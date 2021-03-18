@@ -49,7 +49,6 @@ if (!$user->readAccess($forum)) {
 }
 
 //Escape strings for later display
-$threadTitle = display_str($threadInfo['Title']);
 $ForumName = display_str($forum->name());
 $IsDonorForum = ($forumId == DONOR_FORUM);
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
@@ -89,11 +88,9 @@ if ($quoteCount === false || $quoteCount > 0) {
     (new Gazelle\User\Quote($user))->clearThread($threadId, $firstOnPage, $lastOnPage);
 }
 
-if (!$threadInfo['isLocked'] || $threadInfo['isSticky']) {
-    $lastRead = $forum->userLastReadPost($user->id(), $threadId);
-    if ($lastRead < $lastOnPage) {
-        $forum->userCatchupThread($user->id(), $threadId, $lastOnPage);
-    }
+$lastRead = $forum->userLastReadPost($user->id(), $threadId);
+if ($lastRead < $lastOnPage) {
+    $forum->userCatchupThread($user->id(), $threadId, $lastOnPage);
 }
 
 $isSubscribed = (new Gazelle\Manager\Subscription($user->id()))->isSubscribed($threadId);
@@ -104,72 +101,22 @@ if ($isSubscribed) {
 $userMan = new Gazelle\Manager\User;
 
 $transitions = Forums::get_thread_transitions($forumId);
+$department = $forum->departmentList($user);
 $auth = $LoggedUser['AuthKey'];
 View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
-    'comments,subscriptions,bbcode', $IsDonorForum ? ',donor' : '');
-?>
-<div class="thin">
-    <h2>
-        <a href="forums.php">Forums</a> &rsaquo;
-        <a href="forums.php?action=viewforum&amp;forumid=<?=$threadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
-        <?=$threadTitle?>
-    </h2>
-    <div class="linkbox">
-        <div class="center">
-            <a href="reports.php?action=report&amp;type=thread&amp;id=<?=$threadId?>" class="brackets">Report thread</a>
-            <a href="#" onclick="Subscribe(<?=$threadId?>);return false;" id="subscribelink<?=$threadId?>" class="brackets"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe' ?></a>
-            <a href="#" onclick="$('#searchthread').gtoggle(); this.innerHTML = (this.innerHTML == 'Search this thread' ? 'Hide search' : 'Search this thread'); return false;" class="brackets">Search this thread</a>
-        </div>
-        <div id="searchthread" class="hidden center">
-            <div style="display: inline-block;">
-                <h3>Search this thread:</h3>
-                <form class="search_form" name="forum_thread" action="forums.php" method="get">
-                    <input type="hidden" name="action" value="search" />
-                    <input type="hidden" name="threadid" value="<?=$threadId?>" />
-                    <table cellpadding="6" cellspacing="1" border="0" class="layout border">
-                        <tr>
-                            <td><strong>Search for:</strong></td>
-                            <td><input type="search" id="searchbox" name="search" size="70" /></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Posted by:</strong></td>
-                            <td><input type="search" id="username" name="user" placeholder="Username" size="70" /></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="text-align: center;">
-                                <input type="submit" name="submit" value="Search" />
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-                <br />
-            </div>
-        </div>
-    </div>
-<?php
-echo $paginator->linkbox();
-if ($transitions) {
-?>
-    <table class="layout border">
-        <tr>
-            <td class="label">Move thread</td>
-            <td>
-<?php   foreach ($transitions as $transition) { ?>
-                <form action="forums.php" method="post" style="display: inline-block">
-                    <input type="hidden" name="action" value="mod_thread" />
-                    <input type="hidden" name="auth" value="<?=$auth?>" />
-                    <input type="hidden" name="threadid" value="<?=$threadId?>" />
-                    <input type="hidden" name="page" value="<?=$Page?>" />
-                    <input type="hidden" name="title" value="<?=display_str($threadInfo['Title'])?>" />
-                    <input type="hidden" name="transition" value="<?=$transition['id']?>" />
-                    <input type="submit" value="<?=$transition['label']?>" />
-                </form>
-<?php   } ?>
-            </td>
-        </tr>
-    </table>
-<?php
-}
+    'comments,subscriptions,bbcode', $IsDonorForum ? ',donor' : ''
+);
+echo G::$Twig->render('forum/header-thread.twig', [
+    'auth'         => $auth,
+    'forum'        => $forum,
+    'dept_list'    => $forum->departmentList($user),
+    'is_subbed'    => $isSubscribed,
+    'paginator'    => $paginator,
+    'thread_id'    => $threadId,
+    'thread_title' => $threadInfo['Title'],
+    'transition'   => $transitions,
+]);
+
 if ($threadInfo['NoPoll'] == 0) {
     [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
 
@@ -446,7 +393,7 @@ foreach ($thread as $Key => $Post) {
 <div class="breadcrumbs">
     <a href="forums.php">Forums</a> &rsaquo;
     <a href="forums.php?action=viewforum&amp;forumid=<?=$threadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
-    <?=$threadTitle?>
+    <?= display_str($threadInfo['Title']) ?>
 </div>
 <?php
 echo $paginator->linkbox();

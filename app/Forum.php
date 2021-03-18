@@ -1129,6 +1129,42 @@ class Forum extends Base {
         return $forumToc;
     }
 
+    public function departmentList(User $user): array {
+        $cond = [];
+        $args = [];
+        $permittedForums = $user->permittedForums();
+        if (!$permittedForums) {
+            $cond[] = 'f.MinClassRead <= ?';
+            $args[] = $user->classLevel();
+        } else {
+            $cond[] = '(f.MinClassRead <= ? OR f.ID IN (' . placeholders($permittedForums) . '))';
+            $args = array_merge([$user->classLevel()], $permittedForums);
+        }
+        $forbiddenForums = $user->forbiddenForums();
+        if ($forbiddenForums) {
+            $cond[] = 'f.ID NOT IN (' . placeholders($forbiddenForums) . ')';
+            $args = array_merge($args, $forbiddenForums);
+        }
+        $this->db->prepared_query("
+            SELECT f.ID  AS forum_id,
+                f.Name   AS name,
+                sum(if(ft.LastPostId > coalesce(flrt.PostID, 0) AND C.last_read <= ft.LastPostTime, 1, 0)) AS unread,
+                (f.id = origin.id) AS active
+            FROM (SELECT coalesce((SELECT last_read FROM user_read_forum WHERE user_id = ?), '2015-01-01 00:00:00') AS last_read) AS C,
+                forums_topics ft
+            INNER JOIN forums f ON (f.id = ft.ForumID)
+            INNER JOIN forums origin USING (CategoryID)
+            LEFT JOIN forums_last_read_topics flrt ON (flrt.TopicID = ft.id AND flrt.UserID = ?)
+            WHERE origin.ID = ?
+                AND " . implode($cond, ' AND ') . "
+            GROUP BY ft.ForumID
+            ORDER BY f.Sort
+            ", $user->id(), $user->id(), $this->forumId, ...$args
+        );
+        $departmentList = $this->db->to_array('forum_id', MYSQLI_ASSOC, false);
+        return $departmentList;
+    }
+
     /**
      * Get a catalogue of thread posts
      *
@@ -1180,8 +1216,7 @@ class Forum extends Base {
                    (UserID, TopicID, PostID)
             SELECT ?,       ID,      LastPostID
             FROM forums_topics
-            WHERE (LastPostTime > now() - INTERVAL 30 DAY OR IsSticky = '1')
-                AND ForumID = ?
+            WHERE ForumID = ?
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $userId, $this->forumId
         );

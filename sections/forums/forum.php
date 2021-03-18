@@ -77,9 +77,9 @@ View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? 'donor' :
 <div class="thin">
 <?php
 echo G::$Twig->render('forum/header.twig', [
-    'create' => $user->writeAccess($forum) && $user->createAccess($forum),
-    'id'     => $forumId,
-    'name'   => display_str($forum->name()),
+    'create'    => $user->writeAccess($forum) && $user->createAccess($forum),
+    'dept_list' => $forum->departmentList($user),
+    'forum'     => $forum,
 ]);
 ?>
     <div class="linkbox pager">
