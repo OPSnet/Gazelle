@@ -21,6 +21,7 @@ class User extends BaseObject {
     protected $staffNote = [];
 
     protected $info;
+    protected $lastReadForum;
 
     /** @var \Gazelle\Manager\Torrent to look up torrents associated with a user (snatched, uploaded, ...) */
     protected $torMan;
@@ -512,11 +513,14 @@ class User extends BaseObject {
      * @return int epoch of catchup
      */
     public function forumCatchupEpoch() {
-        $lastRead = $this->db->scalar("
-            SELECT last_read FROM user_read_forum WHERE user_id = ?
-            ", $this->id
-        );
-        return is_null($lastRead) ? 0 : strtotime($lastRead);
+        if (!$this->lastReadForum) {
+            $this->lastReadForum = $this->db->scalar("
+                SELECT last_read FROM user_read_forum WHERE user_id = ?
+                ", $this->id
+            );
+            $this->lastReadForum = strtotime($this->lastReadForum) ?? 0;
+        }
+        return $this->lastReadForum;
     }
 
     public function forceCacheFlush($flush = true) {
