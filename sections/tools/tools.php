@@ -188,7 +188,7 @@ Category('Developer Sandboxes', [
 
 Category('Development', [
     Item('Cache/DB stats',        'tools.php?action=service_stats',            All(['site_debug'])),
-    Item('Cache key management',  'tools.php?action=clear_cache',              All(['users_mod'])),
+    Item('Cache Inspector',       'tools.php?action=clear_cache',              All(['users_mod'])),
     Item('Database schema info',  'tools.php?action=database_specifics',       All(['site_database_specifics'])),
     Item('Error Analysis',        'tools.php?action=analysis_list',            All(['site_analysis'])),
     Item('PHP processes',         'tools.php?action=process_info',             All(['admin_site_debug'])),

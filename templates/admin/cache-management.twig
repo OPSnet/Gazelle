@@ -1,0 +1,100 @@
+<div class="header">
+    <h2>View or flush cache keys</h2>
+</div>
+<div class="thin pad">
+
+{% if result %}
+    <div class="box pad">
+        <h2>{% if flushed %}Cache flushed{% else %}Cache contents{% endif %}</h2>
+        <table>
+        <tr><th>Name</th><th>Value</th><tr>
+    {% for name, value in result %}
+        <tr><td style="vertical-align: top">{{ name }}</td>
+        {% if flushed %}
+            {% if multi %}
+        <td>Flushed {{ value|number_format }} key{{ value|plural }} in this namespace</td>
+            {% else %}
+        <td>{{ value }}</td>
+            {% endif %}
+        {% else %}
+        <td style="overflow: scroll; max-width: 400px;">
+            {%- if value is null -%}
+            <tt>null</tt>
+            {%- elseif value is iterable -%}
+            {{- dump(value) -}}
+            {%- elseif value == false -%}
+            <tt>false</tt>
+            {%- else -%}
+            {{- value -}}
+            {%- endif -%}
+        </td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    {% if flushed %}
+        <tr><td colspan="2">Flush performed in
+        {%- if delta > 1 %} {{ delta|number_format(3) }} sec</td></tr>
+        {%- else %} {{ (delta*1000)|number_format(3) }} msec
+        {%- endif %}</td></tr>
+    {% endif %}
+        </table>
+    </div>
+{% endif %}
+
+    <div class="box pad">
+    <h2>Inspection</h2>
+    <form class="manage_form" name="cache" method="get" action="">
+        <input type="hidden" name="action" value="clear_cache" />
+        <p>View or flush keys (separated by spaces). Remember to check the checkbox to validate that you really want to flush content.</p>
+        <textarea cols="80" rows="8" name="key" id="key" class="inputtext">{{ key }}</textarea><br />
+        <span style="padding: 0 0"><input type="submit" name="view" value="View" /></span>
+        <span style="padding: 0 20px"><input type="submit" name="json" value="View as JSON" /></span>
+{% if can_flush %}
+        <span style="padding: 0 15px"><input type="checkbox" name="check" /> <input type="submit" name="flush" value="Flush" /></span>
+{% endif %}
+    </form>
+    </div>
+{% if can_flush %}
+    <div class="box pad">
+    <h2>Bulk eraser</h2>
+        <p>Flush collections. Warning: may be so slow as to cause a gateway timeout, but the process will complete.</p>
+        <form class="manage_form" name="cache" action="">
+        <input type="hidden" name="action" value="clear_cache" />
+        <table>
+            <tr>
+{% for name in namespace|keys %}
+                <th width="{{ 100/(namespace|length) }}%">{{ name }}</th>
+{% endfor %}
+            </tr>
+{% for list in namespace %}
+                <td style="vertical-align: top">
+    {% for field, shape in list %}
+                    <label><input type="checkbox" name="{{ field }}" id="flush-{{ field }}" checked="checked" /> {{ shape|replace({'%d': '*'}) }}</label>
+                    <br />
+    {% endfor %}
+                </td>
+{% endfor %}
+            <tr>
+                <td colspan="{{ namespace|length }}">If you also want to flush a specfic collection (or more) that is not listed,
+                you may write it in below (e.g. <tt>artist_foo_*</tt>, space separated, in the appropriate column).</td>
+            </tr>
+            <tr>
+{% for name in namespace|keys %}
+                <td>write-in<br />
+                    <textarea cols="{{ 90/(namespace|length) }}" rows="3" name="{{ name }}-free" id="{{ name }}-free" class="inputtext"></textarea><br />
+                </td>
+{% endfor %}
+            </tr>
+            <tr>
+{% for name in namespace|keys %}
+                <td align="center">
+                    <input type="submit" name="flush-{{ name }}" value="Flush checked" /></span>
+                </td>
+{% endfor %}
+            </tr>
+        </table>
+    <form class="manage_form" name="eraser" action="">
+    </form>
+    </div>
+{% endif %}
+</div>
