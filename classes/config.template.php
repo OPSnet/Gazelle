@@ -377,10 +377,62 @@ $SpecialChars = [
 ];
 
 // Deny cache access to keys without specified permission
-$CachePermissions = [
+define('CACHE_PERMISSION', [
     'api_apps' => 'site_debug',
     'catalogue' => 'site_debug'
-];
+]);
+
+define('CACHE_BULK_FLUSH', 500);
+
+define('CACHE_RESPONSE', [
+     0 => 'success',
+     1 => 'failure/delete ok',
+    16 => 'not found',
+]);
+
+define('CACHE_DB', [
+    'artist'        => ['table' => 'artists_group',  'pk' => 'ArtistID'],
+    'collage'       => ['table' => 'collages',       'pk' => 'ID'],
+    'torrent-group' => ['table' => 'torrents_group', 'pk' => 'ID'],
+    'user'          => ['table' => 'users_main',     'pk' => 'ID'],
+]);
+
+define('CACHE_NAMESPACE', [
+    'artist' => [
+        'a1' => 'artist_%d',
+        'a2' => 'artist_comments_%d',
+        'a3' => 'artist_comments_%d_catalogue_0',
+        'a4' => 'artist_groups_%d',
+        'a5' => 'artists_collages_%d',
+        'a6' => 'artists_requests_%d',
+        'a7' => 'similar_positions_%d',
+    ],
+    'collage' => [
+        'c1' => 'collage_%d',
+        'c2' => 'collage_display_%d',
+        'c3' => 'collage_subs_user_%d',
+        'c4' => 'collage_subs_user_new_%d',
+    ],
+    'torrent-group' => [
+        'g1' => 'torrents_collages_%d',
+        'g2' => 'torrent_collages_personal_%d',
+        'g3' => 'torrents_cover_art_%d',
+        'g4' => 'torrents_details_%d',
+        'g5' => 'torrent_group_%d',
+        'g6' => 'torrent_group_light_%d',
+        'g7' => 'groups_artists_%d',
+    ],
+    'user' => [
+        'u1' => 'donor_info_%d',
+        'u2' => 'inbox_new_%d',
+        'u3' => 'u_%d',
+        'u4' => 'user_info_%d',
+        'u5' => 'user_info_heavy_%d',
+        'u6' => 'user_stats_%d',
+        'u7' => 'user_statgraphs_%d',
+        'u8' => 'user_tokens_%d',
+    ]
+]);
 
 // array to store external site credentials and API URIs, stored in cache to keep user sessions alive
 $ExternalServicesConfig = [

@@ -33,8 +33,8 @@ class Collage extends BaseObject {
     protected $artists;
     protected $contributors;
 
-    const CACHE_KEY    = 'collagev2_%d';
-    const DISPLAY_KEY  = 'collagev2_display_%d';
+    const CACHE_KEY    = 'collage_%d';
+    const DISPLAY_KEY  = 'collage_display_%d';
     const SUBS_KEY     = 'collage_subs_user_%d';
     const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
