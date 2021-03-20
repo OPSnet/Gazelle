@@ -466,11 +466,11 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
             <div class="head colhead_dark">Personal</div>
             <ul class="stats nobullet">
                 <li>Class: <?=$ClassLevels[$User->classLevel()]['Name']?></li>
-<?php if (($secondary = $User->secondaryClasses())) { ?>
+<?php if (($secondary = array_values($User->secondaryClasses()))) { ?>
                 <li>
                     <ul class="stats">
-<?php foreach ($secondary as $classId) { ?>
-                        <li><?=$Classes[$classId]['Name']?></li>
+<?php asort($secondary); foreach ($secondary as $name) { ?>
+                        <li><?= $name ?></li>
 <?php    } ?>
                     </ul>
                 </li>

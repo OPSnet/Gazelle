@@ -69,7 +69,7 @@ if (isset($_POST['transition'])) {
         error(0);
     } else {
         // Permissions are handled inside forums.class.php
-        $transitions = Forums::get_transitions();
+        $transitions = $forumMan->forumTransitionList($viewer);
         if (!isset($transitions[$transId])) {
             error(0);
         } else {

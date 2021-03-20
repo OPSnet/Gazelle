@@ -1,17 +1,17 @@
 <?php
-function forumList($forums, $selected = 0) {
+function forumList(array $list, $selected = 0) {
     $return = '';
     $cat = '';
-    foreach ($forums as $id => $forum) {
-        if ($cat !== $forum['Category']) {
+    foreach ($list as $forum) {
+        if ($cat !== $forum->categoryName()) {
             if ($cat !== '') {
                 $return .= '</optgroup>';
             }
-            $cat = $forum['Category'];
+            $cat = $forum->categoryName();;
             $return .= sprintf('<optgroup label="%s">', $cat);
         }
 
-        $return .= sprintf('<option value="%s"%s>%s</option>', $id, $id == $selected ? ' selected="selected"' : '', $forum['Name']);
+        $return .= sprintf('<option value="%s"%s>%s</option>', $forum->id(), $forum->id() == $selected ? ' selected="selected"' : '', $forum->name());
     }
     if ($cat !== '') {
         $return .= '</optgroup>';
@@ -44,24 +44,28 @@ if (!check_perms('admin_manage_forums')) {
 }
 
 if (isset($_GET['userid'])) {
-    $user = $_GET['userid'];
+    $userId = $_GET['userid'];
 } else {
-    $user = $LoggedUser['ID'];
+    $userId = $LoggedUser['ID'];
 }
+$user = (new Gazelle\Manager\User)->find($userId);
+if (is_null($user)) {
+    error(404);
+}
+$userId = $user->id();
 
-$DB->prepared_query('
-    SELECT f.ID, f.Name, fc.Name AS Category
-    FROM forums f
-    INNER JOIN forums_categories fc ON f.CategoryID = fc.ID
-    ORDER BY fc.Sort, f.Sort');
-$forums = $DB->to_array('ID', MYSQLI_ASSOC);
-
-$items = Forums::get_transitions($user);
+$forumMan = new Gazelle\Manager\Forum;
+$forumList = array_map(function ($f) {return new Gazelle\Forum($f);}, $forumMan->forumList());
+$items = $forumMan->forumTransitionList($user);
 
 View::show_header('Forum Transitions');
 ?>
 <div class="header">
     <h2>Forum transition manager</h2>
+</div>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=categories">Forum Categories</a>
+    <a class="brackets" href="tools.php?action=forum">Forum Control Panel</a>
 </div>
 <div class="thin box">
     <h4>Preview transitions</h4>
@@ -69,9 +73,9 @@ View::show_header('Forum Transitions');
         <input type="hidden" name="action" value="forum_transitions" />
         <table class="layout">
             <tr>
-                <td class="label"><label for="userid">User ID</label></td>
-                <td><input type="text" name="userid" value="<?=$user?>" /></td>
-                <td><input type="submit" name="submit" value="Submit" class="submit" /></td>
+                <td class="label"><label for="userid">User ID (or @username)</label></td>
+                <td><input type="text" name="userid" value="<?=$userId?>" /> <?= $user ? $user->username() : '' ?></td>
+                <td><input type="submit" name="submit" value="Preview" class="submit" /></td>
             <tr>
         </table>
     </form>
@@ -91,7 +95,7 @@ View::show_header('Forum Transitions');
 <?php
 $row = 'b';
 foreach ($items as $i) {
-    list($id, $source, $destination, $label, $secondaryClasses, $userClass, $permissions, $userIds) = array_values($i);
+    [$id, $source, $destination, $label, $secondaryClasses, $userClass, $permissions, $userIds] = array_values($i);
     $row = $row === 'a' ? 'b' : 'a';
 ?>
     <tr class="row<?=$row?>">
@@ -101,19 +105,19 @@ foreach ($items as $i) {
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
                 <select name="source">
-                    <?=forumList($forums, $source)?>
+                    <?=forumList($forumList, $source)?>
                 </select>
             </td>
             <td>
                 <select name="destination">
-                    <?=forumList($forums, $destination)?>
+                    <?=forumList($forumList, $destination)?>
                 </select>
             </td>
             <td>
                 <input type="text" name="label" value="<?=$label?>" />
             </td>
             <td>
-                <input type="text" name="secondary_classes" value="<?=$secondaryClasses?>" />
+                <input type="text" name="secondary_classes" value="<?= implode(',', array_keys($secondaryClasses)) ?>" />
             </td>
             <td>
                 <select name="permission_class">
@@ -121,10 +125,10 @@ foreach ($items as $i) {
                 </select>
             </td>
             <td>
-                <input type="text" name="permissions" value="<?=$permissions?>" />
+                <input type="text" name="permissions" value="<?= implode(',', array_keys($permissions)) ?>" />
             </td>
             <td>
-                <input type="text" name="user_ids" value="<?=$userIds?>" />
+                <input type="text" name="user_ids" value="<?= implode(',', array_keys($userIds)) ?>" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Edit" />
@@ -142,12 +146,12 @@ foreach ($items as $i) {
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
                 <select name="source">
-                    <?=forumList($forums)?>
+                    <?=forumList($forumList)?>
                 </select>
             </td>
             <td>
                 <select name="destination">
-                    <?=forumList($forums)?>
+                    <?=forumList($forumList)?>
                 </select>
             </td>
             <td>
@@ -174,5 +178,4 @@ foreach ($items as $i) {
     </tr>
 </table>
 <?php
-    View::show_footer();
-?>
+View::show_footer();

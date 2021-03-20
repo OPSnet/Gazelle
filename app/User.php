@@ -61,6 +61,7 @@ class User extends BaseObject {
         $qid = $this->db->get_query_id();
         $this->db->prepared_query("
             SELECT um.Username,
+                um.CustomPermissions,
                 um.IP,
                 um.Email,
                 um.Paranoia,
@@ -102,6 +103,7 @@ class User extends BaseObject {
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
+                p.Values AS primaryPermissions,
                 if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
@@ -139,43 +141,61 @@ class User extends BaseObject {
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
 
+        // load their permissions
         $this->db->prepared_query("
             SELECT p.ID,
-                p.PermittedForums
+                p.Level,
+                p.Name,
+                p.PermittedForums,
+                p.Secondary,
+                p.Values
             FROM permissions p
             INNER JOIN users_levels ul ON (ul.PermissionID = p.ID)
             WHERE ul.UserID = ?
+            ORDER BY p.Secondary, p.Level DESC
             ", $this->id
         );
-        $perms = $this->db->to_pair('ID', 'PermittedForums');
+        $permissions = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+        $this->info['secondary_class'] = [];
         $forumAccess = [];
-        foreach ($perms as $p => $permitted) {
-            $allowed = explode(',', $permitted);
+        $secondaryClassLevel = [];
+        $secondaryClassPerms = [];
+        foreach ($permissions as $p) {
+            if ($p['Secondary']) {
+                $this->info['secondary_class'][$p['ID']] = $p['Name'];
+                $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
+                $secondaryClassLevel[$p['ID']] = $p['Level'];
+            }
+            $allowed = array_map(function ($id) {return (int)$id;}, explode(',', $p['PermittedForums']) ?: []);
             foreach ($allowed as $forumId) {
-                if ((int)$forumId) {
-                    $forumAccess[(int)$forumId] = true;
+                if ($forumId) {
+                    $forumAccess[$forumId] = true;
                 }
             }
         }
-        $this->info['secondary_class'] = array_keys($perms);
-        $this->info['effective_class'] =
-            $this->info['secondary_class'] ? max($this->info['Class'], ...$this->info['secondary_class']) : $this->info['Class'];
+        $this->info['effective_class'] = count($secondaryClassLevel)
+            ? max($this->info['Class'], ...array_values($secondaryClassLevel))
+            : $this->info['Class'];
 
-        if (!is_null($this->info['PermittedForums'])) {
-            $allowed = explode(',', $this->info['PermittedForums']);
-            foreach ($allowed as $forumId) {
-                if ((int)$forumId) {
-                    $forumAccess[(int)$forumId] = true;
-                }
-            }
+        $this->info['Permission'] = [];
+        $primary = unserialize($this->info['primaryPermissions']) ?: [];
+        foreach ($primary as $name => $value) {
+            $this->info['Permission'][$name] = (bool)$value;
         }
-        if (!is_null($this->info['RestrictedForums'])) {
-            $forbidden = explode(',', $this->info['RestrictedForums']);
-            foreach ($forbidden as $forumId) {
-                // forbidden may override permitted
-                if ((int)$forumId) {
-                    $forumAccess[(int)$forumId] = false;
-                }
+        foreach ($secondaryClassPerms as $name => $value) {
+            $this->info['Permission'][$name] = (bool)$value;
+        }
+        // a custom permission may revoke a primary or secondary grant
+        $custom = unserialize($this->info['CustomPermissions']) ?: [];
+        foreach ($custom as $name => $value) {
+            $this->info['Permission'][$name] = (bool)$value;
+        }
+
+        $forbidden = array_map(function ($id) {return (int)$id;}, explode(',', $this->info['RestrictedForums'])) ?: [];
+        foreach ($forbidden as $forumId) {
+            // forbidden may override permitted
+            if ($forumId) {
+                $forumAccess[$forumId] = false;
             }
         }
         $this->info['forum_access'] = $forumAccess;
@@ -187,9 +207,19 @@ class User extends BaseObject {
             WHERE uha.UserID = ?
             ", $this->id
         );
-        $this->info['attr'] = $this->db->to_pair('Name', 'ID');
+        $this->info['attr'] = $this->db->to_pair('Name', 'ID', false);
         $this->cache->cache_value($key, $this->info, 86400);
         return $this->info;
+    }
+
+    /**
+     * Does the user have a specific permission?
+     *
+     * @param string permission name
+     * @return bool permission granted
+     */
+    public function permitted(string $permission) {
+        return $this->info()['Permission'][$permission] ?? false;
     }
 
     public function hasAttr(string $name): ?int {
@@ -410,7 +440,7 @@ class User extends BaseObject {
      * Return the list for forum IDs to which the user has been banned.
      * (Note that banning takes precedence of permitting).
      *
-     * return array of forum ids
+     * @return array of forum ids
      */
     public function forbiddenForums(): array {
         return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === false;}));
@@ -423,7 +453,7 @@ class User extends BaseObject {
     /**
      * Return the list for forum IDs to which the user has been granted special access.
      *
-     * return array of forum ids
+     * @return array of forum ids
      */
     public function permittedForums(): array {
         $permitted = array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === true;}));
@@ -502,7 +532,7 @@ class User extends BaseObject {
                 SELECT TopicID, PostID FROM forums_last_read_topics WHERE UserID = ?
                 ", $this->id
             );
-            $this->lastRead = $this->db->to_pair('TopicID', 'PostID');
+            $this->lastRead = $this->db->to_pair('TopicID', 'PostID', false);
         }
         return $this->lastRead[$threadId] ?? 0;
     }
