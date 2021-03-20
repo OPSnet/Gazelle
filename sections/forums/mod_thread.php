@@ -46,7 +46,7 @@ if (isset($_POST['forumid'])) {
 }
 
 $newTitle = trim($_POST['title']);
-if ($newTitle === '') {
+if (!isset($_POST['transition']) && $newTitle === '') {
     error("Title cannot be empty");
 }
 
@@ -69,7 +69,7 @@ if (isset($_POST['transition'])) {
         error(0);
     } else {
         // Permissions are handled inside forums.class.php
-        $transitions = Forums::get_transitions();
+        $transitions = $forumMan->forumTransitionList($viewer);
         if (!isset($transitions[$transId])) {
             error(0);
         } else {

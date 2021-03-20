@@ -33,6 +33,10 @@ View::show_header('Forum Management');
     <script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
     <h2>Forum control panel</h2>
 </div>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=categories">Forum Categories</a>
+    <a class="brackets" href="tools.php?action=forum_transitions">Forum Transitions</a>
+</div>
 <table>
     <tr class="colhead">
         <td>Category</td>

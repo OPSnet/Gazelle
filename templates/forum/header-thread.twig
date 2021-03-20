@@ -46,7 +46,7 @@
         </div>
     </div>
 {{ paginator.linkbox|raw }}
-{% for t in transitions %}
+{% for t in transition %}
     {% if loop.first %}
     <table class="layout border">
         <tr>
@@ -58,7 +58,6 @@
                     <input type="hidden" name="auth" value="{{ auth }}" />
                     <input type="hidden" name="threadid" value="{{ thread_id }}" />
                     <input type="hidden" name="page" value="{{ paginator.page }}" />
-                    <input type="hidden" name="title" value="{{ t.Title }}" />
                     <input type="hidden" name="transition" value="{{ t.id }}" />
                     <input type="submit" value="{{ t.label }}" />
                 </form>

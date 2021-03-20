@@ -169,6 +169,75 @@ class Forum extends \Gazelle\Base {
         return $toc;
     }
 
+    public function forumTransitionList(\Gazelle\User $user) {
+        $items = $this->cache->get_value('forum_transitions_v2');
+        if (!$items) {
+            $queryId = $this->db->get_query_id();
+            $this->db->prepared_query("
+                SELECT forums_transitions_id AS id, source, destination, label, permission_levels,
+                       permission_class, permissions, user_ids
+                FROM forums_transitions
+            ");
+            $items = $this->db->to_array('id', MYSQLI_ASSOC);
+            $this->db->set_query_id($queryId);
+            foreach ($items as &$i) {
+                // permission_class == primary class
+                // permission_levels == secondary classes
+                $i['user_ids'] = array_fill_keys(explode(',', $i['user_ids']), 1);
+                $i['permissions'] = array_fill_keys(explode(',', $i['permissions']), 1);
+                $i['permission_levels'] = array_fill_keys(explode(',', $i['permission_levels']), 1);
+                unset($i['user_ids'][''], $i['permissions'][''], $i['permission_levels']['']);
+            }
+            unset($i);
+            $this->cache->cache_value('forum_transitions', $items, 0);
+        }
+
+        $userId = $user->id();
+        $info['EffectiveClass']  = $user->effectiveClass();
+        $info['ExtraClasses']    = array_keys($user->secondaryClasses());
+        $info['Permissions']     = array_keys($user->info()['Permission']);
+        $info['ExtraClassesOff'] = array_flip(array_map(function ($i) { return -$i; }, $info['ExtraClasses']));
+        $info['PermissionsOff']  = array_flip(array_map(function ($i) { return "-$i"; }, array_keys($user->info()['Permission'])));
+
+        return array_filter($items, function ($item) use ($info, $userId) {
+            if (count(array_intersect_key($item['permission_levels'], $info['ExtraClassesOff'])) > 0) {
+                return false;
+            }
+
+            if (count(array_intersect_key($item['permissions'], $info['PermissionsOff'])) > 0) {
+                return false;
+            }
+
+            if (count(array_intersect_key($item['user_ids'], [-$userId => 1])) > 0) {
+                return false;
+            }
+
+            if (count(array_intersect_key($item['permission_levels'], $info['ExtraClasses'])) > 0) {
+                return true;
+            }
+
+            if (count(array_intersect_key($item['permissions'], $info['Permissions'])) > 0) {
+                return true;
+            }
+
+            if (count(array_intersect_key($item['user_ids'], [$userId => 1])) > 0) {
+                return true;
+            }
+
+            if ($item['permission_class'] <= $info['EffectiveClass']) {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    public function threadTransitionList(\Gazelle\User $user, int $forumId): array {
+        return array_filter($this->forumTransitionList($user),
+            function ($t) use ($forumId) {return $t['source'] === $forumId;}
+        );
+    }
+
     public function flushToc() {
         $this->cache->delete_value(self::CACHE_TOC);
         return $this;

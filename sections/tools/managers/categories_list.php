@@ -16,6 +16,10 @@ $DB->prepared_query('
     <script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
     <h2>Forum Category Control Panel</h2>
 </div>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=forum">Forum Control Panel</a>
+    <a class="brackets" href="tools.php?action=forum_transitions">Forum Transitions</a>
+</div>
 <table width="100%">
     <tr class="colhead">
         <td>Sort</td>

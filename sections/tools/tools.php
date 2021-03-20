@@ -120,12 +120,12 @@ Category('User management', [
 ]);
 
 Category('Community', [
-    Item('Category manager',         'tools.php?action=categories',        All(['admin_manage_forums'])),
-    Item('Contest manager',          'contest.php?action=admin',           All(['admin_manage_contest'])),
-    Item('Forum manager',            'tools.php?action=forum',             All(['admin_manage_forums'])),
-    Item('Forum transition manager', 'tools.php?action=forum_transitions', All(['admin_manage_forums'])),
-    Item('IRC manager',              'tools.php?action=irc',               All(['admin_manage_forums'])),
-    Item('Navigation link manager',  'tools.php?action=navigation',        All(['admin_manage_navigation'])),
+    Item('Contest manager',         'contest.php?action=admin',           All(['admin_manage_contest'])),
+    Item('Forum categories',        'tools.php?action=categories',        All(['admin_manage_forums'])),
+    Item('Forum departments',       'tools.php?action=forum',             All(['admin_manage_forums'])),
+    Item('Forum transitions',       'tools.php?action=forum_transitions', All(['admin_manage_forums'])),
+    Item('IRC manager',             'tools.php?action=irc',               All(['admin_manage_forums'])),
+    Item('Navigation link manager', 'tools.php?action=navigation',        All(['admin_manage_navigation'])),
 ]);
 
 ?>
