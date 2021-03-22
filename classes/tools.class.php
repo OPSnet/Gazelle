@@ -18,7 +18,7 @@ class Tools {
             $Long = sprintf('%u', ip2long($IP));
         }
         if (!$Long || $Long == 2130706433) { // No need to check cc for 127.0.0.1
-            return false;
+            return 'localhost';
         }
         return '?';
     }

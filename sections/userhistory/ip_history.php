@@ -17,10 +17,11 @@ if (!check_perms('users_view_ips')) {
     error(403);
 }
 
-$UserID = $_GET['userid'];
-if (!is_number($UserID)) {
+$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+if (is_null($user)) {
     error(404);
 }
+$UserID = $user->id();
 
 $UsersOnly = !empty($_GET['usersonly']);
 $cond = [];
@@ -93,13 +94,12 @@ if ($Results) {
     }
 }
 
-$Username = Users::user_info($UserID)['Username'];
-$Pages = Format::get_pages($Page, $totalCommon, IPS_PER_PAGE, 9);
-View::show_header($Username . " &rsaquo; IP address history", 'iphist');
+$Pages = Format::get_pages($Page, $totalCommon, IPS_PER_PAGE);
+View::show_header($user->username() . " &rsaquo; IP address history", 'iphist');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id=<?=$UserID?>"><?= $Username ?></a> &rsaquo; IP address history</h2>
+        <h2><a href="user.php?id=<?=$UserID?>"><?= $user->username() ?></a> &rsaquo; IP address history</h2>
         <div class="linkbox">
 <?php
 if ($UsersOnly) { ?>
