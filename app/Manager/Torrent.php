@@ -66,16 +66,23 @@ class Torrent extends \Gazelle\Base {
 
     public function findGroupById(int $groupId) {
         $id = $this->db->scalar("
-            SELECT ID
-            FROM torrents_group
-            WHERE ID = ?
+            SELECT ID FROM torrents_group WHERE ID = ?
             ", $groupId
         );
-        if (is_null($id)) {
-            return null;
-        }
-        return (new \Gazelle\TorrentGroup($id))
-            ->setInfo($this->groupInfo($id));
+        return $id ? (new \Gazelle\TorrentGroup($id))->setInfo($this->groupInfo($id)) : null;
+    }
+
+    public function findTorrentById(int $torrentId) {
+        $id = $this->db->scalar("
+            SELECT ID FROM torrents WHERE ID = ?
+            ", $torrentId
+        );
+        return $id ? new \Gazelle\Torrent($id) : null;
+    }
+
+    public function findTorrentByHash(string $hash) {
+        $id = $this->hashToTorrentId($hash);
+        return $id ? new \Gazelle\Torrent($id) : null;
     }
 
     /**
@@ -447,7 +454,8 @@ class Torrent extends \Gazelle\Base {
                     group_concat(tt.NegativeVotes SEPARATOR '|')   AS tagDownvotes
                 FROM torrents_group AS g
                 LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
-                LEFT JOIN tags ON (tags.ID = tt.TagID)";
+                LEFT JOIN tags ON (tags.ID = tt.TagID)
+            ";
 
             $args = [];
             if ($revisionId) {
@@ -504,7 +512,7 @@ class Torrent extends \Gazelle\Base {
                     lwa.TorrentID AS LossywebApproved,
                     t.LastReseedRequest,
                     t.ID AS HasFile,
-                    COUNT(tl.LogID) AS LogCount
+                    group_concat(tl.LogID) as ripLogIds
             ";
 
             $this->db->prepared_query("
@@ -608,7 +616,7 @@ class Torrent extends \Gazelle\Base {
             ) {
                 $torrent[$nullable] = $torrent[$nullable] == '' ? null : $torrent[$nullable];
             }
-            foreach (['HasCue', 'HasLog', 'HasLogDB', 'LogChecksum', 'Remastered', 'Scene']
+            foreach (['FreeTorrent', 'HasCue', 'HasLog', 'HasLogDB', 'LogChecksum', 'Remastered', 'Scene']
                 as $zerotruth
             ) {
                 $torrent[$zerotruth] = !($torrent[$zerotruth] == '0');
@@ -618,6 +626,9 @@ class Torrent extends \Gazelle\Base {
             ) {
                 $torrent[$emptytruth] = !($torrent[$emptytruth] == '');
             }
+            $torrent['ripLogIds'] = empty($torrent['ripLogIds'])
+                ? [] : array_map(function ($x) { return (int)$x; },  explode(',', $torrent['ripLogIds']));
+            $torrent['LogCount'] = count($torrent['ripLogIds']);
         }
         return [$group, $torrentList];
     }
@@ -652,7 +663,7 @@ class Torrent extends \Gazelle\Base {
      * @param string $hash
      * @return int The torrent id if found, otherwise null
      */
-    public function hashToTorrentId(string $hash) {
+    public function hashToTorrentId(string $hash): ?int {
         return $this->db->scalar("
             SELECT ID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash

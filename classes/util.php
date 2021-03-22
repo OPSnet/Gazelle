@@ -719,12 +719,11 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 lwa.TorrentID AS LossywebApproved,
                 t.LastReseedRequest,
                 t.ID AS HasFile,
-                COUNT(tl.LogID) AS LogCount
+                group_concat(tl.LogID) as ripLogIds
         ";
 
         $DB->prepared_query("
-            SELECT $columns
-                ,0 as is_deleted
+            SELECT $columns, 0 as is_deleted
             FROM torrents AS t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
@@ -738,8 +737,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
             WHERE t.GroupID = ?
             GROUP BY t.ID
             UNION DISTINCT
-            SELECT $columns
-                ,1 as is_deleted
+            SELECT $columns, 1 as is_deleted
             FROM deleted_torrents AS t
             INNER JOIN deleted_torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             LEFT JOIN deleted_torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
@@ -785,6 +783,11 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
     } else { // If we're reading from cache
         $TorrentDetails = $TorrentCache[0];
         $TorrentList = $TorrentCache[1];
+    }
+    foreach ($TorrentList as &$torrent) {
+        $torrent['ripLogIds'] = empty($torrent['ripLogIds'])
+            ? [] : array_map(function ($x) { return (int)$x; },  explode(',', $torrent['ripLogIds']));
+        $torrent['LogCount'] = count($torrent['ripLogIds']);
     }
 
     if ($PersonalProperties) {

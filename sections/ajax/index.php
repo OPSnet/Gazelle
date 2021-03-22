@@ -12,15 +12,42 @@ enforce_login();
 
 define('AJAX', true);
 
-/*    AJAX_LIMIT = array(x,y) = 'x' requests every 'y' seconds.
-    e.g. array(5,10) = 5 requests every 10 seconds    */
-$AJAX_LIMIT = [5,10];
+/* 'x' requests every 'y' seconds: [5,10] = 5 requests every 10 seconds */
 $LimitedPages = [
-    'tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements',
-    'notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents',
-    'collage', 'raw_bbcode', 'requestfill', 'request_fill', 'addtag', 'add_tag',
+    'add_tag'         => [5, 10],
+    'addtag'          => [5, 10],
+    'announcements'   => [2, 60],
+    'artist'          => [5, 10],
+    'better'          => [5, 10],
+    'bookmarks'       => [5, 60],
+    'browse'          => [5, 10],
+    'collage'         => [5, 60],
+    'forum'           => [5, 10],
+    'inbox'           => [2, 60],
+    'news_ajax'       => [2, 60],
+    'notifications'   => [2, 60],
+    'raw_bbcode'      => [5, 10],
+    'request'         => [4, 60],
+    'request_fill'    => [5, 10],
+    'requestfill'     => [5, 10],
+    'requests'        => [5, 60],
+    'riplog'          => [5, 10],
+    'similar_artists' => [4, 60],
+    'subscriptions'   => [5, 10],
+    'tcomments'       => [5, 10],
+    'top10'           => [2, 60],
+    'torrentgroup'    => [5, 60],
+    'user'            => [4, 60],
+    'user_recents'    => [5, 10],
+    'userhistory'     => [5, 10],
+    'usersearch'      => [5, 10],
+    'votefavorite'    => [5, 10],
+    'wiki'            => [5, 60],
 ];
-$RequireTokenPages = ['upload', 'download'];
+$RequireTokenPages = [
+    'download',
+    'upload',
+];
 
 $UserID = $LoggedUser['ID'];
 
@@ -29,16 +56,17 @@ if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) 
 }
 
 header('Content-Type: application/json; charset=utf-8');
-//    Enforce rate limiting everywhere except info.php
-if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && in_array($_GET['action'], $LimitedPages)) {
-    if (!$UserRequests = $Cache->get_value('ajax_requests_'.$UserID)) {
+// Enforce rate limiting everywhere except info.php
+if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && isset($LimitedPages[$_GET['action']])) {
+    [$rate, $interval] = $LimitedPages[$_GET['action']];
+    if (($UserRequests = $Cache->get_value('ajax_requests_'.$UserID)) === false) {
         $UserRequests = 0;
-        $Cache->cache_value('ajax_requests_'.$UserID, '0', $AJAX_LIMIT[1]);
-    }
-    if ($UserRequests > $AJAX_LIMIT[0]) {
-        json_die("failure", "Rate limit exceeded");
+        $Cache->cache_value('ajax_requests_'.$UserID, '0', $interval);
     } else {
         $Cache->increment_value('ajax_requests_'.$UserID);
+        if ($UserRequests > $rate) {
+            json_die("failure", "Rate limit exceeded");
+        }
     }
 }
 
@@ -47,7 +75,7 @@ if (!isset($FullToken) && in_array($_GET['action'], $RequireTokenPages)) {
 }
 
 switch ($_GET['action']) {
-    // things that (may be) used on the site
+    // things (that may be) used on the site
     case 'upload_section':
         // Gets one of the upload forms
         require('upload.php');
@@ -61,10 +89,10 @@ switch ($_GET['action']) {
     case 'stats':
         require('stats.php');
         break;
-
     case 'checkprivate':
         include('checkprivate.php');
         break;
+
     // things not yet used on the site
     case 'torrent':
         require('torrent.php');
@@ -186,6 +214,9 @@ switch ($_GET['action']) {
         break;
     case 'logchecker':
         require('logchecker.php');
+        break;
+    case 'riplog':
+        require('riplog.php');
         break;
 
     case 'upload':
