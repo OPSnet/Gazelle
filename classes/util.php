@@ -783,11 +783,6 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
         } else {
             $CacheTime = 3600;
         }
-        foreach ($TorrentList as &$torrent) {
-            $torrent['ripLogIds'] = empty($torrent['ripLogIds'])
-                ? [] : array_map(function ($x) { return (int)$x; },  explode(',', $torrent['ripLogIds']));
-            $torrent['LogCount'] = count($torrent['ripLogIds']);
-        }
         // Store it all in cache
         if (!$RevisionID) {
             $Cache->cache_value("torrents_details_$GroupID", [$TorrentDetails, $TorrentList], $CacheTime);
@@ -795,6 +790,11 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
     } else { // If we're reading from cache
         $TorrentDetails = $TorrentCache[0];
         $TorrentList = $TorrentCache[1];
+    }
+    foreach ($TorrentList as &$torrent) {
+        $torrent['ripLogIds'] = empty($torrent['ripLogIds'])
+            ? [] : array_map(function ($x) { return (int)$x; },  explode(',', $torrent['ripLogIds']));
+        $torrent['LogCount'] = count($torrent['ripLogIds']);
     }
 
     if ($PersonalProperties) {
