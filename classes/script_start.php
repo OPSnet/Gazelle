@@ -197,6 +197,27 @@ G::$Twig->addFunction(new Twig\TwigFunction('ratio', function ($up, $down) {
     );
 }));
 
+G::$Twig->addFunction(new Twig\TwigFunction('resolveCountryIpv4', function ($addr) {
+    return new Twig\Markup(
+        (function ($ip) {
+            static $cache = [];
+            if (!isset($cache[$ip])) {
+                $Class = strtr($ip, '.', '-');
+                $cache[$ip] = '<span class="cc_'.$Class.'">Resolving CC...'
+                    . '<script type="text/javascript">'
+                        . '$(document).ready(function() {'
+                            . '$.get(\'tools.php?action=get_cc&ip='.$ip.'\', function(cc) {'
+                                . '$(\'.cc_'.$Class.'\').html(cc);'
+                            . '});'
+                        . '});'
+                    . '</script></span>';
+            }
+            return $cache[$ip];
+        })($addr),
+        'UTF-8'
+    );
+}));
+
 G::$Twig->addFunction(new Twig\TwigFunction('resolveIpv4', function ($addr) {
     return new Twig\Markup(
         (function ($ip) {
