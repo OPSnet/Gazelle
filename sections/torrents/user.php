@@ -7,10 +7,12 @@ if (!isset($_GET['userid'])) {
     exit;
 }
 
-$userID = $_GET['userid'];
-if (!is_number($userID)) {
-    error(0);
+$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+if (is_null($user)) {
+    error(404);
 }
+$userId = $user->id();
+$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
@@ -166,13 +168,9 @@ if (!empty($_GET['tags'])) {
     }
 }
 
-$user = Users::user_info($userID);
-$perms = Permissions::get_permissions($user['PermissionID']);
-$userClass = $perms['Class'];
-
 switch ($_GET['type']) {
     case 'snatched':
-        if (!check_paranoia('snatched', $user['Paranoia'], $userClass, $userID)) {
+        if (!$user->propertyVisible($viewer, 'snatched')) {
             error(403);
         }
         $join = "INNER JOIN xbt_snatched AS xs ON (xs.fid =  t.ID)";
@@ -180,7 +178,7 @@ switch ($_GET['type']) {
         $userField = 'xs.uid';
         break;
     case 'snatched-unseeded':
-        if (!check_paranoia('snatched', $user['Paranoia'], $userClass, $userID)) {
+        if (!$user->propertyVisible($viewer, 'snatched')) {
             error(403);
         }
         $join = "INNER JOIN xbt_snatched AS xs ON (xs.fid = t.ID)
@@ -190,7 +188,7 @@ switch ($_GET['type']) {
         $userField = 'xs.uid';
         break;
     case 'seeding':
-        if (!check_paranoia('seeding', $user['Paranoia'], $userClass, $userID)) {
+        if (!$user->propertyVisible($viewer, 'seeding')) {
             error(403);
         }
         $join = "INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)";
@@ -199,7 +197,7 @@ switch ($_GET['type']) {
         $userField = 'xfu.uid';
         break;
     case 'leeching':
-        if (!check_paranoia('leeching', $user['Paranoia'], $userClass, $userID)) {
+        if (!$user->propertyVisible($viewer, 'leeching')) {
             error(403);
         }
         $join = "INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)";
@@ -208,7 +206,7 @@ switch ($_GET['type']) {
         $userField = 'xfu.uid';
         break;
     case 'uploaded':
-        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !check_paranoia('uploads', $user['Paranoia'], $userClass, $userID)) {
+        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !$user->propertyVisible($viewer, 'uploads')) {
             error(403);
         }
         $join = "";
@@ -216,7 +214,7 @@ switch ($_GET['type']) {
         $userField = 't.UserID';
         break;
     case 'uploaded-unseeded':
-        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !check_paranoia('uploads', $user['Paranoia'], $userClass, $userID)) {
+        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !$user->propertyVisible($viewer, 'uploads')) {
             error(403);
         }
         $join = "LEFT JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)";
@@ -225,7 +223,7 @@ switch ($_GET['type']) {
         $userField = 't.UserID';
         break;
     case 'downloaded':
-        if (!($userID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist'))) {
+        if (!($userId === $viewer->id() || $viewer->permitted('site_view_torrent_snatchlist'))) {
             error(403);
         }
         $join = "INNER JOIN users_downloads AS ud ON (ud.TorrentID = t.ID)";
@@ -238,7 +236,7 @@ switch ($_GET['type']) {
 
 if (!empty($_GET['filter'])) {
     if ($_GET['filter'] === 'perfectflac') {
-        if (!check_paranoia('perfectflacs', $user['Paranoia'], $userClass, $userID)) {
+        if (!$user->propertyVisible($viewer, 'perfectflacs')) {
             error(403);
         }
         $cond[] = "t.Format = ?";
@@ -250,7 +248,7 @@ if (!empty($_GET['filter'])) {
             $args[] = 100;
         }
     } elseif ($_GET['filter'] === 'uniquegroup') {
-        if (!check_paranoia('uniquegroups', $user['Paranoia'], $userClass, $userID)) {
+        if (!$user->propertyVisible($viewer, 'uniquegroups')) {
             error(403);
         }
         $groupBy = 'tg.ID';
@@ -280,7 +278,7 @@ if ($having) {
 }
 
 $cond[] = "$userField = ?";
-$args = array_merge($args, [$userID], $havingArgs);
+$args = array_merge($args, [$userId], $havingArgs);
 
 $whereCondition = implode("\nAND ", $cond);
 if (empty($groupBy)) {
@@ -324,11 +322,10 @@ $torrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
 
 $results = Torrents::get_groups($groupIDs);
 $action = display_str($_GET['type']);
-$user = Users::user_info($userID);
 $pages = Format::get_pages($page, $torrentCount, TORRENTS_PER_PAGE);
-$urlStem = "torrents.php?userid={$userID}&amp;type=";
+$urlStem = "torrents.php?userid={$userId}&amp;type=";
 
-View::show_header($user['Username']."'s $action torrents",'voting');
+View::show_header($user->username() . "'s $action torrents", 'voting');
 ?>
 <div class="thin">
     <div class="linkbox">
@@ -341,7 +338,7 @@ View::show_header($user['Username']."'s $action torrents",'voting');
     <a class="brackets" href="<?= $urlStem ?>leeching" title="Torrents you have downloaded and partially snatched">leeching</a>
     </div>
     <div class="header">
-        <h2><a href="user.php?id=<?=$userID?>"><?=$user['Username']?></a>'s <?= str_replace('-', ' and ', $action) ?> torrents</h2>
+        <h2><a href="user.php?id=<?=$userId?>"><?= $user->username() ?></a>'s <?= str_replace('-', ' and ', $action) ?> torrents</h2>
     </div>
     <div>
         <form class="search_form" name="torrents" action="" method="get">
@@ -350,7 +347,7 @@ View::show_header($user['Username']."'s $action torrents",'voting');
                     <td class="label"><strong>Search for:</strong></td>
                     <td>
                         <input type="hidden" name="type" value="<?=$_GET['type']?>" />
-                        <input type="hidden" name="userid" value="<?=$userID?>" />
+                        <input type="hidden" name="userid" value="<?=$userId?>" />
                         <input type="search" name="search" size="60" value="<?php Format::form('search'); ?>" />
                     </td>
                 </tr>
@@ -543,7 +540,7 @@ foreach ($Categories as $catKey => $catName) {
 <?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
                 <?= $vote->setGroupId($groupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
-                    <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userID.'&amp;tags=')?></div>
+                    <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userId.'&amp;tags=')?></div>
                 </div>
             </td>
             <td class="td_time nobr"><?=time_diff($time, 1)?></td>

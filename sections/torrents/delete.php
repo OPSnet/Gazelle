@@ -119,7 +119,7 @@ View::show_header('Delete torrent', 'reportsv2');
     if (!$GroupName) {
         error("Torrent " . display_str($TorrentID) . " not found.");
     }
-    $UploaderName = Users::user_info($UploaderID)['Username'];
+    $UploaderName = (new Gazelle\User($UploaderID))->username();
 
     $TypeList = $Types['master'];
     if (isset($Types[$CategoryID])) {
@@ -218,7 +218,7 @@ View::show_header('Delete torrent', 'reportsv2');
         $requests = $torMan->requestFills($TorrentID);
         foreach ($requests as $r) {
             [$RequestID, $FillerID, $FilledTime] = $r;
-            $FillerName = Users::user_info($FillerID)['Username'];
+            $FillerName = (new Gazelle\User($FillerID))->username();
 ?>
                         <div style="text-align: right;">
                             <strong class="important_text"><a href="user.php?id=<?=$FillerID?>"><?=$FillerName?></a> used this torrent to fill <a href="requests.php?action=viewrequest&amp;id=<?=$RequestID?>">this request</a> <?=time_diff($FilledTime)?></strong>

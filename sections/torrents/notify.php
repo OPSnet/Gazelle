@@ -158,8 +158,7 @@ if (!empty($GroupIDs)) {
     }
 }
 if ($Sneaky) {
-    $UserInfo = Users::user_info($UserID);
-    View::show_header($UserInfo['Username'].'\'s notifications', 'notifications');
+    View::show_header((new Gazelle\User($UserID))->username() . '\'s notifications', 'notifications');
 } else {
     View::show_header('My notifications', 'notifications');
 }
