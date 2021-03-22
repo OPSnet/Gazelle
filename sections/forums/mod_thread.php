@@ -46,7 +46,7 @@ if (isset($_POST['forumid'])) {
 }
 
 $newTitle = trim($_POST['title']);
-if ($newTitle === '') {
+if (!isset($_POST['transition']) && $newTitle === '') {
     error("Title cannot be empty");
 }
 

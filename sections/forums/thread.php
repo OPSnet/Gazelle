@@ -425,7 +425,6 @@ if (count($transitions)) {
                     <input type="hidden" name="auth" value="<?=$auth?>" />
                     <input type="hidden" name="threadid" value="<?=$threadId?>" />
                     <input type="hidden" name="page" value="<?=$Page?>" />
-                    <input type="hidden" name="title" value="<?=display_str($threadInfo['Title'])?>" />
                     <input type="hidden" name="transition" value="<?=$transition['id']?>" />
                     <input type="submit" value="<?=$transition['label']?>" />
                 </form>
