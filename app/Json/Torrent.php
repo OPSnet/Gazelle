@@ -120,6 +120,7 @@ class Torrent extends \Gazelle\Json {
                     'logScore'      => $torrent['LogScore'],
                     'logChecksum'   => $torrent['LogChecksum'],
                     'logCount'      => $torrent['LogCount'],
+                    'ripLogIds'     => $torrent['ripLogIds'],
                     'fileCount'     => $torrent['FileCount'],
                     'size'          => $torrent['Size'],
                     'seeders'       => $torrent['Seeders'],

@@ -719,12 +719,18 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 lwa.TorrentID AS LossywebApproved,
                 t.LastReseedRequest,
                 t.ID AS HasFile,
-                COUNT(tl.LogID) AS LogCount
+                (
+                    SELECT group_concat(tl.LogID)
+                    FROM torrents_logs tl
+                    INNER JOIN torrents t ON (t.ID = tl.TorrentID)
+                    WHERE t.Media = 'CD'
+                        AND t.HasLogDB = '1'
+                        AND t.GroupID = ?
+                ) AS ripLogIds
         ";
 
         $DB->prepared_query("
-            SELECT $columns
-                ,0 as is_deleted
+            SELECT $columns, 0 as is_deleted
             FROM torrents AS t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
@@ -738,8 +744,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
             WHERE t.GroupID = ?
             GROUP BY t.ID
             UNION DISTINCT
-            SELECT $columns
-                ,1 as is_deleted
+            SELECT $columns, 1 as is_deleted
             FROM deleted_torrents AS t
             INNER JOIN deleted_torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             LEFT JOIN deleted_torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
@@ -761,7 +766,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 Media ASC,
                 Format,
                 Encoding,
-                ID", $GroupID, $GroupID);
+                ID", $GroupID, $GroupID, $GroupID, $GroupID);
 
         $TorrentList = $DB->to_array('ID', MYSQLI_ASSOC);
         if (empty($TorrentDetails) || empty($TorrentList)) {
@@ -777,6 +782,11 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
             $CacheTime = 600;
         } else {
             $CacheTime = 3600;
+        }
+        foreach ($TorrentList as &$torrent) {
+            $torrent['ripLogIds'] = empty($torrent['ripLogIds'])
+                ? [] : array_map(function ($x) { return (int)$x; },  explode(',', $torrent['ripLogIds']));
+            $torrent['LogCount'] = count($torrent['ripLogIds']);
         }
         // Store it all in cache
         if (!$RevisionID) {
