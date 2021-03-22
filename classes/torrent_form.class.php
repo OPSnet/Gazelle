@@ -497,7 +497,8 @@ class TORRENT_FORM {
                     Log files:<br /><a href="javascript:;" onclick="AddLogField('<?=Logchecker::getAcceptValues()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
                 </td>
                 <td id="logfields">
-                    Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
+                    <a class="brackets" href="logchecker.php" target="_blank">Logchecker</a>
+                    You may analyze your log files prior uploading to verify that they are perfect.<br />For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
                     <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" />
                 </td>
             </tr>
