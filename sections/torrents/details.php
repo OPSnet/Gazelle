@@ -554,7 +554,7 @@ foreach ($TorrentList as $Torrent) {
                 ? 'Someone reported it'
                 : sprintf('<a href="user.php?id=%d">%s</a> <a href="reportsv2.php?view=report&amp;id=%d">reported it</a>',
                     $Report['ReporterID'],
-                    Users::user_info($Report['ReporterID'])['Username'],
+                    (new Gazelle\User($Report['ReporterID']))->username(),
                     $Report['ID']);
 
             if (isset($Types[$GroupCategoryID][$Report['Type']])) {

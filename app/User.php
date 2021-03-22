@@ -140,6 +140,7 @@ class User extends BaseObject {
         $this->info['NotifyOnQuote']   = ($this->info['NotifyOnQuote'] == '1');
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+        $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
@@ -452,6 +453,89 @@ class User extends BaseObject {
 
     public function paranoia(): array {
         return $this->info()['Paranoia'];
+    }
+
+    // The following are used throughout the site:
+    // uploaded, ratio, downloaded: stats
+    // lastseen: approximate time the user last used the site
+    // uploads: the full list of the user's uploads
+    // uploads+: just how many torrents the user has uploaded
+    // snatched, seeding, leeching: the list of the user's snatched torrents, seeding torrents, and leeching torrents respectively
+    // snatched+, seeding+, leeching+: the length of those lists respectively
+    // uniquegroups, perfectflacs: the list of the user's uploads satisfying a particular criterion
+    // uniquegroups+, perfectflacs+: the length of those lists
+    // If "uploads+" is disallowed, so is "uploads". So if "uploads" is in the array, the user is a little paranoid, "uploads+", very paranoid.
+
+    // The following are almost only used in /sections/user/user.php:
+    // requiredratio
+    // requestsfilled_count: the number of requests the user has filled
+    //   requestsfilled_bounty: the bounty thus earned
+    //   requestsfilled_list: the actual list of requests the user has filled
+    // requestsvoted_...: similar
+    // artistsadded: the number of artists the user has added
+    // torrentcomments: the list of comments the user has added to torrents
+    //   +
+    // collages: the list of collages the user has created
+    //   +
+    // collagecontribs: the list of collages the user has contributed to
+    //   +
+    // invitedcount: the number of users this user has directly invited
+
+    /**
+     * Return whether currently logged in user can see $Property on a user with $Paranoia, $UserClass and (optionally) $UserID
+     * If $Property is an array of properties, returns whether currently logged in user can see *all* $Property ...
+     *
+     * @param $Property The property to check, or an array of properties.
+     * @param $Paranoia The paranoia level to check against.
+     * @param $UserClass The user class to check against (Staff can see through paranoia of lower classed staff)
+     * @param $UserID Optional. The user ID of the person being viewed
+     * @return mixed   1 representing the user has normal access
+                       2 representing that the paranoia was overridden,
+                       false representing access denied.
+     */
+
+    /**
+     * What right does the viewer have to see a list of properties of this user?
+     *
+     * @param Gazelle\User viewer Who is looking?
+     * @param array Property What properties are they looking for?
+     * @return int PARANOIA_HIDDEN, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
+     */
+    function propertyVisibleMulti(User $viewer, array $property): int {
+        $final = false;
+        foreach ($property as $p) {
+            $result = $this->propertyVisible($viewer, $p);
+            if ($result === PARANOIA_HIDDEN) {
+                return PARANOIA_HIDDEN;
+            }
+            if ($final === PARANOIA_OVERRIDDEN && $result = PARANOIA_ALLOWED) {
+                continue;
+            }
+            $final = $result;
+        }
+        return $final;
+    }
+
+    /**
+     * What right does the viewer have to see a property of this user?
+     *
+     * @param Gazelle\User viewer Who is looking?
+     * @param array Property What property are they looking for?
+     * @return int PARANOIA_HIDDEN, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
+     */
+    function propertyVisible(User $viewer, string $property): int {
+        if ($this->id() === $viewer->id()) {
+            return PARANOIA_ALLOWED;
+        }
+
+        $paranoia = $this->paranoia();
+        if (!in_array($property, $paranoia) && !in_array("$property+", $paranoia)) {
+            return PARANOIA_ALLOWED;
+        }
+        if ($viewer->permitted('users_override_paranoia') || $viewer->permitted(PARANOIA_OVERRIDE[$property])) {
+            return PARANOIA_OVERRIDDEN;
+        }
+        return PARANOIA_HIDDEN;
     }
 
     public function ratioWatchExpiry(): ?string {

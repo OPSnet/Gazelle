@@ -123,7 +123,7 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
             } else {
                 Irc::sendChannel(
                     "user.php?id=" . $UserID
-                    . " (" . Users::user_info($UserID)['Username'] . ")"
+                    . " (" . $User->username() . ")"
                     . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
                     . " accessing "
                     . SITE_URL . $_SERVER['REQUEST_URI']
