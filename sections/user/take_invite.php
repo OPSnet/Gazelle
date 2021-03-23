@@ -11,7 +11,7 @@ authorize();
 
 $user = new Gazelle\User($LoggedUser['ID']);
 // Can the member issue an invite?
-if (!($user->canInvite() || check_perms('site_send_unlimited_invites'))) {
+if (!$user->canInvite()) {
     error(403);
 }
 // Can the site allow an invite to be spent?
