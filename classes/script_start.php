@@ -182,8 +182,8 @@ G::$Twig->addFunction(new Twig\TwigFunction('privilege', function ($default, $co
             : ''
         )
         . sprintf(
-            '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label for="%s">%s</label><br />',
-            "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key,
+            '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s">%s</label><br />',
+            "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key, $key,
             \Permissions::list()[$key] ?? "!unknown($key)!"
         ),
         'UTF-8'

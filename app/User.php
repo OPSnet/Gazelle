@@ -54,6 +54,9 @@ class User extends BaseObject {
     }
 
     public function info(): ?array {
+        if ($this->info) {
+            return $this->info;
+        }
         $key = sprintf(self::CACHE_KEY, $this->id);
         if (($this->info = $this->cache->get_value($key)) !== false) {
             return $this->info;
@@ -185,6 +188,8 @@ class User extends BaseObject {
         foreach ($secondaryClassPerms as $name => $value) {
             $this->info['Permission'][$name] = (bool)$value;
         }
+        $this->info['defaultPermission'] = $this->info['Permission'];
+
         // a custom permission may revoke a primary or secondary grant
         $custom = unserialize($this->info['CustomPermissions']) ?: [];
         foreach ($custom as $name => $value) {
@@ -213,13 +218,85 @@ class User extends BaseObject {
     }
 
     /**
+     * Get the permissions (granted or revoked) for this user
+     *
+     * @return array permission list
+     */
+    public function permissionList(): array {
+        return $this->info()['Permission'];
+    }
+
+    /**
+     * Get the default permissions of this user
+     * (before any userlevel grants or revocations are considered).
+     *
+     * @return array permission list
+     */
+    public function defaultPermissionList(): array {
+        return $this->info()['defaultPermission'] ?? [];
+    }
+
+    /**
+     * Set the custom permissions for this user
+     *
+     * @param array a list of "perm_<permission_name>" custom permissions
+     * @return bool was there a change?
+     */
+    public function modifyPermissionList(array $current): bool {
+        $permissionList = array_keys(\Permissions::list());
+        $default = $this->defaultPermissionList();
+        $delta = [];
+        foreach ($permissionList as $p) {
+            $new = isset($current["perm_$p"]) ? 1 : 0;
+            $old = isset($default[$p]) ? 1 : 0;
+            if ($new != $old) {
+                $delta[$p] = $new;
+            }
+        }
+        $this->db->prepared_query("
+            UPDATE users_main SET
+                CustomPermissions = ?
+            WHERE ID = ?
+            ", count($delta) ? serialize($delta) : null, $this->id
+        );
+        $this->cache->delete_value("u_" . $this->id);
+        $this->cache->delete_value("user_info_heavy_" . $this->id);
+        $this->info = false;
+        return $this->db->affected_rows() === 1;
+    }
+
+    /**
      * Does the user have a specific permission?
      *
      * @param string permission name
      * @return bool permission granted
      */
-    public function permitted(string $permission) {
+    public function permitted(string $permission): bool {
         return $this->info()['Permission'][$permission] ?? false;
+    }
+
+    /**
+     * Get the secondary classes of the user (enabled or not)
+     *
+     * @return array secondary classes list
+     */
+    public function secondaryClassesList(): array {
+        $this->db->prepared_query('
+            SELECT
+                p.ID                   AS permId,
+                p.Name                 AS permName,
+                (l.UserID IS NOT NULL) AS isSet
+            FROM permissions AS p
+            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
+            WHERE p.Secondary = 1
+            ORDER BY p.Name
+            ', $this->id
+        );
+        return $this->db->to_array('permName', MYSQLI_ASSOC, false);
+    }
+
+    public function secondaryClasses(): array {
+        return $this->info()['secondary_class'];
     }
 
     public function hasAttr(string $name): ?int {
@@ -982,21 +1059,6 @@ class User extends BaseObject {
         return (new WitnessTable\UserReadForum)->witness($this->id);
     }
 
-    public function permissionList(): array {
-        $this->db->prepared_query('
-            SELECT
-                p.ID                   AS permId,
-                p.Name                 AS permName,
-                (l.UserID IS NOT NULL) AS isSet
-            FROM permissions AS p
-            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
-            WHERE p.Secondary = 1
-            ORDER BY p.Name
-            ', $this->id
-        );
-        return $this->db->to_array('permName', MYSQLI_ASSOC, false);
-    }
-
     public function addClasses(array $classes): int {
         $this->db->prepared_query("
             INSERT IGNORE INTO users_levels (UserID, PermissionID)
@@ -1156,10 +1218,6 @@ class User extends BaseObject {
     public function isFLS(): bool           { return in_array(FLS_TEAM, $this->info()['secondary_class']); }
     public function isStaff(): bool         { return $this->info()['isStaff']; }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
-
-    public function secondaryClasses(): array {
-        return $this->info()['secondary_class'];
-    }
 
     public function warningExpiry(): ?string {
         return $this->info()['Warned'];
