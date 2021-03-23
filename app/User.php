@@ -1540,6 +1540,39 @@ class User extends BaseObject {
         ');
     }
 
+    public function pendingInviteList(): array {
+        $this->db->prepared_query("
+            SELECT InviteKey AS invite_key,
+                Email        AS email,
+                Expires      AS expires
+            FROM invites
+            WHERE InviterID = ?
+            ORDER BY Expires
+            ", $this->id
+        );
+        return $this->db->to_array('invite_key', MYSQLI_ASSOC, false);
+    }
+
+    public function inviteList(string $orderBy, string $direction): array {
+        $this->db->prepared_query("
+            SELECT
+                um.ID          AS user_id,
+                um.Email       AS email,
+                uls.Uploaded   AS uploaded,
+                uls.Downloaded AS downloaded,
+                ui.JoinDate    AS join_date,
+                ula.last_access
+            FROM users_main AS um
+            LEFT  JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+            WHERE ui.Inviter = ?
+            ORDER BY $orderBy $direction
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function passwordAge() {
         $age = time_diff(
             $this->getSingleValue('user_pw_age', '
@@ -2279,7 +2312,7 @@ class User extends BaseObject {
         return !$this->info()['DisableInvites']
             && !$this->onRatioWatch()
             && $this->canLeech()
-            && $this->info()['Invites'] > 0;
+            && ($this->info()['Invites'] > 0 || $this->permitted('site_send_unlimited_invites'));
     }
 
     /**

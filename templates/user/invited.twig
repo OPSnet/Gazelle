@@ -1,0 +1,115 @@
+<div class="thin">
+<div class="header">
+    <h2>{{ user.id|user_url }} &rsaquo; Invites</h2>
+    <div class="linkbox">
+        <a href="user.php?action=invitetree{% if not own_profile %}&amp;userid={{ user.id }}{% endif %}" class="brackets">Invite tree</a>
+{% if view_pool %}
+        <a href="tools.php?action=invite_pool" class="brackets">Invite pool</a>
+{% endif %}
+    </div>
+</div>
+
+{% if user.disableInvites %}
+<div class="box pad" style="text-align: center;">
+    <strong class="important_text">Your invites have been disabled.
+    Please read <a href="wiki.php?action=article&amp;id={{ wiki_article }}">this article</a> for more information.</strong>
+</div>
+
+{% elseif user.onRatioWatch or not user.canLeech %}
+<div class="box pad" style="text-align: center;">
+    <strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled.
+    Please read <a href="wiki.php?action=article&amp;id={{ wiki_article }}">this article</a> for more information.</strong>
+</div>
+
+{% elseif not invites_open %}
+<div class="box pad notice">
+    <p>The user limit has been reached: you are unable to send invites at this time.
+    Please wait until the enabled user count falls below {{ constant('USER_LIMIT') }}.</p>
+</div>
+
+{% elseif own_profile and user.canInvite %}
+<div class="box pad">
+    <p>Please note that selling, trading, or publicly giving away our invitations&#8202;&mdash;&#8202;or responding
+    to public invite requests&#8202;&mdash;&#8202;is strictly forbidden, and may result in you and your entire invite tree being banned.</p>
+    <p>Do not send an invite to anyone who has previously had an {{ constant('SITE_NAME') }} account.
+    Please direct them to {{ constant('BOT_DISABLED_CHAN') }} on {{ constant('BOT_SERVER') }} if they wish to reactivate their account.</p>
+    <p>Remember that you are responsible for ALL invitees, and your account and/or privileges may be disabled due to your invitees' actions.
+    You should know and trust the person you're inviting. If you aren't familiar enough with the user to trust them, do not invite them.</p>
+    <p><em>Do not send an invite if you have not read or do not understand the information above.</em></p>
+</div>
+<div class="box box2">
+    <form class="send_form pad" name="invite" action="user.php" method="post">
+        <input type="hidden" name="action" value="take_invite" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <div class="field_div">
+            <div class="label">Email address:</div>
+            <div class="input">
+                <input type="email" name="email" size="60" />
+                <input type="submit" value="Invite" />
+            </div>
+        </div>
+    {% if user.permitted('users_invite_notes') %}
+        <div class="field_div">
+            <div class="label">Staff Note:</div>
+            <div class="input">
+                <input type="text" name="reason" size="60" maxlength="255" />
+            </div>
+        </div>
+    {% endif %}
+    </form>
+</div>
+{% endif %}
+
+{% for p in user.pendingInviteList %}
+    {% if loop.first %}
+<h3>Pending invites</h3>
+<div class="box pad">
+    <table width="100%">
+        <tr class="colhead">
+            <td>Email address</td>
+            <td>Expires in</td>
+            <td>Key</td>
+            <td>Invite link</td>
+            <td>Delete invite</td>
+        </tr>
+    {% endif %}
+        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <td>{{ p.email }}</td>
+            <td>{{ p.expires|time_diff }}</td>
+            <td>{{ p.invite_key }}</td>
+            <td><a href="register.php?invite={{ p.invite_key }}">Invite link</a></td>
+            <td><a href="user.php?action=delete_invite&amp;invite={{ p.invite_key }}&amp;auth={{ auth }}"
+                onclick="return confirm('Are you sure you want to delete this invite?');">Delete invite</a></td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+</div>
+{% endfor %}
+
+<h3>Invitee list</h3>
+<div class="box pad">
+    <table class="invite_table m_table" width="100%">
+        <tr class="colhead">
+            <td class="m_th_left nobr">{{ heading.emit('username')|raw }}</td>
+            <td class="nobr">{{ heading.emit('email')|raw }}</td>
+            <td class="nobr">{{ heading.emit('joined')|raw }}</td>
+            <td class="nobr">{{ heading.emit('lastseen')|raw }}</td>
+            <td class="m_th_right nobr">{{ heading.emit('uploaded')|raw }}</td>
+            <td class="m_th_right nobr">{{ heading.emit('downloaded')|raw }}</td>
+            <td class="m_th_right nobr">{{ heading.emit('ratio')|raw }}</td>
+        </tr>
+{% for u in invited %}
+        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <td class="td_username">{{ u.user_id|user_full|raw }}</td>
+            <td class="td_email">{{ u.email }}</td>
+            <td class="td_join_date">{{ u.join_date|time_diff }}</td>
+            <td class="td_last_access">{{ u.last_access|time_diff }}</td>
+            <td class="td_up m_td_right">{{ u.uploaded|octet_size }}</td>
+            <td class="td_dl m_td_right">{{ u.downloaded|octet_size }}</td>
+            <td class="td_ratio m_td_right">{{ ratio(u.uploaded, u.downloaded) }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div>
+</div>
