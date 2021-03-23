@@ -882,8 +882,8 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
     }
 
     if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
-        echo G::$Twig->render('user/edit-permission.twig', [
-            'permission' => $User->permissionList(),
+        echo G::$Twig->render('user/edit-secondary-class.twig', [
+            'permission' => $User->secondaryClassesList(),
         ]);
     }
 
