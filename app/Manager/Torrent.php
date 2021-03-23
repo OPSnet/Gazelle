@@ -512,14 +512,7 @@ class Torrent extends \Gazelle\Base {
                     lwa.TorrentID AS LossywebApproved,
                     t.LastReseedRequest,
                     t.ID AS HasFile,
-                    (
-                        SELECT group_concat(tl.LogID)
-                        FROM torrents_logs tl
-                        INNER JOIN torrents t ON (t.ID = tl.TorrentID)
-                        WHERE t.Media = 'CD'
-                            AND t.HasLogDB = '1'
-                            AND t.GroupID = ?
-                    ) AS ripLogIds
+                    group_concat(tl.LogID) as ripLogIds
             ";
 
             $this->db->prepared_query("
@@ -560,7 +553,7 @@ class Torrent extends \Gazelle\Base {
                     Format,
                     Encoding,
                     ID
-                ", $groupId, $groupId, $groupId, $groupId
+                ", $groupId, $groupId
             );
             $torrentList = $this->db->to_array('ID', MYSQLI_ASSOC, false);
             if (empty($group) || empty($torrentList)) {
