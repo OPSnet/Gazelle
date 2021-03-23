@@ -130,7 +130,7 @@ $DB->prepared_query("
         r.Link,
         r.LogMessage,
         tg.Name,
-        tg.ID,
+        t.GroupID,
         CASE COUNT(ta.GroupID)
             WHEN 1 THEN aa.ArtistID
             WHEN 0 THEN '0'
@@ -169,7 +169,7 @@ $DB->prepared_query("
     LIMIT ? OFFSET ?
     ", ...array_merge($args, [$paginator->limit(), $paginator->offset()])
 );
-$Reports = $DB->to_array();
+$Reports = $DB->to_array(false, MYSQLI_NUM);
 
 View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
 ?>
