@@ -4,27 +4,31 @@ use Gazelle\Util\Irc;
 
 authorize();
 
-$UserID = empty($_REQUEST['userid']) ? $LoggedUser['ID'] : (int)$_REQUEST['userid'];
-if (!$UserID) {
+$userMan = new Gazelle\Manager\User;
+if (empty($_REQUEST['userid'])) {
+    $user = $userMan->findById($LoggedUser['ID']);
+    $ownProfile = true;
+} else {
+    if (!check_perms('admin_bp_history')) {
+        error(403);
+    }
+    $user = $userMan->findById((int)($_REQUEST['userid'] ?? 0));
+    $ownProfile = false;
+}
+if (is_null($user)) {
     error(404);
 }
-$user = new Gazelle\User($UserID);
+$userId = $user->id();
 
-//For this entire page, we should generally be using $UserID not $LoggedUser['ID'] and $U[] not $LoggedUser[]
-$U = Users::user_info($UserID);
-if (!$U) {
-    error(404);
-}
-$UH = Users::user_heavy_info($UserID);
-
-$Permissions = Permissions::get_permissions($U['PermissionID']);
-if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Permissions['Class'])) {
-    Irc::sendRaw('PRIVMSG '.ADMIN_CHAN.' :User '.$LoggedUser['Username'].' ('.SITE_URL.'/user.php?id='.$LoggedUser['ID'].') just tried to edit the profile of '.SITE_URL.'/user.php?id='.$_REQUEST['userid']);
+if (!$ownProfile && !check_perms('users_edit_profiles')) {
+    Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $LoggedUser['Username']
+        . ' (' . SITE_URL . '/user.php?id=' . $LoggedUser['ID']
+        . ') just tried to edit the profile of ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']);
     error(403);
 }
 
-$Val = new Gazelle\Util\Validator;
-$Val->setFields([
+$validator = new Gazelle\Util\Validator;
+$validator->setFields([
     ['stylesheet', 1, "number", "You forgot to select a stylesheet."],
     ['styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => '/^'.CSS_REGEX.'$/i']],
     ['postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
@@ -39,10 +43,10 @@ $Val->setFields([
     ['new_pass_2', 1, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']],
 ]);
 if (check_perms('site_advanced_search')) {
-    $Val->setField('searchtype', 1, "number", "You forgot to select your default search preference.", ['range' => [0, 1]]);
+    $validator->setField('searchtype', 1, "number", "You forgot to select your default search preference.", ['range' => [0, 1]]);
 }
-if (!$Val->validate($_POST)) {
-    error($Val->errorMessage());
+if (!$validator->validate($_POST)) {
+    error($validator->errorMessage());
 }
 
 // Begin building $Paranoia
@@ -116,7 +120,7 @@ if (!isset($_POST['p_donor_heart'])) {
 // End building $Paranoia
 
 $donorMan = new Gazelle\Manager\Donation;
-$donorMan->updateReward($UserID,
+$donorMan->updateReward($userId,
     array_map('trim',
         array_filter($_POST,
         function ($key) {
@@ -134,18 +138,17 @@ $donorMan->updateReward($UserID,
 );
 
 if (isset($_POST['p_donor_stats'])) {
-    $donorMan->show($UserID);
+    $donorMan->show($userId);
 } else {
-    $donorMan->hide($UserID);
+    $donorMan->hide($userId);
 }
 
-// Email change
 $CurEmail = $user->email();
 if ($CurEmail != $_POST['email']) {
     if (!check_perms('users_edit_profiles')) { // Non-admins have to authenticate to change email
         $PassHash = $DB->scalar("
             SELECT PassHash FROM users_main WHERE ID = ?
-            ", $UserID
+            ", $userId
         );
         if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
             error('You did not enter the correct password.');
@@ -156,16 +159,15 @@ if ($CurEmail != $_POST['email']) {
         INSERT INTO users_history_emails
                (UserID, Email, IP)
         VALUES (?,      ?,     ?)
-        ", $UserID, $NewEmail, $_SERVER['REMOTE_ADDR']
+        ", $userId, $NewEmail, $_SERVER['REMOTE_ADDR']
     );
 }
-//End email change
 
 $ResetPassword = false;
 if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
     $PassHash = $DB->scalar("
         SELECT PassHash FROM users_main WHERE ID = ?
-        ", $UserID
+        ", $userId
     );
     if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
         error('You did not enter the correct password.');
@@ -179,7 +181,7 @@ if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST[
     }
 }
 
-if ($LoggedUser['DisableAvatar'] && $_POST['avatar'] != $U['Avatar']) {
+if ($LoggedUser['DisableAvatar'] && $_POST['avatar'] != $user->avatar()) {
     error('Your avatar privileges have been revoked.');
 }
 
@@ -251,41 +253,39 @@ $UserNavItems = implode(',', $UserNavItems);
 $LastFMUsername = $_POST['lastfm_username'];
 $OldLastFMUsername = '';
 $DB->prepared_query('
-    SELECT username
-    FROM lastfm_users
-    WHERE ID = ?
-    ', $UserID
+    SELECT username FROM lastfm_users WHERE ID = ?
+    ', $userId
 );
 
 if ($DB->has_results()) {
-    list($OldLastFMUsername) = $DB->next_record();
+    [$OldLastFMUsername] = $DB->next_record();
     if ($OldLastFMUsername != $LastFMUsername) {
         if (empty($LastFMUsername)) {
             $DB->prepared_query('
-                DELETE FROM lastfm_users
-                WHERE ID = ?
-                ', $UserID
+                DELETE FROM lastfm_users WHERE ID = ?
+                ', $userId
             );
         } else {
             $DB->prepared_query('
-                UPDATE lastfm_users
-                SET Username = ?
+                UPDATE lastfm_users SET
+                    Username = ?
                 WHERE ID = ?
-                ', $LastFMUsername, $UserID
+                ', $LastFMUsername, $userId
             );
         }
+        $Cache->delete_value("lastfm_username_$userId");
     }
 } elseif (!empty($LastFMUsername)) {
     $DB->prepared_query('
         INSERT INTO lastfm_users (ID, Username)
         VALUES (?, ?)
-        ', $UserID, $LastFMUsername
+        ', $userId, $LastFMUsername
     );
+    $Cache->delete_value("lastfm_username_$userId");
 }
-G::$Cache->delete_value("lastfm_username_$UserID");
 
 $user->toggleAcceptFL($Options['AcceptFL']);
-(new Gazelle\Manager\Notification($UserID))
+(new Gazelle\Manager\Notification($userId))
     ->save(
         array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST)))),
         ["PushKey" => $_POST['pushkey']],
@@ -294,8 +294,8 @@ $user->toggleAcceptFL($Options['AcceptFL']);
     );
 
 // Information on how the user likes to download torrents is stored in cache
-if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['HttpsTracker']) {
-    $Cache->delete_value('user_'.$UH['torrent_pass']);
+if ($DownloadAlt != $user->option('DownloadAlt') || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {
+    $Cache->delete_value('user_' . $user->announceKey());
 }
 
 $SQL = "
@@ -343,26 +343,23 @@ if ($ResetPassword) {
     $Params[] = Gazelle\UserCreator::hashPassword($_POST['new_pass_1']);
     $DB->prepared_query('
         INSERT INTO users_history_passwords
-            (UserID, ChangerIP, ChangeTime)
-        VALUES
-            (?, ?, now())
-        ', $UserID, $LoggedUser['IP']
+               (UserID, ChangerIP, ChangeTime)
+        VALUES (?,      ?,         now())
+        ', $userId, $LoggedUser['IP']
     );
 }
 
 if (isset($_POST['resetpasskey'])) {
-    $UserInfo = Users::user_heavy_info($UserID);
-    $OldPassKey = $UserInfo['torrent_pass'];
+    $OldPassKey = $user->announceKey();
     $NewPassKey = randomString();
     $ChangerIP = $LoggedUser['IP'];
     $SQL .= ',m.torrent_pass = ?';
     $Params[] = $NewPassKey;
     $DB->prepared_query('
         INSERT INTO users_history_passkeys
-            (UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
-        VALUES
-            (?, ?, ?, ?, now())
-        ', $UserID, $OldPassKey, $NewPassKey, $ChangerIP
+               (UserID, OldPassKey, NewPassKey, ChangerIP)
+        VALUES (?,      ?,          ?,          ?)
+        ', $userId, $OldPassKey, $NewPassKey, $ChangerIP
     );
     $Cache->delete_value("user_$OldPassKey");
 
@@ -370,14 +367,14 @@ if (isset($_POST['resetpasskey'])) {
 }
 
 $SQL .= ' WHERE m.ID = ?';
-$Params[] = $UserID;
+$Params[] = $userId;
 
 $DB->prepared_query($SQL, ...$Params);
 
 $user->flush();
 
 if ($ResetPassword) {
-    logout_all_sessions($UserID);
+    logout_all_sessions($userId);
 }
 
-header("Location: user.php?action=edit&userid=$UserID");
+header("Location: user.php?action=edit&userid=$userId");
