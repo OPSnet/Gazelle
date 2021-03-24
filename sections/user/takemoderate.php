@@ -163,12 +163,13 @@ if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) &&
     $donorMan->moderatorAdjust($user, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $LoggedUser['ID']);
 }
 
-// If we're deleting the user, we can ignore all the other crap
+$tracker = new Gazelle\Tracker;
 
+// If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
     (new Gazelle\Log)->general("User account $userID (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
     $user->remove();
-    Tracker::update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
+    $tracker->update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
     header("Location: log.php?search=User+$userID");
     exit;
 }
@@ -528,7 +529,7 @@ if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
     } elseif ($enableUser == '1') {
         $Cache->increment('stats_user_count');
         $visibleTrIP = $visible && $cur['IP'] != '127.0.0.1' ? '1' : '0';
-        Tracker::update_tracker('add_user', ['id' => $userID, 'passkey' => $cur['torrent_pass'], 'visible' => $visibleTrIP]);
+        $tracker->update_tracker('add_user', ['id' => $userID, 'passkey' => $cur['torrent_pass'], 'visible' => $visibleTrIP]);
         if (($cur['Downloaded'] == 0) || ($cur['Uploaded'] / $cur['Downloaded'] >= $cur['RequiredRatio'])) {
             $canLeech = 1;
             $set[] = "i.RatioWatchEnds = ?";
@@ -560,7 +561,7 @@ if ($resetPasskey == 1 && check_perms('users_edit_reset_keys')) {
     $user->modifyAnnounceKeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
     $Cache->delete_value('user_'.$cur['torrent_pass']);
     $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
-    Tracker::update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
+    $tracker->update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
     $set[] = "torrent_pass = ?";
     $args[] = $passkey;
     $editSummary[] = 'passkey reset';
@@ -661,7 +662,7 @@ if ($flTokens != $cur['FLTokens']) {
 }
 
 if (count($trackerUserUpdates) > 1) {
-    Tracker::update_tracker('update_user', $trackerUserUpdates);
+    $tracker->update_tracker('update_user', $trackerUserUpdates);
 }
 
 if (count($set) || count($leechSet)) {

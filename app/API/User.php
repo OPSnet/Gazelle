@@ -137,7 +137,8 @@ class User extends AbstractAPI {
 
         $this->cache->increment('stats_user_count');
         $VisibleTrIp = $Cur['Visible'] && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
-        \Tracker::update_tracker('add_user', ['id' => $this->id,
+        $tracker = new \Gazelle\Tracker;
+        $tracker->update_tracker('add_user', ['id' => $this->id,
             'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIp]);
         if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >=
             $Cur['RequiredRatio'])) {
@@ -151,7 +152,7 @@ class User extends AbstractAPI {
                 $Comment .= ' (Ratio: '.\Format::get_ratio_html($Cur['Uploaded'],
                     $Cur['Downloaded'], false).', RR: '.number_format($Cur['RequiredRatio'], 2).')';
             }
-            \Tracker::update_tracker('update_user', ['passkey' => $Cur['torrent_pass'],
+            $tracker->update_tracker('update_user', ['passkey' => $Cur['torrent_pass'],
                 'can_leech' => 0]);
         }
         $UpdateSet[] = "ui.BanReason = '0'";

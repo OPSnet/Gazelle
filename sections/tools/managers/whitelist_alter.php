@@ -14,7 +14,7 @@ if ($_POST['submit'] == 'Delete') {
     }
     $peer = $whitelist->peerId($clientId);
     $whitelist->remove($clientId);
-    Tracker::update_tracker('remove_whitelist', ['peer_id' => $peer]);
+    (new Gazelle\Tracker)->update_tracker('remove_whitelist', ['peer_id' => $peer]);
 } else {
     // Edit or Create
     if (empty($_POST['client']) || empty($_POST['peer_id'])) {
@@ -23,18 +23,19 @@ if ($_POST['submit'] == 'Delete') {
     $peer    = trim($_POST['peer_id']);
     $vstring = trim($_POST['client']);
 
+    $tracker = new \Gazelle\Tracker;
     if ($_POST['submit'] == 'Edit') {
         $clientId = (int)$_POST['id'];
         if ($clientId < 1) {
             error(0);
         }
         $oldPeer = $whitelist->modify($clientId, $peer, $vstring);
-        Tracker::update_tracker('edit_whitelist', [
+        $tracker->update_tracker('edit_whitelist', [
             'old_peer_id' => $oldPeer,
             'new_peer_id' => $peer,
         ]);
     } else {
-        Tracker::update_tracker('add_whitelist', [
+        $tracker->update_tracker('add_whitelist', [
             'peer_id' => $whitelist->create($peer, $vstring)
         ]);
     }

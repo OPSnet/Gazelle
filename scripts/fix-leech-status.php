@@ -22,8 +22,9 @@ $DB->prepared_query('
 ');
 $users = $DB->to_array('ID', MYSQLI_ASSOC, false);
 
+$tracker = new \Gazelle\Tracker;
 foreach ($users as $u) {
-    \Tracker::update_tracker('update_user', ['passkey' => $u['torrent_pass'], 'can_leech' => '1']);
+    $tracker->update_tracker('update_user', ['passkey' => $u['torrent_pass'], 'can_leech' => '1']);
     $DB->prepared_query('
         UPDATE users_main SET
             can_leech = 1

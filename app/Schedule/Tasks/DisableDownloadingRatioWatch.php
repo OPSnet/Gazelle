@@ -44,8 +44,9 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
 
         $this->db->set_query_id($userQuery);
         $passkeys = $this->db->collect('torrent_pass');
+        $tracker = new \Gazelle\Tracker;
         foreach ($passkeys as $passkey) {
-            \Tracker::update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '0']);
+            $tracker->update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '0']);
         }
     }
 }

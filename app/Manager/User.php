@@ -664,15 +664,16 @@ class User extends \Gazelle\Base {
         $PassKeys = $this->db->collect('torrent_pass');
         $this->db->commit();
         $Concat = '';
+        $tracker = new \Gazelle\Tracker;
         foreach ($PassKeys as $PassKey) {
             if (strlen($Concat) > 3950) { // Ocelot's read buffer is 4 KiB and anything exceeding it is truncated
-                \Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
+                $tracker->update_tracker('remove_users', ['passkeys' => $Concat]);
                 $Concat = $PassKey;
             } else {
                 $Concat .= $PassKey;
             }
         }
-        \Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
+        $tracker->update_tracker('remove_users', ['passkeys' => $Concat]);
         return $n;
     }
 

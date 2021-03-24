@@ -101,7 +101,6 @@ class Debug {
         if (empty($Report)) {
             $Report = $Message;
         }
-        $info =
         $Identifier = randomString(5);
         self::$cache->cache_value(
             'analysis_'.$Identifier, [
@@ -113,7 +112,7 @@ class Debug {
                 'includes' => $this->get_includes(),
                 'vars'     => $this->get_logged_vars(),
                 'perf'     => $this->get_perf(),
-                'ocelot'        => class_exists('Tracker') ? \Tracker::$Requests : [],
+                'ocelot'        => (new \Gazelle\Tracker)->requestList(),
                 'searches'      => class_exists('Sphinxql') ? \Sphinxql::$Queries : [],
                 'searches_time' => class_exists('Sphinxql') ? \Sphinxql::$Time : 0.0,
                 'queries'       => $this->get_queries(),

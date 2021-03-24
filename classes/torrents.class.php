@@ -759,7 +759,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         $groupLog = new Gazelle\Log;
         foreach ($Torrents as $Torrent) {
             [$TorrentID, $GroupID, $InfoHash] = $Torrent;
-            Tracker::update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral]);
+            (new Gazelle\Tracker)->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral]);
             $Cache->delete_value("torrent_download_$TorrentID");
             $groupLog->torrent($GroupID, $TorrentID, $LoggedUser['ID'], "marked as freeleech type $FreeLeechType!")
                 ->general($LoggedUser['Username']." marked torrent $TorrentID freeleech type $FreeLeechType!");
