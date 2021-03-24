@@ -1,36 +1,23 @@
 <?php
 
 ini_set('memory_limit', -1);
-//~~~~~~~~~~~ Main bookmarks page ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-
-function compare($X, $Y) {
-    return($Y['count'] - $X['count']);
-}
-
-if (!empty($_GET['userid'])) {
+if (empty($_GET['userid'])) {
+    $user = new Gazelle\User($LoggedUser['ID']);
+} else {
     if (!check_perms('users_override_paranoia')) {
         error(403);
     }
-    $UserID = $_GET['userid'];
-    if (!is_number($UserID)) {
+    $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+    if (is_null($user)) {
         error(404);
     }
-    $Username = $DB->scalar("
-        SELECT Username
-        FROM users_main
-        WHERE ID = ?
-        ", $UserID
-    );
-} else {
-    $UserID = $LoggedUser['ID'];
 }
-
-$Sneaky = ($UserID != $LoggedUser['ID']);
 
 $JsonBookmarks = [];
 
-list($GroupIDs, $CollageDataList, $GroupList) = Users::get_bookmarks($UserID);
+[$GroupIDs, , $GroupList] = $user->bookmarkList();
+
 foreach($GroupIDs as $GroupID) {
     if (!isset($GroupList[$GroupID])) {
         continue;

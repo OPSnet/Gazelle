@@ -485,33 +485,4 @@ class Users {
         $Classes = (new Gazelle\Manager\User)->classList();
         return $Classes[$ClassID]['Name'];
     }
-
-    /**
-     * Returns an array with User Bookmark data: group IDs, collage data, torrent data
-     * @param string|int $UserID
-     * @return array Group IDs, Bookmark Data, Torrent List
-     */
-    public static function get_bookmarks($UserID) {
-        $UserID = (int)$UserID;
-
-        if (($Data = G::$Cache->get_value("bookmarks_group_ids_$UserID"))) {
-            list($GroupIDs, $BookmarkData) = $Data;
-        } else {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
-                SELECT GroupID, Sort, `Time`
-                FROM bookmarks_torrents
-                WHERE UserID = $UserID
-                ORDER BY Sort, `Time` ASC");
-            $GroupIDs = G::$DB->collect('GroupID');
-            $BookmarkData = G::$DB->to_array('GroupID', MYSQLI_ASSOC);
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value("bookmarks_group_ids_$UserID",
-                [$GroupIDs, $BookmarkData], 3600);
-        }
-
-        $TorrentList = Torrents::get_groups($GroupIDs);
-
-        return [$GroupIDs, $BookmarkData, $TorrentList];
-    }
 }
