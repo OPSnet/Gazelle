@@ -9,28 +9,23 @@ function compare($X, $Y) {
 }
 
 if (empty($_GET['userid'])) {
-    $UserID = $LoggedUser['ID'];
-    $Title  = 'Your bookmarked torrent groups';
+    $user = new Gazelle\User($LoggedUser['ID']);
+    $ownProfile = true;
 } else {
     if (!check_perms('users_override_paranoia')) {
         error(403);
     }
-    [$UserID, $Title] = $DB->row("
-        SELECT ID, concat(Username, '''s bookmarked torrent groups')
-        FROM users_main
-        WHERE ID = ?
-        ", (int)$_GET['userid']
-    );
-    if (!$UserID) {
+    $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+    if (is_null($user)) {
         error(404);
     }
+    $ownProfile = ($user->id() === $LoggedUser['ID']);
 }
 
-$Sneaky = $UserID !== $LoggedUser['ID'];
 $NumGroups = 0;
 $ArtistCount = [];
 
-[$GroupIDs, $CollageDataList, $TorrentList] = Users::get_bookmarks($UserID);
+[$GroupIDs, $CollageDataList, $TorrentList] = $user->bookmarkList();
 foreach ($GroupIDs as $Idx => $GroupID) {
     if (!isset($TorrentList[$GroupID])) {
         unset($GroupIDs[$Idx]);
@@ -52,14 +47,14 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 }
 
 $GroupIDs = array_values($GroupIDs);
-
 $CollageCovers = isset($LoggedUser['CollageCovers']) ? (int)$LoggedUser['CollageCovers'] : 25;
+$title = $user->username() . " &rsaquo; Bookmarked torrent groups";
 
-View::show_header($Title, 'browse,collage');
+View::show_header($title, 'browse,collage');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?php if (!$Sneaky) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=$LoggedUser['torrent_pass']?>&amp;user=<?=$LoggedUser['ID']?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?=$LoggedUser['torrent_pass']?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;name=<?=urlencode(SITE_NAME.': Bookmarked Torrents')?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?=$Title?></h2>
+        <h2><?php if ($ownProfile) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=$LoggedUser['torrent_pass']?>&amp;user=<?=$LoggedUser['ID']?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?=$LoggedUser['torrent_pass']?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;name=<?=urlencode(SITE_NAME.': Bookmarked Torrents')?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?= $title ?></h2>
         <div class="linkbox">
             <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
             <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
@@ -251,7 +246,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="td_info" colspan="5">
                 <strong><?= $DisplayName ?></strong>
                 <span style="text-align: right;" class="float_right">
-    <?php if (!$Sneaky) { ?>
+    <?php if ($ownProfile) { ?>
         <a href="#group_<?= $GroupID ?>" class="brackets remove_bookmark"
            onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a>
         <br/>
@@ -371,7 +366,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 </span>
                 <strong><?= $DisplayName ?></strong>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
-                <?php if (!$Sneaky) { ?>
+                <?php if ($ownProfile) { ?>
                     <span class="float_right float_clear"><a href="#group_<?= $GroupID ?>"
                                                              class="brackets remove_bookmark"
                                                              onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a></span>

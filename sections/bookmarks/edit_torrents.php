@@ -11,18 +11,17 @@ function artistName(array &$extended, array &$artists) {
 }
 
 if (empty($_GET['userid'])) {
-    $UserID = $LoggedUser['ID'];
+    $user = new Gazelle\User($LoggedUser['ID']);
 } else {
     if (!check_perms('users_override_paranoia')) {
         error(403);
     }
-    $UserID = (int)$_GET['userid'];
-    if (!$UserID) {
+    $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+    if (is_null($user)) {
         error(404);
     }
 }
-
-[, $CollageDataList, $TorrentList] = Users::get_bookmarks($UserID); // TODO: $TorrentList might not have the correct order, use the $GroupIDs instead
+[, $CollageDataList, $TorrentList] = $user->bookmarkList(); // TODO: $TorrentList might not have the correct order, use the $GroupIDs instead
 
 View::show_header('Organize Bookmarks', 'browse,jquery-ui,jquery.tablesorter,sort');
 

@@ -216,11 +216,12 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
         </form>
     </div>
 <?php } else { ?>
+    <div class="linkbox">
         <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
         <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
         <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
         <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
-        <br /><br />
+    </div>
 <?php } ?>
     <div class="linkbox">
 <?php

@@ -2373,4 +2373,32 @@ class User extends BaseObject {
             ])
         );
     }
+
+    /**
+     * Returns an array with User Bookmark data: group IDs, collage data, torrent data
+     * @param string|int $UserID
+     * @return array Group IDs, Bookmark Data, Torrent List
+     */
+    public function bookmarkList(): array {
+        $key = "bookmarks_group_ids_" . $this->id;
+        if (($info = $this->cache->get_value($key)) !== false) {
+            [$groupIds, $bookmarks] = $info;
+        } else {
+            $qid = $this->db->get_query_id();
+            $this->db->prepared_query("
+                SELECT GroupID,
+                    Sort,
+                    `Time`
+                FROM bookmarks_torrents
+                WHERE UserID = ?
+                ORDER BY Sort, `Time`
+                ", $this->id
+            );
+            $groupIds = $this->db->collect('GroupID');
+            $bookmarks = $this->db->to_array('GroupID', MYSQLI_ASSOC, false);
+            $this->db->set_query_id($qid);
+            $this->cache->cache_value($key, [$groupIds, $bookmarks], 3600);
+        }
+        return [$groupIds, $bookmarks, \Torrents::get_groups($groupIds)];
+    }
 }

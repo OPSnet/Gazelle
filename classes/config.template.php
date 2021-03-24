@@ -423,15 +423,16 @@ define('CACHE_NAMESPACE', [
         'g7' => 'groups_artists_%d',
     ],
     'user' => [
-        'u1' => 'donor_info_%d',
-        'u2' => 'inbox_new_%d',
-        'u3' => 'u_%d',
-        'u4' => 'user_info_%d',
-        'u5' => 'user_info_heavy_%d',
-        'u6' => 'user_stats_%d',
-        'u7' => 'user_statgraphs_%d',
-        'u8' => 'user_tokens_%d',
-    ]
+        'u1' => 'bookmarks_group_ids_%d',
+        'u2' => 'donor_info_%d',
+        'u3' => 'inbox_new_%d',
+        'u4' => 'u_%d',
+        'u5' => 'user_info_%d',
+        'u6' => 'user_info_heavy_%d',
+        'u7' => 'user_stats_%d',
+        'u8' => 'user_statgraphs_%d',
+        'u9' => 'user_tokens_%d',
+    ],
 ]);
 
 // array to store external site credentials and API URIs, stored in cache to keep user sessions alive
