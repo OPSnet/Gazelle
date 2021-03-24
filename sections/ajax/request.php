@@ -20,9 +20,11 @@ if ($Request === false) {
     json_die("failure");
 }
 
+$userMan = new Gazelle\Manager\User;
+
 $CategoryID = $Request['CategoryID'];
-$Requestor = Users::user_info($Request['UserID']);
-$Filler = $Request['FillerID'] ? Users::user_info($Request['FillerID']) : null;
+$Requestor = $userMan->findById($Request['UserID']);
+$Filler = $userMan->findById($Request['FillerID']);
 //Convenience variables
 $IsFilled = !empty($Request['TorrentID']);
 $CanVote = !$IsFilled && check_perms('site_vote');
@@ -62,20 +64,24 @@ if (isset($_GET['page'])) {
 }
 $thread = $commentPage->load()->thread();
 
+$authorCache = [];
 $JsonRequestComments = [];
 foreach ($thread as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername] = array_values($Post);
-    [$AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
+    if (!isset($authorCache[$AuthorID])) {
+        $authorCache[$AuthorID] = $userMan->findById($AuthorID);
+    }
+    $author = $authorCache[$AuthorID];
     $JsonRequestComments[] = [
         'postId'         => $PostID,
         'authorId'       => $AuthorID,
-        'name'           => $Username,
-        'donor'          => $Donor == 1,
-        'warned'         => !is_null($Warned),
-        'enabled'        => $Enabled == 1,
-        'class'          => Users::make_class_string($PermissionID),
+        'name'           => $author->username(),
+        'donor'          => $author->isDonor(),
+        'warned'         => $author->isWarned(),
+        'enabled'        => $author->isEnabled(),
+        'class'          => $userMan->userclassName($author->primaryClass()),
         'addedTime'      => $AddedTime,
-        'avatar'         => $Avatar,
+        'avatar'         => $author->avatar(),
         'bbBody'         => $Body,
         'comment'        => Text::full_format($Body),
         'editedUserId'   => $EditedUserID,
@@ -91,7 +97,7 @@ foreach ($Request['Tags'] as $Tag) {
 json_print('success', [
     'requestId'       => $requestId,
     'requestorId'     => $Request['UserID'],
-    'requestorName'   => $Requestor['Username'],
+    'requestorName'   => $Requestor->username(),
     'isBookmarked'    => (new Gazelle\Bookmark)->isRequestBookmarked($LoggedUser['ID'], $requestId),
     'requestTax'      => $RequestTax,
     'timeAdded'       => $Request['TimeAdded'],
@@ -120,7 +126,7 @@ json_print('success', [
     'logCue'          => html_entity_decode($Request['LogCue']),
     'isFilled'        => $IsFilled,
     'fillerId'        => (int)$Request['FillerID'],
-    'fillerName'      => ($Filler ? $Filler['Username'] : ''),
+    'fillerName'      => is_null($Filler) ? '' : $Filler->username(),
     'torrentId'       => (int)$Request['TorrentID'],
     'timeFilled'      => $Request['TimeFilled'],
     'tags'            => $JsonTags,

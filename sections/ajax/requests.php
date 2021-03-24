@@ -33,19 +33,22 @@ if ($OrderBy === 'random') {
 
 $Submitted = !empty($_GET['submit']);
 
+$userMan = new Gazelle\Manager\User;
 //Paranoia
-if (!empty($_GET['userid'])) {
+if (empty($_GET['userid'])) {
+    $user = null;
+} else {
     if (!is_number($_GET['userid'])) {
         json_die("failure");
     }
-    $UserInfo = Users::user_info($_GET['userid']);
-    if (empty($UserInfo)) {
+    $user = $userMan->findById((int)($_GET['userid'] ?? 0));
+    if (is_null($user)) {
         json_die("failure");
     }
-    $Perms = Permissions::get_permissions($UserInfo['PermissionID']);
-    $UserClass = $Perms['Class'];
 }
 $BookmarkView = false;
+
+$viewer = $userMan->findById($LoggedUser['ID']);
 
 if (empty($_GET['type'])) {
     $Title = 'Requests';
@@ -55,38 +58,38 @@ if (empty($_GET['type'])) {
 } else {
     switch ($_GET['type']) {
         case 'created':
-            if (!empty($UserInfo)) {
-                if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
+            if ($user) {
+                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
                     json_die("failure");
                 }
-                $Title = "Requests created by " . $UserInfo['Username'];
-                $SphQL->where('userid', $UserInfo['ID']);
+                $Title = "Requests created by " . $user->username();
+                $SphQL->where('userid', $user->id());
             } else {
                 $Title = 'My requests';
                 $SphQL->where('userid', $LoggedUser['ID']);
             }
             break;
         case 'voted':
-            if (!empty($UserInfo)) {
-                if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
+            if ($user) {
+                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
                     json_die("failure");
                 }
-                $Title = "Requests voted for by " . $UserInfo['Username'];
-                $SphQL->where('voter', $UserInfo['ID']);
+                $Title = "Requests voted for by " . $user->username();
+                $SphQL->where('voter', $user->id());
             } else {
-                $Title = 'Requests I have voted on';
+                $Title = 'Requests you have voted on';
                 $SphQL->where('voter', $LoggedUser['ID']);
             }
             break;
         case 'filled':
-            if (!empty($UserInfo)) {
-                if (!check_paranoia('requestsfilled_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
+            if ($user) {
+                if (!$user->propertyVisible($viewer, 'requestsfilled_list')) {
                     json_die("failure");
                 }
-                $Title = "Requests filled by " . $UserInfo['Username'];
-                $SphQL->where('fillerid', $UserInfo['ID']);
+                $Title = "Requests filled by " . $user->username();
+                $SphQL->where('fillerid', $user->id());
             } else {
-                $Title = 'Requests I have filled';
+                $Title = 'Requests you have filled';
                 $SphQL->where('fillerid', $LoggedUser['ID']);
             }
             break;
@@ -267,7 +270,7 @@ if (!empty($_GET['filter_cat'])) {
     }
 }
 
- 	$releaseTypes = (new \Gazelle\ReleaseType)->list();
+    $releaseTypes = (new \Gazelle\ReleaseType)->list();
 if (!empty($_GET['releases'])) {
     $ReleaseArray = $_GET['releases'];
     if (count($ReleaseArray) !== count($releaseTypes)) {
@@ -334,8 +337,8 @@ if ($NumResults == 0) {
         $Request = $Requests[$RequestID];
         $VoteCount = $SphRequest['votes'];
         $Bounty = $SphRequest['bounty'] * 1024; // Sphinx stores bounty in kB
-        $Requestor = Users::user_info($Request['UserID']);
-        $Filler = $Request['FillerID'] ? Users::user_info($Request['FillerID']) : null;
+        $Requestor = $userMan->findById((int)$Request['UserID']);
+        $Filler = $userMan->findById((int)$Request['FillerID']);
 
         if ($Request['CategoryID'] == 0) {
             $CategoryName = 'Unknown';
@@ -353,8 +356,8 @@ if ($NumResults == 0) {
 
         $JsonResults[] = [
             'requestId' => (int)$RequestID,
-            'requestorId' => (int)$Requestor['ID'],
-            'requestorName' => $Requestor['Username'],
+            'requestorId' => (int)$Request['UserID'],
+            'requestorName' => $Requestor->username(),
             'timeAdded' => $Request['TimeAdded'],
             'lastVote' => $Request['LastVote'],
             'voteCount' => (int)$VoteCount,
@@ -375,7 +378,7 @@ if ($NumResults == 0) {
             'logCue' => $Request['LogCue'],
             'isFilled' => ($Request['TorrentID'] > 0),
             'fillerId' => (int)$Request['FillerID'],
-            'fillerName' => $Filler ? $Filler['Username'] : '',
+            'fillerName' => is_null($Filler) ? '' : $Filler->username(),
             'torrentId' => (int)$Request['TorrentID'],
             'timeFilled' => $Request['TimeFilled'] == 0 ? '' : $Request['TimeFilled']
         ];
