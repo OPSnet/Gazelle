@@ -594,7 +594,7 @@ class User extends \Gazelle\Base {
         );
         foreach ($userIds as $userId) {
             $this->cache->deleteMulti([
-                "enabled_$userId", "u_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "users_sessions_$userId"
+                "u_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "users_sessions_$userId"
             ]);
 
         }

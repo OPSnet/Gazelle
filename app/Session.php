@@ -95,7 +95,6 @@ class Session extends Base {
             'user_info_' . $this->id,
             'user_info_heavy_' . $this->id,
             'user_stats_' . $this->id,
-            'enabled_' . $this->id,
         ]);
         return $this->db->affected_rows();
     }
@@ -135,7 +134,6 @@ class Session extends Base {
                 'user_info_' . $this->id,
                 'user_info_heavy_' . $this->id,
                 'user_stats_' . $this->id,
-                'enabled_' . $this->id,
             ]
         ));
         $this->db->prepared_query('

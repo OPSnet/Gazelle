@@ -77,7 +77,6 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                         "user_info_heavy_$userId",
                         "user_stats_$userId",
                         "user_rlim_$userId",
-                        "enabled_$userId",
                     ]);
                     $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), $toClass);
                     $this->db->prepared_query("
