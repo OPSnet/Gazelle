@@ -1,16 +1,14 @@
 <?php
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if (!empty($_GET['userid'])) {
-    if (!intval($_GET['userid'])) {
-        error('User ID must be an integer');
+$userMan = new Gazelle\Manager\User;
+$viewer = new Gazelle\User($LoggedUser['ID']);
+if (empty($_GET['userid'])) {
+    $user = null;
+} else {
+    $user = $userMan->findById((int)$_GET['userid']);
+    if (is_null($user)) {
+        error(404);
     }
-    $UserInfo = Users::user_info($_GET['userid']);
-    if (empty($UserInfo)) {
-        error('That user does not exist');
-    }
-    $Perms = Permissions::get_permissions($UserInfo['PermissionID']);
-    $UserClass = $Perms['Class'];
 }
 $BookmarkView = false;
 
@@ -40,11 +38,11 @@ if (empty($_GET['type'])) {
     }
     switch ($_GET['type']) {
         case 'created':
-            if (!empty($UserInfo)) {
-                if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
+            if ($user) {
+                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
                     error(403);
                 }
-                $Title = "Requests created by " . $UserInfo['Username'];
+                $Title = "Requests created by " . $user->username();
                 $SphQL->where('userid', $UserInfo['ID']);
             } else {
                 $Title = 'My requests';
@@ -52,26 +50,26 @@ if (empty($_GET['type'])) {
             }
             break;
         case 'voted':
-            if (!empty($UserInfo)) {
-                if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
+            if ($user) {
+                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
                     error(403);
                 }
-                $Title = "Requests voted for by " . $UserInfo['Username'];
+                $Title = "Requests voted for by " . $user->username();
                 $SphQL->where('voter', $UserInfo['ID']);
             } else {
-                $Title = 'Requests I have voted on';
+                $Title = 'Requests you have voted on';
                 $SphQL->where('voter', $LoggedUser['ID']);
             }
             break;
         case 'filled':
-            if (!empty($UserInfo)) {
-                if (!check_paranoia('requestsfilled_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
+            if ($user) {
+                if (!$user->propertyVisible($viewer, 'requestsfilled_list')) {
                     error(403);
                 }
-                $Title = "Requests filled by " . $UserInfo['Username'];
+                $Title = "Requests filled by " . $user->username();
                 $SphQL->where('fillerid', $UserInfo['ID']);
             } else {
-                $Title = 'Requests I have filled';
+                $Title = 'Requests you have filled';
                 $SphQL->where('fillerid', $LoggedUser['ID']);
             }
             break;
@@ -370,7 +368,7 @@ View::show_header($Title, 'requests');
                 <td class="label">Tags (comma-separated):</td>
                 <td>
                     <input type="search" name="tags" id="tags" size="60" value="<?=!empty($TagNames) ? display_str($TagNames) : ''?>"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
+                            $viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
                     <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                     <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
                 </td>
@@ -569,7 +567,7 @@ View::show_header($Title, 'requests');
 
         if ($Request['TorrentID'] != 0) {
             $IsFilled = true;
-            $FillerInfo = Users::user_info($Request['FillerID']);
+            $Filler = $userMan->findById($Request['FillerID']);
         } else {
             $IsFilled = false;
         }
@@ -616,8 +614,8 @@ View::show_header($Title, 'requests');
 <?php        } ?>
             </td>
             <td>
-<?php        if ($IsFilled) { ?>
-                <a href="user.php?id=<?=$FillerInfo['ID']?>"><?=$FillerInfo['Username']?></a>
+<?php        if ($Filler) { ?>
+                <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username ?>?></a>
 <?php        } else { ?>
                 &mdash;
 <?php        } ?>

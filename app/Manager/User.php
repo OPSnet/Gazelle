@@ -30,13 +30,14 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findById(int $userId): ?\Gazelle\User {
-        $userId = (int)$this->db->scalar("
-            SELECT ID
-            FROM users_main
-            WHERE ID = ?
-            ", $userId
-        );
-        return $userId ? new \Gazelle\User($userId) : null;
+        static $idCache;
+        if (!isset($idCache[$userId])) {
+            $idCache[$userId] = (int)$this->db->scalar("
+                SELECT ID FROM users_main WHERE ID = ?
+                ", $userId
+            );
+        }
+        return $idCache[$userId] ? new \Gazelle\User($idCache[$userId]) : null;
     }
 
     /**
@@ -47,9 +48,7 @@ class User extends \Gazelle\Base {
      */
     public function findByUsername(string $username): ?\Gazelle\User {
         $userId = (int)$this->db->scalar("
-            SELECT ID
-            FROM users_main
-            WHERE Username = ?
+            SELECT ID FROM users_main WHERE Username = ?
             ", trim($username)
         );
         return $userId ? new \Gazelle\User($userId) : null;
@@ -64,10 +63,7 @@ class User extends \Gazelle\Base {
      */
     public function findByEmail(string $email): ?\Gazelle\User {
         $userId = (int)$this->db->scalar("
-            SELECT ID
-            FROM users_main
-            WHERE Email = ?
-            ", $email
+            SELECT ID FROM users_main WHERE Email = ?  ", $email
         );
         return $userId ? new \Gazelle\User($userId) : null;
     }
@@ -133,6 +129,16 @@ class User extends \Gazelle\Base {
             $this->cache->cache_value('user_class', $classList, 0);
         }
         return $classList;
+    }
+
+    /**
+     * Textual name of a userclass (a.k.a users_main.PermissionID)
+     *
+     * @param int permission id
+     * @return string class name
+     */
+    public function userclassName(int $id): ?string {
+        return $this->classlist()[$id] ?? null;
     }
 
     /**
