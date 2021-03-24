@@ -171,13 +171,14 @@ class Bookmark extends Base {
                 $labelMan = new Manager\TorrentLabel;
                 $userMan = new Manager\User;
                 foreach ($list as $torrent) {
-                    $Feed->populate('torrents_bookmarks_t_' . \Users::user_heavy_info($userId)['torrent_pass'],
+                    $user = $userMan->findById($torrent['UserID']);
+                    $Feed->populate('torrents_bookmarks_t_' . $user->announceKey(),
                         $Feed->item(
                             $group['Name'] . ' ' . $labelMan->load($torrent)->label(),
                             \Text::strip_bbcode($group['WikiBody']),
                             'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id='
                                 . $torrent['ID'],
-                            $userMan->findById($torrent['UserID'])->username(),
+                            $user->username(),
                             "torrents.php?id=$id",
                             $group['tagIds']
                         )
