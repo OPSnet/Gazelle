@@ -256,7 +256,7 @@ class AutoEnable {
                 $Cache->decrement_value(AutoEnable::CACHE_KEY_NAME);
                 $DB->prepared_query("UPDATE users_main SET Enabled = '1', can_leech = '1' WHERE ID = ?", $UserID);
                 $DB->prepared_query("UPDATE users_info SET BanReason = '0' WHERE UserID = ?", $UserID);
-                Tracker::update_tracker('add_user', [
+                (new Gazelle\Tracker)->update_tracker('add_user', [
                     'id' => $UserID,
                     'passkey' => $DB->scalar("SELECT torrent_pass FROM users_main WHERE ID = ?", $UserID)
                 ]);

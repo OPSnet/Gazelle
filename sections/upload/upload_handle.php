@@ -713,7 +713,8 @@ $DB->prepared_query('
     ', $TorrentID
 );
 
-Tracker::update_tracker('add_torrent', ['id' => $TorrentID, 'info_hash' => rawurlencode($InfoHash), 'freetorrent' => 0]);
+$tracker = new \Gazelle\Tracker;
+$tracker->update_tracker('add_torrent', ['id' => $TorrentID, 'info_hash' => rawurlencode($InfoHash), 'freetorrent' => 0]);
 $Debug->set_flag('upload: ocelot updated');
 
 // Prevent deletion of this torrent until the rest of the upload process is done
@@ -832,7 +833,11 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
         ', $ExtraTorrentID
     );
 
-    Tracker::update_tracker('add_torrent', ['id' => $ExtraTorrentID, 'info_hash' => rawurlencode($ExtraTorrent['InfoHash']), 'freetorrent' => 0]);
+    $tracker->update_tracker('add_torrent', [
+        'id' => $ExtraTorrentID,
+        'info_hash' => rawurlencode($ExtraTorrent['InfoHash']),
+        'freetorrent' => 0
+    ]);
 
     //******************************************************************************//
     //--------------- Write torrent file -------------------------------------------//

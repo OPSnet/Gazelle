@@ -884,7 +884,7 @@ class Torrent extends \Gazelle\Base {
             return [false, $message];
         }
         $manager->relaxConstraints(false);
-        \Tracker::update_tracker('delete_torrent', [
+        (new \Gazelle\Tracker)->update_tracker('delete_torrent', [
             'id' => $this->torrentId,
             'info_hash' => rawurlencode(hex2bin($torrent['InfoHash'])),
             'reason' => $trackerReason,
@@ -1003,7 +1003,7 @@ class Torrent extends \Gazelle\Base {
             ", $userId, $torrentId
         );
         $this->cache->delete_value("users_tokens_{$userId}");
-        \Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
+        (new \Gazelle\Tracker)->update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
         return true;
     }
 

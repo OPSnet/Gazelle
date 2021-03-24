@@ -68,7 +68,7 @@ if (!empty($_REQUEST['confirm'])) {
                         'announce_url' => $user->announceUrl(),
                     ])
                 );
-                Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
+                (new Gazelle\Tracker)->update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
                 $Sent = 1;
             }
             catch (Gazelle\Exception\UserCreatorException $e) {

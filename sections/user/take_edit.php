@@ -352,7 +352,7 @@ if (isset($_POST['resetpasskey'])) {
     );
     $Cache->delete_value("user_$OldPassKey");
 
-    Tracker::update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
+    (new Gazelle\Tracker)->update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
 }
 
 $SQL .= ' WHERE m.ID = ?';

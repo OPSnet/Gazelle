@@ -166,7 +166,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         }
 
         // Let the tracker know about this
-        if (!Tracker::update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
+        if (!(new Gazelle\Tracker)->update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
             $DB->rollback();
             json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
         }
