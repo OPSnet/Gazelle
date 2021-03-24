@@ -17,44 +17,40 @@ $header = new \Gazelle\Util\SortableTableHeader('hourlypoints', [
     'pointspergb'   => ['dbColumn' => 'PointsPerGB',   'defaultSort' => 'desc', 'text' => 'BP/GB/year'],
 ]);
 
-if (!empty($_GET['userid'])) {
+$userMan = new Gazelle\Manager\User;
+if (empty($_GET['userid'])) {
+    $user = $userMan->findById($LoggedUser['ID']);
+    $ownProfile = true;
+} else {
     if (!check_perms('admin_bp_history')) {
         error(403);
     }
-    $userId = (int)$_GET['userid'];
-    if (!$userId) {
-        error(404);
-    }
-    // TODO: subsume all info into the Gazelle\User class
-    $tmp = new Gazelle\User($userId);
-    $User = array_merge(Users::user_heavy_info($userId), Users::user_info($userId), $tmp->activityStats());
-    if (empty($User)) {
-        error(404);
-    }
+    $user = $userMan->findById((int)($_GET['userid'] ?? 0));
+    $ownProfile = false;
 }
-else {
-    $userId = $LoggedUser['ID'];
-    $User = $LoggedUser;
+if (is_null($user)) {
+    error(404);
 }
-
-$Title = ($userId === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
-View::show_header($Title);
+$userId = $user->id();
 
 $Bonus = new Gazelle\Bonus;
-
 [$totalTorrents, $totalSize, $totalHourlyPoints, $totalDailyPoints, $totalWeeklyPoints, $totalMonthlyPoints, $totalYearlyPoints, $totalPointsPerGB
 ] = $Bonus->userTotals($userId);
-$pages = Format::get_pages($page, $totalTorrents, TORRENTS_PER_PAGE);
 
+$paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($totalTorrents);
+
+$Title = $ownProfile ? 'Your Bonus Points Rate' : ($user->username() . "'s Bonus Point Rate");
+View::show_header($Title);
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
-    <h3>Points: <?=number_format((int)$User['BonusPoints'])?></h3>
+    <h3>Points: <?= number_format($user->activityStats()['BonusPoints']) ?></h3>
 </div>
 <div class="linkbox">
     <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php" class="brackets">Bonus Point Shop</a>
-    <a href="bonus.php?action=history<?= check_perms('admin_bp_history') && $userId != G::$LoggedUser['ID'] ? "&amp;userid=$userId" : '' ?>" class="brackets">History</a>
+    <a href="bonus.php?action=history<?= check_perms('admin_bp_history') && !$ownProfile ? "&amp;userid=$userId" : '' ?>" class="brackets">History</a>
 </div>
 <table>
     <thead>
@@ -85,7 +81,7 @@ $pages = Format::get_pages($page, $totalTorrents, TORRENTS_PER_PAGE);
 <br />
 
 <div class="linkbox">
-    <?=$pages?>
+    <?= $paginator->linkbox() ?>
 </div>
 <table>
     <thead>
@@ -151,14 +147,11 @@ else {
     <tr>
         <td colspan="9" style="text-align:center;">No torrents being seeded currently</td>
     </tr>
-<?php
-}
-?>
-
+<?php } ?>
     </tbody>
 </table>
 <div class="linkbox">
-    <?=$pages?>
+    <?= $paginator->linkbox() ?>
 </div>
 <?php
 View::show_footer();
