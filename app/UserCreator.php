@@ -185,7 +185,7 @@ class UserCreator extends Base {
         $this->db->commit();
 
         $this->cache->increment('stats_user_count');
-        \Tracker::update_tracker('add_user', [
+        (new \Gazelle\Tracker)->update_tracker('add_user', [
             'id'      => $this->id,
             'passkey' => $this->announceKey
         ]);

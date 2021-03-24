@@ -31,8 +31,9 @@ class ExpireFlTokens extends \Gazelle\Schedule\Task
                 WHERE (uf.Expired = FALSE OR (t.Size > 0 AND uf.Downloaded / t.Size > ?))
                     AND uf.Time < ? - INTERVAL ? DAY
             ", $slop, $now, $expiry);
+            $tracker = new \Gazelle\Tracker;
             while (list($userID, $infoHash) = $this->db->next_record(MYSQLI_NUM, false)) {
-                \Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($infoHash), 'userid' => $userID]);
+                $tracker->update_tracker('remove_token', ['info_hash' => rawurlencode($infoHash), 'userid' => $userID]);
                 $this->processed++;
             }
             $this->db->prepared_query("

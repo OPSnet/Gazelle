@@ -1,13 +1,32 @@
 <?php
-// TODO: Turn this into a class with nice functions like update_user, etc.
+// TODO: The following actions are used, turn them into methods
+// change_passkey
+// add_token
+// remove_token
+// add_torrent
+// delete_torrent
+// update_torrent
+// add_user
+// update_user
+// remove_user
+// remove_users
+// add_whitelist
+// edit_whitelist
+// remove_whitelist
 
-use \Gazelle\Util\Irc;
+use Util\Irc;
+
+namespace Gazelle;
 
 class Tracker {
     const STATS_MAIN = 0;
     const STATS_USER = 1;
 
-    public static $Requests = [];
+    protected static $Requests = [];
+
+    public function requestList(): array {
+        return self::$Requests;
+    }
 
     /**
      * Send a GET request over a socket directly to the tracker
@@ -18,7 +37,7 @@ class Tracker {
      * @param array $Updates An associative array of key->value pairs to send to the tracker
      * @param boolean $ToIRC Sends a message to the channel #tracker with the GET URL.
      */
-    public static function update_tracker($Action, $Updates, $ToIRC = false) {
+    public function update_tracker($Action, $Updates, $ToIRC = false) {
         // Build request
         $Get = TRACKER_SECRET . "/update?action=$Action";
         foreach ($Updates as $Key => $Value) {
@@ -43,7 +62,7 @@ class Tracker {
      *
      * @return array(0 => $Leeching, 1 => $Seeding) or false if request failed
      */
-    public static function global_peer_count() {
+    public function global_peer_count(): ?array {
         $Stats = self::get_stats(self::STATS_MAIN);
         if (isset($Stats['leechers tracked']) && isset($Stats['seeders tracked'])) {
             $Leechers = $Stats['leechers tracked'];
@@ -60,7 +79,7 @@ class Tracker {
      * @param string $TorrentPass The user's pass key
      * @return array(0 => $Leeching, 1 => $Seeding) or false if the request failed
      */
-    public static function user_peer_count($TorrentPass) {
+    public function user_peer_count(string $TorrentPass): ?array {
         $Stats = self::get_stats(self::STATS_USER, ['key' => $TorrentPass]);
         if ($Stats === false) {
             return false;
@@ -80,7 +99,7 @@ class Tracker {
      *
      * @return results from get_stats()
      */
-    public static function info() {
+    public function info() {
         return self::get_stats(self::STATS_MAIN);
     }
 
@@ -89,11 +108,11 @@ class Tracker {
      *
      * @param int $Type Stats type to get
      * @param array $Params Parameters required by stats type
-     * @return array with stats in named keys or false if the request failed
+     * @return array with stats in named keys or empty if the request failed
      */
-    private static function get_stats($Type, $Params = false) {
+    private function get_stats($Type, $Params = false): array {
         if (!defined('TRACKER_REPORTKEY')) {
-            return false;
+            return [];
         }
         $Get = TRACKER_REPORTKEY . '/report?';
         if ($Type === self::STATS_MAIN) {
@@ -101,11 +120,11 @@ class Tracker {
         } elseif ($Type === self::STATS_USER && !empty($Params['key'])) {
             $Get .= "get=user&key={$Params['key']}";
         } else {
-            return false;
+            return [];
         }
         $Response = self::send_request($Get);
         if ($Response === false) {
-            return false;
+            return [];
         }
         $Stats = [];
         foreach (explode("\n", $Response) as $Stat) {
@@ -123,7 +142,7 @@ class Tracker {
      * @param bool $Err Variable to use as storage for the error string if the request fails
      * @return tracker response message or false if the request failed
      */
-    private static function send_request($Get, $MaxAttempts = 1, &$Err = false) {
+    private function send_request($Get, $MaxAttempts = 1, &$Err = false) {
         if (defined('DISABLE_TRACKER') && DISABLE_TRACKER === true) {
             return false;
         }
@@ -183,4 +202,3 @@ class Tracker {
         return false;
     }
 }
-?>

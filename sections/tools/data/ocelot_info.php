@@ -3,8 +3,9 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
+$tracker = new \Gazelle\Tracker;
 if (!isset($_GET['userid'])) {
-    $MainStats = Tracker::info() ?? [];
+    $MainStats = $tracker->info();
     $main = [];
     foreach ($MainStats as $Key => $Value) {
         if (is_numeric($Value)) {
@@ -24,7 +25,7 @@ if (!isset($_GET['userid'])) {
     } else {
     echo $user->username();
         $TorrentPass = $user->announceKey();
-        $UserPeerStats = Tracker::user_peer_count($TorrentPass);
+        $UserPeerStats = $tracker->user_peer_count($TorrentPass);
         $_GET['userid'] = $user->id();
     }
 }
