@@ -1,6 +1,6 @@
 <?php
 // Main feeds page
-// The feeds don't use script_start.php, their code resides entirely in feeds.php in the document root
+// Feeds don't use script_start.php, the code resides entirely in feeds.php in the document root
 // Bear this in mind when you try to use script_start functions.
 
 if (
@@ -20,17 +20,10 @@ if (
     die();
 }
 
-$User = (int)$_GET['user'];
+G::init($DB, $Cache);
 
-if (!$Enabled = $Cache->get_value("enabled_$User")) {
-    $Enabled = $DB->scalar("
-        SELECT Enabled FROM users_main WHERE ID = ?
-        ", $User
-    );
-    $Cache->cache_value("enabled_$User", $Enabled, 0);
-}
-
-if (md5($User.RSS_HASH.$_GET['passkey']) !== $_GET['auth'] || $Enabled != 1) {
+$user = (new Gazelle\Manager\User)->findById((int)($_GET['user'] ?? 0));;
+if (md5($user->id() . RSS_HASH . $_GET['passkey']) !== $_GET['auth'] || is_null($user) || !$user->isEnabled()) {
     $Feed->open_feed();
     $Feed->channel('Blocked', 'RSS feed.');
     $Feed->close_feed();

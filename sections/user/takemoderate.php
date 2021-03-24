@@ -551,7 +551,6 @@ if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
         $set[] = "Enabled = ?";
         $args[] = '1';
     }
-    $Cache->replace_value("enabled_$userID", $enableUser, 0);
     $editSummary[] = $enableStr;
 }
 

@@ -637,7 +637,6 @@ class User extends BaseObject {
     public function flush() {
         $this->info = null;
         $this->cache->deleteMulti([
-            "enabled_" . $this->id,
             "u_" . $this->id,
             "user_info_" . $this->id,
             "user_info_heavy_" . $this->id,
@@ -1195,21 +1194,9 @@ class User extends BaseObject {
         return $change;
     }
 
-    protected function enabledState(): int {
-        if ($this->forceCacheFlush || ($enabled = $this->cache->get_value('enabled_' . $this->id)) === false) {
-            $this->db->prepared_query("
-                SELECT Enabled FROM users_main WHERE ID = ?
-                ", $this->id()
-            );
-            [$enabled] = $this->db->next_record(MYSQLI_NUM);
-            $this->cache->cache_value('enabled_' . $this->id, (int)$enabled, 86400 * 3);
-        }
-        return $enabled;
-    }
-
-    public function isUnconfirmed(): bool { return $this->enabledState() == 0; }
-    public function isEnabled(): bool     { return $this->enabledState() == 1; }
-    public function isDisabled(): bool    { return $this->enabledState() == 2; }
+    public function isUnconfirmed(): bool { return $this->info()['Enabled'] == '0'; }
+    public function isEnabled(): bool     { return $this->info()['Enabled'] == '1'; }
+    public function isDisabled(): bool    { return $this->info()['Enabled'] == '2'; }
     public function isLocked(): bool      { return !is_null($this->info()['locked_account']); }
     public function isVisible(): bool     { return $this->info()['Visible'] == '1'; }
     public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
