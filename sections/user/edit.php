@@ -116,7 +116,7 @@ echo G::$Twig->render('user/setting.twig', [
         'settings'   => (new Notification($UserID))->settings(),
     ],
     'paranoia' => [
-        'donor_visible'    => $donorMan->isVisible($UserID),
+        'donor_visible'    => $User->donorVisible($UserID),
         'artists'          => !in_array('artistsadded', $Paranoia),
         'bonus'            => !in_array('bonuspoints', $Paranoia),
         'hide_heart'       => !in_array('hide_donor_heart', $Paranoia),

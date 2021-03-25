@@ -1,0 +1,187 @@
+{% from 'macro/paranoia.twig' import class_override, override %}
+{% set user_id = user.id %}
+{% set viewer_id = viewer.id %}
+{% set own_profile = user_id == viewer_id %}
+<div class="thin">
+    <div class="header">
+        <h2>{{ user.username }}
+        {%- if user.isDonor and (own_profile or user.donorVisible or viewer.permitted('users_override_paranoia')) -%}
+        &nbsp;{{ user.donorHeart|raw -}}
+        {%- endif -%}
+        {%- if user.isWarned -%}
+            &nbsp;<a href="wiki.php?action=article&amp;name=warnings"><img src="{{
+                constant('STATIC_SERVER') }}/common/symbols/warned.png" alt="Warned" title="Warned
+                {%- if own_profile or viewer.permitted('users_mod') %} – Expires {{ user.warningExpiry }}{% endif %}" class="tooltip" /></a>
+        {%- endif -%}
+        {%- if user.isDisabled -%}
+        &nbsp;<a href="rules.php"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="Banished" title="Naughty person" class="tooltip" /></a>
+        {%- endif -%}
+        {% for badge, name in user.secondaryBadges %}
+            <span class="tooltip secondary_class" title="{{ name }}">{{ badge }}</span>
+        {% endfor %}
+        {% if user.title -%}
+            <span class="user_title">{{ user.title|raw }}</span></h2>
+        {%- endif %}
+    </div>
+
+    <div class="linkbox">
+{% if not own_profile %}
+        <a href="inbox.php?action=compose&amp;toid={{ user_id }}" class="brackets" title="Send a private message">Send PM</a>
+    {% if not user.isFriend(viewer_id) %}
+        <a href="friends.php?action=add&amp;friendid={{ user_id }}&amp;auth={{ auth }}" class="brackets">Add to friends</a>
+    {% endif %}
+        <a href="reports.php?action=report&amp;type=user&amp;id={{ user_id }}" class="brackets">Report user</a>
+{% endif %}
+{% if own_profile or viewer.permitted('users_edit_profiles') %}
+        <a href="user.php?action=edit&amp;userid={{ user_id }}" class="brackets">Edit</a>
+{% endif %}
+{% if viewer.permitted('users_view_invites') %}
+        <a href="user.php?action=invite&amp;userid={{ user_id }}" class="brackets">Invites</a>
+{% endif %}
+{% if viewer.permitted('admin_reports') %}
+        <a href="reportsv2.php?view=reporter&amp;id={{ user_id }}" class="brackets">Reports</a>
+{% endif %}
+{% if viewer.permitted('users_mod') %}
+        <a href="userhistory.php?action=token_history&amp;userid={{ user_id }}" class="brackets">FL tokens</a>
+{% endif %}
+{% if viewer.permitted('users_mod') or (own_profile and viewer.permitted('site_user_stats')) %}
+        <a href="user.php?action=stats&amp;userid={{ user_id }}" class="brackets">Stats</a>
+{% endif %}
+{% if user.hasAttr('feature-seedbox') and (own_profile or viewer.permitted('users_view_ips')) %}
+        <a href="user.php?action=seedbox{% if viewer.permitted('users_view_ips') %}&amp;userid={{ user_id }}{% endif %}" class="brackets">Seedboxes</a>
+{% endif %}
+{% if viewer.permitted('users_view_ips') %}
+        <a href="user.php?action=sessions&amp;userid={{ user_id }}" class="brackets">Sessions</a>
+        <a href="tools.php?action=user_info&amp;userid={{ user_id }}" class="brackets">Email/IP info</a>
+{% endif %}
+{% if viewer.permitted('admin_clear_cache') and viewer.permitted('users_override_paranoia') %}
+        <a href="user.php?action=clearcache&amp;id={{ user_id }}" class="brackets">Clear cache</a>
+{% endif %}
+{% if viewer.permitted('admin_manage_permissions') %}
+        <a href="user.php?action=permissions&amp;userid={{ user_id }}" class="brackets">Permissions</a>
+{% endif %}
+{% if viewer.permitted('users_mod') %}
+        <a href="#staff_tools" class="brackets">Staff tools</a>
+{% endif %}
+    </div>
+
+<div class="sidebar">
+
+{% if viewer.showAvatars %}
+<div class="box box_image box_image_avatar">
+    <div class="head colhead_dark">Avatar</div>
+    <div align="center">
+        {{ userMan.avatarMarkup(viewer, user)|raw }}
+    </div>
+</div>
+{% endif %}
+
+{% if user.isEnabled and user.hasAcceptFL and (freeleech.item or freeleech.other) %}
+<div class="box box_info box_userinfo_give_FL">
+    {% if freeleech.other %}
+    <div class="head colhead_dark">Freeleech Tokens Given</div>
+    <ul class="stats nobullet">
+        {% if freeleech.other > 0 %}
+    <li>You gave {{ freeleech.other }} token{{ freeleech.other|plural }} to {{ user.username }}. Your generosity is most appreciated!</li>
+        {% else %}
+    <li>You attempted to give some tokens to {{ user.username }} but something didn't work out.
+    No points were spent.</li>
+        {% endif %}
+            </ul>
+    {% else %}
+    <div class="head colhead_dark">Give Freeleech Tokens</div>
+    <form class="fl_form" name="user" id="fl_form" action="user.php?id={{ user_id }}" method="post">
+        <ul class="stats nobullet">
+        {% for f in freeleech.item %}
+            <li><input type="radio" name="fltype" id="fl-{{ f.Label }}" value="fl-{{ f.Label }}" />
+            <label title="This costs {{ f.Price|number_format }} BP, which will leave you with {{ f.After|number_format
+                }} afterwards" for="fl-{{ f.Label }}"> {{ f.Name }}</label></li>
+        {% endfor %}
+    <li><input type="submit" name="flsubmit" value="Send" /></li>
+        </ul>
+        <input type="hidden" name="action" value="fltoken" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="box box_info box_userinfo_stats">
+    <div class="head colhead_dark">Statistics</div>
+    <ul class="stats nobullet">
+        <li>Joined: {{ user.joinDate|time_diff }}</li>
+{% set visible = user.propertyVisible(preview_user, 'lastseen') %}
+{% if visible %}
+        <li{{ class_override(visible) }}>Last seen: {{ user.lastAccess|time_diff }}</li>
+{% endif %}
+
+{% set stats = user.activityStats %}
+{% set visible = user.propertyVisible(preview_user, 'uploaded') %}
+{% if visible %}
+        <li class="tooltip{{ override(visible) }}" title="{{ stats.BytesUploaded|octet_size(5) }}">Uploaded: {{ stats.BytesUploaded|octet_size }}</li>
+{% endif %}
+
+{% set visible = user.propertyVisible(preview_user, 'downloaded') %}
+{% if visible %}
+        <li class="tooltip{{ override(visible) }}" title="{{ stats.BytesDownloaded|octet_size(5) }}">Downloaded: {{ stats.BytesDownloaded|octet_size }}</li>
+{% endif %}
+
+{% set visible = min(user.propertyVisible(preview_user, 'downloaded'), user.propertyVisible(preview_user, 'uploaded')) %}
+{% if visible %}
+    {% set buffer = user.buffer[1] %}
+        <li class="tooltip{{ override(visible) }}" title="{{ buffer|octet_size(5) }}">Buffer: {{ buffer|octet_size }}</li>
+{% endif %}
+
+{% set visible = user.propertyVisible(preview_user, 'ratio') %}
+{% if visible %}
+        <li{{ class_override(visible) }}>Ratio: {{ ratio(stats.BytesUploaded, stats.BytesDownloaded) }} </li>
+{% endif %}
+
+{% if own_profile or viewer.permitted('users_mod') %}
+    {% if recovered %}
+        <li class="tooltip" title="Recovered from previous site: {{ recovered|octet_size(5) }}">Recovered: {{ recovered|octet_size }}</li>
+    {% elseif viewer.permitted('users_mod') %}
+        <li class="tooltip paranoia_override">Recovered: no record</li>
+    {% endif %}
+{% endif %}
+
+{% set visible = user.propertyVisible(preview_user, 'requiredratio') %}
+{% if visible %}
+    {% set required = user.buffer[0] %}
+        <li{{ class_override(visible) }}>Required Ratio: <span class="tooltip" title="{{ stats.RequiredRatio|number_format(5) }}">{{ stats.RequiredRatio|number_format(2) }}</span></li>
+        <li{{ class_override(visible) }}>Required Class Ratio: <span class="tooltip" title="{{ required|number_format(5) }}">{{ required|number_format(2) }}</span></li>
+{% endif %}
+
+{% set visible = user.propertyVisible(preview_user, 'requiredratio') %}
+{% if visible %}
+    {% set size = user.seedingSize %}
+        <li class="tooltip{{ override(visible) }}" title="{{ size|number_format }}">Seeding Size: {{ size|octet_size }}</li>
+{% endif %}
+
+{% set visible = user.propertyVisible(preview_user, 'bonuspoints') %}
+{% if visible %}
+    {% if viewer.permitted('admin_bp_history') %}
+        <li{{ class_override(visible) }}>Bonus Points: {{ stats.BonusPoints|number_format }}
+            <a href="bonus.php?action=history&amp;userid={{ user_id }}" class="brackets">History</a></li>
+        <li{{ class_override(visible) }}><a href="bonus.php?action=bprates&amp;userid={{ user_id }}">Points Per Hour</a>: {{ hourly_rate|number_format(2) }}
+    {% elseif own_profile %}
+        <li{{ class_override(visible) }}>Bonus Points: {{ stats.BonusPoints|number_format }}
+            <a href="bonus.php?action=history&amp" class="brackets">History</a></li>
+        <li{{ class_override(visible) }}><a href="bonus.php?action=bprates">Points Per Hour</a>: {{ hourly_rate|number_format(2) }}
+    {% else %}
+        <li{{ class_override(visible) }}>Bonus Points: {{ stats.BonusPoints|number_format }}</li>
+        <li{{ class_override(visible) }}>Points Per Hour: {{ hourly_rate|number_format(2) }}
+    {% endif %}
+{% endif %}
+
+{% if own_profile or viewer.permitted('users_mod') %}
+        <li{{ class_override(viewer.permitted('users_mod') ? constant('PARANOIA_OVERRIDDEN') : constant('PARANOIA_ALLOWED'))
+            }}><a href="userhistory.php?action=token_history&amp;userid={{ user_id }}">Tokens</a>: {{ user.tokenCount|number_format }}</li>
+{% endif %}
+
+{% if user.isWarned and (own_profile or viewer.permitted('users_mod')) %}
+        <li{{ class_override(viewer.permitted('users_mod') ? constant('PARANOIA_OVERRIDDEN') : constant('PARANOIA_ALLOWED'))
+            }}>Warning expires in: {{ user.warningExpiry|time_diff }}</li>
+{% endif %}
+    </ul>
+</div>

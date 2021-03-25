@@ -130,8 +130,28 @@ define('AOTM_FORUM_ID', 51); // ID of the Album of The Month forum
 define('VANITY_HOUSE_FORUM_ID', 18); // Vanity House forum
 define('CLIENT_WHITELIST_FORUM_ID', 680); // Client whitelist suggestion forum
 
+define("PARANOIA_HIDE", 0);
 define("PARANOIA_ALLOWED", 1);
 define("PARANOIA_OVERRIDDEN", 2);
+
+define("PARANOIA_PREVIEW_USER", 1); // change to an unprivileged staff account
+define("PARANOIA_OVERRIDE", [
+    'downloaded'    => 'users_mod',
+    'uploaded'      => 'users_mod',
+    'lastseen'      => 'users_mod',
+    'ratio'         => 'users_mod',
+    'requiredratio' => 'users_mod',
+    'bonuspoints'   => 'admin_bp_history',
+    'invitedcount'  => 'users_view_invites',
+    'snatched'      => 'users_view_torrents_snatchlist',
+    'snatched+'     => 'users_view_torrents_snatchlist',
+    'leeching'      => 'users_view_seedleech',
+    'leeching+'     => 'users_view_seedleech',
+    'seeding'       => 'users_view_seedleech',
+    'seeding+'      => 'users_view_seedleech',
+    'uploads'       => 'users_view_seedleech',
+    'uploads+'      => 'users_view_seedleech',
+]);
 
 define('USER_TORRENT_DELETE_MAX', 3);
 define('USER_TORRENT_DELETE_HOURS', 24);
