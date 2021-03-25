@@ -64,19 +64,20 @@ class User extends BaseObject {
         $qid = $this->db->get_query_id();
         $this->db->prepared_query("
             SELECT um.Username,
+                um.can_leech,
                 um.CustomPermissions,
                 um.IP,
                 um.Email,
-                um.Paranoia,
-                um.PermissionID,
-                um.Title,
                 um.Enabled,
                 um.Invites,
-                um.can_leech,
-                um.Visible,
-                um.torrent_pass,
-                um.RequiredRatio,
                 um.IRCKey,
+                um.Paranoia,
+                um.PassHash,
+                um.PermissionID,
+                um.RequiredRatio,
+                um.Title,
+                um.torrent_pass,
+                um.Visible,
                 um.2FA_Key,
                 ui.AdminComment,
                 ui.Avatar,
@@ -896,6 +897,16 @@ class User extends BaseObject {
             ', $newIP, \Tools::geoip($newIP), $this->id
         );
         $this->flush();
+    }
+
+    /**
+     * Validate a user password
+     *
+     * @param string password
+     * @return bool  true on correct password
+     */
+    public function validatePassword(string $plaintext): bool {
+        return password_verify(hash('sha256', $plaintext), $this->info()['PassHash']);
     }
 
     public function updatePassword(string $pw, string $ipaddr): bool {

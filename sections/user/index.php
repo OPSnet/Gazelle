@@ -143,7 +143,7 @@ switch ($_REQUEST['action'] ?? '') {
                         require_once('2fa/password_confirm.php');
                         break;
                     }
-                    if (!Users::check_password($_POST['password'], $PassHash)) {
+                    if ((new Gazelle\User($UserID))->validatePassword($_POST['password'])) {
                         header('Location: user.php?action=2fa&do=disable&invalid&userid=' . $UserID);
                         exit;
                     }
