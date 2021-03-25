@@ -73,7 +73,9 @@ if (!$Info) { ?>
 </blockquote>
 
 <?php
-} else { ?>
+} else {
+    $userMan = new Gazelle\Manager\User;
+?>
 
 <h3>View recovery details for <?= $Info['username'] ?></h3>
 
@@ -88,17 +90,15 @@ if (!$Info) { ?>
                 <th>state</th>
                 <td><?= $Info['state'] ?></td>
             </tr>
-<?php
-    if (count($Candidate)) { ?>
+<?php if (count($Candidate)) { ?>
             <tr>
                 <td><?= $enabled[$Candidate['Enabled']] ?></td>
-                <td><?= \Users::make_class_string($Candidate['PermissionID']) ?></th>
+                <td><?= $userMan->userclassName($Candidate['PermissionID']) ?></th>
                 <td><?= $Candidate['nr_torrents'] ?> torrents</td>
                 <td><?= Format::get_size($Candidate['Uploaded']) ?> up</td>
                 <td><?= Format::get_size($Candidate['Downloaded']) ?> down</td>
             </tr>
-<?php
-    } ?>
+<?php } ?>
             <tr>
                 <th>Password verified</th>
                 <td colspan="2"><?= $Info['password_ok'] ? 'Yes' : 'No' ?></td>

@@ -192,9 +192,10 @@ class InviteTree extends Base {
             ", ...$args
         );
 
-        $markup = '';
+        $userMan = new Manager\User;
+        $Classes = $userMan->classList();
         $classSummary = [];
-
+        $markup = '';
         while ([$inviteeId, $enabled, $permissionId, $donor, $uploaded, $downloaded, $paranoia, $position, $level]
             = $this->db->next_record(MYSQLI_NUM, false)
         ) {
@@ -226,7 +227,6 @@ class InviteTree extends Base {
             $markup .= '<strong>' . \Users::format_username($inviteeId, true, true, ($enabled != 2 ? false : true), true)
                 . '</strong>';
 
-            $Classes = (new Manager\User)->classList();
             if (!check_paranoia(['uploaded', 'downloaded'], $paranoia, $Classes[$permissionId]['Level'])) {
                 $markup .= "&nbsp;Hidden";
                 $stats['paranoid']++;
@@ -254,7 +254,7 @@ class InviteTree extends Base {
         } else {
             $className = [];
             foreach ($classSummary as $id => $count) {
-                $name = \Users::make_class_string($id);
+                $name = $userMan->userclassName($id);
                 if ($count > 1) {
                     $name = ($name == 'Torrent Celebrity') ? 'Torrent Celebrities' : "{$name}s";
                 }

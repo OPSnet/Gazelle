@@ -138,7 +138,7 @@ class User extends \Gazelle\Base {
      * @return string class name
      */
     public function userclassName(int $id): ?string {
-        return $this->classlist()[$id] ?? null;
+        return $this->classlist()[$id]['Name'];
     }
 
     /**
