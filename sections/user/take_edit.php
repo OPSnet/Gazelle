@@ -5,20 +5,19 @@ use Gazelle\Util\Irc;
 authorize();
 
 $userMan = new Gazelle\Manager\User;
-if (empty($_REQUEST['userid'])) {
-    $user = $userMan->findById($LoggedUser['ID']);
+$user = $userMan->findById((int)($_REQUEST['userid'] ?? $LoggedUser['ID']));
+if (is_null($user)) {
+    error(404);
+}
+$userId = $user->id();
+if ($userId == $LoggedUser['ID']) {
     $ownProfile = true;
 } else {
     if (!check_perms('admin_bp_history')) {
         error(403);
     }
-    $user = $userMan->findById((int)($_REQUEST['userid'] ?? 0));
     $ownProfile = false;
 }
-if (is_null($user)) {
-    error(404);
-}
-$userId = $user->id();
 
 if (!$ownProfile && !check_perms('users_edit_profiles')) {
     Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $LoggedUser['Username']
@@ -145,14 +144,9 @@ if (isset($_POST['p_donor_stats'])) {
 
 $CurEmail = $user->email();
 if ($CurEmail != $_POST['email']) {
-    if (!check_perms('users_edit_profiles')) { // Non-admins have to authenticate to change email
-        $PassHash = $DB->scalar("
-            SELECT PassHash FROM users_main WHERE ID = ?
-            ", $userId
-        );
-        if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
-            error('You did not enter the correct password.');
-        }
+    // Non-admins have to authenticate to change email
+    if (!check_perms('users_edit_profiles') && !$user->validatePassword($_POST['cur_pass'])) {
+        error('You did not enter the correct password.');
     }
     $NewEmail = $_POST['email'];
     $DB->prepared_query("
@@ -165,11 +159,7 @@ if ($CurEmail != $_POST['email']) {
 
 $ResetPassword = false;
 if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
-    $PassHash = $DB->scalar("
-        SELECT PassHash FROM users_main WHERE ID = ?
-        ", $userId
-    );
-    if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
+    if (!$user->validatePassword($_POST['cur_pass'])) {
         error('You did not enter the correct password.');
     } else {
         if ($_POST['cur_pass'] == $_POST['new_pass_1']) {

@@ -324,29 +324,6 @@ class Users {
     }
 
     /**
-     * Verify a password against a password hash
-     *
-     * @param string $Password password
-     * @param string $Hash password hash
-     * @return bool  true on correct password
-     */
-    public static function check_password($Password, $Hash) {
-        if (empty($Password) || empty($Hash)) {
-            return false;
-        }
-
-        return password_verify(hash('sha256', $Password), $Hash) || password_verify($Password, $Hash);
-    }
-
-    public static function check_password_old($Password, $Hash) {
-        if (empty($Password) || empty($Hash)) {
-            return false;
-        }
-
-        return password_verify($Password, $Hash);
-    }
-
-    /**
      * Returns a username string for display
      *
      * @param int|string $UserID

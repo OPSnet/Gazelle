@@ -347,12 +347,12 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 $watch->ban($Attempts, $username);
                 $BannedUntil = $watch->bannedUntil();
             } else {
-                if (!($UserID && Users::check_password($password, $PassHash))) {
+                if (!($UserID && (new Gazelle\User($UserID))->validatePassword($password))) {
                     log_attempt($UserID ?? 0, $username);
                     $Err = 'Your username or password was incorrect.';
                     setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
                 } else {
-                    if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($password, $PassHash)) {
+                    if (password_needs_rehash($PassHash, PASSWORD_DEFAULT)) {
                         $DB->prepared_query('
                             UPDATE users_main SET
                                 PassHash = ?
