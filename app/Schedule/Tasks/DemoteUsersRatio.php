@@ -13,7 +13,7 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
     }
 
     private function demote(int $newClass, float $ratio, int $upload, array $demoteClasses, \Gazelle\Manager\User $userMan) {
-        $classString = \Users::make_class_string($newClass);
+        $classString = $userMan->userclassName($newClass);
         $placeholders = placeholders($demoteClasses);
         $query = $this->db->prepared_query("
             SELECT ID

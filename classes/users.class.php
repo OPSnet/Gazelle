@@ -451,10 +451,11 @@ class Users {
         }
 
         if ($Class) {
+            $userClass = (new Gazelle\Manager\User)->userclassName($UserInfo['PermissionID']);
             if ($Title) {
-                $Str .= ' <strong>('.Users::make_class_string($UserInfo['PermissionID']).')</strong>';
+                $Str .= " <strong>($userClass)</strong>";
             } else {
-                $Str .= ' ('.Users::make_class_string($UserInfo['PermissionID']).')';
+                $Str .= " ($userClass)";
             }
         }
 
@@ -473,16 +474,5 @@ class Users {
             }
         }
         return $Str;
-    }
-
-    /**
-     * Given a class ID, return its name.
-     *
-     * @param int $ClassID
-     * @return string name
-     */
-    public static function make_class_string($ClassID) {
-        $Classes = (new Gazelle\Manager\User)->classList();
-        return $Classes[$ClassID]['Name'];
     }
 }

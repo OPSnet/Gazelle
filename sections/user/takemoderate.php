@@ -292,7 +292,7 @@ if ($Classes[$class]['Level'] != $cur['Class']
 )) {
     $set[] = 'PermissionID = ?';
     $args[] = $class;
-    $editSummary[] = 'class changed to '.Users::make_class_string($class);
+    $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
 
     if ($user->supportCount($class, $cur['PermissionID']) === 2) {
         if ($Classes[$class]['Level'] < $cur['Class']) {

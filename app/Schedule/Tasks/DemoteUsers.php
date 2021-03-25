@@ -6,32 +6,33 @@ class DemoteUsers extends \Gazelle\Schedule\Task
 {
     public function run()
     {
+        $userMan = new \Gazelle\Manager\User;
         $criteria = array_reverse(\Gazelle\User::promotionCriteria());
         foreach ($criteria as $l) { // $l = Level
-            $fromClass = \Users::make_class_string($l['To']);
-            $toClass = \Users::make_class_string($l['From']);
+            $fromClass = $userMan->userclassName($l['To']);
+            $toClass = $userMan->userclassName($l['From']);
             $this->debug("Begin demoting users from $fromClass to $toClass");
 
             $query = "
-                    SELECT ID
-                    FROM users_main
-                    INNER JOIN users_leech_stats uls ON (uls.UserID = users_main.ID)
-                    INNER JOIN users_info ui ON (users_main.ID = ui.UserID)
-                    LEFT JOIN
-                    (
-                        SELECT rv.UserID, sum(Bounty) AS Bounty
-                        FROM requests_votes rv
-                        INNER JOIN requests r ON (r.ID = rv.RequestID)
-                        WHERE r.UserID != r.FillerID
-                        GROUP BY rv.UserID
-                    ) b ON (b.UserID = users_main.ID)
-                    WHERE users_main.PermissionID = ?
-                    AND (uls.Uploaded + coalesce(b.Bounty, 0) < ?
-                        OR (
-                            SELECT count(ID)
-                            FROM torrents
-                            WHERE UserID = users_main.ID
-                        ) < ?";
+                SELECT ID
+                FROM users_main
+                INNER JOIN users_leech_stats uls ON (uls.UserID = users_main.ID)
+                INNER JOIN users_info ui ON (users_main.ID = ui.UserID)
+                LEFT JOIN
+                (
+                    SELECT rv.UserID, sum(Bounty) AS Bounty
+                    FROM requests_votes rv
+                    INNER JOIN requests r ON (r.ID = rv.RequestID)
+                    WHERE r.UserID != r.FillerID
+                    GROUP BY rv.UserID
+                ) b ON (b.UserID = users_main.ID)
+                WHERE users_main.PermissionID = ?
+                AND (uls.Uploaded + coalesce(b.Bounty, 0) < ?
+                    OR (
+                        SELECT count(ID)
+                        FROM torrents
+                        WHERE UserID = users_main.ID
+                    ) < ?";
 
             $params = [$l['To'], $l['MinUpload'], $l['MinUploads']];
 
@@ -67,7 +68,6 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                     ", $l['From'], ...$userIds
                 );
 
-                $userMan = new \Gazelle\Manager\User;
                 foreach ($userIds as $userId) {
                     $this->debug(sprintf('Demoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
 

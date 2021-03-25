@@ -2106,7 +2106,7 @@ class User extends BaseObject {
         $stats = $this->activityStats();
         [$votes, $bounty] = $this->requestsVotes();
         $progress = [
-            'Class' => \Users::make_class_string($criteria['To']),
+            'Class' => (new Manager\User)->userclassName($criteria['To']),
             'Requirements' => [
                 'Upload' => [$stats['BytesUploaded'] + $bounty, $criteria['MinUpload'], 'bytes'],
                 'Ratio' => [$stats['BytesDownloaded'] == 0 ? '∞'

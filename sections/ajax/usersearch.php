@@ -18,36 +18,27 @@ $total = $DB->scalar("
 
 $paginator = new Paginator(AJAX_USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $DB->prepared_query("
-    SELECT um.ID,
-        um.Username,
-        um.Enabled,
-        um.PermissionID,
-        (donor.UserID IS NOT NULL) AS Donor,
-        ui.Warned,
-        ui.Avatar
+    SELECT um.ID
     FROM users_main AS um
-    INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-    LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
-        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
-    )
     WHERE $condition
     ORDER BY Username
     LIMIT ? OFFSET ?
     ", $search, $paginator->limit(), $paginator->offset()
 );
-$results = $DB->to_array(0, MYSQLI_NUM);
+$userIds = $DB->collect(0, false);
 
 $payload = [];
-foreach ($results as $result) {
-    [$userId, $username, $enabled, $permissionId, $donor, $warned, $avatar] = $result;
+$userMan = new Gazelle\Manager\User;
+foreach ($userIds as $userId) {
+    $user = $userMan->findById($userId);
     $payload[] = [
-        'userId'   => (int)$userId,
-        'username' => $username,
-        'donor'    => $donor == 1,
-        'warned'   => !is_null($warned),
-        'enabled'  => ($enabled == 2 ? false : true),
-        'class'    => Users::make_class_string($permissionId),
-        'avatar'   => $avatar,
+        'userId'   => $user->id(),
+        'username' => $user->username(),
+        'donor'    => $user->isDonor(),
+        'warned'   => $user->isWarned(),
+        'enabled'  => $user->isEnabled(),
+        'class'    => $userMan->userclassName($permissionId),
+        'avatar'   => $user->avatar(),
     ];
 }
 
