@@ -85,207 +85,31 @@ function check_paranoia_here($Setting) {
 $stats = $User->activityStats();
 [$ClassRatio, $Buffer] = $User->buffer();
 
+if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_perms('users_mod'))) {
+    $recovered = $DB->scalar("
+        SELECT final FROM users_buffer_log WHERE opsid = ?
+        ", $UserID
+    );
+} else {
+    $recovered = null;
+}
+
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
+echo G::$Twig->render('user/header.twig', [
+    'auth'    => $LoggedUser['AuthKey'],
+    'freeleech' => [
+        'item'  => $FL_Items,
+        'other' => $FL_OTHER_tokens ?? null,
+    ],
+    'hourly_rate'  => $Bonus->userHourlyRate($UserID),
+    'preview_user' => $Preview ? $userMan->findById(47) : $viewer,
+    'recovered'    => $recovered,
+    'user'         => $User,
+    'userMan'      => $userMan,
+    'viewer'       => $viewer,
+]);
+?>
 
-?>
-<div class="thin">
-    <div class="header">
-        <h2><?=Users::format_username($UserID, true, true, true, false, true)?></h2>
-    </div>
-    <div class="linkbox">
-<?php
-if (!$OwnProfile) {
-?>
-        <a href="inbox.php?action=compose&amp;toid=<?=$UserID?>" class="brackets" title="Send a private message">Send PM</a>
-<?php if (!$User->isFriend($LoggedUser['ID'])) { ?>
-        <a href="friends.php?action=add&amp;friendid=<?=$UserID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Add to friends</a>
-<?php } ?>
-        <a href="reports.php?action=report&amp;type=user&amp;id=<?=$UserID?>" class="brackets">Report user</a>
-<?php
-}
-
-if ($OwnProfile || check_perms('users_edit_profiles')) {
-?>
-        <a href="user.php?action=edit&amp;userid=<?=$UserID?>" class="brackets">Edit</a>
-<?php
-}
-if (check_perms('users_view_invites')) {
-?>
-        <a href="user.php?action=invite&amp;userid=<?=$UserID?>" class="brackets">Invites</a>
-<?php
-}
-if (check_perms('admin_reports')) {
-?>
-        <a href="reportsv2.php?view=reporter&amp;id=<?=$UserID?>" class="brackets">Reports</a>
-<?php
-}
-if (check_perms('users_mod')) {
-?>
-        <a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
-<?php
-}
-if (check_perms('users_mod') || ($OwnProfile && check_perms('site_user_stats'))) {
-?>
-        <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
-<?php
-}
-if ($User->hasAttr('feature-seedbox') && ($OwnProfile || check_perms('users_view_ips'))) {
-?>
-        <a href="user.php?action=seedbox<?= $OwnProfile ? '' : "&amp;userid={$UserID}" ?>" class="brackets">Seedboxes</a>
-<?php
-}
-if (check_perms('users_view_ips')) {
-?>
-        <a href="user.php?action=sessions&amp;userid=<?=$UserID?>" class="brackets">Sessions</a>
-        <a href="tools.php?action=user_info&amp;userid=<?=$UserID?>" class="brackets">Email/IP info</a>
-<?php
-}
-if (check_perms('admin_clear_cache') && check_perms('users_override_paranoia')) {
-?>
-        <a href="user.php?action=clearcache&amp;id=<?=$UserID?>" class="brackets">Clear cache</a>
-<?php
-}
-if (check_perms('admin_manage_permissions')) {
-?>
-        <a href="user.php?action=permissions&amp;userid=<?=$UserID?>" class="brackets">Permissions</a>
-<?php
-}
-if (check_perms('users_mod')) {
-?>
-        <a href="#staff_tools" class="brackets">Staff tools</a>
-<?php } ?>
-    </div>
-
-    <div class="sidebar">
-<?php
-if ($viewer->showAvatars()) {
-?>
-        <div class="box box_image box_image_avatar">
-            <div class="head colhead_dark">Avatar</div>
-            <div align="center">
-                <?= $userMan->avatarMarkup($viewer, $User) ?>
-            </div>
-        </div>
-<?php
-}
-if ($User->isEnabled() && $User->hasAcceptFL() && (count($FL_Items) || isset($FL_OTHER_tokens))) {
-?>
-        <div class="box box_info box_userinfo_give_FL">
-<?php if (isset($FL_OTHER_tokens)) { ?>
-            <div class="head colhead_dark">Freeleech Tokens Given</div>
-            <ul class="stats nobullet">
-<?php   if ($FL_OTHER_tokens > 0) { ?>
-            <li>You gave <?= $FL_OTHER_tokens ?> token<?= plural($FL_OTHER_tokens) ?> to <?= $Username ?>. Your generosity is most appreciated!</li>
-<?php   } else { ?>
-            <li>You attempted to give some tokens to <?= $Username ?> but something didn't work out.
-            No points were spent.</li>
-<?php   } ?>
-            </ul>
-<?php } else { ?>
-            <div class="head colhead_dark">Give Freeleech Tokens</div>
-            <form class="fl_form" name="user" id="fl_form" action="user.php?id=<?= $UserID ?>" method="post">
-                <ul class="stats nobullet">
-<?php
-        foreach ($FL_Items as $data) {
-            $label = sprintf("This costs %d BP, which will leave you %d afterwards", $data['Price'], $data['After']);
-?>
-                    <li><input type="radio" name="fltype" id="fl-<?= $data['Label'] ?>" value="fl-<?= $data['Label'] ?>" />
-                    <label title="<?= $label ?>" for="fl-<?= $data['Label'] ?>"> <?= $data['Name'] ?></label></li>
-<?php   } ?>
-            <li><input type="submit" name="flsubmit" value="Send" /></li>
-                </ul>
-                <input type="hidden" name="action" value="fltoken" />
-                <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
-            </form>
-<?php } ?>
-        </div>
-<?php } ?>
-        <div class="box box_info box_userinfo_stats">
-            <div class="head colhead_dark">Statistics</div>
-            <ul class="stats nobullet">
-                <li>Joined: <?= time_diff($User->joinDate()) ?></li>
-<?php if (($Override = check_paranoia_here('lastseen'))) { ?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Last seen: <?= time_diff($User->lastAccess()) ?></li>
-<?php
-    }
-    if (($Override = check_paranoia_here('uploaded'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats['BytesUploaded'], 5)?>">Uploaded: <?=Format::get_size($stats['BytesUploaded'])?></li>
-<?php
-    }
-    if (($Override = check_paranoia_here('downloaded'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats['BytesDownloaded'], 5)?>">Downloaded: <?=Format::get_size($stats['BytesDownloaded'])?></li>
-<?php
-    }
-    if (($Override = (check_paranoia_here('uploaded') && check_paranoia_here('downloaded')))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Buffer, 5)?>">Buffer: <?=Format::get_size($Buffer)?></li>
-<?php
-    }
-    if (($Override = check_paranoia_here('ratio'))) {
-?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Ratio: <?=Format::get_ratio_html($stats['BytesUploaded'], $stats['BytesDownloaded'])?></li>
-<?php
-    }
-    if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_perms('users_mod'))) {
-        $recovered = $DB->scalar("
-            SELECT final FROM users_buffer_log WHERE opsid = ?
-            ", $UserID
-        );
-        if ($recovered) {
-?>
-            <li class="tooltip" title="<?= "Recovered from previous site: " . Format::get_size($recovered, 5)?>">Recovered: <?=Format::get_size($recovered)?></li>
-<?php
-        } elseif (check_perms('users_mod')) {
-?>
-            <li class="tooltip paranoia_override">Recovered: no record</li>
-<?php
-        }
-    }
-    if (($Override = check_paranoia_here('requiredratio'))) {
-?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Required Ratio: <span class="tooltip" title="<?=number_format((double)$stats['RequiredRatio'], 5)?>"><?=number_format((double)$stats['RequiredRatio'], 2)?></span></li>
-<?php
-    }
-    if ($Override = check_paranoia_here('requiredratio')) {
-?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Required Class Ratio: <span class="tooltip" title="<?=number_format((double)$ClassRatio, 5)?>"><?=number_format((double)$ClassRatio, 2)?></span></li>
-<?php
-    }
-    if ($Override = check_paranoia_here('seeding+')) {
-        $seedingSize = $User->seedingSize();
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($seedingSize, 5)?>">Seeding Size: <?=Format::get_size($seedingSize)?></li>
-<?php
-    }
-    if (($Override = check_paranoia_here('bonuspoints'))) {
-?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Bonus Points: <?=number_format((int)$stats['BonusPoints'])?><?php
-        if (check_perms('admin_bp_history')) {
-             printf('&nbsp;<a href="bonus.php?action=history&amp;userid=%d" class="brackets">History</a>', $UserID);
-             $text = '<a href="bonus.php?action=bprates&amp;userid=' . $UserID . '">Points Per Hour</a>';
-        } else if ($OwnProfile) {
-             printf('&nbsp;<a href="bonus.php?action=history" class="brackets">History</a>', $UserID);
-             $text = '<a href="bonus.php?action=bprates">Points Per Hour</a>';
-        } else {
-            $text = 'Points Per Hour';
-        }
-        ?></li>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($Bonus->userHourlyRate($UserID), 2)?></li>
-<?php
-    }
-    if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
-?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($User->tokenCount())?></li>
-<?php
-    }
-    if (($OwnProfile || check_perms('users_mod')) && $User->isWarned()) {
-?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Warning expires in: <?= time_diff($User->warningExpiry()) ?></li>
-<?php    } ?>
-            </ul>
-        </div>
 <?php
     if ($OwnProfile || check_perms('users_mod')) {
         $nextClass = $User->nextClass();
@@ -530,10 +354,9 @@ if ($appMan->userIsApplicant($UserID) && (check_perms('admin_manage_applicants')
 }
 if ($OwnProfile || check_perms('users_mod') || $viewer->isFLS()) {
 ?>
-                <li<?= check_perms('users_mod') ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
+                <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
                     implode('; ', $User->clients()) ?></li>
-
-    <li>Password age: <?= $User->passwordAge() ?></li>
+                <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Password age: <?= $User->passwordAge() ?></li>
 <?php }
 if ($OwnProfile || check_perms('users_override_paranoia')) { ?>
     <li>IRC Key: <?=strlen($User->IRCKey()) ? 'Yes' : 'No' ?></li>
@@ -549,9 +372,9 @@ if (check_paranoia_here('snatched')) {
 }
 require('community_stats.php');
 
-if (check_perms("users_mod") || $OwnProfile || $donorMan->isVisible($UserID)) {
+if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
     echo G::$Twig->render('donation/stats.twig', [
-        'is_donor'    => $donorMan->isDonor($UserID),
+        'is_donor'    => $User->isDonor(),
         'is_self'     => $OwnProfile,
         'is_mod'      => check_perms('users_mod'),
         'total_rank'  => $donorMan->totalRank($UserID),

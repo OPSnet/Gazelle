@@ -1,0 +1,7 @@
+{% macro override(v) %}
+    {% if v == constant('PARANOIA_OVERRIDDEN') %} paranoia_override{% endif %}
+{% endmacro %}
+
+{% macro class_override(v) %}
+    {% if v == constant('PARANOIA_OVERRIDDEN') %} class="paranoia_override"{% endif %}
+{% endmacro %}

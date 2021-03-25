@@ -617,16 +617,6 @@ class Donation extends \Gazelle\Base {
         return $this->rank($userId) > 0;
     }
 
-    public function isVisible(int $userId): bool {
-        return null !== $this->db->scalar("
-            SELECT 1
-            FROM users_donor_ranks
-            WHERE Hidden = '0'
-                AND UserID = ?
-            ", $userId
-        );
-    }
-
     protected function messageBody(string $Source, string $Currency, string $amount, int $ReceivedRank, int $CurrentRank) {
         if ($Currency != 'XBT') {
             $amount = number_format($amount, 2);

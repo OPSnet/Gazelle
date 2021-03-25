@@ -22,6 +22,8 @@ class User extends BaseObject {
 
     protected $info;
     protected $lastReadForum;
+    protected $donorHeart;
+    protected $donorVisible;
 
     /** @var \Gazelle\Manager\Torrent to look up torrents associated with a user (snatched, uploaded, ...) */
     protected $torMan;
@@ -153,7 +155,8 @@ class User extends BaseObject {
                 p.Name,
                 p.PermittedForums,
                 p.Secondary,
-                p.Values
+                p.Values,
+                if(p.badge = '', NULL, p.badge) as badge
             FROM permissions p
             INNER JOIN users_levels ul ON (ul.PermissionID = p.ID)
             WHERE ul.UserID = ?
@@ -161,12 +164,14 @@ class User extends BaseObject {
             ", $this->id
         );
         $permissions = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+        $this->info['secondary_badge'] = [];
         $this->info['secondary_class'] = [];
         $forumAccess = [];
         $secondaryClassLevel = [];
         $secondaryClassPerms = [];
         foreach ($permissions as $p) {
             if ($p['Secondary']) {
+                $this->info['secondary_badge'][$p['badge']] = $p['Name'];
                 $this->info['secondary_class'][$p['ID']] = $p['Name'];
                 $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
                 $secondaryClassLevel[$p['ID']] = $p['Level'];
@@ -301,6 +306,10 @@ class User extends BaseObject {
         return $this->info()['secondary_class'];
     }
 
+    public function secondaryBadges(): array {
+        return $this->info()['secondary_badge'];
+    }
+
     public function hasAttr(string $name): ?int {
         $attr = $this->info()['attr'];
         return isset($attr[$name]) ? $attr[$name] : null;
@@ -424,6 +433,54 @@ class User extends BaseObject {
         return $this->avatarMode() != 1;
     }
 
+    public function donorVisible(): bool {
+        if (is_null($this->donorVisible)) {
+            $this->donorVisible = (bool)$this->db->scalar("
+                SELECT 1 FROM users_donor_ranks WHERE Hidden = '0' AND UserID = ?
+                ", $this->id
+            );
+        }
+        return $this->donorVisible;
+    }
+
+    public function donorHeart(): string {
+        if (is_null($this->donorHeart)) {
+            $donorMan = new \Gazelle\Manager\Donation;
+            if (!$this->isDonor()) {
+                $this->donorHeart = '';
+            } else {
+                $enabled = $donorMan->enabledRewards($this->id);
+                $reward = $donorMan->rewards($this->id);
+                if ($enabled['HasCustomDonorIcon'] && $reward['CustomIcon']) {
+                    $iconImage = \ImageTools::process($reward['CustomIcon'], false, 'donoricon', $this->id);
+                } else {
+                    $rank = $donorMan->rank($this->id);
+                    if ($rank == 0) {
+                        $rank = 1;
+                    }
+                    if ($donorMan->specialRank($this->id) === MAX_SPECIAL_RANK) {
+                        $donorHeart = 6;
+                    } elseif ($rank === 5) {
+                        $donorHeart = 4; // Two points between rank 4 and 5
+                    } elseif ($rank >= MAX_RANK) {
+                        $donorHeart = 5;
+                    } else {
+                        $donorHeart = $rank;
+                    }
+                    $iconImage = STATIC_SERVER . '/common/symbols/'
+                        . ($donorHeart === 1 ? 'donor.png' : "donor_{$donorHeart}.png");
+                }
+                $iconText = $enabled['HasDonorIconMouseOverText'] ? ($reward['IconMouseOverText'] ?? 'Donor') : 'Donor';
+                $this->donorHeart = '<a target="_blank" href="'
+                    . ($enabled['HasDonorIconLink'] ? ($reward['CustomIconLink'] ?? 'donate.php') : 'donate.php')
+                    . '"><img class="donor_icon tooltip" src="' . $iconImage
+                    . '" alt="' . $iconText . '" title="' . $iconText
+                    . '" /></a>';
+            }
+        }
+        return $this->donorHeart;
+    }
+
     public function email(): string {
         return $this->info()['Email'];
     }
@@ -500,14 +557,14 @@ class User extends BaseObject {
      *
      * @param Gazelle\User viewer Who is looking?
      * @param array Property What properties are they looking for?
-     * @return int PARANOIA_HIDDEN, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
+     * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
     function propertyVisibleMulti(User $viewer, array $property): int {
         $final = false;
         foreach ($property as $p) {
             $result = $this->propertyVisible($viewer, $p);
-            if ($result === PARANOIA_HIDDEN) {
-                return PARANOIA_HIDDEN;
+            if ($result === PARANOIA_HIDE) {
+                return PARANOIA_HIDE;
             }
             if ($final === PARANOIA_OVERRIDDEN && $result = PARANOIA_ALLOWED) {
                 continue;
@@ -522,7 +579,7 @@ class User extends BaseObject {
      *
      * @param Gazelle\User viewer Who is looking?
      * @param array Property What property are they looking for?
-     * @return int PARANOIA_HIDDEN, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
+     * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
     function propertyVisible(User $viewer, string $property): int {
         if ($this->id() === $viewer->id()) {
@@ -536,7 +593,7 @@ class User extends BaseObject {
         if ($viewer->permitted('users_override_paranoia') || $viewer->permitted(PARANOIA_OVERRIDE[$property])) {
             return PARANOIA_OVERRIDDEN;
         }
-        return PARANOIA_HIDDEN;
+        return PARANOIA_HIDE;
     }
 
     public function ratioWatchExpiry(): ?string {
@@ -1296,9 +1353,9 @@ class User extends BaseObject {
     public function isVisible(): bool     { return $this->info()['Visible'] == '1'; }
     public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
 
-    public function isDonor(): bool         { return in_array(DONOR, $this->info()['secondary_class']) || $this->classLevel() >= STAFF_LEVEL; }
-    public function isFLS(): bool           { return in_array(FLS_TEAM, $this->info()['secondary_class']); }
     public function isStaff(): bool         { return $this->info()['isStaff']; }
+    public function isDonor(): bool         { return isset($this->info()['secondary_class'][DONOR]) || $this->isStaff(); }
+    public function isFLS(): bool           { return isset($this->info()['secondary_class'][FLS_TEAM]); }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
 
     public function warningExpiry(): ?string {
