@@ -43,9 +43,9 @@ if (empty($_GET['type'])) {
                     error(403);
                 }
                 $Title = "Requests created by " . $user->username();
-                $SphQL->where('userid', $UserInfo['ID']);
+                $SphQL->where('userid', $user->id());
             } else {
-                $Title = 'My requests';
+                $Title = 'Your requests';
                 $SphQL->where('userid', $LoggedUser['ID']);
             }
             break;
@@ -55,7 +55,7 @@ if (empty($_GET['type'])) {
                     error(403);
                 }
                 $Title = "Requests voted for by " . $user->username();
-                $SphQL->where('voter', $UserInfo['ID']);
+                $SphQL->where('voter', $user->id());
             } else {
                 $Title = 'Requests you have voted on';
                 $SphQL->where('voter', $LoggedUser['ID']);
@@ -67,7 +67,7 @@ if (empty($_GET['type'])) {
                     error(403);
                 }
                 $Title = "Requests filled by " . $user->username();
-                $SphQL->where('fillerid', $UserInfo['ID']);
+                $SphQL->where('fillerid', $user->id());
             } else {
                 $Title = 'Requests you have filled';
                 $SphQL->where('fillerid', $LoggedUser['ID']);
@@ -615,7 +615,7 @@ View::show_header($Title, 'requests');
             </td>
             <td>
 <?php        if ($Filler) { ?>
-                <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username ?>?></a>
+                <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username() ?></a>
 <?php        } else { ?>
                 &mdash;
 <?php        } ?>
