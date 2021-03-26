@@ -43,9 +43,9 @@ if (empty($_GET['type'])) {
                     error(403);
                 }
                 $Title = "Requests created by " . $user->username();
-                $SphQL->where('userid', $UserInfo['ID']);
+                $SphQL->where('userid', $user->id());
             } else {
-                $Title = 'My requests';
+                $Title = 'Your requests';
                 $SphQL->where('userid', $LoggedUser['ID']);
             }
             break;
@@ -55,7 +55,7 @@ if (empty($_GET['type'])) {
                     error(403);
                 }
                 $Title = "Requests voted for by " . $user->username();
-                $SphQL->where('voter', $UserInfo['ID']);
+                $SphQL->where('voter', $user->id());
             } else {
                 $Title = 'Requests you have voted on';
                 $SphQL->where('voter', $LoggedUser['ID']);
