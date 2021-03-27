@@ -11,13 +11,13 @@ class Applicant extends \Gazelle\Base {
     const CACHE_KEY_NEW_REPLY = 'applicant_new_reply';
     const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
 
-    public function createApplicant(int $userId, string $role, string $body) {
-        $threadMan = new Thread();
-        $thread = $threadMan->createThread('staff-role');
+    public function createApplicant(int $userId, int $roleId, string $body) {
         $this->db->prepared_query("
-            INSERT INTO applicant (RoleID, UserID, ThreadID, Body)
-            VALUES ((SELECT ID FROM applicant_role WHERE Title = ?), ?, ?, ?)
-            ", $role, $userId, $thread->id(), $body
+            INSERT INTO applicant
+                   (RoleID, UserID, Body, ThreadID)
+            VALUES (?,      ?,      ?,    ?)
+            ", $roleId, $userId, $body,
+                (new Thread())->createThread('staff-role')->id()
         );
         $this->cache->delete_value(self::CACHE_KEY_NEW_COUNT);
         return new \Gazelle\Applicant($this->db->inserted_id());

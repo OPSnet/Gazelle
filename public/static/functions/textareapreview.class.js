@@ -75,9 +75,6 @@ $(document).ready(function () {
                     $.proxy(this.html, this),
                     'html'
                 );
-                // .fail(function (jqXHR, textStatus) {
-                    // alert('Request failed: ' + textStatus);
-                // });
         },
         html : function (data) {
             this.el.preview.html(data);

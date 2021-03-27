@@ -1,5 +1,8 @@
 </div>
-<?php TEXTAREA_PREVIEW::JavaScript(); ?>
+<?php
+TEXTAREA_PREVIEW::JavaScript();
+echo Gazelle\Util\Textarea::activate();
+?>
 <div id="footer">
 <?php if (DEBUG_MODE || check_perms('site_debug')) { ?>
     <div id="site_debug">

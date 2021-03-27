@@ -23,34 +23,25 @@ class ApplicantRole extends \Gazelle\Base {
         if ($list === false) {
             $where = $all ? '/* all */' : 'WHERE r.Published = 1';
             $this->db->prepared_query("
-                SELECT r.ID as role_id, r.Title as role, r.Published, r.Description, r.UserID, r.Created, r.Modified
+                SELECT r.ID       AS role_id,
+                    r.Title       AS title,
+                    r.Published   AS published,
+                    r.Description AS description,
+                    r.UserID      AS user_id,
+                    r.Created     AS created,
+                    r.Modified    AS modified
                 FROM applicant_role r
                 $where
                 ORDER BY r.Title
             ");
-            $list = [];
-            while (($row = $this->db->next_record(MYSQLI_ASSOC))) {
-                $list[$row['role']] = [
-                    'id'          => $row['role_id'],
-                    'published'   => $row['Published'] ? 1 : 0,
-                    'description' => $row['Description'],
-                    'user_id'     => $row['UserID'],
-                    'created'     => $row['Created'],
-                    'modified'    => $row['Modified']
-                ];
-            }
+            $list = $this->db->to_array('role_id', MYSQLI_ASSOC, false);
             $this->cache->cache_value($key, $list, 86400 * 10);
         }
         return $list;
     }
 
-    public function title(int $roleId) {
-        $list = $this->list(true);
-        foreach ($list as $role => $data) {
-            if ($data['id'] == $roleId) {
-                return $role;
-            }
-        }
-        return null;
+    public function title(int $roleId): ?string {
+        $role = array_filter($this->list(true), function ($r) use ($roleId) { return $r['role_id'] == $roleId;});
+        return current($role)['title'] ?? null;
     }
 }

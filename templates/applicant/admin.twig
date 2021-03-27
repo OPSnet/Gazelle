@@ -1,0 +1,88 @@
+{% from 'macro/form.twig' import checked %}
+<div class="thin">
+
+<div class="linkbox">
+    <a href="/apply.php" class="brackets">Apply</a>
+    <a href="/apply.php?action=view" class="brackets">Current applications</a>
+    <a href="/apply.php?action=view&amp;status=resolved" class="brackets">Resolved applications</a>
+</div>
+
+<h3>Manage roles at {{ constant('SITE_NAME') }}</h3>
+
+<form method="post" action="/apply.php?action=admin">
+
+<div class="box">
+    <div class="head">Current Roles</div>
+    <div class="pad">
+{% if saved %}
+        <p>The role {{ role.title }} was {{ saved }}.</p>
+{% endif %}
+{% if not editId %}
+    {% for role_id, info in list %}
+        {% if loop.first %}
+        <table>
+        {% endif %}
+            <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+                <td>
+                    <div class="head">
+                        <div style="float: right;">
+                            <input style="margin-bottom: 10px;" type="submit" name="edit-{{ role_id }}" value="Edit" />
+                        </div>
+                        <span style="font-size: medium">{{ info.title }}</span> ({% if info.published %}published{% else %}archived{% endif %})
+                        <br />Role created {{ info.created|time_diff }} by {{ info.user_id|user_url }}
+                        {% if info.modified != ino.created %}
+                            last modified {{ info.modified|time_diff }}
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><div class="pad">{{ info.description|bb_format }}</div></td>
+            </tr>
+        {% if loop.last %}
+        </table>
+        {% endif %}
+    {% else %}
+        <p>There are no current roles. Create one using the form below.</p>
+    {% endfor %}
+{% endif %}
+    </div>
+</div>
+
+<div class="box">
+    <div class="head">{% if edit_id %}Edit{% else %}New{% endif %} Role</div>
+    <div class="pad">
+
+    <table>
+        <tr>
+            <td class="label">Title</td>
+            <td><input type="text" width="100" name="title" value="{% if edit_id %}{{ role.title }}{% endif %}" /></td>
+        </tr>
+        <tr>
+            <td class="label">Visibility</td>
+            <td>
+                <input type="radio" name="status" value="1" id="status-pub"{{ checked(edit_id and role.isPublished) }} /><label for="status-pub">published</label><br />
+                <input type="radio" name="status" value="0" id="status-arch"{{ checked((not edit_id) or role.isArchived) }} /><label for="status-arch">archived</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Description</td>
+            <td>
+{% if edit_id %}
+                <input type="hidden" name="edit" value="{{ edit_id }}"/>
+{% endif %}
+                <input type="hidden" name="user_id" value="{{ user_id }}"/>
+                <input type="hidden" name="auth" value="{{ auth }}"/>
+                {{ text.preview|raw }}
+                {{ text.textarea|raw }}
+                {{ text.button|raw }}
+                <input type="submit" id="submit" value="Save Role"/>
+            </td>
+        </tr>
+    </table>
+</div>
+</div>
+
+</form>
+
+</div>
