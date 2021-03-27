@@ -7,41 +7,36 @@ namespace Gazelle;
  * A collection of notes is called a story.
  */
 
-class Thread extends Base {
-    protected $id;      // the ID of the row in the thread table
+class Thread extends BaseObject {
     protected $type;    // the type of thread
     protected $created; // date created
     protected $story;   // the array of notes in the conversation
 
-    /**
-     */
+    public function tableName(): string { return 'thread'; }
+    public function flush() {}
+
+    protected const CACHE_KEY = "thread_%d";
+    protected const STORY_KEY = "thread_story_%d";
+
     public function __construct(int $id) {
-        parent::__construct();
-        $this->id = $id;
-        $key = "thread_$id";
-        $data = $this->cache->get_value($key);
-        if ($data === false) {
-            $data = $this->db->row("
-                SELECT tt.Name as ThreadType, t.Created
+        parent::__construct($id);
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        [$this->type, $this->created] = $this->cache->get_value($key);
+        if (is_null($this->type)) {
+            [$this->type, $this->created] = $this->db->row("
+                SELECT tt.Name as ThreadType,
+                    t.Created
                 FROM thread t
                 INNER JOIN thread_type tt ON (tt.ID = t.ThreadTypeID)
                 WHERE t.ID = ?
-            ", $id);
-            if (!$data) {
-                throw new Exception\ResourceNotFoundException($id);
+                ", $this->id
+            );
+            if (is_null($this->type)) {
+                throw new Exception\ResourceNotFoundException($this->id);
             }
-            $data = $this->db->next_record();
-            $this->cache->cache_value($key, $data, 86400);
+            $this->cache->cache_value($key, [$this->type, $this->created], 86400);
         }
-        [$this->type, $this->created] = $data;
         return $this->refresh(); /* load the story */
-    }
-
-    /**
-     * @return int The id of a Thread
-     */
-    public function id() {
-        return $this->id;
     }
 
     /**
@@ -64,7 +59,7 @@ class Thread extends Base {
      * @param string $body The note text
      * @param int $visibility 'public' or 'staff'
      */
-    public function saveNote($userId, $body, $visibility) {
+    public function saveNote(int $userId, string $body, string $visibility) {
         $this->db->prepared_query("
             INSERT INTO thread_note
                    (ThreadID, UserID, Body, Visibility)
@@ -80,7 +75,7 @@ class Thread extends Base {
      * @param string $body The note text
      * @param int $visibility 'public' or 'staff'
      */
-    public function modifyNote($id, $body, $visibility) {
+    public function modifyNote(int $id, string $body, string $visibility) {
         $this->db->prepared_query("
             UPDATE thread_note SET
                 Body = ?,
@@ -95,11 +90,12 @@ class Thread extends Base {
      * Delete a note.
      * @param int $note_id The id to identify a note
      */
-    public function removeNote($note_id) {
+    public function removeNote(int $noteId) {
         $this->db->prepared_query("
             DELETE FROM thread_note
-            WHERE ThreadID = ? AND ID = ?
-            ", $this->id(), $note_id
+            WHERE ThreadID = ?
+                AND ID = ?
+            ", $this->id, $noteId
         );
         return $this->refresh();
     }
@@ -108,32 +104,21 @@ class Thread extends Base {
      * Refresh the story cache when a note is added, changed, deleted.
      */
     protected function refresh() {
-        $key = "thread_story_" . $this->id;
         $this->db->prepared_query("
-            SELECT ID, UserID, Visibility, Created, Body
-            FROM thread_note
-            WHERE ThreadID = ?
-            ORDER BY created;
-        ", $this->id);
-        $this->story = [];
-        $userMan = new Manager\User;
-        if ($this->db->has_results()) {
-            $user_cache = [];
-            while (($row = $this->db->next_record())) {
-                if (!in_array($row['UserID'], $user_cache)) {
-                    $user_cache[$row['UserID']] = $userMan->findById($row['UserID'])->username();
-                }
-                $this->story[] = [
-                    'id'         => $row['ID'],
-                    'user_id'    => $row['UserID'],
-                    'user_name'  => $user_cache[$row['UserID']],
-                    'visibility' => $row['Visibility'],
-                    'created'    => $row['Created'],
-                    'body'       => $row['Body']
-                ];
-            }
-        }
-        $this->cache->cache_value($key, $this->story, 3600);
+            SELECT tn.ID      AS id,
+                tn.UserID     AS user_id,
+                um.Username   AS username,
+                tn.Visibility AS visibility,
+                tn.Created    AS created,
+                tn.Body       AS body
+            FROM thread_note tn
+            INNER JOIN users_main um ON (um.ID = tn.UserID)
+            WHERE tn.ThreadID = ?
+            ORDER BY tn.Created;
+            ", $this->id
+        );
+        $this->story = $this->db->to_array('id', MYSQLI_ASSOC, false);
+        $this->cache->cache_value(sprintf(self::STORY_KEY, $this->id), $this->story, 86400);
         return $this;
     }
 }

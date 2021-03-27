@@ -1,0 +1,136 @@
+<div class="thin">
+
+<div class="linkbox">
+    <a href="/apply.php" class="brackets">Apply</a>
+{% if id and not is_staff %}
+    <a href="/apply.php?action=view" class="brackets">View your applications</a>
+{% endif %}
+{% if is_staff %}
+    {% if resolved or (id and not resolved) %}
+    <a href="/apply.php?action=view" class="brackets">Current applications</a>
+    {% endif %}
+    {% if not resolved %}
+    <a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
+    {% endif %}
+    <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
+{% endif %}
+</div>
+
+{% if id %}
+<div class="box">
+    <div class="head"{% if app.isResolved %} style="font-style: italic;"{% endif %}>{{ app.roleTitle }}
+    {% if is_staff %}
+        <div style="float: right;">
+            <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id={{ id }}">
+                <input type="submit" name="resolve" value="{% if app.isResolved %}Reopen{% else %}Resolve{% endif %}" />
+                <input type="hidden" name="id" value="{{ id }}"/>
+                <input type="hidden" name="auth" value="{{ auth }}"/>
+            </form>
+        </div>
+        <br />Application received from {{ app.userId|user_full }} received {{ app.created|time_diff }}.
+    {% endif %}
+    </div>
+
+    <div class="pad">
+        <p>{{ app.body|bb_format }}</p>
+    {% if not app.isResolved %}
+        <form id="thread_note_reply" name="thread_note_replay" method="POST" action="/apply.php?action=view&amp;id={{ id }}">
+    {% endif %}
+        <table class="forum_post wrap_overflow box vertical_margin">
+    {% for note in app.story(is_staff) %}
+            <tr class="colhead_dark">
+                <td colspan="2">
+                    <div style="float: left; padding-top: 10px;">{{ note.user_id|user_url }} - {{ note.created|time_diff }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 2px solid
+                    {%- if not is_staff -%}
+                        #808080
+                    {%- else -%}
+                        {%- if note.visibility == 'staff' -%}
+                            #FF8017
+                        {%- else -%}
+                            #347235
+                        {%- endif -%}
+                    {%- endif -%}
+                    ;">
+                    <div style="margin: 5px 4px 20px 4px">
+                        {{ note.body|bb_format }}
+                    </div>
+        {% if is_staff and not app.isResolved %}
+                    <div style="float: right; padding-top: 10px 0; margin-bottom: 6px;">
+                        <input type="submit" name="note-delete-{{ note.id }}" value="delete" style="height: 20px; padding: 0 3px;"/>
+                    </div>
+        {% endif %}
+                </td>
+            </tr>
+    {% endfor %}
+    {% if not app.isResolved %}
+        {% if is_staff %}
+            <tr>
+                <td class="label">Visibility</td>
+                <td>
+                    <div>
+                        <input type="radio" name="visibility" value="public" /><label for="public">public <span style="color: #347235">(member will see this reply)</span></label><br />
+                        <input type="radio" name="visibility" value="staff" checked /><label for="staff">staff <span style="color: #FF8017">(only staff will see this reply)</span></label><br />
+                    </div>
+                <td>
+            </tr>
+        {% endif %}
+            <tr>
+                <td class="label">Reply</td>
+                <td>
+                    {{ note.preview|raw }}
+                    {{ note.textarea|raw }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div style="text-align: center;">
+                        <input type="hidden" name="id" value="{{ id }}"/>
+                        <input type="hidden" name="auth" value="{{ auth }}"/>
+                        {{ note.button|raw }}
+                        <input type="submit" id="submit" value="Save" />
+                    </div>
+                </td>
+            </tr>
+    {% endif %}
+        </table>
+        </form>
+    </div>
+</div>
+{% else %}
+    <h3>{% if resolved %}Resolved{% else %}Current{% endif %} Applications</h3>
+    {% for a in list %}
+        {% if loop.first %}
+    <table>
+        <tr class="colhead">
+            <td>Role</td>
+            {% if is_staff %}
+            <td>Applicant</td>
+            {% endif %}
+            <td>Date Created</td>
+            <td>Comments</td>
+            <td>Last comment from</td>
+            <td>Last comment added</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td><a href="/apply.php?action=view&amp;id={{ a.ID }}">{{ a.Role }}</a></td>
+        {% if is_staff %}
+            <td><a href="/user.php?id={{ a.UserID }}">{{ a.Username }}</a></td>
+        {% endif %}
+            <td>{{ a.Created|time_diff }}</td>
+            <td>{{ a.nr_notes|number_format }}</td>
+            <td><a href="/user.php?id={{ a.last_UserID }}">{{ a.last_Username }}</a></td>
+            <td>{% if a.last_Created %}{{ a.last_Created|time_diff }}{% endif %}</td>
+        </tr>
+        {% if loop.last %}
+    </table>
+        {% endif %}
+    {% else %}
+<div class="box pad">The cupboard is empty. There are no applications to show.</div>
+    {% endfor %}
+{% endif %}
+</div>

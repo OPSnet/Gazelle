@@ -1,0 +1,77 @@
+{% from 'macro/form.twig' import selected %}
+<div class="thin">
+    <div class="header">
+        <h3>Apply for a role at {{ constant('SITE_NAME') }}</h3>
+{% if is_admin or is_applicant %}
+        <div class="linkbox">
+    {% if is_admin %}
+            <a href="/apply.php?action=view" class="brackets">Current applications</a>
+            <a href="/apply.php?action=view&amp;status=resolved" class="brackets">Resolved applications</a>
+            <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
+    {% else %}
+            <a href="/apply.php?action=view" class="brackets">View your application</a>
+    {% endif %}
+        </div>
+{% endif %}
+    </div>
+
+{% for role_id, role in list %}
+    {% if loop.first %}
+    <div class="box">
+        <div class="head">Open Roles</div>
+        <div class="pad">
+            <table>
+    {% endif %}
+                <tr>
+                    <td><div class="head">{{ role.title }}</div></td>
+                </tr>
+                <tr>
+                    <td><div class="pad">{{ role.description|bb_format }}</div></td>
+                </tr>
+    {% if loop.last %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="box pad">
+    <p>Thanks for your interest in helping {{ constant('SITE_NAME') }}! There are
+    no openings at the moment. Keep an eye on the front page
+    or the forum for announcements in the future.</p>
+    </div>
+{% endfor %}
+
+{% if list %}
+    {% if error %}
+<div class="important">{{ error }}</div>
+    {% endif %}
+<form class="send_form" id="applicationform" name="apply" action="/apply.php?action=save" method="post">
+    <div class="box">
+        <div id="quickpost">
+            <div class="head">Your Role at {{ constant('SITE_NAME') }}</div>
+            <div class="pad">
+                <div>Choose a role from the following list:</div>
+                <select name="role">
+                    <option value="">---</option>
+{% for role in list %}
+                    <option value="{{ role.role_id }}"{{ selected(role.title == title) }}>{{ role.title }}</option>
+{% endfor %}
+                </select>
+            </div>
+            <div class="head">Your cover letter</div>
+            <div class="pad">Give us least 80 characters to convince us!
+            {{ body.preview|raw }}
+            {{ body.textarea|raw }}
+            </div>
+        </div>
+
+        <div class="pad preview_submit">
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            {{ body.button|raw }}
+            <input type="submit" value="Send Application" />
+        </div>
+    </div>
+</form>
+{% endif %}
+</div>
+
