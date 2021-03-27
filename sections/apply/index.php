@@ -1,11 +1,6 @@
 <?php
 enforce_login();
 
-$Role  = '';
-$Title = '';
-$Body  = '';
-$Error = '';
-
 switch ($_GET['action'] ?? '') {
     case 'admin':
         if (check_perms('admin_manage_applicants')) {
