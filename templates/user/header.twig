@@ -155,7 +155,7 @@
 {% set visible = user.propertyVisible(preview_user, 'requiredratio') %}
 {% if visible %}
     {% set size = user.seedingSize %}
-        <li class="tooltip{{ override(visible) }}" title="{{ size|number_format(5) }}">Seeding Size: {{ size|number_format }}</li>
+        <li class="tooltip{{ override(visible) }}" title="{{ size|number_format }}">Seeding Size: {{ size|octet_size }}</li>
 {% endif %}
 
 {% set visible = user.propertyVisible(preview_user, 'bonuspoints') %}
