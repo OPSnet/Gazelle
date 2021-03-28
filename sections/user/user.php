@@ -102,7 +102,7 @@ echo G::$Twig->render('user/header.twig', [
         'other' => $FL_OTHER_tokens ?? null,
     ],
     'hourly_rate'  => $Bonus->userHourlyRate($UserID),
-    'preview_user' => $Preview ? $userMan->findById(47) : $viewer,
+    'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $viewer,
     'recovered'    => $recovered,
     'user'         => $User,
     'userMan'      => $userMan,

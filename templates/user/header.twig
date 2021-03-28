@@ -123,10 +123,10 @@
 
 {% set visible = user.propertyVisible(preview_user, 'downloaded') %}
 {% if visible %}
-        <li class="tooltip{{ override(visible) }}" title="{{ stats.BytesDownloaded|octet_size(5) }}">Uploaded: {{ stats.BytesDownloaded|octet_size }}</li>
+        <li class="tooltip{{ override(visible) }}" title="{{ stats.BytesDownloaded|octet_size(5) }}">Downloaded: {{ stats.BytesDownloaded|octet_size }}</li>
 {% endif %}
 
-{% set visible = user.propertyVisible(preview_user, 'downloaded') and user.propertyVisible(preview_user, 'uploaded') %}
+{% set visible = min(user.propertyVisible(preview_user, 'downloaded'), user.propertyVisible(preview_user, 'uploaded')) %}
 {% if visible %}
     {% set buffer = user.buffer[1] %}
         <li class="tooltip{{ override(visible) }}" title="{{ buffer|octet_size(5) }}">Buffer: {{ buffer|octet_size }}</li>

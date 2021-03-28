@@ -134,6 +134,7 @@ define("PARANOIA_HIDE", 0);
 define("PARANOIA_ALLOWED", 1);
 define("PARANOIA_OVERRIDDEN", 2);
 
+define("PARANOIA_PREVIEW_USER", 1); // change to an unprivileged staff account
 define("PARANOIA_OVERRIDE", [
     'downloaded'    => 'users_mod',
     'uploaded'      => 'users_mod',
