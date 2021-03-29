@@ -41,7 +41,7 @@ if (check_perms('users_mod')) {
 
         <div class="box">
             <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
-            <ul class="stats">
+            <ul class="stats nobullet">
 <?php
 $blogMan = new Gazelle\Manager\Blog;
 $headlines = array_slice($blogMan->headlines(), 0, 5);
