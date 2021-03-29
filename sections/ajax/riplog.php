@@ -2,10 +2,15 @@
 
 $logId = (int)$_GET['logid'];
 if (!$logId) {
-    json_die('missing logid parameter');
+    json_error('missing logid parameter');
 }
 $torrent = (new Gazelle\Manager\Torrent)->findTorrentById((int)$_GET['id']);
 if (is_null($torrent)) {
-    json_die('missing id parameter');
+    json_error('torrent not found');
 }
-(new Gazelle\Json\RipLog($torrent->id(), $logId))->emit();
+try {
+    $ripLog = new Gazelle\Json\RipLog($torrent->id(), $logId);
+} catch (Gazelle\Exception\ResourceNotFoundException $e) {
+    json_error('inconsistent id/logid parameters');
+}
+$ripLog->emit();
