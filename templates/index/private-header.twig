@@ -1,10 +1,10 @@
-{% macro active(t) %}
+{% macro active(t) -%}
     {%- if t %} class="active"{% endif -%}
 {% endmacro %}
 {% macro active_class(t) %}
     {%- if t %} active{% endif -%}
 {% endmacro -%}
-
+{% set stats = user.activityStats -%}
 <meta name="viewport" content="width=device-width" />
 </head>
 <body id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
@@ -38,11 +38,11 @@
         </li>
         <li id="nav_bonus" class="brackets{{ _self.active_class(document == 'user' and action == 'bonus') }}">
             <a href="bonus.php" class='tooltip' title="BP/hour: {{
-                user.activityStats.BonusPointsPerHour|number_format(3) }}">Bonus ({{ user.activityStats.BonusPoints|number_format }})</a>
+                stats.BonusPointsPerHour|number_format(3) }}">Bonus ({{ stats.BonusPoints|number_format }})</a>
         </li>
         <li id="nav_invite" class="brackets{{ _self.active_class(document == 'user' and action == 'invite') }}">
             <a href="user.php?action=invite" class='tooltip' title="Invite a friend!">Invite
-            {% if unlimited_invites %} (∞){% elseif user.inviteCount %} ({{ user.inviteCount }}){% endif %}</a>
+            {% if user.permitted('unlimited_invites') %} (∞){% elseif user.inviteCount %} ({{ user.inviteCount }}){% endif %}</a>
         </li>
         <li id="nav_donate" class="brackets{{ _self.active_class(document == 'donate') }}">
             <a href="donate.php" class='tooltip' title="Donate">Donate ({{ dono_target }}%)</a>
@@ -51,14 +51,14 @@
     <ul id="userinfo_stats">
         <li id="stats_seeding">
             <a href="torrents.php?type=seeding&amp;userid={{ user.id }}">Up</a>:
-            <span class="stat tooltip" title="{{ user.activityStats.BytesUploaded|octet_size(5) }}">{{ user.activityStats.BytesUploaded|octet_size }}</span>
+            <span class="stat tooltip" title="{{ stats.BytesUploaded|octet_size(5) }}">{{ stats.BytesUploaded|octet_size }}</span>
         </li>
         <li id="stats_leeching">
             <a href="torrents.php?type=leeching&amp;userid={{ user.id }}">Down</a>:
-            <span class="stat tooltip" title="{{ user.activityStats.BytesDownloaded|octet_size(5) }}">{{ user.activityStats.BytesDownloaded|octet_size }}</span>
+            <span class="stat tooltip" title="{{ stats.BytesDownloaded|octet_size(5) }}">{{ stats.BytesDownloaded|octet_size }}</span>
         </li>
         <li id="stats_ratio">
-            Ratio: <span class="stat">{{ ratio|raw }}</span>
+            Ratio: <span class="stat">{{ ratio(stats.BytesUploaded, stats.BytesDownloaded) }}</span>
         </li>
 {% if required_ratio > 0 %}
         <li id="stats_required">
@@ -128,6 +128,12 @@
             <input id="artistsearch"
                 {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% else %} {% endif -%}
                 value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a" />
+        </form>
+    </li>
+    <li id="searchbar_collages">
+        <span class="hidden">Collage: </span>
+        <form class="search_form" name="artists" action="collage.php" method="get">
+            <input id="collagesearch" value="Collages" placeholder="Collage" type="text" name="search" size="17" spellcheck="false" accesskey="c" />
         </form>
     </li>
     <li id="searchbar_requests">

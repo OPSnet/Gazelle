@@ -390,6 +390,9 @@ $(document).ready(function () {
     $('#artistsearch').focus(function () { if (this.value == 'Artists') { this.value = ''; }});
     $('#artistsearch').blur(function () { if (this.value == '') { this.value = 'Artists'; }});
 
+    $('#collagesearch').focus(function () { if (this.value == 'Collages') { this.value = ''; }});
+    $('#collagesearch').blur(function () { if (this.value == '') { this.value = 'Collages'; }});
+
     $('#requestssearch').focus(function () { if (this.value == 'Requests') { this.value = ''; }});
     $('#requestssearch').blur(function () { if (this.value == '') { this.value = 'Requests'; }});
 

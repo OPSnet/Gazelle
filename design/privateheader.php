@@ -315,10 +315,8 @@ echo G::$Twig->render('index/private-header.twig', [
     'document'          => $Document,
     'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
     'nav_links'         => $navLinks,
-    'ratio'             => Format::get_ratio_html($user->activityStats()['BytesUploaded'], $user->activityStats()['BytesDownloaded']),
     'required_ratio'    => G::$LoggedUser['RequiredRatio'],
     'subscriptions'     => $NewSubscriptions,
-    'unlimited_invites' => check_perms('site_send_unlimited_invites'),
     'user'              => $user,
-    'user_class'        => (new Gazelle\Manager\User)->classLevelList()[G::$LoggedUser['Class']]['Name'],
+    'user_class'        => (new Gazelle\Manager\User)->userclassName($user->primaryClass()),
 ]);
