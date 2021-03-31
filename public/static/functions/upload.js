@@ -25,6 +25,8 @@ var AllowedBitrate = {
 };
 
 var MAX_EXTRA_FORMATS = 5;
+var MAX_RIPLOGS = 400;
+
 
 function MBhide() {
     document.getElementById("musicbrainz_popup").style.display = "none";
@@ -326,7 +328,7 @@ function add_tag() {
 }
 
 function AddLogField(acceptTypes) {
-    if (LogCount >= 200) {
+    if (LogCount > MAX_RIPLOGS) {
         return;
     }
     LogCount++;
@@ -343,7 +345,7 @@ function AddLogField(acceptTypes) {
 }
 
 function AddExtraLogField(id) {
-    if (LogCount >= 200) {
+    if (LogCount > MAX_RIPLOGS) {
         return;
     }
     var LogField = document.createElement("input");
