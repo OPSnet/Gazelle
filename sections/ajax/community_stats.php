@@ -1,48 +1,45 @@
 <?php
-if (!isset($_GET['userid']) || !is_number($_GET['userid'])) {
+
+$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+if (is_null($user)) {
     json_die('failure');
 }
-
-$UserID = $_GET['userid'];
-$User = new \Gazelle\User($UserID);
-$UInfo = Users::user_info($UserID);
-
-function check_paranoia_here($info, $setting) {
-    return check_paranoia($setting, $info['Paranoia'], $info['Class'], $info['ID']);
-}
+$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $CommStats = [
-    'leeching' => false,
-    'seeding' => false,
-    'snatched' => false,
-    'usnatched' => false,
-    'downloaded' => false,
+    'leeching'    => false,
+    'seeding'     => false,
+    'snatched'    => false,
+    'usnatched'   => false,
+    'downloaded'  => false,
     'udownloaded' => false,
     'seedingperc' => false,
 ];
 
-if (check_paranoia_here($UInfo, 'seeding+') || check_paranoia_here($UInfo, 'leeching+')) {
-    $peerCounts = $User->peerCounts();
-    if (check_paranoia_here($UInfo, 'seeding+')) {
+$leechingVisible = $user->propertyVisible($viewer, 'leeching+');
+$seedingVisible = $user->propertyVisible($viewer, 'seeding+');
+if ($leechingVisible || $seedingVisible) {
+    $peerCounts = $user->peerCounts();
+    if ($leechingVisible) {
+        $CommStats['leeching'] = number_format($peerCounts['leeching']);
+    }
+    if ($seedingVisible) {
         $Seeding = $peerCounts['seeding'];
         $CommStats['seeding'] = number_format($Seeding);
     }
-    if (check_paranoia_here($Uinfo, 'leeching+')) {
-        $CommStats['leeching'] = $peerCounts['leeching'];
-    }
 }
-if (check_paranoia_here($Uinfo, 'snatched+')) {
-    list($Snatched, $UniqueSnatched) = $User->snatchCounts();
+if ($user->propertyVisible($viewer, 'snatched+')) {
+    [$Snatched, $UniqueSnatched] = $user->snatchCounts();
     $CommStats['snatched'] = number_format($Snatched);
-    if (check_perms('site_view_torrent_snatchlist', $UInfo['Class'])) {
+    if ($user->permitted('site_view_torrent_snatchlist')) {
         $CommStats['usnatched'] = number_format($UniqueSnatched);
     }
-    if (check_paranoia_here($Uinfo, 'seeding+') && check_paranoia_here($Uinfo, 'snatched+') && $UniqueSnatched > 0) {
+    if ($seedingVisible && $user->propertyVisible($viewer, 'snatched+')) {
         $CommStats['seedingperc'] = 100 * min(1, round($Seeding / $UniqueSnatched, 2));
     }
 }
-if ($UserID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist', $Class)) {
-    list($NumDownloads, $UniqueDownloads) = $User->downloadCounts();
+if ($user->id() == $LoggedUser['ID'] || $viewer->permitted('site_view_torrent_snatchlist')) {
+    [$NumDownloads, $UniqueDownloads] = $user->downloadCounts();
     $CommStats['downloaded'] = number_format($NumDownloads);
     $CommStats['udownloaded'] = number_format($UniqueDownloads);
 }

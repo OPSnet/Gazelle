@@ -6,7 +6,7 @@ if (!$ConvID || !is_number($ConvID)) {
 }
 
 $UserID = $LoggedUser['ID'];
-list($InInbox, $InSentbox) = $DB->row("
+[$InInbox, $InSentbox] = $DB->row("
     SELECT InInbox, InSentbox
     FROM pm_conversations_users
     WHERE UserID = ?
@@ -19,7 +19,7 @@ if (!$InInbox && !$InSentbox) {
 }
 
 // Get information on the conversation
-list($Subject, $Sticky, $UnRead, $ForwardedID, $ForwardedName) = $DB->row("
+[$Subject, $Sticky, $UnRead, $ForwardedID, $ForwardedName] = $DB->row("
     SELECT
         c.Subject,
         cu.Sticky,
@@ -35,18 +35,22 @@ list($Subject, $Sticky, $UnRead, $ForwardedID, $ForwardedName) = $DB->row("
 );
 
 $DB->prepared_query("
-    SELECT um.ID, Username
+    SELECT DISTINCT um.ID
     FROM pm_messages AS pm
     INNER JOIN users_main AS um ON (um.ID = pm.SenderID)
     WHERE pm.ConvID = ?
     ", $ConvID
 );
-while (list($PMUserID, $Username) = $DB->next_record()) {
+while ([$PMUserID] = $DB->next_record()) {
     $PMUserID = (int)$PMUserID;
+    if ($PMUserID > 0) {
+        $user = new Gazelle\User($PMUserID);
+        $Users[$PMUserID] = [
+            'Username' => $user->username(),
+            'Avatar'   => $user->avatar(),
+        ];
+    }
     $Users[$PMUserID]['UserStr'] = Users::format_username($PMUserID, true, true, true, true);
-    $Users[$PMUserID]['Username'] = $Username;
-    $UserInfo = Users::user_info($PMUserID);
-    $Users[$PMUserID]['Avatar'] = $UserInfo['Avatar'];
 }
 $Users[0]['UserStr'] = 'System'; // in case it's a message from the system
 $Users[0]['Username'] = 'System';
@@ -74,7 +78,7 @@ $DB->prepared_query("
 );
 
 $JsonMessages = [];
-while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) {
+while ([$SentDate, $SenderID, $Body, $MessageID] = $DB->next_record()) {
     $JsonMessage = [
         'messageId'  => (int)$MessageID,
         'senderId'   => (int)$SenderID,

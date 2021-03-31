@@ -10,10 +10,16 @@ if (isset($_GET['page'])) {
 }
 $thread = $commentPage->load()->thread();
 
+$userCache = [];
+$userMan = new Gazelle\Manager\User;
+
 $JsonComments = [];
 foreach ($thread as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername] = array_values($Post);
-    [$AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
+    if (!isset($userCache[$AuthorID])) {
+        $userCache[$AuthorID] = $userMan->findById((int)$AuthorID);
+    }
+    $author = $userCache[$AuthorID];
     $JsonComments[] = [
         'postId'         => $PostID,
         'addedTime'      => $AddedTime,
@@ -24,12 +30,12 @@ foreach ($thread as $Key => $Post) {
         'editedUsername' => $EditedUsername,
         'userinfo' => [
             'authorId'   => $AuthorID,
-            'authorName' => $Username,
-            'donor'      => $Donor == 1,
-            'warned'     => !is_null($Warned),
-            'avatar'     => $Avatar,
-            'enabled'    => $Enabled == '1',
-            'userTitle'  => $UserTitle
+            'authorName' => $author->username(),
+            'donor'      => $author->isDonor(),
+            'warned'     => $author->isWarned(),
+            'avatar'     => $author->avatar(),
+            'enabled'    => $author->isEnabled(),
+            'userTitle'  => $author->title(),
         ]
     ];
 }

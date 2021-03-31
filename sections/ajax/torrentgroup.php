@@ -62,6 +62,7 @@ $JsonTorrentDetails = [
     'tags'            => explode('|', $TorrentDetails['tagNames']),
 ];
 
+$userMan = new Gazelle\Manager\User;
 $JsonTorrentList = [];
 foreach ($TorrentList as $Torrent) {
     if ($Torrent['is_deleted']) {
@@ -74,7 +75,7 @@ foreach ($TorrentList as $Torrent) {
         $File = Torrents::filelist_old_format($File);
     }
     unset($File);
-    $Username = Users::user_info($Torrent['UserID'])['Username'];
+    $user = $userMan->findById($Torrent['UserID']);
 
     $JsonTorrentList[] = [
         'id'                      => (int)$Torrent['ID'],
@@ -104,7 +105,7 @@ foreach ($TorrentList as $Torrent) {
         'fileList'                => implode('|||', $FileList),
         'filePath'                => $Torrent['FilePath'],
         'userId'                  => (int)$Torrent['UserID'],
-        'username'                => $Username,
+        'username'                => $user ? $user->username() : null,
     ];
 }
 
