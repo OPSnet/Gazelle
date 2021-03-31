@@ -57,6 +57,8 @@ $DB->prepared_query("
 $LastRead = $DB->to_array('TopicID');
 
 $JsonTopics = [];
+$userCache = [];
+$userMan = new Gazelle\Manager\User;
 foreach ($threadList as $thread) {
     [$threadId, $Title, $AuthorID, $Locked, $Sticky, $PostCount, $LastID, $LastTime, $LastAuthorID] = array_values($thread);
 
@@ -67,22 +69,27 @@ foreach ($threadList as $thread) {
             && strtotime($LastTime) > $user->forumCatchupEpoch()
         );
 
-    $UserInfo = Users::user_info($AuthorID);
-    $AuthorName = $UserInfo['Username'];
-    $UserInfo = Users::user_info($LastAuthorID);
-    $LastAuthorName = $UserInfo['Username'];
+    if (!isset($userCache[$AuthorID])) {
+        $userCache[$AuthorID] = $userMan->findById($AuthorID);
+    }
+    $author = $userCache[$AuthorID];
+    if (!isset($userCache[$LastAuthorID])) {
+        $userCache[$LastAuthorID] = $userMan->findById($LastAuthorID);
+    }
+    $lastAuthor = $userCache[$LastAuthorID];
+
     $JsonTopics[] = [
         'topicId'        => $threadId,
         'title'          => display_str($Title),
         'authorId'       => $AuthorID,
-        'authorName'     => $AuthorName,
+        'authorName'     => $author ? $author->username() : null,
         'locked'         => $Locked == 1,
         'sticky'         => $Sticky == 1,
         'postCount'      => $PostCount,
         'lastID'         => $LastID ?? 0,
         'lastTime'       => $LastTime,
         'lastAuthorId'   => $LastAuthorID ?? 0,
-        'lastAuthorName' => $LastAuthorName ?? '',
+        'lastAuthorName' => $lastAuthor ? $lastAuthor->username() : '',
         'lastReadPage'   => (int)($LastRead[$threadId]['Page'] ?? 0),
         'lastReadPostId' => (int)($LastRead[$threadId]['PostID'] ?? 0),
         'read'           => !$unread,

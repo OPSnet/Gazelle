@@ -201,12 +201,20 @@ if ($threadInfo['StickyPostID']) {
     }
 }
 
+$userCache = [];
+$userMan = new Gazelle\Manager\User;
 $JsonPosts = [];
 foreach ($Thread as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
-    [$AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
+    if (!isset($userCache[$AuthorID])) {
+        $userCache[$AuthorID] = $userMan->findById((int)$AuthorID);
+    }
+    $author = $userCache[$AuthorID];
+    if (!isset($userCache[$EditedUserID])) {
+        $userCache[$EditedUserID] = $userMan->findById((int)$EditedUserID);
+    }
+    $editor = $userCache[$EditedUserID];
 
-    $UserInfo = Users::user_info($EditedUserID);
     $JsonPosts[] = [
         'postId'         => $PostID,
         'addedTime'      => $AddedTime,
@@ -214,16 +222,16 @@ foreach ($Thread as $Key => $Post) {
         'body'           => Text::full_format($Body),
         'editedUserId'   => $EditedUserID,
         'editedTime'     => $EditedTime,
-        'editedUsername' => $UserInfo['Username'],
+        'editedUsername' => $editor ? $editor->username() : null,
         'author' => [
             'authorId'   => $AuthorID,
-            'authorName' => $Username,
-            'paranoia'   => $Paranoia,
-            'donor'      => $Donor == 1,
-            'warned'     => !is_null($Warned),
-            'avatar'     => $Avatar,
-            'enabled'    => $Enabled === '2' ? false : true,
-            'userTitle'  => $UserTitle,
+            'authorName' => $author->username(),
+            'paranoia'   => $author->paranoia(),
+            'donor'      => $author->isDonor(),
+            'warned'     => $author->isWarned(),
+            'avatar'     => $author->avatar(),
+            'enabled'    => $author->isEnabled(),
+            'userTitle'  => $author->title(),
         ],
     ];
 }
