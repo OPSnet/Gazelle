@@ -19,10 +19,10 @@ services:
       - MYSQL_PASSWORD=password
 
   memcached:
-    image: memcached:1.5-alpine
+    image: memcached:1.6.9-alpine
 
   mysql:
-    image: mariadb:10.3
+    image: mariadb:10.5.9-focal
     ports:
       - 36000:3306
     volumes:
