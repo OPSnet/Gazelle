@@ -29,7 +29,7 @@
             </div>
         </div>
 
-{% for article in news %}
+{% for article in news[0:5] %}
         <div id="news{{ article.0 }}" class="box news_post">
             <div class="head">
                 <strong>{{ article.1|bb_format }}</strong> {{ article.3|time_diff }}
@@ -49,3 +49,4 @@
             </div>
         </div>
     </div>
+</div>

@@ -697,6 +697,38 @@ class Forum extends Base {
         return [$Question, $Answers, $Votes, $Featured, $Closed];
     }
 
+    public function pollDataExtended(int $threadId, int $userId): array {
+        [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
+        $userVote = $this->db->scalar("
+            SELECT Vote
+            FROM forums_polls_votes
+            WHERE Vote > 0
+                AND UserID = ?
+                AND TopicID = ?
+            ", $userId, $threadId
+        );
+        $max   = max($Votes) ?? 0;
+        $total = array_sum($Votes ?? []);
+        $tally = [];
+        foreach ($Votes as $key => $score) {
+            $tally[$key] = [
+                'answer'  => $Answers[$key],
+                'score'   => $score,
+                'ratio'   => $total ? ($score /   $max) * 100.0 : 0.0,
+                'percent' => $total ? ($score / $total) * 100.0 : 0.0,
+            ];
+        }
+        return [
+            'question'    => $Question,
+            'is_closed'   => (bool)$Closed,
+            'is_featured' => (bool)$Featured,
+            'tally'       => $tally,
+            'user_vote'   => $userVote,
+            'votes_max'   => $max,
+            'votes_total' => $total,
+        ];
+    }
+
     /**
      * Edit a poll
      * TODO: feature and unfeature a poll.

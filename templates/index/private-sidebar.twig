@@ -1,0 +1,147 @@
+<div class="thin">
+    <div class="sidebar">
+
+{% if featured_aotm %}
+<div class="box">
+    <div class="head colhead_dark">
+        <strong>Album of the Month</strong>
+        <a href="forums.php?action=viewthread&amp;threadid={{ featured_aotm.ThreadID}}">[Discuss]</a>
+    </div>
+    <div class="center pad">
+        <a href="torrents.php?id={{ featured_aotm.GroupID }}" class="tooltip" title="{{
+            featured_aotm.artist_name }} - {{  featured_aotm.Name }}">
+            <img src="{{ featured_aotm.image|raw }}" alt="{{ featured_aotm.artist_name }} - {{ featured_aotm.Name }}" width="100%" />
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% if featured_showcase %}
+<div class="box">
+    <div class="head colhead_dark">
+        <strong>Showcase</strong>
+        <a href="forums.php?action=viewthread&amp;threadid={{ featured_showcase.ThreadID}}">[Discuss]</a>
+    </div>
+    <div class="center pad">
+        <a href="torrents.php?id={{ featured_showcase.GroupID }}" class="tooltip" title="{{
+            featured_showcase.artist_name }} - {{  featured_showcase.Name }}">
+            <img src="{{ featured_showcase.image|raw }}" alt="{{ featured_showcase.artist_name }} - {{ featured_showcase.Name }}" width="100%" />
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% if viewer.permitted('users_mod') %}
+    {% set read = staff_blog.readBy(viewer) %}
+<div class="box">
+    <div class="head colhead_dark">
+        <strong><a href="staffblog.php">Latest staff blog posts</a></strong>
+    </div>
+    <ul class="stats nobullet">
+    {% for article in staff_blog.blogList[0:5] %}
+        {% set unread = read < article.epoch %}
+        <li>
+            {%- if unread %}<strong>{% endif -%}
+            <a href="staffblog.php#blog{{ article.id }}">{{ article.title }}</a>
+            {%- if unread %}</strong>{% endif -%}
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="box">
+    <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
+    <ul class="stats nobullet">
+{% for article in blog.headlines[0:5] %}
+        <li>
+            <a href="blog.php#blog{{ article.0 }}">{{ article.1 }}</a>
+        </li>
+{% endfor %}
+    </ul>
+</div>
+
+{% if leaderboard %}
+<div class="box">
+    <div class="head colhead_dark"><strong>Contest Leaderboard</strong></div>
+    <table>
+    {% for entry in leaderboard %}
+        <tr>
+            <td><a href="user.php?id={{ entry.user_id }}">{{ entry.username }}</a></td>
+            <td>{{ entry.entry_count }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    <div class="center pad">
+        <a href="contest.php?action=leaderboard"><em>View More</em></a>
+    </div>
+</div>
+{% endif %}
+
+<div class="box">
+    <div class="head colhead_dark"><strong>Stats</strong></div>
+    <ul class="stats nobullet">
+{% if constant('USER_LIMIT') > 0 %}
+        <li>Maximum users: {{ constant('USER_LIMIT')|number_format }}</li>
+{% endif %}
+        <li>Enabled users: {{ user_count|number_format }} <a href="stats.php?action=users" class="brackets">Details</a></li>
+        <li>Users active today: {{ user_stats.Day }} ({{ (user_stats.Day / user_count * 100)|number_format(2) }}%)</li>
+        <li>Users active this week: {{ user_stats.Week }} ({{ (user_stats.Week / user_count * 100)|number_format(2) }}%)</li>
+        <li>Users active this month: {{ user_stats.Month }} ({{ (user_stats.Month / user_count * 100)|number_format(2) }}%)</li>
+        <li>Torrents: {{ torrent_stats.torrentCount|number_format }}</li>
+        <li>Releases: {{ torrent_stats.albumCount|number_format }}</li>
+        <li>Artists: {{ torrent_stats.artistCount|number_format }}</li>
+        <li>"Perfect" FLACs: {{ torrent_stats.perfectCount|number_format }}</li>
+        <li>Collages: {{ collage_count|number_format }}</li>
+        <li>Requests: {{ request_stats.requestCount|number_format }} ({{ request_stats.filledPercent|number_format(2) }}% filled)</li>
+{% if snatch_stats %}
+        <li>Snatches: {{ snatch_stats|number_format }}</li>
+{% endif %}
+        <li>Peers: {{ torrent_stats.peerCount|number_format }}</li>
+        <li>Seeders: {{ torrent_stats.seederCount|number_format }}</li>
+        <li>Leechers: {{ torrent_stats.leecherCount|number_format }}</li>
+        <li>Seeder/leecher ratio: {{ ratio(torrent_stats.leecherCount, torrent_stats.seederCount)|raw }}</li>
+    </ul>
+</div>
+
+{%- if poll -%}
+<div class="box">
+    <div class="head colhead_dark"><strong>Poll{% if poll.is_closed %} [Closed]{% endif %}</strong></div>
+    <div class="pad">
+        <p><strong>{{ poll.question }}</strong></p>
+    {% if poll.user_vote or poll.is_closed %}
+        <ul class="poll nobullet">
+        {% for id, vote in poll.tally %}
+            <li title="{{ vote.score }}">
+            {%- if id == poll.user_vote %}&raquo;&nbsp;{% endif -%}
+            {{ vote.answer }} ({{ vote.percent|number_format(2) }}%)</li>
+            <li title="{{ vote.score }}" class="graph">
+                <span class="left_poll"></span>
+                <span class="center_poll" style="width: {{ vote.ratio|number_format(2) }}%;"></span>
+                <span class="right_poll"></span>
+                <br />
+            </li>
+        {% endfor %}
+        </ul>
+        <strong>Votes:</strong> {{ poll.votes_total|number_format }}<br />
+    {% else %}
+        <div id="poll_container">
+        <form class="vote_form" name="poll" id="poll" action="">
+            <input type="hidden" name="action" value="poll" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="threadid" value="{{ poll_thread_id }}" />
+        {% for id, vote in poll.tally %}
+            <input type="radio" name="vote" id="answer_{{ id }}" value="{{ id }}" />
+            <label for="answer_{{ id }}">{{ vote.answer }}</label><br />
+        {% endfor %}
+            <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br /><br />
+            <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response } );" value="Vote" />
+        </form>
+        </div>
+    {% endif %}
+        <br /><strong>Topic:</strong> <a href="forums.php?action=viewthread&amp;threadid={{ poll_thread_id }}">Visit</a>
+    </div>
+</div>
+{% endif -%}
+
+</div>
