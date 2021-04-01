@@ -40,6 +40,7 @@ define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow 
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
 
 define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
+define('FAKE_USERAGENT', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11');
 define('SEEDBOX_SALT', '8EQKRWZqA5DMVwpAqQKRCiMm5xaucsPePseXwZhm88T8PyyuAkjVgTLrAMWWeB8W'); // change me
 define('AVATAR_SALT', 'BEapyctddrananytAqnkqccFgEntBdgf'); // change me
 define('AVATAR_WIDTH', 150);
@@ -99,7 +100,7 @@ define('TRACKER_REPORTKEY', ''); // Must be 32 characters and match report_passw
 
 // Site settings
 define('CRYPT_HASH_PREFIX', '$2y$07$');
-define('DEBUG_MAIL', false); //Set to true to write messages to TMPDIR instead of delivering
+define('DEBUG_EMAIL', false); //Set to true to write messages to TMPDIR instead of delivering
 define('DEBUG_MODE', false); //Set to false if you dont want everyone to see debug information, can be overriden with 'site_debug'
 define('DEBUG_WARNINGS', true); //Set to true if you want to see PHP warnings in the footer
 define('DEBUG_UPLOAD_NOTIFICATION', false); // Set to true to dump notification trigger results

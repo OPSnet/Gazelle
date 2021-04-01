@@ -1,0 +1,39 @@
+<div class="box pad">
+    <p>Please note that if you lose your 2FA key and all of your backup keys,
+    {{ constant('SITE_NAME') }} staff cannot help you retrieve your account.
+    Ensure you keep your backup keys in a safe place.</p>
+
+    <p>We have generated a secure secret that only we should share. Please
+    import it into your phone, either by scanning the QR key, or copying
+    in the Secret Text below it. We recommend using the Authy app which
+    you can find in the <a href="https://itunes.apple.com/gb/app/authy/id494168017?mt=8">App
+	Store</a> or
+    <a href="https://play.google.com/store/apps/details?id=com.authy.authy&hl=en_GB">Play
+	Store</a>. Other authenticator apps will work too.</p>
+</div>
+
+<div class="box box2">
+    <div class="center pad">
+	<div>
+        <img src="{{ qrcode.writeDataUri }}">
+        <div class="twofa_text">Secret Text: <span>{{ secret }}</span></div>
+{% if not valid %}
+        <p class="warning">Please ensure you have imported the correct secret key
+        into your authentication app and try again.</p>
+{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="box pad">
+    <p><strong>Please enter the Two-Factor Authentication key provided by your
+    app.</strong></p>
+    <p>Once you have registered the secret, your authentication app should now
+    be displaying a code. Please enter it now to confirm everything works.</p>
+    <p>The clock on your phone must be accurate. Current server time is {{ utc_time }} UTC.</p>
+
+    <form method="post">
+    <label for="2fa"><strong>Authentication Key</strong></label>
+    &nbsp;&nbsp;&nbsp;<input type="text" size="8" name="2fa" id="2fa"/>
+    &nbsp;&nbsp;&nbsp;<input type="submit" value="Authenticate!">
+</div>

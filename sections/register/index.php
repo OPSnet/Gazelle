@@ -16,22 +16,21 @@ $Val->setFields([
 
 if (!empty($_REQUEST['confirm'])) {
     // Confirm registration
-    $UserID = $DB->scalar("
-        SELECT ID
-        FROM users_main
-        WHERE Enabled = '0'
-            AND torrent_pass = ?
+    $user = (new Gazelle\Manager\User)->findById(
+        (int)$DB->scalar("
+            SELECT ID FROM users_main WHERE Enabled = '0' AND torrent_pass = ?
         ", $_REQUEST['confirm']
+        )
     );
 
-    if ($UserID) {
+    if ($user) {
         $DB->prepared_query("
             UPDATE users_main SET
                 Enabled = '1'
             WHERE ID = ?
-            ", $UserID
+            ", $user->id()
         );
-        $Cache->delete_value("user_info_{$UserID}");
+        $user->flush();
         $Cache->increment('stats_user_count');
         require('step2.php');
     }
@@ -116,7 +115,6 @@ if (!empty($_REQUEST['confirm'])) {
             exit;
         }
     }
-
     require('step1.php');
 
 } elseif (!OPEN_REGISTRATION) {

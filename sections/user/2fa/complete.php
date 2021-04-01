@@ -1,18 +1,26 @@
 <?php
-View::show_header('Two-factor Authentication');
 
-$UserID = (int)$_REQUEST['userid'];
-if (!$UserID) {
+$user = (new Gazelle\Manager\User)->findById((int)($_REQUEST['userid'] ?? 0));
+if (is_null($user)) {
+    error(404);
+}
+if (session_status() === PHP_SESSION_NONE) {
+    session_start(['read_and_close' => true]);
+}
+if (empty($_SESSION['private_key'])) {
     error(404);
 }
 
-$keys = unserialize($DB->scalar("
-    SELECT Recovery FROM users_main WHERE ID = ?
-    ", $UserID
-));
+$user->create2FA($_SESSION['private_key']);
 
-echo G::$Twig->render('login/2fa-backup.twig', [
-    'keys' => $keys,
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+unset($_SESSION['private_key']);
+session_write_close();
+
+View::show_header('Two-factor Authentication');
+echo G::$Twig->render('user/2fa/complete.twig', [
+    'keys' => $user->list2FA(),
 ]);
-
 View::show_footer();

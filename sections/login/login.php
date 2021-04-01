@@ -1,72 +1,63 @@
-<?php View::show_header(); ?>
-<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br /><br /></span>
-<noscript><span class="warning-login"><?=SITE_NAME?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br /><br /></noscript>
+<?php
 
-<div id="logo">
-<a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
-</div>
-
-<div class="main">
-<div class="auth">
-<?php
-$banEpoch = strtotime($BannedUntil);
-$delta = $banEpoch - time();
-if ($delta > 0) {
-?>
-    <div class="warning-login"><?= isset($Err) ? "$Err<br />" : '' ?>You are blocked from logging in<br />for <?=
-        $delta <= 60
-            ? ('<span title="' . $delta . ' seconds">a few moments.</span>')
-            : ('another ' . time_diff($BannedUntil) . '.')
-?>
-    </div>
-<?php } else { ?>
-<form class="auth_form" name="login" id="loginform" method="post" action="login.php">
-<?php
-    if (isset($Err) || isset($_GET['invalid2fa']) || $Attempts > 0) { ?>
-<div class="warning-login">
-<?php if (isset($Err)) { ?>
-<?= $Err ?><br />
-<?php
-    }
-    if (isset($_GET['invalid2fa'])) { ?>
-You have entered an invalid two-factor authentication key, please login again.<br />
-<?php
-    }
-    if ($Attempts > 0) {
-?>
-<strong>WARNING:</strong> Incorrect username/password details<br />will increase the time you are blocked from logging in.
-<?php } ?>
-</div>
-
-<?php } /* $Err, invalid2fa, $Attempts */ ?>
-    <div>
-    <label for="username">Username</label>
-    <input type="text" name="username" id="username" class="inputtext" required="required" maxlength="20" pattern="[A-Za-z0-9_?\.]{1,20}" autofocus="autofocus" placeholder="Username" />
-    </div>
-    <div>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" class="inputtext" required="required" pattern=".{6,}" placeholder="Password" />
-    </div>
-    <div>
-    <label title="Keep me logged in" for="keeplogged">Persistent</label>
-    <input title="Keep me logged in" type="checkbox" id="keeplogged" name="keeplogged" value="1"<?=(isset($_REQUEST['keeplogged']) && $_REQUEST['keeplogged']) ? ' checked="checked"' : ''?> />
-    </div>
-    <div>
-    <input type="submit" name="login" value="Log in" class="submit" />
-    </div>
-    <a href="login.php?act=recover" class="tooltip" title="Recover your password">Password recovery</a>
-</form>
-<?php } ?>
-</div>
-</div>
-<script type="text/javascript">
-cookie.set('cookie_test', 1, 1);
-if (cookie.get('cookie_test') != null) {
-    cookie.del('cookie_test');
-} else {
-    $('#no-cookies').gshow();
+if (isset($LoggedUser['ID'])) {
+    header("Location: /index.php");
+    exit;
 }
-window.onload = function() {document.getElementById("username").focus();};
-</script>
-<?php
+
+$watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
+$login = new Gazelle\Login;
+
+if (isset($_POST['login'])) {
+    $user = $login->setPassword($_POST['password'] ?? null)
+        ->setUsername($_POST['username'] ?? null)
+        ->set2FA($_POST['twofa'] ?? null)
+        ->setPersistent($_POST['keeplogged'] ?? false)
+        ->setWatch($watch)
+        ->login();
+
+    if ($user) {
+        if ($user->isDisabled()) {
+            if (FEATURE_EMAIL_REENABLE) {
+                setcookie('username', urlencode($user->username()), [
+                    'expires'  => time() + 60 * 60,
+                    'path'     => '/',
+                    'secure'   => !DEBUG_MODE,
+                    'httponly' => DEBUG_MODE,
+                    'samesite' => 'Lax',
+                ]);
+            }
+            header("Location: /login.php?action=disabled");
+            exit;
+        }
+
+        if ($user->isEnabled()) {
+            $browser = parse_user_agent();
+            $sessionMan = new Gazelle\Session($user->id());
+            $session = $sessionMan->create([
+                'keep-logged' => $login->persistent() ? '1' : '0',
+                'browser'     => $browser['Browser'],
+                'os'          => $browser['OperatingSystem'],
+                'ipaddr'      => $user->permitted('site_disable_ip_history') ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
+                'useragent'   => $user->permitted('site_disable_ip_history') ? FAKE_USERAGENT : $_SERVER['HTTP_USER_AGENT'],
+            ]);
+            setcookie('session', $sessionMan->cookie($session['SessionID']), [
+                'expires'  => $login->persistent() * (time() + 60 * 60 * 24 * 90),
+                'path'     => '/',
+                'secure'   => !DEBUG_MODE,
+                'httponly' => DEBUG_MODE,
+                'samesite' => 'Lax',
+            ]);
+            header("Location: /index.php");
+            exit;
+        }
+    }
+}
+
+View::show_header();
+echo G::$Twig->render('login/login.twig', [
+    'delta' => $watch->bannedEpoch() - time(),
+    'error' => $login->error(),
+    'watch' => $watch,
+]);
 View::show_footer();

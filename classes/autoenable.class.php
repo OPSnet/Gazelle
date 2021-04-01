@@ -67,7 +67,13 @@ class AutoEnable {
 
             // Cache the number of requests for the modbar
             G::$Cache->increment_value(self::CACHE_KEY_NAME);
-            setcookie('username', '', time() - 60 * 60, '/', '', false);
+            setcookie('username', '', [
+                'expires'  => time() + 60 * 60,
+                'path'     => '/',
+                'secure'   => !DEBUG_MODE,
+                'httponly' => DEBUG_MODE,
+                'samesite' => 'Lax',
+            ]);
             $Output = self::RECEIVED_MESSAGE;
             $user->addStaffNote()->modify("Enable request " . G::$DB->inserted_id() . " received from $IP");
         }
