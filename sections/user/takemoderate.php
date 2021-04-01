@@ -69,7 +69,7 @@ $visible = isset($_POST['Visible']) ? '1' : '0';
 $unlimitedDownload = isset($_POST['unlimitedDownload']) ? 1 : 0;
 $invites = (int)$_POST['Invites'];
 $supportFor = trim($_POST['SupportFor']);
-$changePassword = $_POST['ChangePassword'];
+$changePassword = !empty($_POST['ChangePassword']);
 $warned = isset($_POST['Warned']) ? 1 : 0;
 $uploaded = $downloaded = $bonusPoints = null;
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
@@ -612,6 +612,7 @@ if (!(count($set) || count($leechSet) || count($editSummary)) && $reason) {
 // almost always evaluates to true, even if the user did not purposely change the field. This then means
 // we do have a bug where if a mod changes something about a user AND changes the admin comment, we will lose
 // that change, but until we never decode stuff coming out of the DB, not much can be done.
+
 if (count($editSummary)) {
     $summary = implode(', ', $editSummary) . ' by ' . $LoggedUser['Username'];
     $set[] = "AdminComment = ?";
@@ -621,7 +622,7 @@ if (count($editSummary)) {
     $args[] = $adminComment;
 }
 
-if ($set) {
+if (!empty($set)) {
     $args[] = $userID;
     $DB->prepared_query("
         UPDATE users_main AS m

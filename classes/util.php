@@ -156,6 +156,50 @@ function redirectUrl(string $fallback): string {
     return empty($_SERVER['HTTP_REFERER']) ? $fallback : $_SERVER['HTTP_REFERER'];
 }
 
+function parse_user_agent(): array {
+    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+        $OS = explode(" ", $Matches[2]);
+        $browserUserAgent = [
+            'Browser' => 'Lidarr',
+            'BrowserVersion' => substr($Matches[1], 0, strrpos($Matches[1], '.')),
+            'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
+            'OperatingSystemVersion' => $OS[1] ?? null
+        ];
+    } elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+        $browserUserAgent = [
+            'Browser' => 'VarroaMusica',
+            'BrowserVersion' => str_replace('dev', '', $Matches[1]),
+            'OperatingSystem' => null,
+            'OperatingSystemVersion' => null
+        ];
+    } elseif (in_array($_SERVER['HTTP_USER_AGENT'], ['Headphones/None', 'whatapi [isaaczafuta]'])) {
+        $browserUserAgent = [
+            'Browser' => $_SERVER['HTTP_USER_AGENT'],
+            'BrowserVersion' => null,
+            'OperatingSystem' => null,
+            'OperatingSystemVersion' => null
+        ];
+    } else {
+        $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
+        $Browser = $Result->browser;
+        if (empty($Browser->getName()) && !empty($Browser->using)) {
+            $Browser = $Browser->using;
+        }
+        $browserUserAgent = [
+            'Browser' => $Browser->getName(),
+            'BrowserVersion' => explode('.', $Browser->getVersion())[0],
+            'OperatingSystem' => $Result->os->getName(),
+            'OperatingSystemVersion' => $Result->os->getVersion()
+        ];
+    }
+    foreach (['Browser', 'BrowserVersion', 'OperatingSystem', 'OperatingSystemVersion'] as $Key) {
+        if ($browserUserAgent[$Key] === "") {
+            $browserUserAgent[$Key] = null;
+        }
+    }
+    return $browserUserAgent;
+}
+
 /**
  * Display a critical error and kills the page.
  *

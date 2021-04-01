@@ -118,6 +118,7 @@ if (!isset($_POST['p_donor_heart'])) {
 }
 // End building $Paranoia
 
+$userMan = new Gazelle\Manager\User;
 $donorMan = new Gazelle\Manager\Donation;
 $donorMan->updateReward($userId,
     array_map('trim',
@@ -364,7 +365,7 @@ $DB->prepared_query($SQL, ...$Params);
 $user->flush();
 
 if ($ResetPassword) {
-    logout_all_sessions($userId);
+    $user->logoutEverywhere();
 }
 
 header("Location: user.php?action=edit&userid=$userId");

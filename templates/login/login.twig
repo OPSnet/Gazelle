@@ -1,0 +1,80 @@
+{% from 'macro/form.twig' import checked %}
+
+<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br /><br /></span>
+<noscript><span class="warning-login">{{ constant('SITE_NAME') }} requires JavaScript to function properly.
+Please enable JavaScript in your browser.</span><br /><br /></noscript>
+
+<div id="logo">
+<a href="/" style="margin-left: 0;"><img src="{{
+    constant('STATIC_SERVER') }}/styles/public/images/loginlogo.png" alt="{{
+    constant('SITE_NAME') }}" title="{{ constant('SITE_NAME') }}" /></a>
+</div>
+
+<div class="main">
+<div class="auth">
+{% if error or delta > 0 or watch.nrAttempts > 0 %}
+    <div class="warning-login">
+    {% if error %}
+        {% if error == constant('\\Gazelle\\Login::ERR_USERNAME') %}
+        You must supply a valid username.
+        {% elseif error == constant('\\Gazelle\\Login::ERR_PASSWORD') %}
+        You must supply a valid password.
+        {% elseif error == constant('\\Gazelle\\Login::ERR_CREDENTIALS') %}
+        Your login credentials were not recognized.<br />
+        Please double check your username and password.<br />
+        If previously enabled, you must supply a valid two-factor authentication code.<br />
+        {% elseif error == constant('\\Gazelle\\Login::ERR_UNCONFIRMED') %}
+        Your account has not been confirmed. Please check your email account for a message with a validation link.
+        {% else %}
+        System error code: {{ error }}
+        {% endif %}
+    {% endif %}
+    {% if delta > 0 %}
+    <br />As a security measure, you are temporarily prevented<br />from logging in for
+        {% if delta < 60 %}
+    <span title="{{ delta }} seconds">a few moments.</span>
+        {% else %}
+    another {{ watch.bannedUntil|time_diff }}.
+        {% endif %}
+    <br />
+    {% endif %}
+    {% if watch.nrAttempts > 0 %}
+        <br /><strong>WARNING:</strong> Incorrect login credentials will increase<br />
+        the duration you are prevented from logging in.
+    {% endif %}
+    </div>
+{% endif %}
+{% if delta <= 0 %}
+<form class="auth_form" name="login" id="loginform" method="post" action="login.php">
+    <div>
+    <label for="username">Username</label>
+    <input type="text" name="username" id="username" class="inputtext" required="required" maxlength="20" pattern="[A-Za-z0-9_?\.]{1,20}" autofocus="autofocus" placeholder="Username" />
+    </div>
+    <div>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" class="inputtext" required="required" pattern=".{6,}" placeholder="Password" />
+    </div>
+    <div>
+    <label title="2FA key (or recovery key), if configured" for="keeplogged">2FA Key</label>
+    <input type="text" name="twofa" id="twofa" class="inputtext" placeholder="2FA key (or recovery code) if required" />
+    <div>
+    <label title="Keep me logged in for 90 days" for="keeplogged">Remember me</label>
+    <input title="Keep me logged in for 90 days" type="checkbox" id="keeplogged" name="keeplogged" value="1"{{ checked(keep_logged) }} />
+    </div>
+    <div>
+    <input type="submit" name="login" value="Log in" class="submit" />
+    </div>
+    <a href="login.php?action=recover" class="tooltip" title="I forgot my password :-(">Password recovery</a>
+</form>
+{% endif %}
+</div>
+</div>
+<script type="text/javascript">
+cookie.set('cookie_test', 1, 1);
+if (cookie.get('cookie_test') != null) {
+    cookie.del('cookie_test');
+} else {
+    $('#no-cookies').gshow();
+}
+window.onload = function() {document.getElementById("username").focus();};
+</script>

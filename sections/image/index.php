@@ -24,7 +24,7 @@ while (($imageData = $Cache->get_value($key)) === false) {
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 10,
-        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11',
+        CURLOPT_USERAGENT      => FAKE_USERAGENT,
     ]);
     if (defined('HTTP_PROXY')) {
         curl_setopt_array($curl, [

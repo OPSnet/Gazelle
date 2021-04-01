@@ -41,6 +41,32 @@ class User extends BaseObject {
         parent::__construct($id);
     }
 
+    /**
+     * Log out the current session
+     */
+    function logout($sessionId = false) {
+        setcookie('session', '', [
+            'expires'  => time() - 60 * 60 * 24 * 90,
+            'path'     => '/',
+            'secure'   => !DEBUG_MODE,
+            'httponly' => DEBUG_MODE,
+            'samesite' => 'Lax',
+        ]);
+        if ($sessionId) {
+            (new Session($this->id))->drop($sessionId);
+        }
+        $this->flush();
+    }
+
+    /**
+     * Logout all sessions
+     */
+    function logoutEverywhere() {
+        $session = new Session($this->id);
+        $session->dropAll();
+        $this->logout();
+    }
+
     public function setTorrentManager(Manager\Torrent $torMan) {
         $this->torMan = $torMan;
         return $this;
@@ -505,6 +531,63 @@ class User extends BaseObject {
         return $this->info()['2FA_Key'];
     }
 
+    /**
+     * Create the recovery keys for the user
+     *
+     * @param string 2FA seed (to validate challenges)
+     * @return int 1 if update succeeded
+     */
+    public function create2FA($key): int {
+        $recovery = [];
+        for ($i = 0; $i < 10; $i++) {
+            $recovery[] = randomString(20);
+        }
+        $this->db->prepared_query("
+            UPDATE users_main SET
+                2FA_Key = ?,
+                Recovery = ?
+            WHERE ID = ?
+            ", $key, serialize($recovery), $this->id
+        );
+        $this->flush();
+        return $this->db->affected_rows();
+    }
+
+    public function list2FA(): array {
+        return unserialize($this->db->scalar("
+            SELECT Recovery FROM users_main WHERE ID = ?
+            ", $this->id
+        )) ?: [];
+    }
+
+    /**
+     * A user is attempting to login with 2FA via a recovery key
+     * If we have the key on record, burn it and let them in.
+     *
+     * @param string Recovery key from user
+     * @return bool Valid key, they may log in.
+     */
+    public function burn2FARecovery(string $key): bool {
+        $list = $this->list2FA();
+        $index = array_search($key, $list);
+        if ($index === false) {
+            return false;
+        }
+        unset($list[$index]);
+        $this->db->prepared_query('
+            UPDATE users_main SET
+                Recovery = ?
+            WHERE ID = ?
+            ', count($list) === 0 ? null : serialize($list), $this->id
+        );
+        return $this->db->affected_rows() === 1;
+    }
+
+    public function remove2FA() {
+        return $this->setUpdate('2FA_Key', null)
+            ->setUpdate('Recovery', null);
+    }
+
     public function joinDate() {
         return $this->info()['JoinDate'];
     }
@@ -794,11 +877,6 @@ class User extends BaseObject {
         $this->flush();
     }
 
-    public function remove2FA() {
-        return $this->setUpdate('2FA_Key', '')
-            ->setUpdate('Recovery', '');
-    }
-
     /**
      * Record a forum warning for this user
      *
@@ -963,26 +1041,44 @@ class User extends BaseObject {
      * @return bool  true on correct password
      */
     public function validatePassword(string $plaintext): bool {
-        return password_verify(hash('sha256', $plaintext), $this->info()['PassHash']);
+        $hash = $this->info()['PassHash'];
+        $success = password_verify(hash('sha256', $plaintext), $hash);
+        if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+            $this->db->prepared_query("
+                UPDATE users_main SET
+                    PassHash = ?
+                WHERE ID = ?
+                ", UserCreator::hashPassword($plaintext), $this->userId
+            );
+        }
+        return $success;
     }
 
     public function updatePassword(string $pw, string $ipaddr): bool {
+        $this->db->begin_transaction();
         $this->db->prepared_query('
             UPDATE users_main SET
                 PassHash = ?
             WHERE ID = ?
             ', UserCreator::hashPassword($pw), $this->id
         );
-        if ($this->db->affected_rows() == 1) {
-            $this->db->prepared_query('
-                INSERT INTO users_history_passwords
-                       (UserID, ChangerIP, ChangeTime)
-                VALUES (?,      ?,         now())
-                ', $this->id, $ipaddr
-            );
+        if ($this->db->affected_rows() !== 1) {
+            $this->db->rollback();
+            return false;
         }
+        $this->db->prepared_query('
+            INSERT INTO users_history_passwords
+                   (UserID, ChangerIP, ChangeTime)
+            VALUES (?,      ?,         now())
+            ', $this->id, $ipaddr
+        );
+        if ($this->db->affected_rows() !== 1) {
+            $this->db->rollback();
+            return false;
+        }
+        $this->db->commit();
         $this->flush();
-        return $this->db->affected_rows() === 1;
+        return true;
     }
 
     public function passwordHistory(): array {
@@ -2507,7 +2603,7 @@ class User extends BaseObject {
      * @param string $Username The username
      * @param string $Email The email address
      */
-    public function resetPassword() {
+    public function resetPassword($twig) {
         $resetKey = randomString();
         $this->db->prepared_query("
             UPDATE users_info SET
@@ -2518,12 +2614,43 @@ class User extends BaseObject {
         );
         $this->flush();
         (new Mail)->send($this->email(), 'Password reset information for ' . SITE_NAME,
-            \G::$Twig->render('email/password_reset.twig', [
+            $twig->render('email/password_reset.twig', [
                 'username'  => $this->username(),
                 'reset_key' => $resetKey,
                 'ipaddr'    => $_SERVER['REMOTE_ADDR'],
             ])
         );
+    }
+
+    /*
+     * Has a password reset expired?
+     *
+     * @return true if it has expired (or none exists)
+     */
+    public function resetPasswordExpired(): bool {
+        return (bool)$this->db->scalar("
+            SELECT 1
+            FROM users_info
+            WHERE coalesce(ResetExpires, now()) <= now()
+                AND UserID = ?
+            ", $this->id
+        );
+    }
+
+    /**
+     * Forcibly clear a password reset
+     *
+     * @return 1 if the user was cleared
+     */
+    public function clearPasswordReset(): int {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                ResetKey = '',
+                ResetExpires = NULL
+            WHERE UserID = ?
+            ", $this->id
+        );
+        return $this->db->affected_rows();
     }
 
     /**

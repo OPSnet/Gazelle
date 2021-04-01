@@ -1,4 +1,6 @@
 <?php
-enforce_login(); // authorize() doesn't work if we're not logged in
+
+enforce_login();
 authorize();
-logout(G::$LoggedUser['ID'], $SessionID);
+(new Gazelle\User($LoggedUser['ID']))->logout();
+header("Location: /index.php");

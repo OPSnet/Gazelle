@@ -3,49 +3,26 @@
 namespace Gazelle;
 
 class LoginWatch extends Base {
-    protected $watchId;
+    protected $id;
+    protected $ipaddr;
+    protected $userId = 0;
 
-    /**
-     * Set the context of a watched IP address (to save passing it in to each method call).
-     * On a virgin login with no previous errors there may not even be a watch yet
-     * @param int ID of the watch
-     */
-    public function setWatch($watchId) {
-        if (!is_null($watchId)) {
-            $this->watchId = $watchId;
+    public function __construct(string $ipaddr) {
+        parent::__construct();
+        $this->ipaddr = $ipaddr;
+        $this->id = $this->db->scalar("
+            SELECT ID FROM login_attempts WHERE IP = ?
+            ", $this->ipaddr
+        );
+        if (is_null($this->id)) {
+            $this->db->prepared_query("
+                INSERT INTO login_attempts
+                       (IP, UserID)
+                VALUES (?,  0)
+                ", $ipaddr
+            );
+            $this->id = $this->db->inserted_id();
         }
-        return $this;
-    }
-
-    /**
-     * Find a login watch by IP address
-     * @param string IPv4 address
-     * @return array [watchId, nrAttemtps, nrBans, bannedUntil]
-     */
-    public function findByIp(string $ipaddr): ?array {
-        return $this->db->row("
-            SELECT ID, Attempts, Bans, BannedUntil
-            FROM login_attempts
-            WHERE IP = ?
-            ", $_SERVER['REMOTE_ADDR']
-        );
-    }
-
-    /**
-     * Create a new login watch on an userid/username/ipaddress
-     * @param string IPv4 address
-     * @param string|null $capture The username captured on the form
-     * @param int $userId
-     * @return int ID of watch
-     */
-    public function create(string $ipaddr, ?string $capture, int $userId = 0) {
-        $this->db->prepared_query("
-            INSERT INTO login_attempts
-                   (IP, capture, UserID)
-            VALUES (?,  ?,       ?)
-            ", $ipaddr, $capture, $userId
-        );
-        return ($this->watchId = $this->db->inserted_id());
     }
 
     /**
@@ -54,20 +31,18 @@ class LoginWatch extends Base {
      * will be blocked for increasingly longer times, otherwise 1 minute.
      *
      * @param int $userId The ID of the user
-     * @param string $ipaddr The IP the user is coming from
-     * @param string $capture The username captured on the form
      * @return int 1 if the watch was updated
      */
-    public function increment(int $userId, string $ipaddr, ?string $capture): int {
-        $seen = $this->db->scalar("
+    public function increment(int $userId, string $username): int {
+        $this->userId = $userId;
+        $seen = (bool)$this->db->scalar("
             SELECT 1
             FROM users_history_ips
             WHERE (EndTime IS NULL OR EndTime > now() - INTERVAL 1 WEEK)
                 AND UserID = ?
                 AND IP = ?
-            ", $userId, $ipaddr
+            ", $this->userId, $this->ipaddr
         );
-        $delay = $seen ? 60 : LOGIN_ATTEMPT_BACKOFF[min($this->nrAttempts(), count(LOGIN_ATTEMPT_BACKOFF)-1)];
         $this->db->prepared_query('
             UPDATE login_attempts SET
                 Attempts = Attempts + 1,
@@ -76,29 +51,26 @@ class LoginWatch extends Base {
                 UserID = ?,
                 capture = ?
             WHERE ID = ?
-            ', $delay, $userId, $capture, $this->watchId
+            ', $seen ? 60 : LOGIN_ATTEMPT_BACKOFF[min($this->nrAttempts(), count(LOGIN_ATTEMPT_BACKOFF)-1)],
+                $this->userId, $username, $this->id
         );
         return $this->db->affected_rows();
     }
 
     /**
      * Ban subsequent attempts to login from this watched IP address for 6 hours
-     * @param int $attempts How many attempts so far?
-     * @param string the username captured on the form (which may not even be a valid user)
-     * @param int $userId user ID of a valid user (or 0 if invalid username)
      * @return int 1 if the watch was banned
      */
-    public function ban(int $attempts, ?string $capture, int $userId = 0): int {
+    public function ban(string $username): int {
         $this->db->prepared_query('
             UPDATE login_attempts SET
                 Bans = Bans + 1,
                 LastAttempt = now(),
                 BannedUntil = now() + INTERVAL 6 HOUR,
-                Attempts = ?,
                 capture = ?,
                 UserID = ?
             WHERE ID = ?
-            ', $attempts, $capture, $userId, $this->watchId
+            ', $username, $this->userId, $this->id
         );
         return $this->db->affected_rows();
     }
@@ -110,8 +82,16 @@ class LoginWatch extends Base {
     public function bannedUntil(): ?string {
         return $this->db->scalar("
             SELECT BannedUntil FROM login_attempts WHERE ID = ?
-            ", $this->watchId
+            ", $this->id
         );
+    }
+
+    /**
+     * When does the login ban expire?
+     * @return int epoch
+     */
+    public function bannedEpoch(): int {
+        return strtotime($this->bannedUntil()) ?? 0;
     }
 
     /**
@@ -124,7 +104,7 @@ class LoginWatch extends Base {
                 BannedUntil = NULL,
                 Attempts = 0
             WHERE BannedUntil < now() AND ID = ?
-            ", $this->watchId
+            ", $this->id
         );
         return $this->db->affected_rows();
     }
@@ -138,7 +118,7 @@ class LoginWatch extends Base {
             UPDATE login_attempts SET
                 Attempts = 0
             WHERE ID = ?
-            ", $this->watchId
+            ", $this->id
         );
         return $this->db->affected_rows();
     }
@@ -150,8 +130,19 @@ class LoginWatch extends Base {
     public function nrAttempts(): int {
         return (int)$this->db->scalar("
             SELECT Attempts FROM login_attempts WHERE ID = ?
-            ", $this->watchId
-        ) ?? 0;
+            ", $this->id
+        );
+    }
+
+    /**
+     * How many bans have been made on this watch?
+     * @return int Number of attempts
+     */
+    public function nrBans(): int {
+        return (int)$this->db->scalar("
+            SELECT Bans FROM login_attempts WHERE IP = ?
+            ", $this->ipaddr
+        );
     }
 
     /**
@@ -185,7 +176,7 @@ class LoginWatch extends Base {
      * @param array list of IDs to ban.
      * @return number of addresses banned
      */
-    public function setBan(int $userId, string $reason, array $list): int {
+    public function setBan(string $reason, array $list): int {
         if (!$list) {
             return 0;
         }
@@ -194,13 +185,13 @@ class LoginWatch extends Base {
         foreach ($list as $id) {
             $ipv4 = $this->db->scalar("
                 SELECT inet_aton(IP) FROM login_attempts WHERE ID = ?
-                ", $id
+                ", $this->id
             );
             $this->db->prepared_query("
                 INSERT IGNORE INTO ip_bans
                        (user_id, Reason, FromIP, ToIP)
                 VALUES (?,       ?,      ?,      ?)
-                ", $userId, $reason, $ipv4, $ipv4
+                ", $this->userId, $reason, $ipv4, $ipv4
             );
             $n += $this->db->affected_rows();
         }

@@ -69,6 +69,22 @@ class User extends \Gazelle\Base {
     }
 
     /**
+     * Get a User object from their password reset key
+     *
+     * @param string key
+     * @return \Gazelle\User object or null if not found
+     */
+    public function findByResetKey(string $key): ?\Gazelle\User {
+        $userId = (int)$this->db->scalar("
+            SELECT ui.UserID
+            FROM users_info ui
+            WHERE ui.ResetKey = ?
+            ", $key
+        );
+        return $userId ? new \Gazelle\User($userId) : null;
+    }
+
+    /**
      * Generate HTML for a user's avatar
      *
      * @param Gazelle\User viewer Who is doing the viewing, to determine how to fallback if no avatar is available

@@ -43,15 +43,13 @@ ob_start(); //Start a buffer, mainly in case there is a mysql error
 $Debug = new Gazelle\Debug;
 $Debug->setStartTime($now)
     ->handle_errors()
-    ->set_flag('Debug constructed');
+    ->set_flag('init');
 
 $DB = new DB_MYSQL;
 G::$DB = $DB;
-$Debug->set_flag('DB constructed');
 
 $Cache = new CACHE;
 G::$Cache = $Cache;
-$Debug->set_flag('Memcached constructed');
 
 G::$Twig = new Twig\Environment(
     new Twig\Loader\FilesystemLoader(__DIR__ . '/../templates'), [
@@ -250,8 +248,6 @@ G::$Twig->addTest(
     })
 );
 
-$Debug->set_flag('start user handling');
-
 //-- Load user information
 // User info is broken up into many sections
 // Heavy - Things that the site never has to look at if the user isn't logged in (as opposed to things like the class, donor status, etc)
@@ -306,40 +302,47 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     }
 }
 
-$UserSessions = [];
+$user = null;
 if (isset($_COOKIE['session'])) {
     $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
     if ($LoginCookie !== false) {
-        [$SessionID, $LoggedUser['ID']] = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
-        $LoggedUser['ID'] = (int)$LoggedUser['ID'];
-
-        if (!$LoggedUser['ID'] || !$SessionID) {
-            logout($LoggedUser['ID'], $SessionID);
+        [$SessionID, $LoggedUser['ID']] = Gazelle\Session::decode($LoginCookie);
+        $user = (new Gazelle\Manager\User)->findById((int)$LoggedUser['ID']);
+        if (is_null($user)) {
+            setcookie('session', '', [
+                'expires'  => time() - 60 * 60 * 24 * 90,
+                'path'     => '/',
+                'secure'   => !DEBUG_MODE,
+                'httponly' => DEBUG_MODE,
+                'samesite' => 'Lax',
+            ]);
+            header('Location: login.php');
+            exit;
         }
-
-        $Session = new Gazelle\Session($LoggedUser['ID']);
-        $UserSessions = $Session->sessions();
-        if (!array_key_exists($SessionID, $UserSessions)) {
-            logout($LoggedUser['ID'], $SessionID);
+        $session = new Gazelle\Session($user->id());
+        if (!$session->valid($SessionID)) {
+            $user->logout($SessionID);
+            header('Location: login.php');
+            exit;
         }
+        $session->refresh($SessionID);
+        $LoggedUser['ID'] = $user->id();
     }
 }
 
-if (isset($LoggedUser['ID'])) {
-    $User = new Gazelle\User($LoggedUser['ID']);
-    $Session = new Gazelle\Session($LoggedUser['ID']);
-
-    if (!is_null($FullToken) && !$User->hasApiToken($FullToken)) {
+if ($user) {
+    if (!is_null($FullToken) && !$user->hasApiToken($FullToken)) {
         log_token_attempt($DB, $LoggedUser['ID']);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
 
-    if ($User->isDisabled()) {
+    if ($user->isDisabled()) {
         if (is_null($FullToken)) {
-            logout($LoggedUser['ID'], $SessionID);
-        }
-        else {
+            $user->logout($SessionID);
+            header('Location: login.php');
+            exit;
+        } else {
             log_token_attempt($DB, $LoggedUser['ID']);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
@@ -351,18 +354,19 @@ if (isset($LoggedUser['ID'])) {
     $LightInfo = Users::user_info($LoggedUser['ID']);
     if (empty($LightInfo['Username'])) { // Ghost
         if (!is_null($FullToken)) {
-            $User->flush();
+            $user->flush();
             log_token_attempt($DB, $LoggedUser['ID']);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
-        }
-        else {
-            logout($LoggedUser['ID'], $SessionID);
+        } else {
+            $user->logout();
+            header('Location: login.php');
+            exit;
         }
     }
 
     $HeavyInfo = Users::user_heavy_info($LoggedUser['ID']);
-    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $User->activityStats());
+    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $user->activityStats());
     G::$LoggedUser =& $LoggedUser;
 
     // No conditions will force a logout from this point, can hit the DB more.
@@ -372,7 +376,7 @@ if (isset($LoggedUser['ID'])) {
 
     // Notifications
     if (isset($LoggedUser['Permissions']['site_torrents_notify'])) {
-        $LoggedUser['Notify'] = $User->notifyFilters();
+        $LoggedUser['Notify'] = $user->notifyFilters();
     }
 
     // Stylesheet
@@ -404,116 +408,28 @@ if (isset($LoggedUser['ID'])) {
         if ($IPv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
-        $User->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
-    }
-
-    // Update LastUpdate every 10 minutes
-    if ($SessionID && strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
-        $userAgent = parse_user_agent($Debug);
-        $Session->update([
-            'ip-address'      => $_SERVER['REMOTE_ADDR'],
-            'browser'         => $userAgent['Browser'],
-            'browser-version' => $userAgent['BrowserVersion'],
-            'os'              => $userAgent['OperatingSystem'],
-            'os-version'      => $userAgent['OperatingSystemVersion'],
-            'session-id'      => $SessionID
-        ]);
+        $user->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
     }
 }
 if (DEBUG_MODE || check_perms('site_debug')) {
     G::$Twig->addExtension(new Twig\Extension\DebugExtension());
 }
 
-$Debug->set_flag('end user handling');
-
-function parse_user_agent($Debug) {
-    $Debug->set_flag('start parsing user agent');
-    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
-        $OS = explode(" ", $Matches[2]);
-        $browserUserAgent = [
-            'Browser' => 'Lidarr',
-            'BrowserVersion' => substr($Matches[1], 0, strrpos($Matches[1], '.')),
-            'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
-            'OperatingSystemVersion' => $OS[1] ?? null
-        ];
-    }
-    elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
-        $browserUserAgent = [
-            'Browser' => 'VarroaMusica',
-            'BrowserVersion' => str_replace('dev', '', $Matches[1]),
-            'OperatingSystem' => null,
-            'OperatingSystemVersion' => null
-        ];
-    }
-    elseif (in_array($_SERVER['HTTP_USER_AGENT'], ['Headphones/None', 'whatapi [isaaczafuta]'])) {
-        $browserUserAgent = [
-            'Browser' => $_SERVER['HTTP_USER_AGENT'],
-            'BrowserVersion' => null,
-            'OperatingSystem' => null,
-            'OperatingSystemVersion' => null
-        ];
-    }
-    else {
-        $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
-        $Browser = $Result->browser;
-        if (empty($Browser->getName()) && !empty($Browser->using)) {
-            $Browser = $Browser->using;
-        }
-        $browserUserAgent = [
-            'Browser' => $Browser->getName(),
-            'BrowserVersion' => explode('.', $Browser->getVersion())[0],
-            'OperatingSystem' => $Result->os->getName(),
-            'OperatingSystemVersion' => $Result->os->getVersion()
-        ];
-    }
-    foreach (['Browser', 'BrowserVersion', 'OperatingSystem', 'OperatingSystemVersion'] as $Key) {
-        if ($browserUserAgent[$Key] === "") {
-            $browserUserAgent[$Key] = null;
-        }
-    }
-
-    $Debug->set_flag('end parsing user agent');
-
-    return $browserUserAgent;
-}
-
-/**
- * Log out the current session
- */
-function logout($userId, $sessionId = false) {
-    $epoch = time() - 60 * 60 * 24 * 365;
-    setcookie('session', '',    $epoch, '/', '', false);
-    setcookie('keeplogged', '', $epoch, '/', '', false);
-    if ($sessionId) {
-        $session = new Gazelle\Session($userId);
-        $session->drop($sessionId);
-    }
-
-    $user = new Gazelle\User($userId);
-    $user->flush();
-
-    header('Location: login.php');
-    die();
-}
-
-/**
- * Logout all sessions
- */
-function logout_all_sessions($userId) {
-    $session = new Gazelle\Session($userId);
-    $session->dropAll();
-    logout($userId);
-}
-
 function enforce_login() {
     if (!G::$LoggedUser) {
         header('Location: login.php');
-        die();
+        exit;
     }
     global $SessionID, $FullToken, $Document;
     if (!$SessionID && ($Document !== 'ajax' || empty($FullToken))) {
-        setcookie('redirect', $_SERVER['REQUEST_URI'], time() + 60 * 30, '/', '', false);
-        logout(G::$LoggedUser['ID']);
+        setcookie('redirect', $_SERVER['REQUEST_URI'], [
+            'expires'  => time() + 60 * 30,
+            'path'     => '/',
+            'secure'   => !DEBUG_MODE,
+            'httponly' => DEBUG_MODE,
+            'samesite' => 'Lax',
+        ]);
+        (new Gazelle\User(G::$LoggedUser['ID']))->logout();
     }
 }
 
@@ -533,23 +449,12 @@ function authorize($Ajax = false) {
     return true;
 }
 
-function authorizeIfPost($Ajax = false) {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (empty($_POST['auth']) || $_POST['auth'] != G::$LoggedUser['AuthKey']) {
-            Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
-            error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
-            return false;
-        }
-    }
-    return true;
-}
-
-$Debug->set_flag('ending function definitions');
-
 // We cannot error earlier, as we need the user info for headers and stuff
 if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
     error(404);
 }
+
+$Debug->set_flag('load page');
 
 // load the appropriate /sections/*/index.php
 $Cache->cache_value('php_' . getmypid(),
@@ -609,8 +514,6 @@ if (G::$Router->hasRoutes()) {
     }
 }
 
-$Debug->set_flag('completed module execution');
-
 /* Required in the absence of session_start() for providing that pages will change
  * upon hit rather than being browser cached for changing content.
  * Old versions of Internet Explorer choke when downloading binary files over HTTPS with disabled cache.
@@ -623,7 +526,7 @@ if (!defined('SKIP_NO_CACHE_HEADERS')) {
 
 ob_end_flush();
 
-$Debug->set_flag('set headers and send to user');
+$Debug->set_flag('and send to user');
 
 //Attribute profiling
 $Debug->profile();

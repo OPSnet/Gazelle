@@ -80,7 +80,7 @@
         <td>
             Two-factor authentication is currently <strong class="{{ user.TFAKey ? 'r99' : 'warning' }}">{{ user.TFAKey ? 'enabled' : 'disabled' }}</strong> for your account.
             <br><br>
-            <a href="user.php?action=2fa&amp;do={{ user.TFAKey ? 'disable' : 'enable' }}&amp;userid={{ user.id }}">Click here to {{ user.TFAKey ? 'disable' : 'enable' }}</a>
+            <a href="user.php?action=2fa&amp;do={{ user.TFAKey ? 'remove' : 'configure' }}&amp;userid={{ user.id }}">Click here to {{ user.TFAKey ? 'remove' : 'configure' }}</a>
         </td>
     </tr>
 

@@ -1,40 +1,44 @@
 <?php
+
+$user = (new Gazelle\Manager\User)->findByResetKey($_GET['key']);
+if (is_null($user)) {
+    header('Location: login.php?action=recover');
+    exit;
+}
+if ($user->resetPasswordExpired()) {
+    $user->clearPasswordReset();
+    header('Location: login.php?action=recover&expired=1');
+    exit;
+}
+
+$validator = new Gazelle\Util\Validator;
+$validator->setFields([
+    ['verifypassword', '1', 'compare', 'Your passwords did not match.', ['comparefield' => 'password']],
+    ['password', '1', 'regex',
+        'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer',
+        ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']
+    ],
+]);
+
+$success = false;
+if (!empty($_REQUEST['password'])) {
+    if (!$validator->validate($_REQUEST)) {
+        $error = $Validate->errorMessage();
+    } else {
+        // Form validates without error, set new secret and password.
+        $user->clearPasswordReset();
+        $user->updatePassword($_REQUEST['password'], $_SERVER['REMOTE_ADDR']);
+        $user->logoutEverywhere();
+        $success = true;
+    }
+}
 View::show_header('Recover Password');
-echo $Validate->generateJS('recoverform');
-?>
-<script src="<?=(STATIC_SERVER)?>/functions/validate.js" type="text/javascript"></script>
-<script src="<?=(STATIC_SERVER)?>/functions/password_validate.js" type="text/javascript"></script>
-<form class="auth_form" name="recovery" id="recoverform" method="post" action="" onsubmit="return formVal();">
-    <input type="hidden" name="key" value="<?=display_str($_REQUEST['key'])?>" />
-    <div style="width: 500px;">
-        <span class="titletext">Reset your password - Final Step</span><br /><br />
-<?php
-if (empty($Reset)) {
-    if (!empty($Err)) {
-?>
-        <strong class="important_text"><?=display_str($Err)?></strong><br /><br />
-<?php
-    } ?> A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer.<br /><br />
-        <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center" width="100%">
-            <tr valign="top">
-                <td align="right" style="width: 100px;">Password&nbsp;</td>
-                <td align="left"><input type="password" name="password" id="new_pass_1" class="inputtext" /> <strong id="pass_strength"></strong></td>
-            </tr>
-            <tr valign="top">
-                <td align="right">Confirm Password&nbsp;</td>
-                <td align="left"><input type="password" name="verifypassword" id="new_pass_2" class="inputtext" /> <strong id="pass_match"></strong></td>
-            </tr>
-            <tr>
-                <td colspan="2" align="right"><input type="submit" name="reset" value="Reset!" class="submit" /></td>
-            </tr>
-        </table>
-<?php
-} else { ?>
-        Your password has been successfully reset.<br />
-        Please <a href="login.php">click here</a> to log in using your new password.
-<?php
-} ?>
-    </div>
-</form>
-<?php
+
+echo G::$Twig->render('login/new-password.twig', [
+    'error'     => $error,
+    'key'       => $_GET['key'],
+    'success'   => $success,
+    'validator' => $validator,
+]);
+
 View::show_footer(['recover' => true]);

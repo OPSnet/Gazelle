@@ -13,8 +13,7 @@ class Curl {
             CURLOPT_HEADER         => 0,
             CURLOPT_TIMEOUT        => 5,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_USERAGENT      =>
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36',
+            CURLOPT_USERAGENT      => FAKE_USERAGENT,
         ]);
         if (defined('HTTP_PROXY')) {
             curl_setopt_array($this->curl, [

@@ -6,18 +6,23 @@ use \Gazelle\Util\Crypto;
 
 class Session extends Base {
 
-    private $id;
-
-    public function __construct($id) {
-        parent::__construct();
-        $this->id = $id;
+    static public function decode(string $cookie): array {
+        return explode('|~|', Crypto::decrypt($cookie, ENCKEY)) ?? [];
     }
 
-    public function sessions(): array {
-        if (($sessions = $this->cache->get_value('users_sessions_' . $this->id)) === false) {
+    protected $sessions;
+    protected $userId;
+
+    public function __construct(int $userId) {
+        parent::__construct();
+        $this->userId = $userId;
+        $this->sessions = $this->loadSessions();
+    }
+
+    public function loadSessions(): array {
+        if (($sessions = $this->cache->get_value('users_sessions_' . $this->userId)) === false) {
             $this->db->prepared_query("
-                SELECT
-                    SessionID,
+                SELECT SessionID,
                     Browser,
                     OperatingSystem,
                     IP,
@@ -26,45 +31,30 @@ class Session extends Base {
                 WHERE Active = 1
                     AND UserID = ?
                 ORDER BY LastUpdate DESC
-                ", $this->id
+                ", $this->userId
             );
-            $sessions = $this->db->to_array('SessionID', MYSQLI_ASSOC);
-            $this->cache->cache_value('users_sessions_' . $this->id, $sessions, 43200);
+            $sessions = $this->db->to_array('SessionID', MYSQLI_ASSOC, false);
+            $this->cache->cache_value('users_sessions_' . $this->userId, $sessions, 43200);
         }
-        return $sessions ?: [];
+        return $sessions;
     }
 
-    public function create(array $info): array {
-        $sessionId = randomString();
-        $this->db->prepared_query('
-            INSERT INTO users_sessions
-                   (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
-            VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
-            ', $this->id, $sessionId, $info['keep-logged'], $info['browser'], $info['os'], $info['ipaddr'], $info['useragent']
-        );
-
-        $this->db->prepared_query('
-            INSERT INTO user_last_access
-                   (user_id, last_access)
-            VALUES (?, now())
-            ON DUPLICATE KEY UPDATE last_access = now()
-            ', $this->id
-        );
-        $this->cache->delete_value("users_sessions_" . $this->id);
-        $sessions = $this->sessions();
-        return $sessions[$sessionId];
+    public function valid(string $sessionId): bool {
+        return isset($this->sessions[$sessionId]);
     }
 
-    public function cookie(string $sessionId): string {
-        return Crypto::encrypt(Crypto::encrypt($sessionId . '|~|' . $this->id, ENCKEY), ENCKEY);
-    }
+    public function refresh(string $sessionId) {
+        if (strtotime($this->sessions[$sessionId]['LastUpdate']) + 600 >= time()) {
+            // Update every 10 minutes
+            return;
+        }
+        $userAgent = parse_user_agent();
 
-    public function update(array $info): array {
         $this->db->prepared_query("
             UPDATE user_last_access SET
                 last_access = now()
             WHERE user_id = ?
-            ", $this->id
+            ", $this->userId
         );
         $this->db->prepared_query("
             UPDATE users_sessions SET
@@ -75,26 +65,52 @@ class Session extends Base {
                 OperatingSystem = ?,
                 OperatingSystemVersion = ?
             WHERE UserID = ? AND SessionID = ?
-            ", $info['ip-address'], $info['browser'], $info['browser-version'], $info['os'], $info['os-version'],
-                /* where */ $this->id, $info['session-id']
+            ", $_SERVER['REMOTE_ADDR'], $userAgent['Browser'], $userAgent['BrowserVersion'],
+                $userAgent['OperatingSystem'], $userAgent['OperatingSystemVersion'],
+                $this->userId, $sessionId
         );
-        $this->cache->delete_value('users_sessions_' . $this->id);
-        return $this->sessions();
+        $this->cache->delete_value('users_sessions_' . $this->userId);
+        $this->sessions = $this->loadSessions();
+    }
+
+    public function create(array $info): array {
+        $sessionId = randomString();
+        $this->db->prepared_query('
+            INSERT INTO users_sessions
+                   (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
+            VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
+            ', $this->userId, $sessionId, $info['keep-logged'], $info['browser'], $info['os'], $info['ipaddr'], $info['useragent']
+        );
+
+        $this->db->prepared_query('
+            INSERT INTO user_last_access
+                   (user_id, last_access)
+            VALUES (?, now())
+            ON DUPLICATE KEY UPDATE last_access = now()
+            ', $this->userId
+        );
+        $this->cache->delete_value("users_sessions_" . $this->userId);
+        $this->sessions = $this->loadSessions();
+        return $this->sessions[$sessionId];
+    }
+
+    public function cookie(string $sessionId): string {
+        return Crypto::encrypt(Crypto::encrypt($sessionId . '|~|' . $this->userId, ENCKEY), ENCKEY);
     }
 
     public function drop(string $sessionId): int {
         $this->db->prepared_query('
             DELETE FROM users_sessions
             WHERE UserID = ?  AND SessionID = ?
-            ', $this->id, $sessionId
+            ', $this->userId, $sessionId
         );
         $this->cache->deleteMulti([
             'session_' . $sessionId,
-            'u_' . $this->id,
-            'users_sessions_' . $this->id,
-            'user_info_' . $this->id,
-            'user_info_heavy_' . $this->id,
-            'user_stats_' . $this->id,
+            'u_' . $this->userId,
+            'users_sessions_' . $this->userId,
+            'user_info_' . $this->userId,
+            'user_info_heavy_' . $this->userId,
+            'user_stats_' . $this->userId,
         ]);
         return $this->db->affected_rows();
     }
@@ -124,21 +140,21 @@ class Session extends Base {
             SELECT concat('session_', SessionID) AS ck
             FROM users_sessions
             WHERE UserID = ?
-            ", $this->id
+            ", $this->userId
         );
         $this->cache->deleteMulti(array_merge(
             $this->db->collect('ck'),
             [
-                'u_' . $this->id,
-                'users_sessions_' . $this->id,
-                'user_info_' . $this->id,
-                'user_info_heavy_' . $this->id,
-                'user_stats_' . $this->id,
+                'u_' . $this->userId,
+                'users_sessions_' . $this->userId,
+                'user_info_' . $this->userId,
+                'user_info_heavy_' . $this->userId,
+                'user_stats_' . $this->userId,
             ]
         ));
         $this->db->prepared_query('
             DELETE FROM users_sessions WHERE UserID = ?
-            ', $this->id
+            ', $this->userId
         );
         return $this->db->affected_rows();
     }
