@@ -77,6 +77,25 @@ class Forum extends \Gazelle\Base {
     }
 
     /**
+     * Find the thread of the poll featured on the front page.
+     *
+     * @return thread id or null
+     */
+    public function findThreadIdByFeaturedPoll(): ?int {
+        if (($threadId = $this->cache->get_value('polls_featured')) === false) {
+            $threadId = $this->db->scalar("
+                SELECT TopicID
+                FROM forums_polls
+                WHERE Featured IS NOT NULL
+                ORDER BY Featured DESC
+                LIMIT 1
+            ");
+            $this->cache->cache_value('polls_featured', $threadId, 86400 * 7);
+        }
+        return $threadId;
+    }
+
+    /**
      * Get list of forum names
      */
     public function nameList() {

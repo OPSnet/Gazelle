@@ -15,7 +15,7 @@ class StaffBlog extends \Gazelle\Base {
     /** @var string */
     protected $title;
 
-    protected const CACHE_KEY = 'staff_blogv3';
+    protected const CACHE_KEY = 'staff_blog';
     protected const CACHE_READ_KEY = 'staff_blog_read_%d';
 
     /**
@@ -74,7 +74,8 @@ class StaffBlog extends \Gazelle\Base {
                     um.Username AS author,
                     b.Title     AS title,
                     b.Body      AS body,
-                    b.Time      AS created
+                    b.Time      AS created,
+                    unix_timestamp(b.Time) as epoch
                 FROM staff_blog AS b
                 INNER JOIN users_main AS um ON (b.UserID = um.ID)
                 ORDER BY Time DESC
@@ -91,12 +92,12 @@ class StaffBlog extends \Gazelle\Base {
      * @param int user id
      * @return int epoch
      */
-    public function readBy(int $userId) {
-        $key = sprintf(self::CACHE_READ_KEY, $userId);
+    public function readBy(\Gazelle\User $user) {
+        $key = sprintf(self::CACHE_READ_KEY, $user->id());
         if (($time = $this->cache->get_value($key)) === false) {
             $time = $this->db->scalar("
                 SELECT Time FROM staff_blog_visits WHERE UserID = ?
-                ", $userId
+                ", $user->id()
             );
             $time = $time ? strtotime($time) : 0;
             $this->cache->cache_value($key, $time, 86400);

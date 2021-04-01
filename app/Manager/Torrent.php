@@ -48,9 +48,13 @@ class Torrent extends \Gazelle\Base {
     protected $showFallbackImage = true;
     protected $logger;
 
+    const FEATURED_AOTM     = 0;
+    const FEATURED_SHOWCASE = 1;
+
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
+    const CACHE_KEY_FEATURED       = 'featured_%d';
 
     const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
@@ -1111,5 +1115,36 @@ class Torrent extends \Gazelle\Base {
             $result[$ID] = $DisplayName;
         }
         return $result;
+    }
+
+    protected function featuredAlbum(int $type): array {
+        $key = sprintf(self::CACHE_KEY_FEATURED, $type);
+        if (($featured = $this->cache->get_value($key)) === false) {
+            $featured = $this->db->rowAssoc("
+                SELECT fa.GroupID,
+                    tg.Name,
+                    tg.WikiImage,
+                    fa.ThreadID,
+                    fa.Title
+                FROM featured_albums AS fa
+                INNER JOIN torrents_group AS tg ON (tg.ID = fa.GroupID)
+                WHERE Ended IS NULL AND type = ?
+                ", $type
+            );
+            if (!is_null($featured)) {
+                $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
+                $featured['image']       = \ImageTools::process($featured['WikiImage'], true);
+            }
+            $this->cache->cache_value($key, $featured, 86400 * 7);
+        }
+        return $featured ?? [];
+    }
+
+    public function featuredAlbumAotm(): array {
+        return $this->featuredAlbum(self::FEATURED_AOTM);
+    }
+
+    public function featuredAlbumShowcase(): array {
+        return $this->featuredAlbum(self::FEATURED_SHOWCASE);
     }
 }

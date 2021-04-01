@@ -5,8 +5,12 @@ namespace Gazelle\Stats;
 class Torrent extends \Gazelle\Base {
 
     protected $stats;
+    protected $peerStats;
+    protected $busy = false;
 
     const CACHE_KEY = 'stats_torrent';
+    const PEER_KEY  = 'stats_peers';
+    const CALC_STATS_LOCK = 'stats_peers_lock';
 
     public function __construct() {
         parent::__construct();
@@ -184,5 +188,49 @@ class Torrent extends \Gazelle\Base {
             $this->cache->cache_value('stats_perfect_count', $count, 7200 + rand(0, 300));
         }
         return $count;
+    }
+
+    public function leecherCount() {
+        return $this->busy ? 'Server busy' : $this->peerStats()['leecher_count'];
+    }
+
+    public function seederCount() {
+        return $this->busy ? 'Server busy' : $this->peerStats()['seeder_count'];
+    }
+
+    public function peerCount() {
+        return $this->busy ? 'Server busy' : $this->peerStats()['leecher_count'] + $this->peerStats()['seeder_count'];
+    }
+
+    protected function peerStats(): array {
+        if ($this->peerStats) {
+            return $this->peerStats;
+        }
+        $this->peerStats = $this->cache->get_value(self::PEER_KEY);
+        if (is_array($this->peerStats)) {
+            return $this->peerStats;
+        }
+        $this->busy = (bool)$this->cache->get_value(self::CALC_STATS_LOCK);
+        if ($this->busy) {
+            return [];
+        }
+        $this->cache->cache_value(self::CALC_STATS_LOCK, 1, 30);
+        $this->db->prepared_query("
+            SELECT if(remaining = 0, 'Seeding', 'Leeching') AS Type,
+                count(uid)
+            FROM xbt_files_users
+            WHERE active = 1
+            GROUP BY Type
+        ");
+        $stats = $this->db->to_array(0, MYSQLI_NUM, false);
+        var_dump($stats);
+        $this->peerStats = [
+            'leecher_count' => $stats['Leeching'][1] ?: 0,
+            'seeder_count'  => $stats['Seeding'][1] ?: 0,
+        ];
+        $this->cache->cache_value(self::PEER_KEY, $this->peerStats, 86400 * 2);
+        $this->cache->delete_value(self::CALC_STATS_LOCK);
+        $this->busy = false;
+        return $this->peerStats;
     }
 }
