@@ -557,4 +557,48 @@ class Artist extends Base {
         );
         return $this->db->to_array('revision', MYSQLI_ASSOC, false);
     }
+
+    public function addSimilar(Artist $similar, int $userId) {
+        $artistId = $this->id();
+        $similarArtistId = $similar->id();
+        // Let's see if there's already a similar artists field for these two
+        $similarId = $this->db->scalar("
+            SELECT s1.SimilarID
+            FROM artists_similar AS s1
+                JOIN artists_similar AS s2 ON s1.SimilarID = s2.SimilarID
+            WHERE s1.ArtistID = ?
+                AND s2.ArtistID = ?
+            ", $this->id(), $similar->id()
+        );
+        if ($similarId) { // The similar artists field already exists, just update the score
+            $this->db->prepared_query("
+                UPDATE artists_similar_scores SET
+                    Score = Score + 200
+                WHERE SimilarID = ?
+                ", $similarId
+            );
+        } else { // No, it doesn't exist - create it
+            $this->db->prepared_query("
+                INSERT INTO artists_similar_scores (Score) VALUES (200)
+            ");
+            $similarId = $this->db->inserted_id();
+            $this->db->prepared_query("
+                INSERT INTO artists_similar
+                       (ArtistID, SimilarID)
+                VALUES (?, ?), (?, ?)
+                ", $artistId, $similarId, $similarArtistId, $similarId
+            );
+        }
+
+        $this->db->prepared_query("
+            INSERT IGNORE INTO artists_similar_votes
+                   (SimilarID, UserID, way)
+            VALUES (?,         ?,      'up')
+            ", $similarId, $userId
+        );
+
+        $this->flushCache();
+        $similar->flushCache();
+        $this->cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+    }
 }

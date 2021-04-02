@@ -259,10 +259,11 @@ G::$Twig->addTest(
 
 // Set the document we are loading
 $Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
-
+$userMan = new Gazelle\Manager\User;
 $LoggedUser = [];
 $SessionID = false;
 $FullToken = null;
+$user = null;
 
 // Only allow using the Authorization header for ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
@@ -270,7 +271,6 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
     }
-
     $AuthorizationHeader = explode(" ", (string) $_SERVER['HTTP_AUTHORIZATION']);
     // this first case is for compatibility with RED
     if (count($AuthorizationHeader) === 1) {
@@ -294,20 +294,17 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     if (!empty($UserId)) {
         [$LoggedUser['ID'], $Revoked] = $DB->row('SELECT user_id, revoked FROM api_tokens WHERE user_id=? AND token=?', $UserId, $FullToken);
     }
-
-    if (empty($LoggedUser['ID']) || $Revoked === 1) {
+    $user = $userMan->findById((int)$LoggedUser['ID']);
+    if (is_null($user) || $Revoked === 1) {
         log_token_attempt($DB);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
-}
-
-$user = null;
-if (isset($_COOKIE['session'])) {
+} elseif (isset($_COOKIE['session'])) {
     $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
     if ($LoginCookie !== false) {
         [$SessionID, $LoggedUser['ID']] = Gazelle\Session::decode($LoginCookie);
-        $user = (new Gazelle\Manager\User)->findById((int)$LoggedUser['ID']);
+        $user = $userMan->findById((int)$LoggedUser['ID']);
         if (is_null($user)) {
             setcookie('session', '', [
                 'expires'  => time() - 60 * 60 * 24 * 90,
