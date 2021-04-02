@@ -1,5 +1,10 @@
 <?php
 
+if (isset($LoggedUser['ID'])) {
+    header("Location: /index.php");
+    exit;
+}
+
 $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
 $login = new Gazelle\Login;
 
