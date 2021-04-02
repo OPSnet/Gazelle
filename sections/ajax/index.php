@@ -14,6 +14,7 @@ define('AJAX', true);
 
 /* 'x' requests every 'y' seconds: [5,10] = 5 requests every 10 seconds */
 $LimitedPages = [
+    'add_similar'     => [5, 10],
     'add_tag'         => [5, 10],
     'addtag'          => [5, 10],
     'announcements'   => [2, 60],
@@ -126,6 +127,9 @@ switch ($_GET['action']) {
         break;
     case 'artist':
         require('artist.php');
+        break;
+    case 'add_similar':
+        require(__DIR__ . '/../artist/add_similar.php');
         break;
     case 'inbox':
         require('inbox/index.php');
