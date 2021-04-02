@@ -1,0 +1,35 @@
+<div id="logo">
+<img src="{{ constant('STATIC_SERVER') }}/styles/public/images/loginlogo.png" alt="{{
+    constant('SITE_NAME') }}" title="{{ constant('SITE_NAME') }}" />
+</div>
+
+<div class="main">
+<div class="para">Orpheus with his lute made trees<br />
+And the mountain tops that freeze<br />
+Bow themselves when he did sing:<br />
+To his music plants and flowers<br />
+Ever sprung; as sun and showers<br />
+There had made a lasting spring.</div>
+
+<div class="para">Every thing that heard him play,<br />
+Even the billows of the sea,<br />
+Hung their heads and then lay by.<br />
+In sweet music is such art,<br />
+Killing care and grief of heart<br />
+Fall asleep, or hearing, die.</div>
+</div>
+
+<div class="actions">
+    <span class="action-bar">
+    <a href="/login.php">Enter</a>
+{% if constant('OPEN_REGISTRATION') %}
+    <a title="Obtain an account by supplying a valid email address" href="register.php">Register</a>
+{% endif %}
+{% if constant('OPEN_EXTERNAL_REFERRALS') %}
+    <a title="Obtain an account by proving your membership on a site we trust" href="referral.php">Referral</a>
+{% endif %}
+{% if constant('RECOVERY') %}
+    <a title="Obtain a new account by proving your membership on the previous site" href="recovery.php">Recovery</a>
+{% endif %}
+    </span>
+</div>
