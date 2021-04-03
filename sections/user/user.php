@@ -338,7 +338,7 @@ if (check_perms('users_view_invites')) {
     if (is_null($User->inviter())) {
         $Invited = '<span style="font-style: italic;">Nobody</span>';
     } else {
-        $Invited = "<a href=\"user.php?id=$InviterID\">" . $User->inviter()->username() . "</a>";
+        $Invited = '<a href="user.php?id=' . $User->inviter()->id() . '">' . $User->inviter()->username() . "</a>";
     }
 ?>
                 <li>Invited by: <?=$Invited?></li>
