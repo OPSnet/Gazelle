@@ -16,22 +16,21 @@ if ($userId != $LoggedUser['ID'] && !check_perms('users_mod')) {
 switch($_GET['do']) {
     case 'configure':
         if ($user->TFAKey()) {
-            // 2fa is already configured
-            error(404);
+            error(check_perms('users_edit_password') ? '2FA is already configured' : 404);
         }
         require_once('configure.php');
         break;
 
     case 'complete':
         if ($user->TFAKey()) {
-            error(404);
+            error(check_perms('users_edit_password') ? '2FA is already configured' : 404);
         }
         require_once('complete.php');
         break;
 
     case 'remove':
         if (!$user->TFAKey()) {
-            error(404);
+            error(check_perms('users_edit_password') ? 'No 2FA configured' : 404);
         }
         require_once('remove.php');
         break;
