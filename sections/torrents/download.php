@@ -152,7 +152,8 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
             json_or_error('This torrent is too large. Please use the regular DL link.');
         }
-        $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
+        $TokensToUse = (int)ceil($Size / BYTES_PER_FREELEECH_TOKEN);
+        $DB->begin_transaction();
         $DB->prepared_query('
             UPDATE user_flt SET
                 tokens = tokens - ?
@@ -160,33 +161,26 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
             ', $TokensToUse, $TokensToUse, $UserID
         );
         if ($DB->affected_rows() == 0) {
+            $DB->rollback();
             json_or_error('You do not have any freeleech tokens left. Please use the regular DL link.');
         }
 
         // Let the tracker know about this
         if (!Tracker::update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
+            $DB->rollback();
             json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
-            // recredit the tokens we just subtracted
-            $DB->prepared_query('
-                UPDATE user_flt SET
-                    tokens = tokens + ?
-                WHERE user_id = ?
-                ', $TokensToUse, $UserID
-            );
         }
-
-        if (!Torrents::has_token($TorrentID)) {
-            $DB->prepared_query("
-                INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
-                VALUES (?, ?, ?, now())
-                ON DUPLICATE KEY UPDATE
-                    Time = VALUES(Time),
-                    Expired = FALSE,
-                    Uses = Uses + ?", $UserID, $TorrentID, $TokensToUse, $TokensToUse);
-
-            $Cache->delete_value("user_info_heavy_$UserID");
-            $Cache->delete_value("users_tokens_$UserID");
-        }
+        $DB->prepared_query("
+            INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
+            VALUES (?, ?, ?, now())
+            ON DUPLICATE KEY UPDATE
+                Time = VALUES(Time),
+                Expired = FALSE,
+                Uses = Uses + ?
+            ", $UserID, $TorrentID, $TokensToUse, $TokensToUse
+        );
+        $DB->commit();
+        $Cache->deleteMulti(["u_$UserID", "user_info_heavy_$UserID", "users_tokens_$UserID"]);
     }
 }
 
