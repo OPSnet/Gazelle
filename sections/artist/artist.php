@@ -44,7 +44,7 @@ View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions')
     <div class="header">
         <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
         <div class="linkbox">
-<?php if (check_perms('site_edit_wiki')) { ?>
+<?php if (check_perms('torrents_edit')) { ?>
             <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
 <?php } ?>
             <a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
