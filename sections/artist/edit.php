@@ -1,26 +1,16 @@
 <?php
-/************************************************************************
-||------------|| Edit artist wiki page ||------------------------------||
 
-This page is the page that is displayed when someone feels like editing
-an artist's wiki page.
-
-It is called when $_GET['action'] == 'edit'. $_GET['artistid'] is the
-ID of the artist, and must be set.
-
-************************************************************************/
-
-$artistId = (int)$_GET['artistid'];
-if ($artistId < 1) {
-    error(0);
+if (!check_perms('torrents_edit')) {
+    error(403);
 }
 
 try {
-    $artist = new \Gazelle\Artist($artistId);
+    $artist = new Gazelle\Artist((int)$_GET['artistid']);
 }
 catch (Exception $e) {
     error("Cannot find an artist with the ID {$artistId}: See the <a href=\"log.php?search=Artist+$artistId\">site log</a>.");
 }
+$artistId = $artist->id();
 
 // Get the artist name and the body of the last revision
 list($name, $image, $body, $vanityHouse, $discogsId) = $artist->editableInformation();
