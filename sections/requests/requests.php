@@ -615,7 +615,7 @@ View::show_header($Title, 'requests');
             </td>
             <td>
 <?php        if ($Filler) { ?>
-                <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username ?>?></a>
+                <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username() ?></a>
 <?php        } else { ?>
                 &mdash;
 <?php        } ?>
