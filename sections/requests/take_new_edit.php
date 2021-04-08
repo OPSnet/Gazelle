@@ -2,29 +2,33 @@
 
 use Gazelle\Util\Irc;
 
-//******************************************************************************//
-//----------------- Take request -----------------------------------------------//
 authorize();
 
-if ($_POST['action'] !== 'takenew' && $_POST['action'] !== 'takeedit') {
+if (empty($_POST['type'])) {
     error(0);
 }
-
-$NewRequest = ($_POST['action'] === 'takenew');
-if (!$NewRequest) {
-    $ReturnEdit = true;
+$CategoryName = $_POST['type'];
+$CategoryID = array_search($CategoryName, CATEGORY);
+if ($CategoryID === false) {
+    error(0);
 }
+$CategoryID += 1;
 
+if (!in_array($_POST['action'], ['takenew', 'takeedit'])) {
+    error(0);
+}
+$NewRequest = ($_POST['action'] === 'takenew');
+
+$onlyMetadata = false;
 if ($NewRequest) {
-    if (!check_perms('site_submit_requests') || $Viewer->uploadedSize() < 250 * 1024 * 1024) {
+    if (!$Viewer->permitted('site_submit_requests') || $LoggedUser['BytesUploaded'] < 250 * 1024 * 1024) {
         error(403);
     }
 } else {
-    $RequestID = $_POST['requestid'];
-    if (!intval($RequestID)) {
-        error(0);
+    $RequestID = (int)$_POST['requestid'];
+    if (!$RequestID) {
+        error(404);
     }
-
     $Request = Requests::get_request($RequestID);
     if ($Request === false) {
         error(404);
@@ -32,35 +36,13 @@ if ($NewRequest) {
     $VoteArray = Requests::get_votes_array($RequestID);
     $VoteCount = count($VoteArray['Voters']);
     $IsFilled = !empty($Request['TorrentID']);
-    $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
-    $CanEdit = ((!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
+
+    $CanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2)
+        || $Viewer->permittedAny(['site_edit_requests', 'site_moderate_requests']);
     if (!$CanEdit) {
         error(403);
     }
-}
-
-// Validate
-if (empty($_POST['type'])) {
-    error(0);
-}
-
-$CategoryName = $_POST['type'];
-$CategoryID = (array_search($CategoryName, CATEGORY) + 1);
-
-if (empty($CategoryID)) {
-    error(0);
-}
-
-if (empty($_POST['title'])) {
-    $Err = 'You forgot to enter the title!';
-} else {
-    $Title = trim($_POST['title']);
-}
-
-if (empty($_POST['tags'])) {
-    $Err = 'You forgot to enter any tags!';
-} else {
-    $Tags = trim($_POST['tags']);
+    $onlyMetadata = $Viewer->id() != $Request['UserID'] && $Viewer->permitted('site_edit_requests');
 }
 
 if ($NewRequest) {
@@ -77,6 +59,18 @@ if ($NewRequest) {
     }
 }
 
+if (empty($_POST['title'])) {
+    $Err = 'You forgot to enter the title!';
+} else {
+    $Title = trim($_POST['title']);
+}
+
+if (empty($_POST['tags'])) {
+    $Err = 'You forgot to enter any tags!';
+} else {
+    $Tags = trim($_POST['tags']);
+}
+
 if (empty($_POST['image'])) {
     $Image = null;
 } else {
@@ -86,12 +80,11 @@ if (empty($_POST['image'])) {
     } else {
         $Err = display_str($_POST['image']).' does not appear to be a valid link to an image.';
     }
-}
-
-foreach (IMAGE_HOST_BANNED as $banned) {
-    if (stripos($banned, $Image) !== false) {
-        $Err = "Please rehost images from $banned elsewhere.";
-        break;
+    foreach (IMAGE_HOST_BANNED as $banned) {
+        if (stripos($banned, $Image) !== false) {
+            $Err = "Please rehost images from $banned elsewhere.";
+            break;
+        }
     }
 }
 
@@ -108,87 +101,6 @@ if (empty($_POST['artists'])) {
     $role = $_POST['importance'];
 }
 
-if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
-    $Err = 'Please pick a release type';
-}
-$ReleaseType = $_POST['releasetype'];
-
-if (empty($_POST['all_formats']) && count($_POST['formats']) !== count(FORMAT)) {
-    $FormatArray = $_POST['formats'];
-    if (count($FormatArray) < 1) {
-        $Err = 'You must require at least one format';
-    }
-} else {
-    $AllFormats = true;
-}
-
-if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count(ENCODING)) {
-    $BitrateArray = $_POST['bitrates'];
-    if (count($BitrateArray) < 1) {
-        $Err = 'You must require at least one bitrate';
-    }
-} else {
-    $AllBitrates = true;
-}
-
-if (empty($_POST['all_media']) && count($_POST['media']) !== count(MEDIA)) {
-    $MediaArray = $_POST['media'];
-    if (count($MediaArray) < 1) {
-        $Err = 'You must require at least one medium.';
-    }
-} else {
-    $AllMedia = true;
-}
-
-//ENCODING[1] = FLAC
-if (!empty($FormatArray) && in_array(array_search('FLAC', FORMAT), $FormatArray)) {
-    $NeedLog = empty($_POST['needlog']) ? false : true;
-    if ($NeedLog) {
-        if ($_POST['minlogscore']) {
-            $MinLogScore = intval(trim($_POST['minlogscore']));
-        } else {
-            $MinLogScore = 0;
-        }
-        if ($MinLogScore < 0 || $MinLogScore > 100) {
-            $Err = 'You have entered a minimum log score that is not between 0 and 100 inclusive.';
-        }
-    }
-    $NeedCue = empty($_POST['needcue']) ? false : true;
-    //FLAC was picked, require either Lossless or 24 bit Lossless
-    if (!$AllBitrates && !in_array(array_search('Lossless', ENCODING), $BitrateArray) && !in_array(array_search('24bit Lossless', ENCODING), $BitrateArray)) {
-        $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
-    }
-    $NeedChecksum = empty($_POST['needcksum']) ? false : true;
-
-    if (($NeedCue || $NeedLog || $NeedChecksum)) {
-        if (empty($_POST['all_media']) && !(in_array('0', $MediaArray))) {
-            $Err = 'Only CD is allowed as media for FLAC + log/cue requests.';
-        }
-    }
-} else {
-    $NeedLog = false;
-    $NeedCue = false;
-    $NeedChecksum = false;
-    $MinLogScore = false;
-}
-
-// GroupID
-if (!empty($_POST['groupid'])) {
-    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['groupid'] ?? 0));
-    if (is_null($tgroup) || $tgroup->categoryId() !== 1) {
-        $Err = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
-    } else {
-        $GroupID = $tgroup->id();
-    }
-} elseif ($_POST['groupid'] === '0') {
-    $GroupID = 0;
-}
-
-//Not required
-$EditionInfo = empty($_POST['editioninfo']) ? '' : trim($_POST['editioninfo']);
-$CatalogueNumber = empty($_POST['cataloguenumber']) ? '' : trim($_POST['cataloguenumber']);
-$RecordLabel = empty($_POST['recordlabel']) ? '' : trim($_POST['recordlabel']);
-
 if (empty($_POST['year'])) {
     $Err = 'You forgot to enter the year!';
 } else {
@@ -198,8 +110,94 @@ if (empty($_POST['year'])) {
     }
 }
 
+// optional
+$EditionInfo = empty($_POST['editioninfo']) ? '' : trim($_POST['editioninfo']);
+$CatalogueNumber = empty($_POST['cataloguenumber']) ? '' : trim($_POST['cataloguenumber']);
+$RecordLabel = empty($_POST['recordlabel']) ? '' : trim($_POST['recordlabel']);
+
 //Apply OCLC to all types
 $OCLC = empty($_POST['oclc']) ? '' : trim($_POST['oclc']);
+
+if (!$onlyMetadata) {
+    if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
+        $Err = 'Please pick a release type';
+    }
+    $ReleaseType = (int)$_POST['releasetype'];
+
+    if (empty($_POST['all_formats']) && count($_POST['formats']) !== count(FORMAT)) {
+        $FormatArray = $_POST['formats'];
+        if (count($FormatArray) < 1) {
+            $Err = 'You must require at least one format';
+        }
+    } else {
+        $AllFormats = true;
+    }
+
+    if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count(ENCODING)) {
+        $BitrateArray = $_POST['bitrates'];
+        if (count($BitrateArray) < 1) {
+            $Err = 'You must require at least one bitrate';
+        }
+    } else {
+        $AllBitrates = true;
+    }
+
+    if (empty($_POST['all_media']) && count($_POST['media']) !== count(MEDIA)) {
+        $MediaArray = $_POST['media'];
+        if (count($MediaArray) < 1) {
+            $Err = 'You must require at least one medium.';
+        }
+    } else {
+        $AllMedia = true;
+    }
+
+    if (!empty($FormatArray) && in_array(array_search('FLAC', FORMAT), $FormatArray)) {
+        $NeedLog = empty($_POST['needlog']) ? false : true;
+        if ($NeedLog) {
+            if ($_POST['minlogscore']) {
+                $MinLogScore = intval(trim($_POST['minlogscore']));
+            } else {
+                $MinLogScore = 0;
+            }
+            if ($MinLogScore < 0 || $MinLogScore > 100) {
+                $Err = 'You have entered a minimum log score that is not between 0 and 100 inclusive.';
+            }
+        }
+        $NeedCue = empty($_POST['needcue']) ? false : true;
+        //FLAC was picked, require either Lossless or 24 bit Lossless
+        if (!$AllBitrates && !in_array(array_search('Lossless', ENCODING), $BitrateArray) && !in_array(array_search('24bit Lossless', ENCODING), $BitrateArray)) {
+            $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
+        }
+        $NeedChecksum = empty($_POST['needcksum']) ? false : true;
+
+        if (($NeedCue || $NeedLog || $NeedChecksum)) {
+            if (empty($_POST['all_media']) && !(in_array('0', $MediaArray))) {
+                $Err = 'Only CD is allowed as media for FLAC + log/cue requests.';
+            }
+        }
+    } else {
+        $NeedLog = false;
+        $NeedCue = false;
+        $NeedChecksum = false;
+        $MinLogScore = false;
+    }
+}
+
+
+// GroupID
+if (!empty($_POST['groupid'])) {
+    $GroupID = preg_match(TGROUP_REGEXP, trim($_POST['groupid']), $match)
+        ? (int)$match['id']
+        : (int)$_POST['groupid'];
+    if ($GroupID > 0) {
+        $tgroup = (new Gazelle\Manager\TGroup)->findById($GroupID);
+        if (is_null($tgroup)) {
+            $Err = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
+        } else {
+            $GroupID = $tgroup->id();
+        }
+    }
+}
 
 //For refilling on error
 if ($CategoryName === 'Music') {
@@ -242,51 +240,53 @@ if (!empty($Err)) {
     exit;
 }
 
-//Databasify the input
-if (empty($AllBitrates)) {
-    foreach ($BitrateArray as $Index => $MasterIndex) {
-        if (array_key_exists($Index, ENCODING)) {
-            $BitrateArray[$Index] = ENCODING[$MasterIndex];
-        } else {
-            //Hax
-            error(0);
+if (!$onlyMetadata) {
+    if (empty($AllBitrates)) {
+        foreach ($BitrateArray as $Index => $MasterIndex) {
+            if (array_key_exists($Index, ENCODING)) {
+                $BitrateArray[$Index] = ENCODING[$MasterIndex];
+            } else {
+                //Hax
+                error(0);
+            }
         }
+        $BitrateList = implode('|', $BitrateArray);
+    } else {
+        $BitrateList = 'Any';
     }
-    $BitrateList = implode('|', $BitrateArray);
-} else {
-    $BitrateList = 'Any';
+
+    if (empty($AllFormats)) {
+        foreach ($FormatArray as $Index => $MasterIndex) {
+            if (array_key_exists($Index, FORMAT)) {
+                $FormatArray[$Index] = FORMAT[$MasterIndex];
+            } else {
+                //Hax
+                error(0);
+            }
+        }
+        $FormatList = implode('|', $FormatArray);
+    } else {
+        $FormatList = 'Any';
+    }
+
+    if (empty($AllMedia)) {
+        foreach ($MediaArray as $Index => $MasterIndex) {
+            if (array_key_exists($Index, MEDIA)) {
+                $MediaArray[$Index] = MEDIA[$MasterIndex];
+            } else {
+                //Hax
+                error(0);
+            }
+        }
+        $MediaList = implode('|', $MediaArray);
+    } else {
+        $MediaList = 'Any';
+    }
 }
 
-if (empty($AllFormats)) {
-    foreach ($FormatArray as $Index => $MasterIndex) {
-        if (array_key_exists($Index, FORMAT)) {
-            $FormatArray[$Index] = FORMAT[$MasterIndex];
-        } else {
-            //Hax
-            error(0);
-        }
-    }
-    $FormatList = implode('|', $FormatArray);
+if (!$NeedLog) {
+    $LogCue = '';
 } else {
-    $FormatList = 'Any';
-}
-
-if (empty($AllMedia)) {
-    foreach ($MediaArray as $Index => $MasterIndex) {
-        if (array_key_exists($Index, MEDIA)) {
-            $MediaArray[$Index] = MEDIA[$MasterIndex];
-        } else {
-            //Hax
-            error(0);
-        }
-    }
-    $MediaList = implode('|', $MediaArray);
-} else {
-    $MediaList = 'Any';
-}
-
-$LogCue = '';
-if ($NeedLog) {
     $LogCue .= 'Log';
     if ($MinLogScore > 0) {
         if ($MinLogScore >= 100) {
@@ -304,7 +304,6 @@ if ($NeedCue) {
     }
 }
 
-//Query time!
 if ($NewRequest) {
     $DB->prepared_query('
         INSERT INTO requests (
@@ -315,18 +314,28 @@ if ($NewRequest) {
             ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         $Viewer->id(), $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
         $CatalogueNumber, $ReleaseType, $BitrateList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC);
-
     $RequestID = $DB->inserted_id();
 
 } else {
-    $DB->prepared_query('
-        UPDATE requests
-        SET CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?,
-            ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
-        WHERE ID = ?',
-        $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel,
-        $ReleaseType, $BitrateList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC,
-        $RequestID);
+    if ($onlyMetadata) {
+        $DB->prepared_query("
+            UPDATE requests SET
+                CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?, GroupID = ?, OCLC = ?
+            WHERE ID = ?
+            ", $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel, $GroupID, $OCLC,
+            $RequestID
+        );
+    } else {
+        $DB->prepared_query('
+            UPDATE requests SET
+                CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?,
+                ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
+            WHERE ID = ?',
+            $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel,
+            $ReleaseType, $BitrateList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC,
+            $RequestID
+        );
+    }
 
     // We need to be able to delete artists / tags
     $DB->prepared_query("
@@ -337,9 +346,10 @@ if ($NewRequest) {
     foreach ($RequestArtists as $RequestArtist) {
         $Cache->delete_value("artists_requests_$RequestArtist");
     }
-    $DB->prepared_query('
-        DELETE FROM requests_artists
-        WHERE RequestID = ?', $RequestID);
+    $DB->prepared_query("
+        DELETE FROM requests_artists WHERE RequestID = ?
+        ", $RequestID
+    );
     $Cache->delete_value("request_artists_$RequestID");
 }
 
@@ -389,7 +399,7 @@ foreach ($ArtistForm as $role => $Artists) {
 $artistMan->setGroupID($RequestID);
 foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Num => $Artist) {
-        echo $artistMan->addToRequest($Artist['id'], $Artist['aliasid'], $role);
+        $artistMan->addToRequest($Artist['id'], $Artist['aliasid'], $role);
         $Cache->increment('stats_album_count');
         $Cache->delete_value('artists_requests_'.$Artist['id']);
     }

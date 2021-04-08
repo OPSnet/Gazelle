@@ -24,6 +24,7 @@ class Permissions {
             'site_can_invite_always' => 'Can invite beyond maximum user count',
             'users_invite_notes' => 'Can add a staff note when inviting someone',
             'users_edit_invites' => 'Can edit invite numbers and cancel sent invites',
+            'site_edit_requests' => 'Can edit the metdata of a request',
             'site_moderate_requests' => 'Request moderation access',
             'site_admin_requests' => 'Edit request bounties',
             'site_delete_artist' => 'Can delete artists (must be able to delete torrents+requests)',
