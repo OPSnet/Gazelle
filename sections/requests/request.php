@@ -58,7 +58,7 @@ if (empty($Request['ReleaseType'])) {
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
 $UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);
-$CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
+$CanEdit = ($UserCanEdit || check_perms('site_moderate_requests') || check_perms('site_edit_requests'));
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 $commentPage = new Gazelle\Comment\Request($RequestID);
@@ -80,7 +80,7 @@ View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,
     <div class="header">
         <h2><a href="requests.php">Requests</a> &rsaquo; <?=$CategoryName?> &rsaquo; <?=$DisplayLink?></h2>
         <div class="linkbox">
-<?php    if ($CanEdit) { ?>
+<?php if ($CanEdit) { ?>
             <a href="requests.php?action=edit&amp;id=<?=$RequestID?>" class="brackets">Edit</a>
 <?php
     }
@@ -435,7 +435,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                             <input type="hidden" name="requestid" value="<?=$RequestID?>" />
                             <input type="text" size="50" name="link"<?=(!empty($Link) ? " value=\"$Link\"" : '')?> />
                             <br />
-                            <strong>Should be the permalink (PL) to the torrent (e.g. <?=SITE_URL?>/torrents.php?torrentid=xxxx).</strong>
+                            <strong>Must be the permalink [PL] of the torrent<br />(e.g. <?=SITE_URL?>/torrents.php?torrentid=nnn).</strong>
                         </div>
 <?php        if (check_perms('site_moderate_requests')) { ?>
                         <div class="field_div">

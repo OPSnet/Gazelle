@@ -331,6 +331,21 @@ class User extends BaseObject {
     }
 
     /**
+     * Does the user have any of the specified permissions?
+     *
+     * @param array permission names
+     * @return bool permission granted
+     */
+    public function permittedAny(array $permission): bool {
+        foreach ($permission as $p) {
+            if ($this->info()['Permission'][$p] ?? false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get the secondary classes of the user (enabled or not)
      *
      * @return array secondary classes list

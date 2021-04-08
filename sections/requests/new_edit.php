@@ -8,103 +8,98 @@
 
 $NewRequest = $_GET['action'] === 'new';
 if (!$NewRequest) {
-    $RequestID = $_GET['id'];
-    if (!intval($RequestID)) {
+    $RequestID = (int)$_GET['id'];
+    if (!$RequestID) {
         error(404);
     }
 }
 
-if ($NewRequest && ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !check_perms('site_submit_requests'))) {
+if ($NewRequest && ($LoggedUser['BytesUploaded'] < 250 * 1024 * 1024 || !$Viewer->permitted('site_submit_requests'))) {
     error('You do not have enough uploaded to make a request.');
 }
 
 $RequestTaxPercent = ($RequestTax * 100);
 
 if (!$NewRequest) {
-    if (empty($ReturnEdit)) {
-
-        $Request = Requests::get_request($RequestID);
-        if ($Request === false) {
-            error(404);
-        }
-
-        // Define these variables to simplify _GET['groupid'] requests later on
-        $CategoryID = $Request['CategoryID'];
-        $Title = $Request['Title'];
-        $Year = $Request['Year'];
-        $Image = $Request['Image'];
-        $ReleaseType = $Request['ReleaseType'];
-        $GroupID = $Request['GroupID'];
-
-        $VoteArray = Requests::get_votes_array($RequestID);
-        $VoteCount = count($VoteArray['Voters']);
-
-        $LogCue = $Request['LogCue'];
-        $NeedCue = (strpos($LogCue, 'Cue') !== false);
-        $NeedLog = (strpos($LogCue, 'Log') !== false);
-        if ($NeedLog) {
-            if (strpos($LogCue, '%') !== false) {
-                preg_match('/\d+/', $LogCue, $Matches);
-                $MinLogScore = (int)$Matches[0];
-            }
-        }
-        $Checksum = $Request['Checksum'] ? 1 : 0;
-
-        $IsFilled = !empty($Request['TorrentID']);
-        $CategoryName = CATEGORY[$CategoryID - 1];
-
-        $CanEdit = ((!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
-        if (!$CanEdit) {
-            error(403);
-        }
-
-        if ($CategoryName === 'Music') {
-            $ArtistForm = Requests::get_artists($RequestID);
-
-            $BitrateArray = [];
-            if ($Request['BitrateList'] == 'Any') {
-                $BitrateArray = array_keys(ENCODING);
-            } else {
-                $BitrateArray = array_keys(array_intersect(ENCODING, explode('|', $Request['BitrateList'])));
-            }
-
-            $FormatArray = [];
-            if ($Request['FormatList'] == 'Any') {
-                $FormatArray = array_keys(FORMAT);
-            } else {
-                foreach (FORMAT as $Key => $Val) {
-                    if (strpos($Request['FormatList'], $Val) !== false) {
-                        $FormatArray[] = $Key;
-                    }
-                }
-            }
-
-            $MediaArray = [];
-            if ($Request['MediaList'] == 'Any') {
-                $MediaArray = array_keys(MEDIA);
-            } else {
-                $MediaTemp = explode('|', $Request['MediaList']);
-                foreach (MEDIA as $Key => $Val) {
-                    if (in_array($Val, $MediaTemp)) {
-                        $MediaArray[] = $Key;
-                    }
-                }
-            }
-        }
-
-        $Tags = implode(', ', $Request['Tags']);
+if (empty($ReturnEdit)) {
+    $Request = Requests::get_request($RequestID);
+    if ($Request === false) {
+        error(404);
     }
+
+    // Define these variables to simplify _GET['groupid'] requests later on
+    $CategoryID = $Request['CategoryID'];
+    $Title = $Request['Title'];
+    $Year = $Request['Year'];
+    $Image = $Request['Image'];
+    $ReleaseType = $Request['ReleaseType'];
+    $GroupID = $Request['GroupID'];
+
+    $VoteArray = Requests::get_votes_array($RequestID);
+    $VoteCount = count($VoteArray['Voters']);
+    $IsFilled = !empty($Request['TorrentID']);
+    $ownRequest = $Viewer->id() == $Request['UserID'];
+    $CanEdit = (!$IsFilled && $ownRequest && $VoteCount < 2)
+        || $Viewer->permittedAny(['site_edit_requests', 'site_moderate_requests']);
+    if (!$CanEdit) {
+        error(403);
+    }
+
+    $LogCue = $Request['LogCue'];
+    $NeedCue = (strpos($LogCue, 'Cue') !== false);
+    $NeedLog = (strpos($LogCue, 'Log') !== false);
+    if ($NeedLog) {
+        if (strpos($LogCue, '%') !== false) {
+            preg_match('/(\d+)/', $LogCue, $match);
+            $MinLogScore = (int)$match[1];
+        }
+    }
+    $Checksum = $Request['Checksum'] ? 1 : 0;
+
+    $CategoryName = CATEGORY[$CategoryID - 1];
+    if ($CategoryName === 'Music') {
+        $ArtistForm = Requests::get_artists($RequestID);
+
+        $BitrateArray = [];
+        if ($Request['BitrateList'] == 'Any') {
+            $BitrateArray = array_keys(ENCODING);
+        } else {
+            $BitrateArray = array_keys(array_intersect(ENCODING, explode('|', $Request['BitrateList'])));
+        }
+
+        $FormatArray = [];
+        if ($Request['FormatList'] == 'Any') {
+            $FormatArray = array_keys(FORMAT);
+        } else {
+            foreach (FORMAT as $Key => $Val) {
+                if (strpos($Request['FormatList'], $Val) !== false) {
+                    $FormatArray[] = $Key;
+                }
+            }
+        }
+
+        $MediaArray = [];
+        if ($Request['MediaList'] == 'Any') {
+            $MediaArray = array_keys(MEDIA);
+        } else {
+            $MediaTemp = explode('|', $Request['MediaList']);
+            foreach (MEDIA as $Key => $Val) {
+                if (in_array($Val, $MediaTemp)) {
+                    $MediaArray[] = $Key;
+                }
+            }
+        }
+    }
+
+    $Tags = implode(', ', $Request['Tags']);
+}
 }
 
 if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
-    $DB->prepared_query('
-        SELECT Name
-        FROM artists_group
-        WHERE artistid = ?
-        LIMIT 1',
-        $_GET['artistid']
+    $ArtistName = $DB->scalar("
+        SELECT Name FROM artists_group WHERE artistid = ?
+        ", $_GET['artistid']
     );
-    list($ArtistName) = $DB->next_record();
     $ArtistForm = [
         1 => [['name' => trim($ArtistName)]],
         2 => [],
@@ -113,8 +108,7 @@ if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
 } elseif ($NewRequest && !empty($_GET['groupid']) && intval($_GET['groupid'])) {
     $ArtistForm = Artists::get_artist($_GET['groupid']);
     $DB->prepared_query("
-        SELECT
-            tg.Name,
+        SELECT tg.Name,
             tg.Year,
             tg.ReleaseType,
             tg.WikiImage,
@@ -140,6 +134,17 @@ View::show_header($title, ['js' => 'requests,form_validate']);
     <div class="header">
         <h2><?= $title ?></h2>
     </div>
+
+<?php
+if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_requests')) {
+    $requester = new Gazelle\User($Request['UserID']);
+?>
+    <div class="box pad">
+        <strong class="important_text">Warning! You are editing
+        <a href="/user.php?id=<?= $Request['UserID'] ?>"><?= $requester->username() ?></a>'s request.
+        Be careful when making changes!</strong>
+    </div>
+<?php    } ?>
 
     <div class="box pad">
         <form action="" method="post" id="request_form" onsubmit="Calculate();">
@@ -277,7 +282,7 @@ View::show_header($title, ['js' => 'requests,form_validate']);
                         There is a list of official tags to the left of the text box. Please use these tags instead of "unofficial" tags (e.g. use the official "<strong class="important_text_alt">drum.and.bass</strong>" tag, instead of an unofficial "<strong class="important_text">dnb</strong>" tag.).
                     </td>
                 </tr>
-<?php    if ($NewRequest || $CanEdit) { ?>
+<?php    if ($NewRequest || ($CanEdit && $ownRequest)) { ?>
                 <tr id="releasetypes_tr">
                     <td class="label">Release type</td>
                     <td>
@@ -351,7 +356,7 @@ View::show_header($title, ['js' => 'requests,form_validate']);
                         <textarea name="description" cols="70" rows="7"><?=(!empty($Request['Description']) ? $Request['Description'] : '')?></textarea> <br />
                     </td>
                 </tr>
-<?php    if (check_perms('site_moderate_requests')) { ?>
+<?php    if ($Viewer->permitted('site_moderate_requests')) { ?>
                 <tr>
                     <td class="label">Torrent group</td>
                     <td>
