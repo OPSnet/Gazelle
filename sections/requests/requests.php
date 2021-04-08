@@ -67,7 +67,7 @@ if (empty($_GET['type'])) {
                     error(403);
                 }
                 $Title = "Requests filled by " . $user->username();
-                $SphQL->where('fillerid', $UserInfo['ID']);
+                $SphQL->where('fillerid', $user->id());
             } else {
                 $Title = 'Requests you have filled';
                 $SphQL->where('fillerid', $LoggedUser['ID']);
