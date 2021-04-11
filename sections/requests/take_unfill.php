@@ -35,7 +35,7 @@ $DB->prepared_query('
         Visible = 1
     WHERE ID = ?', $RequestID);
 
-$CategoryName = $CategoriesV2[$CategoryID - 1];
+$CategoryName = $Categories[$CategoryID - 1];
 
 $ArtistForm = Requests::get_artists($RequestID);
 $ArtistName = Artists::display_artists($ArtistForm, false, true);

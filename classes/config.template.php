@@ -279,8 +279,6 @@ $AllowedProxies = [
 $Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
 $GroupedCategories = array_intersect(['Music'], $Categories);
 $CategoryIcons = ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png'];
-$CategoriesV2 = ['Music'];
-$CategoryV2Icons = ['music.png'];
 
 $Formats = ['MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS'];
 $Bitrates = ['Lossless', '24bit Lossless', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '320', '256', '192', '160', '128', '96', '64', 'APS (VBR)', 'APX (VBR)', 'q8.x (VBR)', 'Other'];

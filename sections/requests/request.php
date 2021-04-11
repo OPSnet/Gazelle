@@ -25,7 +25,7 @@ $CanVote = !$IsFilled && check_perms('site_vote');
 if ($Request['CategoryID'] === '0') {
     $CategoryName = 'Unknown';
 } else {
-    $CategoryName = $CategoriesV2[$Request['CategoryID'] - 1];
+    $CategoryName = $Categories[$Request['CategoryID'] - 1];
 }
 
 $ArtistForm = Requests::get_artists($RequestID);
