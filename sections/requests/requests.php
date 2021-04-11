@@ -249,9 +249,9 @@ if (isset($SearchWords)) {
 
 if (!empty($_GET['filter_cat'])) {
     $CategoryArray = array_keys($_GET['filter_cat']);
-    if (count($CategoryArray) !== count($CategoriesV2)) {
+    if (count($CategoryArray) !== count($Categories)) {
         foreach ($CategoryArray as $Key => $Index) {
-            if (!isset($CategoriesV2[$Index - 1])) {
+            if (!isset($Categories[$Index - 1])) {
                 unset($CategoryArray[$Key]);
             }
         }
@@ -398,8 +398,8 @@ View::show_header($Title, 'requests');
         <table class="layout cat_list">
 <?php
         $x = 1;
-        reset($CategoriesV2);
-        foreach ($CategoriesV2 as $CatKey => $CatName) {
+        reset($Categories);
+        foreach ($Categories as $CatKey => $CatName) {
             if ($x % 8 === 0 || $x === 1) {
 ?>
                 <tr>
@@ -562,7 +562,7 @@ View::show_header($Title, 'requests');
         if ($Request['CategoryID'] == 0) {
             $CategoryName = 'Unknown';
         } else {
-            $CategoryName = $CategoriesV2[$Request['CategoryID'] - 1];
+            $CategoryName = $Categories[$Request['CategoryID'] - 1];
         }
 
         if ($Request['TorrentID'] != 0) {
@@ -614,7 +614,7 @@ View::show_header($Title, 'requests');
 <?php        } ?>
             </td>
             <td>
-<?php        if ($Filler) { ?>
+<?php        if ($IsFilled) { ?>
                 <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username() ?></a>
 <?php        } else { ?>
                 &mdash;

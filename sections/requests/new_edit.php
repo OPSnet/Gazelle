@@ -52,7 +52,7 @@ if (!$NewRequest) {
         $Checksum = $Request['Checksum'] ? 1 : 0;
 
         $IsFilled = !empty($Request['TorrentID']);
-        $CategoryName = $CategoriesV2[$CategoryID - 1];
+        $CategoryName = $Categories[$CategoryID - 1];
 
         $CanEdit = ((!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
         if (!$CanEdit) {
@@ -163,7 +163,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                     </td>
                     <td>
                         <select id="categories" name="type" onchange="Categories();">
-<?php        foreach ($CategoriesV2 as $Cat) { ?>
+<?php        foreach ($Categories as $Cat) { ?>
                             <option value="<?=$Cat?>"<?=(!empty($CategoryName) && ($CategoryName === $Cat) ? ' selected="selected"' : '')?>><?=$Cat?></option>
 <?php        } ?>
                         </select>

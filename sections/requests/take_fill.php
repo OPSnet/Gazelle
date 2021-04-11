@@ -120,7 +120,7 @@ if ($RequestCategoryID !== '0' && $TorrentCategoryID !== $RequestCategoryID) {
     $Err[] = 'This torrent is of a different category than the request. If the request is actually miscategorized, please contact staff.';
 }
 
-$CategoryName = $CategoriesV2[$RequestCategoryID - 1];
+$CategoryName = $Categories[$RequestCategoryID - 1];
 
 if ($Format === 'FLAC' && $LogCue && $Media === 'CD') {
     if (strpos($LogCue, 'Log') !== false) {
