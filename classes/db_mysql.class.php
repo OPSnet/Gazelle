@@ -304,11 +304,7 @@ class DB_MYSQL {
             return $Statement->get_result();
         };
 
-        $Query = "$this->PreparedQuery\n";
-        foreach ($Parameters as $key => $value) {
-            $Query .= "$key => $value\n";
-        }
-
+        $Query = $this->PreparedQuery . ' -- ' . json_encode($Parameters);
         return $this->attempt_query($Query, $Closure);
     }
 

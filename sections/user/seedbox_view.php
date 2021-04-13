@@ -1,17 +1,22 @@
 <?php
 use Gazelle\Util\Paginator;
 
-if (isset($_POST['action'])) {
-    $userId = (int)$_POST['userid'];
-} else {
-    $userId = (int)($_GET['userid'] ?? $LoggedUser['ID']);
-}
-if ($LoggedUser['ID'] != $userId && !check_perms('users_view_ips')) {
+$viewer = new Gazelle\User($LoggedUser['ID']);
+if (!$viewer->hasAttr('feature-seedbox') && !$viewer->permitted('users_view_ips')) {
     error(403);
+}
+if (!isset($_POST['action'])) {
+    $userId = (int)($_GET['userid'] ?? $viewer->id());
+} else {
+    authorize();
+    $userId = (int)$_POST['userid'];
 }
 $user = (new Gazelle\Manager\User)->findById($userId);
 if (!$user) {
     error(404);
+}
+if ($viewer->id() != $userId && !$viewer->permitted('users_view_ips')) {
+    error(403);
 }
 
 $union = trim($_REQUEST['view'] ?? 'union') === 'union';
@@ -25,7 +30,7 @@ if (isset($_POST['action']) || isset($_REQUEST['viewby'])) {
     }
     $seedbox->setSource($source)
         ->setTarget($target)
-        ->setUnion($union ? 'union' : 'exclude');
+        ->setUnion($union);
     if (isset($_REQUEST['viewby']) && $_REQUEST['viewby'] == Gazelle\Seedbox::VIEW_BY_PATH) {
         $seedbox->setViewByPath();
     } else {
@@ -39,8 +44,8 @@ if (isset($_POST['action']) || isset($_REQUEST['viewby'])) {
 
 $paginator = new Paginator(TORRENTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
 $paginator->setTotal($seedbox->total());
-View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
 
+View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
 ?>
 <div class="thin">
     <div class="header">
@@ -53,8 +58,6 @@ View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
 <?php
 
 if ($source && $target) {
-    echo $paginator->linkbox();
-
     echo G::$Twig->render('seedbox/report.twig', [
         'list' => $seedbox->torrentList(
             $paginator->limit(),
@@ -62,24 +65,20 @@ if ($source && $target) {
             new Gazelle\Manager\Torrent,
             (new Gazelle\Manager\TorrentLabel)->showFlags(false)->showEdition(false)
         ),
-        'mode'   => $union ? 'union' : 'exclude',
-        'source' => $seedbox->name($source),
-        'target' => $seedbox->name($target),
+        'mode'      => $union ? 'union' : 'exclude',
+        'paginator' => $paginator,
+        'source'    => $seedbox->name($source),
+        'target'    => $seedbox->name($target),
     ]);
-
-    echo $paginator->linkbox();
 }
 
 echo G::$Twig->render('seedbox/view.twig', [
-    'auth'   => $LoggedUser['AuthKey'],
-    'host'   => $seedbox->hostList(),
-    'mode'   => $union ? 'union' : 'exclude',
-    'source' => $source,
-    'target' => $target,
-    'userid' => $userId,
-    'viewby' => $seedbox->viewBy(),
+    'auth'    => $LoggedUser['AuthKey'],
+    'host'    => $seedbox->hostList(),
+    'mode'    => $union ? 'union' : 'exclude',
+    'source'  => $source,
+    'target'  => $target,
+    'user_id' => $userId,
+    'viewby'  => $seedbox->viewBy(),
 ]);
-?>
-</div>
-<?php
 View::show_footer();
