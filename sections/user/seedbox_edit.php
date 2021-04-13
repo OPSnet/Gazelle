@@ -1,26 +1,24 @@
 <?php
 
+$viewer = new Gazelle\User($LoggedUser['ID']);
+if (!$viewer->hasAttr('feature-seedbox') && !$viewer->permitted('users_view_ips')) {
+    error(403);
+}
 if (!isset($_POST['action'])) {
-    $userId = (int)($_GET['userid'] ?? $LoggedUser['ID']);
-    if (!$userId) {
-        error(404);
-    }
-    if ($LoggedUser['ID'] != $userId && !check_perms('users_view_ips')) {
-        error(403);
-    }
+    $userId = (int)($_GET['userid'] ?? $viewer->id());
 } else {
     authorize();
     $userId = (int)$_POST['userid'];
-    if (!$userId) {
-        error(404);
-    }
 }
-
 $user = (new Gazelle\Manager\User)->findById($userId);
 if (!$user) {
     error(404);
 }
-$seedbox = new Gazelle\Seedbox($user->id());
+if ($viewer->id() != $userId && !$viewer->permitted('users_view_ips')) {
+    error(403);
+}
+
+$seedbox = new Gazelle\Seedbox($userId);
 View::show_header($user->username() . ' &rsaquo; Seedboxes');
 
 if (isset($_POST['mode'])) {
@@ -74,21 +72,12 @@ if (isset($_POST['mode'])) {
             error(403);
     }
 }
-?>
-<div class="thin">
-    <div class="header">
-        <h2><?=Users::format_username($userId, false, false, false)?> &rsaquo; Seedboxes &rsaquo; Configure</h2>
-        <div class="linkbox">
-            <a href="user.php?action=seedbox&amp;userid=<?= $userId ?>" class="brackets">Configure</a>
-            <a href="user.php?action=seedbox-view&amp;userid=<?= $userId ?>" class="brackets">View</a>
-        </div>
-    </div>
-<?= G::$Twig->render('seedbox/config.twig',[
-    'auth' => $LoggedUser['AuthKey'],
-    'free' => $seedbox->freeList(),
-    'host' => $seedbox->hostList(),
-    'userid' => $userId,
-]) ?>
-</div>
-<?php
+
+echo G::$Twig->render('seedbox/config.twig',[
+    'auth'    => $LoggedUser['AuthKey'],
+    'free'    => $seedbox->freeList(),
+    'host'    => $seedbox->hostList(),
+    'user_id' => $userId,
+]);
+
 View::show_footer();
