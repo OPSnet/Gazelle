@@ -602,7 +602,14 @@ $IsNewGroup = !isset($GroupID);
 
 //----- Start inserts
 $artistMan = new Gazelle\Manager\Artist;
-if ($IsNewGroup) {
+if (!$IsNewGroup) {
+    $DB->prepared_query('
+        UPDATE torrents_group
+        SET Time = now()
+        WHERE ID = ?
+        ', $GroupID
+    );
+} else {
     if ($isMusicUpload) {
         //array to store which artists we have added already, to prevent adding an artist twice
         $ArtistsAdded = [];
@@ -641,20 +648,6 @@ if ($IsNewGroup) {
         }
     }
     $Cache->increment('stats_group_count');
-} else {
-    $DB->prepared_query('
-        UPDATE torrents_group
-        SET Time = now()
-        WHERE ID = ?
-        ', $GroupID
-    );
-    $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID", "detail_files_$GroupID"]);
-    if ($isMusicUpload) {
-        $Properties['ReleaseType'] = $DB->scalar('
-            SELECT ReleaseType FROM torrents_group WHERE ID = ?
-            ', $GroupID
-        );
-    }
 }
 
 // Description
@@ -999,3 +992,6 @@ if (!in_array('notifications', $paranoia)) {
 
 // Clear cache and allow deletion of this torrent now
 $Cache->deleteMulti(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
+if (!$IsNewGroup) {
+    $Cache->deleteMulti(["torrent_group_$GroupID", "detail_files_$GroupID"]);
+}
