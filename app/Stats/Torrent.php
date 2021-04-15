@@ -207,7 +207,7 @@ class Torrent extends \Gazelle\Base {
             return $this->peerStats;
         }
         $this->peerStats = $this->cache->get_value(self::PEER_KEY);
-        if (is_array($this->peerStats)) {
+        if ($this->peerStats !== false && isset($this->peerStats['leecher_count'])) {
             return $this->peerStats;
         }
         $this->busy = (bool)$this->cache->get_value(self::CALC_STATS_LOCK);
@@ -223,7 +223,6 @@ class Torrent extends \Gazelle\Base {
             GROUP BY Type
         ");
         $stats = $this->db->to_array(0, MYSQLI_NUM, false);
-        var_dump($stats);
         $this->peerStats = [
             'leecher_count' => $stats['Leeching'][1] ?: 0,
             'seeder_count'  => $stats['Seeding'][1] ?: 0,
