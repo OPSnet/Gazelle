@@ -38,7 +38,7 @@ if (isset($_POST['action']) || isset($_REQUEST['viewby'])) {
     }
     // this seems hackish
     if (isset($_POST['action'])) {
-        $_SERVER['REQUEST_URI'] .= "&source={$_POST['source']}&target={$_POST['target']}&viewby={$_POST['viewby']}";
+        $_SERVER['REQUEST_URI'] .= "&source={$_POST['source']}&target={$_POST['target']}&viewby={$_POST['viewby']}&view=" . ($union ? 'union' : 'exclude');
     }
 }
 
