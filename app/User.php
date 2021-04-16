@@ -1244,7 +1244,7 @@ class User extends BaseObject {
         return $this->db->affected_rows();
     }
 
-    public function resetPasskeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): bool {
+    public function modifyAnnounceKeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): bool {
         $this->db->prepared_query("
             INSERT INTO users_history_passkeys
                    (UserID, OldPassKey, NewPassKey, ChangerIP)
@@ -1252,6 +1252,20 @@ class User extends BaseObject {
             ", $this->id, $oldPasskey, $newPasskey, $ipaddr
         );
         return $this->db->affected_rows() === 1;
+    }
+
+    public function announceKeyHistory(): array {
+        $this->db->prepared_query("
+            SELECT OldPassKey AS old,
+                NewPassKey    AS new,
+                ChangeTime    AS date,
+                ChangerIP     AS ipaddr
+            FROM users_history_passkeys
+            WHERE UserID = ?
+            ORDER BY ChangeTime DESC
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function inboxUnreadCount(): int {
@@ -1727,7 +1741,7 @@ class User extends BaseObject {
         ');
     }
 
-    public function passkeyCount(): int {
+    public function announceKeyCount(): int {
         return $this->getSingleValue('user_passkey_count', '
             SELECT count(*) FROM users_history_passkeys WHERE UserID = ?
         ');

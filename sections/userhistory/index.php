@@ -14,6 +14,9 @@ enforce_login();
 
 if ($_GET['action']) {
     switch ($_GET['action']) {
+        case 'passkeys':
+            require_once('announce_key_history.php');
+            break;
         case 'ips':
             require_once('ip_history.php');
             break;
@@ -25,9 +28,6 @@ if ($_GET['action']) {
             break;
         case 'email':
             require_once('email_history.php');
-            break;
-        case 'passkeys':
-            require_once('passkey_history.php');
             break;
         case 'posts':
             require_once('post_history.php');

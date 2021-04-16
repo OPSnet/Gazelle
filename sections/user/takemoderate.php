@@ -556,7 +556,7 @@ if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
 
 if ($resetPasskey == 1 && check_perms('users_edit_reset_keys')) {
     $passkey = randomString();
-    $user->resetPasskeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
+    $user->modifyAnnounceKeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
     $Cache->delete_value('user_'.$cur['torrent_pass']);
     $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
     Tracker::update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
