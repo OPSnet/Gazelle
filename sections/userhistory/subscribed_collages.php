@@ -1,11 +1,10 @@
 <?php
-/*
-User collage subscription page
-*/
+
 if (!check_perms('site_collages_subscribe')) {
     error(403);
 }
 
+$viewer = new Gazelle\User($LoggedUser['ID']);
 $ShowAll = !empty($_GET['showall']);
 
 if ($ShowAll) {
@@ -47,8 +46,7 @@ View::show_header('Subscribed collages','browse,collage');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= Users::user_info($LoggedUser['ID'])['Username']
-            ?></a> &rsaquo; Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
+        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= $viewer->username() ?></a> &rsaquo; Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
 
         <div class="linkbox">
 <?php if ($ShowAll) { ?>

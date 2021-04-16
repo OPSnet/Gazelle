@@ -1,0 +1,20 @@
+<div class="header">
+    <h2><a href="/user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Announce Key History</h2>
+</div>
+<table width="100%">
+    <tr class="colhead">
+        <td>Old</td>
+        <td>New</td>
+        <td>Changed</td>
+        <td>IP <a href="/userhistory.php?action=ips&amp;userid={{ user.id }}" class="brackets">H</a></td>
+    </tr>
+{% for change in user.announceKeyHistory %}
+    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <td>{{ change.old }}</td>
+        <td>{{ change.new }}</td>
+        <td>{{ change.date|time_diff }}</td>
+        <td>{{ change.ipaddr }} <a href="user.php?action=search&amp;ip_history=on&amp;ip={{
+            change.ipaddr }}" class="brackets tooltip" title="Search">S</a><br />{{ resolveIpv4(change.ipaddr) }}</td>
+    </tr>
+{% endfor %}
+</table>
