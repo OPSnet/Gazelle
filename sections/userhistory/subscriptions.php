@@ -1,12 +1,16 @@
 <?php
 
+$userMan = new Gazelle\Manager\User;
+$viewer = new Gazelle\User($LoggedUser['ID']);
+
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 [$Page, $Limit] = Format::page_limit($PerPage);
 
 View::show_header('Subscriptions','subscriptions,comments,bbcode');
 
-$ShowCollapsed = (bool)($_GET['collapse'] ?? true);
-$ShowUnread = (bool)($_GET['showunread'] ?? true);
+$showAvatars   = $viewer->showAvatars();
+$showCollapsed = (bool)($_GET['collapse'] ?? true);
+$showUnread    = (bool)($_GET['showunread'] ?? true);
 
 $NumResults = $DB->scalar("
     SELECT sum(total)
@@ -21,7 +25,7 @@ $NumResults = $DB->scalar("
         LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
         WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
             AND (s.Page != 'collages' OR co.Deleted = '0')
-            " . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
+            " . ($showUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
             AND s.UserID = ?
         GROUP BY s.PageID
     UNION ALL
@@ -34,7 +38,7 @@ $NumResults = $DB->scalar("
             (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
         LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
         WHERE " . Forums::user_forums_sql()
-            . ($ShowUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
+            . ($showUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
             AND s.UserID = ?
         GROUP BY t.ID
     ) TOTAL
@@ -85,7 +89,7 @@ $DB->prepared_query("
     LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
     WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
         AND (s.Page != 'collages' OR co.Deleted = '0')
-        " . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
+        " . ($showUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
         AND s.UserID = ?
     GROUP BY s.PageID
 UNION ALL
@@ -113,7 +117,7 @@ UNION ALL
     LEFT JOIN users_main AS um ON (um.ID = p_lr.AuthorID)
     LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
     WHERE " . Forums::user_forums_sql()
-        . ($ShowUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
+        . ($showUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
         AND s.UserID = ?
     GROUP BY t.ID
     ORDER BY LastPostTime DESC
@@ -140,10 +144,10 @@ $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= Users::user_info($LoggedUser['ID'])['Username']
-            ?></a> &rsaquo; Subscriptions<?=$ShowUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
+        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= $viewer->username()
+            ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
         <div class="linkbox">
-<?php if (!$ShowUnread) { ?>
+<?php if (!$showUnread) { ?>
             <br /><br />
             <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>&nbsp;
 <?php } else { ?>
@@ -152,10 +156,8 @@ $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
 <?php
 }
 if ($NumResults) {
-    $userMan = new Gazelle\Manager\User;
-    $user = $userMan->findById($LoggedUser['ID']);
 ?>
-            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$ShowCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
+            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$showCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
 <?php } ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$LoggedUser['ID']?>" class="brackets">Go to post history</a>&nbsp;
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
@@ -164,7 +166,7 @@ if ($NumResults) {
     </div>
 <?php if (!$NumResults) { ?>
     <div class="center">
-        No subscriptions<?=$ShowUnread ? ' with unread posts' : ''?>
+        No subscriptions<?=$showUnread ? ' with unread posts' : ''?>
     </div>
 <?php } else { ?>
     <div class="linkbox">
@@ -223,15 +225,15 @@ if ($NumResults) {
                 error(0);
         }
 ?>
-    <table class="forum_post box vertical_margin<?=(!$user->showAvatars() ? ' noavatar' : '')?>">
+    <table class="forum_post box vertical_margin<?=(!$showAvatars ? ' noavatar' : '')?>">
         <colgroup>
-<?php   if ($user->showAvatars()) { ?>
+<?php   if ($showAvatars) { ?>
             <col class="col_avatar" />
 <?php   } ?>
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark notify_<?=$Result['Page']?>">
-            <td colspan="<?= $user->showAvatars() ? 2 : 1 ?>">
+            <td colspan="<?= $showAvatars ? 2 : 1 ?>">
                 <span style="float: left;">
                     <?=$Links . ($Result['PostID'] < $Result['LastPost'] ? ' <span class="new">(New!)</span>' : '')?>
                 </span>
@@ -251,10 +253,10 @@ if ($NumResults) {
             </td>
         </tr>
 <?php   if (!empty($Result['LastReadBody'])) { /* if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. */ ?>
-        <tr class="row<?=$ShowCollapsed ? ' hidden' : '' ?>">
-<?php       if ($user->showAvatars()) { ?>
+        <tr class="row<?=$showCollapsed ? ' hidden' : '' ?>">
+<?php       if ($showAvatars) { ?>
             <td class="avatar" valign="top">
-                <?= $userMan->avatarMarkup($user, new Gazelle\User($Result['LastReadUserID'])) ?>
+                <?= $userMan->avatarMarkup($viewer, new Gazelle\User($Result['LastReadUserID'])) ?>
             </td>
 <?php       } ?>
             <td class="body" valign="top">

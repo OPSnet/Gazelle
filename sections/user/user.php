@@ -275,7 +275,7 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
         }
         if (check_perms('users_view_keys')) {
 ?>
-                <li>Passkeys: <?=number_format($User->passkeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Announce keys: <?=number_format($User->announceKeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
         }
         if (check_perms('users_mod')) {
