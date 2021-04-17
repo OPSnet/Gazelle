@@ -73,7 +73,7 @@
             <td>Delete invite</td>
         </tr>
     {% endif %}
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ p.email }}</td>
             <td>{{ p.expires|time_diff }}</td>
             <td>{{ p.invite_key }}</td>
@@ -100,7 +100,7 @@
             <td class="m_th_right nobr">{{ heading.emit('ratio')|raw }}</td>
         </tr>
 {% for u in invited %}
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td class="td_username">{{ u.user_id|user_full|raw }}</td>
             <td class="td_email">{{ u.email }}</td>
             <td class="td_join_date">{{ u.join_date|time_diff }}</td>

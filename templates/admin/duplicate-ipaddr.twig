@@ -12,7 +12,7 @@
         <td>Joined</td>
     </tr>
 {% for item in list %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ item.user_id|user_full }}</td>
         <td>
             <span style="float: left;">{{ ajax_ipv4(item.ipaddr) }} ({{ item.ipaddr }})</span><span style="float: right;"><a href="userhistory.php?action=ips&amp;userid={{ item.user_id }}" title="History" class="brackets tooltip">H</a> <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ item.ipaddr }}" title="Search" class="brackets tooltip">S</a></span>

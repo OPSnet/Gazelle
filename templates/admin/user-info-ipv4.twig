@@ -5,7 +5,7 @@
     <th>Last seen</th>
 </tr>
 {% for i in info %}
-<tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
     <td>{{ i.0 }}
         <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ i.0 }}" class="brackets tooltip" title="Shared with other users?">S</a>
         <a href="https://whatismyipaddress.com/ip/{{ i.0 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>

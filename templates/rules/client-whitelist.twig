@@ -11,7 +11,7 @@
     </tr>
 {% for c in list %}
 {% if 'HIDDEN' not in c.vstring %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ c.vstring }}</td>
         <td>{{ c.peer_id }}</td>
     </tr>
