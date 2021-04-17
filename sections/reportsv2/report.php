@@ -40,8 +40,7 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
             foreach ($Reports as $Report) {
                 if (check_perms('admin_reports')) {
                     $ReporterID = $Report['ReporterID'];
-                    $Reporter = Users::user_info($ReporterID);
-                    $ReporterName = $Reporter['Username'];
+                    $ReporterName = $userMan->findById($ReporterID)->username();
                     $ReportLinks = "<a href=\"user.php?id=$ReporterID\">$ReporterName</a> <a href=\"reportsv2.php?view=report&amp;id={$Report['ID']}\">reported it</a>";
                 } else {
                     $ReportLinks = 'Someone reported it';
@@ -251,6 +250,7 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
+$userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
 
 //If we're not coming from torrents.php, check we're being returned because of an error.
