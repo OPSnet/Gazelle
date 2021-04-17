@@ -5,7 +5,7 @@
     <th>Registered from</th>
 </tr>
 {% for i in info %}
-<tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
     <td>{{ i.0 }}</td>
     <td>{{ i.1 }}</td>
     <td>{{ i.2 }}

@@ -1,5 +1,5 @@
 {% for b in list %}
-<tr class="drag row{{ cycle(['b', 'a'], loop.index0) }}" id="li_{{ b.group_id }}">
+<tr class="drag row{{ cycle(['a', 'b'], loop.index0) }}" id="li_{{ b.group_id }}">
     <td>
         <input class="sort_numbers" type="text" name="sort[{{ b.group_id }}]" value="{{ b.sequence }}" id="sort_{{ b.group_id }}" size="4" />
     </td>

@@ -17,7 +17,7 @@
     </tr>
 {% set torrent_list = user.tokenPage(paginator.limit, paginator.offset) %}
 {% for t in torrent_list %}
-    <tr class="{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ t.name|raw }}</td>
         <td class="nowrap">{{ t.created|time_diff }}</td>
         <td>{{ t.expired ? 'Yes' : 'No' }}

@@ -55,7 +55,7 @@
             <td>Time</td>
         </tr>
 {% for r in details %}
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>
     {% if user %}
             {{ r.IP }} ({{ resolveCountryIpv4(r.ip) }}) {{ resolveIpv4(r.ip) }}

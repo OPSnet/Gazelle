@@ -34,7 +34,7 @@
     <input type="hidden" name="action" value="whitelist_alter" />
     <input type="hidden" name="auth" value="{{ auth }}" />
     <table>
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>
                 <input type="hidden" name="id" value="{{ c.client_id }}" />
                 <input type="text" size="60" name="client" value="{{ c.vstring }}" />

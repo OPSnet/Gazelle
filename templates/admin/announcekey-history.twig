@@ -9,7 +9,7 @@
         <td>IP <a href="/userhistory.php?action=ips&amp;userid={{ user.id }}" class="brackets">H</a></td>
     </tr>
 {% for change in user.announceKeyHistory %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ change.old }}</td>
         <td>{{ change.new }}</td>
         <td>{{ change.date|time_diff }}</td>

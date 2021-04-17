@@ -26,7 +26,7 @@
                 </td>
             </tr>
 {% endif %}
-            <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>
                     {{ dono.Source }} ({{ dono.AddedBy|user_url }})
                 </td>

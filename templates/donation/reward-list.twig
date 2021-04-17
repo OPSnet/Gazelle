@@ -26,7 +26,7 @@
         <td>Second Avatar</td>
     </tr>
     {% endif %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ u.user_id|user_full }}</td>
         <td>{{ u.rank }}</td>
         <td>{{ u.hidden }}</td>

@@ -10,7 +10,7 @@
         <th>Registered from</th>
     </tr>
 {% for i in user.emailHistory  %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ i.0 }}</td>
         <td>{{ i.1 }}</td>
         <td>{{ i.2 }}
@@ -38,7 +38,7 @@
         <th>Warned until</th>
     </tr>
 {% endif %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.user.email }}</td>
         <td>{{ r.created }}</td>
