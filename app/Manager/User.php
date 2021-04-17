@@ -190,6 +190,40 @@ class User extends \Gazelle\Base {
         return $staffLevelList;
     }
 
+    /**
+     * Get list of staff names
+     * @return array id => username
+     */
+    public function staffList(): array {
+        $this->db->prepared_query("
+            SELECT um.ID    AS id,
+                um.Username AS username
+            FROM users_main AS um 
+            INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+            WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
+            ORDER BY p.Level DESC, um.Username ASC
+            ", FORUM_MOD
+        );
+        return $this->db->to_pair('id', 'username');
+    }
+
+    /**
+     * Get list of FLS names
+     * @return array id => username
+     */
+    public function FLSList(): array {
+        $this->db->prepared_query("
+            SELECT um.ID    AS id,
+                um.Username AS username
+            FROM users_main AS um 
+            INNER JOIN users_levels ul ON (ul.UserID = um.ID)
+            WHERE ul.PermissionID = ?
+            ORDER BY um.Username ASC
+            ", FLS_TEAM
+        );
+        return $this->db->to_pair('id', 'username');
+    }
+
     public function findAllByCustomPermission(): array {
         $this->db->prepared_query("
             SELECT ID, CustomPermissions
