@@ -40,7 +40,7 @@
             <td>Registered</td>
         </tr>
     {% for user in list %}
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>
                 {{ user.id|user_full }}
                 <br />

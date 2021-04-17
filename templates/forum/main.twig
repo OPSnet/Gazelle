@@ -10,7 +10,7 @@
         <td class="m_th_right" style="width: 7%;">Posts</td>
     </tr>
 {% endif %}
-<tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
     <td class="td_read {{ icon_class }} {{ tooltip }}" title="{{ icon_class|replace({'_': ' '})|ucfirstall }}"></td>
     <td class="td_forum">
         <h4 class="min_padding">

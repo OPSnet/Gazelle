@@ -20,7 +20,7 @@
         <tbody>
 {% endif %}
 {% if item.MinClass <= class %}
-            <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>{{ item.Title }}</td>
                 <td style="text-align:right">{{ item.Price|number_format }}</td>
                 <td>

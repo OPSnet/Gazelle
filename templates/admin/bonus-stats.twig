@@ -72,7 +72,7 @@
 {% set quarter = bonus.expenditureRange('WEEK', 0, 13) %}
 {% set year = bonus.expenditureRange('YEAR', 0, 1) %}
 {% for i in item %}
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ i.title }}</td>
             <td>{{ day[i.id].total|number_format }}</td>
             <td>{{ week[i.id].total|number_format }}</td>
@@ -114,7 +114,7 @@
 {% set poolers  = bonus.topPoolContributors(limit) %}
 {% set overall = bonus.topAggregateSpenders(limit) %}
 {% for i in range(0, limit - 1) %}
-        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td style="text-align: right">{{ i + 1 }}</td>
             <td style="text-align: right">{{ _self.total(hoarders, i) }}</td>
             <td>{{ _self.user(hoarders, i) }}</td>

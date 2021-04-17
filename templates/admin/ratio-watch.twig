@@ -23,7 +23,7 @@
         <td class="tooltip" title="If the time shown here ends in &quot;ago&quot;, it represents how long the user has been on ratio watch and/or below their required ratio. Otherwise, it represents the time until the two week Ratio Watch period expires.">Ratio Watch Ended/Ends</td>
     </tr>
     {% for u in users %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ u.user_id|user_full }}</td>
         <td class="number_column">{{ u.uploaded|octet_size }}</td>
         <td class="number_column">{{ u.downloaded|octet_size }}</td>

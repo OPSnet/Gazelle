@@ -98,7 +98,7 @@
                     <th>Revoke</th>
                 </tr>
 {% for token in user.apiTokenList %}
-                <tr class="{{ cycle(['b', 'a'], loop.index0) }}">
+                <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
                     <td>{{ token.name }}</td>
                     <td>{{ token.created|time_diff }}</td>
                     <td style='text-align: center'><a href='user.php?action=token&amp;do=revoke&amp;user_id={{ logged_user }}&amp;token_id={{ token.id }}'>Revoke</a>

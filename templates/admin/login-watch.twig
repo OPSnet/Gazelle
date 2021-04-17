@@ -37,7 +37,7 @@
 
     </tr>
     {% endif %}
-    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>
             {{ b.ipaddr|raw }}
             <a href="https://whatismyipaddress.com/ip/{{ b.ipaddr }}" class="brackets tooltip" title="whatismyipaddress.com" target="_blank">WI</a>

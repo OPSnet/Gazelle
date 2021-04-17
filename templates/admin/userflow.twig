@@ -17,7 +17,7 @@
         </tr>
 {% for d in details %}
     {% set total_out = d.ratio + d.inactivity + d.manual %}
-        <tr class="{{ cycle(['b', 'a'], loop.index0) }}">
+        <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ d.date }}</td>
             <td>{{ d.joined|number_format }}</td>
             <td>{{ d.manual|number_format }}</td>
