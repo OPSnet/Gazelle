@@ -4,6 +4,8 @@ if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
     error(403);
 }
 
+$userMan = new Gazelle\Manager\User;
+
 [$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
 
 $cond = [];
@@ -238,13 +240,10 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                         </form>
                     </td>
                 </tr>
-<?php
-            } else {
-                $ResolverInfo = Users::user_info($ResolverID);
-?>
+<?php       } else { ?>
                 <tr>
                     <td colspan="2">
-                        Resolved by <a href="users.php?id=<?=$ResolverID?>"><?=$ResolverInfo['Username']?></a>
+                        Resolved by <a href="users.php?id=<?=$ResolverID?>"><?= $userMan->findById($ResolverID)->username() ?></a>
                     </td>
                 </tr>
 <?php       } ?>
@@ -255,7 +254,7 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
     }
     ?>
     <div class="linkbox">
-<?= $Pages; ?>
+<?= $Pages ?>
     </div>
 </div>
 <?php
