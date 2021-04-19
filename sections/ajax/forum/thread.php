@@ -67,11 +67,11 @@ if ($threadInfo['Posts'] <= $PerPage) {
         $PostNum = 1;
     }
 }
-[$Page, $Limit] = Format::page_limit($PerPage, min($threadInfo['Posts'], $PostNum));
+[$Page] = Format::page_limit($PerPage, min($threadInfo['Posts'], $PostNum));
 if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
     $Page = ceil($threadInfo['Posts'] / $PerPage);
 }
-[$CatalogueID,$CatalogueLimit] = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
+[$CatalogueID, $CatalogueLimit] = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
 
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
 if (!$Catalogue = $Cache->get_value("thread_$threadId"."_catalogue_$CatalogueID")) {
