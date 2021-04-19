@@ -29,8 +29,8 @@ if (isset($_GET['pp'])) {
 } else {
     $PerPage = POSTS_PER_PAGE;
 }
-[$Page, $Limit] = Format::page_limit(TOPICS_PER_PAGE);
-$Pages = Format::get_pages($Page, $forum->numThreads(), TOPICS_PER_PAGE, 9);
+$Page = (int)($_GET['page'] ?? 1);
+
 $ForumID = $forum->id();
 $ForumName = $forum->name();
 $threadList = $forum->tableOfContentsForum($Page);

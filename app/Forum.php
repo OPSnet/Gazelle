@@ -7,7 +7,7 @@ class Forum extends Base {
 
     const CACHE_TOC_MAIN    = 'forum_toc_main';
     const CACHE_TOC_FORUM   = 'forum_toc_%d';
-    const CACHE_FORUM       = 'forumv5_%d';
+    const CACHE_FORUM       = 'forum_%d';
     const CACHE_THREAD_INFO = 'thread_%d_info';
     const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
 
@@ -187,7 +187,6 @@ class Forum extends Base {
     public function flushCache() {
         (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
-            'forums_list',
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
@@ -270,7 +269,8 @@ class Forum extends Base {
     public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
         (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
-            'forums_list', "forums_" . $forumId, "forums_" . $this->forumId,
+            sprintf(self::CACHE_FORUM, $forumId),
+            sprintf(self::CACHE_FORUM, $this->forumId),
             "thread_forum_{$threadId}", "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $forumId),
@@ -302,11 +302,6 @@ class Forum extends Base {
      * @param int threadId The thread to remove
      */
     public function removeThread(int $threadId) {
-        (new \Gazelle\Manager\Forum)->flushToc();
-        $this->cache->deleteMulti([
-            'forums_list', "forums_" . $this->forumId, "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
-            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
-        ]);
         $this->db->prepared_query("
             DELETE ft, fp, unq
             FROM forums_topics AS ft
@@ -321,6 +316,14 @@ class Forum extends Base {
         $subscription = new \Gazelle\Manager\Subscription;
         $subscription->flushQuotes('forums', $threadId);
         $subscription->move('forums', $threadId, null);
+
+        (new \Gazelle\Manager\Forum)->flushToc();
+        $this->cache->deleteMulti([
+            "thread_{$threadId}",
+            sprintf(self::CACHE_FORUM, $this->forumId),
+            sprintf(self::CACHE_THREAD_INFO, $threadId),
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
+        ]);
     }
 
     /**
@@ -498,20 +501,27 @@ class Forum extends Base {
      */
     protected function updateRoot(int $userId, int $threadId, int $postId) {
         $this->db->prepared_query("
-            UPDATE forums SET
-                NumPosts         = NumPosts + 1,
-                NumTopics        = NumTopics + 1,
-                LastPostID       = ?,
-                LastPostAuthorID = ?,
-                LastPostTopicID  = ?,
-                LastPostTime     = now()
-            WHERE ID = ?
-            ", $postId,  $userId, $threadId, $this->forumId
+            UPDATE forums f
+            INNER JOIN (
+                SELECT ft.ForumID,
+                    COUNT(DISTINCT ft.ID) as numThreads,
+                    COUNT(fp.ID) as numPosts
+                FROM forums_topics ft
+                INNER JOIN forums_posts fp ON (fp.TopicID = ft.ID)
+                WHERE ft.ForumID = ?
+            ) STATS ON (STATS.ForumID = f.ID) SET
+                f.NumTopics        = STATS.numThreads,
+                f.NumPosts         = STATS.numPosts,
+                f.LastPostID       = ?,
+                f.LastPostAuthorID = ?,
+                f.LastPostTopicID  = ?,
+                f.LastPostTime     = now()
+            WHERE f.ID = ?
+            ", $this->forumId, $postId,  $userId, $threadId, $this->forumId
         );
         (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
-            "forums_list",
-            "forums_{$threadId}",
+            sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
         ]);
@@ -975,7 +985,7 @@ class Forum extends Base {
         for ($i = $begin; $i <= $end; $i++) {
             $this->cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
         }
-        $this->cache->deleteMulti([sprintf(self::CACHE_THREAD_INFO, $threadId), 'forums_list', "forums_$forumId"]);
+        $this->cache->deleteMulti([sprintf(self::CACHE_THREAD_INFO, $threadId)]);
         $this->flushCache();
         return true;
     }
