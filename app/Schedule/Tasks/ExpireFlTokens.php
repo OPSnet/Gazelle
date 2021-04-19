@@ -36,10 +36,11 @@ class ExpireFlTokens extends \Gazelle\Schedule\Task
                 $this->processed++;
             }
             $this->db->prepared_query("
-                UPDATE users_freeleeches
-                SET Expired = TRUE
-                WHERE (Expired = FALSE OR (t.Size > 0 AND uf.Downloaded / t.Size > ?))
-                    AND Time < ? - INTERVAL ? DAY
+                UPDATE users_freeleeches uf
+                INNER JOIN torrents AS t ON (t.ID = uf.TorrentID) SET
+                    uf.Expired = TRUE
+                WHERE (uf.Expired = FALSE OR (t.Size > 0 AND uf.Downloaded / t.Size > ?))
+                    AND uf.time < ? - INTERVAL ? DAY
             ", $slop, $now, $expiry);
         }
     }
