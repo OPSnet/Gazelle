@@ -116,7 +116,7 @@ class User extends \Gazelle\Base {
                     break;
             }
             $attrs = ['width="' . AVATAR_WIDTH . '"'];
-            [$mouseover, $second] = (new \Gazelle\Manager\Donation)->avatarInfo($viewedId);
+            [$mouseover, $second] = $viewed->donorAvatar();
             if (!is_null($mouseover)) {
                 $attrs[] = $mouseover;
             }
@@ -674,5 +674,29 @@ class User extends \Gazelle\Base {
         }
         \Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
         return $n;
+    }
+
+    /**
+     * Manage donor status visibility
+     */
+    protected function setDonorVisibility(\Gazelle\User $user, bool $visible): int {
+        $hidden = $visible ? '0' : '1';
+        $this->db->prepared_query("
+            INSERT INTO users_donor_ranks
+                   (UserID, Hidden)
+            VALUES (?,      ?)
+            ON DUPLICATE KEY UPDATE
+                Hidden = ?
+            ", $user->id(), $hidden, $hidden
+        );
+        return $this->db->affected_rows();
+    }
+
+    public function hideDonor(\Gazelle\User $user): int {
+        return $this->setDonorVisibility($user, false);
+    }
+
+    public function showDonor(\Gazelle\User $user): int {
+        return $this->setDonorVisibility($user, true);
     }
 }

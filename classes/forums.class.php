@@ -48,7 +48,7 @@ class Forums {
         $RestrictedForums = self::get_restricted_forums();
         $PermittedForums = self::get_permitted_forums();
         $donorMan = new Gazelle\Manager\Donation;
-        if ($donorMan->hasForumAccess(G::$LoggedUser['ID']) && !in_array(DONOR_FORUM, $PermittedForums)) {
+        if ($donorMan->hasForumAccess(new Gazelle\User(G::$LoggedUser['ID'])) && !in_array(DONOR_FORUM, $PermittedForums)) {
             $PermittedForums[] = DONOR_FORUM;
         }
         $SQL = "((f.MinClassRead <= '" . G::$LoggedUser['Class'] . "'";

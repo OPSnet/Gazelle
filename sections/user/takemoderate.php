@@ -157,9 +157,9 @@ if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['
 $donorMan = new Gazelle\Manager\Donation;
 $donorMan->twig(G::$Twig);
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
-    $donorMan->moderatorDonate($userID, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $LoggedUser['ID']);
+    $donorMan->moderatorDonate($user, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $LoggedUser['ID']);
 } elseif (!empty($_POST['donor_values_submit'])) {
-    $donorMan->moderatorAdjust($userID, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $LoggedUser['ID']);
+    $donorMan->moderatorAdjust($user, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $LoggedUser['ID']);
 }
 
 // If we're deleting the user, we can ignore all the other crap

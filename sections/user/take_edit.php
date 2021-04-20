@@ -118,9 +118,7 @@ if (!isset($_POST['p_donor_heart'])) {
 }
 // End building $Paranoia
 
-$userMan = new Gazelle\Manager\User;
-$donorMan = new Gazelle\Manager\Donation;
-$donorMan->updateReward($userId,
+$user->updateReward(
     array_map('trim',
         array_filter($_POST,
         function ($key) {
@@ -138,9 +136,9 @@ $donorMan->updateReward($userId,
 );
 
 if (isset($_POST['p_donor_stats'])) {
-    $donorMan->show($userId);
+    $userMan->showDonor($user);
 } else {
-    $donorMan->hide($userId);
+    $userMan->hideDonor($user);
 }
 
 $CurEmail = $user->email();
