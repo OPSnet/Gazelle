@@ -339,65 +339,55 @@ class Users {
         if ($UserID == 0) {
             return 'System';
         }
-
-        $UserInfo = self::user_info($UserID);
-        if ($UserInfo['Username'] == '') {
+        $userMan = new Gazelle\Manager\User;
+        $user = $userMan->findById($UserID);
+        if (is_null($user)) {
             return "Unknown [$UserID]";
         }
 
-        $Str = '';
-
-        $Username = $UserInfo['Username'];
-        $Paranoia = $UserInfo['Paranoia'];
-
         $Classes = (new \Gazelle\Manager\User)->classList();
-        if ($UserInfo['Class'] < $Classes[MOD]['Level']) {
-            $OverrideParanoia = check_perms('users_override_paranoia', $UserInfo['Class']);
+        if ($user->primaryClass() < $Classes[MOD]['Level']) {
+            $OverrideParanoia = check_perms('users_override_paranoia', $user->primaryClass());
         } else {
             // Don't override paranoia for mods who don't want to show their donor heart
             $OverrideParanoia = false;
         }
-        $ShowDonorIcon = (!in_array('hide_donor_heart', $Paranoia) || $OverrideParanoia);
+        $ShowDonorIcon = $OverrideParanoia || $user->propertyVisible($userMan->findById(G::$LoggedUser['ID']), 'hide_donor_heart');
 
-        $donorMan = new \Gazelle\Manager\Donation;
+        $Username = $user->username();
         if ($IsDonorForum) {
-            list($Prefix, $Suffix, $HasComma) = $donorMan->titles($UserID);
-            $Username = "$Prefix $Username" . ($HasComma ? ', ' : ' ') . "$Suffix ";
+            [$Prefix, $Suffix, $HasComma] = $user->donorTitles();
+            $Username = "$Prefix $Username" . ($HasComma ? ', ' : ' ') . $Suffix;
         }
 
         if ($Title) {
-            $Str .= "<strong><a href=\"user.php?id=$UserID\">$Username</a></strong>";
+            $Str = "<strong><a href=\"user.php?id=$UserID\">$Username</a></strong>";
         } else {
-            $Str .= "<a href=\"user.php?id=$UserID\">$Username</a>";
+            $Str = "<a href=\"user.php?id=$UserID\">$Username</a>";
         }
         if ($Badges) {
-            $DonorRank = $donorMan->rank($UserID);
-            if ($DonorRank == 0 && $UserInfo['Donor'] == 1) {
+            $DonorRank = $user->donorRank();
+            if ($DonorRank == 0 && $user->isDonor()) {
                 $DonorRank = 1;
             }
             if ($ShowDonorIcon && $DonorRank > 0) {
-                $IconLink = 'donate.php';
-                $IconImage = 'donor.png';
-                $IconText = 'Donor';
-                $DonorHeart = $DonorRank;
-                $SpecialRank = $donorMan->specialRank($UserID);
-                $EnabledRewards = $donorMan->enabledRewards($UserID);
-                $DonorRewards = $donorMan->rewards($UserID);
-                if ($EnabledRewards['HasDonorIconMouseOverText'] && !empty($DonorRewards['IconMouseOverText'])) {
-                    $IconText = display_str($DonorRewards['IconMouseOverText']);
-                }
-                if ($EnabledRewards['HasDonorIconLink'] && !empty($DonorRewards['CustomIconLink'])) {
-                    $IconLink = display_str($DonorRewards['CustomIconLink']);
-                }
+                $EnabledRewards = $user->enabledDonorRewards();
+                $DonorRewards = $user->donorRewards();
+                $IconText = ($EnabledRewards['HasDonorIconMouseOverText'] && !empty($DonorRewards['IconMouseOverText']))
+                    ? display_str($DonorRewards['IconMouseOverText']) : 'Donor';
+                $IconLink = ($EnabledRewards['HasDonorIconLink'] && !empty($DonorRewards['CustomIconLink']))
+                    ? display_str($DonorRewards['CustomIconLink']) : 'donate.php';
                 if ($EnabledRewards['HasCustomDonorIcon'] && !empty($DonorRewards['CustomIcon'])) {
                     $IconImage = ImageTools::process($DonorRewards['CustomIcon'], false, 'donoricon', $UserID);
                 } else {
-                    if ($SpecialRank === MAX_SPECIAL_RANK) {
+                    if ($user->specialDonorRank() === MAX_SPECIAL_RANK) {
                         $DonorHeart = 6;
                     } elseif ($DonorRank === 5) {
                         $DonorHeart = 4; // Two points between rank 4 and 5
                     } elseif ($DonorRank >= MAX_RANK) {
                         $DonorHeart = 5;
+                    } else {
+                        $DonorHeart = $DonorRank;
                     }
                     if ($DonorHeart === 1) {
                         $IconImage = STATIC_SERVER . '/common/symbols/donor.png';
@@ -409,26 +399,28 @@ class Users {
             }
         }
 
-        $Str .= ($IsWarned && $UserInfo['Warned']) ? '<a href="wiki.php?action=article&amp;name=warnings"'
-                    . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
-                    . (G::$LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
-                    . '" class="tooltip" /></a>' : '';
-        $Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
+        $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
+            . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
+            . (G::$LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
+            . '" class="tooltip" /></a>' : '';
+        $Str .= ($IsEnabled && $user->isDisabled())
+            ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>'
+            : '';
 
         if ($Badges) {
-            $ClassesDisplay = [];
-            foreach (array_keys($UserInfo['ExtraClasses']) as $PermID) {
-                if ($Classes[$PermID]['badge'] !== '') {
-                    $ClassesDisplay[] = '<span class="tooltip secondary_class" title="'.$Classes[$PermID]['Name'].'">'.$Classes[$PermID]['badge'].'</span>';
+            $badgeList = [];
+            foreach ($user->secondaryBadges() as $badge => $name) {
+                if ($name !== '') {
+                    $badgeList[] = '<span class="tooltip secondary_class" title="' . $name . '">' . $badge . '</span>';
                 }
             }
-            if (!empty($ClassesDisplay)) {
-                $Str .= '&nbsp;'.implode('&nbsp;', $ClassesDisplay);
+            if ($badgeList) {
+                $Str .= '&nbsp;'.implode('&nbsp;', $badgeList);
             }
         }
 
         if ($Class) {
-            $userClass = (new Gazelle\Manager\User)->userclassName($UserInfo['PermissionID']);
+            $userClass = $userMan->userclassName($user->primaryClass());
             if ($Title) {
                 $Str .= " <strong>($userClass)</strong>";
             } else {
@@ -438,16 +430,16 @@ class Users {
 
         if ($Title) {
             // Image proxy CTs
-            if (check_perms('site_proxy_images') && !empty($UserInfo['Title'])) {
-                $UserInfo['Title'] = preg_replace_callback('~src=("?)(http.+?)(["\s>])~',
+            if (check_perms('site_proxy_images') && !empty($user->title())) {
+                $userTitle = preg_replace_callback('~src=("?)(http.+?)(["\s>])~',
                     function($Matches) {
                         return 'src=' . $Matches[1] . ImageTools::process($Matches[2]) . $Matches[3];
                     },
-                    $UserInfo['Title']);
+                    $user->title());
             }
 
-            if ($UserInfo['Title']) {
-                $Str .= ' <span class="user_title">('.$UserInfo['Title'].')</span>';
+            if ($userTitle ?? false) {
+                $Str .= ' <span class="user_title">('.$userTitle.')</span>';
             }
         }
         return $Str;

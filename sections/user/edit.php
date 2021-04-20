@@ -53,9 +53,8 @@ if (!count($UserNavItems)) {
     }));
 }
 
-$donorMan = new Gazelle\Manager\Donation;
-$enabledReward = $donorMan->enabledRewards($UserID);
-$profileReward = $donorMan->profileRewards($UserID);
+$enabledReward = $User->enabledDonorRewards();
+$profileReward = $User->donorRewards();
 $profile = [
     0 => [
         'title'    => $InfoTitle,
@@ -104,8 +103,8 @@ echo G::$Twig->render('user/setting.twig', [
     ],
     'donor' => [
         'enabled' => $enabledReward,
-        'reward'  => $donorMan->rewards($UserID),
-        'title'   => $donorMan->titles($UserID),
+        'reward'  => $User->donorRewards(),
+        'title'   => $User->donorTitles(),
     ],
     'notify' => [
         'autosub'    => $options['AutoSubscribe'] ?: false,

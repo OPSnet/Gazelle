@@ -13,6 +13,7 @@ $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 $isMod = check_perms("users_mod");
 
+$userMan = new Gazelle\Manager\User;
 $donorMan = new Gazelle\Manager\Donation;
 $donor = new Gazelle\Top10\Donor;
 $results = $donor->getTopDonors($limit);
@@ -62,15 +63,16 @@ switch ($limit) {
 <?php } ?>
 
 <?php
-  foreach($results as $index=>$donor) {
-    $highlight = ($index % 2 ? 'a' : 'b');
+  foreach($results as $index => $info) {
+    $donor = $userMan->findById($info['UserID']);
 ?>
-    <tr class="row<?=$highlight?>">
+    <tr class="row<?= $index % 2 ? 'a' : 'b' ?>">
         <td class="center"><?=$index + 1?></td>
-        <td><?=$donor['Hidden'] && !$isMod ? 'Hidden' : Users::format_username($donor['UserID'], false, false, false)?></td>
-        <td style="text-align: left;"><?=check_perms('users_mod') || $index < 51 ? $donor['TotalRank'] : 'Hidden';?></td>
-        <td style="text-align: left;"><?=$donor['Hidden'] && !$isMod ? 'Hidden' : $donorMan->rankLabel($donor['UserID']) ?></td>
-        <td style="text-align: left;"><?=$donor['Hidden'] && !$isMod ? 'Hidden' : time_diff($donor['DonationTime'])?></td>
+        <td><?=$info['Hidden'] && !$isMod
+            ? 'Hidden' : ('<a href="user.php?id=' . $donor->id() . '">' . $donor->username() . '</a>') ?></td>
+        <td style="text-align: left;"><?= $isMod || $index < 51 ? $info['TotalRank'] : 'Hidden' ?></td>
+        <td style="text-align: left;"><?= $info['Hidden'] && !$isMod ? 'Hidden' : $donor->donorRankLabel() ?></td>
+        <td style="text-align: left;"><?= $info['Hidden'] && !$isMod ? 'Hidden' : $donor->lastDonation() ?></td>
     </tr>
 <?php } ?>
   </table>

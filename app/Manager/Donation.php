@@ -6,13 +6,12 @@ class Donation extends \Gazelle\Base {
 
     protected $twig;
 
-    // TODO: use dependency injection
     public function twig(\Twig\Environment $twig) {
         $this->twig = $twig;
     }
 
-    public function moderatorAdjust(int $UserID, int $Rank, int $TotalRank, string $Reason, int $who) {
-        $this->donate($UserID, [
+    public function moderatorAdjust(\Gazelle\User $user, int $Rank, int $TotalRank, string $Reason, int $who) {
+        $this->donate($user, [
             "Source" => "Modify Values",
             "Rank" => (int)$Rank,
             "TotalRank" => (int)$TotalRank,
@@ -22,8 +21,8 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function moderatorDonate(int $UserID, string $amount, string $Currency, string $Reason, int $who) {
-        $this->donate($UserID, [
+    public function moderatorDonate(\Gazelle\User $user, string $amount, string $Currency, string $Reason, int $who) {
+        $this->donate($user, [
             "Source" => 'Add Points',
             "Amount" => $amount,
             "Currency" => $Currency,
@@ -33,8 +32,8 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function regularDonate(int $UserID, string $DonationAmount, string $Source, string $Reason, $Currency = "EUR") {
-        $this->donate($UserID, [
+    public function regularDonate(\Gazelle\User $user, string $DonationAmount, string $Source, string $Reason, $Currency = "EUR") {
+        $this->donate($user, [
             "Source" => $Source,
             "Amount" => $DonationAmount,
             "Currency" => $Currency,
@@ -44,17 +43,15 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function donate(int $UserID, array $Args) {
-        $UserID = $UserID;
+    public function donate(\Gazelle\User $user, array $Args) {
         $QueryID = $this->db->get_query_id();
-
         $this->cache->InternalCache = false;
 
         if (!isset($Args['Amount'])) {
             $xbtAmount = 0.0;
             $fiatAmount = 0.0;
         } else {
-            $XBT = new \Gazelle\Manager\XBT;
+            $XBT = new XBT;
             $forexRate = $XBT->latestRate('EUR');
             switch ($Args['Currency'] == 'XBT') {
                 case 'XBT':
@@ -78,6 +75,7 @@ class Donation extends \Gazelle\Base {
         // Total ranks acquired (all time) unlock Special ranks.
         $rankDelta = $Args['Rank'] ?? floor($fiatAmount / DONOR_RANK_PRICE);
         $totalDelta = $Args['TotalRank'] ?? $rankDelta;
+        $UserID = $user->id();
 
         $this->db->prepared_query('
             INSERT INTO users_donor_ranks
@@ -114,7 +112,7 @@ class Donation extends \Gazelle\Base {
         // Now that their rank and total rank has been set, we can calculate their special rank and invites
         $column = [];
         $args = [];
-        $newSpecial = $this->calculateSpecialRank($UserID, $TotalRank);
+        $newSpecial = $this->calculateSpecialRank($user, $TotalRank);
         if ($newSpecial != $SpecialRank) {
             $column[] = 'SpecialRank = ?';
             $args[] = $newSpecial;
@@ -167,13 +165,12 @@ class Donation extends \Gazelle\Base {
         $this->db->set_query_id($QueryID);
     }
 
-    protected function calculateSpecialRank(int $UserID, int $TotalRank) {
-        $SpecialRank = $this->specialRank($UserID);
+    protected function calculateSpecialRank(\Gazelle\User $user, int $TotalRank) {
+        $SpecialRank = $user->specialDonorRank();
+        $UserID = $user->id();
         if ($TotalRank < 10) {
             $SpecialRank = 0;
         }
-
-        $userMan = new User;
 
         if ($SpecialRank < 1 && $TotalRank >= 10) {
             $userMan->sendPM($UserID, 0,
@@ -241,337 +238,11 @@ class Donation extends \Gazelle\Base {
         return $this->db->affected_rows();
     }
 
-    protected function setHidden(int $userId, string $state): int {
-        $this->db->prepared_query("
-            INSERT INTO users_donor_ranks
-                   (UserID, Hidden)
-            VALUES (?,      ?)
-            ON DUPLICATE KEY UPDATE
-                Hidden = ?
-            ", $userId, $state, $state
-        );
-        return $this->db->affected_rows();
+    public function hasForumAccess(\Gazelle\User $user) {
+        return $user->donorRank() >= DONOR_FORUM_RANK || $user->specialDonorRank() >= MAX_SPECIAL_RANK;
     }
 
-    public function hide(int $userId): int {
-        return $this->setHidden($userId, '1');
-    }
-
-    public function show(int $userId): int {
-        return $this->setHidden($userId, '0');
-    }
-
-    public function hasForumAccess($UserID) {
-        return $this->rank($UserID) >= DONOR_FORUM_RANK || $this->specialRank($UserID) >= MAX_SPECIAL_RANK;
-    }
-
-    /**
-     * Put all the common donor info in the same cache key to save some cache calls
-     */
-    protected function info($UserID) {
-        // Our cache class should prevent identical memcached requests
-        $DonorInfo = $this->cache->get_value("donor_info_$UserID");
-        if ($DonorInfo === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query('
-                SELECT
-                    Rank,
-                    SpecialRank,
-                    TotalRank,
-                    DonationTime,
-                    RankExpirationTime + INTERVAL 766 HOUR
-                FROM users_donor_ranks
-                WHERE UserID = ?
-                ', $UserID
-            );
-            // 2 hours less than 32 days to account for schedule run times
-            if ($this->db->has_results()) {
-                [$Rank, $SpecialRank, $TotalRank, $DonationTime, $ExpireTime]
-                    = $this->db->next_record(MYSQLI_NUM, false);
-                if ($DonationTime === null) {
-                    $DonationTime = 0;
-                }
-                if ($ExpireTime === null) {
-                    $ExpireTime = 0;
-                }
-            } else {
-                $Rank = $SpecialRank = $TotalRank = $DonationTime = $ExpireTime = 0;
-            }
-            if (\Permissions::is_mod($UserID)) {
-                $Rank = MAX_EXTRA_RANK;
-                $SpecialRank = MAX_SPECIAL_RANK;
-            }
-            $this->db->prepared_query('
-                SELECT
-                    IconMouseOverText,
-                    AvatarMouseOverText,
-                    CustomIcon,
-                    CustomIconLink,
-                    SecondAvatar
-                FROM donor_rewards
-                WHERE UserID = ?
-                ', $UserID
-            );
-            $Rewards = $this->db->next_record(MYSQLI_ASSOC);
-            $this->db->set_query_id($QueryID);
-
-            $DonorInfo = [
-                'Rank' => (int)$Rank,
-                'SRank' => (int)$SpecialRank,
-                'TotRank' => (int)$TotalRank,
-                'Time' => $DonationTime,
-                'ExpireTime' => $ExpireTime,
-                'Rewards' => $Rewards
-            ];
-            $this->cache->cache_value("donor_info_$UserID", $DonorInfo, 86400);
-        }
-        return $DonorInfo;
-    }
-
-    public function rank($UserID) {
-        return $this->info($UserID)['Rank'];
-    }
-
-    public function specialRank($UserID) {
-        return $this->info($UserID)['SRank'];
-    }
-
-    public function totalRank($UserID) {
-        return $this->info($UserID)['TotRank'];
-    }
-
-    public function lastDonation($UserID) {
-        return $this->info($UserID)['Time'];
-    }
-
-    public function personalCollages($UserID) {
-        $DonorInfo = $this->info($UserID);
-        if ($DonorInfo['SRank'] == MAX_SPECIAL_RANK) {
-            $Collages = 5;
-        } else {
-            $Collages = min($DonorInfo['Rank'], 5); // One extra collage per donor rank up to 5
-        }
-        return $Collages;
-    }
-
-    public function titles($UserID) {
-        $Results = $this->cache->get_value("donor_title_$UserID");
-        if ($Results === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query('
-                SELECT Prefix, Suffix, UseComma
-                FROM donor_forum_usernames
-                WHERE UserID = ?
-                ', $UserID
-            );
-            $Results = $this->db->next_record();
-            $this->db->set_query_id($QueryID);
-            $this->cache->cache_value("donor_title_$UserID", $Results, 0);
-        }
-        return $Results;
-    }
-
-    public function avatarInfo(int $userId): array {
-        $enabled = $this->enabledRewards($userId);
-        $rewards = $this->rewards($userId);
-        if (!$enabled['HasAvatarMouseOverText']) {
-            $mouseOver = null;
-        } else {
-            $text = $rewards['AvatarMouseOverText'];
-            $mouseOver = empty($text) ? null : "title=\"$text\" alt=\"$text\"";
-        }
-        return [$mouseOver, $enabled['HasSecondAvatar'] ? ($rewards['SecondAvatar'] ?: null) : null];
-    }
-
-    public function enabledRewards($UserID) {
-        $Rewards = [];
-        $Rank = $this->rank($UserID);
-        $SpecialRank = $this->specialRank($UserID);
-        $HasAll = $SpecialRank == 3;
-
-        $Rewards = [
-            'HasAvatarMouseOverText' => false,
-            'HasCustomDonorIcon' => false,
-            'HasDonorForum' => false,
-            'HasDonorIconLink' => false,
-            'HasDonorIconMouseOverText' => false,
-            'HasProfileInfo1' => false,
-            'HasProfileInfo2' => false,
-            'HasProfileInfo3' => false,
-            'HasProfileInfo4' => false,
-            'HasSecondAvatar' => false
-        ];
-
-        if ($Rank >= 2 || $HasAll) {
-            $Rewards["HasDonorIconMouseOverText"] = true;
-            $Rewards["HasProfileInfo1"] = true;
-        }
-        if ($Rank >= 3 || $HasAll) {
-            $Rewards["HasAvatarMouseOverText"] = true;
-            $Rewards["HasProfileInfo2"] = true;
-        }
-        if ($Rank >= 4 || $HasAll) {
-            $Rewards["HasDonorIconLink"] = true;
-            $Rewards["HasProfileInfo3"] = true;
-        }
-        if ($Rank >= MAX_RANK || $HasAll) {
-            $Rewards["HasCustomDonorIcon"] = true;
-            $Rewards["HasDonorForum"] = true;
-            $Rewards["HasProfileInfo4"] = true;
-        }
-        if ($SpecialRank >= 2) {
-            $Rewards["HasSecondAvatar"] = true;
-        }
-        return $Rewards;
-    }
-
-    public function rewards($UserID) {
-        return $this->info($UserID)['Rewards'];
-    }
-
-    public function profileRewards($UserID) {
-        $Results = $this->cache->get_value("donor_profile_rewards_$UserID");
-        if ($Results === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query('
-                SELECT
-                    ProfileInfo1,
-                    ProfileInfoTitle1,
-                    ProfileInfo2,
-                    ProfileInfoTitle2,
-                    ProfileInfo3,
-                    ProfileInfoTitle3,
-                    ProfileInfo4,
-                    ProfileInfoTitle4
-                FROM donor_rewards
-                WHERE UserID = ?
-                ', $UserID
-            );
-            $Results = $this->db->next_record();
-            $this->db->set_query_id($QueryID);
-            $this->cache->cache_value("donor_profile_rewards_$UserID", $Results, 0);
-        }
-        return $Results;
-    }
-
-    public function updateReward($UserID, array $field) {
-        $Rank = $this->rank($UserID);
-        $SpecialRank = $this->specialRank($UserID);
-        $HasAll = ($SpecialRank === 3);
-        $insert = [];
-        $args = [];
-
-        $QueryID = $this->db->get_query_id();
-
-        if ($Rank >= 2 || $HasAll) {
-            if (isset($field['donor_icon_mouse_over_text'])) {
-                $insert[] = "IconMouseOverText";
-                $args[] = $field['donor_icon_mouse_over_text'];
-            }
-        }
-        if ($Rank >= 3 || $HasAll) {
-            if (isset($field['avatar_mouse_over_text'])) {
-                $insert[] = "AvatarMouseOverText";
-                $args[] = $field['avatar_mouse_over_text'];
-            }
-        }
-        if ($Rank >= 4 || $HasAll) {
-            if (isset($field['donor_icon_link'])) {
-                $value = $field['donor_icon_link'];
-                if ($value === '' || preg_match("/^".URL_REGEX."$/i", $value)) {
-                    $insert[] = "CustomIconLink";
-                    $args[] = $value;
-                }
-            }
-        }
-        if ($Rank >= MAX_RANK || $HasAll) {
-            if (isset($field['donor_icon_custom_url'])) {
-                $value = $field['donor_icon_custom_url'];
-                if ($value === '' || preg_match("/^".IMAGE_REGEX."$/i", $value)) {
-                    $insert[] = "CustomIcon";
-                    $args[] = $value;
-                }
-            }
-            $comma = empty($field['donor_title_comma']) ? 0 : 1;
-            $this->db->prepared_query('
-                INSERT INTO donor_forum_usernames
-                       (UserID, Prefix, Suffix, UseComma)
-                VALUES (?,      ?,      ?,      ?)
-                ON DUPLICATE KEY UPDATE
-                    Prefix = ?, Suffix = ?, UseComma = ?
-                ', $UserID, $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
-                    $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
-            );
-            $this->cache->delete_value("donor_title_$UserID");
-        }
-
-        for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
-            if (isset($field["profile_title_" . $i]) && isset($field["profile_info_" . $i])) {
-                $insert[] = "ProfileInfoTitle" . $i;
-                $insert[] = "ProfileInfo" . $i;
-                $args[] = $field["profile_title_" . $i];
-                $args[] = $field["profile_info_" . $i];
-            }
-        }
-        if ($SpecialRank >= 2) {
-            if (isset($field['second_avatar'])) {
-                $value = $field['second_avatar'];
-                if ($value === '' || preg_match("/^".IMAGE_REGEX."$/i", $value)) {
-                    $insert[] = "SecondAvatar";
-                    $args[] = $value;
-                }
-            }
-        }
-        if (count($insert) > 0) {
-            $this->db->prepared_query("
-                INSERT INTO donor_rewards
-                       (UserID, " . implode(', ', $insert) . ")
-                VALUES (?, " . placeholders($insert) . ")
-                ON DUPLICATE KEY UPDATE
-                " . implode(', ', array_map(function ($c) { return "$c = ?";}, $insert)),
-                $UserID, ...array_merge($args, $args)
-            );
-        }
-        $this->db->set_query_id($QueryID);
-        $this->cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
-    }
-
-    public function history(int $UserID) {
-        if (!$UserID) {
-            error(404);
-        }
-        $QueryID = $this->db->get_query_id();
-        $this->db->prepared_query('
-            SELECT Amount, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
-            FROM donations
-            WHERE UserID = ?
-            ORDER BY Time DESC
-            ', $UserID
-        );
-        $DonationHistory = $this->db->to_array(false, MYSQLI_ASSOC, false);
-        $this->db->set_query_id($QueryID);
-        return $DonationHistory;
-    }
-
-    public function rankExpiry($UserID) {
-        $DonorInfo = $this->info($UserID);
-        if ($DonorInfo['SRank'] == MAX_SPECIAL_RANK || $DonorInfo['Rank'] == 1) {
-            $Return = 'Never';
-        } elseif ($DonorInfo['ExpireTime']) {
-            $ExpireTime = strtotime($DonorInfo['ExpireTime']);
-            if ($ExpireTime - time() < 60) {
-                $Return = 'Soon';
-            } else {
-                $Expiration = time_diff($ExpireTime); // 32 days
-                $Return = "in $Expiration";
-            }
-        } else {
-            $Return = '';
-        }
-        return $Return;
-    }
-
-    public function leaderboardRank(int $UserID): int {
+    public function leaderboardRank(\Gazelle\User $user): int {
         $this->db->prepared_query("SET @RowNum := 0");
         $Position = $this->db->scalar("
             SELECT Position
@@ -581,40 +252,9 @@ class Donation extends \Gazelle\Base {
                 ORDER BY TotalRank DESC
             ) l
             WHERE UserID = ?
-            ", $UserID
+            ", $user->id()
         );
         return $Position ?? 0;
-    }
-
-    public function rankLabel(int $userId, bool $showOverflow = false): string {
-        if ($this->specialRank($userId) == 3) {
-            return '∞ [Diamond]';
-        }
-        $rank = $this->rank($userId);
-        $label = $rank >= MAX_RANK ? MAX_RANK : $rank;
-        $overflow = $rank - $label;
-        if ($label == 5 || $label == 6) {
-            $label--;
-        }
-        if ($showOverflow && $overflow) {
-            $label .= " (+$overflow)";
-        }
-        if ($rank >= 6) {
-            $label .= ' [Gold]';
-        } elseif ($rank >= 4) {
-            $label .= ' [Silver]';
-        } elseif ($rank >= 3) {
-            $label .= ' [Bronze]';
-        } elseif ($rank >= 2) {
-            $label .= ' [Copper]';
-        } elseif ($rank >= 1) {
-            $label .= ' [Red]';
-        }
-        return $label;
-    }
-
-    public function isDonor(int $userId) {
-        return $this->rank($userId) > 0;
     }
 
     protected function messageBody(string $Source, string $Currency, string $amount, int $ReceivedRank, int $CurrentRank) {
