@@ -14,7 +14,7 @@ class LoginWatch extends Base {
             SELECT ID FROM login_attempts WHERE IP = ?
             ", $this->ipaddr
         );
-        if (is_null($this->id)) {
+        if (is_null($this->id) && $ipaddr != '0.0.0.0') {
             $this->db->prepared_query("
                 INSERT INTO login_attempts
                        (IP, UserID)
@@ -146,13 +146,24 @@ class LoginWatch extends Base {
     }
 
     /**
+     * Get total login failures
+     * @return int count
+     */
+    public function activeTotal(): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM login_attempts w
+            WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
+        ");
+    }
+
+    /**
      * Get the list of login failures
      * @return array list [ID, ipaddr, userid, LastAttempt (datetime), Attempts, BannedUntil (datetime), Bans]
      */
-    public function activeList(string $orderBy, string $orderWay): array {
+    public function activeList(string $orderBy, string $orderWay, int $limit, int $offset): array {
         $this->db->prepared_query("
-            SELECT
-                w.ID          AS id,
+            SELECT w.ID       AS id,
                 w.IP          AS ipaddr,
                 w.UserID      AS user_id,
                 w.LastAttempt AS last_attempt,
@@ -167,7 +178,9 @@ class LoginWatch extends Base {
             LEFT JOIN ip_bans ip ON (ip.FromIP = inet_aton(w.IP))
             WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
             ORDER BY $orderBy $orderWay
-        ");
+            LIMIT ?, ?
+            ", $limit, $offset
+        );
         return $this->db->to_array('id', MYSQLI_ASSOC, false);
     }
 

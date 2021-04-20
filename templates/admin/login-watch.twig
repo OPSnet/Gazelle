@@ -1,4 +1,13 @@
 {% from 'macro/form.twig' import checked %}
+
+<div class="thin">
+<div class="header">
+    <h2>Login Watch Management</h2>
+</div>
+<div class="linkbox">
+    <a href="tools.php?action=ip_ban">IP Address Bans</a>
+</div>
+
 {% if nr_ban or nr_clear %}
 <div class="pad box">
     {% if nr_ban %}
@@ -15,6 +24,7 @@
     There are no current login watches.
 </div>
 {% else %}
+{{ paginator.linkbox|raw }}
 {% for b in list %}
     {% if loop.first %}
 <form class="manage_form" name="bans" action="" method="post">
@@ -101,4 +111,6 @@
 </form>
     {% endif %}
 {% endfor %}
+{{ paginator.linkbox|raw }}
 {% endif %}
+</div>

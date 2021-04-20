@@ -8,9 +8,9 @@ if (isset($LoggedUser['ID'])) {
 $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
 $login = new Gazelle\Login;
 
-if (isset($_POST['login'])) {
-    $user = $login->setPassword($_POST['password'] ?? null)
-        ->setUsername($_POST['username'] ?? null)
+if (isset($_POST['username'])) {
+    $user = $login->setUsername($_POST['username'])
+        ->setPassword($_POST['password'] ?? null)
         ->set2FA($_POST['twofa'] ?? null)
         ->setPersistent($_POST['keeplogged'] ?? false)
         ->setWatch($watch)
