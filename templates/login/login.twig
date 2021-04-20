@@ -45,7 +45,7 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
     </div>
 {% endif %}
 {% if delta <= 0 %}
-<form class="auth_form" name="login" id="loginform" method="post" action="login.php">
+<form class="auth_form" name="login" id="loginform" method="post" action="login.php" autocomplete="off">
     <div>
     <label for="username">Username</label>
     <input type="text" name="username" id="username" class="inputtext" required="required" maxlength="20" pattern="[A-Za-z0-9_?\.]{1,20}" autofocus="autofocus" placeholder="Username" />
@@ -57,6 +57,7 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
     <div>
     <label title="2FA key (or recovery key), if configured" for="keeplogged">2FA Key</label>
     <input type="text" name="twofa" id="twofa" class="inputtext" placeholder="2FA key (or recovery code) if required" />
+    </div>
     <div>
     <label title="Keep me logged in for 90 days" for="keeplogged">Remember me</label>
     <input title="Keep me logged in for 90 days" type="checkbox" id="keeplogged" name="keeplogged" value="1"{{ checked(keep_logged) }} />
