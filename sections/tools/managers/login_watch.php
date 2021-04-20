@@ -28,7 +28,7 @@ if ($_POST) {
     }
 }
 
-$watch = new Gazelle\LoginWatch;
+$watch = new Gazelle\LoginWatch('0.0.0.0');
 if (isset($ban)) {
     $nrBan = $watch->setBan(
         $LoggedUser['ID'],
@@ -54,7 +54,10 @@ foreach ($headerInfo->getAllSortKeys() as $column) {
     $header[$column] = $headerInfo->emit($column);
 }
 
-$list = $watch->activeList($headerInfo->getOrderBy(), $headerInfo->getOrderDir());
+$paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 0));
+$paginator->setTotal($watch->activeTotal());
+
+$list = $watch->activeList($headerInfo->getOrderBy(), $headerInfo->getOrderDir(), $paginator->limit(), $paginator->offset());
 $resolve = isset($_REQUEST['resolve']);
 foreach ($list as &$attempt) {
     $attempt['dns'] = $resolve ? gethostbyaddr($attempt['ipaddr']) : $attempt['ipaddr'];
@@ -65,23 +68,14 @@ foreach ($list as &$attempt) {
 unset($attempt);
 
 View::show_header('Login Watch');
-?>
-<div class="thin">
-    <div class="header">
-        <h2>Login Watch Management</h2>
-    </div>
-    <div class="linkbox">
-        <a href="tools.php?action=ip_ban">IP Address Bans</a>
-    </div>
-    <?= G::$Twig->render('admin/login-watch.twig', [
-        'auth'     => $LoggedUser['AuthKey'],
-        'header'   => $header,
-        'list'     => $list,
-        'can_ban'  => check_perms('admin_manage_ipbans'),
-        'nr_ban'   => $nrBan ?? null,
-        'nr_clear' => $nrClear ?? null,
-        'resolve'  => $resolve,
-    ]) ?>
-</div>
-<?php
+echo G::$Twig->render('admin/login-watch.twig', [
+    'auth'      => $LoggedUser['AuthKey'],
+    'header'    => $header,
+    'list'      => $list,
+    'can_ban'   => check_perms('admin_manage_ipbans'),
+    'nr_ban'    => $nrBan ?? null,
+    'nr_clear'  => $nrClear ?? null,
+    'paginator' => $paginator,
+    'resolve'   => $resolve,
+]);
 View::show_footer();
