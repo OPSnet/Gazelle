@@ -6,6 +6,9 @@ LinoHaze: linotype
 Style derived from Gazelle Postmod
 *********************************************************/
 
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 @import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,bold";
 * {
     padding: 0;
@@ -68,6 +71,14 @@ a {
 
 a:hover {
     color: #fff
+}
+
+svg|a {
+  fill: #ffffff;
+}
+
+svg|a:hover {
+  fill: #ffffff;
 }
 
 a img {
@@ -162,10 +173,6 @@ b {
 }
 
 ::selection {
-    background: rgba(255, 255, 255, 0.4)
-}
-
-::-moz-selection {
     background: rgba(255, 255, 255, 0.4)
 }
 
@@ -341,8 +348,6 @@ logo a:focus {
 
 #menu a {
     display: inline-block;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     height: 50px!important;
     line-height: 50px!important;
@@ -445,8 +450,6 @@ logo a:focus {
 #nav_staff a {
     font-weight: 400;
     font-size: 12px;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     height: 38px!important;
     margin-top: 11px;
@@ -478,8 +481,6 @@ logo a:focus {
     font-weight: 400;
     font-size: 12px;
     position: absolute;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     margin: -65px 0 0 663px;
     float: right;
@@ -488,10 +489,7 @@ logo a:focus {
 
 #userinfo_major li a {
     display: inline-block;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    /*width: 50px;*/
     color: transparent
 }
 
@@ -593,8 +591,6 @@ logo a:focus {
 #userinfo_username li:first-child a {
     font-weight: 400;
     font-size: 13px;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     width: 130px!important;
     height: 50px!important;
@@ -645,8 +641,6 @@ logo a:focus {
 }
 
 #userinfo_username li a {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     width: 178px;
     height: 36px;
@@ -703,8 +697,6 @@ logo a:focus {
 #userinfo_minor:before {
     content: '';
     text-align: center;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     width: 48px!important;
     height: 50px!important;
@@ -743,8 +735,6 @@ logo a:focus {
 
 #userinfo_minor li a {
     display: block;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     vertical-align: middle;
     width: 178px;
@@ -803,8 +793,6 @@ logo a:focus {
 }
 
 #searchbars input {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     width: 112px;
     height: 34px;
@@ -819,19 +807,7 @@ logo a:focus {
     font-size: 12px!important
 }
 
-::-webkit-input-placeholder {
-    color: rgba(255, 255, 255, 0.5)
-}
-
-:-moz-placeholder {
-    color: rgba(255, 255, 255, 0.5)
-}
-
-::-moz-placeholder {
-    color: rgba(255, 255, 255, 0.5)
-}
-
-:-ms-input-placeholder {
+::placeholder {
     color: rgba(255, 255, 255, 0.5)
 }
 
@@ -907,8 +883,6 @@ logo a:focus {
 }
 
 #alerts .alertbar {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     border: 1px solid rgba(0, 0, 0, 0.1);
     height: 36px;
@@ -1439,8 +1413,6 @@ tr.torrent td {
 }
 
 .add_form[name="artists"] {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     width: 232px
 }
@@ -1596,9 +1568,6 @@ code {
     margin: 0;
     padding: 3px;
     white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
     line-height: 15px;
     display: inline-block
 }
@@ -1839,7 +1808,6 @@ ul .invitetree {
     height: 100%;
     background: #111 50% 0 no-repeat fixed;
     z-index: 1001;
-    -moz-opacity: .9;
     opacity: .9;
     filter: alpha(opacity=90)
 }
@@ -1888,8 +1856,6 @@ button:active {
 
 input[type=button],
 input[type=submit] {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     font-size: 10px;
     height: 30px;
@@ -1926,8 +1892,6 @@ input[type=text],
 input[type="password"],
 input[type="search"],
 input[type="email"] {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     height: 34px;
     padding: 11px 9px;
@@ -1955,8 +1919,6 @@ input[type="email"]:focus {
 }
 
 ::-webkit-search-cancel-button {
-    -webkit-appearance: none;
-    -moz-appearance: window;
     appearance: none
 }
 
@@ -1991,11 +1953,8 @@ select {
     border-radius: 1px;
     display: inline-block;
     color: #fff;
-    -webkit-appearance: none;
     appearance: none;
     font-family: 'Source Sans Pro', Source Sans Pro, Source Sans Pro, sans-serif;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     margin: 2px;
     height: 34px;
@@ -2302,6 +2261,12 @@ div.sidebar #event_div {
     padding: 0!important
 }
 
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #999999;
+    background: rgba(68, 68, 68, 0.5);
+    padding: 2px 4px;
+}
+
 #merchbox img,
 #merchbox+.box img {
     width: 240px;
@@ -2526,10 +2491,6 @@ body {
     right: 0;
     margin: 0 auto;
     z-index: -2;
-    -webkit-filter: blur(12px);
-    -moz-filter: blur(12px);
-    -o-filter: blur(12px);
-    -ms-filter: blur(12px);
     filter: blur(12px);
     clip: rect(0%, 100%, 100%, 100%)
 }
@@ -2563,7 +2524,7 @@ body {
 }
 
 select {
-    -moz-appearance: none;
+    appearance: none;
     text-indent: .01px
 }
 

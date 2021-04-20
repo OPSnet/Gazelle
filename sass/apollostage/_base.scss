@@ -1,3 +1,6 @@
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 a:active,
 a:focus,
 button:active,
@@ -85,7 +88,7 @@ textarea {
 body {
   background-color: $base-background-color;
   box-sizing: border-box;
-  color: #b9bdbd;
+  color: $base-text-color;
   font-size: 12px;
   line-height: 1.6;
   margin: 0 8px;
@@ -137,6 +140,14 @@ a:hover {
   color: $a-hover-color;
 }
 
+svg|a {
+  fill: $a-color;
+}
+
+svg|a:hover {
+  fill: $a-hover-color;
+}
+
 b,
 strong {
   color: #fff;
@@ -170,11 +181,6 @@ blockquote {
 }
 
 ::selection {
-  background-color: $selection-background-color;
-  color: #fff;
-}
-
-::-moz-selection {
   background-color: $selection-background-color;
   color: #fff;
 }
@@ -873,6 +879,14 @@ table.box2 {
   padding: 0 !important;
 }
 
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid $base-text-color;
+    background: rgba(60, 60, 60, 0.7);
+    color: $base-text-color;
+    margin: 0;
+    padding: 0 5px; 
+}
+
 #covers img {
   width: 100%;
 }
@@ -1324,9 +1338,6 @@ ul.collage_images li a > span {
   right: 0;
   top: 0;
   user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
   z-index: 1000;
 }
 

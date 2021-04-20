@@ -17,26 +17,26 @@ enforce_login();
 
 if (!empty($_POST['action'])) {
     switch ($_POST['action']) {
-        case 'edit':
-            require(__DIR__ . '/takeedit.php');
-            break;
-        case 'download':
-            require(__DIR__ . '/download.php');
-            break;
-        case 'rename':
-            require(__DIR__ . '/rename.php');
-            break;
         case 'add_similar':
-            require(__DIR__ . '/add_similar.php');
+            require_once('add_similar.php');
             break;
         case 'add_alias':
-            require(__DIR__ . '/add_alias.php');
+            require_once('add_alias.php');
             break;
         case 'change_artistid':
-            require(__DIR__ . '/change_artistid.php');
+            require_once('change_artistid.php');
+            break;
+        case 'download':
+            require_once('download.php');
+            break;
+        case 'rename':
+            require_once('rename.php');
+            break;
+        case 'edit':
+            require_once('takeedit.php');
             break;
         case 'takeeditrequest':
-            include(__DIR__ . '/takeeditrequest.php');
+            require_once('takeeditrequest.php');
             break;
         default:
             error(0);
@@ -44,47 +44,40 @@ if (!empty($_POST['action'])) {
 } elseif (!empty($_GET['action'])) {
     switch ($_GET['action']) {
         case 'autocomplete':
-            require(__DIR__ . '/autocomplete.php');
-            break;
-
-        case 'edit':
-            require(__DIR__ . '/edit.php');
-            break;
-        case 'delete':
-            require(__DIR__ . '/delete.php');
-            break;
-        case 'revert':
-            require(__DIR__ . '/takeedit.php');
-            break;
-        case 'history':
-            require(__DIR__ . '/history.php');
-            break;
-        case 'vote_similar':
-            require(__DIR__ . '/vote_similar.php');
-            break;
-        case 'delete_similar':
-            require(__DIR__ . '/delete_similar.php');
-            break;
-        case 'similar':
-            require(__DIR__ . '/similar.php');
-            break;
-        case 'similar_bg':
-            require(__DIR__ . '/similar_bg.php');
-            break;
-        case 'notify':
-            require(__DIR__ . '/notify.php');
-            break;
-        case 'notifyremove':
-            require(__DIR__ . '/notifyremove.php');
-            break;
-        case 'delete_alias':
-            require(__DIR__ . '/delete_alias.php');
+            require_once('autocomplete.php');
             break;
         case 'change_artistid':
-            require(__DIR__ . '/change_artistid.php');
+            require_once('change_artistid.php');
+            break;
+        case 'delete':
+            require_once('delete.php');
+            break;
+        case 'delete_alias':
+            require_once('delete_alias.php');
+            break;
+        case 'delete_similar':
+            require_once('delete_similar.php');
+            break;
+        case 'edit':
+            require_once('edit.php');
             break;
         case 'editrequest':
-            require(__DIR__ . '/editrequest.php');
+            require_once('editrequest.php');
+            break;
+        case 'history':
+            require_once('history.php');
+            break;
+        case 'notify':
+            require_once('notify.php');
+            break;
+        case 'notifyremove':
+            require_once('notifyremove.php');
+            break;
+        case 'revert':
+            require_once('takeedit.php');
+            break;
+        case 'vote_similar':
+            require_once('vote_similar.php');
             break;
         default:
             error(0);
@@ -92,7 +85,7 @@ if (!empty($_POST['action'])) {
     }
 } else {
     if (!empty($_GET['id'])) {
-        require(__DIR__ . '/artist.php');
+        require_once('artist.php');
     } elseif (empty($_GET['artistname'])) {
         header('Location: torrents.php');
     } else {

@@ -1,3 +1,6 @@
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* GLOBAL */
 // TODO: FIX_STATIC_SERVER
 body {
@@ -19,6 +22,14 @@ a:hover {
     text-decoration: none;
 }
 
+svg|a {
+  fill: #007dc6;
+}
+
+svg|a:hover {
+  fill: #575757;
+}
+
 a img {
     border-style: none;
     position: relative;
@@ -26,7 +37,7 @@ a img {
 }
 
 #wrapper {
-    width: 950px;
+    width: 1000px;
     margin: 0 auto;
 }
 
@@ -38,8 +49,6 @@ a img {
     position: relative;
     margin: -22px auto 20px auto;
     z-index: 1;
-    -moz-border-radius: 11px;
-    -webkit-border-radius: 11px;
     border-radius: 11px;
     overflow: hidden;
     clear: both;
@@ -128,7 +137,6 @@ td p {
 
 input {
     cursor: pointer;
-    cursor: hand;
 }
 
 input[type="text"] {
@@ -179,24 +187,23 @@ select {
 }
 
 input:focus,
-textarea:focus,
-#searchbars input:focus {
+textarea:focus {
     border: 1px solid #575757;
     color: #575757;
+    border-radius: 11px;
 }
 
 #searchbars input {
-    background: transparent url('images/searchbox.png') top left no-repeat;
-    border: 0 !important;
-    height: 19px !important;
-    width: 131px !important;
-    margin: 0 !important;
-    padding: 3px 5px 0 19px !important;
-    outline: none;
+    height: 17px;
+    width: 131px;
+    border: 1px solid #cccccc;
+    border-radius: 11px;
 }
 
 #searchbars input:focus {
-    background: transparent url('images/searchbox.png') 0 -23px no-repeat;
+    border: 1px solid #575757;
+    color: #575757;
+    border-radius: 11px;
 }
 
 input[type="submit"],
@@ -466,7 +473,6 @@ ul#userinfo_username {
 #searchbars ul li {
     display: inline;
     position: relative;
-    list-style: none;
 }
 
 #searchbars ul li ul {
@@ -513,13 +519,10 @@ ul#userinfo_username {
     margin: 38px 0 0 0;
     background-color: white;
     color: #575757;
-    -moz-border-radius: 11px;
-    -webkit-border-radius: 11px;
     border-radius: 11px;
     z-index: 2;
     position: relative;
     border: 1px solid #b5b5b5;
-    -moz-background-clip: padding-box;
     background-clip: padding-box;
     -webkit-background-clip: border-box;
 }
@@ -530,11 +533,7 @@ ul#userinfo_username {
     background-color: #f0f0f0;
     margin: 20px -20px -1px -20px !important;
     padding: 20px;
-    -moz-border-radius-topleft: 11px;
-    -webkit-border-radius-topleft: 11px;
     border-top-left-radius: 11px;
-    -moz-border-radius-topright: 11px;
-    -webkit-border-radius-topright: 11px;
     border-top-right-radius: 11px;
     border-bottom: 1px solid #c6c6c6;
     position: relative;
@@ -560,11 +559,7 @@ body:not(#requests):not(#friends) .box h2 {
     background: none;
     margin: 0;
     padding: 0;
-    -moz-border-radius-topleft: 0;
-    -webkit-border-radius-topleft: 0;
     border-top-left-radius: 0;
-    -moz-border-radius-topright: 0;
-    -webkit-border-radius-topright: 0;
     border-top-right-radius: 0;
     position: static;
     border-bottom: 0;
@@ -751,16 +746,10 @@ table {
 
 .forum_post .body {
     padding: 10px 20px 15px 15px;
-    -webkit-border-bottom-right-radius: 10px;
-    -webkit-border-bottom-left-radius: 10px;
-    -moz-border-radius-bottomright: 10px;
-    -moz-border-radius-bottomleft: 10px;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
     border: 1px solid #d9d9d9;
     border-top-style: none !important;
-    -webkit-box-shadow: -4px 1px 8px rgba(187, 215, 235, 0.8);
-    -moz-box-shadow: -4px 1px 8px rgba(187, 215, 235, 0.8);
     box-shadow: -4px 1px 8px rgba(187, 215, 235, 0.8);
     background-color: #F5F5F5;
     word-wrap: break-word;
@@ -863,8 +852,6 @@ strong.quoteheader {
     width: 70%;
     margin: 20px auto 0 auto;
     border: 1px solid #dcdcdc;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
     border-radius: 7px;
     padding: 8px;
     background: #f3f3f3 url('images/filter.png') -30px -30px no-repeat;
@@ -1100,7 +1087,7 @@ tr.torrent .bookmark > a:after {
 
 /* HOME AND ARTISTS */
 .main_column {
-    width: 645px;
+    width: 695px;
 }
 
 .sidebar {
@@ -1134,11 +1121,7 @@ tr.torrent .bookmark > a:after {
     background-color: #f0f0f0;
     padding: 10px !important;
     border-bottom: 1px solid #c6c6c6;
-    -moz-border-radius-topleft: 4px;
-    -webkit-border-radius-topleft: 4px;
     border-top-left-radius: 4px;
-    -moz-border-radius-topright: 4px;
-    -webkit-border-radius-topright: 4px;
     border-top-right-radius: 4px;
 }
 
@@ -1154,8 +1137,6 @@ tr.torrent .bookmark > a:after {
     background-color: #f5f5f5;
     border: 1px solid #dcdcdc;
     margin: 0 0 20px 0;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
     border-radius: 4px;
 }
 
@@ -1183,6 +1164,12 @@ tr.torrent .bookmark > a:after {
 #wiki .sidebar ul ul,
 #wiki .sidebar ol ol {
     margin: 0 0 0 10px;
+}
+
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #dcdcdc;
+    background: rgba(240, 240, 240, 0.5);
+    padding: 2px 4px;
 }
 
 #wiki .main_column .box h1,
@@ -1457,7 +1444,6 @@ td.r00 {
     height: 100%;
     background: #111 50% 0 no-repeat fixed;
     z-index: 1001;
-    -moz-opacity: 0.9;
     opacity: .90;
     filter: alpha(opacity=90);
 }
@@ -1489,8 +1475,6 @@ td.r00 {
     float: middle;
     text-align: center;
     font-weight: bold;
-    -moz-border-radius: 11px;
-    -webkit-border-radius: 11px;
     border-radius: 11px;
 }
 
@@ -1502,8 +1486,6 @@ td.r00 {
     float: middle;
     text-align: center;
     font-weight: bold;
-    -moz-border-radius: 11px;
-    -webkit-border-radius: 11px;
     border-radius: 11px;
 }
 
@@ -1592,7 +1574,7 @@ ul.collage_images li a:hover img {
 }
 
 ul.collage_images {
-    width: 645px !important;
+    width: 695px !important;
     margin: 0 !important;
 }
 
@@ -1605,7 +1587,7 @@ ul.collage_images {
 }
 
 #upload .thin {
-    width: 700px;
+    width: 750px;
     margin: 30px auto 0 auto;
 }
 
@@ -2089,8 +2071,6 @@ TODO: Make these rules apply globally and add exceptions where needed
     background-color: #f5f5f5;
     border: 1px solid #dcdcdc;
     margin: 0 0 20px 0;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
     border-radius: 4px;
 }
 

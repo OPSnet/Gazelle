@@ -1,5 +1,8 @@
 /* Layout (Torrents page) */
 
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* We're going to opt for the category icon method for now, tags_* is also available */
 .cats_applications {
   background: url('images/apps.png') no-repeat center center;
@@ -74,6 +77,14 @@ a {
 a:hover {
   color: #444;
   text-decoration: underline;
+}
+
+svg|a {
+  fill: #444444;
+}
+
+svg|a:hover {
+  fill: #444444;
 }
 
 h1,
@@ -373,11 +384,19 @@ input.hidden {
   position: absolute;
 }
 
+/* Layout (Artist page) */
+
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #666666;
+    background: rgba(225, 225, 225, 0.5);
+    padding: 2px 4px;
+}
+
 /* Layout (Any page) */
 
 .thin {
   margin: 0 auto;
-  width: 850px;
+  width: 950px;
 }
 
 .widethin { /* overriding the thin class on torrents.php */
@@ -462,7 +481,7 @@ p.min_padding {
 }
 
 .main_column {
-  width: 592px;
+  width: 695px;
 }
 
 .main_column table {
@@ -858,7 +877,6 @@ ul .invitetree {
   filter: alpha(opacity=80);
   height: 100%;
   left: 0;
-  -moz-opacity: 0.8;
   opacity: 0.8;
   position: fixed;
   top: 0;

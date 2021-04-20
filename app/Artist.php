@@ -90,25 +90,6 @@ class Artist extends Base {
         }
     }
 
-    public function loadSimilar() {
-        $this->db->prepared_query("
-            SELECT
-                s2.ArtistID,
-                a.Name,
-                ass.Score,
-                ass.SimilarID
-            FROM artists_similar AS s1
-            INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
-            INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
-            INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
-            WHERE s1.ArtistID = ?
-            ORDER BY ass.Score DESC
-            LIMIT 30
-            ", $this->id
-        );
-        return $this->db->to_array(false, MYSQLI_ASSOC);
-    }
-
     public function loadArtistRole() {
         $this->db->prepared_query("
             SELECT ta.GroupID AS group_id,
@@ -565,11 +546,12 @@ class Artist extends Base {
         $similarId = $this->db->scalar("
             SELECT s1.SimilarID
             FROM artists_similar AS s1
-                JOIN artists_similar AS s2 ON s1.SimilarID = s2.SimilarID
+            INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID)
             WHERE s1.ArtistID = ?
                 AND s2.ArtistID = ?
             ", $this->id(), $similar->id()
         );
+        $this->db->begin_transaction();
         if ($similarId) { // The similar artists field already exists, just update the score
             $this->db->prepared_query("
                 UPDATE artists_similar_scores SET
@@ -596,9 +578,301 @@ class Artist extends Base {
             VALUES (?,         ?,      'up')
             ", $similarId, $userId
         );
+        $this->db->commit();
 
         $this->flushCache();
         $similar->flushCache();
         $this->cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+    }
+
+    public function removeSimilar(int $similarId): bool {
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            SELECT ArtistID FROM artists_similar WHERE SimilarID = ?
+            ", $similarId
+        );
+        $artistIds = $this->db->collect(0);
+        if (!in_array($this->id, $artistIds)) {
+            $this->db->rollback();
+            return false;
+        }
+        $this->db->prepared_query("
+            DELETE FROM artists_similar_votes WHERE SimilarID = ?
+            ", $similarId
+        );
+        $this->db->prepared_query("
+            DELETE FROM artists_similar_scores WHERE SimilarID = ?
+            ", $similarId
+        );
+        $this->db->prepared_query("
+            DELETE FROM artists_similar WHERE SimilarID = ?
+            ", $similarId
+        );
+        $manager = Manager\Artist;
+        foreach ($artistIds as $id) {
+            $manager->findById($id)->flushCache();
+            $this->cache->delete_value("similar_positions_$id");
+        }
+        $this->db->commit();
+        return true;
+    }
+
+    public function loadSimilar(): array {
+        $this->db->prepared_query("
+            SELECT
+                s2.ArtistID,
+                a.Name,
+                ass.Score,
+                ass.SimilarID
+            FROM artists_similar AS s1
+            INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+            INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
+            INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+            WHERE s1.ArtistID = ?
+            ORDER BY ass.Score DESC
+            LIMIT 30
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function similarGraph(int $width, int $height): array {
+        // find the similar artists of this one
+        $this->db->prepared_query("
+            SELECT s2.ArtistID       AS artist_id,
+                a.Name               AS artist_name,
+                ass.Score            AS score,
+                count(asv.SimilarID) AS votes
+            FROM artists_similar s1
+            INNER join artists_similar s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+            INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+            INNER JOIN artists_similar_scores ass ON (ass.SimilarID = s1.SimilarID)
+            INNER JOIN artists_similar_votes asv ON (asv.SimilarID = s1.SimilarID)
+            WHERE s1.ArtistID = ?
+            GROUP BY s1.SimilarID
+            ORDER BY score DESC,
+                votes DESC
+            LIMIT 30
+            ", $this->id
+        );
+        $artistIds = $this->db->collect('artist_id') ?: [0];
+        $similar   = $this->db->to_array('artist_id', MYSQLI_ASSOC, false);
+        if (!$similar) {
+            return [];
+        }
+        $nrSimilar = count($similar);
+
+        // of these similar artists, see if any are similar to each other
+        $this->db->prepared_query("
+            SELECT s1.artistid AS source,
+                group_concat(s2.artistid) AS target
+            FROM artists_similar s1
+            INNER JOIN artists_similar s2 ON (s1.similarid = s2.similarid and s1.artistid != s2.artistid)
+            WHERE s1.artistid in (" . placeholders($artistIds) . ")
+                AND s2.artistid in (" . placeholders($artistIds) . ")
+            GROUP BY s1.artistid
+            ", ...array_merge($artistIds, $artistIds)
+        );
+        $relation = $this->db->to_array('source', MYSQLI_ASSOC, false);
+
+        // calculate some minimax stuff to figure out line lengths
+        $max = 0;
+        $min = null;
+        $totalScore = 0;
+        foreach ($similar as &$s) {
+            $s['related'] = [];
+            $s['nrRelated'] = 0;
+            $max = max($max, $s['score']);
+            if (is_null($min)) {
+                $min = $s['score'];
+            } else {
+                $min = min($min, $s['score']);
+            }
+            $totalScore += $s['score'];
+        }
+        unset($s);
+
+        // Use the golden ratio formula to generate the angles where the
+        // artists will be placed (to avoid drawing a line through the
+        // origin for a relation when there are an even number of artists).
+        // Sort the results because a) the order will be vaguely chaotic,
+        // and b) we have a guarantee that two adjacent angles will be
+        // at the beginning and end of the array (as long as we alternate
+        // between shifting and popping the array).
+        $layout = [];
+        $angle = fmod($this->id, 2 * M_PI);
+        $golden = M_PI * (3 - sqrt(5));
+        foreach (range(0, $nrSimilar-1) as $r) {
+            $layout[] = $angle;
+            $angle = fmod($angle + $golden, 2 * M_PI);
+        }
+        sort($layout);
+
+        // Thread all the similar artists with their related artists
+        // and sort those with the most relations first.
+        foreach ($relation as $source => $targetList) {
+            $t = explode(',', $targetList['target']);
+            foreach ($t as $target) {
+                $similar[$source]['related'][] = (int)$target;
+                $similar[$source]['nrRelated']++;
+            }
+        }
+
+        // For all artists with relations, sort their relations list by least relations first.
+        // The idea is to have other artists that are only related to this one close by.
+        foreach ($similar as &$s) {
+            if ($s['nrRelated'] < 2)  {
+                // trivial case
+                continue;
+            }
+            $related = $s['related'];
+            usort($related, function ($a, $b) use ($similar) {
+                return $similar[$a]['nrRelated'] <=> $similar[$b]['nrRelated'];
+            });
+            $s['related'] = $related;
+        }
+        unset($s);
+
+        // Now sort the artists by most relations first
+        uksort($similar, function ($a, $b) use ($similar) {
+            $cmp = $similar[$b]['nrRelated'] <=> $similar[$a]['nrRelated'];
+            if ($cmp != 0) {
+                return $cmp;
+            }
+            $cmp = $similar[$b]['score'] <=> $similar[$a]['score'];
+            if ($cmp != 0) {
+                return $cmp;
+            }
+            return $similar[$b]['artist_id'] <=> $similar[$a]['artist_id'];
+        });
+
+        // Place the artists with the most relations first, and place
+        // their relations near them, alternating on each side.
+        $xOrigin = (int)$width / 2;
+        $yOrigin = (int)$height / 2;
+        $range = ($max === $min) ? $max : $max - $min;
+        $placed = array_fill_keys(array_keys($similar), false);
+        $seen = 0;
+        foreach ($similar as &$s) {
+            $id = $s['artist_id'];
+            if ($placed[$id] !== false) {
+                continue;
+            }
+            $relatedToPlace = 0;
+            $relatedTotal = 0;
+            foreach ($s['related'] as $r) {
+                $relatedTotal++;
+                if ($placed[$r] === false) {
+                    $relatedToPlace++;
+                }
+            }
+            if ($relatedToPlace > 0) {
+                // Rotate the layout angles to fit this artist in, so that we can
+                // pick the first and last angles off the layout list below.
+                $move = (int)ceil(($relatedToPlace + 1) / 2);
+                $layout = array_merge(array_slice($layout, $move, NULL, true), array_slice($layout, 0, $move, true));
+            }
+            if (!($relatedTotal > 0 && $seen > 1)) {
+                $angle = array_shift($layout);
+                $up = false;
+            } else {
+                // By now we have already placed two artists and we are here because the
+                // current artist has a related artist to place. Have a look at the previously
+                // placed artists, and if this artist is related to them, then choose first
+                // or last angle in the layout list to place this artist close to them.
+                $nextAngle = reset($layout);
+                $prevAngle = end($layout);
+                $bestNextAngle = 2 * M_PI;
+                $bestPrevAngle = 2 * M_PI;
+                foreach ($s['related'] as $r) {
+                    if ($placed[$r] === false) {
+                        continue;
+                    }
+                    $nextAngleDistance = fmod($nextAngle + $placed[$r], 2 * M_PI);
+                    $prevAngleDistance = fmod($prevAngle + $placed[$r], 2 * M_PI);
+                    if ($nextAngleDistance <= $prevAngleDistance) {
+                        $bestNextAngle = min($bestNextAngle, $nextAngleDistance);
+                    } else {
+                        $bestPrevAngle = min($bestPrevAngle, prevAngleDistance);
+                    }
+                }
+                if (fmod($bestNextAngle + $placed[$r], 2 * M_PI) < fmod($bestPrevAngle + $placed[$r], 2 * M_PI))  {
+                    $angle = array_shift($layout);
+                    $up = false;
+                } else {
+                    $angle = array_pop($layout);
+                    $up = true;
+                }
+            }
+            $placed[$id] = angle;
+            ++$seen;
+
+            // place this artist
+            $distance = 0.9 - (($s['score'] - $min) * 0.4 / $range);
+            $s['x'] = (int)(cos($angle) * $distance * $xOrigin) + $xOrigin;
+            $s['y'] = (int)(sin($angle) * $distance * $yOrigin) + $yOrigin;
+            $s['proportion'] = pow($s['score'] / ($totalScore + 1), 1.0);
+
+            // Place their related close by, first anti-clockwise (angle
+            // increasing: array_shift(), next clockwise (angle decreasing:
+            // array_pop() and repeat until done.
+            // There might be a way to refactor this to avoid repetition.
+            foreach ($s['related'] as $r) {
+                if ($placed[$r] !== false) {
+                    continue;
+                }
+                $angle = $up ? array_shift($layout) : array_pop($layout);
+                $up = !$up;
+                $placed[$r] = $angle;
+                ++$seen;
+
+                // place this related artist
+                $distance = 0.9 - (($similar[$r]['score'] - $min) * 0.45 / $range);
+                $similar[$r]['x'] = (int)(cos($angle) * $distance * $xOrigin) + $xOrigin;
+                $similar[$r]['y'] = (int)(sin($angle) * $distance * $yOrigin) + $yOrigin;
+                $similar[$r]['proportion'] = pow($similar[$r]['score'] / ($totalScore + 1), 1.0);
+            }
+
+        }
+        return $similar;
+    }
+
+    public function voteSimilar(int $userId, int $similarId, bool $upvote): bool {
+        if ($this->db->scalar("
+            SELECT 1
+            FROM artists_similar_votes
+            WHERE SimilarID = ?
+                AND UserID = ?
+                AND Way = ?
+            ", $similarId, $userId, $upvote ? 'up' : 'down'
+        )) {
+            return false;
+        }
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            UPDATE artists_similar_scores SET
+                Score = Score + ?
+            WHERE SimilarID = ?
+            ", $upvote ? 100 : -100, $similarId
+        );
+        $this->db->prepared_query("
+            INSERT INTO artists_similar_votes
+                   (SimilarID, UserID, Way)
+            VALUES (?,         ?,      ?)
+            ", $similarId, $userId, $upvote ? 'up' : 'down'
+        );
+        $this->db->commit();
+        $similarArtistId = $this->db->scalar("
+            SELECT ArtistID
+            FROM artists_similar
+            WHERE SimilarID = ?
+                AND ArtistID != ?
+            ", $similarId, $this->id
+        );
+        $similarArtist = new Artist($similarArtistId, 0);
+        $this->flushCache();
+        $similarArtist->flushCache();
+        $this->cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+        return true;
     }
 }

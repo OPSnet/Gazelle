@@ -3,6 +3,9 @@ Postmodern: A mongrel stylesheet for What.CD, based on 'Zeal', a modification of
 This design incorporates some code from the 'Customize Zeal' Greasemonkey script by OhmG. The background image is also sourced from that script.
 */
 
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* Layout (Torrents page) */
 
 /* Global */
@@ -48,6 +51,14 @@ a {
 
 a img {
     border: 0;
+}
+
+svg|a {
+  fill: #0C9CCF;
+}
+
+svg|a:hover {
+  fill: #4FD1FF;
 }
 
 table tbody a, .main_column a, .sidebar a, .box a {
@@ -141,14 +152,14 @@ ul.thin li { margin:0px 0px; padding:0px; }
     padding: 0 0 0 0;
 }
 #header {
-    width: 950px;
+    width: 1000px;
     margin: 0 auto 0 auto;
     height: 173px;
     padding: 0 0 0 0;
 }
 
 #content {
-    width: 906px;
+    width: 1000px;
     margin: 0 auto 0 auto;
     border: 1px solid #222;
     color: #DFDFDF;
@@ -161,8 +172,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
     background: transparent url('images/content.png');
     padding: 4px 9px;
     margin: -19px auto 0 auto;
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    box-shadow: 1px 3px rgba(0,0,0,0.5);
 }
 
 #footer {
@@ -209,7 +219,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
     height: 38px;
     position: absolute;
     padding: 0 0 0 0;
-    margin: 30px 0 0 340px;
+    margin: 30px 0 0 430px;
     font-family: Helvetica, Arial, sans-serif;
     font-size: 11pt;
     min-width: 595px;
@@ -260,7 +270,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #userinfo_major {
     position: absolute;
     width: 609px;
-    margin: 110px 0 0 326px;
+    margin: 110px 0 0 400px;
     text-align: right;
 }
 #userinfo_username {
@@ -279,7 +289,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #userinfo_minor {
     position: absolute;
     width: 295px;
-    margin: 70px 0 0 640px;
+    margin: 70px 0 0 718px;
     text-align: right;
     float: right;
 }
@@ -315,22 +325,20 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #searchbars {
     position: absolute;
     top: 132px;
-    width: 912px;
-    margin: 0 0 0 17px;
+    width: 1000px;
+    margin: 0;
 }
 
 #searchbars input {
-    width: 130px;
+    width: 122px;
     border: 1px solid #FFF;
     padding: 0 2px 0 10px;
     font-family: Helvetica, Arial, sans-serif;
     height: 22px;
     background: url('images/content_light.png') transparent;
     color: #FFF;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    box-shadow: 0 2px rgba(0,0,0,0.5);
 }
 
 #autocomplete {
@@ -346,7 +354,6 @@ ul.thin li { margin:0px 0px; padding:0px; }
 }
 
 #searchbars ul {
-    margin: 0;
     padding: 0;
     list-style: none;
     display: block;
@@ -354,13 +361,10 @@ ul.thin li { margin:0px 0px; padding:0px; }
 }
 
 #searchbars ul li {
-    display: inline;
     float: left;
-    width: 148px;
-    margin: 0;
-    padding-left: 4px;
     position: relative;
     list-style: none;
+    margin: 0px;
 }
 
 #searchbars ul li ul {
@@ -440,11 +444,18 @@ input.hidden {
     display: none;
 }
 
+/* Layout (Artist page) */
+
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #0a84af;
+    background: rgba(239, 239, 239, 0.5);
+    padding: 2px 4px;
+}
+
 /* Layout (Any page) */
 
-
 .thin {
-    width: 850px;
+    width: 1000px;
     margin: 0px auto;
     color: #DFDFDF;
 }
@@ -503,7 +514,7 @@ p.min_padding {
 
 .sidebar {
     float: right;
-    width: 245px;
+    width: 250px;
 }
 
 .body {
@@ -511,7 +522,7 @@ p.min_padding {
 }
 
 .main_column {
-    width: 592px;
+    width: 738px;
 }
 
 .main_column table {
@@ -551,8 +562,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     border: none;
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.6);
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    box-shadow: 1px 3px rgba(0,0,0,0.6);
 }
 
 tr {
@@ -672,7 +682,6 @@ ul.poll li.graph {
     width: 28px;
     height: 28px;
     background: url('images/show.png') no-repeat center center;
-    -moz-opacity: 0.5;
     opacity:.50;
     filter: alpha(opacity=50);
 }
@@ -681,7 +690,6 @@ ul.poll li.graph {
     width: 28px;
     height: 28px;
     background: url('images/hide.png') no-repeat center center;
-    -moz-opacity: 0.5;
     opacity:.50;
     filter: alpha(opacity=50);
 }
@@ -896,7 +904,6 @@ ul .invitetree {
     height: 100%;
     background: #111 50% 0 no-repeat fixed;
     z-index: 1001;
-    -moz-opacity: 0.9;
     opacity: 0.90;
     filter: alpha(opacity=90);
 }
@@ -927,10 +934,8 @@ input[type="button"], input[type="submit"] {
     margin: 3px;
     color: #fff;
     text-decoration: none;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    border-radius: 2px;
+    box-shadow: 1px 3px rgba(0,0,0,0.5);
     border-left: 0;
     border-top: 0;
     border-right: 0;
@@ -952,10 +957,8 @@ input[type="button"]:active, input[type="button"]:focus, input[type="submit"]:ac
     margin: 3px;
     color: #fff;
     text-decoration: none;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    border-radius: 2px;
+    box-shadow: 1px 3px rgba(0,0,0,0.5);
     border-left: 0;
     border-top: 0;
     border-right: 0;

@@ -4,6 +4,10 @@ apollo-theme-post-office: A continuation of the original wcd-theme-post-office b
 with various fixes and updated image resources for apollo.rip.
 Originally forked from Postmodern, which was based on 'Zeal', a modification of the original 'Teal' by pellad.
 */
+
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* Image resources */
 /* Colors */
 /* Layout (Torrents page) */
@@ -51,6 +55,14 @@ a {
 
 a:hover {
   color: #b39770;
+}
+
+svg|a {
+  fill: #b39770;
+}
+
+svg|a:hover {
+  fill: #f7f7f7;
 }
 
 a img {
@@ -603,6 +615,14 @@ input.hidden {
   display: none;
 }
 
+/* Layout (Artist page) */
+
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #999999;
+    background: rgba(68, 68, 68, 0.5);
+    padding: 2px 4px;
+}
+
 /* Layout (Any page) */
 .thin {
   width: 100%;
@@ -738,7 +758,7 @@ tr.colhead_dark td {
 }
 
 .main_column {
-  width: 692px;
+  width: 705px;
 }
 
 .main_column table {
