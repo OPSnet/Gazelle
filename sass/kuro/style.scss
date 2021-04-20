@@ -1,5 +1,8 @@
 /* Layout (Torrents page) */
 
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* We're going to opt for the category icon method for now, tags_* is also available */
 .cats_applications { width: 28px; height: 28px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAImSURBVHjatJa7bupAEIbHlhFQgEhBQUdFSyIk2pAGGgryBIEGShIQtZ0nIKelIh3dISU0IQ+AkpomVNAiQIg7Z8YaH6HIDouxV/rllbXeb+e6lg6HA0iSBG6MdDodwkcepXY6nSt6p7gAuEalUHFUDtVE3RhrpEstREgUH2XenOY91Bfqg+bdbndC64jjlIWfqDaqgJv3Tq42yHatQwltQByddQmQoe8oTRQoO+DSJ4ohQq9FFl8MxLhRghRQfzlL3QUytM3ZmT+1VihLE4kEnfwRdcs1RmPI6f/GWUpl8IB6uQiYTCbzu92ujtNQIBCAVCoF2WwWYrFYtN/vRxuNRm4wGNRns9nQ7/efLAvLwud41I/dtN/vYbPZwGq1gnA4TFBAGBSLRRiNRtBqtSbT6fQPHkSzKj9TIMPeuU2ZDgIvFguIx+OgaRpEIhEYj8dQrVbpEE2EFoSAnN4EC4nEd7lcgizLoKqq7m4apVIJCIhq/gQqFpaFRDPU5/PBdruFWq0GlUpFf0eWCsUQgZ+/ufG3sV6vYT6fg9frBY/H08NxZ+ZS5cg6zS5M30hRIBgM6k/uPtYWZjIZula+HboWn7ERWGap0WnKDsHaZjCz1pZzAGb0VKFeGnUAdmfc7m43b4Lci8CcAE7YsqHoB/JR57d1+fJ9COcCX23A6Kepee5HBvCF3eMq7D+QA14QhNqGmfVSam2qSV1+8S/E67kx+9lp/gkwAI16A6sS8qrsAAAAAElFTkSuQmCC') no-repeat center center; }
 .cats_audiobooks { width: 28px; height: 28px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAALMSURBVHjarFYxjGlBFJ232Y5it9Lup0etWQ1KJEoivxPN5odoRYtif6f8Cb0axdKIbh+JkthEo/FJqP05k5mXMX/mefL/TSbmMe6559w7913rcrkQy7KImyWTyTjfvvAFe9V892M4HL6b/ADrkTuM0o8M/z5C1xNfUXKfFel6dztgATWVSvUlwH+1b5TlxsTwge//F9hNX49evYRCIRKLxUgwGCR+v5/sdju2ptMpWa1WnmUVkn7QfVx3ACClUokEAgFjMIvFgjQaDXI6nVxllSWd6BxVq1VSr9cdMMGo1+sxEDzDwuEwaTabjPktWYWktvoDWCUSCbaHZJ1Oh4GohmBwFkoAtFargembSVbBcKw6yWazbD8ajUi5XNaCCdaQE+eQZx7kC79qekCq94F+OJrLYO1221NR4RzApVwX3RhesYQ8+LNXMJktWLrlUQaciAJAlCYJ7zCtrDKgLUocJpW4Z/P5fLo7qQekeQQgcslKH7J6NSgyGAyYnJKkWlkflGfGst/vX1XqLSsUCs4eKWm1WkZZ1daGPMYhK1Y+n2fA5/OZdLtdIztxX2VQNAGelqJ8z1WGTqUCAH8CSwCj60id5Kr1mfKpk1Urqc4RWCjtywgotz1V1itA3gAYqI4NCqJSqTjPOAP5VNPI/2Zi6LBUyvuvt4fIn46d5g5n3AAnolJxPUyFIoJCn8VZcXfRVzX2RGXNOO9DeYjien/KJY+iUZu1qoBIgUvD+EXv6ndLN7VR0N98iHLKHNWKT7x+THLfsAMFfDaNGGNZd0NebhpYYySJRCIoyJ9uM8383sFKNH3R3iAtGgbUmM1mB5oKW5tDafD9MBUMFqJG9MLW6zVzfjwe7eVyueFBQymbXzc201imyZuCXuSIwQBRi2kNzqnMY36NvrjjsZsKroC5XO4znU5H5/M52e/39na7FVHb3Pnm3pwC648AAwBuJH971tHCfQAAAABJRU5ErkJggg==') no-repeat center center; }
@@ -26,7 +29,7 @@ body {
     font-family: tahoma,helvetica,sans-serif;
     font-size: 8pt;
     color: #999;
-    min-width: 850px;
+    min-width: 950px;
     background-color: #222;
 }
 
@@ -43,6 +46,13 @@ a:hover {
     color: #aaaaaa;
 }
 
+svg|a {
+  fill: #cccccc;
+}
+
+svg|a:hover {
+  fill: #aaaaaa;
+}
 
 a.similar_artist {
     background-color: #444444;
@@ -63,7 +73,13 @@ a.similar_artist:hover {
     padding: 3px 5px;
 }
 
-h1,h2,h3,h4 {
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #999999;
+    background: rgba(68, 68, 68, 0.5);
+    padding: 2px 4px;
+}
+
+h1, h2, h3, h4 {
     margin: 5px 0;
     font-weight: bold;
 }
@@ -321,7 +337,8 @@ ul.thin li {
 
 #searchbars input {
     position: relative;
-    padding: 3px 3px 3px 5px;
+    width: 117px;
+    margin: 0px;
     font-size: 0.9em;
     background-color: #222;
     color: #ccc;
@@ -432,7 +449,7 @@ input.hidden {
 /* Layout (Any page) */
 
 .thin {
-    width: 850px;
+    width: 950px;
     margin: 0 auto;
 }
 
@@ -519,7 +536,7 @@ p.min_padding {
 }
 
 .main_column {
-    width: 592px;
+    width: 696px;
 }
 
 .main_column table {
@@ -872,7 +889,6 @@ ul .invitetree {
     height: 100%;
     background-color: black;
     z-index: 1001;
-    -moz-opacity: 0.8;
     opacity: .80;
     filter: alpha(opacity=80);
 }

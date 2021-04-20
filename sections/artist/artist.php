@@ -98,14 +98,14 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
 <?php } ?>
 
         <div class="box box_search">
-            <div class="head" title="Use this to find a particular song or track in a release"><strong>File Lists Search</strong></div>
-            <ul class="nobullet">
+            <div class="head"><strong>Song Search</strong></div>
+            <ul class="nobullet" style="padding-bottom: 2px">
                 <li>
                     <form class="search_form" name="filelists" action="torrents.php">
                         <input type="hidden" name="artistname" value="<?= $name ?>" />
                         <input type="hidden" name="action" value="advanced" />
-                        <input type="text" autocomplete="off" id="filelist" name="filelist" size="20" />
-                        <input type="submit" value="&rsaquo;" />
+                        <input type="text" autocomplete="off" id="filelist" name="filelist" size="24" placeholder="Find a specific song or track..." spellcheck="false" />
+                        <input type="submit" value="&#x1f50e;" />
                     </form>
                 </li>
             </ul>
@@ -145,7 +145,7 @@ Tags::reset();
         </div>
         <div class="box box_info box_addcollage_artist">
             <div class="head"><strong>Add to artist collage</strong></div>
-                <div class="box pad">
+                <div class="pad">
                     <form action="collages.php" method="post">
                     <select name="collage_combo">
                         <option value="0">Choose recent...</option>
@@ -562,67 +562,77 @@ if ($Requests) {
 <?php
 }
 
-// Similar Artist Map
-if ($Artist->similarArtists()) {
-    $Similar = new ARTISTS_SIMILAR($ArtistID, $name);
-    if ($SimilarData = $Cache->get_value("similar_positions_$ArtistID")) {
-        $Similar->load_data($SimilarData);
-        if (!(current($Similar->Artists)->NameLength)) {
-            unset($Similar);
-        }
-    }
-    if (empty($Similar) || empty($Similar->Artists)) {
-        $Img = new IMAGE;
-        $Img->create(WIDTH, HEIGHT);
-        $Img->color(255, 255, 255, 127);
-
-        $Similar->set_up();
-        $Similar->set_positions();
-        $Similar->background_image();
-
-        $Cache->cache_value("similar_positions_$ArtistID",  $Similar->dump_data(), 3600 * 24);
-    }
+$similar = $Artist->similarGraph(SIMILAR_WIDTH, SIMILAR_HEIGHT);
+if ($similar) {
 ?>
-        <div id="similar_artist_map" class="box">
-            <div id="flipper_head" class="head">
-                <a href="#">&uarr;</a>&nbsp;
-                <strong id="flipper_title">Similar Artist Map</strong>
-                <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
-            </div>
-            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(<?= STATIC_SERVER ?>/similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
-<?php
-    $Similar->write_artists();
-?>
-            </div>
-            <div id="flip_view_2" style="display: none; width: <?=WIDTH?>px; height: <?=HEIGHT?>px;">
-                <canvas width="<?=WIDTH?>px" height="<?=(HEIGHT - 20)?>px" id="similarArtistsCanvas"></canvas>
-                <div id="artistTags" style="display: none;">
-                    <ul><li></li></ul>
-                </div>
-                <strong style="margin-left: 10px;"><a id="currentArtist" href="#null">Loading...</a></strong>
-            </div>
+    <div id="similar_artist_map" class="box">
+      <div id="flipper_head" class="head">
+        <a href="#">&uarr;</a>&nbsp;
+        <strong id="flipper_title">Similar Artist Map</strong>
+        <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
+      </div>
+      <div id="flip_view_1" style="width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
+        <div id="similar-artist" style=" top: <?= SIMILAR_HEIGHT/2 - 25 ?>px; left: <?= SIMILAR_WIDTH/2 - mb_strlen($Artist->name()) * 4 ?>px;">
+          <span class="name"><?= $Artist->name() ?></span>
         </div>
+        <div class="similar-artist-graph" style="padding-top: <?= SIMILAR_HEIGHT / SIMILAR_WIDTH * 100 ?>%;">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 <?=
+            SIMILAR_WIDTH ?> <?= SIMILAR_HEIGHT ?>" style="display: inline-block; position: absolute; top: 0; left: 0;">
+<?php
+    $names = '';
+    foreach ($similar as $s) {
+        if ($s['proportion'] <= 0.2) {
+            $pt = 8;
+        } elseif ($s['proportion'] <= 0.3) {
+            $pt = 9;
+        } elseif ($s['proportion'] <= 0.4) {
+            $pt = 10;
+        } else {
+            $pt = 11;
+        }
+        $xPos = max(3, $s['x'] - ($s['x'] < SIMILAR_WIDTH * 0.85 ? 0 : (int)(mb_strlen($s['artist_name']) * $pt * 0.6)));
+        $yPos = max(3, $s['y'] + ($s['y'] < SIMILAR_HEIGHT * 0.5 ? -2 : 10));
+        $names .= "<a xlink:href=\"artist.php?id={$s['artist_id']}\"><text x=\"{$xPos}\" y=\"{$yPos}\" >{$s['artist_name']}</text></a>";
+        foreach ($s['related'] as $r) {
+            if ($r >= $s['artist_id']) {
+?>
+          <line x1="<?= $similar[$r]['x'] ?>" y1="<?= $similar[$r]['y'] ?>" x2="<?= $s['x'] ?>" y2="<?=
+            $s['y'] ?>" style="stroke:rgb(0,153,0);stroke-width:1" />
+<?php
+            }
+        }
+?>
+          <line x1="<?= SIMILAR_WIDTH/2 ?>" y1="<?= SIMILAR_HEIGHT/2 ?>" x2="<?= $s['x'] ?>" y2="<?=
+            $s['y'] ?>" style="stroke:rgb(77,153,0);stroke-width:<?= (int)ceil($s['proportion'] * 4) + 1 ?>" />
+<?php
+    }
+?>
+          <?= $names // last, to overlay text on graph ?>
+        </svg>
+      </div>
+    </div>
+    <div id="flip_view_2" style="display: none; position: relative; width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
+      <canvas id="similarArtistsCanvas" style="position: absolute;" width="<?= SIMILAR_WIDTH - 20 ?>px" height="<?= SIMILAR_HEIGHT - 20 ?>px"></canvas>
+      <div id="artistTags" style="display: none;"><ul><li></li></ul></div>
+      <strong><br /><a id="currentArtist" style="position: relative; margin-left: 15px" href="#null">Loading...</a></strong>
+    </div>
+  </div>
 
 <script type="text/javascript">//<![CDATA[
 var cloudLoaded = false;
-
 function flipView() {
-    var state = document.getElementById('flip_view_1').style.display == 'block';
-
-    if (state) {
+    if (document.getElementById('flip_view_1').style.display == 'block') {
         document.getElementById('flip_view_1').style.display = 'none';
         document.getElementById('flip_view_2').style.display = 'block';
         document.getElementById('flipper_title').innerHTML = 'Similar Artist Cloud';
         document.getElementById('flip_to').innerHTML = 'Switch to map';
-
         if (!cloudLoaded) {
             require("<?= STATIC_SERVER ?>/functions/tagcanvas.js", function () {
                 require("<?= STATIC_SERVER ?>/functions/artist_cloud.js", function () {});
             });
             cloudLoaded = true;
         }
-    }
-    else {
+    } else {
         document.getElementById('flip_view_1').style.display = 'block';
         document.getElementById('flip_view_2').style.display = 'none';
         document.getElementById('flipper_title').innerHTML = 'Similar Artist Map';
@@ -652,9 +662,8 @@ function require(file, callback) {
 }
 //]]>
 </script>
+<?php } // if $similar ?>
 
-<?php
-} /* if count($Artist->similar()) > 0 */ ?>
         <div id="artist_information" class="box">
             <div id="info" class="head">
                 <a href="#">&uarr;</a>&nbsp;
