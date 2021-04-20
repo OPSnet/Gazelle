@@ -8,14 +8,12 @@ $(document).ready(function() {
 });
 function initArtistCloud() {
     $("#currentArtist").text();
-
     artistTags = $("#artistTags").find('ul');
     artistName = $("#content").find("h2:first").text();
     artistId = window.location.search.split("?id=")[1];
     addArtistMain(artistName);
     loadArtists();
 }
-
 
 function loadArtists() {
     $.getJSON('ajax.php?action=similar_artists&id='+artistId+'&limit='+LIMIT, function(data) {
@@ -30,35 +28,27 @@ function loadArtists() {
             score = score <= 150 ? 150 : score;
             addArtist(val['id'], val['name'], score);
         });
-
-    createCloud();
+        createCloud();
     });
-
 }
 
 function addArtist(id, name, score) {
     var item = $('<li><a style="color:#007DC6;" data-weight="' + score + '">' + name + '</a></li>');
-
     $(item).click(function(e) {
         e.preventDefault();
         reinit(id, name);
     });
-
     artistTags.append(item);
 }
 
 function addArtistMain(name) {
     var item = $('<li><a style="color: #007DC6;" data-weight="350">' + name + '</a></li>');
-
     $("#currentArtist").attr('href', 'artist.php?id=' + artistId);
     $("#currentArtist").text(artistName);
-
-
     $(item).click(function(e) {
         e.preventDefault();
         reinit(artistId, name);
     });
-
     artistTags.append(item);
 }
 

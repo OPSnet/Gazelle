@@ -1,5 +1,8 @@
 /* Layout (Torrents page) */
 
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* We're going to opt for the category icon method for now, tags_* is also available */
 .cats_applications {
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAolBMVEVHcEy5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubnMzMy5ubnMzMzMzMzMzMy5ubnJycnMzMy/v7/MzMzMzMzMzMy+vr7Gxsa9vb25ubnMzMy/v7+ysrIAAAC7u7u9vb1ZWVmZmZnLy8tAQEAZGRmmpqbAwMB/f3/ExMS+vr7Hx8czMzPBwcHIyMgNDQ2MjIxMTExmZmYewlHFAAAAHXRSTlMAgI/fzyBgEO8wn69Qv2BA7xCAcGC/v5/fr+/PjwAfzywAAADGSURBVCjPfdLXEoMgEAVQu9hiS0/WXtPr//9aMsmMuKLcR84wwGUFYTx6SCbAFS0w1RFRJRkcydZHtxHTFaaigsCJI3LQIAZHbVnnqBmya36wiKL1ZuZrDmNzL4qP10fderv9sBQTALLDJXkmr/c2wKbAP+d72aRNu0LXhy63uE7Tckb39Qwgr4oioagASlydlp2J2CDLwaBVM6H1SoxZ9Kry0JRetzwbIkGzMzD8m/hMDXcucgyVp7FzQabt+ynW7wkSM1kfpjohDiIxujAAAAAASUVORK5CYII=') no-repeat center center;
@@ -73,6 +76,14 @@ a {
 a:hover {
   color: #7c818c;
   text-decoration: underline;
+}
+
+svg|a {
+  fill: #a7adb9;
+}
+
+svg|a:hover {
+  fill: #7c818c;
 }
 
 h1,
@@ -384,7 +395,7 @@ input.hidden {
 
 .thin {
   margin: 0 auto;
-  width: 850px;
+  width: 1000px;
 }
 
 .widethin { /* overriding the thin class on torrents.php */
@@ -469,7 +480,7 @@ p.min_padding {
 }
 
 .main_column {
-  width: 592px;
+  width: 745px;
 }
 
 .main_column table {
@@ -586,6 +597,14 @@ table.slice {
 
 .hidden {
   display: none;
+}
+
+/* Layout (artist page) */
+
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #5294e2;
+    background: rgba(75, 81, 98, 0.5);
+    padding: 2px 4px;
 }
 
 /* Layout (home page) */
@@ -955,7 +974,6 @@ ul .invitetree {
   height: 100%;
   left: 0;
   opacity: 0.8;
-  -moz-opacity: 0.8;
   position: fixed;
   top: 0;
   width: 100%;

@@ -1,5 +1,8 @@
 /* Layout (Torrents page) */
 
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+
 /* We're going to opt for the category icon method for now, tags_* is also available */
 .cats_applications {
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAolBMVEVHcEy5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubnMzMy5ubnMzMzMzMzMzMy5ubnJycnMzMy/v7/MzMzMzMzMzMy+vr7Gxsa9vb25ubnMzMy/v7+ysrIAAAC7u7u9vb1ZWVmZmZnLy8tAQEAZGRmmpqbAwMB/f3/ExMS+vr7Hx8czMzPBwcHIyMgNDQ2MjIxMTExmZmYewlHFAAAAHXRSTlMAgI/fzyBgEO8wn69Qv2BA7xCAcGC/v5/fr+/PjwAfzywAAADGSURBVCjPfdLXEoMgEAVQu9hiS0/WXtPr//9aMsmMuKLcR84wwGUFYTx6SCbAFS0w1RFRJRkcydZHtxHTFaaigsCJI3LQIAZHbVnnqBmya36wiKL1ZuZrDmNzL4qP10fderv9sBQTALLDJXkmr/c2wKbAP+d72aRNu0LXhy63uE7Tckb39Qwgr4oioagASlydlp2J2CDLwaBVM6H1SoxZ9Kry0JRetzwbIkGzMzD8m/hMDXcucgyVp7FzQabt+ynW7wkSM1kfpjohDiIxujAAAAAASUVORK5CYII=') no-repeat center center;
@@ -59,7 +62,7 @@ body {
   color: #000;
   font-family: tahoma, helvetica, sans-serif;
   font-size: 8pt;
-  min-width: 850px;
+  min-width: 950px;
   width: 100%;
 }
 
@@ -74,6 +77,14 @@ a {
 a:hover {
   color: #555;
   text-decoration: underline;
+}
+
+svg|a {
+  fill: #444444;
+}
+
+svg|a:hover {
+  fill: #555555;
 }
 
 h1,
@@ -347,7 +358,7 @@ ul.thin li {
   margin: 0 auto 0 auto;
   padding: 10px;
   text-align: center;
-  width: 350px;
+  width: 450px;
 }
 
 .alertbar a {
@@ -373,11 +384,19 @@ input.hidden {
   position: absolute;
 }
 
+/* Layout (Artist page) */
+
+div#flip_view_1 div#similar-artist .name {
+    border: 1px solid #666666;
+    background: rgba(226, 226, 226, 0.5);
+    padding: 2px 4px;
+}
+
 /* Layout (Any page) */
 
 .thin {
   margin: 0 auto;
-  width: 850px;
+  width: 950px;
 }
 
 .widethin { /* overriding the thin class on torrents.php */
@@ -462,7 +481,7 @@ p.min_padding {
 }
 
 .main_column {
-  width: 592px;
+  width: 695px;
 }
 
 .main_column table {
@@ -621,7 +640,7 @@ ul.poll li.graph {
 
 .filter_torrents {
   margin: auto;
-  width: 750px;
+  width: 850px;
 }
 
 .filter_torrents .submit {
@@ -872,7 +891,6 @@ ul .invitetree {
   filter: alpha(opacity=80);
   height: 100%;
   left: 0;
-  -moz-opacity: 0.8;
   opacity: 0.8;
   position: fixed;
   top: 0;

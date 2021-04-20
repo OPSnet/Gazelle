@@ -44,6 +44,8 @@ define('FAKE_USERAGENT', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML
 define('SEEDBOX_SALT', '8EQKRWZqA5DMVwpAqQKRCiMm5xaucsPePseXwZhm88T8PyyuAkjVgTLrAMWWeB8W'); // change me
 define('AVATAR_SALT', 'BEapyctddrananytAqnkqccFgEntBdgf'); // change me
 define('AVATAR_WIDTH', 150);
+define('SIMILAR_WIDTH', 720);
+define('SIMILAR_HEIGHT', 500);
 
 define('LOGIN_ATTEMPT_BACKOFF', [
     0,

@@ -19,8 +19,6 @@
     background-color: #ffffff;
     border: 1px solid #dedede;
     border-radius: 2px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
     display: none; /** Hide items initially to avoid a flicker effect **/
     cursor: pointer;
     padding: 4px;
@@ -53,8 +51,6 @@
  */
 .wookmark-placeholder {
     border-radius: 2px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
     background-color: #eee;
     border: 1px solid #dedede;
     z-index: -1;

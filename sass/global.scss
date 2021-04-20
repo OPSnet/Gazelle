@@ -192,6 +192,23 @@ div#AddArtists a {
     bottom: 0pt;
 }
 
+div#flip_view_1 {
+    position: relative; 
+}
+
+div#flip_view_1 div#similar-artist {
+    position: absolute;
+    z-index: 1;
+    font-size: 13pt;
+    white-space: nowrap;
+}
+
+div#flip_view_1 .similar-artist-graph {
+    position: relative;
+    height: 0;
+    width: 100%;
+}
+
 .clear:after {
     content: ".";
     display: block;
@@ -218,11 +235,6 @@ div#AddArtists a {
     height: 180px;
     bottom: 0px;
     right: 0px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
 }
 
@@ -233,11 +245,6 @@ div#AddArtists a {
     position: fixed;
     bottom: 0px;
     right: 0px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
 }
 
@@ -288,8 +295,6 @@ span.secondary_class {
 
 #manage_collage_table.ui-sortable .ui-sortable-helper.drag {
     cursor: grabbing;
-    cursor: -moz-grabbing;
-    cursor: -webkit-grabbing;
 }
 
 #manage_collage_table .ui-sortable-helper td, #manage_collage_table .ui-sortable-placeholder {
@@ -477,15 +482,8 @@ tr.torrent .bookmark>a:after {
  */
 .wrap_overflow, .filelist_table td, .reportinfo_table, .torrentdetails blockquote {
     word-break: normal;
-    -ms-word-wrap: break-word;
     word-wrap: break-word;
-    -webkit-hyphens: auto;
-    -moz-hyphens: auto;
-    -ms-hyphens: auto;
     hyphens: auto;
-    /* Note that IE will have different behavior on word-break,
-     * but this is required to keep the layout from breaking. */
-    -ms-word-break: break-all;
 }
 /* Non-web-standard for webkit */
 .torrentdetails blockquote {
@@ -587,7 +585,6 @@ tr.torrent .bookmark>a:after {
 
 #settings_sections #submit, #settings_sections #settings_search {
     box-sizing: border-box;
-    -moz-box-sizing: border-box;
     width: 100%;
 }
 
@@ -654,8 +651,6 @@ tr.torrent .bookmark>a:after {
     float: left;
     width: 50%;
     box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
 }
 
 .field_div {
