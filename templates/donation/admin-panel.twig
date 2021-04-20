@@ -8,7 +8,7 @@
     <tr>
         <td class="label">Value:</td>
         <td>
-            <input type="text" name="donation_value" onkeypress="return isNumberKey(event);" />
+            <input type="text" name="donation_value" />
             <select name="donation_currency">
                 <option value="EUR">EUR</option>
                 <option value="USD">USD</option>
@@ -40,20 +40,20 @@
     </tr>
     <tr>
         <td class="label">Special Rank:</td>
-        <td><b> {{ special_rank }} </b></td>
+        <td><b> {{ user.specialDonorRank }} </b></td>
     </tr>
     <tr>
         <td class="label">Adjust active points:</td>
         <td>
         <input type="text" width="4" name="donor_rank_delta" value="0" />
-        (add or subtract) currently: <b>{{ rank }}</b>
+        (add or subtract) currently: <b>{{ user.donorRank }}</b>
         </td>
     </tr>
     <tr>
         <td class="label">Adjust total points:</td>
         <td>
         <input type="text" width="4" name="total_donor_rank_delta" value="0" />
-        (add or subtract) currently: <b>{{ total_rank }}</b>
+        (add or subtract) currently: <b>{{ user.totalDonorRank }}</b>
         </td>
     </tr>
     <tr>

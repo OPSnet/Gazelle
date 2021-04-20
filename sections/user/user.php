@@ -11,8 +11,6 @@ $UserID = $User->id();
 $Username = $User->username();
 $Bonus = new Gazelle\Bonus;
 $donorMan = new Gazelle\Manager\Donation;
-$ClassLevels = $userMan->classLevelList();
-$Classes = $userMan->classList();
 
 if (!empty($_POST)) {
     authorize();
@@ -285,17 +283,23 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
 <?php        } ?>
             </ul>
         </div>
-<?php    } ?>
+<?php } ?>
         <div class="box box_info box_userinfo_personal">
             <div class="head colhead_dark">Personal</div>
             <ul class="stats nobullet">
-                <li>Class: <?=$ClassLevels[$User->classLevel()]['Name']?></li>
-<?php if (($secondary = array_values($User->secondaryClasses()))) { ?>
+                <li>Class: <?= $userMan->userclassName($User->primaryClass()) ?></li>
+<?php if (($secondary = $User->secondaryClasses())) { ?>
                 <li>
                     <ul class="stats">
-<?php asort($secondary); foreach ($secondary as $name) { ?>
+<?php
+        asort($secondary);
+        foreach ($secondary as $id => $name) {
+            if ($id == DONOR && !$User->propertyVisible($viewer, 'hide_donor_heart')) {
+                continue;
+            }
+?>
                         <li><?= $name ?></li>
-<?php    } ?>
+<?php } ?>
                     </ul>
                 </li>
 <?php
@@ -377,11 +381,11 @@ if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
         'is_donor'    => $User->isDonor(),
         'is_self'     => $OwnProfile,
         'is_mod'      => check_perms('users_mod'),
-        'total_rank'  => $donorMan->totalRank($UserID),
-        'current'     => $donorMan->rankLabel($UserID, true),
-        'leaderboard' => $donorMan->leaderboardRank($UserID),
-        'last'        => $donorMan->lastDonation($UserID),
-        'expiry'      => $donorMan->rankExpiry($UserID),
+        'total_rank'  => $User->totalDonorRank(),
+        'current'     => $User->donorRankLabel(true),
+        'leaderboard' => $donorMan->leaderboardRank($User),
+        'last'        => $User->lastDonation(),
+        'expiry'      => $User->donorRankExpiry(),
     ]);
 }
 ?>
@@ -403,14 +407,14 @@ if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
             </div>
         </div>
 <?php
-$EnabledRewards = $donorMan->enabledRewards($UserID);
-$ProfileRewards = $donorMan->profileRewards($UserID);
+$EnabledRewards = $user->enabledDonorRewards();
+$ProfileRewards = $user->profileDonorRewards();
 for ($i = 1; $i <= 4; $i++) {
     if ($EnabledRewards['HasProfileInfo' . $i] && $ProfileRewards['ProfileInfo' . $i]) {
 ?>
     <div class="box">
-        <div class="head" style="height: 13px;">
-            <span style="float: left;"><?=!empty($ProfileRewards['ProfileInfoTitle' . $i]) ? display_str($ProfileRewards['ProfileInfoTitle' . $i]) : "Extra Profile " . ($i + 1)?></span>
+        <div class="head">
+            <?=!empty($ProfileRewards['ProfileInfoTitle' . $i]) ? display_str($ProfileRewards['ProfileInfoTitle' . $i]) : "Extra Profile " . ($i + 1)?>
             <span style="float: right;"><a href="#" onclick="$('#profilediv_<?=$i?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
         </div>
         <div class="pad profileinfo" id="profilediv_<?= $i ?>"><?= Text::full_format($ProfileRewards['ProfileInfo' . $i]); ?></div>
@@ -517,7 +521,7 @@ if (check_perms('users_view_invites')) {
 
 if (check_perms('users_give_donor')) {
     echo G::$Twig->render('donation/history.twig', [
-        'history' => $donorMan->history($UserID),
+        'history' => $User->donorHistory(),
     ]);
 }
 
@@ -680,6 +684,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
                 <td>
                     <select name="Class">
 <?php
+        $ClassLevels = $userMan->classLevelList();
         foreach ($ClassLevels as $CurClass) {
             if ($CurClass['Secondary']) {
                 continue;
@@ -728,7 +733,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
             'down'           => $stats['BytesDownloaded'],
             'bonus'          => $stats['BonusPoints'],
             'collages'       => $User->paidPersonalCollages(),
-            'donor_collages' => $donorMan->personalCollages($UserID),
+            'donor_collages' => $User->personalDonorCollages(),
         ]);
     }
 
@@ -797,9 +802,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
 
     if (check_perms('users_give_donor')) {
         echo G::$Twig->render('donation/admin-panel.twig', [
-            'rank' => $donorMan->rank($UserID),
-            'special_rank' => $donorMan->specialRank($UserID),
-            'total_rank' => $donorMan->totalRank($UserID),
+            'user' => $user,
         ]);
     }
 
