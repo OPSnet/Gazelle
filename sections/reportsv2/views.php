@@ -19,6 +19,7 @@ View::show_header('Reports V2', 'reportsv2');
 ", $LoggedUser['ID']);
 $owner = display_str($owner);
 $reportMan = new Gazelle\Manager\ReportV2;
+$userMan = new Gazelle\Manager\User;
 ?>
 <div class="header">
     <h2>Reports V2 Information</h2>
@@ -166,13 +167,13 @@ foreach ($list as $summary) {
             </tr>
 <?php
 $list = $reportMan->inProgressSummary();
-    foreach ($list as $summary) {
+foreach ($list as $summary) {
 ?>
-            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+            <tr class="<?= $summary['user_id'] == $LoggedUser['ID'] ? 'rowa' : 'rowb' ?>">
                 <td>
-                    <a href="reportsv2.php?view=staff&amp;id=<?=$summary['ResolverID']?>"><?=display_str($summary['Username'])?>'s reports</a>
+                    <a href="reportsv2.php?view=staff&amp;id=<?=$summary['user_id']?>"><?=display_str($userMan->findById($summary['user_id'])->username())?>'s reports</a>
                 </td>
-                <td class="number_column"><?=number_format($summary['Count'])?></td>
+                <td class="number_column"><?=number_format($summary['nr'])?></td>
             </tr>
 <?php } ?>
         </table>
