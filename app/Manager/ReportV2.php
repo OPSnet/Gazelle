@@ -58,16 +58,14 @@ class ReportV2 extends \Gazelle\Base {
 
     public function inProgressSummary(): array {
         $this->db->prepared_query("
-            SELECT r.ResolverID,
-                um.Username,
-                count(*) AS Count
+            SELECT r.ResolverID AS user_id,
+                count(*)        AS nr
             FROM reportsv2 AS r
-            INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
             WHERE r.Status = 'InProgress'
             GROUP BY r.ResolverID
-            ORDER By Count DESC
+            ORDER By nr DESC
         ");
-        return $this->db->to_array(MYSQLI_NUM);
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function newSummary(): array {
@@ -92,7 +90,7 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY Reports DESC
         ");
-        return $this->db->to_array(MYSQLI_NUM);
+        return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
     protected function resolvedLastInterval(string $interval): array {
@@ -106,7 +104,7 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY Reports DESC
         ");
-        return $this->db->to_array(MYSQLI_NUM);
+        return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function resolvedLastDay(): array {
