@@ -19,7 +19,7 @@ if (is_null($user)) {
 }
 
 View::show_header($user->username() . " &rsaquo; Password reset history");
-echo G::$Twig->render('user/password-history.twig', [
+echo $Twig->render('user/password-history.twig', [
     'list' => $user->passwordHistory(),
     'user' => $user,
 ]);

@@ -27,7 +27,7 @@ View::show_header('Logchecker');
 </div>
 <div class="thin">
     <h2 class="center">Logchecker Test Results</h2>
-<?= G::$Twig->render('logchecker/report.twig', [
+<?= $Twig->render('logchecker/report.twig', [
     'pasted'   => $isPaste,
     'logfile'  => $logfile,
 ]) ?>

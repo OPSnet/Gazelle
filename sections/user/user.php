@@ -93,7 +93,7 @@ if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_per
 }
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
-echo G::$Twig->render('user/header.twig', [
+echo $Twig->render('user/header.twig', [
     'auth'    => $LoggedUser['AuthKey'],
     'freeleech' => [
         'item'  => $FL_Items,
@@ -369,7 +369,7 @@ if ($OwnProfile || check_perms('users_override_paranoia')) { ?>
         </div>
 <?php
 if (check_paranoia_here('snatched')) {
-    echo G::$Twig->render('user/tag-snatch.twig', [
+    echo $Twig->render('user/tag-snatch.twig', [
         'id'   => $UserID,
         'list' => $User->tagSnatchCounts(),
     ]);
@@ -377,7 +377,7 @@ if (check_paranoia_here('snatched')) {
 require('community_stats.php');
 
 if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
-    echo G::$Twig->render('donation/stats.twig', [
+    echo $Twig->render('donation/stats.twig', [
         'is_donor'    => $User->isDonor(),
         'is_self'     => $OwnProfile,
         'is_mod'      => check_perms('users_mod'),
@@ -424,7 +424,7 @@ for ($i = 1; $i <= 4; $i++) {
 }
 
 if (check_paranoia_here('snatched')) {
-    echo G::$Twig->render('user/recent.twig', [
+    echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
         'recent' => $User->recentSnatches(),
         'title'  => 'Snatches',
@@ -433,7 +433,7 @@ if (check_paranoia_here('snatched')) {
 }
 
 if (check_paranoia_here('uploads')) {
-    echo G::$Twig->render('user/recent.twig', [
+    echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
         'recent' => $User->recentUploads(),
         'title'  => 'Uploads',
@@ -493,7 +493,7 @@ foreach ($Collages as $CollageInfo) {
 // Linked accounts
 if (check_perms('users_edit_usernames')) {
     [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($User))->info();
-    echo G::$Twig->render('user/linked.twig', [
+    echo $Twig->render('user/linked.twig', [
         'auth'     => $LoggedUser['AuthKey'],
         'comments' => $comments,
         'group_id' => $linkGroupId,
@@ -512,7 +512,7 @@ if (check_perms('users_view_invites')) {
                 Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
             </div>
             <div id="invitetree" class="hidden">
-                <?= $tree->render(G::$Twig) ?>
+                <?= $tree->render($Twig) ?>
             </div>
         </div>
 <?php
@@ -520,7 +520,7 @@ if (check_perms('users_view_invites')) {
 }
 
 if (check_perms('users_give_donor')) {
-    echo G::$Twig->render('donation/history.twig', [
+    echo $Twig->render('donation/history.twig', [
         'history' => $User->donorHistory(),
     ]);
 }
@@ -614,7 +614,7 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
 }
 
 if (check_perms('users_mod') || $viewer->isStaffPMReader()) {
-    echo G::$Twig->render('admin/staffpm-list.twig', [
+    echo $Twig->render('admin/staffpm-list.twig', [
         'list' => (new Gazelle\Staff($User))->userStaffPmList($LoggedUser['ID']),
     ]);
 }
@@ -666,13 +666,13 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
 
 <?php
     if (check_perms('users_edit_usernames')) {
-        echo G::$Twig->render('user/edit-username.twig', [
+        echo $Twig->render('user/edit-username.twig', [
             'username' => $Username,
         ]);
     }
 
     if (check_perms('users_edit_titles')) {
-        echo G::$Twig->render('user/edit-title.twig', [
+        echo $Twig->render('user/edit-title.twig', [
             'title' => $User->title(),
         ]);
     }
@@ -710,25 +710,25 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
     }
 
     if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
-        echo G::$Twig->render('user/edit-secondary-class.twig', [
+        echo $Twig->render('user/edit-secondary-class.twig', [
             'permission' => $User->secondaryClassesList(),
         ]);
     }
 
     if (check_perms('users_make_invisible')) {
-        echo G::$Twig->render('user/edit-peer-visibility.twig', [
+        echo $Twig->render('user/edit-peer-visibility.twig', [
             'is_visible' => $User->isVisible(),
         ]);
     }
 
     if (check_perms('admin_rate_limit_manage')) {
-        echo G::$Twig->render('user/edit-rate-limit.twig', [
+        echo $Twig->render('user/edit-rate-limit.twig', [
             'unlimited' => $User->hasUnlimitedDownload(),
         ]);
     }
 
     if (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $OwnProfile)) {
-        echo G::$Twig->render('user/edit-buffer.twig', [
+        echo $Twig->render('user/edit-buffer.twig', [
             'up'             => $stats['BytesUploaded'],
             'down'           => $stats['BytesDownloaded'],
             'bonus'          => $stats['BonusPoints'],
@@ -738,29 +738,29 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
     }
 
     if (check_perms('users_edit_invites')) {
-        echo G::$Twig->render('user/edit-invite.twig', [
+        echo $Twig->render('user/edit-invite.twig', [
             'amount' => $User->inviteCount(),
         ]);
     }
 
     if (check_perms('admin_manage_user_fls')) {
-        echo G::$Twig->render('user/edit-fltoken.twig', [
+        echo $Twig->render('user/edit-fltoken.twig', [
             'amount' => $User->tokenCount(),
         ]);
     }
 
     if (check_perms('admin_manage_fls') || (check_perms('users_mod') && $OwnProfile)) {
-        echo G::$Twig->render('user/edit-remark.twig', [
+        echo $Twig->render('user/edit-remark.twig', [
             'remark' => $User->supportFor(),
         ]);
     }
 
     if (check_perms('users_edit_reset_keys')) {
-        echo G::$Twig->render('user/edit-reset.twig');
+        echo $Twig->render('user/edit-reset.twig');
     }
 
     if (check_perms('users_edit_password')) {
-        echo G::$Twig->render('user/edit-password.twig', [
+        echo $Twig->render('user/edit-password.twig', [
             'key_2fa' => $User->TFAKey(),
             'user_id' => $UserID,
         ]);
@@ -770,7 +770,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
 
 <?php
     if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
-        echo G::$Twig->render('user/edit-privileges.twig', [
+        echo $Twig->render('user/edit-privileges.twig', [
             'email'          => $User->emailHistory(),
             'is_unconfirmed' => $User->isUnconfirmed(),
             'is_enabled'     => $User->isEnabled(),
@@ -801,27 +801,27 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
     }
 
     if (check_perms('users_give_donor')) {
-        echo G::$Twig->render('donation/admin-panel.twig', [
+        echo $Twig->render('donation/admin-panel.twig', [
             'user' => $user,
         ]);
     }
 
     if (check_perms('users_warn')) {
-        echo G::$Twig->render('user/edit-warn.twig', [
+        echo $Twig->render('user/edit-warn.twig', [
             'is_warned' => $User->isWarned(),
             'until'     => $User->warningExpiry(),
         ]);
     }
 
     if (check_perms('users_disable_any')) {
-        echo G::$Twig->render('user/edit-lock.twig', [
+        echo $Twig->render('user/edit-lock.twig', [
             'is_locked'  => $User->isLocked(),
             'staff_lock' => STAFF_LOCKED,
             'can_logout' => check_perms('users_logout'),
         ]);
     }
 
-    echo G::$Twig->render('user/edit-submit.twig');
+    echo $Twig->render('user/edit-submit.twig');
 ?>
         </form>
 <?php } /* check_perms('users_mod') */ ?>

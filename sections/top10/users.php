@@ -72,7 +72,7 @@ foreach ($tables as $tag => $table) {
         }
         unset($result);
 
-        echo(G::$Twig->render('top10/users.twig', [
+        echo($Twig->render('top10/users.twig', [
             'results' => $results,
             'limit'   => $limit,
             'tag'     => $tag,

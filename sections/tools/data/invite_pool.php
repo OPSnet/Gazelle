@@ -22,7 +22,7 @@ $paginator = new Gazelle\Util\Paginator(INVITES_PER_PAGE, (int)($_GET['page'] ??
 $paginator->setTotal($inviteMan->totalPending());
 
 View::show_header('Invite Pool');
-echo G::$Twig->render('invite/pool.twig', [
+echo $Twig->render('invite/pool.twig', [
     'auth'      => $LoggedUser['AuthKey'],
     'paginator' => $paginator,
     'list'      => $inviteMan->pendingInvites($paginator->limit(), $paginator->offset()),

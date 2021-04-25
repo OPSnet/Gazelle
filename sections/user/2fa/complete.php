@@ -20,7 +20,7 @@ unset($_SESSION['private_key']);
 session_write_close();
 
 View::show_header('Two-factor Authentication');
-echo G::$Twig->render('user/2fa/complete.twig', [
+echo $Twig->render('user/2fa/complete.twig', [
     'keys' => $user->list2FA(),
 ]);
 View::show_footer();

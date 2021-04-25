@@ -11,7 +11,7 @@ if (isset($_REQUEST['expired'])) {
     if (!$error) {
         $user = (new Gazelle\Manager\User)->findByEmail(trim($_REQUEST['email']));
         if ($user) {
-            $user->resetPassword(G::$Twig);
+            $user->resetPassword($Twig);
             $user->logoutEverywhere();
             $sent = true;
         }
@@ -21,7 +21,7 @@ if (isset($_REQUEST['expired'])) {
 
 View::show_header('Recover Password','validate');
 echo $validator->generateJS('recoverform');
-echo G::$Twig->render('login/reset-password.twig', [
+echo $Twig->render('login/reset-password.twig', [
     'error' => $error,
     'sent'  => $sent,
 ]);

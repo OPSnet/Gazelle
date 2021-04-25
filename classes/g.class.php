@@ -7,9 +7,6 @@ class G {
     /** @var \Gazelle\Router */
     public static $Router;
 
-    /** @var \Twig\Environment */
-    public static $Twig;
-
     public static $LoggedUser;
 
     public static function initialize() {

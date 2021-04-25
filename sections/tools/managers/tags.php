@@ -25,7 +25,7 @@ echo $Val->generateJS('tagform');
     <h2>Batch Tag Editor</h2>
 </div>
 <div class="thin">
-<?= G::$Twig->render('tag/batch-editor.twig') ?>
+<?= $Twig->render('tag/batch-editor.twig') ?>
     <br />
 <?php
 
@@ -119,7 +119,7 @@ if ($failure || $success) {
 }
 
 if (!$failure && $success && $_GET['list']) {
-    echo G::$Twig->render('tag/merged.twig', [
+    echo $Twig->render('tag/merged.twig', [
         'torrents' => $affectedTorrents,
         'requests' => $affectedRequests,
     ]);

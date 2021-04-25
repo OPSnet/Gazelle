@@ -6,17 +6,17 @@ if (!check_perms('admin_recovery')) {
 if (isset($_POST['username']) && strlen($_POST['username'])) {
     $class = 'username';
     $target = trim($_POST['username']);
-    $List = \Gazelle\Recovery::get_candidate_by_username($target, G::$DB);
+    $List = \Gazelle\Recovery::get_candidate_by_username($target, $DB);
 }
 elseif (isset($_POST['email']) && strlen($_POST['email'])) {
     $class = 'email';
     $target = trim($_POST['email']);
-    $List = \Gazelle\Recovery::get_candidate_by_email($target, G::$DB);
+    $List = \Gazelle\Recovery::get_candidate_by_email($target, $DB);
 }
 elseif (isset($_POST['announce']) && strlen($_POST['announce'])) {
     $class = 'announce';
     $target = trim($_POST['announce']);
-    $List = \Gazelle\Recovery::get_candidate_by_announce($target, G::$DB);
+    $List = \Gazelle\Recovery::get_candidate_by_announce($target, $DB);
 }
 
 View::show_header('Recovery browse users');

@@ -61,7 +61,7 @@ if (isset($_REQUEST['json'])) {
 
 View::show_header('Cache Inspector');
 
-echo G::$Twig->render('admin/cache-management.twig', [
+echo $Twig->render('admin/cache-management.twig', [
     'can_flush'     => check_perms('admin_clear_cache'),
     'delta'         => $delta,
     'flushed'       => $flushed,

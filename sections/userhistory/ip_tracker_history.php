@@ -21,7 +21,7 @@ $paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1))
 $paginator->setTotal($snatchInfo->total());
 
 View::show_header('Tracker IP address history &rsaquo; ' . ($user ? $user->username() : "IP address $ipaddr"));
-echo G::$Twig->render('admin/history-ip-tracker.twig', [
+echo $Twig->render('admin/history-ip-tracker.twig', [
     'details'   => $snatchInfo->page($paginator->limit(), $paginator->offset()),
     'ipaddr'    => $ipaddr,
     'is_mod'    => check_perms('users_mod'),

@@ -5,7 +5,7 @@ if (!check_perms('admin_manage_permissions')) {
 }
 
 View::show_header('Special Users List');
-echo G::$Twig->render('admin/user-custom-permission.twig', [
+echo $Twig->render('admin/user-custom-permission.twig', [
     'list' => (new Gazelle\Manager\User)->findAllByCustomPermission()
 ]);
 View::show_footer();

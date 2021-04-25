@@ -15,7 +15,7 @@ if (is_null($user)) {
 }
 
 View::show_header('Warn User');
-echo G::$Twig->render('forum/warn.twig', [
+echo $Twig->render('forum/warn.twig', [
     'auth'     => $LoggedUser['AuthKey'],
     'body'     => $forum->postBody($postId),
     'forum_id' => $forum->id(),

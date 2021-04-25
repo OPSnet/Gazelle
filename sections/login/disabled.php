@@ -3,7 +3,7 @@
 $auto = (FEATURE_EMAIL_REENABLE && isset($_POST['email']) && $_POST['email'] != '');
 
 View::show_header('Disabled');
-echo G::$Twig->render('login/disabled.twig', [
+echo $Twig->render('login/disabled.twig', [
     'username' => $_COOKIE['username'],
     'auto'     => $auto,
     'message'  => $auto

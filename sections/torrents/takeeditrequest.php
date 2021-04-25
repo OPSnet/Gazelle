@@ -26,7 +26,7 @@ $forum = new \Gazelle\Forum(EDITING_FORUM_ID);
 $threadId = $forum->addThread(
     SYSTEM_USER_ID,
     "Editing request – Torrent Group: $groupName",
-    G::$Twig->render('forum/request-edit.twig', [
+    $Twig->render('forum/request-edit.twig', [
         'username' => $LoggedUser['Username'],
         'url'      => SITE_URL . '/torrents.php?id=' . $groupId,
         'name'     => $name,

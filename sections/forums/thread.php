@@ -106,7 +106,7 @@ $auth = $LoggedUser['AuthKey'];
 View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
     'comments,subscriptions,bbcode', $IsDonorForum ? ',donor' : ''
 );
-echo G::$Twig->render('forum/header-thread.twig', [
+echo $Twig->render('forum/header-thread.twig', [
     'auth'         => $auth,
     'forum'        => $forum,
     'dept_list'    => $forum->departmentList($viewer),
@@ -399,7 +399,7 @@ foreach ($thread as $Key => $Post) {
 echo $paginator->linkbox();
 $lastPost = end($thread);
 if (check_perms('site_moderate_forums') || ($viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
-    echo G::$Twig->render('reply.twig', [
+    echo $Twig->render('reply.twig', [
         'auth'     => $LoggedUser['AuthKey'],
         'action'   => 'reply',
         'forum'    => $forumId,

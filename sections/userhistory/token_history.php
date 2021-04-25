@@ -40,7 +40,7 @@ $user->setTorrentManager($torMan)
         (new Gazelle\Manager\TorrentLabel)->showMedia(true)->showEdition(true)
     );
 
-echo G::$Twig->render('user/history-freeleech.twig', [
+echo $Twig->render('user/history-freeleech.twig', [
     'admin'       => check_perms('admin_fl_history'),
     'auth'        => $LoggedUser['AuthKey'],
     'own_profile' => $LoggedUser['ID'] == $userId,

@@ -44,7 +44,7 @@ if ($Saved) {
 $contestTypes = $contestMan->contestTypes();
 
 if (!$create) {
-    echo G::$Twig->render('contest/list.twig', [
+    echo $Twig->render('contest/list.twig', [
         'current' => !is_null($contest) ? $contest->id() : 0,
         'pointer' => "\xE2\x98\x9E",
         'list' => $contestMan->contestList(),
@@ -88,7 +88,7 @@ if ($contest instanceof Gazelle\Contest\RequestFill) {
 
 if ($create || $contest) {
 
-    echo G::$Twig->render('contest/admin-form.twig', [
+    echo $Twig->render('contest/admin-form.twig', [
         'action'     => $create ? 'contest.php?action=create' : 'contest.php?action=admin&id=' . $contest->id(),
         'auth'       => $LoggedUser['AuthKey'],
         'contest'    => $contest,

@@ -29,14 +29,14 @@ $ipaddr     = $_SERVER['REMOTE_ADDR'];
 $key        = "apl-recovery.$ipaddr";
 $rate_limit = 0;
 
-if (G::$Cache->get_value($key)) {
+if ($Cache->get_value($key)) {
     $msg = "Rate limiting in force.<br />You tried to save this page too rapidly following the previous save.";
 }
 else {
     $info = \Gazelle\Recovery::validate($_POST);
     if (count($info)) {
         $info['ipaddr']   = $ipaddr;
-        $info['password_ok'] = \Gazelle\Recovery::check_password($info['username'], $_POST['password'], G::$DB);
+        $info['password_ok'] = \Gazelle\Recovery::check_password($info['username'], $_POST['password'], $DB);
 
         list($ok, $filename) = \Gazelle\Recovery::save_screenshot($_FILES);
         if (!$ok) {
@@ -54,7 +54,7 @@ else {
             }
             $info['token'] = $token;
 
-            if (\Gazelle\Recovery::persist($info, G::$DB)) {
+            if (\Gazelle\Recovery::persist($info, $DB)) {
                 $msg = 'ok';
             }
             else {
@@ -66,7 +66,7 @@ else {
         $msg = "Your upload was not accepted.";
     }
 }
-G::$Cache->cache_value($key, 1, 300);
+$Cache->cache_value($key, 1, 300);
 
 if ($msg == 'ok') {
 ?>

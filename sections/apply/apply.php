@@ -17,7 +17,7 @@ var_dump($_POST);
 }
 
 View::show_header('Apply', 'apply');
-echo G::$Twig->render('applicant/apply.twig', [
+echo $Twig->render('applicant/apply.twig', [
     'auth'         => $LoggedUser['AuthKey'],
     'body'         => new Gazelle\Util\Textarea('body', $body ?? ''),
     'error'        => $error ?? null,

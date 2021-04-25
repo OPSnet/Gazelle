@@ -74,7 +74,7 @@ if (check_perms('admin_manage_blog')) {
                 break;
         }
     }
-    echo G::$Twig->render('staffblog/edit.twig', [
+    echo $Twig->render('staffblog/edit.twig', [
         'auth' => $LoggedUser['AuthKey'],
         'blog' => $blogMan,
         'verb' => empty($_GET['action']) ? 'create' : 'edit',
@@ -82,7 +82,7 @@ if (check_perms('admin_manage_blog')) {
     ]);
 }
 
-echo G::$Twig->render('staffblog/list.twig', [
+echo $Twig->render('staffblog/list.twig', [
     'auth'   => $LoggedUser['AuthKey'],
     'editor' => check_perms('admin_manage_blog'),
     'list'   => $blogMan->blogList(),

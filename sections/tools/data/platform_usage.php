@@ -17,8 +17,8 @@ View::show_header('OS and Browser Usage');
     </tr>
 
 <?php
-G::$DB->prepared_query("SELECT OperatingSystem, OperatingSystemVersion, COUNT(*) FROM users_sessions WHERE OperatingSystem IS NOT NULL GROUP BY OperatingSystem, OperatingSystemVersion ORDER BY COUNT(*) DESC");
-while (list($OperatingSystem, $OperatingSystemVersion, $Count) = G::$DB->fetch_record(0, 'OperatingSystem', 1, 'OperatingSystemVersion')) {
+$DB->prepared_query("SELECT OperatingSystem, OperatingSystemVersion, COUNT(*) FROM users_sessions WHERE OperatingSystem IS NOT NULL GROUP BY OperatingSystem, OperatingSystemVersion ORDER BY COUNT(*) DESC");
+while (list($OperatingSystem, $OperatingSystemVersion, $Count) = $DB->fetch_record(0, 'OperatingSystem', 1, 'OperatingSystemVersion')) {
     ?>
     <tr>
         <td><?=$OperatingSystem?> <?=$OperatingSystemVersion?></td>
@@ -38,8 +38,8 @@ while (list($OperatingSystem, $OperatingSystemVersion, $Count) = G::$DB->fetch_r
     </tr>
 
 <?php
-G::$DB->prepared_query("SELECT Browser, BrowserVersion, COUNT(*) FROM users_sessions WHERE Browser IS NOT NULL GROUP BY Browser, BrowserVersion ORDER BY COUNT(*) DESC");
-while (list($Browser, $BrowserVersion, $Count) = G::$DB->fetch_record(0, 'Browser', 1, 'BrowserVersion')) {
+$DB->prepared_query("SELECT Browser, BrowserVersion, COUNT(*) FROM users_sessions WHERE Browser IS NOT NULL GROUP BY Browser, BrowserVersion ORDER BY COUNT(*) DESC");
+while (list($Browser, $BrowserVersion, $Count) = $DB->fetch_record(0, 'Browser', 1, 'BrowserVersion')) {
     ?>
     <tr>
         <td><?=$Browser?> <?=$BrowserVersion?></td>

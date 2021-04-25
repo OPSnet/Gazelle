@@ -11,7 +11,7 @@ if ($collage->isDeleted() && !$collage->isOwner($LoggedUser['ID']) && !check_per
 }
 
 View::show_header('Delete collage');
-echo G::$Twig->render('collage/delete.twig', [
+echo $Twig->render('collage/delete.twig', [
     'auth'        => $LoggedUser['AuthKey'],
     'id'          => $collage->id(),
     'is_personal' => $collage->isPersonal(),

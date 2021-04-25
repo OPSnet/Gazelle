@@ -10,7 +10,7 @@ if ($letter && $letter !== '1') {
 
 View::show_header($title);
 
-echo G::$Twig->render('wiki/browse.twig', [
+echo $Twig->render('wiki/browse.twig', [
     'title' => $title,
     'articles' => $wikiMan->articles($LoggedUser['EffectiveClass'], $letter),
 ]);

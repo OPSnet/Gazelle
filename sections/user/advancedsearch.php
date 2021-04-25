@@ -516,7 +516,7 @@ $Secondaries = array_filter($ClassLevels, function ($class) { return $class['Sec
 usort($Secondaries, function($c1, $c2) { return strcmp($c1['Name'], $c2['Name']); });
 
 View::show_header('User search');
-echo G::$Twig->render('admin/advanced-user-search.twig', [
+echo $Twig->render('admin/advanced-user-search.twig', [
     'paginator'     => $paginator,
     'show_invited'  => $showInvited,
     'total'         => $total,

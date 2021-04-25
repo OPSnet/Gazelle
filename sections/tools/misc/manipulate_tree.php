@@ -66,7 +66,7 @@ if ($_POST['id']) {
 }
 
 View::show_header('Manipulate Invite Tree');
-echo G::$Twig->render('user/invite-tree-bulkedit.twig', [
+echo $Twig->render('user/invite-tree-bulkedit.twig', [
     'auth'    => $LoggedUser['AuthKey'],
     'message' => $message,
 ]);

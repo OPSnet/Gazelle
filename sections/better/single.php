@@ -4,7 +4,7 @@ $results = $better->twigGroups($better->singleSeeded());
 
 View::show_header('Single seeder FLACs');
 
-echo G::$Twig->render('better/single.twig', [
+echo $Twig->render('better/single.twig', [
     'results'      => $results,
     'result_count' => count($results),
     'auth_key'     => $LoggedUser['AuthKey'],

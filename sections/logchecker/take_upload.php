@@ -86,7 +86,7 @@ View::show_header();
 </div>
 <?php foreach ($logfileSummary->all() as $logfile) { ?>
 <div class="thin">
-    <?= G::$Twig->render('logchecker/report.twig', ['logfile' => $logfile]) ?>
+    <?= $Twig->render('logchecker/report.twig', ['logfile' => $logfile]) ?>
 </div>
 <?php
 }
