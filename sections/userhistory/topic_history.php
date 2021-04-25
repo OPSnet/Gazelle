@@ -17,7 +17,7 @@ $paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_REQUEST['page']
 $paginator->setTotal($forumSearch->threadsByUserTotal());
 
 View::show_header($user->username() . " &rsaquo; Threads created", 'subscriptions,comments,bbcode');
-echo G::$Twig->render('user/thread-history.twig', [
+echo $Twig->render('user/thread-history.twig', [
     'paginator' => $paginator,
     'page' => $forumSearch->threadsByUserPage($paginator->limit(), $paginator->offset()),
     'user' => $user,

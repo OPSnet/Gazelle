@@ -3,7 +3,7 @@
 use OrpheusNET\Logchecker\Logchecker;
 
 View::show_header('Logchecker', 'upload');
-echo G::$Twig->render('logchecker/upload.twig', [
+echo $Twig->render('logchecker/upload.twig', [
     'accepted' => Logchecker::getAcceptValues(),
     'list'     => (new Gazelle\Manager\Torrent)->missingLogfiles($LoggedUser['ID']),
 ]);

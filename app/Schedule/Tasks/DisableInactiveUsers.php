@@ -33,9 +33,10 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         // Send email
         $this->userQuery(110, 111);
         $mail = new Mail;
+        global $Twig;
         while ([$username, $email] = $this->db->next_record()) {
             $mail->send($email, 'Your ' . SITE_NAME . ' account is about to be disabled',
-                \G::$Twig->render('email/disable-warning.twig', [
+                $Twig->render('email/disable-warning.twig', [
                     'username' => $username,
                 ])
             );

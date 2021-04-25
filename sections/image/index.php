@@ -132,7 +132,7 @@ if (isset($_GET['type']) && isset($_GET['userid'])) {
         $user->addStaffNote(
             ucfirst($imageType) . " $url reset automatically (Size: {$sizeKb}kB, Height: {$image->height()}px)."
         )->modify();
-        (new Gazelle\Manager\User)->sendPM($userId, 0, $subject, G::$Twig->render('user/reset-avatar.twig', [
+        (new Gazelle\Manager\User)->sendPM($userId, 0, $subject, $Twig->render('user/reset-avatar.twig', [
             'height'    => $maxHeight,
             'size_kb'   => $sizeKb,
             'type'      => $imageType,

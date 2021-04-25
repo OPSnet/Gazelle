@@ -26,7 +26,7 @@ $paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? 1
 $paginator->setTotal($changeMan->total());
 
 View::show_header(SITE_NAME . ' Change Log');
-echo G::$Twig->render('admin/changelog.twig', [
+echo $Twig->render('admin/changelog.twig', [
     'auth'      => $LoggedUser['AuthKey'],
     'author'    => $viewer->username(),
     'list'      => $changeMan->page($paginator->limit(), $paginator->offset()),

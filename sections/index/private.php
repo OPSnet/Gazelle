@@ -42,7 +42,7 @@ if (!$threadId) {
 
 View::show_header('News', 'bbcode,news_ajax');
 
-echo G::$Twig->render('index/private-sidebar.twig', [
+echo $Twig->render('index/private-sidebar.twig', [
     'auth'              => $LoggedUser['AuthKey'],
     'blog'              => new Gazelle\Manager\Blog,
     'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
@@ -60,7 +60,7 @@ echo G::$Twig->render('index/private-sidebar.twig', [
     'viewer'            => $viewer,
 ]);
 
-echo G::$Twig->render('index/private-main.twig', [
+echo $Twig->render('index/private-main.twig', [
     'admin'   => $viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
     'latest'  => $torMan->latestUploads(5),

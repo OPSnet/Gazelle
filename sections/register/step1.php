@@ -23,7 +23,7 @@ if (empty($Sent)) {
     <strong class="important_text"><?= $Err ?></strong><br /><br />
 <?php
     }
-    echo G::$Twig->render('login/create.twig', [
+    echo $Twig->render('login/create.twig', [
         'username'  => $_REQUEST['username'],
         'email'     => $_REQUEST['email'] ?? $InviteEmail,
         'readrules' => $_REQUEST['readrules'],

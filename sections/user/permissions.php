@@ -19,7 +19,7 @@ if (isset($_POST['action'])) {
 }
 
 View::show_header($user->username() . " &rsaquo; Permissions");
-echo G::$Twig->render('user/privilege-list.twig', [
+echo $Twig->render('user/privilege-list.twig', [
     'auth'    => $LoggedUser['AuthKey'],
     'user'    => $user,
 ]);

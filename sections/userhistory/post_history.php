@@ -32,7 +32,7 @@ $paginator->setTotal($forumSearch->postHistoryTotal());
 
 View::show_header($user->username() . " &rsaquo; $title", 'subscriptions,comments,bbcode');
 
-echo G::$Twig->render('user/post-history.twig', [
+echo $Twig->render('user/post-history.twig', [
     'avatar'        => $userMan->avatarMarkup($viewer, $user),
     'is_fmod'       => check_perms('site_moderate_forums'),
     'own_profile'   => $ownProfile,

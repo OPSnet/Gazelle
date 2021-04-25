@@ -4,5 +4,5 @@ if (!SHOW_PUBLIC_INDEX) {
     exit;
 }
 View::show_header();
-echo G::$Twig->render('index/public.twig');
+echo $Twig->render('index/public.twig');
 View::show_footer();

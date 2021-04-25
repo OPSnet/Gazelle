@@ -6,9 +6,9 @@ if (!check_perms('site_analysis')) {
 
 View::show_header('Analysis List');
 
-$keys = array_filter(G::$Cache->getAllKeys(), function ($key) { return strpos($key, 'analysis_') === 0; });
+$keys = array_filter($Cache->getAllKeys(), function ($key) { return strpos($key, 'analysis_') === 0; });
 $items = array_map(function($key) {
-    $value = G::$Cache->get_value($key);
+    $value = $Cache->get_value($key);
     $value['time'] = $value['time'] ?? 0;
     $value['key'] = substr($key, strlen('analysis_'));
     return $value;

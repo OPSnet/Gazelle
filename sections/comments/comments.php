@@ -323,7 +323,7 @@ View::show_header($Title, 'bbcode,comments');
                 $heading = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>";
                 break;
         }
-        echo G::$Twig->render('comment/comment.twig', [
+        echo $Twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,
             'author'      => $author,
             'avatar'      => $userMan->avatarMarkup($user, $author),

@@ -39,7 +39,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
 }
 $Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
 View::show_header('View Applications', 'apply');
-echo G::$Twig->render('applicant/view.twig', [
+echo $Twig->render('applicant/view.twig', [
     'app'      => $app ?? null,
     'auth'     => $LoggedUser['AuthKey'],
     'id'       => $ID ?? 0,

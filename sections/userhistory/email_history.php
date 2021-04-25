@@ -10,7 +10,7 @@ if (is_null($user)) {
 }
 
 View::show_header($user->username() . " &rasquo; Email History");
-echo G::$Twig->render('user/email-history.twig', [
+echo $Twig->render('user/email-history.twig', [
     'user' => $user,
 ]);
 View::show_footer();

@@ -132,7 +132,7 @@ $Cache->increment('num_torrent_reportsv2');
 if ($UserID != $LoggedUser['ID']) {
     (new Gazelle\Manager\User)->sendPM($UserID, 0,
         "One of your torrents has been reported",
-        G::$Twig->render('reportsv2/new.twig', [
+        $Twig->render('reportsv2/new.twig', [
             'id'     => $TorrentID,
             'title'  => $ReportType['title'],
             'reason' => $userComment,
