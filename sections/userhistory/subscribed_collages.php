@@ -284,6 +284,7 @@ View::show_header('Subscribed collages','browse,collage');
         </td>
     </tr>
 </table>
+
 <!--</div>-->
 <table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?=$CollageID?>">
     <tr class="colhead">
@@ -301,27 +302,29 @@ View::show_header('Subscribed collages','browse,collage');
     if ($artistCollage) {
 ?>
         <h2>Subscribed artist collages<?=($ShowAll ? '' : ' with new additions')?></h2>
-<?php   foreach ($artistCollage as $c) {
+<?php
+        foreach ($artistCollage as $c) {
             [$id, $name, $new, $artistIds] = $c;
 ?>
-            <div class="box pad">
-                <span style="float: left;"><strong><a href="collage.php?id=<?= $id ?>"><?= $name ?></a></strong> (<?= $new ?> new artist<?= plural($new) ?>)</span>
-                <span style="float: right;">
-                    <a href="#" onclick="$('#discog_table_<?= $id ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?= $id ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?= $id ?>); return false;" id="subscribelink<?= $id ?>" class="brackets">Unsubscribe</a>
-                </span>
-            </div>
-            <table class="artist_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $id ?>">
-<?php
-            foreach ($artistIds as $artistId) {
-                $artist = new Gazelle\Artist($artistId);
-?>
-                <tr>
-                <td>
-                    <?= $artist->url() ?>
-                </td>
-                </tr>
+<table style="margin-top: 8px;" class="subscribed_collages_table">
+    <tr class="colhead_dark">
+        <td>
+            <span style="float: left;">
+                <strong><a href="collage.php?id=<?= $id ?>"><?= $name ?></a></strong> (<?= $new ?> new artist<?= plural($new) ?>)
+            </span>&nbsp;
+            <span style="float: right;">
+                <a href="#" onclick="$('#discog_table_<?= $id ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?= $id ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?= $id ?>); return false;" id="subscribelink<?= $id ?>" class="brackets">Unsubscribe</a>
+            </span>
+        </td>
+    </tr>
+</table>
+<table class="artist_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $id ?>">
+<?php       foreach ($artistIds as $artistId) { ?>
+    <tr class="colhead">
+        <td><?= (new Gazelle\Artist($artistId))->url() ?></td>
+    </tr>
 <?php       } ?>
-            </table>
+</table>
 <?php
         }
     }

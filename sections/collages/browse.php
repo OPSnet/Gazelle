@@ -1,9 +1,5 @@
 <?php
 
-define('COLLAGES_PER_PAGE', 25);
-
-[$Page, $Limit] = Format::page_limit(COLLAGES_PER_PAGE);
-
 $header = new \Gazelle\Util\SortableTableHeader('time', [
     'time'        => ['dbColumn' => 'ID',            'defaultSort' => 'desc', 'text' => 'Created'],
     'name'        => ['dbColumn' => 'c.Name',        'defaultSort' => 'asc',  'text' => 'Collage'],
@@ -12,7 +8,8 @@ $header = new \Gazelle\Util\SortableTableHeader('time', [
     'updated'     => ['dbColumn' => 'c.Updated',     'defaultSort' => 'desc', 'text' => 'Updated'],
 ]);
 
-$user = new Gazelle\User($LoggedUser['ID']);
+$userMan = new Gazelle\Manager\User;
+$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $tagMan = new \Gazelle\Manager\Tag;
 if (!empty($_GET['tags'])) {
@@ -21,13 +18,18 @@ if (!empty($_GET['tags'])) {
         $Tags[$ID] = $tagMan->sanitize($Tag);
     }
 }
+$userLink = false;
+$contrib = false;
 $tagSearchAll = ($_GET['tags_type'] ?? 1) ? 1 : 0;
+$searchField = (!empty($_GET['type']) && in_array($_GET['type'], ['c.name', 'description']))
+    ? $_GET['type'] : 'c.name';
 
-$BookmarkView = !empty($_GET['bookmarks']);
 $Where = ["c.Deleted = '0'"];
 $Args = [];
 
+$BookmarkView = !empty($_GET['bookmarks']);
 if ($BookmarkView) {
+    $userLink = '<a href="user.php?id=' . $viewer->id() . '">' . $viewer->username() . '</a>';
     $Categories = array_keys($CollageCats);
     $Join = 'INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)';
     $Where[] = "bc.UserID = ?";
@@ -47,10 +49,8 @@ if ($BookmarkView) {
     }
 }
 
-$searchField = (!empty($_GET['type']) && in_array($_GET['type'], ['c.name', 'description']))
-    ? $_GET['type'] : 'c.name';
-
 if (isset($_GET['action']) && $_GET['action'] === 'mine') {
+    $userLink = '<a href="user.php?id=' . $viewer->id() . '">' . $viewer->username() . '</a>';
     $Where[] = 'c.CategoryID = 0 AND c.UserID = ?';
     $Args[] = $LoggedUser['ID'];
 } else {
@@ -71,28 +71,25 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
     }
 
     if (!empty($_GET['userid'])) {
-        $UserID = (int)$_GET['userid'];
-        if ($UserID < 1) {
+        $user = $userMan->findById((int)$_GET['userid']);
+        if (is_null($user)) {
             error(404);
         }
-        $User = Users::user_info($UserID);
-        $Perms = Permissions::get_permissions($User['PermissionID']);
-        $UserClass = $Perms['Class'];
-
-        $UserLink = '<a href="user.php?id='.$UserID.'">'.$User['Username'].'</a>';
         if (empty($_GET['contrib'])) {
-            if (!check_paranoia('collages', $User['Paranoia'], $UserClass, $UserID)) {
+            if (!$user->propertyVisible($viewer, 'collages')) {
                 error(403);
             }
             $Where[] = "c.UserID = ?";
-            $Args[] = $UserID;
+            $Args[] = $user->id();
         } else {
-            if (!check_paranoia('collagecontribs', $User['Paranoia'], $UserClass, $UserID)) {
+            if (!$user->propertyVisible($viewer, 'collagecontribs')) {
                 error(403);
             }
             $Where[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
-            $Args[] = $UserID;
+            $Args[] = $user->id();
+            $contrib = true;
         }
+        $userLink = '<a href="user.php?id=' . $user->id() . '">' . $user->username() . '</a>';
     }
 
     // Don't filter on categories if all are selected
@@ -103,13 +100,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
     }
 }
 
-$From = "collages AS c $Join
-WHERE " . implode("\n    AND ", $Where);
-
+$From = "collages AS c $Join WHERE " . implode("\n    AND ", $Where);
 $NumResults = $DB->scalar("
     SELECT count(*) FROM $From
     ", ...$Args
 );
+
+$paginator = new Gazelle\Util\Paginator(COLLAGES_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($NumResults);
+$Args[] = $paginator->limit();
+$Args[] = $paginator->offset();
+
 $OrderBy = $header->getOrderBy();
 $OrderDir = $header->getOrderDir();
 $DB->prepared_query("
@@ -123,26 +124,31 @@ $DB->prepared_query("
     c.Subscribers,
     c.Updated
     FROM $From
-    ORDER BY $OrderBy $OrderDir LIMIT $Limit
+    ORDER BY $OrderBy $OrderDir
+    LIMIT ? OFFSET ?
     ", ...$Args
 );
 $Collages = $DB->to_array();
 
-View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages', 'collage');
+View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'collage');
 ?>
 <div class="thin">
     <div class="header">
+<?php if ($BookmarkView) { ?>
+        <h2><?= $userLink ?> &rsaquo; Bookmarked collages</h2>
 <?php
-    if ($BookmarkView) { ?>
-        <h2>Your bookmarked collages</h2>
+    } else {
+        if ($userLink) {
+?>
+        <h2><?= $userLink ?> &rsaquo; <?= $contrib ? " Collage contributions" : "Collages" ?></h2>
+<?php   } else { ?>
+        <h2><?= isset($CollageIDs) ? " Collage contributions" : "Collages" ?></h2>
 <?php
-    } else { ?>
-        <h2>Browse collages<?=(!empty($UserLink) ? (isset($CollageIDs) ? " with contributions by $UserLink" : " started by $UserLink") : '')?></h2>
-<?php
-    } ?>
+        }
+    }
+?>
     </div>
-<?php
-    if (!$BookmarkView) { ?>
+<?php if (!$BookmarkView) { ?>
     <div>
         <form class="search_form" name="collages" action="" method="get">
             <div><input type="hidden" name="action" value="search" /></div>
@@ -164,7 +170,7 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
                     <td class="label">Tags (comma-separated):</td>
                     <td>
                         <input type="text" id="tags" name="tags" size="70" value="<?= empty($_GET['tags']) ? '' : display_str($_GET['tags']) ?>"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /><br />
+                            $viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /><br />
                         <input type="radio" name="tags_type" id="tags_type0" value="0"<?= !$tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
 
                         <input type="radio" name="tags_type" id="tags_type1" value="1"<?= $tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type1"> All</label>
@@ -231,11 +237,11 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
         <a href="collages.php?action=new" class="brackets">New collage</a>
 <?php
         }
-        $activeCollages = $user->activePersonalCollages();
+        $activeCollages = $viewer->activePersonalCollages();
         if ($activeCollages === 1) {
-            $collages = $user->personalCollages();
+            $collages = $viewer->personalCollages();
 ?>
-        <a href="collages.php?id=<?= $collages[0]['ID'] ?>" class="brackets">Personal collage</a>
+        <a href="collages.php?id=<?= $collages[0][0] ?>" class="brackets">Personal collage</a>
 <?php       } elseif ($activeCollages > 1) { ?>
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
 <?php
@@ -259,12 +265,9 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
 ?>
         <a href="collages.php?userid=<?=$LoggedUser['ID']?>" class="brackets">Collages you started</a>
         <a href="collages.php?userid=<?=$LoggedUser['ID']?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
-        <br /><br />
-<?php }
-    $Pages = Format::get_pages($Page, $NumResults, COLLAGES_PER_PAGE, 9);
-    echo $Pages;
-?>
+<?php } ?>
     </div>
+<?= $paginator->linkbox(); ?>
 <?php
     if (count($Collages) === 0) { ?>
 <div class="box pad" align="center">
@@ -322,7 +325,7 @@ foreach ($Collages as $Collage) {
 }
 ?>
 </table>
-    <div class="linkbox"><?=$Pages?></div>
+<?= $paginator->linkbox(); ?>
 </div>
 <?php
 View::show_footer();
