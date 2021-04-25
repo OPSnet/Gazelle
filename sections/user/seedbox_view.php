@@ -58,7 +58,7 @@ View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
 <?php
 
 if ($source && $target) {
-    echo G::$Twig->render('seedbox/report.twig', [
+    echo $Twig->render('seedbox/report.twig', [
         'list' => $seedbox->torrentList(
             $paginator->limit(),
             $paginator->offset(),
@@ -72,7 +72,7 @@ if ($source && $target) {
     ]);
 }
 
-echo G::$Twig->render('seedbox/view.twig', [
+echo $Twig->render('seedbox/view.twig', [
     'auth'    => $LoggedUser['AuthKey'],
     'host'    => $seedbox->hostList(),
     'mode'    => $union ? 'union' : 'exclude',

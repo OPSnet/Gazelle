@@ -462,10 +462,10 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
     <div id="request_comments">
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Request(G::$Twig, $LoggedUser['ID'], $RequestID);
+$comments = new Gazelle\CommentViewer\Request($Twig, $LoggedUser['ID'], $RequestID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-echo G::$Twig->render('reply.twig', [
+echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $LoggedUser['AuthKey'],
     'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),

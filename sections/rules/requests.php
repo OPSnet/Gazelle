@@ -4,8 +4,8 @@ View::show_header('Request Rules');
 ?>
 <div class="thin">
 <?php
-echo G::$Twig->render('rules/toc.twig');
-echo G::$Twig->render('rules/request.twig');
+echo $Twig->render('rules/toc.twig');
+echo $Twig->render('rules/request.twig');
 ?>
 </div>
 <?php

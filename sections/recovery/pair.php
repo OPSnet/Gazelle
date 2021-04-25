@@ -14,17 +14,17 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
         $Result = "No current ID found for <tt>$curr_id</tt>.";
     } else {
         $prev_id = (int)trim($_POST['prev']);
-        $prev = Gazelle\Recovery::get_candidate_by_id($prev_id, G::$DB);
+        $prev = Gazelle\Recovery::get_candidate_by_id($prev_id, $DB);
         if (!$prev) {
             $Result = "No previous ID found for <tt>$prev_id</tt>.";
-        } elseif ($Map = Gazelle\Recovery::is_mapped($prev_id, G::$DB)) {
+        } elseif ($Map = Gazelle\Recovery::is_mapped($prev_id, $DB)) {
             $ID = $Map[0]['ID'];
             $Result = "Previous id $prev_id already mapped to " . \Users::format_username($ID);
-        } elseif ($Map = Gazelle\Recovery::is_mapped_local($curr_id, G::$DB)) {
+        } elseif ($Map = Gazelle\Recovery::is_mapped_local($curr_id, $DB)) {
             $ID = $Map[0]['ID'];
             $Result = \Users::format_username($curr_id) . " is already mapped to previous id $ID";
         } else {
-            [$Prev, $Confirm] = Gazelle\Recovery::get_pair_confirmation($prev_id, $curr_id, G::$DB);
+            [$Prev, $Confirm] = Gazelle\Recovery::get_pair_confirmation($prev_id, $curr_id, $DB);
             if (!($Prev && $Confirm)) {
                 $Result = "No database information to pair from $prev_id to $curr_id";
             }
@@ -33,7 +33,7 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
                     $Result = "Security checksum failed";
                 }
                 else {
-                    $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, G::$LoggedUser['Username'], G::$DB)
+                    $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, G::$LoggedUser['Username'], $DB)
                         ? \Users::format_username($curr_id) . " has been successfully mapped to previous user " .$Confirm['Username'] . "."
                         : "DB Error: could not map $curr_id to $prev_id"
                         ;

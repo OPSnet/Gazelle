@@ -30,7 +30,7 @@ if (!isset($_GET['userid'])) {
 }
 
 View::show_header('Tracker info');
-echo G::$Twig->render('admin/tracker-info.twig', [
+echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
     'announce_key' => $TorrentPass,
     'main_stats'   => $MainStats ?? null,

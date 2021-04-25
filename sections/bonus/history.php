@@ -37,7 +37,7 @@ if ($poolTotal && $summary['total']) {
     elseif ($total > 10000000) { $adj = 'exceptionally '; }
 }
 
-echo G::$Twig->render('user/bonus-history.twig', [
+echo $Twig->render('user/bonus-history.twig', [
     'history'      => $Bonus->userHistory($userId, $paginator->limit(), $paginator->offset()),
     'item'         => $Bonus->purchaseHistoryByUser($userId),
     'summary'      => $summary,

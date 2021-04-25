@@ -28,7 +28,7 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
 }
 
 View::show_header('Collage recovery!');
-echo G::$Twig->render('collage/recover.twig', [
+echo $Twig->render('collage/recover.twig', [
     'auth' => $LoggedUser['AuthKey'],
 ]);
 View::show_footer();

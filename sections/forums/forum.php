@@ -76,7 +76,7 @@ View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? 'donor' :
 ?>
 <div class="thin">
 <?php
-echo G::$Twig->render('forum/header.twig', [
+echo $Twig->render('forum/header.twig', [
     'create'    => $user->writeAccess($forum) && $user->createAccess($forum),
     'dept_list' => $forum->departmentList($user),
     'forum'     => $forum,
@@ -101,7 +101,7 @@ echo G::$Twig->render('forum/header.twig', [
 <?php
 } else {
     foreach ($forumToc as $thread) {
-        echo G::$Twig->render('forum/toc.twig', [
+        echo $Twig->render('forum/toc.twig', [
             'author'         => Users::format_username($thread['AuthorID'], false, false, false, false, false, $isDonorForum),
             'cut_title'      => $thread['cut_title'],
             'icon_class'     => $thread['icon_class'],

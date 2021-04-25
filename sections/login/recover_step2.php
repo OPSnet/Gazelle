@@ -34,7 +34,7 @@ if (!empty($_REQUEST['password'])) {
 }
 View::show_header('Recover Password');
 
-echo G::$Twig->render('login/new-password.twig', [
+echo $Twig->render('login/new-password.twig', [
     'error'     => $error,
     'key'       => $_GET['key'],
     'success'   => $success,

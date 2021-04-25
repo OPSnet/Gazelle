@@ -26,9 +26,9 @@ if (empty($_GET['userid'])) {
 View::show_header('Organize Bookmarks', 'browse,jquery-ui,jquery.tablesorter,sort');
 
 if (empty($TorrentList)) {
-    echo G::$Twig->render('bookmark/none.twig');
+    echo $Twig->render('bookmark/none.twig');
 } else {
-    echo G::$Twig->render('bookmark/header.twig', [
+    echo $Twig->render('bookmark/header.twig', [
         'heading' => 'Organize Torrent Bookmarks',
     ]);
 
@@ -51,11 +51,11 @@ if (empty($TorrentList)) {
         ];
     }
 
-    echo G::$Twig->render('bookmark/body.twig', [
+    echo $Twig->render('bookmark/body.twig', [
         'list' => $list,
     ]);
 
-    echo G::$Twig->render('bookmark/footer.twig', [
+    echo $Twig->render('bookmark/footer.twig', [
         'auth'      => $LoggedUser['AuthKey'],
         'edit_type' => $_GET['type'] ?? 'torrents',
     ]);

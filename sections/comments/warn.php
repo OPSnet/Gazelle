@@ -18,7 +18,7 @@ if (is_null($body)) {
 
 View::show_header('Warn User');
 
-echo G::$Twig->render('comment/warn.twig', [
+echo $Twig->render('comment/warn.twig', [
     'body'     => $body,
     'post_id'  => $postId,
     'user'     => new Gazelle\User($userId),

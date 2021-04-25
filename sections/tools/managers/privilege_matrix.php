@@ -12,7 +12,7 @@ View::show_header('Privilege Matrix');
             <a href="tools.php" class="brackets">Back to tools</a>
         </div>
     </div>
-<?= G::$Twig->render('admin/privilege-matrix.twig', [
+<?= $Twig->render('admin/privilege-matrix.twig', [
     'class_list'     => $privMan->classList(),
     'privilege'      => $privMan->privilege(),
     'star'           => "\xE2\x98\x85",

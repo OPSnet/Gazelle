@@ -260,8 +260,9 @@ class Recovery {
              VALUES              (?,         ?,         ?,      ?,      now() + interval 1 week)
              ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
+        global $Twig;
         (new Mail)->send($email, 'Account recovery confirmation at ' . SITE_NAME,
-            \G::$Twig->render('email/recovery.twig', [
+            $Twig->render('email/recovery.twig', [
                 'invite_key' => $key,
             ])
         );

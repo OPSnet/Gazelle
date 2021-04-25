@@ -28,7 +28,7 @@ View::show_header($Username.' &rsaquo; Invites &rsaquo; Tree');
         <h2><?=Users::format_username($userId, false, false, false)?> &rsaquo; <a href="user.php?action=invite&amp;userid=<?=$userId?>">Invites</a> &rsaquo; Tree</h2>
     </div>
     <div class="box pad">
-        <?= $tree->render(G::$Twig) ?>
+        <?= $tree->render($Twig) ?>
     </div>
 </div>
 <?php

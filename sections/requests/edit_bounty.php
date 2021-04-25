@@ -20,7 +20,7 @@ foreach ($bounty as &$b) {
 }
 
 View::show_header('Edit request bounty');
-echo G::$Twig->render('request/edit-bounty.twig', [
+echo $Twig->render('request/edit-bounty.twig', [
     'auth'   => $LoggedUser['AuthKey'],
     'bounty' => $bounty,
     'id'     => $requestId,

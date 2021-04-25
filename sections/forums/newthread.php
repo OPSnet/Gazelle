@@ -10,7 +10,7 @@ if (!$user->writeAccess($forum) || !$user->createAccess($forum)) {
 }
 
 View::show_header('Forums &rsaquo; ' . $forum->name() . ' &rsaquo; New Thread', 'comments,bbcode,jquery.validate,form_validate,newpoll');
-echo G::$Twig->render('forum/new-thread.twig', [
+echo $Twig->render('forum/new-thread.twig', [
     'can' => [
         'create_poll' => check_perms('forums_polls_create'),
         'see_avatars' => $user->showAvatars(),

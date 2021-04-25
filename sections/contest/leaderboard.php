@@ -30,7 +30,7 @@ if ($contest->banner()) {
 
 <?php
 if (check_perms('admin_manage_contest')) {
-    echo G::$Twig->render('contest/switcher.twig', [
+    echo $Twig->render('contest/switcher.twig', [
         'current' => $contest->id(),
         'prior'   => $contestMan->priorContests(),
     ]);
@@ -39,7 +39,7 @@ if (check_perms('admin_manage_contest')) {
 $paginator = new Gazelle\Util\Paginator(CONTEST_ENTRIES_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($contest->totalUsers());
 $isRequestFill = $contest instanceof \Gazelle\Contest\RequestFill;
-echo G::$Twig->render('contest/leaderboard.twig', [
+echo $Twig->render('contest/leaderboard.twig', [
     'action'        => $isRequestFill ? 'fill' : 'upload',
     'action_header' => $isRequestFill ? 'requests have been filled' : 'torrents have been uploaded',
     'score_header'  => $isRequestFill ? 'Requests Filled' : 'Perfect FLACs',

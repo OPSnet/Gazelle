@@ -51,7 +51,7 @@ $points = (int)$LoggedUser['BonusPoints'];
 $auth = $LoggedUser['AuthKey'];
 $pool = $Bonus->getOpenPool();
 if ($pool) {
-    echo G::$Twig->render('bonus/bonus-pool.twig', [
+    echo $Twig->render('bonus/bonus-pool.twig', [
         'auth'    => $auth,
         'points'  => $points,
         'pool'    => $pool,
@@ -59,7 +59,7 @@ if ($pool) {
     ]);
 }
 
-echo G::$Twig->render('bonus/store.twig', [
+echo $Twig->render('bonus/store.twig', [
     'admin'    => check_perms('admin_bp_history'),
     'auth'     => $auth,
     'class'    => $user->classLevel(),

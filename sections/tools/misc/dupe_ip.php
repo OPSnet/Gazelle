@@ -8,7 +8,7 @@ $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1
 $paginator->setTotal($manager->total(IP_OVERLAPS));
 
 View::show_header('Dupe IPs');
-echo G::$Twig->render('admin/duplicate-ipaddr.twig', [
+echo $Twig->render('admin/duplicate-ipaddr.twig', [
     'list'      => $manager->page(IP_OVERLAPS, $paginator->limit(), $paginator->offset()),
     'overlap'   => IP_OVERLAPS,
     'paginator' => $paginator,

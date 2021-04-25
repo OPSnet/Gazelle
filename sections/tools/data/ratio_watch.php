@@ -14,7 +14,7 @@ $Users = $userMan->ratioWatchUsers($paginator->limit(), $paginator->offset());
 
 View::show_header('Ratio Watch');
 
-echo G::$Twig->render('admin/ratio-watch.twig', [
+echo $Twig->render('admin/ratio-watch.twig', [
     'total'          => $Results,
     'total_disabled' => $TotalDisabled,
     'linkbox'        => $Pages,

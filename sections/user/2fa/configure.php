@@ -37,7 +37,7 @@ $qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
 
 View::show_header('Two-factor Authentication');
 
-echo G::$Twig->render('user/2fa/configure.twig', [
+echo $Twig->render('user/2fa/configure.twig', [
     'valid'    => $valid,
     'qrcode'   => $qrCode,
     'secret'   => $secret,

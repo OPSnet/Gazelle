@@ -888,7 +888,7 @@ if (defined('AJAX')) {
 } else {
     if ($PublicTorrent || $UnsourcedTorrent) {
         View::show_header('Warning');
-        echo G::$Twig->render('upload/result_warnings.twig', [
+        echo $Twig->render('upload/result_warnings.twig', [
             'group_id' => $GroupID,
             'public' => $PublicTorrent,
             'unsourced' => $UnsourcedTorrent,

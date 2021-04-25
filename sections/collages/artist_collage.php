@@ -37,7 +37,7 @@ for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
 View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ?>
 <div class="thin">
-<?= G::$Twig->render('collage/header.twig', [
+<?= $Twig->render('collage/header.twig', [
     'auth'        => $LoggedUser['AuthKey'],
     'bookmarked'  => $bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID),
     'can_create'  => check_perms('site_collages_create'),
@@ -53,7 +53,7 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ]);
 ?>
     <div class="sidebar">
-<?= G::$Twig->render('collage/sidebar.twig', [
+<?= $Twig->render('collage/sidebar.twig', [
     'artists'        => 0, // only makes sense for torrent collages
     'auth'           => $LoggedUser['AuthKey'],
     'can_add'        => check_perms('site_collages_manage') && !$Collage->isLocked(),

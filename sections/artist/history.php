@@ -7,7 +7,7 @@ if (is_null($artist)) {
 }
 
 View::show_header($artist->name() . " &rsaquo; Revision History");
-echo G::$Twig->render('revision.twig', [
+echo $Twig->render('revision.twig', [
     'id'   => $artist->id(),
     'list' => $artist->revisionList(),
     'name' => $artist->name(),

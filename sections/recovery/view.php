@@ -22,24 +22,24 @@ if ($search) {
             $terms[] = [$key => $_GET[$key]];
         }
     }
-    $Info = \Gazelle\Recovery::search($terms, G::$DB);
+    $Info = \Gazelle\Recovery::search($terms, $DB);
     $ID = $Info['recovery_id'];
 }
 else {
     if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
         $claim_id = (int)$_GET['claim'];
         if ($claim_id == G::$LoggedUser['ID']) {
-            \Gazelle\Recovery::claim($ID, $claim_id, G::$LoggedUser['Username'], G::$DB);
+            \Gazelle\Recovery::claim($ID, $claim_id, G::$LoggedUser['Username'], $DB);
         }
     }
-    $Info = \Gazelle\Recovery::get_details($ID, G::$DB);
+    $Info = \Gazelle\Recovery::get_details($ID, $DB);
 }
 
 $Email = ($Info['email'] == $Info['email_clean'])
     ? $Info['email']
     : $Info['email_clean'] . "<br />(cleaned from " . $Info['email'] . ")";
 
-$Candidate = \Gazelle\Recovery::get_candidate($Info['username'], G::$DB);
+$Candidate = \Gazelle\Recovery::get_candidate($Info['username'], $DB);
 $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
 ?>
 

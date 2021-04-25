@@ -16,7 +16,7 @@ $forum = new \Gazelle\Forum(EDITING_FORUM_ID);
 $threadId = $forum->addThread(
     SYSTEM_USER_ID,
     "Editing request — Artist: $name",
-    G::$Twig->render('forum/request-edit.twig', [
+    $Twig->render('forum/request-edit.twig', [
         'username' => $LoggedUser['Username'],
         'url'      => SITE_URL . '/artist.php?id=' . $artistId,
         'name'     => $name,

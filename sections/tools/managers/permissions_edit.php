@@ -66,7 +66,7 @@ echo $Val->generateJS('permissionsform');
         </tr>
 <?php } ?>
     </table>
-<?= G::$Twig->render('admin/privilege-list.twig', [ 'default' => null, 'user' => $values ]); ?>
+<?= $Twig->render('admin/privilege-list.twig', [ 'default' => null, 'user' => $values ]); ?>
 </form>
 <?php
 View::show_footer();

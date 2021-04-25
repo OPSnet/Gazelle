@@ -118,7 +118,7 @@ View::show_header('External Tracker Referrals');
             if ($Verified !== true) {
                 $Error = $Verified;
             } else {
-                [$Success, $Invite] = $ReferralManager->generateInvite($Account, $_POST['username'], $Email, G::$Twig);
+                [$Success, $Invite] = $ReferralManager->generateInvite($Account, $_POST['username'], $Email, $Twig);
                 if (!$Success) {
                     $Error = $Invite;
                 } else if ($Invite === false) {

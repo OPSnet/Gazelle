@@ -552,6 +552,7 @@ class TORRENT_FORM {
 <?php
         }
         if ($this->NewTorrent) {
+            global $Twig;
 ?>
             <tr>
                 <td class="label">Tags:</td>
@@ -566,7 +567,7 @@ class TORRENT_FORM {
 <?php       } ?>
                     <input type="text" id="tags" name="tags" size="40" value="<?= display_str($Torrent['TagList']) ?>"<?=
                         $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
-                    <br /><?= G::$Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
+                    <br /><?= $Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>
@@ -598,6 +599,7 @@ class TORRENT_FORM {
     function audiobook_form() {
         $Torrent = $this->Torrent;
         $user = new \Gazelle\User(G::$LoggedUser['ID']);
+        global $Twig;
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
@@ -663,7 +665,7 @@ class TORRENT_FORM {
                 <td>
                     <input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
                         $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
-                    <br /><?= G::$Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
+                    <br /><?= $Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>

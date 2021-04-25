@@ -23,7 +23,7 @@ if (isset($_POST['session'])) {
 }
 
 View::show_header($user->username().' &rsaquo; Sessions');
-echo G::$Twig->render('user/session.twig', [
+echo $Twig->render('user/session.twig', [
     'auth'    => $LoggedUser['AuthKey'],
     'current' => $SessionID,
     'session' => $sessionMan->loadSessions(),

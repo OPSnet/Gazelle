@@ -46,7 +46,7 @@ if (isset($_POST['delete'])) {
                 AND ConvID = ?
             ", $UserID, $ConvID
         );
-        if (G::$DB->affected_rows() > 0) {
+        if ($DB->affected_rows() > 0) {
             $Cache->increment('inbox_new_'.$UserID);
         }
     }

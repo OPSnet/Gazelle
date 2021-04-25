@@ -68,7 +68,7 @@ foreach ($list as &$attempt) {
 unset($attempt);
 
 View::show_header('Login Watch');
-echo G::$Twig->render('admin/login-watch.twig', [
+echo $Twig->render('admin/login-watch.twig', [
     'auth'      => $LoggedUser['AuthKey'],
     'header'    => $header,
     'list'      => $list,

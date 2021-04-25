@@ -3,10 +3,10 @@ View::show_header('Ratio Requirements');
 ?>
 <div class="thin">
 <?php
-echo G::$Twig->render('rules/toc.twig');
+echo $Twig->render('rules/toc.twig');
 $b   = $LoggedUser['BytesDownloaded'];
 $GiB = 1024 * 1024 * 1024;
-echo G::$Twig->render('rules/ratio.twig', [
+echo $Twig->render('rules/ratio.twig', [
     'level_1'  => ($b <    5 * $GiB) ? 'a' : 'b',
     'level_2'  => ($b >=   5 * $GiB && $b <  10 * $GiB) ? 'a' : 'b',
     'level_3'  => ($b >=  10 * $GiB && $b <  20 * $GiB) ? 'a' : 'b',

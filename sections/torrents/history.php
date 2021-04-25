@@ -7,7 +7,7 @@ if (is_null($group)) {
 }
 
 View::show_header($group->name() . " &rsaquo; Revision History");
-echo G::$Twig->render('revision.twig', [
+echo $Twig->render('revision.twig', [
     'id'   => $group->id(),
     'list' => $group->revisionList(),
     'name' => $group->name(),

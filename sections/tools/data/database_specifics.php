@@ -10,7 +10,7 @@ if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) 
 
     View::show_header('Database Specifics - ' . $tableName);
     $siteInfo = new Gazelle\SiteInfo;
-    echo G::$Twig->render('admin/db-table.twig', [
+    echo $Twig->render('admin/db-table.twig', [
         'definition' => $DB->row('SHOW CREATE TABLE ' . $tableName)[1],
         'table_read' => $siteInfo->tableRowsRead($tableName),
         'index_read' => $siteInfo->indexRowsRead($tableName),

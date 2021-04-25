@@ -7,7 +7,7 @@ View::show_header('Tagging rules');
         <h2 id="general">Tagging rules</h2>
     </div>
     <div class="box pad rule_summary" style="padding: 10px 10px 10px 20px;">
-        <?= G::$Twig->render('rules/tag.twig', ['on_upload' => false]) ?>
+        <?= $Twig->render('rules/tag.twig', ['on_upload' => false]) ?>
     </div>
 </div>
 <?php

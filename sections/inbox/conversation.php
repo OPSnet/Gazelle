@@ -67,7 +67,7 @@ if ($UnRead == '1') {
         ", $UserID, $ConvID
     );
     // Clear the caches of the inbox and sentbox
-    if (G::$DB->affected_rows() > 0) {
+    if ($DB->affected_rows() > 0) {
         $Cache->decrement("inbox_new_$UserID");
     }
 

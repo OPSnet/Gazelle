@@ -25,7 +25,7 @@ if (!$Username) {
 }
 
 View::show_header('Compose', 'inbox,bbcode,jquery.validate,form_validate');
-echo G::$Twig->render('inbox/compose.twig', [
+echo $Twig->render('inbox/compose.twig', [
     'auth'     => $LoggedUser['AuthKey'],
     'body'     => $Body ?? '',
     'subject'  => $Subject ?? '',

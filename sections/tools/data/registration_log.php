@@ -23,7 +23,7 @@ $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1
 $paginator->setTotal($registration->total());
 
 View::show_header('Registration log');
-echo G::$Twig->render('admin/registration.twig', [
+echo $Twig->render('admin/registration.twig', [
     'after'  => $_REQUEST['after_date'] ?? null,
     'before' => $_REQUEST['before_date'] ?? null,
     'list'   => array_map(function ($u) { return new Gazelle\User($u); },

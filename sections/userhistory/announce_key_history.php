@@ -9,7 +9,7 @@ if (is_null($user)) {
 }
 
 View::show_header($user->username() . ' &rsaquo; Announce Key History');
-echo G::$Twig->render('admin/announcekey-history.twig', [
+echo $Twig->render('admin/announcekey-history.twig', [
     'user' => $user,
 ]);
 View::show_footer();

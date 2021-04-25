@@ -8,7 +8,7 @@
 </div>
 
 <?php
-echo G::$Twig->render('contest/intro.twig', [
+echo $Twig->render('contest/intro.twig', [
     'contest' => $contestMan->currentContest(),
 ]);
 

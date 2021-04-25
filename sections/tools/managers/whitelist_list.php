@@ -6,7 +6,7 @@ if (!check_perms('admin_whitelist')) {
 $whitelist = new \Gazelle\Manager\ClientWhitelist;
 
 View::show_header('Client Whitelist Manager');
-echo G::$Twig->render('admin/client-whitelist.twig', [
+echo $Twig->render('admin/client-whitelist.twig', [
     'auth' => $LoggedUser['AuthKey'],
     'list' => $whitelist->list(),
 ]);

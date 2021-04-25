@@ -44,7 +44,7 @@ if (isset($_POST['auth'])) {
 }
 
 View::show_header('Applicant administration');
-echo G::$Twig->render('applicant/admin.twig', [
+echo $Twig->render('applicant/admin.twig', [
     'auth'     => $LoggedUser['AuthKey'],
     'edit_id'  => $editId,
     'list'     => (new Gazelle\Manager\ApplicantRole)->list(true),

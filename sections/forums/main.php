@@ -38,7 +38,7 @@ foreach ($toc as $category => $forumList) {
             . ($f['IsLocked'] ? '_locked' : '')
             . ($f['IsSticky'] ? '_sticky' : '');
 
-        echo G::$Twig->render('forum/main.twig', [
+        echo $Twig->render('forum/main.twig', [
             'creator'        => $f['MinClassCreate'] <= $LoggedUser['Class'],
             'category'       => $category,
             'category_id'    => $f['categoryId'],

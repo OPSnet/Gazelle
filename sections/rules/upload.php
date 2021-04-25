@@ -6,7 +6,7 @@ $Body = Text::full_format($Body, false, 3, true);
 View::show_header('Uploading Rules', 'rules');
 ?>
 <div class="thin">
-    <?= G::$Twig->render('rules/toc.twig') ?>
+    <?= $Twig->render('rules/toc.twig') ?>
     <div class="header">
         <h2>Uploading Rules</h2>
     </div>

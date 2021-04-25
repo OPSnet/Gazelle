@@ -56,14 +56,14 @@ if (!empty($_REQUEST['confirm'])) {
             try {
                 $user = $creator->create();
                 (new Mail)->send($user->email(), 'New account confirmation at '.SITE_NAME,
-                    G::$Twig->render('email/registration.twig', [
+                    $Twig->render('email/registration.twig', [
                         'username'     => $username,
                         'announce_key' => $user->announceKey(),
                     ])
                 );
                 (new Gazelle\Manager\User)->sendPM( $user->id(), 0,
                     "Welcome to " . SITE_NAME,
-                    G::$Twig->render('user/welcome.twig', [
+                    $Twig->render('user/welcome.twig', [
                         'username'     => $username,
                         'announce_url' => $user->announceUrl(),
                     ])
@@ -81,7 +81,7 @@ if (!empty($_REQUEST['confirm'])) {
                         break;
                     case 'invitation':
                         View::show_header('No invitation found');
-                        echo G::$Twig->render('login/no-invite.twig', [
+                        echo $Twig->render('login/no-invite.twig', [
                             'static' => STATIC_SERVER,
                             'key'    => $_GET['invite']
                         ]);
@@ -109,7 +109,7 @@ if (!empty($_REQUEST['confirm'])) {
             ", $_GET['invite']
         )) {
             View::show_header('No invitation found');
-            echo G::$Twig->render('login/no-invite.twig', [
+            echo $Twig->render('login/no-invite.twig', [
                 'static' => STATIC_SERVER,
                 'key'    => $_GET['invite']]);
             exit;

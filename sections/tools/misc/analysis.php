@@ -17,26 +17,26 @@ View::show_header('Case Analysis');
 </div>
 <pre id="debug_report"><?=display_str($Analysis['message'])?></pre>
 <?php
-echo G::$Twig->render('debug/performance.twig', ['list' => $Analysis['perf']]);
-echo G::$Twig->render('debug/flag.twig', ['list' => $Analysis['flags']]);
-echo G::$Twig->render('debug/include.twig', ['list' => $Analysis['includes']]);
-echo G::$Twig->render('debug/error.twig', ['list' => $Analysis['errors']]);
-echo G::$Twig->render('debug/sphinxql.twig', ['list' => $Analysis['searches'], 'time' => $Analysis['searches_time']]);
-echo G::$Twig->render('debug/query.twig', ['list' => $Analysis['queries'], 'time' => $Analysis['queries_time']]);
+echo $Twig->render('debug/performance.twig', ['list' => $Analysis['perf']]);
+echo $Twig->render('debug/flag.twig', ['list' => $Analysis['flags']]);
+echo $Twig->render('debug/include.twig', ['list' => $Analysis['includes']]);
+echo $Twig->render('debug/error.twig', ['list' => $Analysis['errors']]);
+echo $Twig->render('debug/sphinxql.twig', ['list' => $Analysis['searches'], 'time' => $Analysis['searches_time']]);
+echo $Twig->render('debug/query.twig', ['list' => $Analysis['queries'], 'time' => $Analysis['queries_time']]);
 if (check_perms('admin_clear_cache')) {
-    echo G::$Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => $Analysis['cache_time']]);
+    echo $Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => $Analysis['cache_time']]);
 }
 if (check_perms('site_debug')) {
-    echo G::$Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
-    echo G::$Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
+    echo $Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
+    echo $Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
 }
 if (check_perms('admin_periodic_task_view') && array_key_exists('Script start', $Analysis['perf'])) {
-    echo G::$Twig->render('debug/task.twig', [
+    echo $Twig->render('debug/task.twig', [
         'list' => (new \Gazelle\Schedule\Scheduler)->getTaskSnapshot(
             $Analysis['perf']['Script start'],
             $Analysis['perf']['Script end']
         )
     ]);
 }
-echo G::$Twig->render('debug/var.twig', ['list' => $Analysis['vars']]);
+echo $Twig->render('debug/var.twig', ['list' => $Analysis['vars']]);
 View::show_footer();

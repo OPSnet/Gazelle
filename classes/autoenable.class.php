@@ -143,7 +143,8 @@ class AutoEnable {
                         ", $token, $ID
                     );
                 }
-                (new Mail)->send($Email, $subject, G::$Twig->render($template, ['token' => $token]));
+                global $Twig;
+                (new Mail)->send($Email, $subject, $Twig->render($template, ['token' => $token]));
             }
         }
 

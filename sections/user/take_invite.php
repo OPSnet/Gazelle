@@ -67,7 +67,7 @@ foreach ($Emails as $CurEmail) {
     $DB->commit();
 
     (new Mail)->send($CurEmail, 'You have been invited to ' . SITE_NAME,
-        G::$Twig->render('email/invite-member.twig', [
+        $Twig->render('email/invite-member.twig', [
             'email'    => $CurEmail,
             'key'      => $InviteKey,
             'username' => $LoggedUser['Username'],

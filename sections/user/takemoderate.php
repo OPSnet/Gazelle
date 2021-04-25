@@ -33,7 +33,7 @@ function disabled (bool $state) {
 }
 
 function classNames(array $classes) {
-    return G::$DB->scalar("
+    return $DB->scalar("
         SELECT group_concat(Name SEPARATOR ', ')
         FROM permissions
         WHERE ID in (" . placeholders($classes) . ")
@@ -155,7 +155,7 @@ if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['
 }
 
 $donorMan = new Gazelle\Manager\Donation;
-$donorMan->twig(G::$Twig);
+$donorMan->twig($Twig);
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
     $donorMan->moderatorDonate($user, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $LoggedUser['ID']);
 } elseif (!empty($_POST['donor_values_submit'])) {
@@ -509,7 +509,7 @@ if ($privChange && $userReason) {
     $userMan->sendPM(
         $userID, 0,
         count($privChange) == 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
-        G::$Twig->render('user/pm-privilege.twig', [
+        $Twig->render('user/pm-privilege.twig', [
             'privs'  => $privChange,
             'reason' => $userReason,
             'chan'   => BOT_DISABLED_CHAN,
@@ -573,7 +573,7 @@ if ($resetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
 
 if ($sendHackedMail && check_perms('users_disable_any')) {
     (new Mail)->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
-        G::$Twig->render('email/hacked.twig')
+        $Twig->render('email/hacked.twig')
     );
     Tools::disable_users($userID, '', 1);
     $editSummary[] = "hacked account email sent to $hackedEmail";

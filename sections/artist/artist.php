@@ -176,7 +176,7 @@ Tags::reset();
         </div>
 
 <?php
-echo G::$Twig->render('artist/similar.twig', [
+echo $Twig->render('artist/similar.twig', [
     'admin'        => check_perms('site_delete_tag'),
     'artist_id'    => $ArtistID,
     'auth'         => $LoggedUser['AuthKey'],
@@ -381,7 +381,7 @@ if ($sections = $Artist->sections()) {
         }
         if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
-                            <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+                            <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
                             <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>
@@ -690,10 +690,10 @@ $commentPage->load()->handleSubscription($User);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total());
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Artist(G::$Twig, $LoggedUser['ID'], $ArtistID);
+$comments = new Gazelle\CommentViewer\Artist($Twig, $LoggedUser['ID'], $ArtistID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-echo G::$Twig->render('reply.twig', [
+echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $LoggedUser['AuthKey'],
     'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($User, $User),

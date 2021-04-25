@@ -399,7 +399,7 @@ if ($GroupCategoryID === 1) {
     }
 }
 
-echo G::$Twig->render('vote/box.twig', [
+echo $Twig->render('vote/box.twig', [
     'auth'     => $LoggedUser['AuthKey'],
     'can_vote' => check_perms('site_album_votes'),
     'group_id' => $GroupID,
@@ -918,10 +918,10 @@ if (!empty($similar)) {
         </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Torrent(G::$Twig, $LoggedUser['ID'], $GroupID);
+$comments = new Gazelle\CommentViewer\Torrent($Twig, $LoggedUser['ID'], $GroupID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-echo G::$Twig->render('reply.twig', [
+echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $LoggedUser['AuthKey'],
     'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),

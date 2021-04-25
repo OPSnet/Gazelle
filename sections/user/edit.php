@@ -81,7 +81,7 @@ View::show_header($User->username() . " &rsaquo; Settings",
 $Val = new Gazelle\Util\Validator;
 echo $Val->generateJS('userform');
 
-echo G::$Twig->render('user/setting.twig', [
+echo $Twig->render('user/setting.twig', [
     'auth'             => $LoggedUser['AuthKey'],
     'avatar'           => $Avatar,
     'download_text'    => $DownloadAlt,

@@ -18,16 +18,16 @@ View::show_header($user->username() . ' &rsaquo; Email and IP summary');
 <tr><th>Last seen</th><td colspan="2"><?= $user->lastAccess() ?></td></tr>
 <tr><th>Joined</th><td colspan="2"><?= $user->joinDate() ?></td></tr>
 <?php
-echo G::$Twig->render('admin/user-info-email.twig', [
+echo $Twig->render('admin/user-info-email.twig', [
     'info'   => $user->emailHistory(),
 ]);
 
-echo G::$Twig->render('admin/user-info-ipv4.twig', [
+echo $Twig->render('admin/user-info-ipv4.twig', [
     'title'  => 'Site IPv4 Information',
     'info'   => $user->siteIPv4Summary(),
 ]);
 
-echo G::$Twig->render('admin/user-info-ipv4.twig', [
+echo $Twig->render('admin/user-info-ipv4.twig', [
     'title'  => 'Tracker IPv4 Information',
     'info'   => $user->trackerIPv4Summary(),
 ]);

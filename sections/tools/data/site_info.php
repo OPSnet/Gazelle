@@ -27,13 +27,13 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
             $rankTable[$name][$rank] = $metric;
         }
     }
-    echo G::$Twig->render('admin/site-info-userrank.twig', [
+    echo $Twig->render('admin/site-info-userrank.twig', [
         'name' => $names,
         'table' => $rankTable,
     ]);
 } else {
     $random = openssl_random_pseudo_bytes(8, $strong);
-    echo G::$Twig->render('admin/site-info.twig', [
+    echo $Twig->render('admin/site-info.twig', [
         'uid'              => uid(posix_getuid()),
         'gid'              => gid(posix_getgid()),
         'euid'             => uid(posix_geteuid()),

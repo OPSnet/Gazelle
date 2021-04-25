@@ -50,7 +50,7 @@ Highcharts.chart('user-flow', {
 <?php
 }
 
-echo G::$Twig->render('admin/userflow.twig', [
+echo $Twig->render('admin/userflow.twig', [
     'paginator' => $paginator,
     'show_flow' => $showFlow,
     'details'   => $userflowDetails,

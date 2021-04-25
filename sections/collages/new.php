@@ -40,7 +40,7 @@ $personalAllowed = $user->canCreatePersonalCollage();
 <?php } ?>
                     </select>
                     <br />
-<?= G::$Twig->render('collage/description.twig', [ 'personal_allowed' => $personalAllowed, ]) ?>
+<?= $Twig->render('collage/description.twig', [ 'personal_allowed' => $personalAllowed, ]) ?>
                 </td>
             </tr>
             <tr>

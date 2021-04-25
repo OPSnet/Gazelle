@@ -306,7 +306,8 @@ foreach ($navItems as $n) {
     $navLinks[] = $li . '<a href="' . $Target . '">' . $Title . "</a></li>\n";
 }
 
-echo G::$Twig->render('index/private-header.twig', [
+global $Twig;
+echo $Twig->render('index/private-header.twig', [
     'action'            => $_REQUEST['action'] ?? null,
     'action_list'       => $activity->actionList(),
     'alert_list'        => $activity->alertList(),

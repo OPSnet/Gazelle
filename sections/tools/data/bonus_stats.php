@@ -16,7 +16,7 @@ foreach (range(0, 6) as $n) {
     $month[] = $bonus->accrualRange('MONTH', $n, 1);
 }
 
-echo G::$Twig->render('admin/bonus-stats.twig', [
+echo $Twig->render('admin/bonus-stats.twig', [
     'bonus' => $bonus,
     'day'   => $day,
     'week'  => $week,

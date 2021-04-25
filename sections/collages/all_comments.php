@@ -41,10 +41,10 @@ View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,s
     </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Collage(G::$Twig, $LoggedUser['ID'], $CollageID);
+$comments = new Gazelle\CommentViewer\Collage($Twig, $LoggedUser['ID'], $CollageID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-echo G::$Twig->render('reply.twig', [
+echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $LoggedUser['AuthKey'],
     'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),

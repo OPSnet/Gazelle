@@ -81,7 +81,7 @@ switch ($mode) {
         break;
 }
 
-echo G::$Twig->render('better/missing.twig', [
+echo $Twig->render('better/missing.twig', [
     'mode'           => $mode,
     'results'        => $results,
     'result_count'   => $resultCount,

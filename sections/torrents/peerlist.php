@@ -8,7 +8,7 @@ $torMan = new Gazelle\Manager\Torrent;
 $paginator = new Gazelle\Util\Paginator(PEERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($torMan->peerlistTotal($torrentId));
 
-echo G::$Twig->render('torrent/peerlist.twig', [
+echo $Twig->render('torrent/peerlist.twig', [
     'is_admin'   => check_perms('users_mod'),
     'linkbox'    => $paginator->linkboxJS('show_peers', $torrentId),
     'list'       => $torMan->peerlistPage($torrentId, $LoggedUser['ID'], $paginator->limit(), $paginator->offset()),

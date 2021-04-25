@@ -39,7 +39,7 @@ $title = "Donor Rewards";
 
 View::show_header($title);
 
-echo G::$Twig->render('donation/reward-list.twig', [
+echo $Twig->render('donation/reward-list.twig', [
     'pages' => $pages,
     'title' => $title,
     'user' => $DB->to_array(false, MYSQLI_ASSOC, false),

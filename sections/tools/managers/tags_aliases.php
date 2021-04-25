@@ -68,7 +68,7 @@ View::show_header('Tag Aliases');
 <?php    } ?>
         </form>
     </tr>
-<?= G::$Twig->render('tag/alias.twig', [
+<?= $Twig->render('tag/alias.twig', [
     'alias' => $tagMan->listAlias(($_GET['order'] ?? 'badtags') === 'badtags'),
     'is_mod' => check_perms('users_mod'),
 ]) ?>

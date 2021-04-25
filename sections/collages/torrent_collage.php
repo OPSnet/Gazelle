@@ -6,7 +6,7 @@ $GroupIDs = $Collage->groupIds();
 View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ?>
 <div class="thin">
-<?= G::$Twig->render('collage/header.twig', [
+<?= $Twig->render('collage/header.twig', [
     'auth'        => $LoggedUser['AuthKey'],
     'bookmarked'  => $bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID),
     'can_create'  => check_perms('site_collages_create'),
@@ -22,7 +22,7 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ]);
 ?>
     <div class="sidebar">
-<?= G::$Twig->render('collage/sidebar.twig', [
+<?= $Twig->render('collage/sidebar.twig', [
     'artists'        => $Collage->numArtists(),
     'auth'           => $LoggedUser['AuthKey'],
     'can_add'        => !$Collage->isLocked()
@@ -245,7 +245,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         }
         if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
-                    <?= $vote->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+                    <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
@@ -355,7 +355,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     </span>
                 <strong><?= $DisplayName ?></strong>
 <?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
-                <?= $vote->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+                <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>

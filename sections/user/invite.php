@@ -28,7 +28,7 @@ $heading = new \Gazelle\Util\SortableTableHeader('joined', [
 ]);
 
 View::show_header('Invites');
-echo G::$Twig->render('user/invited.twig', [
+echo $Twig->render('user/invited.twig', [
     'auth'         => $LoggedUser['AuthKey'],
     'heading'      => $heading,
     'invited'      => $user->inviteList($heading->getOrderBy(), $heading->getOrderDir()),

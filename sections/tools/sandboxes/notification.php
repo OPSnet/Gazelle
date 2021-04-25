@@ -57,7 +57,7 @@ if (isset($_POST['torrentid'])) {
 }
 
 View::show_header("Notifications Sandbox");
-echo G::$Twig->render('admin/notification-sandbox.twig', [
+echo $Twig->render('admin/notification-sandbox.twig', [
     'notified_id' => $notifiedId,
 
     'group'   => $group,

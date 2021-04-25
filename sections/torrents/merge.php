@@ -129,7 +129,7 @@ if (empty($_POST['confirm'])) {
     // GroupIDs
     $DB->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $oldGroupId);
     $cacheKeys = [];
-    while ([$TorrentID] = G::$DB->next_row()) {
+    while ([$TorrentID] = $DB->next_row()) {
         $cacheKeys[] = 'torrent_download_' . $TorrentID;
         $cacheKeys[] = 'tid_to_group_' . $TorrentID;
     }

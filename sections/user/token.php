@@ -34,14 +34,14 @@ elseif ($_GET['do'] === 'generate') {
 View::show_header('Generate API Token');
 
 if (is_null($token)) {
-    echo G::$Twig->render('user/token-new.twig', [
+    echo $Twig->render('user/token-new.twig', [
         'error' => $error,
         'id'    => $userId,
         'token_name' => $tokenName,
     ]);
 }
 else {
-    echo G::$Twig->render('user/token-show.twig', [
+    echo $Twig->render('user/token-show.twig', [
         'id'    => $userId,
         'name'  => $tokenName,
         'token' => $token,

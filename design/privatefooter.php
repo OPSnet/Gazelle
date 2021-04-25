@@ -7,18 +7,19 @@ echo Gazelle\Util\Textarea::activate();
 <?php if (DEBUG_MODE || check_perms('site_debug')) { ?>
     <div id="site_debug">
 <?php
-    echo G::$Twig->render('debug/performance.twig', ['list' => $Debug->get_perf()]);
-    echo G::$Twig->render('debug/flag.twig', ['list' => $Debug->get_flags()]);
-    echo G::$Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
-    echo G::$Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
-    echo G::$Twig->render('debug/error.twig', ['list' => $Debug->get_errors()]);
+    global $Twig;
+    echo $Twig->render('debug/performance.twig', ['list' => $Debug->get_perf()]);
+    echo $Twig->render('debug/flag.twig', ['list' => $Debug->get_flags()]);
+    echo $Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
+    echo $Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
+    echo $Twig->render('debug/error.twig', ['list' => $Debug->get_errors()]);
     if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
-        echo G::$Twig->render('debug/sphinxql.twig', ['list' => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]);
+        echo $Twig->render('debug/sphinxql.twig', ['list' => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]);
     }
-    echo G::$Twig->render('debug/query.twig', ['list' => $Debug->get_queries(), 'time' => G::$DB->Time]);
-    echo G::$Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => G::$Cache->Time]);
-    echo G::$Twig->render('debug/var.twig', ['list' => $Debug->get_logged_vars()]);
-    echo G::$Twig->render('debug/ocelot.twig', ['list' => class_exists('Tracker') ? \Tracker::$Requests : []]);
+    echo $Twig->render('debug/query.twig', ['list' => $Debug->get_queries(), 'time' => G::$DB->Time]);
+    echo $Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => G::$Cache->Time]);
+    echo $Twig->render('debug/var.twig', ['list' => $Debug->get_logged_vars()]);
+    echo $Twig->render('debug/ocelot.twig', ['list' => class_exists('Tracker') ? \Tracker::$Requests : []]);
 ?>
     </div>
 <?php
