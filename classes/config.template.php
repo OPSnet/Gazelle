@@ -191,6 +191,7 @@ define('STAFF_LEVEL', 820); // least permissions.Level of staff
 
 // Pagination
 define('BOOKMARKS_PER_PAGE', 20);
+define('COLLAGES_PER_PAGE', 25);
 define('CONTEST_ENTRIES_PER_PAGE', 50);
 define('FRIENDS_PER_PAGE', 20);
 define('INVITES_PER_PAGE', 50);
