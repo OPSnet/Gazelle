@@ -33,6 +33,7 @@ function disabled (bool $state) {
 }
 
 function classNames(array $classes) {
+    global $DB;
     return $DB->scalar("
         SELECT group_concat(Name SEPARATOR ', ')
         FROM permissions
