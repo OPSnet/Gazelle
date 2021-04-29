@@ -285,7 +285,7 @@ if ($threadInfo['StickyPostID']) {
 
 foreach ($thread as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
-    [$AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
+    $author = new Gazelle\User($AuthorID);
     $tableClass = ['forum_post', 'wrap_overflow', 'box vertical_margin'];
     if (((!$threadInfo['isLocked'] || $threadInfo['isSticky'])
             && $PostID > $lastRead
@@ -318,7 +318,7 @@ foreach ($thread as $Key => $Post) {
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
 <?php if (!$threadInfo['isLocked'] && !$viewer->disablePosting()) { ?>
-                - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" title="Select text to quote" class="brackets">Quote</a>
+                - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?= $author->username() ?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
     if ((!$threadInfo['isLocked'] && $viewer->writeAccess($forum) && $AuthorID == $viewer->id()) && !$viewer->disablePosting() || check_perms('site_moderate_forums')) {
