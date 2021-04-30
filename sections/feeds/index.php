@@ -20,7 +20,7 @@ if (
     die();
 }
 
-G::init($DB, $Cache);
+init($DB, $Cache);
 
 $user = (new Gazelle\Manager\User)->findById((int)($_GET['user'] ?? 0));;
 if (md5($user->id() . RSS_HASH . $_GET['passkey']) !== $_GET['auth'] || is_null($user) || !$user->isEnabled()) {

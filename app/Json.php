@@ -87,7 +87,7 @@ abstract class Json extends Base {
         if (!check_perms('site_debug')) {
             return [];
         }
-        $Debug = new \Gazelle\Debug;
+        global $Debug;
         $info = ['debug' => ['queries'  => $Debug->get_queries()]];
         if (class_exists('Sphinxql')) {
             $info['searches'] = \Sphinxql::$Queries;

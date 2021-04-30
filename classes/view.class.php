@@ -29,10 +29,11 @@ class View {
             empty($_REQUEST['type']) ? false : $_REQUEST['type'] // Type
         ];
 
-        if (!is_array(G::$LoggedUser) || empty(G::$LoggedUser['ID']) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
-            require(__DIR__ . '/../design/publicheader.php');
+        global $LoggedUser;
+        if (!isset($LoggedUser['ID']) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
+            require_once('../design/publicheader.php');
         } else {
-            require(__DIR__ . '/../design/privateheader.php');
+            require_once('../design/privateheader.php');
         }
     }
 
@@ -49,11 +50,11 @@ class View {
             return;
         }
         self::$footerSeen = true;
-        global $SessionID, $UserSessions, $Debug, $Time;
-        if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
-            require(__DIR__ . '/../design/publicfooter.php');
+        global $Debug, $LoggedUser, $SessionID, $Time, $UserSessions;
+        if (!isset($LoggedUser['ID']) || (isset($Options['recover']) && $Options['recover'] === true)) {
+            require_once('../design/publicfooter.php');
         } else {
-            require(__DIR__ . '/../design/privatefooter.php');
+            require_once('../design/privatefooter.php');
         }
     }
 

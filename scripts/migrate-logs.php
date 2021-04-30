@@ -11,13 +11,13 @@ require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
-$Debug = new Gazelle\Debug;
+$DB    = new DB_MYSQL;
+$Cache = new CACHE;
+Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
+$Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->handle_errors();
 
 ini_set('max_execution_time', -1);
-
-$DB = new DB_MYSQL;
-$Cache = new CACHE;
 
 define('CHUNK', 100);
 

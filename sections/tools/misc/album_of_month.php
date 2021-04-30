@@ -106,7 +106,7 @@ if (isset($_POST['GroupID'])) {
                 INSERT INTO featured_albums
                        (GroupID, ThreadID, Type)
                 VALUES (?,       ?,        0)
-                ', $GroupID, $forum->addThread(G::$LoggedUser['ID'], $Title, $Body)
+                ', $GroupID, $forum->addThread($LoggedUser['ID'], $Title, $Body)
             );
             header("Location: /");
         }

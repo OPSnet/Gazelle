@@ -56,7 +56,7 @@ foreach ($URL as $u) {
     $GroupID = end($match);
     if (!$GroupID || (int)$GroupID === 0) {
         $safe = htmlspecialchars($u);
-        error("The entered url ($safe) does not correspond to a torrent page on site.");
+        error("The entered url ($safe) does not correspond to a torrent page on site." .TORRENT_GROUP_REGEX. '');
     }
     $id = $DB->scalar("
         SELECT ID FROM torrents_group WHERE ID = ?

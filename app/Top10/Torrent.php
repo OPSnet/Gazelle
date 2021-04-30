@@ -229,7 +229,7 @@ class Torrent extends \Gazelle\Base {
         // exclude artists because it's retarded
         $groups = \Torrents::get_groups($groupIds, true, false);
         $artists = \Artists::get_artists($groupIds);
-        $Debug = new \Gazelle\Debug;
+        global $Debug;
         foreach ($top10 as $i => $torrent) {
             [$torrentID, $groupID, $data] = $torrent;
             $group = $groups[$groupID];

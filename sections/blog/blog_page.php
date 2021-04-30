@@ -64,7 +64,7 @@ if ($action === 'Create') { /* default for non-staff */
             <strong><?=$Title?></strong> - posted <?=time_diff($BlogTime);?> by <a href="user.php?id=<?=$AuthorID?>"><?=$Author?></a>
 <?php    if (check_perms('admin_manage_blog')) { ?>
                 - <a href="blog.php?action=editblog&amp;id=<?=$BlogID?>" class="brackets">Edit</a>
-                <a href="blog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?=G::$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
+                <a href="blog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
 <?php    } ?>
         </div>
         <div class="pad">
@@ -73,7 +73,7 @@ if ($action === 'Create') { /* default for non-staff */
                 <br /><br />
                 <em><a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadID?>">Discuss this post here</a></em>
 <?php        if (check_perms('admin_manage_blog')) { ?>
-                    <span style="float: right"><a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?=G::$LoggedUser['AuthKey']?>"
+                    <span style="float: right"><a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?=$LoggedUser['AuthKey']?>"
                         class="brackets">Remove link</a></span>
 <?php
                 }

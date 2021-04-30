@@ -847,7 +847,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //******************************************************************************//
 //--------------- Give Bonus Points  -------------------------------------------//
 
-if (G::$LoggedUser['DisablePoints'] == 0) {
+if ($LoggedUser['DisablePoints'] == 0) {
     $Bonus->addPoints($LoggedUser['ID'], $BonusPoints);
 }
 

@@ -22,6 +22,9 @@ require_once(__DIR__.'/../classes/util.php');
 
 $DB    = new DB_MYSQL;
 $Cache = new CACHE;
+Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
+$Debug = new Gazelle\Debug($Cache, $DB);
+$Debug->handle_errors();
 
 $allConfig = [
     '-html' => [
@@ -54,9 +57,6 @@ if ($argc < 2 || !isset($allConfig[$argv[1]])) {
     die('usage: ' . basename($argv[0]) . " <-html|-log|-torrent>\n");
 }
 $config = $allConfig[$argv[1]];
-
-$Debug = new Gazelle\Debug;
-$Debug->handle_errors();
 
 ini_set('max_execution_time', -1);
 

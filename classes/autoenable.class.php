@@ -32,7 +32,8 @@ class AutoEnable {
         }
 
         // Make sure the user is allowed to make an enable request
-        [$UserID, $requestExists] = G::$DB->row("
+        global $Cache, $DB;
+        [$UserID, $requestExists] = $DB->row("
             SELECT um.ID,
                 (uer.UserID IS NOT NULL) as requestExists
             FROM users_main AS um
@@ -58,7 +59,7 @@ class AutoEnable {
             $user->addStaffNote("Enable request rejected from $IP")->modify();
         } else {
             // New disable activation request
-            G::$DB->prepared_query("
+            $DB->prepared_query("
                 INSERT INTO users_enable_requests
                        (UserID, Email, IP, UserAgent, Timestamp)
                 VALUES (?,      ?,     ?,  ?,         now())
@@ -66,7 +67,7 @@ class AutoEnable {
             );
 
             // Cache the number of requests for the modbar
-            G::$Cache->increment_value(self::CACHE_KEY_NAME);
+            $Cache->increment_value(self::CACHE_KEY_NAME);
             setcookie('username', '', [
                 'expires'  => time() + 60 * 60,
                 'path'     => '/',
@@ -75,7 +76,7 @@ class AutoEnable {
                 'samesite' => 'Lax',
             ]);
             $Output = self::RECEIVED_MESSAGE;
-            $user->addStaffNote()->modify("Enable request " . G::$DB->inserted_id() . " received from $IP");
+            $user->addStaffNote()->modify("Enable request " . $DB->inserted_id() . " received from $IP");
         }
         return $Output;
     }
@@ -103,14 +104,15 @@ class AutoEnable {
             }
         }
 
-        G::$DB->prepared_query("
+        global $Cache, $DB, $LoggedUser;
+        $DB->prepared_query("
             SELECT Email, ID, UserID
             FROM users_enable_requests
             WHERE Outcome IS NULL
                 AND ID IN (" . placeholders($IDs) . ")
             ", ...$IDs
         );
-        $Results = G::$DB->to_array(false, MYSQLI_NUM);
+        $Results = $DB->to_array(false, MYSQLI_NUM);
 
         if ($Status === self::DISCARDED) {
             foreach ($Results as $Result) {
@@ -136,7 +138,7 @@ class AutoEnable {
                 } else {
                     // Generate token
                     $token = randomString();
-                    G::$DB->prepared_query("
+                    $DB->prepared_query("
                         UPDATE users_enable_requests SET
                             Token = ?
                         WHERE ID = ?
@@ -153,20 +155,20 @@ class AutoEnable {
             [$ID, $UserID] = $User;
             (new \Gazelle\User($UserID))->addStaffNote(
                 "Enable request $ID " . strtolower(self::get_outcome_string($Status))
-                    . ' by [user]' . G::$LoggedUser['Username'] . '[/user]' . (!empty($Comment) ? "\nReason: $Comment" : "")
+                    . ' by [user]' . $LoggedUser['Username'] . '[/user]' . (!empty($Comment) ? "\nReason: $Comment" : "")
             )->modify();
         }
 
         // Update database values and decrement cache
-        G::$DB->prepared_query("
+        $DB->prepared_query("
             UPDATE users_enable_requests SET
                 HandledTimestamp = now(),
                 CheckedBy = ?,
                 Outcome = ?
             WHERE ID IN (" . placeholders($IDs) . ")
-            ", G::$LoggedUser['ID'], $Status, ...$IDs
+            ", $LoggedUser['ID'], $Status, ...$IDs
         );
-        G::$Cache->decrement_value(self::CACHE_KEY_NAME, count($IDs));
+        $Cache->decrement_value(self::CACHE_KEY_NAME, count($IDs));
     }
 
     /**
@@ -179,8 +181,9 @@ class AutoEnable {
         if (!$ID) {
             error(404);
         }
+        global $Cache, $DB, $LoggedUser;
         $user = (new \Gazelle\Manager\User)->findById(
-            G::$DB->scalar("
+            $DB->scalar("
                 SELECT UserID
                 FROM users_enable_requests
                 WHERE Outcome = ?
@@ -192,8 +195,8 @@ class AutoEnable {
             error(404);
         }
 
-        $user->addStaffNote("Enable request $ID unresolved by [user]" . G::$LoggedUser['Username'] . '[/user]')->modify();
-        G::$DB->prepared_query("
+        $user->addStaffNote("Enable request $ID unresolved by [user]" . $LoggedUser['Username'] . '[/user]')->modify();
+        $DB->prepared_query("
             UPDATE users_enable_requests SET
                 Outcome = NULL,
                 HandledTimestamp = NULL,
@@ -201,7 +204,7 @@ class AutoEnable {
             WHERE ID = ?
             ", $ID
         );
-        G::$Cache->increment_value(self::CACHE_KEY_NAME);
+        $Cache->increment_value(self::CACHE_KEY_NAME);
     }
 
     /**
@@ -230,7 +233,8 @@ class AutoEnable {
      * @return string The error output, or an empty string
      */
     public static function handle_token($Token) {
-        [$UserID, $Timestamp] = G::$DB->row("
+        global $Cache, $DB;
+        [$UserID, $Timestamp] = $DB->row("
             SELECT UserID, HandledTimestamp
             FROM users_enable_requests
             WHERE Token = ?
@@ -239,7 +243,7 @@ class AutoEnable {
         if (!$UserID) {
             $Err = "Invalid token.";
         } else {
-            G::$DB->query("
+            $DB->query("
                 UPDATE users_enable_requests SET Token = NULL WHERE Token = ?
                 ", $Token
             );
@@ -249,12 +253,12 @@ class AutoEnable {
                 $Err = "Token has expired. Please visit ".BOT_DISABLED_CHAN." on ".BOT_SERVER." to discuss this with staff.";
             } else {
                 // Good request, decrement cache value and enable account
-                G::$Cache->decrement_value(AutoEnable::CACHE_KEY_NAME);
-                G::$DB->prepared_query("UPDATE users_main SET Enabled = '1', can_leech = '1' WHERE ID = ?", $UserID);
-                G::$DB->prepared_query("UPDATE users_info SET BanReason = '0' WHERE UserID = ?", $UserID);
+                $Cache->decrement_value(AutoEnable::CACHE_KEY_NAME);
+                $DB->prepared_query("UPDATE users_main SET Enabled = '1', can_leech = '1' WHERE ID = ?", $UserID);
+                $DB->prepared_query("UPDATE users_info SET BanReason = '0' WHERE UserID = ?", $UserID);
                 Tracker::update_tracker('add_user', [
                     'id' => $UserID,
-                    'passkey' => G::$DB->scalar("SELECT torrent_pass FROM users_main WHERE ID = ?", $UserID)
+                    'passkey' => $DB->scalar("SELECT torrent_pass FROM users_main WHERE ID = ?", $UserID)
                 ]);
                 $Err = "Your account has been enabled. You may now log in.";
             }

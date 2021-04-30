@@ -77,7 +77,6 @@ class Tools {
      * @return string the host.
      */
     public static function lookup_ip($IP) {
-        //TODO: use the G::$Cache
         $Output = explode(' ',shell_exec('host -W 1 '.escapeshellarg($IP)));
         if (count($Output) == 1 && empty($Output[0])) {
             //No output at all implies the command failed
