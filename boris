@@ -30,26 +30,27 @@ require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
 $Cache = new CACHE;
 $DB = new DB_MYSQL;
-$Debug = new \Gazelle\Debug;
-$Debug->setStartTime(microtime(true))->handle_errors();
+$Twig = new Twig\Environment(
+    new Twig\Loader\FilesystemLoader('templates'),
+    ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
+);
+\Gazelle\Base::initialize($Cache, $DB, $Twig);
 
-G::init($DB, $Cache);
+$Debug = new \Gazelle\Debug($Cache, $DB);
+$Debug->setStartTime(microtime(true))->handle_errors();
 
 $b = new \Boris\Boris(SITE_NAME . '> ');
 $preload = [
     'cache'       => $Cache,
     'db'          => $DB,
     'debug'       => $Debug,
+    'twig'        => $Twig,
     'bonus'       => new \Gazelle\Bonus,
     'collMan'     => new \Gazelle\Manager\Collage,
     'forMan'      => new \Gazelle\Manager\Forum,
     'tagMan'      => new \Gazelle\Manager\Tag,
     'torMan'      => new \Gazelle\Manager\Torrent,
     'userMan'     => new \Gazelle\Manager\User,
-    'twig'        => new Twig\Environment(
-        new Twig\Loader\FilesystemLoader('templates'),
-        ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
-    ),
 ];
 
 printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));

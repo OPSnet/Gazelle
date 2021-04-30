@@ -2,11 +2,12 @@
 
 use Gazelle\Manager\Notification;
 
-$user = new Gazelle\User(G::$LoggedUser['ID']);
-$authArgs = '&amp;user=' . G::$LoggedUser['ID']
-    . '&amp;auth=' . G::$LoggedUser['RSS_Auth']
-    . '&amp;passkey=' . G::$LoggedUser['torrent_pass']
-    . '&amp;authkey=' . G::$LoggedUser['AuthKey'];
+global $LoggedUser;
+$user = new Gazelle\User($LoggedUser['ID']);
+$authArgs = '&amp;user=' . $LoggedUser['ID']
+    . '&amp;auth=' . $LoggedUser['RSS_Auth']
+    . '&amp;passkey=' . $LoggedUser['torrent_pass']
+    . '&amp;authkey=' . $LoggedUser['AuthKey'];
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -28,7 +29,7 @@ $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_news<?= $authArgs ?>" title="<?=SITE_NAME?> - News" />
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_blog<?= $authArgs ?>" title="<?=SITE_NAME?> - Blog" />
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_changelog<?= $authArgs ?>" title="<?=SITE_NAME?> - Change Log" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_<?=G::$LoggedUser['torrent_pass']?><?= $authArgs ?>" title="<?=SITE_NAME?> - P.T.N." />
+    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_<?=$LoggedUser['torrent_pass']?><?= $authArgs ?>" title="<?=SITE_NAME?> - P.T.N." />
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_all<?= $authArgs ?>" title="<?=SITE_NAME?> - All Torrents" />
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_music<?= $authArgs ?>" title="<?=SITE_NAME?> - Music Torrents" />
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_apps<?= $authArgs ?>" title="<?=SITE_NAME?> - Application Torrents" />
@@ -43,12 +44,12 @@ $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless<?= $authArgs ?>" title="<?=SITE_NAME?> - Lossless Torrents" />
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless24<?= $authArgs ?>" title="<?=SITE_NAME?> - 24bit Lossless Torrents" />
 <?php
-if (isset(G::$LoggedUser['Notify'])) {
-    foreach (G::$LoggedUser['Notify'] as $Filter) {
+if (isset($LoggedUser['Notify'])) {
+    foreach ($LoggedUser['Notify'] as $Filter) {
         [$FilterID, $FilterName] = $Filter;
 ?>
     <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_<?=
-        $FilterID?>_<?=G::$LoggedUser['torrent_pass']?><?= $authArgs ?>&amp;name=<?=
+        $FilterID?>_<?=$LoggedUser['torrent_pass']?><?= $authArgs ?>&amp;name=<?=
         urlencode($FilterName)?>" title="<?=SITE_NAME?> - <?=display_str($FilterName)?>" />
 <?php
     }
@@ -75,7 +76,7 @@ if (DEBUG_MODE || check_perms('site_debug')) {
     $Scripts[] = 'jquery-migrate';
     $Scripts[] = 'debug';
 }
-if (!isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Tooltipster']) {
+if (!isset($LoggedUser['Tooltipster']) || $LoggedUser['Tooltipster']) {
     $Scripts[] = 'tooltipster';
     $Scripts[] = 'tooltipster_settings';
 ?>
@@ -83,26 +84,26 @@ if (!isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Tooltipster']) {
 <?php
 }
 
-if (empty(G::$LoggedUser['StyleURL'])) {
+if (empty($LoggedUser['StyleURL'])) {
 ?>
-    <link rel="stylesheet" type="text/css" title="<?=G::$LoggedUser['StyleName']?>" media="screen" href="<?=
-        STATIC_SERVER?>/styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/'.G::$LoggedUser['StyleName'].'/style.scss')?>" />
+    <link rel="stylesheet" type="text/css" title="<?=$LoggedUser['StyleName']?>" media="screen" href="<?=
+        STATIC_SERVER?>/styles/<?=$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/'.$LoggedUser['StyleName'].'/style.scss')?>" />
 <?php
 } else {
-        $StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
-        if (substr(G::$LoggedUser['StyleURL'], -4) == '.css'
+        $StyleURLInfo = parse_url($LoggedUser['StyleURL']);
+        if (substr($LoggedUser['StyleURL'], -4) == '.css'
                 && $StyleURLInfo['query'].$StyleURLInfo['fragment'] == ''
                 && $StyleURLInfo['host'] === SITE_HOST
                 && file_exists(SERVER_ROOT.$StyleURLInfo['path'])) {
-            $StyleURL = G::$LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.'/public/'.$StyleURLInfo['path']);
+            $StyleURL = $LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.'/public/'.$StyleURLInfo['path']);
         } else {
-            $StyleURL = G::$LoggedUser['StyleURL'];
+            $StyleURL = $LoggedUser['StyleURL'];
         }
 ?>
     <link rel="stylesheet" type="text/css" media="screen" href="<?=$StyleURL?>" title="External CSS" />
 <?php
 }
-if (!empty(G::$LoggedUser['UseOpenDyslexic'])) {
+if (!empty($LoggedUser['UseOpenDyslexic'])) {
 ?>
     <link rel="stylesheet" type="text/css" charset="utf-8" href="<?=
         STATIC_SERVER?>/styles/opendyslexic/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/opendyslexic/style.css')?>" />
@@ -125,20 +126,20 @@ foreach ($Scripts as $Script) {
 <?php } ?>
     <script type="text/javascript">
         //<![CDATA[
-        var authkey = "<?=G::$LoggedUser['AuthKey']?>";
-        var userid = <?=G::$LoggedUser['ID']?>;
+        var authkey = "<?=$LoggedUser['AuthKey']?>";
+        var userid = <?=$LoggedUser['ID']?>;
         //]]>
     </script>
 
 <?php
 
 // Get notifications early to change menu items if needed
-$notifMan = new Notification(G::$LoggedUser['ID']);
+$notifMan = new Notification($LoggedUser['ID']);
 
 $Notifications = $notifMan->notifications();
 $NewSubscriptions = isset($Notifications[Notification::SUBSCRIPTIONS]);
 if ($notifMan->isSkipped(Notification::SUBSCRIPTIONS)) {
-    $NewSubscriptions = (new Gazelle\Manager\Subscription(G::$LoggedUser['ID']))->unread();
+    $NewSubscriptions = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->unread();
 }
 
 if ($notifMan->useNoty()) {
@@ -150,17 +151,17 @@ if ($notifMan->useNoty()) {
 }
 
 $activity = new Gazelle\Activity;
-if (G::$LoggedUser['RatioWatch']) {
+if ($LoggedUser['RatioWatch']) {
     $activity->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: You have '
-        . time_diff(G::$LoggedUser['RatioWatchEnds'], 3)
+        . time_diff($LoggedUser['RatioWatchEnds'], 3)
         . ' to get your ratio over your required ratio or your leeching abilities will be disabled.'
     );
-} elseif (G::$LoggedUser['CanLeech'] != 1) {
+} elseif ($LoggedUser['CanLeech'] != 1) {
     $activity->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: Your downloading privileges are disabled until you meet your required ratio.');
 }
 
 $needStaffInbox = false;
-if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] === FORUM_MOD) {
+if (check_perms('users_mod') || $LoggedUser['PermissionID'] === FORUM_MOD) {
     if (check_perms('users_mod')) {
         $activity->setAction('<a class="nobr" href="tools.php">Toolbox</a>');
     }
@@ -177,10 +178,11 @@ if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] === FORUM_MOD) {
     }
 
     if (FEATURE_EMAIL_REENABLE) {
-        $NumEnableRequests = G::$Cache->get_value(AutoEnable::CACHE_KEY_NAME);
+        global $Cache, $DB;
+        $NumEnableRequests = $Cache->get_value(AutoEnable::CACHE_KEY_NAME);
         if ($NumEnableRequests === false) {
-            $NumEnableRequests = G::$DB->scalar("SELECT count(*) FROM users_enable_requests WHERE Outcome IS NULL");
-            G::$Cache->cache_value(AutoEnable::CACHE_KEY_NAME, $NumEnableRequests);
+            $NumEnableRequests = $DB->scalar("SELECT count(*) FROM users_enable_requests WHERE Outcome IS NULL");
+            $Cache->cache_value(AutoEnable::CACHE_KEY_NAME, $NumEnableRequests);
         }
         if ($NumEnableRequests > 0) {
             $activity->setAction('<a class="nobr" href="tools.php?action=enable_requests">' . $NumEnableRequests . " Enable requests</a>");
@@ -262,7 +264,7 @@ $parseNavItem = function($val) {
     return $val === 'false' ? false : $val;
 };
 
-$navItems = Users::get_user_nav_items(G::$LoggedUser['ID']);
+$navItems = Users::get_user_nav_items($LoggedUser['ID']);
 
 $navLinks = [];
 foreach ($navItems as $n) {
@@ -285,7 +287,7 @@ foreach ($navItems as $n) {
 
     $extraClass = [];
     if ($Key === 'inbox') {
-        $Target = Gazelle\Inbox::getLinkQuick(null, G::$LoggedUser['ListUnreadPMsFirst'] ?? false);
+        $Target = Gazelle\Inbox::getLinkQuick(null, $LoggedUser['ListUnreadPMsFirst'] ?? false);
     } elseif ($Key === 'subscriptions') {
         if ($NewSubscriptions) {
             $extraClass[] = 'new-subscriptions';
@@ -311,12 +313,12 @@ echo $Twig->render('index/private-header.twig', [
     'action'            => $_REQUEST['action'] ?? null,
     'action_list'       => $activity->actionList(),
     'alert_list'        => $activity->alertList(),
-    'auth'              => G::$LoggedUser['AuthKey'],
-    'advanced_search'   => isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'],
+    'auth'              => $LoggedUser['AuthKey'],
+    'advanced_search'   => isset($LoggedUser['SearchType']) && $LoggedUser['SearchType'],
     'document'          => $Document,
     'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
     'nav_links'         => $navLinks,
-    'required_ratio'    => G::$LoggedUser['RequiredRatio'],
+    'required_ratio'    => $LoggedUser['RequiredRatio'],
     'subscriptions'     => $NewSubscriptions,
     'user'              => $user,
     'user_class'        => (new Gazelle\Manager\User)->userclassName($user->primaryClass()),

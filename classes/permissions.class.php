@@ -137,11 +137,12 @@ class Permissions {
      * @return bool
      */
     public static function check_perms($PermissionName, $MinClass = 0) {
-        $Override = self::has_override(G::$LoggedUser['EffectiveClass']);
+        global $LoggedUser;
+        $Override = self::has_override($LoggedUser['EffectiveClass']);
         return ($PermissionName === null ||
-            (isset(G::$LoggedUser['Permissions'][$PermissionName]) && G::$LoggedUser['Permissions'][$PermissionName]))
-            && (G::$LoggedUser['Class'] >= $MinClass
-                || G::$LoggedUser['EffectiveClass'] >= $MinClass
+            (isset($LoggedUser['Permissions'][$PermissionName]) && $LoggedUser['Permissions'][$PermissionName]))
+            && ($LoggedUser['Class'] >= $MinClass
+                || $LoggedUser['EffectiveClass'] >= $MinClass
                 || $Override);
     }
 
@@ -152,19 +153,20 @@ class Permissions {
      * @return array permissions
      */
     public static function get_permissions($PermissionID) {
-        $Permission = G::$Cache->get_value("perm_$PermissionID");
+        global $Cache, $DB;
+        $Permission = $Cache->get_value("perm_$PermissionID");
         if (empty($Permission)) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->prepared_query("
+            $QueryID = $DB->get_query_id();
+            $DB->prepared_query("
                 SELECT Level AS Class, `Values` AS Permissions, Secondary, PermittedForums
                 FROM permissions
                 WHERE ID = ?
                 ", $PermissionID
             );
-            $Permission = G::$DB->next_record(MYSQLI_ASSOC, ['Permissions']);
-            G::$DB->set_query_id($QueryID);
+            $Permission = $DB->next_record(MYSQLI_ASSOC, ['Permissions']);
+            $DB->set_query_id($QueryID);
             $Permission['Permissions'] = unserialize($Permission['Permissions']) ?: [];
-            G::$Cache->cache_value("perm_$PermissionID", $Permission, 2592000);
+            $Cache->cache_value("perm_$PermissionID", $Permission, 2592000);
         }
         return $Permission;
     }
@@ -183,12 +185,13 @@ class Permissions {
 
         // Fetch custom permissions if they weren't passed in.
         if ($CustomPermissions === false) {
-            $QueryID = G::$DB->get_query_id();
-            $CustomPermissions = G::$DB->scalar("
+            global $DB;
+            $QueryID = $DB->get_query_id();
+            $CustomPermissions = $DB->scalar("
                 SELECT CustomPermissions FROM users_main WHERE ID = ?
                 ", $UserID
             );
-            G::$DB->set_query_id($QueryID);
+            $DB->set_query_id($QueryID);
         }
 
         if (!empty($CustomPermissions) && !is_array($CustomPermissions)) {
@@ -224,7 +227,8 @@ class Permissions {
     public static function has_override($Level) {
         static $max;
         if (is_null($max)) {
-            $max = G::$DB->scalar('SELECT max(Level) FROM permissions');
+            global $DB;
+            $max = $DB->scalar('SELECT max(Level) FROM permissions');
         }
         return $Level >= $max;
     }

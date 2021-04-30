@@ -28,8 +28,8 @@ if ($search) {
 else {
     if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
         $claim_id = (int)$_GET['claim'];
-        if ($claim_id == G::$LoggedUser['ID']) {
-            \Gazelle\Recovery::claim($ID, $claim_id, G::$LoggedUser['Username'], $DB);
+        if ($claim_id == $LoggedUser['ID']) {
+            \Gazelle\Recovery::claim($ID, $claim_id, $LoggedUser['Username'], $DB);
         }
     }
     $Info = \Gazelle\Recovery::get_details($ID, $DB);
@@ -151,13 +151,13 @@ if (!$Info) { ?>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=deny&amp;id=<?= $ID ?>">Deny</a> - The request is denied, no e-mail will be sent</p>
 <?php
         }
-        if ($Info['admin_user_id'] == G::$LoggedUser['ID']) {
+        if ($Info['admin_user_id'] == $LoggedUser['ID']) {
 ?>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=unclaim&amp;id=<?= $ID ?>">Unclaim</a> - Release the claim on this request, you don't know what to do.</p>
 <?php
         } else {
 ?>
-        <p><a class="brackets" href="/recovery.php?action=view&amp;id=<?= $ID ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a> - Claim this request, you need to contact the person via IRC.</p>
+        <p><a class="brackets" href="/recovery.php?action=view&amp;id=<?= $ID ?>&amp;claim=<?= $LoggedUser['ID'] ?>">Claim</a> - Claim this request, you need to contact the person via IRC.</p>
 <?php
         }
     }

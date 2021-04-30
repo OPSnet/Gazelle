@@ -52,13 +52,14 @@ class TORRENT_FORM {
     }
 
     function head() {
+        global $LoggedUser;
 ?>
 
 <div class="thin">
 <?php   if ($this->NewTorrent) { ?>
     <div style="text-align: center;">
         Your personal announce URL is:<br />
-        <div style="margin: 0 auto;"><input type="text" value="<?= (new \Gazelle\User(G::$LoggedUser['ID']))->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
+        <div style="margin: 0 auto;"><input type="text" value="<?= (new \Gazelle\User($LoggedUser['ID']))->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
     </div>
 <?php
         }
@@ -70,7 +71,7 @@ class TORRENT_FORM {
         <div>
             <input type="hidden" id="torrent-new" name="torrent-new" value="<?= $this->NewTorrent ? 1 : 0 ?>" />
             <input type="hidden" name="submit" value="true" />
-            <input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
 <?php       if (!$this->NewTorrent) { ?>
                 <input type="hidden" name="action" value="takeedit" />
                 <input type="hidden" name="torrentid" value="<?=display_str($this->TorrentID)?>" />
@@ -172,13 +173,14 @@ class TORRENT_FORM {
     } //function foot
 
     function music_form($GenreTags) {
-        $QueryID = G::$DB->get_query_id();
+        global $DB, $LoggedUser;
+        $QueryID = $DB->get_query_id();
         $Torrent = $this->Torrent;
         $IsRemaster = !empty($Torrent['Remastered']);
         $UnknownRelease = !$this->NewTorrent && $IsRemaster && !$Torrent['RemasterYear'];
 
         if ($Torrent['GroupID']) {
-            G::$DB->prepared_query("
+            $DB->prepared_query("
                 SELECT
                     ID,
                     RemasterYear,
@@ -195,8 +197,8 @@ class TORRENT_FORM {
                     RemasterCatalogueNumber DESC
                 ", $Torrent['GroupID']
             );
-            if (G::$DB->has_results()) {
-                $GroupRemasters = G::$DB->to_array(false, MYSQLI_BOTH, false);
+            if ($DB->has_results()) {
+                $GroupRemasters = $DB->to_array(false, MYSQLI_BOTH, false);
             }
         }
 
@@ -210,7 +212,7 @@ class TORRENT_FORM {
         $LossymasterApproved = $Torrent['LossymasterApproved'];
         $LossywebApproved = $Torrent['LossywebApproved'];
         $releaseTypes = (new \Gazelle\ReleaseType)->list();
-        $user = new \Gazelle\User(G::$LoggedUser['ID']);
+        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <div id="musicbrainz_popup" style="display: none;">
             <a href="#null" id="popup_close">x</a>
@@ -353,7 +355,7 @@ class TORRENT_FORM {
                     <input type="checkbox" id="remaster" name="remaster"<?php if ($IsRemaster) { echo ' checked="checked"'; } ?> onclick="Remaster();<?php if ($this->NewTorrent) { ?> CheckYear();<?php } ?>" />
                     <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
                     <div id="remaster_true"<?php if (!$IsRemaster) { echo ' class="hidden"';} ?>>
-<?php    if (check_perms('edit_unknowns') || G::$LoggedUser['ID'] == $Torrent['UserID']) { ?>
+<?php    if (check_perms('edit_unknowns') || $LoggedUser['ID'] == $Torrent['UserID']) { ?>
                         <br />
                         <input type="checkbox" id="unknown" name="unknown"<?php if ($UnknownRelease) { echo ' checked="checked"'; } ?> onclick="<?php if ($this->NewTorrent) { ?>CheckYear(); <?php } ?>ToggleUnknown();" /> <label for="unknown">Unknown Release</label>
 <?php    } ?>
@@ -593,12 +595,13 @@ class TORRENT_FORM {
         if ($_SERVER['SCRIPT_NAME'] === '/ajax.php') {
             TEXTAREA_PREVIEW::JavaScript(false);
         }
-        G::$DB->set_query_id($QueryID);
+        $DB->set_query_id($QueryID);
     }
 
     function audiobook_form() {
         $Torrent = $this->Torrent;
-        $user = new \Gazelle\User(G::$LoggedUser['ID']);
+        global $LoggedUser;
+        $user = new \Gazelle\User($LoggedUser['ID']);
         global $Twig;
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
@@ -690,7 +693,7 @@ class TORRENT_FORM {
 
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
-        $user = new \Gazelle\User(G::$LoggedUser['ID']);
+        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
 <?php

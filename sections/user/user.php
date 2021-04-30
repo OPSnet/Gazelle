@@ -470,9 +470,10 @@ foreach ($Collages as $CollageInfo) {
             </td>
         </tr>
         <tr class="images<?=$FirstCol ? '' : ' hidden'?>">
-<?php   foreach ($Collage as $C) {
+<?php
+    foreach ($Collage as $C) {
             $Group = Torrents::get_groups([$C['GroupID']], true, true, false);
-            $Name = Artists::display_artists(['1' => $Group['Artists']], false, true) . $Group['Name'];
+            $Name = Artists::display_artists(['1' => $Group[$C['GroupID']]['Artists']], false, true) . $Group[$C['GroupID']]['Name'];
 ?>
             <td>
                 <a href="torrents.php?id=<?= $C['GroupID'] ?>">

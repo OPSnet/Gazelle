@@ -11,15 +11,15 @@ if (isset($_GET['task'])) {
     if ($id > 0) {
         switch ($_GET['task']) {
             case 'accept';
-                $ok = \Gazelle\Recovery::accept($id, G::$LoggedUser['ID'], G::$LoggedUser['Username'], $DB);
+                $ok = \Gazelle\Recovery::accept($id, $LoggedUser['ID'], $LoggedUser['Username'], $DB);
                 $message = $ok ? '<font color="#008000">Invite sent</font>' : '<font color="#800000">Invite not sent, check log</font>';
                 break;
             case 'deny';
-                \Gazelle\Recovery::deny($id, G::$LoggedUser['ID'], G::$LoggedUser['Username'], $DB);
+                \Gazelle\Recovery::deny($id, $LoggedUser['ID'], $LoggedUser['Username'], $DB);
                 $message = sprintf('<font color="orange">Request %d was denied</font>', $id);
                 break;
             case 'unclaim';
-                \Gazelle\Recovery::unclaim($id, G::$LoggedUser['Username'], $DB);
+                \Gazelle\Recovery::unclaim($id, $LoggedUser['Username'], $DB);
                 $message = sprintf('<font color="orange">Request %d was unclaimed</font>', $id);
                 break;
             default:
@@ -47,8 +47,8 @@ $Limit  = 100;
 $Offset = $Limit * ($Page-1);
 
 $State = isset($_GET['state']) ? $_GET['state'] : 'pending';
-$Total = \Gazelle\Recovery::get_total($State, G::$LoggedUser['ID'], $DB);
-$Info  = \Gazelle\Recovery::get_list($Limit, $Offset, $State, G::$LoggedUser['ID'], $DB);
+$Total = \Gazelle\Recovery::get_total($State, $LoggedUser['ID'], $DB);
+$Info  = \Gazelle\Recovery::get_list($Limit, $Offset, $State, $LoggedUser['ID'], $DB);
 
 $Pages = Format::get_pages($Page, $Total, $Limit);
 ?>
@@ -114,7 +114,7 @@ foreach ($Info as $i) { ?>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
 <?php
     if ($i['state'] == 'PENDING') { ?>
-                    <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a>
+                    <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= $LoggedUser['ID'] ?>">Claim</a>
 <?php
     } ?>
                 </td>

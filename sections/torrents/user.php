@@ -537,7 +537,7 @@ foreach ($Categories as $catKey => $catName) {
                         | <a href="reportsv2.php?action=report&amp;id=<?=$torrentID?>" class="tooltip" title="Report">RP</a> ]
                     </span>
                     <?= $displayName ?>
-<?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
+<?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
                 <?= $vote->setGroupId($groupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userId.'&amp;tags=')?></div>

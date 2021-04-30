@@ -1,7 +1,7 @@
 <?php
 
 if (!isset($_GET['userid'])) {
-    $userId = G::$LoggedUser['ID'];
+    $userId = $LoggedUser['ID'];
 } elseif (!check_perms('users_view_ips') || !check_perms('users_logout')) {
         error(403);
 } else {

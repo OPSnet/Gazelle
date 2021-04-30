@@ -19,9 +19,10 @@ class Comments {
      */
     public static function collageSummary($CollageID, $count = 5) {
         $key = "collages_comments_recent_$CollageID";
-        if (($list = G::$Cache->get_value($key)) === false) {
-            $qid = G::$DB->get_query_id();
-            G::$DB->prepared_query('
+        global $Cache, $DB;
+        if (($list = $Cache->get_value($key)) === false) {
+            $qid = $DB->get_query_id();
+            $DB->prepared_query('
                 SELECT c.ID AS id,
                     c.Body as body,
                     c.AuthorID as author_id,
@@ -33,14 +34,14 @@ class Comments {
                 LIMIT ?
                 ', 'collages', $CollageID, $count
             );
-            $list = G::$DB->to_array(false, MYSQLI_ASSOC);
+            $list = $DB->to_array(false, MYSQLI_ASSOC);
             foreach ($list as &$c) {
                 $c['body'] = Text::full_format($c['body']);
             }
             unset($c);
-            G::$DB->set_query_id($quid);
+            $DB->set_query_id($quid);
             if (count($list)) {
-                G::$Cache->cache_value($key, $list, 7200);
+                $Cache->cache_value($key, $list, 7200);
             }
         }
         return $list;
@@ -53,9 +54,10 @@ class Comments {
      * @param type $TargetPageID
      */
     public static function merge($Page, $PageID, $TargetPageID) {
-        $QueryID = G::$DB->get_query_id();
+        global $Cache, $DB;
+        $QueryID = $DB->get_query_id();
 
-        G::$DB->prepared_query("
+        $DB->prepared_query("
             UPDATE comments SET
                 PageID = ?
             WHERE Page = ? AND PageID = ?
@@ -63,7 +65,7 @@ class Comments {
         );
 
         // quote notifications
-        G::$DB->prepared_query("
+        $DB->prepared_query("
             UPDATE users_notify_quoted SET
                 PageID = ?
             WHERE Page = ? AND PageID = ?
@@ -75,7 +77,7 @@ class Comments {
         $subscription->move($Page, $PageID, $TargetPageID);
 
         // cache (we need to clear all comment catalogues)
-        $CommPages = G::$DB->scalar("
+        $CommPages = $DB->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
             WHERE Page = ? AND PageID = ?
@@ -84,10 +86,10 @@ class Comments {
         );
         $LastCatalogue = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         for ($i = 0; $i <= $LastCatalogue; ++$i) {
-            G::$Cache->delete_value($Page . "_comments_$TargetPageID" . "_catalogue_$i");
+            $Cache->delete_value($Page . "_comments_$TargetPageID" . "_catalogue_$i");
         }
-        G::$Cache->delete_value($Page."_comments_$TargetPageID");
-        G::$DB->set_query_id($QueryID);
+        $Cache->delete_value($Page."_comments_$TargetPageID");
+        $DB->set_query_id($QueryID);
     }
 
     /**
@@ -97,10 +99,11 @@ class Comments {
      * @return boolean
      */
     public static function delete_page($Page, $PageID) {
-        $QueryID = G::$DB->get_query_id();
+        global $Cache, $DB;
+        $QueryID = $DB->get_query_id();
 
         // get number of pages
-        $CommPages = G::$DB->scalar("
+        $CommPages = $DB->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
             WHERE Page = ? AND PageID = ?
@@ -112,7 +115,7 @@ class Comments {
         }
 
         // Delete comments
-        G::$DB->prepared_query("
+        $DB->prepared_query("
             DELETE FROM comments WHERE Page = ? AND PageID = ?
             ", $Page, $PageID
         );
@@ -122,7 +125,7 @@ class Comments {
         $subscription->move($Page, $PageID, null);
         $subscription->flushQuotes($Page, $PageID);
 
-        G::$DB->query("
+        $DB->query("
             DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?
             ", $Page, $PageID
         );
@@ -130,11 +133,11 @@ class Comments {
         // Clear cache
         $LastCatalogue = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         for ($i = 0; $i <= $LastCatalogue; ++$i) {
-            G::$Cache->delete_value($Page . '_comments_' . $PageID . '_catalogue_' . $i);
+            $Cache->delete_value($Page . '_comments_' . $PageID . '_catalogue_' . $i);
         }
-        G::$Cache->delete_value($Page.'_comments_'.$PageID);
+        $Cache->delete_value($Page.'_comments_'.$PageID);
 
-        G::$DB->set_query_id($QueryID);
+        $DB->set_query_id($QueryID);
 
         return true;
     }

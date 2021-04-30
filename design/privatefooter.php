@@ -1,13 +1,13 @@
 </div>
 <?php
-TEXTAREA_PREVIEW::JavaScript();
-echo Gazelle\Util\Textarea::activate();
+//TEXTAREA_PREVIEW::JavaScript();
+// echo Gazelle\Util\Textarea::activate();
 ?>
 <div id="footer">
 <?php if (DEBUG_MODE || check_perms('site_debug')) { ?>
     <div id="site_debug">
 <?php
-    global $Twig;
+    global $Cache, $DB, $Twig;
     echo $Twig->render('debug/performance.twig', ['list' => $Debug->get_perf()]);
     echo $Twig->render('debug/flag.twig', ['list' => $Debug->get_flags()]);
     echo $Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
@@ -16,8 +16,8 @@ echo Gazelle\Util\Textarea::activate();
     if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
         echo $Twig->render('debug/sphinxql.twig', ['list' => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]);
     }
-    echo $Twig->render('debug/query.twig', ['list' => $Debug->get_queries(), 'time' => G::$DB->Time]);
-    echo $Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => G::$Cache->Time]);
+    echo $Twig->render('debug/query.twig', ['list' => $Debug->get_queries(), 'time' => $DB->Time]);
+    echo $Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => $Cache->Time]);
     echo $Twig->render('debug/var.twig', ['list' => $Debug->get_logged_vars()]);
     echo $Twig->render('debug/ocelot.twig', ['list' => class_exists('Tracker') ? \Tracker::$Requests : []]);
 ?>
@@ -72,7 +72,8 @@ if ($Y != SITE_LAUNCH_YEAR) {
 <div id="curtain" class="curtain hidden"></div>
 <?php
 $notifMan = new Gazelle\Manager\Notification();
-$notifications = $notifMan->registeredNotifications(G::$LoggedUser['ID']);
+global $LoggedUser;
+$notifications = $notifMan->registeredNotifications($LoggedUser['ID']);
 foreach ($notifications as $type => $n) {
 ?>
     <span class="noty-notification" style="display: none;" data-noty-type="<?= $type ?>" data-noty-id="<?= $n['id'] ?>" data-noty-importance="<?= $n['importance'] ?>" data-noty-url="<?= $n['url'] ?>"><?= $n['message'] ?></span>

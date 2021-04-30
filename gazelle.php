@@ -5,28 +5,14 @@ if (PHP_VERSION_ID < 70300) {
 }
 date_default_timezone_set('UTC');
 
-$Redirects = [
-    'browse'  => 'torrents.php',
-    'collage' => 'collages.php',
-    'signup'  => 'register.php',
-    'whitelist' => 'rules.php?p=clients',
-    'forum' => 'forums.php',
-    'randomcollage' => 'random.php?action=collage'
-];
-
 $PathInfo = pathinfo($_SERVER['SCRIPT_NAME']);
 $Document = $PathInfo['filename'];
+
 if ($PathInfo['dirname'] !== '/') {
-    header("Location: /index.php");
-}
-elseif (isset($Redirects[$Document])) {
-    $Seperator = (strpos($Redirects[$Document], "?") === false) ? "?" : "&";
-    $Rest = (!empty($_SERVER['QUERY_STRING'])) ? $Seperator.$_SERVER['QUERY_STRING'] : "";
-    header("Location: {$Redirects[$Document]}{$Rest}");
-}
-elseif (in_array($Document, ['announce', 'scrape'])) {
-    echo "d14:failure reason40:Invalid .torrent, try downloading again.e";
-    die();
+    var_dump($PathInfo);
+    die(); header("Location: /index.php");
+} elseif (in_array($Document, ['announce', 'scrape'])) {
+    die("d14:failure reason40:Invalid .torrent, try downloading again.e");
 }
 
 $Valid = false;
@@ -93,4 +79,4 @@ if (!$Valid) {
     $_SERVER['SCRIPT_FILENAME'] = 'error.php';
     $Error = 404;
 }
-require_once(__DIR__.'/classes/script_start.php');
+require_once('classes/script_start.php');

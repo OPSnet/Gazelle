@@ -212,8 +212,6 @@ class Text {
      * @return string
      */
     public static function full_format($Str, $OutputTOC = true, $Min = 3, $Rules = false) {
-        $Debug = new \Gazelle\Debug;
-        $Debug->set_flag('BBCode start');
         $Str = display_str($Str);
         self::$Headlines = [];
 
@@ -241,8 +239,6 @@ class Text {
         if (self::$TOC && $OutputTOC) {
             $HTML = self::parse_toc($Min) . $HTML;
         }
-
-        $Debug->set_flag('BBCode end');
         return $HTML;
     }
 
@@ -315,9 +311,10 @@ class Text {
         }
         parse_str($info['query'] ?? '', $args);
         $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
+        global $Cache, $DB, $LoggedUser;
         switch ($info['path']) {
             case '/artist.php':
-                $name = G::$DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
+                $name = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
                     $args['id'] ?? 0);
                 return $name
                     ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name)
@@ -340,12 +337,12 @@ class Text {
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
-                    $GroupID = G::$DB->scalar('
+                    $GroupID = $DB->scalar('
                         SELECT tg.ID FROM torrents_group tg INNER JOIN torrents t ON (t.GroupID = tg.ID) WHERE t.ID = ?
                         ', (int)$args['torrentid']
                     );
                 } else {
-                    $GroupID = G::$DB->scalar('
+                    $GroupID = $DB->scalar('
                         SELECT ID FROM torrents_group WHERE ID = ?
                         ', $args['id'] ?? 0
                     );
@@ -959,7 +956,7 @@ class Text {
                     $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
                     break;
                 case 'mature':
-                    if (G::$LoggedUser['EnableMatureContent']) {
+                    if ($LoggedUser['EnableMatureContent']) {
                         if (!empty($Block['Attr'])) {
                             $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
                             $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
@@ -969,7 +966,7 @@ class Text {
                         }
                     }
                     else {
-                        $Str .= '<span class="mature_blocked" style="font-style: italic;"><a href="wiki.php?action=article&amp;id=1063">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href="user.php?action=edit&amp;userid=' . G::$LoggedUser['ID'] . '">settings</a>.</span>';
+                        $Str .= '<span class="mature_blocked" style="font-style: italic;"><a href="wiki.php?action=article&amp;id=1063">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href="user.php?action=edit&amp;userid=' . $LoggedUser['ID'] . '">settings</a>.</span>';
                     }
                     break;
                 case 'img':
@@ -1144,14 +1141,15 @@ class Text {
                 $username = $match[1];
                 static $cache;
                 if (!isset($cache[$username])) {
-                    $cache[$username] = G::$DB->scalar("
+                    global $DB;
+                    $cache[$username] = $DB->scalar("
                         SELECT ID FROM users_main WHERE Username = ?
                         ", $username
                     );
                     if (is_null($cache[$username]) && preg_match('/^(.*)[.?]+$/', $username, $match)) {
                         // strip off trailing dots to see if we can match @Spine...
                         $username = $match[1];
-                        $cache[$username] = G::$DB->scalar("
+                        $cache[$username] = $DB->scalar("
                             SELECT ID FROM users_main WHERE Username = ?
                             ", $username
                         );
@@ -1166,7 +1164,8 @@ class Text {
     }
 
     private static function smileys($Str) {
-        if (!empty(G::$LoggedUser['DisableSmileys'])) {
+        global $LoggedUser;
+        if (!empty($LoggedUser['DisableSmileys'])) {
             return $Str;
         }
         if (count(self::$ProcessedSmileys) == 0 && count(self::$Smileys) > 0) {
@@ -1382,15 +1381,16 @@ class Text {
 
     protected static function bbcodeForumUrl($val) {
         $cacheKey = 'bbcode_forum_' . $val;
-        [$id, $name] = G::$Cache->get_value($cacheKey);
+        global $Cache, $DB, $LoggedUser;
+        [$id, $name] = $Cache->get_value($cacheKey);
         if (is_null($id)) {
             [$id, $name] = (int)$val > 0
-                ? G::$DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
-                : G::$DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
-            G::$Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
+                ? $DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
+                : $DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
+            $Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
         }
         if (!self::$viewer) {
-            self::$viewer = new Gazelle\User(G::$LoggedUser['ID']);
+            self::$viewer = new Gazelle\User($LoggedUser['ID']);
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($id))) {
             $name = 'restricted';
@@ -1406,15 +1406,16 @@ class Text {
         }
 
         $cacheKey = 'bbcode_thread_' . $thread;
-        [$id, $name, $isLocked, $forumId] = G::$Cache->get_value($cacheKey);
+        global $Cache, $DB, $LoggedUser;
+        [$id, $name, $isLocked, $forumId] = $Cache->get_value($cacheKey);
         if (is_null($forumId)) {
             if ($thread) {
-                [$id, $name, $isLocked, $forumId] = G::$DB->row('
+                [$id, $name, $isLocked, $forumId] = $DB->row('
                     SELECT ft.ID, ft.Title, ft.IsLocked, ft.ForumID FROM forums_topics ft WHERE ft.ID = ?
                     ', $thread
                 );
             } else {
-                [$id, $name, $isLocked, $forumId] = G::$DB->row('
+                [$id, $name, $isLocked, $forumId] = $DB->row('
                     SELECT ft.ID, ft.Title, ft.IsLocked, ft.ForumID
                     FROM forums_topics ft
                     INNER JOIN forums_posts fp ON (fp.TopicID = ft.ID)
@@ -1422,10 +1423,10 @@ class Text {
                     ', $post
                 );
             }
-            G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked, $forumId], 86400 + rand(1, 3600));
+            $Cache->cache_value($cacheKey, [$id, $name, $isLocked, $forumId], 86400 + rand(1, 3600));
         }
         if (!self::$viewer) {
-            self::$viewer = new Gazelle\User(G::$LoggedUser['ID']);
+            self::$viewer = new Gazelle\User($LoggedUser['ID']);
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($forumId))) {
             return sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, 'restricted');

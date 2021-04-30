@@ -220,10 +220,10 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     $artists = Artists::get_artists($groupIds);
 
     $bookmark = new \Gazelle\Bookmark;
-    $Debug = new \Gazelle\Debug;
     foreach ($details as $index => $detail) {
         [$torrentID, $groupID, $data] = $detail;
         $group = $groups[$groupID];
+        global $Debug;
         $Debug->log_var($group, $groupID);
 
         $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);

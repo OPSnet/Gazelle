@@ -19,12 +19,13 @@ class Users {
      *    int     EffectiveClass - the highest level of their main and secondary classes
      */
     public static function user_info($UserID) {
-        $UserInfo = G::$Cache->get_value("user_info_$UserID");
+        global $Cache, $DB;
+        $UserInfo = $Cache->get_value("user_info_$UserID");
         // the !isset($UserInfo['Paranoia']) can be removed after a transition period
         if (empty($UserInfo) || empty($UserInfo['ID']) || !isset($UserInfo['Paranoia']) || empty($UserInfo['Class'])) {
-            $OldQueryID = G::$DB->get_query_id();
+            $OldQueryID = $DB->get_query_id();
 
-            G::$DB->prepared_query("
+            $DB->prepared_query("
                 SELECT
                     m.ID,
                     m.Username,
@@ -51,7 +52,7 @@ class Users {
             );
 
             $Classes = (new \Gazelle\Manager\User)->classList();
-            if (!G::$DB->has_results()) { // Deleted user, maybe?
+            if (!$DB->has_results()) { // Deleted user, maybe?
                 $UserInfo = [
                         'ID' => $UserID,
                         'Username' => '',
@@ -66,7 +67,7 @@ class Users {
                         'Levels' => '',
                         'Class' => 0];
             } else {
-                $UserInfo = G::$DB->next_record(MYSQLI_ASSOC, ['Paranoia', 'Title']);
+                $UserInfo = $DB->next_record(MYSQLI_ASSOC, ['Paranoia', 'Title']);
                 $UserInfo['Paranoia'] = unserialize_array($UserInfo['Paranoia']);
                 if ($UserInfo['Paranoia'] === false) {
                     $UserInfo['Paranoia'] = [];
@@ -90,12 +91,12 @@ class Users {
             }
             $UserInfo['EffectiveClass'] = $EffectiveClass;
 
-            G::$Cache->cache_value("user_info_$UserID", $UserInfo, 2592000);
-            G::$DB->set_query_id($OldQueryID);
+            $Cache->cache_value("user_info_$UserID", $UserInfo, 2592000);
+            $DB->set_query_id($OldQueryID);
         }
         if (strtotime($UserInfo['Warned']) < time()) {
             $UserInfo['Warned'] = null;
-            G::$Cache->cache_value("user_info_$UserID", $UserInfo, 2592000);
+            $Cache->cache_value("user_info_$UserID", $UserInfo, 2592000);
         }
 
         return $UserInfo;
@@ -111,11 +112,12 @@ class Users {
      */
     public static function user_heavy_info($UserID) {
 
-        $HeavyInfo = G::$Cache->get_value("user_info_heavy_$UserID");
+        global $Cache, $DB;
+        $HeavyInfo = $Cache->get_value("user_info_heavy_$UserID");
         if (empty($HeavyInfo)) {
 
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->prepared_query('
+            $QueryID = $DB->get_query_id();
+            $DB->prepared_query('
                 SELECT
                     m.Invites,
                     m.torrent_pass,
@@ -157,7 +159,7 @@ class Users {
                 WHERE m.ID = ?
                 ', 'no-fl-gifts', $UserID
             );
-            $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, ['CustomPermissions', 'SiteOptions']);
+            $HeavyInfo = $DB->next_record(MYSQLI_ASSOC, ['CustomPermissions', 'SiteOptions']);
             if ($HeavyInfo['RatioWatchEnds'] == '') {
                 $HeavyInfo['RatioWatchEnds'] = null;
             }
@@ -183,11 +185,11 @@ class Users {
             }
             $HeavyInfo['NavItems'] = $NavItems;
 
-            G::$DB->query("
+            $DB->query("
                 SELECT PermissionID
                 FROM users_levels
                 WHERE UserID = $UserID");
-            $PermIDs = G::$DB->collect('PermissionID');
+            $PermIDs = $DB->collect('PermissionID');
             foreach ($PermIDs AS $PermID) {
                 $Perms = Permissions::get_permissions($PermID);
                 if (!empty($Perms['PermittedForums'])) {
@@ -221,9 +223,9 @@ class Users {
 
             unset($HeavyInfo['SiteOptions']);
 
-            G::$DB->set_query_id($QueryID);
+            $DB->set_query_id($QueryID);
 
-            G::$Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
+            $Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
         }
         return $HeavyInfo;
     }
@@ -247,15 +249,16 @@ class Users {
     }
 
     public static function get_nav_items() {
-        $Items = G::$Cache->get_value("nav_items");
+        global $Cache, $DB;
+        $Items = $Cache->get_value("nav_items");
         if (!$Items) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->prepared_query("
+            $QueryID = $DB->get_query_id();
+            $DB->prepared_query("
                 SELECT id, tag, title, target, tests, test_user, mandatory, initial
                 FROM nav_items");
-            $Items = G::$DB->to_array("id", MYSQLI_ASSOC);
-            G::$Cache->cache_value("nav_items", $Items, 0);
-            G::$DB->set_query_id($QueryID);
+            $Items = $DB->to_array("id", MYSQLI_ASSOC);
+            $Cache->cache_value("nav_items", $Items, 0);
+            $DB->set_query_id($QueryID);
         }
         return $Items;
     }
@@ -285,14 +288,15 @@ class Users {
             return false;
         }
 
-        $QueryID = G::$DB->get_query_id();
+        global $Cache, $DB;
+        $QueryID = $DB->get_query_id();
 
         // Get SiteOptions
-        G::$DB->query("
+        $DB->query("
             SELECT SiteOptions
             FROM users_info
             WHERE UserID = $UserID");
-        list($SiteOptions) = G::$DB->next_record(MYSQLI_NUM, false);
+        list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
         $SiteOptions = unserialize_array($SiteOptions);
         $SiteOptions = array_merge(static::default_site_options(), $SiteOptions);
 
@@ -304,21 +308,22 @@ class Users {
         $HeavyInfo = array_merge($HeavyInfo, $NewOptions);
 
         // Update DB
-        G::$DB->prepared_query('
+        $DB->prepared_query('
             UPDATE users_info
             SET SiteOptions = ?
             WHERE UserID = ?
             ', $UserID, serialize($SiteOptions)
         );
-        G::$DB->set_query_id($QueryID);
+        $DB->set_query_id($QueryID);
 
         // Update cache
-        G::$Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
+        $Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
 
-        // Update G::$LoggedUser if the options are changed for the current
-        if (G::$LoggedUser['ID'] == $UserID) {
-            G::$LoggedUser = array_merge(G::$LoggedUser, $NewOptions);
-            G::$LoggedUser['ID'] = $UserID; // We don't want to allow userid switching
+        // Update global $LoggedUser if the options are changed for the current
+        global $LoggedUser;
+        if ($LoggedUser['ID'] == $UserID) {
+            $LoggedUser = array_merge($LoggedUser, $NewOptions);
+            $LoggedUser['ID'] = $UserID; // We don't want to allow userid switching
         }
         return true;
     }
@@ -352,7 +357,8 @@ class Users {
             // Don't override paranoia for mods who don't want to show their donor heart
             $OverrideParanoia = false;
         }
-        $ShowDonorIcon = $OverrideParanoia || $user->propertyVisible($userMan->findById(G::$LoggedUser['ID']), 'hide_donor_heart');
+        global $LoggedUser;
+        $ShowDonorIcon = $OverrideParanoia || $user->propertyVisible($userMan->findById($LoggedUser['ID']), 'hide_donor_heart');
 
         $Username = $user->username();
         if ($IsDonorForum) {
@@ -401,7 +407,7 @@ class Users {
 
         $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
             . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
-            . (G::$LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
+            . ($LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
             . '" class="tooltip" /></a>' : '';
         $Str .= ($IsEnabled && $user->isDisabled())
             ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>'

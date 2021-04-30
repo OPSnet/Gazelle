@@ -11,6 +11,9 @@ class Debug {
     protected const MAX_ERRORS = 0; //Maxmimum errors, warnings, notices we will allow in a page
     protected const MAX_MEMORY = 80 * 1024 * 1024; //Maximum memory used per pageload
 
+    protected static $cache;
+    protected static $db;
+
     protected static $Errors = [];
     protected static $Flags = [];
     protected static $Perf = [];
@@ -19,11 +22,13 @@ class Debug {
     protected static $startTime;
     protected static $cpuTime = false;
 
-    public function __construct() {
+    public function __construct(\CACHE $cache, \DB_MYSQL $db) {
         if (self::$cpuTime === false) {
             $r = getrusage();
             self::$cpuTime = $r['ru_utime.tv_sec'] * 1000000 + $r['ru_utime.tv_usec'];
         }
+        self::$cache =& $cache;
+        self::$db    =& $db;
     }
 
     public function handle_errors() {
@@ -62,17 +67,18 @@ class Debug {
             $Reason[] = \Format::get_size($Ram).' RAM used';
         }
 
-        \G::$DB->warnings(); // see comment in MYSQL::query
+        self::$db->warnings(); // see comment in MYSQL::query
 
-        $CacheStatus = \G::$Cache->server_status();
-        if (in_array(0, $CacheStatus) && !\G::$Cache->get_value('cache_fail_reported')) {
+        $CacheStatus = self::$cache->server_status();
+        if (in_array(0, $CacheStatus) && !self::$cache->get_value('cache_fail_reported')) {
             // Limit to max one report every 15 minutes to avoid massive debug spam
-            \G::$Cache->cache_value('cache_fail_reported', true, 900);
+            self::$cache->cache_value('cache_fail_reported', true, 900);
             $Reason[] = "Cache server error";
         }
 
         if (isset($_REQUEST['profile'])) {
-            $Reason[] = 'Requested by ' . \G::$LoggedUser['Username'];
+            global $LoggedUser;
+            $Reason[] = 'Requested by ' . $LoggedUser['Username'];
         }
 
         if (isset($Reason[0])) {
@@ -97,7 +103,7 @@ class Debug {
         }
         $info =
         $Identifier = randomString(5);
-        \G::$Cache->cache_value(
+        self::$cache->cache_value(
             'analysis_'.$Identifier, [
                 'URI'      => isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
                 'message'  => $Report,
@@ -111,9 +117,9 @@ class Debug {
                 'searches'      => class_exists('Sphinxql') ? \Sphinxql::$Queries : [],
                 'searches_time' => class_exists('Sphinxql') ? \Sphinxql::$Time : 0.0,
                 'queries'       => $this->get_queries(),
-                'queries_time'  => \G::$DB->Time,
+                'queries_time'  => self::$db->Time,
                 'cache'         => $this->get_cache_keys(),
-                'cache_time'    => \G::$Cache->Time,
+                'cache_time'    => self::$cache->Time,
             ],
             $Time
         );
@@ -235,9 +241,9 @@ class Debug {
 
     public function get_cache_keys() {
         $list = [];
-        $keys = array_keys(\G::$Cache->CacheHits);
+        $keys = array_keys(self::$cache->CacheHits);
         foreach ($keys as $key) {
-            $list[$key] = print_r(\G::$Cache->get_value($key, true), true);
+            $list[$key] = print_r(self::$cache->get_value($key, true), true);
         }
         ksort($list, SORT_NATURAL);
         return $list;
@@ -313,7 +319,7 @@ class Debug {
 
     public function get_queries() {
         $list = [];
-        foreach (\G::$DB->Queries as $q) {
+        foreach (self::$db->Queries as $q) {
             $q[0] = str_replace("\t", '&nbsp;', nl2br(display_str(trim($q[0]))));
             $list[] = $q;
         }

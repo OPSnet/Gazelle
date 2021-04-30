@@ -25,11 +25,12 @@ class TorrentsDL {
      * @param string $Title name of the collection that will be created
      */
     public function __construct(&$QueryResult, $Title) {
-        G::$Cache->InternalCache = false; // The internal cache is almost completely useless for this
+        global $Cache, $LoggedUser;
+        $Cache->InternalCache = false; // The internal cache is almost completely useless for this
         $this->QueryResult = $QueryResult;
         $this->Title = $Title;
-        $this->User = G::$LoggedUser;
-        $this->AnnounceURL = (new \Gazelle\User(G::$LoggedUser['ID']))->announceUrl();
+        $this->User = $LoggedUser;
+        $this->AnnounceURL = (new \Gazelle\User($LoggedUser['ID']))->announceUrl();
         $options = new ZipStream\Option\Archive;
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false); // for macOS compatibility
@@ -55,17 +56,18 @@ class TorrentsDL {
      */
     public function get_downloads($Key) {
         $GroupIDs = $Downloads = [];
-        $OldQuery = G::$DB->get_query_id();
-        G::$DB->set_query_id($this->QueryResult);
+        global $Cache, $DB;
+        $OldQuery = $DB->get_query_id();
+        $DB->set_query_id($this->QueryResult);
         if (!isset($this->IDBoundaries)) {
             if ($Key == 'TorrentID') {
                 $this->IDBoundaries = false;
             } else {
-                $this->IDBoundaries = G::$DB->to_pair($Key, 'TorrentID', false);
+                $this->IDBoundaries = $DB->to_pair($Key, 'TorrentID', false);
             }
         }
         $Found = 0;
-        while ($Download = G::$DB->next_record(MYSQLI_ASSOC, false)) {
+        while ($Download = $DB->next_record(MYSQLI_ASSOC, false)) {
             if (!$this->IDBoundaries || $Download['TorrentID'] == $this->IDBoundaries[$Download[$Key]]) {
                 $Found++;
                 $Downloads[$Download[$Key]] = $Download;
@@ -76,7 +78,7 @@ class TorrentsDL {
             }
         }
         $this->NumFound += $Found;
-        G::$DB->set_query_id($OldQuery);
+        $DB->set_query_id($OldQuery);
         if (empty($Downloads)) {
             return false;
         }
@@ -138,7 +140,6 @@ class TorrentsDL {
      * @return string summary text
      */
     public function summary($FilterStats) {
-        $debug = new \Gazelle\Debug;
         $Time = number_format(1000 * (microtime(true) - $debug->startTime()), 2)." ms";
         $Used = Format::get_size(memory_get_usage(true));
         $Date = date("M d Y, H:i");

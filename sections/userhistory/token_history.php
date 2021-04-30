@@ -7,7 +7,7 @@ if (!isset($_GET['userid'])) {
     if (!$userId) {
         error(0);
     }
-    if ($userId !== G::$LoggedUser['ID'] && !check_perms('admin_fl_history')) {
+    if ($userId !== $LoggedUser['ID'] && !check_perms('admin_fl_history')) {
         error(403);
     }
 }

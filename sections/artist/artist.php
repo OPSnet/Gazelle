@@ -379,7 +379,7 @@ if ($sections = $Artist->sections()) {
                             </span>
 <?php
         }
-        if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
+        if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
                             <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
