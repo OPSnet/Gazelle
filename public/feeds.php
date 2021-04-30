@@ -16,7 +16,10 @@ require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE;
-$DB = new DB_MYSQL;
+$DB    = new DB_MYSQL;
+$Twig  = Gazelle\Util\Twig::factory();
+Gazelle\Base::initialize($Cache, $DB, $Twig);
+
 $Feed = new Feed;
 
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
