@@ -123,7 +123,7 @@ class InviteTree extends Base {
         );
     }
 
-    function render(\Twig\Environment $twig): string {
+    function details(): array {
         $qid = $this->db->get_query_id();
         [$treeId, $position, $level] = $this->db->row("
             SELECT TreeID, TreePosition, TreeLevel
@@ -138,7 +138,7 @@ class InviteTree extends Base {
         $maxLevel   = $level; // The deepest level (this changes)
         $startLevel = $level; // The level of the user we're viewing
         $prevLevel  = $level;
-        $stats = [
+        $info = [
             'total'          => 0,
             'branch'         => 0,
             'disabled'       => 0,
@@ -199,17 +199,17 @@ class InviteTree extends Base {
         while ([$inviteeId, $enabled, $permissionId, $donor, $uploaded, $downloaded, $paranoia, $position, $level]
             = $this->db->next_record(MYSQLI_NUM, false)
         ) {
-            $stats['total']++;
+            $info['total']++;
             if ($enabled == 2) {
-                $stats['disabled']++;
+                $info['disabled']++;
             }
             if ($donor) {
-                $stats['donor']++;
+                $info['donor']++;
             }
             if ($level == $startLevel + 1) {
-                $stats['branch']++;
-                $stats['upload_top'] += $uploaded;
-                $stats['download_top'] += $downloaded;
+                $info['branch']++;
+                $info['upload_top'] += $uploaded;
+                $info['download_top'] += $downloaded;
             }
             if (!isset($classSummary[$permissionId])) {
                 $classSummary[$permissionId] = 0;
@@ -229,15 +229,15 @@ class InviteTree extends Base {
 
             if (!check_paranoia(['uploaded', 'downloaded'], $paranoia, $Classes[$permissionId]['Level'])) {
                 $markup .= "&nbsp;Hidden";
-                $stats['paranoid']++;
+                $info['paranoid']++;
             } else {
                 $markup .= sprintf(" Uploaded:&nbsp;<strong>%s</strong> Downloaded:&nbsp;<strong>%s</strong> Ratio:&nbsp;<strong>%s</strong>",
                     \Format::get_size($uploaded),
                     \Format::get_size($downloaded),
                     \Format::get_ratio_html($uploaded, $downloaded)
                 );
-                $stats['upload_total'] += $uploaded;
-                $stats['download_total'] += $downloaded;
+                $info['upload_total'] += $uploaded;
+                $info['download_total'] += $downloaded;
             }
 
             if ($maxLevel < $level) {
@@ -248,28 +248,26 @@ class InviteTree extends Base {
             $this->db->set_query_id($treeQ);
         }
 
-        $markup .= str_repeat("</li>\n</ul>\n", $prevLevel - $startLevel);
-        if (!$stats['total']) {
-            $summary = '';
+        if (!$info['total']) {
+            $details = [];
         } else {
+            $markup .= str_repeat("</li>\n</ul>\n", $prevLevel - $startLevel);
             $className = [];
             foreach ($classSummary as $id => $count) {
                 $name = $userMan->userclassName($id);
                 if ($count > 1) {
                     $name = ($name == 'Torrent Celebrity') ? 'Torrent Celebrities' : "{$name}s";
                 }
-                $className[] = "$count $name (" . number_format(($count / $stats['total']) * 100) . '%)';
+                $className[] = "$count $name (" . number_format(($count / $info['total']) * 100) . '%)';
             }
-            $summary = $twig->render('user/invite-tree.twig', [
+            $details = [
                 'classes'     => $className,
                 'depth'       => $maxLevel - $startLevel,
-                'pc_disabled' => $stats['disabled'] / $stats['total'] * 100,
-                'pc_donor'    => $stats['donor']    / $stats['total'] * 100,
-                'pc_paranoid' => $stats['paranoid'] / $stats['total'] * 100,
-                'stats'       => $stats,
-            ]);
+                'info'        => $info,
+                'markup'      => $markup,
+            ];
         }
-        return '<div class="invitetree pad">' . $summary . $markup . '</div>';
         $this->db->set_query_id($qid);
+        return $details;
     }
 }
