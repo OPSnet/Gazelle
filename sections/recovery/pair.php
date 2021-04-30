@@ -33,7 +33,7 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
                     $Result = "Security checksum failed";
                 }
                 else {
-                    $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, G::$LoggedUser['Username'], $DB)
+                    $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, $LoggedUser['Username'], $DB)
                         ? \Users::format_username($curr_id) . " has been successfully mapped to previous user " .$Confirm['Username'] . "."
                         : "DB Error: could not map $curr_id to $prev_id"
                         ;

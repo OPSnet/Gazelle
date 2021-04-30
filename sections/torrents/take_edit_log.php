@@ -21,7 +21,7 @@ if (!$GroupID) {
 $Adjusted = isset($_POST['adjusted']) ? '1' : '0';
 $AdjustedScore = 100;
 $AdjustedChecksum = isset($_POST['adjusted_checksum']) ? '1' : '0';
-$AdjustedBy = G::$LoggedUser['ID'];
+$AdjustedBy = $LoggedUser['ID'];
 $AdjustmentReason = $_POST['adjustment_reason'];
 $AdjustmentDetails = [];
 

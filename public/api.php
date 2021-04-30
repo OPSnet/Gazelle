@@ -21,19 +21,13 @@ require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE;
-$DB = new DB_MYSQL;
-$Debug = new Gazelle\Debug;
-$Debug->setStartTime($now);
-$Twig = new Environment(
-    new FilesystemLoader(__DIR__.'/../templates'),
-    [
-        'debug' => DEBUG_MODE,
-        'cache' => __DIR__.'/../cache/twig'
-    ]
-);
-$Debug->handle_errors();
+$DB    = new DB_MYSQL;
+$Twig  = Gazelle\Util\Twig::factory();
+Gazelle\Base::initialize($Cache, $DB, $Twig);
 
-G::initialize();
+$Debug = new Gazelle\Debug($Cache, $DB);
+$Debug->setStartTime($now);
+$Debug->handle_errors();
 
 header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');

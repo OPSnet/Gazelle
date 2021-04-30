@@ -40,213 +40,15 @@ else if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
 
 ob_start(); //Start a buffer, mainly in case there is a mysql error
 
-$Debug = new Gazelle\Debug;
+$Cache = new CACHE;
+$DB    = new DB_MYSQL;
+$Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->setStartTime($now)
     ->handle_errors()
     ->set_flag('init');
 
-$DB = new DB_MYSQL;
-G::$DB = $DB;
-
-$Cache = new CACHE;
-G::$Cache = $Cache;
-
-$Twig = new Twig\Environment(
-    new Twig\Loader\FilesystemLoader(__DIR__ . '/../templates'), [
-        'debug' => DEBUG_MODE,
-        'cache' => __DIR__ . '/../cache/twig'
-]);
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'article',
-    function ($word) {
-        return preg_match('/^[aeiou]/i', $word) ? 'an' : 'a';
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'b64',
-    function (string $binary) {
-        return base64_encode($binary);
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'bb_format',
-    function ($text) {
-        return new Twig\Markup(\Text::full_format($text), 'UTF-8');
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'checked',
-    function ($isChecked) {
-        return $isChecked ? ' checked="checked"' : '';
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'image',
-    function ($i) {
-        return new Twig\Markup(\ImageTools::process($i, true), 'UTF-8');
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'ipaddr',
-    function ($ipaddr) {
-        return new Twig\Markup(\Tools::display_ip($ipaddr), 'UTF-8');
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'octet_size',
-    function ($size, array $option = []) {
-        return \Format::get_size($size, empty($option) ? 2 : $option[0]);
-    },
-    ['is_variadic' => true]
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'plural',
-    function ($number) {
-        return plural($number);
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'selected',
-    function ($isSelected) {
-        return $isSelected ? ' selected="selected"' : '';
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'shorten',
-    function (string $text, int $length) {
-        return shortenString($text, $length);
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'time_diff',
-    function ($time) {
-        return new Twig\Markup(time_diff($time), 'UTF-8');
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'ucfirst',
-    function ($text) {
-        return ucfirst($text);
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'ucfirstall',
-    function ($text) {
-        return implode(' ', array_map(function ($w) {return ucfirst($w);}, explode(' ', $text)));
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'user_url',
-    function ($userId) {
-        return new Twig\Markup(Users::format_username($userId, false, false, false), 'UTF-8');
-    }
-));
-
-$Twig->addFilter(new Twig\TwigFilter(
-    'user_full',
-    function ($userId) {
-        return new Twig\Markup(\Users::format_username($userId, true, true, true, true), 'UTF-8');
-    }
-));
-
-$Twig->addFunction(new Twig\TwigFunction('donor_icon', function($icon, $userId) {
-    return new Twig\Markup(
-        \ImageTools::process($icon, false, 'donoricon', $userId),
-        'UTF-8'
-    );
-}));
-
-$Twig->addFunction(new Twig\TwigFunction('privilege', function ($default, $config, $key) {
-    return new Twig\Markup(
-        ($default
-            ? sprintf(
-                '<input id="%s" type="checkbox" disabled="disabled"%s />&nbsp;',
-                "default_$key", (isset($default[$key]) && $default[$key] ? ' checked="checked"' : '')
-            )
-            : ''
-        )
-        . sprintf(
-            '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s">%s</label><br />',
-            "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key, $key,
-            \Permissions::list()[$key] ?? "!unknown($key)!"
-        ),
-        'UTF-8'
-    );
-}));
-
-$Twig->addFunction(new Twig\TwigFunction('ratio', function ($up, $down) {
-    return new Twig\Markup(
-        \Format::get_ratio_html($up, $down),
-        'UTF-8'
-    );
-}));
-
-$Twig->addFunction(new Twig\TwigFunction('resolveCountryIpv4', function ($addr) {
-    return new Twig\Markup(
-        (function ($ip) {
-            static $cache = [];
-            if (!isset($cache[$ip])) {
-                $Class = strtr($ip, '.', '-');
-                $cache[$ip] = '<span class="cc_'.$Class.'">Resolving CC...'
-                    . '<script type="text/javascript">'
-                        . '$(document).ready(function() {'
-                            . '$.get(\'tools.php?action=get_cc&ip='.$ip.'\', function(cc) {'
-                                . '$(\'.cc_'.$Class.'\').html(cc);'
-                            . '});'
-                        . '});'
-                    . '</script></span>';
-            }
-            return $cache[$ip];
-        })($addr),
-        'UTF-8'
-    );
-}));
-
-$Twig->addFunction(new Twig\TwigFunction('resolveIpv4', function ($addr) {
-    return new Twig\Markup(
-        (function ($ip) {
-            if (!$ip) {
-                $ip = '127.0.0.1';
-            }
-            static $cache = [];
-            if (!isset($cache[$ip])) {
-                $class = strtr($ip, '.', '-');
-                $cache[$ip] = '<span class="host_' . $class
-                    . '">Resolving host' . "\xE2\x80\xA6" . '<script type="text/javascript">$(document).ready(function() {'
-                    .  "\$.get('tools.php?action=get_host&ip=$ip', function(host) {\$('.host_$class').html(host)})})</script></span>";
-            }
-            return $cache[$ip];
-        })($addr),
-        'UTF-8'
-    );
-}));
-
-$Twig->addFunction(new Twig\TwigFunction('shorten', function ($text, $length) {
-    return new Twig\Markup(
-        shortenString($text, $length),
-        'UTF-8'
-    );
-}));
-
-$Twig->addTest(
-    new \Twig\TwigTest('numeric', function ($value) {
-        return is_numeric($value);
-    })
-);
+$Twig = Gazelle\Util\Twig::factory();
+Gazelle\Base::initialize($Cache, $DB, $Twig);
 
 //-- Load user information
 // User info is broken up into many sections
@@ -364,7 +166,6 @@ if ($user) {
 
     $HeavyInfo = Users::user_heavy_info($LoggedUser['ID']);
     $LoggedUser = array_merge($HeavyInfo, $LightInfo, $user->activityStats());
-    G::$LoggedUser =& $LoggedUser;
 
     // No conditions will force a logout from this point, can hit the DB more.
     // Complete the $LoggedUser array
@@ -413,11 +214,11 @@ if (DEBUG_MODE || check_perms('site_debug')) {
 }
 
 function enforce_login() {
-    if (!G::$LoggedUser) {
+    global $LoggedUser, $FullToken, $Document, $SessionID;
+    if (!isset($LoggedUser['ID'])) {
         header('Location: login.php');
         exit;
     }
-    global $SessionID, $FullToken, $Document;
     if (!$SessionID && ($Document !== 'ajax' || empty($FullToken))) {
         setcookie('redirect', $_SERVER['REQUEST_URI'], [
             'expires'  => time() + 60 * 30,
@@ -426,7 +227,7 @@ function enforce_login() {
             'httponly' => DEBUG_MODE,
             'samesite' => 'Lax',
         ]);
-        (new Gazelle\User(G::$LoggedUser['ID']))->logout();
+        (new Gazelle\User($LoggedUser['ID']))->logout();
     }
 }
 
@@ -438,8 +239,9 @@ function enforce_login() {
  * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
  */
 function authorize($Ajax = false) {
-    if (empty($_REQUEST['auth']) || $_REQUEST['auth'] != G::$LoggedUser['AuthKey']) {
-        Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+    global $LoggedUser;
+    if (empty($_REQUEST['auth']) || $_REQUEST['auth'] != $LoggedUser['AuthKey']) {
+        Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
         error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
         return false;
     }
@@ -467,12 +269,12 @@ $Cache->cache_value('php_' . getmypid(),
     ], 600
 );
 
-G::$Router = new Gazelle\Router($LoggedUser['AuthKey'] ?? '');
+$Router = new Gazelle\Router($LoggedUser['AuthKey'] ?? '');
 if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
     require_once(__DIR__ . '/../sections/locked/index.php');
 }
 else {
-    $file = __DIR__ . '/../sections/' . $Document . '/index.php';
+    $file = realpath(__DIR__ . '/../sections/' . $Document . '/index.php');
     if (!file_exists($file)) {
         error(404);
     } else {
@@ -494,11 +296,11 @@ else {
     }
 }
 
-if (G::$Router->hasRoutes()) {
+if ($Router->hasRoutes()) {
     $action = $_REQUEST['action'] ?? '';
     try {
         /** @noinspection PhpIncludeInspection */
-        require_once(G::$Router->getRoute($action));
+        require_once($Router->getRoute($action));
     }
     catch (Gazelle\Exception\RouterException $exception) {
         error(404);

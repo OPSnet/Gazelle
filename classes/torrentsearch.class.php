@@ -206,8 +206,8 @@ class TorrentSearch {
                 || !$GroupResults && !isset(self::$SortOrders[$OrderBy])
                 || !in_array($OrderWay, ['asc', 'desc'])
         ) {
-            $Debug = new \Gazelle\Debug;
             $ErrMsg = "TorrentSearch constructor arguments:\n" . print_r(func_get_args(), true);
+            global $Debug;
             $Debug->analysis('Bad arguments in TorrentSearch constructor', $ErrMsg, 3600*24);
             error('-1');
         }

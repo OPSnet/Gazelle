@@ -1,7 +1,7 @@
 <?php
 enforce_login();
 
-if (G::$LoggedUser['DisablePoints']) {
+if ($LoggedUser['DisablePoints']) {
     error('Your points have been disabled.');
 }
 
@@ -16,8 +16,8 @@ switch ($_GET['action'] ?? '') {
             $Label = $_REQUEST['label'];
             $Item = $Bonus->getItem($Label);
             if ($Item) {
-                $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['ID']);
-                if ($Price > G::$LoggedUser['BonusPoints']) {
+                $Price = $Bonus->getEffectivePrice($Label, $LoggedUser['ID']);
+                if ($Price > $LoggedUser['BonusPoints']) {
                     error('You cannot afford this item.');
                 }
                 switch($Label)  {

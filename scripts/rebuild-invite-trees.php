@@ -4,14 +4,11 @@ require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
-$Debug = new Gazelle\Debug;
-$Debug->handle_errors();
-
-$DB = new DB_MYSQL;
 $Cache = new CACHE;
-
-G::$Cache = $Cache;
-G::$DB = $DB;
+$DB    = new DB_MYSQL;
+Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
+$Debug = new Gazelle\Debug($Cache, $DB);
+$Debug->handle_errors();
 
 $DB->prepared_query("
     DELETE FROM invite_tree

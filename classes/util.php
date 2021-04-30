@@ -276,8 +276,7 @@ function add_json_info($Json) {
         ]);
     }
     if (!isset($Json['debug']) && check_perms('site_debug')) {
-        /** @var Gazelle\Debug $Debug */
-        $Debug = new Gazelle\Debug;
+        global $Debug;
         $info = ['debug' => ['queries' => $Debug->get_queries()]];
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
             $info['searches'] = \Sphinxql::$Queries;
@@ -630,7 +629,8 @@ function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
         }
         return $all;
     } else {
-        if (($UserID !== false) && (G::$LoggedUser['ID'] == $UserID)) {
+        global $LoggedUser;
+        if (($UserID !== false) && ($LoggedUser['ID'] == $UserID)) {
             return PARANOIA_ALLOWED;
         }
 

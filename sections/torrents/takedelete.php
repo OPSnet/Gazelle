@@ -59,7 +59,7 @@ Torrents::send_pm(
         . strtoupper($torrent['InfoHash'])
         . ") was deleted by {$LoggedUser['Username']}: $reason",
     0,
-    G::$LoggedUser['ID'] != $UserID
+    $LoggedUser['ID'] != $UserID
 );
 View::show_header('Torrent deleted');
 ?>

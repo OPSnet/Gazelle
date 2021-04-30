@@ -37,7 +37,7 @@ $DB->prepared_query('SELECT ID, `Name`, Sort, MinLevel, Classes FROM irc_channel
     <form class="manage_form" name="forums" action="" method="post">
         <input type="hidden" name="id" value="<?=$ID?>" />
         <input type="hidden" name="action" value="irc_alter" />
-        <input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
         <tr class="row<?=$Row?>">
             <td>
                 <input type="text" size="3" name="sort" value="<?=$Sort?>" />
@@ -66,7 +66,7 @@ $DB->prepared_query('SELECT ID, `Name`, Sort, MinLevel, Classes FROM irc_channel
     </tr>
     <form class="create_form" name="forum" action="" method="post">
         <input type="hidden" name="action" value="irc_alter" />
-        <input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
         <tr class="rowa">
             <td>
                 <input type="text" size="3" name="sort" />

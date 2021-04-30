@@ -5,19 +5,20 @@ class Forums {
      * @return array ForumCategoryID => Name
      */
     public static function get_forum_categories() {
-        $ForumCats = G::$Cache->get_value('forums_categories');
+        global $Cache, $DB;
+        $ForumCats = $Cache->get_value('forums_categories');
         if ($ForumCats === false) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            $QueryID = $DB->get_query_id();
+            $DB->query("
                 SELECT ID, Name
                 FROM forums_categories
                 ORDER BY Sort, Name");
             $ForumCats = [];
-            while (list ($ID, $Name) = G::$DB->next_record()) {
+            while (list ($ID, $Name) = $DB->next_record()) {
                 $ForumCats[$ID] = $Name;
             }
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('forums_categories', $ForumCats, 0);
+            $DB->set_query_id($QueryID);
+            $Cache->cache_value('forums_categories', $ForumCats, 0);
         }
         return $ForumCats;
     }
@@ -27,7 +28,8 @@ class Forums {
      * @return array Array of ForumIDs
      */
     public static function get_permitted_forums() {
-        return isset(G::$LoggedUser['CustomForums']) ? array_keys(G::$LoggedUser['CustomForums'], 1) : [];
+        global $LoggedUser;
+        return isset($LoggedUser['CustomForums']) ? array_keys($LoggedUser['CustomForums'], 1) : [];
     }
 
     /**
@@ -35,7 +37,8 @@ class Forums {
      * @return array Array of ForumIDs
      */
     public static function get_restricted_forums() {
-        return isset(G::$LoggedUser['CustomForums']) ? array_keys(G::$LoggedUser['CustomForums'], 0) : [];
+        global $LoggedUser;
+        return isset($LoggedUser['CustomForums']) ? array_keys($LoggedUser['CustomForums'], 0) : [];
     }
 
     /**
@@ -48,10 +51,11 @@ class Forums {
         $RestrictedForums = self::get_restricted_forums();
         $PermittedForums = self::get_permitted_forums();
         $donorMan = new Gazelle\Manager\Donation;
-        if ($donorMan->hasForumAccess(new Gazelle\User(G::$LoggedUser['ID'])) && !in_array(DONOR_FORUM, $PermittedForums)) {
+        global $LoggedUser;
+        if ($donorMan->hasForumAccess(new Gazelle\User($LoggedUser['ID'])) && !in_array(DONOR_FORUM, $PermittedForums)) {
             $PermittedForums[] = DONOR_FORUM;
         }
-        $SQL = "((f.MinClassRead <= '" . G::$LoggedUser['Class'] . "'";
+        $SQL = "((f.MinClassRead <= '" . $LoggedUser['Class'] . "'";
         if (count($RestrictedForums)) {
             $SQL .= " AND f.ID NOT IN ('" . implode("', '", $RestrictedForums) . "')";
         }

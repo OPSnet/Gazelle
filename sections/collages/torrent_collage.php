@@ -243,7 +243,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     </span>
 <?php
         }
-        if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
+        if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
                     <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
@@ -354,7 +354,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                         | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
                     </span>
                 <strong><?= $DisplayName ?></strong>
-<?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
+<?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
                 <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>

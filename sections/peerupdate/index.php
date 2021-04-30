@@ -107,8 +107,8 @@ while ($TorrentID) {
         $Changed = false;
     }
 }
-$debug = new \Gazelle\Debug;
-printf("Updated %d keys, skipped %d keys in %.6fs (%d kB memory)\n", $UpdatedKeys, $UncachedGroups, microtime(true) - $debug->startTime(), memory_get_usage(true) >> 10);
+global $Debug;
+printf("Updated %d keys, skipped %d keys in %.6fs (%d kB memory)\n", $UpdatedKeys, $UncachedGroups, microtime(true) - $Debug->startTime(), memory_get_usage(true) >> 10);
 
 $DB->prepared_query("DELETE FROM torrents_peerlists");
 $DB->prepared_query("

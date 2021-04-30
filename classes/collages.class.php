@@ -40,9 +40,10 @@ class Collages {
 
     public static function bbcodeUrl($id, $url = null) {
         $cacheKey = 'bbcode_collage_' . $id;
-        if (($name = G::$Cache->get_value($cacheKey)) === false) {
-            $name = G::$DB->scalar('SELECT Name FROM collages WHERE id = ?', $id);
-            G::$Cache->cache_value($cacheKey, $name, 86400 + rand(1, 3600));
+        global $Cache, $DB;
+        if (($name = $Cache->get_value($cacheKey)) === false) {
+            $name = $DB->scalar('SELECT Name FROM collages WHERE id = ?', $id);
+            $Cache->cache_value($cacheKey, $name, 86400 + rand(1, 3600));
         }
         return $name
             ? $url

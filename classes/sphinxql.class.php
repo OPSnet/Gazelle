@@ -68,7 +68,7 @@ class Sphinxql extends mysqli {
         if ($this->Connected || $this->connect_errno) {
             return;
         }
-        $Debug = new \Gazelle\Debug;
+        global $Debug;
         $Debug->set_flag("Connecting to Sphinx server $this->Ident");
         for ($Attempt = 0; $Attempt < 3; $Attempt++) {
             parent::__construct($this->Server, '', '', '', $this->Port, $this->Socket);
@@ -96,8 +96,8 @@ class Sphinxql extends mysqli {
      * @return Sphinxql object
      */
     public function error($Msg, $Halt = false) {
-        $Debug = new \Gazelle\Debug;
         $ErrorMsg = 'SphinxQL ('.$this->Ident.'): '.strval($Msg);
+        global $Debug;
         $Debug->analysis('SphinxQL Error', $ErrorMsg, 3600*24);
         if ($Halt === true && (DEBUG_MODE || check_perms('site_debug'))) {
             echo '<pre>'.display_str($ErrorMsg).'</pre>';
