@@ -59,45 +59,7 @@ class View {
     }
 
     /**
-     * This is a generic function to load a template fromm /design and render it.
-     * The template should be in /design/my_template_name.php, and have a class
-     * in it called MyTemplateNameTemplate (my_template_name transformed to
-     * MixedCase, with the word 'Template' appended).
-     * This class should have a public static function render($Args), where
-     * $Args is an associative array of the template variables.
-     * You should note that by "Template", we mean "php file that outputs stuff".
-     *
-     * This function loads /design/$TemplateName.php, and then calls
-     * render($Args) on the class.
-     *
-     * @param string $TemplateName The name of the template, in underscore_format
-     * @param array $Args the arguments passed to the template.
-     */
-    public static function render_template($TemplateName, $Args) {
-        static $LoadedTemplates; // Keep track of templates we've already loaded.
-        $ClassName = '';
-        if (isset($LoadedTemplates[$TemplateName])) {
-            $ClassName = $LoadedTemplates[$TemplateName];
-        } else {
-            include(SERVER_ROOT.'/design/' . $TemplateName . '.php');
-
-            // Turn template_name into TemplateName
-            $ClassNameParts = explode('_', $TemplateName);
-            foreach ($ClassNameParts as $Index => $Part) {
-                $ClassNameParts[$Index] = ucfirst($Part);
-            }
-            $ClassName = implode($ClassNameParts). 'Template';
-            $LoadedTemplates[$TemplateName] = $ClassName;
-        }
-        $ClassName::render($Args);
-    }
-
-    /**
-     * This method is similar to render_template, but does not require a
-     * template class.
-     *
-     * Instead, this method simply renders a PHP file (PHTML) with the supplied
-     * variables.
+     * This method simply renders a PHP file (PHTML) with the supplied variables.
      *
      * All files must be placed within {self::IncludePath}. Create and organize
      * new paths and files. (e.g.: /design/views/artist/, design/view/forums/, etc.)
