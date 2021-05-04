@@ -240,7 +240,8 @@ function enforce_login() {
  */
 function authorize($Ajax = false) {
     global $LoggedUser;
-    if (empty($_REQUEST['auth']) || $_REQUEST['auth'] != $LoggedUser['AuthKey']) {
+    $auth = $_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '';
+    if ($auth != $LoggedUser['AuthKey']) {
         Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
         error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
         return false;

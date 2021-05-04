@@ -126,6 +126,16 @@ function reverse_display_str($Str) {
 }
 
 /**
+ * Sanitize a string for use as a filename.
+ *
+ * @param string name to escape
+ * @return string contents with all OS meta-characters removed.
+ */
+function safeFilename(string $name): string {
+    return str_replace(['"', '*', '/', ':', '<', '>', '?', '\\', '|'], '', $name);
+}
+
+/**
  * This function formats a string containing a torrent's remaster information.
  *
  * @param boolean Remastered - whether the torrent contains remaster information

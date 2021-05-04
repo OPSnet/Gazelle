@@ -311,7 +311,7 @@ class Collage extends BaseObject {
     }
 
     public function toggleSubscription(int $userId) {
-        $this->db->set_query_id($qid);
+        $qid = $this->db->get_query_id();
         if ($this->db->scalar("
             SELECT 1
             FROM users_collage_subs
@@ -649,99 +649,5 @@ class Collage extends BaseObject {
             );
         }
         return parent::modify();
-    }
-
-    public function zipCollector(string $orderBy, array $list) {
-
-        $SQL = 'SELECT CASE ';
-        foreach ($list as $Priority => $Selection) {
-            if (!is_number($Priority)) {
-                continue;
-            }
-            $SQL .= 'WHEN ';
-            switch ($Selection) {
-                case '00': $SQL .= "t.Format = 'MP3'  AND t.Encoding = 'V0 (VBR)'"; break;
-                case '01': $SQL .= "t.Format = 'MP3'  AND t.Encoding = 'APX (VBR)'"; break;
-                case '02': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '256 (VBR)'"; break;
-                case '03': $SQL .= "t.Format = 'MP3'  AND t.Encoding = 'V1 (VBR)'"; break;
-                case '10': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '224 (VBR)'"; break;
-                case '11': $SQL .= "t.Format = 'MP3'  AND t.Encoding = 'V2 (VBR)'"; break;
-                case '12': $SQL .= "t.Format = 'MP3'  AND t.Encoding = 'APS (VBR)'"; break;
-                case '13': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '192 (VBR)'"; break;
-                case '20': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '320'"; break;
-                case '21': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '256'"; break;
-                case '22': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '224'"; break;
-                case '23': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '192'"; break;
-                case '24': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '160'"; break;
-                case '25': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '128'"; break;
-                case '26': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '96'"; break;
-                case '27': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '64'"; break;
-                case '30': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'Vinyl'"; break;
-                case '31': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'DVD'"; break;
-                case '32': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'SACD'"; break;
-                case '33': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'WEB'"; break;
-                case '34': $SQL .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1' AND LogScore = '100' AND HasCue = '1'"; break;
-                case '35': $SQL .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1' AND LogScore = '100'"; break;
-                case '36': $SQL .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1'"; break;
-                case '37': $SQL .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless'"; break;
-                case '40': $SQL .= "t.Format = 'DTS'"; break;
-                case '42': $SQL .= "t.Format = 'AAC'  AND t.Encoding = '320'"; break;
-                case '43': $SQL .= "t.Format = 'AAC'  AND t.Encoding = '256'"; break;
-                case '44': $SQL .= "t.Format = 'AAC'  AND t.Encoding = 'q5.5'"; break;
-                case '45': $SQL .= "t.Format = 'AAC'  AND t.Encoding = 'q5'"; break;
-                case '46': $SQL .= "t.Format = 'AAC'  AND t.Encoding = '192'"; break;
-                default: error(0);
-            }
-            $SQL .= " THEN $Priority ";
-        }
-        $SQL .= "
-                ELSE 100
-            END AS Rank,
-            t.GroupID,
-            t.ID AS TorrentID,
-            t.Media,
-            t.Format,
-            t.Encoding,
-            IF(t.RemasterYear = 0, tg.Year, t.RemasterYear) AS Year,
-            tg.Name,
-            t.Size
-        FROM torrents AS t
-        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) /* FIXME: only needed if sorting by Seeders */
-        INNER JOIN collages_torrents AS c ON (t.GroupID = c.GroupID AND c.CollageID = ?)
-        INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID AND tg.CategoryID = '1')
-        ORDER BY t.GroupID ASC, Rank DESC, $orderBy";
-
-        $DownloadsQ = $this->db->prepared_query($SQL, $this->id());
-        $Collector = new \TorrentsDL($DownloadsQ, $this->name());
-        $filer = new \Gazelle\File\Torrent;
-
-        while ([$Downloads, $GroupIDs] = $Collector->get_downloads('GroupID')) {
-            $this->db->prepared_query("
-                SELECT ID FROM torrents WHERE GroupID IN (" . placeholders($GroupIDs) .  ")
-                ", ...$GroupIDs
-            );
-            $torrentIds = $this->db->collect('ID');
-            $Artists = \Artists::get_artists($GroupIDs);
-            foreach ($torrentIds as $TorrentID) {
-                if (!array_key_exists($TorrentID, $GroupIDs)) {
-                    continue;
-                }
-                $GroupID = $GroupIDs[$TorrentID];
-                $Download =& $Downloads[$GroupID];
-                $Download['Artist'] = \Artists::display_artists($Artists[$Download['GroupID']], false, true, false);
-                if ($Download['Rank'] == 100) {
-                    $Collector->skip_file($Download);
-                    continue;
-                }
-                $torrent = $filer->get($TorrentID);
-                if ($torrent === false) {
-                    $Collector->fail_file($Download);
-                } else {
-                    $Collector->add_file($torrent, $Download);
-                }
-                unset($Download);
-            }
-        }
-        return $Collector;
     }
 }

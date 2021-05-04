@@ -4,6 +4,11 @@
     {% if loop.first %}
     <h3>Seeds on {{ source }} that are {{ mode == 'union' ? 'also' : 'not' }} on {{ target }} <small>({{
         paginator.total }} seed{{ paginator.total|plural }})</small></h3>
+    <div class="pad">
+        <a class="brackets" href="torrents.php?action=collector&amp;title=seedbox&amp;userid={{ user_id
+            }}&amp;s={{ source_id }}&amp;t={{ target_id }}&amp;m={{ mode }}&amp;auth={{ auth
+            }}" onclick="return confirm('If you do not have the content, your ratio WILL be affected; be sure to check the size of all torrents before downloading.');">Download All</a>
+    </div>
     <ul class="stats nobullet">
     {% endif %}
         <li>{{ t.artist|raw }} - {{ t.name|raw }}<br />{{ t.folder }}</li>
