@@ -63,7 +63,7 @@ class Artist extends \Gazelle\Json {
                 }
             }
 
-            $Found = \Misc::search_array($artists, 'id', $artistId);
+            $Found = $this->search_array($artists, 'id', $artistId);
             if ($this->releasesOnly && empty($Found)) {
                 continue;
             }
@@ -174,5 +174,18 @@ class Artist extends \Gazelle\Json {
             'torrentgroup' => $JsonTorrents,
             'requests' => $JsonRequests,
         ];
+    }
+
+    protected function search_array($Array, $Key, $Value) {
+        $Results = [];
+        if (is_array($Array)) {
+            if (isset($Array[$Key]) && $Array[$Key] == $Value) {
+                $Results[] = $Array;
+            }
+            foreach ($Array as $subarray) {
+                $Results = array_merge($Results, $this->search_array($subarray, $Key, $Value));
+            }
+        }
+        return $Results;
     }
 }

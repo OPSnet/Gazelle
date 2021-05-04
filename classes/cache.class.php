@@ -40,19 +40,9 @@ class CACHE extends Memcached {
     protected $InTransaction = false;
     public $Time = 0;
     private $Servers = [];
-    private $PersistentKeys = [
-        'ajax_requests_*',
-        'query_lock_*',
-        'stats_*',
-        'top10tor_*',
-        'top10votes_*',
-        'users_snatched_*',
-
-        // Cache-based features
-        'global_notification',
-        'notifications_one_reads_*',
-    ];
     private $ClearedKeys = [];
+    private $PersistentKeysRegexp =
+        '/^(?:global_notification$|(?:ajax_requests|notifications_one_reads_|query_lock|stats|top10(?:tor|votes)|users_snatched)_)/';
 
     public $CanClear = false;
     public $InternalCache = true;
@@ -142,13 +132,13 @@ class CACHE extends Memcached {
             trigger_error('Cache retrieval failed for empty key');
         }
 
-        if (!empty($_GET['clearcache']) && $this->CanClear && !isset($this->ClearedKeys[$Key]) && !Misc::in_array_partial($Key, $this->PersistentKeys)) {
+        if (!empty($_GET['clearcache']) && $this->CanClear && !isset($this->ClearedKeys[$Key]) && !preg_match($this->PersistentKeys, $Key)) {
             if ($_GET['clearcache'] === '1') {
                 // Because check_perms() isn't true until LoggedUser is pulled from the cache, we have to remove the entries loaded before the LoggedUser data
                 // Because of this, not user cache data will require a secondary pageload following the clearcache to update
                 if (count($this->CacheHits) > 0) {
                     foreach (array_keys($this->CacheHits) as $HitKey) {
-                        if (!isset($this->ClearedKeys[$HitKey]) && !Misc::in_array_partial($HitKey, $this->PersistentKeys)) {
+                        if (!isset($this->ClearedKeys[$HitKey]) && !preg_match($this->PersistentKeys, $Key)) {
                             $this->delete($HitKey);
                             unset($this->CacheHits[$HitKey]);
                             $this->ClearedKeys[$HitKey] = true;
