@@ -162,8 +162,8 @@ $Cache->delete_value('user_rlim_' . $userId);
 
 $torMan = new Gazelle\Manager\Torrent;
 
-header('Content-Type: charset=utf-8; ' . ($Viewer->option('DownloadAlt') === '1')
-    ? 'text/plain' : 'application/x-bittorrent');
+$downloadAsText = ($Viewer->option('DownloadAlt') === '1');
+header('Content-Type: charset=utf-8; ' . $downloadAsText ? 'text/plain' : 'application/x-bittorrent');
 header('Content-Disposition: attachment; filename="' . $torMan->torrentFilename($info, $downloadAsText) . '"');
 echo $torMan->torrentBody($torrentId, $Viewer->announceUrl());
 
