@@ -11,10 +11,12 @@ class ReleaseType extends Base {
     public function __construct() {
         parent::__construct();
         if (($this->list = $this->cache->get_value(self::CACHE_KEY)) === false) {
+            $qid = $this->db->get_query_id();
             $this->db->prepared_query("
                 SELECT ID, Name FROM release_type ORDER BY ID
             ");
             $this->list = $this->db->to_pair('ID', 'Name');
+            $this->db->get_query_id($qid);
             $this->cache->cache_value(self::CACHE_KEY, $this->list, 86400 * 30);
         }
     }

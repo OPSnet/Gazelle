@@ -108,6 +108,7 @@ class User extends BaseObject {
                 um.Visible,
                 um.2FA_Key,
                 ui.AdminComment,
+                ui.AuthKey,
                 ui.Avatar,
                 ui.collages,
                 ui.DisableAvatar,
@@ -445,6 +446,10 @@ class User extends BaseObject {
 
     public function disableWiki(): bool {
         return $this->info()['DisableWiki'];
+    }
+
+    public function auth(): string {
+        return $this->info()['AuthKey'];
     }
 
     public function avatar(): ?string {
@@ -1059,7 +1064,7 @@ class User extends BaseObject {
                 UPDATE users_main SET
                     PassHash = ?
                 WHERE ID = ?
-                ", UserCreator::hashPassword($plaintext), $this->userId
+                ", UserCreator::hashPassword($plaintext), $this->id
             );
         }
         return $success;
@@ -2152,7 +2157,7 @@ class User extends BaseObject {
     public function releaseOrder(array $options, array $releaseType) {
         if (empty($options['SortHide'])) {
             $sort = $releaseType;
-            $defaults = !empty($option['HideTypes']);
+            $defaults = !empty($options['HideTypes']);
         } else {
             $sort = $options['SortHide'];
             $missingTypes = array_diff_key($releaseType, $sort);
@@ -2164,7 +2169,7 @@ class User extends BaseObject {
         $x = [];
         foreach ($sort as $key => $val) {
             if (isset($defaults)) {
-                $checked = $defaults && isset($option['HideTypes'][$key]);
+                $checked = $defaults && isset($options['HideTypes'][$key]);
             } else {
                 if (!isset($releaseType[$key])) {
                     continue;
@@ -2950,7 +2955,7 @@ class User extends BaseObject {
         if ($this->specialDonorRank() == 3) {
             return '&infin; [Diamond]';
         }
-        $rank = $this->donorRank($user);
+        $rank = $this->donorRank();
         $label = $rank >= MAX_RANK ? MAX_RANK : $rank;
         $overflow = $rank - $label;
         if ($label == 5 || $label == 6) {
@@ -3076,5 +3081,23 @@ class User extends BaseObject {
         }
         $this->db->set_query_id($QueryID);
         $this->cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
+    }
+
+    public function modifyCollectorDefaults(array $collector): int {
+        if (serialize($this->option('Collector')) != serialize($collector)) {
+            $this->info['SiteOptions']['Collector'] = $collector;
+            $this->db->prepared_query("
+                UPDATE users_info SET
+                    SiteOptions = ?
+                WHERE UserID = ?
+                ", serialize($this->info['SiteOptions']), $this->id
+            );
+            $success = $this->db->affected_rows() == 1;
+            if ($success) {
+                $this->flush();
+            }
+            return $success;
+        }
+        return false;
     }
 }

@@ -30,184 +30,188 @@ if (!empty($_REQUEST['action'])) {
     switch ($_REQUEST['action']) {
         case 'editlog':
             enforce_login();
-            require(__DIR__ . '/edit_log.php');
+            require_once('edit_log.php');
             break;
 
         case 'deletelog':
             enforce_login();
-            require(__DIR__ . '/delete_log.php');
+            require_once('delete_log.php');
             break;
 
         case 'take_editlog':
             enforce_login();
-            require(__DIR__ . '/take_edit_log.php');
+            require_once('take_edit_log.php');
             break;
 
         case 'rescore_log':
             enforce_login();
-            require(__DIR__ . '/rescore_log.php');
+            require_once('rescore_log.php');
             break;
 
         case 'viewlog':
             enforce_login();
-            require(__DIR__ . '/log_ajax.php');
+            require_once('log_ajax.php');
             break;
 
         case 'removelogs':
             enforce_login();
-            require(__DIR__ . '/remove_logs.php');
+            require_once('remove_logs.php');
             break;
 
         case 'edit':
             enforce_login();
-            require(__DIR__ . '/edit.php');
+            require_once('edit.php');
             break;
 
         case 'editgroup':
             enforce_login();
-            require(__DIR__ . '/editgroup.php');
+            require_once('editgroup.php');
             break;
 
         case 'editgroupid':
             enforce_login();
-            require(__DIR__ . '/editgroupid.php');
+            require_once('editgroupid.php');
             break;
 
         case 'changecategory':
             enforce_login();
-            require(__DIR__ . '/takechangecategory.php');
+            require_once('takechangecategory.php');
             break;
         case 'grouplog':
             enforce_login();
-            require(__DIR__ . '/grouplog.php');
+            require_once('grouplog.php');
             break;
         case 'takeedit':
             enforce_login();
-            require(__DIR__ . '/takeedit.php');
+            require_once('takeedit.php');
             break;
 
         case 'newgroup':
             enforce_login();
-            require(__DIR__ . '/takenewgroup.php');
+            require_once('takenewgroup.php');
             break;
 
         case 'peerlist':
             enforce_login();
-            require(__DIR__ . '/peerlist.php');
+            require_once('peerlist.php');
             break;
 
         case 'snatchlist':
             enforce_login();
-            require(__DIR__ . '/snatchlist.php');
+            require_once('snatchlist.php');
+            break;
+
+        case 'download':
+            require_once('download.php');
             break;
 
         case 'downloadlist':
             enforce_login();
-            require(__DIR__ . '/downloadlist.php');
+            require_once('downloadlist.php');
             break;
 
         case 'redownload':
             enforce_login();
-            require(__DIR__ . '/redownload.php');
+            require_once('redownload.php');
             break;
 
         case 'revert':
         case 'takegroupedit':
             enforce_login();
-            require(__DIR__ . '/takegroupedit.php');
+            require_once('takegroupedit.php');
             break;
 
         case 'nonwikiedit':
             enforce_login();
-            require(__DIR__ . '/nonwikiedit.php');
+            require_once('nonwikiedit.php');
             break;
 
         case 'rename':
             enforce_login();
-            require(__DIR__ . '/rename.php');
+            require_once('rename.php');
             break;
 
         case 'merge':
             enforce_login();
-            require(__DIR__ . '/merge.php');
+            require_once('merge.php');
             break;
 
         case 'add_alias':
             enforce_login();
-            require(__DIR__ . '/add_alias.php');
+            require_once('add_alias.php');
             break;
 
         case 'delete_alias':
             enforce_login();
             authorize();
-            require(__DIR__ . '/delete_alias.php');
+            require_once('delete_alias.php');
             break;
 
         case 'history':
             enforce_login();
-            require(__DIR__ . '/history.php');
+            require_once('history.php');
             break;
 
         case 'delete':
             enforce_login();
-            require(__DIR__ . '/delete.php');
+            require_once('delete.php');
             break;
 
         case 'takedelete':
             enforce_login();
-            require(__DIR__ . '/takedelete.php');
+            require_once('takedelete.php');
             break;
 
         case 'masspm':
             enforce_login();
-            require(__DIR__ . '/masspm.php');
+            require_once('masspm.php');
             break;
 
         case 'reseed':
             enforce_login();
-            require(__DIR__ . '/reseed.php');
+            require_once('reseed.php');
             break;
 
         case 'takemasspm':
             enforce_login();
-            require(__DIR__ . '/takemasspm.php');
+            require_once('takemasspm.php');
             break;
 
         case 'vote_tag':
             enforce_login();
             authorize();
-            require(__DIR__ . '/vote_tag.php');
+            require_once('vote_tag.php');
             break;
 
         case 'add_tag':
             enforce_login();
-            require(__DIR__ . '/add_tag.php');
+            require_once('add_tag.php');
             break;
 
         case 'delete_tag':
             enforce_login();
             authorize();
-            require(__DIR__ . '/delete_tag.php');
+            require_once('delete_tag.php');
             break;
 
         case 'notify':
             enforce_login();
-            require(__DIR__ . '/notify.php');
+            require_once('notify.php');
             break;
 
         case 'manage_artists':
             enforce_login();
-            require(__DIR__ . '/manage_artists.php');
+            require_once('manage_artists.php');
             break;
 
         case 'editrequest':
             enforce_login();
-            require(__DIR__ . '/editrequest.php');
+            require_once('editrequest.php');
             break;
 
         case 'takeeditrequest':
             enforce_login();
-            require(__DIR__ . '/takeeditrequest.php');
+            require_once('takeeditrequest.php');
             break;
 
         case 'notify_clear':
@@ -220,16 +224,13 @@ if (!empty($_REQUEST['action'])) {
         case 'notify_catchup_filter':
             authorize();
             enforce_login();
-            require(__DIR__ . '/notify_actions.php');
-            break;
-
-        case 'download':
-            require(__DIR__ . '/download.php');
+            require_once('notify_actions.php');
             break;
 
         case 'collector':
+            // NB: called from better.php
             enforce_login();
-            require(__DIR__ . '/collector.php');
+            require_once('collector.php');
             break;
 
         case 'regen_filelist':
@@ -242,19 +243,19 @@ if (!empty($_REQUEST['action'])) {
             }
             break;
         case 'add_cover_art':
-            require(__DIR__ . '/add_cover_art.php');
+            require_once('add_cover_art.php');
             break;
         case 'remove_cover_art':
-            require(__DIR__ . '/remove_cover_art.php');
+            require_once('remove_cover_art.php');
             break;
         case 'autocomplete_tags':
-            require(__DIR__ . '/autocomplete_tags.php');
+            require_once('autocomplete_tags.php');
             break;
         default:
             enforce_login();
 
             if (!empty($_GET['id'])) {
-                require(__DIR__ . '/details.php');
+                require_once('details.php');
             } elseif (isset($_GET['torrentid']) && is_number($_GET['torrentid'])) {
                 $GroupID = $DB->scalar("
                     SELECT GroupID FROM torrents WHERE ID = ?
@@ -264,7 +265,7 @@ if (!empty($_REQUEST['action'])) {
                     header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid']);
                 }
             } else {
-                require(__DIR__ . '/browse.php');
+                require_once('browse.php');
             }
             break;
     }
@@ -272,7 +273,7 @@ if (!empty($_REQUEST['action'])) {
     enforce_login();
 
     if (!empty($_GET['id'])) {
-        require(__DIR__ . '/details.php');
+        require_once('details.php');
     } elseif (isset($_GET['torrentid']) && intval($_GET['torrentid'])) {
         $torrent_id = (int)$_GET['torrentid'];
         $DB->prepared_query('
@@ -291,7 +292,7 @@ if (!empty($_REQUEST['action'])) {
             header("Location: log.php?search=Torrent+" . $_GET['torrentid']);
         }
     } elseif (!empty($_GET['type'])) {
-        require(__DIR__ . '/user.php');
+        require_once('user.php');
     } elseif (!empty($_GET['groupname']) && !empty($_GET['forward'])) {
         $DB->prepared_query('
             SELECT ID
@@ -301,9 +302,9 @@ if (!empty($_REQUEST['action'])) {
         if ($GroupID) {
             header("Location: torrents.php?id=$GroupID");
         } else {
-            require(__DIR__ . '/browse.php');
+            require_once('browse.php');
         }
     } else {
-        require(__DIR__ . '/browse.php');
+        require_once('browse.php');
     }
 }
