@@ -1,0 +1,27 @@
+{{ constant('SITE_NAME') }} Collector Summary for {{ title }}
+
+User:     {{ user.username }}
+Passkey:  {{ user.announceKey }}
+Announce: {{ user.announceUrl }}
+
+Torrent groups scanned: {{ total }}
+Torrents included:      {{ added }}
+Torrent groups skipped: {{ skipped|length }}
+
+Total size of torrents: {{ size|octet_size }}
+Your buffer:            {{ user.buffer[1]|octet_size }}
+To download this collection as freeleech, you will need {{ tokens|number_format }} token{{ tokens|plural }}.
+
+{% if error %}
+Some torrents could not be added to the archive. See ERRORS.txt for details.
+{% endif %}
+{% if skipped %}
+Albums unavailable given your criteria (consider making a request for your desired format)
+    {% for file in skipped %}
+        {{- file }}
+    {% endfor %}
+{% endif %}
+
+Date: {{ date }}
+Used: {{ used|octet_size }}
+CPU:  {{ time|number_format(2) }} ms

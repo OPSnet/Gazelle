@@ -39,6 +39,7 @@ define('GRANDFATHER_SOURCE', ''); // flag to use for grandfathering torrents. us
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow source flag from previous site.
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
 
+define('MAX_PATH_LEN', 200); // Maximum filename length for torrent files and in archives
 define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
 define('FAKE_USERAGENT', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11');
 define('SEEDBOX_SALT', '8EQKRWZqA5DMVwpAqQKRCiMm5xaucsPePseXwZhm88T8PyyuAkjVgTLrAMWWeB8W'); // change me
@@ -344,9 +345,9 @@ $ZIPOptions = [
     '34' => [3, 4, 'FLAC / Log (100) / Cue'],
     '35' => [3, 5, 'FLAC / Log (100)'],
     '36' => [3, 6, 'FLAC / Log'],
-    '37' => [3, 7, 'FLAC'],
+    '37' => [3, 7, 'FLAC / WEB'],
+    '38' => [3, 8, 'FLAC'],
     '40' => [4, 0, 'DTS'],
-    '41' => [4, 1, 'Ogg Vorbis'],
     '42' => [4, 2, 'AAC - 320'],
     '43' => [4, 3, 'AAC - 256'],
     '44' => [4, 4, 'AAC - q5.5'],

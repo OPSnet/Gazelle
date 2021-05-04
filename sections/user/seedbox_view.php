@@ -65,10 +65,14 @@ if ($source && $target) {
             new Gazelle\Manager\Torrent,
             (new Gazelle\Manager\TorrentLabel)->showFlags(false)->showEdition(false)
         ),
+        'auth'      => $LoggedUser['AuthKey'],
         'mode'      => $union ? 'union' : 'exclude',
         'paginator' => $paginator,
+        'source_id' => $source,
+        'target_id' => $target,
         'source'    => $seedbox->name($source),
         'target'    => $seedbox->name($target),
+        'user_id'   => $user->id(),
     ]);
 }
 

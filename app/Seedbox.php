@@ -189,6 +189,23 @@ class Seedbox extends Base {
     }
 
     /**
+     * Get a list of all the torrent Ids in this comparison,
+     * used to produce an archive of torrents
+     *
+     * @return array of torrentIds
+     */
+    public function idList() {
+        $from = $this->buildFrom();
+        $this->db->prepared_query("
+            SELECT xfu.fid
+            $from
+            ORDER BY xfu.fid
+            ", $this->userId, $this->source, $this->userId, $this->target
+        );
+        return $this->db->collect(0, false);
+    }
+
+    /**
      * Update the names of the various seeding locations
      *
      * @param array $update Associate array of 'ipv4' => 'name'

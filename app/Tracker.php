@@ -14,9 +14,9 @@
 // edit_whitelist
 // remove_whitelist
 
-use Util\Irc;
-
 namespace Gazelle;
+
+use Gazelle\Util\Irc;
 
 class Tracker {
     const STATS_MAIN = 0;
@@ -48,9 +48,10 @@ class Tracker {
         $Err = false;
         if (self::send_request($Get, $MaxAttempts, $Err) === false) {
             Irc::sendRaw("PRIVMSG #tracker :$MaxAttempts $Err $Get");
-            if (G::$Cache->get_value('ocelot_error_reported') === false) {
+            global $Cache;
+            if ($Cache->get_value('ocelot_error_reported') === false) {
                 Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . " :Failed to update ocelot: $Err : $Get");
-                G::$Cache->cache_value('ocelot_error_reported', true, 3600);
+                $Cache->cache_value('ocelot_error_reported', true, 3600);
             }
             return false;
         }

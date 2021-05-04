@@ -6,7 +6,6 @@ use Gazelle\Exception\TorrentManagerIdNotSetException;
 use Gazelle\Exception\TorrentManagerUserNotSetException;
 
 class Torrent extends \Gazelle\Base {
-
     /*
      **** To display a torrent name, edition and flags, at the minimum the code looks like:
 
@@ -1094,11 +1093,11 @@ class Torrent extends \Gazelle\Base {
                 $DisplayName .= " [{$GroupYear}]";
             }
             $Info = [];
-            if (!empty($Data['Format'])) {
-                $Info[] = $Data['Format'];
+            if (strlen($Format)) {
+                $Info[] = $Format;
             }
-            if (!empty($Data['Encoding'])) {
-                $Info[] = $Data['Encoding'];
+            if (strlen($Encoding)) {
+                $Info[] = $Encoding;
             }
             if (!empty($Info)) {
                 $DisplayName .= ' [' . implode('/', $Info) . ']';
@@ -1146,5 +1145,72 @@ class Torrent extends \Gazelle\Base {
 
     public function featuredAlbumShowcase(): array {
         return $this->featuredAlbum(self::FEATURED_SHOWCASE);
+    }
+
+    /**
+     * Combine torrent media into a standardized file name
+     *
+     * @param array Torrent metadata
+     * @param bool whether to use .txt or .torrent as file extension
+     * @param int $MaxLength maximum file name length
+     * @return string file name with at most $MaxLength characters
+     */
+    public function torrentFilename(array $info, bool $asText, $MaxLength = MAX_PATH_LEN) {
+        $MaxLength -= ($asText ? 4 : 8);
+        if ($info['TorrentID'] !== false) {
+            $MaxLength -= (strlen($info['TorrentID']) + 1);
+        }
+        $artist = safeFilename($info['Artist']);
+        if ($info['Year'] > 0) {
+            $artist .= ".{$info['Year']}";
+        }
+        $meta = [];
+        if ($info['Media'] != '') {
+            $meta[] = $info['Media'];
+        }
+        if ($info['Format'] != '') {
+            $meta[] = $info['Format'];
+        }
+        if ($info['Encoding'] != '') {
+            $meta[] = $info['Encoding'];
+        }
+        $label = empty($meta) ? '' : ('.(' . safeFilename(implode('-', $meta)) . ')');
+
+        $filename = safeFilename($info['Name']);
+        if (!$filename) {
+            $filename = 'Unnamed';
+        } elseif (mb_strlen("$artist.$filename$label", 'UTF-8') <= $MaxLength) {
+            $filename = "$artist.$filename";
+        }
+
+        $filename = shortenString($filename . $label, $MaxLength, true, false);
+        if ($info['TorrentID'] !== false) {
+            $filename .= "-{$info['TorrentID']}";
+        }
+        return $asText ? "$filename.txt" : "$filename.torrent";
+    }
+
+    /**
+     * Convert a stored torrent into a binary file that can be loaded in a torrent client
+     *
+     * @param mixed $TorrentData bencoded torrent without announce URL
+     * @param string $AnnounceURL
+     * @param int $TorrentID
+     * @return string bencoded string
+     */
+    public function torrentBody(int $TorrentID, string $AnnounceURL): string {
+        $filer = new \Gazelle\File\Torrent;
+        $contents = $filer->get($TorrentID);
+        if (is_null($contents)) {
+            return '';
+        }
+        $Tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
+        $Tor->decodeString($contents);
+        $Tor->cleanDataDictionary();
+        $Tor->setValue([
+            'announce' => $AnnounceURL,
+            'comment' => SITE_URL . "/torrents.php?torrentid=$TorrentID",
+        ]);
+        return $Tor->getEncode();
     }
 }
