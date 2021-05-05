@@ -53,5 +53,4 @@ echo $Twig->render('applicant/admin.twig', [
     'text'     => new Textarea('description', $editId ? $appRole->description() : ''),
     'user_id'  => $LoggedUser['ID'],
 ]);
-echo Textarea::activate();
 View::show_footer();

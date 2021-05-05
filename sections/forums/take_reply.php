@@ -1,23 +1,6 @@
 <?php
 authorize();
 
-/*********************************************************************\
-//--------------Take Post--------------------------------------------//
-
-This page takes a forum post submission, validates it (TODO), and
-enters it into the database. The user is then redirected to their
-post.
-
-$_POST['action'] is what the user is trying to do. It can be:
-
-'reply' if the user is replying to a thread
-    It will be accompanied with:
-    $_POST['thread']
-    $_POST['body']
-
-
-\*********************************************************************/
-
 $user = new Gazelle\User($LoggedUser['ID']);
 if ($user->disablePosting()) {
     error('Your posting privileges have been removed.');
@@ -35,7 +18,7 @@ if (!$user->readAccess($forum)|| !$user->writeAccess($forum) || $ThreadInfo['isL
 }
 
 // If you're not sending anything, go back
-$Body = trim($_POST['body'] ?? '');
+$Body = trim($_POST['quickpost'] ?? '');
 if ($Body === '') {
     header("Location: " .  $_SERVER['HTTP_REFERER'] ?? "forums.php?action=viewthread&threadid={$_POST['thread']}");
     exit;

@@ -12,6 +12,7 @@
  **                                                                            **
  ********************************************************************************/
 
+use Gazelle\Util\Textarea;
 use OrpheusNET\Logchecker\Logchecker;
 
 class TORRENT_FORM {
@@ -49,6 +50,22 @@ class TORRENT_FORM {
             $this->Disabled = ' disabled="disabled"';
             $this->DisabledFlag = true;
         }
+    }
+
+    /**
+     * This is an awful hack until something better can be figured out.
+     * We want to get rid eval()'ing Javascript code, and this produces
+     * something that can be added to the DOM and the engine will run it.
+     */
+    function albumReleaseJS() {
+        $groupDesc = new Textarea('album_desc', '');
+        $relDesc   = new Textarea('release_desc', '');
+        return Gazelle\Util\Textarea::factory();
+    }
+
+    function descriptionJS() {
+        $groupDesc = new Textarea('desc', '');
+        return Gazelle\Util\Textarea::factory();
     }
 
     function head() {
@@ -575,7 +592,13 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Album description:</td>
                 <td>
-<?php new TEXTAREA_PREVIEW('album_desc', 'album_desc', display_str($Torrent['GroupDescription']), 60, 8, true, true, false, [$this->Disabled]); ?>
+<?php
+            $groupDesc = new Textarea('album_desc', display_str($Torrent['GroupDescription'] ?? ''), 60, 5);
+            if ($this->DisabledFlag) {
+                $groupDesc->setDisabled();
+            }
+?>
+            <?= $groupDesc->setAutoResize()->emit() ?>
                     <p class="min_padding">Contains background information such as album history and maybe a review.</p>
                 </td>
             </tr>
@@ -583,18 +606,12 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-<?php new TEXTAREA_PREVIEW('release_desc', 'release_desc', display_str($Torrent['TorrentDescription']), 60, 8); ?>
+                <?= (new Textarea('release_desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->setAutoResize()->emit() ?>
                     <p class="min_padding">Contains information like encoder settings or details of the ripping process. <strong class="important_text">Do not paste the ripping log here.</strong></p>
                 </td>
             </tr>
         </table>
 <?php
-        //    For AJAX requests (e.g. when changing the type from Music to Applications),
-        //    we don't need to include all scripts, but we do need to include the code
-        //    that generates previews. It will have to be eval'd after an AJAX request.
-        if ($_SERVER['SCRIPT_NAME'] === '/ajax.php') {
-            TEXTAREA_PREVIEW::JavaScript(false);
-        }
         $DB->set_query_id($QueryID);
     }
 
@@ -674,7 +691,13 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Description:</td>
                 <td>
-<?php new TEXTAREA_PREVIEW('album_desc', 'album_desc', display_str($Torrent['GroupDescription']), 60, 8); ?>
+<?php
+            $groupDesc = new Textarea('album_desc', display_str($Torrent['GroupDescription'] ?? ''), 60, 5);
+            if ($this->DisabledFlag) {
+                $groupDesc->setDisabled();
+            }
+?>
+            <?= $groupDesc->setAutoResize()->emit() ?>
                     <p class="min_padding">Contains information like the track listing, a review, a link to Discogs or MusicBrainz, etc.</p>
                 </td>
             </tr>
@@ -682,19 +705,19 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-<?php new TEXTAREA_PREVIEW('release_desc', 'release_desc', display_str($Torrent['TorrentDescription']), 60, 8); ?>
+                <?= (new Textarea('release_desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->setAutoResize()->emit() ?>
                     <p class="min_padding">Contains information like encoder settings. For analog rips, this frequently contains lineage information.</p>
                 </td>
             </tr>
         </table>
 <?php
-        TEXTAREA_PREVIEW::JavaScript(false);
     }
 
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
         $user = new \Gazelle\User($LoggedUser['ID']);
-?>        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+?>
+        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
 <?php
         if ($this->NewTorrent) {
@@ -723,10 +746,7 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Description:</td>
                 <td>
-<?php
-            new TEXTAREA_PREVIEW('desc', 'desc', display_str($Torrent['GroupDescription']), 60, 8);
-            TEXTAREA_PREVIEW::JavaScript(false);
-?>
+                    <?= (new Textarea('desc', display_str($Torrent['TorrentDescription']), 60, 5))->setAutoResize()->emit() ?>
                 </td>
             </tr>
 <?php   } ?>

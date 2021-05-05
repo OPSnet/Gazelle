@@ -57,7 +57,7 @@ View::show_header('Edit artist');
     <tr>
         <td class="label" style="vertical-align: top;">Artist information</td>
         <td>
-        <textarea name="body" cols="91" rows="15"><?= $body ?></textarea> <br /><br />
+           <?= (new Gazelle\Util\Textarea('body', display_str($body), 80, 10))->emit() ?><br /><br />
         </td>
     </tr>
     <tr>

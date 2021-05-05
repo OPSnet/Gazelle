@@ -119,10 +119,7 @@
             <td class="label">Introduction:</td>
             <td>
                 <p>This is the introduction / guide of the contest.</p>
-                {{ intro.getBuffer|raw }}
-                <div style="text-align: center;">
-                    <input type="button" value="Preview" class="hidden button_preview_{{ intro.getID }}" tabindex="1" />
-                </div>
+                {{ intro.emit|raw }}
             </td>
         </tr>
 
