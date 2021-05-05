@@ -15,34 +15,26 @@
         </td>
     </tr>
 {% include 'user/setting/donor.twig' with {'enabled': donor.enabled, 'reward': donor.reward, 'title': donor.title, 'user': user} only %}
-    <tr id="pers_lastfm_tr">
-        <td class="label tooltip_interactive" title="This is used to display &lt;a href=&quot;http://www.last.fm/&quot;&gt;Last.fm&lt;/a&gt; information on your profile. Entering your Last.fm username will allow others to see your Last.fm account." data-title-plain="This is used to display Last.fm information on your profile. Entering your Last.fm username will allow others to see your Last.fm account.">
-            <strong>Last.fm username</strong>
-        </td>
-        <td><input type="text" size="50" name="lastfm_username" id="lastfm_username" value="{{ user.LastFMusername }}" />
-        </td>
-    </tr>
     <tr id="pers_proftitle_tr">
         <td class="label tooltip" title="You can customize your profile information with text and BBCode. Entering a title will label your profile information section. Unlock additional profile info boxes via Donor Ranks.">
-            <strong>Profile title 1</strong>
+            <strong>Profile heading</strong>
         </td>
         <td><input type="text" size="50" name="profile_title" id="profile_title" value="{{ profile.0.title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo_tr">
         <td class="label tooltip" title="You can customize your profile information with text and BBCode. Entering a title will label your profile information section. Unlock additional profile info boxes via Donor Ranks.">
-            <strong>Profile info 1</strong>
+            <strong>Profile</strong>
         </td>
-        <td>{{ profile.0.textarea.getBuffer|raw }}
-        <div style="text-align: center;">
-            <input type="button" value="Preview" class="hidden button_preview_{{ profile.0.textarea.getID }}" tabindex="1" />
-        </div></td>
+        <td>
+            {{ profile.0.ta.emit|raw }}
+        </td>
     </tr>
 {% if profile.1.enabled %}
     <tr id="pers_proftitle2_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2.
         Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile title 2</strong>
+            <strong>Profile 2 heading</strong>
         </td>
         <td><input type="text" size="50" name="profile_title_1" id="profile_title_1" value="{{ profile.1.title }}" />
         </td>
@@ -50,67 +42,70 @@
     <tr id="pers_profinfo2_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2.
         Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile info 2</strong>
+            <strong>Profile 2</strong>
         </td>
-        <td>{{ profile.1.textarea.getBuffer|raw }}
-        <div style="text-align: center;">
-            <input type="button" value="Preview" class="hidden button_preview_{{ profile.1.textarea.getID }}" tabindex="1" />
-        </div></td>
+        <td>
+            {{ profile.1.ta.emit|raw }}
+        </td>
     </tr>
 {% endif %}
 {% if profile.2.enabled %}
     <tr id="pers_proftitle3_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3.
         Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile title 3</strong>
+            <strong>Profile 3 heading</strong>
         </td>
         <td><input type="text" size="50" name="profile_title_2" id="profile_title_2" value="{{ profile.2.title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo3_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile info 3</strong>
+            <strong>Profile 3</strong>
         </td>
-        <td>{{ profile.2.textarea.getBuffer|raw }}
-        <div style="text-align: center;">
-            <input type="button" value="Preview" class="hidden button_preview_{{ profile.2.textarea.getID }}" tabindex="1" />
-        </div></td>
+        <td>
+            {{ profile.2.ta.emit|raw }}
+        </td>
     </tr>
 {% endif %}
 {% if profile.3.enabled %}
     <tr id="pers_proftitle4_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile title 4</strong>
+            <strong>Profile 4 heading</strong>
         </td>
         <td><input type="text" size="50" name="profile_title_3" id="profile_title_3" value="{{ profile.3.title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo4_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile info 4</strong>
+            <strong>Profile 4</strong>
         </td>
-        <td>{{ profile.3.textarea.getBuffer|raw }}
-        <div style="text-align: center;">
-            <input type="button" value="Preview" class="hidden button_preview_{{ profile.3.textarea.getID }}" tabindex="1" />
-        </div></td>
+        <td>
+            {{ profile.3.ta.emit|raw }}
+        </td>
     </tr>
 {% endif %}
 {% if profile.4.enabled %}
     <tr id="pers_proftitle5_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile title 5</strong>
+            <strong>Profile 5 heading</strong>
         </td>
         <td><input type="text" size="50" name="profile_title_4" id="profile_title_4" value="{{ profile.4.title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo5_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
-            <strong>Profile info 5</strong>
+            <strong>Profile 5</strong>
         </td>
-        <td>{{ profile.4.textarea.getBuffer|raw }}
-        <div style="text-align: center;">
-            <input type="button" value="Preview" class="hidden button_preview_{{ profile.4.textarea.getID }}" tabindex="1" />
-        </div></td>
+        <td>
+            {{ profile.4.ta.emit|raw }}
+        </td>
     </tr>
 {% endif %}
+    <tr id="pers_lastfm_tr">
+        <td class="label tooltip_interactive" title="This is used to display &lt;a href=&quot;http://www.last.fm/&quot;&gt;Last.fm&lt;/a&gt; information on your profile. Entering your Last.fm username will allow others to see your Last.fm account." data-title-plain="This is used to display Last.fm information on your profile. Entering your Last.fm username will allow others to see your Last.fm account.">
+            <strong>Last.fm username</strong>
+        </td>
+        <td><input type="text" size="50" name="lastfm_username" id="lastfm_username" value="{{ user.LastFMusername }}" />
+        </td>
+    </tr>
 </table>

@@ -46,7 +46,7 @@ $personalAllowed = $user->canCreatePersonalCollage();
             <tr>
                 <td class="label">Description</td>
                 <td>
-                    <textarea name="description" id="description" cols="60" rows="10"><?=display_str($Description ?? '')?></textarea>
+                    <?= (new Gazelle\Util\Textarea('description', display_str($Description ?? ''), 60, 10))->emit() ?>
                 </td>
             </tr>
             <tr>

@@ -77,7 +77,7 @@ View::show_header('Edit torrent group');
                 <label><input type="checkbox" name="no_cover_art" value="1" <?=($noCoverArt ? 'checked="checked" ' : '')?>/> No release cover art</label><br /><br />
 
                 <h3>Torrent group description:</h3>
-                <textarea name="body" cols="91" rows="20"><?=$Body?></textarea><br />
+                <?= (new Gazelle\Util\Textarea('body', display_str($Body), 80, 20))->emit() ?>
 <?php if ($CategoryID == 1) { ?>
                 <h3>Release type:
                     <select id="releasetype" name="releasetype">

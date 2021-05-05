@@ -6,7 +6,7 @@
 {% else %}
     <h3>{% if forum %}Post reply{% else %}Post comment{% endif %}</h3>
     <div class="box pad">
-        <table class="forum_post box vertical_margin hidden preview_wrap" id="preview_wrap_{{ textarea.getID }}">
+        <table class="forum_post box vertical_margin hidden preview_wrap" id="{{ textarea.previewId }}">
             <colgroup>
 {% if user.showAvatars %}
                 <col class="col_avatar" />
@@ -31,9 +31,7 @@
                 </td>
 {% endif %}
                 <td class="body" valign="top">
-                    <div id="contentpreview" style="text-align: left;">
-                        <div id="preview_{{ textarea.getID }}"></div>
-                    </div>
+                    {{ textarea.preview|raw }}
                 </td>
             </tr>
         </table>
@@ -42,7 +40,7 @@
             <input type="hidden" name="auth" value="{{ auth }}" />
             <input type="hidden" name="{{ name }}" value="{{ id }}" />
             <div id="quickreplytext">
-                {{ textarea.getBuffer|raw }}
+                {{ textarea.field|raw }}
                 <br />
             </div>
             <div class="preview_submit">
@@ -59,7 +57,7 @@
                 </script>
     {% endif %}
 {% endif %}
-                <input type="button" value="Preview" class="hidden button_preview_{{ textarea.getID }}" tabindex="1" />
+                {{ textarea.button|raw }}
                 <input type="submit" value="Post reply" id="submit_button" tabindex="1" />
             </div>
         </form>

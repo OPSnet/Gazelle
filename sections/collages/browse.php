@@ -277,8 +277,8 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'co
     <h2>Your search did not match anything.</h2>
     <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
 <?php   } ?>
-</div><!--box-->
-</div><!--content-->
+</div>
+</div>
 <?php   View::show_footer();
         die();
     }

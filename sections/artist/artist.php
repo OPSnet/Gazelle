@@ -692,6 +692,8 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total());
 echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Artist($Twig, $LoggedUser['ID'], $ArtistID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
+$textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
+$textarea->setAutoResize()->setPreviewManual(true);
 echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
@@ -700,8 +702,7 @@ echo $Twig->render('reply.twig', [
     'id'       => $ArtistID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
-    'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
-        70, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+    'textarea' => $textarea,
     'url'      => 'comments.php?page=artist',
     'user'     => $User,
 ]);

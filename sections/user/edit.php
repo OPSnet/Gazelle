@@ -54,11 +54,11 @@ if (!count($UserNavItems)) {
 }
 
 $enabledReward = $User->enabledDonorRewards();
-$profileReward = $User->donorRewards();
+$profileReward = $User->profileDonorRewards();
 $profile = [
     0 => [
-        'title'    => $InfoTitle,
-        'textarea' => new TEXTAREA_PREVIEW('info', 'info', display_str($Info), 40, 8, false, false, true),
+        'title' => $InfoTitle,
+        'ta'    => new Gazelle\Util\Textarea('info', $Info, 42, 8),
     ]
 ];
 foreach (range(1, 4) as $level) {
@@ -68,9 +68,9 @@ foreach (range(1, 4) as $level) {
         ];
     } else {
         $profile[$level] = [
-            'enabled'  => true,
-            'title'    => display_str($profileReward["ProfileInfoTitle$level"]),
-            'textarea' => new TEXTAREA_PREVIEW("profile_info_$level", "profile_info_$level", display_str($profileReward["ProfileInfo$level"]), 40, 8, false, false, true),
+            'enabled' => true,
+            'title'   => display_str($profileReward["ProfileInfoTitle$level"]),
+            'ta'      => new Gazelle\Util\Textarea("profile_info_$level", $profileReward["ProfileInfo$level"], 42, 8),
         ];
     }
 }

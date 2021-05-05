@@ -83,6 +83,22 @@ function Categories() {
     var dynamic_form = $('#dynamic_form');
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
         dynamic_form.raw().innerHTML = response;
+        if ($('#categories').val() == 0) { /* Music */
+            musicFormInit();
+        }
+    });
+    ajax.get('ajax.php?action=upload_section&js=1&categoryid=' + $('#categories').raw().value, function (response) {
+        script = document.createElement('script', {'type': 'text/javascript'});
+        script.innerHTML = response;
+        document.body.append(script);
+        console.log('append done');
+    });
+}
+
+function Categories0() {
+    var dynamic_form = $('#dynamic_form');
+    ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
+        dynamic_form.raw().innerHTML = response;
         eval($('#dynamic_form script.preview_code').html());
         setTimeout(function() {
             dynamic_form.data('loaded', true);

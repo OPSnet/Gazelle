@@ -53,6 +53,7 @@ if (!$create) {
 }
 
 if ($contest instanceof Gazelle\Contest\RequestFill) {
+    $userMan = new Gazelle\Manager\User;
 ?>
     <div class="box pad">
         <h2>Request pairs</h2>
@@ -71,12 +72,12 @@ if ($contest instanceof Gazelle\Contest\RequestFill) {
             </tr>
 <?php
             foreach ($Pairs as $p) {
-                $filler  = Users::user_info($p['FillerID']);
-                $creator = Users::user_info($p['UserID']);
+                $filler  = $userMan->findById($p['FillerID']);
+                $creator = $userMan->findById($p['UserID']);
 ?>
             <tr>
-                <td><?= $filler['Username'] ?></td>
-                <td><?= $creator['Username'] ?></td>
+                <td><?= $filler->username() ?></td>
+                <td><?= $creator->username() ?></td>
                 <td><?= $p['nr'] ?></td>
             </tr>
 <?php       } ?>
@@ -94,7 +95,7 @@ if ($create || $contest) {
         'contest'    => $contest,
         'create'     => $create,
         'type'       => $contestTypes,
-        'intro'      => new TEXTAREA_PREVIEW('description', 'description', $create ? '' : display_str($contest->description()), 60, 8, false, false, true),
+        'intro'      => new Gazelle\Util\Textarea('description', $create ? '' : $contest->description(), 60, 8),
         'user_count' => (new \Gazelle\Manager\User())->getEnabledUsersCount(),
     ]);
 ?>

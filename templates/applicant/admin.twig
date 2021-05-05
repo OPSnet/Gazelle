@@ -73,9 +73,7 @@
 {% endif %}
                 <input type="hidden" name="user_id" value="{{ user_id }}"/>
                 <input type="hidden" name="auth" value="{{ auth }}"/>
-                {{ text.preview|raw }}
-                {{ text.textarea|raw }}
-                {{ text.button|raw }}
+                {{ text.emit|raw }}
                 <input type="submit" id="submit" value="Save Role"/>
             </td>
         </tr>

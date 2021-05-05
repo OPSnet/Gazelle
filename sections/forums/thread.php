@@ -249,7 +249,7 @@ if ($threadInfo['NoPoll'] == 0) {
             </div>
 <?php
     }
-    if (check_perms('forums_polls_moderate') && !$RevealVoters) {
+    if ($viewer->permitted('forums_polls_moderate') && !$RevealVoters) {
         if (!$Featured) {
 ?>
             <form class="manage_form" name="poll" action="forums.php" method="post">
@@ -321,22 +321,22 @@ foreach ($thread as $Key => $Post) {
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?= $author->username() ?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
-    if ((!$threadInfo['isLocked'] && $viewer->writeAccess($forum) && $AuthorID == $viewer->id()) && !$viewer->disablePosting() || check_perms('site_moderate_forums')) {
+    if ((!$threadInfo['isLocked'] && $viewer->writeAccess($forum) && $AuthorID == $viewer->id()) && !$viewer->disablePosting() || $viewer->permitted('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
-<?php if (check_perms('site_forum_post_delete') && $threadInfo['Posts'] > 1) { ?>
+<?php if ($viewer->permitted('site_forum_post_delete') && $threadInfo['Posts'] > 1) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>
 <?php
     }
     if ($PostID == $threadInfo['StickyPostID']) { ?>
                 <strong><span class="sticky_post_label" class="brackets">Pinned</span></strong>
-<?php   if (check_perms('site_moderate_forums')) { ?>
+<?php   if ($viewer->permitted('site_moderate_forums')) { ?>
                 - <a href="forums.php?action=sticky_post&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>&amp;remove=true&amp;auth=<?=$auth?>" title="Unpin this post" class="brackets tooltip">X</a>
 <?php
         }
     } else {
-        if (check_perms('site_moderate_forums')) {
+        if ($viewer->permitted('site_moderate_forums')) {
 ?>
                 - <a href="forums.php?action=sticky_post&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>&amp;auth=<?=$auth?>" title="Pin this post" class="tooltip" style="font-size: 1.4em">&#X1f4cc;</a>
 <?php
@@ -349,7 +349,7 @@ foreach ($thread as $Key => $Post) {
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
     $author = new Gazelle\User($AuthorID);
-    if (check_perms('users_warn') && $viewer->id() != $AuthorID && $viewer->classLevel() >= $author->classLevel()) {
+    if ($viewer->permitted('users_warn') && $viewer->id() != $AuthorID && $viewer->classLevel() >= $author->classLevel()) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn" />
@@ -378,7 +378,7 @@ foreach ($thread as $Key => $Post) {
                 <br />
                 <br />
                 <span class="last_edited">
-<?php       if (check_perms('site_admin_forums')) { ?>
+<?php       if ($viewer->permitted('site_admin_forums')) { ?>
                 <a href="#content<?=$PostID?>" onclick="LoadEdit('forums', <?=$PostID?>, 1); return false;">&laquo;</a>
 <?php       } ?>
                 Last edited by
@@ -398,7 +398,10 @@ foreach ($thread as $Key => $Post) {
 <?php
 echo $paginator->linkbox();
 $lastPost = end($thread);
-if (check_perms('site_moderate_forums') || ($viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
+$textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
+$textarea->setPreviewManual(true);
+
+if ($viewer->permitted('site_moderate_forums') || ($viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
     echo $Twig->render('reply.twig', [
         'auth'     => $LoggedUser['AuthKey'],
         'action'   => 'reply',
@@ -407,8 +410,7 @@ if (check_perms('site_moderate_forums') || ($viewer->writeAccess($forum) && !$th
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $viewer->id(),
         'name'     => 'thread',
         'subbed'   => $isSubscribed,
-        'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
-            90, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+        'textarea' => $textarea,
         'user'     => $viewer,
     ]);
 }
@@ -434,7 +436,7 @@ if (count($transitions)) {
     </table>
 <?php
 }
-if (check_perms('site_moderate_forums')) {
+if ($viewer->permitted('site_moderate_forums')) {
     $Notes = $forum->threadNotes($threadId);
 ?>
     <br />
@@ -518,7 +520,7 @@ if (check_perms('site_moderate_forums')) {
                     </select>
                 </td>
             </tr>
-<?php    if (check_perms('site_admin_forums')) { ?>
+<?php    if ($viewer->permitted('site_admin_forums')) { ?>
             <tr>
                 <td class="label"><label for="delete_thread_checkbox">Delete thread</label></td>
                 <td>
@@ -533,7 +535,7 @@ if (check_perms('site_moderate_forums')) {
             </tr>
         </table>
     </form>
-<?php } // check_perms('site_moderate_forums') ?>
+<?php } // $viewer->permitted('site_moderate_forums') ?>
 </div>
 <?php
 view::show_footer();
