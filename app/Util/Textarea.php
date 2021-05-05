@@ -6,12 +6,6 @@ class Textarea extends \Gazelle\Base {
 
     /**
      * @static
-     * @var Twig context
-     */
-    protected static $twig;
-
-    /**
-     * @static
      * @var array of textareas
      */
     protected static $list = [];
@@ -41,9 +35,15 @@ class Textarea extends \Gazelle\Base {
      */
     protected $cols;
 
-    public static function twig($twig) {
-        self::$twig = $twig;
-    }
+    /**
+     * @var bool the id (preview_wrap_<n>) is handled manually in the markup
+     */
+    protected $previewManual = false;
+
+    /**
+     * @var int extra attributes on the textarea field
+     */
+    protected $extra = [];
 
     /**
      * This method must be called once to enable activation.
@@ -52,14 +52,16 @@ class Textarea extends \Gazelle\Base {
         if (!self::$list) {
             return '';
         }
-        $html = '<script type="text/javascript" src="' . STATIC_SERVER . '/functions/textareapreview.class.js?v='
+        return '<script type="text/javascript" src="' . STATIC_SERVER . '/functions/textareapreview.class.js?v='
             . filemtime(SERVER_ROOT . '/public/static/functions/textareapreview.class.js')
-            . '"></script>';
-        $n = 0;
-        foreach (self::$list as $name) {
-            $html .= '<script type="text/javascript" class="preview_code">'
-                . '$(document).ready(function () { TextareaPreview.factory([[' . $n++ . ', "' . $name . '"]]); });</script>';
-        }
+            . '"></script><script type="text/javascript">console.log("foo");$(document).ready(function () {' . self::factory() . '});</script>';
+    }
+
+    /**
+     * Emit the javascript required to activate the textareas dynamically (see the upload form)
+     */
+    public static function factory(): string {
+        $html = 'console.log("bar");TextareaPreview.factory([' . implode(',', self::$list) . ']);';
         self::$list = [];
         return $html;
     }
@@ -75,26 +77,63 @@ class Textarea extends \Gazelle\Base {
     public function __construct(string $name, string $value, int $cols = 72, int $rows = 10) {
         parent::__construct();
         $this->id     = count(self::$list);
-        self::$list[] = $name;
         $this->name   = $name;
         $this->value  = $value;
         $this->cols   = $cols;
         $this->rows   = $rows;
+        self::$list[] = "[{$this->id}, '$name']";
+    }
+
+    public function id(): int {
+        return $this->id;
+    }
+
+    public function previewId(): string {
+        return "preview_wrap_" . $this->id;
+    }
+
+    public function setAutoResize() {
+        $this->extra[] = "onkeyup=\"resize('{$this->name}')\"";
+        return $this;
+    }
+
+    public function setDisabled() {
+        $this->extra[] = "disabled=\"disabled\"";
+        return $this;
+    }
+
+    public function setPreviewManual(bool $previewManual) {
+        $this->previewManual = $previewManual;
+        return $this;
     }
 
     /**
      * emit the DOM elements for previewing the content
      */
     public function preview(): string {
-        return '<div id="preview_wrap_' . $this->id . '" class="preview_wrap hidden"><div id="preview_'
-            . $this->id . '" class="text_preview tooltip" title="Double-click to edit"></div></div>';
+        if ($this->previewManual) {
+            $attr = [
+                'class="preview_wrap"',
+            ];
+        } else {
+            $attr = [
+                'id="' . $this->previewId() . '"',
+                'class="preview_wrap hidden"',
+            ];
+        }
+        return '<div ' . implode(' ', $attr) . '><div id="preview_' . $this->id
+            . '" class="text_preview tooltip" title="Double-click to edit"></div></div>';
     }
 
-    public function textarea(): string {
+    public function field(): string {
+        $attr = array_merge($this->extra, [
+            'name="' . $this->name . '"',
+            'id="' . $this->name . '"',
+            'cols="' . $this->cols . '"',
+            'rows="' . $this->rows . '"',
+        ]);
         return '<div id="textarea_wrap_' . $this->id . '" class="field_div textarea_wrap">'
-            . '<textarea name="' . $this->name
-            . '" id="' . $this->name . '" cols="' . $this->cols . '" rows="' . $this->rows . '">'
-            . $this->value . '</textarea></div>';
+            . '<textarea ' . implode(' ', $attr ) . '>' . $this->value . '</textarea></div>';
     }
 
     /**
@@ -103,5 +142,14 @@ class Textarea extends \Gazelle\Base {
     public function button(): string {
         return '<input type="button" class="hidden button_preview_'
             . $this->id . '" value="Preview" title="Preview text" />';
+    }
+
+    /**
+     * Emit everything
+     */
+    public function emit(): string {
+        return $this->preview()
+            . $this->field()
+            . $this->button();
     }
 }

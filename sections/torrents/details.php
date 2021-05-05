@@ -921,6 +921,9 @@ echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Torrent($Twig, $LoggedUser['ID'], $GroupID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
+
+$textarea = new Gazelle\Util\Textarea('quickpost', '');
+$textarea->setAutoResize()->setPreviewManual(true);
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $LoggedUser['AuthKey'],
@@ -928,8 +931,7 @@ echo $Twig->render('reply.twig', [
     'id'       => $GroupID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
-    'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
-        65, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+    'textarea' => $textarea,
     'url'      => 'comments.php?page=torrents',
     'user'     => $user,
 ]);
