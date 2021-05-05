@@ -3,12 +3,9 @@
 use \Gazelle\Util\Irc;
 
 authorize();
+enforce_login();
 
 $Viewer = new Gazelle\User($LoggedUser['ID']);
-if (!$Viewer->permitted('zip_downloader')) {
-    header('HTTP/1.1 403 Forbidden');
-    exit;
-}
 if ($Viewer->isLocked()) {
     header('HTTP/1.1 403 Forbidden');
     exit;
