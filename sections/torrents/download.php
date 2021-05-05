@@ -113,10 +113,10 @@ if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
 
     // First make sure this isn't already FL, and if it is, do nothing
     if (!Torrents::has_token($torrentId)) {
-        if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
+        if (!STACKABLE_FREELEECH_TOKENS && $info['Size'] >= BYTES_PER_FREELEECH_TOKEN) {
             json_or_error('This torrent is too large. Please use the regular DL link.');
         }
-        $tokensToUse = (int)ceil($Size / BYTES_PER_FREELEECH_TOKEN);
+        $tokensToUse = (int)ceil($info['Size'] / BYTES_PER_FREELEECH_TOKEN);
         $DB->begin_transaction();
         $DB->prepared_query('
             UPDATE user_flt SET
