@@ -39,7 +39,7 @@ if (($info = $Cache->get_value($key)) === false) {
             t.Media,
             t.Format,
             t.Encoding,
-            if(t.RemasterYear = 0, tg.Year, t.RemasterYear),
+            if(t.RemasterYear = 0, tg.Year, t.RemasterYear) AS Year,
             t.Size,
             t.FreeTorrent,
             t.info_hash,
@@ -127,7 +127,7 @@ if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
         }
 
         // Let the tracker know about this
-        if (!(new Gazelle\Tracker)->update_tracker('add_token', ['info_hash' => rawurlencode($info['InfoHash']), 'userid' => $userId])) {
+        if (!(new Gazelle\Tracker)->update_tracker('add_token', ['info_hash' => rawurlencode($info['info_hash']), 'userid' => $userId])) {
             $DB->rollback();
             json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
         }
@@ -152,7 +152,7 @@ $DB->prepared_query("
 );
 Torrents::set_snatch_update_time($userId, Torrents::SNATCHED_UPDATE_AFTERDL);
 
-if ($info['CategoryID'] == '1' && $info['Image'] != '' && $info['uploaderId'] != $userId) {
+if ($info['CategoryID'] == '1' && $info['WikiImage'] != '' && $info['uploaderId'] != $userId) {
     $Cache->delete_value("user_recent_snatch_$userId");
 }
 $Cache->delete_value('user_rlim_' . $userId);
