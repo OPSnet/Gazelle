@@ -206,7 +206,7 @@ abstract class Collector extends Base  {
             $this->skip($info);
             return;
         }
-        $contents = $this->torMan->torrentBody($info['TorrentID'], $this->user->announceKey());
+        $contents = $this->torMan->torrentBody($info['TorrentID'], $this->user->announceUrl());
         if ($contents === '') {
             $this->fail($info);
             return;
