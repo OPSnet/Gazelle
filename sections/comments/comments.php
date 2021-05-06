@@ -24,35 +24,31 @@ function createdBy(int $ownProfile, string $user, string $objects): string {
     return $ownProfile ? "your $objects" : "$objects created by $user";
 }
 
+$userMan = new Gazelle\Manager\User;
+$Viewer = $userMan->findById($LoggedUser['ID']);
+
 // who is it?
 if (!isset($_GET['id'])) {
-    $UserID   = $LoggedUser['ID'];
-    $Username = $LoggedUser['Username'];
+    $User = $Viewer;
 } else {
-    $UserID = (int)$_GET['id'];
-    if (!$UserID) {
+    $User = $userMan->findById((int)($_GET['id'] ?? 0));
+    if (is_null($User)) {
         error(404);
     }
-    $UserInfo = Users::user_info($UserID);
-    $Perms = Permissions::get_permissions($UserInfo['PermissionID']);
-    if (!check_paranoia('torrentcomments', $UserInfo['Paranoia'], $Perms['Class'], $UserID)) {
+    if (!$User->propertyVisible($Viewer, 'torrentcomments')) {
         error(403);
     }
-    $Username = $UserInfo['Username'];
 }
+$UserID   = $User->id();
+$Username = $User->username();
+$Userlink = Users::format_username($UserID, false, false, false);
 
 if ($LoggedUser['ID'] == $UserID) {
     $ownProfile = true;
     $linkId     = '';
-    $have       = 'you have';
-    $who        = 'you';
-    $whoHas     = 'you have';
 } else {
     $ownProfile = false;
     $linkId     = "&amp;id=$UserID";
-    $have       = "$Username has";
-    $who        = $Username;
-    $whoHas     = Users::format_username($UserID, false, false, false) . ' has';
 }
 
 $Action   = $_REQUEST['action'] ?? 'torrents';
@@ -70,8 +66,7 @@ $TypeLinks = [];
 
 switch ($Action) {
     case 'artist':
-        $Header = 'Artist comments left by %s';
-        $Title = 'Artist comments left by ' . $who;
+        $Title = '%s &rsaquo; Artist comments';
 
         $table       = 'artists_group AS ag';
         $idField     = 'ag.ArtistID';
@@ -89,38 +84,35 @@ switch ($Action) {
     case 'collages':
         switch ($Type) {
             case 'created':
-                $Header = 'Comments left on collages %s created';
-                $Title  = 'Comments left on collages ' . $who . ' created';
+                $Title = "%s &rsaquo; Comments on their collages";
                 $condition[] = "cl.UserID = ?";
                 $condition[] = "C.AuthorID != ?";
                 $condArgs[] = $UserID;
                 $condArgs[] = $UserID;
                 $TypeLinks = [
-                    [$BaseLink, "Display comments left on collages $have made"],
-                    [$BaseLink . "&amp;type=contributed", "Display comments left on collages $have contributed to"],
+                    [$BaseLink, "$Username &rsaquo; Collage comments"],
+                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Contributed collage comments"],
                 ];
                 break;
             case 'contributed':
-                $Header = 'Comments left on collages %s contributed to';
-                $Title  = 'Comments left on collages ' . $have . ' contributed to';
+                $Title = '%s &rsaquo; Contributed collage comments';
                 $condition[] = "C.AuthorID != ? AND cl.ID IN (
                     SELECT DISTINCT CollageID FROM collages_torrents ct WHERE ct.UserID = ?
                     UNION ALL
                     SELECT DISTINCT CollageID FROM collages_artists ca WHERE ca.UserID = ?)";
                 $condArgs = array_merge($condArgs, [$UserID, $UserID, $UserID]);
                 $TypeLinks = [
-                    [$BaseLink, "Display comments left on collages $have made"],
-                    ["$BaseLink&amp;type=created", "Display comments left on " . createdBy($ownProfile, $Username, 'collages')],
+                    [$BaseLink, "$Username &rsaquo; Collage comments"],
+                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Comments on their collages"],
                 ];
                 break;
             default:
-                $Header = 'Collage comments left by %s';
-                $Title  = 'Collage comments left by ' . $who;
+                $Title = "%s &rsaquo; Collage comments";
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[]  = $UserID;
                 $TypeLinks = [
-                    ["$BaseLink&amp;type=contributed", "Display comments left on collages $have contributed to"],
-                    ["$BaseLink&amp;type=created", "Display comments left on " . createdBy($ownProfile, $Username, 'collages')],
+                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Contributed collage comments"],
+                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Comments on their collages"],
                 ];
                 break;
         }
@@ -140,38 +132,35 @@ switch ($Action) {
     case 'requests':
         switch($Type) {
             case 'created':
-                $Header = 'Comments left on requests %s created';
-                $Title  = 'Comments left on requests ' . $who . ' created';
+                $Title = "%s &rsaquo; Comments on their requests";
                 $condition[] = "r.UserID = ?";
                 $condition[] = "C.AuthorID != ?";
                 $condArgs[] = $UserID;
                 $condArgs[] = $UserID;
                 $TypeLinks = [
-                    [$BaseLink, "Display comments left on requests $have made"],
-                    ["$BaseLink&amp;type=voted", "Display comments left on requests $have voted on"],
+                    [$BaseLink, "$Username &rsaquo; Request comments"],
+                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Voted-on request comments"],
                 ];
                 break;
             case 'voted':
-                $Header = 'Comments left on requests %s voted on';
-                $Title  = 'Comments left on requests ' . $who . ' voted on';
+                $Title = "%s &rsaquo; Comments on voted-on requests";
                 $Join[] = 'INNER JOIN requests_votes rv ON (rv.RequestID = r.ID)';
                 $condition[] = "rv.UserID = ?";
                 $condition[] = "C.AuthorID != ?";
                 $condArgs[] = $UserID;
                 $condArgs[] = $UserID;
                 $TypeLinks = [
-                    [$BaseLink, "Display comments left on requests $have made"],
-                    ["$BaseLink&amp;type=created", "Display comments left on requests $have created"],
+                    [$BaseLink, "$Username &rsaquo; Request comments"],
+                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Created request comments"],
                 ];
                 break;
             default:
-                $Header = 'Request comments left by %s';
-                $Title  = 'Request comments left by ' . $who;
+                $Title = "%s &rsaquo; Request comments";
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[] = $UserID;
                 $TypeLinks = [
-                    ["$BaseLink&amp;type=created", "Display comments left on requests $have created"],
-                    ["$BaseLink&amp;type=voted", "Display comments left on requests $have voted on"],
+                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Created request comments"],
+                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Voted-on request comments"],
                 ];
                 break;
         }
@@ -190,22 +179,20 @@ switch ($Action) {
     case 'torrents':
         switch($Type) {
             case 'uploaded':
-                $Header = 'Comments left on torrents %s uploaded';
-                $Title  = 'Comments left on torrents ' . $who . ' uploaded';
+                $Title = "%s &rsaquo; Comments on their uploads";
                 $Join[] = 'INNER JOIN torrents t ON (t.GroupID = tg.ID)';
                 $condition[] = 'C.AddedTime > t.Time';
                 $condition[] = "C.AuthorID != ?";
                 $condition[] = "t.UserID = ?";
                 $condArgs[] = $UserID;
                 $condArgs[] = $UserID;
-                $TypeLinks[] = [$BaseLink, "Display comments $have made on torrents"];
+                $TypeLinks[] = [$BaseLink, "$Username &rsaquo; Torrent comments"];
                 break;
             default:
-                $Header = 'Torrent comments left by %s';
-                $Title  = 'Torrent comments left by ' . $who;
+                $Title = "%s &rsaquo; Torrent comments";
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[] = $UserID;
-                $TypeLinks[] = ["$BaseLink&amp;type=uploaded", "Display comments left on torrents $have uploaded"];
+                $TypeLinks[] = ["$BaseLink&amp;type=uploaded", "$Username &rsaquo; Comments on their uploads"];
                 break;
         }
 
@@ -280,15 +267,12 @@ $Links = implode(' ', $ActionLinks)
         : ''
     );
 
-View::show_header($Title, 'bbcode,comments');
+View::show_header(sprintf($Title, $Username), 'bbcode,comments');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= sprintf($Header, $ownProfile
-            ? 'you'
-            : Users::format_username($UserID, false, false, false)
-        ) ?></h2>
-<?php if ($Links) { ?>
+        <h2><?= sprintf($Title, $Userlink) ?></h2>
+<?php if ($Links != '') { ?>
         <div class="linkbox">
             <?= $Links ?>
         </div>
@@ -303,8 +287,6 @@ View::show_header($Title, 'bbcode,comments');
 } else {
     $isAdmin = check_perms('site_admin_forums');
     $commentMan = new Gazelle\Manager\Comment;
-    $userMan = new Gazelle\Manager\User;
-    $user = $userMan->findById($LoggedUser['ID']);
     $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
         $author = new Gazelle\User($AuthorID);
@@ -333,7 +315,7 @@ View::show_header($Title, 'bbcode,comments');
             'id'          => $PostID,
             'is_admin'    => $isAdmin,
             'heading'     => $heading,
-            'show_avatar' => $user->showAvatars(),
+            'show_avatar' => $Viewer->showAvatars(),
             'show_delete' => check_perms('site_forum_post_delete'),
             'show_edit'   => check_perms('site_moderate_forums') || $ownProfile,
             'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author->classLevel(),

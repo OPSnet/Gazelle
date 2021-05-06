@@ -4,37 +4,11 @@ if (!check_perms('admin_staffpm_stats')) {
     error(403);
 }
 
-require(__DIR__ . '/../staff/functions.php');
 $View   = ($_REQUEST['view'] ?? 'staff');
 $Action = ($_REQUEST['action'] ?? 'stats');
 
-View::show_header('Staff Inbox');
-?>
-    <div class="thin">
-        <div class="linkbox">
-<?php if ($user->isStaff()) { ?>
-            <a href="staffpm.php" class="brackets">View your unanswered</a>
-<?php } ?>
-            <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
-            <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
-            <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
-            <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
-            <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
-<?php if ($user->isFLS()) { ?>
-            <span class="tooltip" title="The Staff PMs that you created are here."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
-<?php } ?>
-        </div>
-        <div class="head">Statistics</div>
-        <div class="box pad">
-        <table>
-        <tr>
-            <td style="width: 50%; vertical-align: top;">
-<?php
-
-$SupportStaff = get_support();
-[$FrontLineSupport, $Staff] = $SupportStaff;
-$SupportStaff = array_merge($FrontLineSupport, ...array_values($Staff));
-$SupportStaff = array_column($SupportStaff, 'ID');
+$userMan = new Gazelle\Manager\User;
+$SupportStaff = array_merge(array_keys($userMan->flsList()), array_keys($userMan->staffList()));
 
 if ($View != 'staff') {
     $IN    = "NOT IN";
@@ -59,8 +33,8 @@ $BaseSQL = sprintf("
         count(*) AS Num,
         %s AS Extra
     FROM staff_pm_messages AS spm
-    INNER JOIN users_main AS um ON um.ID=spm.UserID
-    INNER JOIN permissions p ON p.ID = um.PermissionID
+    INNER JOIN users_main AS um ON (um.ID = spm.UserID)
+    INNER JOIN permissions p ON (p.ID = um.PermissionID)
     WHERE spm.SentDate > now() - INTERVAL ? DAY AND p.Level <= ? AND um.ID %s (%s)
     GROUP BY spm.UserID
     ORDER BY Num DESC
@@ -70,7 +44,28 @@ $BaseSQL = sprintf("
 
 $DB->prepared_query($BaseSQL, 1, 1, $LoggedUser['Class'], ...$SupportStaff);
 $Results = $DB->to_array();
+
+View::show_header('Staff Inbox');
 ?>
+    <div class="thin">
+        <div class="linkbox">
+<?php if ($user->isStaff()) { ?>
+            <a href="staffpm.php" class="brackets">View your unanswered</a>
+<?php } ?>
+            <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
+            <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
+            <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
+            <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+            <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
+<?php if ($user->isFLS()) { ?>
+            <span class="tooltip" title="The Staff PMs that you created are here."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
+<?php } ?>
+        </div>
+        <div class="head">Statistics</div>
+        <div class="box pad">
+        <table>
+        <tr>
+            <td style="width: 50%; vertical-align: top;">
             <strong>Inbox actions in the last 24 hours</strong>
             <table class="noborder">
                 <tr class="colhead">
@@ -78,10 +73,7 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php
-foreach ($Results as $Result) {
-    [$UserID, $Username, $Num, $Extra] = $Result;
-?>
+<?php foreach ($Results as list($UserID, $Username, $Num, $Extra)) { ?>
                 <tr>
                     <td><a href="/reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                     <td><?=$Num?></td>
@@ -101,10 +93,7 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php
-foreach ($Results as $Result) {
-    [$UserID, $Username, $Num, $Extra] = $Result;
-?>
+<?php foreach ($Results as list($UserID, $Username, $Num, $Extra)) { ?>
                 <tr>
                     <td><a href="/reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                     <td><?=$Num?></td>
@@ -124,10 +113,7 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php
-foreach ($Results as $Result) {
-    [$UserID, $Username, $Num, $Extra] = $Result;
-?>
+<?php foreach ($Results as list($UserID, $Username, $Num, $Extra)) { ?>
                 <tr>
                     <td><a href="/reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                     <td><?=$Num?></td>
@@ -148,10 +134,7 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php
-foreach ($Results as $Result) {
-    [$UserID, $Username, $Num, $Extra] = $Result;
-?>
+<?php foreach ($Results as list($UserID, $Username, $Num, $Extra)) { ?>
                 <tr>
                     <td><a href="/reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                     <td><?=$Num?></td>
@@ -163,6 +146,5 @@ foreach ($Results as $Result) {
         </table>
         </div>
     </div>
-
 <?php
 View::show_footer();

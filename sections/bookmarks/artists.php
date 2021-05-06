@@ -1,18 +1,23 @@
 <?php
 
-if (empty($_GET['userid'])) {
-    $UserID = $LoggedUser['ID'];
+$userMan = new Gazelle\Manager\User;
+$Viewer = $userMan->findById($LoggedUser['ID']);
+
+if (!isset($_GET['userid'])) {
+    $User = $Viewer;
+    $ownProfile = true;
 } else {
-    if (!check_perms('users_override_paranoia')) {
-        error(403);
-    }
-    $UserID = (int)$_GET['userid'];
-    if (!$UserID) {
+    $User = $userMan->findById((int)($_GET['userid'] ?? 0));
+    if (is_null($User)) {
         error(404);
     }
+    $ownProfile = $User->id() == $Viewer->id();
+    if (!$ownProfile && !$Viewer->permitted('users_override_paranoia')) {
+        error(403);
+    }
 }
-$Username = Users::user_info($UserID)['Username'];
-$Sneaky = $UserID !== $LoggedUser['ID'];
+$UserID   = $User->id();
+$Username = $User->username();
 
 $DB->prepared_query("
     SELECT ag.ArtistID, ag.Name
@@ -24,7 +29,22 @@ $DB->prepared_query("
 );
 $ArtistList = $DB->to_array();
 
-$Title = $Sneaky ? "$Username's bookmarked artists" : 'Your bookmarked artists';
+$Title = "$Username &rsaquo; Bookmarked artists";
+
+if ($Viewer->permitted('site_torrents_notify')) {
+    if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
+        $DB->prepared_query("
+            SELECT ID, Artists
+            FROM users_notify_filters
+            WHERE Label = 'Artist notifications'
+                AND UserID = ?
+            LIMIT 1
+            ", $LoggedUser['ID']
+        );
+        $Notify = $DB->next_record(MYSQLI_ASSOC);
+        $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
+    }
+}
 
 View::show_header($Title, 'browse');
 ?>
@@ -41,13 +61,14 @@ View::show_header($Title, 'browse');
     <div class="box pad" align="center">
 <?php
 if (count($ArtistList) === 0) { ?>
-        <h2>You have not bookmarked any artists.</h2>
+        <h2>No bookmarked artists</h2>
     </div>
-</div><!--content-->
+</div>
 <?php
     View::show_footer();
-    die();
-} ?>
+    exit;
+}
+?>
     <table width="100%" class="artist_table">
         <tr class="colhead">
             <td>Artist</td>
@@ -64,18 +85,6 @@ foreach ($ArtistList as $Artist) {
                 <span style="float: right;">
 <?php
     if (check_perms('site_torrents_notify')) {
-        if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
-            $DB->prepared_query("
-                SELECT ID, Artists
-                FROM users_notify_filters
-                WHERE Label = 'Artist notifications'
-                    AND UserID = ?
-                LIMIT 1
-                ", $LoggedUser['ID']
-            );
-            $Notify = $DB->next_record(MYSQLI_ASSOC);
-            $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
-        }
         if (stripos($Notify['Artists'], "|$Name|") === false) {
 ?>
                     <a href="artist.php?action=notify&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Notify of new uploads</a>
@@ -84,8 +93,10 @@ foreach ($ArtistList as $Artist) {
 <?php
         }
     }
+    if ($ownProfile) {
 ?>
                     <a href="#" id="bookmarklink_artist_<?=$ArtistID?>" onclick="Unbookmark('artist', <?=$ArtistID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
+<?php } ?>
                 </span>
             </td>
         </tr>

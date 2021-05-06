@@ -178,28 +178,19 @@ if ($threadInfo['NoPoll'] == 0) {
 <?php
         } else {
             //Staff forum, output voters, not percentages
-            require_once(__DIR__ . '/../staff/functions.php');
-            $Staff = get_staff();
-            $StaffNames = [];
-            foreach ($Staff as $Group) {
-                foreach ($Group as $Staffer) {
-                    $StaffNames[] = $Staffer['Username'];
-                }
-            }
-
-            $StaffVotesTmp = $forum->staffVote($threadId);
-            $StaffCount = count($StaffNames);
+            $names = array_map(function ($s) { return $s->username(); }, $userMan->staffList());
+            $staffCount = count($names);
+            $votes = $forum->staffVote($threadId);
             $StaffVotes = [];
-            foreach ($StaffVotesTmp as $StaffVote) {
-                [$Vote, $Names] = $StaffVote;
-                $StaffVotes[$Vote] = $Names;
-                $Names = explode(', ', $Names);
-                $StaffNames = array_diff($StaffNames, $Names);
+            foreach ($votes as list($who, $Vote)) {
+                $StaffVotes[$Vote] = $who;
+                $names = array_diff($names, explode(', ', $who));
             }
-?>            <ul class="nobullet" id="poll_options">
+?>
+            <ul class="nobullet" id="poll_options">
 <?php       foreach ($Answers as $i => $Answer) { ?>
                 <li>
-                    <a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=<?=(int)$i?>"><?=display_str($Answer == '' ? 'Blank' : $Answer)?></a>
+                    <a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=<?=(int)$i?>"><?=$Answer == '' ? 'Blank' : display_str($Answer)?></a>
                      - <?=$StaffVotes[$i]?>&nbsp;(<?=number_format(((float)$Votes[$i] / $TotalVotes) * 100, 2)?>%)
                     <a href="forums.php?action=delete_poll_option&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=<?=(int)$i?>" onclick="return confirm('Are you sure you want to delete this poll option?');" class="brackets tooltip" title="Delete poll option">X</a>
                 </li>
@@ -210,9 +201,9 @@ if ($threadInfo['NoPoll'] == 0) {
             </ul>
 <?php       if ($forumId == STAFF_FORUM_ID) { ?>
             <br />
-            <strong>Votes:</strong> <?=number_format($StaffCount - count($StaffNames))?> / <?=$StaffCount?> current staff, <?=number_format($TotalVotes)?> total
+            <strong>Votes:</strong> <?=number_format($staffCount - count($names))?> / <?=$staffCount?> current staff, <?=number_format($TotalVotes)?> total
             <br />
-            <strong>Missing votes:</strong> <?=implode(", ", $StaffNames); echo "\n";?>
+            <strong>Missing votes:</strong> <?=implode(", ", $names); echo "\n";?>
             <br /><br />
 <?php       } ?>
             <a href="#" onclick="AddPollOption(<?=$threadId?>); return false;" class="brackets">+</a>
