@@ -81,13 +81,13 @@
     {% endfor %}
                     </optgroup>
                     <optgroup label="Staff">
-    {% for id, username in staff %}
-                        <option value="user_{{ id }}"{{ selected(not pm.unassigned and pm.assigned.id == id) }}>{{ username }}</option>
+    {% for u in staff %}
+                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assigned.id == u.id) }}>{{ u.username }}</option>
     {% endfor %}
                     </optgroup>
                     <optgroup label="First Line Support">
-    {% for id, username in fls %}
-                        <option value="user_{{ id }}"{{ selected(not pm.unassigned and pm.assigned.id == id) }}>{{ username }}</option>
+    {% for u in fls %}
+                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assigned.id == u.id) }}>{{ u.username }}</option>
     {% endfor %}
                     </optgroup>
                 </select>

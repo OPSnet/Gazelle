@@ -25,9 +25,9 @@ echo $Twig->render('staffpm/message.twig', [
     'heading'     => $manager->heading($viewer),
     'pm'          => $staffPM,
     'textarea'    => new Gazelle\Util\Textarea('message', '', 90, 10),
-    'staff_level' => $userMan->staffLevelList(),
+    'staff_level' => $userMan->staffClassList(),
     'staff'       => $userMan->staffList(),
-    'fls'         => $userMan->FLSList(),
+    'fls'         => $userMan->flsList(),
     'viewer'      => $viewer,
 ]);
 View::show_footer();
