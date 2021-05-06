@@ -184,23 +184,27 @@ class User extends \Gazelle\Base {
     }
 
     /**
-     * Get list of staff classes by ID
-     * @return array $classes
+     * Get list of FLS names
+     * @return array id => \Gazelle\User
      */
-    public function staffLevelList(): array {
-        if (($staffLevelList = $this->cache->get_value('staff_class')) === false) {
+    public function flsList() {
+        if (($list = $this->cache->get_value('idfls')) === false) {
             $this->db->prepared_query("
-                SELECT ID, Name, Level 
-                FROM permissions
-                WHERE Secondary = 0
-                    AND LEVEL >= (SELECT Level FROM permissions WHERE ID = ?)
-                ORDER BY Level
-                ", FORUM_MOD
+                SELECT um.ID
+                FROM users_main AS um
+                INNER JOIN users_levels AS ul ON (ul.UserID = um.ID)
+                WHERE ul.PermissionID = ?
+                ORDER BY um.Username
+                ", FLS_TEAM
             );
-            $staffLevelList = $this->db->to_array('ID');
-            $this->cache->cache_value('staff_class', $staffLevelList, 0);
+            $list = $this->db->collect(0);
+            $this->cache->cache_value('idfls', $list, 3600);
         }
-        return $staffLevelList;
+        $fls = [];
+        foreach ($list as $id) {
+            $fls[$id] = $this->findById($id);
+        }
+        return $fls;
     }
 
     /**
@@ -208,33 +212,69 @@ class User extends \Gazelle\Base {
      * @return array id => username
      */
     public function staffList(): array {
-        $this->db->prepared_query("
-            SELECT um.ID    AS id,
-                um.Username AS username
-            FROM users_main AS um 
-            INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
-            WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
-            ORDER BY p.Level DESC, um.Username ASC
-            ", FORUM_MOD
-        );
-        return $this->db->to_pair('id', 'username');
+            $this->db->prepared_query("
+                SELECT um.ID    AS id
+                FROM users_main AS um
+                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+                WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
+                ORDER BY p.Level DESC, um.Username ASC
+                ", FORUM_MOD
+            );
+            $list = $this->db->collect(0);
+        $staff = [];
+        foreach ($list as $id) {
+            $staff[$id] = $this->findById($id);
+        }
+        return $staff;
     }
 
     /**
-     * Get list of FLS names
-     * @return array id => username
+     * Get the names of the staff classes sorted by rank
+     * @return array $classes
      */
-    public function FLSList(): array {
-        $this->db->prepared_query("
-            SELECT um.ID    AS id,
-                um.Username AS username
-            FROM users_main AS um 
-            INNER JOIN users_levels ul ON (ul.UserID = um.ID)
-            WHERE ul.PermissionID = ?
-            ORDER BY um.Username ASC
-            ", FLS_TEAM
-        );
-        return $this->db->to_pair('id', 'username');
+    public function staffClassList(): array {
+        if (($staffClassList = $this->cache->get_value('staff_class')) === false) {
+            $this->db->prepared_query("
+                SELECT ID, Name, Level
+                FROM permissions
+                WHERE Secondary = 0
+                    AND LEVEL >= (SELECT Level FROM permissions WHERE ID = ?)
+                ORDER BY Level
+                ", FORUM_MOD
+            );
+            $staffClassList = $this->db->to_array('ID', MYSQLI_ASSOC);
+            $this->cache->cache_value('staff_class', $staffClassList, 0);
+        }
+        return $staffClassList;
+    }
+
+    public function staffListGrouped() {
+        if (($staff = $this->cache->get_value('idstaff')) === false) {
+            $this->db->prepared_query("
+                SELECT sg.Name as staffGroup,
+                    um.ID
+                FROM users_main AS um
+                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+                INNER JOIN staff_groups AS sg ON (sg.ID = p.StaffGroup)
+                WHERE p.DisplayStaff = '1'
+                    AND p.Secondary = 0
+                ORDER BY sg.Sort, p.Level, um.Username
+            ");
+            $list = $this->db->to_array(false, MYSQLI_ASSOC);
+            $staff = [];
+            foreach ($list as $user) {
+                if (!isset($staff[$user['staffGroup']])) {
+                    $staff[$user['staffGroup']] = [];
+                }
+                $staff[$user['staffGroup']][] = $user['ID'];
+            }
+            $this->cache->cache_value('idstaff', $staff, 3600);
+        }
+        $userMan = new \Gazelle\Manager\User;
+        foreach ($staff as &$group) {
+            $group = array_map(function ($userId) use ($userMan) { return $userMan->findById($userId); }, $group);
+        }
+        return $staff;
     }
 
     public function findAllByCustomPermission(): array {

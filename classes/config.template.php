@@ -131,7 +131,6 @@ define('CLIENT_WHITELIST_FORUM_ID', 680); // Client whitelist suggestion forum
 define("PARANOIA_HIDE", 0);
 define("PARANOIA_ALLOWED", 1);
 define("PARANOIA_OVERRIDDEN", 2);
-
 define("PARANOIA_PREVIEW_USER", 1); // change to an unprivileged staff account
 define("PARANOIA_OVERRIDE", [
     'downloaded'       => 'users_mod',
@@ -141,6 +140,7 @@ define("PARANOIA_OVERRIDE", [
     'requiredratio'    => 'users_mod',
     'hide_donor_heart' => 'users_mod',
     'bonuspoints'      => 'admin_bp_history',
+    'torrentcomments'  => 'site_moderate_forums',
     'invitedcount'     => 'users_view_invites',
     'snatched'         => 'users_view_torrents_snatchlist',
     'snatched+'        => 'users_view_torrents_snatchlist',

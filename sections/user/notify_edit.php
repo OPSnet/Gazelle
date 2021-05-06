@@ -54,6 +54,7 @@ $Notifications[] = [
     'Users' => ''
 ];
 
+$userMan = new Gazelle\Manager\User;
 $i = 0;
 foreach ($Notifications as $N) { // $N stands for Notifications
     $i++;
@@ -70,8 +71,10 @@ foreach ($Notifications as $N) { // $N stands for Notifications
 
     $Usernames = [];
     foreach ($N['Users'] as $UserID) {
-        $UserInfo = Users::user_info($UserID);
-        $Usernames[] = $UserInfo['Username'];
+        $u = $userMan->findById((int)$UserID);
+        if (!is_null($u)) {
+            $Usernames[] = $u->username();
+        }
     }
     $Usernames = implode("\n", $Usernames);
 

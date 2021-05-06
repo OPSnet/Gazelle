@@ -74,10 +74,8 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             }
         } else {
             //Staff forum, output voters, not percentages
-
-            $StaffVotes = $forum->staffVotes($threadId);
-            foreach ($StaffVotes as $StaffVote) {
-                [$StaffString, $StaffVoted] = $StaffVote;
+            $vote = $forum->staffVote($threadId);
+            foreach ($vote as list($StaffString, $StaffVoted)) {
 ?>
                 <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
 <?php
