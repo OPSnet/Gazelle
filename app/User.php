@@ -203,12 +203,6 @@ class User extends BaseObject {
                 $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
                 $secondaryClassLevel[$p['ID']] = $p['Level'];
             }
-            $allowed = array_map(function ($id) {return (int)$id;}, explode(',', $p['PermittedForums']) ?: []);
-            foreach ($allowed as $forumId) {
-                if ($forumId) {
-                    $forumAccess[$forumId] = true;
-                }
-            }
         }
         $this->info['effective_class'] = count($secondaryClassLevel)
             ? max($this->info['Class'], ...array_values($secondaryClassLevel))
@@ -230,6 +224,12 @@ class User extends BaseObject {
             $this->info['Permission'][$name] = (bool)$value;
         }
 
+        $allowed = array_map(function ($id) {return (int)$id;}, explode(',', $this->info['PermittedForums']) ?: []);
+        foreach ($allowed as $forumId) {
+            if ($forumId) {
+                $forumAccess[$forumId] = true;
+            }
+        }
         $forbidden = array_map(function ($id) {return (int)$id;}, explode(',', $this->info['RestrictedForums'])) ?: [];
         foreach ($forbidden as $forumId) {
             // forbidden may override permitted

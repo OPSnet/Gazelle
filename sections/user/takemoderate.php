@@ -28,18 +28,8 @@ function enabledStatus($status) {
     }
 }
 
-function disabled (bool $state) {
-    return $state ? 'disabled' : 'enabled';
-}
-
-function classNames(array $classes) {
-    global $DB;
-    return $DB->scalar("
-        SELECT group_concat(Name SEPARATOR ', ')
-        FROM permissions
-        WHERE ID in (" . placeholders($classes) . ")
-        ", ...$classes
-    );
+function revoked(bool $state) {
+    return $state ? 'revoked' : 'restored';
 }
 
 if (!check_perms('users_mod')) {
@@ -49,23 +39,22 @@ if (!check_perms('users_mod')) {
 $userMan = new Gazelle\Manager\User;
 $user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
-    header("Location: log.php?search=User+$userID");
+    header("Location: log.php?search=User+$userId");
     exit;
 }
-$userID = $user->id();
-$ownProfile = $userID === $LoggedUser['ID'];
+$userId = $user->id();
+$ownProfile = $userId === $LoggedUser['ID'];
 
 // Variables for database input
 $class = (int)$_POST['Class'];
 $username = trim($_POST['Username']);
-$title = $_POST['Title'];
+$title = trim($_POST['Title']);
 $adminComment = trim($_POST['AdminComment']);
-$secondaryClasses = isset($_POST['secondary_classes']) ? $_POST['secondary_classes'] : [];
-foreach ($secondaryClasses as $i => $Val) {
-    if (!is_number($Val)) {
-        unset($secondaryClasses[$i]);
-    }
-}
+$secondaryClasses = array_filter(
+    array_map(function ($id) { return (int)$id; }, $_POST['secondary_classes'] ?? [] ),
+    function ($id) { return $id > 0; }
+);
+sort($secondaryClasses);
 $visible = isset($_POST['Visible']) ? '1' : '0';
 $unlimitedDownload = isset($_POST['unlimitedDownload']) ? 1 : 0;
 $invites = (int)$_POST['Invites'];
@@ -87,15 +76,7 @@ if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
     }
 }
 if (isset($_POST['BonusPoints'])) {
-    if (empty($_POST['BonusPoints'])) {
-        $bonusPoints = 0;
-    }
-    elseif ($_POST['BonusPoints'] != strval(floatval($_POST['BonusPoints']))) {
-        error(0);
-    }
-    else {
-        $bonusPoints = round(floatval($_POST['BonusPoints']), 5);
-    }
+    $bonusPoints = empty($_POST['BonusPoints']) ? 0.0 : (float)$_POST['BonusPoints'];
 }
 $Collages = (int)$_POST['Collages'] ?? 0;
 $flTokens = isset($_POST['FLTokens']) ? trim($_POST['FLTokens']) : 0;
@@ -123,8 +104,6 @@ $disableLeech = isset($_POST['DisableLeech']) ? 0 : 1;
 $lockAccount = isset($_POST['LockAccount']) ? 1 : 0;
 $lockType = (int)$_POST['LockType'];
 
-$restrictedForums = trim($_POST['RestrictedForums']);
-$permittedForums = trim($_POST['PermittedForums']);
 $enableUser = (int)$_POST['UserStatus'];
 $resetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
 $resetIPHistory = $_POST['ResetIPHistory'] ?? 0;
@@ -167,10 +146,10 @@ $tracker = new Gazelle\Tracker;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
-    (new Gazelle\Log)->general("User account $userID (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
+    (new Gazelle\Log)->general("User account $userId (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
     $user->remove();
     $tracker->update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
-    header("Location: log.php?search=User+$userID");
+    header("Location: log.php?search=User+$userId");
     exit;
 }
 
@@ -180,16 +159,16 @@ $editSummary = [];
 $trackerUserUpdates = ['passkey' => $cur['torrent_pass']];
 
 if (!$lockType || $lockAccount == 0) {
-    if ($cur['Type']) {
+    if ($cur['locked_account']) {
         $user->unlock();
         $Cache->delete_value('user_' . $cur['torrent_pass']);
         $editSummary[] = 'account unlocked';
     }
 } elseif ($lockType) {
-    if ($cur['Type'] !== $lockType) {
+    if ($cur['locked_account'] !== $lockType) {
         if ($user->lock($lockType)) {
             $Cache->delete_value('user_' . $cur['torrent_pass']);
-            $editSummary[] = empty($cur['Type'])
+            $editSummary[] = empty($cur['locked_account'])
                 ? "Account locked (type $lockType)"
                 : "Account lock type changed to $lockType";
         }
@@ -222,7 +201,7 @@ if ($_POST['ResetDownloadList'] ?? 0 && check_perms('users_edit_reset_keys')) {
 }
 
 if ($logoutSession && check_perms('users_logout')) {
-    $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\Session($UserID))->dropAll() . ")";
+    $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\Session($userId))->dropAll() . ")";
 }
 
 if ($flTokens != $cur['FLTokens'] && ($editRatio || check_perms('admin_manage_user_fls'))) {
@@ -241,19 +220,6 @@ if ($Collages != $Cur['Collages'] && $Collages != (int)$_POST['OldCollages']
     $set[] = 'collages = ?';
     $args[] = $Collages;
     $EditSummary[] = "personal collages changed from {$Cur['Collages']} to {$Collages}";
-}
-
-$removedClasses = [];
-$addedClasses   = [];
-if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
-    $removedClasses = array_diff($cur['secondary_class'], $secondaryClasses);
-    $addedClasses   = array_diff($secondaryClasses, $cur['secondary_class']);
-    if ($removedClasses) {
-        $editSummary[] = 'secondary classes dropped: ' . classNames($removedClasses);
-    }
-    if ($addedClasses) {
-        $editSummary[] = "secondary classes added: " . classNames($addedClasses);
-    }
 }
 
 if ($unlimitedDownload != $cur['unlimitedDownload'] && check_perms('admin_rate_limit_manage')) {
@@ -302,13 +268,13 @@ if ($Classes[$class]['Level'] != $cur['Class']
         }
         $Cache->delete_value('staff_ids');
     }
-    $Cache->delete_value("donor_info_$userID");
+    $Cache->delete_value("donor_info_$userId");
 }
 
 if ($username !== $cur['Username'] && check_perms('users_edit_usernames')) {
     if (in_array($username, ['0', '1'])) {
         error('You cannot set a username of "0" or "1".');
-        header("Location: user.php?id=$userID");
+        header("Location: user.php?id=$userId");
         exit;
     } elseif (strtolower($username) !== strtolower($cur['Username'])) {
         $found = $userMan->findByUsername($username);
@@ -328,7 +294,7 @@ if ($title != $cur['Title'] && check_perms('users_edit_titles')) {
     // Using the unescaped value for the test to avoid confusion
     if (mb_strlen($_POST['Title']) > 1024) {
         error("Custom titles have a maximum length of 1,024 characters.");
-        header("Location: user.php?id=$userID");
+        header("Location: user.php?id=$userId");
         exit;
     } else {
         $set[] = 'Title = ?';
@@ -375,30 +341,68 @@ if (check_perms('users_warn')) {
         $message['body'] .= ", by [user]" . $LoggedUser['Username'] . "[/user]."
             . " The reason given was:\n[quote]{$warnReason}[/quote]. The warning will expire on $expiry."
             . "\n\nThis is an automated message. You may reply for more information if necessary.";
-        $userMan->sendPM($userID, $LoggedUser['ID'], $message['subject'], $message['body']);
+        $userMan->sendPM($userId, $LoggedUser['ID'], $message['subject'], $message['body']);
         $editSummary[] = $message['summary'] . ", expiry: $expiry"
             . ($warnReason ? ", reason: \"$warnReason\"" : '');
     }
 }
 
-if ($restrictedForums != $cur['RestrictedForums'] && check_perms('users_mod')) {
-    $set[] = "RestrictedForums = ?";
-    $args[] = $restrictedForums;
-    $editSummary[] = "prohibited forum(s): $restrictedForums";
-}
-
-if ($permittedForums != $cur['PermittedForums'] && check_perms('users_mod')) {
-    $forumSet = explode(',', $permittedForums);
-    $forumList = [];
-    foreach ($forumSet as $forumID) {
-        $f = trim($forumID);
-        if ($forums[$f]['MinClassCreate'] <= $LoggedUser['EffectiveClass']) {
-            $forumList[] = $f;
+$removedClasses = [];
+$addedClasses   = [];
+if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
+    $currentClasses = array_keys($cur['secondary_class']);
+    sort($currentClasses);
+    if (implode(',', $currentClasses) != implode(',', $secondaryClasses)) {
+        $removedClasses = array_diff($currentClasses, $secondaryClasses);
+        $addedClasses   = array_diff($secondaryClasses, $currentClasses);
+        if (!empty($removedClasses)) {
+            $names = array_map(function ($c) use ($userMan) { return $userMan->userclassName($c); }, $removedClasses);
+            $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
+        }
+        if (!empty($addedClasses)) {
+            $names = array_map(function ($c) use ($userMan) { return $userMan->userclassName($c); }, $addedClasses);
+            $editSummary[] = "secondary classes added: " . implode(', ', $names);
         }
     }
-    $set[] = "PermittedForums = ?";
-    $args[] = implode(',', $forumList);
-    $editSummary[] = "permitted forum(s): $permittedForums";
+}
+
+if (check_perms('users_mod')) {
+    $fMan = new Gazelle\Manager\Forum;
+    $restricted = array_map(function ($id) {return (int)$id;}, array_unique(explode(',', trim($_POST['RestrictedForums']))));
+    sort($restricted);
+    $restrictedIds = [];
+    $restrictedNames = [];
+    foreach ($restricted as $forumId) {
+        $forum = $fMan->findById($forumId);
+        if (!is_null($forum)) {
+            $restrictedIds[] = $forumId;
+            $restrictedNames[] = $forum->name() . "($forumId)";
+        }
+    }
+    $restrictedForums = implode(',', $restrictedIds);
+    if ($restrictedForums != $cur['RestrictedForums']) {
+        $set[] = "RestrictedForums = ?";
+        $args[] = $restrictedForums;
+        $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
+    }
+
+    $permitted = array_map(function ($id) {return (int)$id;}, array_unique(explode(',', trim($_POST['PermittedForums']))));
+    sort($permitted);
+    $permittedIds = [];
+    $permittedNames = [];
+    foreach ($permitted as $forumId) {
+        $forum = $fMan->findById($forumId);
+        if (!is_null($forum)) {
+            $permittedIds[] = $forumId;
+            $permittedNames[] = $forum->name() . "($forumId)";
+        }
+    }
+    $permittedForums = implode(',', $permittedIds);
+    if ($permittedForums != $cur['PermittedForums']) {
+        $set[] = "PermittedForums = ?";
+        $args[] = $permittedForums;
+        $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
+    }
 }
 
 if ($visible != $cur['Visible'] && check_perms('users_make_invisible')) {
@@ -421,95 +425,93 @@ if ($supportFor != $cur['SupportFor'] && (check_perms('admin_manage_fls') || (ch
 }
 
 $privChange = [];
-if ($disableAvatar != $cur['DisableAvatar'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your avatar privileges have been ' . ($disableAvatar ? 'removed' : 'restored');
-    $set[] = "DisableAvatar = ?";
-    $args[] = $disableAvatar ? '1' : '0';
-    $editSummary[] = 'avatar privileges ' . disabled($disableAvatar);
+
+if (check_perms('users_disable_any')) {
+    if ($disableLeech != $cur['can_leech']) {
+        $privChange[] = 'Your leeching privileges have been ' . revoked($disableLeech);
+        $set[] = "can_leech = ?";
+        $args[] = $disableLeech ? '1' : '0';
+        $trackerUserUpdates['can_leech'] = $disableLeech;
+        $editSummary[] = "leeching status changed ("
+            . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech).")";
+    }
+    if ($disableInvites != $cur['DisableInvites']) {
+        $set[] = "DisableInvites = ?";
+        $args[] = $disableInvites ? '1' : '0';
+        $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
+        $editSummary[] = 'invites privileges ' . revoked($disableInvites);
+    }
+    if ($disableAvatar != $cur['DisableAvatar'] && check_perms('users_disable_any')) {
+        $set[] = "DisableAvatar = ?";
+        $args[] = $disableAvatar ? '1' : '0';
+        $privChange[] = 'Your avatar privileges have been ' . revoked($disableAvatar);
+        $editSummary[] = 'avatar privileges ' . revoked($disableAvatar);
+    }
+    if ($disablePoints != $cur['DisablePoints']) {
+        $set[] = "DisablePoints = ?";
+        $args[] = $disablePoints ? '1' : '0';
+        $privChange[] = 'Your bonus points acquisition has been ' . revoked($disablePoints);
+        $editSummary[] = 'points privileges ' . revoked($disablePoints);
+    }
+    if ($disableTagging != $cur['DisableTagging']) {
+        $set[] = "DisableTagging = ?";
+        $args[] = $disableTagging ? '1' : '0';
+        $privChange[] = 'Your tagging privileges have been ' . revoked($disableTagging);
+        $editSummary[] = 'tagging privileges ' . revoked($disableTagging);
+    }
+    if ($disableUpload != $cur['DisableUpload']) {
+        $set[] = "DisableUpload = ?";
+        $args[] = $disableUpload ? '1' : '0';
+        $privChange[] = 'Your upload privileges have been ' . revoked($disableUpload);
+        $editSummary[] = 'upload privileges ' . revoked($disableUpload);
+    }
+    if ($disableWiki != $cur['DisableWiki']) {
+        $set[] = "DisableWiki = ?";
+        $args[] = $disableWiki ? '1' : '0';
+        $privChange[] = 'Your site editing privileges have been ' . revoked($disableWiki);
+        $editSummary[] = 'wiki privileges ' . revoked($disableWiki);
+    }
+    if ($disablePM != $cur['DisablePM']) {
+        $set[] = "DisablePM = ?";
+        $args[] = $disablePM ? '1' : '0';
+        $privChange[] = 'Your private messate (PM) privileges have been ' . revoked($disablePM);
+        $editSummary[] = 'PM privileges ' . revoked($disablePM);
+    }
+    if ($disableRequests != $cur['DisableRequests']) {
+        $set[] = "DisableRequests = ?";
+        $args[] = $disableRequests ? '1' : '0';
+        $privChange[] = 'Your request privileges have been ' . revoked($disableRequests);
+        $editSummary[] = 'request privileges ' . revoked($disableRequests);
+    }
 }
 
-if ($disableLeech != $cur['can_leech'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your leeching privileges have been ' . ($disableLeech ? 'removed' : 'restored');
-    $set[] = "can_leech = ?";
-    $args[] = $disableLeech ? '1' : '0';
-    $trackerUserUpdates['can_leech'] = $disableLeech;
-    $editSummary[] = "leeching status changed (".enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech).")";
-}
+if (check_perms('users_disable_posts')) {
+    if ($disablePosting != $cur['DisablePosting']) {
+        $set[] = "DisablePosting = ?";
+        $args[] = $disablePosting ? '1' : '0';
+        $privChange[] = 'Your forum posting privileges have been ' . revoked($disablePosting);
+        $editSummary[] = 'posting privileges ' . revoked($disablePosting);
+    }
 
-if ($disableInvites != $cur['DisableInvites'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your invite privileges have been ' . ($disableInvites ? 'removed' : 'restored');
-    $set[] = "DisableInvites = ?";
-    $args[] = $disableInvites ? '1' : '0';
-    $editSummary[] = 'invites privileges ' . disabled($disableInvites);
-}
-
-if ($disablePosting != $cur['DisablePosting'] && check_perms('users_disable_posts')) {
-    $privChange[] = 'Your forum posting privileges have been ' . ($disablePosting ? 'removed' : 'restored');
-    $set[] = "DisablePosting = ?";
-    $args[] = $disablePosting ? '1' : '0';
-    $editSummary[] = 'posting privileges ' . disabled($disablePosting);
-}
-
-if ($disablePoints != $cur['DisablePoints'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your bonus points acquisition has been ' . ($disablePoints ? 'revoked' : 'restored');
-    $set[] = "DisablePoints = ?";
-    $args[] = $disablePoints ? '1' : '0';
-    $editSummary[] = 'points privileges ' . disabled($disablePoints);
-}
-
-if ($disableForums != $cur['DisableForums'] && check_perms('users_disable_posts')) {
-    $privChange[] = 'Your forum access has been ' . ($disableForums ? 'revoked' : 'restored');
-    $set[] = "DisableForums = ?";
-    $args[] = $disableForums ? '1' : '0';
-    $editSummary[] = 'forums privileges ' . disabled($disableForums);
-}
-
-if ($disableTagging != $cur['DisableTagging'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your tagging privileges have been ' . ($disableTagging ? 'removed' : 'restored');
-    $set[] = "DisableTagging = ?";
-    $args[] = $disableTagging ? '1' : '0';
-    $editSummary[] = 'tagging privileges ' . disabled($disableTagging);
-}
-
-if ($disableUpload != $cur['DisableUpload'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your upload privileges have been ' . ($disableUpload ? 'removed' : 'restored');
-    $set[] = "DisableUpload = ?";
-    $args[] = $disableUpload ? '1' : '0';
-    $editSummary[] = 'upload privileges ' . disabled($disableUpload);
-}
-
-if ($disableWiki != $cur['DisableWiki'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your site editing privileges have been ' . ($disableWiki ? 'removed' : 'restored');
-    $set[] = "DisableWiki = ?";
-    $args[] = $disableWiki ? '1' : '0';
-    $editSummary[] = 'wiki privileges ' . disabled($disableWiki);
-}
-
-if ($disablePM != $cur['DisablePM'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your private messate (PM) privileges have been ' . ($disablePM ? 'removed' : 'restored');
-    $set[] = "DisablePM = ?";
-    $args[] = $disablePM ? '1' : '0';
-    $editSummary[] = 'PM privileges ' . disabled($disablePM);
+    if ($disableForums != $cur['DisableForums']) {
+        $set[] = "DisableForums = ?";
+        $args[] = $disableForums ? '1' : '0';
+        $privChange[] = 'Your forum access has been ' . revoked($disableForums);
+        $editSummary[] = 'forums privileges ' . revoked($disableForums);
+    }
 }
 
 if ($disableIRC != $cur['DisableIRC']) {
-    $privChange[] = 'Your IRC privileges have been ' . ($disableIRC ? 'removed' : 'restored');
     $set[] = "DisableIRC = ?";
     $args[] = $disableIRC ? '1' : '0';
-    $editSummary[] = 'IRC privileges ' . disabled($disableIRC);
-}
-
-if ($disableRequests != $cur['DisableRequests'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your request privileges have been ' . ($disableRequests ? 'removed' : 'restored');
-    $set[] = "DisableRequests = ?";
-    $args[] = $disableRequests ? '1' : '0';
-    $editSummary[] = 'request privileges ' . disabled($disableRequests);
+    $privChange[] = 'Your IRC privileges have been ' . revoked($disableIRC);
+    $editSummary[] = 'IRC privileges ' . revoked($disableIRC);
 }
 
 if ($privChange && $userReason) {
     sort($privChange);
     $userMan->sendPM(
-        $userID, 0,
+        $userId, 0,
         count($privChange) == 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
         $Twig->render('user/pm-privilege.twig', [
             'privs'  => $privChange,
@@ -524,12 +526,12 @@ if ($privChange && $userReason) {
 if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
     $enableStr = 'account ' . translateUserStatus($cur['Enabled']) . ' &rarr; ' . translateUserStatus($enableUser);
     if ($enableUser == '2') {
-        $userMan->disableUserList([$userID], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
+        $userMan->disableUserList([$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
         $trackerUserUpdates = [];
     } elseif ($enableUser == '1') {
         $Cache->increment('stats_user_count');
         $visibleTrIP = $visible && $cur['IP'] != '127.0.0.1' ? '1' : '0';
-        $tracker->update_tracker('add_user', ['id' => $userID, 'passkey' => $cur['torrent_pass'], 'visible' => $visibleTrIP]);
+        $tracker->update_tracker('add_user', ['id' => $userId, 'passkey' => $cur['torrent_pass'], 'visible' => $visibleTrIP]);
         if (($cur['Downloaded'] == 0) || ($cur['Uploaded'] / $cur['Downloaded'] >= $cur['RequiredRatio'])) {
             $canLeech = 1;
             $set[] = "i.RatioWatchEnds = ?";
@@ -556,28 +558,29 @@ if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
     $editSummary[] = $enableStr;
 }
 
-if ($resetPasskey == 1 && check_perms('users_edit_reset_keys')) {
-    $passkey = randomString();
-    $user->modifyAnnounceKeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
-    $Cache->delete_value('user_'.$cur['torrent_pass']);
-    $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
-    $tracker->update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
-    $set[] = "torrent_pass = ?";
-    $args[] = $passkey;
-    $editSummary[] = 'passkey reset';
-}
-
-if ($resetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
-    $set[] = "Authkey = ?";
-    $args[] = randomString();
-    $editSummary[] = 'authkey reset';
+if (check_perms('users_edit_reset_keys')) {
+    if ($resetAuthkey == 1) {
+        $set[] = "Authkey = ?";
+        $args[] = randomString();
+        $editSummary[] = 'authkey reset';
+    }
+    if ($resetPasskey == 1) {
+        $passkey = randomString();
+        $user->modifyAnnounceKeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
+        $Cache->delete_value('user_'.$cur['torrent_pass']);
+        $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
+        $tracker->update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
+        $set[] = "torrent_pass = ?";
+        $args[] = $passkey;
+        $editSummary[] = 'passkey reset';
+    }
 }
 
 if ($sendHackedMail && check_perms('users_disable_any')) {
     (new Mail)->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
         $Twig->render('email/hacked.twig')
     );
-    Tools::disable_users($userID, '', 1);
+    Tools::disable_users($userId, '', 1);
     $editSummary[] = "hacked account email sent to $hackedEmail";
 }
 
@@ -600,9 +603,6 @@ if ($mergeStatsFrom && check_perms('users_edit_ratio')) {
 }
 
 if ($changePassword && check_perms('users_edit_password')) {
-    $set[] = "PassHash = ?";
-    $args[] = Gazelle\UserCreator::hashPassword($changePassword);
-    (new \Gazelle\Session($userID))->dropAll();
     $editSummary[] = 'password reset';
 }
 
@@ -625,7 +625,7 @@ if (count($editSummary)) {
 }
 
 if (!empty($set)) {
-    $args[] = $userID;
+    $args[] = $userId;
     $DB->prepared_query("
         UPDATE users_main AS m
         INNER JOIN users_info AS i ON (m.ID = i.UserID)
@@ -636,7 +636,7 @@ if (!empty($set)) {
 }
 
 if ($leechSet) {
-    $leechArgs[] = $userID;
+    $leechArgs[] = $userId;
     $DB->prepared_query("
         UPDATE users_leech_stats
         SET " . implode(', ', $leechSet) . "
@@ -652,9 +652,14 @@ if ($addedClasses) {
     $user->addClasses($addedClasses);
 }
 
+if ($changePassword && check_perms('users_edit_password')) {
+    $user->updatePassword($_POST['ChangePassword'], '127.0.0.1');
+    (new \Gazelle\Session($userId))->dropAll();
+}
+
 if ($newBonusPoints !== false) {
     $bonus = new \Gazelle\Bonus;
-    $bonus->setPoints($userID, $newBonusPoints);
+    $bonus->setPoints($userId, $newBonusPoints);
 }
 
 if ($flTokens != $cur['FLTokens']) {
@@ -669,4 +674,4 @@ if (count($set) || count($leechSet)) {
     $user->flush();
 }
 
-header("location: user.php?id=$userID");
+header("location: user.php?id=$userId");

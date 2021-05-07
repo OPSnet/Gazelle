@@ -75,12 +75,18 @@
         <td class="label tooltip" title="Enter a comma-delimited list of forum IDs that the user is no longer allowed to access">Prohibited forums:</td>
         <td>
             <input type="text" class="wide_input_text" name="RestrictedForums" value="{{ forum.restricted }}" />
+            {% if forum.restricted %}
+            <br />{{ forum.restricted_names }}
+            {% endif %}
         </td>
     </tr>
     <tr>
         <td class="label tooltip" title="Enter a comma-delimited list of forum IDs that the user is allowed to access">Extra forums:</td>
         <td>
             <input type="text" class="wide_input_text" name="PermittedForums" value="{{ forum.permitted }}" />
+            {% if forum.permitted %}
+            <br />{{ forum.permitted_names }}
+            {% endif %}
         </td>
     </tr>
 </table>
