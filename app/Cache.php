@@ -1,4 +1,7 @@
 <?php
+
+namespace Gazelle;
+
 /*************************************************************************|
 |--------------- Caching class -------------------------------------------|
 |*************************************************************************|
@@ -12,9 +15,9 @@ however, this class has page caching functions superior to those of
 memcache.
 
 Also, Memcache::get and Memcache::set have been wrapped by
-CACHE::get_value and CACHE::cache_value. get_value uses the same argument
-as get, but cache_value only takes the key, the value, and the duration
-(no zlib).
+Gazelle\Cache::get_value and Gazelle\Cache::cache_value. get_value uses
+the same argument as get, but cache_value only takes the key, the value,
+and the duration (no zlib).
 
 // Unix sockets
 memcached -d -m 5120 -s /var/run/memcached.sock -a 0777 -t16 -C -u root
@@ -28,7 +31,7 @@ if (!extension_loaded('memcached')) {
     die('memcached Extension not loaded.');
 }
 
-class CACHE extends Memcached {
+class Cache extends \Memcached {
     /**
      * Torrent Group cache version
      */
@@ -48,7 +51,7 @@ class CACHE extends Memcached {
     public $InternalCache = true;
 
     /**
-     * CACHE constructor. Takes a array of $Servers with a host, port, and optionally a weight.
+     * Constructor. Takes a array of $Servers with a host, port, and optionally a weight.
      * We then add each of the servers in the array to our memcached pool assuming we haven't
      * already connected to it before (cross-checking against the pool's server list). If you want
      * to connect to a socket, you need to use port 0, though internally in the pool it'll have
@@ -57,14 +60,10 @@ class CACHE extends Memcached {
      * with the same weight.
      *
      * @see Memcached::getServerList()
-     *
-     * @param $Servers
-     * @param string $PersistantID
      */
-    function __construct($PersistantID = 'ops') {
-        parent::__construct($PersistantID);
-        global $MemcachedServers;
-        $this->Servers = $MemcachedServers;
+    function __construct() {
+        parent::__construct(CACHE_ID);
+        $this->Servers = MEMCACHE_HOST_LIST;
         $ServerList = [];
         foreach ($this->getServerList() as $Server) {
             $ServerList["{$Server['host']}:{$Server['port']}"] = true;

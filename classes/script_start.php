@@ -40,7 +40,7 @@ else if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
 
 ob_start(); //Start a buffer, mainly in case there is a mysql error
 
-$Cache = new CACHE;
+$Cache = new Gazelle\Cache;
 $DB    = new DB_MYSQL;
 $Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->setStartTime($now)

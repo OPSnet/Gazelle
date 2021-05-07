@@ -17,7 +17,7 @@ use Twig\Environment;
 
 set_include_path(SERVER_ROOT);
 
-$Cache = new CACHE;
+$Cache = new Gazelle\Cache;
 $DB    = new DB_MYSQL;
 $Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->handle_errors();

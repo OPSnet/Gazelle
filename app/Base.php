@@ -7,7 +7,7 @@ abstract class Base {
     protected static $_db;
     protected $db;
 
-    /** @var \CACHE */
+    /** @var \Gazelle\Cache */
     protected static $_cache;
     protected $cache;
 
@@ -21,7 +21,7 @@ abstract class Base {
         $this->twig  =& self::$_twig;
     }
 
-    public static function initialize(\CACHE $cache, \DB_MYSQL $db, \Twig\Environment $twig) {
+    public static function initialize(\Gazelle\Cache $cache, \DB_MYSQL $db, \Twig\Environment $twig) {
         self::$_db    =& $db;
         self::$_cache =& $cache;
         self::$_twig  =& $twig;
