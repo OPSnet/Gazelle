@@ -79,12 +79,6 @@ define('SQLDB', 'gazelle'); //The MySQL database to use
 define('SQLPORT', 3306); //The MySQL port to connect on
 define('SQLSOCK', false); // Socket mysql is listening on, usually /var/run/mysqld/mysqld.sock
 
-// Memcached details
-$MemcachedServers = [
-    // unix sockets are fast, and other people can't telnet into them
-    ['host' => 'unix:///var/run/memcached.sock', 'port' => 0, 'buckets' => 1],
-];
-
 // Sphinx details
 define('SPHINX_HOST', 'localhost');
 define('SPHINX_PORT', 9312);
@@ -398,6 +392,13 @@ $CaptchaBGs = [
 $SpecialChars = [
     '&' => 'and'
 ];
+
+// Memcached details
+define('MEMCACHE_HOST_LIST', [
+    // unix sockets are fast, and other people can't telnet into them
+    ['host' => 'unix:///var/run/memcached.sock', 'port' => 0, 'buckets' => 1],
+]);
+define('CACHE_ID', 'ops');
 
 // Deny cache access to keys without specified permission
 define('CACHE_PERMISSION', [

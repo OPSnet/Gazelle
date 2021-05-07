@@ -12,7 +12,7 @@ require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $DB    = new DB_MYSQL;
-$Cache = new CACHE;
+$Cache = new Gazelle\Cache;
 Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
 $Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->handle_errors();
