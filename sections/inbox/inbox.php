@@ -12,6 +12,10 @@ try {
 } catch (Throwable $e) {
     error(404);
 }
+$paginator = new Gazelle\Util\Paginator(MESSAGES_PER_PAGE, (int)($_GET['page'] ?? 1));
+
+[$NumResults, $Messages] = $Inbox->result($paginator->limit(), $paginator->offset());
+$paginator->setTotal($NumResults);
 
 View::show_header('Inbox');
 ?>
@@ -19,23 +23,18 @@ View::show_header('Inbox');
     <h2><?= $Inbox->title() ?></h2>
     <div class="linkbox">
 <?php foreach (array_keys(Inbox::SECTIONS) as $Section) {
-    if ($Inbox->section() != $Section) { ?>
+    if ($Inbox->section() != $Section) {
+?>
         <a href="<?= $Inbox->getLink($Section) ?>" class="brackets">
             <?= $Inbox->title($Section) ?>
         </a><?php
     }
-} ?>
-<br /><br />
-<?php
-[$NumResults, $Count, $Messages] = $Inbox->result();
-
-$Pages = Format::get_pages(Format::page_limit(MESSAGES_PER_PAGE)[0], $NumResults, MESSAGES_PER_PAGE, 9);
-echo $Pages;
+}
 ?>
     </div>
-
+    <?= $paginator->linkbox() ?>
     <div class="box pad">
-<?php if ($Count == 0 && empty($_GET['search'])) { ?>
+<?php if ($NumResults == 0 && empty($_GET['search'])) { ?>
     <h2>Your <?= $Inbox->section() ?> is empty.</h2>
 <?php } else { ?>
         <form class="search_form" name="<?= $Inbox->section() ?>" action="inbox.php" method="get" id="searchbox">
@@ -75,13 +74,13 @@ echo $Pages;
                     <td>Forwarded to</td>
 <?php        } ?>
                 </tr>
-<?php if ($Count == 0) { ?>
+<?php if ($NumResults == 0) { ?>
                 <tr class="a">
                     <td colspan="5">No results.</td>
                 </tr>
 <?php } else {
         $Row = 'a';
-        foreach ($Messages as list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $SenderID, $Date)) {
+        foreach ($Messages as [$ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $SenderID, $Date]) {
             if ($Unread === '1') {
                 $RowClass = 'unreadpm';
             } else {
@@ -106,7 +105,8 @@ echo $Pages;
 <?php
             if ($Unread) {
                 echo "</strong>";
-            } ?>
+            }
+?>
                     </td>
                     <td><?= Users::format_username($SenderID, true, true, true, true) ?></td>
                     <td><?= time_diff($Date) ?></td>
@@ -116,7 +116,8 @@ echo $Pages;
                 </tr>
 <?php
         }
-    } ?>
+    }
+?>
             </table>
             <input type="submit" name="read" value="Mark as read" />&nbsp;
             <input type="submit" name="unread" value="Mark as unread" />&nbsp;
@@ -125,9 +126,7 @@ echo $Pages;
         </form>
 <?php } ?>
     </div>
-    <div class="linkbox">
-<?= $Pages ?>
-    </div>
+    <?= $paginator->linkbox() ?>
 </div>
 <?php
 View::show_footer();
