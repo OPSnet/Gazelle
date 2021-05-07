@@ -45,6 +45,11 @@ class Referral extends \Gazelle\Base {
     }
 
     public function checkBouncer() {
+        if (!OPEN_EXTERNAL_REFERRALS) {
+            // Not strictly true, but we don't care about this if referrals are closed.
+            return true;
+        }
+
         if (!count($this->accounts)) {
             return true;
         }
