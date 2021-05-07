@@ -186,12 +186,12 @@ class Inbox extends Base {
     }
 
     /**
-     * Runs the query and returns the total result count,
-     * the count on this page, and the results on this page.
+     * Runs the query and returns the total result count
+     * and the results on this page.
      *
-     * @return void
+     * @return array total messages, pagefull of messages
      */
-    public function result() {
+    public function result(int $limit, int $offset): array {
         $searching = (!empty($this->searchField) && !empty($this->searchTerm));
         $table = ($searching && $this->searchField === 'message')
             ? 'INNER JOIN pm_messages AS m ON (c.ID = m.ConvID) '
@@ -216,7 +216,8 @@ class Inbox extends Base {
             ),
             $this->userId,
             $this->userId,
-            ...$searchWords);
+            ...$searchWords
+        );
 
         // Now set up the main query for this page's results
         $cols = "
@@ -228,27 +229,18 @@ class Inbox extends Base {
             cu2.UserID,
             " . self::SECTIONS[$this->section]['dateField'];
         $search .= 'GROUP BY c.ID';
-        // TODO: the function below has a fragile dep on $_GET
-        $limit = "LIMIT " . \Format::page_limit(MESSAGES_PER_PAGE)[1];
 
         $this->db->prepared_query(
             sprintf($this->sql,
                 $cols,
                 $table,
                 $search,
-                $limit
+                "LIMIT ? OFFSET ?"
             ),
             $this->userId,
             $this->userId,
-            ...$searchWords);
-        // The count on this page
-        $pageCount = $this->db->record_count();
-
-        $results = [];
-        while ($data = $this->db->next_record()) {
-            // Each result
-            $results[] = $data;
-        }
-        return [$totalCount, $pageCount, $results];
+            ...(array_merge($searchWords, [$limit, $offset]))
+        );
+        return [$totalCount, $this->db->to_array(false, MYSQLI_NUM)];
     }
 }
