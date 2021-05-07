@@ -6,7 +6,7 @@ require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
-$Cache = new CACHE;
+$Cache = new Gazelle\Cache;
 $DB    = new DB_MYSQL;
 $Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->handle_errors();

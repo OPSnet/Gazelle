@@ -22,7 +22,7 @@ class Debug {
     protected static $startTime;
     protected static $cpuTime = false;
 
-    public function __construct(\CACHE $cache, \DB_MYSQL $db) {
+    public function __construct(\Gazelle\Cache $cache, \DB_MYSQL $db) {
         if (self::$cpuTime === false) {
             $r = getrusage();
             self::$cpuTime = $r['ru_utime.tv_sec'] * 1000000 + $r['ru_utime.tv_usec'];

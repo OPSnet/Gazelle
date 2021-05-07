@@ -28,7 +28,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 require_once(__DIR__ . '/classes/util.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
-$Cache = new CACHE;
+$Cache = new Gazelle\Cache;
 $DB = new DB_MYSQL;
 $Twig = new Twig\Environment(
     new Twig\Loader\FilesystemLoader('templates'),
