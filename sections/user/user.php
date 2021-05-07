@@ -407,8 +407,8 @@ if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
             </div>
         </div>
 <?php
-$EnabledRewards = $user->enabledDonorRewards();
-$ProfileRewards = $user->profileDonorRewards();
+$EnabledRewards = $User->enabledDonorRewards();
+$ProfileRewards = $User->profileDonorRewards();
 for ($i = 1; $i <= 4; $i++) {
     if ($EnabledRewards['HasProfileInfo' . $i] && $ProfileRewards['ProfileInfo' . $i]) {
 ?>
@@ -513,7 +513,10 @@ if (check_perms('users_view_invites')) {
                 Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
             </div>
             <div id="invitetree" class="hidden">
-                <?= $tree->render($Twig) ?>
+                <?= $Twig->render('user/invite-tree.twig', [
+                    'info' => $tree->details(),
+                    'user' => $User,
+                ]) ?>
             </div>
         </div>
 <?php
@@ -771,14 +774,17 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
 
 <?php
     if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
+        $fm = new Gazelle\Manager\Forum;
         echo $Twig->render('user/edit-privileges.twig', [
             'email'          => $User->emailHistory(),
             'is_unconfirmed' => $User->isUnconfirmed(),
             'is_enabled'     => $User->isEnabled(),
             'is_disabled'    => $User->isDisabled(),
             'forum' => [
-                'restricted' => implode(',', $User->forbiddenForums()),
-                'permitted'  => implode(',', $User->permittedForums()),
+                'restricted'       => implode(', ', $User->forbiddenForums()),
+                'permitted'        => implode(', ', $User->permittedForums()),
+                'restricted_names' => implode(', ', array_map(function ($id) use ($fm) { return $fm->findById($id)->name(); }, $User->forbiddenForums())),
+                'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { return $fm->findById($id)->name(); }, $User->permittedForums())),
             ],
             'permission' => [
                 'disable_any' => check_perms('users_disable_any'),
@@ -803,7 +809,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
 
     if (check_perms('users_give_donor')) {
         echo $Twig->render('donation/admin-panel.twig', [
-            'user' => $user,
+            'user' => $User,
         ]);
     }
 
