@@ -73,6 +73,34 @@ class Collage extends \Gazelle\Base {
         return new \Gazelle\Collage($id);
     }
 
+    public function coverRow(array $group): string {
+        $groupId = $group['ID'];
+        $ExtendedArtists = $group['ExtendedArtists'];
+        $Artists = $group['Artists'];
+        $name = '';
+        if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])|| !empty($ExtendedArtists[6])) {
+            unset($ExtendedArtists[2]);
+            unset($ExtendedArtists[3]);
+            $name = \Artists::display_artists($ExtendedArtists, false);
+        } elseif (count($Artists) > 0) {
+            $name = \Artists::display_artists(['1' => $Artists], false);
+        }
+        $name .= $group['Name'];
+        $groupYear = $group['Year'];
+        if ($groupYear > 0) {
+            $name = "$name [$groupYear]";
+        }
+        $tags = new \Tags($group['TagList']);
+
+        return $this->twig->render('collage/row.twig', [
+            'group_id'   => $groupId,
+            'image'      => \ImageTools::process($group['WikiImage'], true),
+            'name'       => $name,
+            'tags'       => $tags->format(),
+            'tags_plain' => implode(', ', $tags->get_tags()),
+        ]);
+    }
+
     /**
      * Create a generic collage name for a personal collage.
      * Used for people who lack the privileges create personal collages with arbitrary names
@@ -220,7 +248,7 @@ class Collage extends \Gazelle\Base {
         }
         $stem = mb_strtolower(mb_substr($text, 0, $length));
         $key = 'autocomplete_collage_' . $length . '_' . $stem;
-        if (($autcomplete = $this->cache->get($key)) === false) {
+        if (($autocomplete = $this->cache->get($key)) === false) {
             $this->db->prepared_query("
                 SELECT ID,
                     Name

@@ -321,7 +321,7 @@ class Text {
                     : null;
 
             case '/collages.php':
-                return \Collages::bbcodeUrl($args['id'] ?? $args['collageid'], $url) ?? null;
+                return self::bbcodeCollageUrl($args['id'] ?? $args['collageid'], $url) ?? null;
 
             case '/forums.php':
                 if (!isset($args['action'])) {
@@ -776,6 +776,7 @@ class Text {
                 continue;
             }
             if (self::$Levels < self::$MaximumNests) {
+            global $LoggedUser;
             switch ($Block['Type']) {
                 case 'b':
                     $Str .= '<strong>'.self::to_html($Block['Val'], $Rules).'</strong>';
@@ -809,7 +810,7 @@ class Text {
                     $Str .= '<a href="rules.php?p=upload#'.urlencode(self::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
                     break;
                 case 'collage':
-                    $Str .= \Collages::bbcodeUrl($Block['Val']);
+                    $Str .= self::bbcodeCollageUrl($Block['Val']);
                     break;
                 case 'forum':
                     $Str .= self::bbcodeForumUrl($Block['Val']);
@@ -1377,6 +1378,20 @@ class Text {
      */
     protected static function undisplay_str($Str) {
         return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
+    }
+
+    public static function bbcodeCollageUrl($id, $url = null) {
+        $cacheKey = 'bbcode_collage_' . $id;
+        global $Cache, $DB;
+        if (($name = $Cache->get_value($cacheKey)) === false) {
+            $name = $DB->scalar('SELECT Name FROM collages WHERE id = ?', $id);
+            $Cache->cache_value($cacheKey, $name, 86400 + rand(1, 3600));
+        }
+        return $name
+            ? $url
+                ? sprintf('<a href="%s">%s</a>', $url, $name)
+                : sprintf('<a href="collages.php?id=%d">%s</a>', $id, $name)
+            : "[collage]{$id}[/collage]";
     }
 
     protected static function bbcodeForumUrl($val) {

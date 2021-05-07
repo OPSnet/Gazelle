@@ -118,8 +118,9 @@ if (check_perms('zip_downloader')) {
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
 <?php
+    $collMan = new Gazelle\Manager\Collage;
     for ($Idx = 0; $Idx < min($NumGroups, $CollageCovers); $Idx++) {
-        echo Collages::collage_cover_row($TorrentList[$GroupIDs[$Idx]]);
+        echo $collMan->coverRow($TorrentList[$GroupIDs[$Idx]]);
     }
 ?>
             </ul>
@@ -140,8 +141,8 @@ if (check_perms('zip_downloader')) {
             $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($GroupID) use ($TorrentList) {
-                        return Collages::collage_cover_row($TorrentList[$GroupID]);
+                    function($id) use ($TorrentList) {
+                        return $collMan->coverRow($TorrentList[$id]);
                     },
                     $Groups
                 )
