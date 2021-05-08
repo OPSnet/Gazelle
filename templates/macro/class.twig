@@ -1,0 +1,8 @@
+{% macro class_option(max_level, list, active) %}
+    {% from 'macro/form.twig' import selected %}
+    {% for class in list %}
+        {% if not class.Secondary and class.Level <= max_level %}
+            <option value="{{ class.Level }}"{{ selected(class.Level == active) }}>{{ class.Name }}</option>
+        {% endif %}
+    {% endfor %}}
+{% endmacro %}
