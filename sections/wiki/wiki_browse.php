@@ -2,17 +2,16 @@
 
 $wikiMan = new Gazelle\Manager\Wiki;
 
-$title = 'Browse wiki articles';
 $letter = $_GET['letter'] ? strtoupper(substr($_GET['letter'], 0, 1)) : null;
 if ($letter && $letter !== '1') {
-    $title .= " ($letter)";
+    View::show_header('Wiki &rsaquo; Table of contents');
+} else {
+    View::show_header("Wiki &rsaquo; Articles &rsaquo; $letter");
 }
 
-View::show_header($title);
-
 echo $Twig->render('wiki/browse.twig', [
-    'title' => $title,
     'articles' => $wikiMan->articles($LoggedUser['EffectiveClass'], $letter),
+    'letter'   => $letter,
 ]);
 
 View::show_footer();

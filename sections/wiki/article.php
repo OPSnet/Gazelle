@@ -45,8 +45,9 @@ View::show_header($Title,'wiki,bbcode');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=$Title?></h2>
+        <h2><a href="wiki.php">Wiki</a> &rsaquo; <?=$Title?></h2>
         <div class="linkbox">
+            <a href="wiki.php?action=browse" class="brackets">Browse</a>
             <a href="wiki.php?action=create" class="brackets">Create</a>
 <?php if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
             <a href="wiki.php?action=edit&amp;id=<?=$ArticleID?>" class="brackets">Edit</a>
@@ -66,8 +67,6 @@ View::show_header($Title,'wiki,bbcode');
                 <input type="search" placeholder="Search articles" name="search" size="20" />
                 <input value="Search" type="submit" class="hidden" />
             </form>
-            <br style="line-height: 10px;" />
-            <a href="wiki.php?action=browse" class="brackets">Browse articles</a>
         </div>
         </div>
         <div class="box">
