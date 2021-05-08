@@ -17,52 +17,38 @@ function class_list($Selected = 0) {
     return $Return;
 }
 
-if (empty($_REQUEST['action'])) {
-    $_GET['id'] = INDEX_WIKI_PAGE_ID;
-    require_once('article.php');
-} else {
-    switch ($_REQUEST['action']) {
-        case 'create':
-            if ($_POST['action']) {
-                require_once('takecreate.php');
-            } else {
-                require_once('create.php');
-            }
-            break;
-        case 'edit':
-            if (!empty($_POST['action'])) {
-                require_once('takeedit.php');
-            } else {
-                require_once('edit.php');
-            }
-            break;
-        case 'delete':
-            if ($_POST['action']) {
-                require_once('takedelete.php');
-            } else {
-                require_once('delete.php');
-            }
-            break;
-        case 'revisions':
-            require_once('revisions.php');
-            break;
-        case 'compare':
-            require_once('compare.php');
-            break;
-        case 'add_alias':
-            require_once('add_alias.php');
-            break;
-        case 'delete_alias':
-            require_once('delete_alias.php');
-            break;
-        case 'browse':
-            require_once('wiki_browse.php');
-            break;
-        case 'article':
-            require_once('article.php');
-            break;
-        case 'search':
-            require_once('search.php');
-            break;
-    }
+switch ($_REQUEST['action'] ?? 'article') {
+    case 'create':
+        require_once(isset($_POST['action']) ? 'takecreate.php' : 'create.php');
+        break;
+    case 'edit':
+        require_once(isset($_POST['action']) ? 'takeedit.php' : 'edit.php');
+        break;
+    case 'delete':
+        require_once(isset($_POST['action']) ? 'takedelete.php' : 'delete.php');
+        break;
+    case 'revisions':
+        require_once('revisions.php');
+        break;
+    case 'compare':
+        require_once('compare.php');
+        break;
+    case 'add_alias':
+        require_once('add_alias.php');
+        break;
+    case 'delete_alias':
+        require_once('delete_alias.php');
+        break;
+    case 'browse':
+        require_once('wiki_browse.php');
+        break;
+    case 'article':
+        if (!isset($_GET['id'])) {
+            $_GET['id'] = INDEX_WIKI_PAGE_ID;
+        }
+        require_once('article.php');
+        break;
+    case 'search':
+        require_once('search.php');
+        break;
 }

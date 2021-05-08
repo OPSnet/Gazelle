@@ -1,0 +1,38 @@
+{% from 'macro/class.twig' import class_option %}
+<div class="thin">
+    <div class="box pad">
+{% if action == 'create' %}
+        <h3><a href="wiki.php">Wiki</a> &rsaquo; Create new article</h3>
+{% else %}
+        <h3><a href="wiki.php">Wiki</a> &rsaquo; Edit &rsaquo; {{ title }}</h3>
+{% endif %}
+        <form class="create_form" name="wiki_article" action="wiki.php" method="post">
+            <input type="hidden" name="action" value="{{ action }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+{% if id %}
+            <input type="hidden" name="id" value="{{ id }}" />
+{% endif %}
+{% if revision %}
+            <input type="hidden" name="revision" value="{{ revision }}" />
+{% endif %}
+            <div class="pad">
+                <h3>Title</h3>
+                <input type="text" name="title" size="92" maxlength="100" value="{{ title }}" /><br /><br />
+                <h3>Contents</h3>
+                {{ body.field|raw }}
+                {{ body.preview|raw }}
+{% if viewer.permitted('admin_manage_wiki') %}
+                <h3>Access</h3>
+                <p>There are some situations in which the viewing or editing of an article should be restricted to a certain class.</p>
+                <p>
+                <strong>Minimum read class:</strong> <select name="minclassread">{{ class_option(viewer.classLevel, class_list, read) }}</select>
+                <strong>Minimum edit class:</strong> <select name="minclassedit">{{ class_option(viewer.classLevel, class_list, edit) }}</select>
+                </p>
+{% endif %}
+                <p>{{ body.button|raw }}
+                    <input type="submit" value="Submit" />
+                </p>
+            </div>
+        </form>
+    </div>
+</div>

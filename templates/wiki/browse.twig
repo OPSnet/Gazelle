@@ -22,7 +22,11 @@
 
 <div class="thin">
     <div class="header">
-        <h2>{{ title }}</h2>
+{% if letter %}
+        <h2><a href="wiki.php">Wiki</a> &rsaquo; <a href="wiki.php?action=browse">Articles</a> &rsaquo; {{ letter }}</h2>
+{% else %}
+        <h2><a href="wiki.php">Wiki</a> &rsaquo; Table of contents</h2>
+{% endif %}
     </div>
     <div class="linkbox">
         <a href="wiki.php?action=create" class="brackets">Create</a>
