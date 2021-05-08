@@ -92,14 +92,6 @@ function Categories() {
         script.innerHTML = response;
         document.body.append(script);
         console.log('append done');
-    });
-}
-
-function Categories0() {
-    var dynamic_form = $('#dynamic_form');
-    ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
-        dynamic_form.raw().innerHTML = response;
-        eval($('#dynamic_form script.preview_code').html());
         setTimeout(function() {
             dynamic_form.data('loaded', true);
             if ($('#categories').val() == 0) { /* Music */
@@ -730,7 +722,7 @@ function WaitForCategory(callback) {
             callback();
         }
         else {
-            setTimeout(WaitForCategory(callback), 400);
+            setTimeout(function(){WaitForCategory(callback);}, 400);
         }
     }, 100);
 }
