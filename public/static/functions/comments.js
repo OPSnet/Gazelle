@@ -142,8 +142,8 @@ function Edit_Form(post,key) {
         }
         $('#bar' + postid).raw().cancel = $('#content' + postid).raw().innerHTML;
         $('#bar' + postid).raw().oldbar = $('#bar' + postid).raw().innerHTML;
-        $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + authkey + "\" /><input type=\"hidden\" name=\"key\" value=\"" + key + "\" /><input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
-        $('#bar' + postid).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit(' + postid + ');" /><input type="button" value="Post" onclick="Save_Edit(' + postid + ')" /><input type="button" value="Cancel" onclick="Cancel_Edit(' + postid + ');" />';
+        $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + authkey + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\"" + key + "\" />&nbsp;<input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
+        $('#bar' + postid).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit(' + postid + ');" />&nbsp;<input type="button" value="Post" onclick="Save_Edit(' + postid + ')" />&nbsp;<input type="button" value="Cancel" onclick="Cancel_Edit(' + postid + ');" />';
         $('#postcontrol-' + postid).ghide();
     }
     /* If it's the initial edit, fetch the post content to be edited.
@@ -174,7 +174,7 @@ function Cancel_Edit(postid) {
 }
 
 function Preview_Edit(postid) {
-    $('#bar' + postid).raw().innerHTML = "<input type=\"button\" value=\"Editor\" onclick=\"Cancel_Preview(" + postid + ");\" /><input type=\"button\" value=\"Post\" onclick=\"Save_Edit(" + postid + ")\" /><input type=\"button\" value=\"Cancel\" onclick=\"Cancel_Edit(" + postid + ");\" />";
+    $('#bar' + postid).raw().innerHTML = "<input type=\"button\" value=\"Editor\" onclick=\"Cancel_Preview(" + postid + ");\" />&nbsp;<input type=\"button\" value=\"Post\" onclick=\"Save_Edit(" + postid + ")\" />&nbsp;<input type=\"button\" value=\"Cancel\" onclick=\"Cancel_Edit(" + postid + ");\" />";
     ajax.post("ajax.php?action=preview","form" + postid, function(response) {
         $('#preview' + postid).raw().innerHTML = response;
         $('#editbox' + postid).ghide();
@@ -182,7 +182,7 @@ function Preview_Edit(postid) {
 }
 
 function Cancel_Preview(postid) {
-    $('#bar' + postid).raw().innerHTML = "<input type=\"button\" value=\"Preview\" onclick=\"Preview_Edit(" + postid + ");\" /><input type=\"button\" value=\"Post\" onclick=\"Save_Edit(" + postid + ")\" /><input type=\"button\" value=\"Cancel\" onclick=\"Cancel_Edit(" + postid + ");\" />";
+    $('#bar' + postid).raw().innerHTML = "<input type=\"button\" value=\"Preview\" onclick=\"Preview_Edit(" + postid + ");\" />&nbsp;<input type=\"button\" value=\"Post\" onclick=\"Save_Edit(" + postid + ")\" />&nbsp;<input type=\"button\" value=\"Cancel\" onclick=\"Cancel_Edit(" + postid + ");\" />";
     $('#preview' + postid).raw().innerHTML = "";
     $('#editbox' + postid).gshow();
 }
