@@ -9,15 +9,14 @@ $authArgs = '&amp;user=' . $LoggedUser['ID']
     . '&amp;passkey=' . $LoggedUser['torrent_pass']
     . '&amp;authkey=' . $LoggedUser['AuthKey'];
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title><?=display_str($PageTitle)?></title>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1;IE=edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="msapplication-config" content="none" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
     <meta name="referrer" content="none, no-referrer, same-origin" />
-    <link rel="shortcut icon" href="favicon.ico" />
+    <title><?=display_str($PageTitle)?></title>
+    <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Torrents" href="opensearch.php?type=torrents" />
     <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Artists" href="opensearch.php?type=artists" />
