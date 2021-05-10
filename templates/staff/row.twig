@@ -1,0 +1,11 @@
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    <td class="nobr">
+        {{ u.id|user_url|raw }}
+    </td>
+    <td class="nobr">
+        {% if u.propertyVisible(user, 'lastseen') %}{{ u.lastAccess|time_diff }}{% else %}Hidden{% endif %}
+    </td>
+    <td class="nobr">
+        {{ u.supportFor|bb_format }}
+    </td>
+</tr>

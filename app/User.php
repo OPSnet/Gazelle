@@ -136,6 +136,7 @@ class User extends BaseObject {
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
+                p.Name  AS className,
                 p.Values AS primaryPermissions,
                 if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
@@ -722,6 +723,10 @@ class User extends BaseObject {
             );
         }
         return $this->info()['PermissionID'];
+    }
+
+    public function userclassName(): string {
+        return $this->info()['className'];
     }
 
     public function classLevel(): int {

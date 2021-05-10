@@ -399,7 +399,7 @@ foreach ($thread as $Key => $Post) {
 echo $paginator->linkbox();
 $lastPost = end($thread);
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
-$textarea->setPreviewManual(true);
+$textarea->setAutoResize()->setPreviewManual(true);
 
 if ($viewer->permitted('site_moderate_forums') || ($viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
     echo $Twig->render('reply.twig', [

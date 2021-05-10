@@ -1,22 +1,8 @@
 <?php
 
+$userMan = new \Gazelle\Manager\User;
+$classList = $userMan->classList();
 View::show_header('Staff PMs', 'staffpm');
-
-// Get messages
-$StaffPMs = $DB->prepared_query("
-    SELECT ID,
-        Subject,
-        UserID,
-        Status,
-        Level,
-        AssignedToUser,
-        Date,
-        Unread
-    FROM staff_pm_conversations
-    WHERE UserID = ?
-    ORDER BY Status, Date DESC
-    ", $LoggedUser['ID']
-);
 
 // Start page
 ?>
@@ -32,18 +18,37 @@ $StaffPMs = $DB->prepared_query("
     </div>
     <br />
     <br />
-    <?php View::parse('generic/reply/staffpm.php', ['Hidden' => true]); ?>
+<?= $Twig->render('staffpm/reply.twig', [
+    'hidden'=> true,
+    'reply' => new Gazelle\Util\Textarea('message', ''),
+    'user'  => new Gazelle\User($LoggedUser['ID']),
+    'level' => [
+        'fmod'  => $classList[FORUM_MOD]['Level'],
+        'mod'   => $classList[MOD]['Level'],
+        'sysop' => $classList[SYSOP]['Level'],
+    ],
+]); ?>
     <div class="box pad" id="inbox">
 <?php
 
-if (!$DB->has_results()) {
-    // No messages
-?>
+$StaffPMs = $DB->prepared_query("
+    SELECT ID,
+        Subject,
+        UserID,
+        Status,
+        Level,
+        AssignedToUser,
+        Date,
+        Unread
+    FROM staff_pm_conversations
+    WHERE UserID = ?
+    ORDER BY Status, Date DESC
+    ", $LoggedUser['ID']
+);
+
+if (!$DB->has_results()) { ?>
         <h2>No messages</h2>
-<?php
-} else {
-    // Messages, draw table
-?>
+<?php } else { ?>
         <form class="manage_form" name="staff_messages" method="post" action="staffpm.php" id="messageform">
             <input type="hidden" name="action" value="multiresolve" />
             <h3>Open messages</h3>
@@ -56,7 +61,7 @@ if (!$DB->has_results()) {
                 </tr>
 <?php
     // List messages
-    $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
+    $ClassLevels = $userMan->classLevelList();
     $Row = 'a';
     $ShowBox = 1;
     while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread] = $DB->next_record()) {
@@ -86,14 +91,10 @@ if (!$DB->has_results()) {
 <?php
         }
 
-        // Get assigned
         $Assigned = ($Level == 0) ? 'First Line Support' : $ClassLevels[$Level]['Name'];
-        // No + on Sysops
         if ($Assigned != 'Sysop') {
-            $Assigned .= '+';
+            $Assigned .= '+'; // No + on Sysops
         }
-
-        // Table row
 ?>
                 <tr class="<?=$RowClass?>">
                     <td class="center"><input type="checkbox" name="id[]" value="<?=$ID?>" /></td>
@@ -104,17 +105,14 @@ if (!$DB->has_results()) {
 <?php
         $DB->set_query_id($StaffPMs);
     }
-
-    // Close table and multiresolve form
 ?>
             </table>
             <div class="submit_div">
                 <input type="submit" value="Resolve selected" />
             </div>
         </form>
-<?php
-}
-?>
+<?php } ?>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

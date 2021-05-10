@@ -54,14 +54,14 @@ class Textarea extends \Gazelle\Base {
         }
         return '<script type="text/javascript" src="' . STATIC_SERVER . '/functions/textareapreview.class.js?v='
             . filemtime(SERVER_ROOT . '/public/static/functions/textareapreview.class.js')
-            . '"></script><script type="text/javascript">console.log("foo");$(document).ready(function () {' . self::factory() . '});</script>';
+            . '"></script><script type="text/javascript">$(document).ready(function () {' . self::factory() . '});</script>';
     }
 
     /**
      * Emit the javascript required to activate the textareas dynamically (see the upload form)
      */
     public static function factory(): string {
-        $html = 'console.log("bar");TextareaPreview.factory([' . implode(',', self::$list) . ']);';
+        $html = 'TextareaPreview.factory([' . implode(',', self::$list) . ']);';
         self::$list = [];
         return $html;
     }
