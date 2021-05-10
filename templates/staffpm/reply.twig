@@ -1,0 +1,24 @@
+<div id="compose" class="box pad{% if hidden %} hidden{% endif %}">
+    <form class="send_form" name="staff_message" action="staffpm.php" method="post">
+        <h3><label for="subject">Subject</label></h3>
+        <input size="85" type="text" name="subject" id="subject" required/>
+        <br />
+        <h3><label for="message">Message</label></h3>
+        {{ reply.preview|raw }}
+        {{ reply.field|raw }}
+        <br />
+        <strong>Send to: </strong>
+        <select name="level">
+{% if not user.isLocked %}
+            <option value="0" selected="selected">First Line Support</option>
+            <option value="{{ level.fmod }}">Forum Moderators</option>
+            <option value="{{ level.mod }}">Moderators</option>
+{% endif %}
+            <option value="{{ level.sysop }}">Sysops</option>
+        </select>
+        {{ reply.button|raw }}
+        <input type="hidden" name="action" value="takepost" />
+        <input type="submit" value="Send message" />
+        <input type="button" value="Hide" onclick="$('#compose').gtoggle(); return false;" />
+    </form>
+</div>

@@ -67,9 +67,6 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
     </div>
     <a href="login.php?action=recover" class="tooltip" title="I forgot my password :-(">Password recovery</a>
 </form>
-{% endif %}
-</div>
-</div>
 <script type="text/javascript">
 cookie.set('cookie_test', 1, 1);
 if (cookie.get('cookie_test') != null) {
@@ -79,3 +76,6 @@ if (cookie.get('cookie_test') != null) {
 }
 window.onload = function() {document.getElementById("username").focus();};
 </script>
+{% endif %}
+</div>
+</div>

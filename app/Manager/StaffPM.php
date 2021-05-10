@@ -60,4 +60,50 @@ class StaffPM extends \Gazelle\Base {
         }
         return $heading;
     }
+
+    public function flsList() {
+        if (($list = $this->cache->get_value('idfls')) === false) {
+            $this->db->prepared_query("
+                SELECT um.ID
+                FROM users_main AS um
+                INNER JOIN users_levels AS ul ON (ul.UserID = um.ID)
+                WHERE ul.PermissionID = ?
+                ORDER BY um.Username
+                ", FLS_TEAM
+            );
+            $list = $this->db->collect(0);
+            $this->cache->cache_value('idfls', $list, 3600);
+        }
+        $userMan = new \Gazelle\Manager\User;
+        return array_map(function ($id) use ($userMan) { return $userMan->findById($id); }, $list);
+    }
+
+    public function staffList() {
+        if (($staff = $this->cache->get_value('idstaff')) === false) {
+            $this->db->prepared_query("
+                SELECT sg.Name as staffGroup,
+                    um.ID
+                FROM users_main AS um
+                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+                INNER JOIN staff_groups AS sg ON (sg.ID = p.StaffGroup)
+                WHERE p.DisplayStaff = '1'
+                    AND p.Secondary = 0
+                ORDER BY sg.Sort, p.Level, um.Username
+            ");
+            $list = $this->db->to_array(false, MYSQLI_ASSOC);
+            $staff = [];
+            foreach ($list as $user) {
+                if (!isset($staff[$user['staffGroup']])) {
+                    $staff[$user['staffGroup']] = [];
+                }
+                $staff[$user['staffGroup']][] = $user['ID'];
+            }
+            $this->cache->cache_value('idstaff', $staff, 3600);
+        }
+        $userMan = new \Gazelle\Manager\User;
+        foreach ($staff as &$group) {
+            $group = array_map(function ($userId) use ($userMan) { return $userMan->findById($userId); }, $group);
+        }
+        return $staff;
+    }
 }

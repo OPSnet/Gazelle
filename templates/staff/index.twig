@@ -1,0 +1,63 @@
+{% if user.permitted('admin_manage_applicants') %}
+<div class="linkbox">
+    <a href="apply.php">Role applications</a>
+</div>
+{% endif %}
+<div class="thin">
+    <div class="header">
+        <h2>{{ constant('SITE_NAME') }}  Staff</h2>
+    </div>
+    <div class="box pad" style="padding: 0px 10px 10px 10px;">
+        <br />
+        <h3>Contact Staff</h3>
+        <div id="below_box">
+            <p>If you are looking for help with a general question, we appreciate it if you would only message through the staff inbox, where we can all help you.</p>
+            <p>You can do that by <strong><a href="#" onclick="$('#compose').gtoggle(); return false;">sending a Staff PM</a></strong>.</p>
+            <p>If you'd like to join our staff, please feel free to <strong><a href="apply.php">apply</a></strong>!</p>
+        </div>
+    </div>
+{% include 'staffpm/reply.twig' %}
+    <div class="box pad">
+        <h2 style="text-align: left;">Community Help</h2>
+        <h3 style="font-size: 17px;" id="fls"><i>First-Line Support</i></h3>
+        <p><strong>These users are not official staff members.</strong> They are users who have volunteered their time to help people in need. Please treat them with respect, and read <a href="wiki.php?action=article&amp;id=52">this</a> before contacting them.</p><br />
+        <table class="staff" width="100%">
+            <tr class="colhead">
+                <td style="width: 130px;">Username</td>
+                <td style="width: 130px;">Last seen</td>
+                <td><strong>Support for</strong></td>
+            </tr>
+{% for u in fls %}
+    {% include 'staff/row.twig' %}
+{% endfor %}
+        </table>
+    </div>
+    <br />
+{% for section, roster in staff %}
+    <div class="box pad" style="padding: 0px 10px 10px 10px;">
+        <h2 style='text-align: left;'>{{ section }}</h2>
+    {% set cur_class = 0 %}
+    {% set close_table = false %}
+    {% for u in roster %}
+        {% if u.primaryClass != cur_class %}
+            {% if close_table %}
+                {% set close_table = false %}
+        </table><br />
+            {% endif %}
+            {% set cur_class = u.primaryClass %}
+            {% set close_table = true %}
+        <h3 style="font-size: 17px;" id="{{ u.userclassName|lower|replace({'_': ' '}) }}"><i>{{ u.userclassName }}s</i></h3>
+        <table class="staff" width="100%">
+            <tr class="colhead">
+                <td style="width: 130px;">Username</td>
+                <td style="width: 130px;">Last seen</td>
+                <td><strong>Remark</strong></td>
+            </tr>
+        {% endif %}
+        {% include 'staff/row.twig' %}
+    {% endfor %}
+        </table>
+    </div>
+    <br />
+{% endfor %}
+</div>
