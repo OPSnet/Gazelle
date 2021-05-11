@@ -1147,6 +1147,73 @@ class Torrent extends \Gazelle\Base {
         return $this->featuredAlbum(self::FEATURED_SHOWCASE);
     }
 
+    public function modifyLogscore(int $groupId, int $torrentId): int {
+        $count = $this->db->scalar("
+            SELECT count(*) FROM torrents_logs WHERE TorrentID = ?
+            ", $torrentId
+        );
+        if (!$count) {
+            $this->db->prepared_query("
+                UPDATE torrents SET
+                    HasLogDB = '0',
+                    LogChecksum = '1',
+                    LogScore = 0
+                WHERE ID = ?
+                ", $torrentId
+            );
+        } else {
+            $this->db->prepared_query("
+                UPDATE torrents AS t
+                LEFT JOIN (
+                    SELECT TorrentID,
+                        min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+                        min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+                    FROM torrents_logs
+                    WHERE TorrentID = ?
+                    GROUP BY TorrentID
+                ) AS tl ON (t.ID = tl.TorrentID)
+                SET
+                    t.LogScore    = tl.Score,
+                    t.LogChecksum = tl.Checksum
+                WHERE t.ID = ?
+                ", $torrentId, $torrentId
+            );
+        }
+        $this->cache->deleteMulti(["torrent_group_{$groupId}", "torrents_details_{$groupId}"]);
+        return $this->db->affected_rows();
+    }
+
+    public function adjustLogscore(int $groupId, int $torrentId, int $logId, $Adjusted, int $adjScore, $adjChecksum, $adjBy, $adjReason, $adjDetails): int {
+        $this->db->prepared_query("
+            UPDATE torrents_logs SET
+                Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
+            WHERE LogID = ? AND TorrentID = ?
+            ", $Adjusted, $adjScore, $adjChecksum, $adjBy, $adjReason, $adjDetails,
+                $logId, $torrentId
+        );
+        if ($this->db->affected_rows() > 0) {
+            return $this->modifyLogscore($groupId, $torrentId);
+        }
+        return 0;
+    }
+
+    public function rescoreLog(int $groupId, int $torrentId, int $logId, \Gazelle\Logfile $logfile, string $version): int {
+        $this->db->prepared_query("
+            UPDATE torrents_logs SET
+                Score = ?, `Checksum` = ?, ChecksumState = ?, Ripper = ?, RipperVersion = ?,
+                `Language` = ?, Details = ?, LogcheckerVersion = ?,
+                Adjusted = '0'
+            WHERE LogID = ? AND TorrentID = ?
+            ", $logfile->score(), $logfile->checksumStatus(), $logfile->checksumState(), $logfile->ripper(), $logfile->ripperVersion(),
+                $logfile->language(), $logfile->detailsAsString(), $version,
+                $logId, $torrentId
+        );
+        if ($this->db->affected_rows() > 0) {
+            return $this->modifyLogscore($groupId, $torrentId);
+        }
+        return 0;
+    }
+
     /**
      * Combine torrent media into a standardized file name
      *

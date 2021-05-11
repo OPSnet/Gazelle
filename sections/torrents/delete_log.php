@@ -2,7 +2,6 @@
 
 $torrentId = (int)$_GET['torrentid'];
 $logId = (int)$_GET['logid'];
-
 if (!$torrentId || !$logId) {
     error(404);
 }
@@ -15,7 +14,8 @@ if (!$groupId) {
 (new Gazelle\File\RipLog)->remove([$torrentId, $logId]);
 (new Gazelle\Log)->torrent($groupId, $torrentId, $LoggedUser['ID'], "Riplog ID $logId removed from torrent $torrentId");
 
+$torMan = new Gazelle\Manager\Torrent;
 Torrents::clear_log($torrentId, $logId);
-Torrents::set_logscore($torrentId, $groupId);
+$torMan->modifyLogscore($groupId, $torrentId);
 
 header("Location: torrents.php?torrentid={$torrentId}");

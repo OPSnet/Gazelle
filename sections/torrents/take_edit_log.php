@@ -73,14 +73,6 @@ foreach ($TrackDeductions as $Deduction) {
     $AdjustedScore -= $Total;
 }
 
-$DB->prepared_query('
-    UPDATE torrents_logs
-    SET Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
-    WHERE LogID = ? AND TorrentID = ?
-    ', $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $AdjustedBy, $AdjustmentReason, serialize($AdjustmentDetails),
-    $LogID, $TorrentID
-);
-
-Torrents::set_logscore($TorrentID, $GroupID);
+(new Gazelle\Manager\Torrent)->adjustLogscore($GroupID, $TorrentID, $LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $AdjustedBy, $AdjustmentReason, serialize($AdjustmentDetails));
 
 header("Location: torrents.php?torrentid={$TorrentID}");

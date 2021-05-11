@@ -1104,45 +1104,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         return $DB->affected_rows();
     }
 
-    public static function set_logscore($TorrentID, $GroupID) {
-        global $Cache, $DB;
-        $count = $DB->scalar("
-            SELECT COUNT(*) FROM torrents_logs WHERE TorrentID = ?
-            ", $TorrentID
-        );
-
-        if (!$count) {
-            $DB->prepared_query("
-                UPDATE torrents SET
-                    HasLogDB = '0',
-                    LogChecksum = '1',
-                    LogScore = 0
-                WHERE ID = ?
-                ", $TorrentID
-            );
-        }
-        else {
-            $DB->prepared_query("
-                UPDATE torrents AS t
-                LEFT JOIN (
-                    SELECT
-                        TorrentID,
-                        min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-                        min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
-                    FROM torrents_logs
-                    WHERE TorrentID = ?
-                    GROUP BY TorrentID
-                ) AS tl ON t.ID = tl.TorrentID
-                SET
-                    t.LogScore    = tl.Score,
-                    t.LogChecksum = tl.Checksum
-                WHERE t.ID = ?
-        ", $TorrentID, $TorrentID);
-        }
-
-        $Cache->deleteMulti(["torrent_group_{$GroupID}", "torrents_details_{$GroupID}"]);
-    }
-
     public static function bbcodeUrl($val, $attr) {
         $cacheKey = 'bbcode_torrent_' . $val;
         if ($attr) {
