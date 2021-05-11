@@ -159,19 +159,6 @@ class Format {
         return [$Page, $Limit];
     }
 
-    // A9 magic. Some other poor soul can write the phpdoc.
-    // For data stored in memcached catalogues (giant arrays), e.g. forum threads
-    public static function catalogue_limit($Page, $PerPage, $CatalogueSize = 500) {
-        $CatalogueID = floor(($PerPage * $Page - $PerPage) / $CatalogueSize);
-        $CatalogueLimit = ($CatalogueID * $CatalogueSize).", $CatalogueSize";
-        return [$CatalogueID, $CatalogueLimit];
-    }
-
-    public static function catalogue_select($Catalogue, $Page, $PerPage, $CatalogueSize = 500) {
-        return array_slice($Catalogue, (($PerPage * $Page - $PerPage) % $CatalogueSize), $PerPage, true);
-    }
-
-
     /* Get pages
      * Returns a page list, given certain information about the pages.
      *

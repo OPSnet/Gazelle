@@ -71,9 +71,9 @@ if ($threadInfo['Posts'] <= $PerPage) {
 if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
     $Page = ceil($threadInfo['Posts'] / $PerPage);
 }
-[$CatalogueID, $CatalogueLimit] = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
 
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
+$CatalogueID = floor(($PerPage * ($Page - 1)) / THREAD_CATALOGUE);
 if (!$Catalogue = $Cache->get_value("thread_$threadId"."_catalogue_$CatalogueID")) {
     $DB->prepared_query("
         SELECT
@@ -86,15 +86,15 @@ if (!$Catalogue = $Cache->get_value("thread_$threadId"."_catalogue_$CatalogueID"
         FROM forums_posts AS p
         WHERE p.TopicID = ?
             AND p.ID != ?
-        LIMIT ?
-        ", $threadId, $threadInfo['StickyPostID'], $CatalogueLimit
+        LIMIT ? OFFSET ?
+        ", $threadId, $threadInfo['StickyPostID'], THREAD_CATALOGUE, $CatalogueID * $CatalogueSize
     );
     $Catalogue = $DB->to_array(false, MYSQLI_ASSOC);
     if (!$threadInfo['isLocked'] || $threadInfo['isSticky']) {
         $Cache->cache_value("thread_$threadId"."_catalogue_$CatalogueID", $Catalogue, 0);
     }
 }
-$Thread = Format::catalogue_select($Catalogue, $Page, $PerPage, THREAD_CATALOGUE);
+$Thread = array_slice($Catalogue, ($PerPage * ($Page - 1)) % THREAD_CATALOGUE, $PerPage, true);
 
 if ($_GET['updatelastread'] !== '0') {
     $LastPost = end($Thread);
