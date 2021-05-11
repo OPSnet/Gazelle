@@ -5,6 +5,7 @@ $viewer = new Gazelle\User($LoggedUser['ID']);
 
 $action = !empty($_GET['action']) && $_GET['action'] === 'editblog' ? 'Edit' : 'Create';
 if (check_perms('admin_manage_blog')) {
+    $textarea = new Gazelle\Util\Textarea('body', $action === 'Edit' ? $blog->title() : '');
     if ($action === 'Edit' && !empty($_GET['id'])) {
         $blog = new Gazelle\Blog((int)$_GET['id']);
     }
@@ -22,7 +23,8 @@ if (check_perms('admin_manage_blog')) {
             <input type="text" name="title" size="95" value="<?= $action === 'Edit' ? $blog->title() : '' ?>" /><br/>
 
             <h3>Body</h3>
-<?php $bodyText = new TEXTAREA_PREVIEW('body', 'body', $action === 'Edit' ? $blog->body() : '', 95, 15, true, false); ?>
+                <?= $textarea->preview() ?>
+                <?= $textarea->field() ?>
             <br/>
             <input type="checkbox" value="1" name="important" id="important" checked="checked" />
             <label for="important">Important</label><br/>
@@ -35,7 +37,7 @@ if (check_perms('admin_manage_blog')) {
             <label for="subscribebox">Subscribe</label>
 
             <div class="center">
-                <input type="button" value="Preview" class="hidden button_preview_<?= $bodyText->getID() ?>" tabindex="1" />
+                <?= $textarea->button() ?>
                 <input type="submit" value="<?= $action ?> blog post" />
             </div>
         </div>
