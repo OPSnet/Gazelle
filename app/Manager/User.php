@@ -69,6 +69,19 @@ class User extends \Gazelle\Base {
     }
 
     /**
+     * Get a User object from their announceKey
+     *
+     * @param string announceKey
+     * @return \Gazelle\User object or null if not found
+     */
+    public function findByAnnounceKey(string $announceKey): ?\Gazelle\User {
+        $userId = (int)$this->db->scalar("
+            SELECT ID FROM users_main WHERE torrent_pass = ?  ", $announceKey
+        );
+        return $userId ? new \Gazelle\User($userId) : null;
+    }
+
+    /**
      * Get a User object from their password reset key
      *
      * @param string key

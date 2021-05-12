@@ -619,14 +619,15 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 ?>
     <tr class="group_torrent groupid_<?=$GroupID?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1 ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
-            <span>
-                [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Data['HasFile'] ? 'DL' : 'Missing'?></a>
-<?php            if (Torrents::can_use_token($Data)) { ?>
-                | <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Data['Seeders'], $Data['Size'])?>');">FL</a>
-<?php            } ?>
-                | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a> ]
-            </span>
-            &raquo; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Data)?><?php if ($Reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
+            <?= $Twig->render('torrent/action.twig', [
+                'can_fl' => Torrents::can_use_token($Data),
+                'key'    => $LoggedUser['torrent_pass'],
+                't'      => $Data,
+            ]) ?>
+            &raquo; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Data)?>
+<?php if ($Reported) { ?>
+            / <strong class="torrent_label tl_reported">Reported</strong>
+<?php } ?></a>
         </td>
         <td class="td_file_count"><?=$Data['FileCount']?></td>
         <td class="td_time nobr"><?=time_diff($Data['Time'], 1)?></td>
@@ -659,26 +660,24 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
         $SnatchedTorrentClass = $Data['IsSnatched'] ? ' snatched_torrent' : '';
 ?>
     <tr class="torrent<?=$SnatchedTorrentClass . $SnatchedGroupClass?>">
-<?php        if ($GroupResults) { ?>
+<?php   if ($GroupResults) { ?>
         <td></td>
-<?php        } ?>
+<?php   } ?>
         <td class="center cats_col m_cats_col m_td_left">
             <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($CategoryID)?> <?=$TorrentTags->css_name()?>"></div>
         </td>
         <td class="td_info big_info">
-<?php        if ($LoggedUser['CoverArt']) { ?>
+<?php   if ($LoggedUser['CoverArt']) { ?>
             <div class="group_image float_left clear">
                 <?=ImageTools::cover_thumb($GroupInfo['WikiImage'], $CategoryID) ?>
             </div>
-<?php        } ?>
+<?php   } ?>
             <div class="group_info clear">
-                <span>
-                    [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?php        if (Torrents::can_use_token($Data)) { ?>
-                    | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Data['Seeders'], $Data['Size'])?>');">FL</a>
-<?php        } ?>
-                    | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a> ]
-                </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($Data),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $Data,
+                ]) ?>
                 <?=$DisplayName?>
                 <div class="torrent_info"><?=$ExtraInfo?></div>
                 <div class="tags"><?=$TorrentTags->format("torrents.php?$Action&amp;taglist=")?></div>

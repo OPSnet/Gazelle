@@ -959,7 +959,7 @@ if (!in_array('notifications', $paranoia)) {
     $Item = $Feed->item(
         $Title,
         Text::strip_bbcode($Properties['GroupDescription']),
-        'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id=' . $TorrentID,
+        "torrents.php?action=download&amp;id={$TorrentID}&amp;torrent_pass=[[PASSKEY]]",
         $LoggedUser['Username'],
         'torrents.php?id=' . $GroupID,
         implode(',', $tagList)

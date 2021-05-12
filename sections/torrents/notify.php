@@ -283,9 +283,9 @@ if (empty($Results)) {
             $ExtraInfo = Torrents::torrent_info($TorrentInfo, true, true);
 
             $TorrentTags = new Tags($GroupInfo['TagList']);
-
-            if ($GroupInfo['TagList'] == '')
+            if ($GroupInfo['TagList'] == '') {
                 $TorrentTags->set_primary($Categories[$GroupCategoryID - 1]);
+            }
 
         // print row
 ?>
@@ -297,22 +297,20 @@ if (empty($Results)) {
             <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
         </td>
         <td class="td_info big_info">
-<?php   if ($LoggedUser['CoverArt']) { ?>
+<?php       if ($LoggedUser['CoverArt']) { ?>
             <div class="group_image float_left clear">
                 <?php ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupCategoryID) ?>
             </div>
-<?php   } ?>
+<?php       } ?>
             <div class="group_info clear">
-                <span>
-                    [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?php   if (Torrents::can_use_token($TorrentInfo)) { ?>
-                    | <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($TorrentInfo['Seeders'], $TorrentInfo['Size'])?>');">FL</a>
-<?php
-        }
-        if (!$Sneaky) { ?>
-                    | <a href="#" onclick="clearItem(<?=$TorrentID?>); return false;" class="tooltip" title="Remove from notifications list">CL</a>
-<?php   } ?> ]
-                </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($TorrentInfo),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $TorrentInfo,
+                    'extra'  => [
+                        !$Sneaky ? "<a href=\"#\" onclick=\"clearItem(<?=$TorrentID?>); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
+                    ],
+                ]) ?>
                 <strong><?=$DisplayName?></strong>
                 <div class="torrent_info">
                     <?=$ExtraInfo?>
@@ -320,7 +318,8 @@ if (empty($Results)) {
                     <strong class="new">New!</strong>
 <?php
         }
-        if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
+        if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) {
+?>
                     <span class="remove_bookmark float_right">
                         <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                     </span>
@@ -348,7 +347,6 @@ if (empty($Results)) {
 <?php
     }
 }
-
 if ($Pages) { ?>
     <div class="linkbox"><?=$Pages?></div>
 <?php } ?>

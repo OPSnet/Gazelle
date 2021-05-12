@@ -232,7 +232,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     if (count($Torrents) > 1 || $GroupCategoryID == 1) {
         // Grouped torrents
         $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1);
-        ?>
+?>
         <tr class="group groupid_<?=$GroupID?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $GroupID ?>">
             <td class="td_collapse m_td_left center">
                 <div id="showimg_<?= $GroupID ?>" class="<?= ($ShowGroups ? 'hide' : 'show') ?>_torrents">
@@ -247,17 +247,17 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="td_info" colspan="5">
                 <strong><?= $DisplayName ?></strong>
                 <span style="text-align: right;" class="float_right">
-    <?php if ($ownProfile) { ?>
+ <?php if ($ownProfile) { ?>
         <a href="#group_<?= $GroupID ?>" class="brackets remove_bookmark"
            onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a>
         <br/>
-    <?php } ?>
+<?php } ?>
                     <?= time_diff($AddedTime); ?>
                         </span>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
         </tr>
-        <?php
+<?php
         $LastRemasterYear = '-';
         $LastRemasterTitle = '';
         $LastRemasterRecordLabel = '';
@@ -283,7 +283,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 || $Torrent['Media'] != $LastMedia
             ) {
                 $EditionID++;
-                ?>
+?>
                 <tr class="group_torrent groupid_<?= $GroupID ?> edition<?= $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1 ? ' hidden' : '') ?>">
                     <td colspan="7" class="edition_info"><strong><a href="#"
                         onclick="toggle_edition(<?= $GroupID ?>, <?= $EditionID ?>, this, event)"
@@ -292,27 +292,21 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                             <?= Torrents::edition_string($Torrent, $Group) ?>
                         </strong></td>
                 </tr>
-                <?php
+<?php
             }
             $LastRemasterTitle = $Torrent['RemasterTitle'];
             $LastRemasterYear = $Torrent['RemasterYear'];
             $LastRemasterRecordLabel = $Torrent['RemasterRecordLabel'];
             $LastRemasterCatalogueNumber = $Torrent['RemasterCatalogueNumber'];
             $LastMedia = $Torrent['Media'];
-            ?>
+?>
             <tr class="group_torrent torrent_row groupid_<?= $GroupID ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1 ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
-                <span>[ <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
-                           class="tooltip" title="Download">DL</a>
-                    <?php if (Torrents::can_use_token($Torrent)) { ?>
-                        |
-                        <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
-                           class="tooltip" title="Use a FL Token"
-                           onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size']) ?>');">FL</a>
-                    <?php } ?>
-                    | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip"
-                         title="Report">RP</a> ]
-                </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $Torrent,
+                ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp; <a
                             href="torrents.php?id=<?= $GroupID ?>&amp;torrentid=<?= $TorrentID ?>"><?= Torrents::torrent_info($Torrent) ?></a>
                 </td>
@@ -321,7 +315,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <td class="td_seeders m_td_right number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
                 <td class="td_leechers m_td_right number_column"><?= number_format($Torrent['Leechers']) ?></td>
             </tr>
-            <?php
+<?php
         }
     }
     else {
@@ -344,7 +338,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             $DisplayName .= ' ' . Format::torrent_label('Personal Freeleech!');
         }
         $SnatchedTorrentClass = $Torrent['IsSnatched'] ? ' snatched_torrent' : '';
-        ?>
+?>
         <tr class="torrent torrent_row<?= $SnatchedTorrentClass . $SnatchedGroupClass ?>" id="group_<?= $GroupID ?>">
             <td></td>
             <td class="center">
@@ -353,25 +347,17 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 </div>
             </td>
             <td>
-                <span>
-                    [ <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
-                         class="tooltip" title="Download">DL</a>
-                    <?php if (Torrents::can_use_token($Torrent)) { ?>
-                        |
-                        <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
-                           class="tooltip" title="Use a FL Token"
-                           onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size']) ?>');">FL</a>
-                    <?php } ?>
-                    | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip"
-                         title="Report">RP</a> ]
-                </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $Torrent,
+                ]) ?>
                 <strong><?= $DisplayName ?></strong>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
-                <?php if ($ownProfile) { ?>
-                    <span class="float_right float_clear"><a href="#group_<?= $GroupID ?>"
-                                                             class="brackets remove_bookmark"
-                                                             onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a></span>
-                <?php } ?>
+<?php if ($ownProfile) { ?>
+                    <span class="float_right float_clear"><a href="#group_<?= $GroupID
+                        ?>" class="brackets remove_bookmark" onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a></span>
+<?php } ?>
                 <span class="float_right float_clear"><?= time_diff($AddedTime); ?></span>
 
             </td>
@@ -380,7 +366,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
             <td class="number_column"><?= number_format($Torrent['Leechers']) ?></td>
         </tr>
-        <?php
+<?php
     }
     echo ob_get_clean();
 }
