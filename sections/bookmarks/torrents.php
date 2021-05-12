@@ -157,7 +157,7 @@ if ($CollageCovers !== 0) { ?>
             $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($id) use ($TorrentList) {
+                    function($id) use ($collMan, $TorrentList) {
                         return $collMan->coverRow($TorrentList[$id]);
                     },
                     $Groups

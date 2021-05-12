@@ -141,7 +141,7 @@ if (check_perms('zip_downloader')) {
             $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($id) use ($TorrentList) {
+                    function($id) use ($collMan, $TorrentList) {
                         return $collMan->coverRow($TorrentList[$id]);
                     },
                     $Groups
