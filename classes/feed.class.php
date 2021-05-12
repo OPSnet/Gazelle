@@ -54,7 +54,7 @@ class Feed {
             $Entries = [];
         } else {
             foreach ($Entries as $Item) {
-                echo str_replace(['[[PASSKEY]]', '[[AUTHKEY]]'], [display_str($PassKey), display_str($AuthKey)], $Item);
+                echo str_replace('[[PASSKEY]]', $PassKey, $Item);
             }
         }
     }
