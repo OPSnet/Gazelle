@@ -254,7 +254,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         $reports = Torrents::get_reports($torrentID);
         $reported = count($reports) > 0;
 
-        // print row
+        global $Twig;
 ?>
     <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '') . ($isSnatched ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
@@ -266,11 +266,11 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             </div>
 <?php   } ?>
             <div class="group_info clear">
-                <span>
-                  <a href="torrents.php?action=download&amp;id=<?=$torrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                  <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($torrentDetails['Seeders'], $torrentDetails['Size'])?>');">FL</a>
-                </span>
-
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($torrentDetails),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $torrentDetails,
+                ]) ?>
                 <strong><?=$displayName?></strong> <?=$torrentInformation?><?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>
 <?php
         if ($isBookmarked) {

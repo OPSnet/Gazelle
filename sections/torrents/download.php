@@ -2,18 +2,14 @@
 
 use \Gazelle\Util\Irc;
 
-authorize();
 enforce_login();
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
-if ($Viewer->isLocked()) {
+$Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass']);
+if (is_null($Viewer)) {
+    json_or_error('missing user', 404);
+} elseif (!$Viewer->isEnabled() || $Viewer->isLocked()) {
     header('HTTP/1.1 403 Forbidden');
     exit;
-}
-if (defined('AJAX')) {
-    enforce_login();
-} elseif (strpos($_REQUEST['torrent_pass'], '_') !== false) {
-    error(404);
 }
 $torrentId = (int)$_REQUEST['id'];
 if (!$torrentId) {

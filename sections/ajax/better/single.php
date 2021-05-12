@@ -1,8 +1,7 @@
 <?php
 if (($Results = $Cache->get_value('better_single_groupids')) === false) {
     $DB->prepared_query("
-        SELECT
-            t.ID AS TorrentID,
+        SELECT t.ID AS TorrentID,
             t.GroupID AS GroupID
         FROM xbt_files_users AS x
         INNER JOIN torrents AS t ON (t.ID = x.fid)
@@ -20,7 +19,7 @@ if (($Results = $Cache->get_value('better_single_groupids')) === false) {
 $Groups = Torrents::get_groups(array_keys($Results));
 
 $JsonResults = [];
-foreach ($Results as $GroupID => $FlacID) {
+foreach ($Results as $GroupID => $TorrentID) {
     if (!isset($Groups[$GroupID])) {
         continue;
     }
@@ -38,12 +37,12 @@ foreach ($Results as $GroupID => $FlacID) {
     }
 
     $JsonResults[] = [
-        'torrentId' => (int)$FlacID,
+        'torrentId' => (int)$TorrentID,
         'groupId' => (int)$GroupID,
         'artist' => $JsonArtists,
         'groupName' => $Group['GroupName'],
         'groupYear' => (int)$Group['GroupYear'],
-        'downloadUrl' => "torrents.php?action=download&id=$FlacID&authkey=".$LoggedUser['AuthKey'].'&torrent_pass='.$LoggedUser['torrent_pass']
+        'downloadUrl' => "torrents.php?action=download&id=$TorrentID&torrent_pass=" . $LoggedUser['torrent_pass'],
     ];
 }
 

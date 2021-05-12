@@ -176,8 +176,7 @@ class Bookmark extends Base {
                         $Feed->item(
                             $group['Name'] . ' ' . $labelMan->load($torrent)->label(),
                             \Text::strip_bbcode($group['WikiBody']),
-                            'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id='
-                                . $torrent['ID'],
+                            "torrents.php?action=download&amp;id={$torrent['ID']}&amp;torrent_pass=[[PASSKEY]]",
                             $user->username(),
                             "torrents.php?id=$id",
                             $group['tagIds']

@@ -641,21 +641,18 @@ foreach ($TorrentList as $Torrent) {
 <?php
         }
     } else {
+        echo $Twig->render('torrent/action.twig', [
+            'can_fl' => Torrents::can_use_token($Torrent),
+            'key'    => $LoggedUser['torrent_pass'],
+            't'      => $Torrent,
+            'edit'   => $CanEdit,
+            'remove' => check_perms('torrents_delete') || $UserID == $LoggedUser['ID'],
+            'pl'     => true,
+            'extra'  => [
+                "<a href=\"ajax.php?action=torrent&id=$TorrentID\" download=\"$Title [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
+            ],
+        ]);
 ?>
-                    <span>[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=($HasFile ? 'DL' : 'Missing')?></a>
-<?php   if (Torrents::can_use_token($Torrent)) { ?>
-                        | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size'])?>');">FL</a>
-<?php   } ?>
-                        | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a>
-<?php   if ($CanEdit) { ?>
-                        | <a href="torrents.php?action=edit&amp;id=<?=$TorrentID ?>" class="tooltip" title="Edit">ED</a>
-<?php   }
-        if (check_perms('torrents_delete') || $UserID == $LoggedUser['ID']) { ?>
-                        | <a href="torrents.php?action=delete&amp;torrentid=<?=$TorrentID ?>" class="tooltip" title="Remove">RM</a>
-<?php   } ?>
-                        | <a href="torrents.php?torrentid=<?=$TorrentID ?>" class="tooltip" title="Permalink">PL</a>
-                        | <a href="ajax.php?action=torrent&id=<?=($TorrentID)?>" download="<?=$Title?> [<?=($TorrentID)?>] [orpheus.network].json" class="tooltip" title="Download JSON">JS</a>
-                    ]</span>
                     &raquo; <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;"><?=$ExtraInfo; ?></a>
                 </td>
                 <td class="td_size number_column nobr"><?=Format::get_size($Size)?></td>

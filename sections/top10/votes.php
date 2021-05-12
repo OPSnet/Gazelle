@@ -232,13 +232,11 @@ foreach ($topVotes as $groupID => $group) {
 ?>
         <tr class="group_torrent torrent_row groupid_<?=$groupID?> edition_<?=$editionID?><?=$snatchedTorrentClass . $snatchedGroupClass?> hidden">
             <td colspan="3">
-                <span>
-                    [ <a href="torrents.php?action=download&amp;id=<?=$torrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?php            if (Torrents::can_use_token($torrent)) { ?>
-                    | <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($torrent['Seeders'], $torrent['Size'])?>');">FL</a>
-<?php            } ?>
-                    | <a href="reportsv2.php?action=report&amp;id=<?=$torrentID?>" class="tooltip" title="Report">RP</a> ]
-                </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($torrent),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $torrent,
+                ]) ?>
                 &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$groupID?>&amp;torrentid=<?=$torrentID?>"><?=Torrents::torrent_info($torrent)?><?php if ($reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
             </td>
             <td class="number_column nobr"><?=Format::get_size($torrent['Size'])?></td>
@@ -280,19 +278,16 @@ foreach ($topVotes as $groupID => $group) {
                 </div>
 <?php        } ?>
                 <div class="group_info clear">
-                    <span>
-                        [ <a href="torrents.php?action=download&amp;id=<?=$torrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?php        if (Torrents::can_use_token($torrent)) { ?>
-                        | <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($torrent['Seeders'], $torrent['Size'])?>');">FL</a>
-<?php        } ?>
-                        | <a href="reportsv2.php?action=report&amp;id=<?=$torrentID?>" class="tooltip" title="Report">RP</a>
-<?php        if ($isBookmarked) { ?>
-                        | <a href="#" id="bookmarklink_torrent_<?=$groupID?>" class="remove_bookmark" onclick="Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;">Remove bookmark</a>
-<?php        } else { ?>
-                        | <a href="#" id="bookmarklink_torrent_<?=$groupID?>" class="add_bookmark" onclick="Bookmark('torrent', <?=$groupID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?php        } ?>
-                        ]
-                    </span>
+                    <?= $Twig->render('torrent/action.twig', [
+                        'can_fl' => Torrents::can_use_token($torrent),
+                        'key'    => $LoggedUser['torrent_pass'],
+                        't'      => $torrent,
+                        'extra'  => [
+                            "<a href=\"#\" id=\"bookmarklink_torrent_<?=$groupID?>\" " . $isBookmarked
+                                ? "class=\"remove_bookmark\" onclick=\"Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;\">Remove bookmark</a>"
+                                : "class=\"add_bookmark\" onclick=\"Bookmark('torrent', <?=$groupID?>, 'Remove bookmark'); return false;\">Bookmark</a>"
+                        ],
+                    ]) ?>
                     <strong><?=$displayName?></strong>
                     <div class="tags"><?=$torrentTags->format()?></div>
                 </div>

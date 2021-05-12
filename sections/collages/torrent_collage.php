@@ -293,17 +293,11 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 ?>
             <tr class="group_torrent torrent_row groupid_<?= $GroupID ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1 ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
-                    <span class="brackets">
-                        <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
-                           class="tooltip" title="Download">DL</a>
-<?php       if (Torrents::can_use_token($Torrent)) { ?>
-                            | <a
-                                href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
-                                class="tooltip" title="Use a FL Token"
-                                onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size']) ?>');">FL</a>
-<?php       } ?>
-                        | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
-                    </span>
+                    <?= $Twig->render('torrent/action.twig', [
+                        'can_fl' => Torrents::can_use_token($Torrent),
+                        'key'    => $LoggedUser['torrent_pass'],
+                        't'      => $Torrent,
+                    ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp; <a
                         href="torrents.php?id=<?= $GroupID ?>&amp;torrentid=<?= $TorrentID ?>"><?= Torrents::torrent_info($Torrent) ?></a>
                 </td>
@@ -343,17 +337,11 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 </div>
             </td>
             <td class="td_info">
-                    <span class="brackets">
-                        <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
-                           class="tooltip" title="Download">DL</a>
-<?php   if (Torrents::can_use_token($Torrent)) { ?>
-                            | <a
-                                href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
-                                class="tooltip" title="Use a FL Token"
-                                onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size']) ?>');">FL</a>
-<?php   } ?>
-                        | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
-                    </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $Torrent,
+                ]) ?>
                 <strong><?= $DisplayName ?></strong>
 <?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
                 <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>

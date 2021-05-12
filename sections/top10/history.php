@@ -180,7 +180,7 @@ if (!empty($_GET['date'])) {
         <td style="padding: 8px; text-align: center;"><strong><?=$Rank?></strong></td>
         <td class="center cats_col"><div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div></td>
         <td>
-        <span><?=($GroupID ? '<a href="torrents.php?action=download&amp;id='.$TorrentID.'&amp;authkey='.$LoggedUser['AuthKey'].'&amp;torrent_pass='.$LoggedUser['torrent_pass'].' title="Download" class="brackets tooltip">DL</a>' : '(Deleted)')?></span>
+        <span><?=($GroupID ? '<a href="torrents.php?action=download&amp;id='.$TorrentID.'&amp;torrent_pass='.$LoggedUser['torrent_pass'].' title="Download" class="brackets tooltip">DL</a>' : '(Deleted)')?></span>
             <?=$DisplayName?>
             <div class="tags"><?=$TorrentTags->format()?></div>
         </td>
@@ -194,4 +194,3 @@ if (!empty($_GET['date'])) {
 <?php
 }
 View::show_footer();
-?>

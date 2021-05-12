@@ -335,7 +335,7 @@ if ($resultCount == 0) { ?>
         <tr<?=($edition['FLACIsSnatched'] ? ' class="snatched_torrent"' : '')?>>
             <td>
                 <span class="torrent_links_block">
-                    <a href="torrents.php?action=download&amp;id=<?=$flacID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+                    <a href="torrents.php?action=download&amp;id=<?=$flacID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
                 </span>
                 <?=$displayName?>
                 <div class="torrent_info"><?=$edition['EditionName']?></div>

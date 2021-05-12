@@ -89,6 +89,13 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'token_count',
+            function (int $size) {
+                return (int)ceil($size / BYTES_PER_FREELEECH_TOKEN);
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'ucfirst',
             function ($text) {
                 return ucfirst($text);

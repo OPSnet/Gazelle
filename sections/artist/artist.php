@@ -30,6 +30,7 @@ $bookmark = new Gazelle\Bookmark;
 $collageMan = new Gazelle\Manager\Collage;
 $isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('artist', $ArtistID);
 $User = new Gazelle\User($LoggedUser['ID']);
+$authKey = $User->auth();
 
 function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catalogueNumber, $media]);
@@ -54,7 +55,7 @@ View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions')
 }
 
 if (check_perms('site_torrents_notify')) {
-    $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $LoggedUser['AuthKey']);
+    $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $authKey);
     if ($User->hasArtistNotification($name)) {
 ?>
             <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
@@ -64,7 +65,7 @@ if (check_perms('site_torrents_notify')) {
     }
 }
 
-if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
+if ($bookmark->isArtistBookmarked($User->id(), $ArtistID)) { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php } else { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
@@ -73,7 +74,7 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
                 $ArtistID ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 
 <?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
-            <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
+            <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#info" class="brackets">Info</a>
 <?php if (defined('LASTFM_API_KEY')) { ?>
@@ -82,7 +83,7 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
             <a href="artist.php?id=<?=$ArtistID?>#artistcomments" class="brackets">Comments</a>
             <a href="artist.php?action=history&amp;artistid=<?= $ArtistID ?>" class="brackets">View history</a>
 <?php if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
-            &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
+            &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid=<?=$ArtistID?>&amp;auth=<?= $authKey ?>" class="brackets">Delete</a>
 <?php } ?>
         </div>
     </div>
@@ -157,8 +158,8 @@ Tags::reset();
                     <input type="text" name="collage_ref" size="25" />
                     <input type="hidden" name="action" value="add_artist" />
                     <input type="hidden" name="artistid" value="<?= $ArtistID ?>" />
-                    <input type="hidden" name="userid" value="<?= $LoggedUser['ID'] ?>" />
-                    <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+                    <input type="hidden" name="userid" value="<?= $User->id() ?>" />
+                    <input type="hidden" name="auth" value="<?= $authKey  ?>" />
                     <br /><br /><input type="submit" value="Add" />
                     </form>
             </div>
@@ -179,7 +180,7 @@ Tags::reset();
 echo $Twig->render('artist/similar.twig', [
     'admin'        => check_perms('site_delete_tag'),
     'artist_id'    => $ArtistID,
-    'auth'         => $LoggedUser['AuthKey'],
+    'auth'         => $authKey,
     'autocomplete' => $User->hasAutocomplete('other'),
     'similar'      => $Artist->similarArtists(),
 ]);
@@ -198,7 +199,7 @@ if (check_perms('zip_downloader')) {
             <div class="pad">
                 <form class="download_form" name="zip" action="artist.php" method="post">
                     <input type="hidden" name="action" value="download" />
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="auth" value="<?=$authKey?>" />
                     <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
                     <ul id="list" class="nobullet">
 <?php foreach ($ZIPList as $ListItem) { ?>
@@ -381,7 +382,7 @@ if ($sections = $Artist->sections()) {
         }
         if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
-                            <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
+                            <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig($Twig)->links($authKey) ?>
 <?php   } ?>
                             <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>
@@ -415,14 +416,14 @@ if ($sections = $Artist->sections()) {
 ?>
         <tr class="releases_<?=$sectionId?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
             <td class="td_info" colspan="2">
-                <span>
-                    [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Torrent['HasFile'] ? 'DL' : 'Missing'?></a>
-<?php   if (Torrents::can_use_token($Torrent)) { ?>
-                            | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size'])?>');">FL</a>
-<?php   } ?>
-                            | <a href="ajax.php?action=torrent&amp;id=<?=($TorrentID)?>" download="<?= $name . " - " . $GroupName . ' ['. $GroupYear .']' ?> [<?=($TorrentID)?>] [orpheus.network].json" class="tooltip" title="Download JSON">JS</a>
-                    ]
-                </span>
+                <?= $Twig->render('torrent/action.twig', [
+                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'key'    => $LoggedUser['torrent_pass'],
+                    't'      => $Torrent,
+                    'extra'  => [
+                        "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"$name - $GroupName  [$GroupYear] $TorrentID [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
+                    ],
+                ]) ?>
                 &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?= Torrents::torrent_info($Torrent) ?></a>
             </td>
             <td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
@@ -546,7 +547,7 @@ if ($Requests) {
             <td class="nobr">
                 <span id="vote_count_<?=$RequestID?>"><?=$Request['Votes']?></span>
 <?php       if (check_perms('site_vote')) { ?>
-                <input type="hidden" id="auth" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" id="auth" name="auth" value="<?=$authKey?>" />
                 &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
 <?php       } ?>
             </td>
@@ -697,7 +698,7 @@ $textarea->setAutoResize()->setPreviewManual(true);
 echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $authKey,
     'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($User, $User),
     'id'       => $ArtistID,
     'name'     => 'pageid',

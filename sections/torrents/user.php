@@ -532,10 +532,11 @@ foreach ($Categories as $catKey => $catName) {
                 </div>
 <?php    } ?>
                 <div class="group_info clear">
-                    <span class="torrent_links_block">
-                        [ <a href="torrents.php?action=download&amp;id=<?=$torrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-                        | <a href="reportsv2.php?action=report&amp;id=<?=$torrentID?>" class="tooltip" title="Report">RP</a> ]
-                    </span>
+                    <?= $Twig->render('torrent/action.twig', [
+                        'can_fl' => Torrents::can_use_token($torrent),
+                        'key'    => $LoggedUser['torrent_pass'],
+                        't'      => $torrent,
+                    ]) ?>
                     <?= $displayName ?>
 <?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
                 <?= $vote->setGroupId($groupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>

@@ -3,12 +3,12 @@ if (!isset($_GET['type']) || !is_number($_GET['type']) || $_GET['type'] > 3) {
     error(0);
 }
 
-$Options = ['v0', 'v2', '320'];
-$Encodings = ['V0 (VBR)', 'V2 (VBR)', '320'];
+$Options = ['v0', '320'];
+$Encodings = ['V0 (VBR)', '320'];
 $EncodingKeys = array_fill_keys($Encodings, true);
 
 if ($_GET['type'] === '3') {
-    $List = "!(v0 | v2 | 320)";
+    $List = "!(v0 | 320)";
 } else {
     $List = '!'.$Options[$_GET['type']];
     if ($_GET['type'] !== '0') {
@@ -46,28 +46,17 @@ foreach ($Groups as $GroupID => $Group) {
     foreach ($Group['Torrents'] as $Torrent) {
         $TorRemIdent = "{$Torrent['Media']} {$Torrent['RemasterYear']} {$Torrent['RemasterTitle']} {$Torrent['RemasterRecordLabel']} {$Torrent['RemasterCatalogueNumber']}";
         if (!isset($TorrentGroups[$Group['ID']])) {
-            $TorrentGroups[$Group['ID']] = [
-                $TorRemIdent => [
-                    'FlacID' => 0,
-                    'Formats' => [],
-                    'RemasterTitle' => $Torrent['RemasterTitle'],
-                    'RemasterYear' => $Torrent['RemasterYear'],
-                    'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
-                    'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber'],
-                    'IsSnatched' => false
-                ]
-            ];
-        } elseif (!isset($TorrentGroups[$Group['ID']][$TorRemIdent])) {
-            $TorrentGroups[$Group['ID']][$TorRemIdent] = [
-                'FlacID' => 0,
-                'Formats' => [],
-                'RemasterTitle' => $Torrent['RemasterTitle'],
-                'RemasterYear' => $Torrent['RemasterYear'],
-                'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
-                'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber'],
-                'IsSnatched' => false
-            ];
+            $TorrentGroups[$Group['ID']] = [];
         }
+        $TorrentGroups[$Group['ID']][$TorRemIdent] = [
+            'FlacID' => 0,
+            'Formats' => [],
+            'RemasterTitle' => $Torrent['RemasterTitle'],
+            'RemasterYear' => $Torrent['RemasterYear'],
+            'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
+            'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber'],
+            'IsSnatched' => false,
+        ];
         if (isset($EncodingKeys[$Torrent['Encoding']])) {
             $TorrentGroups[$Group['ID']][$TorRemIdent]['Formats'][$Torrent['Encoding']] = true;
         } elseif ($TorrentGroups[$Group['ID']][$TorRemIdent]['FlacID'] == 0 && $Torrent['Format'] == 'FLAC' && $Torrent['LogScore'] == 100) {
@@ -114,10 +103,9 @@ foreach ($TorrentGroups as $GroupID => $Editions) {
             'artist' => $ArtistNames,
             'groupName' => $GroupName,
             'groupYear' => (int)$GroupYear,
-            'missingV2' => !isset($Edition['Formats']['V2 (VBR)']),
             'missingV0' => !isset($Edition['Formats']['V0 (VBR)']),
             'missing320' => !isset($Encodings['Formats']['320']),
-            'downloadUrl' => 'torrents.php?action=download&id='.$Edition['FlacID'].'&authkey='.$LoggedUser['AuthKey'].'&torrent_pass='.$LoggedUser['torrent_pass']
+            'downloadUrl' => 'torrents.php?action=download&id='.$Edition['FlacID'].'&torrent_pass='.$LoggedUser['torrent_pass'],
         ];
     }
 }
