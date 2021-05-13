@@ -6,8 +6,6 @@ if (!empty($LoggedUser['DisableForums'])) {
     error(403);
 }
 
-$ForumCats = Forums::get_forum_categories();
-
 $Router->addGet('', __DIR__ . '/main.php');
 
 $Router->addPost('add_poll_option',  __DIR__ . '/add_poll_option.php');
