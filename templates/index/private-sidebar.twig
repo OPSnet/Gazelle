@@ -100,7 +100,7 @@
         <li>Peers: {{ torrent_stats.peerCount|number_format }}</li>
         <li>Seeders: {{ torrent_stats.seederCount|number_format }}</li>
         <li>Leechers: {{ torrent_stats.leecherCount|number_format }}</li>
-        <li>Seeder/leecher ratio: {{ ratio(torrent_stats.leecherCount, torrent_stats.seederCount)|raw }}</li>
+        <li>Seeder/leecher ratio: {{ ratio(torrent_stats.seederCount, torrent_stats.leecherCount)|raw }}</li>
     </ul>
 </div>
 
