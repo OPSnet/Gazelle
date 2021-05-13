@@ -9,7 +9,7 @@ $torMan     = new Gazelle\Manager\Torrent;
 $userMan    = new Gazelle\Manager\User;
 $viewer     = new Gazelle\User($LoggedUser['ID']);
 
-if ($newsReader->lastRead($LoggedUser['ID']) < $newsMan->latestId()) {
+if ($newsMan->latestId() != -1 && $newsReader->lastRead($LoggedUser['ID']) < $newsMan->latestId()) {
     $newsReader->witness($LoggedUser['ID']);
 }
 

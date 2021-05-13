@@ -233,7 +233,7 @@ define('RANK_FIVE_COST', 30);
 define('MAX_RANK', 6);
 define('MAX_EXTRA_RANK', 8);
 define('DONOR_FORUM_RANK', 6);
-define('DONOR_FORUM', 70);
+define('DONOR_FORUM', null); // donor forum id
 define('MAX_SPECIAL_RANK', 3);
 
 define('BONUS_AWARD_FLAC_PERFECT', 400);
