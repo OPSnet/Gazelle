@@ -26,7 +26,7 @@ abstract class Json extends Base {
      *
      * @param int $mode the bit-or'ed values to confgure encoding results
      */
-    public function setMode(string $mode) {
+    public function setMode(int $mode) {
         $this->mode = $mode;
         return $this;
     }
