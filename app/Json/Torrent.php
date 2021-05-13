@@ -10,6 +10,7 @@ class Torrent extends \Gazelle\Json {
 
     public function __construct() {
         parent::__construct();
+        $this->setMode(JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
     }
 
     public function setViewer(int $userId) {
