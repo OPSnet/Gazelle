@@ -1,29 +1,6 @@
 <?php
 class Forums {
     /**
-     * Get the forum categories
-     * @return array ForumCategoryID => Name
-     */
-    public static function get_forum_categories() {
-        global $Cache, $DB;
-        $ForumCats = $Cache->get_value('forums_categories');
-        if ($ForumCats === false) {
-            $QueryID = $DB->get_query_id();
-            $DB->query("
-                SELECT ID, Name
-                FROM forums_categories
-                ORDER BY Sort, Name");
-            $ForumCats = [];
-            while (list ($ID, $Name) = $DB->next_record()) {
-                $ForumCats[$ID] = $Name;
-            }
-            $DB->set_query_id($QueryID);
-            $Cache->cache_value('forums_categories', $ForumCats, 0);
-        }
-        return $ForumCats;
-    }
-
-    /**
      * Get all forums that the current user has special access to ("Extra forums" in the profile)
      * @return array Array of ForumIDs
      */
