@@ -70,7 +70,7 @@ foreach (range(1, 4) as $level) {
         $profile[$level] = [
             'enabled' => true,
             'title'   => display_str($profileReward["ProfileInfoTitle$level"]),
-            'ta'      => new Gazelle\Util\Textarea("profile_info_$level", $profileReward["ProfileInfo$level"], 42, 8),
+            'ta'      => new Gazelle\Util\Textarea("profile_info_$level", $profileReward["ProfileInfo$level"] ?? '', 42, 8),
         ];
     }
 }
