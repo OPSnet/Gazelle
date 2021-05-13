@@ -32,7 +32,7 @@
     "endroid/qr-code": "^3.9",
     "maennchen/zipstream-php": "^2.1",
     "orpheusnet/bencode-torrent": "^1.1.1",
-    "orpheusnet/logchecker": "^0.9.4",
+    "orpheusnet/logchecker": "^0.10.0",
     "robmorgan/phinx": "^0.12.4",
     "robthree/twofactorauth": "^1.7",
     "twig/twig": "^2.12",
