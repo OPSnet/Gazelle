@@ -223,7 +223,7 @@ class Upload extends \Gazelle\Base {
             $n += $this->db->affected_rows();
             $feed->populate("torrents_notify_{$notify['passkey']}", $item);
             $feed->populate("torrents_notify_{$notify['filter_id']}_{$notify['passkey']}", $item);
-            $this->cache->delete_value("user_notify_upload_{$notify['filter_id']}");
+            $this->cache->delete_value("user_notify_upload_{$notify['user_id']}");
         }
         fprintf($out, "inserted=%d\n", $n);
         fclose($out);

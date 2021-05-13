@@ -780,7 +780,7 @@ class User extends BaseObject {
      */
     public function permittedForums(): array {
         $permitted = array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === true;}));
-        if ($this->isDonor() && !in_array(DONOR_FORUM, $this->forbiddenForums())) {
+        if ($this->isDonor() && DONOR_FORUM && !in_array(DONOR_FORUM, $this->forbiddenForums())) {
             $permitted[] = DONOR_FORUM;
         }
         return $permitted;

@@ -38,7 +38,7 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
      * Return the ID of the most recent unread article
      *
      * @param int user ID of the reader
-     * @return int article ID or null if the reader is fully caught up
+     * @return int article ID or null if no article has been read
      */
     public function lastRead(int $userId): ?int {
         return $this->db->scalar("
