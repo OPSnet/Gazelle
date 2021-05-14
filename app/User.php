@@ -2469,17 +2469,17 @@ class User extends BaseObject {
 
         if (defined('RECOVERY_DB') && !empty(RECOVERY_DB)) {
             $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
-               'Query' => sprintf("
-                            SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(rb.final, 0)
-                            FROM users_leech_stats uls
-                            LEFT JOIN
-                            (
-                                SELECT UserID, sum(Bounty) AS Bounty
-                                FROM requests_votes
-                                GROUP BY UserID
-                            ) b ON (b.UserID = uls.UserID)
-                            LEFT JOIN %s.recovery_buffer rb ON (rb.user_id = uls.UserID)
-                            WHERE uls.UserID = users_main.ID", RECOVERY_DB),
+               'Query' => "
+                    SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(rb.final, 0)
+                    FROM users_leech_stats uls
+                    LEFT JOIN
+                    (
+                        SELECT UserID, sum(Bounty) AS Bounty
+                        FROM requests_votes
+                        GROUP BY UserID
+                    ) b ON (b.UserID = uls.UserID)
+                    LEFT JOIN recovery_buffer rb ON (rb.user_id = uls.UserID)
+                    WHERE uls.UserID = users_main.ID",
                'Count' => 2 * 1024 * 1024 * 1024 * 1024,
                'Type' => 'bytes'
             ];
