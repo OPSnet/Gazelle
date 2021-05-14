@@ -4,7 +4,7 @@ use \Gazelle\Util\Irc;
 
 enforce_login();
 
-$Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass']);
+$Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass'] ?? '');
 if (is_null($Viewer)) {
     json_or_error('missing user', 404);
 } elseif (!$Viewer->isEnabled() || $Viewer->isLocked()) {
