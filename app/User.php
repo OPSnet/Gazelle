@@ -203,6 +203,12 @@ class User extends BaseObject {
                 $this->info['secondary_class'][$p['ID']] = $p['Name'];
                 $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
                 $secondaryClassLevel[$p['ID']] = $p['Level'];
+                $allowed = array_map(function ($id) {return (int)$id;}, explode(',', $p['PermittedForums']) ?: []);
+                foreach ($allowed as $forumId) {
+                    if ($forumId) {
+                        $forumAccess[$forumId] = true;
+                    }
+                }
             }
         }
         $this->info['effective_class'] = count($secondaryClassLevel)
@@ -769,21 +775,17 @@ class User extends BaseObject {
         return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === false;}));
     }
 
-    public function forbiddenForumsList(): string {
-        return $this->info()['RestrictedForums'];
-    }
-
     /**
      * Return the list for forum IDs to which the user has been granted special access.
      *
      * @return array of forum ids
      */
     public function permittedForums(): array {
-        $permitted = array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === true;}));
-        if ($this->isDonor() && DONOR_FORUM && !in_array(DONOR_FORUM, $this->forbiddenForums())) {
-            $permitted[] = DONOR_FORUM;
-        }
-        return $permitted;
+        return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === true;}));
+    }
+
+    public function forbiddenForumsList(): string {
+        return $this->info()['RestrictedForums'];
     }
 
     public function permittedForumsList(): string {
