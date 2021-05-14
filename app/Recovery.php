@@ -431,7 +431,7 @@ class Recovery extends Base {
                     0
                 ) as new_up
             FROM (
-                SELECT uam.mapped_id, uam.UserID,
+                SELECT uam.MappedID, uam.UserID,
                     u.Username,
                     u.Uploaded,
                     u.Downloaded,
