@@ -33,12 +33,12 @@ if ($Cache->get_value($key)) {
     $msg = "Rate limiting in force.<br />You tried to save this page too rapidly following the previous save.";
 }
 else {
-    $info = \Gazelle\Recovery::validate($_POST);
+    $info = $recovery->validate($_POST);
     if (count($info)) {
         $info['ipaddr']   = $ipaddr;
-        $info['password_ok'] = \Gazelle\Recovery::check_password($info['username'], $_POST['password'], $DB);
+        $info['password_ok'] = $recovery->checkPassword($info['username'], $_POST['password']);
 
-        list($ok, $filename) = \Gazelle\Recovery::save_screenshot($_FILES);
+        list($ok, $filename) = $recovery->saveScreenshot($_FILES);
         if (!$ok) {
             $msg = $filename; // the reason we were unable to save the screenshot info
         }
@@ -54,7 +54,7 @@ else {
             }
             $info['token'] = $token;
 
-            if (\Gazelle\Recovery::persist($info, $DB)) {
+            if ($recovery->persist($info)) {
                 $msg = 'ok';
             }
             else {

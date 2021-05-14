@@ -1,33 +1,23 @@
 <?php
 
-if (isset($_GET['action'])) {
-    switch ($_GET['action']) {
-        case 'save':
-            if (defined('RECOVERY') && RECOVERY) {
-                require_once(SERVER_ROOT . '/sections/recovery/save.php');
-            }
-            else {
-                require_once(SERVER_ROOT . '/sections/recovery/recover.php');
-            }
-            break;
-        case 'admin':
-            require_once(SERVER_ROOT . '/sections/recovery/admin.php');
-            break;
-        case 'browse':
-            require_once(SERVER_ROOT . '/sections/recovery/browse.php');
-            break;
-        case 'pair':
-            require_once(SERVER_ROOT . '/sections/recovery/pair.php');
-            break;
-        case 'search':
-        case 'view':
-            require_once(SERVER_ROOT . '/sections/recovery/view.php');
-            break;
-        default:
-            require_once(SERVER_ROOT . '/sections/recovery/recover.php');
-            break;
-    }
-}
-else {
-    require_once(SERVER_ROOT . '/sections/recovery/recover.php');
+switch ($_GET['action'] ?? '') {
+    case 'save':
+        require_once(defined('RECOVERY') && RECOVERY ? 'save.php' : 'recover.php');
+        break;
+    case 'admin':
+        require_once('admin.php');
+        break;
+    case 'browse':
+        require_once('browse.php');
+        break;
+    case 'pair':
+        require_once('pair.php');
+        break;
+    case 'search':
+    case 'view':
+        require_once('view.php');
+        break;
+    default:
+        require_once('recover.php');
+        break;
 }

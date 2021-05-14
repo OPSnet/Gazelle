@@ -85,7 +85,7 @@ $stats = $User->activityStats();
 
 if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_perms('users_mod'))) {
     $recovered = $DB->scalar("
-        SELECT final FROM users_buffer_log WHERE opsid = ?
+        SELECT final FROM recovery_buffer WHERE user_id = ?
         ", $UserID
     );
 } else {

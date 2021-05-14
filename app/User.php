@@ -2470,7 +2470,7 @@ class User extends BaseObject {
         if (defined('RECOVERY_DB') && !empty(RECOVERY_DB)) {
             $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
                'Query' => sprintf("
-                            SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(ubl.final, 0)
+                            SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(rb.final, 0)
                             FROM users_leech_stats uls
                             LEFT JOIN
                             (
@@ -2478,7 +2478,7 @@ class User extends BaseObject {
                                 FROM requests_votes
                                 GROUP BY UserID
                             ) b ON (b.UserID = uls.UserID)
-                            LEFT JOIN %s.users_buffer_log ubl ON (ubl.opsid = uls.UserID)
+                            LEFT JOIN %s.recovery_buffer rb ON (rb.user_id = uls.UserID)
                             WHERE uls.UserID = users_main.ID", RECOVERY_DB),
                'Count' => 2 * 1024 * 1024 * 1024 * 1024,
                'Type' => 'bytes'
