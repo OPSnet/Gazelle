@@ -1,0 +1,25 @@
+<div class="header">
+    <h2>Error Analysis</h2>
+</div>
+<table width="100%">
+    <tr class="colhead">
+        <td>Case</td>
+        <td>Errors</td>
+        <td>Queries</td>
+        <td>Cache</td>
+        <td>Elapsed</td>
+        <td>Date</td>
+        <td>Message</td>
+    </tr>
+{% for item in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td><a href="tools.php?action=analysis&amp;case={{ item.key }}">{{ item.key }}</a></td>
+        <td>{{ item.errors|length|number_format }}</td>
+        <td>{{ item.queries|length|number_format }}</td>
+        <td>{{ item.cache|length|number_format }}</td>
+        <td>{{ item.perf['Page process time'] }}</td>
+        <td>{{ item.time }}</td>
+        <td><pre>{{ item.message }}</pre></td>
+    </tr>
+{% endfor %}
+</table>
