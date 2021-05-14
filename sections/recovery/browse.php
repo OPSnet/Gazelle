@@ -2,21 +2,22 @@
 if (!check_perms('admin_recovery')) {
     error(403);
 }
+$recovery = new Gazelle\Recovery;
 
 if (isset($_POST['username']) && strlen($_POST['username'])) {
     $class = 'username';
     $target = trim($_POST['username']);
-    $List = \Gazelle\Recovery::get_candidate_by_username($target, $DB);
+    $List = $recovery->findByUsername($target);
 }
 elseif (isset($_POST['email']) && strlen($_POST['email'])) {
     $class = 'email';
     $target = trim($_POST['email']);
-    $List = \Gazelle\Recovery::get_candidate_by_email($target, $DB);
+    $List = $recovery->findByEmail($target);
 }
 elseif (isset($_POST['announce']) && strlen($_POST['announce'])) {
     $class = 'announce';
     $target = trim($_POST['announce']);
-    $List = \Gazelle\Recovery::get_candidate_by_announce($target, $DB);
+    $List = $recovery->findByAnnounce($target);
 }
 
 View::show_header('Recovery browse users');
@@ -33,8 +34,7 @@ View::show_header('Recovery browse users');
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
-<?php
-if (isset($List)) { ?>
+<?php if (isset($List)) { ?>
 <div class="box pad">
 <?php
     if (!count($List)) {
@@ -57,8 +57,7 @@ if (isset($List)) { ?>
 <th>Announce</th>
 </tr>
 
-<?php
-        foreach ($List as $r) { ?>
+<?php foreach ($List as $r) { ?>
 <tr>
 <td><?= $r['Username'] ?></td>
 <td><?= $r['UserID'] ?></td>
@@ -69,14 +68,11 @@ if (isset($List)) { ?>
 <td><?= $r['nr_torrents'] ?></td>
 <td><?= $r['torrent_pass'] ?></td>
 </tr>
-<?php
-        } /* foreach */ ?>
+<?php } /* foreach */ ?>
 </table>
-<?php
-    } /* count() */ ?>
+<?php } /* count() */ ?>
 </div>
-<?php
-} /* isset() */ ?>
+<?php } /* isset() */ ?>
 
 <div class="box">
     <div class="head">Browse recovery details</div>

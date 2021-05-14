@@ -22,10 +22,10 @@ h5{padding-top:30px}
 <div class="container">
 <?php
 if (defined('RECOVERY') && RECOVERY) {
-    include('sections/recovery/form.php');
+    require_once('form.php');
 }
 else {
-    include('sections/recovery/closed.php');
+    require_once('closed.php');
 }
 ?>
 </div>

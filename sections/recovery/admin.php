@@ -2,24 +2,22 @@
 if (!check_perms('admin_recovery')) {
     error(403);
 }
-View::show_header('Recovery administration');
+$recovery = new Gazelle\Recovery;
 
 if (isset($_GET['task'])) {
-    $id = (isset($_GET['id']) && (int)$_GET['id'] > 0)
-        ? (int)$_GET['id']
-        : 0;
-    if ($id > 0) {
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id) {
         switch ($_GET['task']) {
             case 'accept';
-                $ok = \Gazelle\Recovery::accept($id, $LoggedUser['ID'], $LoggedUser['Username'], $DB);
+                $ok = $recovery->accept($id, $LoggedUser['ID'], $LoggedUser['Username']);
                 $message = $ok ? '<font color="#008000">Invite sent</font>' : '<font color="#800000">Invite not sent, check log</font>';
                 break;
             case 'deny';
-                \Gazelle\Recovery::deny($id, $LoggedUser['ID'], $LoggedUser['Username'], $DB);
+                $recovery->deny($id, $LoggedUser['ID'], $LoggedUser['Username']);
                 $message = sprintf('<font color="orange">Request %d was denied</font>', $id);
                 break;
             case 'unclaim';
-                \Gazelle\Recovery::unclaim($id, $LoggedUser['Username'], $DB);
+                $recovery->unclaim($id, $LoggedUser['Username']);
                 $message = sprintf('<font color="orange">Request %d was unclaimed</font>', $id);
                 break;
             default:
@@ -27,8 +25,7 @@ if (isset($_GET['task'])) {
                 break;
         }
     }
-}
-else {
+} else {
     foreach (explode(' ', 'token username announce email') as $field) {
         if (array_key_exists($field, $_POST)) {
             $value = trim($_POST[$field]);
@@ -47,10 +44,12 @@ $Limit  = 100;
 $Offset = $Limit * ($Page-1);
 
 $State = isset($_GET['state']) ? $_GET['state'] : 'pending';
-$Total = \Gazelle\Recovery::get_total($State, $LoggedUser['ID'], $DB);
-$Info  = \Gazelle\Recovery::get_list($Limit, $Offset, $State, $LoggedUser['ID'], $DB);
+$Total = $recovery->getTotal($State, $LoggedUser['ID']);
+$Info  = $recovery->getList($Limit, $Offset, $State, $LoggedUser['ID']);
 
 $Pages = Format::get_pages($Page, $Total, $Limit);
+
+View::show_header('Recovery administration');
 ?>
 
 <div class="thin">
@@ -76,11 +75,9 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 
 <h3><?= $Total ?> <?= $State ?> recovery requests</h3>
 
-<?php
-if (isset($message)) { ?>
+<?php if (isset($message)) { ?>
 <h5><?= $message ?></h5>
-<?php
-} ?>
+<?php } ?>
 
 <div class="linkbox">
     <?=$Pages?>
@@ -100,8 +97,7 @@ if (isset($message)) { ?>
                 <th>Updated</th>
                 <th>Action</th>
             </tr>
-<?php
-foreach ($Info as $i) { ?>
+<?php foreach ($Info as $i) { ?>
             <tr>
                 <td><?= $i['recovery_id'] ?></td>
                 <td><?= $i['username'] ?></td>
@@ -112,15 +108,12 @@ foreach ($Info as $i) { ?>
                 <td><?= time_diff($i['updated_dt']) ?></td>
                 <td>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
-<?php
-    if ($i['state'] == 'PENDING') { ?>
+<?php   if ($i['state'] == 'PENDING') { ?>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= $LoggedUser['ID'] ?>">Claim</a>
-<?php
-    } ?>
+<?php   } ?>
                 </td>
             </tr>
-<?php
-} ?>
+<?php } ?>
         </table>
     </div>
 </div>
@@ -132,4 +125,3 @@ foreach ($Info as $i) { ?>
 </div>
 <?php
 View::show_footer();
-
