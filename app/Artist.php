@@ -608,9 +608,9 @@ class Artist extends Base {
             DELETE FROM artists_similar WHERE SimilarID = ?
             ", $similarId
         );
-        $manager = Manager\Artist;
+        $manager = new Manager\Artist;
         foreach ($artistIds as $id) {
-            $manager->findById($id)->flushCache();
+            $manager->findById($id, 0)->flushCache();
             $this->cache->delete_value("similar_positions_$id");
         }
         $this->db->commit();
@@ -793,10 +793,10 @@ class Artist extends Base {
                     if ($nextAngleDistance <= $prevAngleDistance) {
                         $bestNextAngle = min($bestNextAngle, $nextAngleDistance);
                     } else {
-                        $bestPrevAngle = min($bestPrevAngle, prevAngleDistance);
+                        $bestPrevAngle = min($bestPrevAngle, $prevAngleDistance);
                     }
                 }
-                if (fmod($bestNextAngle + $placed[$r], 2 * M_PI) < fmod($bestPrevAngle + $placed[$r], 2 * M_PI))  {
+                if (fmod($bestNextAngle, 2 * M_PI) < fmod($bestPrevAngle, 2 * M_PI))  {
                     $angle = array_shift($layout);
                     $up = false;
                 } else {
@@ -804,7 +804,7 @@ class Artist extends Base {
                     $up = true;
                 }
             }
-            $placed[$id] = angle;
+            $placed[$id] = $angle;
             ++$seen;
 
             // place this artist
@@ -872,7 +872,7 @@ class Artist extends Base {
         $similarArtist = new Artist($similarArtistId, 0);
         $this->flushCache();
         $similarArtist->flushCache();
-        $this->cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+        $this->cache->deleteMulti(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
         return true;
     }
 }
