@@ -2,6 +2,7 @@
 if (!check_perms('admin_recovery')) {
     error(403);
 }
+$recovery = new Gazelle\Recovery;
 
 function security_checksum($a, $b) {
     return sha1(implode(chr(1), [RECOVERY_PAIR_SALT, implode(chr(2), $a), implode(chr(3), $b)]));
@@ -14,17 +15,17 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
         $Result = "No current ID found for <tt>$curr_id</tt>.";
     } else {
         $prev_id = (int)trim($_POST['prev']);
-        $prev = Gazelle\Recovery::get_candidate_by_id($prev_id, $DB);
+        $prev = $recovery->findById($prev_id);
         if (!$prev) {
             $Result = "No previous ID found for <tt>$prev_id</tt>.";
-        } elseif ($Map = Gazelle\Recovery::is_mapped($prev_id, $DB)) {
+        } elseif ($Map = $recovery->isMapped($prev_id)) {
             $ID = $Map[0]['ID'];
             $Result = "Previous id $prev_id already mapped to " . \Users::format_username($ID);
-        } elseif ($Map = Gazelle\Recovery::is_mapped_local($curr_id, $DB)) {
+        } elseif ($Map = $recovery->isMappedLocal($curr_id)) {
             $ID = $Map[0]['ID'];
             $Result = \Users::format_username($curr_id) . " is already mapped to previous id $ID";
         } else {
-            [$Prev, $Confirm] = Gazelle\Recovery::get_pair_confirmation($prev_id, $curr_id, $DB);
+            [$Prev, $Confirm] = $recovery->pairConfirmation($prev_id, $curr_id);
             if (!($Prev && $Confirm)) {
                 $Result = "No database information to pair from $prev_id to $curr_id";
             }
@@ -33,7 +34,7 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
                     $Result = "Security checksum failed";
                 }
                 else {
-                    $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, $LoggedUser['Username'], $DB)
+                    $Result = $recovery->mapToPrevious($curr_id, $prev_id, $LoggedUser['Username'])
                         ? \Users::format_username($curr_id) . " has been successfully mapped to previous user " .$Confirm['Username'] . "."
                         : "DB Error: could not map $curr_id to $prev_id"
                         ;
@@ -58,16 +59,12 @@ View::show_header('Recovery pair users');
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
-<?php
-if (isset($Result)) { ?>
+<?php if (isset($Result)) { ?>
 <div class="box">
     <div class="head">Result</div>
     <div><?= $Result ?></div>
 </div>
-<?php
-}
-elseif (isset($Confirm)) {
-?>
+<?php } elseif (isset($Confirm)) { ?>
 <div class="box">
     <div class="head">Confirm</div>
 
@@ -123,8 +120,7 @@ elseif (isset($Confirm)) {
     <input type="hidden" name="check" value="<?= security_checksum($prev_id, $curr_id) ?>" />
     </form>
 </div>
-<?php
-} /* $Confirm */ ?>
+<?php } /* $Confirm */ ?>
 
 <div class="box">
     <div class="head">Pair <?= SITE_NAME ?> user</div>

@@ -2,16 +2,14 @@
 if (!check_perms('admin_recovery')) {
     error(403);
 }
-View::show_header('Recovery view user');
+$recovery = new Gazelle\Recovery;
 
 if (isset($_GET['id']) && (int)$_GET['id'] > 0) {
     $ID = (int)$_GET['id'];
     $search = false;
-}
-elseif (isset($_GET['action']) && $_GET['action'] == 'search') {
+} elseif (isset($_GET['action']) && $_GET['action'] == 'search') {
     $search = true;
-}
-else {
+} else {
     error(404);
 }
 
@@ -22,27 +20,27 @@ if ($search) {
             $terms[] = [$key => $_GET[$key]];
         }
     }
-    $Info = \Gazelle\Recovery::search($terms, $DB);
+    $Info = $recovery->search($terms);
     $ID = $Info['recovery_id'];
-}
-else {
+} else {
     if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
         $claim_id = (int)$_GET['claim'];
         if ($claim_id == $LoggedUser['ID']) {
-            \Gazelle\Recovery::claim($ID, $claim_id, $LoggedUser['Username'], $DB);
+            $recovery->claim($ID, $claim_id, $LoggedUser['Username']);
         }
     }
-    $Info = \Gazelle\Recovery::get_details($ID, $DB);
+    $Info = $recovery->getDetails($ID);
 }
 
 $Email = ($Info['email'] == $Info['email_clean'])
     ? $Info['email']
     : $Info['email_clean'] . "<br />(cleaned from " . $Info['email'] . ")";
 
-$Candidate = \Gazelle\Recovery::get_candidate($Info['username'], $DB);
+$Candidate = $recovery->getCandidate($Info['username']);
 $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
 ?>
 
+View::show_header('Recovery view user');
 <div class="thin">
 
 <div class="linkbox">
