@@ -1,11 +1,6 @@
 <?php
 
 authorize();
-$DB->prepared_query("
-    UPDATE friends SET
-        Comment = ?
-    WHERE UserID = ?
-        AND FriendID = ?
-    ", trim($_POST['comment']), $LoggedUser['ID'], (int)$_POST[friendid]
-);
+$Viewer = new Gazelle\User($LoggedUser['ID']);
+$Viewer->addFriendComment((int)($_POST['friendid'] ?? 0), trim($_POST['comment']));
 header('Location: friends.php');

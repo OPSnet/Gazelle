@@ -1,0 +1,55 @@
+<div class="thin">
+    <div class="header">
+        <h2>Friends List</h2>
+    </div>
+    <div class="box pad">
+    {{ paginator.linkbox|raw }}
+{% for friend in list %}
+    {% set allspan = viewer.showAvatars ? 3 : 2 %}
+    {% set uploaded = friend.user.activityStats.BytesUploaded %}
+    {% set downloaded = friend.user.activityStats.BytesDownloaded %}
+<form class="manage_form" name="friends" action="friends.php" method="post">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <table class="friends_table vertical_margin">
+        <tr class="colhead">
+            <td colspan="{{ allspan }}">
+                <span style="float: left;">{{ friend.id|user_full }}
+        {% if friend.user.propertyVisible(viewer, 'ratio') %}
+                &nbsp;Ratio: <strong>{{ ratio(uploaded, downloaded)|raw }}</strong>
+        {% endif %}
+        {% if friend.user.propertyVisible(viewer, 'uploaded') %}
+                &nbsp;Up: <strong>{{ uploaded|octet_size }}</strong>
+        {% endif %}
+        {% if friend.user.propertyVisible(viewer, 'downloaded') %}
+                &nbsp;Down: <strong>{{ downloaded|octet_size }}</strong>
+        {% endif %}
+                </span>
+        {% if friend.user.propertyVisible(viewer, 'lastseen') %}
+                <span style="float: right;">Last seen: {{ friend.user.lastAccess|time_diff }}</span>
+        {% endif %}
+            </td>
+        </tr>
+        <tr>
+        {% if viewer.showAvatars %}
+            <td valign="top">
+                {{ friend.avatar|raw }}
+            </td>
+        {% endif %}
+            <td valign="top">
+                <input type="hidden" name="friendid" value="{{ friend.id }}" />
+                <textarea name="comment" rows="4" cols="85">{{ friend.comment }}</textarea>
+            </td>
+            <td class="left" valign="top">
+                <input type="submit" name="action" value="Send PM" />
+                <input type="submit" name="action" value="Save notes" />
+                <input type="submit" name="action" value="Unfriend" />
+            </td>
+        </tr>
+    </table>
+</form>
+    {{ paginator.linkbox|raw }}
+{% else %}
+   <p>You have no friends! :(</p>
+{% endfor %}
+    </div>
+</div>
