@@ -753,4 +753,141 @@ class User extends \Gazelle\Base {
     public function showDonor(\Gazelle\User $user): int {
         return $this->setDonorVisibility($user, true);
     }
+
+    public function demotionCriteria(): array {
+        return [
+            USER => [
+                'From' => [MEMBER, POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM, ULTIMATE_TM],
+                'To' => USER,
+                'Ratio' => 0.65,
+                'Upload' => 0
+            ],
+            MEMBER => [
+                'From' => [POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM, ULTIMATE_TM],
+                'To' => MEMBER,
+                'Ratio' => 0.95,
+                'Upload' => 25 * 1024 * 1024 * 1024
+            ],
+        ];
+    }
+
+    public function promotionCriteria(): array {
+        $criteria = [
+            USER => [
+                'From' => USER,
+                'To' => MEMBER,
+                'MinUpload' => 10 * 1024 * 1024 * 1024,
+                'MinRatio' => 0.7,
+                'MinUploads' => 0,
+                'Weeks' => 1
+            ],
+            MEMBER => [
+                'From' => MEMBER,
+                'To' => POWER,
+                'MinUpload' => 25 * 1024 * 1024 * 1024,
+                'MinRatio' => 1.05,
+                'MinUploads' => 5,
+                'Weeks' => 2
+            ],
+            POWER => [
+                'From' => POWER,
+                'To' => ELITE,
+                'MinUpload' => 100 * 1024 * 1024 * 1024,
+                'MinRatio' => 1.05,
+                'MinUploads' => 50,
+                'Weeks' => 4
+            ],
+            ELITE => [
+                'From' => ELITE,
+                'To' => TORRENT_MASTER,
+                'MinUpload' => 500 * 1024 * 1024 * 1024,
+                'MinRatio' => 1.05,
+                'MinUploads' => 500,
+                'Weeks' => 8
+            ],
+            TORRENT_MASTER => [
+                'From' => TORRENT_MASTER,
+                'To' => POWER_TM,
+                'MinUpload' => 500 * 1024 * 1024 * 1024,
+                'MinRatio' => 1.05,
+                'MinUploads' => 500,
+                'Weeks' => 8,
+                'Extra' => [
+                    'Unique groups' => [
+                        'Query' => '
+                            SELECT count(DISTINCT GroupID) AS val
+                            FROM torrents
+                            WHERE UserID = users_main.ID',
+                        'Count' => 500,
+                        'Type' => 'int'
+                    ]
+                ]
+            ],
+            POWER_TM => [
+                'From' => POWER_TM,
+                'To' => ELITE_TM,
+                'MinUpload' => 500 * 1024 * 1024 * 1024,
+                'MinRatio' => 1.05,
+                'MinUploads' => 500,
+                'Weeks' => 8,
+                'Extra' => [
+                    '"Perfect" FLACs' => [
+                        'Query' => "
+                            SELECT count(ID)
+                            FROM torrents
+                            WHERE Format = 'FLAC'
+                                AND (
+                                    (Media = 'CD' AND LogScore = 100)
+                                    OR Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT')
+                                )
+                                AND UserID = users_main.ID",
+                        'Count' => 500,
+                        'Type' => 'int'
+                    ]
+                ]
+            ],
+            ELITE_TM => [
+                'From' => ELITE_TM,
+                'To' => ULTIMATE_TM,
+                'MinUpload' => 2 * 1024 * 1024 * 1024 * 1024,
+                'MinRatio' => 1.05,
+                'MinUploads' => 2000,
+                'Weeks' => 12,
+                'Extra' => [
+                    '"Perfecter" FLACs' => [
+                        'Query' => "
+                            SELECT count(DISTINCT t.GroupID, t.RemasterYear, t.RemasterCatalogueNumber, t.RemasterRecordLabel, t.RemasterTitle, t.Media)
+                            FROM torrents t
+                            WHERE t.Format = 'FLAC'
+                                AND (
+                                    (t.LogScore = 100 AND t.Media = 'CD')
+                                    OR t.Media IN ('Cassette', 'DAT')
+                                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless')
+                                )
+                                AND t.UserID = users_main.ID",
+                        'Count' => 2000,
+                        'Type' => 'int'
+                    ]
+                ]
+            ]
+        ];
+        if (defined('RECOVERY_DB') && !empty(RECOVERY_DB)) {
+            $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
+               'Query' => "
+                    SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(rb.final, 0)
+                    FROM users_leech_stats uls
+                    LEFT JOIN
+                    (
+                        SELECT UserID, sum(Bounty) AS Bounty
+                        FROM requests_votes
+                        GROUP BY UserID
+                    ) b ON (b.UserID = uls.UserID)
+                    LEFT JOIN recovery_buffer rb ON (rb.user_id = uls.UserID)
+                    WHERE uls.UserID = users_main.ID",
+               'Count' => 2 * 1024 * 1024 * 1024 * 1024,
+               'Type' => 'bytes'
+            ];
+        }
+        return $criteria;
+    }
 }
