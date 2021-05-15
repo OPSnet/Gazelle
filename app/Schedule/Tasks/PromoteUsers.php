@@ -7,7 +7,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
     public function run()
     {
         $userMan = new \Gazelle\Manager\User;
-        $criteria = \Gazelle\User::promotionCriteria();
+        $criteria = $userMan->promotionCriteria();
         foreach ($criteria as $l) { // $l = Level
             $fromClass = $userMan->userclassName($l['From']);
             $toClass = $userMan->userclassName($l['To']);
@@ -82,7 +82,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         "You have been promoted to $toClass",
                         "Congratulations on your promotion to $toClass!\n\nTo read more about "
                             . SITE_NAME
-                            . "'s user classes, read [url=" . SITE_URL . "/wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                            . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
                     );
                 }
             }

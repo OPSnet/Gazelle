@@ -7,7 +7,7 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
     public function run()
     {
         $userMan = new \Gazelle\Manager\User;
-        foreach (\Gazelle\User::demotionCriteria() as $criteria) {
+        foreach ($userMan->demotionCriteria() as $criteria) {
             $this->demote($criteria['To'], $criteria['Ratio'], $criteria['Upload'], $criteria['From'], $userMan);
         }
     }
