@@ -55,26 +55,25 @@ if (empty($Request['ReleaseType'])) {
     $ReleaseName = (new Gazelle\ReleaseType)->findNameById($Request['ReleaseType']);
 }
 
-//Votes time
+$Viewer = new Gazelle\User($LoggedUser['ID']);
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
-$UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2);
+$UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);
 $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-$user = new Gazelle\User($LoggedUser['ID']);
 $commentPage = new Gazelle\Comment\Request($RequestID);
 if (isset($_GET['postid'])) {
     $commentPage->setPostId((int)$_GET['postid']);
 } elseif (isset($_GET['page'])) {
     $commentPage->setPageNum((int)$_GET['page']);
 }
-$commentPage->load()->handleSubscription($user);
+$commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
-$paginator->setAnchor('comments')->setTotal($commentPage->total());
+$paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('requests', $RequestID);
+$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('requests', $RequestID);
 
 View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
 ?>
@@ -95,7 +94,7 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
 <?php
     }
     $bookmark = new Gazelle\Bookmark;
-    if ($bookmark->isRequestBookmarked($LoggedUser['ID'], $RequestID)) { ?>
+    if ($bookmark->isRequestBookmarked($Viewer->id(), $RequestID)) { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Unbookmark('request', <?=$RequestID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php    } else { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Bookmark('request', <?=$RequestID?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
@@ -246,7 +245,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
     for ($i = 0; $i < $VoteMax; $i++) {
         $User = array_shift($RequestVotes['Voters']);
         $Boldify = false;
-        if ($User['UserID'] === $LoggedUser['ID']) {
+        if ($User['UserID'] === $Viewer->id()) {
             $ViewerVote = true;
             $Boldify = true;
         }
@@ -263,7 +262,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
     reset($RequestVotes['Voters']);
     if (!$ViewerVote) {
         foreach ($RequestVotes['Voters'] as $User) {
-            if ($User['UserID'] === $LoggedUser['ID']) { ?>
+            if ($User['UserID'] === $Viewer->id()) { ?>
                 <tr>
                     <td>
                         <a href="user.php?id=<?=$User['UserID']?>"><strong><?=display_str($User['Username'])?></strong></a>
@@ -391,10 +390,9 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                 <td>
                     <form class="add_form" name="request" action="requests.php" method="get" id="request_form">
                         <input type="hidden" name="action" value="vote" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                         <input type="hidden" id="request_tax" value="<?=$RequestTax?>" />
                         <input type="hidden" id="requestid" name="id" value="<?=$RequestID?>" />
-                        <input type="hidden" id="auth" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" id="auth" name="auth" value="<?= $Viewer->auth() ?>" />
                         <input type="hidden" id="amount" name="amount" value="0" />
                         <input type="hidden" id="current_uploaded" value="<?=$LoggedUser['BytesUploaded']?>" />
                         <input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
@@ -422,7 +420,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                 <td>
                     <strong><a href="torrents.php?torrentid=<?=$Request['TorrentID']?>">Yes</a></strong>,
                     by user <?=Users::format_username($Request['FillerID'], false, false, false)?>
-<?php        if ($LoggedUser['ID'] == $Request['UserID'] || $LoggedUser['ID'] == $Request['FillerID'] || check_perms('site_moderate_requests')) { ?>
+<?php        if ($Viewer->id() == $Request['UserID'] || $Viewer->id() == $Request['FillerID'] || check_perms('site_moderate_requests')) { ?>
                         <strong><a href="requests.php?action=unfill&amp;id=<?=$RequestID?>" class="brackets">Unfill</a></strong> Unfilling a request without a valid, nontrivial reason will result in a warning.
 <?php        } ?>
                 </td>
@@ -434,7 +432,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                     <form class="edit_form" name="request" action="" method="post">
                         <div class="field_div">
                             <input type="hidden" name="action" value="takefill" />
-                            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                             <input type="hidden" name="requestid" value="<?=$RequestID?>" />
                             <input type="text" size="50" name="link"<?=(!empty($Link) ? " value=\"$Link\"" : '')?> />
                             <br />
@@ -462,21 +460,21 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
     <div id="request_comments">
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Request($Twig, $LoggedUser['ID'], $RequestID);
+$comments = new Gazelle\CommentViewer\Request($Viewer->id(), $RequestID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setAutoResize()->setPreviewManual(true);
 echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $LoggedUser['AuthKey'],
-    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
+    'auth'     => $Viewer->auth(),
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
     'id'       => $RequestID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => $textarea,
     'url'      => 'comments.php?page=requests',
-    'user'     => $user,
+    'user'     => $Viewer,
 ]);
 ?>
         </div>

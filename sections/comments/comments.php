@@ -43,7 +43,7 @@ $UserID   = $User->id();
 $Username = $User->username();
 $Userlink = Users::format_username($UserID, false, false, false);
 
-if ($LoggedUser['ID'] == $UserID) {
+if ($Viewer->id() == $UserID) {
     $ownProfile = true;
     $linkId     = '';
 } else {
@@ -227,8 +227,7 @@ $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 $Pages = Format::get_pages($Page, $Count, $PerPage, 11);
 
 $Comments = $DB->prepared_query("
-    SELECT
-        C.AuthorID,
+    SELECT C.AuthorID,
         C.Page,
         C.PageID,
         $nameField,
@@ -290,7 +289,7 @@ View::show_header(sprintf($Title, $Username), 'bbcode,comments');
     $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
         $author = new Gazelle\User($AuthorID);
-        $ownProfile = $AuthorID == $LoggedUser['ID'];
+        $ownProfile = $AuthorID == $Viewer->id();
         switch ($Page) {
             case 'artist':
                 $heading = " on <a href=\"artist.php?id=$PageID\">$Name</a>";
@@ -316,9 +315,9 @@ View::show_header(sprintf($Title, $Username), 'bbcode,comments');
             'is_admin'    => $isAdmin,
             'heading'     => $heading,
             'show_avatar' => $Viewer->showAvatars(),
-            'show_delete' => check_perms('site_forum_post_delete'),
-            'show_edit'   => check_perms('site_moderate_forums') || $ownProfile,
-            'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author->classLevel(),
+            'show_delete' => $Viewer->permitted('site_forum_post_delete'),
+            'show_edit'   => $Viewer->permitted('site_moderate_forums') || $ownProfile,
+            'show_warn'   => $Viewer->permitted('users_warn') && !$ownProfile && $Viewer->classLevel() >= $author->classLevel(),
             'show_unread' => false,
             'url'         => $commentMan->findById($PostID)->url(),
         ]);

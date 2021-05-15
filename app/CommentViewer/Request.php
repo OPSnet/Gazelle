@@ -3,10 +3,9 @@
 namespace Gazelle\CommentViewer;
 
 class Request extends \Gazelle\CommentViewer {
-
-    public function __construct(\Twig\Environment $twig, int $viewerId, int $requestId) {
-        parent::__construct($twig, $viewerId);
-        $this->baseLink = "requests.php?action=view&id={$requestId}&postid=%d#post%d";
+    public function __construct(int $viewerId, int $requestId) {
+        parent::__construct($viewerId);
+        $this->baseLink = "requests.php?action=view&id={$requestId}";
         $this->page     = 'request';
     }
 }
