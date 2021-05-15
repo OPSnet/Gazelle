@@ -21,9 +21,9 @@ if (isset($_GET['postid'])) {
 $commentPage->load()->handleSubscription($user);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
-$paginator->setAnchor('comments')->setTotal($commentPage->total());
+$paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('collages', $CollageID);
+$isSubscribed = (new Gazelle\Manager\Subscription($user->id()))->isSubscribedComments('collages', $CollageID);
 $Collage = new Gazelle\Collage($CollageID);
 
 View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,subscriptions');
@@ -41,14 +41,14 @@ View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,s
     </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Collage($Twig, $LoggedUser['ID'], $CollageID);
+$comments = new Gazelle\CommentViewer\Collage($user->id(), $CollageID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setAutoResize()->setPreviewManual(true);
 echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $user->auth(),
     'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
     'id'       => $CollageID,
     'name'     => 'pageid',

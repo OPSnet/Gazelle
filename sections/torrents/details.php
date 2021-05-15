@@ -81,20 +81,20 @@ if (!$CoverArt) {
 }
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-$user = new Gazelle\User($LoggedUser['ID']);
+$Viewer = new Gazelle\User($LoggedUser['ID']);
 $commentPage = new Gazelle\Comment\Torrent($GroupID);
 if (isset($_GET['postid'])) {
     $commentPage->setPostId((int)$_GET['postid']);
 } elseif (isset($_GET['page'])) {
     $commentPage->setPageNum((int)$_GET['page']);
 }
-$commentPage->load()->handleSubscription($user);
+$commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
-$paginator->setAnchor('comments')->setTotal($commentPage->total());
+$paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
 $collageMan = new Gazelle\Manager\Collage;
-$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('torrents', $GroupID);
+$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('torrents', $GroupID);
 
 View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting');
 ?>
@@ -107,11 +107,11 @@ View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscription
 <?php } ?>
             <a href="torrents.php?action=editrequest&amp;groupid=<?=$GroupID?>" class="brackets">Request an Edit</a>
 <?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
-            <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
+            <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
 <?php
 }
 $bookmark = new \Gazelle\Bookmark;
-if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) {
+if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) {
 ?>
             <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="remove_bookmark brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
 <?php } else { ?>
@@ -198,7 +198,7 @@ $Index++;
                     <li>
                         <?=$Summary?>
                         <?=(check_perms('users_mod') ? ' added by ' . Users::format_username($AddedBy, false, false, false, false, false) : '')?>
-                        <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('torrents.php?action=remove_cover_art&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;id=<?=$ImageID?>&amp;groupid=<?=$GroupID?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
+                        <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('torrents.php?action=remove_cover_art&amp;auth=<?=$Viewer->auth() ?>&amp;id=<?=$ImageID?>&amp;groupid=<?=$GroupID?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
                     </li>
                 </ul>
             </div>
@@ -219,7 +219,7 @@ $Index++;
                 <form class="add_form" name="covers" id="add_covers_form" action="torrents.php" method="post">
                     <div id="add_cover">
                         <input type="hidden" name="action" value="add_cover_art" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                     </div>
                 </form>
@@ -288,10 +288,10 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                 <form class="add_form" name="artists" action="torrents.php" method="post">
                     <div id="AddArtists">
                         <input type="hidden" name="action" value="add_alias" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                         <input type="text" id="artist" name="aliasname[]" size="17"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <select name="importance[]">
                             <option value="1">Main</option>
                             <option value="2">Guest</option>
@@ -316,7 +316,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                 <div class="box pad">
                     <form action="collages.php" method="post">
 <?php
-            $collageList = $collageMan->addToCollageDefault($user, $GroupID);
+            $collageList = $collageMan->addToCollageDefault($Viewer, $GroupID);
             if (empty($collageList)) {
 ?>
                     <div>Search for a collage name:</div>
@@ -332,8 +332,8 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                     <input type="text" id="collage_ref" name="collage_ref" data-gazelle-autocomplete="true" size="25" />
                     <input type="hidden" name="action" value="add_torrent" />
                     <input type="hidden" name="groupid" value="<?= $GroupID ?>" />
-                    <input type="hidden" name="userid" value="<?= $LoggedUser['ID'] ?>" />
-                    <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+                    <input type="hidden" name="userid" value="<?= $Viewer->id() ?>" />
+                    <input type="hidden" name="auth" value="<?= $Viewer->auth()  ?>" />
                     <br /><br /><input type="submit" value="Add" />
                     </form>
             </div>
@@ -341,7 +341,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
 <?php
     }
 }
-$vote = (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID);
+$vote = (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID);
 if ($GroupCategoryID === 1) {
     $decade = $GroupYear - ($GroupYear % 10);
     $decadeEnd = $decade + 9;
@@ -400,7 +400,7 @@ if ($GroupCategoryID === 1) {
 }
 
 echo $Twig->render('vote/box.twig', [
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $Viewer->auth() ,
     'can_vote' => check_perms('site_album_votes'),
     'group_id' => $GroupID,
     'percent'  => $vote->total() ? $vote->totalUp() / $vote->total() * 100 : '&mdash;',
@@ -411,7 +411,7 @@ echo $Twig->render('vote/box.twig', [
     'vote'     => $vote->vote(),
 ]);
 
-$DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
+$DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
 ?>
         <div class="box box_tags">
             <div class="head">
@@ -419,7 +419,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
 <?php if (!empty($DeletedTag)) { ?>
                     <form style="display: none;" id="undo_tag_delete_form" name="tags" action="torrents.php" method="post">
                         <input type="hidden" name="action" value="add_tag" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                         <input type="hidden" name="tagname" value="<?=$DeletedTag?>" />
                         <input type="hidden" name="undo" value="true" />
@@ -436,16 +436,16 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
                 <li>
                     <a href="torrents.php?taglist=<?=$Tag['name']?>" style="float: left; display: block;"><?=display_str($Tag['name'])?></a>
                     <div style="float: right; display: block; letter-spacing: -1px;" class="edit_tags_votes">
-                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Vote this tag up" class="brackets tooltip vote_tag_up">&and;</a>
+                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="brackets tooltip vote_tag_up">&and;</a>
                     <?=$Tag['score']?>
-                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Vote this tag down" class="brackets tooltip vote_tag_down">&or;</a>
+                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag down" class="brackets tooltip vote_tag_down">&or;</a>
 <?php       if (check_perms('users_warn')) { ?>
                     <a href="user.php?id=<?=$Tag['userid']?>" title="View the profile of the user that added this tag" class="brackets tooltip view_tag_user">U</a>
 <?php
             }
             if (empty($LoggedUser['DisableTagging']) && check_perms('site_delete_tag')) {
 ?>
-                    <span class="remove remove_tag"><a href="torrents.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets tooltip" title="Remove tag">X</a></span>
+                    <span class="remove remove_tag"><a href="torrents.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
 <?php       } ?>
                     </div>
                     <br style="clear: both;" />
@@ -461,10 +461,10 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
             <div class="body">
                 <form class="add_form" name="tags" action="torrents.php" method="post">
                     <input type="hidden" name="action" value="add_tag" />
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
                     <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                     <input type="text" name="tagname" id="tagname" size="20"<?=
-                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
+                        $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                     <input type="submit" value="+" />
                 </form>
                 <br /><br />
@@ -575,7 +575,7 @@ foreach ($TorrentList as $Torrent) {
         $ReportInfo .= "\n\t\t</table>";
     }
 
-    $CanEdit = (check_perms('torrents_edit') || (($UserID == $LoggedUser['ID'] && !$LoggedUser['DisableWiki']) && !($Remastered && !$RemasterYear)));
+    $CanEdit = (check_perms('torrents_edit') || (($UserID == $Viewer->id() && !$LoggedUser['DisableWiki']) && !($Remastered && !$RemasterYear)));
 
     $RegenLink = check_perms('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid='.$TorrentID.'" class="brackets">Regenerate</a>' : '';
     $FileTable = '
@@ -643,10 +643,10 @@ foreach ($TorrentList as $Torrent) {
     } else {
         echo $Twig->render('torrent/action.twig', [
             'can_fl' => Torrents::can_use_token($Torrent),
-            'key'    => $LoggedUser['torrent_pass'],
+            'key'    => $Viewer->announceKey() ,
             't'      => $Torrent,
             'edit'   => $CanEdit,
-            'remove' => check_perms('torrents_delete') || $UserID == $LoggedUser['ID'],
+            'remove' => check_perms('torrents_delete') || $UserID == $Viewer->id(),
             'pl'     => true,
             'extra'  => [
                 "<a href=\"ajax.php?action=torrent&id=$TorrentID\" download=\"$Title [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
@@ -915,7 +915,7 @@ if (!empty($similar)) {
         </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Torrent($Twig, $LoggedUser['ID'], $GroupID);
+$comments = new Gazelle\CommentViewer\Torrent($Viewer->id(), $GroupID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
 
@@ -923,14 +923,14 @@ $textarea = new Gazelle\Util\Textarea('quickpost', '');
 $textarea->setAutoResize()->setPreviewManual(true);
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $LoggedUser['AuthKey'],
-    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
+    'auth'     => $Viewer->auth() ,
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
     'id'       => $GroupID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => $textarea,
     'url'      => 'comments.php?page=torrents',
-    'user'     => $user,
+    'user'     => $Viewer,
 ]);
 ?>
         </div>

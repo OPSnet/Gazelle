@@ -1,36 +1,19 @@
 <?php
-//~~~~~~~~~~~ Main artist page ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-$ArtistID = $_GET['id'];
-if (!is_number($ArtistID)) {
-    error(0);
-}
-
-if (empty($_GET['revisionid'])) {
-    $RevisionID = false;
-} else {
-    if (!is_number($_GET['revisionid'])) {
-        error(0);
-    }
-    $RevisionID = $_GET['revisionid'];
-}
-
-//----------------- Build list and get stats
-
+$ArtistID = (int)($_GET['id'] ?? 0);
+$RevisionID = (int)($_GET['revisionid'] ?? 0);
 $artistMan = new Gazelle\Manager\Artist;
-try {
-    $Artist = new Gazelle\Artist($ArtistID, $RevisionID);
-}
-catch (\Exception $e) {
+$Artist = $artistMan->findById($ArtistID, $RevisionID);
+if (is_null($Artist)) {
     error(404);
 }
 $Artist->loadArtistRole();
 
 $bookmark = new Gazelle\Bookmark;
 $collageMan = new Gazelle\Manager\Collage;
-$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('artist', $ArtistID);
-$User = new Gazelle\User($LoggedUser['ID']);
-$authKey = $User->auth();
+$Viewer = new Gazelle\User($LoggedUser['ID']);
+$authKey = $Viewer->auth();
+$isSubscribed = (new Gazelle\Manager\Subscription($user->id()))->isSubscribedComments('artist', $ArtistID);
 
 function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catalogueNumber, $media]);
@@ -56,7 +39,7 @@ View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions')
 
 if (check_perms('site_torrents_notify')) {
     $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $authKey);
-    if ($User->hasArtistNotification($name)) {
+    if ($Viewer->hasArtistNotification($name)) {
 ?>
             <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
 <?php } else { ?>
@@ -65,7 +48,7 @@ if (check_perms('site_torrents_notify')) {
     }
 }
 
-if ($bookmark->isArtistBookmarked($User->id(), $ArtistID)) { ?>
+if ($bookmark->isArtistBookmarked($Viewer->id(), $ArtistID)) { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php } else { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
@@ -150,7 +133,7 @@ Tags::reset();
                     <form action="collages.php" method="post">
                     <select name="collage_combo">
                         <option value="0">Choose recent...</option>
-<?php foreach($collageMan->addToArtistCollageDefault($User, $ArtistID) as $id => $collageName) { ?>
+<?php foreach($collageMan->addToArtistCollageDefault($Viewer, $ArtistID) as $id => $collageName) { ?>
                         <option value="<?= $id ?>"><?= $collageName ?></option>
 <?php } ?>
                     </select>
@@ -158,7 +141,7 @@ Tags::reset();
                     <input type="text" name="collage_ref" size="25" />
                     <input type="hidden" name="action" value="add_artist" />
                     <input type="hidden" name="artistid" value="<?= $ArtistID ?>" />
-                    <input type="hidden" name="userid" value="<?= $User->id() ?>" />
+                    <input type="hidden" name="userid" value="<?= $Viewer->id() ?>" />
                     <input type="hidden" name="auth" value="<?= $authKey  ?>" />
                     <br /><br /><input type="submit" value="Add" />
                     </form>
@@ -181,7 +164,7 @@ echo $Twig->render('artist/similar.twig', [
     'admin'        => check_perms('site_delete_tag'),
     'artist_id'    => $ArtistID,
     'auth'         => $authKey,
-    'autocomplete' => $User->hasAutocomplete('other'),
+    'autocomplete' => $Viewer->hasAutocomplete('other'),
     'similar'      => $Artist->similarArtists(),
 ]);
 
@@ -279,7 +262,7 @@ if ($sections = $Artist->sections()) {
 <?php
     }
 
-    $Requests = $LoggedUser['DisableRequests'] ? [] : $Artist->requests();
+    $Requests = $Viewer->disableRequests() ? [] : $Artist->requests();
     if (count($Requests)) {
 ?>
     <a href="#requests" class="brackets">Requests</a>
@@ -418,7 +401,7 @@ if ($sections = $Artist->sections()) {
             <td class="td_info" colspan="2">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Torrent),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                     'extra'  => [
                         "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"$name - $GroupName  [$GroupYear] $TorrentID [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
@@ -686,12 +669,12 @@ if (isset($_GET['postid'])) {
 } elseif (isset($_GET['page'])) {
     $commentPage->setPageNum((int)$_GET['page']);
 }
-$commentPage->load()->handleSubscription($User);
+$commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
-$paginator->setAnchor('comments')->setTotal($commentPage->total());
+$paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Artist($Twig, $LoggedUser['ID'], $ArtistID);
+$comments = new Gazelle\CommentViewer\Artist($Viewer->id(), $ArtistID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setAutoResize()->setPreviewManual(true);
@@ -699,13 +682,13 @@ echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $authKey,
-    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($User, $User),
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
     'id'       => $ArtistID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => $textarea,
     'url'      => 'comments.php?page=artist',
-    'user'     => $User,
+    'user'     => $Viewer,
 ]);
 ?>
         </div>
