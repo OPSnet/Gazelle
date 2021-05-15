@@ -1,11 +1,6 @@
 <?php
 
 authorize();
-$DB->prepared_query("
-    DELETE FROM friends
-    WHERE UserID = ?
-        AND FriendID = ?
-    ", $LoggedUser['ID'], (int)$_POST['friendid']
-);
-
+$Viewer = new Gazelle\User($LoggedUser['ID']);
+$Viewer->removeFriend((int)($_POST['friendid'] ?? 0));
 header('Location: friends.php');
