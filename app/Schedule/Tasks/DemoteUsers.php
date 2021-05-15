@@ -7,7 +7,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
     public function run()
     {
         $userMan = new \Gazelle\Manager\User;
-        $criteria = array_reverse(\Gazelle\User::promotionCriteria());
+        $criteria = array_reverse($userMan->promotionCriteria());
         foreach ($criteria as $l) { // $l = Level
             $fromClass = $userMan->userclassName($l['To']);
             $toClass = $userMan->userclassName($l['From']);
@@ -89,7 +89,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                         "You have been demoted to $toClass",
                         "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
                             . SITE_NAME
-                            . "'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                            . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
                     );
                 }
             }
