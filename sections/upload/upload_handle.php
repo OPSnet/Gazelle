@@ -715,7 +715,7 @@ $Debug->set_flag('upload: ocelot updated');
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 300);
 
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    $torMan->flushLatestUploads(5);
+    (new Gazelle\Manager\TGroup)->flushLatestUploads(5);
 }
 
 //******************************************************************************//
@@ -961,7 +961,7 @@ if (!in_array('notifications', $paranoia)) {
         ->addEncodings($Properties['Encoding'])
         ->addMedia($Properties['Media'])
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
-        ->addArtists($torMan->setGroupId($GroupID)->artistRole())
+        ->addArtists((new Gazelle\Manager\TGroup)->findById($GroupID)->artistRole())
         ->addTags($tagList)
         ->addCategory($Type)
         ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
@@ -990,5 +990,5 @@ if (!in_array('notifications', $paranoia)) {
 // Clear cache and allow deletion of this torrent now
 $Cache->deleteMulti(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
 if (!$IsNewGroup) {
-    $Cache->deleteMulti(["torrent_group_$GroupID", "detail_files_$GroupID"]);
+    $Cache->deleteMulti(["torrent_group_$GroupID", "detail_files_$GroupID", "tg_$GroupID", "tlist_$GroupID"]);
 }

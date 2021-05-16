@@ -4,28 +4,22 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$TorrentID = intval($_POST['torrentid']);
-$LogID = intval($_POST['logid']);
-
-[$GroupID, $Checksum] = $DB->row("
-    SELECT t.GroupID, tl.Checksum
-    FROM torrents_logs tl
-    INNER JOIN torrents t ON (tl.TorrentID = t.ID)
-    WHERE tl.TorrentID = ? AND tl.LogID = ?
-    ", $TorrentID, $LogID
-);
-if (!$GroupID) {
+$LogID = (int)($_POST['logid'] ?? 0);
+if (!$LogID) {
+    error(404);
+}
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+if (is_null($torrent)) {
     error(404);
 }
 
 $Adjusted = isset($_POST['adjusted']) ? '1' : '0';
 $AdjustedScore = 100;
 $AdjustedChecksum = isset($_POST['adjusted_checksum']) ? '1' : '0';
-$AdjustedBy = $LoggedUser['ID'];
 $AdjustmentReason = $_POST['adjustment_reason'];
 $AdjustmentDetails = [];
 
-if ($AdjustedChecksum != $Checksum) {
+if ($AdjustedChecksum != $torrent->info()['Checksum']) {
     $AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');
 }
 
@@ -73,6 +67,6 @@ foreach ($TrackDeductions as $Deduction) {
     $AdjustedScore -= $Total;
 }
 
-(new Gazelle\Manager\Torrent)->adjustLogscore($GroupID, $TorrentID, $LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $AdjustedBy, $AdjustmentReason, serialize($AdjustmentDetails));
+$torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $LoggedUser['ID'], $AdjustmentReason, $AdjustmentDetails);
 
-header("Location: torrents.php?torrentid={$TorrentID}");
+header("Location: torrents.php?torrentid=" . $torrent->id());

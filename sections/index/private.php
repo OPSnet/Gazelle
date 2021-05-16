@@ -5,7 +5,7 @@ $contestMan = new Gazelle\Manager\Contest;
 $forumMan   = new Gazelle\Manager\Forum;
 $newsMan    = new Gazelle\Manager\News;
 $newsReader = new Gazelle\WitnessTable\UserReadNews;
-$torMan     = new Gazelle\Manager\Torrent;
+$tgroupMan  = new Gazelle\Manager\TGroup;
 $userMan    = new Gazelle\Manager\User;
 $viewer     = new Gazelle\User($LoggedUser['ID']);
 
@@ -47,8 +47,8 @@ echo $Twig->render('index/private-sidebar.twig', [
     'blog'              => new Gazelle\Manager\Blog,
     'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
     'leaderboard'       => $leaderboard,
-    'featured_aotm'     => $torMan->featuredAlbumAotm(),
-    'featured_showcase' => $torMan->featuredAlbumShowcase(),
+    'featured_aotm'     => $tgroupMan->featuredAlbumAotm(),
+    'featured_showcase' => $tgroupMan->featuredAlbumShowcase(),
     'staff_blog'        => new Gazelle\Manager\StaffBlog,
     'poll'              => $poll,
     'poll_thread_id'    => $threadId,
@@ -63,7 +63,7 @@ echo $Twig->render('index/private-sidebar.twig', [
 echo $Twig->render('index/private-main.twig', [
     'admin'   => $viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
-    'latest'  => $torMan->latestUploads(5),
+    'latest'  => $tgroupMan->latestUploads(5),
     'news'    => $newsMan->headlines(),
 ]);
 View::show_footer(['disclaimer'=>true]);

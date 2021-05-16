@@ -1,7 +1,6 @@
 <?php
 
-$torMan = new Gazelle\Manager\Torrent;
-$group = $torMan->findGroupById((int)$_GET['groupid']);
+$group = (new Gazelle\Manager\TGroup)->findById((int)($_GET['groupid'] ?? 0));
 if (is_null($group)) {
     error(404);
 }

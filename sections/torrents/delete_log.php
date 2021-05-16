@@ -1,21 +1,19 @@
 <?php
 
-$torrentId = (int)$_GET['torrentid'];
+if (!check_perms('users_mod')) {
+    error(403);
+}
+
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
 $logId = (int)$_GET['logid'];
-if (!$torrentId || !$logId) {
+if (is_null($torrent) || !$logId) {
     error(404);
 }
 
-$groupId = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $torrentId);
-if (!$groupId) {
-    error(404);
-}
+(new Gazelle\File\RipLog)->remove([$torrent->id(), $logId]);
+(new Gazelle\Log)->torrent($torrent->groupId(), $torrent->id(), $LoggedUser['ID'], "Riplog ID $logId removed from torrent $torrentId");
 
-(new Gazelle\File\RipLog)->remove([$torrentId, $logId]);
-(new Gazelle\Log)->torrent($groupId, $torrentId, $LoggedUser['ID'], "Riplog ID $logId removed from torrent $torrentId");
+Torrents::clear_log($torrent->id(), $logId);
+$torrent->modifyLogscore();
 
-$torMan = new Gazelle\Manager\Torrent;
-Torrents::clear_log($torrentId, $logId);
-$torMan->modifyLogscore($groupId, $torrentId);
-
-header("Location: torrents.php?torrentid={$torrentId}");
+header("Location: torrents.php?torrentid=" . $torrent->id());

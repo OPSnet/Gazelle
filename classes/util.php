@@ -846,8 +846,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
 }
 
 function get_torrent_info($TorrentID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
-    $torMan = new \Gazelle\Manager\Torrent;
-    $GroupInfo = get_group_info($torMan->idToGroupId($TorrentID), $RevisionID, $PersonalProperties, $ApiCall);
+    $GroupInfo = get_group_info((new Gazelle\Manager\Torrent)->findById($TorrentID)->id(), $RevisionID, $PersonalProperties, $ApiCall);
     if (!$GroupInfo) {
         return null;
     }

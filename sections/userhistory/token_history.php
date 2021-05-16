@@ -22,11 +22,11 @@ if ($_GET['expire'] ?? 0) {
     if (!check_perms('admin_fl_history')) {
         error(403);
     }
-    $torrentId = (int)$_GET['torrentid'];
-    if (!$torrentId) {
+    $torrent = $torMan->findById((int)$_GET['torrentid']);
+    if (is_null($torrent)) {
         error(404);
     }
-    $torMan->expireToken($userId, $torrentId);
+    $torrent->expireToken($userId);
     header("Location: userhistory.php?action=token_history&userid=$userId");
 }
 
