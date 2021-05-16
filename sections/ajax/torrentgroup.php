@@ -4,28 +4,23 @@ $GroupAllowed = ['WikiBody', 'WikiImage', 'ID', 'Name', 'Year', 'RecordLabel', '
 $TorrentAllowed = ['ID', 'Media', 'Format', 'Encoding', 'Remastered', 'RemasterYear', 'RemasterTitle', 'RemasterRecordLabel', 'RemasterCatalogueNumber', 'Scene', 'HasLog', 'HasCue', 'LogScore', 'FileCount', 'Size', 'Seeders', 'Leechers', 'Snatched', 'FreeTorrent', 'Time', 'Description', 'FileList', 'FilePath', 'UserID', 'Username'];
 
 $GroupID = (int)$_GET['id'];
-$TorrentHash = (string)$_GET['hash'];
-
-if ($GroupID && $TorrentHash) {
+$infohash = $_GET['hash'];
+if ($GroupID && $infohash) {
     json_die("failure", "bad parameters");
 }
-
-$torMan = new \Gazelle\Manager\Torrent;
-
-if ($TorrentHash) {
-    if (!$torMan->isValidHash($TorrentHash)) {
+$tgroupMan = new Gazelle\Manager\TGroup;
+if ($GroupID) {
+    $group = $tgroupMan->findById($GroupID);
+} else if ($infohash) {
+    $group = $tgroupMan->findByTorrentInfohash($infohash);
+    if (!$GroupID) {
         json_die("failure", "bad hash parameter");
-    } else {
-        $GroupID = $torMan->hashToGroupId($TorrentHash);
-        if (!$GroupID) {
-            json_die("failure", "bad hash parameter");
-        }
     }
 }
-
-if ($GroupID <= 0) {
+if (is_null($group)) {
     json_die("failure", "bad id parameter");
 }
+$GroupID = $group->id();
 
 $TorrentCache = get_group_info($GroupID, 0, true, true);
 if (!$TorrentCache) {

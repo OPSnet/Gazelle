@@ -9,15 +9,15 @@ if ($torrentId && $torrentHash) {
     $json->failure('bad parameters');
     exit;
 } elseif ($torrentHash) {
-    if (!$json->setIdFromHash($torrentHash)) {
+    if (!$json->findByInfohash($torrentHash)) {
         exit;
     }
 } else {
-    if (!$json->setId($torrentId)) {
+    if (!$json->findById($torrentId)) {
         exit;
     }
 }
 
 $json->setVersion(5)
-    ->setViewer($LoggedUser['ID'])
+    ->setViewerId($LoggedUser['ID'])
     ->emit();

@@ -2,6 +2,14 @@
 
 use Gazelle\Util\SortableTableHeader;
 
+if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
+    $t = (new Gazelle\Manager\Torrent)->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
+    if ($t) {
+        header("Location: torrents.php?id=" . $t->groupId() . "&torrentid=" . $t->id());
+        exit;
+    }
+}
+
 $user = new Gazelle\User($LoggedUser['ID']);
 
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
@@ -16,19 +24,6 @@ $headerMap = [
 ];
 $header = new SortableTableHeader('time', $headerMap);
 $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
-
-if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
-    $InfoHash = (!empty($_GET['searchstr'])) ? $_GET['searchstr'] : $_GET['groupname'];
-
-    $torMan = new Gazelle\Manager\Torrent;
-    // Search by infohash
-    if ($InfoHash = $torMan->isValidHash($InfoHash)) {
-        if (list($ID, $GroupID) = $torMan->hashToTorrentGroup($InfoHash)) {
-            header("Location: torrents.php?id=$GroupID&torrentid=$ID");
-            die();
-        }
-    }
-}
 
 // Setting default search options
 if (!empty($_GET['setdefault'])) {

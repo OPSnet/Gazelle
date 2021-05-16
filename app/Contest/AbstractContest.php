@@ -29,17 +29,15 @@ trait TorrentLeaderboard {
             $leaderboard = $this->db->to_array(false, MYSQLI_ASSOC);
             $leaderboardCount = count($leaderboard);
             for ($i = 0; $i < $leaderboardCount; $i++) {
-                [$group, $torrent] = $torMan
-                    ->setTorrentId($leaderboard[$i]['last_entry_id'])
-                    ->setGroupId($leaderboard[$i]['group_id'])
-                    ->torrentInfo();
+                $torrent = $torMan->findById($leaderboard[$i]['last_entry_id']);
+                $group = $torrent->group();
                 $leaderboard[$i]['last_entry_link'] = sprintf(
                     '%s - <a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> - %s',
-                    $torMan->artistHtml(),
+                    $group->artistHtml(),
                     $leaderboard[$i]['group_id'],
                     $leaderboard[$i]['last_entry_id'],
-                    $group['Name'],
-                    $labelMan->load($torrent)->label()
+                    $group->name(),
+                    $labelMan->load($torrent->info())->label()
                 );
             }
             $this->cache->cache_value($key, $leaderboard, 3600);

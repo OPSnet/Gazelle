@@ -38,6 +38,9 @@ class Tracker {
      * @param boolean $ToIRC Sends a message to the channel #tracker with the GET URL.
      */
     public function update_tracker($Action, $Updates, $ToIRC = false) {
+        if (DISABLE_TRACKER) {
+            return true;
+        }
         // Build request
         $Get = TRACKER_SECRET . "/update?action=$Action";
         foreach ($Updates as $Key => $Value) {

@@ -5,6 +5,7 @@
  */
 
 function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types) {
+    // TODO: replace this horror with Twig
     global $Cache, $DB, $LoggedUser, $Twig;
     $torMan = new Gazelle\Manager\Torrent;
 
@@ -14,14 +15,15 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
     $LastRemasterCatalogueNumber = '';
 
     $EditionID = 0;
-    foreach ($TorrentList as $Torrent) {
+    $torMan = new Gazelle\Manager\Torrent;
+    // foreach ($TorrentList as $Torrent) {
         [$TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
         $RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
         $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
         $Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
         $FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
         $MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
-        $HasFile, $LogCount, $PersonalFL, $IsSnatched] = array_values($Torrent);
+        $HasFile, $LogCount, $PersonalFL, $IsSnatched] = array_values($TorrentList);
 
         $FirstUnknown = ($Remastered && !$RemasterYear);
 
@@ -156,9 +158,10 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
         ) {
 
             $EditionID++;
+            $info = $torMan->findById($TorrentID)->info();
 ?>
                 <tr class="releases_<?=($ReleaseType)?> groupid_<?=($GroupID)?> edition group_torrent">
-                    <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=($GroupID)?>, <?=($EditionID)?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent)?></strong></td>
+                    <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=($GroupID)?>, <?=($EditionID)?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($info)?></strong></td>
                 </tr>
 <?php
         }
@@ -172,9 +175,9 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
                 <tr class="torrent_row releases_<?=($ReleaseType)?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=($IsSnatched ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
                     <td>
                         <?= $Twig->render('torrent/action.twig', [
-                            'can_fl' => Torrents::can_use_token($Torrent),
+                            'can_fl' => Torrents::can_use_token($TorrentList),
                             'key'    => $LoggedUser['torrent_pass'],
-                            't'      => $Torrent,
+                            't'      => $TorrentList,
                             'edit'   => $CanEdit,
                             'remove' => check_perms('torrents_delete') || $UserID == $LoggedUser['ID'],
                             'pl'     => true,
@@ -239,7 +242,7 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
                     </td>
                 </tr>
 <?php
-    }
+    // }
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
@@ -267,8 +270,9 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
         exit;
     }
     $Artists = Artists::get_artist($GroupID);
-    [$GroupDetails, $TorrentList] = $torMan->groupInfo($GroupID);
-    $TorrentList = [$TorrentList[$TorrentID]];
+    $torrent = (new Gazelle\Manager\Torrent)->findById($TorrentID);
+    $TorrentList = $torrent->info();
+    $GroupDetails = $torrent->group()->info();
     // Group details
     [$WikiBody,, $GroupID, $GroupName, $GroupYear,,, $ReleaseType, $GroupCategoryID,,
         $GroupVanityHouse,,,,,, $GroupFlags] = array_values($GroupDetails);

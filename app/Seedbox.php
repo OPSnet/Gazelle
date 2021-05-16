@@ -159,10 +159,7 @@ class Seedbox extends Base {
                 'id' => $tid,
                 'folder' => $details['FilePath'],
                 'sortname' => $details['Name'],
-                'artist' => $torMan
-                    ->setGroupId($details['GroupID'])
-                    ->setTorrentId($tid)
-                    ->artistHtml(),
+                'artist' => $torMan->findById($tid)->group()->artistHtml(),
                 'name' => sprintf('<a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> (%s) [%s]',
                     $details['GroupID'],
                     $tid,

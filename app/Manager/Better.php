@@ -23,7 +23,7 @@ class Better extends \Gazelle\Base
             ', $table), $id
         );
 
-        $this->cache->delete_value('torrents_details_' . (new \Gazelle\Manager\Torrent())->idToGroupId($id));
+        $this->cache->delete_value('torrents_details_' . (new \Gazelle\Manager\Torrent())->findById($id)->groupId());
     }
 
     public function missing(string $type, string $filter, string $search, int $limit, int $offset, int $userId) {

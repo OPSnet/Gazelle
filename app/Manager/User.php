@@ -513,6 +513,22 @@ class User extends \Gazelle\Base {
     }
 
     /**
+     * How many unresolved torrent reports are there for this user?
+     * @param int User ID
+     * @return int number of unresolved reports
+     */
+    public function unresolvedReportsTotal(int $userId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM reportsv2 AS r
+            INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
+            WHERE r.Status != 'Resolved'
+                AND t.UserID = ?
+            ", $userId
+        );
+    }
+
+    /**
      * Sends a PM from $FromId to $ToId.
      *
      * @param string $toId ID of user to send PM to. If $toId is an array and $convId is empty, a message will be sent to multiple users.
