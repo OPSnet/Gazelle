@@ -436,16 +436,16 @@ class Users {
 
         if ($Title) {
             // Image proxy CTs
-            if (check_perms('site_proxy_images') && !empty($user->title())) {
-                $userTitle = preg_replace_callback('~src=("?)(http.+?)(["\s>])~',
+            $userTitle = $user->title();
+            if (check_perms('site_proxy_images') && !empty($userTitle)) {
+                $userTitle = preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
                     function($Matches) {
                         return 'src=' . $Matches[1] . ImageTools::process($Matches[2]) . $Matches[3];
-                    },
-                    $user->title());
+                    }, $userTitle
+                );
             }
-
-            if ($userTitle ?? false) {
-                $Str .= ' <span class="user_title">('.$userTitle.')</span>';
+            if ($userTitle) {
+                $Str .= ' <span class="user_title">(' . $userTitle . ')</span>';
             }
         }
         return $Str;
