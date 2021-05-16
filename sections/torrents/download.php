@@ -4,7 +4,12 @@ use \Gazelle\Util\Irc;
 
 enforce_login();
 
-$Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass'] ?? '');
+// If using an ajax endpoint, we only have access to their LoggedUser['ID'] which is evaluated
+// and confirmed in script_start.php. For regular endpoints, we just utilize the torrent_pass
+// which is part of the GET payload.
+$Viewer = defined('AJAX')
+    ? (new Gazelle\Manager\User)->findById($LoggedUser['ID'])
+    : (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass'] ?? '');
 if (is_null($Viewer)) {
     json_or_error('missing user', 404);
 } elseif (!$Viewer->isEnabled() || $Viewer->isLocked()) {
