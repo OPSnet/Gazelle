@@ -12,7 +12,6 @@ $auth = new RobThree\Auth\TwoFactorAuth;
 if (!empty($_SESSION['private_key'])) {
     $secret = $_SESSION['private_key'];
     if (isset($_POST['2fa'])) {
-        var_dump([$secret, $_POST]);
         if ($auth->verifyCode($secret, trim($_POST['2fa']), 2)) {
             header('Location: user.php?action=2fa&do=complete&userid=' . $userId);
             exit;

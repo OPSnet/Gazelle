@@ -49,6 +49,7 @@ $preload = [
     'collMan'     => new \Gazelle\Manager\Collage,
     'forMan'      => new \Gazelle\Manager\Forum,
     'tagMan'      => new \Gazelle\Manager\Tag,
+    'tgMan'       => new \Gazelle\Manager\TGroup,
     'torMan'      => new \Gazelle\Manager\Torrent,
     'userMan'     => new \Gazelle\Manager\User,
 ];

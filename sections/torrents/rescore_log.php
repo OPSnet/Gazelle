@@ -6,24 +6,16 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$torrentId = (int)$_GET['torrentid'];
-$logId     = (int)$_GET['logid'];
-if (!$DB->scalar("
-    SELECT 1 FROM torrents_logs WHERE LogID = ? AND TorrentID = ?
-    ", $logId, $torrentId)
-) {
-    error(404);
-}
-$groupId = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $torrentId);
-if (!$groupId) {
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+$logId = (int)$_GET['logid'];
+if (is_null($torrent) || !$logId) {
     error(404);
 }
 
-$logpath = (new Gazelle\File\RipLog)->path([$torrentId, $logId]);
+$logpath = (new Gazelle\File\RipLog)->path([$torrent->id(), $logId]);
 $logfile = new Gazelle\Logfile($logpath, basename($logpath));
-(new Gazelle\File\RipLogHTML)->put($logfile->text(), [$torrentId, $logId]);
+(new Gazelle\File\RipLogHTML)->put($logfile->text(), [$torrent->id(), $logId]);
 
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->rescoreLog($groupId, $torrentId, $logId, $logfile, Logchecker::getLogcheckerVersion());
+$torrent->rescoreLog($logId, $logfile, Logchecker::getLogcheckerVersion());
 
-header("Location: torrents.php?torrentid={$torrentId}");
+header("Location: torrents.php?torrentid=" . $torrent->id());

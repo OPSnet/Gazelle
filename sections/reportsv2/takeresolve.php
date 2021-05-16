@@ -160,9 +160,9 @@ if (!(isset($_POST['delete']) && check_perms('users_mod'))) {
         . ($_POST['resolve_type'] == 'custom' ? '' : ' for the reason: ' . $ResolveType['title'] . ".")
         . ($logMessage ? " $logMessage" : '');
     (new Gazelle\Manager\Torrent)
-        ->setTorrentId($torrentId)
-        ->setViewer($LoggedUser['ID'])
+        ->findById($torrentId)
         ->remove(
+            $LoggedUser['ID'],
             sprintf('%s (%s)', $ResolveType['title'], $logMessage ?? 'none'),
             $ResolveType['reason']
         );

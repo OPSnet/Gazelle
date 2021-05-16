@@ -158,9 +158,9 @@ if ($info['CategoryID'] == '1' && $info['WikiImage'] != '' && $info['uploaderId'
 }
 $Cache->delete_value('user_rlim_' . $userId);
 
-$torMan = new Gazelle\Manager\Torrent;
+$torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
 
 $downloadAsText = ($Viewer->option('DownloadAlt') === '1');
 header('Content-Type: ' . ($downloadAsText ? 'text/plain' : 'application/x-bittorrent') . '; charset=utf-8');
-header('Content-Disposition: attachment; filename="' . $torMan->torrentFilename($info, $downloadAsText) . '"');
-echo $torMan->torrentBody($torrentId, $Viewer->announceUrl());
+header('Content-Disposition: attachment; filename="' . $torrent->torrentFilename($downloadAsText, MAX_PATH_LEN) . '"');
+echo $torrent->torrentBody($Viewer->announceUrl());

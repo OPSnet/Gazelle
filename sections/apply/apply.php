@@ -2,7 +2,6 @@
 $appMan = new Gazelle\Manager\Applicant;
 if (isset($_POST['auth'])) {
     authorize();
-var_dump($_POST);
     $roleId = (int)($_POST['role'] ?? 0);
     $body = trim($_POST['body'] ?? '');
     if (!$roleId) {

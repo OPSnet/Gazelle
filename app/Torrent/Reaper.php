@@ -30,21 +30,22 @@ class Reaper extends \Gazelle\Base {
 
         $logEntries = $deleteNotes = [];
         $torMan = new \Gazelle\Manager\Torrent;
-        $torMan->setArtistDisplayText()->setViewer(0);
         $labelMan = new \Gazelle\Manager\TorrentLabel;
         $labelMan->showMedia(true)->showEdition(true);
 
         $i = 0;
         foreach ($torrents as $id) {
-            [$group, $torrent] = $torMan->setTorrentId($id)->torrentInfo();
+            $t = $torMan->findById($id);
+            $torrent = $t->info();
+            $group   = $t->group->info();
             $name = $group['Name'] . " " . $labelMan->load($torrent)->edition();
 
-            $artistName = $torMan->artistName();
+            $artistName = $t->group()->artistName();
             if ($artistName) {
                 $name = "$artistName - $name";
             }
 
-            [$success, $message] = $torMan->remove('inactivity (unseeded)');
+            [$success, $message] = $t->remove('inactivity (unseeded)');
             if (!$success) {
                 continue;
             }

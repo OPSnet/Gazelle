@@ -1,10 +1,10 @@
 <?php
 
-[$info] = (new Gazelle\Manager\Torrent)->setShowSnatched(false)->groupInfo((int)$_GET['id']);
-if (!$info) {
+$tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['id']);
+if (is_null($tgroup)) {
     json_die('failure', 'bad id parameter');
 }
 
 json_print("success", [
-    'wikiImage' => $info['WikiImage']
+    'wikiImage' => $tgroup->info()['WikiImage'],
 ]);

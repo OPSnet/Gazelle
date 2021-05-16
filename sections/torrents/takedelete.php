@@ -1,21 +1,14 @@
 <?php
 authorize();
 
-$torrentId = (int)$_POST['torrentid'];
-if (!$torrentId) {
+$t = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
+if (is_null($t)) {
     error(404);
 }
-
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setTorrentId($torrentId)
-    ->setViewer($LoggedUser['ID'])
-    ->setArtistDisplayText();
-
-[$group, $torrent] = $torMan->torrentInfo();
-
-if (!$torrent) {
-    error(404);
-}
+$t->setViewerId($LoggedUser['ID']);
+$tgroup  = $t->group();
+$group   = $tgroup->info();
+$torrent = $t->info();
 
 if ($LoggedUser['ID'] != $torrent['UserID'] && !check_perms('torrents_delete')) {
     error(403);
@@ -36,16 +29,14 @@ $labelMan->showMedia(true)
     ->showEdition(true)
     ->load($torrent);
 
-$name = $group['Name']
-    . " [" . $labelMan->release()
-    . '] (' . $labelMan->edition() . ')';
-$artistName = $torMan->setGroupID($group['ID'])->artistName();
+$name = $group['Name'] . " [" . $labelMan->release() . '] (' . $labelMan->edition() . ')';
+$artistName = $tgroup()->artistName();
 if ($artistName) {
     $name = "$artistName - $name";
 }
 
 $reason = trim($_POST['reason']) . ' ' . trim($_POST['extra']);
-[$success, $message] = $torMan->remove($reason);
+[$success, $message] = $torrent->remove($reason);
 if (!$success) {
     error($message);
 }

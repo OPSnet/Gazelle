@@ -206,13 +206,18 @@ abstract class Collector extends Base  {
             $this->skip($info);
             return;
         }
-        $contents = $this->torMan->torrentBody($info['TorrentID'], $this->user->announceUrl());
+        $torrent = $this->torMan->findById($info['TorrentID']);
+        if (is_null($torrent)) {
+            $this->fail($info);
+            return;
+        }
+        $contents = $torrent->torrentBody($this->user->announceUrl());
         if ($contents === '') {
             $this->fail($info);
             return;
         }
         $folder = is_null($folderName) ? '' : (safeFilename($folderName) . '/');
-        $name = $this->torMan->torrentFilename($info, false, MAX_PATH_LEN - strlen($folder));
+        $name = $torrent->torrentFilename(false, MAX_PATH_LEN - strlen($folder));
         $this->zip->addFile("$folder$name", $contents);
 
         $this->totalAdded++;

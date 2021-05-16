@@ -169,6 +169,7 @@ View::show_header('Delete torrent', 'reportsv2');
     $BBName .= " [url={$torrentUrl}]" . $mastering . "[/url]" . ($HasLog ? (" [url=$viewLogUrl]{$log}[/url]") : '') . $sizeMB;
 
     $torMan = new Gazelle\Manager\Torrent;
+    $userMan = new Gazelle\Manager\User;
 ?>
 
 <div id="report<?=$ReportID?>" class="report">
@@ -199,7 +200,8 @@ View::show_header('Delete torrent', 'reportsv2');
                     uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> <?=time_diff($Time)?>
                     <br />
 <?php
-        $GroupOthers = $torMan->unresolvedGroupReports($GroupID);
+        $torrent = $torMan->findById($TorrentID);
+        $GroupOthers = $torrent->group()->unresolvedReportsTotal();
         if ($GroupOthers > 0) {
 ?>
                         <div style="text-align: right;">
@@ -207,7 +209,7 @@ View::show_header('Delete torrent', 'reportsv2');
                         </div>
 <?php
 }
-        $UploaderOthers = $torMan->unresolvedUserReports($UploaderID);
+        $UploaderOthers = $userMan->unresolvedReportsTotal($UploaderID);
         if ($UploaderOthers > 0) {
 ?>
                         <div style="text-align: right;">
@@ -215,7 +217,7 @@ View::show_header('Delete torrent', 'reportsv2');
                         </div>
 <?php
         }
-        $requests = $torMan->requestFills($TorrentID);
+        $requests = $torrent->requestFills();
         foreach ($requests as $r) {
             [$RequestID, $FillerID, $FilledTime] = $r;
             $FillerName = (new Gazelle\User($FillerID))->username();

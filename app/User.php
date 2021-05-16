@@ -2214,11 +2214,12 @@ class User extends BaseObject {
                 $name = "(<i>Deleted torrent <a href=\"log.php?search=Torrent+{$t['torrent_id']}\">{$t['torrent_id']}</a></i>)";
             } else {
                 $name = "<a href=\"torrents.php?id={$t['group_id']}&amp;torrentid={$t['torrent_id']}\">{$t['group_name']}</a>";
-                $artist = $this->torMan->setGroupId($t['group_id'])->setTorrentId($t['torrent_id'])->artistHtml();
+                $torrent = $this->torMan->findById($t['torrent_id']);
+                $artist = $torrent->group()->artistHtml();
                 if ($artist) {
                     $name = "$artist - $name";
                 }
-                $this->labelMan->load($this->torMan->torrentInfo()[1]);
+                $this->labelMan->load($torrent->info());
                 $name .= ' [' . $this->labelMan->label() . ']';
             }
             $t['expired'] = ($t['expired'] === 1);

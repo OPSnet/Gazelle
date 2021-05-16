@@ -16,8 +16,10 @@ $args     = null;
 $torMan   = new Gazelle\Manager\Torrent;
 
 if (isset($_POST['torrentid'])) {
-    $torMan->setTorrentId((int)$_POST['torrentid']);
-    [$group, $torrent] = $torMan->torrentInfo();
+    $t = $torMan->findById((int)$_POST['torrentid']);
+    $torrent = $t->info();
+    $tgroup  = $t->group();
+    $group   = $tgroup->info();
     if ($group) {
         $tags = explode('|', $group['tagNames']);
         if (!$tags) {
@@ -30,7 +32,7 @@ if (isset($_POST['torrentid'])) {
             ->addEncodings($torrent['Encoding'])
             ->addMedia($torrent['Media'])
             ->addYear($group['Year'], $torrent['RemasterYear'])
-            ->addArtists($torMan->artistRole())
+            ->addArtists($tgroup->artistRole())
             ->addTags($tags)
             ->addCategory($category)
             ->addUser(new Gazelle\User($torrent['UserID']))

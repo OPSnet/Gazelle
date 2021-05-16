@@ -53,7 +53,12 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 if (check_perms('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
         [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
-        $ZIPList = explode(':', $ZIPList);
+        if (is_null($ZIPList)) {
+            $ZIPList = ['00', '11'];
+            $ZIPPrefs = 1;
+        } else {
+            $ZIPList = explode(':', $ZIPList);
+        }
     } else {
         $ZIPList = ['00', '11'];
         $ZIPPrefs = 1;

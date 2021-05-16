@@ -9,8 +9,7 @@ $PathInfo = pathinfo($_SERVER['SCRIPT_NAME']);
 $Document = $PathInfo['filename'];
 
 if ($PathInfo['dirname'] !== '/') {
-    var_dump($PathInfo);
-    die(); header("Location: /index.php");
+    exit;
 } elseif (in_array($Document, ['announce', 'scrape'])) {
     die("d14:failure reason40:Invalid .torrent, try downloading again.e");
 }
