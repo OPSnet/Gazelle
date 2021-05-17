@@ -1,52 +1,50 @@
 <div class="header">
-    <h2>{{ title }}</h2>
-    <div class="linkbox">
-        {{ pages|raw }}
-    </div>
+    <h2>Donor Rewards</h2>
+    {{ paginator.linkbox|raw }}
 </div>
 <form action="" method="get">
     <input type="hidden" name="action" value="donor_rewards" />
     <strong>Username (regexps allowed): </strong>
-    <input type="search" name="username" />
+    <input name="search" value="{{ search }}"/>
 </form>
 <br />
 
 {% for u in user %}
     {% if loop.first %}
-<table style="table-layout: fixed; width: 100%;">
+<table style="width: 100%;">
     <tr class="colhead">
         <td>Username</td>
         <td>Rank</td>
         <td>Hidden</td>
         <td>Last Donated</td>
-        <td>Icon Text</td>
+        <td>Avatar Hover</td>
         <td>Icon</td>
-        <td>Icon Link</td>
-        <td>Avatar Text</td>
+        <td>Icon Hover</td>
         <td>Second Avatar</td>
     </tr>
     {% endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-        <td>{{ u.user_id|user_full }}</td>
-        <td>{{ u.rank }}</td>
-        <td>{{ u.hidden }}</td>
-        <td>{{ u.donation_time|time_diff }}</td>
-        <td style="word-wrap: break-word;">
-           {{ u.icon_mouse }}
+        <td style="vertical-align: top">{{ u.user_id|user_full }}</td>
+        <td style="vertical-align: top">{{ u.rank }}</td>
+        <td style="vertical-align: top">{{ u.hidden }}</td>
+        <td style="vertical-align: top" class="nobr">{{ u.donation_time|time_diff }}</td>
+        <td style="vertical-align: top; word-wrap: anywhere">
+            {{ u.avatar_mouse }}
         </td>
-        <td style="word-wrap: break-word;">
+        <td style="vertical-align: top; word-wrap: anywhere">
+            {{ u.custom_icon }}
     {% if u.custom_icon %}
+            <br />
             <img src="{{ donor_icon(u.custom_icon, u.user_id) }}" width="15" height="13" alt="" />
     {% endif %}
         </td>
-        <td style="word-wrap: break-word;">
-            {{ u.custom_icon }}
+        <td style="vertical-align: top; word-wrap: anywhere">
+           {{ u.icon_mouse }}
         </td>
-        <td style="word-wrap: break-word;">
-            {{ u.avatar_mouse }}
-        </td>
-        <td style="word-wrap: break-word;">
+        <td style="vertical-align: top">
             {{ u.second_avatar }}
+            <br />
+            <img width="150" src="{{ u.second_avatar }}" />
         </td>
     </tr>
     {% if loop.last %}
@@ -54,4 +52,4 @@
     {% endif %}
 {% endfor %}
 
-<div class="linkbox">{{ pages|raw }}</div>
+{{ paginator.linkbox|raw }}

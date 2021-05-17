@@ -754,6 +754,44 @@ class User extends \Gazelle\Base {
         return $this->setDonorVisibility($user, true);
     }
 
+    public function donorRewardTotal() {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM users_main AS um
+            INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
+            INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
+        ");
+    }
+
+    public function donorRewardPage($search, int $limit, int $offset): array {
+        $args = [$limit, $offset];
+        if (is_null($search)) {
+            $where = '';
+        } else {
+            $where = "WHERE um.username REGEXP ?";
+            array_unshift($args, $search);
+        }
+        $this->db->prepared_query("
+            SELECT um.Username,
+                d.UserID AS user_id,
+                d.Rank AS rank,
+                if(hidden=0, 'No', 'Yes') AS hidden,
+                d.DonationTime AS donation_time,
+                r.IconMouseOverText AS icon_mouse,
+                r.AvatarMouseOverText AS avatar_mouse,
+                r.CustomIcon AS custom_icon,
+                r.SecondAvatar AS second_avatar,
+                r.CustomIconLink AS custom_link
+            FROM users_main AS um
+            INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
+            INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
+            $where ORDER BY d.Rank DESC, d.DonationTime ASC
+            LIMIT ? OFFSET ?
+            ", ...$args
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function demotionCriteria(): array {
         return [
             USER => [
