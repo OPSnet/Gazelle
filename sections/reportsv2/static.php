@@ -656,7 +656,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                     $Extras = explode(' ', $ExtraIDs);
                         $Value = '';
                         foreach ($Extras as $ExtraID) {
-                            $Value .= SITE_URL . "/torrents.php?torrentid=$ExtraID ";
+                            $Value .= "torrents.php?torrentid=$ExtraID ";
                         }
                 } elseif (isset($ReportType['extra_log'])) {
                     $Value = $ReportType['extra_log'];

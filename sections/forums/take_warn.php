@@ -33,7 +33,7 @@ if (empty($forum->threadInfo($threadId))) {
 }
 $forum->editPost($user->id(), $postId, trim($_POST['body']));
 
-$URL = SITE_URL . "/forums.php?action=viewthread&amp;postid=$postId#post$postId";
+$URL = "forums.php?action=viewthread&amp;postid=$postId#post$postId";
 $Reason = trim($_POST['reason']);
 $WarningLength = $_POST['length'];
 if ($WarningLength !== 'verbal') {

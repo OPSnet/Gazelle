@@ -57,7 +57,7 @@ switch ($Type) {
         if (!$Name) {
             error('No request with the reported ID found');
         } else {
-            $TypeLink = 'the request [url='.SITE_URL."/requests.php?action=view&amp;id=$ThingID]".display_str($Name).'[/url]';
+            $TypeLink = "the request [url=requests.php?action=view&amp;id=$ThingID]".display_str($Name).'[/url]';
             $Subject = 'Request Report: '.display_str($Name);
         }
         break;
@@ -69,7 +69,7 @@ switch ($Type) {
         if (!$Name) {
             error('No collage with the reported ID found');
         } else {
-            $TypeLink = 'the collage [url='.SITE_URL."/collage.php?id=$ThingID]".display_str($Name).'[/url]';
+            $TypeLink = "the collage [url=collage.php?id=$ThingID]".display_str($Name).'[/url]';
             $Subject = 'Collage Report: '.display_str($Name);
         }
         break;
@@ -81,7 +81,7 @@ switch ($Type) {
         if (!$Name) {
             error('No forum thread with the reported ID found');
         } else {
-            $TypeLink = 'the forum thread [url='.SITE_URL."/forums.php?action=viewthread&amp;threadid=$ThingID]".display_str($Name).'[/url]';
+            $TypeLink = "the forum thread [url=forums.php?action=viewthread&amp;threadid=$ThingID]".display_str($Name).'[/url]';
             $Subject = 'Forum Thread Report: '.display_str($Name);
         }
         break;
@@ -104,7 +104,7 @@ switch ($Type) {
         if (!$PostID) {
             error('No forum post with the reported ID found');
         } else {
-            $TypeLink = 'this [url='.SITE_URL."/forums.php?action=viewthread&amp;threadid=$TopicID&amp;post=$PostNum#post$PostID]forum post[/url]";
+            $TypeLink = "this [url=forums.php?action=viewthread&amp;threadid=$TopicID&amp;post=$PostNum#post$PostID]forum post[/url]";
             $Subject = 'Forum Post Report: Post ID #'.display_str($PostID);
         }
         break;
@@ -116,7 +116,7 @@ switch ($Type) {
         if (!$Body) {
             error('No comment with the reported ID found');
         } else {
-            $TypeLink = '[url='.SITE_URL."/comments.php?action=jump&amp;postid=$ThingID]this comment[/url]";
+            $TypeLink = "[url=comments.php?action=jump&amp;postid=$ThingID]this comment[/url]";
             $Subject = 'Comment Report: ID #' . display_str($ThingID) . " " . shortenString($Body, 200);
         }
         break;

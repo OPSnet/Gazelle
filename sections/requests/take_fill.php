@@ -183,15 +183,15 @@ foreach ($UserIDs as $User) {
     [$VoterID] = $User;
     $userMan->sendPM($VoterID, 0,
         "The request \"$FullName\" has been filled",
-        'One of your requests&#8202;&mdash;&#8202;[url='.SITE_URL
-            . "/requests.php?action=view&amp;id=$RequestID]$FullName"
-            . '[/url]&#8202;&mdash;&#8202;has been filled. You can view it here: [url]'
-            . SITE_URL."/torrents.php?torrentid=$TorrentID".'[/url]'
+        "One of your requests&#8202;&mdash;&#8202;[url=requests.php?action=view&amp;id={$RequestID}]$FullName"
+            . "[/url]&#8202;&mdash;&#8202;has been filled. You can view it here: [torrent]{$TorrentID}[/torrent]"
     );
 }
 
 $RequestVotes = Requests::get_votes_array($RequestID);
-(new Gazelle\Log)->general("Request $RequestID ($FullName) was filled by user $FillerID ($FillerUsername) with the torrent $TorrentID for a ".Format::get_size($RequestVotes['TotalBounty']).' bounty.');
+(new Gazelle\Log)->general("Request $RequestID ($FullName) was filled by user $FillerID ($FillerUsername) with the torrent $TorrentID for a "
+    . Format::get_size($RequestVotes['TotalBounty']) . ' bounty.'
+);
 
 // Give bounty
 $DB->prepared_query('

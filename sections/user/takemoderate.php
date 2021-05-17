@@ -321,8 +321,7 @@ if (check_perms('users_warn')) {
             $message = [
                 'summary' => "warned for $warnLength $duration",
                 'subject' => 'You have received a warning',
-                'body'    => "You have been [url=" . SITE_URL
-                    . "/wiki.php?action=article&amp;name=warnings]warned[/url] for $warnLength $duration",
+                'body'    => "You have been [url=wiki.php?action=article&amp;name=warnings]warned[/url] for $warnLength $duration",
             ];
         } else {
             $weeksChange = ($extendWarning != '---') ? $extendWarning : -$reduceWarning;
@@ -516,8 +515,7 @@ if ($privChange && $userReason) {
         $Twig->render('user/pm-privilege.twig', [
             'privs'  => $privChange,
             'reason' => $userReason,
-            'chan'   => BOT_DISABLED_CHAN,
-            'url'    => SITE_URL . '/wiki.php?action=article&amp;id=5',
+            'url'    => 'wiki.php?action=article&amp;id=5',
         ])
     );
     $editSummary[] = 'PM sent';

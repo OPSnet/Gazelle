@@ -150,7 +150,7 @@ END_MSG
                     , (new User($this->userId()))->username()
                     , (new User($posterId))->username()
                     , $this->roleTitle()
-                    , SITE_URL . '/apply.php?action=view&id=' . $this->id()
+                    , 'apply.php?action=view&id=' . $this->id()
                     , SITE_NAME
                 )
             );

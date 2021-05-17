@@ -64,7 +64,7 @@ $DB->prepared_query('
 if ($UserID != $LoggedUser['ID']) {
     (new Gazelle\Manager\User)->sendPM($UserID, 0,
         'A request you created has been deleted',
-        "The request \"$FullName\" was deleted by [url=".SITE_URL.'/user.php?id='.$LoggedUser['ID'].']'
+        "The request \"$FullName\" was deleted by [url=user.php?id={$LoggedUser['ID']}]"
             . $LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]'
     );
 }

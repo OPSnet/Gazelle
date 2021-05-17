@@ -27,7 +27,7 @@ if ($LoggedUser['ID'] != $forumPost['user-id']) {
         (new Gazelle\Manager\User)->sendPM($forumPost['user-id'], 0,
             "Your post #$postId has been edited",
             sprintf('One of your posts has been edited by [url=%s]%s[/url]: [url]%s[/url]',
-                SITE_URL . "/user.php?id={$LoggedUser['ID']}",
+                "user.php?id={$LoggedUser['ID']}",
                 $LoggedUser['Username'],
                 SITE_URL . "/forums.php?action=viewthread&postid=$postId#post$postId"
             )
