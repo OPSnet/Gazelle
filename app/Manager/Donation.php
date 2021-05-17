@@ -176,8 +176,8 @@ class Donation extends \Gazelle\Base {
             $userMan->sendPM($UserID, 0,
                 "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
                 $this->twig->render('donation/special-rank-1.twig', [
-                   'forum_url'   => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                   'staffpm_url' => SITE_URL . '/staffpm.php',
+                   'forum_url'   => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'staffpm_url' => 'staffpm.php',
                 ])
             );
             $SpecialRank = 1;
@@ -187,7 +187,7 @@ class Donation extends \Gazelle\Base {
             $userMan->sendPM($UserID, 0,
                 "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
                 $this->twig->render('donation/special-rank-2.twig', [
-                   'forum_url' => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'forum_url' => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                 ])
             );
             $SpecialRank = 2;
@@ -197,8 +197,8 @@ class Donation extends \Gazelle\Base {
             $userMan->sendPM($UserID, 0,
                 "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
                 $this->twig->render('donation/special-rank-3.twig', [
-                   'forum_url'      => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                   'forum_gold_url' => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
+                   'forum_url'      => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'forum_gold_url' => 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
                 ])
             );
             $SpecialRank = 3;
@@ -272,7 +272,7 @@ class Donation extends \Gazelle\Base {
             'points' => $ReceivedRank,
             's'      => plural($ReceivedRank),
             'rank'   => $CurrentRank,
-            'staffpm_url' => SITE_URL . '/staffpm.php',
+            'staffpm_url' => 'staffpm.php',
         ]);
     }
 

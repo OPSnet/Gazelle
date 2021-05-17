@@ -47,7 +47,7 @@ $reportId = (int)$_POST['reportid'];
 if (!$reportId) {
     error("error report id");
 }
-$reportUrl = SITE_URL . "/reportsv2.php?view=report&amp;id=$reportId";
+$reportUrl = "reportsv2.php?view=report&amp;id=$reportId";
 
 $torrentId = (int)$_POST['torrentid'];
 if (!$torrentId) {
@@ -217,7 +217,7 @@ if ($weeksWarned > 0) {
 //PM
 if ($_POST['uploader_pm'] || $weeksWarned > 0 || isset($_POST['delete']) || $SendPM) {
     $message = [
-        '[url=' . SITE_URL . "/torrents.php?torrentid=$torrentId]Your above torrent[/url] was reported "
+        "[url=torrents.php?torrentid=$torrentId]Your above torrent[/url] was reported "
         . (isset($_POST['delete']) ? 'and has been deleted.' : 'but not deleted.')
     ];
 
@@ -227,7 +227,7 @@ if ($_POST['uploader_pm'] || $weeksWarned > 0 || isset($_POST['delete']) || $Sen
     }
 
     if ($weeksWarned > 0) {
-        $message[] = "This has resulted in a [url=" . SITE_URL . "/wiki.php?action=article&amp;name=warnings]$weeksWarned week warning.[/url]";
+        $message[] = "This has resulted in a [url=wiki.php?action=article&amp;name=warnings]$weeksWarned week warning.[/url]";
     }
 
     if ($revokeUpload) {

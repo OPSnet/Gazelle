@@ -139,7 +139,7 @@ View::show_header('External Tracker Referrals');
         if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) { ?>
             <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. We have sent you an email to the address you specified. Make sure to check your spam folder! Welcome to <?=SITE_NAME?>!</h3>
 <?php        } else { ?>
-            <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. <a href="<?=SITE_URL?>/register.php?invite=<?=$Invite?>">Click here</a> to register. Welcome to <?=SITE_NAME?></h3>
+            <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. <a href=register.php?invite=<?=$Invite?>">Click here</a> to register. Welcome to <?=SITE_NAME?></h3>
 <?php        } ?>
 </div>
 <?php

@@ -62,7 +62,7 @@ foreach ($usersToNotify as $UserID => $info) {
 
     $Request = "Hi $Username,
 
-The user [url=".SITE_URL."/user.php?id={$LoggedUser['ID']}]{$LoggedUser['Username']}[/url] has requested a re-seed for the torrent [url=".SITE_URL."/torrents.php?id=$GroupID&torrentid=$TorrentID]{$Name}[/url], which you ".$action." on ".date('M d Y', $TimeStamp).". The torrent is now un-seeded, and we need your help to resurrect it!
+The user [url=user.php?id={$LoggedUser['ID']}]{$LoggedUser['Username']}[/url] has requested a re-seed for the torrent [url=torrents.php?id=$GroupID&torrentid=$TorrentID]{$Name}[/url], which you ".$action." on ".date('M d Y', $TimeStamp).". The torrent is now un-seeded, and we need your help to resurrect it!
 
 The exact process for re-seeding a torrent is slightly different for each client, but the concept is the same. The idea is to download the torrent file and open it in your client, and point your client to the location where the data files are, then initiate a hash check.
 

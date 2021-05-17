@@ -1011,18 +1011,10 @@ class Text {
                     }
 
                     if (!self::valid_url($Block['Attr'])) {
-                        if (!self::relative_url($Block['Attr'])) {
-                            $Str .= '[url=' . $Block['Attr'] . ']' . $Block['Val'] . '[/url]';
+                        if (self::relative_url($Block['Attr'])) {
+                            $Str .= '<a href="' . $Block['Attr'] . '">' . $Block['Val'] . '</a>';
                         } else {
-                            if (substr($Block['Val'], 0, 1) != '/') {
-                                $Block['Val'] = '/' . $Block['Val'];
-                            }
-                            $url = self::resolve_url(SITE_URL . $Block['Val']);
-                            if ($url) {
-                                $Str .= $url;
-                            } else {
-                                $Str .= '[url=' . $Block['Attr'] . ']' . $Block['Val'] . '[/url]';
-                            }
+                            $Str .= '[url=' . $Block['Attr'] . ']' . $Block['Val'] . '[/url]';
                         }
                     } else {
                         $LocalURL = self::local_url($Block['Attr']);
@@ -1411,7 +1403,7 @@ class Text {
             $name = 'restricted';
         }
         return $name
-            ? sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, $name)
+            ? sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $id, $name)
             : '[forum]' . $val . '[/forum]';
     }
 
@@ -1444,7 +1436,7 @@ class Text {
             self::$viewer = new Gazelle\User($LoggedUser['ID']);
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($forumId))) {
-            return sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, 'restricted');
+            return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $id, 'restricted');
         }
 
         if ($post) {

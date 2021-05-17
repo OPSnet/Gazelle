@@ -8,12 +8,9 @@ View::show_header('Client Rules');
 <?php
 echo $Twig->render('rules/toc.twig');
 echo $Twig->render('rules/client-whitelist.twig', [
-    'forum_thread' => CLIENT_WHITELIST_FORUM_ID,
-    'list'         => $whitelist->list(),
-    'site_url'     => SITE_URL,
+    'list' => $whitelist->list(),
 ]);
 ?>
 </div>
 <?php
-
 View::show_footer();

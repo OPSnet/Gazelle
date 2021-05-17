@@ -259,12 +259,12 @@ class Torrents {
 
         $MessageStart = 'A torrent ';
         if ($TrumpID > 0) {
-            $MessageEnd = ' has been trumped. You can find the new torrent [url='.SITE_URL.'/torrents.php?torrentid='.$TrumpID.']here[/url].';
+            $MessageEnd = ' has been trumped. You can find the new torrent [url=torrents.php?torrentid='.$TrumpID.']here[/url].';
         }
         else {
             $MessageEnd = ' has been deleted.';
         }
-        $MessageEnd .= "\n\n[url=".SITE_URL."/log.php?search=Torrent+{$TorrentID}]Log message[/url]: {$Log}.";
+        $MessageEnd .= "\n\n[url=log.php?search=Torrent+{$TorrentID}]Log message[/url]: {$Log}.";
 
         // Uploader
         $userMan = new \Gazelle\Manager\User;

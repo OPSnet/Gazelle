@@ -21,7 +21,7 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
         if (count($users) > 0) {
             $userMan = new \Gazelle\Manager\User;
             $subject = 'Leeching Disabled';
-            $message = 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been disabled. Please reread the rules and refer to this guide on how to improve your ratio ' . SITE_URL . '/wiki.php?action=article&amp;name=ratiotips';
+            $message = 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been disabled. Please reread the rules and refer to this guide on [url=wiki.php?action=article&amp;name=ratiotips]how to improve your ratio[/url]';
             $tracker = new \Gazelle\Tracker;
             foreach ($users as $torrentPass => $userID) {
                 $userMan->sendPM($userID, 0, $subject, $message);

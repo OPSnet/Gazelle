@@ -56,7 +56,7 @@ class Reaper extends \Gazelle\Base {
                 $deleteNotes[$userID] = ['Count' => 0, 'Msg' => ''];
             }
 
-            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=%s/torrents.php?id=%s]%s[/url]", SITE_URL, $group['ID'], $name);
+            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=torrents.php?id=%s]%s[/url]", $group['ID'], $name);
             $deleteNotes[$userID]['Count']++;
 
             ++$i;

@@ -69,7 +69,7 @@ class Request extends Base {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("%s Refund of %s bounty (%s b) on %s by %s\n\n",
                 sqltime(), \Format::get_size($bounty), $bounty,
-                SITE_URL . '/requests.php?action=view&id=' . $this->id, $staffName
+                'requests.php?action=view&id=' . $this->id, $staffName
             );
             $this->db->prepared_query("
                 UPDATE users_info ui
@@ -99,7 +99,7 @@ class Request extends Base {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("%s Removal of %s bounty (%s b) on %s by %s\n\n",
                 sqltime(), \Format::get_size($bounty), $bounty,
-                SITE_URL . '/requests.php?action=view&id=' . $this->id, $staffName
+                'requests.php?action=view&id=' . $this->id, $staffName
             );
             $this->db->prepared_query("
                 UPDATE users_info ui SET
@@ -126,7 +126,7 @@ class Request extends Base {
         if (!$fillerId) {
             return;
         }
-        $requestUrl = SITE_URL . '/requests.php?action=view&id=' . $this->id;
+        $requestUrl = 'requests.php?action=view&id=' . $this->id;
         $message = sprintf("%s Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
             sqltime(), \Format::get_size($bounty), $bounty, $requestUrl, $staffName
         );
