@@ -224,8 +224,8 @@ class Torrent extends \Gazelle\Base {
         ");
         $stats = $this->db->to_array(0, MYSQLI_NUM, false);
         $this->peerStats = [
-            'leecher_count' => $stats['Leeching'][1] ?: 0,
-            'seeder_count'  => $stats['Seeding'][1] ?: 0,
+            'leecher_count' => $stats['Leeching'] ? $stats['Leeching'][1] : 0,
+            'seeder_count'  => $stats['Seeding'] ? $stats['Seeding'][1] : 0,
         ];
         $this->cache->cache_value(self::PEER_KEY, $this->peerStats, 86400 * 2);
         $this->cache->delete_value(self::CALC_STATS_LOCK);
