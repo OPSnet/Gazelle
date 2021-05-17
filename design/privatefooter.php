@@ -26,7 +26,7 @@ if (!empty($Options['disclaimer'])) {
 ?>
     <br />
     <div id="disclaimer_container" class="thin" style="width: 95%; text-align: justify; margin: 0px auto 20px auto;">
-        None of the files shown here are actually hosted on this server. The links are provided solely by this site's users. These BitTorrent files are meant for the distribution of backup files. By downloading the BitTorrent file, you are claiming that you own the original file. The administrator of this site (<?=SITE_URL?>) holds NO RESPONSIBILITY if these files are misused in any way and cannot be held responsible for what its users post, or any other actions of it.
+        None of the files shown here are hosted on this server. The links are provided solely by this site's users. These BitTorrent files are meant for the distribution of backup files. By downloading the BitTorrent file, you are claiming that you own the original file. The administrator of (<?=SITE_URL?>) holds NO RESPONSIBILITY if these files are misused in any way and cannot be held responsible for what its users post, or any other actions of it.
     </div>
 <?php
 }

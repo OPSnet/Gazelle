@@ -68,7 +68,7 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
                 "You have been demoted to $classString",
                 "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about "
                     . SITE_NAME
-                    . "'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                    . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
             );
         }
 

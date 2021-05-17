@@ -6,7 +6,5 @@ if (!empty($_POST['AdminComment'])) {
 } elseif (!empty($_POST['WikiText'])) {
     echo Text::full_format($_REQUEST['WikiText']);
 } else {
-    $Content = $_REQUEST['body']; // Don't use URL decode.
-    echo Text::full_format($Content);
+    echo Text::full_format($_REQUEST['body']);
 }
-

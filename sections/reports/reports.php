@@ -151,7 +151,7 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                                     if (!$thread) {
                                         echo 'No forum thread with the reported ID found';
                                     } else { ?>
-<a href="forums.php?action=viewforum&forumid=<?= $forumId ?>"><?= $forumName
+<a href="forums.php?action=viewforum&amp;forumid=<?= $forumId ?>"><?= $forumName
     ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?= $ThingID ?>"><?=
     display_str($thread) ?></a> created by <a href="user.php?id=<?= $userId ?>"><?= $username ?></a>
 <?php
@@ -184,7 +184,7 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                                     if (!$PostID) {
                                         echo 'No forum post with the reported ID found';
                                     } else { ?>
-<a href="forums.php?action=viewforum&forumid=<?= $forumId ?>"><?= $forumName
+<a href="forums.php?action=viewforum&amp;forumid=<?= $forumId ?>"><?= $forumName
     ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?= $threadId ?>"><?=
     display_str($threadName) ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?=
     $threadId ?>&amp;post=<?= $PostNum ?>#post<?= $PostID ?>">Post #<?= $PostID ?></a> by

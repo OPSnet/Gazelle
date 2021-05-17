@@ -441,7 +441,6 @@ class Bonus extends Base {
                 'FROM'     => (new User($fromID))->username(),
                 'AMOUNT'   => $amount,
                 'PLURAL'   => plural($amount),
-                'SITE_URL' => SITE_URL,
                 'WIKI_ID'  => 57,
             ])
         );
