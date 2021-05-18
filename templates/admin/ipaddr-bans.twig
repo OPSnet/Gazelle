@@ -1,0 +1,83 @@
+<div class="header">
+    <h2>IP Address Bans</h2>
+</div>
+<div class="linkbox">
+    <a href="tools.php?action=login_watch">Login Watch</a>
+</div>
+<div class="pad">
+<div class="thin box">
+    <form class="search_form" name="bans" action="" method="get">
+        <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
+            <tr>
+                <td class="label"><label for="ip">IP address:</label></td>
+                <td>
+                    <input type="hidden" name="action" value="ip_ban" />
+                    <input type="search" id="ip" name="ip" size="20" value="{{ ip }}" />
+                </td>
+                <td class="label"><label for="notes">Notes:</label></td>
+                <td>
+                    <input type="hidden" name="action" value="ip_ban" />
+                    <input type="search" id="notes" name="notes" size="60" value="{{ notes }}" />
+                </td>
+                <td>
+                    <input type="submit" value="Search" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div class="pad">
+<h3>Manage</h3>
+{{ paginator.linkbox|raw }}
+<table width="100%">
+    <tr class="colhead">
+        <td title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range.">From</td>
+        <td>To</td>
+        <td>Reason</td>
+        <td colspan="3">&nbsp;</td>
+    </tr>
+    <tr class="rowa">
+        <form class="create_form" name="ban" action="" method="post">
+            <input type="hidden" name="action" value="ip_ban" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <td><input type="text" size="15" name="start" /></td>
+            <td><input type="text" size="15" name="end" /></td>
+            <td><input type="text" size="72" name="notes" /></td>
+            <td colspan="3">
+                <input type="submit" name="submit" value="Create" />
+            </td>
+        </form>
+    </tr>
+    <tr class="colhead">
+        <td title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range.">
+            {{ header.emit('fromip')|raw }}
+        </td>
+        <td>{{ header.emit('toip')|raw }}</td>
+        <td>{{ header.emit('reason')|raw }}</td>
+        <td>{{ header.emit('username')|raw }}</td>
+        <td>{{ header.emit('created')|raw }}</td>
+        <td>&nbsp;</td>
+    </tr>
+{% for ban in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <form class="manage_form" name="ban" action="" method="post">
+            <input type="hidden" name="id" value="{{ ban.id }}" />
+            <input type="hidden" name="action" value="ip_ban" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <td><input type="text" size="15" name="start" value="{{ ban.from_ip }}" /></td>
+            <td><input type="text" size="15" name="end" value="{{ ban.to_ip }}" /></td>
+            <td><input type="text" size="72" name="notes" value="{{ ban.reason }}" /></td>
+            <td>{{ ban.user_id|user_url }}</td>
+            <td>{{ ban.created|time_diff }}</td>
+            <td>
+                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Delete" />
+            </td>
+        </form>
+    </tr>
+{% endfor %}
+</table>
+</div>
+{{ paginator.linkbox|raw }}
+</div>
