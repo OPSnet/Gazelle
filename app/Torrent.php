@@ -309,6 +309,17 @@ class Torrent extends BaseObject {
         return 0;
     }
 
+    public function clearLog(int $logId): int {
+        $this->db->prepared_query("
+            DELETE FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
+            ", $this->id, $logId
+        );
+        if ($this->db->affected_rows() > 0) {
+            return $this->modifyLogscore();
+        }
+        return 0;
+    }
+
     public function rescoreLog(int $logId, \Gazelle\Logfile $logfile, string $version): int {
         $this->db->prepared_query("
             UPDATE torrents_logs SET
