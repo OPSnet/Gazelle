@@ -223,7 +223,7 @@ class Collage extends BaseObject {
         return $this;
     }
 
-    public function setViewer(int $viewerId) {
+    public function setViewerId(int $viewerId) {
         $this->viewerId = $viewerId;
         $this->lockedForUser = false;
         if (!check_perms('site_collages_delete')) {
