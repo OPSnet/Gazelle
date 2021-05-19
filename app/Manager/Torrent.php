@@ -194,6 +194,65 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
+     * Regenerate a torrent's file list from its meta data,
+     * update the database record and clear relevant cache keys
+     *
+     * @param int torrentId
+     * @return int number of files regenned
+     */
+    public function regenerateFilelist(int $torrentId): int {
+        $qid = $this->db->get_query_id();
+        $groupId = $this->db->scalar("
+            SELECT t.GroupID FROM torrents AS t WHERE t.ID = ?
+            ", $torrentId
+        );
+        $n = 0;
+        if ($groupId) {
+            $Tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
+            $Tor->decodeString($str = (new \Gazelle\File\Torrent())->get($torrentId));
+            $TorData = $Tor->getData();
+            ['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
+            $TmpFileList = [];
+            foreach ($FileList as $file) {
+                $TmpFileList[] = $this->metaFilename($file['path'], $file['size']);
+                ++$n;
+            }
+            $this->db->prepared_query("
+                UPDATE torrents SET
+                    Size = ?,
+                    FilePath = ?,
+                    FileList = ?
+                WHERE ID = ?
+                ", $TotalSize,
+                    (isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : ''),
+                    implode("\n", $TmpFileList),
+                $torrentId
+            );
+            $this->cache->delete_value("torrents_details_$groupId");
+        }
+        $this->db->set_query_id($qid);
+        return $n;
+    }
+
+	public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent) {
+		$torrentSource = $torrent->getSource();
+		if ($torrentSource === SOURCE) {
+			return false;
+		}
+
+		$creationDate = $torrent->getCreationDate();
+		if (!is_null($creationDate)) {
+			if (is_null($torrentSource) && $creationDate <= GRANDFATHER_OLD_SOURCE) {
+				return false;
+			}
+			elseif (!is_null($torrentSource) && $torrentSource === GRANDFATHER_SOURCE && $creationDate <= GRANDFATHER_OLD_SOURCE) {
+				return false;
+			}
+		}
+		return $torrent->setSource(SOURCE);
+	}
+
+    /**
      * Aggregate the audio files per audio type
      *
      * @param string filelist

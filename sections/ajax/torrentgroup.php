@@ -56,6 +56,7 @@ $JsonTorrentDetails = [
 ];
 
 $userMan = new Gazelle\Manager\User;
+$torMan = new Gazelle\Manager\Torrent;
 $JsonTorrentList = [];
 foreach ($TorrentList as $Torrent) {
     if ($Torrent['is_deleted']) {

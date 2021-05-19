@@ -30,13 +30,13 @@ $labelMan->showMedia(true)
     ->load($torrent);
 
 $name = $group['Name'] . " [" . $labelMan->release() . '] (' . $labelMan->edition() . ')';
-$artistName = $tgroup()->artistName();
+$artistName = $tgroup->artistName();
 if ($artistName) {
     $name = "$artistName - $name";
 }
 
 $reason = trim($_POST['reason']) . ' ' . trim($_POST['extra']);
-[$success, $message] = $torrent->remove($reason);
+[$success, $message] = $t->remove($LoggedUser['ID'], $reason);
 if (!$success) {
     error($message);
 }
