@@ -167,7 +167,7 @@ class Bookmark extends Base {
                 // RSS feed stuff
                 $Feed = new \Feed;
 
-                $tgroup = (new Manager\Torrent)->findById($id);
+                $tgroup = (new Manager\TGroup)->findById($id);
                 $group = $tgroup->info();
                 $list  = $tgroup->torrentList();
                 $labelMan = new Manager\TorrentLabel;

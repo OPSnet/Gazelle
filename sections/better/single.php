@@ -1,7 +1,6 @@
 <?php
 $better = new Gazelle\Manager\Better(new Gazelle\ReleaseType);
 $results = $better->twigGroups($better->singleSeeded());
-
 View::show_header('Single seeder FLACs');
 
 echo $Twig->render('better/single.twig', [
