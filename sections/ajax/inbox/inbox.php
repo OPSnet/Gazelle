@@ -9,5 +9,5 @@ if (!empty($_GET['search'])) {
 $json->setVersion(1)
     ->setUnreadFirst(($_GET['sort'] ?? 'unread') === 'unread')
     ->setFolder($_GET['type'] ?? 'inbox')
-    ->setViewer($LoggedUser['ID'])
+    ->setViewerId($LoggedUser['ID'])
     ->emit();
