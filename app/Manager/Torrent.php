@@ -173,7 +173,7 @@ class Torrent extends \Gazelle\Base {
      * @return with the keys 'ext', 'size' and 'name'
      */
     public function splitMetaFilename(string $metaname): array {
-        preg_match('/^(\.\S+) s(\d+)s (.+) &divide;$/', $metaname, $match);
+        preg_match('/^(\.\S+) s(\d+)s (.+) ' . self::FILELIST_DELIM_UTF8 . '$/', $metaname, $match);
         return [
             'ext'  => $match[1] ?? null,
             'size' => (int)$match[2] ?? 0,
