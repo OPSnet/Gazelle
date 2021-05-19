@@ -999,19 +999,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         return $Reports;
     }
 
-    /**
-     * Update the logscore of a torrent. The score is the minimum score of any
-     * log files that are part of the torrent.
-     */
-    public static function clear_log($TorrentID, $LogID) {
-        global $DB;
-        $DB->prepared_query("
-            DELETE FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
-            ", $TorrentID, $LogID
-        );
-        return $DB->affected_rows();
-    }
-
     public static function bbcodeUrl($val, $attr) {
         $cacheKey = 'bbcode_torrent_' . $val;
         if ($attr) {
