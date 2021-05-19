@@ -16,7 +16,7 @@ class Inbox extends \Gazelle\Json {
         parent::__construct();
     }
 
-    public function setViewer(int $userId) {
+    public function setViewerId(int $userId) {
         $this->userId = $userId;
         return $this;
     }

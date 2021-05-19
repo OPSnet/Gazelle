@@ -21,7 +21,7 @@ if (isset($_GET['id'])) {
 }
 
 $json = new Gazelle\Json\Artist($artist);
-$json->setViewer(new Gazelle\User($LoggedUser['ID']))
+$json->setViewerId(new Gazelle\User($LoggedUser['ID']))
     ->setReleasesOnly(!empty($_GET['artistreleases']))
     ->setVersion(2)
     ->emit();
