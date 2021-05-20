@@ -37,6 +37,20 @@ class TGroup extends BaseObject {
         return $this;
     }
 
+    public function revisionList(): array {
+         $this->db->prepared_query("
+            SELECT RevisionID AS revision,
+                Summary       AS summary,
+                Time          AS time,
+                UserID        AS user_id
+            FROM wiki_torrents
+            WHERE PageID = ?
+            ORDER BY RevisionID DESC
+            ", $this->id
+        );
+        return $this->db->to_array('revision', MYSQLI_ASSOC, false);
+    }
+
     /**
      * Get the metadata of the torrent
      *
