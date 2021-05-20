@@ -45,9 +45,9 @@ foreach ($forumToc as &$thread) {
         $thread['is_read'] = false;
     }
 
-    $thread['icon_class'] = (($thread['IsLocked'] && !$thread['IsSticky']) || $catchup ? 'read' : 'unread')
-        . ($thread['IsLocked'] ? '_locked' : '')
-        . ($thread['IsSticky'] ? '_sticky' : '');
+    $thread['icon_class'] = (($thread['isLocked'] && !$thread['isSticky']) || $catchup ? 'read' : 'unread')
+        . ($thread['isLocked'] ? '_locked' : '')
+        . ($thread['isSticky'] ? '_sticky' : '');
 
     $links = [];
     $threadPages = ceil($thread['NumPosts'] / $perPage);
