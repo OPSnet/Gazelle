@@ -640,6 +640,7 @@ class Forum extends Base {
                 AND UserID = ?
             ", $vote, $threadId, $userId
         );
+        $change = $this->db->affected_rows();
         if ($change) {
             $this->cache->delete_value("polls_$threadId");
         }
@@ -1043,32 +1044,6 @@ class Forum extends Base {
     }
 
     /**
-     * Get extended information about a thread
-     * TODO: merge with threadInfo()
-     *
-     * @param int threadId The thread
-     * @return array [$forumId, $forumName, $minClassWrite, $numPosts, $authorId, $title, $isLocked, $isSticky, $ranking]
-     */
-    public function threadInfoExtended(int $threadId): ?array {
-        return $this->db->row("
-            SELECT
-                t.ForumID,
-                f.Name,
-                f.MinClassWrite,
-                t.NumPosts AS Posts,
-                t.AuthorID,
-                t.Title,
-                t.IsLocked,
-                t.IsSticky,
-                t.Ranking
-            FROM forums_topics AS t
-            INNER JOIN forums AS f ON (f.ID = t.ForumID)
-            WHERE t.ID = ?
-            ", $threadId
-        );
-    }
-
-    /**
      * The forum table of contents (the main /forums.php view)
      *
      * @return array
@@ -1242,7 +1217,7 @@ class Forum extends Base {
     }
 
     public function threadPage(int $threadId, int $perPage, int $page): array {
-        return array_slice($this->threadCatalog($threadId, $perPage, $page, THREAD_CATALOGUE),
+        return array_slice($this->threadCatalog($threadId, $perPage, $page),
             (($page - 1) * $perPage) % THREAD_CATALOGUE, $perPage, true
         );
     }
