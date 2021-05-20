@@ -78,8 +78,8 @@ if (isset($_POST['transition'])) {
                 error(403);
             }
             $newForum  = $forumMan->findById($transition['destination']);
-            $newSticky = $threadInfo['isSticky'];
-            $locked    = $threadInfo['isLocked'];
+            $newSticky = $threadInfo['IsSticky'];
+            $locked    = $threadInfo['IsLocked'];
             $newRank   = $threadInfo['Ranking'];
             $newTitle  = $threadInfo['Title'];
             $action    = 'transitioning';
