@@ -34,7 +34,9 @@ if (!empty($_GET['setdefault'])) {
         SELECT SiteOptions FROM users_info WHERE UserID = ?
         ", $LoggedUser['ID']
     ));
-    $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
+    if (!isset($SiteOptions['HttpsTracker'])) {
+        $SiteOptions['HttpsTracker'] = true;
+    }
 
     $SiteOptions['DefaultSearch'] = preg_replace($UnsetRegexp, '', $_SERVER['QUERY_STRING']);
     $DB->prepared_query("

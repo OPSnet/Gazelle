@@ -51,7 +51,7 @@ class Users {
                 ", $UserID
             );
 
-            $Classes = (new \Gazelle\Manager\User)->classList();
+            $Classes = (new Gazelle\Manager\User)->classList();
             if (!$DB->has_results()) { // Deleted user, maybe?
                 $UserInfo = [
                         'ID' => $UserID,
@@ -185,10 +185,10 @@ class Users {
             }
             $HeavyInfo['NavItems'] = $NavItems;
 
-            $DB->query("
-                SELECT PermissionID
-                FROM users_levels
-                WHERE UserID = $UserID");
+            $DB->prepared_query("
+                SELECT PermissionID FROM users_levels WHERE UserID = ?
+                ", $UserID
+            );
             $PermIDs = $DB->collect('PermissionID');
             foreach ($PermIDs AS $PermID) {
                 $Perms = Permissions::get_permissions($PermID);
@@ -218,10 +218,11 @@ class Users {
             }
 
             $HeavyInfo['SiteOptions'] = unserialize_array($HeavyInfo['SiteOptions']);
-            $HeavyInfo['SiteOptions'] = array_merge(static::default_site_options(), $HeavyInfo['SiteOptions']);
             $HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
-
             unset($HeavyInfo['SiteOptions']);
+            if (!isset($HeavyInfo['HttpsTracker'])) {
+                $HeavyInfo['HttpsTracker'] = true;
+            }
 
             $DB->set_query_id($QueryID);
 
@@ -264,16 +265,6 @@ class Users {
     }
 
     /**
-     * Default settings to use for SiteOptions
-     * @return array
-     */
-    public static function default_site_options() {
-        return [
-            'HttpsTracker' => true
-        ];
-    }
-
-    /**
      * Updates the site options in the database
      *
      * @param int $UserID the UserID to set the options for
@@ -298,7 +289,9 @@ class Users {
             WHERE UserID = $UserID");
         list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
         $SiteOptions = unserialize_array($SiteOptions);
-        $SiteOptions = array_merge(static::default_site_options(), $SiteOptions);
+        if (!isset($SiteOptions['HttpsTracker'])) {
+            $SiteOptions['HttpsTracker'] = true;
+        }
 
         // Get HeavyInfo
         $HeavyInfo = Users::user_heavy_info($UserID);
@@ -350,7 +343,7 @@ class Users {
             return "Unknown [$UserID]";
         }
 
-        $Classes = (new \Gazelle\Manager\User)->classList();
+        $Classes = $userMan->classList();
         if ($user->primaryClass() < $Classes[MOD]['Level']) {
             $OverrideParanoia = check_perms('users_override_paranoia', $user->primaryClass());
         } else {
