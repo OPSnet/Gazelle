@@ -42,8 +42,11 @@ $User = new Gazelle\User($UserID);
     ", $UserID
 );
 
-$options = array_merge(Users::default_site_options(), unserialize($SiteOptions) ?: []);
-$Paranoia = unserialize($Paranoia) ?? [];
+$options = unserialize($SiteOptions) ?: [];
+if (!isset($options['HttpsTracker'])) {
+    $options['HttpsTracker'] = true;
+}
+$Paranoia = unserialize($Paranoia) ?: [];
 
 $NavItems = Users::get_nav_items();
 $UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
