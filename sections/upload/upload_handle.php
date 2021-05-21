@@ -428,6 +428,7 @@ if ($isMusicUpload) {
         $Name = $ExtraTorrent['Name'];
         $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
         $ThisInsert =& $ExtraTorrentsInsert[$Name];
+        $bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
         $bencoder->decodeFile($Name);
         $ExtraTorData = $bencoder->getData();
         if (isset($ExtraTorData['encrypted_files'])) {
