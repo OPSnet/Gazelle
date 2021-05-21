@@ -173,7 +173,10 @@ class User extends BaseObject {
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = unserialize($this->info['Paranoia']) ?: [];
-        $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
+        $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: [];
+        if (!isset($this->info['SiteOptions']['HttpsTracker'])) {
+            $this->info['SiteOptions'] = true;
+        }
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
 
         // load their permissions
