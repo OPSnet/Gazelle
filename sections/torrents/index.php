@@ -277,8 +277,8 @@ if (!empty($_REQUEST['action'])) {
     if (!empty($_GET['id'])) {
         require_once('details.php');
     } elseif (isset($_GET['torrentid']) && intval($_GET['torrentid'])) {
-        $torrent_id = (int)$_GET['torrentid'];
-        $GroupID = $DB->scalar("
+        $torrentId = (int)$_GET['torrentid'];
+        $this->db->prepared("
             SELECT GroupID
             FROM torrents
             WHERE ID = ?
@@ -286,7 +286,7 @@ if (!empty($_REQUEST['action'])) {
             SELECT GroupID
             FROM deleted_torrents
             WHERE ID = ?
-            ", $torrent_id, $torrent_id
+            ", $torrentId, $torrentId
         );
         if ($GroupID) {
             header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
@@ -296,14 +296,15 @@ if (!empty($_REQUEST['action'])) {
     } elseif (!empty($_GET['type'])) {
         require_once('user.php');
     } elseif (!empty($_GET['groupname'])) {
-        $GroupID = $DB->scalar("
-            SELECT ID FROM torrents_group WHERE Name LIKE ?
+        $DB->prepared_query("
+            SELECT ID FROM torrents_group WHERE Name = ? LIMIT 2
             ", trim($_GET['groupname'])
         );
-        if ($GroupID) {
-            header("Location: torrents.php?id=$GroupID");
+        $list = $DB->collect(0);
+        if (count($list) == 1) {
+            header("Location: torrents.php?id=$list[0]");
         } else {
-            require_once('browse.php');
+            header("Location: torrents.php?action=advanced&groupname=" . trim($_GET['groupname']));
         }
     } else {
         require_once('browse.php');

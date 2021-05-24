@@ -10,7 +10,7 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     }
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
+$Viewer = new Gazelle\User($LoggedUser['ID']);
 
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
@@ -84,15 +84,14 @@ if (isset($_GET['searchsubmit'])) {
     $GroupResults = !isset($LoggedUser['DisableGrouping2']) || $LoggedUser['DisableGrouping2'] == 0;
 }
 
-$Page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
-$Search = new TorrentSearch($GroupResults, $header->getSortKey(), $header->getOrderDir(), $Page, TORRENTS_PER_PAGE);
+$paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$Search = new TorrentSearch($GroupResults, $header->getSortKey(), $header->getOrderDir(), $paginator->page(), TORRENTS_PER_PAGE);
 $Results = $Search->query($_GET);
-$Groups = $Search->get_groups();
 $RealNumResults = $NumResults = $Search->record_count();
-
 if (!check_perms('site_search_many')) {
     $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
 }
+$paginator->setTotal($NumResults);
 
 $HideFilter = isset($LoggedUser['ShowTorFilter']) && $LoggedUser['ShowTorFilter'] == 0;
 // This is kinda ugly, but the enormous if paragraph was really hard to read
@@ -281,7 +280,7 @@ View::show_header('Browse Torrents', 'browse');
                 <td class="label"><span title="Use !tag to exclude tag" class="tooltip">Tags (comma-separated):</span></td>
                 <td colspan="3" class="ft_taglist">
                     <input type="search" size="40" id="tags" name="taglist" class="inputtext smaller" value="<?= display_str($Search->get_terms('taglist')) ?>"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
                     <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked'); ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                     <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked'); ?> /><label for="tags_type1"> All</label>
                 </td>
@@ -395,12 +394,13 @@ if ($x % 7 != 0) { // Padding
     </div>
 </div>
 </form>
+<?php if ($NumResults == 0) { ?>
+<div class="box pad" align="center">
+    <h2>Your search did not match anything.</h2>
+    <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
 <?php
-if ($NumResults == 0) {
     $DB->prepared_query("
-        SELECT
-            tags.Name,
-            ((COUNT(tags.Name) - 2) * (SUM(tt.PositiveVotes) - SUM(tt.NegativeVotes))) / (tags.Uses * 0.8) AS Score
+        SELECT tags.Name
         FROM xbt_snatched AS s
         INNER JOIN torrents AS t ON (t.ID = s.fid)
         INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
@@ -410,49 +410,30 @@ if ($NumResults == 0) {
             AND tags.Uses > 10
             AND s.uid = ?
         GROUP BY tt.TagID
-        ORDER BY Score DESC
+        ORDER BY ((count(tags.Name) - 2) * (sum(tt.PositiveVotes) - sum(tt.NegativeVotes))) / (tags.Uses * 0.8) DESC
         LIMIT 8
         ", $LoggedUser['ID']
     );
-    $TagText = [];
-    while ([$Tag] = $DB->next_record()) {
-        $TagText[] = "<a href='torrents.php?taglist={$Tag}'>{$Tag}</a>";
+    $list = $DB->collect(0);
+    $link = [];
+    foreach ($list as $tag) {
+        $link[] = "<a href='torrents.php?taglist={$tag}'>{$tag}</a>";
     }
-    $TagText = implode(", ", $TagText);
-    print <<<HTML
-<div class="box pad" align="center">
-    <h2>Your search did not match anything.</h2>
-    <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
-    <p>You might like (beta): {$TagText}</p>
-</div>
-</div>
-HTML;
-    View::show_footer();
-    die();
-}
-
-if ($NumResults < ($Page - 1) * TORRENTS_PER_PAGE + 1) {
-    $LastPage = ceil($NumResults / TORRENTS_PER_PAGE);
-    $Pages = Format::get_pages(0, $NumResults, TORRENTS_PER_PAGE);
+    if ($link) {
 ?>
-<div class="box pad" align="center">
-    <h2>The requested page contains no matches.</h2>
-    <p>You are requesting page <?=$Page?>, but the search returned only <?=number_format($LastPage) ?> pages.</p>
+    <p>You might like: <?= implode(" &mdash; ", $link) ?></p>
+<?php } ?>
 </div>
-<div class="linkbox">Go to page <?=$Pages?></div>
 </div>
 <?php
-View::show_footer();
-die();
+    View::show_footer();
+    exit;
 }
-
-// List of pages
-$Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
 $bookmark = new \Gazelle\Bookmark;
 ?>
 
-<div class="linkbox"><?=$Pages?></div>
+<?= $paginator->linkbox() ?>
 
 <table class="torrent_table cats <?=$GroupResults ? 'grouping' : 'no_grouping'?> m_table" id="torrent_table">
     <tr class="colhead">
@@ -471,21 +452,25 @@ $bookmark = new \Gazelle\Bookmark;
 <?php
 
 // Start printing torrent list
-foreach ($Results as $Key => $GroupID) {
-    $GroupInfo = $Groups[$GroupID];
-    if (empty($GroupInfo['Torrents'])) {
+$tgroupMan = new Gazelle\Manager\TGroup;
+foreach ($Results as $GroupID) {
+    $tgroup = $tgroupMan->findById($GroupID);
+    if (is_null($tgroup)) {
         continue;
     }
+    $Torrents = $tgroup->setViewer($Viewer)->torrentList();
+    if (empty($Torrents)) {
+        continue;
+    }
+    $GroupInfo = $tgroup->info();
 
     $CategoryID = $GroupInfo['CategoryID'];
     $GroupYear = $GroupInfo['Year'];
-    $ExtendedArtists = $GroupInfo['ExtendedArtists'];
     $GroupCatalogueNumber = $GroupInfo['CatalogueNumber'];
     $GroupName = $GroupInfo['Name'];
     $GroupRecordLabel = $GroupInfo['RecordLabel'];
     $ReleaseType = $GroupInfo['ReleaseType'];
     if ($GroupResults) {
-        $Torrents = $GroupInfo['Torrents'];
         $GroupTime = $MaxSize = $TotalLeechers = $TotalSeeders = $TotalSnatched = 0;
         foreach ($Torrents as $T) {
             $GroupTime = max($GroupTime, strtotime($T['Time']));
@@ -494,24 +479,11 @@ foreach ($Results as $Key => $GroupID) {
             $TotalSeeders += $T['Seeders'];
             $TotalSnatched += $T['Snatched'];
         }
-    } else {
-        $TorrentID = $Key;
-        $Torrents = [$TorrentID => $GroupInfo['Torrents'][$TorrentID]];
     }
 
-    $TorrentTags = new Tags($GroupInfo['TagList']);
+    $TorrentTags = new Tags(implode(' ', (array_column($GroupInfo['tags'], 'name'))));
 
-    if (!empty($ExtendedArtists[1])
-        || !empty($ExtendedArtists[4])
-        || !empty($ExtendedArtists[5])
-        || !empty($ExtendedArtists[6])
-    ) {
-        unset($ExtendedArtists[2]);
-        unset($ExtendedArtists[3]);
-        $DisplayName = Artists::display_artists($ExtendedArtists);
-    } else {
-        $DisplayName = '';
-    }
+    $DisplayName = $tgroup->artistHtml() . ' - ';
     $SnatchedGroupClass = $GroupInfo['Flags']['IsSnatched'] ? ' snatched_group' : '';
 
     if ($GroupResults && (count($Torrents) > 1 || isset($GroupedCategories[$CategoryID - 1]))) {
@@ -577,6 +549,9 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 
         foreach ($Torrents as $TorrentID => $Data) {
             // All of the individual torrents in the group
+            if ($Data['is_deleted']) {
+                continue;
+            }
 
             //Get report info for each torrent, use the cache if available, if not, add to it.
             $Reported = false;
@@ -690,7 +665,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 }
 ?>
 </table>
-<div class="linkbox"><?=$Pages?></div>
+<?= $paginator->linkbox() ?>
 </div>
 <?php
 View::show_footer();

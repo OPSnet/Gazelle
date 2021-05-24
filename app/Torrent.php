@@ -92,7 +92,7 @@ class Torrent extends BaseObject {
                     t.FreeTorrent, t.FreeLeechType, t.Time, t.Description, t.LastReseedRequest,
                     tls.Seeders, tls.Leechers, tls.Snatched, tls.last_action,
                     tbt.TorrentID AS BadTags, tbf.TorrentID AS BadFolders, tfi.TorrentID AS BadFiles, ml.TorrentID  AS MissingLineage,
-                    ca.TorrentID  AS CassetteApproved, lma.TorrentID AS LossyMasterApproved, lwa.TorrentID AS LossyWebApproved,
+                    ca.TorrentID  AS CassetteApproved, lma.TorrentID AS LossymasterApproved, lwa.TorrentID AS LossywebApproved,
                     group_concat(tl.LogID) as ripLogIds
                 FROM %table% t
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
@@ -120,16 +120,17 @@ class Torrent extends BaseObject {
             ) {
                 $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
             }
-            foreach (['FreeTorrent', 'LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene']
+            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene']
                 as $zerotruth
             ) {
                 $info[$zerotruth] = !($info[$zerotruth] == '0');
             }
-            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossyMasterApproved', 'LossyWebApproved', 'MissingLineage']
+            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage']
                 as $emptytruth
             ) {
                 $info[$emptytruth] = !($info[$emptytruth] == '');
             }
+
             $info['ripLogIds'] = empty($info['ripLogIds']) ? [] : array_map('intval', explode(',', $info['ripLogIds']));
             $info['LogCount'] = count($info['ripLogIds']);
             $info['FileList'] = explode("\n", $info['FileList']);
@@ -138,7 +139,7 @@ class Torrent extends BaseObject {
         }
 
         if ($this->viewerId) {
-            $info['PersonalFL'] = !$info['FreeTorrent'] && $this->hasToken($this->viewerId);
+            $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewerId);
             $info['IsSnatched'] = $this->showSnatched && $this->isSnatched($this->viewerId);
         } else {
             $info['PersonalFL'] = false;

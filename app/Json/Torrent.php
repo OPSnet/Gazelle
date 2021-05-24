@@ -56,8 +56,7 @@ class Torrent extends \Gazelle\Json {
 
         // Convert file list back to the old format
         $torMan = new \Gazelle\Manager\Torrent;
-        $fileList = explode("\n", $info['FileList']);
-        foreach ($fileList as &$file) {
+        foreach ($info['FileList'] as &$file) {
             $file = $torMan->apiFilename($file);
         }
         unset($file);
@@ -113,7 +112,7 @@ class Torrent extends \Gazelle\Json {
                     'reported'      => count(\Torrents::get_reports($this->torrent->id())) > 0,
                     'time'          => $info['Time'],
                     'description'   => $info['Description'],
-                    'fileList'      => implode('|||', $fileList),
+                    'fileList'      => implode('|||', $info['FileList']),
                     'filePath'      => $info['FilePath'],
                     'userId'        => $info['UserID'],
                     'username'      => $this->torrent->uploader()->username(),
