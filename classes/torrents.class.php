@@ -598,28 +598,28 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         }
 
         if ($ShowFlags) {
-            if ($Data['HasLog'] && $Data['HasLogDB'] && $Data['LogChecksum'] !== '1') {
+            if ($Data['HasLog'] && $Data['HasLogDB'] && !in_array($Data['LogChecksum'], ['1', true])) {
                 $Info[] = Format::torrent_label('Bad/Missing Checksum');
             }
-            if (!empty($Data['BadTags'])) {
+            if (in_array($Data['BadTags'], ['1', true])) {
                 $Info[] = Format::torrent_label('Bad Tags');
             }
-            if (!empty($Data['BadFolders'])) {
+            if (in_array($Data['BadFolders'], ['1', true])) {
                 $Info[] = Format::torrent_label('Bad Folders');
             }
-            if (!empty($Data['MissingLineage'])) {
+            if (in_array($Data['MissingLineage'], ['1', true])) {
                 $Info[] = Format::torrent_label('Missing Lineage');
             }
-            if (!empty($Data['CassetteApproved'])) {
+            if (in_array($Data['CassetteApproved'], ['1', true])) {
                 $Info[] = Format::torrent_label('Cassette Approved');
             }
-            if (!empty($Data['LossymasterApproved'])) {
+            if (in_array($Data['LossymasterApproved'], ['1', true])) {
                 $Info[] = Format::torrent_label('Lossy Master Approved');
             }
-            if (!empty($Data['LossywebApproved'])) {
+            if (in_array($Data['LossywebApproved'], ['1', true])) {
                 $Info[] = Format::torrent_label('Lossy WEB Approved');
             }
-            if (!empty($Data['BadFiles'])) {
+            if (in_array($Data['BadFiles'], ['1', true])) {
                 $Info[] = Format::torrent_label('Bad File Names');
             }
         }

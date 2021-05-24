@@ -13,6 +13,7 @@ class TGroup extends BaseObject {
     protected $artistDisplay = self::ARTIST_DISPLAY_HTML;
     protected $revisionId = 0;
     protected $showFallbackImage = true;
+    protected $viewer;
 
     public function tableName(): string {
         return 'torrents_group';
@@ -23,6 +24,11 @@ class TGroup extends BaseObject {
     }
 
     public function flush() {
+    }
+
+    public function setViewer(User $viewer) {
+        $this->viewer = $viewer;
+        return $this;
     }
 
     /**
@@ -133,6 +139,20 @@ class TGroup extends BaseObject {
         if (!$this->revisionId) {
             $this->cache->cache_value($key, $info, 0);
         }
+        $info['Flags'] = [];
+        $info['Flags']['IsSnatched'] = ($this->viewer && $this->viewer->option('ShowSnatched'))
+            ? $this->db->scalar("
+                SELECT 1 
+                FROM torrents_group tg
+                WHERE exists(
+                        SELECT 1
+                        FROM torrents t
+                        INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
+                        WHERE t.GroupID = tg.ID
+                    )
+                    AND tg.ID = ?
+                ", $this->id)
+            : false;
         return $info;
     }
 
@@ -225,12 +245,12 @@ class TGroup extends BaseObject {
             return $nameCache[$renderMode][$this->id] = sprintf('(torrent id:%d)', $this->id);
         }
 
-        $and = $renderMode === self::ARTIST_DISPLAY_HTML ? '&amp;' : '&';
+        $and = $renderMode === self::ARTIST_DISPLAY_HTML ? ' &amp; ' : ' & ';
         $chunk = [];
         if ($djCount == 1) {
             $chunk[] = $this->artistLink($roleList['dj'][0], $renderMode);
         } elseif ($djCount == 2) {
-            $chunk[] = $this->artistLink($roleList['dj'][0], $renderMode) . " $and " . $this->artistLink($roleList['dj'][1], $renderMode);
+            $chunk[] = $this->artistLink($roleList['dj'][0], $renderMode) . $and . $this->artistLink($roleList['dj'][1], $renderMode);
         } elseif ($djCount > 2) {
             $chunk[] = 'Various DJs';
         } else {
@@ -238,12 +258,12 @@ class TGroup extends BaseObject {
                 if ($composerCount == 1) {
                     $chunk[] = $this->artistLink($roleList['composer'][0], $renderMode);
                 } elseif ($composerCount == 2) {
-                    $chunk[] = $this->artistLink($roleList['composer'][0], $renderMode) . " $and " . $this->artistLink($roleList['composer'][1], $renderMode);
-                } elseif ($composerCount > 2 && $mainCount + $conductorCount == 0) {
+                    $chunk[] = $this->artistLink($roleList['composer'][0], $renderMode) . $and . $this->artistLink($roleList['composer'][1], $renderMode);
+                } else {
                     $chunk[] = 'Various Composers';
                 }
-                if ($mainCount > 0) {
-                    $chunk[] = 'Various Composers performed by';
+                if ($mainCount + $conductorCount > 0) {
+                    $chunk[] = 'performed by';
                 }
             }
 
@@ -256,7 +276,7 @@ class TGroup extends BaseObject {
                 if ($mainCount == 1) {
                     $chunk[] = $this->artistLink($roleList['main'][0], $renderMode);
                 } elseif ($mainCount == 2) {
-                    $chunk[] = $this->artistLink($roleList['main'][0], $renderMode) . " $and " . $this->artistLink($roleList['main'][1], $renderMode);
+                    $chunk[] = $this->artistLink($roleList['main'][0], $renderMode) . $and . $this->artistLink($roleList['main'][1], $renderMode);
                 } elseif ($mainCount > 2) {
                     $chunk[] = 'Various Artists';
                 }
@@ -270,7 +290,7 @@ class TGroup extends BaseObject {
                 if ($conductorCount == 1) {
                     $chunk[] = $this->artistLink($roleList['conductor'][0], $renderMode);
                 } elseif ($conductorCount == 2) {
-                    $chunk[] = $this->artistLink($roleList['conductor'][0], $renderMode) . " $and " . $this->artistLink($roleList['conductor'][1], $renderMode);
+                    $chunk[] = $this->artistLink($roleList['conductor'][0], $renderMode) . $and . $this->artistLink($roleList['conductor'][1], $renderMode);
                 } elseif ($conductorCount > 2) {
                     $chunk[] = 'Various Conductors';
                 }
@@ -279,7 +299,40 @@ class TGroup extends BaseObject {
         return $nameCache[$renderMode][$this->id] = implode(' ', $chunk);
     }
 
+
     public function torrentList(): array {
+        $viewerId = $this->viewer ? $this->viewer->id() : 0;
+        $showSnatched = $viewerId ? $this->viewer->option('ShowSnatched') : false;
+        $list = $this->rawTorrentList();
+        foreach ($list as &$info) {
+            foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear']
+                as $nullable
+            ) {
+                $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
+            }
+            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene']
+                as $zerotruth
+            ) {
+                $info[$zerotruth] = !($info[$zerotruth] == '0');
+            }
+            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage']
+                as $emptytruth
+            ) {
+                $info[$emptytruth] = !($info[$emptytruth] == '');
+            }
+            if ($viewerId) {
+                $torrent = new Torrent($info['ID']);
+                $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $torrent->hasToken($viewerId);
+                $info['IsSnatched'] = $showSnatched && $torrent->isSnatched($viewerId);
+            } else {
+                $info['PersonalFL'] = false;
+                $info['IsSnatched'] = false;
+            }
+        }
+        return $list;
+    }
+
+    public function rawTorrentList(): array {
         $key = sprintf(self::CACHE_TLIST_KEY, $this->id);
         if (!$this->revisionId) {
             $list = $this->cache->get_value($key);

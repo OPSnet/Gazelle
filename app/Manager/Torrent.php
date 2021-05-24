@@ -173,7 +173,7 @@ class Torrent extends \Gazelle\Base {
      * @return with the keys 'ext', 'size' and 'name'
      */
     public function splitMetaFilename(string $metaname): array {
-        preg_match('/^(\.\S+) s(\d+)s (.+) ' . self::FILELIST_DELIM_UTF8 . '$/', $metaname, $match);
+        preg_match('/^(\.\S+) s(\d+)s (.+) (?:&divide;|' . self::FILELIST_DELIM_UTF8 . ')$/', $metaname, $match);
         return [
             'ext'  => $match[1] ?? null,
             'size' => (int)$match[2] ?? 0,
@@ -234,23 +234,22 @@ class Torrent extends \Gazelle\Base {
         return $n;
     }
 
-	public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent) {
-		$torrentSource = $torrent->getSource();
-		if ($torrentSource === SOURCE) {
-			return false;
-		}
-
-		$creationDate = $torrent->getCreationDate();
-		if (!is_null($creationDate)) {
-			if (is_null($torrentSource) && $creationDate <= GRANDFATHER_OLD_SOURCE) {
-				return false;
-			}
-			elseif (!is_null($torrentSource) && $torrentSource === GRANDFATHER_SOURCE && $creationDate <= GRANDFATHER_OLD_SOURCE) {
-				return false;
-			}
-		}
-		return $torrent->setSource(SOURCE);
-	}
+    public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent) {
+        $torrentSource = $torrent->getSource();
+        if ($torrentSource === SOURCE) {
+            return false;
+        }
+        $creationDate = $torrent->getCreationDate();
+        if (!is_null($creationDate)) {
+            if (is_null($torrentSource) && $creationDate <= GRANDFATHER_OLD_SOURCE) {
+                return false;
+            }
+            elseif (!is_null($torrentSource) && $torrentSource === GRANDFATHER_SOURCE && $creationDate <= GRANDFATHER_OLD_SOURCE) {
+                return false;
+            }
+        }
+        return $torrent->setSource(SOURCE);
+    }
 
     /**
      * Aggregate the audio files per audio type
