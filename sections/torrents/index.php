@@ -276,9 +276,9 @@ if (!empty($_REQUEST['action'])) {
 
     if (!empty($_GET['id'])) {
         require_once('details.php');
-    } elseif (isset($_GET['torrentid']) && intval($_GET['torrentid'])) {
+    } elseif (isset($_GET['torrentid'])) {
         $torrentId = (int)$_GET['torrentid'];
-        $this->db->prepared("
+        $GroupID = $DB->scalar("
             SELECT GroupID
             FROM torrents
             WHERE ID = ?
@@ -289,9 +289,9 @@ if (!empty($_REQUEST['action'])) {
             ", $torrentId, $torrentId
         );
         if ($GroupID) {
-            header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
+            header("Location: torrents.php?id=$GroupID&torrentid={$torrentId}#torrent{$torrentId}");
         } else {
-            header("Location: log.php?search=Torrent+" . $_GET['torrentid']);
+            header("Location: log.php?search=Torrent+$torrentId");
         }
     } elseif (!empty($_GET['type'])) {
         require_once('user.php');
