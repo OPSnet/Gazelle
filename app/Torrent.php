@@ -229,10 +229,7 @@ class Torrent extends BaseObject {
             $filename = "$artist.$filename";
         }
 
-        $filename = shortenString($filename . $label, $MaxLength, true, false);
-        if ($info['TorrentID'] !== false) {
-            $filename .= "-{$info['TorrentID']}";
-        }
+        $filename = shortenString($filename . $label, $MaxLength, true, false) . "-" . $this->id;
         return $asText ? "$filename.txt" : "$filename.torrent";
     }
 
