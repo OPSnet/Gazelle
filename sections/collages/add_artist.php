@@ -55,21 +55,15 @@ elseif ($_REQUEST['action'] == 'add_artist_batch') {
 }
 
 /* check that they correspond to artist pages */
+$artistMan = new Gazelle\Manager\Artist;
 $ID = [];
 foreach ($URL as $u) {
-    if (!preg_match('/^'.ARTIST_REGEX.'/i', $u, $match)) {
-        $safe = htmlspecialchars($u);
-        error("The entered url ($safe) does not correspond to an artist page on site.");
+    preg_match(ARTIST_REGEXP, $u, $match);
+    $artist = $artistMan->findById((int)$match['id'], 0);
+    if (is_null($artist)) {
+        error("The artist " . htmlspecialchars($u) . " does not exist.");
     }
-    $ArtistID = end($match);
-    try {
-        $artist = new Gazelle\Artist($ArtistID);
-    }
-    catch (Exception $e) {
-        $safe = htmlspecialchars($u);
-        error("The entered url ($safe) does not correspond to an artist page on site.");
-    }
-    $ID[] = $ArtistID;
+    $ID[] = $artist->id();
 }
 
 /* would the addition overshoot the allowed number of entries? */

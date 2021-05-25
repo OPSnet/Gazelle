@@ -45,24 +45,23 @@ foreach ($ReportType['report_fields'] as $Field => $Value) {
 if (empty($_POST['sitelink'])) {
     $ExtraIDs = '';
 } else {
-    if (preg_match_all('/'.TORRENT_REGEX.'/i', $_POST['sitelink'], $Matches)) {
-        $Match = end($Matches);
-        $ExtraIDs = implode(' ', $Match);
-        if (in_array($TorrentID, $Match)) {
+    $torMan = new Gazelle\Manager\Torrent;
+    if (!preg_match_all(TORRENT_REGEXP, $_POST['sitelink'], $match)) {
+        $Err = 'The permalink was incorrect. Please copy the torrent permalink URL, which is labelled as [PL] and is found next to the [DL] buttons.';
+    } else {
+        $all = $match['id'];
+        if (in_array($TorrentID, $all)) {
             $Err = "The extra permalinks you gave included the link to the torrent you're reporting!";
         }
-    } else {
-        $Err = 'The permalink was incorrect. Please copy the torrent permalink URL, which is labelled as [PL] and is found next to the [DL] buttons.';
+        $ExtraIDs = implode(' ', $all);
     }
 }
 
 if (empty($_POST['link'])) {
     $Links = '';
 } else {
-    //resource_type://domain:port/filepathname?query_string#anchor
-    //                    http://        www            .foo.com                                /bar
-    if (preg_match_all('/'.URL_REGEX.'/is', $_POST['link'], $Matches)) {
-        $Links = implode(' ', $Matches[0]);
+    if (preg_match_all(URL_REGEXP, $_POST['link'], $match)) {
+        $Links = implode(' ', $match[1]);
     } else {
         $Err = "The extra links you provided weren't links...";
     }
@@ -71,8 +70,8 @@ if (empty($_POST['link'])) {
 if (empty($_POST['image'])) {
     $Images = '';
 } else {
-    if (preg_match("/^(".IMAGE_REGEX.")( ".IMAGE_REGEX.")*$/is", trim($_POST['image']), $Matches)) {
-        $Images = $Matches[0];
+    if (preg_match_all(IMAGE_REGEXP, trim($_POST['image']), $match)) {
+        $Images = implode(' ', $match[1]);
     } else {
         $Err = "The extra image links you provided weren't links to images...";
     }
@@ -81,7 +80,7 @@ if (empty($_POST['image'])) {
 if (empty($_POST['track'])) {
     $Tracks = '';
 } else {
-    if (preg_match('/([0-9]+( [0-9]+)*)|All/is', $_POST['track'], $Matches)) {
+    if (preg_match('/(\d+(?:\s+\d+)*)|all/is', $_POST['track'], $Matches)) {
         $Tracks = $Matches[0];
     } else {
         $Err = 'Tracks should be given in a space-separated list of numbers with no other characters.';

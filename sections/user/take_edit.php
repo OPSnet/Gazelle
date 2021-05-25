@@ -29,10 +29,10 @@ if (!$ownProfile && !check_perms('users_edit_profiles')) {
 $validator = new Gazelle\Util\Validator;
 $validator->setFields([
     ['stylesheet', 1, "number", "You forgot to select a stylesheet."],
-    ['styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => '/^'.CSS_REGEX.'$/i']],
+    ['styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => CSS_REGEXP]],
     ['postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
     ['collagecovers', 1, "number", "You forgot to select your collage option."],
-    ['avatar', 0, "regex", "You did not enter a valid avatar URL.", ['regex' => "/^".IMAGE_REGEX."$/i"]],
+    ['avatar', 0, "regex", "You did not enter a valid avatar URL.", ['regex' => IMAGE_REGEXP]],
     ['email', 1, "email", "You did not enter a valid email address."],
     ['irckey', 0, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['range' => [6, 32]]],
     ['new_pass_1', 0, "regex",

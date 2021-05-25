@@ -44,7 +44,7 @@ $OrderDir = $header->getOrderDir();
 if (!empty($_REQUEST['notes'])) {
     $IPv4Man->setFilterNotes($_REQUEST['notes']);
 }
-if (!empty($_REQUEST['ip']) && preg_match('/'.IP_REGEX.'/', $_REQUEST['ip'])) {
+if (!empty($_REQUEST['ip']) && preg_match(IP_REGEXP, $_REQUEST['ip'])) {
     $IPv4Man->setFilterIpaddr($_REQUEST['ip']);
 }
 $paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1));

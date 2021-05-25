@@ -20,7 +20,7 @@ if (count($Images) != count($Summaries)) {
 $Changed = false;
 for ($i = 0; $i < count($Images); $i++) {
     $Image = trim($Images[$i]);
-    if (ImageTools::blacklisted($Image, true) || !preg_match("/^".IMAGE_REGEX."$/i", $Image)) {
+    if (ImageTools::blacklisted($Image, true) || !preg_match(IMAGE_REGEXP, $Image)) {
         continue;
     }
     $Summary = trim($Summaries[$i]);

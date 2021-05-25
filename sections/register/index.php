@@ -5,7 +5,7 @@ use Gazelle\Util\Mail;
 // needs to be defined here for fall-through to step1
 $Val = new Gazelle\Util\Validator;
 $Val->setFields([
-    ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]],
+    ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEXP]],
     ['email', true, 'email', 'You did not enter a valid email address.'],
     ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
     ['confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']],

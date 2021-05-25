@@ -522,21 +522,17 @@ define('RANDOM_ARTIST_MIN_ENTRIES', 1);
 define('RANDOM_COLLAGE_MIN_ENTRIES', 1);
 define('RANDOM_TORRENT_MIN_SEEDS', 0);
 
-//resource_type://username:password@domain:port/path?query_string#anchor
-define('RESOURCE_REGEX', '(https?|ftps?):\/\/');
-define('IP_REGEX', '(\d{1,3}\.){3}\d{1,3}');
-define('DOMAIN_REGEX', '[\w-]+(?:\.[\w-]+)+');
-define('EMAIL_REGEX', '/^[\w-]+(?:\.[\w-]+)*(?:\+[.\w-]*)?@' . DOMAIN_REGEX . '$/');
-define('PORT_REGEX', ':\d{1,5}');
-define('URL_REGEX', '('.RESOURCE_REGEX.')('.IP_REGEX.'|'.DOMAIN_REGEX.')('.PORT_REGEX.')?(\/\S*)*');
-define('USERNAME_REGEX_SHORT', '[\w?.]{1,20}');
-define('USERNAME_REGEX', '/^'.USERNAME_REGEX_SHORT.'$/D');
-define('IMAGE_REGEX', URL_REGEX.'\/\S+\.(jpg|jpeg|tif|tiff|png|gif|bmp)(\?\S*)?');
-define('CSS_REGEX', URL_REGEX.'\/\S+\.css(\?\S*)?');
-define('SITELINK_REGEX', '(?:' . preg_quote(SITE_URL, '/') . (defined('ALT_SITE_URL') ? '|' . preg_quote(ALT_SITE_URL, '/') : '') . ')');
-define('TORRENT_REGEX', SITELINK_REGEX.'\/torrents\.php\?(.*&)?torrentid=(\d+)'); // torrentid = group 4
-define('TORRENT_GROUP_REGEX', SITELINK_REGEX.'\/torrents\.php\?(.*&)?id=(\d+)'); // id = group 4
-define('ARTIST_REGEX', SITELINK_REGEX.'\/artist\.php\?(.*&)?id=(\d+)'); // id = group 4
+define('IP_REGEXP',       '/\b(?:\d{1,3}\.){3}\d{1,3}\b/');
+define('URL_REGEXP_STEM', '((?:f|ht)tps?:\/\/)(?:' . str_replace('/', '', IP_REGEXP) . '|[\w-]+(?:\.[\w-]+)+)(?::\d{1,5})?(?:\/\S*)');
+define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
+define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)$/i');
+define('IMAGE_REGEXP',    '/\b(' . URL_REGEXP_STEM . '\.(?:gif|png|webm|jpe?g|tiff?)(\?\S*)?)\b/i');
+define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') . (defined('ALT_SITE_URL') ? '|' . preg_quote(ALT_SITE_URL, '/') : '') . ')');
+define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
+define('TGROUP_REGEXP',   '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\bid=(?P<id>\d+)\b/');
+define('TORRENT_REGEXP',  '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\btorrentid=(?P<id>\d+)\b/');
+define('EMAIL_REGEXP',    '/^[\w-]+(?:\.[\w-]+)*(?:\+[.\w-]+)?@[\w-]+(?:\.[\w-]+)+$/');
+define('USERNAME_REGEXP', '/\b(?:[01]$(*PRUNE)(*FAIL)|(?P<username>[\w.]{1,20}))\b/');
 
 define('IMAGE_HOST_BANNED', ['badhost.example.com']);
 define('IMAGE_HOST_RECOMMENDED', ['goodhost.example.com']);

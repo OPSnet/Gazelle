@@ -208,6 +208,10 @@ class TGroup extends BaseObject {
         return $roleList;
     }
 
+    public function categoryId(): int {
+        return $this->info()['CategoryID'];
+    }
+
     public function name(): string {
         return $this->info()['Name'];
     }

@@ -15,7 +15,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function setFilterIpaddr(string $filterIpaddr) {
-        if (preg_match('/'.IP_REGEX.'/', $filterIpaddr)) {
+        if (preg_match(IP_REGEXP, $filterIpaddr)) {
             $this->filterIpaddr = $filterIpaddr;
         }
         return $this;

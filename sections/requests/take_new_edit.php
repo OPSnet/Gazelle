@@ -84,8 +84,8 @@ if (empty($_POST['image'])) {
     $Image = null;
 } else {
     ImageTools::blacklisted($_POST['image']);
-    if (preg_match('/'.IMAGE_REGEX.'/', trim($_POST['image'])) > 0) {
-            $Image = trim($_POST['image']);
+    if (preg_match_all(IMAGE_REGEXP, $_POST['image'], $match) > 0) {
+        $Image = implode(' ', $match[1]);
     } else {
         $Err = display_str($_POST['image']).' does not appear to be a valid link to an image.';
     }
@@ -177,21 +177,12 @@ if (!empty($FormatArray) && in_array(array_search('FLAC', $Formats), $FormatArra
 
 // GroupID
 if (!empty($_POST['groupid'])) {
-    $GroupID = trim($_POST['groupid']);
-    if (preg_match('/^'.TORRENT_GROUP_REGEX.'/i', $GroupID, $Matches)) {
-        $GroupID = end($Matches);
-    }
-    if (intval($GroupID)) {
-        $DB->prepared_query('
-            SELECT 1
-            FROM torrents_group
-            WHERE ID = ?  AND CategoryID = ?',
-            $GroupID, 1);
-        if (!$DB->has_results()) {
-            $Err = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
-        }
-    } else {
+    preg_match(TGROUP_REGEXP, $_POST['groupid'], $match);
+    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)($match['id'] ?? 0));
+    if (is_null($tgroup) || $tgroup->categoryId() !== 1) {
         $Err = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
+    } else {
+        $GroupID = $tgroup->id();
     }
 } elseif ($_POST['groupid'] === '0') {
     $GroupID = 0;
@@ -251,8 +242,8 @@ if (!empty($Err)) {
     error($Err);
     $Div = $_POST['unit'] === 'mb' ? 1024 * 1024 : 1024 * 1024 * 1024;
     $Bounty /= $Div;
-    include(SERVER_ROOT.'/sections/requests/new_edit.php');
-    die();
+    require_once('new_edit.php');
+    exit;
 }
 
 //Databasify the input
