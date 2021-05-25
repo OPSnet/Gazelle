@@ -6,7 +6,7 @@ if (!check_perms('users_mod') || !check_perms('users_view_ips')) {
 
 $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
 $ipaddr = $_GET['ip'] ?? null;
-if (is_null($user) && !preg_match('/^' . IP_REGEX . '$/', $ipaddr)) {
+if (is_null($user) && !preg_match(IP_REGEXP, $ipaddr)) {
     error(403);
 }
 

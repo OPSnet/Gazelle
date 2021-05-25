@@ -46,8 +46,7 @@ class UserCreator extends Base {
         if ($this->db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->userName)) {
             throw new UserCreatorException('duplicate');
         }
-        if (in_array($this->userName, ['0', '1'])) {
-            // TODO: see what breaks if this is allowed
+        if (!preg_match(USERNAME_REGEXP, $this->userName)) {
             throw new UserCreatorException('username-invalid');
         }
 

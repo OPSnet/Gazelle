@@ -822,11 +822,9 @@ class Text {
                     $Str .= \Torrents::bbcodeUrl($Block['Val'], $Block['Attr']);
                     break;
                 case 'torrent':
-                    $Pattern = '/('.SITELINK_REGEX.'\/torrents\.php.*[\?&]id=)?(\d+)($|&|\#).*/i';
-                    $Matches = [];
-                    if (preg_match($Pattern, $Block['Val'], $Matches)) {
-                        if (isset($Matches[2])) {
-                            $GroupID = $Matches[2];
+                    if (preg_match(TGROUP_REGEXP, $Block['Val'], $match)) {
+                        if (isset($match['id'])) {
+                            $GroupID = $match['id'];
                             $Groups = Torrents::get_groups([$GroupID], true, true, false);
                             if ($Groups[$GroupID]) {
                                 $Group = $Groups[$GroupID];
@@ -1129,28 +1127,25 @@ class Text {
     }
 
     private static function userMention(string $text): string {
-        return preg_replace_callback('/(?<=^|\W)@(' . USERNAME_REGEX_SHORT . ')/i',
+        return preg_replace_callback('/(?<=^|\W)@' . str_replace('/', '', USERNAME_REGEXP) . '/',
             function ($match) {
-                $username = $match[1];
+                $username = $match['username'];
                 static $cache;
                 if (!isset($cache[$username])) {
-                    global $DB;
-                    $cache[$username] = $DB->scalar("
-                        SELECT ID FROM users_main WHERE Username = ?
-                        ", $username
-                    );
-                    if (is_null($cache[$username]) && preg_match('/^(.*)[.?]+$/', $username, $match)) {
+                    $userMan = new \Gazelle\Manager\User;
+                    $user = $userMan->findByUsername($username);
+                    if (is_null($user) && preg_match('/^(.*)[.?]+$/', $username, $match)) {
                         // strip off trailing dots to see if we can match @Spine...
                         $username = $match[1];
-                        $cache[$username] = $DB->scalar("
-                            SELECT ID FROM users_main WHERE Username = ?
-                            ", $username
-                        );
+                        $user = $userMan->findByUsername($username);
+                    }
+                    if ($user) {
+                        $cache[$username] = $user;
                     }
                 }
-                return is_null($cache[$username])
-                    ? $match[0]
-                    : sprintf('<a href="/user.php?id=%d">@%s</a>', $cache[$username], $username);
+                return !isset($cache[$username])
+                    ? "@$username"
+                    : sprintf('<a href="user.php?id=%d">@%s</a>', $cache[$username]->id(), $cache[$username]->username());
             },
             $text
         );

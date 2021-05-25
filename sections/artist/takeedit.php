@@ -31,9 +31,8 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     $summary[] = trim($_POST['summary']);
     $image     = trim($_POST['image']);
     ImageTools::blacklisted($image);
-    // Trickery
-    if (!preg_match("/^".IMAGE_REGEX."$/i", $image)) {
-        $image = '';
+    if (!preg_match(IMAGE_REGEXP, $image)) {
+        error("That does not look like a valid image url");
     }
     foreach (IMAGE_HOST_BANNED as $banned) {
         if (stripos($banned, $image) !== false) {

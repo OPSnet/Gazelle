@@ -2958,7 +2958,7 @@ class User extends BaseObject {
         if ($Rank >= 4 || $HasAll) {
             if (isset($field['donor_icon_link'])) {
                 $value = $field['donor_icon_link'];
-                if ($value === '' || preg_match("/^".URL_REGEX."$/i", $value)) {
+                if ($value === '' || preg_match(URL_REGEXP, $value)) {
                     $insert[] = "CustomIconLink";
                     $args[] = $value;
                 }
@@ -2967,7 +2967,7 @@ class User extends BaseObject {
         if ($Rank >= MAX_RANK || $HasAll) {
             if (isset($field['donor_icon_custom_url'])) {
                 $value = $field['donor_icon_custom_url'];
-                if ($value === '' || preg_match("/^".IMAGE_REGEX."$/i", $value)) {
+                if ($value === '' || preg_match(IMAGE_REGEXP, $value)) {
                     $insert[] = "CustomIcon";
                     $args[] = $value;
                 }
@@ -2996,7 +2996,7 @@ class User extends BaseObject {
         if ($SpecialRank >= 2) {
             if (isset($field['second_avatar'])) {
                 $value = $field['second_avatar'];
-                if ($value === '' || preg_match("/^".IMAGE_REGEX."$/i", $value)) {
+                if ($value === '' || preg_match(IMAGE_REGEXP, $value)) {
                     $insert[] = "SecondAvatar";
                     $args[] = $value;
                 }

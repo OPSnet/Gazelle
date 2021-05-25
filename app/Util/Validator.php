@@ -108,11 +108,11 @@ class Validator {
      *      falls within MinLength and MaxLength (using weak type coercion as necessary). This field cannot be left
      *      empty.
      * - email: Checks to make sure the length of the email falls within MinLength and MaxLength and performs a
-     *      preg_match using the EMAIL_REGEX constant against the field to check that it passes
+     *      preg_match using the EMAIL_REGEXP constant against the field to check that it passes
      * - link: Makes sure the length of the link falls between MinLength and MaxLength and performs a preg_match
-     *      using the URL_REGEX constant against the field
+     *      using the URL_REGEXP constant against the field
      * - username: checks that the length of the username falls within MinLength and MaxLength and performs a preg_match
-     *      using the USERNAME_REGEX constant against the field
+     *      using the USERNAME_REGEXP constant against the field
      * - checkbox: just checks if the field exists within the associate array, doesn't matter the value
      * - compare: compares the field against field specified in the CompareField option. Useful for stuff like password
      *      where you have to input it twice, check that the second password equals the first one
@@ -177,7 +177,7 @@ class Validator {
                     $MaxLength = $Field['maxlength'] ?? 255;
                     $MinLength = $Field['minlength'] ?? 6;
 
-                    if (!preg_match(EMAIL_REGEX, $ValidateVar)) {
+                    if (!preg_match(EMAIL_REGEXP, $ValidateVar)) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
                     } elseif (strlen($ValidateVar) > $MaxLength) {
@@ -192,7 +192,7 @@ class Validator {
                     $MaxLength = $Field['maxlength'] ?? 255;
                     $MinLength = $Field['minlength'] ?? 10;
 
-                    if (!preg_match('/^'.URL_REGEX.'$/i', $ValidateVar)) {
+                    if (!preg_match(URL_REGEXP, $ValidateVar)) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
                     } elseif (strlen($ValidateVar) > $MaxLength) {
@@ -204,16 +204,7 @@ class Validator {
                     }
 
                 } elseif ($Field['Type'] == 'username') {
-                    $MaxLength = $Field['maxlength'] ?? 20;
-                    $MinLength = $Field['minlength'] ?? 1;
-
-                    if (!preg_match(USERNAME_REGEX, $ValidateVar)) {
-                        $this->errorMessage = $Field['ErrorMessage'];
-                        break;
-                    } elseif (strlen($ValidateVar) > $MaxLength) {
-                        $this->errorMessage = $Field['ErrorMessage'];
-                        break;
-                    } elseif (strlen($ValidateVar) < $MinLength) {
+                    if (!preg_match(USERNAME_REGEXP, $ValidateVar)) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
                     }

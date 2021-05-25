@@ -87,7 +87,7 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
     }
 
     // Trickery
-    if (!preg_match("/^".IMAGE_REGEX."$/i", $Image)) {
+    if (!preg_match(IMAGE_REGEXP, $Image)) {
         $Image = '';
     }
     ImageTools::blacklisted($Image);

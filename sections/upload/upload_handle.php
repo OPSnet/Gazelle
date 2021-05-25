@@ -294,7 +294,7 @@ if ($Properties['Image']) {
     if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
         $Properties['Image'] = $Matches[1].'.jpg';
     }
-    if (!preg_match('/^'.IMAGE_REGEX.'$/i', $Properties['Image'])) {
+    if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
         $Properties['Image'] = '';
     } else {
         ImageTools::blacklisted($Properties['Image']);

@@ -5,17 +5,17 @@ if (isset($_GET['search'])) {
 }
 
 if (!empty($_GET['search'])) {
-    if (preg_match('/^'.IP_REGEX.'$/', $_GET['search'])) {
+    if (preg_match(IP_REGEXP, $_GET['search'])) {
         $_GET['ip'] = $_GET['search'];
-    } elseif (preg_match(EMAIL_REGEX, $_GET['search'])) {
+    } elseif (preg_match(EMAIL_REGEXP, $_GET['search'])) {
         $_GET['email'] = $_GET['search'];
-    } elseif (preg_match(USERNAME_REGEX,$_GET['search'])) {
+    } elseif (preg_match(USERNAME_REGEXP, $_GET['search'])) {
         $found = (new Gazelle\Manager\User)->findByUsername($_GET['search']);
         if ($found) {
             header("Location: user.php?id=" . $found->id());
             exit;
         }
-        $_GET['username'] = $_GET['search'];
+        $_GET['username'] = $found->username();
     } else {
         $_GET['comment'] = $_GET['search'];
     }
