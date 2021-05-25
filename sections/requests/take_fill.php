@@ -24,31 +24,30 @@ function search_joined_string($Haystack, $Needle, $Separator = '|', $Strict = tr
     return (array_search($Needle, explode($Separator, $Haystack), $Strict) !== false);
 }
 
-$RequestID = $_REQUEST['requestid'];
-if (!intval($RequestID)) {
+$RequestID = (int)$_REQUEST['requestid'];
+if (!$RequestID) {
     error(0);
 }
 
 authorize();
 
 //VALIDATION
-if (!empty($_GET['torrentid']) && intval($_GET['torrentid'])) {
-    $TorrentID = $_GET['torrentid'];
+$Err = [];
+if (!empty($_GET['torrentid'])) {
+    $TorrentID = (int)$_GET['torrentid'];
 } else {
     if (empty($_REQUEST['link'])) {
-        return print_or_return('You forgot to supply a link to the filling torrent');
+        $Err[] = print_or_return('You forgot to supply a link to the filling torrent');
     } else {
-        $Link = $_REQUEST['link'];
-        if (!preg_match('/'.TORRENT_REGEX.'/i', $Link, $Matches)) {
-            return print_or_return('Your link does not appear to be valid (use the [PL] button to obtain the correct URL).');
+        if (!preg_match(TORRENT_REGEXP, $_REQUEST['link'], $match)) {
+            $Err[] = print_or_return('Your link does not appear to be valid (use the [PL] button to obtain the correct URL).');
         } else {
-            $TorrentID = end($Matches);
+            $TorrentID = (int)$match['id'];
         }
     }
-
-    if (!$TorrentID || !intval($TorrentID)) {
-        return print_or_return('could not determine torrentid', 404);
-    }
+}
+if (!$TorrentID) {
+    $Err[] = print_or_return('could not determine torrentid', 404);
 }
 
 //Torrent exists, check it's applicable
@@ -73,14 +72,13 @@ $DB->prepared_query("
     WHERE t.ID = ?", $TorrentID);
 
 if (!$DB->has_results()) {
-    return print_or_return('invalid torrentid', 404);
+    $Err[] = print_or_return('invalid torrentid', 404);
 }
 list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber, $GracePeriod) = $DB->next_record();
 
 $FillerID = intval($LoggedUser['ID']);
 $FillerUsername = $LoggedUser['Username'];
 
-$Err = [];
 if (!empty($_REQUEST['user']) && check_perms('site_moderate_requests')) {
     $filler = (new Gazelle\Manager\User)->findByUsername(trim($_REQUEST['user']));
     if (!$filler) {
@@ -157,7 +155,7 @@ if ($MediaList && $MediaList != 'Any' && !search_joined_string($MediaList, $Medi
 }
 
 if (count($Err)) {
-    return print_or_return($Err, implode('<br />', $Err));
+    echo print_or_return($Err, implode('<br />', $Err));
 }
 
 //We're all good! Fill!

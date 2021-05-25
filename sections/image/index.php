@@ -11,7 +11,7 @@ $key = 'imagev4_' . md5($url);
 
 // use a while loop to allow early exit
 while (($imageData = $Cache->get_value($key)) === false) {
-    if (!preg_match('/^'.IMAGE_REGEX.'/is', $url)) {
+    if (!preg_match(IMAGE_REGEXP, $url)) {
         $imageData = null;
         $error = 'bad parameters';
         break;

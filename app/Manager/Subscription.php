@@ -27,43 +27,19 @@ class Subscription extends \Gazelle\Base {
          * different Page are: forums: TopicID artist: ArtistID collages:
          * CollageID requests: RequestID torrents: GroupID
          */
-        $Matches = [];
-        $Pattern = sprintf('/\[quote(?:=(%s)(?:\|.*)?)?]|\[\/quote]|@(%s)/i', USERNAME_REGEX_SHORT, USERNAME_REGEX_SHORT);
-        preg_match_all($Pattern, $Body, $Matches, PREG_SET_ORDER);
 
-        $Usernames = [];
-        if (count($Matches)) {
-            $Level = 0;
-            foreach ($Matches as $M) {
-                if ($M[0] != '[/quote]') {
-                    // @mentions
-                    if ($Level == 0 && isset($M[2])) {
-                        $Usernames[] = $M[2];
-                        continue;
-                    } else if ($Level == 0 && isset($M[1])) {
-                        $Usernames[] = preg_replace('/(^[.,]*)|([.,]*$)/', '', $M[1]); // wut?
-                    }
-                    ++$Level;
-                } else {
-                    --$Level;
-                }
-            }
-        }
-
+        if (!preg_match_all('/(?:\[quote=|@)' . str_replace('/', '', USERNAME_REGEXP) . '/i', $Body, $match)) {
+            return;
+        };
+        $Usernames = array_unique($match['username']);
         if (empty($Usernames)) {
             return;
         }
 
-        // remove any dupes in the array (the fast way)
-        // TODO: replace the above with $Usernames[$M[2]] = 1
-        //       (once the $Usernames[] = preg_replace() construct is understood)
-        //       and the following statement can be removed
-        $Usernames = array_flip(array_flip($Usernames));
-
         $this->db->prepared_query("
             SELECT m.ID
             FROM users_main AS m
-            LEFT JOIN users_info AS i ON (i.UserID = m.ID)
+            INNER JOIN users_info AS i ON (i.UserID = m.ID)
             WHERE i.NotifyOnQuote = '1'
                 AND i.UserID != ?
                 AND m.Username IN (" . placeholders($Usernames) . ")
@@ -72,6 +48,7 @@ class Subscription extends \Gazelle\Base {
 
         $Results = $this->db->to_array();
         $notification = new Notification;
+        $quotername = (new User)->findById($this->userId)->username();
         foreach ($Results as $Result) {
             $this->db->prepared_query('
                 INSERT IGNORE INTO users_notify_quoted
@@ -81,14 +58,11 @@ class Subscription extends \Gazelle\Base {
                 ', $Result['ID'], $this->userId, $Page, $PageID, $PostID
             );
             $this->cache->delete_value("notify_quoted_" . $Result['ID']);
-            $URL = SITE_URL . (
-                ($Page == 'forums')
-                    ? "/forums.php?action=viewthread&postid=$PostID"
-                    : "/comments.php?action=jump&postid=$PostID"
-            );
-            $notification->push($Result['ID'], 'New Quote!', 'Quoted by '
-                . (new User)->findById($this->userId)->username()
-                . " $URL", $URL, Notification::QUOTES);
+            $URL = SITE_URL .  ($Page == 'forums')
+                ? "/forums.php?action=viewthread&postid=$PostID"
+                : "/comments.php?action=jump&postid=$PostID";
+            $notification->push($Result['ID'], 'New Quote!',
+                "Quoted by $quotername $URL", $URL, Notification::QUOTES);
         }
         $this->db->set_query_id($QueryID);
     }

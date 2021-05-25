@@ -50,23 +50,15 @@ if ($_REQUEST['action'] == 'add_torrent') {
 }
 
 /* check that they correspond to torrent pages */
+$tgroupMan = new Gazelle\Manager\TGroup;
 $groupIds = [];
 foreach ($URL as $u) {
-    preg_match('/^'.TORRENT_GROUP_REGEX.'/i', $u, $match);
-    $GroupID = end($match);
-    if (!$GroupID || (int)$GroupID === 0) {
-        $safe = htmlspecialchars($u);
-        error("The entered url ($safe) does not correspond to a torrent page on site." .TORRENT_GROUP_REGEX. '');
+    preg_match(TGROUP_REGEXP, $u, $match);
+    $tgroup = $tgroupMan->findById((int)($match['id'] ?? 0));
+    if (is_null($tgroup)) {
+        error("The torrent " . htmlspecialchars($u) . " does not exist.");
     }
-    $id = $DB->scalar("
-        SELECT ID FROM torrents_group WHERE ID = ?
-        ", $GroupID
-    );
-    if (!$id) {
-        $safe = htmlspecialchars($GroupID);
-        error('The torrent ($safe) does not exist.');
-    }
-    $groupIds[] = $id;
+    $groupIds[] = $tgroup->id();
 }
 
 if (!check_perms('site_collages_delete')) {

@@ -112,7 +112,7 @@ class Login extends Base {
         }
         $validator = new Util\Validator;
         $validator->setFields([
-            ['username', true, 'regex', self::ERR_USERNAME, ['regex' => USERNAME_REGEX]],
+            ['username', true, 'regex', self::ERR_USERNAME, ['regex' => USERNAME_REGEXP]],
             ['password', '1', 'string', self::ERR_PASSWORD, ['minlength' => 6]],
         ]);
         if (!$validator->validate([

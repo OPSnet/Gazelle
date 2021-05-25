@@ -107,7 +107,7 @@ View::show_header('External Tracker Referrals');
     $Email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $Error = false;
     $Invite = false;
-    if (!preg_match(EMAIL_REGEX, $Email)) {
+    if (!preg_match(EMAIL_REGEXP, $Email)) {
         $Error = "Invalid email address.";
     } else {
         $Account = $ReferralManager->getFullAccount($_POST['service']);

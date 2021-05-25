@@ -29,7 +29,7 @@ if (strpos($Email, '|') !== false && check_perms('site_send_unlimited_invites'))
 
 foreach ($Emails as $CurEmail) {
     $CurEmail = trim($CurEmail);
-    if (!preg_match(EMAIL_REGEX, $CurEmail)) {
+    if (!preg_match(EMAIL_REGEXP, $CurEmail)) {
         if (count($Emails) > 1) {
             continue;
         } else {

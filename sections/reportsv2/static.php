@@ -653,11 +653,9 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                     <td>
 <?php
                 if ($ExtraIDs) {
-                    $Extras = explode(' ', $ExtraIDs);
-                        $Value = '';
-                        foreach ($Extras as $ExtraID) {
-                            $Value .= "torrents.php?torrentid=$ExtraID ";
-                        }
+                    $Value = implode(' ',
+                        array_map(function ($id) {return "torrents.php?torrentid=$id"; }, explode(' ', $ExtraIDs))
+                    );
                 } elseif (isset($ReportType['extra_log'])) {
                     $Value = $ReportType['extra_log'];
                 }
