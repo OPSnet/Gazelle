@@ -617,9 +617,8 @@ class TORRENT_FORM {
 
     function audiobook_form() {
         $Torrent = $this->Torrent;
-        global $LoggedUser;
+        global $LoggedUser, $Twig;
         $user = new \Gazelle\User($LoggedUser['ID']);
-        global $Twig;
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
@@ -641,8 +640,7 @@ class TORRENT_FORM {
                     <select id="format" name="format" onchange="Format()">
                         <option value="">---</option>
 <?php   foreach ($this->Formats as $Format) { ?>
-                        <option value="<?= $Format ?>"<?=
-                            $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?><?= $Format ?></option>
+                        <option value="<?= $Format ?>"<?= $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
 <?php   } ?>
                     </select>
                 </td>
@@ -715,6 +713,7 @@ class TORRENT_FORM {
 
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
+        global $LoggedUser;
         $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
