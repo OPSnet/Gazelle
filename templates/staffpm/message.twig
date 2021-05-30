@@ -37,31 +37,6 @@
     <div align="center" style="display: none;"></div>
 {% endfor %}
 
-{% if viewer.isStaffPMReader %}
-    {% if pm.inProgress %}
-    <div id="common_answers" class="hidden">
-        <div class="box vertical_space">
-            <div class="head">
-                <strong>Preview</strong>
-            </div>
-            <div id="common_answers_body" class="body">Select an answer from the drop-down to view it.</div>
-        </div>
-        <br />
-        <div class="center">
-            <select id="common_answers_select" onchange="UpdateMessage();">
-                <option id="first_common_response">Select a message</option>
-        {% for id, c in common %}
-                <option value="{{ id }}">{{ c.Name }}</option>
-        {% endfor %}
-            </select>
-            <input type="button" title="Use this message as the basis for your reply" value="Use message" onclick="SetMessage();" />
-            <input type="button" value="Create new/Edit Common Response" onclick="location.href='staffpm.php?action=responses&amp;convid={{ pm.id }}';" />
-        </div>
-    </div>
-    {% endif %}
-    <div id="ajax_message" class="hidden center alertbar"></div>
-{% endif %}
-
     <h3>Reply</h3>
     <div class="box pad" id="reply_box">
         <div id="buttons" class="center">
@@ -107,6 +82,31 @@
                 <input type="hidden" name="action" value="takepost" />
                 <input type="hidden" name="convid" value="{{ pm.id }}" id="convid" />
             </form>
+
+{% if viewer.isStaffPMReader %}
+    {% if pm.inProgress %}
+    <br />
+    <div id="common_answers" class="hidden">
+        <h3>Retrieve a common answer for the reply</h3>
+        <div class="center">
+            <select id="common_answers_select" onchange="UpdateMessage();">
+                <option id="first_common_response">Select a message</option>
+        {% for id, c in common %}
+                <option value="{{ id }}">{{ c.Name }}</option>
+        {% endfor %}
+            </select>
+            <input type="button" title="Use this message as the basis for your reply" value="Use this draft" onclick="SetMessage();" />
+            <input type="button" value="Create new/Edit Common Response" onclick="location.href='staffpm.php?action=responses&amp;convid={{ pm.id }}';" />
+        </div>
+        <br />
+        <div class="box vertical_space">
+            <h3>Answer preview</h3>
+            <div id="common_answers_body" class="body">Select an answer from the drop-down to view it.</div>
+        </div>
+    </div>
+    {% endif %}
+    <div id="ajax_message" class="hidden center alertbar"></div>
+{% endif %}
         </div>
     </div>
 </div>

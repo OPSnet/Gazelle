@@ -1,6 +1,6 @@
 <?php
 
-if (isset($_POST['message'])) {
+if (isset($_POST['quickpost'])) {
     if (isset($_POST['subject'])) {
         // New staff PM conversation
         if (!isset($_POST['level'])) {
@@ -10,7 +10,7 @@ if (isset($_POST['message'])) {
         if (empty($subject)) {
             error("You must provide a subject for your message");
         }
-        $message = trim($_POST['message'] ?? '');
+        $message = trim($_POST['quickpost'] ?? '');
         if (empty($message)) {
             error("You must write something in your message");
         }
@@ -51,7 +51,7 @@ if (isset($_POST['message'])) {
                 error(403);
             } else {
                 // Response to existing conversation
-                $message = trim($_POST['message'] ?? '');
+                $message = trim($_POST['quickpost'] ?? '');
                 $DB->begin_transaction();
                 $DB->prepared_query("
                     INSERT INTO staff_pm_messages

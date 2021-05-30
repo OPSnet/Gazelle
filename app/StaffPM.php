@@ -34,7 +34,7 @@ class StaffPM extends BaseObject {
     }
 
     public function assigned(): ?User {
-        return $this->ssigned;
+        return $this->assigned;
     }
 
     public function author(): User {

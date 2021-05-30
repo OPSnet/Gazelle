@@ -8,7 +8,7 @@ $classList = $userMan->classList();
 View::show_header('Staff');
 echo $Twig->render('staff/index.twig', [
     'hidden'=> true,
-    'reply' => new Gazelle\Util\Textarea('message', ''),
+    'reply' => new Gazelle\Util\Textarea('quickpost', ''),
     'fls'   => $userMan->flsList(),
     'staff' => $userMan->staffListGrouped(),
     'user'  => new Gazelle\User($LoggedUser['ID']),

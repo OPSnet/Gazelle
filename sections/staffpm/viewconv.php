@@ -24,7 +24,7 @@ echo $Twig->render('staffpm/message.twig', [
     'common'      => $manager->commonAnswerList(),
     'heading'     => $manager->heading($viewer),
     'pm'          => $staffPM,
-    'textarea'    => new Gazelle\Util\Textarea('message', '', 90, 10),
+    'textarea'    => new Gazelle\Util\Textarea('quickpost', '', 90, 10),
     'staff_level' => $userMan->staffClassList(),
     'staff'       => $userMan->staffList(),
     'fls'         => $userMan->flsList(),
