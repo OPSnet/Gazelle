@@ -20,7 +20,7 @@ View::show_header('Staff PMs', 'staffpm');
     <br />
 <?= $Twig->render('staffpm/reply.twig', [
     'hidden'=> true,
-    'reply' => new Gazelle\Util\Textarea('message', ''),
+    'reply' => new Gazelle\Util\Textarea('quickpost', ''),
     'user'  => new Gazelle\User($LoggedUser['ID']),
     'level' => [
         'fmod'  => $classList[FORUM_MOD]['Level'],
