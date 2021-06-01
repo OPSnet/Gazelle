@@ -37,13 +37,13 @@
     <table width="100%" style="margin-bottom: 10px;">
         <tr class="colhead">
             <td>Article</td>
-            <td>Last updated on</td>
-            <td>Last edited by</td>
+            <td>Last updated</td>
+            <td>Created by</td>
         </tr>
         {% for article in articles %}
         <tr>
             <td><a href="wiki.php?action=article&amp;id={{ article.ID }}">{{ article.Title }}</a></td>
-            <td>{{ article.Date }}</td>
+            <td>{{ article.Date|time_diff }}</td>
             <td>{{ article.Author|user_url }}</td>
         </tr>
         {% endfor %}
