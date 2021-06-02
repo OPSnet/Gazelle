@@ -6,7 +6,7 @@ if (!empty($_GET['order_way']) && $_GET['order_way'] == 'asc') {
     $OrderWay = 'desc';
 }
 
-if (empty($_GET['order_by']) || !isset(TorrentSearch::$SortOrders[$_GET['order_by']])) {
+if (empty($_GET['order_by']) || !isset(Gazelle\Search\Torrent::$SortOrders[$_GET['order_by']])) {
     $OrderBy = 'time';
 } else {
     $OrderBy = $_GET['order_by'];
@@ -14,7 +14,7 @@ if (empty($_GET['order_by']) || !isset(TorrentSearch::$SortOrders[$_GET['order_b
 
 $GroupResults = !isset($_GET['group_results']) || $_GET['group_results'] != '0';
 $Page = !empty($_GET['page']) ? (int)$_GET['page'] : 1;
-$Search = new TorrentSearch($GroupResults, $OrderBy, $OrderWay, $Page, TORRENTS_PER_PAGE);
+$Search = new Gazelle\Search\Torrent($GroupResults, $OrderBy, $OrderWay, $Page, TORRENTS_PER_PAGE);
 $Results = $Search->query($_GET);
 $Groups = $Search->get_groups();
 $NumResults = $Search->record_count();
