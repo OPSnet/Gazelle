@@ -1,5 +1,8 @@
 <?php
-class TorrentSearch {
+
+namespace Gazelle\Search;
+
+class Torrent {
     const TAGS_ANY = 0;
     const TAGS_ALL = 1;
     const SPH_BOOL_AND = ' ';
@@ -193,7 +196,7 @@ class TorrentSearch {
     private $GroupResults;
 
     /**
-     * Initialize and configure a TorrentSearch object
+     * Initialize and configure a Search\Torrent object
      *
      * @param bool $GroupResults whether results should be grouped by group id
      * @param string $OrderBy attribute to use for sorting the results
@@ -206,9 +209,9 @@ class TorrentSearch {
                 || !$GroupResults && !isset(self::$SortOrders[$OrderBy])
                 || !in_array($OrderWay, ['asc', 'desc'])
         ) {
-            $ErrMsg = "TorrentSearch constructor arguments:\n" . print_r(func_get_args(), true);
+            $ErrMsg = "Search\Torrent constructor arguments:\n" . print_r(func_get_args(), true);
             global $Debug;
-            $Debug->analysis('Bad arguments in TorrentSearch constructor', $ErrMsg, 3600*24);
+            $Debug->analysis('Bad arguments in Search\Torrent constructor', $ErrMsg, 3600*24);
             error('-1');
         }
         if (!is_number($Page) || $Page < 1) {
@@ -222,7 +225,7 @@ class TorrentSearch {
         $ResultLimit = $PageSize;
         $this->PageSize = $PageSize;
         $this->GroupResults = $GroupResults;
-        $this->SphQL = new SphinxqlQuery();
+        $this->SphQL = new \SphinxqlQuery();
         if ($OrderBy === 'random') {
             $this->SphQL->select('id, groupid')
                 ->order_by('RAND()', '');
@@ -321,12 +324,12 @@ class TorrentSearch {
             }
             if (!empty($Words['include'])) {
                 foreach ($Words['include'] as $Word) {
-                    $QueryParts['include'][] = Sphinxql::sph_escape_string($Word);
+                    $QueryParts['include'][] = \Sphinxql::sph_escape_string($Word);
                 }
             }
             if (!empty($Words['exclude'])) {
                 foreach ($Words['exclude'] as $Word) {
-                    $QueryParts['exclude'][] = '!' . Sphinxql::sph_escape_string(substr($Word, 1));
+                    $QueryParts['exclude'][] = '!' . \Sphinxql::sph_escape_string(substr($Word, 1));
                 }
             }
             if (!empty($QueryParts)) {
@@ -485,7 +488,7 @@ class TorrentSearch {
     private function post_process_fields() {
         if (isset($this->Terms['taglist'])) {
             // Replace bad tags with tag aliases
-            $this->Terms['taglist'] = Tags::remove_aliases($this->Terms['taglist']);
+            $this->Terms['taglist'] = \Tags::remove_aliases($this->Terms['taglist']);
             if (isset($this->RawTerms['tags_type']) && (int)$this->RawTerms['tags_type'] === self::TAGS_ANY) {
                 $this->Terms['taglist']['operator'] = self::SPH_BOOL_OR;
             }
@@ -538,7 +541,7 @@ class TorrentSearch {
      * @param string $Term Given search expression
      */
     private function search_filelist($Term) {
-        $SearchString = '"' . Sphinxql::sph_escape_string($Term) . '"~20';
+        $SearchString = '"' . \Sphinxql::sph_escape_string($Term) . '"~20';
         $this->SphQL->where_match($SearchString, 'filelist', false);
         $this->UsedTorrentFields['filelist'] = $SearchString;
         $this->EnableNegation = true;
@@ -668,7 +671,7 @@ class TorrentSearch {
         if (count($this->SphResults) == 0) {
             return;
         }
-        $this->Groups = Torrents::get_groups($this->SphResults);
+        $this->Groups = \Torrents::get_groups($this->SphResults);
         if ($this->need_torrent_ft()) {
             // Query Sphinx for torrent IDs if torrent-specific fulltext filters were used
             $this->filter_torrents_sph();
@@ -691,7 +694,7 @@ class TorrentSearch {
             }
         }
         $TorrentCount = count($AllTorrents);
-        $this->SphQLTor = new SphinxqlQuery();
+        $this->SphQLTor = new \SphinxqlQuery();
         $this->SphQLTor->select('id')->from('torrents, delta');
         foreach ($this->UsedTorrentFields as $Field => $Term) {
             $this->SphQLTor->where_match($Term, $Field, false);

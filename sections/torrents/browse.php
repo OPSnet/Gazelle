@@ -87,7 +87,7 @@ if (isset($_GET['searchsubmit'])) {
 }
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$Search = new TorrentSearch($GroupResults, $header->getSortKey(), $header->getOrderDir(), $paginator->page(), TORRENTS_PER_PAGE);
+$Search = new Gazelle\Search\Torrent($GroupResults, $header->getSortKey(), $header->getOrderDir(), $paginator->page(), TORRENTS_PER_PAGE);
 $Results = $Search->query($_GET);
 $RealNumResults = $NumResults = $Search->record_count();
 if (!check_perms('site_search_many')) {
