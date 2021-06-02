@@ -89,6 +89,7 @@ echo $Twig->render('user/setting.twig', [
     'avatar'           => $Avatar,
     'download_text'    => $DownloadAlt,
     'is_mod'           => check_perms('users_mod'),
+    'lastfm_username'  => (new Gazelle\Util\LastFM)->username($UserID),
     'logged_user'      => $LoggedUser['ID'],
     'nav_items'        => $NavItems,
     'nav_items_user'   => $UserNavItems,

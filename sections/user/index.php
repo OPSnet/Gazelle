@@ -106,32 +106,32 @@ switch ($_REQUEST['action'] ?? '') {
     // Provide public methods for Last.fm data gets.
     case 'lastfm_compare':
         if (isset($_GET['username'])) {
-            echo LastFM::compare_user_with($_GET['username']);
+            echo (new Gazelle\Util\LastFM)->compare($LoggedUser['ID'], $_GET['username']);
         }
         break;
     case 'lastfm_last_played_track':
         if (isset($_GET['username'])) {
-            echo LastFM::get_last_played_track($_GET['username']);
+            echo (new Gazelle\Util\LastFM)->lastTrack($_GET['username']);
         }
         break;
     case 'lastfm_top_artists':
         if (isset($_GET['username'])) {
-            echo LastFM::get_top_artists($_GET['username']);
+            echo (new Gazelle\Util\LastFM)->topArtists($_GET['username']);
         }
         break;
     case 'lastfm_top_albums':
         if (isset($_GET['username'])) {
-            echo LastFM::get_top_albums($_GET['username']);
+            echo (new Gazelle\Util\LastFM)->topAlbums($_GET['username']);
         }
         break;
     case 'lastfm_top_tracks':
         if (isset($_GET['username'])) {
-            echo LastFM::get_top_tracks($_GET['username']);
+            echo (new Gazelle\Util\LastFM)->topTracks($_GET['username']);
         }
         break;
     case 'lastfm_clear_cache':
         if (isset($_GET['username']) && isset($_GET['uid'])) {
-            echo LastFM::clear_cache($_GET['username'],$_GET['uid']);
+            echo (new Gazelle\Util\LastFM)->clear($LoggedUser['ID'], $_GET['username'],$_GET['uid']);
         }
         break;
     default:
