@@ -239,36 +239,27 @@ foreach ($NavItems as $n) {
 }
 $UserNavItems = implode(',', $UserNavItems);
 
-$LastFMUsername = $_POST['lastfm_username'];
-$OldLastFMUsername = '';
-$DB->prepared_query('
-    SELECT username FROM lastfm_users WHERE ID = ?
-    ', $userId
-);
-
-if ($DB->has_results()) {
-    [$OldLastFMUsername] = $DB->next_record();
-    if ($OldLastFMUsername != $LastFMUsername) {
-        if (empty($LastFMUsername)) {
-            $DB->prepared_query('
-                DELETE FROM lastfm_users WHERE ID = ?
-                ', $userId
-            );
-        } else {
-            $DB->prepared_query('
-                UPDATE lastfm_users SET
-                    Username = ?
-                WHERE ID = ?
-                ', $LastFMUsername, $userId
-            );
-        }
-        $Cache->delete_value("lastfm_username_$userId");
-    }
-} elseif (!empty($LastFMUsername)) {
+$LastFMUsername = trim($_POST['lastfm_username'] ?? '');
+$OldFMUsername = (new Gazelle\Util\LastFM)->username($userId);
+if (is_null($OldFMUsername) && $LastFMUsername !== '') {
     $DB->prepared_query('
         INSERT INTO lastfm_users (ID, Username)
         VALUES (?, ?)
         ', $userId, $LastFMUsername
+    );
+    $Cache->delete_value("lastfm_username_$userId");
+} elseif (!is_null($OldFMUsername) && $LastFMUsername !== '') {
+    $DB->prepared_query('
+        UPDATE lastfm_users SET
+            Username = ?
+        WHERE ID = ?
+        ', $LastFMUsername, $userId
+    );
+    $Cache->delete_value("lastfm_username_$userId");
+} elseif (!is_null($OldFMUsername) && $LastFMUsername === '') {
+    $DB->prepared_query('
+        DELETE FROM lastfm_users WHERE ID = ?
+        ', $userId
     );
     $Cache->delete_value("lastfm_username_$userId");
 }

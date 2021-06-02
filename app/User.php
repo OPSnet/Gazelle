@@ -1507,13 +1507,6 @@ class User extends BaseObject {
         );
     }
 
-    public function LastFMUsername(): string {
-        return $this->db->scalar("
-            SELECT username FROM lastfm_users WHERE ID = ?
-            ", $this->id
-        ) ?? '';
-    }
-
     /**
      * How many personal collages is this user allowed to create?
      *

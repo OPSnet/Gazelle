@@ -1,0 +1,19 @@
+<div class="box box_info box_lastfm">
+    <div class="head colhead_dark">Last.fm</div>
+    <ul class="stats nobullet">
+        <li>
+            Username: <a id="lastfm_username" href="{{ info.url }}" target="_blank" class="tooltip" title="{{ info.name }}
+            on Last.fm: {{ info.playcount|number_format }} plays, {{ info.playlists|number_format }} playlist{{ info.playlists }}">{{ info.username }}</a>
+        </li>
+        <div id="lastfm_stats"{% if own_profile %} data-uid="1"{% endif %}>
+        </div>
+        <li>
+            <a href="#" id="lastfm_expand" onclick="return false;" class="brackets">Show more info</a>
+{% if can_reload %}
+        <span id="lastfm_reload_container">
+            <a href="#" id="lastfm_reload" onclick="return false;" class="brackets">Reload stats</a>
+        </span>
+{% endif %}
+        </li>
+    </ul>
+</div>

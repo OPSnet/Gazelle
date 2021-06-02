@@ -2,7 +2,7 @@
 $Concerts = '';
 ob_start();
 
-$ArtistEvents = LastFM::get_artist_events($ArtistID, $Name);
+$ArtistEvents = (new Gazelle\Util\LastFM)->artistEventList($ArtistID, $Name);
 $Hidden = false;
 if ($ArtistEvents === false) { // Something went wrong
     echo '<br />An error occurred when retrieving concert info.<br />';
