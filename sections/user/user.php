@@ -109,63 +109,68 @@ echo $Twig->render('user/header.twig', [
 ?>
 
 <?php
-    if ($OwnProfile || check_perms('users_mod')) {
-        $nextClass = $User->nextClass();
-        if ($nextClass) {
+if ($OwnProfile || check_perms('users_mod')) {
+    $nextClass = $User->nextClass();
+    if ($nextClass) {
 ?>
         <div class="box box_info box_userinfo_nextclass">
             <div class="head colhead_dark"><a href="wiki.php?action=article&amp;name=userclasses">Next Class</a></div>
             <ul class="stats nobullet">
                 <li>Class: <?=$nextClass['Class']?></li>
 <?php
-            foreach ($nextClass['Requirements'] as $key => $req) {
-                [$current, $goal, $type] = $req;
-                if ($goal === 0) {
-                    continue;
-                }
+        foreach ($nextClass['Requirements'] as $key => $req) {
+            [$current, $goal, $type] = $req;
+            if ($goal === 0) {
+                continue;
+            }
 
-                switch ($type) {
-                case 'time':
-                    $percent = (time() - strtotime($current)) / $goal;
-                    $current = Gazelle\Util\Time::timeDiff($current, 2, true, false, false, true);
-                    $goal = $goal / (86400 * 7);
-                    $goal = "$goal week" . plural($goal);
-                    break;
-                case 'float':
-                    if ($current === '∞') {
-                        $percent = 1;
-                    } else {
-                        $percent = $current / $goal;
-                        $current = round($current, 2);
-                    }
-                    break;
-                case 'int':
-                    $percent = $current === '∞' ? 1 : $current / $goal;
-                    break;
-                case 'bytes':
+            switch ($type) {
+            case 'time':
+                $percent = (time() - strtotime($current)) / $goal;
+                $current = Gazelle\Util\Time::timeDiff($current, 2, true, false, false, true);
+                $goal = $goal / (86400 * 7);
+                $goal = "$goal week" . plural($goal);
+                break;
+            case 'float':
+                if ($current === '∞') {
+                    $percent = 1;
+                } else {
                     $percent = $current / $goal;
-                    $current = Format::get_size($current);
-                    $goal = Format::get_size($goal);
-                    break;
+                    $current = round($current, 2);
                 }
+                break;
+            case 'int':
+                $percent = $current === '∞' ? 1 : $current / $goal;
+                break;
+            case 'bytes':
+                $percent = $current / $goal;
+                $current = Format::get_size($current);
+                $goal = Format::get_size($goal);
+                break;
+            }
 
-                $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
-                    Format::get_ratio_color($percent),
-                    round($percent * 100, 2) . '%',
-                    round(min(1.0, $percent) * 100, 0) . '%'
-                );
+            $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
+                Format::get_ratio_color($percent),
+                round($percent * 100, 2) . '%',
+                round(min(1.0, $percent) * 100, 0) . '%'
+            );
  ?>
                 <li><?=$key?>: <?=$current?> / <?=$goal?> (<?=$percent?>)</li>
-<?php } ?>
+<?php   } ?>
             </ul>
         </div>
 <?php
-        }
-      }
+    }
+}
+
 // Last.fm statistics and comparability
-$LastFMUsername = LastFM::get_lastfm_username($UserID);
-if ($LastFMUsername)  {
-    LastFMView::render_sidebar($LastFMUsername, $UserID, $OwnProfile);
+$lastfmInfo = (new Gazelle\Util\LastFM)->userInfo($User);
+if ($lastfmInfo)  {
+    echo $Twig->render('user/lastfm.twig', [
+        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$UserID") === false) || check_perms('users_mod'),
+        'info'        => $lastfmInfo,
+        'own_profile' => $OwnProfile,
+    ]);
 }
 
 if (check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty')) {
