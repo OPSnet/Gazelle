@@ -428,24 +428,24 @@ if ($isMusicUpload) {
         $Name = $ExtraTorrent['Name'];
         $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
         $ThisInsert =& $ExtraTorrentsInsert[$Name];
-        $bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
-        $bencoder->decodeFile($Name);
-        $ExtraTorData = $bencoder->getData();
+        $xbencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
+        $xbencoder->decodeFile($Name);
+        $ExtraTorData = $xbencoder->getData();
         if (isset($ExtraTorData['encrypted_files'])) {
             $Err = 'At least one of the torrents contain an encrypted file list which is not supported here';
             break;
         }
-        if (!$bencoder->isPrivate()) {
-            $bencoder->makePrivate(); // The torrent is now private.
+        if (!$xbencoder->isPrivate()) {
+            $xbencoder->makePrivate(); // The torrent is now private.
             $PublicTorrent = true;
         }
-        if ($torMan->setSourceFlag($bencoder)) {
+        if ($torMan->setSourceFlag($xbencoder)) {
             $UnsourcedTorrent = true;
         }
 
         // File list and size
-        ['total_size' => $ExtraTotalSize, 'files' => $ExtraFileList] = $bencoder->getFileList();
-        $ExtraDirName = isset($ExtraTorData['info']['files']) ? make_utf8($bencoder->getName()) : '';
+        ['total_size' => $ExtraTotalSize, 'files' => $ExtraFileList] = $xbencoder->getFileList();
+        $ExtraDirName = isset($ExtraTorData['info']['files']) ? make_utf8($xbencoder->getName()) : '';
         $ExtraTmpFileList = [];
         foreach ($ExtraFileList as $ExtraFile) {
             ['path' => $ExtraName, 'size' => $ExtraSize] = $ExtraFile;
@@ -456,15 +456,15 @@ if ($isMusicUpload) {
                 $Err = "The torrent contained one or more files with too long of a name: <br />$ExtraDirName/$ExtraName";
                 break;
             }
-            $TmpFileList[] = $torMan->metaFilename($ExtraName, $ExtraSize);
+            $ExtraTmpFileList[] = $torMan->metaFilename($ExtraName, $ExtraSize);
         }
 
         // To be stored in the database
         $ThisInsert['FilePath'] = $ExtraDirName;
         $ThisInsert['FileString'] = implode("\n", $ExtraTmpFileList);
-        $ThisInsert['InfoHash'] = $bencoder->getHexInfoHash();
+        $ThisInsert['InfoHash'] = $xbencoder->getHexInfoHash();
         $ThisInsert['NumFiles'] = count($ExtraFileList);
-        $ThisInsert['TorEnc'] = $bencoder->getEncode();
+        $ThisInsert['TorEnc'] = $xbencoder->getEncode();
         $ThisInsert['TotalSize'] = $ExtraTotalSize;
 
         $Debug->set_flag('upload: torrent decoded');
