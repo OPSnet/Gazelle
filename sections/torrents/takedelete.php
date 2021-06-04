@@ -9,6 +9,7 @@ $t->setViewerId($LoggedUser['ID']);
 $tgroup  = $t->group();
 $group   = $tgroup->info();
 $torrent = $t->info();
+$torrentId = $torrent->id();
 
 if ($LoggedUser['ID'] != $torrent['UserID'] && !check_perms('torrents_delete')) {
     error(403);
@@ -47,10 +48,10 @@ Torrents::send_pm(
     $name,
     "Torrent $torrentId $name ("
         . number_format($torrent['Size'] / (1024 * 1024), 2) . ' MiB '
-        . strtoupper($torrent['InfoHash'])
+        . strtoupper($torrent['info_hash'])
         . ") was deleted by {$LoggedUser['Username']}: $reason",
     0,
-    $LoggedUser['ID'] != $UserID
+    $LoggedUser['ID'] != $torrent['UserID']
 );
 View::show_header('Torrent deleted');
 ?>
