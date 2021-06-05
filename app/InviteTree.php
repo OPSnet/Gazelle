@@ -175,11 +175,13 @@ class InviteTree extends Base {
                 (donor.UserID IS NOT NULL) AS Donor,
                 uls.Uploaded,
                 uls.Downloaded,
+                ui.JoinDate,
                 um.Paranoia,
                 it.TreePosition,
                 it.TreeLevel
             FROM invite_tree AS it
             INNER JOIN users_main AS um ON (um.ID = it.UserID)
+            INNER JOIN users_info AS ui ON (ui.UserID = it.UserID)
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = it.UserID)
             LEFT JOIN users_levels AS donor ON (donor.UserID = it.UserID
                 AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
@@ -196,7 +198,7 @@ class InviteTree extends Base {
         $Classes = $userMan->classList();
         $classSummary = [];
         $markup = '';
-        while ([$inviteeId, $enabled, $permissionId, $donor, $uploaded, $downloaded, $paranoia, $position, $level]
+        while ([$inviteeId, $enabled, $permissionId, $donor, $uploaded, $downloaded, $joindate, $paranoia, $position, $level]
             = $this->db->next_record(MYSQLI_NUM, false)
         ) {
             $info['total']++;
@@ -238,6 +240,7 @@ class InviteTree extends Base {
                 );
                 $info['upload_total'] += $uploaded;
                 $info['download_total'] += $downloaded;
+                $markup .= ", joined " . time_diff($joindate) . ".";
             }
 
             if ($maxLevel < $level) {
