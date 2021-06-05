@@ -21,18 +21,17 @@ if ($_POST['id']) {
     if (!$_POST['comment']) {
         error('Please enter a comment to add to the users affected.');
     }
-    $userId = (int)$_POST['id'];
-    if (!$userId) {
+    $userMan = new Gazelle\Manager\User;
+    $user = $userMan->find(trim($_POST['id']));
+    if (is_null($user)) {
         error(404);
     }
-    $user = new Gazelle\User($userId);
     $username = $user->username();
 
-    $inviteTree = new Gazelle\InviteTree($userId);
+    $inviteTree = new Gazelle\InviteTree($user->id());
     if (!$inviteTree->treeId()) {
         $message = "No invite tree exists for $username";
     } else {
-        $userMan = new Gazelle\Manager\User;
         $inviteeList = $inviteTree->inviteeList();
         $inviteeCount = count($inviteeList);
         if (!$inviteeCount) {
@@ -51,13 +50,16 @@ if ($_POST['id']) {
             $message .= " entire tree ({$inviteeCount} user" . plural($inviteeCount) . ')';
             $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree $comment on $username by {$LoggedUser['Username']}";
             foreach ($inviteeList as $inviteeId) {
-                $user = $userMan->findById($inviteeId);
+                $invitee = $userMan->findById($inviteeId);
+                if (is_null($invitee)) {
+                    continue;
+                }
                 if ($doComment) {
-                    $user->addStaffNote($comment)->modify();
+                    $invitee->addStaffNote($comment)->modify();
                 } elseif ($doDisable) {
                     $userMan->disableUserList([$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
                 } elseif ($doInvites) {
-                    $user->addStaffNote($comment)->modify();
+                    $invitee->addStaffNote($comment)->modify();
                     $userMan->disableInvites($inviteeId);
                 }
             }
