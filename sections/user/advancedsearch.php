@@ -9,13 +9,14 @@ if (!empty($_GET['search'])) {
         $_GET['ip'] = $_GET['search'];
     } elseif (preg_match(EMAIL_REGEXP, $_GET['search'])) {
         $_GET['email'] = $_GET['search'];
-    } elseif (preg_match(USERNAME_REGEXP, $_GET['search'])) {
-        $found = (new Gazelle\Manager\User)->findByUsername($_GET['search']);
+    } elseif (preg_match(USERNAME_REGEXP, $_GET['search'], $match)) {
+        $username = $match['username'];
+        $found = (new Gazelle\Manager\User)->findByUsername($username);
         if ($found) {
             header("Location: user.php?id=" . $found->id());
             exit;
         }
-        $_GET['username'] = $found->username();
+        $_GET['username'] = $username;
     } else {
         $_GET['comment'] = $_GET['search'];
     }
@@ -491,8 +492,7 @@ if (!empty($_GET)) {
     if (count($Having)) {
         $SQL .= "\nHAVING " . implode(' AND ', $Having);
     }
-    $total = $DB->scalar($SQL, ...array_merge($Args, $HavingArgs));
-    $paginator->setTotal($total);
+    $paginator->setTotal($DB->scalar($SQL, ...array_merge($Args, $HavingArgs)) ?? 0);
 
     $SQL = "SELECT $columns $from " . implode("\n", $Join);
     if (count($Where)) {
@@ -519,7 +519,6 @@ View::show_header('User search');
 echo $Twig->render('admin/advanced-user-search.twig', [
     'paginator'     => $paginator,
     'show_invited'  => $showInvited,
-    'total'         => $total,
     'page'          => $Results,
 
     // first column

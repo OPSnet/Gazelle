@@ -428,7 +428,7 @@ Results ordered <select name="order">
 
 {{ paginator.linkbox|raw }}
 <div class="box pad center">
-    <h2>{{ total|number_format }} result{{ total|plural }}</h2>
+    <h2>{{ paginator.total|number_format }} result{{ paginator.total|plural }}</h2>
     <table width="100%">
         <tr class="colhead">
             <td>Username</td>
