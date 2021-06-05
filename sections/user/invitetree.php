@@ -8,7 +8,7 @@ if (!isset($_GET['userid'])) {
     }
     $userId = (int)$_GET['userid'];
 }
-$user = (new Gazelle\Manager\User)->findById($userId);
+$user = (new Gazelle\Manager\User)->find($userId);
 if (is_null($user)) {
     error(404);
 }
