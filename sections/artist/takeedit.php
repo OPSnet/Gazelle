@@ -30,6 +30,9 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     $body      = trim($_POST['body']);
     $summary[] = trim($_POST['summary']);
     $image     = trim($_POST['image']);
+}
+
+if (!empty($image)) {
     ImageTools::blacklisted($image);
     if (!preg_match(IMAGE_REGEXP, $image)) {
         error("That does not look like a valid image url");
