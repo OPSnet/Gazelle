@@ -177,8 +177,7 @@ if (!empty($FormatArray) && in_array(array_search('FLAC', $Formats), $FormatArra
 
 // GroupID
 if (!empty($_POST['groupid'])) {
-    preg_match(TGROUP_REGEXP, $_POST['groupid'], $match);
-    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)($match['id'] ?? 0));
+    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['groupid'] ?? 0));
     if (is_null($tgroup) || $tgroup->categoryId() !== 1) {
         $Err = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
     } else {
