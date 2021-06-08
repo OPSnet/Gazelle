@@ -9,7 +9,7 @@ $t->setViewerId($LoggedUser['ID']);
 $tgroup  = $t->group();
 $group   = $tgroup->info();
 $torrent = $t->info();
-$torrentId = $torrent->id();
+$torrentId = $t->id();
 
 if ($LoggedUser['ID'] != $torrent['UserID'] && !check_perms('torrents_delete')) {
     error(403);
