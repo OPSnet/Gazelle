@@ -453,7 +453,6 @@ function log_token_attempt(DB_MYSQL $db, int $userId = 0): void {
     }
 
     $attempts++;
-    $watch->setWatch($attemptId);
     if ($attempts < 6) {
         $watch->increment($userId, $ipaddr, null);
         return;
