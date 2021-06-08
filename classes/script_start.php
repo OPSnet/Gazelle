@@ -50,6 +50,33 @@ $Debug->setStartTime($now)
 $Twig = Gazelle\Util\Twig::factory();
 Gazelle\Base::initialize($Cache, $DB, $Twig);
 
+// TODO: reconcile this with log_attempt in login/index.php
+function log_token_attempt(DB_MYSQL $db, int $userId): void {
+    $ipaddr = $_SERVER['REMOTE_ADDR'];
+    [$attemptId, $attempts, $bans] = $DB->row("
+        SELECT ID, Attempts, Bans
+        FROM login_attempts
+        WHERE IP = ?
+        ", $ipaddr
+    );
+
+    $watch = new Gazelle\LoginWatch($ipaddr);
+    if (!$attemptId) {
+        $watch->create($ipaddr, null, $userId);
+        return;
+    }
+
+    $attempts++;
+    if ($attempts < 6) {
+        $watch->increment($userId, $ipaddr, null);
+        return;
+    }
+    $watch->ban($attempts, null, $userId);
+    if ($bans > 9) {
+        (new Gazelle\Manager\IPv4)->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
+    }
+}
+
 //-- Load user information
 // User info is broken up into many sections
 // Heavy - Things that the site never has to look at if the user isn't logged in (as opposed to things like the class, donor status, etc)
@@ -62,6 +89,7 @@ Gazelle\Base::initialize($Cache, $DB, $Twig);
 // Set the document we are loading
 $Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
 $userMan = new Gazelle\Manager\User;
+$ipv4Man = new Gazelle\Manager\IPv4;
 $LoggedUser = [];
 $SessionID = false;
 $FullToken = null;
@@ -69,7 +97,7 @@ $user = null;
 
 // Only allow using the Authorization header for ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
-    if ((new Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
+    if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
     }
@@ -98,7 +126,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     }
     $user = $userMan->findById((int)$LoggedUser['ID']);
     if (is_null($user) || $Revoked === 1) {
-        log_token_attempt($DB);
+        log_token_attempt($DB, (int)$UserID);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
@@ -202,8 +230,7 @@ if ($user) {
 
     // IP changed
     if ($LoggedUser['IP'] != $_SERVER['REMOTE_ADDR'] && !check_perms('site_disable_ip_history')) {
-        $IPv4Man = new Gazelle\Manager\IPv4;
-        if ($IPv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
+        if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
         $user->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);

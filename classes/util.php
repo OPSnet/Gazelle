@@ -435,34 +435,6 @@ function randomString($len = 32) {
     return $out;
 }
 
-// TODO: reconcile this with log_attempt in login/index.php
-function log_token_attempt(DB_MYSQL $db, int $userId = 0): void {
-    $ipaddr = $_SERVER['REMOTE_ADDR'];
-    $watch = new Gazelle\LoginWatch($ipaddr);
-
-    [$attemptId, $attempts, $bans] = $db->row('
-        SELECT ID, Attempts, Bans
-        FROM login_attempts
-        WHERE IP = ?
-        ', $ipaddr
-    );
-
-    if (!$attemptId) {
-        $watch->create($ipaddr, null, $userId);
-        return;
-    }
-
-    $attempts++;
-    if ($attempts < 6) {
-        $watch->increment($userId, $ipaddr, null);
-        return;
-    }
-    $watch->ban($attempts, null, $userId);
-    if ($bans > 9) {
-        (new IPv4())->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
-    }
-}
-
 /**
  * Shorten a string
  *
