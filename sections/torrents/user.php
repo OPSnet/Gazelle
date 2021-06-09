@@ -6,7 +6,9 @@ if (!isset($_GET['userid'])) {
     header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
     exit;
 }
-
+if ($_GET['userid'] == 'me') {
+    $_GET['userid'] = $LoggedUser['ID'];
+}
 $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
