@@ -102,7 +102,8 @@ class Text {
         ':wub:'      => 'wub.gif',
         ':|'         => 'blank.gif',
         ';-)'        => 'wink.gif',
-        //':\\'      => 'hmm.gif',
+        ':\\'        => 'hmm.gif',
+        ':/'         => 'hmm.gif',
     ];
 
     private static $ColorName = [
