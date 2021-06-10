@@ -698,7 +698,7 @@ $DB->prepared_query("
        $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
-$tgroupMan->flushFolderCache($DirName);
+$torMan->flushFolderCache($DirName);
 $folderCheck = [$DirName => true];
 
 $Cache->increment('stats_torrent_count');
