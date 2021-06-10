@@ -90,9 +90,8 @@ class Torrent extends \Gazelle\Base {
         return $all;
     }
 
-    public function flushFoldernameCache(string $folder): int {
-        $key = sprintf(self::CACHE_FOLDERNAME, md5($folder));
-        return $this->cache->delete_value($key);
+    public function flushFoldernameCache(string $folder) {
+        $this->cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($folder)));
     }
 
     public function missingLogfiles(int $userId): array {
@@ -261,7 +260,7 @@ class Torrent extends \Gazelle\Base {
                 $torrentId
             );
             $this->cache->delete_value("torrents_details_$groupId");
-            $this->clearFoldernameCache($folderPath);
+            $this->flushFoldernameCache($folderPath);
         }
         $this->db->set_query_id($qid);
         return $n;
