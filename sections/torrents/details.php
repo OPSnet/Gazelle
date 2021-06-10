@@ -5,15 +5,9 @@ function compare($X, $Y) {
 header('Access-Control-Allow-Origin: *');
 
 $GroupID = (int)$_GET['id'];
-if (!empty($_GET['revisionid']) && is_number($_GET['revisionid'])) {
-    $RevisionID = $_GET['revisionid'];
-} else {
-    $RevisionID = 0;
-}
+$RevisionID = (int)($_GET['revisionid'] ?? 0);
 
-$TorrentCache = get_group_info($GroupID, $RevisionID);
-$TorrentDetails = $TorrentCache[0];
-$TorrentList = $TorrentCache[1];
+[$TorrentDetails, $TorrentList] = get_group_info($GroupID, $RevisionID);
 
 // Group details
 [$WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
@@ -538,8 +532,7 @@ foreach ($TorrentList as $Torrent) {
 
     if ($NumReports == 0) {
         $Reported = false;
-    }
-    else {
+    } else {
         $Reported = true;
         $Torrent['Reported'] = $NumReports;
         $reportMan = new Gazelle\Manager\ReportV2;
@@ -649,7 +642,7 @@ foreach ($TorrentList as $Torrent) {
             'remove' => check_perms('torrents_delete') || $UserID == $Viewer->id(),
             'pl'     => true,
             'extra'  => [
-                "<a href=\"ajax.php?action=torrent&id=$TorrentID\" download=\"$Title [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
+                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"$Title [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
             ],
         ]);
 ?>
@@ -666,6 +659,30 @@ foreach ($TorrentList as $Torrent) {
                 <td colspan="5">
                     <div id="release_<?=$TorrentID?>" class="no_overflow">
                         <blockquote>
+<?php
+    if ($GroupCategoryID == 1) {
+        $folderClash = $torMan->findAllByFoldername($FilePath);
+        $total = count($folderClash);
+        if ($total > 1) {
+?>
+        <strong class="important">The folder of this upload clashes with <?= $total-1 ?> other upload<?= plural($total-1) ?>.<br />
+        Downloading two or more uploads to the same folder may result in corrupted files.</strong>
+        <ul class="nobullet">
+<?php
+            foreach ($folderClash as $torrent) {
+                if ($torrent->id() === $TorrentID) {
+                    continue;
+                }
+                $group = $torrent->group();
+?>
+            <li><a href="/torrents.php?id=<?= $torrent->groupId() ?>&amp;torrentid=<?= $torrent->id() ?>"><?=
+                $group->artistName() ?> - <?= $group->name() ?></a> (torrent id=<?= $torrent->id() ?>)</li>
+<?php       } ?>
+        </ul>
+<?php
+        }
+    }
+?>
                             Uploaded by <?=Users::format_username($UserID, false, false, false)?> <?=time_diff($TorrentTime);?>
 <?php
     if ($Seeders == 0) {
