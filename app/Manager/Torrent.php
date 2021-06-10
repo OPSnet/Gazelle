@@ -90,7 +90,7 @@ class Torrent extends \Gazelle\Base {
         return $all;
     }
 
-    public function clearFoldernameCache(string $folder): int {
+    public function flushFoldernameCache(string $folder): int {
         $key = sprintf(self::CACHE_FOLDERNAME, md5($folder));
         return $this->cache->delete_value($key);
     }
