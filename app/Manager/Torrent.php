@@ -37,6 +37,7 @@ class Torrent extends \Gazelle\Base {
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     const CACHE_KEY_FEATURED       = 'featured_%d';
+    const CACHE_FOLDERNAME         = 'foldername_%s';
 
     const FILELIST_DELIM_UTF8 = "\xC3\xB7";
 
@@ -60,6 +61,38 @@ class Torrent extends \Gazelle\Base {
             ", $hash
         );
         return $id ? new \Gazelle\Torrent($id) : null;
+    }
+
+    /**
+     * How many other uploads share the same folder path?
+     *
+     * @param string base path in the torrent
+     * @return array of Gazelle\Torrent objects;
+     */
+    public function findAllByFoldername(string $folder): array {
+        $key = sprintf(self::CACHE_FOLDERNAME, md5($folder));
+        $list = $this->cache->get_value($key);
+        if ($list === false) {
+            $this->db->prepared_query("
+                SELECT ID FROM torrents WHERE FilePath = ?
+                ", $folder
+            );
+            $list = $this->db->collect(0);
+            $this->cache->cache_value($key, $list, 0);
+        }
+        $all = [];
+        foreach ($list as $id) {
+            $torrent = $this->findById($id);
+            if ($torrent) {
+                $all[] = $torrent;
+            }
+        }
+        return $all;
+    }
+
+    public function clearFoldernameCache(string $folder): int {
+        $key = sprintf(self::CACHE_FOLDERNAME, md5($folder));
+        return $this->cache->delete_value($key);
     }
 
     public function missingLogfiles(int $userId): array {
@@ -211,6 +244,7 @@ class Torrent extends \Gazelle\Base {
             $Tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
             $Tor->decodeString($str = (new \Gazelle\File\Torrent())->get($torrentId));
             $TorData = $Tor->getData();
+            $folderPath = isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : '';
             ['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
             $TmpFileList = [];
             foreach ($FileList as $file) {
@@ -223,12 +257,11 @@ class Torrent extends \Gazelle\Base {
                     FilePath = ?,
                     FileList = ?
                 WHERE ID = ?
-                ", $TotalSize,
-                    (isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : ''),
-                    implode("\n", $TmpFileList),
+                ", $TotalSize, $folderPath, implode("\n", $TmpFileList),
                 $torrentId
             );
             $this->cache->delete_value("torrents_details_$groupId");
+            $this->clearFoldernameCache($folderPath);
         }
         $this->db->set_query_id($qid);
         return $n;
