@@ -337,7 +337,8 @@ if (!empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
 //--------------- Generate torrent file ----------------------------------------//
 
 $torMan = new Gazelle\Manager\Torrent;
-$torrentFiler = new Gazelle\File\Torrent();
+$tgroupMan = new Gazelle\Manager\TGroup;
+$torrentFiler = new Gazelle\File\Torrent;
 $bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
 $bencoder->decodeFile($TorrentName);
 $PublicTorrent = $bencoder->makePrivate(); // The torrent is now private.
@@ -697,6 +698,8 @@ $DB->prepared_query("
        $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
+$tgroupMan->flushFolderCache($DirName);
+$folderCheck = [$DirName => true];
 
 $Cache->increment('stats_torrent_count');
 $TorrentID = $DB->inserted_id();
@@ -716,7 +719,7 @@ $Debug->set_flag('upload: ocelot updated');
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 300);
 
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    (new Gazelle\Manager\TGroup)->flushLatestUploads(5);
+    $tgroupMan->flushLatestUploads(5);
 }
 
 //******************************************************************************//
@@ -816,16 +819,16 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
         $ExtraTorrent['InfoHash'], $ExtraTorrent['NumFiles'], $ExtraTorrent['FileString'],
         $ExtraTorrent['FilePath'], $ExtraTorrent['TotalSize'], $ExtraTorrent['TorrentDescription']
     );
-
-    $Cache->increment('stats_torrent_count');
     $ExtraTorrentID = $DB->inserted_id();
-
     $DB->prepared_query('
         INSERT INTO torrents_leech_stats (TorrentID)
         VALUES (?)
         ', $ExtraTorrentID
     );
 
+    $torMan->flushFolderCache($ExtraTorrent['FilePath']);
+    $folderCheck[$ExtraTorrent['FilePath']] = true;
+    $Cache->increment('stats_torrent_count');
     $tracker->update_tracker('add_torrent', [
         'id' => $ExtraTorrentID,
         'info_hash' => rawurlencode($ExtraTorrent['InfoHash']),
@@ -884,13 +887,24 @@ if (defined('AJAX')) {
     }
     json_print('success', $Response);
 } else {
-    if ($PublicTorrent || $UnsourcedTorrent) {
+    $folderClash = 0;
+    if ($isMusicUpload) {
+        foreach (array_keys($folderCheck) as $foldername) {
+            // This also has the nice side effect of warming the cache immediately
+            $list = $torMan->findAllByFoldername($foldername);
+            if (count($list) > 1) {
+                ++$folderClash;
+            }
+        }
+    }
+    if ($PublicTorrent || $UnsourcedTorrent || $folderClash) {
         View::show_header('Warning');
         echo $Twig->render('upload/result_warnings.twig', [
-            'group_id' => $GroupID,
-            'public' => $PublicTorrent,
+            'clash'     => $folderClash,
+            'group_id'  => $GroupID,
+            'public'    => $PublicTorrent,
             'unsourced' => $UnsourcedTorrent,
-            'source_flag_wiki_id' => SOURCE_FLAG_WIKI_PAGE_ID,
+            'wiki_id'   => SOURCE_FLAG_WIKI_PAGE_ID,
         ]);
         View::show_footer();
     } elseif ($RequestID) {
@@ -962,7 +976,7 @@ if (!in_array('notifications', $paranoia)) {
         ->addEncodings($Properties['Encoding'])
         ->addMedia($Properties['Media'])
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
-        ->addArtists((new Gazelle\Manager\TGroup)->findById($GroupID)->artistRole())
+        ->addArtists($tgroupMan->findById($GroupID)->artistRole())
         ->addTags($tagList)
         ->addCategory($Type)
         ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
