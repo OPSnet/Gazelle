@@ -53,7 +53,7 @@ Gazelle\Base::initialize($Cache, $DB, $Twig);
 // TODO: reconcile this with log_attempt in login/index.php
 function log_token_attempt(DB_MYSQL $db, int $userId): void {
     $ipaddr = $_SERVER['REMOTE_ADDR'];
-    [$attemptId, $attempts, $bans] = $DB->row("
+    [$attemptId, $attempts, $bans] = $db->row("
         SELECT ID, Attempts, Bans
         FROM login_attempts
         WHERE IP = ?
