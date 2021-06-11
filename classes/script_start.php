@@ -53,26 +53,13 @@ Gazelle\Base::initialize($Cache, $DB, $Twig);
 // TODO: reconcile this with log_attempt in login/index.php
 function log_token_attempt(DB_MYSQL $db, int $userId): void {
     $ipaddr = $_SERVER['REMOTE_ADDR'];
-    [$attemptId, $attempts, $bans] = $db->row("
-        SELECT ID, Attempts, Bans
-        FROM login_attempts
-        WHERE IP = ?
-        ", $ipaddr
-    );
-
     $watch = new Gazelle\LoginWatch($ipaddr);
-    if (!$attemptId) {
-        $watch->create($ipaddr, null, $userId);
+    $watch->increment($userId, "[usertoken:$userId]");
+    if ($watch->nrAttempts() < 6) {
         return;
     }
-
-    $attempts++;
-    if ($attempts < 6) {
-        $watch->increment($userId, $ipaddr, null);
-        return;
-    }
-    $watch->ban($attempts, null, $userId);
-    if ($bans > 9) {
+    $watch->ban("[id:$userId]");
+    if ($watch->nrBans() > 9) {
         (new Gazelle\Manager\IPv4)->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
     }
 }
