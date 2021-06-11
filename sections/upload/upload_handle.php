@@ -698,7 +698,7 @@ $DB->prepared_query("
        $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
-$torMan->flushFolderCache($DirName);
+$torMan->flushFoldernameCache($DirName);
 $folderCheck = [$DirName => true];
 
 $Cache->increment('stats_torrent_count');
@@ -826,7 +826,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
         ', $ExtraTorrentID
     );
 
-    $torMan->flushFolderCache($ExtraTorrent['FilePath']);
+    $torMan->flushFoldernameCache($ExtraTorrent['FilePath']);
     $folderCheck[$ExtraTorrent['FilePath']] = true;
     $Cache->increment('stats_torrent_count');
     $tracker->update_tracker('add_torrent', [
