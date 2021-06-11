@@ -20,6 +20,7 @@ class Login extends Base {
     protected $watch;
 
     public function __construct() {
+        parent::__construct();
         $this->ipaddr = $_SERVER['REMOTE_ADDR'];
     }
 
