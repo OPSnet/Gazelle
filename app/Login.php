@@ -84,9 +84,8 @@ class Login extends Base {
                 (new Manager\IPv4)->createBan(
                     $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
                 );
-                global $Twig;
                 (new Manager\User)->sendPM($this->userId, 0, "Too many login attempts on your account",
-                    $Twig->render('login/too-many-failures.twig', [
+                    $this->twig->render('login/too-many-failures.twig', [
                     'ipaddr' => $this->ipaddr,
                     'username' => $this->username,
                 ]));
