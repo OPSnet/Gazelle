@@ -2,14 +2,18 @@
 
 use \Gazelle\Util\Irc;
 
-enforce_login();
+// The torrent_pass is not passed if we're using AJAX, and optional if we're
+// going through the site regularly as we can validate based on cookie. In
+// these cases, we want to then enforce_login, but if the user IS using a torrent
+// pass, we have to assume it is coming from a seedbox or other non-authenticated
+// environment so we cannot enforce_login.
+if (defined('AJAX') || !isset($_REQUEST['torrent_pass'])) {
+    enforce_login();
+    $Viewer = (new Gazelle\Manager\User)->findById($LoggedUser['ID']);
+} else {
+    $Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass']);
+}
 
-// If using an ajax endpoint, we only have access to their LoggedUser['ID'] which is evaluated
-// and confirmed in script_start.php. For regular endpoints, we just utilize the torrent_pass
-// which is part of the GET payload.
-$Viewer = defined('AJAX')
-    ? (new Gazelle\Manager\User)->findById($LoggedUser['ID'])
-    : (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass'] ?? '');
 if (is_null($Viewer)) {
     json_or_error('missing user', 404);
 } elseif (!$Viewer->isEnabled() || $Viewer->isLocked()) {
