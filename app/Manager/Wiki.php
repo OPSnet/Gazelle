@@ -65,28 +65,25 @@ class Wiki extends \Gazelle\Base {
         $this->db->begin_transaction();
         $this->db->prepared_query("
             INSERT INTO wiki_revisions
-                   (ID, Revision, Title, Body, Author, Date)
+                  (ID, Revision, Title, Body, Author, Date)
             SELECT ID, Revision, Title, Body, Author, Date
             FROM wiki_articles
             WHERE ID = ?
-            GROUP BY ID
-            ", $articleId
-        );
-        $revision = $this->db->scalar("
-            SELECT max(Revision) FROM wiki_articles WHERE ID = ?
+            ORDER BY Revision DESC
+            LIMIT 1
             ", $articleId
         );
         $this->db->prepared_query("
             UPDATE wiki_articles SET
                 Date = now(),
-                Revision = ?,
                 Title = ?,
                 Body = ?,
                 MinClassRead = ?,
                 MinClassEdit = ?,
-                Author = ?
+                Author = ?,
+                Revision = 1 + (SELECT max(Revision) FROM wiki_articles WHERE ID = ?)
             WHERE ID = ?
-            ", $revision + 1, trim($title), trim($body), $minRead, $minEdit, $userId,
+            ", trim($title), trim($body), $minRead, $minEdit, $userId, $articleId,
                 $articleId
         );
         $this->db->commit();
