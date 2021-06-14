@@ -555,17 +555,11 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
                 continue;
             }
 
-            //Get report info for each torrent, use the cache if available, if not, add to it.
-            $Reported = false;
-            $Reports = Torrents::get_reports($TorrentID);
-            if (count($Reports) > 0) {
-                $Reported = true;
-            }
-
             if ($Data['Remastered'] && !$Data['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
             $SnatchedTorrentClass = $Data['IsSnatched'] ? ' snatched_torrent' : '';
+            $Reported = $torMan->hasReport($TorrentID);
 
             if (isset($GroupedCategories[$CategoryID - 1])
                     && ($Data['RemasterTitle'] != $LastRemasterTitle

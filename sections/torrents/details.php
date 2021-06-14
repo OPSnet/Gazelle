@@ -526,21 +526,17 @@ foreach ($TorrentList as $Torrent) {
         $UnknownCounter++;
     }
 
-    unset($ReportedTimes);
-    $Reports = Torrents::get_reports($TorrentID);
+    $Reports = $torMan->reportList($TorrentID);
     $NumReports = count($Reports);
-
-    if ($NumReports == 0) {
-        $Reported = false;
-    } else {
-        $Reported = true;
+    $Reported = $NumReports > 0;
+    if ($Reported) {
         $Torrent['Reported'] = $NumReports;
         $reportMan = new Gazelle\Manager\ReportV2;
         $Types = $reportMan->types();
         $ReportInfo = '
         <table class="reportinfo_table">
             <tr class="colhead_dark" style="font-weight: bold;">
-                <td>This torrent has '.$NumReports.' active '.($NumReports === 1 ? 'report' : 'reports').":</td>
+                <td>This torrent has ' . $NumReports . ' active ' . ($NumReports === 1 ? 'report' : 'reports') . ":</td>
             </tr>";
 
         foreach ($Reports as $Report) {

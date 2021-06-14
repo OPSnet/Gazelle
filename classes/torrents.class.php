@@ -966,39 +966,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         return $EditionName;
     }
 
-    //Used to get reports info on a unison cache in both browsing pages and torrent pages.
-    public static function get_reports($TorrentID) {
-        global $Cache, $DB;
-        $Reports = $Cache->get_value("reports_torrent_$TorrentID");
-        if ($Reports === false) {
-            $QueryID = $DB->get_query_id();
-            $DB->prepared_query("
-                SELECT
-                    ID,
-                    ReporterID,
-                    Type,
-                    UserComment,
-                    ReportedTime
-                FROM reportsv2
-                WHERE TorrentID = ?
-                    AND Status != 'Resolved'",
-                $TorrentID);
-            $Reports = $DB->to_array(false, MYSQLI_ASSOC, false);
-            $DB->set_query_id($QueryID);
-            $Cache->cache_value("reports_torrent_$TorrentID", $Reports, 0);
-        }
-        if (!check_perms('admin_reports')) {
-            $Return = [];
-            foreach ($Reports as $Report) {
-                if ($Report['Type'] !== 'edited') {
-                    $Return[] = $Report;
-                }
-            }
-            return $Return;
-        }
-        return $Reports;
-    }
-
     public static function bbcodeUrl($val, $attr) {
         $cacheKey = 'bbcode_torrent_' . $val;
         if ($attr) {
