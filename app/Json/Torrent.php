@@ -109,7 +109,7 @@ class Torrent extends \Gazelle\Json {
                     'leechers'      => $info['Leechers'],
                     'snatched'      => $info['Snatched'],
                     'freeTorrent'   => $info['FreeTorrent'],
-                    'reported'      => count(\Torrents::get_reports($this->torrent->id())) > 0,
+                    'reported'      => $torMan->hasReport($this->torrent->id()),
                     'time'          => $info['Time'],
                     'description'   => $info['Description'],
                     'fileList'      => implode('|||', $info['FileList']),

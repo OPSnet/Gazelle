@@ -2,6 +2,7 @@
 
 $vote = new Gazelle\Vote($LoggedUser['ID']);
 $tagMan = new Gazelle\Manager\Tag;
+$torMan = new Gazelle\Manager\Torrent;
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
@@ -199,12 +200,7 @@ foreach ($topVotes as $groupID => $group) {
         unset($firstUnknown);
 
         foreach ($torrents as $torrentID => $torrent) {
-            //Get report info, use the cache if available, if not, add to it.
-            $reported = false;
-            $reports = Torrents::get_reports($torrentID);
-            if (count($reports) > 0) {
-                $reported = true;
-            }
+            $reported = $torMan->hasReport($torrentID);
             if ($torrent['Remastered'] && !$torrent['RemasterYear']) {
                 $firstUnknown = !isset($firstUnknown);
             }
