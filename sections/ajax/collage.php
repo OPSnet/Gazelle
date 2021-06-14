@@ -1,9 +1,9 @@
 <?php
 
-if (empty($_GET['id']) || !is_number($_GET['id'])) {
+$CollageID = (int)$_GET['id'];
+if (!$CollageID) {
     json_die("failure", "bad parameters");
 }
-$CollageID = $_GET['id'];
 
 $CacheKey = sprintf(\Gazelle\Collage::CACHE_KEY, $CollageID);
 $CollageData = $Cache->get_value($CacheKey);
@@ -33,6 +33,8 @@ if ($CollageData) {
     $CommentList = null;
     $SetCache = true;
 }
+
+$torMan = new Gazelle\Manager\Torrent;
 
 // TODO: Cache this
 $DB->prepared_query("
@@ -104,7 +106,7 @@ if ($CollageCategoryID != COLLAGE_ARTISTS_ID) {
                     'leechers'                => (int)$Torrent['Leechers'],
                     'snatched'                => (int)$Torrent['Snatched'],
                     'freeTorrent'             => ($Torrent['FreeTorrent'] == 1),
-                    'reported'                => (count(Torrents::get_reports((int)$Torrent['ID'])) > 0),
+                    'reported'                => $torMan->hasReport((int)$Torrent['ID']),
                     'time'                    => $Torrent['Time']
                 ];
             }

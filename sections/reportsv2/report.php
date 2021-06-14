@@ -149,16 +149,15 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode');
 
 $FirstUnknown = ($Remastered && !$RemasterYear);
 $Reported = false;
-$Reports = Torrents::get_reports($TorrentID);
+$Reports = $torMan->reportList($TorrentID);
 $NumReports = count($Reports);
-
 if ($NumReports > 0) {
     require_once(__DIR__ . '/../reports/array.php');
     $Reported = true;
     $ReportInfo = '
     <table class="reportinfo_table">
         <tr class="colhead_dark" style="font-weight: bold;">
-            <td>This torrent has '.$NumReports.' active report'.plural($NumReports).":</td>
+            <td>This torrent has ' . $NumReports . ' active report' . plural($NumReports) . ":</td>
         </tr>";
 
     foreach ($Reports as $Report) {

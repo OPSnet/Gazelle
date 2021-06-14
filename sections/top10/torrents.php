@@ -2,6 +2,7 @@
 
 $user = new Gazelle\User($LoggedUser['ID']);
 $torrent = new \Gazelle\Top10\Torrent($Formats, $LoggedUser);
+$torMan = new Gazelle\Manager\Torrent;
 
 if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
     $details = 'all';
@@ -149,7 +150,7 @@ View::show_footer();
 
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $LoggedUser, $Categories, $groupBy;
+    global $LoggedUser, $Categories, $groupBy, $torMan;
 ?>
         <h3>Top <?="$limit $caption"?>
 <?php
@@ -246,13 +247,10 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             $displayName .= ' [' . (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']) . ']';
         }
 
-        $torrentDetails = $group['Torrents'][$torrentID];
+        $torrentDetails     = $group['Torrents'][$torrentID];
         $torrentInformation = Torrents::torrent_info($torrentDetails);
-
-        $torrentTags = new Tags($group['TagList']);
-
-        $reports = Torrents::get_reports($torrentID);
-        $reported = count($reports) > 0;
+        $torrentTags        = new Tags($group['TagList']);
+        $reported           = $torMan->hasReport($torrentID);
 
         global $Twig;
 ?>

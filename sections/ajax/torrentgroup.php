@@ -93,7 +93,7 @@ foreach ($TorrentList as $Torrent) {
         'leechers'                => (int)$Torrent['Leechers'],
         'snatched'                => (int)$Torrent['Snatched'],
         'freeTorrent'             => $Torrent['FreeTorrent'] == 1,
-        'reported'                => count(Torrents::get_reports($Torrent['ID'])) > 0,
+        'reported'                => $torMan->hasReport($Torrent['ID']),
         'time'                    => $Torrent['Time'],
         'description'             => $Torrent['Description'],
         'fileList'                => implode('|||', $FileList),
