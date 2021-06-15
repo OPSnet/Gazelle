@@ -641,6 +641,67 @@ class User extends \Gazelle\Base {
         );
     }
 
+    public function sendRemovalPM(int $torrentId, int $uploaderId, string $name, string $Log, int $trumpId, bool $pmUploader): int {
+        $subject = 'Torrent deleted: ' . $name;
+        $message = 'A torrent %s '
+            . (!$trumpId
+                 ? ' has been deleted.'
+                 : " has been trumped. You can find the new torrent [url=torrents.php?torrentid={$trumpId}]here[/url]."
+            )
+            . "\n\n[url=log.php?search=Torrent+{$torrentId}]Log message[/url]: {$Log}.";
+
+        if ($pmUploader) {
+            $this->sendPM($uploaderId, 0, $subject, sprintf($message, 'you uploaded'));
+        }
+        $seen = [$uploaderId];
+
+        $this->db->prepared_query("
+            SELECT DISTINCT xfu.uid
+            FROM xbt_files_users AS xfu
+            INNER JOIN users_info AS ui ON (xfu.uid = ui.UserID)
+            WHERE ui.NotifyOnDeleteSeeding = '1'
+                AND xfu.fid = ?
+                AND xfu.uid NOT IN (" . placeholders($seen) . ")
+            ", $torrentId, ...$seen
+        );
+        $ids = $this->db->collect('uid');
+        foreach ($ids as $userId) {
+            $this->sendPM($userId, 0, $subject, sprintf($message, 'you are seeding'));
+        }
+        $seen = array_merge($seen, $ids);
+
+        $this->db->prepared_query("
+            SELECT DISTINCT xs.uid
+            FROM xbt_snatched AS xs
+            INNER JOIN users_info AS ui ON (xs.uid = ui.UserID)
+            WHERE ui.NotifyOnDeleteSnatched = '1'
+                AND xs.fid = ?
+                AND xs.uid NOT IN (" . placeholders($seen) . ")
+            ", $torrentId, ...$seen
+        );
+        $ids = $this->db->collect('uid');
+        foreach ($ids as $userId) {
+            $this->sendPM($userId, 0, $subject, sprintf($message, 'you have snatched'));
+        }
+        $seen = array_merge($seen, $ids);
+
+        $this->db->prepared_query("
+            SELECT DISTINCT ud.UserID
+            FROM users_downloads AS ud
+            INNER JOIN users_info AS ui ON (ud.UserID = ui.UserID)
+            WHERE ui.NotifyOnDeleteDownloaded = '1'
+                AND ud.TorrentID = ?
+                AND ud.UserID NOT IN (" . placeholders($seen) . ")
+            ", $torrentId, ...$seen
+        );
+        $ids = $this->db->collect('UserID');
+        foreach ($ids as $userId) {
+            $this->sendPM($userId, 0, $subject, sprintf($message, 'you have downloaded'));
+        }
+
+        return count(array_merge($seen, $ids));
+    }
+
     /**
      * Warn a user.
      *

@@ -252,67 +252,6 @@ class Torrents {
         }
     }
 
-    public static function send_pm($TorrentID, $UploaderID, $Name, $Log, $TrumpID = 0, $PMUploader = false) {
-        global $DB;
-
-        $Subject = 'Torrent deleted: ' . $Name;
-
-        $MessageStart = 'A torrent ';
-        if ($TrumpID > 0) {
-            $MessageEnd = ' has been trumped. You can find the new torrent [url=torrents.php?torrentid='.$TrumpID.']here[/url].';
-        }
-        else {
-            $MessageEnd = ' has been deleted.';
-        }
-        $MessageEnd .= "\n\n[url=log.php?search=Torrent+{$TorrentID}]Log message[/url]: {$Log}.";
-
-        // Uploader
-        $userMan = new \Gazelle\Manager\User;
-        if ($PMUploader) {
-            $userMan->sendPM($UploaderID, 0, $Subject, $MessageStart.'you uploaded'.$MessageEnd);
-        }
-        $PMedUsers = [$UploaderID];
-
-        // Seeders
-        $DB->prepared_query("
-SELECT DISTINCT(xfu.uid)
-FROM
-    xbt_files_users AS xfu
-    JOIN users_info AS ui ON xfu.uid = ui.UserID
-WHERE xfu.fid = ?
-    AND ui.NotifyOnDeleteSeeding='1'
-    AND xfu.uid NOT IN (" . placeholders($PMedUsers) . ")
-", $TorrentID, ...$PMedUsers);
-        $UserIDs = $DB->collect('uid');
-        foreach ($UserIDs as $UserID) {
-            $userMan->sendPM($UserID, 0, $Subject, $MessageStart . "you're seeding" . $MessageEnd);
-        }
-        $PMedUsers = array_merge($PMedUsers, $UserIDs);
-
-        // Snatchers
-        $DB->prepared_query("
-SELECT DISTINCT(xs.uid)
-FROM xbt_snatched AS xs JOIN users_info AS ui ON xs.uid = ui.UserID
-WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN (" . placeholders($PMedUsers) . ")
-", $TorrentID, ...$PMedUsers);
-        $UserIDs = $DB->collect('uid');
-        foreach ($UserIDs as $UserID) {
-            $userMan->sendPM($UserID, 0, $Subject, $MessageStart . "you've snatched" . $MessageEnd);
-        }
-        $PMedUsers = array_merge($PMedUsers, $UserIDs);
-
-        // Downloaders
-        $DB->prepared_query("
-SELECT DISTINCT(ud.UserID)
-FROM users_downloads AS ud JOIN users_info AS ui ON ud.UserID = ui.UserID
-WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN (" . placeholders($PMedUsers) . ")
-", $TorrentID, ...$PMedUsers);
-        $UserIDs = $DB->collect('UserID');
-        foreach ($UserIDs as $UserID) {
-            $userMan->sendPM($UserID, 0, $Subject, $MessageStart . "you've downloaded" . $MessageEnd);
-        }
-    }
-
     /**
      * Delete a group, called after all of its torrents have been deleted.
      * IMPORTANT: Never call this unless you're certain the group is no longer used by any torrents
