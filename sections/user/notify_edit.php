@@ -157,7 +157,7 @@ foreach ($Notifications as $N) { // $N stands for Notifications
             <tr>
                 <td class="label"><strong>Only these categories</strong></td>
                 <td>
-<?php   foreach ($Categories as $Category) { ?>
+<?php   foreach (CATEGORY as $Category) { ?>
                     <input type="checkbox" name="categories<?=$i?>[]" id="<?=$Category?>_<?=$N['ID']?>" value="<?=$Category?>"<?php if (in_array($Category, $N['Categories'])) { echo ' checked="checked"';} ?> />
                     <label for="<?=$Category?>_<?=$N['ID']?>"><?=$Category?></label>
 <?php   } ?>

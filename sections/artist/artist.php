@@ -499,7 +499,7 @@ if ($Requests) {
     $Tags = Requests::get_tags(array_keys($Requests));
     $Row = 'b';
     foreach ($Requests as $RequestID => $Request) {
-            $CategoryName = $Categories[$Request['CategoryID'] - 1];
+            $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
             $Title = display_str($Request['Title']);
             if ($CategoryName == 'Music') {
                 $ArtistForm = Requests::get_artists($RequestID);

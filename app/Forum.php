@@ -131,6 +131,10 @@ class Forum extends Base {
         return $this->info()['description'];
     }
 
+    public function hasRevealVotes(): bool {
+        return in_array($this->forumId, FORUM_REVEAL_VOTER);
+    }
+
     public function isLocked(): bool {
         return $this->info()['is_locked'] ?? false;
     }

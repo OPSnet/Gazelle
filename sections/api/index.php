@@ -9,7 +9,6 @@ if (empty($_GET['aid']) || empty($_GET['token'])) {
 }
 
 $api = new $className($Twig, [
-    'Categories' => $Categories,
     'CollageCats' => $CollageCats,
     'ReleaseTypes' => (new \Gazelle\ReleaseType)->list(),
     'Debug' => $Debug,

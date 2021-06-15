@@ -32,9 +32,8 @@ if ($NewRequest) {
     $VoteArray = Requests::get_votes_array($RequestID);
     $VoteCount = count($VoteArray['Voters']);
     $IsFilled = !empty($Request['TorrentID']);
-    $CategoryName = $Categories[$Request['CategoryID'] - 1];
+    $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
     $CanEdit = ((!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
-
     if (!$CanEdit) {
         error(403);
     }
@@ -46,7 +45,7 @@ if (empty($_POST['type'])) {
 }
 
 $CategoryName = $_POST['type'];
-$CategoryID = (array_search($CategoryName, $Categories) + 1);
+$CategoryID = (array_search($CategoryName, CATEGORY) + 1);
 
 if (empty($CategoryID)) {
     error(0);

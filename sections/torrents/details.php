@@ -112,7 +112,7 @@ if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) {
 <?php } ?>
             <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=
                 $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
-<?php if ($Categories[$GroupCategoryID-1] == 'Music') { ?>
+<?php if (CATEGORY[$GroupCategoryID-1] == 'Music') { ?>
             <a href="upload.php?groupid=<?=$GroupID?>" class="brackets">Add format</a>
 <?php
 }
@@ -166,7 +166,7 @@ if (check_perms('site_submit_requests')) {
 <?php if ($WikiImage != '') { ?>
             <p align="center"><img width="100%" src="<?=ImageTools::process($WikiImage, true)?>" alt="<?=$AltName?>" onclick="lightbox.init('<?=ImageTools::process($WikiImage)?>', 220);" /></p>
 <?php } else { ?>
-            <p align="center"><img width="100%" src="<?=STATIC_SERVER?>/common/noartwork/<?=$CategoryIcons[$GroupCategoryID - 1]?>" alt="<?=$Categories[$GroupCategoryID - 1]?>" class="brackets tooltip" title="<?=$Categories[$GroupCategoryID - 1]?>" height="220" border="0" /></p>
+            <p align="center"><img width="100%" src="<?=STATIC_SERVER?>/common/noartwork/<?=CATEGORY_ICON[$GroupCategoryID - 1]?>" alt="<?=CATEGORY[$GroupCategoryID - 1]?>" class="brackets tooltip" title="<?=CATEGORY[$GroupCategoryID - 1]?>" height="220" border="0" /></p>
 <?php
 }
 $Index++;
@@ -222,7 +222,7 @@ $Index++;
 
     </div>
 <?php
-if ($Categories[$GroupCategoryID - 1] == 'Music') {
+if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
     $ShownWith = false;
     $title = '';
     if (!empty($Artists[6]) && !empty($Artists[1])) {

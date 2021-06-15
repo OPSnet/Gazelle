@@ -19,7 +19,7 @@ authorize();
 //******************************************************************************//
 
 $TypeID = (int)$_POST['type'];
-$Type = $Categories[$TypeID-1];
+$Type = CATEGORY[$TypeID - 1];
 $TorrentID = (int)$_POST['torrentid'];
 $Properties = [];
 $Properties['Name'] = trim($_POST['title'] ?? '');
@@ -103,7 +103,7 @@ if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && 
 }
 
 $Validate = new Gazelle\Util\Validator;
-$Validate->setField('type', '1', 'number', 'Not a valid type.', ['range' => [1, count($Categories)]]);
+$Validate->setField('type', '1', 'number', 'Not a valid category.', ['range' => [1, count(CATEGORY)]]);
 switch ($Type) {
     case 'Music':
         if (!empty($Properties['Remastered']) && !$Properties['UnknownRelease'] && $Properties['RemasterYear'] < 1982 && $Properties['Media'] == 'CD') {

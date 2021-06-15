@@ -465,8 +465,7 @@ function shortenString(string $text, int $maxLength, bool $force = false, bool $
 }
 
 function proxyCheck(string $IP): bool {
-    global $AllowedProxies;
-    foreach ($AllowedProxies as $allowed) {
+    foreach (ALLOWED_PROXY as $allowed) {
         //based on the wildcard principle it should never be shorter
         if (strlen($IP) < strlen($allowed)) {
             continue;

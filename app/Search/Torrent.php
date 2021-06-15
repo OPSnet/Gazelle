@@ -429,8 +429,7 @@ class Torrent {
                     if (is_number($Category)) {
                         $CategoryFilter[] = $Category;
                     } else {
-                        global $Categories;
-                        $ValidValues = array_map('strtolower', $Categories);
+                        $ValidValues = array_map('strtolower', CATEGORY);
                         if (($CategoryID = array_search(strtolower($Category), $ValidValues)) !== false) {
                             $CategoryFilter[] = $CategoryID + 1;
                         }

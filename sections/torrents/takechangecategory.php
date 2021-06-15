@@ -17,7 +17,7 @@ if (!$OldGroupID || !$NewCategoryID || !$TorrentID || empty($Title)) {
     error(0);
 }
 
-switch ($Categories[$NewCategoryID-1]) {
+switch (CATEGORY[$NewCategoryID - 1]) {
     case 'Music':
         $ArtistName = trim($_POST['artist']);
         $Year = (int)$_POST['year'];

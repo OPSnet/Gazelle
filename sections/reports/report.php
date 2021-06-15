@@ -34,7 +34,7 @@ switch ($Short) {
         if (!$Name) {
             error(404);
         }
-        if ($Filled || ($CategoryID != 0 && ($Categories[$CategoryID - 1] != 'Music' || $Year != 0))) {
+        if ($Filled || ($CategoryID != 0 && (CATEGORY[$CategoryID - 1] != 'Music' || $Year != 0))) {
             error(403);
         }
         break;

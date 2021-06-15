@@ -65,7 +65,7 @@ Highcharts.chart('torrent-pie', {
         name: 'Upload types',
         data: [
 <?php foreach ($torrentCat as $label => $value) { ?>
-            { name: '<?= $Categories[$value[0] - 1] ?>', y: <?= $value[1] ?> },
+            { name: '<?= CATEGORY[$value[0] - 1] ?>', y: <?= $value[1] ?> },
 <?php } ?>
         ]
     }],

@@ -127,7 +127,7 @@ if ($threadInfo['NoPoll'] == 0) {
         $MaxVotes = 0;
     }
 
-    $RevealVoters = in_array($forumId, $ForumsRevealVoters);
+    $RevealVoters = $forum->hasRevealVotes();
     $UserResponse = $forum->pollVote($Viewer->id(), $threadId);
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];

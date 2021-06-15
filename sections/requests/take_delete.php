@@ -22,7 +22,7 @@ if ($Viewer->id() != $UserID && !check_perms('site_moderate_requests')) {
     error(403);
 }
 
-$CategoryName = $Categories[$CategoryID - 1];
+$CategoryName = CATEGORY[$CategoryID - 1];
 
 //Do we need to get artists?
 if ($CategoryName === 'Music') {

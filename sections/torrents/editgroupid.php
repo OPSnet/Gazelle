@@ -40,7 +40,7 @@ if (empty($_POST['confirm'])) {
         WHERE ID = ?
         ", $GroupID
     );
-    if ($Categories[$CategoryID - 1] != 'Music') {
+    if (CATEGORY[$CategoryID - 1] != 'Music') {
         error('Destination torrent group must be in the "Music" category.');
     }
 

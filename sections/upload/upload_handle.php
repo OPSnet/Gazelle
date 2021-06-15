@@ -27,7 +27,7 @@ if (!defined('AJAX')) {
 
 $Err = null;
 $Properties = [];
-$Type = $Categories[(int)$_POST['type']];
+$Type = CATEGORY[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
 $Properties['Title'] = trim($_POST['title']);
@@ -90,7 +90,7 @@ $isMusicUpload = ($Type === 'Music');
 // common to all types
 $Validate = new Gazelle\Util\Validator;
 $Validate->setFields([
-    ['type', '1', 'inarray', 'Please select a valid type.', ['inarray' => array_keys($Categories)]],
+    ['type', '1', 'inarray', 'Please select a valid category.', ['inarray' => array_keys(CATEGORY)]],
     ['release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1000000]],
     ['rules', '1','require','Your torrent must abide by the rules.'],
 ]);

@@ -57,7 +57,7 @@ print
 
 
 function generate_torrent_json($caption, $tag, $details, $limit) {
-    global $LoggedUser, $Categories;
+    global $LoggedUser;
     $results = [];
     foreach ($details as $detail) {
         list($torrentID, $groupID, $groupName, $groupCategoryID, $wikiImage, $tagsList,

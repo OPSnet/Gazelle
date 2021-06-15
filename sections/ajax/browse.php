@@ -75,7 +75,7 @@ foreach ($Results as $Key => $GroupID) {
     } else {
         $DisplayName = '';
     }
-    if ($GroupResults && (count($Torrents) > 1 || isset($GroupedCategories[$CategoryID - 1]))) {
+    if ($GroupResults && (count($Torrents) > 1 || isset(CATEGORY_GROUPED[$CategoryID - 1]))) {
         // These torrents are in a group
         $LastRemasterYear = '-';
         $LastRemasterTitle = '';
@@ -94,7 +94,7 @@ foreach ($Results as $Key => $GroupID) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
 
-            if (isset($GroupedCategories[$CategoryID - 1])
+            if (isset(CATEGORY_GROUPED[$CategoryID - 1])
                     && ($Data['RemasterTitle'] != $LastRemasterTitle
                         || $Data['RemasterYear'] != $LastRemasterYear
                         || $Data['RemasterRecordLabel'] != $LastRemasterRecordLabel
@@ -201,7 +201,7 @@ foreach ($Results as $Key => $GroupID) {
             'groupName' => $GroupName,
             'torrentId' => (int)$TorrentID,
             'tags' => $TagList,
-            'category' => $Categories[$CategoryID - 1],
+            'category' => CATEGORY[$CategoryID - 1],
             'fileCount' => (int)$Data['FileCount'],
             'groupTime' => (string)strtotime($Data['Time']),
             'size' => (int)$Data['Size'],

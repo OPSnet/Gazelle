@@ -1,7 +1,7 @@
 <?php
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 
-$UploadForm = $Categories[$_GET['categoryid']];
+$UploadForm = CATEGORY[$_GET['categoryid']];
 $TorrentForm = new TORRENT_FORM();
 $emitJS = isset($_GET['js']);
 

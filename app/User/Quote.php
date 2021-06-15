@@ -174,7 +174,7 @@ class Quote extends \Gazelle\Base {
         $quoteList = $this->db->to_array(false, MYSQLI_ASSOC, false);
         $requestList = \Requests::get_requests(
             array_column(array_filter($quoteList, function ($x) { return $x['Page'] === 'requests'; }), 'PageID'),
-            true, true, false
+            true
         );
         $torrentList = \Torrents::get_groups(
             array_column(array_filter($quoteList, function ($x) { return $x['Page'] === 'torrents'; }), 'PageID'),
@@ -184,6 +184,7 @@ class Quote extends \Gazelle\Base {
         $page = [];
         $releaseType = new \Gazelle\ReleaseType;
         foreach ($quoteList as $q) {
+            $context = [];
             switch ($q['Page']) {
             case 'artist':
                 $context = [
@@ -213,8 +214,7 @@ class Quote extends \Gazelle\Base {
                     continue 2;
                 }
                 $request = $requestList[$q['PageID']];
-                global $Categories; // TODO: Fix this shit
-                switch ($Categories[$request['CategoryID'] - 1]) {
+                switch (CATEGORY[$request['CategoryID'] - 1]) {
                     case 'Music':
                         $link = \Artists::display_artists(\Requests::get_artists($q['PageID']))
                             . sprintf('<a href="requests.php?action=view&amp;id=%d" dir="ltr">%s [%d]</a>',

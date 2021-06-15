@@ -40,8 +40,8 @@ if ($_GET['id']) {
             <td>
                 <select id="category" name="category" class="required">
 <?php
-    $Categories = Calendar::$Categories;
-    foreach ($Categories as $Key => $Value) {
+    $calCats = Calendar::$Categories;
+    foreach ($calCats as $Key => $Value) {
 ?>
                     <option    value="<?=$Key?>"<?=$Key == $Event['Category'] ? ' selected="selected"' : ''?>><?=$Value?></option>
 <?php

@@ -443,8 +443,7 @@ View::show_header($user->username() . "'s $action torrents", 'voting');
             <table class="layout cat_list">
 <?php
 $x = 0;
-reset($Categories);
-foreach ($Categories as $catKey => $catName) {
+foreach (CATEGORY as $catKey => $catName) {
     if ($x % 7 === 0) {
         if ($x > 0) {
 ?>

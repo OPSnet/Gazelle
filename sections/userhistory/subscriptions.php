@@ -187,7 +187,7 @@ if ($NumResults) {
             case 'requests':
                 if (isset($Requests[$Result['PageID']])) {
                     $Request = $Requests[$Result['PageID']];
-                    $CategoryName = $Categories[$Request['CategoryID'] - 1];
+                    $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
 
                     $Links = 'Request: ';
                     if ($CategoryName == 'Music' || $CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
