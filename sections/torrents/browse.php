@@ -11,6 +11,7 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
 }
 
 $Viewer = new Gazelle\User($LoggedUser['ID']);
+$torMan = new Gazelle\Manager\Torrent;
 
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
