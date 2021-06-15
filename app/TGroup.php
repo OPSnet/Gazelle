@@ -110,12 +110,9 @@ class TGroup extends BaseObject {
             $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
         }
         if (!$info['WikiImage']) {
-            if (!$this->showFallbackImage) {
-                $info['WikiImage'] = null;
-            } else {
-                global $CategoryIcons;
-                $info['WikiImage'] = STATIC_SERVER . '/common/noartwork/' . $CategoryIcons[$info['CategoryID'] - 1];
-            }
+            $info['WikiImage'] = $this->showFallbackImage
+                ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])
+                : null;
         }
         $info['VanityHouse'] = ($info['VanityHouse'] == 1);
         $info['ReleaseType'] = (int)$info['ReleaseType'];

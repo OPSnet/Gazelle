@@ -317,8 +317,7 @@ View::show_header('Browse Torrents', 'browse');
         <table class="layout cat_list ft_cat_list">
 <?php
 $x = 0;
-reset($Categories);
-foreach ($Categories as $CatKey => $CatName) {
+foreach (CATEGORY as $CatKey => $CatName) {
     if ($x % 7 == 0) {
         if ($x > 0) {
 ?>
@@ -488,7 +487,7 @@ foreach ($Results as $GroupID) {
     $DisplayName = $tgroup->artistHtml() . ' - ';
     $SnatchedGroupClass = $GroupInfo['Flags']['IsSnatched'] ? ' snatched_group' : '';
 
-    if ($GroupResults && (count($Torrents) > 1 || isset($GroupedCategories[$CategoryID - 1]))) {
+    if ($GroupResults && (count($Torrents) > 1 || isset(CATEGORY_GROUPED[$CategoryID - 1]))) {
         // These torrents are in a group
         $DisplayName .= "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">$GroupName</a>";
         if ($GroupYear > 0) {
@@ -561,7 +560,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
             $SnatchedTorrentClass = $Data['IsSnatched'] ? ' snatched_torrent' : '';
             $Reported = $torMan->hasReport($TorrentID);
 
-            if (isset($GroupedCategories[$CategoryID - 1])
+            if (isset(CATEGORY_GROUPED[$CategoryID - 1])
                     && ($Data['RemasterTitle'] != $LastRemasterTitle
                         || $Data['RemasterYear'] != $LastRemasterYear
                         || $Data['RemasterRecordLabel'] != $LastRemasterRecordLabel
@@ -610,7 +609,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
         $TorrentID = key($Torrents);
         $Data = current($Torrents);
         $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$TorrentID#torrent$TorrentID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">$GroupName</a>";
-        if (isset($GroupedCategories[$CategoryID - 1])) {
+        if (isset(CATEGORY_GROUPED[$CategoryID - 1])) {
             if ($GroupYear) {
                 $DisplayName .= " [$GroupYear]";
             }

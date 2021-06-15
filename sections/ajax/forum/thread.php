@@ -142,7 +142,6 @@ if ($threadInfo['NoPoll'] == 0) {
         $MaxVotes = 0;
     }
 
-    $RevealVoters = in_array($forumId, $ForumsRevealVoters);
     //Polls lose the you voted arrow thingy
     $UserResponse = $DB->scalar("
         SELECT Vote
@@ -154,7 +153,7 @@ if ($threadInfo['NoPoll'] == 0) {
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
-        if (!empty($UserResponse) && $RevealVoters) {
+        if (!empty($UserResponse) && $forum->hasRevealVotes()) {
             $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
         }
     }
