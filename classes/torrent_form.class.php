@@ -17,7 +17,6 @@ use OrpheusNET\Logchecker\Logchecker;
 
 class TORRENT_FORM {
     var $UploadForm = '';
-    var $Categories = [];
     var $Formats = [];
     var $Bitrates = [];
     var $Media = [];
@@ -37,10 +36,9 @@ class TORRENT_FORM {
         $this->Torrent = $Torrent;
         $this->Error = $Error;
 
-        global $UploadForm, $Categories, $Formats, $Bitrates, $Media, $TorrentID;
+        global $UploadForm, $Formats, $Bitrates, $Media, $TorrentID;
 
         $this->UploadForm = $UploadForm;
-        $this->Categories = $Categories;
         $this->Formats = $Formats;
         $this->Bitrates = $Bitrates;
         $this->Media = $Media;
@@ -98,7 +96,7 @@ class TORRENT_FORM {
                 if ($this->Torrent && $this->Torrent['GroupID']) {
 ?>
                 <input type="hidden" name="groupid" value="<?=display_str($this->Torrent['GroupID'])?>" />
-                <input type="hidden" name="type" value="<?=array_search($this->UploadForm, $this->Categories)?>" />
+                <input type="hidden" name="type" value="<?=array_search($this->UploadForm, CATEGORY)?>" />
 <?php
                 }
                 if ($this->Torrent && $this->Torrent['RequestID']) {
@@ -128,7 +126,7 @@ class TORRENT_FORM {
                 <td class="label">Type:</td>
                 <td>
                     <select id="categories" name="type" onchange="Categories()"<?=$this->Disabled?>>
-<?php       foreach ($this->Categories as $Index => $Cat) { ?>
+<?php       foreach (CATEGORY as $Index => $Cat) { ?>
                         <option value="<?= $Index ?>"<?= $Cat == $this->Torrent['CategoryName'] ? ' selected="selected"' : '' ?>><?= display_str($Cat) ?></option>
 <?php       } ?>
                     </select>
@@ -720,7 +718,7 @@ class TORRENT_FORM {
             <tr id="name">
 <?php
         if ($this->NewTorrent) {
-            if ($this->Categories[$CategoryID] == 'E-Books') {
+            if (CATEGORY[$CategoryID] == 'E-Books') {
 ?>
                 <td class="label">Author - Title:</td>
 <?php       } else { ?>

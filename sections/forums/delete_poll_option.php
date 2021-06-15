@@ -15,10 +15,9 @@ $forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
 if (is_null($forum)) {
     error(404);
 }
-if (!in_array($forum->id(), $ForumsRevealVoters)) {
+if (!$forum->hasRevealVotes()) {
     error(403);
 }
-
 $forum->removePollAnswer($threadId, $option);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId");

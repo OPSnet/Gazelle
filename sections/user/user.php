@@ -584,7 +584,7 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
             $Request = $Requests[$RequestID];
             $VotesCount = $SphRequest['votes'];
             $Bounty = $SphRequest['bounty'] * 1024; // Sphinx stores bounty in kB
-            $CategoryName = $Categories[$Request['CategoryID'] - 1];
+            $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
 
             if ($CategoryName == 'Music') {
                 $ArtistForm = Requests::get_artists($RequestID);

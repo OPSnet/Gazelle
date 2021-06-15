@@ -256,9 +256,9 @@ if (isset($SearchWords)) {
 
 if (!empty($_GET['filter_cat'])) {
     $CategoryArray = array_keys($_GET['filter_cat']);
-    if (count($CategoryArray) !== count($Categories)) {
+    if (count($CategoryArray) !== count(CATEGORY)) {
         foreach ($CategoryArray as $Key => $Index) {
-            if (!isset($Categories[$Index - 1])) {
+            if (!isset(CATEGORY[$Index - 1])) {
                 unset($CategoryArray[$Key]);
             }
         }
@@ -341,7 +341,7 @@ if ($NumResults == 0) {
         if ($Request['CategoryID'] == 0) {
             $CategoryName = 'Unknown';
         } else {
-            $CategoryName = $Categories[$Request['CategoryID'] - 1];
+            $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
         }
 
         $JsonArtists = [];

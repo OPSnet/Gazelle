@@ -67,7 +67,7 @@ if (!$Properties) {
     error(404);
 }
 
-$UploadForm = $Categories[$Properties['CategoryID'] - 1];
+$UploadForm = CATEGORY[$Properties['CategoryID'] - 1];
 
 if (($Viewer->id() != $Properties['UserID'] && !$Viewer->permitted('torrents_edit')) || $Viewer->disableWiki()) {
     error(403);
@@ -193,7 +193,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
                 <td class="label">Change category</td>
                 <td>
                     <select id="newcategoryid" name="newcategoryid" onchange="ChangeCategory(this.value);">
-<?php   foreach ($Categories as $CatID => $CatName) { ?>
+<?php   foreach (CATEGORY as $CatID => $CatName) { ?>
                         <option value="<?=($CatID + 1)?>"<?php Format::selected('CategoryID', $CatID + 1, 'selected', $Properties); ?>><?=($CatName)?></option>
 <?php   } ?>
                     </select>

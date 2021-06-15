@@ -248,9 +248,9 @@ if (isset($SearchWords)) {
 
 if (!empty($_GET['filter_cat'])) {
     $CategoryArray = array_keys($_GET['filter_cat']);
-    if (count($CategoryArray) !== count($Categories)) {
+    if (count($CategoryArray) !== count(CATEGORY)) {
         foreach ($CategoryArray as $Key => $Index) {
-            if (!isset($Categories[$Index - 1])) {
+            if (!isset(CATEGORY[$Index - 1])) {
                 unset($CategoryArray[$Key]);
             }
         }
@@ -397,8 +397,7 @@ View::show_header($Title, 'requests');
         <table class="layout cat_list">
 <?php
         $x = 1;
-        reset($Categories);
-        foreach ($Categories as $CatKey => $CatName) {
+        foreach (CATEGORY as $CatKey => $CatName) {
             if ($x % 8 === 0 || $x === 1) {
 ?>
                 <tr>
@@ -561,7 +560,7 @@ View::show_header($Title, 'requests');
         if ($Request['CategoryID'] == 0) {
             $CategoryName = 'Unknown';
         } else {
-            $CategoryName = $Categories[$Request['CategoryID'] - 1];
+            $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
         }
 
         if ($Request['TorrentID'] != 0) {

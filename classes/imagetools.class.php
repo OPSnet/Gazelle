@@ -213,17 +213,15 @@ class ImageTools {
 
     /**
      * Cover art thumbnail in browse, on artist pages etc.
-     * @global array $CategoryIcons
      * @param string $Url
      * @param int $CategoryID
      */
     public static function cover_thumb($Url, $CategoryID) {
-        global $CategoryIcons;
         if ($Url) {
             $Src = self::process($Url, true);
             $Lightbox = self::process($Url);
         } else {
-            $Src = STATIC_SERVER . '/common/noartwork/' . $CategoryIcons[$CategoryID - 1];
+            $Src = STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$CategoryID - 1];
             $Lightbox = $Src;
         }
 ?>

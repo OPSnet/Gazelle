@@ -149,7 +149,7 @@ View::show_footer();
 
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $LoggedUser, $Categories, $groupBy, $torMan, $Viewer;
+    global $LoggedUser, $groupBy, $torMan, $Viewer;
 ?>
         <h3>Top <?="$limit $caption"?>
 <?php

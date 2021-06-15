@@ -15,7 +15,7 @@ class Request extends AbstractAPI {
         $artists = \Requests::get_artists($_GET['request_id']);
         $request['Artists'] = $artists;
         $request['DisplayArtists'] = \Artists::display_artists($artists, false, false, false);
-        $request['Category'] = $this->config['Categories'][$request['CategoryID'] - 1];
+        $request['Category'] = CATEGORY[$request['CategoryID'] - 1];
 
         return $request;
     }

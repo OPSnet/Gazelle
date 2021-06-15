@@ -79,7 +79,7 @@ if ($CollageCategoryID != COLLAGE_ARTISTS_ID) {
     foreach ($GroupIDs as $GroupID) {
         if (!empty($GroupList[$GroupID])) {
             $GroupDetails = Torrents::array_group($GroupList[$GroupID]);
-            if ($GroupDetails['GroupCategoryID'] > 0 && $Categories[$GroupDetails['GroupCategoryID'] - 1] == 'Music') {
+            if ($GroupDetails['GroupCategoryID'] > 0 && CATEGORY[$GroupDetails['GroupCategoryID'] - 1] == 'Music') {
                 $JsonMusicInfo = Artists::get_artist_by_type($GroupID);
             } else {
                 $JsonMusicInfo = null;

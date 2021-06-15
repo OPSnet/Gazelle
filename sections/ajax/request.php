@@ -32,7 +32,7 @@ $CanVote = !$IsFilled && check_perms('site_vote');
 if ($CategoryID == 0) {
     $CategoryName = 'Unknown';
 } else {
-    $CategoryName = $Categories[$CategoryID - 1];
+    $CategoryName = CATEGORY[$CategoryID - 1];
 }
 
 //Do we need to get artists?

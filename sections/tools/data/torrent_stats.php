@@ -114,7 +114,7 @@ View::show_header('Torrents');
 
                 <td style="vertical-align: top;"><table>
 <?php foreach ($stats->category() as $c) { ?>
-                    <tr><td><?= $Categories[$c[0] - 1] ?></td>
+                    <tr><td><?= CATEGORY[$c[0] - 1] ?></td>
                     <td class="number_column"><?= number_format($c[1]) ?></td>
                     </tr>
 <?php } ?>

@@ -51,8 +51,7 @@ class Torrent extends \Gazelle\Json {
         $group = $this->torrent->group()->showFallbackImage(false)->info();
 
         // TODO: implement as a Gazelle class
-        global $Categories;
-        $categoryName = ($group['CategoryID'] == 0) ? "Unknown" : $Categories[$group['CategoryID'] - 1];
+        $categoryName = ($group['CategoryID'] == 0) ? "Unknown" : CATEGORY[$group['CategoryID'] - 1];
 
         // Convert file list back to the old format
         $torMan = new \Gazelle\Manager\Torrent;

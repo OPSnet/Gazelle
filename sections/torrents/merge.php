@@ -20,7 +20,7 @@ if ($newGroupId == $oldGroupId) {
 if (!$CategoryID) {
     error('Target group does not exist.');
 }
-if ($Categories[$CategoryID - 1] != 'Music') {
+if (CATEGORY[$CategoryID - 1] != 'Music') {
     error('Only music groups can be merged.');
 }
 

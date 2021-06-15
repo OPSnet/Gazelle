@@ -36,8 +36,8 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
     );
     if ($DB->has_results()) {
         $Properties = $DB->next_record();
-        $UploadForm = $Categories[$Properties['CategoryID'] - 1];
-        $Properties['CategoryName'] = $Categories[$Properties['CategoryID'] - 1];
+        $UploadForm = CATEGORY[$Properties['CategoryID'] - 1];
+        $Properties['CategoryName'] = CATEGORY[$Properties['CategoryID'] - 1];
         $Properties['Artists'] = Artists::get_artist($_GET['groupid']);
     } else {
         unset($_GET['groupid']);
@@ -61,8 +61,8 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
         ", (int)$_GET['requestid']
     );
     $Properties = $DB->next_record();
-    $UploadForm = $Categories[$Properties['CategoryID'] - 1];
-    $Properties['CategoryName'] = $Categories[$Properties['CategoryID'] - 1];
+    $UploadForm = CATEGORY[$Properties['CategoryID'] - 1];
+    $Properties['CategoryName'] = CATEGORY[$Properties['CategoryID'] - 1];
     $Properties['Artists'] = Requests::get_artists($_GET['requestid']);
     $Properties['TagList'] = implode(', ', Requests::get_tags($_GET['requestid'])[$_GET['requestid']]);
 }

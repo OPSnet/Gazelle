@@ -284,7 +284,7 @@ if (empty($Results)) {
 
             $TorrentTags = new Tags($GroupInfo['TagList']);
             if ($GroupInfo['TagList'] == '') {
-                $TorrentTags->set_primary($Categories[$GroupCategoryID - 1]);
+                $TorrentTags->set_primary(CATEGORY[$GroupCategoryID - 1]);
             }
 
         // print row

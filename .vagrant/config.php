@@ -148,12 +148,11 @@ define('DONOR_FORUM_RANK', 6);
 define('DONOR_FORUM', 70);
 define('MAX_SPECIAL_RANK', 3);
 
-$ForumsRevealVoters = [];
-$ForumsDoublePost = [];
+define('FORUM_REVEAL_VOTER', []);
 
-$Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
-$GroupedCategories = array_intersect(['Music'], $Categories);
-$CategoryIcons = ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png'];
+define('CATEGORY', ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics']);
+define('CATEGORY_GROUPED', array_intersect(['Music'], CATEGORY));
+define('CATEGORY_ICON', ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png']);
 
 $Formats = ['MP3', 'FLAC', 'AAC', 'AC3', 'DTS'];
 $Bitrates = ['192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other'];
@@ -199,17 +198,6 @@ $ZIPOptions = [
     '46' => [4,6,'AAC - 192']
 ];
 
-// Ratio requirements, in descending order
-// Columns: Download amount, required ratio, grace period
-$RatioRequirements = [
-    [50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')],
-    [40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')],
-    [30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')],
-    [20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')],
-    [10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')],
-    [5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14))]
-];
-
 //Captcha fonts are located in ./fonts
 $CaptchaFonts = [
     'ARIBLK.TTF',
@@ -234,14 +222,8 @@ $CaptchaBGs = [
     'captcha8.png',
     'captcha9.png'];
 
-// Special characters, and what they should be converted to
-// Used for torrent searching
-$SpecialChars = [
-    '&' => 'and'
-];
-
 // Deny cache access to keys without specified permission
-$CachePermissions = [
+define('CACHE_PERMISSION', [
     'api_apps' => 'site_debug',
     'catalogue' => 'site_debug'
-];
+]);

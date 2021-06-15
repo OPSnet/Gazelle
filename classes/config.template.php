@@ -254,15 +254,14 @@ define('SOURCE_FLAG_WIKI_PAGE_ID', 113);
 
 define('TMPDIR', '/tmp');
 
-$ForumsRevealVoters = [];
-$ForumsDoublePost = [];
+define('FORUM_REVEAL_VOTER', []);
 
 define('STORAGE_PATH_TORRENT', '/var/lib/gazelle/torrent');
 define('STORAGE_PATH_RIPLOG', '/var/lib/gazelle/riplog');
 define('STORAGE_PATH_RIPLOGHTML', '/var/lib/gazelle/riploghtml');
 
 //Useful: http://www.robtex.com/cnet/
-$AllowedProxies = [
+define('ALLOWED_PROXY', [
     //Opera Turbo (may include Opera-owned IP addresses that aren't used for Turbo, but shouldn't run much risk of exploitation)
     '64.255.180.*', //Norway
     '64.255.164.*', //Norway
@@ -273,11 +272,11 @@ $AllowedProxies = [
     '94.246.127.*', //Norway
     '195.189.142.*', //Norway
     '195.189.143.*', //Norway
-];
+]);
 
-$Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
-$GroupedCategories = array_intersect(['Music'], $Categories);
-$CategoryIcons = ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png'];
+define('CATEGORY', ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics']);
+define('CATEGORY_GROUPED', array_intersect(['Music'], CATEGORY));
+define('CATEGORY_ICON', ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png']);
 
 $Formats = ['MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS'];
 $Bitrates = ['Lossless', '24bit Lossless', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '320', '256', '192', '160', '128', '96', '64', 'APS (VBR)', 'APX (VBR)', 'q8.x (VBR)', 'Other'];
@@ -350,17 +349,6 @@ $ZIPOptions = [
     '46' => [4, 6, 'AAC - 192'],
 ];
 
-// Ratio requirements, in descending order
-// Columns: Download amount, required ratio, grace period
-$RatioRequirements = [
-    [50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')],
-    [40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')],
-    [30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')],
-    [20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')],
-    [10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')],
-    [5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14))]
-];
-
 //Captcha fonts are located in ./fonts
 $CaptchaFonts = [
     'ARIBLK.TTF',
@@ -386,12 +374,6 @@ $CaptchaBGs = [
     'captcha7.png',
     'captcha8.png',
     'captcha9.png'
-];
-
-// Special characters, and what they should be converted to
-// Used for torrent searching
-$SpecialChars = [
-    '&' => 'and'
 ];
 
 // Memcached details
@@ -461,45 +443,6 @@ define('CACHE_NAMESPACE', [
         'u9' => 'user_tokens_%d',
     ],
 ]);
-
-// array to store external site credentials and API URIs, stored in cache to keep user sessions alive
-$ExternalServicesConfig = [
-    "Orpheus" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'https://orpheus.network/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ],
-    "VagrantGazelle" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'http://localhost:80/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ],
-    "PassThePopcorn" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'https://passthepopcorn.me/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ]];
 
 define('SITE_LAUNCH_YEAR', 2018);
 

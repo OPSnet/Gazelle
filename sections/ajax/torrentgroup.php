@@ -30,7 +30,7 @@ if (!$TorrentCache) {
 
 $CategoryName = ($TorrentDetails['CategoryID'] == 0)
     ? "Unknown"
-    : $Categories[$TorrentDetails['CategoryID'] - 1];
+    : CATEGORY[$TorrentDetails['CategoryID'] - 1];
 
 $Torrent = $TorrentList[$TorrentID];
 

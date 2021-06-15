@@ -66,7 +66,7 @@ if (!$ByCategory = $Cache->get_value('stats_torrents_category')) {
     $ByCategory = [];
     foreach ($Groups as $Group) {
         list($CategoryID, $Torrents) = $Group;
-        $ByCategory[$Categories[$CategoryID - 1]] = $Torrents;
+        $ByCategory[CATEGORY[$CategoryID - 1]] = $Torrents;
     }
     $Cache->cache_value('stats_torrents_category', $ByCategory, 3600 * 24);
 }
