@@ -42,7 +42,7 @@ if (!$success) {
     error($message);
 }
 
-Torrents::send_pm(
+(new Gazelle\Manager\User)->sendRemovalPM(
     $torrentId,
     $torrent['UserID'],
     $name,
