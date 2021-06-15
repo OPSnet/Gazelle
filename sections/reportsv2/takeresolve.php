@@ -88,6 +88,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
     exit;
 }
 
+$torMan = new Gazelle\Manager\Torrent;
 $reportMan = new Gazelle\Manager\ReportV2;
 $Types = $reportMan->types();
 if (!isset($_POST['resolve_type'])) {
@@ -146,7 +147,8 @@ elseif ($_POST['resolve_type'] === 'lossyapproval') {
     $report->setTorrentFlag('torrents_lossymaster_approved');
 }
 
-$uploader = new \Gazelle\User($uploaderId);
+$userMan = new Gazelle\Manager\User;
+$uploader = $userMan->findById($uploaderId);
 $rawName = trim($_POST['raw_name']);
 $adminMessage = trim($_POST['admin_message']);
 $logMessage = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
@@ -159,8 +161,7 @@ if (!(isset($_POST['delete']) && check_perms('users_mod'))) {
         . " was deleted by " . $LoggedUser['Username']
         . ($_POST['resolve_type'] == 'custom' ? '' : ' for the reason: ' . $ResolveType['title'] . ".")
         . ($logMessage ? " $logMessage" : '');
-    (new Gazelle\Manager\Torrent)
-        ->findById($torrentId)
+    $torMan->findById($torrentId)
         ->remove(
             $LoggedUser['ID'],
             sprintf('%s (%s)', $ResolveType['title'], $logMessage ?? 'none'),
@@ -168,13 +169,12 @@ if (!(isset($_POST['delete']) && check_perms('users_mod'))) {
         );
 
     $TrumpID = 0;
-    if ($_POST['resolve_type'] === 'trump') {
-        if (preg_match('/torrentid=([0-9]+)/', $logMessage, $Matches) === 1) {
-            $TrumpID = $Matches[1];
-        }
+    if ($_POST['resolve_type'] === 'trump' && preg_match('/torrentid=([0-9]+)/', $logMessage, $match) === 1) {
+        $TrumpID = $match[1];
     }
 
-    Torrents::send_pm($torrentId, $uploaderId, $rawName, $Log, $TrumpID, (!$_POST['uploader_pm'] && $weeksWarned <= 0 && !isset($_POST['delete']) && !$SendPM));
+    $pmUploader = !$_POST['uploader_pm'] && $weeksWarned <= 0 && !isset($_POST['delete']) && !$SendPM;
+    $userMan->sendRemovalPM($torrentId, $uploaderId, $rawName, $Log, $TrumpID, $pmUploader);
 }
 
 //Warnings / remove upload
@@ -183,7 +183,6 @@ if ($revokeUpload) {
     $uploader->revokeUpload();
 }
 
-$userMan = new Gazelle\Manager\User;
 if ($weeksWarned > 0) {
     $WarnLength = $weeksWarned * (7 * 86400);
     $Reason = "Uploader of torrent ($torrentId) $rawName which was resolved with the preset: ".$ResolveType['title'].'.';
