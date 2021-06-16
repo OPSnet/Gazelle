@@ -271,43 +271,36 @@ class Artists {
     public static function delete_artist($ArtistID) {
         global $Cache, $DB;
         $QueryID = $DB->get_query_id();
-        $DB->query("
-            SELECT Name
-            FROM artists_group
-            WHERE ArtistID = ".$ArtistID);
-        list($Name) = $DB->next_record(MYSQLI_NUM, false);
+        $Name = $DB->scalar("
+            SELECT Name FROM artists_group WHERE ArtistID = ?
+            ", $ArtistID
+        );
 
         // Delete requests
-        $DB->query("
-            SELECT RequestID
-            FROM requests_artists
-            WHERE ArtistID = $ArtistID
-                AND ArtistID != 0");
-        $Requests = $DB->to_array();
+        $DB->prepared_query("
+            SELECT RequestID FROM requests_artists WHERE ArtistID = ?
+            ", $ArtistID
+        );
+        $Requests = $DB->collect(0);
+        $DB->begin_transaction();
         foreach ($Requests AS $Request) {
-            list($RequestID) = $Request;
-            $DB->query('DELETE FROM requests WHERE ID='.$RequestID);
-            $DB->query('DELETE FROM requests_votes WHERE RequestID='.$RequestID);
-            $DB->query('DELETE FROM requests_tags WHERE RequestID='.$RequestID);
-            $DB->query('DELETE FROM requests_artists WHERE RequestID='.$RequestID);
+            $DB->prepared_query('DELETE FROM requests WHERE ID = ?', $RequestID);
+            $DB->prepared_query('DELETE FROM requests_artists WHERE RequestID = ?', $RequestID);
+            $DB->prepared_query('DELETE FROM requests_tags WHERE RequestID = ?', $RequestID);
+            $DB->prepared_query('DELETE FROM requests_votes WHERE RequestID = ?', $RequestID);
         }
 
-        // Delete artist
-        $DB->query('DELETE FROM artists_group WHERE ArtistID='.$ArtistID);
-        $DB->query('DELETE FROM artists_alias WHERE ArtistID='.$ArtistID);
+        $DB->prepared_query('DELETE FROM artists_alias WHERE ArtistID = ?', $ArtistID);
+        $DB->prepared_query('DELETE FROM artists_group WHERE ArtistID = ?', $ArtistID);
+        $DB->prepared_query('DELETE FROM artists_tags WHERE ArtistID = ?', $ArtistID);
+        $DB->prepared_query('DELETE FROM wiki_artists WHERE PageID = ?', $ArtistID);
+
+        (new \Gazelle\Manager\Comment)->remove('artist', $ArtistID);
+        $DB->commit();
+
+        $Cache->delete_value('artist_' . $ArtistID);
+        $Cache->delete_value('artist_groups_' . $ArtistID);
         $Cache->decrement('stats_artist_count');
-
-        // Delete wiki revisions
-        $DB->query('DELETE FROM wiki_artists WHERE PageID='.$ArtistID);
-
-        // Delete tags
-        $DB->query('DELETE FROM artists_tags WHERE ArtistID='.$ArtistID);
-
-        // Delete artist comments, subscriptions and quote notifications
-        Comments::delete_page('artist', $ArtistID);
-
-        $Cache->delete_value('artist_'.$ArtistID);
-        $Cache->delete_value('artist_groups_'.$ArtistID);
         // Record in log
 
         global $LoggedUser;
