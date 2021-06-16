@@ -308,7 +308,7 @@ if (empty($Results)) {
                     'key'    => $LoggedUser['torrent_pass'],
                     't'      => $TorrentInfo,
                     'extra'  => [
-                        !$Sneaky ? "<a href=\"#\" onclick=\"clearItem(<?=$TorrentID?>); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
+                        !$Sneaky ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
                     ],
                 ]) ?>
                 <strong><?=$DisplayName?></strong>
