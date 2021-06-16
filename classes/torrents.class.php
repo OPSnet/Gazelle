@@ -412,8 +412,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
             $Cache->delete_value("request_$RequestID");
         }
 
-        // comments
-        Comments::delete_page('torrents', $GroupID);
+        (new \Gazelle\Manager\Comment)->remove('torrents', $GroupID);
 
         $DB->prepared_query("
             DELETE FROM torrent_group_has_attr

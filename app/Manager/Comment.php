@@ -67,6 +67,52 @@ class Comment extends \Gazelle\Base {
         return (new $className($pageId))->setPostId($postId);
     }
 
+    /**
+     * Remove all comments on $page/$pageId (handle quote notifications and subscriptions as well)
+     * @param string $page
+     * @param int $pageId
+     * @return boolean removal successful (or there was nothing to remove)
+     */
+    public function remove(string $page, int $pageId) {
+        $qid = $this->db->get_query_id();
+
+        $pageCount = $this->db->scalar("
+            SELECT ceil(count(*) / ?) AS Pages
+            FROM comments
+            WHERE Page = ? AND PageID = ?
+            GROUP BY PageID
+            ", TORRENT_COMMENTS_PER_PAGE, $page, $pageId
+        );
+        if ($pageCount === 0) {
+            return false;
+        }
+
+        $this->db->prepared_query("
+            DELETE FROM comments WHERE Page = ? AND PageID = ?
+            ", $page, $pageId
+        );
+
+        // Delete quote notifications
+        $subscription = new \Gazelle\Manager\Subscription;
+        $subscription->move($page, $pageId, null);
+        $subscription->flushQuotes($page, $pageId);
+
+        $this->db->prepared_query("
+            DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?
+            ", $page, $pageId
+        );
+
+        // Clear cache
+        $last = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
+        for ($i = 0; $i <= $last; ++$i) {
+            $this->cache->delete_value($page . '_comments_' . $pageId . '_catalogue_' . $i);
+        }
+        $this->cache->delete_value($page . '_comments_' . $pageId);
+        $this->db->set_query_id($qid);
+
+        return true;
+    }
+
     public function loadEdits(string $page, int $postId): array {
         $key = "{$page}_edits_{$postId}";
         if (($edits = $this->cache->get_value($key)) === false) {
