@@ -4,20 +4,19 @@
 
 authorize();
 
-$RequestID = $_POST['id'];
-if (!intval($RequestID)) {
-    error(0);
-}
-
-$DB->prepared_query('
-    SELECT
+[$RequestID, $UserID, $Title, $CategoryID, $GroupID] = $DB->row("
+    SELECT ID,
         UserID,
         Title,
         CategoryID,
         GroupID
     FROM requests
-    WHERE ID = ?', $RequestID);
-list($UserID, $Title, $CategoryID, $GroupID) = $DB->next_record();
+    WHERE ID = ?
+    ", (int)$_POST['id']
+);
+if (is_null($RequestID)) {
+    error(404);
+}
 
 if ($LoggedUser['ID'] != $UserID && !check_perms('site_moderate_requests')) {
     error(403);
@@ -34,19 +33,16 @@ if ($CategoryName === 'Music') {
     $FullName = $Title;
 }
 
-
-
 // Delete request, votes and tags
 $DB->prepared_query('DELETE FROM requests WHERE ID = ?', $RequestID);
 $DB->prepared_query('DELETE FROM requests_votes WHERE RequestID = ?', $RequestID);
 $DB->prepared_query('DELETE FROM requests_tags WHERE RequestID = ?', $RequestID);
-Comments::delete_page('requests', $RequestID);
 
-$DB->prepared_query('
-    SELECT ArtistID
-    FROM requests_artists
-    WHERE RequestID = ?', $RequestID);
-$RequestArtists = $DB->to_array();
+$DB->prepared_query("
+    SELECT ArtistID FROM requests_artists WHERE RequestID = ?
+    ", $RequestID
+);
+$RequestArtists = $DB->collect(0);
 foreach ($RequestArtists as $RequestArtist) {
     $Cache->delete_value("artists_requests_$RequestArtist");
 }
@@ -60,6 +56,8 @@ $DB->prepared_query('
         (ID)
     VALUES
         (?)', $RequestID);
+
+(new \Gazelle\Manager\Comment)->remove('requests', $RequestID);
 
 if ($UserID != $LoggedUser['ID']) {
     (new Gazelle\Manager\User)->sendPM($UserID, 0,

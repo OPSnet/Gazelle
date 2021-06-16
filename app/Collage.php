@@ -590,9 +590,7 @@ class Collage extends BaseObject {
 
     public function remove(User $user, Manager\Subscription $subMan, Log $logger, string $reason): int {
         $this->db->prepared_query("
-            SELECT GroupID
-            FROM collages_torrents
-            WHERE CollageID = ?
+            SELECT GroupID FROM collages_torrents WHERE CollageID = ?
             ", $this->id
         );
         while ([$GroupID] = $this->db->next_record()) {
@@ -600,15 +598,13 @@ class Collage extends BaseObject {
         }
 
         if ($this->isPersonal()) {
-            \Comments::delete_page('collages', $this->id);
+            (new \Gazelle\Manager\Comment)->remove('collages', $this->id);
             $this->db->prepared_query("
-                DELETE FROM collages_torrents
-                WHERE CollageID = ?
+                DELETE FROM collages_torrents WHERE CollageID = ?
                 ", $this->id
             );
             $this->db->prepared_query("
-                DELETE FROM collages
-                WHERE ID = ?
+                DELETE FROM collages WHERE ID = ?
                 ", $this->id
             );
             $rows = $this->db->affected_rows();
