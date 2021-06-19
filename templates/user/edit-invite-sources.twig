@@ -1,0 +1,38 @@
+{% from 'macro/form.twig' import checked %}
+<table class="layout" id="user_invite_source_box">
+    <tr class="colhead">
+        <td colspan="2">
+            <a name="invite_source">Invite Sources</a>
+        </td>
+    </tr>
+{% for site in list %}
+    {% if loop.first %}
+    <tr>
+        <td class="label">&nbsp;</td>
+        <td>Check the sources from whence this member recruits or interviews.
+        They will be able to qualify their invites with the source tracker, to distinguish them from personal invitations.</td>
+    </tr>
+    <tr>
+        <td class="label">&nbsp;</td>
+        <td>Source</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td>&nbsp;</td>
+        <td><label><input type="checkbox" name="source-{{ site.invite_source_id }}"{{ checked(site.active == 1) }} /> {{ site.name }}</label></td>
+    </tr>
+    {% if loop.last %}
+    <tr>
+        <td class="label">&nbsp;</td>
+        <td>
+            <input type="submit" name="invite_source_update" value="Update" />
+        </td>
+    </tr>
+    {% endif %}
+{% else %}
+    <tr>
+        <td class="label">&nbsp;</td>
+        <td>No sources have been configured. <a href="tools.php?action=invite_source_config">Configure</a>!</td>
+    </tr>
+{% endfor %}
+</table>

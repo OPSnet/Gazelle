@@ -1,0 +1,43 @@
+<div class="header">
+    <h2>Invite Source Configuration</h2>
+</div>
+<div class="linkbox">
+    <a href="tools.php?action=invite_source" class="brackets">Inviter Summary</a>
+</div>
+<div class="thin pad">
+    <div class="box pad">
+    <h2>Sources</h2>
+    <p>Add the name of the trackers from whence members recruit. You can then assign tracker names on an individual basis for recruiters.
+    <form action="" method="post">
+    <table>
+    <tr>
+        <th>Name</th>
+        <th>Inviter (recruiter) usage</th>
+        <th>Invitee totals</th>
+        <th>Remove?</th>
+    <tr>
+{% for source in list %}
+    <tr>
+        <td>{{ source.name }}</td>
+        <td>{{ source.inviter_total|number_format }}</td>
+        <td>{{ source.user_total|number_format }}</td>
+        <td>
+    {% if source.inviter_total == 0 and source.user_total == 0 %}
+            <input type="checkbox" name="remove-{{ source.invite_source_id }}" />
+    {% else %}
+            <i>in use</i>
+    {% endif %}
+        </td>
+    <tr>
+{% endfor %}
+    </table>
+    <br />
+    New name: <input type="text" length="40" name="name" />
+    <br />
+    <br />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="action" value="invite_source_config" />
+    <input type="submit" value="Update" />
+    </form>
+    </div>
+</div>

@@ -1492,6 +1492,8 @@ class User extends BaseObject {
     public function isStaff(): bool         { return $this->info()['isStaff']; }
     public function isDonor(): bool         { return isset($this->info()['secondary_class'][DONOR]) || $this->isStaff(); }
     public function isFLS(): bool           { return isset($this->info()['secondary_class'][FLS_TEAM]); }
+    public function isInterviewer(): bool   { return isset($this->info()['secondary_class'][INTERVIEWER]); }
+    public function isRecruiter(): bool     { return isset($this->info()['secondary_class'][RECRUITER]); }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
 
     public function warningExpiry(): ?string {
@@ -2436,17 +2438,14 @@ class User extends BaseObject {
     }
 
     /**
-     * Checks whether a user is allowed to purchase an invite. User classes up to Elite are capped,
+     * Checks whether a user is allowed to purchase an invite. Lower classes are capped,
      * users above this class will always return true.
      *
      * @param integer $minClass Minimum class level necessary to purchase invites
      * @return boolean false if insufficient funds, otherwise true
      */
     public function canPurchaseInvite(): bool {
-        if ($this->info()['DisableInvites']) {
-            return false;
-        }
-        return $this->info()['effective_class'] >= MIN_INVITE_CLASS;
+        return !$this->disableInvites() && $this->effectiveClass() >= MIN_INVITE_CLASS;
     }
 
     /**

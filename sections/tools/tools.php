@@ -124,6 +124,7 @@ Category('Community', [
     Item('Forum categories',        'tools.php?action=categories',        All(['admin_manage_forums'])),
     Item('Forum departments',       'tools.php?action=forum',             All(['admin_manage_forums'])),
     Item('Forum transitions',       'tools.php?action=forum_transitions', All(['admin_manage_forums'])),
+    Item('Invite Sources',          'tools.php?action=invite_source',     All(['admin_manage_invite_source'])),
     Item('IRC manager',             'tools.php?action=irc',               All(['admin_manage_forums'])),
     Item('Navigation link manager', 'tools.php?action=navigation',        All(['admin_manage_navigation'])),
 ]);

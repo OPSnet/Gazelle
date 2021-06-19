@@ -84,6 +84,7 @@ class Permissions {
             'admin_manage_polls' => 'Can manage polls',
             'admin_manage_forums' => 'Can manage forums (add/edit/delete)',
             'admin_manage_fls' => 'Can manage First Line Support (FLS) crew',
+            'admin_manage_invite_source' => 'Can manage invite sources',
             'admin_manage_user_fls' => 'Can manage user FL tokens',
             'admin_manage_applicants' => 'Can manage job roles and user applications',
             'admin_manage_referrals' => 'Can manage referrals',
