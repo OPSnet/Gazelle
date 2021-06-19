@@ -162,24 +162,24 @@ if (!defined('FEATURE_EMAIL_REENABLE')) {
     define('FEATURE_EMAIL_REENABLE', true);
 }
 
-// User class IDs needed for automatic promotions. Found in the 'permissions' table
 // Name of class        Class ID (NOT level)
-define('ADMIN',         '1');
-define('USER',          '2');
-define('MEMBER',        '3');
-define('POWER',         '4');
-define('ELITE',         '5');
-define('VIP',           '6');
-define('TORRENT_MASTER','7');
-define('MOD',           '11');
-define('SYSOP',         '15');
-define('ARTIST',        '19');
-define('DONOR',         '20');
-define('FLS_TEAM',      '23');
-define('POWER_TM',      '22');
-define('ELITE_TM',      '23');
-define('FORUM_MOD',     '28');
-define('ULTIMATE_TM',   '48');
+define('USER',            2);
+define('MEMBER',          3);
+define('POWER',           4);
+define('ELITE',           5);
+define('TORRENT_MASTER',  7);
+define('POWER_TM',       22);
+define('ELITE_TM',       23);
+define('ULTIMATE_TM',    48);
+define('FORUM_MOD',      28);
+define('MOD',            11);
+define('SYSOP',          15);
+
+define('DONOR',          20);
+define('FLS_TEAM',       23);
+define('INTERVIEWER',    30);
+define('RECRUITER',      41);
+define('VIP',             6);
 
 // Locked account constant
 define('STAFF_LOCKED', 1);

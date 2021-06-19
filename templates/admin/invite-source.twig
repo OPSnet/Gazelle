@@ -1,0 +1,37 @@
+<div class="header">
+    <h2>Invite Source Inviter Summary</h2>
+</div>
+<div class="linkbox">
+    <a href="tools.php?action=invite_source_config" class="brackets">Configuration</a>
+    <a href="user.php?action=search&secclass={{ constant('INTERVIEWER') }}&order=Joined&way=Ascending" class="brackets">Search Interviewers</a>
+    <a href="user.php?action=search&secclass={{ constant('RECRUITER') }}&order=Joined&way=Ascending" class="brackets">Search Recruiters</a>
+</div>
+<div class="thin pad">
+    <div class="box pad">
+    <h2>Recruitment Summary</h2>
+    <form action="" method="post">
+{% for u in list %}
+    {% if loop.first %}
+    <table>
+    <tr>
+        <th>Inviter (recruiter)</th>
+        <th>Recruitment sites</th>
+    </tr>
+    {% endif %}
+    <tr>
+        <td>{{ u.user_id|user_full }}</td>
+        <td>{{ u.name_list }}</td>
+    </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+{% else %}
+    <h3>No inviters have been configured</h3>
+{% endfor %}
+    <br />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="action" value="invite_source" />
+    Go to user page to edit sources (user id or @name): <input type="text" length="40" name="user" /> <input type="submit" value="Go!" />
+    </form>
+    </div>
+</div>

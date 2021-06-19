@@ -111,6 +111,13 @@ switch ($_REQUEST['action']) {
         require_once('managers/take_global_notification.php');
         break;
 
+    case 'invite_source':
+        require_once('managers/invite_source.php');
+        break;
+    case 'invite_source_config':
+        require_once('managers/invite_source_config.php');
+        break;
+
     case 'irc':
         require_once('managers/irc_list.php');
         break;
@@ -296,7 +303,7 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'periodic':
-        $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : 'view';
+        $mode = $_REQUEST['mode'] ?? 'view';
         switch ($mode) {
             case 'run_now':
             case 'view':

@@ -1,7 +1,16 @@
-{% macro checked(flag) -%}
+{%- macro checked(flag) -%}
     {%- if flag %} checked="checked"{% endif -%}
 {%- endmacro %}
 
-{% macro selected(flag) -%}
+{%- macro selected(flag) -%}
     {%- if flag %} selected="selected"{% endif -%}
+{%- endmacro %}
+
+{%- macro select_invite_source(user_id, config, source) -%}
+<select name="user-{{ user_id }}">
+    <option name="s-none">---</option>
+    {%- for c in config -%}
+    <option value="s-{{ c.invite_source_id }}"{{ _self.selected(c.invite_source_id == source[user_id].invite_source_id) }}>{{ c.name }}</option>
+    {%- endfor -%}
+</select>
 {%- endmacro %}

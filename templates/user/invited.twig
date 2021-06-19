@@ -1,3 +1,5 @@
+{% from 'macro/form.twig' import select_invite_source %}
+
 <div class="thin">
 <div class="header">
     <h2>{{ user.id|user_url }} &rsaquo; Invites</h2>
@@ -8,6 +10,8 @@
 {% endif %}
     </div>
 </div>
+
+{% set is_site_inviter = inviter_config|length %}
 
 {% if user.disableInvites %}
 <div class="box pad" style="text-align: center;">
@@ -29,33 +33,51 @@
 
 {% elseif own_profile and user.canInvite %}
 <div class="box pad">
-    <p>Please note that selling, trading, or publicly giving away our invitations&#8202;&mdash;&#8202;or responding
-    to public invite requests&#8202;&mdash;&#8202;is strictly forbidden, and may result in you and your entire invite tree being banned.</p>
+    <p>Please note that selling, trading, or publicly giving away our invitations &mdash;&nbsp;or responding
+    to public invite requests&nbsp;&mdash; is strictly forbidden, and may result in you and your entire invite tree being banned.</p>
     <p>Do not send an invite to anyone who has previously had an {{ constant('SITE_NAME') }} account.
     Please direct them to {{ constant('BOT_DISABLED_CHAN') }} on {{ constant('BOT_SERVER') }} if they wish to reactivate their account.</p>
     <p>Remember that you are responsible for ALL invitees, and your account and/or privileges may be disabled due to your invitees' actions.
     You should know and trust the person you're inviting. If you aren't familiar enough with the user to trust them, do not invite them.</p>
-    <p><em>Do not send an invite if you have not read or do not understand the information above.</em></p>
 </div>
 <div class="box box2">
     <form class="send_form pad" name="invite" action="user.php" method="post">
-        <input type="hidden" name="action" value="take_invite" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+    {% if is_site_inviter %}
+        <div class="field_div">
+            <div class="label">Invite source:</div>
+            <div class="input">
+            <td class="nobr">{{ select_invite_source(0, inviter_config, user_source) }}</td>
+            </div>
+        </div>
+    {% endif %}
         <div class="field_div">
             <div class="label">Email address:</div>
             <div class="input">
-                <input type="email" name="email" size="60" />
-                <input type="submit" value="Invite" />
+                <input type="email" name="email" size="40" />
             </div>
         </div>
     {% if user.permitted('users_invite_notes') %}
         <div class="field_div">
             <div class="label">Staff Note:</div>
             <div class="input">
-                <input type="text" name="reason" size="60" maxlength="255" />
+                <input type="text" name="reason" size="40" maxlength="255" />
             </div>
         </div>
     {% endif %}
+        <div class="field_div">
+            <div class="label">&nbsp;</div>
+            <div class="input">
+                <label><input type="checkbox" name="agreement" /> I have read and agree to the information written above.</label>
+            </div>
+        </div>
+        <div class="field_div">
+            <div class="label">&nbsp;</div>
+            <div class="input">
+                <input type="hidden" name="action" value="take_invite" />
+                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="submit" value="Invite" />
+            </div>
+        </div>
     </form>
 </div>
 {% endif %}
@@ -87,7 +109,18 @@
 </div>
 {% endfor %}
 
-<h3>Invitee list</h3>
+{% if is_site_inviter %}
+<form action="" method="post">
+{% endif %}
+<h3>Invitee list
+{% if is_site_inviter %}
+    {% if edit_source %}
+    <a class="brackets" href="user.php?action=invite">View</a>
+    {% else %}
+    <a class="brackets" href="user.php?action=invite&edit=source">Edit sources</a>
+    {% endif %}
+{% endif %}
+</h3>
 <div class="box pad">
     <table class="invite_table m_table" width="100%">
         <tr class="colhead">
@@ -98,6 +131,9 @@
             <td class="m_th_right nobr">{{ heading.emit('uploaded')|raw }}</td>
             <td class="m_th_right nobr">{{ heading.emit('downloaded')|raw }}</td>
             <td class="m_th_right nobr">{{ heading.emit('ratio')|raw }}</td>
+{% if is_site_inviter %}
+            <td class="nobr">Source</td>
+{% endif %}
         </tr>
 {% for u in invited %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -108,8 +144,27 @@
             <td class="td_up m_td_right">{{ u.uploaded|octet_size }}</td>
             <td class="td_dl m_td_right">{{ u.downloaded|octet_size }}</td>
             <td class="td_ratio m_td_right">{{ ratio(u.uploaded, u.downloaded) }}</td>
+    {% if is_site_inviter %}
+        {% if edit_source %}
+            <td class="nobr">{{ select_invite_source(u.user_id, inviter_config, user_source) }}</td>
+        {% else %}
+            <td class="nobr">{{ user_source[u.user_id].name|default('<i>not set</i>')|raw }}</td>
+        {% endif %}
+    {% endif %}
         </tr>
 {% endfor %}
+{% if is_site_inviter and edit_source %}
+        <tr>
+            <td colspan="7">&nbsp;</td>
+            <td><input type="submit" value="Update" /></td>
+        </tr>
+{% endif %}
     </table>
+{% if is_site_inviter %}
+    <input type="hidden" name="action" value="invite" />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="user_id" value="{{ user.id }}" />
+</form>
+{% endif %}
 </div>
 </div>
