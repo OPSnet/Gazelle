@@ -125,6 +125,7 @@ class UserCreator extends Base {
         );
 
         if ($inviterId) {
+            (new \Gazelle\Manager\InviteSource)->resolveInviteSource($this->inviteKey, $this->id);
             $this->db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
                 ", $this->inviteKey

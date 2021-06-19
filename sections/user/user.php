@@ -343,14 +343,24 @@ if (check_perms('users_view_keys') || $OwnProfile) {
                 <li>Passkey: <a href="#" id="passkey" onclick="togglePassKey('<?= display_str($User->announceKey()) ?>'); return false;" class="brackets">View</a></li>
 <?php
 }
-if (check_perms('users_view_invites')) {
+if ($viewer->permitted('users_view_invites')) {
     if (is_null($User->inviter())) {
         $Invited = '<span style="font-style: italic;">Nobody</span>';
     } else {
-        $Invited = '<a href="user.php?id=' . $User->inviter()->id() . '">' . $User->inviter()->username() . "</a>";
+        $inviter = $userMan->findById($User->inviter()->id());
+        $Invited = '<a href="user.php?id=' . $inviter->id() . '">' . $User->inviter()->username() . "</a>";
+        if ($viewer->permitted('admin_manage_invite_source')) {
+            $source = (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID);
+            if (is_null($source) && ($inviter->isInterviewer() || $inviter->isRecruiter())) {
+                $source = "<i>unconfirmed</i>";
+            }
+            if (!is_null($source)) {
+                $Invited .= " from $source";
+            }
+        }
     }
 ?>
-                <li>Invited by: <?=$Invited?></li>
+                <li>Invited by: <?= $Invited ?></li>
                 <li>Invites: <?= $User->disableInvites() ? 'X' : number_format($User->inviteCount()) ?>
                     <?= '(' . $User->pendingInviteCount() . ' in use)' ?></li>
 <?php
@@ -809,6 +819,12 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
                 'upload'  => $User->disableUpload(),
                 'wiki'    => $User->disableWiki(),
             ],
+        ]);
+    }
+
+    if ($User->isInterviewer() || $User->isRecruiter() || $User->isStaff()) {
+        echo $Twig->render('user/edit-invite-sources.twig', [
+            'list' => (new \Gazelle\Manager\InviteSource)->inviterConfiguration($User->id()),
         ]);
     }
 

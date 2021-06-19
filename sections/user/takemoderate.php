@@ -672,4 +672,17 @@ if (count($set) || count($leechSet)) {
     $user->flush();
 }
 
+if (isset($_POST['invite_source_update'])) {
+    $source = array_keys(array_filter($_POST, function ($x) { return preg_match('/^source-\d+$/', $x);}, ARRAY_FILTER_USE_KEY));
+    if ($source) {
+        $ids = [];
+        foreach ($source as $s) {
+            $ids[] = ((int)explode('-', $s)[1]);
+        }
+        (new Gazelle\Manager\InviteSource)->modifyInviterConfiguration($user->id(), $ids);
+        header("Location: tools.php?action=invite_source");
+        exit;
+    }
+}
+
 header("location: user.php?id=$userId");
