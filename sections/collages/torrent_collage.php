@@ -34,7 +34,7 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
     'can_post'       => !$LoggedUser['DisablePosting'],
     'category_id'    => $Collage->categoryId(),
     'category_name'  => $CollageCats[$Collage->categoryId()],
-    'comments'       => Comments::collageSummary($CollageID),
+    'comments'       => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
     'contributors_n' => $Collage->numContributors(),
     'contributors'   => array_slice($Collage->contributors(), 0, 5, true),
     'description'    => Text::full_format($Collage->description()),
