@@ -67,6 +67,43 @@ class Comment extends \Gazelle\Base {
         return (new $className($pageId))->setPostId($postId);
     }
 
+    public function merge(string $page, int $pageId, int $targetPageId) {
+        $qid = $this->db->get_query_id();
+
+        $this->db->prepared_query("
+            UPDATE comments SET
+                PageID = ?
+            WHERE Page = ? AND PageID = ?
+            ", $targetPageId, $page, $pageId
+        );
+        $pageCount = $this->db->scalar("
+            SELECT ceil(count(*) / ?) AS Pages
+            FROM comments
+            WHERE Page = ? AND PageID = ?
+            GROUP BY PageID
+            ", TORRENT_COMMENTS_PER_PAGE, $page, $targetPageId
+        );
+        $last = floor((TORRENT_COMMENTS_PER_PAGE * $pageCount - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
+
+        // quote notifications
+        $this->db->prepared_query("
+            UPDATE users_notify_quoted SET
+                PageID = ?
+            WHERE Page = ? AND PageID = ?
+            ", $targetPageId, $page, $pageId
+        );
+        $this->db->set_query_id($qid);
+
+        // comment subscriptions
+        $subscription = new \Gazelle\Manager\Subscription;
+        $subscription->move($page, $pageId, $targetPageId);
+
+        for ($i = 0; $i <= $last; ++$i) {
+            $this->cache->delete_value($page . "_comments_$targetPageId" . "_catalogue_$i");
+        }
+        $this->cache->delete_value($page."_comments_$targetPageId");
+    }
+
     /**
      * Remove all comments on $page/$pageId (handle quote notifications and subscriptions as well)
      * @param string $page
@@ -86,6 +123,7 @@ class Comment extends \Gazelle\Base {
         if ($pageCount === 0) {
             return false;
         }
+        $last = floor((TORRENT_COMMENTS_PER_PAGE * $pageCount - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
 
         $this->db->prepared_query("
             DELETE FROM comments WHERE Page = ? AND PageID = ?
@@ -101,14 +139,13 @@ class Comment extends \Gazelle\Base {
             DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?
             ", $page, $pageId
         );
+        $this->db->set_query_id($qid);
 
         // Clear cache
-        $last = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         for ($i = 0; $i <= $last; ++$i) {
             $this->cache->delete_value($page . '_comments_' . $pageId . '_catalogue_' . $i);
         }
         $this->cache->delete_value($page . '_comments_' . $pageId);
-        $this->db->set_query_id($qid);
 
         return true;
     }
@@ -128,5 +165,42 @@ class Comment extends \Gazelle\Base {
             $this->cache->cache_value($key, $edits, 0);
         }
         return $edits;
+    }
+
+    /**
+     * Load recent collage comments. Used for displaying recent comments on collage pages.
+     * @param int $CollageID ID of the collage
+     * @return array ($Comments)
+     *     $Comments
+     *         ID: Comment ID
+     *         Body: Comment body
+     *         AuthorID: Author of comment
+     *         Username: Their username
+     *         AddedTime: Date of comment creation
+     */
+    public function collageSummary($collageId, $count = 5): array {
+        $key = "collages_comments_recent_$collageId";
+        $list = $this->cache->get_value($key);
+        if ($list === false) {
+            $qid = $this->db->get_query_id();
+            $this->db->prepared_query("
+                SELECT c.ID AS id,
+                    c.Body as body,
+                    c.AuthorID as author_id,
+                    c.AddedTime as added
+                FROM comments AS c
+                LEFT JOIN users_main AS um ON (um.ID = c.AuthorID)
+                WHERE c.Page = ? AND c.PageID = ?
+                ORDER BY c.ID DESC
+                LIMIT ?
+                ", 'collages', $collageId, $count
+            );
+            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+            $this->db->set_query_id($qid);
+            if (count($list)) {
+                $this->cache->cache_value($key, $list, 7200);
+            }
+        }
+        return $list;
     }
 }
