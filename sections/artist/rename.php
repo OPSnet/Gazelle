@@ -186,7 +186,7 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
                 Requests::update_sphinx_requests($RequestID);
             }
         }
-        Comments::merge('artist', $ArtistID, $TargetArtistID);
+        (new \Gazelle\Manager\Comment)->merge('artist', $ArtistID, $TargetArtistID);
     }
 }
 

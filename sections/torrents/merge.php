@@ -150,7 +150,7 @@ if (empty($_POST['confirm'])) {
     );
 
     // Comments
-    Comments::merge('torrents', $oldGroupId, $newGroupId);
+    (new \Gazelle\Manager\Comment)->merge('torrents', $oldGroupId, $newGroupId);
 
     // Collages
     $DB->prepared_query("
