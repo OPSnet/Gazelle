@@ -202,7 +202,7 @@ foreach ($current as $key => $value) {
         continue;
     }
     if (isset($Properties[$key]) && $value !== $Properties[$key]) {
-        $change[] = sprintf('%s %s &rarr; %s', $key, $Properties[$key], $value);
+        $change[] = sprintf('%s %s &rarr; %s', $key, $value, $Properties[$key]);
     }
 }
 
