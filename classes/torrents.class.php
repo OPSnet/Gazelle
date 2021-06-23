@@ -2,7 +2,6 @@
 
 class Torrents {
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
-    const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
     /**
      * Function to get data and torrents for an array of GroupIDs. Order of keys doesn't matter
@@ -697,25 +696,6 @@ class Torrents {
             }
         }
         return isset($CurSnatchedTorrents[$TorrentID]);
-    }
-
-    /**
-     * Change the schedule for when the next update to a user's cached snatch list should be performed.
-     * By default, the change will only be made if the new update would happen sooner than the current
-     * @param int $Time Seconds until the next update
-     * @param bool $Force Whether to accept changes that would push back the update
-     */
-    public static function set_snatch_update_time($UserID, $Time, $Force = false) {
-        global $Cache;
-        if (!$UpdateTime = $Cache->get_value("users_snatched_{$UserID}_time")) {
-            return;
-        }
-        $NextTime = time() + $Time;
-        if ($Force || $NextTime < $UpdateTime['next']) {
-            // Skip if the change would delay the next update
-            $UpdateTime['next'] = $NextTime;
-            $Cache->cache_value("users_snatched_{$UserID}_time", $UpdateTime, 0);
-        }
     }
 
     // Some constants for self::display_string's $Mode parameter
