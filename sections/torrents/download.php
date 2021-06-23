@@ -149,17 +149,11 @@ if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
     }
 }
 
-$DB->prepared_query("
-    INSERT IGNORE INTO users_downloads (UserID, TorrentID, Time)
-    VALUES (?, ?, now())
-    ", $userId, $torrentId
-);
-Torrents::set_snatch_update_time($userId, Torrents::SNATCHED_UPDATE_AFTERDL);
+$Viewer->registerDownload($torrentId);
 
 if ($info['CategoryID'] == '1' && $info['WikiImage'] != '' && $info['uploaderId'] != $userId) {
     $Cache->delete_value("user_recent_snatch_$userId");
 }
-$Cache->delete_value('user_rlim_' . $userId);
 
 $torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
 

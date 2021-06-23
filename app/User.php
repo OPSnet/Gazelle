@@ -6,7 +6,9 @@ use Gazelle\Util\Mail;
 
 class User extends BaseObject {
 
-    const CACHE_KEY = 'u_%d';
+    const CACHE_KEY         = 'u_%d';
+    const CACHE_SNATCH_TIME = 'users_snatched_%d_time';
+    const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
     /** @var int */
     protected $forceCacheFlush = false;
@@ -1058,6 +1060,29 @@ class User extends BaseObject {
             ', $newIP, \Tools::geoip($newIP), $this->id
         );
         $this->flush();
+    }
+
+    public function registerDownload(int $torrentId): int {
+        $this->db->prepared_query("
+            INSERT INTO users_downloads
+                   (UserID, TorrentID)
+            VALUES (?,      ?)
+            ", $this->id, $torrentId
+        );
+        $affected = $this->db->affected_rows();
+        if (!$affected) {
+            return 0;
+        }
+        $this->cache->delete_value('user_rlim_' . $this->id);
+        $key = sprintf(self::CACHE_SNATCH_TIME, $this->id);
+        $nextUpdate = $this->cache->get_value($key);
+        if ($nextUpdate !== false) {
+            $soon = time() + self::SNATCHED_UPDATE_AFTERDL;
+            if ($soon < $nextUpdate['next']) { // only if the change is closer than the next update
+                $this->cache->cache_value($key, ['next' => $soon], 0);
+            }
+        }
+        return $affected;
     }
 
     /**

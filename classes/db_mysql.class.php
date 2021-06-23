@@ -255,6 +255,7 @@ class DB_MYSQL {
      */
     public function prepare($Query) {
         $this->setup_query();
+        $Query = trim($Query);
         $this->PreparedQuery = $Query;
         $this->Statement = $this->LinkID->prepare($Query);
         $this->Errno = $this->LinkID->errno;
