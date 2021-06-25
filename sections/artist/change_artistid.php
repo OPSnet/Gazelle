@@ -155,9 +155,9 @@ if (isset($_POST['confirm'])) {
 
     // Cache clearing
     if (!empty($Groups)) {
+        $tgroupMan = new \Gazelle\Manager\TGroup;
         foreach ($Groups as $GroupID) {
-            $Cache->delete_value("groups_artists_$GroupID");
-            Torrents::update_hash($GroupID);
+            $tgroupMan->refresh($GroupID);
         }
     }
     if (!empty($Requests)) {

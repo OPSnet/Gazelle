@@ -46,12 +46,10 @@ if (($ReqCount + $GroupCount) == 0) {
     Artists::delete_artist($ArtistID);
 }
 
-$Cache->deleteMulti(["torrents_details_$GroupID", "groups_artists_$GroupID", "artist_groups_$ArtistID"]);
-
+(new \Gazelle\Manager\TGroup)->refresh($GroupID);
 (new Gazelle\Log)->group($GroupID, $Viewer->id(), "removed artist $ArtistName (".$ArtistTypes[$Importance].')')
     ->general('Artist ('.$ArtistTypes[$Importance]
         . ") $ArtistID ($ArtistName) was removed from the group $GroupID ($GroupName) by user "
         . $Viewer->id().' ('.$Viewer->username().')');
-Torrents::update_hash($GroupID);
 
 header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$GroupID}");

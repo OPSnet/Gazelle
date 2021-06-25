@@ -748,9 +748,6 @@ $torrentFiler->put($bencoder->getEncode(), $TorrentID);
 (new Gazelle\Log)->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
-Torrents::update_hash($GroupID);
-$Debug->set_flag('upload: sphinx updated');
-
 // Running total for amount of BP to give
 $Bonus = new Gazelle\Bonus;
 $BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
@@ -842,7 +839,6 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
     $sizeMiB = number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2);
     (new Gazelle\Log)->torrent($GroupID, $ExtraTorrentID, $Viewer->id(), "uploaded ($sizeMiB MiB)")
         ->general("Torrent $ExtraTorrentID ($LogName) ($sizeMiB  MiB) was uploaded by " . $Viewer->username());
-    Torrents::update_hash($GroupID);
 }
 
 //******************************************************************************//
@@ -865,6 +861,8 @@ if ($Properties['Image'] != '') {
  * redirecting the user to the destination page and flushing the buffers
  * to make it seem like the PHP process is working in the background.
  */
+
+$tgroupMan->refresh($GroupID);
 
 if (defined('AJAX')) {
     $Response = [
@@ -913,7 +911,6 @@ if (defined('AJAX')) {
         header("Location: torrents.php?id=$GroupID");
     }
 }
-
 
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
