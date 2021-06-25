@@ -246,16 +246,14 @@ class Artist extends Base {
             UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
             ", $targetId, $aliasId
         );
+        $tgroupMan = new Manager\TGroup;
         foreach ($groups as $groupId) {
-            $this->cache->delete_value("groups_artists_$groupId"); // Delete group artist cache
-            \Torrents::update_hash($groupId);
+            $tgroupMan->refresh($groupId);
         }
 
         // process artists in requests
         $this->db->prepared_query("
-            SELECT RequestID
-            FROM requests_artists
-            WHERE AliasID = ?
+            SELECT RequestID FROM requests_artists WHERE AliasID = ?
             ", $aliasId
         );
         $requests = $this->db->collect('RequestID');

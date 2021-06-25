@@ -41,7 +41,7 @@ if ($name) {
         );
     }
 
-    Torrents::update_hash($groupId);
+    (new \Gazelle\Manager\TGroup)->refresh($groupId);
     (new Gazelle\Log)->group($groupId, $Viewer->id(), "Tag \"$name\" removed from group $groupId");
 
     // Cache the deleted tag for 5 minutes

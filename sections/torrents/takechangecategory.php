@@ -89,8 +89,9 @@ $DB->prepared_query('
 );
 
 // Delete old group if needed
+$tgroupMan = new \Gazelle\Manager\TGroup;
 if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $OldGroupID)) {
-    Torrents::update_hash($OldGroupID);
+    $torMan->refresh($OldGroupID);
 } else {
     // TODO: votes etc.
     $DB->prepared_query("
@@ -110,7 +111,7 @@ $DB->prepared_query('
     ', $GroupID, $OldGroupID
 );
 
-Torrents::update_hash($GroupID);
+$torMan->refresh($GroupID);
 
 $Cache->delete_value("torrent_download_$TorrentID");
 

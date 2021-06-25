@@ -371,7 +371,7 @@ $DB->commit();
 if (check_perms('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
     Torrents::freeleech_torrents($TorrentID, $Properties['FreeLeech'], $Properties['FreeLeechType']);
 }
-Torrents::update_hash($current['GroupID']);
+(new \Gazelle\Manager\TGroup)->refresh($current['GroupID']);
 
 $name = $DB->scalar("
     SELECT g.Name

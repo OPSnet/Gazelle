@@ -98,7 +98,6 @@ if (count($CleanArtists) > 0) {
                     . " importance was changed to {$ArtistTypes[$NewImportance]} in group {$GroupID} ({$GroupName}) by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
         }
     }
-    $Cache->delete_value("groups_artists_$GroupID");
-    Torrents::update_hash($GroupID);
+    (new \Gazelle\Manager\TGroup)->refresh($GroupID);
     header("Location: torrents.php?id=$GroupID");
 }

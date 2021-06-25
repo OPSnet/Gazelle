@@ -55,6 +55,7 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     $TargetArtistID = $ArtistID;
 } else {
     // Merge stuff
+    $tgroupMan = new \Gazelle\Manager\TGroup;
     $DB->prepared_query("UPDATE artists_alias SET
             Redirect = ?,
             ArtistID = ?
@@ -107,8 +108,7 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     );
     if (!empty($Groups)) {
         foreach ($Groups as $GroupID) {
-            $Cache->delete_value("groups_artists_$GroupID");
-            Torrents::update_hash($GroupID);
+            $tgroupMan->refresh($GroupID);
         }
     }
     $DB->prepared_query("
@@ -157,8 +157,7 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
         );
         if (!empty($Groups)) {
             foreach ($Groups as $GroupID) {
-                $Cache->delete_value("groups_artists_$GroupID");
-                Torrents::update_hash($GroupID);
+                $tgroupMan->refresh($GroupID);
             }
         }
 

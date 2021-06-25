@@ -91,7 +91,11 @@ if (empty($_POST['confirm'])) {
         WHERE GroupID = ?
         ", $OldGroupID
     );
-    if (!$Count) {
+    $tgroupMan = new \Gazelle\Manager\TGroup;
+    $tgroupMan->refresh($GroupID);
+    if ($Count) {
+        $tgroupMan->refresh($OldGroupID);
+    } else {
         // TODO: votes etc!
         $DB->prepared_query("
             UPDATE comments SET
@@ -103,10 +107,7 @@ if (empty($_POST['confirm'])) {
         $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
         $Cache->delete_value("torrent_comments_$GroupID");
         Torrents::delete_group($OldGroupID);
-    } else {
-        Torrents::update_hash($OldGroupID);
     }
-    Torrents::update_hash($GroupID);
 
     (new Gazelle\Log)->group($GroupID, $Viewer->id(), "merged group $OldGroupID")
         ->general("Torrent $TorrentID was edited by " . $Viewer->username());

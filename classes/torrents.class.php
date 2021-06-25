@@ -381,93 +381,6 @@ class Torrents {
     }
 
     /**
-     * Update the cache and sphinx delta index to keep everything up-to-date.
-     *
-     * @param int $GroupID
-     */
-    public static function update_hash($GroupID) {
-        global $Cache, $DB;
-        $QueryID = $DB->get_query_id();
-
-        // todo: remove this legacy code once TagList replacement is confirmed working
-        $DB->prepared_query("
-            UPDATE torrents_group
-            SET TagList = (
-                    SELECT REPLACE(GROUP_CONCAT(tags.Name SEPARATOR ' '), '.', '_')
-                    FROM torrents_tags AS t
-                        INNER JOIN tags ON tags.ID = t.TagID
-                    WHERE t.GroupID = ?
-                    GROUP BY t.GroupID
-                    )
-            WHERE ID = ?",
-            $GroupID, $GroupID);
-
-        // Fetch album vote score
-        $DB->prepared_query("
-            SELECT Score
-            FROM torrents_votes
-            WHERE GroupID = ?",
-            $GroupID);
-        if ($DB->has_results()) {
-            list($VoteScore) = $DB->next_record();
-        } else {
-            $VoteScore = 0;
-        }
-
-        // Fetch album artists
-        $DB->prepared_query("
-            SELECT GROUP_CONCAT(aa.Name separator ' ')
-            FROM torrents_artists AS ta
-                JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
-            WHERE ta.GroupID = ?
-                AND ta.Importance IN ('1', '4', '5', '6')
-            GROUP BY ta.GroupID", $GroupID);
-        if ($DB->has_results()) {
-            list($ArtistName) = $DB->next_record(MYSQLI_NUM, false);
-        } else {
-            $ArtistName = '';
-        }
-
-        $DB->prepared_query("
-            REPLACE INTO sphinx_delta
-                (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType, RecordLabel,
-                CatalogueNumber, VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
-                HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
-                RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
-            SELECT
-                t.ID, g.ID, g.Name, g.Year, g.CategoryID, unix_timestamp(t.Time), g.ReleaseType,
-                g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
-                tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
-                cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
-                t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
-                replace(replace(t.FileList, '_', ' '), '/', ' ') AS FileList,
-                replace(group_concat(t2.Name SEPARATOR ' '), '.', '_'), ?, ?
-            FROM torrents t
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            INNER JOIN torrents_group g ON (g.ID = t.GroupID)
-            INNER JOIN torrents_tags tt ON (tt.GroupID = g.ID)
-            INNER JOIN tags t2 ON (t2.ID = tt.TagID)
-            WHERE g.ID = ?
-            GROUP BY t.ID
-            ", $VoteScore, $ArtistName, $GroupID
-        );
-
-        $Cache->delete_value("torrents_details_$GroupID");
-        $Cache->delete_value("torrent_group_$GroupID");
-        $Cache->delete_value("torrent_group_light_$GroupID");
-
-        $ArtistInfo = Artists::get_artist($GroupID);
-        foreach ($ArtistInfo as $Importances => $Importance) {
-            foreach ($Importance as $Artist) {
-                $Cache->delete_value('artist_groups_'.$Artist['id']); //Needed for at least freeleech change, if not others.
-            }
-        }
-
-        $Cache->delete_value("groups_artists_$GroupID");
-        $DB->set_query_id($QueryID);
-    }
-
-    /**
      * Format the information about a torrent.
      * @param array $Data an array a subset of the following keys:
      *    Format, Encoding, HasLog, LogScore, HasCue, Media, Scene, RemasterYear
@@ -611,8 +524,9 @@ class Torrents {
                 ->general($LoggedUser['Username']." marked torrent $TorrentID freeleech type $FreeLeechType!");
         }
 
+        $tgroupMan = new \Gazelle\Manager\TGroup;
         foreach ($GroupIDs as $GroupID) {
-            Torrents::update_hash($GroupID);
+            $tgroupMan->refresh($GroupID);
         }
     }
 

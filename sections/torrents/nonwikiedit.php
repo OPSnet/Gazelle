@@ -71,9 +71,8 @@ if ($log) {
         ", $groupId
     );
     $Cache->deleteMulti($DB->collect('cacheKey'));
-    $Cache->delete_value("torrents_details_$groupId");
 
-    Torrents::update_hash($groupId);
+    (new \Gazelle\Manager\TGroup)->refresh($groupId);
 }
 
 header("Location: torrents.php?id=$groupId");

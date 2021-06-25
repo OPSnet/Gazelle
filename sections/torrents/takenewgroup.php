@@ -84,13 +84,13 @@ if (empty($_POST['confirm'])) {
     );
 
     // Update or remove previous group, depending on whether there is anything left
+    $tgroupMan = new \Gazelle\Manager\TGroup;
+    $tgroupMan->refresh($GroupID);
     if ($DB->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $OldGroupID)) {
-        Torrents::update_hash($OldGroupID);
+        $tgroupMan->refresh($OldGroupID);
     } else {
         Torrents::delete_group($OldGroupID);
     }
-
-    Torrents::update_hash($GroupID);
 
     $Cache->delete_value("torrent_download_$TorrentID");
 
