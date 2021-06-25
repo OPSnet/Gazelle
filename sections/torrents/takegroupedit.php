@@ -112,7 +112,7 @@ if (empty($RevisionID)) { // edit
         VALUES (?,      ?,    ?,     ?,      ?)
         ", $GroupID, $Body, $Image, $UserID, trim($_POST['summary'])
     );
-    Torrents::update_hash($GroupID);
+    (new \Gazelle\Manager\TGroup)->refresh($GroupID);
 }
 else { // revert
     list($PossibleGroupID, $Body, $Image) = $DB->row("

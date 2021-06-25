@@ -460,7 +460,7 @@ class Torrent extends BaseObject {
             ", $groupId
         );
         if ($Count > 0) {
-            \Torrents::update_hash($groupId);
+            (new Manager\TGroup)->refresh($groupId);
         }
 
         $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $this->id]]);
@@ -474,7 +474,7 @@ class Torrent extends BaseObject {
 
         $this->db->prepared_query("
             INSERT INTO user_torrent_remove
-                (user_id, torrent_id)
+                   (user_id, torrent_id)
             VALUES (?,       ?)
             ", $userId, $this->id
         );

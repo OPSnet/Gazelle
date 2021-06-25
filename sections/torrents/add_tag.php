@@ -51,7 +51,7 @@ foreach ($Tags as $TagName) {
     }
 }
 
-Torrents::update_hash($GroupID); // Delete torrent group cache
+(new \Gazelle\Manager\TGroup)->refresh($GroupID);
 if (defined('AJAX')) {
     json_print('success', [
         'added' => $Added,

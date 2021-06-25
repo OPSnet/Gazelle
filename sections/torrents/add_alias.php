@@ -54,8 +54,7 @@ for ($i = 0; $i < count($AliasNames); $i++) {
 }
 
 if ($Changed) {
-    $Cache->deleteMulti(["torrents_details_$GroupID", "groups_artists_$GroupID"]);
-    Torrents::update_hash($GroupID);
+    (new \Gazelle\Manager\TGroup)->refresh($GroupID);
 }
 
 header('Location: ' . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id=$GroupID");
