@@ -8,8 +8,7 @@ if ($Cache->get_value('torrent_'.$TorrentID.'_lock')) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if ($user->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !check_perms('torrents_delete_fast')) {
+if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !check_perms('torrents_delete_fast')) {
     error('You have recently deleted ' . USER_TORRENT_DELETE_MAX
         . ' torrents. Please contact a staff member if you need to delete more.');
 }
@@ -29,7 +28,7 @@ if (!$UserID) {
     error('Torrent already deleted.');
 }
 
-if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
+if ($Viewer->id() != $UserID && !check_perms('torrents_delete')) {
     error(403);
 }
 
@@ -51,7 +50,7 @@ View::show_header('Delete torrent', 'reportsv2');
         <div class="pad">
             <form class="delete_form" name="torrent" action="torrents.php" method="post">
                 <input type="hidden" name="action" value="takedelete" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
                 <div class="field_div">
                     <strong>Reason: </strong>
@@ -176,7 +175,7 @@ View::show_header('Delete torrent', 'reportsv2');
     <form class="create_form" name="report" id="reportform_<?=$ReportID?>" action="reports.php" method="post">
 <?php /* Some of these are for takeresolve, some for the JavaScript. */ ?>
         <div>
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" id="reportid<?=$ReportID?>" name="reportid" value="<?=$ReportID?>" />
             <input type="hidden" id="torrentid<?=$ReportID?>" name="torrentid" value="<?=$TorrentID?>" />
             <input type="hidden" id="uploader<?=$ReportID?>" name="uploader" value="<?=$UploaderName?>" />
@@ -196,7 +195,7 @@ View::show_header('Delete torrent', 'reportsv2');
                     <a href="log.php?search=Torrent+<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)
 <?php } else { ?>
                     <?=$LinkName?>
-                    <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="brackets tooltip" title="Download">DL</a>
+                    <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->annouceKey() ?>" class="brackets tooltip" title="Download">DL</a>
                     uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> <?=time_diff($Time)?>
                     <br />
 <?php

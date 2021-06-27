@@ -31,8 +31,8 @@ if ($_POST) {
 $watch = new Gazelle\LoginWatch('0.0.0.0');
 if (isset($ban)) {
     $nrBan = $watch->setBan(
-        $LoggedUser['ID'],
-        $_REQUEST['reason'] ?? "Banned by {$LoggedUser['Username']} from login watch.",
+        $Viewer->id(),
+        $_REQUEST['reason'] ?? "Banned by " . $Viewer->username() . " from login watch.",
         $ban
     );
 }
@@ -69,7 +69,7 @@ unset($attempt);
 
 View::show_header('Login Watch');
 echo $Twig->render('admin/login-watch.twig', [
-    'auth'      => $LoggedUser['AuthKey'],
+    'auth'      => $Viewer->auth(),
     'header'    => $header,
     'list'      => $list,
     'can_ban'   => check_perms('admin_manage_ipbans'),

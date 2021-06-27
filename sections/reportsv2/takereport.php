@@ -109,7 +109,7 @@ if ($DB->scalar("
         ReportedTime > now() - INTERVAL 5 SECOND
         AND TorrentID = ?
         AND ReporterID = ?
-        ", $TorrentID, $LoggedUser['ID']
+        ", $TorrentID, $Viewer->id()
 )) {
     $Err = "Slow down, you're moving too fast!";
 }
@@ -122,13 +122,13 @@ $DB->prepared_query("
     INSERT INTO reportsv2
            (ReporterID, TorrentID, Type, UserComment, Track, Image, ExtraID, Link)
     VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
-    ", $LoggedUser['ID'], $TorrentID, $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links
+    ", $Viewer->id(), $TorrentID, $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links
 );
 
 $Cache->delete_value("reports_torrent_$TorrentID");
 $Cache->increment('num_torrent_reportsv2');
 
-if ($UserID != $LoggedUser['ID']) {
+if ($UserID != $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($UserID, 0,
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.twig', [

@@ -3,12 +3,11 @@
 use Gazelle\Util\Irc;
 
 function notify ($Channel, $Message) {
-    global $LoggedUser;
-    $UserID = empty($LoggedUser['ID']) ? false : $LoggedUser['ID'];
+    global $Viewer;
     Irc::sendRaw("PRIVMSG "
         . $Channel . " :" . $Message . " error by "
-        . ($UserID
-                ? SITE_URL . "/user.php?id=" . $UserID . " (" . $LoggedUser['Username'] . ")"
+        . ($Viewer
+                ? SITE_URL . "/user.php?id=" . $Viewer->id() . " (" . $Viewer->username() . ")"
                 : $_SERVER['REMOTE_ADDR']
           )
         . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"

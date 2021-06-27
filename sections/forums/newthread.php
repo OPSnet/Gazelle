@@ -3,23 +3,22 @@ $forum = (new Gazelle\Manager\Forum)->findById((int)($_GET['forumid'] ?? 0));
 if (!$forum) {
     error(404);
 }
-$userMan = new Gazelle\Manager\User;
-$user = $userMan->findById($LoggedUser['ID']);
-if (!$user->writeAccess($forum) || !$user->createAccess($forum)) {
+if (!$Viewer->writeAccess($forum) || !$Viewer->createAccess($forum)) {
     error(403);
 }
+$userMan = new Gazelle\Manager\User;
 
 View::show_header('Forums &rsaquo; ' . $forum->name() . ' &rsaquo; New Thread', 'comments,bbcode,jquery.validate,form_validate,newpoll');
 echo $Twig->render('forum/new-thread.twig', [
     'can' => [
-        'create_poll' => check_perms('forums_polls_create'),
-        'see_avatars' => $user->showAvatars(),
+        'create_poll' => $Viewer->permitted('forums_polls_create'),
+        'see_avatars' => $Viewer->showAvatars(),
     ],
-    'auth'      => $LoggedUser['AuthKey'],
-    'avatar'    => $userMan->avatarMarkup($user, $user),
+    'auth'      => $Viewer->auth(),
+    'avatar'    => $userMan->avatarMarkup($Viewer, $Viewer),
     'id'        => $forum->id(),
-    'is_subbed' => $user->option('AutoSubscribe'),
+    'is_subbed' => $Viewer->option('AutoSubscribe'),
     'name'      => $forum->name(),
-    'user_id'   => $LoggedUser['ID'],
+    'user_id'   => $Viewer->id(),
 ]);
 View::show_footer();

@@ -4,7 +4,7 @@ use Gazelle\Inbox;
 
 authorize();
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 $ConvID = (int)$_POST['convid'];
 if (!$ConvID) {
     error(404);

@@ -7,7 +7,7 @@ define('NOTIFICATIONS_PER_PAGE', 50);
 list($Page, $Limit) = Format::page_limit(NOTIFICATIONS_PER_PAGE);
 
 $cond = ['unt.UserID = ?'];
-$args = [$LoggedUser['ID']];
+$args = [$Viewer->id()];
 if ((int)$_GET['filterid'] > 0) {
     $cond[] = 'unf.ID = ?';
     $args[] = (int)$_GET['filterid'];
@@ -46,9 +46,9 @@ if (count($GroupIDs)) {
         UPDATE users_notify_torrents
         SET UnRead = ?
         WHERE UserID = ?
-        ', 0, $LoggedUser['ID']
+        ', 0, $Viewer->id()
     );
-    $Cache->delete_value("user_notify_upload_" . $LoggedUser['ID']);
+    $Cache->delete_value("user_notify_upload_" . $Viewer->id());
 }
 
 $DB->set_query_id($Results);

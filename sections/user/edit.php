@@ -14,7 +14,7 @@ $UserID = (int)$_REQUEST['userid'];
 if (!$UserID) {
     error(404);
 }
-if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles')) {
+if ($UserID != $Viewer->id() && !check_perms('users_edit_profiles')) {
     error(403);
 }
 $User = new Gazelle\User($UserID);
@@ -90,7 +90,7 @@ echo $Twig->render('user/setting.twig', [
     'download_text'    => $DownloadAlt,
     'is_mod'           => check_perms('users_mod'),
     'lastfm_username'  => (new Gazelle\Util\LastFM)->username($UserID),
-    'logged_user'      => $LoggedUser['ID'],
+    'logged_user'      => $Viewer->id(),
     'nav_items'        => $NavItems,
     'nav_items_user'   => $UserNavItems,
     'option'           => $options,

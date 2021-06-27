@@ -38,7 +38,7 @@ $Results = $DB->to_array();
 <?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
-        if ($Username == $LoggedUser['Username']) {
+        if ($Username == $Viewer->username()) {
             $RowClass = ' class="rowa"';
         } else {
             $RowClass = '';
@@ -72,7 +72,7 @@ $Results = $DB->to_array();
 <?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
-        if ($Username == $LoggedUser['Username']) {
+        if ($Username == $Viewer->username()) {
             $RowClass = ' class="rowa"';
         } else {
             $RowClass = '';
@@ -106,7 +106,7 @@ $Results = $DB->to_array();
 <?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
-        if ($Username == $LoggedUser['Username']) {
+        if ($Username == $Viewer->username()) {
             $RowClass = ' class="rowa"';
         } else {
             $RowClass = '';
@@ -139,7 +139,7 @@ $Results = $DB->to_array();
 <?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
-        if ($Username == $LoggedUser['Username']) {
+        if ($Username == $Viewer->username()) {
             $RowClass = ' class="rowa"';
         } else {
             $RowClass = '';
@@ -182,7 +182,7 @@ $Results = $DB->to_array();
     $i = 1;
     foreach ($Results as $Result) {
         [$Username, $Trashed] = $Result;
-        if ($Username == $LoggedUser['Username']) {
+        if ($Username == $Viewer->username()) {
             $RowClass = ' class="rowa"';
         } else {
             $RowClass = '';

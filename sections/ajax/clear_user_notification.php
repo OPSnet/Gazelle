@@ -1,14 +1,13 @@
 <?php
 
-$notifMan = new Gazelle\Manager\Notification($LoggedUser['ID']);
-$user = new Gazelle\User($LoggedUser['ID']);
+$notifMan = new Gazelle\Manager\Notification($Viewer->id());
 
 $Type = $_POST['type'];
 
 switch($Type) {
     case 'Blog':
-        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($LoggedUser['ID'])) {
-            $Cache->delete_value('user_info_heavy_' . $LoggedUser['ID']);
+        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($Viewer->id())) {
+            $Cache->delete_value('user_info_heavy_' . $Viewer->id());
         }
         break;
     case 'Collages':
@@ -18,22 +17,22 @@ switch($Type) {
         $notifMan->clearGlobal();
         break;
     case 'Inbox':
-        $user->markAllReadInbox();
+        $Viewer->markAllReadInbox();
         break;
     case 'News':
         $notifMan->clearNews();
         break;
     case 'Quotes':
-        (new Gazelle\User\Quote($user))->clear();
+        (new Gazelle\User\Quote($Viewer))->clear();
         break;
     case 'StaffPM':
-        $user->markAllReadStaffPM();
+        $Viewer->markAllReadStaffPM();
         break;
     case 'Subscriptions':
-        $notifMan->clearSubscriptions($UserID);
+        $notifMan->clearSubscriptions($Viewer->id());
         break;
     case 'Torrents':
-        $user->clearTorrentNotifications();
+        $Viewer->clearTorrentNotifications();
         break;
     default:
         if (strpos($Type, "oneread_") === 0) {

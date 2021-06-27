@@ -91,7 +91,7 @@ if ($create || $contest) {
 
     echo $Twig->render('contest/admin-form.twig', [
         'action'     => $create ? 'contest.php?action=create' : 'contest.php?action=admin&id=' . $contest->id(),
-        'auth'       => $LoggedUser['AuthKey'],
+        'auth'       => $Viewer->auth(),
         'contest'    => $contest,
         'create'     => $create,
         'type'       => $contestTypes,

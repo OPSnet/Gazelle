@@ -31,7 +31,7 @@ foreach ($Items as $i) {
         <form class="manage_form" name="navitems" action="" method="post">
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="action" value="navigation_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" name="tag" value="<?=$Tag?>" />
             </td>
@@ -67,7 +67,7 @@ foreach ($Items as $i) {
     <tr class="rowa">
         <form class="manage_form" name="navitems" action="" method="post">
             <input type="hidden" name="action" value="navigation_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" name="tag" />
             </td>

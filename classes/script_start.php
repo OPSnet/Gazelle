@@ -80,7 +80,7 @@ $ipv4Man = new Gazelle\Manager\IPv4;
 $LoggedUser = [];
 $SessionID = false;
 $FullToken = null;
-$user = null;
+$Viewer = null;
 
 // Only allow using the Authorization header for ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
@@ -92,37 +92,30 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     // this first case is for compatibility with RED
     if (count($AuthorizationHeader) === 1) {
         $FullToken = $AuthorizationHeader[0];
-    }
-    elseif (count($AuthorizationHeader) === 2) {
+    } elseif (count($AuthorizationHeader) === 2) {
         if ($AuthorizationHeader[0] !== 'token') {
             header('Content-type: application/json');
             json_die('failure', 'invalid authorization type, must be "token"');
         }
         $FullToken = $AuthorizationHeader[1];
-    }
-    else {
+    } else {
         header('Content-type: application/json');
         json_die('failure', 'invalid authorization type, must be "token"');
     }
 
-    $Revoked = 1;
-
-    $UserId = (int) substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32);
-    if (!empty($UserId)) {
-        [$LoggedUser['ID'], $Revoked] = $DB->row('SELECT user_id, revoked FROM api_tokens WHERE user_id=? AND token=?', $UserId, $FullToken);
-    }
-    $user = $userMan->findById((int)$LoggedUser['ID']);
-    if (is_null($user) || $Revoked === 1) {
-        log_token_attempt($DB, (int)$UserID);
+    $userId = (int)substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32);
+    $Viewer = $userMan->findById($userId);
+    if (is_null($Viewer) || !$Viewer->hasApiToken($FullToken)) {
+        log_token_attempt($DB, $userId);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
 } elseif (isset($_COOKIE['session'])) {
     $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
     if ($LoginCookie !== false) {
-        [$SessionID, $LoggedUser['ID']] = Gazelle\Session::decode($LoginCookie);
-        $user = $userMan->findById((int)$LoggedUser['ID']);
-        if (is_null($user)) {
+        [$SessionID, $userId] = Gazelle\Session::decode($LoginCookie);
+        $Viewer = $userMan->findById((int)$userId);
+        if (is_null($Viewer)) {
             setcookie('session', '', [
                 'expires'  => time() - 60 * 60 * 24 * 90,
                 'path'     => '/',
@@ -133,63 +126,54 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
             header('Location: login.php');
             exit;
         }
-        $session = new Gazelle\Session($user->id());
+        $session = new Gazelle\Session($Viewer->id());
         if (!$session->valid($SessionID)) {
-            $user->logout($SessionID);
+            $Viewer->logout($SessionID);
             header('Location: login.php');
             exit;
         }
         $session->refresh($SessionID);
-        $LoggedUser['ID'] = $user->id();
     }
 }
-
-if ($user) {
-    if (!is_null($FullToken) && !$user->hasApiToken($FullToken)) {
-        log_token_attempt($DB, $LoggedUser['ID']);
-        header('Content-type: application/json');
-        json_die('failure', 'invalid token');
-    }
-
-    if ($user->isDisabled()) {
-        if (is_null($FullToken)) {
-            $user->logout($SessionID);
+if ($Viewer) {
+    $viewerId = $Viewer->id();
+    if ($Viewer->isDisabled()) {
+        if (isset($SessionID)) {
+            $Viewer->logout($SessionID);
             header('Location: login.php');
             exit;
         } else {
-            log_token_attempt($DB, $LoggedUser['ID']);
+            log_token_attempt($DB, $viewerId);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
         }
     }
 
-    // TODO: These globals need to die, and just use $LoggedUser
-    // TODO: And then instantiate $LoggedUser from Gazelle\Session when needed
-    $LightInfo = Users::user_info($LoggedUser['ID']);
+    $LightInfo = Users::user_info($viewerId);
     if (empty($LightInfo['Username'])) { // Ghost
-        if (!is_null($FullToken)) {
-            $user->flush();
-            log_token_attempt($DB, $LoggedUser['ID']);
+        if (isset($FullToken)) {
+            $Viewer->flush();
+            log_token_attempt($DB, $viewerId);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
         } else {
-            $user->logout();
+            $Viewer->logout();
             header('Location: login.php');
             exit;
         }
     }
 
-    $HeavyInfo = Users::user_heavy_info($LoggedUser['ID']);
-    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $user->activityStats());
+    $HeavyInfo = Users::user_heavy_info($viewerId);
+    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $Viewer->activityStats());
 
     // No conditions will force a logout from this point, can hit the DB more.
     // Complete the $LoggedUser array
-    $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($LoggedUser['ID'], $LoggedUser['CustomPermissions']);
-    $LoggedUser['RSS_Auth'] = md5($LoggedUser['ID'] . RSS_HASH . $LoggedUser['torrent_pass']);
+    $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($viewerId, $LoggedUser['CustomPermissions']);
+    $LoggedUser['RSS_Auth'] = md5($viewerId . RSS_HASH . $Viewer->announceKey());
 
     // Notifications
     if (isset($LoggedUser['Permissions']['site_torrents_notify'])) {
-        $LoggedUser['Notify'] = $user->notifyFilters();
+        $LoggedUser['Notify'] = $Viewer->notifyFilters();
     }
 
     // Stylesheet
@@ -220,16 +204,17 @@ if ($user) {
         if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
-        $user->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
+        $Viewer->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
     }
 }
+
 if (DEBUG_MODE || check_perms('site_debug')) {
     $Twig->addExtension(new Twig\Extension\DebugExtension());
 }
 
 function enforce_login() {
-    global $LoggedUser, $FullToken, $Document, $SessionID;
-    if (!isset($LoggedUser['ID'])) {
+    global $Viewer, $FullToken, $Document, $SessionID;
+    if (!isset($Viewer)) {
         header('Location: login.php');
         exit;
     }
@@ -241,7 +226,7 @@ function enforce_login() {
             'httponly' => DEBUG_MODE,
             'samesite' => 'Lax',
         ]);
-        (new Gazelle\User($LoggedUser['ID']))->logout();
+        $Viewer->logout();
     }
 }
 
@@ -252,15 +237,15 @@ function enforce_login() {
  * @param bool Are we using ajax?
  * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
  */
-function authorize($Ajax = false) {
-    global $LoggedUser;
-    $auth = $_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '';
-    if ($auth != $LoggedUser['AuthKey']) {
-        Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
-        error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
-        return false;
+function authorize($Ajax = false): bool {
+    global $Viewer;
+    if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
+        return true;
     }
-    return true;
+    Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $Viewer->username() . " just failed authorize on "
+        . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+    error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
+    return false;
 }
 
 // We cannot error earlier, as we need the user info for headers and stuff
@@ -284,11 +269,10 @@ $Cache->cache_value('php_' . getmypid(),
     ], 600
 );
 
-$Router = new Gazelle\Router($LoggedUser['AuthKey'] ?? '');
-if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
-    require_once(__DIR__ . '/../sections/locked/index.php');
-}
-else {
+if ($Viewer && $Viewer->isLocked() && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+    require_once('/../sections/locked/index.php');
+} else {
+    $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
     $file = realpath(__DIR__ . '/../sections/' . $Document . '/index.php');
     if (!file_exists($file)) {
         error(404);
@@ -309,22 +293,22 @@ else {
             }
         }
     }
-}
 
-if ($Router->hasRoutes()) {
-    $action = $_REQUEST['action'] ?? '';
-    try {
-        /** @noinspection PhpIncludeInspection */
-        require_once($Router->getRoute($action));
-    }
-    catch (Gazelle\Exception\RouterException $exception) {
-        error(404);
-    }
-    catch (Gazelle\Exception\InvalidAccessException $exception) {
-        error(403);
-    }
-    catch (\DB_MYSQL_Exception $e) {
-        error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+    if ($Router->hasRoutes()) {
+        $action = $_REQUEST['action'] ?? '';
+        try {
+            /** @noinspection PhpIncludeInspection */
+            require_once($Router->getRoute($action));
+        }
+        catch (Gazelle\Exception\RouterException $exception) {
+            error(404);
+        }
+        catch (Gazelle\Exception\InvalidAccessException $exception) {
+            error(403);
+        }
+        catch (\DB_MYSQL_Exception $e) {
+            error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+        }
     }
 }
 

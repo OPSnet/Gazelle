@@ -45,7 +45,7 @@ echo $Twig->render('contest/leaderboard.twig', [
     'score_header'  => $isRequestFill ? 'Requests Filled' : 'Perfect FLACs',
     'contest'       => $contest,
     'paginator'     => $paginator,
-    'viewer'        => $LoggedUser['ID'],
+    'viewer'        => $Viewer->id(),
 ]);
 ?>
 </div>

@@ -32,7 +32,7 @@ if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
         error(403);
     }
 } else {
-    $userId = $LoggedUser['ID'];
+    $userId = $Viewer->id();
 }
 
 $filter = in_array($_GET['filter'] ?? '', $filters) ? $_GET['filter'] : $filters[0];
@@ -88,8 +88,8 @@ echo $Twig->render('better/missing.twig', [
     'filters'        => $filters,
     'search'         => $search,
     'types'          => $types,
-    'auth_key'       => $LoggedUser['AuthKey'],
-    'torrent_pass'   => $LoggedUser['torrent_pass'],
+    'auth_key'       => $Viewer->auth(),
+    'torrent_pass'   => $Viewer->announceKey(),
     'torrent_ids'    => $mode !== 'torrents' ? null : implode(',', array_keys($results)),
     'paginator'      => $paginator,
     'perms'          => [

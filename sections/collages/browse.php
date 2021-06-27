@@ -9,7 +9,6 @@ $header = new \Gazelle\Util\SortableTableHeader('time', [
 ]);
 
 $userMan = new Gazelle\Manager\User;
-$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $tagMan = new \Gazelle\Manager\Tag;
 if (!empty($_GET['tags'])) {
@@ -29,11 +28,11 @@ $Args = [];
 
 $BookmarkView = !empty($_GET['bookmarks']);
 if ($BookmarkView) {
-    $userLink = '<a href="user.php?id=' . $viewer->id() . '">' . $viewer->username() . '</a>';
+    $userLink = '<a href="user.php?id=' . $Viewer->id() . '">' . $Viewer->username() . '</a>';
     $Categories = array_keys($CollageCats);
     $Join = 'INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)';
     $Where[] = "bc.UserID = ?";
-    $Args[] = $LoggedUser['ID'];
+    $Args[] = $Viewer->id();
 } else {
     $Join = '';
     if (empty($_GET['cats'])) {
@@ -50,9 +49,9 @@ if ($BookmarkView) {
 }
 
 if (isset($_GET['action']) && $_GET['action'] === 'mine') {
-    $userLink = '<a href="user.php?id=' . $viewer->id() . '">' . $viewer->username() . '</a>';
+    $userLink = '<a href="user.php?id=' . $Viewer->id() . '">' . $Viewer->username() . '</a>';
     $Where[] = 'c.CategoryID = 0 AND c.UserID = ?';
-    $Args[] = $LoggedUser['ID'];
+    $Args[] = $Viewer->id();
 } else {
     if (!empty($_GET['search'])) {
         $words = explode(' ', trim($_GET['search']));
@@ -76,13 +75,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
             error(404);
         }
         if (empty($_GET['contrib'])) {
-            if (!$user->propertyVisible($viewer, 'collages')) {
+            if (!$user->propertyVisible($Viewer, 'collages')) {
                 error(403);
             }
             $Where[] = "c.UserID = ?";
             $Args[] = $user->id();
         } else {
-            if (!$user->propertyVisible($viewer, 'collagecontribs')) {
+            if (!$user->propertyVisible($Viewer, 'collagecontribs')) {
                 error(403);
             }
             $Where[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
@@ -170,7 +169,7 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'co
                     <td class="label">Tags (comma-separated):</td>
                     <td>
                         <input type="text" id="tags" name="tags" size="70" value="<?= empty($_GET['tags']) ? '' : display_str($_GET['tags']) ?>"<?=
-                            $viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /><br />
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /><br />
                         <input type="radio" name="tags_type" id="tags_type0" value="0"<?= !$tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
 
                         <input type="radio" name="tags_type" id="tags_type1" value="1"<?= $tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type1"> All</label>
@@ -237,9 +236,9 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'co
         <a href="collages.php?action=new" class="brackets">New collage</a>
 <?php
         }
-        $activeCollages = $viewer->activePersonalCollages();
+        $activeCollages = $Viewer->activePersonalCollages();
         if ($activeCollages === 1) {
-            $collages = $viewer->personalCollages();
+            $collages = $Viewer->personalCollages();
 ?>
         <a href="collages.php?id=<?= $collages[0][0] ?>" class="brackets">Personal collage</a>
 <?php       } elseif ($activeCollages > 1) { ?>
@@ -263,8 +262,8 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'co
     }
     if (check_perms('site_collages_create') || check_perms('site_collages_personal')) {
 ?>
-        <a href="collages.php?userid=<?=$LoggedUser['ID']?>" class="brackets">Collages you started</a>
-        <a href="collages.php?userid=<?=$LoggedUser['ID']?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
+        <a href="collages.php?userid=<?=$Viewer->id()?>" class="brackets">Collages you started</a>
+        <a href="collages.php?userid=<?=$Viewer->id()?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
 <?php } ?>
     </div>
 <?= $paginator->linkbox(); ?>

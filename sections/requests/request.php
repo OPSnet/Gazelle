@@ -55,7 +55,6 @@ if (empty($Request['ReleaseType'])) {
     $ReleaseName = (new Gazelle\ReleaseType)->findNameById($Request['ReleaseType']);
 }
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
 $UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);

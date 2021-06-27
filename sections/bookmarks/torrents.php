@@ -9,7 +9,7 @@ function compare($X, $Y) {
 }
 
 if (empty($_GET['userid'])) {
-    $user = new Gazelle\User($LoggedUser['ID']);
+    $user = $Viewer;
     $ownProfile = true;
 } else {
     if (!check_perms('users_override_paranoia')) {
@@ -19,7 +19,7 @@ if (empty($_GET['userid'])) {
     if (is_null($user)) {
         error(404);
     }
-    $ownProfile = ($user->id() === $LoggedUser['ID']);
+    $ownProfile = ($user->id() === $Viewer->id());
 }
 
 $NumGroups = 0;
@@ -54,7 +54,11 @@ View::show_header($title, 'browse,collage');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?php if ($ownProfile) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=$LoggedUser['torrent_pass']?>&amp;user=<?=$LoggedUser['ID']?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?=$LoggedUser['torrent_pass']?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;name=<?=urlencode(SITE_NAME.': Bookmarked Torrents')?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?= $title ?></h2>
+        <h2><?php if ($ownProfile) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=
+            $Viewer->auth() ?>&amp;user=<?= $Viewer->id() ?>&amp;auth=<?=
+            $LoggedUser['RSS_Auth']?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?=
+            $Viewer->auth()?>&amp;name=<?=urlencode(SITE_NAME . ': Bookmarked Torrents')?>"><img src="<?=
+            STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?= $title ?></h2>
         <div class="linkbox">
             <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
             <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
@@ -63,7 +67,7 @@ View::show_header($title, 'browse,collage');
 <?php
 if (count($TorrentList) > 0) { ?>
             <br /><br />
-            <a href="bookmarks.php?action=remove_snatched&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to remove the bookmarks for all items you\'ve snatched?');">Remove snatched</a>
+            <a href="bookmarks.php?action=remove_snatched&amp;auth=<?= $Viewer->auth() ?>" class="brackets" onclick="return confirm('Are you sure you want to remove the bookmarks for all items you\'ve snatched?');">Remove snatched</a>
             <a href="bookmarks.php?action=edit&amp;type=torrents" class="brackets">Manage torrents</a>
 <?php
 } ?>
@@ -304,7 +308,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <td class="td_info" colspan="3">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Torrent),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp; <a
@@ -349,7 +353,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td>
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Torrent),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
                 <strong><?= $DisplayName ?></strong>

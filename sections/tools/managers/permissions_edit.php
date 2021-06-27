@@ -13,7 +13,7 @@ echo $Val->generateJS('permissionsform');
 ?>
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
     <input type="hidden" name="action" value="permissions" />
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
     <input type="hidden" name="id" value="<?=display_str($_REQUEST['id']); ?>" />
     <div class="linkbox">
         <a href="tools.php?action=permissions" class="brackets">Back to permission list</a>

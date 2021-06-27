@@ -1,5 +1,5 @@
 <?php
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 $TagID = $_GET['tagid'];
 $GroupID = $_GET['groupid'];
 $Way = $_GET['way'];

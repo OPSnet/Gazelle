@@ -9,8 +9,6 @@ authorize();
  * Super sorry for doing that, but this is totally not reusable.
  */
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
-// Can the member issue an invite?
 if (!$Viewer->canInvite()) {
     error(403);
 }

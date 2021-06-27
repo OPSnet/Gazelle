@@ -2,7 +2,7 @@
 
 authorize();
 
-$notifMan = new \Gazelle\Manager\Notification($LoggedUser['ID']);
+$notifMan = new \Gazelle\Manager\Notification($Viewer->id());
 if ($_REQUEST['collageid'] && (int)$_REQUEST['collageid']) {
     $notifMan->catchupCollage($_REQUEST['collageid']);
 } else {

@@ -23,7 +23,7 @@ $DB->prepared_query("
         ResolvedTime = now(),
         ResolverID = ?
     WHERE ID = ?
-    ", $LoggedUser['ID'], $ReportID
+    ", $Viewer->id(), $ReportID
 );
 $Cache->delete_value('num_other_reports');
 
@@ -42,7 +42,7 @@ $Remaining = (int)$DB->scalar("
 ");
 foreach ($Channels as $Channel) {
     Irc::sendRaw("PRIVMSG $Channel :Report $ReportID resolved by "
-        . preg_replace('/^(.{2})/', '$1·', $LoggedUser['Username'])
+        . preg_replace('/^(.{2})/', '$1·' , $Viewer->username())
         . " on site ({$Remaining} remaining)."
     );
 }

@@ -10,7 +10,7 @@ if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$ToID])) {
     error(403);
 }
 if (empty($Return)) {
-    if ($ToID == $LoggedUser['ID']) {
+    if ($ToID == $Viewer->id()) {
         error('You cannot start a conversation with yourself!');
         header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
     }
@@ -26,7 +26,7 @@ if (!$Username) {
 
 View::show_header('Compose', 'inbox,bbcode,jquery.validate,form_validate');
 echo $Twig->render('inbox/compose.twig', [
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $Viewer->auth(),
     'body'     => $Body ?? '',
     'subject'  => $Subject ?? '',
     'toid'     => $ToID,

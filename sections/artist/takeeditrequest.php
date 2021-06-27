@@ -17,7 +17,7 @@ $threadId = $forum->addThread(
     SYSTEM_USER_ID,
     "Editing request — Artist: $name",
     $Twig->render('forum/request-edit.twig', [
-        'username' => $LoggedUser['Username'],
+        'username' => $Viewer->username(),
         'url'      => 'artist.php?id=' . $artistId,
         'name'     => $name,
         'details'  => trim($_POST['edit_details']),

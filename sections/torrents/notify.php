@@ -33,12 +33,12 @@ if (!empty($_GET['filterid']) && is_number($_GET['filterid'])) {
 list($Page, $Limit) = Format::page_limit(NOTIFICATIONS_PER_PAGE);
 
 // Perhaps this should be a feature at some point
-if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['userid']) && $_GET['userid'] != $LoggedUser['ID']) {
+if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['userid']) && $_GET['userid'] != $Viewer->id()) {
     $UserID = $_GET['userid'];
     $Sneaky = true;
 } else {
     $Sneaky = false;
-    $UserID = $LoggedUser['ID'];
+    $UserID = $Viewer->id();
 }
 
 $cond = ['unt.UserID = ?'];
@@ -152,9 +152,9 @@ if (!empty($GroupIDs)) {
                 UnRead = 0
             WHERE UserID = ?
                 AND TorrentID IN (" . placeholders($UnReadIDs) . ")
-            ", $LoggedUser['ID'], ...$UnReadIDs
+            ", $Viewer->id(), ...$UnReadIDs
         );
-        $Cache->delete_value('user_notify_upload_'.$LoggedUser['ID']);
+        $Cache->delete_value('user_notify_upload_'.$Viewer->id());
     }
 }
 if ($Sneaky) {
@@ -173,9 +173,9 @@ if ($FilterID) { ?>
     <a href="torrents.php?action=notify<?=($Sneaky ? "&amp;userid=$UserID" : '')?>" class="brackets">View all</a>&nbsp;&nbsp;&nbsp;
 <?php
 } elseif (!$Sneaky) { ?>
-    <a href="torrents.php?action=notify_clear&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Clear all old</a>&nbsp;&nbsp;&nbsp;
+    <a href="torrents.php?action=notify_clear&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old</a>&nbsp;&nbsp;&nbsp;
     <a href="#" onclick="clearSelected(); return false;" class="brackets">Clear selected</a>&nbsp;&nbsp;&nbsp;
-    <a href="torrents.php?action=notify_catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
+    <a href="torrents.php?action=notify_catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
 <?php
 } ?>
     <a href="user.php?action=notify" class="brackets">Edit filters</a>&nbsp;&nbsp;&nbsp;
@@ -224,8 +224,8 @@ if (empty($Results)) {
 <div class="linkbox notify_filter_links">
 <?php   if (!$Sneaky) { ?>
     <a href="#" onclick="clearSelected(<?=$FilterID?>); return false;" class="brackets">Clear selected in filter</a>
-    <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Clear all old in filter</a>
-    <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Mark all in filter as read</a>
+    <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old in filter</a>
+    <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Mark all in filter as read</a>
 <?php   } ?>
 </div>
 <form class="manage_form" name="torrents" id="notificationform_<?=$FilterID?>" action="">
@@ -305,7 +305,7 @@ if (empty($Results)) {
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($TorrentInfo),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $TorrentInfo,
                     'extra'  => [
                         !$Sneaky ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
@@ -318,7 +318,7 @@ if (empty($Results)) {
                     <strong class="new">New!</strong>
 <?php
         }
-        if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) {
+        if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) {
 ?>
                     <span class="remove_bookmark float_right">
                         <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>

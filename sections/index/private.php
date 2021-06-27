@@ -7,10 +7,9 @@ $newsMan    = new Gazelle\Manager\News;
 $newsReader = new Gazelle\WitnessTable\UserReadNews;
 $tgroupMan  = new Gazelle\Manager\TGroup;
 $userMan    = new Gazelle\Manager\User;
-$viewer     = new Gazelle\User($LoggedUser['ID']);
 
-if ($newsMan->latestId() != -1 && $newsReader->lastRead($LoggedUser['ID']) < $newsMan->latestId()) {
-    $newsReader->witness($LoggedUser['ID']);
+if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMan->latestId()) {
+    $newsReader->witness($Viewer->id());
 }
 
 $contest = $contestMan->currentContest();
@@ -37,13 +36,13 @@ if (!$threadId) {
     $poll = false;
 } else {
     $forum = $forumMan->findByThreadId($threadId);
-    $poll = $forum->pollDataExtended($threadId, $LoggedUser['ID']);
+    $poll = $forum->pollDataExtended($threadId, $Viewer->id());
 }
 
 View::show_header('News', 'bbcode,news_ajax');
 
 echo $Twig->render('index/private-sidebar.twig', [
-    'auth'              => $LoggedUser['AuthKey'],
+    'auth'              => $Viewer->auth(),
     'blog'              => new Gazelle\Manager\Blog,
     'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
     'leaderboard'       => $leaderboard,
@@ -57,11 +56,11 @@ echo $Twig->render('index/private-sidebar.twig', [
     'torrent_stats'     => new Gazelle\Stats\Torrent,
     'user_count'        => $userMan->getEnabledUsersCount(),
     'user_stats'        => $userMan->globalActivityStats(),
-    'viewer'            => $viewer,
+    'viewer'            => $Viewer,
 ]);
 
 echo $Twig->render('index/private-main.twig', [
-    'admin'   => $viewer->permitted('admin_manage_news'),
+    'admin'   => $Viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
     'latest'  => $tgroupMan->latestUploads(5),
     'news'    => $newsMan->headlines(),

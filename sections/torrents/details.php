@@ -75,7 +75,6 @@ if (!$CoverArt) {
 }
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $commentPage = new Gazelle\Comment\Torrent($GroupID);
 if (isset($_GET['postid'])) {
     $commentPage->setPostId((int)$_GET['postid']);

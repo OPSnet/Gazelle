@@ -16,9 +16,9 @@ if (!$pageId) {
 }
 
 $commentMan = new Gazelle\Manager\Comment;
-$comment = $commentMan->create($LoggedUser['ID'], $page, $pageId, $_POST['quickpost']);
+$comment = $commentMan->create($Viewer->id(), $page, $pageId, $_POST['quickpost']);
 
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($Viewer->id());
 if (isset($_POST['subscribe']) && !$subscription->isSubscribedComments($page, $pageId)) {
     $subscription->subscribeComments($page, $pageId);
 }

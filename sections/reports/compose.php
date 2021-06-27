@@ -5,7 +5,7 @@ if (!check_perms('site_moderate_forums')) {
 
 if (empty($Return)) {
     $ToID = (int)$_GET['toid'];
-    if ($ToID === $LoggedUser['ID']) {
+    if ($ToID === $Viewer->id()) {
         error("You cannot start a conversation with yourself!");
         header('Location: inbox.php');
     }
@@ -23,7 +23,7 @@ if (!$ReportID || !$ThingID || !$Type) {
     error(403);
 }
 
-if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$ToID])) {
+if ($Viewer->disablePm() && !isset($StaffIDs[$ToID])) {
     error(403);
 }
 
@@ -142,7 +142,7 @@ $Body = "You reported $TypeLink for the reason:\n[quote]"
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose" />
             <input type="hidden" name="toid" value="<?=$ToID?>" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <div id="quickpost">
                 <h3>Subject</h3>
                 <input type="text" name="subject" size="95" value="<?=(!empty($Subject) ? $Subject : '')?>" />

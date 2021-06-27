@@ -1,6 +1,6 @@
 <?php
 
-$notifMan = new Gazelle\Manager\Notification($LoggedUser['ID']);
+$notifMan = new Gazelle\Manager\Notification($Viewer->id());
 foreach ($_GET['type'] as $type) {
     $notifMan->setType($type);
 }

@@ -8,7 +8,7 @@ if (is_null($user)) {
 $userId = $user->id();
 
 if (!check_perms('users_edit_password')) {
-    if ($userId !== $LoggedUser['ID']) {
+    if ($userId !== $Viewer->id()) {
         error(403);
     } elseif (empty($_POST['password'])) {
         require_once('confirm.php');

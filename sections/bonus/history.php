@@ -13,7 +13,7 @@ if (isset($_GET['userid'])) {
     $header = 'Bonus Points Spending History for ' . Users::format_username($userId);
     $whoSpent = Users::format_username($userId) . ' has spent';
 } else {
-    $userId = $LoggedUser['ID'];
+    $userId = $Viewer->id();
     $header = 'Bonus Points Spending History';
     $whoSpent = 'You have spent';
 }
@@ -49,7 +49,7 @@ echo $Twig->render('user/bonus-history.twig', [
     'is_admin'     => check_perms('admin_bp_history'),
     'now'          => time(),
     'paginator'    => $paginator,
-    'self'         => $userId === $LoggedUser['ID'],
+    'self'         => $userId === $Viewer->id(),
     'user_id'      => $userId,
     'who_spent'    => $whoSpent,
 ]);

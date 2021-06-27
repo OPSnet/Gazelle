@@ -10,20 +10,19 @@ if ($LoggedUser['BytesUploaded'] == 0 && $LoggedUser['BytesDownloaded'] == 0) {
     $Ratio = number_format(max($LoggedUser['BytesUploaded'] / $LoggedUser['BytesDownloaded'] - 0.005, 0), 2); //Subtract .005 to floor to 2 decimals
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
 $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 json_print("success", [
-    'username' => $user->username(),
-    'id'       => (int)$LoggedUser['ID'],
-    'authkey'  => $LoggedUser['AuthKey'],
-    'passkey'  => $LoggedUser['torrent_pass'],
+    'username' => $Viewer->username(),
+    'id'       => $Viewer->id(),
+    'authkey'  => $Viewer->auth(),
+    'passkey'  => $Viewer->announceKey(),
     'notifications' => [
-        'messages'         => $user->inboxUnreadCount(),
-        'notifications'    => $user->unreadTorrentNotifications(),
-        'newAnnouncement'  => (new \Gazelle\Manager\News)->latest() < (new \Gazelle\WitnessTable\UserReadNews)->lastRead($user->id()),
-        'newBlog'          => (new \Gazelle\Manager\Blog)->latest() < (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($user->id()),
-        'newSubscriptions' => (new \Gazelle\Manager\Subscription($LoggedUser['ID']))->unread() > 0,
+        'messages'         => $Viewer->inboxUnreadCount(),
+        'notifications'    => $Viewer->unreadTorrentNotifications(),
+        'newAnnouncement'  => (new \Gazelle\Manager\News)->latest() < (new \Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
+        'newBlog'          => (new \Gazelle\Manager\Blog)->latest() < (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
+        'newSubscriptions' => (new \Gazelle\Manager\Subscription($Viewer->id()))->unread() > 0,
     ],
     'userstats' => [
         'uploaded' => (int)$LoggedUser['BytesUploaded'],

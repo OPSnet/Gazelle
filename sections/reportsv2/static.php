@@ -184,7 +184,7 @@ View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
     <span class="tooltip" title="Assigns all of the reports on the page to you!"><input type="button" onclick="Grab();" value="Claim all" /></span>
 <?php
 }
-if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
+if ($View === 'staff' && $Viewer->id() == $ID) { ?>
     | <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all" /></span>
 <?php } ?>
 </div>
@@ -256,7 +256,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
 */
 ?>
             <div>
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" id="reportid<?=$ReportID?>" name="reportid" value="<?=$ReportID?>" />
                 <input type="hidden" id="torrentid<?=$ReportID?>" name="torrentid" value="<?=$TorrentID?>" />
                 <input type="hidden" id="uploader<?=$ReportID?>" name="uploader" value="<?= $uploaderName ?>" />
@@ -275,7 +275,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                         <a href="log.php?search=Torrent+<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)
 <?php       } else { ?>
                         <?=$LinkName?>
-                        <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+                        <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <br /><span class="report_reporter">reported by <a href="user.php?id=<?=$ReporterID?>"><?= $reporterName ?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></span>
                         <br />uploaded by <a href="user.php?id=<?=$UploaderID?>"><?= $uploaderName  ?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
                         <br />Last action: <?= $LastAction ?: 'Never' ?>
@@ -446,7 +446,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
 ?>
                         <?=($First ? '' : '<br />')?>
                         <?=$ExtraLinkName?>
-                        <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+                        <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;torrent_pass=<?php $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <br />uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> on <span title="<?=
                             time_diff($ExtraTime, 3, false) ?>"><?= $ExtraTime ?> (<?=
                             strtotime($ExtraTime) < strtotime($Time) ? 'older upload' : 'more recent upload' ?>)</span>
@@ -671,7 +671,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                     <td colspan="4" style="text-align: center;">
                         <input type="button" value="Invalidate report" onclick="Dismiss(<?=$ReportID?>);" />
                         | <input type="button" value="Resolve report manually" onclick="ManualResolve(<?=$ReportID?>);" />
-<?php           if ($Status == 'InProgress' && $LoggedUser['ID'] == $ResolverID) { ?>
+<?php           if ($Status == 'InProgress' && $Viewer->id() == $ResolverID) { ?>
                         | <input type="button" value="Unclaim" onclick="GiveBack(<?=$ReportID?>);" />
 <?php           } else { ?>
                         | <input id="grab<?=$ReportID?>" type="button" value="Claim" onclick="Grab(<?=$ReportID?>);" />

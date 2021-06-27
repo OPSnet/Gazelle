@@ -69,18 +69,18 @@ $userMan->sendPM($FillerID, 0,
 
 $Cache->delete_value("user_stats_$FillerID");
 
-if ($UserID !== $LoggedUser['ID']) {
+if ($UserID !== $Viewer->id()) {
     $userMan->sendPM($UserID, 0,
         'A request you created has been unfilled',
         "The request \"[url=requests.php?action=view&amp;id=$RequestID]$FullName"
             . "[/url]\" was unfilled by [url=user.php?id={$LoggedUser['ID']}]"
-            . $LoggedUser['Username']."[/url] for the reason: [quote]".$_POST['reason'].'[/quote]'
+            . $Viewer->username()."[/url] for the reason: [quote]".$_POST['reason'].'[/quote]'
     );
 }
 
 (new Gazelle\Log)->general("Request $RequestID ($FullName), with a "
     . Format::get_size($RequestVotes['TotalBounty']).' bounty, was unfilled by user '
-    . $LoggedUser['ID'].' ('.$LoggedUser['Username'].') for the reason: '.$_POST['reason']
+    . $Viewer->id().' ('.$Viewer->username().') for the reason: '.$_POST['reason']
 );
 
 $Cache->delete_value("request_$RequestID");

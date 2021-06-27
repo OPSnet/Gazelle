@@ -24,9 +24,9 @@ if (isset($_POST['submit'])) {
             error($validator->errorMessage());
         }
         if ($id) {
-            $IPv4Man->modifyBan($id, $LoggedUser['ID'], $_POST['start'], $_POST['end'], trim($_POST['notes']));
+            $IPv4Man->modifyBan($id, $Viewer->id(), $_POST['start'], $_POST['end'], trim($_POST['notes']));
         } else {
-            $IPv4Man->createBan($LoggedUser['ID'], $_POST['start'], $_POST['end'], trim($_POST['notes']));
+            $IPv4Man->createBan($Viewer->id(), $_POST['start'], $_POST['end'], trim($_POST['notes']));
         }
     }
 }
@@ -57,6 +57,6 @@ echo $Twig->render('admin/ipaddr-bans.twig', [
     'header'    => $header,
     'list'      => $IPv4Man->page($OrderBy, $OrderDir, $paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
-    'viewer'    => new Gazelle\User($LoggedUser['ID']),
+    'viewer'    => $Viewer,
 ]);
 View::show_footer();

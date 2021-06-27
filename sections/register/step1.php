@@ -12,7 +12,7 @@ echo $Val->generateJS('registerform');
 <div style="width: 100%">
 <div style="width: 45%; margin: auto;">
 <form class="create_form" name="user" id="registerform" method="post" action="" onsubmit="return formVal();">
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <?php
 if (empty($Sent)) {
     if (!empty($_REQUEST['invite'])) {

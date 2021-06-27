@@ -15,6 +15,6 @@ if (!check_perms('site_moderate_forums') && !in_array($forum->id(), $ForumsRevea
     error(403);
 }
 
-$forum->modifyVote($LoggedUser['ID'], $threadId, $vote);
+$forum->modifyVote($Viewer->id(), $threadId, $vote);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId");

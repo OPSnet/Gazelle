@@ -30,7 +30,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     }
     $Artists = Artists::get_artist($GroupID);
     $torrent = (new Gazelle\Manager\Torrent)->findById($TorrentID);
-    $TorrentList = $torrent->setViewerId($LoggedUser['ID'])->info();
+    $TorrentList = $torrent->setViewerId($Viewer->id())->info();
     $group = $torrent->group()->info();
     $GroupID = $group['ID'];
     $GroupName = $group['Name'];
@@ -187,7 +187,7 @@ if ($NumReports > 0) {
     $ReportInfo .= "\n\t\t</table>";
 }
 
-$CanEdit = (check_perms('torrents_edit') || (($UserID == $LoggedUser['ID'] && !$LoggedUser['DisableWiki']) && !($Remastered && !$RemasterYear)));
+$CanEdit = (check_perms('torrents_edit') || (($UserID == $Viewer->id() && !$Viewer->disableWiki()) && !($Remastered && !$RemasterYear)));
 $RegenLink = check_perms('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid=' . $TorrentID . '" class="brackets">Regenerate</a>' : '';
 $FileTable = '
     <table class="filelist_table">
@@ -293,10 +293,10 @@ $LastMedia = $Media;
                     <td>
                         <?= $Twig->render('torrent/action.twig', [
                             'can_fl' => Torrents::can_use_token($TorrentList),
-                            'key'    => $LoggedUser['torrent_pass'],
+                            'key'    => $Viewer->announceKey(),
                             't'      => $TorrentList,
                             'edit'   => $CanEdit,
-                            'remove' => check_perms('torrents_delete') || $UserID == $LoggedUser['ID'],
+                            'remove' => check_perms('torrents_delete') || $UserID == $Viewer->id(),
                             'pl'     => true,
                         ]) ?>
                         &raquo; <a href="#" onclick="$('#torrent_<?=($TorrentID)?>').gtoggle(); return false;"><?=($ExtraInfo)?></a>
@@ -363,7 +363,7 @@ $LastMedia = $Media;
     <form class="create_form" name="report" action="reportsv2.php?action=takereport" enctype="multipart/form-data" method="post" id="reportform">
         <div>
             <input type="hidden" name="submit" value="true" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
             <input type="hidden" name="categoryid" value="<?=$CategoryID?>" />
         </div>

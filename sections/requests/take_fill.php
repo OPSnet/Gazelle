@@ -76,8 +76,8 @@ if (!$DB->has_results()) {
 }
 list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber, $GracePeriod) = $DB->next_record();
 
-$FillerID = intval($LoggedUser['ID']);
-$FillerUsername = $LoggedUser['Username'];
+$FillerID = $Viewer->id();
+$FillerUsername = $Viewer->username();
 
 if (!empty($_REQUEST['user']) && check_perms('site_moderate_requests')) {
     $filler = (new Gazelle\Manager\User)->findByUsername(trim($_REQUEST['user']));

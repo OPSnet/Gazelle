@@ -1,14 +1,14 @@
 <?php
 
-if (!empty($LoggedUser['DisableForums'])) {
+if ($Viewer->disableForums()) {
     json_error('You do not have access to the forums!');
 }
 
-$user = (new Gazelle\Manager\User)->findById(empty($_GET['userid']) ? $LoggedUser['ID'] : (int)$_GET['userid']);
-if (!$user) {
+$user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+if (is_null($user)) {
     json_error('User does not exist!');
 }
-$ownProfile = ($user->id() === $LoggedUser['ID']);
+$ownProfile = ($user->id() === $Viewer->id());
 
 $forumSearch = (new Gazelle\ForumSearch($user))
     ->setShowGrouped($ownProfile && (!isset($_GET['group']) || !!$_GET['group']))

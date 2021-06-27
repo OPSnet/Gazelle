@@ -12,7 +12,7 @@ if (!is_number($_POST['class_id']) || empty($_POST['subject']) || empty($_POST['
 }
 
 $permissionId = $_POST['class_id'];
-$fromId = empty($_POST['from_system']) ? $LoggedUser['ID'] : 0;
+$fromId = empty($_POST['from_system']) ? $Viewer->id() : 0;
 $DB->prepared_query("
     (SELECT ID AS UserID FROM users_main WHERE PermissionID = ? AND ID != ?)
     UNION DISTINCT

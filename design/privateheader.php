@@ -2,8 +2,7 @@
 
 use Gazelle\Manager\Notification;
 
-global $LoggedUser;
-$user = new Gazelle\User($LoggedUser['ID']);
+global $LoggedUser, $Viewer;
 $authArgs = '&amp;user=' . $LoggedUser['ID']
     . '&amp;auth=' . $LoggedUser['RSS_Auth']
     . '&amp;passkey=' . $LoggedUser['torrent_pass']
@@ -165,7 +164,7 @@ if (check_perms('users_mod') || $LoggedUser['PermissionID'] === FORUM_MOD) {
         $activity->setAction('<a class="nobr" href="tools.php">Toolbox</a>');
     }
 
-    $staff = new Gazelle\Staff($user);
+    $staff = new Gazelle\Staff($Viewer);
     $count = $staff->pmCount();
     if ($count > 0) {
         $needStaffInbox = true;
@@ -319,6 +318,6 @@ echo $Twig->render('index/private-header.twig', [
     'nav_links'         => $navLinks,
     'required_ratio'    => $LoggedUser['RequiredRatio'],
     'subscriptions'     => $NewSubscriptions,
-    'user'              => $user,
-    'user_class'        => (new Gazelle\Manager\User)->userclassName($user->primaryClass()),
+    'user'              => $Viewer,
+    'user_class'        => (new Gazelle\Manager\User)->userclassName($Viewer->primaryClass()),
 ]);

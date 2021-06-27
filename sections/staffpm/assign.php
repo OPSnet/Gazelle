@@ -1,5 +1,5 @@
 <?php
-if (!$user->isStaffPMReader()) {
+if (!$Viewer->isStaffPMReader()) {
     error(403);
 }
 if (!isset($_GET['convid']) && !isset($_POST['convid'])) {
@@ -15,7 +15,7 @@ if ($ConvID = (int)$_GET['convid']) {
         ", $ConvID
     );
 
-    if ($user->isFLS() && $Level > 0) {
+    if ($Viewer->isFLS() && $Level > 0) {
         // FLS trying to assign non-FLS conversation
         error(403);
     } else {
@@ -43,7 +43,7 @@ if ($ConvID = (int)$_GET['convid']) {
                 WHERE ID = ?
                 ", $Level, $ConvID
             );
-            $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
+            $Cache->delete_value("num_staff_pms_" . $Viewer->id());
             header('Location: staffpm.php');
         }
     }
@@ -57,7 +57,7 @@ if ($ConvID = (int)$_GET['convid']) {
         ", $ConvID
     );
 
-    if ($LoggedUser['EffectiveClass'] < $Level && $AssignedToUser != $LoggedUser['ID']) {
+    if ($Viewer->effectiveClass() < $Level && $AssignedToUser != $Viewer->id()) {
         // Staff member is not allowed to assign conversation
         echo '-1';
     } else {
@@ -73,7 +73,7 @@ if ($ConvID = (int)$_GET['convid']) {
                 WHERE ID = ?"
                 , $NewLevel, $ConvID
             );
-            $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
+            $Cache->delete_value("num_staff_pms_" . $Viewer->id());
         } else {
             $assignee = new Gazelle\User($NewLevel);
             if (is_null($assignee)) {
@@ -87,7 +87,7 @@ if ($ConvID = (int)$_GET['convid']) {
                 WHERE ID = ?
                 ", $NewLevel, $assignee->effectiveClass(), $ConvID
             );
-            $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
+            $Cache->delete_value("num_staff_pms_" . $Viewer->id());
         }
         echo '1';
     }

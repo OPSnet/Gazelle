@@ -6,7 +6,7 @@ if ($collageID < 1) {
 }
 $collage = new Gazelle\Collage($collageID);
 
-if ($collage->categoryId() == 0 && !$collage->isOwner($LoggedUser['ID']) && !check_perms('site_collages_delete')) {
+if ($collage->categoryId() == 0 && !$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
     error(403);
 }
 
@@ -26,11 +26,11 @@ if (!empty($Err)) {
     </div>
     <form class="edit_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="edit_handle" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?=$Viewer->auth()?>" />
         <input type="hidden" name="collageid" value="<?=$collageID?>" />
         <table id="edit_collage" class="layout">
 <?php
-if (check_perms('site_collages_delete') || ($collage->isPersonal() && $collage->isOwner($LoggedUser['ID']) && check_perms('site_collages_renamepersonal'))) { ?>
+if (check_perms('site_collages_delete') || ($collage->isPersonal() && $collage->isOwner($Viewer->id()) && check_perms('site_collages_renamepersonal'))) { ?>
             <tr>
                 <td class="label">Name</td>
                 <td><input type="text" name="name" size="60" value="<?=$collage->name()?>" /></td>

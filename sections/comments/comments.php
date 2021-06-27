@@ -25,9 +25,6 @@ function createdBy(int $ownProfile, string $user, string $objects): string {
 }
 
 $userMan = new Gazelle\Manager\User;
-$Viewer = $userMan->findById($LoggedUser['ID']);
-
-// who is it?
 if (!isset($_GET['id'])) {
     $User = $Viewer;
 } else {

@@ -40,7 +40,7 @@ foreach ($tasks as $task) {
             <input type="hidden" name="id" value="<?=$id?>" />
             <input type="hidden" name="action" value="periodic" />
             <input type="hidden" name="mode" value="alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="15" name="name" value="<?=$name?>" />
             </td>
@@ -78,7 +78,7 @@ foreach ($tasks as $task) {
         <form class="create_form" name="accounts" action="" method="post">
             <input type="hidden" name="action" value="periodic" />
             <input type="hidden" name="mode" value="alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="10" name="name" />
             </td>

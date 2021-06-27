@@ -23,7 +23,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 <span class="error">Please select an option.</span><br />
 <form class="vote_form" name="poll" id="poll" action="">
     <input type="hidden" name="action" value="poll" />
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
     <input type="hidden" name="large" value="<?=display_str($_POST['large'])?>" />
     <input type="hidden" name="threadid" value="<?=$threadId?>" />
 <?php for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
@@ -42,7 +42,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     }
 
     //Add our vote
-    if ($forum->addPollVote($LoggedUser['ID'], $threadId, $Vote)) {
+    if ($forum->addPollVote($Viewer->id(), $threadId, $Vote)) {
         $Votes[$Vote]++;
         $TotalVotes++;
         $MaxVotes++;
@@ -77,7 +77,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             $vote = $forum->staffVote($threadId);
             foreach ($vote as list($StaffString, $StaffVoted)) {
 ?>
-                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
+                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?=$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
 <?php
             }
         }

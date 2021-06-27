@@ -38,26 +38,26 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ?>
 <div class="thin">
 <?= $Twig->render('collage/header.twig', [
-    'auth'        => $LoggedUser['AuthKey'],
-    'bookmarked'  => $bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID),
+    'auth'        => $Viewer->auth(),
+    'bookmarked'  => $bookmark->isCollageBookmarked($Viewer->id(), $CollageID),
     'can_create'  => check_perms('site_collages_create'),
-    'can_delete'  => check_perms('site_collages_delete') || $Collage->isOwner($LoggedUser['ID']),
+    'can_delete'  => check_perms('site_collages_delete') || $Collage->isOwner($Viewer->id()),
     'can_edit'    => check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$Collage->isLocked()),
     'can_manage'  => check_perms('site_collages_manage') && !$Collage->isLocked(),
     'can_sub'     => check_perms('site_collages_subscribe'),
     'id'          => $CollageID,
     'name'        => $Collage->name(),
     'object'      => 'artist',
-    'subbed'      => $Collage->isSubscribed($LoggedUser['ID']),
-    'user_id'     => $LoggedUser['ID'],
+    'subbed'      => $Collage->isSubscribed($Viewer->id()),
+    'user_id'     => $Viewer->id(),
 ]);
 ?>
     <div class="sidebar">
 <?= $Twig->render('collage/sidebar.twig', [
     'artists'        => 0, // only makes sense for torrent collages
-    'auth'           => $LoggedUser['AuthKey'],
+    'auth'           => $Viewer->auth(),
     'can_add'        => check_perms('site_collages_manage') && !$Collage->isLocked(),
-    'can_post'       => !$LoggedUser['DisablePosting'],
+    'can_post'       => !$Viewer->disablePosting(),
     'category_id'    => $Collage->categoryId(),
     'category_name'  => $CollageCats[$Collage->categoryId()],
     'comments'       => (new Gazelle\Manager\Comment)->collageSummary($CollageID),

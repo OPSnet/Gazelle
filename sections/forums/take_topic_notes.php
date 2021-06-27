@@ -15,6 +15,6 @@ if (!strlen($body)) {
     error("Thread note cannot be empty");
 }
 
-$forum->addThreadNote($threadId, $LoggedUser['ID'], $body);
+$forum->addThreadNote($threadId, $Viewer->id(), $body);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId#thread_notes");

@@ -5,12 +5,11 @@ if (!isset($_GET['forumid']) || ($_GET['forumid'] != 'all' && !is_number($_GET['
 }
 
 if ($_GET['forumid'] == 'all') {
-    $user = new Gazelle\User($LoggedUser['ID']);
-    $user->updateCatchup();
+    $Viewer->updateCatchup();
     header('Location: forums.php');
 } else {
     // Insert a value for each topic
     $forum = new Gazelle\Forum((int)$_GET['forumid']);
-    $forum->userCatchup($LoggedUser['ID']);
+    $forum->userCatchup($Viewer->id());
     header('Location: forums.php?action=viewforum&forumid=' . $_GET['forumid']);
 }

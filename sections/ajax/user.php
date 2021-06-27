@@ -1,11 +1,11 @@
 <?php
-if (empty($_GET['id']) || !is_numeric($_GET['id'])) {
+$UserID = (int)$_GET['id'];
+if (!$UserID) {
     json_die("failure", "bad id parameter");
 }
-$UserID = $_GET['id'];
 $user = new Gazelle\User($UserID);
 
-$OwnProfile = $UserID == $LoggedUser['ID'];
+$OwnProfile = $UserID == $Viewer->id();
 
 // Always view as a normal user.
 $DB->prepared_query("
@@ -195,7 +195,7 @@ $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 json_print("success", [
     'username'    => $Username,
     'avatar'      => $Avatar,
-    'isFriend'    => $user->isFriend($LoggedUser['ID']),
+    'isFriend'    => $user->isFriend($Viewer->id()),
     'profileText' => Text::full_format($Info),
     'stats' => [
         'joinedDate'    => $JoinDate,

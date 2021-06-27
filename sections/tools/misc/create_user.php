@@ -26,7 +26,7 @@ if (isset($_POST['Username'])) {
             ->setEmail($email)
             ->setPassword($password)
             ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by ' . $LoggedUser['Username'] . ' via admin toolbox')
+            ->setAdminComment('Created by ' . $Viewer->username() . ' via admin toolbox')
             ->create();
     }
     catch (Gazelle\Exception\UserCreatorException $e) {
@@ -52,7 +52,7 @@ View::show_header('Create a User');
 <div class="thin box pad">
 <form class="create_form" name="user" method="post" action="">
     <input type="hidden" name="action" value="create_user" />
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
     <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center">
         <tr valign="top">
             <td align="right" class="label">Username:</td>

@@ -48,7 +48,7 @@ if ($_POST['id']) {
                 $comment = "invites removed";
             }
             $message .= " entire tree ({$inviteeCount} user" . plural($inviteeCount) . ')';
-            $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree $comment on $username by {$LoggedUser['Username']}";
+            $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree $comment on $username by " . $Viewer->username();
             foreach ($inviteeList as $inviteeId) {
                 $invitee = $userMan->findById($inviteeId);
                 if (is_null($invitee)) {
@@ -69,7 +69,7 @@ if ($_POST['id']) {
 
 View::show_header('Manipulate Invite Tree');
 echo $Twig->render('user/invite-tree-bulkedit.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
+    'auth'    => $Viewer->auth(),
     'message' => $message,
 ]);
 View::show_footer();

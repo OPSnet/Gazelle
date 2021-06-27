@@ -24,5 +24,5 @@ if (is_null($OldRevision) || $OldRevision != (int)($_POST['revision'] ?? 0)) {
     (int)$_POST['minclassedit']
 );
 
-$wikiMan->modify($articleId, $_POST['title'], $_POST['body'], $minRead, $minWrite, $LoggedUser['ID']);
+$wikiMan->modify($articleId, $_POST['title'], $_POST['body'], $minRead, $minWrite, $Viewer->id());
 header("Location: wiki.php?action=article&id=$articleId");

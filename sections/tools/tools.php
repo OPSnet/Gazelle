@@ -194,7 +194,7 @@ Category('Development', [
     Item('Error Analysis',        'tools.php?action=analysis_list',            All(['site_analysis'])),
     Item('PHP processes',         'tools.php?action=process_info',             All(['admin_site_debug'])),
     Item('Scheduler',             'tools.php?action=periodic&amp;mode=view',   All(['admin_periodic_task_view'])),
-    Item('Scheduler (legacy)',    'schedule.php?auth='.$LoggedUser['AuthKey'], All(['admin_schedule'])),
+    Item('Scheduler (legacy)',    'schedule.php?auth='. $Viewer->auth(),       All(['admin_schedule'])),
 ]);
 
 ?>

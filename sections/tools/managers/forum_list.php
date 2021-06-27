@@ -50,7 +50,7 @@ View::show_header('Forum Management');
     </tr>
 <?php
 $Row = 'b';
-$auth = $LoggedUser['AuthKey'];
+$auth = $Viewer->auth();
 foreach ($toc as $category => $forumList) {
     foreach ($forumList as $f) {
         $Row = $Row === 'a' ? 'b' : 'a';

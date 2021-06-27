@@ -1,7 +1,6 @@
 <?php
 
 View::show_header('Blog','bbcode');
-$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $action = !empty($_GET['action']) && $_GET['action'] === 'editblog' ? 'Edit' : 'Create';
 if (check_perms('admin_manage_blog')) {
@@ -15,7 +14,7 @@ if (check_perms('admin_manage_blog')) {
     <form class="<?= $action === 'Create' ?  'create_form' : 'edit_form' ?>" name="blog_post" action="blog.php" method="post">
         <div class="pad">
             <input type="hidden" name="action" value="<?= $action === 'Create' ? 'takenewblog' : 'takeeditblog' ?>"/>
-            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>"/>
 <?php if ($action === 'Edit') { ?>
                 <input type="hidden" name="blogid" value="<?= $blog->id() ?>"/>
 <?php } ?>
@@ -33,7 +32,7 @@ if (check_perms('admin_manage_blog')) {
             <input type="text" name="thread" size="8" value="<?= $action === 'Edit' ? $blog->topicId() : '' ?>" />
             (Leave blank to create thread automatically, set to 0 to not use thread)
             <br/><br/>
-            <input id="subscribebox" type="checkbox" name="subscribe"<?= $viewer->option('AutoSubscribe') ? ' checked="checked"' : ''; ?> tabindex="2" />
+            <input id="subscribebox" type="checkbox" name="subscribe"<?= $Viewer->option('AutoSubscribe') ? ' checked="checked"' : ''; ?> tabindex="2" />
             <label for="subscribebox">Subscribe</label>
 
             <div class="center">
@@ -53,8 +52,8 @@ if ($action === 'Create') { /* default for non-staff */
 <?php
     $headlines = (new Gazelle\Manager\Blog)->headlines();
     if ($headlines) {
-        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($LoggedUser['ID'])) {
-            $Cache->delete_value('user_info_heavy_' . $LoggedUser['ID']);
+        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($Viewer->id())) {
+            $Cache->delete_value('user_info_heavy_' . $Viewer->id());
         }
     }
 
@@ -66,7 +65,7 @@ if ($action === 'Create') { /* default for non-staff */
             <strong><?=$Title?></strong> - posted <?=time_diff($BlogTime);?> by <a href="user.php?id=<?=$AuthorID?>"><?=$Author?></a>
 <?php    if (check_perms('admin_manage_blog')) { ?>
                 - <a href="blog.php?action=editblog&amp;id=<?=$BlogID?>" class="brackets">Edit</a>
-                <a href="blog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
+                <a href="blog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Delete</a>
 <?php    } ?>
         </div>
         <div class="pad">
@@ -75,7 +74,7 @@ if ($action === 'Create') { /* default for non-staff */
                 <br /><br />
                 <em><a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadID?>">Discuss this post here</a></em>
 <?php        if (check_perms('admin_manage_blog')) { ?>
-                    <span style="float: right"><a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?=$LoggedUser['AuthKey']?>"
+                    <span style="float: right"><a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?= $Viewer->auth() ?>"
                         class="brackets">Remove link</a></span>
 <?php
                 }

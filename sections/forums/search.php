@@ -1,7 +1,6 @@
 <?php
 
-$user = new Gazelle\User($LoggedUser['ID']);
-$search = new Gazelle\ForumSearch($user);
+$search = new Gazelle\ForumSearch($Viewer);
 $search->setSearchType($_GET['type'] ?? 'title')
     ->setSearchText(trim($_GET['search']) ?? '');
 
@@ -128,7 +127,7 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
     $Forums = (new Gazelle\Manager\Forum)->forumList();
     foreach ($Forums as $forumId) {
         $forum = new Gazelle\Forum($forumId);
-        if (!$user->readAccess($forum)) {
+        if (!$Viewer->readAccess($forum)) {
             continue;
         }
         $Columns++;

@@ -17,7 +17,7 @@ View::show_header('Compose Mass PM', 'inbox,bbcode,jquery.validate,form_validate
     <form class="send_form" name="message" action="tools.php" method="post" id="messageform">
         <div class="box pad">
             <input type="hidden" name="action" value="take_mass_pm" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <div id="quickpost">
                 <h3>Class</h3>
                 <select id="class_id" name="class_id">

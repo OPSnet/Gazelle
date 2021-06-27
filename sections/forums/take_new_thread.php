@@ -14,8 +14,7 @@ authorize();
  *      $_POST['answers'] (array of answers)
  */
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if ($user->disablePosting()) {
+if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
 
@@ -25,7 +24,7 @@ if (isset($_POST['forum'])) {
         error(404);
     }
     $ForumID = $forum->id();
-    if (!$user->writeAccess($forum) || !$user->createAccess($forum)) {
+    if (!$Viewer->writeAccess($forum) || !$Viewer->createAccess($forum)) {
         error(403);
     }
 }
@@ -62,16 +61,16 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
     }
 }
 
-$threadId = $forum->addThread($LoggedUser['ID'], $Title, $Body);
+$threadId = $forum->addThread($Viewer->id(), $Title, $Body);
 if ($needPoll) {
     $forum->addPoll($threadId, $Question, $Answers, $Votes);
     if ($ForumID == STAFF_FORUM_ID) {
-        Irc::sendRaw('PRIVMSG '.MOD_CHAN.' :Poll created by '.$LoggedUser['Username'].": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
+        Irc::sendRaw('PRIVMSG '.MOD_CHAN.' :Poll created by '.$Viewer->username().": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }
 }
 
 if (isset($_POST['subscribe'])) {
-    (new Gazelle\Manager\Subscription($LoggedUser['ID']))->subscribe($threadId);
+    (new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($threadId);
 }
 
 header("Location: forums.php?action=viewthread&threadid=$threadId");

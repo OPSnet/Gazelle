@@ -14,7 +14,7 @@ $userLink = new Gazelle\Manager\UserLink($source);
 
 switch ($_REQUEST['dupeaction'] ?? '') {
     case 'remove':
-        $userLink->remove(new Gazelle\User($_REQUEST['removeid']), $LoggedUser['Username']);
+        $userLink->remove(new Gazelle\User($_REQUEST['removeid']), $Viewer->username());
         break;
 
     case 'update':
@@ -28,11 +28,11 @@ switch ($_REQUEST['dupeaction'] ?? '') {
             } elseif ($source->id() === $target->id()) {
                 error("Cannot link a user to themselves");
             }
-            $userLink->link($target, $LoggedUser['Username'], $updateNote);
+            $userLink->link($target, $Viewer->username(), $updateNote);
         }
 
         if ($_REQUEST['dupecomments']) {
-            $userLink->addGroupComments($_REQUEST['dupecomments'], $LoggedUser['Username'], $updateNote);
+            $userLink->addGroupComments($_REQUEST['dupecomments'], $Viewer->username(), $updateNote);
         }
         break;
 

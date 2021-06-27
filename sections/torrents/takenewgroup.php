@@ -31,7 +31,7 @@ if (empty($_POST['confirm'])) {
     <div class="box pad">
         <form class="confirm_form" name="torrent_group" action="torrents.php" method="post">
             <input type="hidden" name="action" value="newgroup" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="confirm" value="true" />
             <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
             <input type="hidden" name="oldgroupid" value="<?=$OldGroupID?>" />
@@ -73,7 +73,7 @@ if (empty($_POST['confirm'])) {
     $GroupID = $DB->inserted_id();
 
     $artistMan->setGroupId($GroupID)
-        ->setUserId($LoggedUser['ID'])
+        ->setUserId($Viewer->id())
         ->addToGroup($ArtistID, $AliasID, 1);
 
     $DB->prepared_query('
@@ -94,7 +94,7 @@ if (empty($_POST['confirm'])) {
 
     $Cache->delete_value("torrent_download_$TorrentID");
 
-    (new Gazelle\Log)->general("Torrent $TorrentID was split out from group $OldGroupID to $GroupId by " . $LoggedUser['Username']);
+    (new Gazelle\Log)->general("Torrent $TorrentID was split out from group $OldGroupID to $GroupId by " . $Viewer->username());
 
     header("Location: torrents.php?id=$GroupID");
 }

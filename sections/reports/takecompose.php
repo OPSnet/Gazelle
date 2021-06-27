@@ -25,7 +25,7 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
         FROM pm_conversations_users
         WHERE UserID = ?
             AND ConvID = ?
-        ", $LoggedUser['ID'], $ConvID
+        ", $Viewer->id(), $ConvID
     );
     if (!$DB->has_results()) {
         error(403);
@@ -55,9 +55,9 @@ if (!empty($Err)) {
 }
 
 if ($ConvID) {
-    (new Gazelle\Manager\User)->replyPM($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+    (new Gazelle\Manager\User)->replyPM($ToID, $Viewer->id(), $Subject, $Body, $ConvID);
 } else {
-    (new Gazelle\Manager\User)->sendPM($ToID, $LoggedUser['ID'], $Subject, $Body);
+    (new Gazelle\Manager\User)->sendPM($ToID, $Viewer->id(), $Subject, $Body);
 }
 
 header('Location: reports.php');

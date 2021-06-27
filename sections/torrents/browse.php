@@ -10,7 +10,6 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     }
 }
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $torMan = new Gazelle\Manager\Torrent;
 
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
@@ -33,7 +32,7 @@ if (!empty($_GET['setdefault'])) {
 
     $SiteOptions = unserialize_array($DB->scalar("
         SELECT SiteOptions FROM users_info WHERE UserID = ?
-        ", $LoggedUser['ID']
+        ", $Viewer->id()
     ));
     if (!isset($SiteOptions['HttpsTracker'])) {
         $SiteOptions['HttpsTracker'] = true;
@@ -44,9 +43,9 @@ if (!empty($_GET['setdefault'])) {
         UPDATE users_info SET
             SiteOptions = ?
         WHERE UserID = ?
-        ", serialize($SiteOptions), $LoggedUser['ID']
+        ", serialize($SiteOptions), $Viewer->id()
     );
-    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
+    $Cache->begin_transaction('user_info_heavy_'.$Viewer->id());
     $Cache->update_row(false, ['DefaultSearch' => $SiteOptions['DefaultSearch']]);
     $Cache->commit_transaction(0);
 
@@ -54,7 +53,7 @@ if (!empty($_GET['setdefault'])) {
 } elseif (!empty($_GET['cleardefault'])) {
     $SiteOptions = unserialize_array($DB->scalar("
         SELECT SiteOptions FROM users_info WHERE UserID = ?
-        ", $LoggedUser['ID']
+        ", $Viewer->id()
     ));
     $SiteOptions['DefaultSearch'] = '';
 
@@ -62,9 +61,9 @@ if (!empty($_GET['setdefault'])) {
         UPDATE users_info SET
             SiteOptions = ?
         WHERE UserID = ?
-        ", serialize($SiteOptions), $LoggedUser['ID']
+        ", serialize($SiteOptions), $Viewer->id()
     );
-    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
+    $Cache->begin_transaction('user_info_heavy_'.$Viewer->id());
     $Cache->update_row(false, ['DefaultSearch' => '']);
     $Cache->commit_transaction(0);
 
@@ -415,7 +414,7 @@ if ($x % 7 != 0) { // Padding
         GROUP BY tt.TagID
         ORDER BY ((count(tags.Name) - 2) * (sum(tt.PositiveVotes) - sum(tt.NegativeVotes))) / (tags.Uses * 0.8) DESC
         LIMIT 8
-        ", $LoggedUser['ID']
+        ", $Viewer->id()
     );
     $list = $DB->collect(0);
     $link = [];
@@ -521,7 +520,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 <?php    } ?>
             <div class="group_info clear">
                 <?=$DisplayName?>
-<?php    if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
+<?php    if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) { ?>
                 <span class="remove_bookmark float_right">
                     <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                 </span>

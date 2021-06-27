@@ -50,7 +50,7 @@ $RequireTokenPages = [
     'upload',
 ];
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 
 if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) === 'application/json') {
     $_POST = json_decode(file_get_contents('php://input'), true);

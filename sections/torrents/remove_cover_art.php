@@ -26,6 +26,6 @@ $DB->prepared_query("
     ", $coverId
 );
 
-(new Gazelle\Log)->group($groupId, $LoggedUser['ID'], "Additional cover \"$summary - $image\" removed from group");
+(new Gazelle\Log)->group($groupId, $Viewer->id(), "Additional cover \"$summary - $image\" removed from group");
 
 $Cache->deleteMulti(["torrents_cover_art_$groupId", "torrents_details_$groupId"]);

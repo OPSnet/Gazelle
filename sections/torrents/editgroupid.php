@@ -55,7 +55,7 @@ if (empty($_POST['confirm'])) {
         <div class="box pad">
             <form class="confirm_form" name="torrent_group" action="torrents.php" method="post">
                 <input type="hidden" name="action" value="editgroupid" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="confirm" value="true" />
                 <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
                 <input type="hidden" name="oldgroupid" value="<?=$OldGroupID?>" />
@@ -108,8 +108,8 @@ if (empty($_POST['confirm'])) {
     }
     Torrents::update_hash($GroupID);
 
-    (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "merged group $OldGroupID")
-        ->general("Torrent $TorrentID was edited by " . $LoggedUser['Username']);
+    (new Gazelle\Log)->group($GroupID, $Viewer->id(), "merged group $OldGroupID")
+        ->general("Torrent $TorrentID was edited by " . $Viewer->username());
     $DB->prepared_query("
         UPDATE group_log
         SET GroupID = ?

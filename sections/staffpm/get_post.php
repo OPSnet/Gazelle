@@ -28,7 +28,7 @@ if (!$PostID) {
     ", $PostID
 );
 
-if (($LoggedUser['ID'] == $UserID) || ($user->isStaffPMReader() && $user->effectiveClass() >= $Level)) {
+if (($Viewer->id() == $UserID) || ($Viewer->isStaffPMReader() && $Viewer->effectiveClass() >= $Level)) {
     // This gets sent to the browser, which echoes it wherever
     echo trim($Message);
 } else {

@@ -17,8 +17,7 @@ if (is_null($forum)) {
     print json_die(['status' => 'failure']);
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if (!$user->readAccess($forum)) {
+if (!$Viewer->readAccess($forum)) {
     json_die("failure", "insufficient permission");
 }
 
@@ -52,7 +51,7 @@ $DB->prepared_query("
     FROM forums_last_read_topics AS l
     WHERE l.UserID = ?
         AND l.TopicID IN (" . placeholders($args) . ")
-    ", $PerPage, $LoggedUser['ID'], ...$args
+    ", $PerPage, $Viewer->id(), ...$args
 );
 $LastRead = $DB->to_array('TopicID');
 
@@ -66,7 +65,7 @@ foreach ($threadList as $thread) {
     $unread = (!$Locked || $Sticky)
         && (
             (empty($LastRead[$threadId]) || $LastRead[$threadId]['PostID'] < $LastID)
-            && strtotime($LastTime) > $user->forumCatchupEpoch()
+            && strtotime($LastTime) > $Viewer->forumCatchupEpoch()
         );
 
     if (!isset($userCache[$AuthorID])) {

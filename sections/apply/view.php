@@ -4,7 +4,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
     authorize();
     $ID = (int)$_POST['id'];
     $app = new Gazelle\Applicant($ID);
-    if (!$IS_STAFF && $app->userId() != $LoggedUser['ID']) {
+    if (!$IS_STAFF && $app->userId() != $Viewer->id()) {
         error(403);
     }
     $remove = array_filter($_POST, function ($x) { return preg_match('/^note-delete-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
@@ -25,7 +25,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
     }
     elseif (isset($_POST['note_reply'])) {
         $app->saveNote(
-            $LoggedUser['ID'],
+            $Viewer->id(),
             $_POST['note_reply'],
             $IS_STAFF && $_POST['visibility'] == 'staff' ? 'staff' : 'public'
         );
@@ -33,7 +33,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
 } elseif (isset($_GET['id']) && is_number($_GET['id'])) {
     $ID = (int)$_GET['id'];
     $app = new Gazelle\Applicant($ID);
-    if (!$IS_STAFF && $app->userId() != $LoggedUser['ID']) {
+    if (!$IS_STAFF && $app->userId() != $Viewer->id()) {
         error(403);
     }
 }
@@ -41,12 +41,12 @@ $Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
 View::show_header('View Applications', 'apply');
 echo $Twig->render('applicant/view.twig', [
     'app'      => $app ?? null,
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $Viewer->auth(),
     'id'       => $ID ?? 0,
     'is_staff' => $IS_STAFF,
-    'list'     => $appMan->list((int)($_GET['page'] ?? 1), $Resolved, $IS_STAFF ? 0 : $LoggedUser['ID']),
+    'list'     => $appMan->list((int)($_GET['page'] ?? 1), $Resolved, $IS_STAFF ? 0 : $Viewer->id()),
     'note'     => new Gazelle\Util\Textarea('note_reply', ''),
     'resolved' => $Resolved,
-    'user_id'  => $LoggedUser['ID'],
+    'user_id'  => $Viewer->id(),
 ]);
 View::show_footer();

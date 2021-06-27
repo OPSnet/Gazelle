@@ -14,7 +14,6 @@ the front page.
 
 authorize();
 
-$viewer = new Gazelle\User($LoggedUser['ID']);
 $forumMan = new Gazelle\Manager\Forum;
 
 if (!check_perms('site_moderate_forums') && empty($_POST['transition'])) {
@@ -25,7 +24,7 @@ $forum = $forumMan->findByThreadId($threadId);
 if (is_null($forum)) {
     error(404);
 }
-if (!$viewer->writeAccess($forum)) {
+if (!$Viewer->writeAccess($forum)) {
     error(403);
 }
 
@@ -69,7 +68,7 @@ if (isset($_POST['transition'])) {
         error(0);
     } else {
         // Permissions are handled inside forums.class.php
-        $transitions = $forumMan->forumTransitionList($viewer);
+        $transitions = $forumMan->forumTransitionList($Viewer);
         if (!isset($transitions[$transId])) {
             error(0);
         } else {
@@ -123,7 +122,7 @@ switch ($action ?? null) {
         break;
 }
 if ($notes) {
-    $forum->addThreadNote($threadId, $LoggedUser['ID'], implode("\n", $notes));
+    $forum->addThreadNote($threadId, $Viewer->id(), implode("\n", $notes));
 }
 
 header("Location: forums.php?action=viewthread&threadid=$threadId&page=$page");

@@ -49,7 +49,7 @@ foreach ($ReferralAccounts as $a) {
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="action" value="referral_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="10" name="site" value="<?=$Site?>" />
             </td>
@@ -91,7 +91,7 @@ if (!$ReferralManager->readOnly) {
     <tr class="rowa">
         <form class="create_form" name="accounts" action="" method="post">
             <input type="hidden" name="action" value="referral_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="10" name="site" />
             </td>

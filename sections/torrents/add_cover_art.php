@@ -29,11 +29,11 @@ for ($i = 0; $i < count($Images); $i++) {
         INSERT IGNORE INTO cover_art
                (GroupID, Image, Summary, UserID, Time)
         VALUES (?,       ?,     ?,       ?,      now())
-        ", $GroupID, $Image, $Summary, $LoggedUser['ID']
+        ", $GroupID, $Image, $Summary, $Viewer->id()
     );
     if ($DB->affected_rows()) {
         $Changed = true;
-        (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "Additional cover \"$Summary - $Image\" added to group");
+        (new Gazelle\Log)->group($GroupID, $Viewer->id(), "Additional cover \"$Summary - $Image\" added to group");
     }
 }
 

@@ -23,7 +23,7 @@ if (isset($_POST['doit'])) {
     }
 
     if ($_POST['newtag']) {
-        $new = $tagMan->officialize($_POST['newtag'], $LoggedUser['ID']);
+        $new = $tagMan->officialize($_POST['newtag'], $Viewer->id());
     }
     $Cache->delete_value('genre_tags');
 }
@@ -56,7 +56,7 @@ View::show_header('Official Tags Manager');
     <div style="display: inline-block;">
         <form class="manage_form" name="tags" method="post" action="">
             <input type="hidden" name="action" value="tags_official" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="doit" value="1" />
             <table class="tags_table layout">
                 <tr class="colhead_dark">

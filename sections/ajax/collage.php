@@ -57,7 +57,7 @@ $JSON = [
     'locked'              => (bool)$Locked,
     'maxGroups'           => (int)$MaxGroups,
     'maxGroupsPerUser'    => (int)$MaxGroupsPerUser,
-    'hasBookmarked'       => $bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID),
+    'hasBookmarked'       => $bookmark->isCollageBookmarked($Viewer->id(), $CollageID),
     'subscriberCount'     => (int)$Subscribers,
     'torrentGroupIDList'  => $TorrentGroups
 ];

@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 $GroupID = $_POST['groupid'];
 $ArtistRoles = $_POST['importance'];
 $AliasNames = $_POST['aliasname'];
@@ -44,9 +44,9 @@ for ($i = 0; $i < count($AliasNames); $i++) {
 
         if ($DB->affected_rows()) {
             $ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
-            (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "added artist $ArtistName as ".$ArtistTypes[$role])
+            (new Gazelle\Log)->group($GroupID, $Viewer->id(), "added artist $ArtistName as ".$ArtistTypes[$role])
                 ->general("Artist $ArtistID ($ArtistName) was added to the group $GroupID ($GroupName) as "
-                    . $ArtistTypes[$role].' by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')'
+                    . $ArtistTypes[$role].' by user '.$Viewer->id().' ('.$Viewer->username().')'
                 );
             $Changed = true;
         }

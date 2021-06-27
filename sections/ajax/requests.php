@@ -48,8 +48,6 @@ if (empty($_GET['userid'])) {
 }
 $BookmarkView = false;
 
-$viewer = $userMan->findById($LoggedUser['ID']);
-
 if (empty($_GET['type'])) {
     $Title = 'Requests';
     if (empty($_GET['showall'])) {
@@ -59,44 +57,44 @@ if (empty($_GET['type'])) {
     switch ($_GET['type']) {
         case 'created':
             if ($user) {
-                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
+                if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
                     json_die("failure");
                 }
                 $Title = "Requests created by " . $user->username();
                 $SphQL->where('userid', $user->id());
             } else {
                 $Title = 'My requests';
-                $SphQL->where('userid', $LoggedUser['ID']);
+                $SphQL->where('userid', $Viewer->id());
             }
             break;
         case 'voted':
             if ($user) {
-                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
+                if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
                     json_die("failure");
                 }
                 $Title = "Requests voted for by " . $user->username();
                 $SphQL->where('voter', $user->id());
             } else {
                 $Title = 'Requests you have voted on';
-                $SphQL->where('voter', $LoggedUser['ID']);
+                $SphQL->where('voter', $Viewer->id());
             }
             break;
         case 'filled':
             if ($user) {
-                if (!$user->propertyVisible($viewer, 'requestsfilled_list')) {
+                if (!$user->propertyVisible($Viewer, 'requestsfilled_list')) {
                     json_die("failure");
                 }
                 $Title = "Requests filled by " . $user->username();
                 $SphQL->where('fillerid', $user->id());
             } else {
                 $Title = 'Requests you have filled';
-                $SphQL->where('fillerid', $LoggedUser['ID']);
+                $SphQL->where('fillerid', $Viewer->id());
             }
             break;
         case 'bookmarks':
             $Title = 'Your bookmarked requests';
             $BookmarkView = true;
-            $SphQL->where('bookmarker', $LoggedUser['ID']);
+            $SphQL->where('bookmarker', $Viewer->id());
             break;
         default:
             json_die("failure");

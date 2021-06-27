@@ -11,8 +11,8 @@ $DB->prepared_query("
         WHERE s.uid = ?
     ) AS s USING (GroupID)
     WHERE b.UserID = ?
-    ", $LoggedUser['ID'], $LoggedUser['ID']
+    ", $Viewer->id(), $Viewer->id()
 );
 
-$Cache->delete_value("bookmarks_group_ids_" . $LoggedUser['ID']);
+$Cache->delete_value("bookmarks_group_ids_" . $Viewer->id());
 header('Location: bookmarks.php');

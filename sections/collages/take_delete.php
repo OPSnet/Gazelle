@@ -12,9 +12,9 @@ if (!$CollageID) {
 }
 $collage = new Gazelle\Collage($CollageID);
 
-if (!check_perms('site_collages_delete') && !$collage->isOwner($LoggedUser['ID'])) {
+if (!$Viewer->permitted('site_collages_delete') && !$collage->isOwner($Viewer->id())) {
     error(403);
 }
 
-$collage->remove(new Gazelle\User($LoggedUser['ID']), new Gazelle\Manager\Subscription, new Gazelle\Log, $reason);
+$collage->remove($Viewer, new Gazelle\Manager\Subscription, new Gazelle\Log, $reason);
 header('Location: collages.php');

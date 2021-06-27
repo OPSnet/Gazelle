@@ -9,25 +9,24 @@ $staffPM = $manager->findById((int)($_GET['id'] ?? 0));
 if (is_null($staffPM)) {
     error(404);
 }
-$viewer = new Gazelle\User($LoggedUser['ID']);
-if (!$staffPM->visible($viewer)) {
+if (!$staffPM->visible($Viewer)) {
     error(403);
 }
-if ($staffPM->author()->id() === $viewer->id() && $staffPM->isUnread()) {
+if ($staffPM->author()->id() === $Viewer->id() && $staffPM->isUnread()) {
     // User is viewing their own unread conversation, set it to read
-    $staffPM->markAsRead($viewer);
+    $staffPM->markAsRead($Viewer);
 }
 $userMan = new Gazelle\Manager\User;
 
 View::show_header('Staff PM', 'staffpm,bbcode');
 echo $Twig->render('staffpm/message.twig', [
     'common'      => $manager->commonAnswerList(),
-    'heading'     => $manager->heading($viewer),
+    'heading'     => $manager->heading($Viewer),
     'pm'          => $staffPM,
     'textarea'    => new Gazelle\Util\Textarea('quickpost', '', 90, 10),
     'staff_level' => $userMan->staffClassList(),
     'staff'       => $userMan->staffList(),
     'fls'         => $userMan->flsList(),
-    'viewer'      => $viewer,
+    'viewer'      => $Viewer,
 ]);
 View::show_footer();

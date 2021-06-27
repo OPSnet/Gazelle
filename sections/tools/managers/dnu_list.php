@@ -28,7 +28,7 @@ View::show_header($Title, 'jquery-ui,dnu_list');
         <tr class="rowa">
             <form class="add_form" name="dnu" action="tools.php" method="post">
                 <input type="hidden" name="action" value="dnu_alter" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <td>
                     <input type="text" name="name" size="40" />
                 </td>
@@ -52,7 +52,7 @@ View::show_header($Title, 'jquery-ui,dnu_list');
                 <form class="manage_form dnu" action="tools.php" method="post">
                     <td>
                         <input type="hidden" name="action" value="dnu_alter" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                         <input type="hidden" name="id" value="<?=$ID?>" />
                         <input type="text" name="name" value="<?=display_str($Name)?>" size="40" />
                     </td>

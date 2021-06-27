@@ -13,7 +13,7 @@ if ($Collage->isDeleted()) {
     header("Location: log.php?search=Collage+$CollageID");
 }
 else {
-    $Collage->setViewerId($LoggedUser['ID']);
+    $Collage->setViewerId($Viewer->id());
     $NumGroups = $Collage->numEntries();
     $CollageCovers = isset($LoggedUser['CollageCovers']) ? $LoggedUser['CollageCovers'] : 25 * abs(($LoggedUser['HideCollage'] ?? 0) - 1);
     $CollagePages = [];

@@ -46,7 +46,7 @@ foreach ($paymentList as $r) {
 <?php } else { ?>
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="action" value="payment_alter" />
-            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="id" value="<?= $r['ID'] ?>" />
             <td>
                 <input type="text" name="text" value="<?= $r['Text'] ?>" />
@@ -86,7 +86,7 @@ if (check_perms('admin_manage_payments')) {
     <tr class="rowa">
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="action" value="payment_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="15" name="text" value="" />
             </td>

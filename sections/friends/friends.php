@@ -1,7 +1,5 @@
 <?php
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
-
 $paginator = new Gazelle\Util\Paginator(FRIENDS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($Viewer->totalFriends());
 

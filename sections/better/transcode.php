@@ -16,7 +16,7 @@ if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
         error(403);
     }
 } else {
-    $userId = $LoggedUser['ID'];
+    $userId = $Viewer->id();
 }
 
 if (empty($_GET['filter']) || !in_array($_GET['filter'], ['uploaded', 'seeding', 'snatched'])) {
@@ -335,7 +335,7 @@ if ($resultCount == 0) { ?>
         <tr<?=($edition['FLACIsSnatched'] ? ' class="snatched_torrent"' : '')?>>
             <td>
                 <span class="torrent_links_block">
-                    <a href="torrents.php?action=download&amp;id=<?=$flacID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+                    <a href="torrents.php?action=download&amp;id=<?=$flacID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                 </span>
                 <?=$displayName?>
                 <div class="torrent_info"><?=$edition['EditionName']?></div>

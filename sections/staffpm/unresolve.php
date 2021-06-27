@@ -6,16 +6,16 @@ if (!$ID) {
 }
 
 // Check if conversation belongs to user
-[$UserID, $Level, $AssignedToUser] = $DB->row("
-    SELECT UserID, Level, AssignedToUser
+[$UserID, $AssignedToUser, $Level] = $DB->row("
+    SELECT UserID, AssignedToUser, Level
     FROM staff_pm_conversations
     WHERE ID = ?
     ", $ID
 );
 
-if (  (!$user->isStaffPMReader() && !in_array($LoggedUser['ID'], [$UserID, $AssignedToUser]))
-    || ($user->isFLS() && !in_array($AssignedToUser, ['', $LoggedUser['ID']]))
-    || ($user->isStaff() && $Level > $user->effectiveClass())
+if (  (!$Viewer->isStaffPMReader() && !in_array($Viewer->id(), [$UserID, $AssignedToUser]))
+    || ($Viewer->isFLS() && !in_array($AssignedToUser, ['', $Viewer->id()]))
+    || ($Viewer->isStaff() && $Level > $Viewer->effectiveClass())
 ) {
     error(403);
 }
@@ -28,6 +28,6 @@ $DB->prepared_query("
     WHERE ID = ?
     ", $ID
 );
-$Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
+$Cache->delete_value("num_staff_pms_" . $Viewer->id());
 
 header('Location: staffpm.php');

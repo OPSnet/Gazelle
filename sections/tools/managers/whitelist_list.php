@@ -7,7 +7,7 @@ $whitelist = new \Gazelle\Manager\ClientWhitelist;
 
 View::show_header('Client Whitelist Manager');
 echo $Twig->render('admin/client-whitelist.twig', [
-    'auth' => $LoggedUser['AuthKey'],
+    'auth' => $Viewer->auth(),
     'list' => $whitelist->list(),
 ]);
 View::show_footer();

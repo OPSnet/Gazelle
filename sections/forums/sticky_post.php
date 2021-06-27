@@ -16,6 +16,6 @@ if (!$postId) {
     error(404);
 }
 
-$forum->stickyPost($LoggedUser['ID'], $threadId, $postId, empty($_GET['remove']));
+$forum->stickyPost($Viewer->id(), $threadId, $postId, empty($_GET['remove']));
 
 header('Location: forums.php?action=viewthread&threadid='.$threadId);

@@ -43,8 +43,7 @@ $threadInfo = $forum->threadInfo($threadId);
 if (empty($threadInfo)) {
     error(404);
 }
-$viewer = new Gazelle\User($LoggedUser['ID']);
-if (!$viewer->readAccess($forum)) {
+if (!$Viewer->readAccess($forum)) {
     error(403);
 }
 
@@ -83,33 +82,33 @@ if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPa
     $lastOnPage = $threadInfo['StickyPostID'];
 }
 
-$quoteCount = $Cache->get_value('notify_quoted_' . $viewer->id());
+$quoteCount = $Cache->get_value('notify_quoted_' . $Viewer->id());
 if ($quoteCount === false || $quoteCount > 0) {
-    (new Gazelle\User\Quote($viewer))->clearThread($threadId, $firstOnPage, $lastOnPage);
+    (new Gazelle\User\Quote($Viewer))->clearThread($threadId, $firstOnPage, $lastOnPage);
 }
 
-$lastRead = $forum->userLastReadPost($viewer->id(), $threadId);
+$lastRead = $forum->userLastReadPost($Viewer->id(), $threadId);
 if ($lastRead < $lastOnPage) {
-    $forum->userCatchupThread($viewer->id(), $threadId, $lastOnPage);
+    $forum->userCatchupThread($Viewer->id(), $threadId, $lastOnPage);
 }
 
-$isSubscribed = (new Gazelle\Manager\Subscription($viewer->id()))->isSubscribed($threadId);
+$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribed($threadId);
 if ($isSubscribed) {
-    $Cache->delete_value('subscriptions_user_new_'.$viewer->id());
+    $Cache->delete_value('subscriptions_user_new_'.$Viewer->id());
 }
 
 $userMan = new Gazelle\Manager\User;
 
-$transitions = $forumMan->threadTransitionList($viewer, $forumId);
-$department = $forum->departmentList($viewer);
-$auth = $LoggedUser['AuthKey'];
+$transitions = $forumMan->threadTransitionList($Viewer, $forumId);
+$department = $forum->departmentList($Viewer);
+$auth = $Viewer->auth();
 View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
     'comments,subscriptions,bbcode', $IsDonorForum ? ',donor' : ''
 );
 echo $Twig->render('forum/header-thread.twig', [
     'auth'         => $auth,
     'forum'        => $forum,
-    'dept_list'    => $forum->departmentList($viewer),
+    'dept_list'    => $forum->departmentList($Viewer),
     'is_subbed'    => $isSubscribed,
     'paginator'    => $paginator,
     'thread_id'    => $threadId,
@@ -129,7 +128,7 @@ if ($threadInfo['NoPoll'] == 0) {
     }
 
     $RevealVoters = in_array($forumId, $ForumsRevealVoters);
-    $UserResponse = $forum->pollVote($viewer->id(), $threadId);
+    $UserResponse = $forum->pollVote($Viewer->id(), $threadId);
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
@@ -240,7 +239,7 @@ if ($threadInfo['NoPoll'] == 0) {
             </div>
 <?php
     }
-    if ($viewer->permitted('forums_polls_moderate') && !$RevealVoters) {
+    if ($Viewer->permitted('forums_polls_moderate') && !$RevealVoters) {
         if (!$Featured) {
 ?>
             <form class="manage_form" name="poll" action="forums.php" method="post">
@@ -280,12 +279,12 @@ foreach ($thread as $Key => $Post) {
     $tableClass = ['forum_post', 'wrap_overflow', 'box vertical_margin'];
     if (((!$threadInfo['isLocked'] || $threadInfo['isSticky'])
             && $PostID > $lastRead
-            && strtotime($AddedTime) > $viewer->forumCatchupEpoch()
+            && strtotime($AddedTime) > $Viewer->forumCatchupEpoch()
             ) || (isset($RequestKey) && $Key == $RequestKey)
         ) {
         $tableClass[] = 'forum_unread';
     }
-    if (!$viewer->showAvatars()) {
+    if (!$Viewer->showAvatars()) {
         $tableClass[] = 'noavatar';
     }
     if ($threadInfo['AuthorID'] == $AuthorID) {
@@ -297,37 +296,37 @@ foreach ($thread as $Key => $Post) {
 ?>
 <table class="<?= implode(' ', $tableClass) ?>" id="post<?= $PostID ?>">
     <colgroup>
-<?php if ($viewer->showAvatars()) { ?>
+<?php if ($Viewer->showAvatars()) { ?>
         <col class="col_avatar" />
 <?php } ?>
         <col class="col_post_body" />
     </colgroup>
     <tr class="colhead_dark">
-        <td colspan="<?= $viewer->showAvatars() ? 2 : 1 ?>">
+        <td colspan="<?= $Viewer->showAvatars() ? 2 : 1 ?>">
             <span style="float: left;"><a class="post_id" href="forums.php?action=viewthread&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>#post<?=$PostID?>">#<?=$PostID?></a>
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
-<?php if (!$threadInfo['isLocked'] && !$viewer->disablePosting()) { ?>
+<?php if (!$threadInfo['isLocked'] && !$Viewer->disablePosting()) { ?>
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?= $author->username() ?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
-    if ((!$threadInfo['isLocked'] && $viewer->writeAccess($forum) && $AuthorID == $viewer->id()) && !$viewer->disablePosting() || $viewer->permitted('site_moderate_forums')) {
+    if ((!$threadInfo['isLocked'] && $Viewer->writeAccess($forum) && $AuthorID == $Viewer->id()) && !$Viewer->disablePosting() || $Viewer->permitted('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
-<?php if ($viewer->permitted('site_forum_post_delete') && $threadInfo['Posts'] > 1) { ?>
+<?php if ($Viewer->permitted('site_forum_post_delete') && $threadInfo['Posts'] > 1) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>
 <?php
     }
     if ($PostID == $threadInfo['StickyPostID']) { ?>
                 <strong><span class="sticky_post_label" class="brackets">Pinned</span></strong>
-<?php   if ($viewer->permitted('site_moderate_forums')) { ?>
+<?php   if ($Viewer->permitted('site_moderate_forums')) { ?>
                 - <a href="forums.php?action=sticky_post&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>&amp;remove=true&amp;auth=<?=$auth?>" title="Unpin this post" class="brackets tooltip">X</a>
 <?php
         }
     } else {
-        if ($viewer->permitted('site_moderate_forums')) {
+        if ($Viewer->permitted('site_moderate_forums')) {
 ?>
                 - <a href="forums.php?action=sticky_post&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>&amp;auth=<?=$auth?>" title="Pin this post" class="tooltip" style="font-size: 1.4em">&#X1f4cc;</a>
 <?php
@@ -340,7 +339,7 @@ foreach ($thread as $Key => $Post) {
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
     $author = new Gazelle\User($AuthorID);
-    if ($viewer->permitted('users_warn') && $viewer->id() != $AuthorID && $viewer->classLevel() >= $author->classLevel()) {
+    if ($Viewer->permitted('users_warn') && $Viewer->id() != $AuthorID && $Viewer->classLevel() >= $author->classLevel()) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn" />
@@ -357,19 +356,19 @@ foreach ($thread as $Key => $Post) {
         </td>
     </tr>
     <tr>
-<?php   if ($viewer->showAvatars()) { ?>
+<?php   if ($Viewer->showAvatars()) { ?>
         <td class="avatar" valign="top">
-            <?= $userMan->avatarMarkup($viewer, $author) ?>
+            <?= $userMan->avatarMarkup($Viewer, $author) ?>
         </td>
 <?php   } ?>
-        <td class="body" valign="top"<?php if (!$viewer->showAvatars()) { echo ' colspan="2"'; } ?>>
+        <td class="body" valign="top"<?php if (!$Viewer->showAvatars()) { echo ' colspan="2"'; } ?>>
             <div id="content<?=$PostID?>">
                 <?= Text::full_format($Body) ?>
 <?php   if ($EditedUserID) { ?>
                 <br />
                 <br />
                 <span class="last_edited">
-<?php       if ($viewer->permitted('site_admin_forums')) { ?>
+<?php       if ($Viewer->permitted('site_admin_forums')) { ?>
                 <a href="#content<?=$PostID?>" onclick="LoadEdit('forums', <?=$PostID?>, 1); return false;">&laquo;</a>
 <?php       } ?>
                 Last edited by
@@ -392,17 +391,17 @@ $lastPost = end($thread);
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setAutoResize()->setPreviewManual(true);
 
-if ($viewer->permitted('site_moderate_forums') || ($viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
+if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
     echo $Twig->render('reply.twig', [
-        'auth'     => $LoggedUser['AuthKey'],
+        'auth'     => $auth,
         'action'   => 'reply',
         'forum'    => $forumId,
         'id'       => $threadId,
-        'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $viewer->id(),
+        'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id(),
         'name'     => 'thread',
         'subbed'   => $isSubscribed,
         'textarea' => $textarea,
-        'user'     => $viewer,
+        'user'     => $Viewer,
     ]);
 }
 
@@ -427,7 +426,7 @@ if (count($transitions)) {
     </table>
 <?php
 }
-if ($viewer->permitted('site_moderate_forums')) {
+if ($Viewer->permitted('site_moderate_forums')) {
     $Notes = $forum->threadNotes($threadId);
 ?>
     <br />
@@ -492,7 +491,7 @@ if ($viewer->permitted('site_moderate_forums')) {
     $Forums = (new Gazelle\Manager\Forum)->forumList();
     foreach ($Forums as $forumId) {
         $forum = new Gazelle\Forum($forumId);
-        if (!$viewer->readAccess($forum)) {
+        if (!$Viewer->readAccess($forum)) {
             continue;
         }
 
@@ -511,7 +510,7 @@ if ($viewer->permitted('site_moderate_forums')) {
                     </select>
                 </td>
             </tr>
-<?php    if ($viewer->permitted('site_admin_forums')) { ?>
+<?php    if ($Viewer->permitted('site_admin_forums')) { ?>
             <tr>
                 <td class="label"><label for="delete_thread_checkbox">Delete thread</label></td>
                 <td>
@@ -526,7 +525,7 @@ if ($viewer->permitted('site_moderate_forums')) {
             </tr>
         </table>
     </form>
-<?php } // $viewer->permitted('site_moderate_forums') ?>
+<?php } // $Viewer->permitted('site_moderate_forums') ?>
 </div>
 <?php
 view::show_footer();

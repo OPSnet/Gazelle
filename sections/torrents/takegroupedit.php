@@ -12,7 +12,7 @@ if (!check_perms('torrents_edit_vanityhouse') && isset($_POST['vanity_house'])) 
 }
 
 // Variables for database input
-$UserID = (int)$LoggedUser['ID'];
+$UserID = $Viewer->id();
 $GroupID = (int)$_REQUEST['groupid'];
 
 // Get information for the group log
@@ -51,7 +51,7 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
     <div class="box pad">
         <form class="confirm_form" name="torrent_group" action="torrents.php" method="get">
             <input type="hidden" name="action" value="revert" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="confirm" value="true" />
             <input type="hidden" name="groupid" value="<?=$GroupID?>" />
             <input type="hidden" name="revisionid" value="<?=$RevisionID?>" />
@@ -176,7 +176,7 @@ if ($OldVH != $VanityHouse) {
     $logInfo[] = 'Vanity House status changed to '. ($VanityHouse ? 'true' : 'false');
 }
 if ($logInfo) {
-    (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], implode(', ', $logInfo));
+    (new Gazelle\Log)->group($GroupID, $Viewer->id(), implode(', ', $logInfo));
 }
 
 // There we go, all done!

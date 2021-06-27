@@ -31,7 +31,7 @@ $DB->prepared_query("
     SELECT ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, LogChecksum
     FROM torrents
     WHERE HasLog = '1' AND HasLogDB = '1' AND UserID = ?
-    ", $LoggedUser['ID']
+    ", $Viewer->id()
 );
 if (!$DB->has_results()) {
     echo "\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";

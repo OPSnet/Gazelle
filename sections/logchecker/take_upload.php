@@ -25,7 +25,7 @@ $args = [$TorrentID];
 
 if (!check_perms('users_mod')) {
     $sql .= " AND t.UserID = ?";
-    $args[] = $LoggedUser['ID'];
+    $args[] = $Viewer->id();
 }
 list($TorrentID, $GroupID) = $DB->row($sql, ...$args);
 if (!$TorrentID) {

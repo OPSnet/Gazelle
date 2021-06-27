@@ -1,6 +1,6 @@
 <?php
 
-$vote = new Gazelle\Vote($LoggedUser['ID']);
+$vote = new Gazelle\Vote($Viewer->id());
 $tagMan = new Gazelle\Manager\Tag;
 $torMan = new Gazelle\Manager\Torrent;
 
@@ -108,7 +108,7 @@ foreach ($topVotes as $groupID => $group) {
     $score = $group['Score'];
     $downVotes = $totalVotes - $upVotes;
 
-    $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);
+    $isBookmarked = $bookmark->isTorrentBookmarked($Viewer->id(), $groupID);
     $userVote = $userVotes[$groupID] ?? '';
 
     $displayName = $group['Rank'] . " - ";

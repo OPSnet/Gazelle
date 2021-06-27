@@ -19,7 +19,7 @@ $header = new \Gazelle\Util\SortableTableHeader('hourlypoints', [
 
 $userMan = new Gazelle\Manager\User;
 if (empty($_GET['userid'])) {
-    $user = $userMan->findById($LoggedUser['ID']);
+    $user = $Viewer;
     $ownProfile = true;
 } else {
     if (!check_perms('admin_bp_history')) {

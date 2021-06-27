@@ -31,14 +31,14 @@ HTML;
 if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     authorize();
     $value = (int)$_POST['donate'];
-    if ($LoggedUser['ID'] != $_POST['userid']) {
+    if ($Viewer->id() != $_POST['userid']) {
 ?>
 <div class="alertbar blend">User error, no bonus points donated.</div>
 <?php } elseif ($value <= 0) { ?>
 <div class="alertbar blend">Warning! You cannot donate negative or no points!</div>
 <?php } elseif ($LoggedUser['BonusPoints'] < $value) { ?>
 <div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int)$LoggedUser['BonusPoints']) ?> points.</div>
-<?php } elseif ($Bonus->donate((int)$_POST['poolid'], $value, $LoggedUser['ID'], $LoggedUser['EffectiveClass'])) { ?>
+<?php } elseif ($Bonus->donate((int)$_POST['poolid'], $value, $Viewer->id(), $Viewer->effectiveClass())) { ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
 <?php } else { ?>
 <div class="alertbar blend">No bonus points donated, insufficient funds.</div>
@@ -46,27 +46,26 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     }
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
 $points = (int)$LoggedUser['BonusPoints'];
-$auth = $LoggedUser['AuthKey'];
+$auth = $Viewer->auth();
 $pool = $Bonus->getOpenPool();
 if ($pool) {
     echo $Twig->render('bonus/bonus-pool.twig', [
         'auth'    => $auth,
         'points'  => $points,
         'pool'    => $pool,
-        'user_id' => $user->id(),
+        'user_id' => $Viewer->id(),
     ]);
 }
 
 echo $Twig->render('bonus/store.twig', [
     'admin'    => check_perms('admin_bp_history'),
     'auth'     => $auth,
-    'class'    => $user->classLevel(),
+    'class'    => $Viewer->classLevel(),
     'discount' => $Bonus->discount(),
-    'list'     => $Bonus->getListForUser($user),
+    'list'     => $Bonus->getListForUser($Viewer),
     'points'   => $points,
-    'user_id'  => $user->id(),
+    'user_id'  => $Viewer->id(),
 ]);
 
 View::show_footer();

@@ -119,7 +119,7 @@ $Row = 'b';
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="action" value="referral_users" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <?=$UserID ? Users::format_username($UserID, true, true, true, true) : ""?>
             </td>

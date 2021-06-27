@@ -48,7 +48,7 @@ $JsonTorrentDetails = [
     'categoryName'    => $CategoryName,
     'time'            => $TorrentDetails['Time'],
     'vanityHouse'     => ($TorrentDetails['VanityHouse'] == 1),
-    'isBookmarked'    => (new \Gazelle\Bookmark)->isTorrentBookmarked($LoggedUser['ID'], $GroupID),
+    'isBookmarked'    => (new \Gazelle\Bookmark)->isTorrentBookmarked($Viewer->id(), $GroupID),
     'musicInfo'       => ($CategoryName != "Music")
         ? []
         : Artists::get_artist_by_type($GroupID),

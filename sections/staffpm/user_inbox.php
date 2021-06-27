@@ -10,7 +10,7 @@ View::show_header('Staff PMs', 'staffpm');
     <div class="header">
         <h2>Staff PMs</h2>
         <div class="linkbox">
-<?php if ($user->isFLS()) {?>
+<?php if ($Viewer->isFLS()) {?>
             <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
 <?php } ?>
             <a href="#" onclick="$('#compose').gtoggle();" class="brackets">Compose new</a>
@@ -21,7 +21,7 @@ View::show_header('Staff PMs', 'staffpm');
 <?= $Twig->render('staffpm/reply.twig', [
     'hidden'=> true,
     'reply' => new Gazelle\Util\Textarea('quickpost', ''),
-    'user'  => new Gazelle\User($LoggedUser['ID']),
+    'user'  => $Viewer,
     'level' => [
         'fmod'  => $classList[FORUM_MOD]['Level'],
         'mod'   => $classList[MOD]['Level'],
@@ -43,7 +43,7 @@ $StaffPMs = $DB->prepared_query("
     FROM staff_pm_conversations
     WHERE UserID = ?
     ORDER BY Status, Date DESC
-    ", $LoggedUser['ID']
+    ", $Viewer->id()
 );
 
 if (!$DB->has_results()) { ?>

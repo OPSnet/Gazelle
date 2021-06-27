@@ -5,24 +5,21 @@ $t = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
 if (is_null($t)) {
     error(404);
 }
-$t->setViewerId($LoggedUser['ID']);
+$t->setViewerId($Viewer->id());
 $tgroup  = $t->group();
 $group   = $tgroup->info();
 $torrent = $t->info();
 $torrentId = $t->id();
 
-if ($LoggedUser['ID'] != $torrent['UserID'] && !check_perms('torrents_delete')) {
+if ($Viewer->id() != $torrent['UserID'] && !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
-
-if ($Cache->get_value("torrent_{$torrentId}_lock")) {
-    error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
-}
-
-$user = new Gazelle\User($LoggedUser['ID']);
-if ($user->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !check_perms('torrents_delete_fast')) {
+if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !$Viewer->permitted('torrents_delete_fast')) {
     error('You have recently deleted ' . USER_TORRENT_DELETE_MAX
         . ' torrents. Please contact a staff member if you need to delete more.');
+}
+if ($Cache->get_value("torrent_{$torrentId}_lock")) {
+    error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
 $labelMan = new Gazelle\Manager\TorrentLabel;
@@ -37,7 +34,7 @@ if ($artistName) {
 }
 
 $reason = trim($_POST['reason']) . ' ' . trim($_POST['extra']);
-[$success, $message] = $t->remove($LoggedUser['ID'], $reason);
+[$success, $message] = $t->remove($Viewer->id(), $reason);
 if (!$success) {
     error($message);
 }
@@ -49,9 +46,9 @@ if (!$success) {
     "Torrent $torrentId $name ("
         . number_format($torrent['Size'] / (1024 * 1024), 2) . ' MiB '
         . strtoupper($torrent['info_hash'])
-        . ") was deleted by {$LoggedUser['Username']}: $reason",
+        . ") was deleted by " . $Viewer->username() . ": $reason",
     0,
-    $LoggedUser['ID'] != $torrent['UserID']
+    $Viewer->id() != $torrent['UserID']
 );
 View::show_header('Torrent deleted');
 ?>

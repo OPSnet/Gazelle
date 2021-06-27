@@ -12,7 +12,7 @@ if (!$wikiMan->editAllowed($articleId, $LoggedUser['EffectiveClass'])) {
 }
 
 try {
-    $wikiMan->addAlias($articleId, trim($_POST['alias']), $LoggedUser['ID']);
+    $wikiMan->addAlias($articleId, trim($_POST['alias']), $Viewer->id());
 } catch (DB_MYSQL_DuplicateKeyException $e) {
     error('The alias you attempted to add was either null or already in the database.');
 }

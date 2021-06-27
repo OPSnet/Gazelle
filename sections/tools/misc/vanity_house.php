@@ -112,7 +112,7 @@ if (isset($_POST['GroupID'])) {
                 INSERT INTO featured_albums
                        (GroupID, ThreadID, Type)
                 VALUES (?,       ?,        1)
-                ', $GroupID, $forum->addThread($LoggedUser['ID'], $Title, $Body)
+                ', $GroupID, $forum->addThread($Viewer->id(), $Title, $Body)
             );
 
             header("Location: /");
@@ -130,7 +130,7 @@ View::show_header('Vanity House');
     <form class="create_form" name="album" method="post" action="">
         <div class="pad">
             <input type="hidden" name="action" value="vanityhouse" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <h3>Torrent</h3>
             (enter a torrent group ID or URL)<br />
             <input type="text" name="GroupID" id="groupid" class="inputtext" /><br /><br />

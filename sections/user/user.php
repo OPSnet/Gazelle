@@ -2,7 +2,6 @@
 
 $userMan = new Gazelle\Manager\User;
 $User = $userMan->findById((int)$_GET['id']);
-$viewer = new Gazelle\User($LoggedUser['ID']);
 if (is_null($User)) {
     header("Location: log.php?search=User+" . (int)$_GET['id']);
     exit;
@@ -26,7 +25,7 @@ if (!empty($_POST)) {
         error(403);
     }
     try {
-        $FL_OTHER_tokens = $Bonus->purchaseTokenOther($LoggedUser['ID'], $UserID, $match[1]);
+        $FL_OTHER_tokens = $Bonus->purchaseTokenOther($Viewer->id(), $UserID, $match[1]);
     } catch (Gazelle\Exception\BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
@@ -36,7 +35,7 @@ if (!empty($_POST)) {
     }
 }
 
-if ($UserID == $LoggedUser['ID']) {
+if ($UserID == $Viewer->id()) {
     $OwnProfile = true;
     $User->forceCacheFlush(true);
     $Preview = (int)($_GET['preview'] ?? 0);
@@ -100,11 +99,11 @@ echo $Twig->render('user/header.twig', [
         'other' => $FL_OTHER_tokens ?? null,
     ],
     'hourly_rate'  => $Bonus->userHourlyRate($UserID),
-    'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $viewer,
+    'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer,
     'recovered'    => $recovered,
     'user'         => $User,
     'userMan'      => $userMan,
-    'viewer'       => $viewer,
+    'viewer'       => $Viewer,
 ]);
 ?>
 
@@ -299,7 +298,7 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
 <?php
         asort($secondary);
         foreach ($secondary as $id => $name) {
-            if ($id == DONOR && !$User->propertyVisible($viewer, 'hide_donor_heart')) {
+            if ($id == DONOR && !$User->propertyVisible($Viewer, 'hide_donor_heart')) {
                 continue;
             }
 ?>
@@ -343,13 +342,13 @@ if (check_perms('users_view_keys') || $OwnProfile) {
                 <li>Passkey: <a href="#" id="passkey" onclick="togglePassKey('<?= display_str($User->announceKey()) ?>'); return false;" class="brackets">View</a></li>
 <?php
 }
-if ($viewer->permitted('users_view_invites')) {
+if ($Viewer->permitted('users_view_invites')) {
     if (is_null($User->inviter())) {
         $Invited = '<span style="font-style: italic;">Nobody</span>';
     } else {
         $inviter = $userMan->findById($User->inviter()->id());
         $Invited = '<a href="user.php?id=' . $inviter->id() . '">' . $User->inviter()->username() . "</a>";
-        if ($viewer->permitted('admin_manage_invite_source')) {
+        if ($Viewer->permitted('admin_manage_invite_source')) {
             $source = (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID);
             if (is_null($source) && ($inviter->isInterviewer() || $inviter->isRecruiter())) {
                 $source = "<i>unconfirmed</i>";
@@ -371,7 +370,7 @@ if ($appMan->userIsApplicant($UserID) && (check_perms('admin_manage_applicants')
                 <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 <?php
 }
-if ($OwnProfile || check_perms('users_mod') || $viewer->isFLS()) {
+if ($OwnProfile || check_perms('users_mod') || $Viewer->isFLS()) {
 ?>
                 <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
                     implode('; ', $User->clients()) ?></li>
@@ -632,9 +631,9 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
     }
 }
 
-if (check_perms('users_mod') || $viewer->isStaffPMReader()) {
+if (check_perms('users_mod') || $Viewer->isStaffPMReader()) {
     echo $Twig->render('admin/staffpm-list.twig', [
-        'list' => (new Gazelle\Staff($User))->userStaffPmList($LoggedUser['ID']),
+        'list' => (new Gazelle\Staff($User))->userStaffPmList($Viewer->id()),
     ]);
 }
 
@@ -653,7 +652,7 @@ if ($User->isStaff() && check_perms('users_warn')) {
     }
 }
 
-if (check_perms('users_mod') || $viewer->isStaff()) { ?>
+if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
         <form class="manage_form" name="user" id="form" action="user.php" method="post">
         <input type="hidden" name="action" value="moderate" />
         <input type="hidden" name="userid" value="<?=$UserID?>" />
@@ -696,7 +695,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
         ]);
     }
 
-    if (check_perms('users_promote_below') || check_perms('users_promote_to', $viewer->classLevel() - 1)) {
+    if (check_perms('users_promote_below') || check_perms('users_promote_to', $Viewer->classLevel() - 1)) {
 ?>
             <tr>
                 <td class="label">Primary class:</td>
@@ -708,10 +707,10 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
             if ($CurClass['Secondary']) {
                 continue;
             }
-            elseif (!$OwnProfile && !check_perms('users_promote_to', $viewer->classLevel() - 1) && $CurClass['Level'] == $viewer->effectiveClass()) {
+            elseif (!$OwnProfile && !check_perms('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->effectiveClass()) {
                 break;
             }
-            elseif ($CurClass['Level'] > $viewer->effectiveClass()) {
+            elseif ($CurClass['Level'] > $Viewer->effectiveClass()) {
                 break;
             }
             if ($User->classLevel() == $CurClass['Level']) {

@@ -39,6 +39,6 @@ if ($Length !== 'verbal') {
     $user->addStaffNote($note);
 }
 $user->addForumWarning($note)->modify();
-$userMan->sendPM($user->id(), $LoggedUser['ID'], $subject, $message);
+$userMan->sendPM($user->id(), $Viewer->id(), $subject, $message);
 
 header("Location: $url");

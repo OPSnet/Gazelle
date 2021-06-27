@@ -46,10 +46,9 @@ if (empty($threadInfo)) {
 }
 
 // Make sure they're allowed to look at the page
-$user = new Gazelle\User($LoggedUser['ID']);
-if (!$user->readAccess($forum)) {
+if (!$Viewer->readAccess($forum)) {
     print json_encode(['status' => 'failure']);
-    die();
+    exit;
 }
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
@@ -110,7 +109,7 @@ if ($_GET['updatelastread'] !== '0') {
             FROM forums_last_read_topics
             WHERE UserID = ?
                 AND TopicID = ?
-            ", $LoggedUser['ID'], $threadId
+            ", $Viewer->id(), $threadId
         );
         if ($LastRead < $LastPost) {
             $DB->prepared_query("
@@ -118,18 +117,18 @@ if ($_GET['updatelastread'] !== '0') {
                        (UserID, TopicID, PostID)
                 VALUES (?,      ?,       ?)
                 ON DUPLICATE KEY UPDATE PostID = ?
-                ", $LoggedUser['ID'], $threadId, $LastPost, $LastPost
+                ", $Viewer->id(), $threadId, $LastPost, $LastPost
             );
         }
     }
 }
 
 //Handle subscriptions
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($Viewer->id());
 $UserSubscriptions = $subscription->subscriptions();
 
 if (in_array($threadId, $UserSubscriptions)) {
-    $Cache->delete_value('subscriptions_user_new_'.$LoggedUser['ID']);
+    $Cache->delete_value('subscriptions_user_new_'.$Viewer->id());
 }
 
 $JsonPoll = [];
@@ -150,7 +149,7 @@ if ($threadInfo['NoPoll'] == 0) {
         FROM forums_polls_votes
         WHERE UserID = ?
             AND TopicID = ?
-        ", $LoggedUser['ID'], $threadId
+        ", $Viewer->id(), $threadId
     );
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
@@ -182,7 +181,7 @@ if ($threadInfo['NoPoll'] == 0) {
         ];
     }
 
-    if ($UserResponse !== null || $Closed || $threadInfo['isLocked'] || $user->writeAccess($forum)) {
+    if ($UserResponse !== null || $Closed || $threadInfo['isLocked'] || $Viewer->writeAccess($forum)) {
         $JsonPoll['voted'] = True;
     } else {
         $JsonPoll['voted'] = False;

@@ -11,8 +11,6 @@ if ($_POST['action'] !== 'takenew' && $_POST['action'] !== 'takeedit') {
 }
 
 $NewRequest = ($_POST['action'] === 'takenew');
-$user = new Gazelle\User($LoggedUser['ID']);
-
 if (!$NewRequest) {
     $ReturnEdit = true;
 }
@@ -35,7 +33,7 @@ if ($NewRequest) {
     $VoteCount = count($VoteArray['Voters']);
     $IsFilled = !empty($Request['TorrentID']);
     $CategoryName = $Categories[$Request['CategoryID'] - 1];
-    $CanEdit = ((!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
+    $CanEdit = ((!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
 
     if (!$CanEdit) {
         error(403);
@@ -316,7 +314,7 @@ if ($NewRequest) {
         VALUES (
             now(), now(), 1, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        $LoggedUser['ID'], $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
+        $Viewer->id(), $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
         $CatalogueNumber, $ReleaseType, $BitrateList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC);
 
     $RequestID = $DB->inserted_id();
@@ -409,7 +407,7 @@ if (!$NewRequest) {
 $tagMan = new Gazelle\Manager\Tag;
 $Tags = array_unique(explode(',', $Tags));
 foreach ($Tags as $Index => $Tag) {
-    $TagID = $tagMan->create($Tag, $LoggedUser['ID']);
+    $TagID = $tagMan->create($Tag, $Viewer->id());
     $tagMan->createRequestTag($TagID, $RequestID);
     $Tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
 }
@@ -420,18 +418,18 @@ if ($NewRequest) {
         INSERT INTO requests_votes
                (RequestID, UserID, Bounty)
         VALUES (?,         ?,      ?)
-        ", $RequestID, $LoggedUser['ID'], $Bytes * (1 - $RequestTax)
+        ", $RequestID, $Viewer->id(), $Bytes * (1 - $RequestTax)
     );
 
     $DB->prepared_query('
         UPDATE users_leech_stats
         SET Uploaded = (Uploaded - ?)
         WHERE UserID = ?',
-        $Bytes, $LoggedUser['ID']);
-    $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+        $Bytes, $Viewer->id());
+    $Cache->delete_value('user_stats_'.$Viewer->id());
 
-    if ($user->option('AutoSubscribe')) {
-        (new Gazelle\Manager\Subscription($user->id()))->subscribeComments('requests', $RequestID);
+    if ($Viewer->option('AutoSubscribe')) {
+        (new Gazelle\Manager\Subscription($Viewer->id()))->subscribeComments('requests', $RequestID);
     }
 
     $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.SITE_URL."/requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);

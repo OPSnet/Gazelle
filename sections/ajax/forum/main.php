@@ -1,14 +1,13 @@
 <?php
 
 $userMan = new Gazelle\Manager\User;
-$viewer = $userMan->findById($LoggedUser['ID']);
-$user = [$viewer->id() => $viewer];
+$user = [$Viewer->id() => $Viewer];
 
 $category = [];
 $forumList = (new Gazelle\Manager\Forum)->forumList();
 foreach ($forumList as $forumId) {
     $forum = new Gazelle\Forum($forumId);
-    if (!$viewer->readAccess($forum)) {
+    if (!$Viewer->readAccess($forum)) {
         continue;
     }
     $lastAuthorId = $forum->lastAuthorId();
@@ -36,7 +35,7 @@ foreach ($forumList as $forumId) {
         'lastTopicId'        => $forum->lastThreadId(),
         'lastTime'           => strftime('%Y-%m-%d %H:%M:%S', $forum->lastPostTime()),
         'lastTopic'          => $forum->lastThread(),
-        'read'               => $viewer->hasReadLastPost($forum),
+        'read'               => $Viewer->hasReadLastPost($forum),
         'locked'             => $forum->isLocked(),
         'sticky'             => $forum->isSticky(),
     ];

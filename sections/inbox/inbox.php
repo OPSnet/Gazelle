@@ -2,11 +2,11 @@
 
 use Gazelle\Inbox;
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 
 try {
     $Inbox = new Inbox(
-        $LoggedUser['ID'],
+        $Viewer->id(),
         $LoggedUser['ListUnreadPMsFirst'] ?? false
     );
 } catch (Throwable $e) {
@@ -50,7 +50,7 @@ View::show_header('Inbox');
             <input type="hidden" name="action" value="masschange" />
             <input type="hidden" name="section" value="<?= $Inbox->section() ?>" />
             <input type="hidden" name="sort" value="<?= (string) (int) $Inbox->getSort() ?>" />
-            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="submit" name="read" value="Mark as read" />&nbsp;
             <input type="submit" name="unread" value="Mark as unread" />&nbsp;
             <input type="submit" name="sticky" value="Toggle sticky" title="Unsticky message are stickied, sticky messages are unstickied" />&nbsp;
@@ -111,7 +111,7 @@ View::show_header('Inbox');
                     <td><?= Users::format_username($SenderID, true, true, true, true) ?></td>
                     <td><?= time_diff($Date) ?></td>
 <?php            if (check_perms('users_mod')) { ?>
-                    <td><?= (($ForwardedID && $ForwardedID != $LoggedUser['ID']) ? Users::format_username($ForwardedID, false, false, false) : '') ?></td>
+                    <td><?= (($ForwardedID && $ForwardedID != $Viewer->id()) ? Users::format_username($ForwardedID, false, false, false) : '') ?></td>
 <?php            } ?>
                 </tr>
 <?php

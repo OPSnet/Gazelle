@@ -19,7 +19,7 @@ View::show_header('Mass PM Snatchers: ' . $GroupName, 'upload');
     </div>
     <form class="send_form" name="mass_message" action="torrents.php" method="post">
         <input type="hidden" name="action" value="takemasspm" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
         <table class="layout">

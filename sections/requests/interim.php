@@ -16,11 +16,11 @@ $DB->prepared_query('
 list($RequestorID, $FillerID) = $DB->next_record();
 
 if ($Action === 'unfill') {
-    if ($LoggedUser['ID'] != $RequestorID && $LoggedUser['ID'] != $FillerID && !check_perms('site_moderate_requests')) {
+    if (!in_array($Viewer->id(), [$RequestorID, $FillerID]) && !check_perms('site_moderate_requests')) {
         error(403);
     }
 } elseif ($Action === 'delete') {
-    if ($LoggedUser['ID'] != $RequestorID && !check_perms('site_moderate_requests')) {
+    if ($Viewer->id() != $RequestorID && !check_perms('site_moderate_requests')) {
         error(403);
     }
 }
@@ -35,7 +35,7 @@ View::show_header(ucwords($Action) . ' Request');
         <div class="pad">
             <form class="<?=(($Action === 'delete') ? 'delete_form' : 'edit_form')?>" name="request" action="requests.php" method="post">
                 <input type="hidden" name="action" value="take<?=$Action?>" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="id" value="<?=$_GET['id']?>" />
 <?php
     if ($Action === 'delete') { ?>

@@ -12,7 +12,7 @@ switch ($_GET['action'] ?? '') {
 
     case 'view':
         $appMan = new Gazelle\Manager\Applicant;
-        if (check_perms('admin_manage_applicants') || (!check_perms('admin_manage_applicants') && $appMan->userIsApplicant($LoggedUser['ID']))) {
+        if (check_perms('admin_manage_applicants') || (!check_perms('admin_manage_applicants') && $appMan->userIsApplicant($Viewer->id()))) {
             require_once('view.php');
         } else {
             require_once('apply.php');

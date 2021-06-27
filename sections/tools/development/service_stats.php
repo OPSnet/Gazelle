@@ -18,7 +18,7 @@ $MemStats = $MemStats[array_keys($MemStats)[0]];
 
 View::show_header("Service Stats");
 echo $Twig->render('admin/cache-db-stats.twig', [
-    'auth'       => $LoggedUser['AuthKey'],
+    'auth'       => $Viewer->auth(),
     'can_see_db' => check_perms('site_database_specifics'),
     'db_stats'   => $DBStats,
     'db_vars'    => $DBVars,

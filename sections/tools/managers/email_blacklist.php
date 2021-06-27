@@ -21,6 +21,6 @@ echo $Twig->render('admin/email-blacklist.twig', [
     'email'     => $_POST['email'] ?? '',
     'list'      => $emailBlacklist->page($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
-    'viewer'    => new Gazelle\User($LoggedUser['ID']),
+    'viewer'    => $Viewer,
 ]);
 View::show_footer();

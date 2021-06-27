@@ -18,10 +18,10 @@ if ($ClaimerID) {
         UPDATE reports SET
             ClaimerID = ?
         WHERE ID = ?
-        ", $LoggedUser['ID'], $postId
+        ", $Viewer->id(), $postId
     );
     print json_encode([
         'status' => 'success',
-        'username' => $LoggedUser['Username']
+        'username' => $Viewer->username()
     ]);
 }

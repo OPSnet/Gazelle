@@ -40,7 +40,7 @@ echo $Twig->render('user/2fa/configure.twig', [
     'valid'    => $valid,
     'qrcode'   => $qrCode,
     'secret'   => $secret,
-    'user_id'  => $LoggedUser['ID'],
+    'user_id'  => $Viewer->id(),
     'utc_time' => gmdate('Y-m-d H:i:s', time()),
 ]);
 View::show_footer();

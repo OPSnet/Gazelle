@@ -2,12 +2,7 @@
 enforce_login();
 View::show_header('IRC');
 
-$IRCKey = $DB->scalar("
-    SELECT IRCKey
-    FROM users_main
-    WHERE ID = ?
-    ", $LoggedUser['ID']
-);
+$IRCKey = $Viewer->IRCKey();
 if (empty($IRCKey)) {
 ?>
 <div class="thin">
@@ -16,7 +11,8 @@ if (empty($IRCKey)) {
     </div>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <p>
-            <strong>Please set your IRC Key on your <a href="user.php?action=edit&amp;userid=<?=$LoggedUser['ID']?>">profile</a> first! For more information on IRC, please read the <a href="wiki.php?action=article&amp;name=IRC+-+How+to+join">wiki article</a>.</strong>
+            <strong>Please set your IRC Key on your <a href="user.php?action=edit&amp;userid=<?=
+                $Viewer->id() ?>">profile</a> first! For more information on IRC, please read the <a href="wiki.php?action=article&amp;name=IRC+-+How+to+join">wiki article</a>.</strong>
         </p>
     </div>
 </div>
@@ -31,14 +27,14 @@ if (empty($IRCKey)) {
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <?= $Twig->render('rules/irc.twig'); ?>
         <form class="confirm_form center" name="chat" method="post" action="chat.php">
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="submit" name="accept" value="I agree to these rules" />
         </form>
     </div>
 </div>
 <?php
     } else {
-        $nick = $LoggedUser['Username'];
+        $nick = $Viewer->username();
         $nick = preg_replace('/[^a-zA-Z0-9\[\]\\`\^\{\}\|_]/', '', $nick);
         if (strlen($nick) == 0) {
             $nick = SITE_NAME.'Guest????';
@@ -58,7 +54,7 @@ if (empty($IRCKey)) {
         </div>
         <applet codebase="<?= STATIC_SERVER ?>/irc/" code="IRCApplet.class" archive="irc.jar,sbox.jar" width="800" height="600" align="center">
             <param name="nick" value="<?=$nick?>" />
-            <param name="alternatenick" value="WhatGuest????" />
+            <param name="alternatenick" value="OpsGuest????" />
             <param name="name" value="Java IRC User" />
             <param name="host" value="<?=BOT_SERVER?>" />
             <param name="multiserver" value="true" />

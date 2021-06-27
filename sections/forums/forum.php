@@ -13,8 +13,7 @@ if (!$forum) {
     error(404);
 }
 $forumId = $forum->id();
-$user = new Gazelle\User($LoggedUser['ID']);
-if (!$user->readAccess($forum)) {
+if (!$Viewer->readAccess($forum)) {
     error(403);
 }
 if (!check_perms('site_moderate_forums')) {
@@ -29,19 +28,19 @@ $forumToc = $forum->tableOfContentsForum($page);
 $Pages        = Format::get_pages($page, $forum->topicCount(), TOPICS_PER_PAGE, 9);
 $isDonorForum = $forumId == DONOR_FORUM ? true : false;
 $perPage      = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
-$userLastRead = $forum->userLastRead($LoggedUser['ID'], $perPage);
+$userLastRead = $forum->userLastRead($Viewer->id(), $perPage);
 
 foreach ($forumToc as &$thread) {
     if (isset($userLastRead[$thread['ID']])) {
         $thread['last_read_page'] = (int)$userLastRead[$thread['ID']]['Page'];
         $thread['last_read_post'] = $userLastRead[$thread['ID']]['PostID'];
         $catchup = $userLastRead[$thread['ID']]['PostID'] >= $thread['LastPostID']
-            || $user->forumCatchupEpoch() >= strtotime($thread['LastPostTime']);
+            || $Viewer->forumCatchupEpoch() >= strtotime($thread['LastPostTime']);
         $thread['is_read'] = true;
     } else {
         $thread['last_read_page'] = null;
         $thread['last_read_post'] = null;
-        $catchup = $user->forumCatchupEpoch() >= strtotime($thread['LastPostTime']);
+        $catchup = $Viewer->forumCatchupEpoch() >= strtotime($thread['LastPostTime']);
         $thread['is_read'] = false;
     }
 
@@ -77,8 +76,8 @@ View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? 'donor' :
 <div class="thin">
 <?php
 echo $Twig->render('forum/header.twig', [
-    'create'    => $user->writeAccess($forum) && $user->createAccess($forum),
-    'dept_list' => $forum->departmentList($user),
+    'create'    => $Viewer->writeAccess($forum) && $Viewer->createAccess($forum),
+    'dept_list' => $forum->departmentList($Viewer),
     'forum'     => $forum,
 ]);
 ?>
@@ -123,7 +122,7 @@ echo $Twig->render('forum/header.twig', [
     <div class="linkbox pager">
         <?= $Pages ?>
     </div>
-    <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=<?= $forumId ?>&amp;auth=<?= $LoggedUser['AuthKey'] ?>" class="brackets">Catch up</a></div>
+    <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=<?= $forumId ?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a></div>
 </div>
 <?php
 View::show_footer();

@@ -67,6 +67,6 @@ foreach ($TrackDeductions as $Deduction) {
     $AdjustedScore -= $Total;
 }
 
-$torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $LoggedUser['ID'], $AdjustmentReason, $AdjustmentDetails);
+$torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $Viewer->id(), $AdjustmentReason, $AdjustmentDetails);
 
 header("Location: torrents.php?torrentid=" . $torrent->id());

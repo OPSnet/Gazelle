@@ -46,7 +46,7 @@ if (!check_perms('admin_manage_forums')) {
 if (isset($_GET['userid'])) {
     $userId = $_GET['userid'];
 } else {
-    $userId = $LoggedUser['ID'];
+    $userId = $Viewer->id();
 }
 $user = (new Gazelle\Manager\User)->find($userId);
 if (is_null($user)) {
@@ -102,7 +102,7 @@ foreach ($items as $i) {
         <form class="manage_form" name="navitems" action="" method="post">
             <input type="hidden" name="id" value="<?=$id?>" />
             <input type="hidden" name="action" value="forum_transitions_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <select name="source">
                     <?=forumList($forumList, $source)?>
@@ -143,7 +143,7 @@ foreach ($items as $i) {
     <tr class="rowa">
         <form class="manage_form" name="navitems" action="" method="post">
             <input type="hidden" name="action" value="forum_transitions_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <select name="source">
                     <?=forumList($forumList)?>

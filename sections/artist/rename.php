@@ -51,7 +51,7 @@ list($TargetAliasID, $TargetArtistID) = $DB->row("
 
 if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     // no merge, just rename
-    $artist->rename($LoggedUser['ID'], $oldAliasId, $newName);
+    $artist->rename($Viewer->id(), $oldAliasId, $newName);
     $TargetArtistID = $ArtistID;
 } else {
     // Merge stuff

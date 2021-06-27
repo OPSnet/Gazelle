@@ -9,7 +9,7 @@ if (is_null($user)) {
     error(404);
 }
 $userId = $user->id();
-if ($userId != $LoggedUser['ID'] && !check_perms('users_mod')) {
+if ($userId != $Viewer->id() && !check_perms('users_mod')) {
     error(403);
 }
 

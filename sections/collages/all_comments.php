@@ -11,19 +11,18 @@ if ($CollageID < 1) {
     error(404);
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
 $commentPage = new Gazelle\Comment\Collage($CollageID);
 if (isset($_GET['postid'])) {
     $commentPage->setPostId((int)$_GET['postid']);
 } elseif (isset($_GET['page'])) {
     $commentPage->setPageNum((int)$_GET['page']);
 }
-$commentPage->load()->handleSubscription($user);
+$commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$isSubscribed = (new Gazelle\Manager\Subscription($user->id()))->isSubscribedComments('collages', $CollageID);
+$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('collages', $CollageID);
 $Collage = new Gazelle\Collage($CollageID);
 
 View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,subscriptions');
@@ -41,21 +40,21 @@ View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,s
     </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Collage($user->id(), $CollageID);
+$comments = new Gazelle\CommentViewer\Collage($Viewer->id(), $CollageID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setAutoResize()->setPreviewManual(true);
 echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $user->auth(),
-    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
+    'auth'     => $Viewer->auth(),
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
     'id'       => $CollageID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => $textarea,
     'url'      => 'comments.php?page=collages',
-    'user'     => $user,
+    'user'     => $Viewer,
 ]);
 ?>
 </div>

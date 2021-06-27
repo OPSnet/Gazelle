@@ -43,14 +43,14 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
                 Comment = ?,
                 UserID = ?
             WHERE ID = ?
-            ", trim($_POST['name']), trim($_POST['comment']), $LoggedUser['ID'], $_POST['id']
+            ", trim($_POST['name']), trim($_POST['comment']), $Viewer->id(), $_POST['id']
         );
     } else { //Create
         $DB->prepared_query("
             INSERT INTO do_not_upload
                    (Name, Comment, UserID, Sequence)
             VALUES (?,    ?,       ?,      9999)
-            ", trim($_POST['name']), trim($_POST['comment']), $LoggedUser['ID']
+            ", trim($_POST['name']), trim($_POST['comment']), $Viewer->id()
        );
     }
 }

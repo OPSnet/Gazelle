@@ -42,9 +42,9 @@ if ($name) {
     }
 
     Torrents::update_hash($groupId);
-    (new Gazelle\Log)->group($groupId, $LoggedUser['ID'], "Tag \"$name\" removed from group $groupId");
+    (new Gazelle\Log)->group($groupId, $Viewer->id(), "Tag \"$name\" removed from group $groupId");
 
     // Cache the deleted tag for 5 minutes
-    $Cache->cache_value('deleted_tags_'.$groupId.'_'.$LoggedUser['ID'], $name, 300);
+    $Cache->cache_value('deleted_tags_'.$groupId.'_'.$Viewer->id(), $name, 300);
 }
 header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$groupId}");

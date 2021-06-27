@@ -5,5 +5,5 @@ if (!check_perms('admin_reports')) {
 
 $id = (int)$_GET['id'];
 if ($id) {
-    echo (new Gazelle\ReportV2($id))->claim($LoggedUser['ID']);
+    echo (new Gazelle\ReportV2($id))->claim($Viewer->id());
 }

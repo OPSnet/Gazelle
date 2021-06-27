@@ -1,14 +1,13 @@
 <?php
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $userMan = new Gazelle\Manager\User;
-$user = $userMan->findById(isset($_REQUEST['userid']) ? (int)$_REQUEST['userid'] : $LoggedUser['ID']);
+$user = empty($_REQUEST['userid']) ? $Viewer : $userMan->findById((int)$_REQUEST['userid']);
 if (is_null($user)) {
     error(404);
 }
 $userId = $user->id();
 $ownProfile = $user->id() == $Viewer->id();
-if (!($Viewer->permitted('users_view_invites') || ($ownProfile && $user->canPurchaseInvite()))) {
+if (!($Viewer->permitted('users_view_invites') || ($ownProfile && $Viewer->canPurchaseInvite()))) {
     error(403);
 }
 

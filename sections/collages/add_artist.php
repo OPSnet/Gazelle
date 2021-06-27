@@ -26,7 +26,7 @@ if (!check_perms('site_collages_delete')) {
     if ($collage->isLocked()) {
         error('This collage is locked');
     }
-    if ($collage->categoryId() == 0 && !$collage->isOwner($LoggedUser['ID'])) {
+    if ($collage->categoryId() == 0 && !$collage->isOwner($Viewer->id())) {
         error("You cannot edit someone else's personal collage.");
     }
     if ($collage->maxGroups() > 0 && $collage->numEntries() >= $collage->maxGroups()) {
@@ -70,7 +70,7 @@ foreach ($URL as $u) {
 if (!check_perms('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
-        if ($collage->countByUser($LoggedUser['ID']) + count($ID) > $maxGroupsPerUser) {
+        if ($collage->countByUser($Viewer->id()) + count($ID) > $maxGroupsPerUser) {
             error("You may add no more than $maxGroupsPerUser entries to this collage.");
         }
     }
@@ -82,7 +82,7 @@ if (!check_perms('site_collages_delete')) {
 }
 
 foreach ($ID as $artistId) {
-    $collage->addArtist($artistId, $LoggedUser['ID']);
+    $collage->addArtist($artistId, $Viewer->id());
 }
-$collageMan->flushDefaultArtist($LoggedUser['ID']);
+$collageMan->flushDefaultArtist($Viewer->id());
 header("Location: collages.php?id=$collageId");

@@ -69,7 +69,7 @@ if (!$Properties) {
 
 $UploadForm = $Categories[$Properties['CategoryID'] - 1];
 
-if (($LoggedUser['ID'] != $Properties['UserID'] && !check_perms('torrents_edit')) || $LoggedUser['DisableWiki']) {
+if (($Viewer->id() != $Properties['UserID'] && !$Viewer->permitted('torrents_edit')) || $Viewer->disableWiki()) {
     error(403);
 }
 
@@ -127,7 +127,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
     </div>
     <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="editgroupid" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
         <input type="hidden" name="oldgroupid" value="<?=$Properties['GroupID']?>" />
         <table class="layout">
@@ -147,7 +147,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
     <h2><a name="group-split">Split off into new group</a></h2>
     <form class="split_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="newgroup" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
         <input type="hidden" name="oldgroupid" value="<?=$Properties['GroupID']?>" />
         <table class="layout">
@@ -183,7 +183,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
     <h2><a name="category-change">Change category</a></h2>
     <form action="torrents.php" method="post">
         <input type="hidden" name="action" value="changecategory" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
         <input type="hidden" name="oldgroupid" value="<?=$Properties['GroupID']?>" />
         <input type="hidden" name="oldartistid" value="<?=$Properties['ArtistID']?>" />

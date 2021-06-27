@@ -71,7 +71,7 @@ $DB->prepared_query('
     INSERT INTO reports
            (UserID, ThingID, Type, Reason)
     VALUES (?,      ?,       ?,    ?)
-    ', $LoggedUser['ID'], $ID, $Short, $Reason
+    ', $Viewer->id(), $ID, $Short, $Reason
 );
 $ReportID = $DB->inserted_id();
 
@@ -86,7 +86,7 @@ if (in_array($Short, ['comment', 'post', 'thread'])) {
 }
 
 foreach ($Channels as $Channel) {
-    Irc::sendRaw("PRIVMSG $Channel :$ReportID - ".$LoggedUser['Username']." just reported a $Short: ".SITE_URL."/$Link : ".strtr($Reason, "\n", ' '));
+    Irc::sendRaw("PRIVMSG $Channel :$ReportID - ".$Viewer->username()." just reported a $Short: ".SITE_URL."/$Link : ".strtr($Reason, "\n", ' '));
 }
 
 $Cache->delete_value('num_other_reports');

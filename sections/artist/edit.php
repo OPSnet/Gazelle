@@ -29,7 +29,7 @@ View::show_header('Edit artist');
 
 <form class="edit_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="edit" />
-<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+<input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <input type="hidden" name="artistid" value="<?= $artistId?>" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_basic">
     <tr class="colhead_dark">
@@ -84,7 +84,7 @@ View::show_header('Edit artist');
 
 <form class="merge_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="change_artistid" />
-<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+<input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <input type="hidden" name="artistid" value="<?= $artistId ?>" />
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
     <tr class="colhead_dark">
@@ -115,7 +115,7 @@ foreach($nonRedirAliases as $r) {
 <?php if ($r['userId']) { ?>
                 &nbsp;<a href="user.php?id=<?= $r['userId'] ?>" class="brackets tooltip">Added by <?= Users::user_info($r['userId'])['Username'] ?></a>
 <?php } ?>
-                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid=<?=$r['aliasId']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Delete this alias" class="brackets tooltip">X</a>
+                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid=<?=$r['aliasId']?>&amp;auth=<?= $Viewer->auth() ?>" title="Delete this alias" class="brackets tooltip">X</a>
 <?php if (!$r['redirectId']) { ?>
                 &nbsp;<?= "\xE2\x98\x85" ?>
 <?php } ?>
@@ -130,7 +130,7 @@ foreach($nonRedirAliases as $r) {
 
 <form class="add_form" name="aliases" action="artist.php" method="post">
 <input type="hidden" name="action" value="add_alias" />
-<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+<input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <input type="hidden" name="artistid" value="<?=$artistId?>" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_alias">
     <tr>
@@ -164,7 +164,7 @@ foreach($nonRedirAliases as $r) {
 
 <form class="merge_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="change_artistid" />
-<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+<input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <input type="hidden" name="artistid" value="<?= $artistId ?>" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
     <tr>
@@ -192,7 +192,7 @@ foreach($nonRedirAliases as $r) {
 
 <form class="rename_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="rename" />
-<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+<input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <input type="hidden" name="artistid" value="<?= $artistId ?>" />
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_rename">
     <tr class="colhead_dark">

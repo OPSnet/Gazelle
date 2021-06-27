@@ -43,7 +43,7 @@ if (is_null($user)) {
     exit;
 }
 $userId = $user->id();
-$ownProfile = $userId === $LoggedUser['ID'];
+$ownProfile = $userId === $Viewer->id();
 
 // Variables for database input
 $class = (int)$_POST['Class'];
@@ -137,16 +137,16 @@ if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['
 $donorMan = new Gazelle\Manager\Donation;
 $donorMan->twig($Twig);
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
-    $donorMan->moderatorDonate($user, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $LoggedUser['ID']);
+    $donorMan->moderatorDonate($user, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $Viewer->id());
 } elseif (!empty($_POST['donor_values_submit'])) {
-    $donorMan->moderatorAdjust($user, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $LoggedUser['ID']);
+    $donorMan->moderatorAdjust($user, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $Viewer->id());
 }
 
 $tracker = new Gazelle\Tracker;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
-    (new Gazelle\Log)->general("User account $userId (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
+    (new Gazelle\Log)->general("User account $userId (".$cur['Username'].") was deleted by ".$Viewer->username());
     $user->remove();
     $tracker->update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
     header("Location: log.php?search=User+$userId");
@@ -337,10 +337,10 @@ if (check_perms('users_warn')) {
         $set[] = "Warned = now() + INTERVAL ? WEEK";
         $args[] = $weeksChange;
         $expiry = $user->endWarningDate($weeksChange);
-        $message['body'] .= ", by [user]" . $LoggedUser['Username'] . "[/user]."
+        $message['body'] .= ", by [user]" . $Viewer->username() . "[/user]."
             . " The reason given was:\n[quote]{$warnReason}[/quote]. The warning will expire on $expiry."
             . "\n\nThis is an automated message. You may reply for more information if necessary.";
-        $userMan->sendPM($userId, $LoggedUser['ID'], $message['subject'], $message['body']);
+        $userMan->sendPM($userId, $Viewer->id(), $message['subject'], $message['body']);
         $editSummary[] = $message['summary'] . ", expiry: $expiry"
             . ($warnReason ? ", reason: \"$warnReason\"" : '');
     }
@@ -583,7 +583,7 @@ if ($sendHackedMail && check_perms('users_disable_any')) {
 }
 
 if ($mergeStatsFrom && check_perms('users_edit_ratio')) {
-    $stats = $user->mergeLeechStats($mergeStatsFrom, $LoggedUser['Username']);
+    $stats = $user->mergeLeechStats($mergeStatsFrom, $Viewer->username());
     if ($stats) {
         $merge = new Gazelle\User($stats['userId']);
         $merge->flush();
@@ -614,7 +614,7 @@ if (!(count($set) || count($leechSet) || count($editSummary)) && $reason) {
 // that change, but until we never decode stuff coming out of the DB, not much can be done.
 
 if (count($editSummary)) {
-    $summary = implode(', ', $editSummary) . ' by ' . $LoggedUser['Username'];
+    $summary = implode(', ', $editSummary) . ' by ' . $Viewer->username();
     $set[] = "AdminComment = ?";
     $args[] = sqltime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
 } elseif ($adminComment !== $cur['AdminComment']) {

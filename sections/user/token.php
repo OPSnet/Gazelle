@@ -1,6 +1,6 @@
 <?php
 
-$userId = (int)($_GET['user_id'] ?? $LoggedUser['ID']);
+$userId = (int)($_GET['user_id'] ?? $Viewer->id());
 $user = new Gazelle\User($userId);
 
 $tokenId = (int)($_GET['token_id'] ?? 0);
@@ -10,7 +10,7 @@ $tokenName = '';
 
 $_GET['do'] = $_GET['do'] ?? '';
 
-if (!empty($_GET['do']) && $userId !== $LoggedUser['ID'] && !check_perms('users_mod')) {
+if (!empty($_GET['do']) && $userId !== $Viewer->id() && !check_perms('users_mod')) {
     error(403);
 }
 
