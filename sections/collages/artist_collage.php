@@ -59,7 +59,7 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
     'can_add'        => check_perms('site_collages_manage') && !$Collage->isLocked(),
     'can_post'       => !$Viewer->disablePosting(),
     'category_id'    => $Collage->categoryId(),
-    'category_name'  => $CollageCats[$Collage->categoryId()],
+    'category_name'  => COLLAGE[$Collage->categoryId()],
     'comments'       => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
     'contributors'   => array_slice($Collage->contributors(), 0, 5, true),
     'contributors_n' => $Collage->numContributors(),

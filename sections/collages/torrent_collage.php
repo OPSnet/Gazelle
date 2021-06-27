@@ -33,7 +33,7 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
         ),
     'can_post'       => !$Viewer->disablePosting(),
     'category_id'    => $Collage->categoryId(),
-    'category_name'  => $CollageCats[$Collage->categoryId()],
+    'category_name'  => COLLAGE[$Collage->categoryId()],
     'comments'       => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
     'contributors_n' => $Collage->numContributors(),
     'contributors'   => array_slice($Collage->contributors(), 0, 5, true),
@@ -75,7 +75,7 @@ if (check_perms('zip_downloader')) {
 <?php foreach ($ZIPList as $ListItem) { ?>
                     <li id="list<?=$ListItem?>">
                         <input type="hidden" name="list[]" value="<?=$ListItem?>" />
-                        <span class="float_left"><?=$ZIPOptions[$ListItem]['2']?></span>
+                        <span class="float_left"><?=ZIP_OPTION[$ListItem]['2']?></span>
                         <span class="remove remove_collector"><a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;" class="float_right brackets">X</a></span>
                         <br style="clear: both;" />
                     </li>
@@ -86,7 +86,7 @@ if (check_perms('zip_downloader')) {
     $OpenGroup = false;
     $LastGroupID = -1;
 
-    foreach ($ZIPOptions as $Option) {
+    foreach (ZIP_OPTION as $Option) {
         [$GroupID, $OptionID, $OptName] = $Option;
 
         if ($GroupID != $LastGroupID) {
@@ -95,7 +95,7 @@ if (check_perms('zip_downloader')) {
 ?>
                     </optgroup>
 <?php        } ?>
-                    <optgroup label="<?=$ZIPGroups[$GroupID]?>">
+                    <optgroup label="<?=ZIP_GROUP[$GroupID]?>">
 <?php
         $OpenGroup = true;
         }

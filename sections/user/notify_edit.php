@@ -181,7 +181,7 @@ foreach ($Notifications as $N) { // $N stands for Notifications
             <tr>
                 <td class="label"><strong>Only these formats</strong></td>
                 <td>
-<?php   foreach ($Formats as $Format) { ?>
+<?php   foreach (FORMAT as $Format) { ?>
                     <input type="checkbox" name="formats<?=$i?>[]" id="<?=$Format?>_<?=$N['ID']?>" value="<?=$Format?>"<?php if (in_array($Format, $N['Formats'])) { echo ' checked="checked"';} ?> />
                     <label for="<?=$Format?>_<?=$N['ID']?>"><?=$Format?></label>
 <?php   } ?>
@@ -190,7 +190,7 @@ foreach ($Notifications as $N) { // $N stands for Notifications
             <tr>
                 <td class="label"><strong>Only these bitrates</strong></td>
                 <td>
-<?php   foreach ($Bitrates as $Bitrate) { ?>
+<?php   foreach (ENCODING as $Bitrate) { ?>
                     <input type="checkbox" name="bitrates<?=$i?>[]" id="<?=$Bitrate?>_<?=$N['ID']?>" value="<?=$Bitrate?>"<?php if (in_array($Bitrate, $N['Encodings'])) { echo ' checked="checked"';} ?> />
                     <label for="<?=$Bitrate?>_<?=$N['ID']?>"><?=$Bitrate?></label>
 <?php   } ?>
@@ -199,7 +199,7 @@ foreach ($Notifications as $N) { // $N stands for Notifications
             <tr>
                 <td class="label"><strong>Only these media</strong></td>
                 <td>
-<?php   foreach ($Media as $Medium) { ?>
+<?php   foreach (MEDIA as $Medium) { ?>
                     <input type="checkbox" name="media<?=$i?>[]" id="<?=$Medium?>_<?=$N['ID']?>" value="<?=$Medium?>"<?php if (in_array($Medium, $N['Media'])) { echo ' checked="checked"';} ?> />
                     <label for="<?=$Medium?>_<?=$N['ID']?>"><?=$Medium?></label>
 <?php   } ?>

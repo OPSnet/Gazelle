@@ -113,7 +113,7 @@ if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($
 }
 $ReleaseType = $_POST['releasetype'];
 
-if (empty($_POST['all_formats']) && count($_POST['formats']) !== count($Formats)) {
+if (empty($_POST['all_formats']) && count($_POST['formats']) !== count(FORMAT)) {
     $FormatArray = $_POST['formats'];
     if (count($FormatArray) < 1) {
         $Err = 'You must require at least one format';
@@ -122,7 +122,7 @@ if (empty($_POST['all_formats']) && count($_POST['formats']) !== count($Formats)
     $AllFormats = true;
 }
 
-if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count($Bitrates)) {
+if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count(ENCODING)) {
     $BitrateArray = $_POST['bitrates'];
     if (count($BitrateArray) < 1) {
         $Err = 'You must require at least one bitrate';
@@ -131,7 +131,7 @@ if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count($Bitrat
     $AllBitrates = true;
 }
 
-if (empty($_POST['all_media']) && count($_POST['media']) !== count($Media)) {
+if (empty($_POST['all_media']) && count($_POST['media']) !== count(MEDIA)) {
     $MediaArray = $_POST['media'];
     if (count($MediaArray) < 1) {
         $Err = 'You must require at least one medium.';
@@ -140,8 +140,8 @@ if (empty($_POST['all_media']) && count($_POST['media']) !== count($Media)) {
     $AllMedia = true;
 }
 
-//$Bitrates[1] = FLAC
-if (!empty($FormatArray) && in_array(array_search('FLAC', $Formats), $FormatArray)) {
+//ENCODING[1] = FLAC
+if (!empty($FormatArray) && in_array(array_search('FLAC', FORMAT), $FormatArray)) {
     $NeedLog = empty($_POST['needlog']) ? false : true;
     if ($NeedLog) {
         if ($_POST['minlogscore']) {
@@ -155,7 +155,7 @@ if (!empty($FormatArray) && in_array(array_search('FLAC', $Formats), $FormatArra
     }
     $NeedCue = empty($_POST['needcue']) ? false : true;
     //FLAC was picked, require either Lossless or 24 bit Lossless
-    if (!$AllBitrates && !in_array(array_search('Lossless', $Bitrates), $BitrateArray) && !in_array(array_search('24bit Lossless', $Bitrates), $BitrateArray)) {
+    if (!$AllBitrates && !in_array(array_search('Lossless', ENCODING), $BitrateArray) && !in_array(array_search('24bit Lossless', ENCODING), $BitrateArray)) {
         $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
     }
     $NeedChecksum = empty($_POST['needcksum']) ? false : true;
@@ -245,8 +245,8 @@ if (!empty($Err)) {
 //Databasify the input
 if (empty($AllBitrates)) {
     foreach ($BitrateArray as $Index => $MasterIndex) {
-        if (array_key_exists($Index, $Bitrates)) {
-            $BitrateArray[$Index] = $Bitrates[$MasterIndex];
+        if (array_key_exists($Index, ENCODING)) {
+            $BitrateArray[$Index] = ENCODING[$MasterIndex];
         } else {
             //Hax
             error(0);
@@ -259,8 +259,8 @@ if (empty($AllBitrates)) {
 
 if (empty($AllFormats)) {
     foreach ($FormatArray as $Index => $MasterIndex) {
-        if (array_key_exists($Index, $Formats)) {
-            $FormatArray[$Index] = $Formats[$MasterIndex];
+        if (array_key_exists($Index, FORMAT)) {
+            $FormatArray[$Index] = FORMAT[$MasterIndex];
         } else {
             //Hax
             error(0);
@@ -273,8 +273,8 @@ if (empty($AllFormats)) {
 
 if (empty($AllMedia)) {
     foreach ($MediaArray as $Index => $MasterIndex) {
-        if (array_key_exists($Index, $Media)) {
-            $MediaArray[$Index] = $Media[$MasterIndex];
+        if (array_key_exists($Index, MEDIA)) {
+            $MediaArray[$Index] = MEDIA[$MasterIndex];
         } else {
             //Hax
             error(0);

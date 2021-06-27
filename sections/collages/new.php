@@ -30,7 +30,7 @@ $personalAllowed = $Viewer->canCreatePersonalCollage();
                 <td class="label" style="vertical-align: top;"><strong>Category</strong></td>
                 <td>
                     <select name="category"<?=$ChangeJS?>>
-<?php foreach ($CollageCats as $CatID => $CatName) {
+<?php foreach (COLLAGE as $CatID => $CatName) {
     if ($CatID == 0 && !$personalAllowed) {
         continue;
     }

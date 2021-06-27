@@ -4,13 +4,10 @@ if (!function_exists('imagettftext')) {
 }
 
 function get_font() {
-    global $CaptchaFonts;
-    return __DIR__ . '/../../fonts/' . $CaptchaFonts[mt_rand(0, count($CaptchaFonts) - 1)];
+    return __DIR__ . '/../../fonts/' . CAPTCHA_FONT[mt_rand(0, count(CAPTCHA_FONT) - 1)];
 }
 
 function make_captcha_img() {
-    global $CaptchaBGs;
-
     $Length = 6;
     $ImageHeight = 75;
     $ImageWidth = 300;
@@ -30,7 +27,7 @@ function make_captcha_img() {
     }
 
     $Img = imagecreatetruecolor($ImageWidth, $ImageHeight);
-    $BGImg = imagecreatefrompng(__DIR__.'/../../captcha/'.$CaptchaBGs[mt_rand(0, count($CaptchaBGs) - 1)]);
+    $BGImg = imagecreatefrompng(__DIR__.'/../../captcha/' . CAPTCHA_BG[mt_rand(0, count(CAPTCHA_BG) - 1)]);
     imagecopymerge($Img, $BGImg, 0, 0, 0, 0, 300, 75, 50);
 
     $ForeColor = imagecolorallocatealpha($Img, 255, 255, 255, 65);

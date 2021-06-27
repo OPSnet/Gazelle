@@ -187,7 +187,7 @@ if (check_perms('zip_downloader')) {
 <?php foreach ($ZIPList as $ListItem) { ?>
                         <li id="list<?=$ListItem?>">
                             <input type="hidden" name="list[]" value="<?=$ListItem?>" />
-                            <span style="float: left;"><?=$ZIPOptions[$ListItem]['2']?></span>
+                            <span style="float: left;"><?=ZIP_OPTION[$ListItem]['2']?></span>
                             <span class="remove remove_collector"><a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;" style="float: right;" class="brackets tooltip" title="Remove format from the Collector">X</a></span>
                             <br style="clear: all;" />
                         </li>
@@ -197,7 +197,7 @@ if (check_perms('zip_downloader')) {
 <?php
 $OpenGroup = false;
 $LastGroupID = -1;
-foreach ($ZIPOptions as $Option) {
+foreach (ZIP_OPTION as $Option) {
     [$GroupID, $OptionID, $OptName] = $Option;
 
     if ($GroupID != $LastGroupID) {
@@ -205,7 +205,7 @@ foreach ($ZIPOptions as $Option) {
         if ($OpenGroup) { ?>
                         </optgroup>
 <?php   } ?>
-                        <optgroup label="<?=$ZIPGroups[$GroupID]?>">
+                        <optgroup label="<?=ZIP_GROUP[$GroupID]?>">
 <?php      $OpenGroup = true;
     }
 ?>

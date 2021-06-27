@@ -43,7 +43,7 @@ if ($collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
                 <td>
                     <select name="category">
 <?php
-    foreach ($CollageCats as $CatID => $CatName) {
+    foreach (COLLAGE as $CatID => $CatName) {
         if (!check_perms('site_collages_delete') && $CatID == 0) {
             // Only mod-type get to make things personal
             continue;

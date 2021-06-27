@@ -56,7 +56,7 @@ if (($collage->isPersonal() && $collage->isOwner($Viewer->id()) && check_perms('
     $collage->setUpdate('Name', trim($_POST['name']));
 }
 
-if (isset($_POST['category']) && isset($CollageCats[$_POST['category']]) && (int)$_POST['category'] !== $collage->categoryId()) {
+if (isset($_POST['category']) && isset(COLLAGE[$_POST['category']]) && (int)$_POST['category'] !== $collage->categoryId()) {
     if ($collage->isPersonal() && !check_perms('site_collages_delete')) {
         error(403);
     }
