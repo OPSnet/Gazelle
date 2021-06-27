@@ -510,11 +510,9 @@ class Torrent {
      * @param string $Term Given search expression
      */
     private function search_basic($Term) {
-        global $Bitrates, $Formats, $Media;
-        $SearchBitrates = array_map('strtolower', $Bitrates);
-        array_push($SearchBitrates, 'v0', 'v1', 'v2', '24bit');
-        $SearchFormats = array_map('strtolower', $Formats);
-        $SearchMedia = array_map('strtolower', $Media);
+        $SearchBitrates = array_map('strtolower', array_merge(ENCODING, ['v0', 'v1', 'v2', '24bit']));
+        $SearchFormats = array_map('strtolower', FORMAT);
+        $SearchMedia = array_map('strtolower', MEDIA);
 
         foreach (explode(' ', $Term) as $Word) {
             if (in_array($Word, $SearchBitrates)) {

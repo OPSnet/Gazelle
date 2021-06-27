@@ -29,18 +29,18 @@ $Args = [];
 $BookmarkView = !empty($_GET['bookmarks']);
 if ($BookmarkView) {
     $userLink = '<a href="user.php?id=' . $Viewer->id() . '">' . $Viewer->username() . '</a>';
-    $Categories = array_keys($CollageCats);
+    $Categories = array_keys(COLLAGE);
     $Join = 'INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)';
     $Where[] = "bc.UserID = ?";
     $Args[] = $Viewer->id();
 } else {
     $Join = '';
     if (empty($_GET['cats'])) {
-        $Categories = array_keys($CollageCats);
+        $Categories = array_keys(COLLAGE);
     } else {
         $Categories = $_GET['cats'];
         foreach ($Categories as $Cat => $Accept) {
-            if (empty($CollageCats[$Cat]) || !$Accept) {
+            if (empty(COLLAGE[$Cat]) || !$Accept) {
                 unset($Categories[$Cat]);
             }
         }
@@ -93,7 +93,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
 
     // Don't filter on categories if all are selected
     sort($Categories);
-    if (!empty($Categories) && implode(' ', $Categories) != implode(' ', array_keys($CollageCats))) {
+    if (!empty($Categories) && implode(' ', $Categories) != implode(' ', array_keys(COLLAGE))) {
         $Where[] = "CategoryID IN (" . placeholders($Categories) . ')';
         $Args = array_merge($Args, $Categories);
     }
@@ -180,7 +180,7 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'co
                     <td>
 <?php
     $n = 0;
-    foreach ($CollageCats as $ID => $Cat) {
+    foreach (COLLAGE as $ID => $Cat) {
 ?>
                         <span style=" white-space: nowrap;">
                         <input type="checkbox" class="collagecat" value="1" name="cats[<?= $ID ?>]" id="cats_<?= $ID ?>"<?= in_array($ID, $Categories) ? ' checked="checked"' : '' ?> />
@@ -302,7 +302,7 @@ foreach ($Collages as $Collage) {
 ?>
     <tr class="row<?=$Row?><?= $BookmarkView ? " bookmark_$ID" : ''; ?>">
         <td class="td_collage_category">
-            <a href="collages.php?action=search&amp;cats[<?= (int)$CategoryID ?>]=1"><?= $CollageCats[(int)$CategoryID] ?></a>
+            <a href="collages.php?action=search&amp;cats[<?= (int)$CategoryID ?>]=1"><?= COLLAGE[(int)$CategoryID] ?></a>
         </td>
         <td class="td_info">
             <a href="collages.php?id=<?=$ID?>"><?=$Name?></a>

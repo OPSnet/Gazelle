@@ -56,7 +56,7 @@ if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
 $cond = [];
 $args = [];
 if (!empty($_GET['format'])) {
-    if (in_array($_GET['format'], $Formats)) {
+    if (in_array($_GET['format'], FORMAT)) {
         $cond[] = 't.Format = ?';
         $args[] = $_GET['format'];
     } elseif ($_GET['format'] == 'perfectflac') {
@@ -64,12 +64,12 @@ if (!empty($_GET['format'])) {
     }
 }
 
-if (!empty($_GET['bitrate']) && in_array($_GET['bitrate'], $Bitrates)) {
+if (!empty($_GET['bitrate']) && in_array($_GET['bitrate'], ENCODING)) {
     $cond[] = 't.Encoding = ?';
     $args[] = $_GET['bitrate'];
 }
 
-if (!empty($_GET['media']) && in_array($_GET['media'], $Media)) {
+if (!empty($_GET['media']) && in_array($_GET['media'], MEDIA)) {
     $cond[] = 't.Media = ?';
     $args[] = $_GET['media'];
 }
@@ -357,20 +357,20 @@ View::show_header($user->username() . "'s $action torrents", 'voting');
                     <td class="nobr" colspan="3">
                         <select id="bitrate" name="bitrate" class="ft_bitrate">
                             <option value="">Bitrate</option>
-<?php foreach ($Bitrates as $bitrateName) { ?>
+<?php foreach (ENCODING as $bitrateName) { ?>
                             <option value="<?=display_str($bitrateName); ?>"<?php Format::selected('bitrate', $bitrateName); ?>><?=display_str($bitrateName); ?></option>
 <?php } ?>                </select>
 
                         <select name="format" class="ft_format">
                             <option value="">Format</option>
-<?php foreach ($Formats as $formatName) { ?>
+<?php foreach (FORMAT as $formatName) { ?>
                             <option value="<?=display_str($formatName); ?>"<?php Format::selected('format', $formatName); ?>><?=display_str($formatName); ?></option>
 <?php } ?>
                             <option value="perfectflac"<?php Format::selected('filter', 'perfectflac'); ?>>Perfect FLACs</option>
                         </select>
                         <select name="media" class="ft_media">
                             <option value="">Media</option>
-<?php foreach ($Media as $mediaName) { ?>
+<?php foreach (MEDIA as $mediaName) { ?>
                             <option value="<?=display_str($mediaName); ?>"<?php Format::selected('media',$mediaName); ?>><?=display_str($mediaName); ?></option>
 <?php } ?>
                         </select>

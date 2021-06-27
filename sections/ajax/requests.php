@@ -109,11 +109,11 @@ $EnableNegation = false; // Sphinx needs at least one positive search condition 
 
 if (!empty($_GET['formats'])) {
     $FormatArray = $_GET['formats'];
-    if (count($FormatArray) !== count($Formats)) {
+    if (count($FormatArray) !== count(FORMAT)) {
         $FormatNameArray = [];
         foreach ($FormatArray as $Index => $MasterIndex) {
-            if (isset($Formats[$MasterIndex])) {
-                $FormatNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string($Formats[$MasterIndex]), '-.', '  ') . '"';
+            if (isset(FORMAT[$MasterIndex])) {
+                $FormatNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string(FORMAT[$MasterIndex]), '-.', '  ') . '"';
             }
         }
         if (count($FormatNameArray) >= 1) {
@@ -130,15 +130,15 @@ if (!empty($_GET['formats'])) {
 
 if (!empty($_GET['media'])) {
     $MediaArray = $_GET['media'];
-    if (count($MediaArray) !== count($Media)) {
+    if (count($MediaArray) !== count(MEDIA)) {
         $MediaNameArray = [];
         foreach ($MediaArray as $Index => $MasterIndex) {
-            if (isset($Media[$MasterIndex])) {
-                $MediaNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string($Media[$MasterIndex]), '-.', '  ') . '"';
+            if (isset(MEDIA[$MasterIndex])) {
+                $MediaNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string(MEDIA[$MasterIndex]), '-.', '  ') . '"';
             }
         }
 
-        if (count($MediaNameArray) >= 1) {
+        if (count(MEDIA) >= 1) {
             $EnableNegation = true;
             if (!empty($_GET['media_strict'])) {
                 $SearchString = '(' . implode(' | ', $MediaNameArray) . ')';
@@ -152,11 +152,11 @@ if (!empty($_GET['media'])) {
 
 if (!empty($_GET['bitrates'])) {
     $BitrateArray = $_GET['bitrates'];
-    if (count($BitrateArray) !== count($Bitrates)) {
+    if (count($BitrateArray) !== count(ENCODING)) {
         $BitrateNameArray = [];
         foreach ($BitrateArray as $Index => $MasterIndex) {
-            if (isset($Bitrates[$MasterIndex])) {
-                $BitrateNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string($Bitrates[$MasterIndex]), '-.', '  ') . '"';
+            if (isset(ENCODING[$MasterIndex])) {
+                $BitrateNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string(ENCODING[$MasterIndex]), '-.', '  ') . '"';
             }
         }
 

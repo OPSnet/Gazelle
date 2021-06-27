@@ -214,18 +214,18 @@ View::show_header('Browse Torrents', 'browse');
                 <td class="nobr ft_ripspecifics" colspan="3">
                     <select id="bitrate" name="encoding" class="ft_bitrate fti_advanced">
                         <option value="">Bitrate</option>
-<?php    foreach ($Bitrates as $BitrateName) { ?>
+<?php    foreach (ENCODING as $BitrateName) { ?>
                         <option value="<?=display_str($BitrateName); ?>"<?php Format::selected('encoding', $BitrateName); ?>><?=display_str($BitrateName); ?></option>
 <?php    } ?>            </select>
 
                     <select name="format" class="ft_format fti_advanced">
                         <option value="">Format</option>
-<?php    foreach ($Formats as $FormatName) { ?>
+<?php    foreach (FORMAT as $FormatName) { ?>
                         <option value="<?=display_str($FormatName); ?>"<?php Format::selected('format', $FormatName); ?>><?=display_str($FormatName); ?></option>
 <?php    } ?>            </select>
                     <select name="media" class="ft_media fti_advanced">
                         <option value="">Media</option>
-<?php    foreach ($Media as $MediaName) { ?>
+<?php    foreach (MEDIA as $MediaName) { ?>
                         <option value="<?=display_str($MediaName); ?>"<?php Format::selected('media', $MediaName); ?>><?=display_str($MediaName); ?></option>
 <?php    } ?>
                     </select>

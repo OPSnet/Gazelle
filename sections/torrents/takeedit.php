@@ -118,9 +118,9 @@ switch ($Type) {
         }
 
         $Validate->setFields([
-            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]],
-            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]],
-            ['media', '1', 'inarray', 'Not a valid media.', ['inarray' => $Media]],
+            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
+            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
+            ['media', '1', 'inarray', 'Not a valid media.', ['inarray' => MEDIA]],
             ['release_desc', '0', 'string', 'Invalid release description.', ['range' => [0, 1000000]]],
             ['remaster_title', '0', 'string', 'Remaster title must be between 2 and 80 characters.', ['range' => [2, 80]]],
             ['remaster_record_label', '0', 'string', 'Remaster record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
@@ -134,7 +134,7 @@ switch ($Type) {
         }
 
         if ($Properties['Encoding'] !== 'Other') {
-            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
+            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
         } else {
             // Handle 'other' bitrates
             $Validate->setField('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
@@ -146,13 +146,13 @@ switch ($Type) {
     case 'Comedy':
         $Validate->setFields([
             ['year', '1', 'number', 'The year of the release must be entered.'],
-            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]],
-            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]],
+            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
+            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
             ['release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1000000]]],
         ]);
         // Handle 'other' bitrates
         if ($Properties['Encoding'] !== 'Other') {
-            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
+            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
         } else {
             $Validate->setField('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');

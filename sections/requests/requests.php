@@ -97,11 +97,11 @@ $EnableNegation = false; // Sphinx needs at least one positive search condition 
 
 if (!empty($_GET['formats'])) {
     $FormatArray = $_GET['formats'];
-    if (count($FormatArray) !== count($Formats)) {
+    if (count($FormatArray) !== count(FORMAT)) {
         $FormatNameArray = [];
         foreach ($FormatArray as $Index => $MasterIndex) {
-            if (isset($Formats[$MasterIndex])) {
-                $FormatNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string($Formats[$MasterIndex]), '-.', '  ') . '"';
+            if (isset(FORMAT[$MasterIndex])) {
+                $FormatNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string(FORMAT[$MasterIndex]), '-.', '  ') . '"';
             }
         }
         if (count($FormatNameArray) >= 1) {
@@ -118,11 +118,11 @@ if (!empty($_GET['formats'])) {
 
 if (!empty($_GET['media'])) {
     $MediaArray = $_GET['media'];
-    if (count($MediaArray) !== count($Media)) {
+    if (count($MediaArray) !== count(MEDIA)) {
         $MediaNameArray = [];
         foreach ($MediaArray as $Index => $MasterIndex) {
-            if (isset($Media[$MasterIndex])) {
-                $MediaNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string($Media[$MasterIndex]), '-.', '  ') . '"';
+            if (isset(MEDIA[$MasterIndex])) {
+                $MediaNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string(MEDIA[$MasterIndex]), '-.', '  ') . '"';
             }
         }
 
@@ -140,11 +140,11 @@ if (!empty($_GET['media'])) {
 
 if (!empty($_GET['bitrates'])) {
     $BitrateArray = $_GET['bitrates'];
-    if (count($BitrateArray) !== count($Bitrates)) {
+    if (count($BitrateArray) !== count(ENCODING)) {
         $BitrateNameArray = [];
         foreach ($BitrateArray as $Index => $MasterIndex) {
-            if (isset($Bitrates[$MasterIndex])) {
-                $BitrateNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string($Bitrates[$MasterIndex]), '-.', '  ') . '"';
+            if (isset(ENCODING[$MasterIndex])) {
+                $BitrateNameArray[$Index] = '"' . strtr(Sphinxql::sph_escape_string(ENCODING[$MasterIndex]), '-.', '  ') . '"';
             }
         }
 
@@ -438,12 +438,12 @@ View::show_header($Title, 'requests');
             <tr id="format_list">
                 <td class="label">Formats</td>
                 <td>
-                    <input type="checkbox" id="toggle_formats" onchange="Toggle('formats', 0);"<?=(!$Submitted || !empty($FormatArray) && count($FormatArray) === count($Formats) ? ' checked="checked"' : '') ?> />
+                    <input type="checkbox" id="toggle_formats" onchange="Toggle('formats', 0);"<?=(!$Submitted || !empty($FormatArray) && count($FormatArray) === count(FORMAT) ? ' checked="checked"' : '') ?> />
                     <label for="toggle_formats">All</label>
                     <input type="checkbox" id="formats_strict" name="formats_strict"<?=(!empty($_GET['formats_strict']) ? ' checked="checked"' : '')?> />
                     <label for="formats_strict">Only specified</label>
 <?php
-        foreach ($Formats as $Key => $Val) {
+        foreach (FORMAT as $Key => $Val) {
             if ($Key % 8 === 0) {
                 echo '<br />';
             }
@@ -457,12 +457,12 @@ View::show_header($Title, 'requests');
             <tr id="bitrate_list">
                 <td class="label">Bitrates</td>
                 <td>
-                    <input type="checkbox" id="toggle_bitrates" onchange="Toggle('bitrates', 0);"<?=(!$Submitted || !empty($BitrateArray) && count($BitrateArray) === count($Bitrates) ? ' checked="checked"' : '')?> />
+                    <input type="checkbox" id="toggle_bitrates" onchange="Toggle('bitrates', 0);"<?=(!$Submitted || !empty($BitrateArray) && count($BitrateArray) === count(ENCODING) ? ' checked="checked"' : '')?> />
                     <label for="toggle_bitrates">All</label>
                     <input type="checkbox" id="bitrate_strict" name="bitrate_strict"<?=(!empty($_GET['bitrate_strict']) ? ' checked="checked"' : '') ?> />
                     <label for="bitrate_strict">Only specified</label>
 <?php
-        foreach ($Bitrates as $Key => $Val) {
+        foreach (ENCODING as $Key => $Val) {
             if ($Key % 8 === 0) {
                 echo '<br />';
             }
@@ -478,12 +478,12 @@ View::show_header($Title, 'requests');
             <tr id="media_list">
                 <td class="label">Media</td>
                 <td>
-                    <input type="checkbox" id="toggle_media" onchange="Toggle('media', 0);"<?=(!$Submitted || !empty($MediaArray) && count($MediaArray) === count($Media) ? ' checked="checked"' : '')?> />
+                    <input type="checkbox" id="toggle_media" onchange="Toggle('media', 0);"<?=(!$Submitted || !empty($MediaArray) && count($MediaArray) === count(MEDIA) ? ' checked="checked"' : '')?> />
                     <label for="toggle_media">All</label>
                     <input type="checkbox" id="media_strict" name="media_strict"<?=(!empty($_GET['media_strict']) ? ' checked="checked"' : '')?> />
                     <label for="media_strict">Only specified</label>
 <?php
-        foreach ($Media as $Key => $Val) {
+        foreach (MEDIA as $Key => $Val) {
             if ($Key % 8 === 0) {
                 echo '<br />';
             }

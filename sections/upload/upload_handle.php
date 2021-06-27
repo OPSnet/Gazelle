@@ -111,9 +111,9 @@ if ($_POST['album_desc']) {
 
 // audio types
 if (in_array($Type, ['Music', 'Audiobooks', 'Comedy'])) {
-    $Validate->setField('format', '1','inarray','Please select a valid format.', ['inarray'=>$Formats]);
+    $Validate->setField('format', '1','inarray','Please select a valid format.', ['inarray'=>FORMAT]);
     if ($Properties['Encoding'] !== 'Other') {
-        $Validate->setField('bitrate', '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
+        $Validate->setField('bitrate', '1','inarray','You must choose a bitrate.', ['inarray'=>ENCODING]);
     } else {
         if ($Properties['Format'] === 'FLAC') {
             $Validate->setField('bitrate', '1','string','FLAC bitrate must be lossless.', ['regex'=>'/Lossless/']);
@@ -132,7 +132,7 @@ switch ($Type) {
     case 'Music':
         $Validate->setFields([
             ['groupid', '0', 'number', 'Group ID was not numeric'],
-            ['media', '1','inarray','Please select a valid media.', ['inarray'=>$Media]],
+            ['media', '1','inarray','Please select a valid media.', ['inarray'=>MEDIA]],
             ['remaster_title', '0','string','Remaster title must be between 2 and 80 characters.', ['range' => [2, 80]]],
             ['remaster_record_label', '0','string','Remaster record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
             ['remaster_catalogue_number', '0','string','Remaster catalogue number must be between 2 and 80 characters.', ['range' => [2, 80]]],
