@@ -27,7 +27,7 @@ if (!$ConvID) {
         FROM pm_conversations_users
         WHERE UserID = ?
             AND ConvID = ?
-            ", $LoggedUser['ID'], $ConvID
+            ", $Viewer->id(), $ConvID
     )) {
         error(403);
     }
@@ -54,9 +54,9 @@ if (!empty($Err)) {
 } else {
     $userMan = new Gazelle\Manager\User;
     if ($ConvID) {
-        $userMan->replyPM($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+        $userMan->replyPM($ToID, $Viewer->id(), $Subject, $Body, $ConvID);
     } else {
-        $userMan->sendPM($ToID, $LoggedUser['ID'], $Subject, $Body);
+        $userMan->sendPM($ToID, $Viewer->id(), $Subject, $Body);
     }
     header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
 }

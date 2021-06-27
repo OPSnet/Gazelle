@@ -7,31 +7,31 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ?>
 <div class="thin">
 <?= $Twig->render('collage/header.twig', [
-    'auth'        => $LoggedUser['AuthKey'],
-    'bookmarked'  => $bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID),
+    'auth'        => $Viewer->auth(),
+    'bookmarked'  => $bookmark->isCollageBookmarked($Viewer->id(), $CollageID),
     'can_create'  => check_perms('site_collages_create'),
-    'can_delete'  => check_perms('site_collages_delete') || $Collage->isOwner($LoggedUser['ID']),
+    'can_delete'  => check_perms('site_collages_delete') || $Collage->isOwner($Viewer->id()),
     'can_edit'    => check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$Collage->isLocked()),
     'can_manage'  => check_perms('site_collages_manage') && !$Collage->isLocked(),
     'can_sub'     => check_perms('site_collages_subscribe'),
     'id'          => $CollageID,
     'name'        => $Collage->name(),
     'object'      => 'torrent',
-    'subbed'      => $Collage->isSubscribed($LoggedUser['ID']),
-    'user_id'     => $LoggedUser['ID'],
+    'subbed'      => $Collage->isSubscribed($Viewer->id()),
+    'user_id'     => $Viewer->id(),
 ]);
 ?>
     <div class="sidebar">
 <?= $Twig->render('collage/sidebar.twig', [
     'artists'        => $Collage->numArtists(),
-    'auth'           => $LoggedUser['AuthKey'],
+    'auth'           => $Viewer->auth(),
     'can_add'        => !$Collage->isLocked()
         && (
             ($Collage->categoryId() != 0 && check_perms('site_collages_manage'))
             ||
-            ($Collage->categoryId() == 0 && $Collage->isOwner($LoggedUser['ID']))
+            ($Collage->categoryId() == 0 && $Collage->isOwner($Viewer->id()))
         ),
-    'can_post'       => !$LoggedUser['DisablePosting'],
+    'can_post'       => !$Viewer->disablePosting(),
     'category_id'    => $Collage->categoryId(),
     'category_name'  => $CollageCats[$Collage->categoryId()],
     'comments'       => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
@@ -69,7 +69,7 @@ if (check_perms('zip_downloader')) {
             <div class="pad">
                 <form class="download_form" name="zip" action="collages.php" method="post">
                 <input type="hidden" name="action" value="download" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?=$Viewer->auth()?>" />
                 <input type="hidden" name="collageid" value="<?=$CollageID?>" />
                 <ul id="list" class="nobullet">
 <?php foreach ($ZIPList as $ListItem) { ?>
@@ -179,7 +179,7 @@ $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
                 <td class="sign leechers"><img src="<?= $iconUri ?>/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
-$vote = new Gazelle\Vote($LoggedUser['ID']);
+$vote = new Gazelle\Vote($Viewer->id());
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
@@ -235,7 +235,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             </td>
             <td colspan="5">
                 <strong><?= $DisplayName ?></strong>
-<?php   if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
+<?php   if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) { ?>
                     <span class="remove_bookmark float_right">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="remove_bookmark brackets"
@@ -251,7 +251,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         }
         if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
-                    <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
+                    <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($Viewer->auth()) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
@@ -300,7 +300,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <td class="td_info" colspan="3">
                     <?= $Twig->render('torrent/action.twig', [
                         'can_fl' => Torrents::can_use_token($Torrent),
-                        'key'    => $LoggedUser['torrent_pass'],
+                        'key'    => $Viewer->announceKey(),
                         't'      => $Torrent,
                     ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp; <a
@@ -344,12 +344,12 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="td_info">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Torrent),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
                 <strong><?= $DisplayName ?></strong>
 <?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
-                <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
+                <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($Viewer->auth()) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>

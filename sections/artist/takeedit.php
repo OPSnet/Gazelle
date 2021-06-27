@@ -14,7 +14,7 @@ if (!check_perms('site_edit_wiki')) {
 }
 
 // Variables for database input
-$userId   = $LoggedUser['ID'];
+$userId   = $Viewer->id();
 $artistId = $_REQUEST['artistid'];
 $artist   = new \Gazelle\Artist($artistId);
 $summary  = [];

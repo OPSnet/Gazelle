@@ -4,7 +4,6 @@ if (!check_perms('site_collages_subscribe')) {
     error(403);
 }
 
-$viewer = new Gazelle\User($LoggedUser['ID']);
 $ShowAll = !empty($_GET['showall']);
 
 if ($ShowAll) {
@@ -38,7 +37,7 @@ if ($ShowAll) {
         GROUP BY c.ID";
 }
 
-$DB->prepared_query($sql, $LoggedUser['ID']);
+$DB->prepared_query($sql, $Viewer->id());
 $NumResults = $DB->record_count();
 $CollageSubs = $DB->to_array();
 View::show_header('Subscribed collages','browse,collage');
@@ -46,7 +45,7 @@ View::show_header('Subscribed collages','browse,collage');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= $viewer->username() ?></a> &rsaquo; Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
+        <h2><a href="user.php?id=<?= $Viewer->id() ?>"><?= $Viewer->username() ?></a> &rsaquo; Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
 
         <div class="linkbox">
 <?php if ($ShowAll) { ?>

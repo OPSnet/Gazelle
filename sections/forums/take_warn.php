@@ -38,7 +38,7 @@ $Reason = trim($_POST['reason']);
 $WarningLength = $_POST['length'];
 if ($WarningLength !== 'verbal') {
     $Time = (int)$WarningLength * (7 * 24 * 60 * 60);
-    $userMan->warn($user->id(), $Time, "$URL - $Reason", $LoggedUser['Username']);
+    $userMan->warn($user->id(), $Time, "$URL - $Reason", $Viewer->username());
     $subject = 'You have received a warning';
     $message = "You have received a $WarningLength week warning for [url=$URL]this post[/url].";
     $warned = "Warned until " . time_plus($Time);
@@ -55,7 +55,7 @@ if (strlen($extraMessage)) {
 }
 
 $user->addForumWarning($adminComment)->addStaffNote($adminComment)->modify();
-$userMan->sendPM($user->id(), $LoggedUser['ID'], $subject, $message);
+$userMan->sendPM($user->id(), $Viewer->id(), $subject, $message);
 
 if ($forumPost['is-sticky']) {
     $Cache->delete_value("thread_{$threadId}_info");

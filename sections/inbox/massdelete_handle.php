@@ -3,7 +3,7 @@
 use Gazelle\Inbox;
 
 enforce_login();
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 $Section = $_POST['section'];
 $UnreadFirst = (bool) $_POST['sort'];
 

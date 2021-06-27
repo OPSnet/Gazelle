@@ -4,7 +4,7 @@ $postId = (int)$_GET['postid'];
 $forum = $forumMan->findByPostId($postId);
 if (is_null($forum)) {
     json_die("failure", "empty postid");
-} elseif (!(new Gazelle\User($LoggedUser['ID']))->readAccess($forum)) {
+} elseif (!$Viewer->readAccess($forum)) {
     json_die("failure", "assholes");
 }
 

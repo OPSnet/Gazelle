@@ -64,12 +64,12 @@ if (!is_number($ToID)) {
     $Err = "Hax occurring, non-number present";
 }
 
-if ($ToID == $LoggedUser['ID']) {
+if ($ToID == $Viewer->id()) {
     $Err = "That's you!";
 }
 
 if (isset($Err)) {
     echo $Err;
 } else {
-    (new Gazelle\Manager\User)->sendPM($ToID, $LoggedUser['ID'], $Subject, $Message);
+    (new Gazelle\Manager\User)->sendPM($ToID, $Viewer->id(), $Subject, $Message);
 }

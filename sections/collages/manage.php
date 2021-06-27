@@ -5,7 +5,7 @@ if (!$CollageID) {
 }
 $collage = new Gazelle\Collage($CollageID);
 
-if ($collage->isPersonal() && !$collage->isOwner($LoggedUser['ID']) && !check_perms('site_collages_delete')) {
+if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
     error(403);
 }
 if ($collage->isArtist()) {
@@ -113,7 +113,7 @@ View::show_header("Manage collage: " . $collage->name(), 'jquery-ui,jquery.table
                     <td class="nobr"><?=Users::format_username($UserID, $Username, false, false, false)?></td>
                     <td class="nobr">
                         <input type="hidden" name="action" value="manage_handle" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                         <input type="hidden" name="collageid" value="<?=$CollageID?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                         <input type="submit" name="submit" value="Edit" />
@@ -131,7 +131,7 @@ View::show_header("Manage collage: " . $collage->name(), 'jquery-ui,jquery.table
     <form class="dragdrop_form hidden" name="collage" action="collages.php" method="post" id="drag_drop_collage_form">
         <div>
             <input type="hidden" name="action" value="manage_handle" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="collageid" value="<?=$CollageID?>" />
             <input type="hidden" name="groupid" value="1" />
             <input type="hidden" name="drag_drop_collage_sort_order" id="drag_drop_collage_sort_order" readonly="readonly" value="" />

@@ -12,7 +12,7 @@ if (!$isPersonal) {
     if (!check_perms('site_collages_manage')) {
         error(403);
     }
-} elseif (!$collage->isOwner($LoggedUser['ID']) && !check_perms('site_collages_delete')) {
+} elseif (!$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
     // only owner or mod+ can edit personal collages
     error(403);
 }
@@ -31,8 +31,8 @@ if (isset($_POST['name'])) {
         require('edit.php');
         exit;
     }
-    if ($collage->isOwner($LoggedUser['ID'])) {
-        if (!check_perms('site_collages_renamepersonal') && !stristr($name, $LoggedUser['Username'])) {
+    if ($collage->isOwner($Viewer->id())) {
+        if (!check_perms('site_collages_renamepersonal') && !stristr($name, $Viewer->username())) {
             error("Your personal collage's title must include your username.");
         }
     }
@@ -43,14 +43,14 @@ $collage->setUpdate('Description', trim($_POST['description']))
 
 if (isset($_POST['featured'])
     && (
-        ($collage->isPersonal() && $collage->isOwner($LoggedUser['ID']))
+        ($collage->isPersonal() && $collage->isOwner($Viewer->id()))
         || check_perms('site_collages_delete')
     )
 ) {
     $collage->setFeatured();
 }
 
-if (($collage->isPersonal() && $collage->isOwner($LoggedUser['ID']) && check_perms('site_collages_renamepersonal'))
+if (($collage->isPersonal() && $collage->isOwner($Viewer->id()) && check_perms('site_collages_renamepersonal'))
     || check_perms('site_collages_delete')
 ) {
     $collage->setUpdate('Name', trim($_POST['name']));

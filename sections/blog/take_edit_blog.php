@@ -21,7 +21,7 @@ if ($ThreadID > 0) {
 }
 elseif ($ThreadID === '') {
     $forum = new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
-    $ThreadID = $forum->addThread($LoggedUser['ID'], $_POST['title'], $_POST['body']);
+    $ThreadID = $forum->addThread($Viewer->id(), $_POST['title'], $_POST['body']);
     if ($ThreadID < 1) {
         error(0);
     }
@@ -41,7 +41,7 @@ if ($BlogID) {
         'threadId'  => $ThreadID,
     ]);
     if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-        $subMan = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+        $subMan = new Gazelle\Manager\Subscription($Viewer->id());
         $subMan->subscribe($ThreadID);
     }
 }

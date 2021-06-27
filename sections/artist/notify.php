@@ -9,7 +9,6 @@ try {
 } catch (Gazelle\Exception\ResourceNotFoundException $e) {
     error(404);
 }
-$user = new Gazelle\User($LoggedUser['ID']);
-$user->addArtistNotification($artist);
+$Viewer->addArtistNotification($artist);
 
 header("Location: " . redirectUrl("artist.php?id=" . $artist->id()));

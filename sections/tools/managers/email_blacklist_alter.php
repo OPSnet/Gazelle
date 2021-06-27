@@ -22,7 +22,7 @@ if ($_POST['submit'] === 'Delete') { // Delete
         if (!$emailBlacklist->modify((int)$_POST['id'], [
             'email'   => trim($_POST['email']),
             'comment' => trim($_POST['comment']),
-            'user_id' => $LoggedUser['ID'],
+            'user_id' => $Viewer->id(),
         ])) {
             error(0);
         }
@@ -30,7 +30,7 @@ if ($_POST['submit'] === 'Delete') { // Delete
         if (!$emailBlacklist->create([
             'email'   => trim($_POST['email']),
             'comment' => trim($_POST['comment']),
-            'user_id' => $LoggedUser['ID'],
+            'user_id' => $Viewer->id(),
         ])) {
             error(0);
         }

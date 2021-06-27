@@ -10,19 +10,19 @@ if (isset($_POST['auth'])) {
         $error = "You need to explain things a bit more.";
     } else {
         header('Location: /apply.php?action=view&id='
-            . $appMan->createApplicant($LoggedUser['ID'], $roleId, $body)->id());
+            . $appMan->createApplicant($Viewer->id(), $roleId, $body)->id());
         exit;
     }
 }
 
 View::show_header('Apply', 'apply');
 echo $Twig->render('applicant/apply.twig', [
-    'auth'         => $LoggedUser['AuthKey'],
+    'auth'         => $Viewer->auth(),
     'body'         => new Gazelle\Util\Textarea('body', $body ?? ''),
     'error'        => $error ?? null,
     'list'         => (new Gazelle\Manager\ApplicantRole)->list(),
     'role'         => $role ?? null,
     'is_admin'     => check_perms('admin_manage_applicants'),
-    'is_applicant' => $appMan->userIsApplicant($LoggedUser['ID']),
+    'is_applicant' => $appMan->userIsApplicant($Viewer->id()),
 ]);
 View::show_footer();

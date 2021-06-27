@@ -190,8 +190,10 @@ if (isset($_POST['confirm'])) {
         WHERE ArtistID = ?
         ", $ArtistID
     );
-    (new Gazelle\Log)->general("The artist $ArtistID ($ArtistName) was made into a non-redirecting alias of artist $NewArtistID ($NewArtistName) by user ".$LoggedUser['ID']." (".$LoggedUser['Username'].')');
-
+    (new Gazelle\Log)->general(
+        "The artist $ArtistID ($ArtistName) was made into a non-redirecting alias of artist $NewArtistID ($NewArtistName) by user "
+        . $Viewer->id() . " (" . $Viewer->username() . ')'
+    );
     header("Location: artist.php?action=edit&artistid=$NewArtistID");
     exit;
 }
@@ -203,7 +205,7 @@ View::show_header('Merging Artists');
     </div>
     <form class="merge_form" name="artist" action="artist.php" method="post">
         <input type="hidden" name="action" value="change_artistid" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
         <input type="hidden" name="newartistid" value="<?=$NewArtistID?>" />
         <input type="hidden" name="confirm" value="1" />

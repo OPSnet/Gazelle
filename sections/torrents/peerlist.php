@@ -11,7 +11,7 @@ $paginator->setTotal($torrent->peerlistTotal());
 echo $Twig->render('torrent/peerlist.twig', [
     'is_admin'   => check_perms('users_mod'),
     'linkbox'    => $paginator->linkboxJS('show_peers', $torrent->id()),
-    'list'       => $torrent->peerlistPage($LoggedUser['ID'], $paginator->limit(), $paginator->offset()),
+    'list'       => $torrent->peerlistPage($Viewer->id(), $paginator->limit(), $paginator->offset()),
     'torrent_id' => $torrent->id(),
-    'user_id'    => $LoggedUser['ID'],
+    'user_id'    => $Viewer->id(),
 ]);

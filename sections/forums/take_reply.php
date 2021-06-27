@@ -1,8 +1,7 @@
 <?php
 authorize();
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if ($user->disablePosting()) {
+if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
 
@@ -13,7 +12,7 @@ if (is_null($forum)) {
 }
 $ThreadInfo = $forum->threadInfo($threadId);
 
-if (!$user->readAccess($forum)|| !$user->writeAccess($forum) || $ThreadInfo['isLocked'] && !check_perms('site_moderate_forums')) {
+if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $ThreadInfo['isLocked'] && !check_perms('site_moderate_forums')) {
     error(403);
 }
 
@@ -24,14 +23,14 @@ if ($Body === '') {
     exit;
 }
 
-if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'])) {
-    $PostID = $forum->mergePost($LoggedUser['ID'], $threadId, $Body);
+if ($ThreadInfo['LastPostAuthorID'] == $Viewer->id() && isset($_POST['merge'])) {
+    $PostID = $forum->mergePost($Viewer->id(), $threadId, $Body);
 } else {
-    $PostID = $forum->addPost($LoggedUser['ID'], $threadId, $Body);
+    $PostID = $forum->addPost($Viewer->id(), $threadId, $Body);
     ++$ThreadInfo['Posts'];
 }
 
-$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+$subscription = new Gazelle\Manager\Subscription($Viewer->id());
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
     $subscription->subscribe($threadId);
 }

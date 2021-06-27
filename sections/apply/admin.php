@@ -20,7 +20,7 @@ if (isset($_POST['auth'])) {
         $appRole = new Gazelle\ApplicantRole($editId);
         if (isset($_POST['user_id']) && is_numeric($_POST['user_id'])) {
             $userId = (int)$_POST['user_id'];
-            if ($userId == $LoggedUser['ID']) {
+            if ($userId == $Viewer->id()) {
                 $appRole->modify(
                     $_POST['title'],
                     $_POST['description'],
@@ -37,7 +37,7 @@ if (isset($_POST['auth'])) {
             $_POST['title'],
             $_POST['description'],
             (isset($_POST['status']) && is_numeric($_POST['status']) && $_POST['status'] == 1),
-            $LoggedUser['ID']
+            $Viewer->id()
         );
         $saved = 'saved';
     }
@@ -45,12 +45,12 @@ if (isset($_POST['auth'])) {
 
 View::show_header('Applicant administration');
 echo $Twig->render('applicant/admin.twig', [
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $Viewer->auth(),
     'edit_id'  => $editId,
     'list'     => (new Gazelle\Manager\ApplicantRole)->list(true),
     'role'     => $appRole ?? null,
     'saved'    => $saved,
     'text'     => new Textarea('description', $editId ? $appRole->description() : ''),
-    'user_id'  => $LoggedUser['ID'],
+    'user_id'  => $Viewer->id(),
 ]);
 View::show_footer();

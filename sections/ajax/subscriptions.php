@@ -1,6 +1,6 @@
 <?php
 
-if (!empty($LoggedUser['DisableForums'])) {
+if ($Viewer->disableForums()) {
     json_die('failure');
 }
 
@@ -16,7 +16,7 @@ $cond = [
     "s.UserID = ?",
 ];
 $args = [
-    $LoggedUser['ID']
+    $Viewer->id()
 ];
 if ($ShowUnread) {
     $cond[] = "IF(l.PostID IS NULL OR (t.IsLocked = '1' && t.IsSticky = '0'), t.LastPostID, l.PostID) < t.LastPostID";

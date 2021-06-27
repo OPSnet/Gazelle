@@ -8,7 +8,7 @@ if (!empty($LoggedUser['DisableTagging'])) {
     json_or_error('tagging disabled for your account', 403);
 }
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 $GroupID = $_REQUEST['groupid'];
 $Location = $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$GroupID}";
 

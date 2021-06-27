@@ -30,7 +30,7 @@
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="action" value="staff_groups_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="10" name="sort" value="<?=$Sort?>" />
             </td>
@@ -52,7 +52,7 @@
     <tr class="rowa">
         <form class="create_form" name="groups" action="" method="post">
             <input type="hidden" name="action" value="staff_groups_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="10" name="sort" />
             </td>

@@ -1,11 +1,9 @@
 <?php
 
-$user = new Gazelle\User($LoggedUser['ID']);
-
 $newsMan = new Gazelle\Manager\News;
 $newsReader = new \Gazelle\WitnessTable\UserReadNews;
-if ($newsMan->latest() < $newsReader->lastRead($user->id())) {
-    $newsReader->witness($user->id());
+if ($newsMan->latest() < $newsReader->lastRead($Viewer->id())) {
+    $newsReader->witness($Viewer->id());
 }
 
 $headlines = $newsMan->headlines();

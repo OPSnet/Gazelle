@@ -63,10 +63,10 @@ foreach ($action as $userId => $operation) {
  */
 $request = new \Gazelle\Request($requestId);
 foreach ($refund as $userId) {
-    $request->refundBounty($userId, $LoggedUser['Username']);
+    $request->refundBounty($userId, $Viewer->username());
 }
 foreach ($remove as $userId) {
-    $request->removeBounty($userId, $LoggedUser['Username']);
+    $request->removeBounty($userId, $Viewer->username());
 }
 
 if ($request || $remove) {

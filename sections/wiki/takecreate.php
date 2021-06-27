@@ -22,7 +22,7 @@ if ($articleId) {
     (int)$_POST['minclassedit']
 );
 
-$ArticleID = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $LoggedUser['ID']);
+$ArticleID = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer->id());
 (new Gazelle\Log)->general("Wiki article $ArticleID ($title) was created by {$LoggedUser['Username']}");
 
 header("Location: wiki.php?action=article&id=$ArticleID");

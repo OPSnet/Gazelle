@@ -1,6 +1,5 @@
 <?php
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 if (!$Viewer->permitted('zip_downloader')) {
     error(403);
 }

@@ -41,6 +41,6 @@ foreach ($Snatchers as $UserID) {
     $userMan->sendPM($UserID, 0, $Subject, $Message);
 }
 $n = count($Snatchers);
-(new Gazelle\Log)->general($LoggedUser['Username']." sent a mass PM to $n snatcher" . plural($n) . " of torrent $TorrentID in group $GroupID");
+(new Gazelle\Log)->general($Viewer->username()." sent a mass PM to $n snatcher" . plural($n) . " of torrent $TorrentID in group $GroupID");
 
 header("Location: torrents.php?id=$GroupID");

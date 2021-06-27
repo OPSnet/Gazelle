@@ -30,7 +30,7 @@ $DB->prepared_query("
         Users
     FROM users_notify_filters
     WHERE UserID = ?
-    ", $LoggedUser['ID']
+    ", $Viewer->id()
 );
 
 $NumFilters = $DB->record_count();
@@ -91,9 +91,9 @@ foreach ($Notifications as $N) { // $N stands for Notifications
 <?php
     } elseif ($NumFilters > 0) { ?>
     <h3>
-        <a href="feeds.php?feed=torrents_notify_<?=$N['ID']?>_<?=$LoggedUser['torrent_pass']?>&amp;user=<?=$LoggedUser['ID']?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?=$LoggedUser['torrent_pass']?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;name=<?=urlencode($N['Label'])?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>
+        <a href="feeds.php?feed=torrents_notify_<?=$N['ID']?>_<?= $Viewer->announceKey() ?>&amp;user=<?=$Viewer->id()?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?= $Viewer->auth() ?>&amp;name=<?=urlencode($N['Label'])?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>
         <?=display_str($N['Label'])?>
-        <a href="user.php?action=notify_delete&amp;id=<?=$N['ID']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" onclick="return confirm('Are you sure you want to delete this notification filter?')" class="brackets">Delete</a>
+        <a href="user.php?action=notify_delete&amp;id=<?=$N['ID']?>&amp;auth=<?= $Viewer->auth() ?>" onclick="return confirm('Are you sure you want to delete this notification filter?')" class="brackets">Delete</a>
         <a href="#" onclick="$('#filter_<?=$N['ID']?>').gtoggle(); return false;" class="brackets">Show</a>
     </h3>
 <?php
@@ -101,7 +101,7 @@ foreach ($Notifications as $N) { // $N stands for Notifications
     <form class="<?=($NewFilter ? 'create_form' : 'edit_form')?>" id="<?=($NewFilter ? 'filter_form' : '')?>" name="notification" action="user.php" method="post">
         <input type="hidden" name="formid" value="<?=$i?>" />
         <input type="hidden" name="action" value="notify_handle" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <?php
     if (!$NewFilter) { ?>
         <input type="hidden" name="id<?=$i?>" value="<?=$N['ID']?>" />

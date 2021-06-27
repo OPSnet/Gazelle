@@ -35,7 +35,7 @@ if (check_perms('admin_manage_permissions') && isset($_POST['submit'])) {
 
 View::show_header('Site Options');
 echo $Twig->render('admin/site-option.twig', [
-    'auth'     => $LoggedUser['AuthKey'],
+    'auth'     => $Viewer->auth(),
     'is_admin' => check_perms('admin_manage_permissions'),
     'list'     => $siteOption->list(),
 ]);

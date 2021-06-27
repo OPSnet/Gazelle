@@ -87,7 +87,7 @@ if (!$UserID) {
     error(404);
 }
 
-if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_edit')) {
+if ($Viewer->id() != $UserID && !check_perms('torrents_edit')) {
     error(403);
 }
 
@@ -97,7 +97,7 @@ if ($Remastered == '1' && !$RemasterYear && !check_perms('edit_unknowns')) {
 
 if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && !check_perms('edit_unknowns')) {
     //It's Unknown now, and it wasn't before
-    if ($LoggedUser['ID'] != $UserID) {
+    if ($Viewer->id() != $UserID) {
         error(403);
     }
 }
@@ -165,7 +165,7 @@ switch ($Type) {
 
 $Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 if (!$Err && $Properties['Remastered'] && !$Properties['RemasterYear']) {
-    if ($LoggedUser['ID'] !== $UserID && !check_perms('edit_unknowns')) {
+    if ($Viewer->id() !== $UserID && !check_perms('edit_unknowns')) {
         $Err = "You may not edit someone else's upload to unknown release.";
     }
 }
@@ -284,7 +284,7 @@ if (check_perms('users_mod')) {
     if (!$bfiID && $Properties['BadFiles']) {
         $change[] = 'Bad Files checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_bad_files (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($bfiID && !$Properties['BadFiles']) {
         $change[] = 'Bad Files cleared';
@@ -295,7 +295,7 @@ if (check_perms('users_mod')) {
     if (!$bfID && $Properties['BadFolders']) {
         $change[] = 'Bad Folders checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_bad_folders (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($bfID && !$Properties['BadFolders']) {
         $change[] = 'Bad Folders cleared';
@@ -306,7 +306,7 @@ if (check_perms('users_mod')) {
     if (!$btID && $Properties['BadTags']) {
         $change[] = 'Bad Tags checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_bad_tags (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($btID && !$Properties['BadTags']) {
         $change[] = 'Bad Tags cleared';
@@ -317,7 +317,7 @@ if (check_perms('users_mod')) {
     if (!$caID && $Properties['CassetteApproved']) {
         $change[] = 'Cassette Approved checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_cassette_approved (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($caID && !$Properties['CassetteApproved']) {
         $change[] = 'Cassette Approved cleared';
@@ -328,7 +328,7 @@ if (check_perms('users_mod')) {
     if (!$lmaID && $Properties['LossymasterApproved']) {
         $change[] = 'Lossy Master checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_lossymaster_approved (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($lmaID && !$Properties['LossymasterApproved']) {
         $change[] = 'Lossy Master cleared';
@@ -339,7 +339,7 @@ if (check_perms('users_mod')) {
     if (!$lwID && $Properties['LossywebApproved']) {
         $change[] = 'Lossy WEB checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_lossyweb_approved (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($lwID && !$Properties['LossywebApproved']) {
         $change[] = 'Lossy WEB cleared';
@@ -350,7 +350,7 @@ if (check_perms('users_mod')) {
     if (!$mlID && $Properties['Lineage']) {
         $change[] = 'Missing Lineage checked';
         $DB->prepared_query('INSERT IGNORE INTO torrents_missing_lineage (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $LoggedUser['ID']
+            $TorrentID, $Viewer->id()
         );
     } elseif ($mlID && !$Properties['Lineage']) {
         $change[] = 'Missing Lineage cleared';
@@ -381,7 +381,7 @@ $name = $DB->scalar("
     ", $TorrentID
 );
 $changeLog = implode(', ', $change);
-(new Gazelle\Log)->torrent($current['GroupID'], $TorrentID, $LoggedUser['ID'], $changeLog)
+(new Gazelle\Log)->torrent($current['GroupID'], $TorrentID, $Viewer->id(), $changeLog)
     ->general("Torrent $TorrentID ($name) in group {$current['GroupID']} was edited by {$LoggedUser['Username']} ($changeLog)");
 
 $Cache->deleteMulti(["torrents_details_{$current['GroupID']}", "torrent_download_$TorrentID"]);

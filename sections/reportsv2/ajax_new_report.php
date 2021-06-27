@@ -87,7 +87,7 @@ if (!$GroupID) {
     $report->resolve('Report already dealt with (torrent deleted)');
     die();
 }
-$report->claim($LoggedUser['ID']);
+$report->claim($Viewer->id());
 
 $reportMan = new Gazelle\Manager\ReportV2;
 $Types = $reportMan->types();
@@ -120,7 +120,7 @@ if ($ArtistID == 0 && empty($ArtistName)) {
     <form class="edit_form" name="report" id="reportform_<?=$ReportID?>" action="reports.php" method="post">
 <?php /* Some of these are for takeresolve, some for the JavaScript. */ ?>
 <div>
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
     <input type="hidden" id="reportid<?=$ReportID?>" name="reportid" value="<?=$ReportID?>" />
     <input type="hidden" id="torrentid<?=$ReportID?>" name="torrentid" value="<?=$TorrentID?>" />
     <input type="hidden" id="uploader<?=$ReportID?>" name="uploader" value="<?=$UploaderName?>" />
@@ -138,7 +138,7 @@ if ($ArtistID == 0 && empty($ArtistName)) {
             <a href="log.php?search=Torrent+<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)
 <?php } else { ?>
             <?=$LinkName?>
-            <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+            <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
             uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> <?=time_diff($Time)?>
             <br />
             <div style="text-align: right;">was reported by <a href="user.php?id=<?=$ReporterID?>"><?=$ReporterName?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></div>
@@ -286,7 +286,7 @@ if ($ExtraIDs) { ?>
             $ExtraLinkName = display_str($ExtraLinkName);
 ?>
                 <?=($First ? '' : '<br />')?><?=$ExtraLinkName?>
-                <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+                <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                 uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> <?=time_diff($ExtraTime)?> <a href="#" onclick="Switch(<?=$ReportID?>, <?=$TorrentID?>, <?=$ExtraID?>); return false;" class="brackets">Switch</a>
 <?php
             $First = false;

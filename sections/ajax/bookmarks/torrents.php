@@ -3,7 +3,7 @@
 ini_set('memory_limit', -1);
 
 if (empty($_GET['userid'])) {
-    $user = new Gazelle\User($LoggedUser['ID']);
+    $user = $Viewer;
 } else {
     if (!check_perms('users_override_paranoia')) {
         error(403);

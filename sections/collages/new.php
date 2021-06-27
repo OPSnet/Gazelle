@@ -8,8 +8,7 @@ if (!check_perms('site_collages_renamepersonal')) {
 
 $NoName = !check_perms('site_collages_renamepersonal') && $Category === '0';
 
-$user = new \Gazelle\User($LoggedUser['ID']);
-$personalAllowed = $user->canCreatePersonalCollage();
+$personalAllowed = $Viewer->canCreatePersonalCollage();
 ?>
 <div class="thin">
 <?php if (isset($Err)) { ?>
@@ -18,13 +17,13 @@ $personalAllowed = $user->canCreatePersonalCollage();
 <?php } ?>
     <form class="create_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="new_handle" />
-        <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <table class="layout">
             <tr id="collagename">
                 <td class="label"><strong>Name</strong></td>
                 <td>
                     <input type="text"<?= $NoName ? ' class="hidden"' : ''; ?> name="name" size="60" id="namebox" value="<?=display_str($Name ?? '')?>" />
-                    <span id="personal"<?= $NoName ? '' : ' class="hidden"'; ?> style="font-style: oblique;"><strong><?=$LoggedUser['Username']?>'s personal collage</strong></span>
+                    <span id="personal"<?= $NoName ? '' : ' class="hidden"'; ?> style="font-style: oblique;"><strong><?= $Viewer->username() ?>'s personal collage</strong></span>
                 </td>
             </tr>
             <tr>

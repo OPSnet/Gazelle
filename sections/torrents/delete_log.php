@@ -11,7 +11,7 @@ if (is_null($torrent) || !$logId) {
 }
 
 (new Gazelle\File\RipLog)->remove([$torrent->id(), $logId]);
-(new Gazelle\Log)->torrent($torrent->groupId(), $torrent->id(), $LoggedUser['ID'], "Riplog ID $logId removed from torrent $torrentId");
+(new Gazelle\Log)->torrent($torrent->groupId(), $torrent->id(), $Viewer->id(), "Riplog ID $logId removed from torrent $torrentId");
 $torrent->clearLog($logId);
 
 header("Location: torrents.php?torrentid=" . $torrent->id());

@@ -1,7 +1,6 @@
 <?php
 
 $userMan = new Gazelle\Manager\User;
-$viewer = new Gazelle\User($LoggedUser['ID']);
 if (empty($_GET['userid'])) {
     $user = null;
 } else {
@@ -39,44 +38,44 @@ if (empty($_GET['type'])) {
     switch ($_GET['type']) {
         case 'created':
             if ($user) {
-                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
+                if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
                     error(403);
                 }
                 $Title = "Requests created by " . $user->username();
                 $SphQL->where('userid', $user->id());
             } else {
                 $Title = 'Your requests';
-                $SphQL->where('userid', $LoggedUser['ID']);
+                $SphQL->where('userid', $Viewer->id());
             }
             break;
         case 'voted':
             if ($user) {
-                if (!$user->propertyVisible($viewer, 'requestsvoted_list')) {
+                if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
                     error(403);
                 }
                 $Title = "Requests voted for by " . $user->username();
                 $SphQL->where('voter', $user->id());
             } else {
                 $Title = 'Requests you have voted on';
-                $SphQL->where('voter', $LoggedUser['ID']);
+                $SphQL->where('voter', $Viewer->id());
             }
             break;
         case 'filled':
             if ($user) {
-                if (!$user->propertyVisible($viewer, 'requestsfilled_list')) {
+                if (!$user->propertyVisible($Viewer, 'requestsfilled_list')) {
                     error(403);
                 }
                 $Title = "Requests filled by " . $user->username();
                 $SphQL->where('fillerid', $user->id());
             } else {
                 $Title = 'Requests you have filled';
-                $SphQL->where('fillerid', $LoggedUser['ID']);
+                $SphQL->where('fillerid', $Viewer->id());
             }
             break;
         case 'bookmarks':
             $Title = 'Your bookmarked requests';
             $BookmarkView = true;
-            $SphQL->where('bookmarker', $LoggedUser['ID']);
+            $SphQL->where('bookmarker', $Viewer->id());
             break;
         default:
             error(404);
@@ -368,7 +367,7 @@ View::show_header($Title, 'requests');
                 <td class="label">Tags (comma-separated):</td>
                 <td>
                     <input type="search" name="tags" id="tags" size="60" value="<?=!empty($TagNames) ? display_str($TagNames) : ''?>"<?=
-                            $viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
                     <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                     <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
                 </td>

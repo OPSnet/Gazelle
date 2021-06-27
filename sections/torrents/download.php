@@ -9,7 +9,6 @@ use \Gazelle\Util\Irc;
 // environment so we cannot enforce_login.
 if (defined('AJAX') || !isset($_REQUEST['torrent_pass'])) {
     enforce_login();
-    $Viewer = (new Gazelle\Manager\User)->findById($LoggedUser['ID']);
 } else {
     $Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass']);
 }

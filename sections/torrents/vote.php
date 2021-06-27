@@ -1,5 +1,5 @@
 <?php
-$vote = Gazelle\Vote($LoggedUser['ID']);
+$vote = Gazelle\Vote($Viewer->id());
 $userVote = $vote->userVotes();
 $GroupVote = $vote->groupVote($groupId);
 
@@ -27,12 +27,12 @@ $Percentage = $TotalVotes > 0 ? number_format($UpVotes / $TotalVotes * 100, 1) :
         <span id="upvoted"<?=(($Voted != 'Up') ? ' class="hidden"' : '')?>>You have upvoted.<br /><br /></span>
         <span id="downvoted"<?=(($Voted != 'Down') ? ' class="hidden"' : '')?>>You have downvoted.<br /><br /></span>
 <?php    if (check_perms('site_album_votes')) { ?>
-        <span<?=($Voted ? ' class="hidden"' : '')?> id="vote_message"><a href="#" class="brackets upvote" onclick="UpVoteGroup(<?=$GroupID?>, '<?=$LoggedUser['AuthKey']?>'); return false;">Upvote</a> - <a href="#" class="brackets downvote" onclick="DownVoteGroup(<?=$GroupID?>, '<?=$LoggedUser['AuthKey']?>'); return false;">Downvote</a></span>
+        <span<?=($Voted ? ' class="hidden"' : '')?> id="vote_message"><a href="#" class="brackets upvote" onclick="UpVoteGroup(<?=$GroupID?>, '<?= $Viewer->auth() ?>'); return false;">Upvote</a> - <a href="#" class="brackets downvote" onclick="DownVoteGroup(<?=$GroupID?>, '<?= $Viewer->auth() ?>'); return false;">Downvote</a></span>
 <?php    } ?>
         <span<?=($Voted ? '' : ' class="hidden"')?> id="unvote_message">
             Changed your mind?
             <br />
-            <a href="#" onclick="UnvoteGroup(<?=$GroupID?>, '<?=$LoggedUser['AuthKey']?>'); return false;" class="brackets">Clear your vote</a>
+            <a href="#" onclick="UnvoteGroup(<?=$GroupID?>, '<?= $Viewer->auth() ?>'); return false;" class="brackets">Clear your vote</a>
         </span>
     </div>
 </div>

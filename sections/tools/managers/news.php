@@ -11,8 +11,8 @@ $newsMan = new Gazelle\Manager\News;
 $create = false;
 switch ($_REQUEST['action']) {
     case 'takenewnews':
-        $newsMan->create($LoggedUser['ID'], $_POST['title'], $_POST['body']);
-        $notification = new Notification($LoggedUser['ID']);
+        $newsMan->create($Viewer->id(), $_POST['title'], $_POST['body']);
+        $notification = new Notification($Viewer->id());
         $notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], SITE_URL . '/index.php', Notification::NEWS);
         header('Location: index.php');
         exit;
@@ -66,7 +66,7 @@ View::show_header('Manage news', 'bbcode,news_ajax');
     <form class="<?= $create ? 'create_form' : 'edit_form';?>" name="news_post" action="tools.php" method="post">
         <div class="box pad">
             <input type="hidden" name="action" value="<?= $create ? 'takenewnews' : 'takeeditnews';?>" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <?php if ($_GET['action'] == 'editnews') { ?>
             <input type="hidden" name="id" value="<?= $id ?>" />
 <?php } ?>
@@ -91,14 +91,14 @@ foreach ($headlines as $article) {
         <div class="head">
             <strong><?= display_str($title) ?></strong> - posted <?=time_diff($time) ?>
             - <a href="tools.php?action=editnews&amp;id=<?= $id ?>" class="brackets">Edit</a>
-            <a href="tools.php?action=deletenews&amp;id=<?= $id ?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
+            <a href="tools.php?action=deletenews&amp;id=<?= $id ?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Delete</a>
         </div>
         <div class="pad"><?= Text::full_format($body) ?></div>
     </div>
 <?php } ?>
     <div id="more_news" class="box">
         <div class="head">
-            <em><span><a href="#" onclick="news_ajax(event, 3, <?=$NewsCount?>, 1, '<?=$LoggedUser['AuthKey']?>'); return false;">Click to load more news</a>.</span></em>
+            <em><span><a href="#" onclick="news_ajax(event, 3, <?=$NewsCount?>, 1, '<?= $Viewer->auth() ?>'); return false;">Click to load more news</a>.</span></em>
         </div>
     </div>
 <?php } ?>

@@ -71,7 +71,7 @@ View::show_header($Title);
                 <form action="torrents.php" method="POST">
                     <input type="hidden" name="action" value="takeeditrequest" />
                     <input type="hidden" name="groupid" value="<?=$GroupID?>" />
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                     <textarea name="edit_details" style="width: 95%" required="required"></textarea><br /><br />
                     <input type="submit" value="Submit Edit Request" />
                 </form>

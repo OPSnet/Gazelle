@@ -18,7 +18,7 @@ if (is_null($RequestID)) {
     error(404);
 }
 
-if ($LoggedUser['ID'] != $UserID && !check_perms('site_moderate_requests')) {
+if ($Viewer->id() != $UserID && !check_perms('site_moderate_requests')) {
     error(403);
 }
 
@@ -59,15 +59,15 @@ $DB->prepared_query('
 
 (new \Gazelle\Manager\Comment)->remove('requests', $RequestID);
 
-if ($UserID != $LoggedUser['ID']) {
+if ($UserID != $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($UserID, 0,
         'A request you created has been deleted',
         "The request \"$FullName\" was deleted by [url=user.php?id={$LoggedUser['ID']}]"
-            . $LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]'
+            . $Viewer->username().'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]'
     );
 }
 
-(new Gazelle\Log)->general("Request $RequestID ($FullName) was deleted by user ".$LoggedUser['ID'].' ('.$LoggedUser['Username'].') for the reason: '.$_POST['reason']);
+(new Gazelle\Log)->general("Request $RequestID ($FullName) was deleted by user ".$Viewer->id().' ('.$Viewer->username().') for the reason: '.$_POST['reason']);
 
 $Cache->delete_value("request_$RequestID");
 $Cache->delete_value("request_votes_$RequestID");

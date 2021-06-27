@@ -1,10 +1,9 @@
 <?php
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if ($user->disableForums()) {
+if ($Viewer->disableForums()) {
     error(403);
 }
-$userQuote = new Gazelle\User\Quote($user);
+$userQuote = new Gazelle\User\Quote($Viewer);
 
 if ($_GET['catchup'] ?? 0) {
     $userQuote->clear();
@@ -15,7 +14,7 @@ if ($_GET['catchup'] ?? 0) {
 $userQuote->setShowAll(($_GET['showall'] ?? 0) == 1);
 $total = $userQuote->total();
 
-$paginator = new Gazelle\Util\Paginator($user->option('PostsPerPage') ?: USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator($Viewer->option('PostsPerPage') ?: USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($total);
 
 View::show_header('Quote Notifications');
@@ -24,6 +23,6 @@ echo $Twig->render('user/quote-notification.twig', [
     'paginator' => $paginator,
     'show_all'  => $userQuote->showAll(),
     'total'     => $total,
-    'user'      => $user,
+    'user'      => $Viewer,
 ]);
 View::show_footer();

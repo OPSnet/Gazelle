@@ -11,7 +11,7 @@ if (!$groupId) {
 if (!check_perms('torrents_edit')) {
     if (!$DB->scalar("
         SELECT ID FROM torrents WHERE GroupID = ? AND UserID = ?
-        ", $groupId, $LoggedUser['ID']
+        ", $groupId, $Viewer->id()
     )) {
         error(403);
     }
@@ -62,7 +62,7 @@ if ($log) {
         WHERE ID = ?
         ", $year, $recordLabel, $catNumber, $groupId
     );
-    (new Gazelle\Log)->group($groupId, $LoggedUser['ID'], ucfirst(implode(", ", $log)));
+    (new Gazelle\Log)->group($groupId, $Viewer->id(), ucfirst(implode(", ", $log)));
 
     $DB->prepared_query("
         SELECT concat('torrent_download_', ID) as cachekey

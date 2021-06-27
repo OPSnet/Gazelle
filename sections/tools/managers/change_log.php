@@ -2,8 +2,6 @@
 
 $changeMan = new Gazelle\Manager\Changelog;
 
-$viewer = new Gazelle\User($LoggedUser['ID']);
-
 if (check_perms('users_mod') && isset($_POST['perform'])) {
     authorize();
     switch ($_POST['perform']) {
@@ -27,8 +25,8 @@ $paginator->setTotal($changeMan->total());
 
 View::show_header(SITE_NAME . ' Change Log');
 echo $Twig->render('admin/changelog.twig', [
-    'auth'      => $LoggedUser['AuthKey'],
-    'author'    => $viewer->username(),
+    'auth'      => $Viewer->auth(),
+    'author'    => $Viewer->username(),
     'list'      => $changeMan->page($paginator->limit(), $paginator->offset()),
     'is_mod'    => check_perms('users_mod'),
     'paginator' => $paginator,

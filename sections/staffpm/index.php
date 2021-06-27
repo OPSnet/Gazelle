@@ -1,7 +1,6 @@
 <?php
 enforce_login();
 
-$user = new Gazelle\User($LoggedUser['ID']);
 switch ($_REQUEST['action'] ?? '') {
     case 'viewconv':
         require('viewconv.php');
@@ -25,19 +24,19 @@ switch ($_REQUEST['action'] ?? '') {
         require('common_responses.php');
         break;
     case 'delete_response':
-        if (!$user->isStaffPMReader()) {
+        if (!$Viewer->isStaffPMReader()) {
             error(403);
         }
         require('ajax_delete_response.php');
         break;
     case 'edit_response':
-        if (!$user->isStaffPMReader()) {
+        if (!$Viewer->isStaffPMReader()) {
             error(403);
         }
         require('ajax_edit_response.php');
         break;
     case 'get_response':
-        if (!$user->isStaffPMReader()) {
+        if (!$Viewer->isStaffPMReader()) {
             error(403);
         }
         require('ajax_get_response.php');
@@ -55,6 +54,6 @@ switch ($_REQUEST['action'] ?? '') {
         require('user_inbox.php');
         break;
     default:
-        require($user->isStaffPMReader()? 'staff_inbox.php' : 'user_inbox.php');
+        require($Viewer->isStaffPMReader()? 'staff_inbox.php' : 'user_inbox.php');
         break;
 }

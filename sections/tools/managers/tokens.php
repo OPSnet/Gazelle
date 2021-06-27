@@ -86,7 +86,7 @@ View::show_header('Add sitewide tokens');
         Tokens to add: <input type="text" name="numtokens" size="5" /><br /><br />
 
         <input type="hidden" name="action" value="tokens" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="submit" name="addtokens" value="Add tokens" />
     </form>
 </div>
@@ -105,7 +105,7 @@ View::show_header('Add sitewide tokens');
         Members with more tokens will have their total reduced to this limit.<br /><br />
 
         <input type="hidden" name="action" value="tokens" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <input type="submit" name="cleartokens" value="Set maximum token limit" />
     </form>
 </div>

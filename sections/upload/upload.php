@@ -92,7 +92,7 @@ $NewDNU = $DB->scalar("
     SELECT IF(MAX(Time) IS NULL OR MAX(Time) < ?, 1, 0)
     FROM torrents
     WHERE UserID = ?
-    ", $Updated, $LoggedUser['ID']
+    ", $Updated, $Viewer->id()
 );
 $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
 ?>

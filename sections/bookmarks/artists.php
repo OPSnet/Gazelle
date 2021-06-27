@@ -1,8 +1,6 @@
 <?php
 
 $userMan = new Gazelle\Manager\User;
-$Viewer = $userMan->findById($LoggedUser['ID']);
-
 if (!isset($_GET['userid'])) {
     $User = $Viewer;
     $ownProfile = true;
@@ -32,17 +30,17 @@ $ArtistList = $DB->to_array();
 $Title = "$Username &rsaquo; Bookmarked artists";
 
 if ($Viewer->permitted('site_torrents_notify')) {
-    if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
+    if (($Notify = $Cache->get_value('notify_artists_' . $Viewer->id() )) === false) {
         $DB->prepared_query("
             SELECT ID, Artists
             FROM users_notify_filters
             WHERE Label = 'Artist notifications'
                 AND UserID = ?
             LIMIT 1
-            ", $LoggedUser['ID']
+            ", $Viewer->id()
         );
         $Notify = $DB->next_record(MYSQLI_ASSOC);
-        $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
+        $Cache->cache_value('notify_artists_' . $Viewer->id(), $Notify, 0);
     }
 }
 
@@ -87,9 +85,9 @@ foreach ($ArtistList as $Artist) {
     if (check_perms('site_torrents_notify')) {
         if (stripos($Notify['Artists'], "|$Name|") === false) {
 ?>
-                    <a href="artist.php?action=notify&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Notify of new uploads</a>
+                    <a href="artist.php?action=notify&amp;artistid=<?=$ArtistID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Notify of new uploads</a>
 <?php } else { ?>
-                    <a href="artist.php?action=notifyremove&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Do not notify of new uploads</a>
+                    <a href="artist.php?action=notifyremove&amp;artistid=<?=$ArtistID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Do not notify of new uploads</a>
 <?php
         }
     }

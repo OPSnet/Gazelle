@@ -1,7 +1,7 @@
 <?php
 
 if (empty($_GET['userid'])) {
-    $UserID = $LoggedUser['ID'];
+    $UserID = $Viewer->id();
 } else {
     if (!check_perms('users_override_paranoia')) {
         print json_encode(['status' => 'failure']);

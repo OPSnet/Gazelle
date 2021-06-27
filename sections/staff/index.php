@@ -11,7 +11,7 @@ echo $Twig->render('staff/index.twig', [
     'reply' => new Gazelle\Util\Textarea('quickpost', ''),
     'fls'   => $userMan->flsList(),
     'staff' => $userMan->staffListGrouped(),
-    'user'  => new Gazelle\User($LoggedUser['ID']),
+    'user'  => $Viewer,
     'level' => [
         'fmod'  => $classList[FORUM_MOD]['Level'],
         'mod'   => $classList[MOD]['Level'],

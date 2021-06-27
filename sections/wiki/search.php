@@ -22,7 +22,6 @@ $TypeMap = [
 ];
 $Type = $TypeMap[$_GET['type'] ?? 'title'];
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $search = new Gazelle\Search\Wiki($Viewer, $Type, $_GET['search'] ?? '');
 $search->setOrderBy($header->getOrderBy())->setOrderDir($header->getOrderDir());
 

@@ -8,7 +8,7 @@ if (isset($_GET['perform'])) {
     if ($_GET['perform'] == 'delete') {
         $IPv4Man->removeBan((int)$_GET['id']);
     } elseif ($_GET['perform'] == 'create') {
-        $IPv4Man->createBan($LoggedUser['ID'], $_GET['ip'], $_GET['ip'], trim($_GET['notes']));
+        $IPv4Man->createBan($Viewer->id(), $_GET['ip'], $_GET['ip'], trim($_GET['notes']));
     } else {
         error(403);
     }

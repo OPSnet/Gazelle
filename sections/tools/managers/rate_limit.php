@@ -73,7 +73,7 @@ foreach ($list as $rateLimitInfo) {
         <td><?= $rateLimitInfo['overshoot'] ?></td>
 <?php if (check_perms('admin_rate_limit_manage')) { ?>
         <td>
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="submit" name="remove-<?= $rateLimitInfo['ID'] ?>" value="Remove"
                 onclick="return confirm('Are you sure you want to remove this rate limit? This is an irreversible action!')" />
         </td>
@@ -109,7 +109,7 @@ if (check_perms('admin_rate_limit_manage')) {
         <td><input type="text" size="6" name="overshoot" /></td>
         <td>
             <input type="hidden" name="task" value="add" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="submit" name="submit" value="Create" />
         </td>
     </tr>

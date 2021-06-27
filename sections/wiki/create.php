@@ -7,6 +7,6 @@ echo $Twig->render('wiki/article.twig', [
     'class_list' => (new Gazelle\Manager\User)->classList(),
     'edit'       => 0,
     'read'       => 0,
-    'viewer'     => new Gazelle\User($LoggedUser['ID']),
+    'viewer'     => $Viewer,
 ]);
 View::show_footer();

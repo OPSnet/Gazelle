@@ -44,7 +44,7 @@ if (empty($_POST['confirm'])) {
     <div class="box pad">
         <form class="confirm_form" name="torrent_group" action="torrents.php" method="post">
             <input type="hidden" name="action" value="merge" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="confirm" value="true" />
             <input type="hidden" name="groupid" value="<?=$oldGroupId?>" />
             <input type="hidden" name="targetgroupid" value="<?=$newGroupId?>" />
@@ -210,6 +210,6 @@ if (empty($_POST['confirm'])) {
         WHERE GroupID = ?
         ", $newGroupId, $oldGroupId
     );
-    (new Gazelle\Log)->group($newGroupId, $LoggedUser['ID'], "Merged Group $oldGroupId ($oldName) to $newGroupId ($newName)");
+    (new Gazelle\Log)->group($newGroupId, $Viewer->id(), "Merged Group $oldGroupId ($oldName) to $newGroupId ($newName)");
     header("Location: torrents.php?id=" . $newGroupId);
 }
