@@ -192,7 +192,7 @@ if (empty($_POST['confirm'])) {
     );
 
     Torrents::delete_group($oldGroupId);
-    (new \Gazelle\Manager\TGroup)->refresh($newGroupID);
+    (new \Gazelle\Manager\TGroup)->refresh($newGroupId);
 
     $Cache->deleteMulti([
         "requests_group_$newGroupId",
