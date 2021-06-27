@@ -76,7 +76,7 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
         break;
     }
 
-    $changed = $tagMan->merge($currentId, $replacement, $LoggedUser['ID']);
+    $changed = $tagMan->merge($currentId, $replacement, $Viewer->id());
     $success[] = "<b>$changed tag" . plural($changed) . "</b> changed";
 
     if ($_GET['alias']) {
@@ -87,7 +87,7 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
     if ($_GET['official']) {
         $madeOfficial = 0;
         foreach ($replacement as $r) {
-            $madeOfficial += $tagMan->officialize($r, $LoggedUser['ID']);
+            $madeOfficial += $tagMan->officialize($r, $Viewer->id());
         }
         $success[] = "<b>$madeOfficial tag" . plural($madeOfficial) . "</b> made official";
     }

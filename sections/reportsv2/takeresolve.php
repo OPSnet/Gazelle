@@ -70,7 +70,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
         }
     }
 
-    if ($report->moderatorResolve($LoggedUser['ID'], $Comment)) {
+    if ($report->moderatorResolve($Viewer->id(), $Comment)) {
         $Cache->deleteMulti(['num_torrent_reportsv2', "reports_torrent_$torrentId"]);
     } else {
         //Someone beat us to it. Inform the staffer.
@@ -107,13 +107,13 @@ $GroupID = $DB->scalar("
     ", $torrentId
 );
 if (!$GroupID) {
-    $report->moderatorResolve($LoggedUser['ID'], 'Report already dealt with (torrent deleted).');
+    $report->moderatorResolve($Viewer->id(), 'Report already dealt with (torrent deleted).');
     $Cache->decrement('num_torrent_reportsv2');
 }
 
 $check = false;
 if ($fromReportPage) {
-    $check = $report->moderatorResolve($LoggedUser['ID'], '');
+    $check = $report->moderatorResolve($Viewer->id(), '');
 }
 
 //See if it we managed to resolve
@@ -126,7 +126,7 @@ if (!($check || !$fromReportPage)) {
     exit;
 }
 
-$report->setModeratorId($LoggedUser['ID'])->setGroupId($GroupID)->setTorrentId($torrentId);
+$report->setModeratorId($Viewer->id())->setGroupId($GroupID)->setTorrentId($torrentId);
 
 if ($_POST['resolve_type'] === 'tags_lots') {
     $report->setTorrentFlag('torrents_bad_tags');
@@ -158,12 +158,12 @@ if (!(isset($_POST['delete']) && check_perms('users_mod'))) {
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
 } else {
     $Log = "Torrent $torrentId ($rawName) uploaded by " . $uploader->username()
-        . " was deleted by " . $LoggedUser['Username']
+        . " was deleted by " . $Viewer->username()
         . ($_POST['resolve_type'] == 'custom' ? '' : ' for the reason: ' . $ResolveType['title'] . ".")
         . ($logMessage ? " $logMessage" : '');
     $torMan->findById($torrentId)
         ->remove(
-            $LoggedUser['ID'],
+            $Viewer->id(),
             sprintf('%s (%s)', $ResolveType['title'], $logMessage ?? 'none'),
             $ResolveType['reason']
         );
@@ -192,11 +192,11 @@ if ($weeksWarned > 0) {
     if ($revokeUpload) {
         $Reason .= ' (Upload privileges removed).';
     }
-    $userMan->warn($uploaderId, $WarnLength, $Reason, $LoggedUser['Username']);
+    $userMan->warn($uploaderId, $WarnLength, $Reason, $Viewer->username());
 } else {
     $staffNote = null;
     if ($revokeUpload) {
-        $staffNote = 'Upload privileges removed by '.$LoggedUser['Username']
+        $staffNote = 'Upload privileges removed by '.$Viewer->username()
             . "\nReason: Uploader of torrent ($torrentId) $rawName which was [url=$reportUrl]resolved with the preset: "
             . $ResolveType['title'] . "[/url].";
     }

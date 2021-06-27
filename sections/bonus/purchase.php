@@ -10,7 +10,7 @@ $label = $_REQUEST['label'];
 switch($label) {
     case 'collage-1':
         try {
-            if ($Bonus->purchaseCollage($LoggedUser['ID'], $label)) {
+            if ($Bonus->purchaseCollage($Viewer->id(), $label)) {
                 header("Location: bonus.php?complete=$label");
                 exit;
             }
@@ -23,7 +23,7 @@ switch($label) {
         break;
     case 'seedbox':
         try {
-            if ($Bonus->unlockSeedbox($LoggedUser['ID'])) {
+            if ($Bonus->unlockSeedbox($Viewer->id())) {
                 header("Location: bonus.php?complete=$label");
                 exit;
             }

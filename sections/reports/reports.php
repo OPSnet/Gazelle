@@ -213,7 +213,7 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                 </tr>
                 <tr>
                     <td colspan="2">
-<?php               if ($ClaimerID == $LoggedUser['ID']) { ?>
+<?php               if ($ClaimerID == $Viewer->id()) { ?>
                         <span id="claimed_<?=$ReportID?>">Claimed by <?=Users::format_username($ClaimerID, false, false, false, false)?> <a href="#" onclick="unClaim(<?=$ReportID?>); return false;" class="brackets">Unclaim</a></span>
 <?php               } elseif ($ClaimerID) { ?>
                         <span id="claimed_<?=$ReportID?>">Claimed by <?=Users::format_username($ClaimerID, false, false, false, false)?></span>
@@ -235,8 +235,8 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                     <td class="center" colspan="2">
                         <form id="report_form_<?=$ReportID?>" action="">
                             <input type="hidden" name="reportid" value="<?=$ReportID?>" />
-                            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-                            <input type="submit" onclick="return resolve(<?=$ReportID?>, <?=(($ClaimerID == $LoggedUser['ID'] || !$ClaimerID) ? 'true' : 'false')?>)" name="submit" value="Resolve" />
+                            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
+                            <input type="submit" onclick="return resolve(<?=$ReportID?>, <?=(($ClaimerID == $Viewer->id() || !$ClaimerID) ? 'true' : 'false')?>)" name="submit" value="Resolve" />
                         </form>
                     </td>
                 </tr>

@@ -78,9 +78,7 @@ switch ($Short) {
             SELECT MinClassRead FROM forums WHERE ID = ?
             ", $ForumID
         );
-        if (!empty($LoggedUser['DisableForums'])
-                || ($MinClassRead > $LoggedUser['EffectiveClass'] && (!isset($LoggedUser['CustomForums'][$ForumID]) || $LoggedUser['CustomForums'][$ForumID] == 0))
-                || (isset($LoggedUser['CustomForums'][$ForumID]) && $LoggedUser['CustomForums'][$ForumID] == 0)) {
+        if ($Viewer->disableForums() || !$Viewer->forumAccess($ForumID, $MinClassRead)) {
             error(403);
         }
         break;
@@ -103,9 +101,7 @@ switch ($Short) {
             WHERE ft.ID = ?
             ", $TopicID
         );
-        if (!empty($LoggedUser['DisableForums'])
-                || ($MinClassRead > $LoggedUser['EffectiveClass'] && (!isset($LoggedUser['CustomForums'][$ForumID]) || $LoggedUser['CustomForums'][$ForumID] == 0))
-                || (isset($LoggedUser['CustomForums'][$ForumID]) && $LoggedUser['CustomForums'][$ForumID] == 0)) {
+        if ($Viewer->disableForums() || !$Viewer->forumAccess($ForumID, $MinClassRead)) {
             error(403);
         }
         break;
@@ -169,7 +165,7 @@ switch ($Short) {
         <p><strong>It will greatly increase the turnover rate of the updates if you can fill in as much of the following details as possible.</strong></p>
         <form class="create_form" id="report_form" name="report" action="" method="post">
             <input type="hidden" name="action" value="takereport" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="type" value="<?=$Short?>" />
             <table class="layout">
@@ -291,7 +287,7 @@ if (empty($NoReason)) {
     <div class="box pad center">
         <form class="create_form" name="report" id="report_form" action="" method="post">
             <input type="hidden" name="action" value="takereport" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="type" value="<?=$Short?>" />
             <textarea class="required" rows="10" cols="95" name="reason"></textarea><br /><br />

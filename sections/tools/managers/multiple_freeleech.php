@@ -93,7 +93,7 @@ if (isset($_POST['torrents'])) {
     </div>
     <div class="box pad">
         <form class="send_form center" action="" method="post">
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <textarea name="torrents" style="width: 95%; height: 200px;"><?=$_POST['torrents']?></textarea><br /><br />
             Mark torrents as:&nbsp;
             <select name="freeleechtype">

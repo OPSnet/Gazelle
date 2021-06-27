@@ -180,7 +180,7 @@ foreach ($Results as $Key => $GroupID) {
             'artist' => $DisplayName,
             'cover' => $GroupInfo['WikiImage'],
             'tags' => $TagList,
-            'bookmarked' => $bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID),
+            'bookmarked' => $bookmark->isTorrentBookmarked($Viewer->id(), $GroupID),
             'vanityHouse' => $GroupInfo['VanityHouse'] == '1',
             'groupYear' => (int)$GroupYear,
             'releaseType' => $releaseMan->findNameById($ReleaseType),

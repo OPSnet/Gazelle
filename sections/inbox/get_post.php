@@ -13,7 +13,7 @@ $body = $DB->scalar("
     INNER JOIN pm_conversations_users AS u USING (ConvID)
     WHERE u.UserID = ?
         AND m.ID = ?
-    ", $LoggedUser['ID'], $postId
+    ", $Viewer->id(), $postId
 );
 
 // This gets sent to the browser, which echoes it wherever

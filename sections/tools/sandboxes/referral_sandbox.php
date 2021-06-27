@@ -88,7 +88,7 @@ var_dump($response)
     <h3>Manual</h3>
     <form class="send_form" action="" method="post">
         <input type="hidden" name="action" value="referral_sandbox" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <table class="layout">
             <tbody>
                 <tr>
@@ -140,7 +140,7 @@ var_dump($response)
     <h3>Auto</h3>
     <form class="send_form" action="" method="post">
         <input type="hidden" name="action" value="referral_sandbox" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
         <table class="layout">
             <tbody>
                 <tr>

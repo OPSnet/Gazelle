@@ -15,12 +15,12 @@ try {
 } catch (\Gazelle\Exception\ResourceNotFoundException $e) {
     error(404, true);
 }
-if ($comment->userId() != $LoggedUser['ID'] && !check_perms('site_moderate_forums')) {
+if ($comment->userId() != $Viewer->id() && !check_perms('site_moderate_forums')) {
     error(403, true);
 }
 
-$comment->setBody($body)->setEditedUserID($LoggedUser['ID'])->modify();
-if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($LoggedUser['ID'])) {
+$comment->setBody($body)->setEditedUserID($Viewer->id())->modify();
+if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($Viewer->id())) {
     // Send a PM to the user to notify them of the edit
     $id = $comment->id();
     $url = SITE_URL . "/comments.php?action=jump&postid=$id";

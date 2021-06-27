@@ -6,9 +6,9 @@ if (isset($_GET['userid']) && check_perms('users_mod')) {
 
     $UserID = $_GET['userid'];
 } else {
-    $UserID = $LoggedUser['ID'];
+    $UserID = $Viewer->id();
 }
-$OwnProfile = $UserID == $LoggedUser['ID'];
+$OwnProfile = $UserID == $Viewer->id();
 
 $Charts = $Cache->get_value("user_statgraphs_$UserID");
 
@@ -106,7 +106,7 @@ if (check_perms('users_mod')) {
         <a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
 <?php
 }
-if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('site_user_stats'))) {
+if (check_perms('users_mod') || ($Viewer->id() == $UserID && check_perms('site_user_stats'))) {
 ?>
         <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?php

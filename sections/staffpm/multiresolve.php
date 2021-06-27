@@ -9,15 +9,15 @@ if (!$IDs) {
 foreach ($IDs as $ID) {
     $ID = (int)$ID;
     // Check if conversation belongs to user
-    [$UserID, $AssignedToUser] = $DB->row("
-        SELECT UserID, AssignedToUser
+    [$UserID, $AssignedToUser, $Level] = $DB->row("
+        SELECT UserID, AssignedToUser, Level
         FROM staff_pm_conversations
         WHERE ID = ?
         ", $ID
     );
-    if (  (!$user->isStaffPMReader() && $LoggedUser['ID'] != $UserID)
-        || ($user->isFLS() && !in_array($AssignedToUser, ['', $LoggedUser['ID']]))
-        || ($user->isStaff() && $Level > $user->effectiveClass())
+    if (  (!$Viewer->isStaffPMReader() && $Viewer->id() != $UserID)
+        || ($Viewer->isFLS() && !in_array($AssignedToUser, ['', $Viewer->id()]))
+        || ($Viewer->isStaff() && $Level > $Viewer->effectiveClass())
     ) {
         // nope
         continue;
@@ -28,9 +28,9 @@ foreach ($IDs as $ID) {
             Status = 'Resolved',
             ResolverID = ?
         WHERE ID = ?
-        ", $LoggedUser['ID'], $ID
+        ", $Viewer->id(), $ID
     );
 }
-$Cache->deleteMulti(["staff_pm_new_" . $LoggedUser['ID'], "num_staff_pms_" . $LoggedUser['ID']]);
+$Cache->deleteMulti(["staff_pm_new_" . $Viewer->id(), "num_staff_pms_" . $Viewer->id()]);
 
 header("Location: staffpm.php");

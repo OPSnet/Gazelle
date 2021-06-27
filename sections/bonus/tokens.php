@@ -11,7 +11,7 @@ if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
 
 if ($match[1] === 'token') {
     try {
-        $Bonus->purchaseToken($LoggedUser['ID'], $Label);
+        $Bonus->purchaseToken($Viewer->id(), $Label);
     } catch (BonusException $e) {
         $message = $e->getMessage();
         error("Purchase not concluded ($message).");
@@ -24,11 +24,11 @@ else {
     $user = (new Gazelle\Manager\User)->findByUsername(urldecode($_GET['user']));
     if (is_null($user)) {
         error('Nobody with that name found at ' . SITE_NAME . '. Are you certain the spelling is right?');
-    } elseif ($user->id() == $LoggedUser['ID']) {
+    } elseif ($user->id() == $Viewer->id()) {
         error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
     try {
-        $Bonus->purchaseTokenOther($LoggedUser['ID'], $user->id(), $Label);
+        $Bonus->purchaseTokenOther($Viewer->id(), $user->id(), $Label);
     } catch (BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');

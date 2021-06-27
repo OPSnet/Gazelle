@@ -9,7 +9,7 @@ $userId = $DB->scalar("
 if (is_null($userId)) {
     error(404);
 }
-if ($userId != $LoggedUser['ID']) {
+if ($userId != $Viewer->id()) {
     error(403);
 }
 

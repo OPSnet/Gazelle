@@ -1,16 +1,15 @@
 <?php
 
-if (!empty($LoggedUser['DisableForums'])) {
+if (!$Viewer->disableForums()) {
     error(403);
 }
 $userMan = new Gazelle\Manager\User;
-$user = $userMan->findById(empty($_GET['userid']) ? $LoggedUser['ID'] : (int)$_GET['userid']);
-if (!$user) {
+$user = empty($_GET['userid']) ? $Viewer : $userMan->findById((int)$_GET['userid']);
+if (is_null($user)) {
     error(404);
 }
-$viewer = new Gazelle\User($LoggedUser['ID']);
 
-$ownProfile = ($user->id() === $LoggedUser['ID']);
+$ownProfile = $user->id() === $Viewer->id();
 $showUnread = ($ownProfile && (!isset($_GET['showunread']) || !!$_GET['showunread']));
 $showGrouped = ($ownProfile && (!isset($_GET['group']) || !!$_GET['group']));
 
@@ -22,7 +21,7 @@ if ($showGrouped) {
     $title = "Post history";
 }
 
-$forumSearch = (new Gazelle\ForumSearch(new Gazelle\User($LoggedUser['ID'])))
+$forumSearch = (new Gazelle\ForumSearch($Viewer))
     ->setPosterId($user->id())
     ->setShowGrouped($ownProfile && $showGrouped)
     ->setShowUnread($ownProfile && $showUnread);
@@ -33,7 +32,7 @@ $paginator->setTotal($forumSearch->postHistoryTotal());
 View::show_header($user->username() . " &rsaquo; $title", 'subscriptions,comments,bbcode');
 
 echo $Twig->render('user/post-history.twig', [
-    'avatar'        => $userMan->avatarMarkup($viewer, $user),
+    'avatar'        => $userMan->avatarMarkup($Viewer, $user),
     'is_fmod'       => check_perms('site_moderate_forums'),
     'own_profile'   => $ownProfile,
     'paginator'     => $paginator,
@@ -44,7 +43,7 @@ echo $Twig->render('user/post-history.twig', [
     'title'         => $title,
     'url_stem'      => 'userhistory.php?action=posts&amp;userid=' . $user->id() . '&amp;',
     'user'          => $user,
-    'viewer'        => $viewer,
+    'viewer'        => $Viewer,
 ]);
 
 View::show_footer();

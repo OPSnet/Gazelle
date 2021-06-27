@@ -23,7 +23,7 @@ View::show_header('Database Encryption Key');
     <form class="create_form" name="db_key" method="post" action="">
         <div class="pad">
             <input type="hidden" name="action" value="dbkey" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="text" name="dbkey" class="inputtext" /> <br />
 
             <div class="center">

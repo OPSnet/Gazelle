@@ -20,7 +20,7 @@ if ($_GET['id']) {
 }
 ?>
 <form id="event_form" name="event_form" method="post" action="">
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 <?php
     if ($Event) { ?>
     <input type="hidden" name="id" value="<?=$Event['ID']?>" />
@@ -108,7 +108,7 @@ if ($_GET['id']) {
         <tr>
             <td class="label small_label">Created by:</td>
             <td>
-                <?=$Event ? Users::format_username($Event['AddedBy']) : Users::format_username($LoggedUser['ID'])?>
+                <?=$Event ? Users::format_username($Event['AddedBy']) : Users::format_username($Viewer->id())?>
             </td>
         </tr>
         <tr>

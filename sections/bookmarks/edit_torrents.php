@@ -11,7 +11,7 @@ function artistName(array &$extended, array &$artists) {
 }
 
 if (empty($_GET['userid'])) {
-    $user = new Gazelle\User($LoggedUser['ID']);
+    $user = $Viewer;
 } else {
     if (!check_perms('users_override_paranoia')) {
         error(403);
@@ -56,7 +56,7 @@ if (empty($TorrentList)) {
     ]);
 
     echo $Twig->render('bookmark/footer.twig', [
-        'auth'      => $LoggedUser['AuthKey'],
+        'auth'      => $Viewer->auth(),
         'edit_type' => $_GET['type'] ?? 'torrents',
     ]);
 }

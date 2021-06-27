@@ -5,7 +5,7 @@ View::show_header('Staff Inbox');
 $View = display_str(empty($_GET['view']) ? '' : $_GET['view']);
 
 // Setup for current view mode
-$SortStr = 'IF(AssignedToUser = '.$LoggedUser['ID'].', 0, 1) ASC, ';
+$SortStr = 'IF(AssignedToUser = ' . $Viewer->id() . ', 0, 1) ASC, ';
 switch ($View) {
     case 'unanswered':
         $ViewString = 'Unanswered';
@@ -27,7 +27,7 @@ switch ($View) {
         break;
     default:
         $Status = "Unanswered";
-        if ($user->isStaff()) {
+        if ($Viewer->isStaff()) {
             $ViewString = 'Your Unanswered';
         } else {
             // FLS
@@ -35,9 +35,9 @@ switch ($View) {
         }
         break;
 }
-$UserLevel = $user->effectiveClass();
+$UserLevel = $Viewer->effectiveClass();
 $WhereCondition = "
-    WHERE (spc.Level <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
+    WHERE (spc.Level <= $UserLevel OR spc.AssignedToUser = '".$Viewer->id()."')
         AND spc.Status IN ('$Status')";
 
 $Classes = (new Gazelle\Manager\User)->classList();
@@ -54,7 +54,7 @@ $Sections = [
     'open' => "Unresolved",
     'resolved' => 'Resolved',
 ];
-if ($user->isStaff()) {
+if ($Viewer->isStaff()) {
     $Sections = ['' => 'Your unanswered'] + $Sections;
 }
 
@@ -72,7 +72,7 @@ foreach ($Sections as $Section => $Text) {
             FROM staff_pm_conversations
             WHERE Status IN ('Unanswered')
                 AND (Level <= ? OR AssignedToUser = ?)
-            ", $UserLevel, $LoggedUser['ID']
+            ", $UserLevel, $Viewer->id()
         ) . ')';
     } elseif ($Section == 'open') {
         $Text .= '(' . $DB->scalar("
@@ -80,7 +80,7 @@ foreach ($Sections as $Section => $Text) {
             FROM staff_pm_conversations
             WHERE Status IN ('Open', 'Unanswered')
                 AND (Level <= ? OR AssignedToUser = ?)
-            ", $UserLevel, $LoggedUser['ID']
+            ", $UserLevel, $Viewer->id()
         ) . ')';
     }
     if ($Section == $View) {
@@ -98,7 +98,7 @@ if (check_perms('admin_staffpm_stats')) { ?>
             <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 <?php
 }
-    if ($user->isFLS()) { ?>
+    if ($Viewer->isFLS()) { ?>
             <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
 <?php    } ?>
         </div>
@@ -145,16 +145,16 @@ $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
 <?php
 } else {
     // Messages, draw table
-    if ($ViewString != 'Resolved' && $user->isStaff()) {
+    if ($ViewString != 'Resolved' && $Viewer->isStaff()) {
         // Open multiresolve form
 ?>
         <form class="manage_form" name="staff_messages" method="post" action="staffpm.php" id="messageform">
             <input type="hidden" name="action" value="multiresolve" />
             <input type="hidden" name="view" value="<?=strtolower($View)?>" />
 <?php } ?>
-            <table class="message_table<?=($ViewString != 'Resolved' && $user->isStaff()) ? ' checkboxes' : '' ?>">
+            <table class="message_table<?=($ViewString != 'Resolved' && $Viewer->isStaff()) ? ' checkboxes' : '' ?>">
                 <tr class="colhead">
-<?php     if ($ViewString != 'Resolved' && $user->isStaff()) { ?>
+<?php     if ($ViewString != 'Resolved' && $Viewer->isStaff()) { ?>
                     <td width="10"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
 <?php     } ?>
                     <td>Subject</td>
@@ -186,7 +186,7 @@ $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
         }
 ?>
                 <tr class="row<?= $Row ?>">
-<?php         if ($ViewString != 'Resolved' && $user->isStaff()) { ?>
+<?php         if ($ViewString != 'Resolved' && $Viewer->isStaff()) { ?>
                     <td class="center"><input type="checkbox" name="id[]" value="<?=$ID?>" /></td>
 <?php         } ?>
                     <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
@@ -203,7 +203,7 @@ $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
     } //while
 ?>
             </table>
-<?php     if ($ViewString != 'Resolved' && $user->isStaff()) { ?>
+<?php     if ($ViewString != 'Resolved' && $Viewer->isStaff()) { ?>
             <div class="submit_div">
                 <input type="submit" value="Resolve selected" />
             </div>

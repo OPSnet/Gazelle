@@ -1,6 +1,5 @@
 <?php
 
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 if (!$Viewer->permitted('admin_manage_invite_source')) {
     error(403);
 }

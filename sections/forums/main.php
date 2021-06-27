@@ -2,7 +2,6 @@
 
 $forumMan = new Gazelle\Manager\Forum();
 $toc = $forumMan->tableOfContentsMain();
-$user = new Gazelle\User($LoggedUser['ID']);
 
 View::show_header('Forums');
 ?>
@@ -14,23 +13,23 @@ foreach ($toc as $category => $forumList) {
     $seen = 0;
     foreach ($forumList as $f) {
         $forum = new Gazelle\Forum($f['ID']);
-        if (!$user->readAccess($forum)) {
+        if (!$Viewer->readAccess($forum)) {
             continue;
         }
         if ($f['ID'] == DONOR_FORUM) {
             $f['Description'] = donorForumDescription();
         }
-        $userLastRead = $forum->userLastRead($LoggedUser['ID'], $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
+        $userLastRead = $forum->userLastRead($Viewer->id(), $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
         if (isset($userLastRead[$f['LastPostTopicID']])) {
             $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
             $lastReadPost = $userLastRead[$f['LastPostTopicID']]['PostID'];
             $catchup = $userLastRead[$f['LastPostTopicID']]['PostID'] >= $f['LastPostID']
-                || $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
+                || $Viewer->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
             $isRead = true;
         } else {
             $lastReadPage = null;
             $lastReadPost = null;
-            $catchup = $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
+            $catchup = $Viewer->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
             $isRead = false;
         }
 
@@ -69,7 +68,7 @@ foreach ($toc as $category => $forumList) {
 } /* foreach */
 ?>
     </div>
-    <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=all&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a></div>
+    <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=all&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a></div>
 </div>
 <?php
 View::show_footer();

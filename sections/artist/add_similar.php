@@ -24,7 +24,7 @@ if (is_null($similar)) {
         }
     }
 }
-$artist->addSimilar($similar, $LoggedUser['ID']);
+$artist->addSimilar($similar, $Viewer->id());
 
 if (defined('AJAX')) {
     json_print('success', [

@@ -34,7 +34,7 @@ if (isset($_REQUEST['add_points'])) {
 
 View::show_header('Add tokens sitewide');
 echo $Twig->render('admin/bonus-points.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
+    'auth'    => $Viewer->auth(),
     'message' => $message,
     'since'   =>  date("Y-m-d", strtotime("-120 day", time())),
 ]);

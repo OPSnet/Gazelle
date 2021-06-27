@@ -9,15 +9,15 @@ if (isset($_GET['task'])) {
     if ($id) {
         switch ($_GET['task']) {
             case 'accept';
-                $ok = $recovery->accept($id, $LoggedUser['ID'], $LoggedUser['Username']);
+                $ok = $recovery->accept($id, $Viewer->id(), $Viewer->username());
                 $message = $ok ? '<font color="#008000">Invite sent</font>' : '<font color="#800000">Invite not sent, check log</font>';
                 break;
             case 'deny';
-                $recovery->deny($id, $LoggedUser['ID'], $LoggedUser['Username']);
+                $recovery->deny($id, $Viewer->id(), $Viewer->username());
                 $message = sprintf('<font color="orange">Request %d was denied</font>', $id);
                 break;
             case 'unclaim';
-                $recovery->unclaim($id, $LoggedUser['Username']);
+                $recovery->unclaim($id, $Viewer->username());
                 $message = sprintf('<font color="orange">Request %d was unclaimed</font>', $id);
                 break;
             default:
@@ -44,8 +44,8 @@ $Limit  = 100;
 $Offset = $Limit * ($Page-1);
 
 $State = isset($_GET['state']) ? $_GET['state'] : 'pending';
-$Total = $recovery->getTotal($State, $LoggedUser['ID']);
-$Info  = $recovery->getList($Limit, $Offset, $State, $LoggedUser['ID']);
+$Total = $recovery->getTotal($State, $Viewer->id());
+$Info  = $recovery->getList($Limit, $Offset, $State, $Viewer->id());
 
 $Pages = Format::get_pages($Page, $Total, $Limit);
 
@@ -109,7 +109,7 @@ View::show_header('Recovery administration');
                 <td>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
 <?php   if ($i['state'] == 'PENDING') { ?>
-                    <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= $LoggedUser['ID'] ?>">Claim</a>
+                    <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= $Viewer->id() ?>">Claim</a>
 <?php   } ?>
                 </td>
             </tr>

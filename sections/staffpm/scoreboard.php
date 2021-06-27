@@ -49,7 +49,7 @@ View::show_header('Staff Inbox');
 ?>
     <div class="thin">
         <div class="linkbox">
-<?php if ($user->isStaff()) { ?>
+<?php if ($Viewer->isStaff()) { ?>
             <a href="staffpm.php" class="brackets">View your unanswered</a>
 <?php } ?>
             <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
@@ -57,7 +57,7 @@ View::show_header('Staff Inbox');
             <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
             <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
             <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
-<?php if ($user->isFLS()) { ?>
+<?php if ($Viewer->isFLS()) { ?>
             <span class="tooltip" title="The Staff PMs that you created are here."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
 <?php } ?>
         </div>

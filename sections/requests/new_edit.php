@@ -19,7 +19,6 @@ if ($NewRequest && ($LoggedUser['BytesUploaded'] < 250 * 1024 * 1024 || !check_p
 }
 
 $RequestTaxPercent = ($RequestTax * 100);
-$user = new Gazelle\User($LoggedUser['ID']);
 
 if (!$NewRequest) {
     if (empty($ReturnEdit)) {
@@ -54,7 +53,7 @@ if (!$NewRequest) {
         $IsFilled = !empty($Request['TorrentID']);
         $CategoryName = $Categories[$CategoryID - 1];
 
-        $CanEdit = ((!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
+        $CanEdit = ((!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
         if (!$CanEdit) {
             error(403);
         }
@@ -148,7 +147,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 <?php    if (!$NewRequest) { ?>
                 <input type="hidden" name="requestid" value="<?=$RequestID?>" />
 <?php    } ?>
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="action" value="<?=($NewRequest ? 'takenew' : 'takeedit')?>" />
             </div>
 
@@ -181,7 +180,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                 foreach ($ArtistNames as $Artist) {
 ?>
                         <input type="text" id="artist_<?=$cnt ?>" name="artists[]"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" value="<?=display_str($Artist['name']) ?>" />
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" value="<?=display_str($Artist['name']) ?>" />
                         <select id="importance" name="importance[]">
                             <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
                             <option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -201,7 +200,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
         } else {
 ?>
                         <input type="text" id="artist_0" name="artists[]"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" onblur="CheckVA();" />
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" onblur="CheckVA();" />
                         <select id="importance" name="importance[]">
                             <option value="1">Main</option>
                             <option value="2">Guest</option>
@@ -271,7 +270,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 <?php    } ?>
                         </select>
                         <input type="text" id="tags" name="tags" size="45" value="<?= empty($Tags) ? '' : display_str($Tags) ?>"<?=
-                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
+                            $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <br />
                         Tags should be comma-separated, and you should use a period (".") to separate words inside a tag&#8202;&mdash;&#8202;e.g. "<strong class="important_text_alt">hip.hop</strong>".
                         <br /><br />

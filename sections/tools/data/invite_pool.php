@@ -23,7 +23,7 @@ $paginator->setTotal($inviteMan->totalPending());
 
 View::show_header('Invite Pool');
 echo $Twig->render('invite/pool.twig', [
-    'auth'      => $LoggedUser['AuthKey'],
+    'auth'      => $Viewer->auth(),
     'paginator' => $paginator,
     'list'      => $inviteMan->pendingInvites($paginator->limit(), $paginator->offset()),
     'pending'   => $pending,

@@ -1,16 +1,16 @@
 <?php
 
-if (!empty($LoggedUser['DisableForums'])) {
+if ($Viewer->disableForums()) {
     error(403);
 }
 
-$user = (new Gazelle\Manager\User)->findById((int)$_GET['userid'] ?: $LoggedUser['ID']);
+$user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
 if (is_null($user)) {
     error(404);
 }
 $forumSearch = new Gazelle\ForumSearch($user);
-if ($LoggedUser['ID'] != $user->id()) {
-    $forumSearch->setViewer(new Gazelle\User($LoggedUser['ID']));
+if ($Viewer->id() != $user->id()) {
+    $forumSearch->setViewer($Viewer);
 }
 
 $paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));

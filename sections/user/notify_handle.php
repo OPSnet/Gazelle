@@ -34,9 +34,9 @@ if ($error) {
 }
 
 if ($filterId) {
-    $filter->modify($LoggedUser['ID'], $filterId);
+    $filter->modify($Viewer->id(), $filterId);
 } else {
-    $filter->create($LoggedUser['ID']);
+    $filter->create($Viewer->id());
 }
 
 $Cache->deleteMulti(["notify_filters_{$LoggedUser['ID']}", "notify_artists_{$LoggedUser['ID']}"]);

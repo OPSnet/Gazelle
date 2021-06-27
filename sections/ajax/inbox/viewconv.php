@@ -5,7 +5,7 @@ if (!$ConvID || !is_number($ConvID)) {
     die();
 }
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 [$InInbox, $InSentbox] = $DB->row("
     SELECT InInbox, InSentbox
     FROM pm_conversations_users

@@ -7,7 +7,7 @@ if (!$ConvID) {
     error(404);
 }
 
-$UserID = $LoggedUser['ID'];
+$UserID = $Viewer->id();
 [$InInbox, $InSentbox] = $DB->row("
     SELECT InInbox, InSentbox
     FROM pm_conversations_users
@@ -127,13 +127,13 @@ $DB->prepared_query("
 );
 $ReceiverIDs = $DB->collect('UserID');
 
-if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect($ReceiverIDs, array_keys($StaffIDs)))) {
+if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverIDs, array_keys($StaffIDs)))) {
 ?>
     <h3>Reply</h3>
     <form class="send_form" name="reply" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="toid" value="<?=implode(',', $ReceiverIDs)?>" />
             <input type="hidden" name="convid" value="<?=$ConvID?>" />
             <textarea id="quickpost" class="required" name="body" cols="90" rows="10" onkeyup="resize('quickpost');"></textarea> <br />
@@ -152,7 +152,7 @@ if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect(
         <div class="box pad">
             <input type="hidden" name="action" value="takeedit" />
             <input type="hidden" name="convid" value="<?=$ConvID?>" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 
             <table class="layout" width="100%">
                 <tr>
@@ -188,12 +188,12 @@ if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID =
         <div class="box pad">
             <input type="hidden" name="action" value="forward" />
             <input type="hidden" name="convid" value="<?=$ConvID?>" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <label for="receiverid">Forward to</label>
             <select id="receiverid" name="receiverid">
 <?php
     foreach ($StaffIDs as $StaffID => $StaffName) {
-        if ($StaffID == $LoggedUser['ID'] || in_array($StaffID, $ReceiverIDs)) {
+        if ($StaffID == $Viewer->id() || in_array($StaffID, $ReceiverIDs)) {
             continue;
         }
 ?>

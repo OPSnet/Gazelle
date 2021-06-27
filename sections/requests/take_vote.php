@@ -52,7 +52,7 @@ $DB->prepared_query('
     VALUES
         (?, ?, ?)
     ON DUPLICATE KEY UPDATE Bounty = Bounty + ?',
-    $RequestID, $LoggedUser['ID'], $Bounty, $Bounty);
+    $RequestID, $Viewer->id(), $Bounty, $Bounty);
 
 $DB->prepared_query('
     UPDATE requests
@@ -63,15 +63,15 @@ $DB->prepared_query('
 $DB->prepared_query('
     UPDATE users_leech_stats
     SET Uploaded = Uploaded - ?
-    WHERE UserID = ?', $Amount, $LoggedUser['ID']);
-$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+    WHERE UserID = ?', $Amount, $Viewer->id());
+$Cache->delete_value('user_stats_'.$Viewer->id());
 
 Requests::update_sphinx_requests($RequestID);
 $DB->prepared_query('
     SELECT UserID
     FROM requests_votes
     WHERE RequestID = ?
-        AND UserID != ?', $RequestID, $LoggedUser['ID']);
+        AND UserID != ?', $RequestID, $Viewer->id());
 $UserIDs = [];
 while (list($UserID) = $DB->next_record()) {
     $UserIDs[] = $UserID;

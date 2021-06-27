@@ -100,8 +100,8 @@ foreach ($tasks as $task) {
         <td class="number_column"><?= number_format($events) ?></td>
         <td>
 <?php if ($canLaunch) { ?>
-            <a class="brackets" href="tools.php?action=periodic&amp;mode=run_now&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;id=<?=$id?>">Run Now</a>
-            <a class="brackets" href="schedule.php?auth=<?=$LoggedUser['AuthKey']?>&amp;id=<?=$id?>">Debug</a>
+            <a class="brackets" href="tools.php?action=periodic&amp;mode=run_now&amp;auth=<?= $Viewer->auth() ?>&amp;id=<?=$id?>">Run Now</a>
+            <a class="brackets" href="schedule.php?auth=<?= $Viewer->auth() ?>&amp;id=<?=$id?>">Debug</a>
 <?php } ?>
         </td>
     </tr>

@@ -5,12 +5,12 @@ use Gazelle\Util\Irc;
 authorize();
 
 $userMan = new Gazelle\Manager\User;
-$user = $userMan->findById((int)($_REQUEST['userid'] ?? $LoggedUser['ID']));
+$user = empty($_REQUEST['userid']) ? $Viewer : $userMan->findById((int)$_REQUEST['userid']);
 if (is_null($user)) {
     error(404);
 }
 $userId = $user->id();
-if ($userId == $LoggedUser['ID']) {
+if ($userId == $Viewer->id()) {
     $ownProfile = true;
 } else {
     if (!check_perms('admin_bp_history')) {
@@ -20,8 +20,8 @@ if ($userId == $LoggedUser['ID']) {
 }
 
 if (!$ownProfile && !check_perms('users_edit_profiles')) {
-    Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $LoggedUser['Username']
-        . ' (' . SITE_URL . '/user.php?id=' . $LoggedUser['ID']
+    Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->username()
+        . ' (' . SITE_URL . '/user.php?id=' . $Viewer->id()
         . ') just tried to edit the profile of ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']);
     error(403);
 }

@@ -16,7 +16,7 @@ View::show_header('Reports V2', 'reportsv2');
     SELECT ID, Username
     FROM users_main
     WHERE ID = ?
-", $LoggedUser['ID']);
+", $Viewer->id());
 $owner = display_str($owner);
 $reportMan = new Gazelle\Manager\ReportV2;
 $userMan = new Gazelle\Manager\User;
@@ -38,7 +38,7 @@ $list = $reportMan->resolvedLastDay();
 foreach ($list as $summary) {
     [$userId, $username, $count] = $summary;
 ?>
-            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+            <tr<?= $username == $Viewer->username() ? ' class="rowa"' : '' ?>>
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
                 <td class="number_column"><?=number_format($count)?></td>
             </tr>
@@ -56,7 +56,7 @@ $list = $reportMan->resolvedLastWeek();
 foreach ($list as $summary) {
     [$userId, $username, $count] = $summary;
 ?>
-            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+            <tr<?= $username == $Viewer->username() ? ' class="rowa"' : '' ?>>
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
                 <td class="number_column"><?=number_format($count)?></td>
             </tr>
@@ -74,7 +74,7 @@ $list = $reportMan->resolvedLastMonth();
 foreach ($list as $summary) {
     [$userId, $username, $count] = $summary;
 ?>
-            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+            <tr<?= $username == $Viewer->username() ? ' class="rowa"' : '' ?>>
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
                 <td class="number_column"><?=number_format($count)?></td>
             </tr>
@@ -92,7 +92,7 @@ $list = $reportMan->resolvedSummary();
 foreach ($list as $summary) {
     [$userId, $username, $count] = $summary;
 ?>
-            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+            <tr<?= $username == $Viewer->username() ? ' class="rowa"' : '' ?>>
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
                 <td class="number_column"><?=number_format($count)?></td>
             </tr>
@@ -169,7 +169,7 @@ foreach ($list as $summary) {
 $list = $reportMan->inProgressSummary();
 foreach ($list as $summary) {
 ?>
-            <tr class="<?= $summary['user_id'] == $LoggedUser['ID'] ? 'rowa' : 'rowb' ?>">
+            <tr class="<?= $summary['user_id'] == $Viewer->id() ? 'rowa' : 'rowb' ?>">
                 <td>
                     <a href="reportsv2.php?view=staff&amp;id=<?=$summary['user_id']?>"><?=display_str($userMan->findById($summary['user_id'])->username())?>'s reports</a>
                 </td>

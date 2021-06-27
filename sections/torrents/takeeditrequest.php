@@ -27,7 +27,7 @@ $threadId = $forum->addThread(
     SYSTEM_USER_ID,
     "Editing request – Torrent Group: $groupName",
     $Twig->render('forum/request-edit.twig', [
-        'username' => $LoggedUser['Username'],
+        'username' => $Viewer->username(),
         'url'      => 'torrents.php?id=' . $groupId,
         'name'     => $name,
         'details'  => trim($_POST['edit_details']),

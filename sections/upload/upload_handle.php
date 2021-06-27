@@ -634,7 +634,7 @@ if (!$IsNewGroup) {
     );
     $GroupID = $DB->inserted_id();
     if ($isMusicUpload) {
-        $artistMan->setGroupId($GroupID)->setUserId($LoggedUser['ID']);
+        $artistMan->setGroupId($GroupID)->setUserId($Viewer->id());
         foreach ($ArtistForm as $role => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 $artistMan->addToGroup($Artist['id'], $Artist['aliasid'], $role);
@@ -651,7 +651,7 @@ if ($NoRevision) {
         INSERT INTO wiki_torrents
                (PageID, Body, UserID, Image, Summary)
         VALUES (?,      ?,    ?,      ?,     ?)
-        ', $GroupID, $Properties['GroupDescription'], $LoggedUser['ID'], $Properties['Image'], 'Uploaded new torrent'
+        ', $GroupID, $Properties['GroupDescription'], $Viewer->id(), $Properties['Image'], 'Uploaded new torrent'
     );
     $RevisionID = $DB->inserted_id();
 
@@ -671,8 +671,8 @@ if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $tag) {
         $tag = $tagMan->resolve($tagMan->sanitize($tag));
         if (!empty($tag)) {
-            $TagID = $tagMan->create($tag, $LoggedUser['ID']);
-            $tagMan->createTorrentTag($TagID, $GroupID, $LoggedUser['ID'], 10);
+            $TagID = $tagMan->create($tag, $Viewer->id());
+            $tagMan->createTorrentTag($TagID, $GroupID, $Viewer->id(), 10);
         }
         $tagList[] = $tag;
     }
@@ -692,7 +692,7 @@ $DB->prepared_query("
          ?, ?, ?, ?, ?,
          ?, ?, ?, ?, ?,
          ?, ?, now(), '0', '0')
-    ", $GroupID, $LoggedUser['ID'], $Properties['Media'], $Properties['Format'], $Properties['Encoding'],
+    ", $GroupID, $Viewer->id(), $Properties['Media'], $Properties['Format'], $Properties['Encoding'],
        $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
        $Properties['Scene'], $HasLog, $HasCue, $LogInDB, $logfileSummary->overallScore(),
        $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
@@ -745,8 +745,8 @@ foreach($logfileSummary->all() as $logfile) {
 //--------------- Write torrent file -------------------------------------------//
 
 $torrentFiler->put($bencoder->getEncode(), $TorrentID);
-(new Gazelle\Log)->torrent($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
-    ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $LoggedUser['Username']);
+(new Gazelle\Log)->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
+    ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
 Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
@@ -814,7 +814,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?,
             now(), 0, '0', '0', '0', '0')
-        ", $GroupID, $LoggedUser['ID'], $Properties['Media'], $ExtraTorrent['Format'], $ExtraTorrent['Encoding'],
+        ", $GroupID, $Viewer->id(), $Properties['Media'], $ExtraTorrent['Format'], $ExtraTorrent['Encoding'],
         $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
         $ExtraTorrent['InfoHash'], $ExtraTorrent['NumFiles'], $ExtraTorrent['FileString'],
         $ExtraTorrent['FilePath'], $ExtraTorrent['TotalSize'], $ExtraTorrent['TorrentDescription']
@@ -840,23 +840,23 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 
     $torrentFiler->put($ExtraTorrent['TorEnc'], $ExtraTorrentID);
     $sizeMiB = number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2);
-    (new Gazelle\Log)->torrent($GroupID, $ExtraTorrentID, $LoggedUser['ID'], "uploaded ($sizeMiB MiB)")
-        ->general("Torrent $ExtraTorrentID ($LogName) ($sizeMiB  MiB) was uploaded by " . $LoggedUser['Username']);
+    (new Gazelle\Log)->torrent($GroupID, $ExtraTorrentID, $Viewer->id(), "uploaded ($sizeMiB MiB)")
+        ->general("Torrent $ExtraTorrentID ($LogName) ($sizeMiB  MiB) was uploaded by " . $Viewer->username());
     Torrents::update_hash($GroupID);
 }
 
 //******************************************************************************//
 //--------------- Give Bonus Points  -------------------------------------------//
 
-if ($LoggedUser['DisablePoints'] == 0) {
-    $Bonus->addPoints($LoggedUser['ID'], $BonusPoints);
+if (!$Viewer->disableBonusPoints()) {
+    $Bonus->addPoints($Viewer->id(), $BonusPoints);
 }
 
 //******************************************************************************//
 //--------------- Recent Uploads (KISS) ----------------------------------------//
 
 if ($Properties['Image'] != '') {
-    $Cache->delete_value('user_recent_up_'.$LoggedUser['ID']);
+    $Cache->delete_value('user_recent_up_'.$Viewer->id());
 }
 
 //******************************************************************************//
@@ -908,7 +908,7 @@ if (defined('AJAX')) {
         ]);
         View::show_footer();
     } elseif ($RequestID) {
-        header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=".$LoggedUser['AuthKey']);
+        header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=" . $Viewer->auth());
     } else {
         header("Location: torrents.php?id=$GroupID");
     }
@@ -924,9 +924,8 @@ if (function_exists('fastcgi_finish_request')) {
     ob_start(); // So we don't keep sending data to the client
 }
 
-$user = new Gazelle\User($LoggedUser['ID']);
-if ($user->option('AutoSubscribe')) {
-    (new Gazelle\Manager\Subscription($user->id()))->subscribeComments('torrents', $GroupID);
+if ($Viewer->option('AutoSubscribe')) {
+    (new Gazelle\Manager\Subscription($Viewer->id()))->subscribeComments('torrents', $GroupID);
 }
 
 // Manage notifications
@@ -958,7 +957,7 @@ if (!$IsNewGroup) {
 
 $paranoia = unserialize($DB->scalar("
     SELECT Paranoia FROM users_main WHERE ID = ?
-    ", $user->id()
+    ", $Viewer->id()
 )) ?: [];
 if (!in_array('notifications', $paranoia)) {
     // For RSS
@@ -967,7 +966,7 @@ if (!in_array('notifications', $paranoia)) {
         $Title,
         Text::strip_bbcode($Properties['GroupDescription']),
         "torrents.php?action=download&amp;id={$TorrentID}&amp;torrent_pass=[[PASSKEY]]",
-        $LoggedUser['Username'],
+        $Viewer->username(),
         'torrents.php?id=' . $GroupID,
         implode(',', $tagList)
     );
@@ -980,7 +979,7 @@ if (!in_array('notifications', $paranoia)) {
         ->addTags($tagList)
         ->addCategory($Type)
         ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
-        ->addUser($user)
+        ->addUser($Viewer)
         ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
         ->trigger($GroupID, $TorrentID, $Feed, $Item);
 

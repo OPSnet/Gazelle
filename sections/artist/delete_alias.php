@@ -47,6 +47,9 @@ $DB->prepared_query("
     ", $AliasID
 );
 
-(new Gazelle\Log)->general("The alias $AliasID ($AliasName) was removed from the artist $ArtistID ($ArtistName) by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
+(new Gazelle\Log)->general(
+    "The alias $AliasID ($AliasName) was removed from the artist $ArtistID ($ArtistName) by user "
+    . $Viewer->id() . " (" . $Viewer->username() . ")"
+);
 
 header("Location: " . redirectUrl("artist.php?action=edit&artistid={$ArtistID}"));

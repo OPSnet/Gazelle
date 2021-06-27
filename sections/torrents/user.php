@@ -3,18 +3,17 @@
 use Gazelle\Util\SortableTableHeader;
 
 if (!isset($_GET['userid'])) {
-    header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
+    header("Location: torrents.php?type={$_GET['type']}&userid=" . $Viewer->id());
     exit;
 }
 if ($_GET['userid'] == 'me') {
-    $_GET['userid'] = $LoggedUser['ID'];
+    $_GET['userid'] = $Viewer->id();
 }
 $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }
 $userId = $user->id();
-$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
@@ -172,7 +171,7 @@ if (!empty($_GET['tags'])) {
 
 switch ($_GET['type']) {
     case 'snatched':
-        if (!$user->propertyVisible($viewer, 'snatched')) {
+        if (!$user->propertyVisible($Viewer, 'snatched')) {
             error(403);
         }
         $join = "INNER JOIN xbt_snatched AS xs ON (xs.fid =  t.ID)";
@@ -180,7 +179,7 @@ switch ($_GET['type']) {
         $userField = 'xs.uid';
         break;
     case 'snatched-unseeded':
-        if (!$user->propertyVisible($viewer, 'snatched')) {
+        if (!$user->propertyVisible($Viewer, 'snatched')) {
             error(403);
         }
         $join = "INNER JOIN xbt_snatched AS xs ON (xs.fid = t.ID)
@@ -190,7 +189,7 @@ switch ($_GET['type']) {
         $userField = 'xs.uid';
         break;
     case 'seeding':
-        if (!$user->propertyVisible($viewer, 'seeding')) {
+        if (!$user->propertyVisible($Viewer, 'seeding')) {
             error(403);
         }
         $join = "INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)";
@@ -199,7 +198,7 @@ switch ($_GET['type']) {
         $userField = 'xfu.uid';
         break;
     case 'leeching':
-        if (!$user->propertyVisible($viewer, 'leeching')) {
+        if (!$user->propertyVisible($Viewer, 'leeching')) {
             error(403);
         }
         $join = "INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)";
@@ -208,7 +207,7 @@ switch ($_GET['type']) {
         $userField = 'xfu.uid';
         break;
     case 'uploaded':
-        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !$user->propertyVisible($viewer, 'uploads')) {
+        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !$user->propertyVisible($Viewer, 'uploads')) {
             error(403);
         }
         $join = "";
@@ -216,7 +215,7 @@ switch ($_GET['type']) {
         $userField = 't.UserID';
         break;
     case 'uploaded-unseeded':
-        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !$user->propertyVisible($viewer, 'uploads')) {
+        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !$user->propertyVisible($Viewer, 'uploads')) {
             error(403);
         }
         $join = "LEFT JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)";
@@ -225,7 +224,7 @@ switch ($_GET['type']) {
         $userField = 't.UserID';
         break;
     case 'downloaded':
-        if (!($userId === $viewer->id() || $viewer->permitted('site_view_torrent_snatchlist'))) {
+        if (!($userId === $Viewer->id() || $Viewer->permitted('site_view_torrent_snatchlist'))) {
             error(403);
         }
         $join = "INNER JOIN users_downloads AS ud ON (ud.TorrentID = t.ID)";
@@ -238,7 +237,7 @@ switch ($_GET['type']) {
 
 if (!empty($_GET['filter'])) {
     if ($_GET['filter'] === 'perfectflac') {
-        if (!$user->propertyVisible($viewer, 'perfectflacs')) {
+        if (!$user->propertyVisible($Viewer, 'perfectflacs')) {
             error(403);
         }
         $cond[] = "t.Format = ?";
@@ -250,7 +249,7 @@ if (!empty($_GET['filter'])) {
             $args[] = 100;
         }
     } elseif ($_GET['filter'] === 'uniquegroup') {
-        if (!$user->propertyVisible($viewer, 'uniquegroups')) {
+        if (!$user->propertyVisible($Viewer, 'uniquegroups')) {
             error(403);
         }
         $groupBy = 'tg.ID';
@@ -487,7 +486,7 @@ foreach ($Categories as $catKey => $catName) {
         </tr>
 <?php
     $pageSize = 0;
-    $vote = new \Gazelle\Vote($LoggedUser['ID']);
+    $vote = new \Gazelle\Vote($Viewer->id());
 
     foreach ($torrentsInfo as $torrentID => $info) {
         [$groupID, , $time] = array_values($info);
@@ -536,12 +535,12 @@ foreach ($Categories as $catKey => $catName) {
                 <div class="group_info clear">
                     <?= $Twig->render('torrent/action.twig', [
                         'can_fl' => Torrents::can_use_token($torrent),
-                        'key'    => $LoggedUser['torrent_pass'],
+                        'key'    => $Viewer->announceKey(),
                         't'      => $torrent,
                     ]) ?>
                     <?= $displayName ?>
 <?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
-                <?= $vote->setGroupId($groupID)->setTwig($Twig)->links($LoggedUser['AuthKey']) ?>
+                <?= $vote->setGroupId($groupID)->setTwig($Twig)->links($Viewer->auth()) ?>
 <?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userId.'&amp;tags=')?></div>
                 </div>

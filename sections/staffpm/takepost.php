@@ -19,14 +19,14 @@ if (isset($_POST['quickpost'])) {
             INSERT INTO staff_pm_conversations
                    (Subject, Level, UserID, Status,       Date)
             VALUES (?,       ?,     ?,      'Unanswered', now())
-            ", $subject, (int)$_POST['level'], $LoggedUser['ID']
+            ", $subject, (int)$_POST['level'], $Viewer->id()
         );
         $ConvID = $DB->inserted_id();
         $DB->prepared_query("
             INSERT INTO staff_pm_messages
                    (UserID, Message, ConvID, SentDate)
             VALUES (?,      ?,       ?,      now())
-            ", $LoggedUser['ID'], $message, $ConvID
+            ", $Viewer->id(), $message, $ConvID
         );
         $DB->commit();
         header('Location: staffpm.php');
@@ -43,9 +43,9 @@ if (isset($_POST['quickpost'])) {
                 ", $ConvID
             );
 
-            if (  (!$user->isStaffPMReader() && (!in_array($LoggedUser['ID'], [$UserID, $AssignedToUser])))
-                || ($user->isFLS() && !in_array($AssignedToUser, ['', $LoggedUser['ID']]))
-                || ($user->isStaff() && $Level > $user->effectiveClass())
+            if (  (!$Viewer->isStaffPMReader() && (!in_array($Viewer->id(), [$UserID, $AssignedToUser])))
+                || ($Viewer->isFLS() && !in_array($AssignedToUser, ['', $Viewer->id()]))
+                || ($Viewer->isStaff() && $Level > $Viewer->effectiveClass())
             ) {
                 // User is trying to respond to conversation that does no belong to them
                 error(403);
@@ -57,7 +57,7 @@ if (isset($_POST['quickpost'])) {
                     INSERT INTO staff_pm_messages
                            (UserID, Message, ConvID, SentDate)
                     VALUES (?,      ?,       ?,      now())
-                    ", $LoggedUser['ID'], $message, $ConvID
+                    ", $Viewer->id(), $message, $ConvID
                 );
                 $DB->prepared_query("
                     UPDATE staff_pm_conversations SET
@@ -65,10 +65,10 @@ if (isset($_POST['quickpost'])) {
                         Unread = true,
                         Status = ?
                     WHERE ID = ?
-                    ", $user->isStaffPMReader() ? 'Open' : 'Unanswered', $ConvID
+                    ", $Viewer->isStaffPMReader() ? 'Open' : 'Unanswered', $ConvID
                 );
                 $DB->commit();
-                $Cache->deleteMulti([ "staff_pm_new_{$UserID}", "num_staff_pms_" . $LoggedUser['ID'], "staff_pm_new_" . $LoggedUser['ID']]);
+                $Cache->deleteMulti([ "staff_pm_new_{$UserID}", "num_staff_pms_" . $Viewer->id(), "staff_pm_new_" . $Viewer->id()]);
 
                 header("Location: staffpm.php?action=viewconv&id=$ConvID");
             }

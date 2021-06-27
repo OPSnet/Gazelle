@@ -1,14 +1,13 @@
 <?php
 
 $userMan = new Gazelle\Manager\User;
-$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 [$Page, $Limit] = Format::page_limit($PerPage);
 
 View::show_header('Subscriptions','subscriptions,comments,bbcode');
 
-$showAvatars   = $viewer->showAvatars();
+$showAvatars   = $Viewer->showAvatars();
 $showCollapsed = (bool)($_GET['collapse'] ?? true);
 $showUnread    = (bool)($_GET['showunread'] ?? true);
 
@@ -42,7 +41,7 @@ $NumResults = $DB->scalar("
             AND s.UserID = ?
         GROUP BY t.ID
     ) TOTAL
-    ", $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID']
+    ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id()
 );
 
 // The monster sql query:
@@ -122,7 +121,7 @@ UNION ALL
     GROUP BY t.ID
     ORDER BY LastPostTime DESC
     LIMIT $Limit
-    ", $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID']
+    ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id()
 );
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 
@@ -144,7 +143,7 @@ $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= $viewer->username()
+        <h2><a href="user.php?id=<?= $Viewer->id() ?>"><?= $Viewer->username()
             ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
         <div class="linkbox">
 <?php if (!$showUnread) { ?>
@@ -159,7 +158,7 @@ if ($NumResults) {
 ?>
             <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$showCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
 <?php } ?>
-            <a href="userhistory.php?action=posts&amp;userid=<?=$LoggedUser['ID']?>" class="brackets">Go to post history</a>&nbsp;
+            <a href="userhistory.php?action=posts&amp;userid=<?=$Viewer->id()?>" class="brackets">Go to post history</a>&nbsp;
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
             <a href="userhistory.php?action=catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>
         </div>
@@ -256,7 +255,7 @@ if ($NumResults) {
         <tr class="row<?=$showCollapsed ? ' hidden' : '' ?>">
 <?php       if ($showAvatars) { ?>
             <td class="avatar" valign="top">
-                <?= $userMan->avatarMarkup($viewer, new Gazelle\User($Result['LastReadUserID'])) ?>
+                <?= $userMan->avatarMarkup($Viewer, new Gazelle\User($Result['LastReadUserID'])) ?>
             </td>
 <?php       } ?>
             <td class="body" valign="top">

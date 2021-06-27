@@ -4,7 +4,6 @@ $ArticleID = (int)$_GET['id'];
 if (!$ArticleID) {
     error(404);
 }
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $wikiMan = new Gazelle\Manager\Wiki;
 [$Revision, $Title, $Body, $Read, $Edit] = $wikiMan->article($ArticleID);
 if ($Edit > $Viewer->effectiveClass()) {

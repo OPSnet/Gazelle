@@ -2,5 +2,5 @@
 
 enforce_login();
 authorize();
-(new Gazelle\User($LoggedUser['ID']))->logout();
+$Viewer->logout();
 header("Location: /index.php");

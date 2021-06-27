@@ -1,13 +1,13 @@
 <?php
 
 if (!isset($_GET['userid'])) {
-    $userId = $LoggedUser['ID'];
+    $userId = $Viewer->id();
 } else {
     $userId = (int)$_GET['userid'];
     if (!$userId) {
         error(0);
     }
-    if ($userId !== $LoggedUser['ID'] && !check_perms('admin_fl_history')) {
+    if ($userId !== $Viewer->id() && !check_perms('admin_fl_history')) {
         error(403);
     }
 }
@@ -43,7 +43,7 @@ $user->setTorrentManager($torMan)
 echo $Twig->render('user/history-freeleech.twig', [
     'admin'       => check_perms('admin_fl_history'),
     'auth'        => $LoggedUser['AuthKey'],
-    'own_profile' => $LoggedUser['ID'] == $userId,
+    'own_profile' => $Viewer->id() == $userId,
     'paginator'   => $paginator,
     'user'        => $user,
 ]);

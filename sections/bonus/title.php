@@ -9,11 +9,10 @@ if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST[
     die();
 }
 
-$userId = $LoggedUser['ID'];
 $Label = $_REQUEST['label'];
 if ($Label === 'title-off') {
     authorize();
-    (new Gazelle\User($userId))->removeTitle()->modify();
+    $Viewer->removeTitle()->modify();
     header('Location: bonus.php?complete=' . urlencode($Label));
 }
 if ($Label === 'title-bb-y') {
@@ -32,7 +31,7 @@ if (isset($_POST['confirm'])) {
         error(403);
     }
     try {
-        $Bonus->purchaseTitle($userId, $Label, $_POST['title']);
+        $Bonus->purchaseTitle($Viewer->id(), $Label, $_POST['title']);
         header('Location: bonus.php?complete=' . urlencode($Label));
     } catch (BonusException $e) {
         switch ($e->getMessage()) {
@@ -59,7 +58,7 @@ View::show_header('Bonus Points - Title', 'bonus');
         <tr>
             <td>
                 <form action="bonus.php?action=purchase&label=<?= $Label ?>" method="post">
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                     <input type="hidden" name="confirm" value="true" />
                     <input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
                     <input type="submit" onclick="ConfirmPurchase(event, '<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />

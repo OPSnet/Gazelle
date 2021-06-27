@@ -11,9 +11,8 @@ $Artist->loadArtistRole();
 
 $bookmark = new Gazelle\Bookmark;
 $collageMan = new Gazelle\Manager\Collage;
-$Viewer = new Gazelle\User($LoggedUser['ID']);
 $authKey = $Viewer->auth();
-$isSubscribed = (new Gazelle\Manager\Subscription($user->id()))->isSubscribedComments('artist', $ArtistID);
+$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('artist', $ArtistID);
 
 function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catalogueNumber, $media]);
@@ -353,7 +352,7 @@ if ($sections = $Artist->sections()) {
 <?php   } ?>
                         <div class="group_info clear">
                             <strong><?=$DisplayName?></strong>
-<?php if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
+<?php if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) { ?>
                             <span class="remove_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>
@@ -365,7 +364,7 @@ if ($sections = $Artist->sections()) {
         }
         if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
-                            <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig($Twig)->links($authKey) ?>
+                            <?= (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID)->setTwig($Twig)->links($authKey) ?>
 <?php   } ?>
                             <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>

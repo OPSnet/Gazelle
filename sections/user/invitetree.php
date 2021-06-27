@@ -1,7 +1,7 @@
 <?php
 
 if (!isset($_GET['userid'])) {
-    $userId = $LoggedUser['ID'];
+    $userId = $Viewer->id();
 } else {
     if (!check_perms('users_view_invites')) {
         error(403);

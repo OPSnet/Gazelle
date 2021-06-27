@@ -21,7 +21,7 @@ foreach ($bounty as &$b) {
 
 View::show_header('Edit request bounty');
 echo $Twig->render('request/edit-bounty.twig', [
-    'auth'   => $LoggedUser['AuthKey'],
+    'auth'   => $Viewer->auth(),
     'bounty' => $bounty,
     'id'     => $requestId,
     'title'  => $request->title(),

@@ -1,6 +1,5 @@
 <?php
 
-$user = new Gazelle\User($LoggedUser['ID']);
 $torrent = new \Gazelle\Top10\Torrent($Formats, $LoggedUser);
 $torMan = new Gazelle\Manager\Torrent;
 
@@ -32,7 +31,7 @@ if (check_perms('site_advanced_top10')) {
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
                     <input type="text" name="tags" id="tags" size="75" value="<?php if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>"<?=
-                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
+                        $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
                     <input type="radio" id="rdoAll" name="anyall" value="all"<?=(empty($_GET['anyall']) || $_GET['anyall'] != 'any' ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
                     <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!empty($_GET['anyall']) && $_GET['anyall'] == 'any' ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
                 </td>
@@ -72,7 +71,7 @@ if (isset($_GET['freeleech'])) {
 
     if ($newPreference != $disableFreeleechTorrentTop10) {
         $disableFreeleechTorrentTop10 = $newPreference;
-        Users::update_site_options($LoggedUser['ID'], ['DisableFreeTorrentTop10' => $disableFreeleechTorrentTop10]);
+        Users::update_site_options($Viewer->id(), ['DisableFreeTorrentTop10' => $disableFreeleechTorrentTop10]);
     }
 }
 
@@ -150,7 +149,7 @@ View::show_footer();
 
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $LoggedUser, $Categories, $groupBy, $torMan;
+    global $LoggedUser, $Categories, $groupBy, $torMan, $Viewer;
 ?>
         <h3>Top <?="$limit $caption"?>
 <?php
@@ -227,7 +226,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         global $Debug;
         $Debug->log_var($group, $groupID);
 
-        $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);
+        $isBookmarked = $bookmark->isTorrentBookmarked($Viewer->id(), $groupID);
         $isSnatched = Torrents::has_snatched($torrentID);
 
         // generate torrent's title

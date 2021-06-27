@@ -65,7 +65,7 @@ View::show_header('Edit torrent group');
         <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
             <div>
                 <input type="hidden" name="action" value="takegroupedit" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                 <h3>Image:</h3>
                 <input type="text" name="image" size="92" value="<?=$Image?>" /><br />
@@ -113,12 +113,12 @@ View::show_header('Edit torrent group');
         ", $GroupID
     );
     //Users can edit the group info if they've uploaded a torrent to the group or have torrents_edit
-    if (in_array($LoggedUser['ID'], $DB->collect('UserID')) || check_perms('torrents_edit')) { ?>
+    if (in_array($Viewer->id(), $DB->collect('UserID')) || check_perms('torrents_edit')) { ?>
     <h3>Non-wiki torrent group editing</h3>
     <div class="box pad">
         <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
             <input type="hidden" name="action" value="nonwikiedit" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <input type="hidden" name="groupid" value="<?=$GroupID?>" />
             <table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
                 <tr>
@@ -177,7 +177,7 @@ if (check_perms('torrents_edit')) {
         <form class="rename_form" name="torrent_group" action="torrents.php" method="post">
             <div>
                 <input type="hidden" name="action" value="rename" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                 <input type="text" name="name" size="92" value="<?= display_str($Name) ?>" />
                 <div style="text-align: center;">
@@ -191,7 +191,7 @@ if (check_perms('torrents_edit')) {
         <form class="merge_form" name="torrent_group" action="torrents.php" method="post">
             <div>
                 <input type="hidden" name="action" value="merge" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                 <h3>Target torrent group ID:
                     <input type="text" name="targetgroupid" size="10" />

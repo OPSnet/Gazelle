@@ -7,4 +7,4 @@ if (!$collageId) {
     error(404);
 }
 $collage = new Gazelle\Collage($collageId);
-$collage->toggleSubscription($LoggedUser['ID']);
+$collage->toggleSubscription($Viewer->id());

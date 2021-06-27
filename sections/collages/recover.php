@@ -21,7 +21,7 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
         error('Collage is completely deleted');
     } else {
         $collageId = $collage->flush()->id();
-        (new Gazelle\Log)->general("Collage $collageId was recovered by " . $LoggedUser['Username']);
+        (new Gazelle\Log)->general("Collage $collageId was recovered by " . $Viewer->username());
         header("Location: collages.php?id=$collageId");
         exit;
     }
@@ -29,6 +29,6 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
 
 View::show_header('Collage recovery!');
 echo $Twig->render('collage/recover.twig', [
-    'auth' => $LoggedUser['AuthKey'],
+    'auth' => $Viewer->auth(),
 ]);
 View::show_footer();

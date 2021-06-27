@@ -34,7 +34,7 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
                     $Result = "Security checksum failed";
                 }
                 else {
-                    $Result = $recovery->mapToPrevious($curr_id, $prev_id, $LoggedUser['Username'])
+                    $Result = $recovery->mapToPrevious($curr_id, $prev_id, $Viewer->username())
                         ? \Users::format_username($curr_id) . " has been successfully mapped to previous user " .$Confirm['Username'] . "."
                         : "DB Error: could not map $curr_id to $prev_id"
                         ;

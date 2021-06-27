@@ -36,7 +36,7 @@ $DB->prepared_query('
             <form class="manage_form" name="forums" action="" method="post">
                 <input type="hidden" name="id" value="<?=$ID?>" />
                 <input type="hidden" name="action" value="categories_alter" />
-                <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <td>
                     <input type="text" size="3" name="sort" value="<?=$Sort?>" />
                 </td>
@@ -64,7 +64,7 @@ $DB->prepared_query('
     <tr class="rowa">
         <form class="create_form" name="forum" action="" method="post">
             <input type="hidden" name="action" value="categories_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <input type="text" size="3" name="sort" />
             </td>

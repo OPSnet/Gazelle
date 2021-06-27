@@ -43,7 +43,7 @@ if ($CategoryName == 'Music') {
 //Votes time
 $RequestVotes = Requests::get_votes_array($requestId);
 $VoteCount = count($RequestVotes['Voters']);
-$UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2);
+$UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);
 $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 $JsonTopContributors = [];
@@ -98,7 +98,7 @@ json_print('success', [
     'requestId'       => $requestId,
     'requestorId'     => $Request['UserID'],
     'requestorName'   => $Requestor->username(),
-    'isBookmarked'    => (new Gazelle\Bookmark)->isRequestBookmarked($LoggedUser['ID'], $requestId),
+    'isBookmarked'    => (new Gazelle\Bookmark)->isRequestBookmarked($Viewer->id(), $requestId),
     'requestTax'      => $RequestTax,
     'timeAdded'       => $Request['TimeAdded'],
     'canEdit'         => $CanEdit,

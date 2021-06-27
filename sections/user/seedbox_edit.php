@@ -1,11 +1,10 @@
 <?php
 
-$viewer = new Gazelle\User($LoggedUser['ID']);
-if (!$viewer->hasAttr('feature-seedbox') && !$viewer->permitted('users_view_ips')) {
+if (!$Viewer->hasAttr('feature-seedbox') && !$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 if (!isset($_POST['action'])) {
-    $userId = (int)($_GET['userid'] ?? $viewer->id());
+    $userId = (int)($_GET['userid'] ?? $Viewer->id());
 } else {
     authorize();
     $userId = (int)$_POST['userid'];
@@ -14,7 +13,7 @@ $user = (new Gazelle\Manager\User)->findById($userId);
 if (!$user) {
     error(404);
 }
-if ($viewer->id() != $userId && !$viewer->permitted('users_view_ips')) {
+if ($Viewer->id() != $userId && !$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 

@@ -2,7 +2,7 @@
 
 enforce_login();
 
-if (!empty($LoggedUser['DisableForums'])) {
+if ($Viewer->disableForums()) {
     error(403);
 }
 

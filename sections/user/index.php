@@ -19,8 +19,7 @@ switch ($_REQUEST['action'] ?? '') {
         authorize();
         $notifId = (int)$_GET['id'];
         if ($notifId) {
-            $user = new Gazelle\User($LoggedUser['ID']);
-            $user->removeNotificationFilter($notifId);
+            $Viewer->removeNotificationFilter($notifId);
         }
         header('Location: user.php?action=notify');
         break;
@@ -37,7 +36,7 @@ switch ($_REQUEST['action'] ?? '') {
             require_once('edit.php');
         }
         else {
-            header("Location: user.php?action=edit&userid={$LoggedUser['ID']}");
+            header("Location: user.php?action=edit&userid=" . $Viewer->id());
         }
         break;
     case '2fa':
@@ -106,7 +105,7 @@ switch ($_REQUEST['action'] ?? '') {
     // Provide public methods for Last.fm data gets.
     case 'lastfm_compare':
         if (isset($_GET['username'])) {
-            echo (new Gazelle\Util\LastFM)->compare($LoggedUser['ID'], $_GET['username']);
+            echo (new Gazelle\Util\LastFM)->compare($Viewer->id(), $_GET['username']);
         }
         break;
     case 'lastfm_last_played_track':
@@ -131,13 +130,13 @@ switch ($_REQUEST['action'] ?? '') {
         break;
     case 'lastfm_clear_cache':
         if (isset($_GET['username']) && isset($_GET['uid'])) {
-            echo (new Gazelle\Util\LastFM)->clear($LoggedUser['ID'], $_GET['username'],$_GET['uid']);
+            echo (new Gazelle\Util\LastFM)->clear($Viewer->id(), $_GET['username'],$_GET['uid']);
         }
         break;
     default:
         if (isset($_REQUEST['id'])) {
             require_once('user.php');
         } else {
-            header("Location: user.php?id={$LoggedUser['ID']}");
+            header("Location: user.php?id=" . $Viewer->id());
         }
 }

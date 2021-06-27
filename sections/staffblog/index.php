@@ -9,7 +9,7 @@ if (!check_perms('users_mod')) {
 }
 
 $blogMan = new Gazelle\Manager\StaffBlog;
-$blogMan->visit($LoggedUser['ID']);
+$blogMan->visit($Viewer->id());
 
 View::show_header('Staff Blog','bbcode');
 
@@ -61,7 +61,7 @@ if (check_perms('admin_manage_blog')) {
                 }
                 $blogMan->setTitle($title)
                     ->setBody($body)
-                    ->setAuthorId($LoggedUser['ID'])
+                    ->setAuthorId($Viewer->id())
                     ->modify();
                 Irc::sendRaw("PRIVMSG ".MOD_CHAN." :New staff blog: " . $blogMan->title()
                     . " - " . SITE_URL."/staffblog.php#blog" . $blogMan->blogId()
@@ -75,7 +75,7 @@ if (check_perms('admin_manage_blog')) {
         }
     }
     echo $Twig->render('staffblog/edit.twig', [
-        'auth' => $LoggedUser['AuthKey'],
+        'auth' => $Viewer->auth(),
         'blog' => $blogMan,
         'verb' => empty($_GET['action']) ? 'create' : 'edit',
         'show_form' => !isset($_REQUEST['action']) || $_REQUEST['action'] != 'editblog',
@@ -83,7 +83,7 @@ if (check_perms('admin_manage_blog')) {
 }
 
 echo $Twig->render('staffblog/list.twig', [
-    'auth'   => $LoggedUser['AuthKey'],
+    'auth'   => $Viewer->auth(),
     'editor' => check_perms('admin_manage_blog'),
     'list'   => $blogMan->blogList(),
 ]);
