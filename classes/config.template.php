@@ -278,9 +278,43 @@ define('CATEGORY', ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learnin
 define('CATEGORY_GROUPED', array_intersect(['Music'], CATEGORY));
 define('CATEGORY_ICON', ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png']);
 
-$Formats = ['MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS'];
-$Bitrates = ['Lossless', '24bit Lossless', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '320', '256', '192', '160', '128', '96', '64', 'APS (VBR)', 'APX (VBR)', 'q8.x (VBR)', 'Other'];
-$Media = ['CD', 'WEB', 'Vinyl', 'DVD', 'BD', 'Soundboard', 'SACD', 'DAT', 'Cassette'];
+define('FORMAT', [
+    'MP3',
+    'FLAC',
+    'Ogg Vorbis',
+    'AAC',
+    'AC3',
+    'DTS'
+]);
+define('ENCODING', [
+    'Lossless',
+    '24bit Lossless',
+    'V0 (VBR)',
+    'V1 (VBR)',
+    'V2 (VBR)',
+    '320',
+    '256',
+    '192',
+    '160',
+    '128',
+    '96',
+    '64',
+    'APS (VBR)',
+    'APX (VBR)',
+    'q8.x (VBR)',
+    'Other'
+]);
+define('MEDIA', [
+    'CD',
+    'WEB',
+    'Vinyl',
+    'DVD',
+    'BD',
+    'Soundboard',
+    'SACD',
+    'DAT',
+    'Cassette',
+]);
 
 define('HOMEPAGE_TAG_IGNORE', [0]); // set to 'test' tag to ignore staff test uploads
 
@@ -289,7 +323,7 @@ define('ICON_NONE',    "\xf0\x9f\x9a\xab");
 define('ICON_TOGGLE',  "\xf0\x9f\x94\x81");
 define('ICON_PADLOCK', "\xF0\x9F\x94\x92");
 
-$CollageCats = [
+define('COLLAGE', [
     0 => 'Personal',
     1 => 'Theme',
     2 => 'Genre Introduction',
@@ -300,22 +334,20 @@ $CollageCats = [
     7 => 'Artists',
     8 => 'Awards',
     9 => 'Series',
-];
+]);
 define('COLLAGE_PERSONAL_ID', 0);
 define('COLLAGE_ARTISTS_ID', 7);
 define('COLLAGE_SAMPLE_THRESHOLD', 4);
 define('PERSONAL_COLLAGE_SAMPLE_THRESHOLD', 4);
 
-$ZIPGroups = [
+define('ZIP_GROUP', [
     0 => 'MP3 (VBR) - High Quality',
     1 => 'MP3 (VBR) - Low Quality',
     2 => 'MP3 (CBR)',
     3 => 'FLAC - Lossless',
     4 => 'Others',
-];
-
-//3D array of attributes, OptionGroup, OptionNumber, Name
-$ZIPOptions = [
+]);
+define('ZIP_OPTION', [
     '00' => [0, 0, 'V0'],
     '01' => [0, 1, 'APX'],
     '02' => [0, 2, '256'],
@@ -347,10 +379,9 @@ $ZIPOptions = [
     '44' => [4, 4, 'AAC - q5.5'],
     '45' => [4, 5, 'AAC - q5'],
     '46' => [4, 6, 'AAC - 192'],
-];
+]);
 
-//Captcha fonts are located in ./fonts
-$CaptchaFonts = [
+define('CAPTCHA_FONT', [
     'ARIBLK.TTF',
     'IMPACT.TTF',
     'TREBUC.TTF',
@@ -360,11 +391,9 @@ $CaptchaFonts = [
     'VERDANA.TTF',
     'VERDANAB.TTF',
     'VERDANAI.TTF',
-    'VERDANAZ.TTF'
-];
-
-//Captcha images should be located in /captcha
-$CaptchaBGs = [
+    'VERDANAZ.TTF',
+]);
+define('CAPTCHA_BG', [
     'captcha1.png',
     'captcha2.png',
     'captcha3.png',
@@ -373,8 +402,8 @@ $CaptchaBGs = [
     'captcha6.png',
     'captcha7.png',
     'captcha8.png',
-    'captcha9.png'
-];
+    'captcha9.png',
+]);
 
 // Memcached details
 define('MEMCACHE_HOST_LIST', [

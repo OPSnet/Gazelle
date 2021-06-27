@@ -36,7 +36,7 @@ if (!$Err) {
     }
 }
 
-if (!$Err && empty($CollageCats[$categoryId])) {
+if (!$Err && empty(COLLAGE[$categoryId])) {
     $Err = 'Please select a category';
 }
 

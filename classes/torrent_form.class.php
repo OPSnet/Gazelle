@@ -17,9 +17,6 @@ use OrpheusNET\Logchecker\Logchecker;
 
 class TORRENT_FORM {
     var $UploadForm = '';
-    var $Formats = [];
-    var $Bitrates = [];
-    var $Media = [];
     var $NewTorrent = false;
     var $Torrent = [];
     var $Error = false;
@@ -36,12 +33,9 @@ class TORRENT_FORM {
         $this->Torrent = $Torrent;
         $this->Error = $Error;
 
-        global $UploadForm, $Formats, $Bitrates, $Media, $TorrentID;
+        global $UploadForm, $TorrentID;
 
         $this->UploadForm = $UploadForm;
-        $this->Formats = $Formats;
-        $this->Bitrates = $Bitrates;
-        $this->Media = $Media;
         $this->TorrentID = $TorrentID;
 
         if ($this->Torrent && $this->Torrent['GroupID']) {
@@ -452,7 +446,7 @@ class TORRENT_FORM {
                 <td>
                     <select name="media" id="media">
                         <option>---</option>
-<?php   foreach ($this->Media as $Media) { ?>
+<?php   foreach (MEDIA as $Media) { ?>
                         <option value="<?= $Media ?>"<?=
                             $Media == $Torrent['Media'] ? ' selected="selected"' : '' ?>><?= $Media ?></option>
 <?php   } ?>
@@ -465,7 +459,7 @@ class TORRENT_FORM {
                 <td>
                     <select id="format" name="format">
                         <option>---</option>
-<?php   foreach ($this->Formats as $Format) { ?>
+<?php   foreach (FORMAT as $Format) { ?>
                         <option value="<?= $Format ?>"<?=
                             $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
 <?php   } ?>
@@ -479,7 +473,7 @@ class TORRENT_FORM {
                     <select id="bitrate" name="bitrate">
                         <option value="">---</option>
 <?php
-        if ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], $this->Bitrates)) {
+        if ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], ENCODING)) {
             $OtherBitrate = true;
             if (substr($Torrent['Bitrate'], strlen($Torrent['Bitrate']) - strlen(' (VBR)')) == ' (VBR)') {
                 $Torrent['Bitrate'] = substr($Torrent['Bitrate'], 0, strlen($Torrent['Bitrate']) - 6);
@@ -493,7 +487,7 @@ class TORRENT_FORM {
         // We have to do this screwery because '(' is a regex character.
         $SimpleBitrate = explode(' ', $Torrent['Bitrate']);
         $SimpleBitrate = $SimpleBitrate[0];
-        foreach ($this->Bitrates as $Bitrate) {
+        foreach (ENCODING as $Bitrate) {
 ?>
                         <option value="<?= $Bitrate ?>"<?=
             ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
@@ -637,7 +631,7 @@ class TORRENT_FORM {
                 <td>
                     <select id="format" name="format" onchange="Format()">
                         <option value="">---</option>
-<?php   foreach ($this->Formats as $Format) { ?>
+<?php   foreach (FORMAT as $Format) { ?>
                         <option value="<?= $Format ?>"<?= $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
 <?php   } ?>
                     </select>
@@ -649,7 +643,7 @@ class TORRENT_FORM {
                     <select id="bitrate" name="bitrate" onchange="Bitrate()">
                         <option value="">---</option>
 <?php
-        if (!$Torrent['Bitrate'] || ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], $this->Bitrates))) {
+        if (!$Torrent['Bitrate'] || ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], ENCODING))) {
             $OtherBitrate = true;
             if (substr($Torrent['Bitrate'], strlen($Torrent['Bitrate']) - strlen(' (VBR)')) == ' (VBR)') {
                 $Torrent['Bitrate'] = substr($Torrent['Bitrate'], 0, strlen($Torrent['Bitrate']) - 6);
@@ -660,7 +654,7 @@ class TORRENT_FORM {
         }
         $SimpleBitrate = explode(' ', $Torrent['Bitrate']);
         $SimpleBitrate = $SimpleBitrate[0];
-        foreach ($this->Bitrates as $Bitrate) {
+        foreach (ENCODING as $Bitrate) {
 ?>
                         <option value="<?= $Bitrate ?>"<?=
             ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')

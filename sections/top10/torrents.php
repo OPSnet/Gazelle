@@ -1,6 +1,6 @@
 <?php
 
-$torrent = new \Gazelle\Top10\Torrent($Formats, $LoggedUser);
+$torrent = new \Gazelle\Top10\Torrent(FORMAT, $LoggedUser);
 $torMan = new Gazelle\Manager\Torrent;
 
 if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
@@ -48,7 +48,7 @@ if (check_perms('site_advanced_top10')) {
                     <select name="format" style="width: auto;" class="ft_format">
                         <option value="">Any</option>
 <?php
-    foreach ($Formats as $formatName) { ?>
+    foreach (FORMAT as $formatName) { ?>
                         <option value="<?=display_str($formatName)?>"<?php if (isset($_GET['format']) && $formatName==$_GET['format']) { ?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
 <?php
     } ?>                </select>
