@@ -7,21 +7,14 @@ if (empty($_GET['userid'])) {
         print json_encode(['status' => 'failure']);
         die();
     }
-    $UserID = $_GET['userid'];
-    $Sneaky = ($UserID != $LoggedUser['ID']);
-    if (!is_number($UserID)) {
+    $UserID = (int)$_GET['userid'];
+    if (!$UserID) {
         print json_encode(['status' => 'failure']);
         die();
     }
-    $Username = $DB->scalar("
-        SELECT Username
-        FROM users_main
-        WHERE ID = ?
-        ", $UserID
-    );
 }
 
-$Sneaky = ($UserID != $LoggedUser['ID']);
+$Sneaky = ($UserID != $Viewer->id());
 
 $DB->prepared_query("
     SELECT ag.ArtistID, ag.Name

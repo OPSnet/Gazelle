@@ -133,10 +133,13 @@ class User extends BaseObject {
                 ui.RatioWatchEnds,
                 ui.RestrictedForums,
                 ui.SiteOptions,
+                ui.StyleID,
+                ui.StyleURL,
                 ui.SupportFor,
                 ui.Warned,
                 uls.Uploaded,
                 uls.Downloaded,
+                lower(replace(s.Name, ' ', '_')) AS styleName,
                 p.Level AS Class,
                 p.Name  AS className,
                 p.Values AS primaryPermissions,
@@ -148,6 +151,7 @@ class User extends BaseObject {
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             INNER JOIN users_info        AS ui ON (ui.UserID = um.ID)
             INNER JOIN user_flt          AS uf ON (uf.user_id = um.ID)
+            INNER JOIN stylesheets       AS s ON (s.ID = ui.StyleID)
             LEFT JOIN permissions        AS p ON (p.ID = um.PermissionID)
             LEFT JOIN user_bonus         AS ub ON (ub.user_id = um.ID)
             LEFT JOIN locked_accounts    AS la ON (la.UserID = um.ID)
@@ -407,6 +411,10 @@ class User extends BaseObject {
         return $this->info()['SiteOptions'][$option] ?? null;
     }
 
+    public function postsPerPage(): int {
+        return $this->info()['SiteOptions']['PostsPerPage'] ?? POSTS_PER_PAGE;
+    }
+
     public function username(): string {
         return $this->info()['Username'];
     }
@@ -462,6 +470,10 @@ class User extends BaseObject {
 
     public function auth(): string {
         return $this->info()['AuthKey'];
+    }
+
+    public function rssAuth(): string {
+        return md5($this->id . RSS_HASH . $this->announceKey());
     }
 
     public function avatar(): ?string {
@@ -713,6 +725,18 @@ class User extends BaseObject {
 
     public function staffNotes() {
         return $this->info()['AdminComment'];
+    }
+
+    public function stylesheetId(): int {
+        return $this->info()['StyleID'];
+    }
+
+    public function stylesheetName(): string {
+        return $this->info()['styleName'];
+    }
+
+    public function stylesheetUrl(): ?string {
+        return $this->info()['StyleURL'];
     }
 
     public function supportFor() {

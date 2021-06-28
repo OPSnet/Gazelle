@@ -105,7 +105,7 @@ foreach ($TorrentGroups as $GroupID => $Editions) {
             'groupYear' => (int)$GroupYear,
             'missingV0' => !isset($Edition['Formats']['V0 (VBR)']),
             'missing320' => !isset($Encodings['Formats']['320']),
-            'downloadUrl' => 'torrents.php?action=download&id='.$Edition['FlacID'].'&torrent_pass='.$LoggedUser['torrent_pass'],
+            'downloadUrl' => 'torrents.php?action=download&id='.$Edition['FlacID'].'&torrent_pass='.$Viewer->announceKey(),
         ];
     }
 }

@@ -1,5 +1,8 @@
 <?php
-if (isset($LoggedUser['ID'])) {
+
+if (!isset($Viewer)) {
+    require('public.php');
+} else {
     if (!isset($_REQUEST['action'])) {
         require('private.php');
     } else {
@@ -11,6 +14,4 @@ if (isset($LoggedUser['ID'])) {
                 error(0);
         }
     }
-} else {
-    require('public.php');
 }

@@ -93,7 +93,7 @@ if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_per
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
 echo $Twig->render('user/header.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
+    'auth'    => $Viewer->auth(),
     'freeleech' => [
         'item'  => $FL_Items,
         'other' => $FL_OTHER_tokens ?? null,
@@ -509,7 +509,7 @@ foreach ($Collages as $CollageInfo) {
 if (check_perms('users_edit_usernames')) {
     [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($User))->info();
     echo $Twig->render('user/linked.twig', [
-        'auth'     => $LoggedUser['AuthKey'],
+        'auth'     => $Viewer->auth(),
         'comments' => $comments,
         'group_id' => $linkGroupId,
         'hash'     => sha1($comments),
@@ -656,7 +656,7 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
         <form class="manage_form" name="user" id="form" action="user.php" method="post">
         <input type="hidden" name="action" value="moderate" />
         <input type="hidden" name="userid" value="<?=$UserID?>" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 
         <div class="box box2" id="staff_notes_box">
             <div class="head">

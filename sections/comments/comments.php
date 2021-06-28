@@ -219,7 +219,7 @@ $Count = $DB->scalar("
 );
 
 // Posts per page limit stuff
-$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+$PerPage = $Viewer->postsPerPage();
 [$Page, $Limit] = Format::page_limit($PerPage);
 $Pages = Format::get_pages($Page, $Count, $PerPage, 11);
 

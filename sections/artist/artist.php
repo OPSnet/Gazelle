@@ -269,7 +269,7 @@ if ($sections = $Artist->sections()) {
     </div>
     <table class="torrent_table grouped release_table m_table">
 <?php
-    $stylePath = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images/';
+    $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
     $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 0) == 1 ? 1 : 0;
 
     foreach ($sections as $sectionId => $groupList) {
@@ -285,9 +285,9 @@ if ($sections = $Artist->sections()) {
                         $artistMan->sectionTitle($sectionId) ?></strong> (<a href="#" onclick="$('.releases_<?=
                         $sectionId ?>').gtoggle(true); return false;">View</a>)</td>
                     <td>Size</td>
-                    <td class="sign snatches"><img src="<?= $stylePath ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                    <td class="sign seeders"><img src="<?= $stylePath ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                    <td class="sign leechers"><img src="<?= $stylePath ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                    <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                    <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                    <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
                 </tr>
 <?php
     foreach(array_keys($groupList) as $groupId) {
@@ -362,7 +362,7 @@ if ($sections = $Artist->sections()) {
                             </span>
 <?php
         }
-        if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
+        if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
                             <?= (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID)->setTwig($Twig)->links($authKey) ?>
 <?php   } ?>

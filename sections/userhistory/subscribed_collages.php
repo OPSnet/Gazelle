@@ -55,7 +55,7 @@ View::show_header('Subscribed collages','browse,collage');
             <br /><br />
             <a href="userhistory.php?action=subscribed_collages&amp;showall=1" class="brackets">Show all subscribed collages</a>&nbsp;&nbsp;&nbsp;
 <?php } ?>
-            <a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
+            <a href="userhistory.php?action=catchup_collages&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
         </div>
     </div>
 <?php if (!$NumResults) { ?>
@@ -69,7 +69,7 @@ View::show_header('Subscribed collages','browse,collage');
     $ActionURL = 'hide';
     $ShowGroups = 0;
     $artistCollage = [];
-
+    $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
     foreach ($CollageSubs as $Collage) {
         $TorrentTable = '';
 
@@ -207,7 +207,7 @@ View::show_header('Subscribed collages','browse,collage');
         <td colspan="2">
             <?= $Twig->render('torrent/action.twig', [
                 'can_fl' => Torrents::can_use_token($Torrent),
-                'key'    => $LoggedUser['torrent_pass'],
+                'key'    => $Viewer->announceKey(),
                 't'      => $Torrent,
             ]) ?>
             &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
@@ -249,7 +249,7 @@ View::show_header('Subscribed collages','browse,collage');
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Torrent),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
                 <strong><?=$DisplayName?></strong>
@@ -274,21 +274,23 @@ View::show_header('Subscribed collages','browse,collage');
                 <strong><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></strong> (<?=$NewCount?> new torrent<?= plural($NewCount) ?>)
             </span>&nbsp;
             <span style="float: right;">
-                <a href="#" onclick="$('#discog_table_<?=$CollageID?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?=$CollageID?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?=$CollageID?>); return false;" id="subscribelink<?=$CollageID?>" class="brackets">Unsubscribe</a>
+                <a href="#" onclick="$('#discog_table_<?=$CollageID?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=
+                    $ShowAll ? 'Show' : 'Hide' ?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=
+                    $Viewer->auth() ?>&amp;collageid=<?=$CollageID?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?=
+                    $CollageID?>); return false;" id="subscribelink<?=$CollageID?>" class="brackets">Unsubscribe</a>
             </span>
         </td>
     </tr>
 </table>
 
-<!--</div>-->
 <table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?=$CollageID?>">
     <tr class="colhead">
         <td width="1%"><!-- expand/collapse --></td>
         <td class="m_th_left" width="70%"><strong>Torrents</strong></td>
         <td>Size</td>
-        <td class="sign snatches"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-        <td class="sign seeders"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-        <td class="sign leechers"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
     </tr>
 <?=$TorrentTable?>
 </table>
@@ -308,7 +310,7 @@ View::show_header('Subscribed collages','browse,collage');
                 <strong><a href="collages.php?id=<?= $id ?>"><?= $name ?></a></strong> (<?= $new ?> new artist<?= plural($new) ?>)
             </span>&nbsp;
             <span style="float: right;">
-                <a href="#" onclick="$('#discog_table_<?= $id ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?= $id ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?= $id ?>); return false;" id="subscribelink<?= $id ?>" class="brackets">Unsubscribe</a>
+                <a href="#" onclick="$('#discog_table_<?= $id ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?= $Viewer->auth() ?>&amp;collageid=<?= $id ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?= $id ?>); return false;" id="subscribelink<?= $id ?>" class="brackets">Unsubscribe</a>
             </span>
         </td>
     </tr>

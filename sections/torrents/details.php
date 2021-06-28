@@ -393,8 +393,6 @@ if ($GroupCategoryID === 1) {
 }
 
 echo $Twig->render('vote/box.twig', [
-    'auth'     => $Viewer->auth() ,
-    'can_vote' => check_perms('site_album_votes'),
     'group_id' => $GroupID,
     'percent'  => $vote->total() ? $vote->totalUp() / $vote->total() * 100 : '&mdash;',
     'total'    => $vote->total(),
@@ -402,6 +400,7 @@ echo $Twig->render('vote/box.twig', [
     'down'     => $vote->totalDown(),
     'score'    => $vote->score($vote->total(), $vote->totalUp()) * 100,
     'vote'     => $vote->vote(),
+    'viewer'   => $Viewer,
 ]);
 
 $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
@@ -464,7 +463,10 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
                 <strong><a href="rules.php?p=tag" class="brackets">View tagging rules</a></strong>
             </div>
         </div>
-<?php } ?>
+<?php
+}
+$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
+?>
     </div>
 
     <div class="main_column">
@@ -472,9 +474,9 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
             <tr class="colhead_dark">
                 <td class="m_th_left" width="80%"><strong>Torrents</strong></td>
                 <td><strong>Size</strong></td>
-                <td class="m_th_right sign snatches"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="m_th_right sign seeders"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="m_th_right sign leechers"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="m_th_right sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                <td class="m_th_right sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                <td class="m_th_right sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
 function filelist($Str) {

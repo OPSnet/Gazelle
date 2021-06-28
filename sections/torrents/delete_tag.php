@@ -1,5 +1,5 @@
 <?php
-if (!empty($LoggedUser['DisableTagging']) || !check_perms('site_delete_tag')) {
+if ($Viewer->disableTagging() || !check_perms('site_delete_tag')) {
     error(403);
 }
 
@@ -34,7 +34,9 @@ if ($name) {
         ", $tagId
     );
     if (!$uses) {
-        (new Gazelle\Log)->general("Unused tag \"$name\" removed by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
+        (new Gazelle\Log)->general("Unused tag \"$name\" removed by user "
+            . $Viewer->id() . " (" . $Viewer->username() . ")"
+        );
         $DB->prepared_query("
             DELETE FROM tags WHERE ID = ?
             ", $tagId
@@ -45,6 +47,6 @@ if ($name) {
     (new Gazelle\Log)->group($groupId, $Viewer->id(), "Tag \"$name\" removed from group $groupId");
 
     // Cache the deleted tag for 5 minutes
-    $Cache->cache_value('deleted_tags_'.$groupId.'_'.$Viewer->id(), $name, 300);
+    $Cache->cache_value('deleted_tags_' . $groupId . '_' . $Viewer->id(), $name, 300);
 }
 header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$groupId}");

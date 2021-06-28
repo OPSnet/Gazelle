@@ -1,5 +1,5 @@
 <?php
-if (isset($LoggedUser["ID"])) {
+if ($Viewer) {
     header("Location: index.php");
     exit;
 }

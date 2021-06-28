@@ -24,7 +24,7 @@ if (isset($_POST['session'])) {
 
 View::show_header($user->username().' &rsaquo; Sessions');
 echo $Twig->render('user/session.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
+    'auth'    => $Viewer->auth(),
     'current' => $SessionID,
     'session' => $sessionMan->loadSessions(),
     'user'    => $user,

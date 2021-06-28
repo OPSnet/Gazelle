@@ -10,16 +10,18 @@
         <span class="tooltip_interactive" title="&lt;span style=&quot;font-weight: bold;&quot;&gt;Score: {{ score|number_format(4) }}&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;This is the lower bound of the binomial confidence interval &lt;a href=&quot;wiki.php?action=article&amp;id=108&quot;&gt;described here&lt;/a&gt;, multiplied by 100." data-title-plain="Score: {{ score|number_format(4) }}. This is the lower bound of the binomial confidence interval described in the Favorite Album Votes wiki article, multiplied by 100.">Score: <span id="votescore" class="favoritecount">{{ score|number_format(1) }}</span></span>
         &nbsp; | &nbsp;
         <span id="votepercent" class="favoritecount">{{ percent|number_format(1) }}%</span> positive
+{% if not viewer.option('NoVoteLinks') %}
         <br />
         <span id="upvoted"{% if vote != 1 %} class="hidden"{% endif %}>You have upvoted.<br /><br /></span>
         <span id="downvoted"{% if vote != -1 %} class="hidden"{% endif %}>You have downvoted.<br /><br /></span>
-{% if can_vote %}
-        <span{% if vote %} class="hidden"{% endif %} id="vote_message"><a href="#" class="brackets upvote" onclick="UpVoteBox({{ group_id }}, '{{ auth }}'); return false;">Upvote</a>
-        - <a href="#" class="brackets downvote" onclick="DownVoteBox({{ group_id }}, '{{ auth }}'); return false;">Downvote</a></span>
-{% endif %}
+    {% if viewer.permitted('site_album_votes') %}
+        <span{% if vote %} class="hidden"{% endif %} id="vote_message"><a href="#" class="brackets upvote" onclick="UpVoteBox({{ group_id }}, '{{ viewer.auth }}'); return false;">Upvote</a>
+        - <a href="#" class="brackets downvote" onclick="DownVoteBox({{ group_id }}, '{{ viewer.auth }}'); return false;">Downvote</a></span>
         <span{% if not vote %} class="hidden"{% endif %} id="unvote_message">Changed your mind?
             <br />
-            <a href="#" onclick="UnvoteBox({{ group_id }}, '{{ auth }}'); return false;" class="brackets">Clear your vote</a>
+            <a href="#" onclick="UnvoteBox({{ group_id }}, '{{ viewer.auth }}'); return false;" class="brackets">Clear your vote</a>
+    {% endif %}
+{% endif %}
         </span>
     </div>
 </div>

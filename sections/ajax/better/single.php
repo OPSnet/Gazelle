@@ -42,7 +42,7 @@ foreach ($Results as $GroupID => $TorrentID) {
         'artist' => $JsonArtists,
         'groupName' => $Group['GroupName'],
         'groupYear' => (int)$Group['GroupYear'],
-        'downloadUrl' => "torrents.php?action=download&id=$TorrentID&torrent_pass=" . $LoggedUser['torrent_pass'],
+        'downloadUrl' => "torrents.php?action=download&id=$TorrentID&torrent_pass=" . $Viewer->announceKey(),
     ];
 }
 

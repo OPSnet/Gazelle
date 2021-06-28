@@ -230,7 +230,7 @@ foreach ($topVotes as $groupID => $group) {
             <td colspan="3">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($torrent),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $torrent,
                 ]) ?>
                 &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$groupID?>&amp;torrentid=<?=$torrentID?>"><?=Torrents::torrent_info($torrent)?><?php if ($reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
@@ -276,7 +276,7 @@ foreach ($topVotes as $groupID => $group) {
                 <div class="group_info clear">
                     <?= $Twig->render('torrent/action.twig', [
                         'can_fl' => Torrents::can_use_token($torrent),
-                        'key'    => $LoggedUser['torrent_pass'],
+                        'key'    => $Viewer->announceKey(),
                         't'      => $torrent,
                         'extra'  => [
                             "<a href=\"#\" id=\"bookmarklink_torrent_<?=$groupID?>\" " . $isBookmarked
@@ -297,6 +297,7 @@ foreach ($topVotes as $groupID => $group) {
     } //if (count($torrents) > 1 || $groupCategoryID == 1)
     $torrentTable .= ob_get_clean();
 }
+$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
 ?>
 <table class="torrent_table grouping cats m_table" id="discog_table">
     <tr class="colhead_dark">
@@ -304,9 +305,9 @@ foreach ($topVotes as $groupID => $group) {
         <td class="cats_col"><!-- category --></td>
         <td class="m_th_left" width="70%">Torrents</td>
         <td>Size</td>
-        <td class="sign snatches"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td class="sign seeders"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td class="sign leechers"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
     </tr>
 <?php
 if ($topVotes === false) { ?>
