@@ -158,7 +158,7 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                                     }
                                     break;
                                 case 'post':
-                                    $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+                                    $PerPage = $Viewer->postsPerPage();
                                     [$forumId, $forumName, $threadId, $threadName, $userId, $username, $PostID, $Body, $PostNum] = $DB->row("
                                         SELECT
                                             f.ID,

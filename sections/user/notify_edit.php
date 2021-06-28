@@ -91,7 +91,10 @@ foreach ($Notifications as $N) { // $N stands for Notifications
 <?php
     } elseif ($NumFilters > 0) { ?>
     <h3>
-        <a href="feeds.php?feed=torrents_notify_<?=$N['ID']?>_<?= $Viewer->announceKey() ?>&amp;user=<?=$Viewer->id()?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?= $Viewer->auth() ?>&amp;name=<?=urlencode($N['Label'])?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>
+        <a href="feeds.php?feed=torrents_notify_<?=$N['ID']?>_<?= $Viewer->announceKey() ?>&amp;user=<?=
+            $Viewer->id() ?>&amp;auth=<?= $Viewer->rssAuth() ?>&amp;passkey=<?=
+            $Viewer->announceKey() ?>&amp;authkey=<?= $Viewer->auth() ?>&amp;name=<?=
+            urlencode($N['Label'])?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>
         <?=display_str($N['Label'])?>
         <a href="user.php?action=notify_delete&amp;id=<?=$N['ID']?>&amp;auth=<?= $Viewer->auth() ?>" onclick="return confirm('Are you sure you want to delete this notification filter?')" class="brackets">Delete</a>
         <a href="#" onclick="$('#filter_<?=$N['ID']?>').gtoggle(); return false;" class="brackets">Show</a>

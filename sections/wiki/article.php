@@ -34,7 +34,7 @@ if (!$ArticleID) { //No article found
 }
 
 [$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $Aliases, $UserIDs] = $wikiMan->article($ArticleID);
-if ($Read > $LoggedUser['EffectiveClass']) {
+if ($Read > $Viewer->effectiveClass()) {
     error('You must be a higher user class to view this wiki article');
 }
 
@@ -49,12 +49,12 @@ View::show_header($Title,'wiki,bbcode');
         <div class="linkbox">
             <a href="wiki.php?action=browse" class="brackets">Browse</a>
             <a href="wiki.php?action=create" class="brackets">Create</a>
-<?php if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
+<?php if ($Edit <= $Viewer->effectiveClass()) { ?>
             <a href="wiki.php?action=edit&amp;id=<?=$ArticleID?>" class="brackets">Edit</a>
 <?php } ?>
             <a href="wiki.php?action=revisions&amp;id=<?=$ArticleID?>" class="brackets">History</a>
 <?php if (check_perms('admin_manage_wiki') && $_GET['id'] != INDEX_WIKI_PAGE_ID) { ?>
-            <a href="wiki.php?action=delete&amp;id=<?=$ArticleID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its aliases and act like it never existed?')">Delete</a>
+            <a href="wiki.php?action=delete&amp;id=<?=$ArticleID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its aliases and act like it never existed?')">Delete</a>
 <?php } ?>
         </div>
     </div>
@@ -111,12 +111,12 @@ if ($Aliases != $Title) {
                 </li>
             </ul>
         </div>
-<?php if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
+<?php if ($Edit <= $Viewer->effectiveClass()) { ?>
         <div class="box box_addalias">
             <div style="padding: 5px;">
                 <form class="add_form" name="aliases" action="wiki.php" method="post">
                     <input type="hidden" name="action" value="add_alias" />
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                     <input type="hidden" name="article" value="<?=$ArticleID?>" />
                     <input
                         onfocus="if (this.value == 'Add alias') this.value='';"

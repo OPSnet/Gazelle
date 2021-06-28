@@ -42,7 +42,7 @@ $user->setTorrentManager($torMan)
 
 echo $Twig->render('user/history-freeleech.twig', [
     'admin'       => check_perms('admin_fl_history'),
-    'auth'        => $LoggedUser['AuthKey'],
+    'auth'        => $Viewer->auth(),
     'own_profile' => $Viewer->id() == $userId,
     'paginator'   => $paginator,
     'user'        => $user,

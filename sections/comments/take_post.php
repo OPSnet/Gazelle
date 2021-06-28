@@ -1,9 +1,9 @@
 <?php
 
-authorize();
-if ($LoggedUser['DisablePosting']) {
+if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
+authorize();
 
 $page = $_REQUEST['page'] ?? null;
 if (!in_array($page, ['artist', 'collages', 'requests', 'torrents'])) {

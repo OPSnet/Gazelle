@@ -1,8 +1,8 @@
 <?php
 
-if (isset($LoggedUser['ID']) || !isset($_GET['token']) || !FEATURE_EMAIL_REENABLE) {
+if (!isset($Viewer) || !isset($_GET['token']) || !FEATURE_EMAIL_REENABLE) {
     header("Location: index.php");
-    die();
+    exit;
 }
 
 if (isset($_GET['token'])) {

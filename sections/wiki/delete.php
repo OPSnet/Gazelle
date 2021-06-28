@@ -15,7 +15,7 @@ if ($articleId == INDEX_WIKI_PAGE_ID) {
 }
 
 $wikiMan = new Gazelle\Manager\Wiki;
-if (!$wikiMan->editAllowed($articleId, $LoggedUser['EffectiveClass'])) {
+if (!$wikiMan->editAllowed($articleId, $Viewer->effectiveClass())) {
     error(403);
 }
 [, $title] = $wikiMan->article($articleId);
@@ -24,6 +24,6 @@ if (is_null($title)) {
 }
 
 $wikiMan->remove($articleId);
-(new Gazelle\Log)->general("Wiki article $articleId \"$title\" was deleted by {$LoggedUser['Username']}");
+(new Gazelle\Log)->general("Wiki article $articleId \"$title\" was deleted by " . $Viewer->username());
 
 header("location: wiki.php");

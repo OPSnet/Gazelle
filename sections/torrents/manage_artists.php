@@ -55,7 +55,9 @@ if (count($CleanArtists) > 0) {
             if ($DB->affected_rows()) {
                 $artistInfo = "$ArtistID ({$ArtistNames[$ArtistID]['Name']} as {$ArtistTypes[$Importance]})";
                 $logger->group($GroupID, $Viewer->id(), "Removed artist $artistInfo")
-                    ->general("Artist $artistInfo was removed from the group $GroupID ($GroupName) by user {$LoggedUser['ID']} ('{$LoggedUser['Username']}')");
+                    ->general("Artist $artistInfo was removed from the group $GroupID ($GroupName) by user "
+                        . $Viewer->id() . " (" . $Viewer->username() . ")"
+                    );
                 $Cache->delete_value("artist_groups_$ArtistID");
             }
         }
@@ -95,7 +97,9 @@ if (count($CleanArtists) > 0) {
             }
             (new Gazelle\Log)->group($GroupID, $Viewer->id(), "Importance changed artist {$ArtistNames[$ArtistID]['Name']} ({$ArtistTypes[$Importance]}) to {$ArtistTypes[$NewImportance]}")
                 ->general("Artist ({$ArtistTypes[$Importance]}) $ArtistID ({$ArtistNames[$ArtistID]['Name']})"
-                    . " importance was changed to {$ArtistTypes[$NewImportance]} in group {$GroupID} ({$GroupName}) by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
+                    . " importance was changed to {$ArtistTypes[$NewImportance]} in group {$GroupID} ({$GroupName}) by user "
+                    . $Viewer->id() . " (" . $Viewer->username() . ")"
+                );
         }
     }
     (new \Gazelle\Manager\TGroup)->refresh($GroupID);

@@ -17,12 +17,12 @@ if ($articleId) {
 }
 [$minRead, $minEdit, $error] = $wikiMan->configureAccess(
     check_perms('admin_manage_wiki'),
-    $LoggedUser['EffectiveClass'],
+    $Viewer->effectiveClass(),
     (int)$_POST['minclassread'],
     (int)$_POST['minclassedit']
 );
 
 $ArticleID = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer->id());
-(new Gazelle\Log)->general("Wiki article $ArticleID ($title) was created by {$LoggedUser['Username']}");
+(new Gazelle\Log)->general("Wiki article $ArticleID ($title) was created by " . $Viewer->username());
 
 header("Location: wiki.php?action=article&id=$ArticleID");

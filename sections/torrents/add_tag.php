@@ -1,11 +1,11 @@
 <?php
 
-if (!defined('AJAX')) {
-    authorize();
+if ($Viewer->disableTagging()) {
+    json_or_error('tagging disabled for your account', 403);
 }
 
-if (!empty($LoggedUser['DisableTagging'])) {
-    json_or_error('tagging disabled for your account', 403);
+if (!defined('AJAX')) {
+    authorize();
 }
 
 $UserID = $Viewer->id();

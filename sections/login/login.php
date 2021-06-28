@@ -1,6 +1,6 @@
 <?php
 
-if (isset($LoggedUser['ID'])) {
+if (isset($Viewer)) {
     header("Location: /index.php");
     exit;
 }

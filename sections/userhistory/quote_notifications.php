@@ -14,7 +14,7 @@ if ($_GET['catchup'] ?? 0) {
 $userQuote->setShowAll(($_GET['showall'] ?? 0) == 1);
 $total = $userQuote->total();
 
-$paginator = new Gazelle\Util\Paginator($Viewer->option('PostsPerPage') ?: USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal($total);
 
 View::show_header('Quote Notifications');

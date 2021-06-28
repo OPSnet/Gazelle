@@ -2,7 +2,7 @@
 
 $userMan = new Gazelle\Manager\User;
 
-$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+$PerPage = $Viewer->postsPerPage();
 [$Page, $Limit] = Format::page_limit($PerPage);
 
 View::show_header('Subscriptions','subscriptions,comments,bbcode');
@@ -160,7 +160,7 @@ if ($NumResults) {
 <?php } ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$Viewer->id()?>" class="brackets">Go to post history</a>&nbsp;
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
-            <a href="userhistory.php?action=catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>
+            <a href="userhistory.php?action=catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>
         </div>
     </div>
 <?php if (!$NumResults) { ?>

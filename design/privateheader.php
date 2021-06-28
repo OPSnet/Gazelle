@@ -3,10 +3,10 @@
 use Gazelle\Manager\Notification;
 
 global $LoggedUser, $Viewer;
-$authArgs = '&amp;user=' . $LoggedUser['ID']
-    . '&amp;auth=' . $LoggedUser['RSS_Auth']
-    . '&amp;passkey=' . $LoggedUser['torrent_pass']
-    . '&amp;authkey=' . $LoggedUser['AuthKey'];
+$authArgs = '&amp;user=' . $Viewer->id()
+    . '&amp;passkey=' . $Viewer->announceKey()
+    . '&amp;authkey=' . $Viewer->auth()
+    . '&amp;auth=' . $Viewer->rssAuth();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -84,8 +84,8 @@ if (!isset($LoggedUser['Tooltipster']) || $LoggedUser['Tooltipster']) {
 
 if (empty($LoggedUser['StyleURL'])) {
 ?>
-    <link rel="stylesheet" type="text/css" title="<?=$LoggedUser['StyleName']?>" media="screen" href="<?=
-        STATIC_SERVER?>/styles/<?=$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/'.$LoggedUser['StyleName'].'/style.scss')?>" />
+    <link rel="stylesheet" type="text/css" title="<?= $Viewer->stylesheetName() ?>" media="screen" href="<?=
+        STATIC_SERVER?>/styles/<?= $Viewer->stylesheetName() ?>/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/'. $Viewer->stylesheetName() .'/style.scss')?>" />
 <?php
 } else {
         $StyleURLInfo = parse_url($LoggedUser['StyleURL']);

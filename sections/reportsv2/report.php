@@ -68,7 +68,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     }
 }
 
-$urlStem = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
+$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
 
 if (empty($Types[$CategoryID])) {
     $TypeList = $Types['master'];
@@ -141,9 +141,9 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode');
             <tr class="colhead_dark">
                 <td width="80%"><strong>Reported torrent</strong></td>
                 <td><strong>Size</strong></td>
-                <td class="sign snatches"><img src="<?= $urlStem ?>/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="<?= $urlStem ?>/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="<?= $urlStem ?>/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
 

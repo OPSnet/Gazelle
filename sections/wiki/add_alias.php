@@ -7,7 +7,7 @@ if (!$articleId) {
 }
 
 $wikiMan = new Gazelle\Manager\Wiki;
-if (!$wikiMan->editAllowed($articleId, $LoggedUser['EffectiveClass'])) {
+if (!$wikiMan->editAllowed($articleId, $Viewer->effectiveClass())) {
     error(403);
 }
 

@@ -174,7 +174,9 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
 <?php   } ?>
         </small>
 <?php
-    } ?>
+    }
+    $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
+?>
         </h3>
     <table class="torrent_table cats numbering border m_table">
     <tr class="colhead">
@@ -183,9 +185,9 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         <td class="m_th_left m_th_left_collapsable">Name</td>
         <td style="text-align: right;">Size</td>
         <td style="text-align: right;">Data</td>
-        <td style="text-align: right;" class="sign snatches"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td style="text-align: right;" class="sign seeders"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td style="text-align: right;" class="sign leechers"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td style="text-align: right;" class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
+        <td style="text-align: right;" class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
+        <td style="text-align: right;" class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
         <td style="text-align: right;">Peers</td>
     </tr>
 <?php
@@ -265,7 +267,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($torrentDetails),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $torrentDetails,
                 ]) ?>
                 <strong><?=$displayName?></strong> <?=$torrentInformation?><?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>

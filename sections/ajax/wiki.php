@@ -16,7 +16,7 @@ if (!$ArticleID) { //No article found
 if (is_null($Revision)) {
     json_die("failure", "article not found");
 }
-if ($Read > $LoggedUser['EffectiveClass']) {
+if ($Read > $Viewer->effectiveClass()) {
     json_die("failure", "higher user class required to view article");
 }
 
