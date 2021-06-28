@@ -56,7 +56,7 @@ View::show_header($title, 'browse,collage');
     <div class="header">
         <h2><?php if ($ownProfile) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=
             $Viewer->auth() ?>&amp;user=<?= $Viewer->id() ?>&amp;auth=<?=
-            $LoggedUser['RSS_Auth']?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?=
+            $Viewer->rssAuth() ?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?=
             $Viewer->auth()?>&amp;name=<?=urlencode(SITE_NAME . ': Bookmarked Torrents')?>"><img src="<?=
             STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?= $title ?></h2>
         <div class="linkbox">
@@ -175,6 +175,7 @@ if ($CollageCovers !== 0) { ?>
         unset($CollagePages);
     }
 }
+$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
 ?>
         <table class="torrent_table grouping cats m_table" id="torrent_table">
             <tr class="colhead_dark">
@@ -182,9 +183,9 @@ if ($CollageCovers !== 0) { ?>
                 <td><!-- Category --></td>
                 <td class="m_th_left m_th_left_collapsable" width="70%"><strong>Torrents</strong></td>
                 <td>Size</td>
-                <td class="sign snatches"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
 foreach ($GroupIDs as $Idx => $GroupID) {

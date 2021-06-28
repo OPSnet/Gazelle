@@ -10,7 +10,7 @@ if ($letter && $letter !== '1') {
 }
 
 echo $Twig->render('wiki/browse.twig', [
-    'articles' => $wikiMan->articles($LoggedUser['EffectiveClass'], $letter),
+    'articles' => $wikiMan->articles($Viewer->effectiveClass(), $letter),
     'letter'   => $letter,
 ]);
 

@@ -166,7 +166,7 @@ if (check_perms('zip_downloader')) {
         unset($CollagePages);
     }
 }
-$iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
+$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
 ?>
         <table class="torrent_table grouping cats m_table" id="discog_table">
             <tr class="colhead_dark">
@@ -174,9 +174,9 @@ $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
                 <td><!-- Category --></td>
                 <td class="m_th_left" width="70%"><strong>Torrents</strong></td>
                 <td>Size</td>
-                <td class="sign snatches"><img src="<?= $iconUri ?>/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="<?= $iconUri ?>/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="<?= $iconUri ?>/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
 $vote = new Gazelle\Vote($Viewer->id());
@@ -249,7 +249,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     </span>
 <?php
         }
-        if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
+        if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
                     <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($Viewer->auth()) ?>
 <?php   } ?>
@@ -348,7 +348,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     't'      => $Torrent,
                 ]) ?>
                 <strong><?= $DisplayName ?></strong>
-<?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
+<?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
                 <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($Viewer->auth()) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>

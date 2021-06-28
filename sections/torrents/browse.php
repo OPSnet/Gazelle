@@ -12,8 +12,8 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
 
 $torMan = new Gazelle\Manager\Torrent;
 
-$iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
-$imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
+$urlStem = STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName()  . '/images/';
+$imgTag = '<img src="' . $urlStem . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['defaultSort' => 'desc', 'text' => 'Year'],
     'time'     => ['defaultSort' => 'desc', 'text' => 'Time'],

@@ -86,7 +86,7 @@ switch ($Type) {
         }
         break;
     case 'post':
-        $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+        $PerPage = $Viewer->postsPerPage();
         [$PostID, $Body, $TopicID, $PostNum] = $DB->row("
             SELECT p.ID,
                 p.Body,

@@ -73,7 +73,7 @@ if (isset($_POST['mode'])) {
 }
 
 echo $Twig->render('seedbox/config.twig',[
-    'auth'    => $LoggedUser['AuthKey'],
+    'auth'    => $Viewer->auth(),
     'free'    => $seedbox->freeList(),
     'host'    => $seedbox->hostList(),
     'user_id' => $userId,

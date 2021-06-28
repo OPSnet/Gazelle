@@ -64,7 +64,7 @@ if ($source && $target) {
             new Gazelle\Manager\Torrent,
             (new Gazelle\Manager\TorrentLabel)->showFlags(false)->showEdition(false)
         ),
-        'auth'      => $LoggedUser['AuthKey'],
+        'auth'      => $Viewer->auth(),
         'mode'      => $union ? 'union' : 'exclude',
         'paginator' => $paginator,
         'source_id' => $source,
@@ -76,7 +76,7 @@ if ($source && $target) {
 }
 
 echo $Twig->render('seedbox/view.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
+    'auth'    => $Viewer->auth(),
     'host'    => $seedbox->hostList(),
     'mode'    => $union ? 'union' : 'exclude',
     'source'  => $source,

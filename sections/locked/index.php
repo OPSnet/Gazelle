@@ -1,9 +1,8 @@
 <?php
 enforce_login();
 
-if (!check_perms('users_mod') && !isset($LoggedUser['LockedAccount'])) {
+if (!$Viewer->permitted('users_mod') && !$Viewer->isLocked()) {
     error(404);
 }
 
-include('default.php');
-
+require_once('default.php');

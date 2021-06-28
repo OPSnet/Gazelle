@@ -50,7 +50,7 @@ if (!$Viewer->readAccess($forum)) {
 //Escape strings for later display
 $ForumName = display_str($forum->name());
 $IsDonorForum = ($forumId == DONOR_FORUM);
-$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+$PerPage = $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
 if ($threadInfo['Posts'] <= $PerPage) {

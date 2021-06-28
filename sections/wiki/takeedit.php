@@ -19,7 +19,7 @@ if (is_null($OldRevision) || $OldRevision != (int)($_POST['revision'] ?? 0)) {
 }
 [$minRead, $minWrite, $error] = $wikiMan->configureAccess(
     check_perms('admin_manage_wiki'),
-    $LoggedUser['EffectiveClass'],
+    $Viewer->effectiveClass(),
     (int)$_POST['minclassread'],
     (int)$_POST['minclassedit']
 );

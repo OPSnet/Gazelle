@@ -4,7 +4,7 @@ if ($Viewer->disableForums()) {
     json_die('failure');
 }
 
-$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+$PerPage = $Viewer->postPerPage();
 [$Page, $Limit] = Format::page_limit($PerPage);
 
 $ShowCollapsed = (bool)($_GET['collapse'] ?? true);

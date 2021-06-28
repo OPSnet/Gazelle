@@ -1,6 +1,6 @@
 <?php
 
-if (!empty($LoggedUser['DisableForums'])) {
+if ($Viewer->disableForums()) {
     print json_die('failure');
 }
 

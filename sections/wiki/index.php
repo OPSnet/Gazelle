@@ -2,11 +2,11 @@
 enforce_login();
 
 function class_list($Selected = 0) {
-    global $LoggedUser;
+    global $Viewer;
     $Return = '';
     $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $ID => $Class) {
-        if ($Class['Level'] <= $LoggedUser['EffectiveClass']) {
+        if ($Class['Level'] <= $Viewer->effectiveClass()) {
             $Return.='<option value="'.$Class['Level'].'"';
             if ($Selected == $Class['Level']) {
                 $Return.=' selected="selected"';

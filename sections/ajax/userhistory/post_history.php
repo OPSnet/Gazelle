@@ -13,7 +13,7 @@ $ownProfile = ($user->id() === $Viewer->id());
 $forumSearch = (new Gazelle\ForumSearch($user))
     ->setShowGrouped($ownProfile && (!isset($_GET['group']) || !!$_GET['group']))
     ->setShowUnread($ownProfile && (!isset($_GET['showunread']) || !!$_GET['showunread']));
-$paginator = new Gazelle\Util\Paginator($LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 
 $json = new Gazelle\Json\PostHistory;
 $json->setForumSearch($forumSearch)

@@ -34,10 +34,8 @@ if ($_GET['postid']) {
 $forumId = $forum->id();
 if (isset($_GET['pp'])) {
     $PerPage = $_GET['pp'];
-} elseif (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
 } else {
-    $PerPage = POSTS_PER_PAGE;
+    $PerPage = $Viewer->postsPerPage();
 }
 
 $threadInfo = $forum->threadInfo($threadId);

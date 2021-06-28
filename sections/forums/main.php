@@ -19,7 +19,7 @@ foreach ($toc as $category => $forumList) {
         if ($f['ID'] == DONOR_FORUM) {
             $f['Description'] = donorForumDescription();
         }
-        $userLastRead = $forum->userLastRead($Viewer->id(), $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
+        $userLastRead = $forum->userLastRead($Viewer->id(), $Viewer->postsPerPage());
         if (isset($userLastRead[$f['LastPostTopicID']])) {
             $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
             $lastReadPost = $userLastRead[$f['LastPostTopicID']]['PostID'];

@@ -26,7 +26,7 @@ $forumSearch = (new Gazelle\ForumSearch($Viewer))
     ->setShowGrouped($ownProfile && $showGrouped)
     ->setShowUnread($ownProfile && $showUnread);
 
-$paginator = new Gazelle\Util\Paginator($LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal($forumSearch->postHistoryTotal());
 
 View::show_header($user->username() . " &rsaquo; $title", 'subscriptions,comments,bbcode');

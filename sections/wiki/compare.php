@@ -87,7 +87,7 @@ $ArticleID = (int)$_GET['id'];
 $wikiMan = new Gazelle\Manager\Wiki;
 
 [$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID] = $wikiMan->article($ArticleID);
-if ($Read > $LoggedUser['EffectiveClass']) {
+if ($Read > $Viewer->effectiveClass()) {
     error(404);
 }
 

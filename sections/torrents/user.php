@@ -15,8 +15,8 @@ if (is_null($user)) {
 }
 $userId = $user->id();
 
-$iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
-$imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
+$urlStem = STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName()  . '/images/';
+$imgTag = '<img src="' . $urlStem . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'name'     => ['dbColumn' => 'tg.Name', 'defaultSort' => 'asc',  'text' => 'Torrent'],
     'time'     => ['dbColumn' => 'Time',    'defaultSort' => 'desc', 'text' => 'Time'],
@@ -538,7 +538,7 @@ foreach (CATEGORY as $catKey => $catName) {
                         't'      => $torrent,
                     ]) ?>
                     <?= $displayName ?>
-<?php   if ((!isset($LoggedUser['NoVoteLinks']) || !$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
+<?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
                 <?= $vote->setGroupId($groupID)->setTwig($Twig)->links($Viewer->auth()) ?>
 <?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userId.'&amp;tags=')?></div>

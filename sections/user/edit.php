@@ -85,7 +85,7 @@ $Val = new Gazelle\Util\Validator;
 echo $Val->generateJS('userform');
 
 echo $Twig->render('user/setting.twig', [
-    'auth'             => $LoggedUser['AuthKey'],
+    'auth'             => $Viewer->auth(),
     'avatar'           => $Avatar,
     'download_text'    => $DownloadAlt,
     'is_mod'           => check_perms('users_mod'),

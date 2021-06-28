@@ -22,11 +22,9 @@ if (!$Viewer->readAccess($forum)) {
 }
 
 if (isset($_GET['pp'])) {
-    $PerPage = (int) $_GET['pp'];
-} elseif (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
+    $PerPage = (int)$_GET['pp'];
 } else {
-    $PerPage = POSTS_PER_PAGE;
+    $PerPage = $Viewer->postsPerPage();
 }
 $Page = (int)($_GET['page'] ?? 1);
 

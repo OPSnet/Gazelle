@@ -38,6 +38,6 @@ $subscription->flush('forums', $threadId);
 $subscription->quoteNotify($Body, $PostID, 'forums', $threadId);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId&page="
-    . (int)ceil($ThreadInfo['Posts'] / ($LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE))
+    . (int)ceil($ThreadInfo['Posts'] / $Viewer->postsPerPage())
     . "#post$PostID"
 );

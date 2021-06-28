@@ -169,16 +169,11 @@ if ($Viewer) {
     // No conditions will force a logout from this point, can hit the DB more.
     // Complete the $LoggedUser array
     $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($viewerId, $LoggedUser['CustomPermissions']);
-    $LoggedUser['RSS_Auth'] = md5($viewerId . RSS_HASH . $Viewer->announceKey());
 
     // Notifications
     if (isset($LoggedUser['Permissions']['site_torrents_notify'])) {
         $LoggedUser['Notify'] = $Viewer->notifyFilters();
     }
-
-    // Stylesheet
-    $Stylesheets = new Gazelle\Stylesheet;
-    $LoggedUser['StyleName'] = $Stylesheets->getName($LoggedUser['StyleID']);
 
     // We've never had to disable the wiki privs of anyone.
     if ($LoggedUser['DisableWiki']) {

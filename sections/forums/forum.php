@@ -27,7 +27,7 @@ $forumToc = $forum->tableOfContentsForum($page);
 
 $Pages        = Format::get_pages($page, $forum->topicCount(), TOPICS_PER_PAGE, 9);
 $isDonorForum = $forumId == DONOR_FORUM ? true : false;
-$perPage      = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+$perPage      = $Viewer->postsPerPage();
 $userLastRead = $forum->userLastRead($Viewer->id(), $perPage);
 
 foreach ($forumToc as &$thread) {

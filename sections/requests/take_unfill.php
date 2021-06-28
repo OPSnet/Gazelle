@@ -22,7 +22,7 @@ $DB->prepared_query('
     WHERE r.ID = ?', $RequestID);
 list($CategoryID, $UserID, $FillerID, $Title, $Uploaded, $GroupID) = $DB->next_record();
 
-if (((intval($LoggedUser['ID']) !== $UserID && intval($LoggedUser['ID']) !== $FillerID) && !check_perms('site_moderate_requests')) || $FillerID === '0') {
+if ((!in_array($Viewer->id(), [$UserID, $FillerID]) && !check_perms('site_moderate_requests')) || $FillerID === '0') {
     error(403);
 }
 
@@ -61,8 +61,8 @@ $userMan = new Gazelle\Manager\User;
 $userMan->sendPM($FillerID, 0,
     'A request you filled has been unfilled',
     "The request \"[url=requests.php?action=view&amp;id=$RequestID]$FullName"
-        . "[/url]\" was unfilled by [url=user.php?id={$LoggedUser['ID']}]"
-        . "{$LoggedUser['Username']}[/url] for the reason: [quote]{$_POST['reason']}"
+        . "[/url]\" was unfilled by [url=user.php?id=" . $Viewer->id() . "]"
+        . $Viewer->username() . "[/url] for the reason: [quote]{$_POST['reason']}"
         . "[/quote]\nIf you feel like this request was unjustly unfilled, please [url="
         . "reports.php?action=report&amp;type=request&amp;id={$RequestID}]report the request[/url] and explain why this request should not have been unfilled."
 );
@@ -73,8 +73,8 @@ if ($UserID !== $Viewer->id()) {
     $userMan->sendPM($UserID, 0,
         'A request you created has been unfilled',
         "The request \"[url=requests.php?action=view&amp;id=$RequestID]$FullName"
-            . "[/url]\" was unfilled by [url=user.php?id={$LoggedUser['ID']}]"
-            . $Viewer->username()."[/url] for the reason: [quote]".$_POST['reason'].'[/quote]'
+            . "[/url] was unfilled by [url=user.php?id=" . $Viewer->id() . "]"
+            . $Viewer->username() . "[/url] for the reason: [quote]" . trim($_POST['reason']) . '[/quote]'
     );
 }
 
