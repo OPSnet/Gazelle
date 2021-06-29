@@ -8,6 +8,7 @@ class IPv4 extends \Gazelle\Base {
 
     protected $filterNotes;
     protected $filterIpaddr;
+    protected $filterIpaddrRegexp;
 
     public function setFilterNotes(string $filterNotes) {
         $this->filterNotes = $filterNotes;
@@ -21,6 +22,11 @@ class IPv4 extends \Gazelle\Base {
         return $this;
     }
 
+    public function setFilterIpaddrRegexp(string $re) {
+        $this->filterIpaddrRegexp = $re;
+        return $this;
+    }
+
     public function queryBase(): array {
         $cond = [];
         $args = [];
@@ -29,7 +35,7 @@ class IPv4 extends \Gazelle\Base {
             $args[] = $this->filterNotes;
         }
         if (!is_null($this->filterIpaddr)) {
-            $cond[] = "? BETWEEN inet_aton(i.FromIP) AND inet_aton(i.ToIP)";
+            $cond[] = "inet_aton(?) BETWEEN i.FromIP AND i.ToIP";
             $args[] = $this->filterIpaddr;
         }
         return [
@@ -61,6 +67,55 @@ class IPv4 extends \Gazelle\Base {
             ORDER BY $orderBy $orderDir
             LIMIT ? OFFSET ?
             ", ...array_merge($args, [$limit, $offset])
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function userTotal(int $userId): int {
+        $cond = ['UserID = ?'];
+        $args = [$userId];
+        if (!is_null($this->filterIpaddrRegexp)) {
+            $cond[] = "IP REGEXP ?";
+            $args[] = $this->filterIpaddrRegexp;
+        }
+        $where  = join(' AND ', $cond);
+        return $this->db->scalar("
+            SELECT count(DISTINCT IP) FROM users_history_ips WHERE $where
+            ", ...$args
+        );
+    }
+
+    public function userPage(int $userId, int $limit, int $offset): array {
+        $this->db->prepared_query("SET SESSION group_concat_max_len = 50000");
+        $cond = ['i.UserID = ?'];
+        $args = [$userId];
+        if (!is_null($this->filterIpaddrRegexp)) {
+            $cond[] = "i.IP REGEXP ?";
+            $args[] = $this->filterIpaddrRegexp;
+        }
+        $where  = join(' AND ', $cond);
+        $args[] = $limit;
+        $args[] = $offset;
+        $this->db->prepared_query("
+            SELECT uhi.IP as ip_addr,
+                count(DISTINCT UserID) as nr_users,
+                group_concat(
+                    concat(UserID, '/', StartTime, '/', coalesce(EndTime, now()))
+                    ORDER BY if(UserID = ?, 0, 1), StartTime DESC
+                ) AS ranges,
+                min(uhi.StartTime) AS min_start,
+                coalesce(max(uhi.EndTime), now()) AS max_end,
+                exists (SELECT ib.ID FROM ip_bans ib WHERE inet_aton(uhi.IP) BETWEEN ib.FromIP AND ib.ToIP) AS is_banned
+            FROM users_history_ips uhi
+            WHERE IP IN (
+                    SELECT DISTINCT i.IP
+                    FROM users_history_ips i
+                    WHERE $where
+                )
+            GROUP BY uhi.IP
+            ORDER BY max_end DESC, ip_addr
+            LIMIT ? OFFSET ?
+            ", $userId, ...$args
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
