@@ -1,0 +1,70 @@
+{% from 'macro/ipv4.twig' import ajax_ipv4 %}
+<div class="thin">
+    <div class="header">
+        <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; IP address history</h2>
+    </div>
+    {{ paginator.linkbox|raw }}
+    <table>
+        <tr class="colhead">
+            <td>IP address search</td>
+        </tr>
+
+        <tr><td>
+            <form class="search_form" name="ip_log" method="get" action="">
+                <input type="hidden" name="action" value="ips" />
+                <input type="hidden" name="userid" value="{{ user.id }}" />
+                <input type="text" name="ip" value="{{ ip }}" />
+                <input type="submit" value="Search" />
+                Regexps may be used
+            </form>
+        </td></tr>
+    </table>
+
+    <table id="iphistory">
+        <tr class="colhead">
+            <td>IP address</td>
+            <td>Started <a href="#" onclick="$('#iphistory .date-rel').gtoggle(); $('#iphistory .date-abs').gtoggle(); return false;" class="brackets">Toggle timestamp</a></td>
+            <td>Ended</td>
+            <td>Duplicate use</td>
+            <td>Started</td>
+            <td>Ended</td>
+        </tr>
+{% for row in page %}
+    {% set open = 0 %}
+    {% for user_span in row.ranges|split(',') %}
+        {% set u = user_span|split('/') %}
+        {% if loop.first %}
+        <tr>
+            <td>
+            {% if not row.is_banned %}
+                {{ ajax_ipv4(row.ip_addr) }} ({{ row.ip_addr }})
+            {% else %}
+            <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ajax_ipv4(item.ipaddr) }} ({{ row.ip_addr }})
+                <img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="IP ranned" title="IP banned" class="tooltip" />
+            </a>
+            {% endif %}
+            </td>
+            <td><span class="date-rel">{{ u.1|time_diff }}</span><span class="date-abs hidden">{{ u.1 }}</span></td>
+            <td><span class="date-rel">{{ u.2|time_diff }}</span><span class="date-abs hidden">{{ u.2 }}</span></td>
+            {% set open = 1 %}
+        {% elseif loop.index > 2 %}
+        </tr>
+        <tr>
+            <td colspan="3">&nbsp;</td>
+        {% endif %}
+        {% if not loop.first %}
+            <td>{{ u.0|user_full }} <a class="brackets" href="/userhistory.php?action=ips&userid={{ u.0 }}">View</a></td>
+            <td><span class="date-rel">{{ u.1|time_diff }}</span><span class="date-abs hidden">{{ u.1 }}</span></td>
+            <td><span class="date-rel">{{ u.2|time_diff }}</span><span class="date-abs hidden">{{ u.2 }}</span></td>
+            {% set open = 0 %}
+        </tr>
+        {% endif %}
+    {% endfor %}
+    {% if open %}
+            <td colspan="3">No other users on this address</td>
+        </tr>
+    {% endif %}
+{% endfor %}
+    </table>
+    {{ paginator.linkbox|raw }}
+</div>
