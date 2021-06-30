@@ -81,15 +81,17 @@ class Login extends Base {
         } else {
             // we might not have an authenticated user, but still have the id of the username
             $this->watch->increment($this->userId, $this->username);
-            if ($this->watch->nrBans() > 9) {
-                (new Manager\IPv4)->createBan(
-                    $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
-                );
+            if ($this->watch->nrAttempts() > 10) {
+                $this->watch->ban($this->username);
                 (new Manager\User)->sendPM($this->userId, 0, "Too many login attempts on your account",
                     $this->twig->render('login/too-many-failures.twig', [
                     'ipaddr' => $this->ipaddr,
                     'username' => $this->username,
                 ]));
+            } elseif ($this->watch->nrBans() > 3) {
+                (new Manager\IPv4)->createBan(
+                    $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
+                );
             }
         }
         usleep(600000 - (microtime(true) - $begin));

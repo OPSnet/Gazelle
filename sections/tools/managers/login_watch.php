@@ -54,7 +54,7 @@ foreach ($headerInfo->getAllSortKeys() as $column) {
     $header[$column] = $headerInfo->emit($column);
 }
 
-$paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 0));
+$paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($watch->activeTotal());
 
 $list = $watch->activeList($headerInfo->getOrderBy(), $headerInfo->getOrderDir(), $paginator->limit(), $paginator->offset());

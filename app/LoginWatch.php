@@ -58,7 +58,7 @@ class LoginWatch extends Base {
     }
 
     /**
-     * Ban subsequent attempts to login from this watched IP address for 6 hours
+     * Ban subsequent attempts to login from this watched IP address for a while
      * @return int 1 if the watch was banned
      */
     public function ban(string $username): int {
@@ -66,7 +66,7 @@ class LoginWatch extends Base {
             UPDATE login_attempts SET
                 Bans = Bans + 1,
                 LastAttempt = now(),
-                BannedUntil = now() + INTERVAL 6 HOUR,
+                BannedUntil = now() + INTERVAL 1 DAY,
                 capture = ?,
                 UserID = ?
             WHERE ID = ?
@@ -178,7 +178,7 @@ class LoginWatch extends Base {
             LEFT JOIN ip_bans ip ON (ip.FromIP = inet_aton(w.IP))
             WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
             ORDER BY $orderBy $orderWay
-            LIMIT ?, ?
+            LIMIT ? OFFSET ?
             ", $limit, $offset
         );
         return $this->db->to_array('id', MYSQLI_ASSOC, false);
