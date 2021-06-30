@@ -14,11 +14,11 @@ if (!$NewRequest) {
     }
 }
 
-if ($NewRequest && ($LoggedUser['BytesUploaded'] < 250 * 1024 * 1024 || !$Viewer->permitted('site_submit_requests'))) {
-    error('You do not have enough uploaded to make a request.');
+if ($NewRequest && ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->permitted('site_submit_requests'))) {
+    error('You have not enough upload to make a request.');
 }
 
-$RequestTaxPercent = ($RequestTax * 100);
+$RequestTaxPercent = REQUEST_TAX * 100;
 
 if (!$NewRequest) {
 if (empty($ReturnEdit)) {
@@ -386,7 +386,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MiB</option>
                             <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GiB</option>
                         </select>
-                        <?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
+                        <?= REQUEST_TAX > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
                         <p>Bounty must be greater than or equal to 100 MiB.</p>
                     </td>
                 </tr>
@@ -396,10 +396,10 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="hidden" id="amount" name="amount" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
                         <input type="hidden" id="current_uploaded" value="<?=$Viewer->uploadedSize()?>" />
                         <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
-                        <input type='hidden' id='request_tax' value="<?=$RequestTax?>" />
-                        <?= $RequestTax > 0
-                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span></strong><br />'
-                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span>'
+                        <input type='hidden' id='request_tax' value="<?=REQUEST_TAX?>" />
+                        <?= REQUEST_TAX > 0
+                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span></strong><br />'
+                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">100.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
