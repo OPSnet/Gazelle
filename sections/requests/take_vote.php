@@ -6,7 +6,7 @@ use \Gazelle\Manager\Notification;
 //--------------- Vote on a request --------------------------------------------//
 //This page is ajax!
 
-if (!check_perms('site_vote')) {
+if (!$Viewer->permitted('site_vote')) {
     error(403);
 }
 
@@ -34,11 +34,11 @@ if ($FilledTorrentID > 0) {
     die();
 }
 
-$Amount = (empty($_GET['amount']) || !intval($_GET['amount']) || $_GET['amount'] < $MinimumVote)
-    ? $MinimumVote
+$Amount = (empty($_GET['amount']) || !intval($_GET['amount']) || $_GET['amount'] < REQUEST_MIN)
+    ? REQUEST_MIN
     : $_GET['amount'];
 
-$Bounty = $Amount * (1 - $RequestTax);
+$Bounty = $Amount * (1 - REQUEST_TAX);
 
 if ($Viewer->uploadedSize() < $Amount) {
     echo 'bankrupt';

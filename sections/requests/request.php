@@ -9,7 +9,7 @@ if (empty($_GET['id']) || !intval($_GET['id'])) {
 }
 
 $RequestID = $_GET['id'];
-$RequestTaxPercent = ($RequestTax * 100);
+$RequestTaxPercent = (REQUEST_TAX * 100);
 
 //First things first, lets get the data for the request.
 
@@ -20,7 +20,7 @@ if ($Request === false) {
 
 //Convenience variables
 $IsFilled = !empty($Request['TorrentID']);
-$CanVote = !$IsFilled && check_perms('site_vote');
+$CanVote = !$IsFilled && $Viewer->permitted('site_vote');
 
 if ($Request['CategoryID'] === '0') {
     $CategoryName = 'Unknown';
@@ -58,7 +58,7 @@ if (empty($Request['ReleaseType'])) {
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
 $UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);
-$CanEdit = ($UserCanEdit || check_perms('site_moderate_requests') || check_perms('site_edit_requests'));
+$CanEdit = ($UserCanEdit || $Viewer->permitted('site_moderate_requests') || $Viewer->permitted('site_edit_requests'));
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 $commentPage = new Gazelle\Comment\Request($RequestID);
@@ -84,11 +84,11 @@ View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,
             <a href="requests.php?action=edit&amp;id=<?=$RequestID?>" class="brackets">Edit</a>
 <?php
     }
-    if (check_perms('site_admin_requests')) { ?>
+    if ($Viewer->permitted('site_admin_requests')) { ?>
             <a href="requests.php?action=edit-bounty&amp;id=<?=$RequestID?>" class="brackets">Edit bounty</a>
 <?php
     }
-    if ($UserCanEdit || check_perms('site_moderate_requests')) { ?>
+    if ($UserCanEdit || $Viewer->permitted('site_moderate_requests')) { ?>
             <a href="requests.php?action=delete&amp;id=<?=$RequestID?>" class="brackets">Delete</a>
 <?php
     }
@@ -359,7 +359,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                     <span id="votecount"><?=number_format($VoteCount)?></span>
 <?php    if ($CanVote) { ?>
                     &nbsp;&nbsp;<a href="javascript:Vote(0)" class="brackets"><strong>+</strong></a>
-                    <strong>Costs <?=Format::get_size($MinimumVote, 0)?></strong>
+                    <strong>Costs <?=Format::get_size(REQUEST_MIN)?></strong>
 <?php    } ?>
                 </td>
             </tr>
@@ -380,7 +380,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                         <option value="mb">MiB</option>
                         <option value="gb">GiB</option>
                     </select>
-                    <?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
+                    <?= REQUEST_TAX > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
                     <p>Bounty must be greater than or equal to 100 MiB.</p>
                 </td>
             </tr>
@@ -389,7 +389,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                 <td>
                     <form class="add_form" name="request" action="requests.php" method="get" id="request_form">
                         <input type="hidden" name="action" value="vote" />
-                        <input type="hidden" id="request_tax" value="<?=$RequestTax?>" />
+                        <input type="hidden" id="request_tax" value="<?=REQUEST_TAX?>" />
                         <input type="hidden" id="requestid" name="id" value="<?=$RequestID?>" />
                         <input type="hidden" id="auth" name="auth" value="<?= $Viewer->auth() ?>" />
                         <input type="hidden" id="amount" name="amount" value="0" />
@@ -397,9 +397,9 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                         <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
                         <input type="hidden" id="current_rr" value="<?=$Viewer->requiredRatio()?>" />
                         <input id="total_bounty" type="hidden" value="<?=$RequestVotes['TotalBounty']?>" />
-                        <?= $RequestTax > 0
-                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span></strong><br />'
-                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span>'
+                        <?= REQUEST_TAX > 0
+                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span></strong><br />'
+                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">0.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
@@ -419,7 +419,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                 <td>
                     <strong><a href="torrents.php?torrentid=<?=$Request['TorrentID']?>">Yes</a></strong>,
                     by user <?=Users::format_username($Request['FillerID'], false, false, false)?>
-<?php        if ($Viewer->id() == $Request['UserID'] || $Viewer->id() == $Request['FillerID'] || check_perms('site_moderate_requests')) { ?>
+<?php        if ($Viewer->id() == $Request['UserID'] || $Viewer->id() == $Request['FillerID'] || $Viewer->permitted('site_moderate_requests')) { ?>
                         <strong><a href="requests.php?action=unfill&amp;id=<?=$RequestID?>" class="brackets">Unfill</a></strong> Unfilling a request without a <a href="/rules.php?p=requests">valid, nontrivial reason</a> will result in a warning.
 <?php        } ?>
                 </td>
@@ -437,7 +437,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                             <br />
                             <strong>Must be the permalink [PL] of the torrent<br />(e.g. <?=SITE_URL?>/torrents.php?torrentid=nnn).</strong>
                         </div>
-<?php        if (check_perms('site_moderate_requests')) { ?>
+<?php        if ($Viewer->permitted('site_moderate_requests')) { ?>
                         <div class="field_div">
                             For user: <input type="text" size="25" name="user"<?=(!empty($FillerUsername) ? " value=\"$FillerUsername\"" : '')?> />
                         </div>

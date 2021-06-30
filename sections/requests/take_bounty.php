@@ -2,12 +2,12 @@
 
 authorize();
 
-if (!check_perms('site_admin_requests')) {
+if (!$Viewer->permitted('site_admin_requests')) {
     error(403);
 }
 
-$requestId = (int)$_POST['id'];
-if ($requestId < 1) {
+$request = (new Gazelle\Manager\Request)->findById((int)$_POST['id']);
+if (is_null($request)) {
     error(404);
 }
 
@@ -61,7 +61,6 @@ foreach ($action as $userId => $operation) {
  *   $refund = [8]
  *   $remove = [4]
  */
-$request = new \Gazelle\Request($requestId);
 foreach ($refund as $userId) {
     $request->refundBounty($userId, $Viewer->username());
 }
@@ -74,7 +73,7 @@ if ($request || $remove) {
         ["request_$requestId", "request_votes_$requestId"],
         array_map(fn($x) => "user_stats_$x", $refund)
     ));
-    Requests::update_sphinx_requests($requestId);
+    Requests::update_sphinx_requests($request->id());
 }
 
-header("Location: requests.php?action=view&id=$requestId");
+header("Location: requests.php?action=view&id=" . $request->id());

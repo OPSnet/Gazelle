@@ -22,7 +22,7 @@ $DB->prepared_query('
     WHERE r.ID = ?', $RequestID);
 list($CategoryID, $UserID, $FillerID, $Title, $Uploaded, $GroupID) = $DB->next_record();
 
-if ((!in_array($Viewer->id(), [$UserID, $FillerID]) && !check_perms('site_moderate_requests')) || $FillerID === '0') {
+if ((!in_array($Viewer->id(), [$UserID, $FillerID]) && !$Viewer->permitted('site_moderate_requests')) || $FillerID === '0') {
     error(403);
 }
 

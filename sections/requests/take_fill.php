@@ -82,7 +82,7 @@ list($GroupID, $UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format,
 $FillerID = $Viewer->id();
 $FillerUsername = $Viewer->username();
 
-if (!empty($_REQUEST['user']) && check_perms('site_moderate_requests')) {
+if (!empty($_REQUEST['user']) && $Viewer->permitted('site_moderate_requests')) {
     $filler = (new Gazelle\Manager\User)->findByUsername(trim($_REQUEST['user']));
     if (!$filler) {
         $Err[] = 'No such user to fill for!';
@@ -92,7 +92,7 @@ if (!empty($_REQUEST['user']) && check_perms('site_moderate_requests')) {
     }
 }
 
-if ($GracePeriod && $UploaderID !== $FillerID && !check_perms('site_moderate_requests')) {
+if ($GracePeriod && $UploaderID !== $FillerID && !$Viewer->permitted('site_moderate_requests')) {
     $Err[] = "There is a one hour grace period for new uploads to allow the uploader ($FillerUsername) to fill the request.";
 }
 

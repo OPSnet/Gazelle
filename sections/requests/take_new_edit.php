@@ -21,7 +21,7 @@ $NewRequest = ($_POST['action'] === 'takenew');
 
 $onlyMetadata = false;
 if ($NewRequest) {
-    if (!$Viewer->permitted('site_submit_requests') || $LoggedUser['BytesUploaded'] < 250 * 1024 * 1024) {
+    if (!$Viewer->permitted('site_submit_requests') || $Viewer->uploadedSize() < 250 * 1024 * 1024) {
         error(403);
     }
 } else {
@@ -427,7 +427,7 @@ if ($NewRequest) {
         INSERT INTO requests_votes
                (RequestID, UserID, Bounty)
         VALUES (?,         ?,      ?)
-        ", $RequestID, $Viewer->id(), $Bytes * (1 - $RequestTax)
+        ", $RequestID, $Viewer->id(), $Bytes * (1 - REQUEST_TAX)
     );
 
     $DB->prepared_query('
