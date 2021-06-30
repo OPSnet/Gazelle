@@ -1,78 +1,29 @@
 <?php
-//******************************************************************************//
-//--------------- Delete request -----------------------------------------------//
 
 authorize();
 
-[$RequestID, $UserID, $Title, $CategoryID, $GroupID] = $DB->row("
-    SELECT ID,
-        UserID,
-        Title,
-        CategoryID,
-        GroupID
-    FROM requests
-    WHERE ID = ?
-    ", (int)$_POST['id']
-);
-if (is_null($RequestID)) {
+$request = (new Gazelle\Manager\Request)->findById((int)$_POST['id']);
+if (is_null($request)) {
     error(404);
 }
-
-if ($Viewer->id() != $UserID && !check_perms('site_moderate_requests')) {
+if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_requests')) {
     error(403);
 }
 
-$CategoryName = CATEGORY[$CategoryID - 1];
-
-//Do we need to get artists?
-if ($CategoryName === 'Music') {
-    $ArtistForm = Requests::get_artists($RequestID);
-    $ArtistName = Artists::display_artists($ArtistForm, false, true);
-    $FullName = $ArtistName.$Title;
-} else {
-    $FullName = $Title;
-}
-
-// Delete request, votes and tags
-$DB->prepared_query('DELETE FROM requests WHERE ID = ?', $RequestID);
-$DB->prepared_query('DELETE FROM requests_votes WHERE RequestID = ?', $RequestID);
-$DB->prepared_query('DELETE FROM requests_tags WHERE RequestID = ?', $RequestID);
-
-$DB->prepared_query("
-    SELECT ArtistID FROM requests_artists WHERE RequestID = ?
-    ", $RequestID
-);
-$RequestArtists = $DB->collect(0);
-foreach ($RequestArtists as $RequestArtist) {
-    $Cache->delete_value("artists_requests_$RequestArtist");
-}
-$DB->prepared_query('
-    DELETE FROM requests_artists
-    WHERE RequestID = ?', $RequestID);
-$Cache->delete_value("request_artists_$RequestID");
-
-$DB->prepared_query('
-    REPLACE INTO sphinx_requests_delta
-        (ID)
-    VALUES
-        (?)', $RequestID);
-
-(new \Gazelle\Manager\Comment)->remove('requests', $RequestID);
-
-if ($UserID != $Viewer->id()) {
-    (new Gazelle\Manager\User)->sendPM($UserID, 0,
+$reason = trim($_POST['reason']);
+$title = $request->fullTitle();
+if ($request->userId() !== $Viewer->id()) {
+    (new Gazelle\Manager\User)->sendPM($request->userId(), 0,
         'A request you created has been deleted',
-        "The request \"$FullName\" was deleted by [url=user.php?id=" . $Viewer->id() . "]"
-            . $Viewer->username().'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]'
+        "The request \"$title\" was deleted by [url=user.php?id=" . $Viewer->id() . "]"
+            . $Viewer->username() . "[/url] for the reason: [quote]{$reason}[/quote]"
     );
 }
+$requestId = $request->id();
+$request->remove();
 
-(new Gazelle\Log)->general("Request $RequestID ($FullName) was deleted by user ".$Viewer->id().' ('.$Viewer->username().') for the reason: '.$_POST['reason']);
-
-$Cache->delete_value("request_$RequestID");
-$Cache->delete_value("request_votes_$RequestID");
-if ($GroupID) {
-    $Cache->delete_value("requests_group_$GroupID");
-}
+(new Gazelle\Log)->general("Request $requestId ($title) was deleted by user "
+    . $Viewer->label() . " for the reason: $reason"
+);
 
 header('Location: requests.php');

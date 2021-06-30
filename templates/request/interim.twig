@@ -1,0 +1,20 @@
+<div class="thin center">
+<div class="box" style="width: 600px; margin: 0px auto;">
+    <div class="head colhead">
+        {{ action|capitalize }} Request
+    </div>
+    <div class="pad">
+        <form class="{% if action == 'delete' %}delete_form{% else %}edit_form{% endif %}" name="request" action="requests.php" method="post">
+            <input type="hidden" name="action" value="take{{ action }}" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="id" value="{{ id }}" />
+{% if action == delete %}
+            <div class="warning">You will <strong>not</strong> get your bounty back if you delete this request.</div>
+{% endif %}
+            <strong>Reason:</strong>
+            <input type="text" name="reason" size="30" />
+            <input value="{{ action|capitalize }}" type="submit" />
+        </form>
+    </div>
+</div>
+</div>

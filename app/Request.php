@@ -2,25 +2,121 @@
 
 namespace Gazelle;
 
-class Request extends Base {
-    protected $id;
+class Request extends BaseObject {
+    protected $info;
 
-    public function __construct (int $id) {
-        parent::__construct();
-        $this->id = $id;
+    protected const CACHE_REQUEST = "request_%d";
+    protected const CACHE_ARTIST  = "request_artists_%d";
+    protected const CACHE_VOTE    = "request_votes_%d";
+
+    public function tableName(): string {
+        return 'requests';
     }
 
-    /**
-     * Get the title of a request
-     * TODO: should tie this into the caching infrastructure
-     *
-     * @return string Title of request
-     */
-    public function title() {
-        return $this->db->scalar("
-            SELECT Title FROM requests WHERE ID = ?
+    public function __construct(int $id) {
+        parent::__construct($id);
+    }
+
+    public function flush() {
+        if ($this->info()['GroupID']) {
+            $this->cache->delete_value("requests_group_" . $this->info()['GroupID']);
+        }
+        $this->cache->deleteMulti([
+            sprintf(self::CACHE_REQUEST, $this->id),
+            sprintf(self::CACHE_ARTIST, $this->id),
+            sprintf(self::CACHE_VOTE, $this->id),
+        ]);
+        $this->info = null;
+    }
+
+    public function remove(): bool {
+        $this->db->begin_transaction();
+        $this->db->prepared_query("DELETE FROM requests_votes WHERE RequestID = ?", $this->id);
+        $this->db->prepared_query("DELETE FROM requests_tags WHERE RequestID = ?", $this->id);
+        $this->db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
+        $affected = $this->db->affected_rows();
+        $this->db->prepared_query("
+            SELECT ArtistID FROM requests_artists WHERE RequestID = ?
             ", $this->id
         );
+        $artisIds = $this->db->collect(0);
+        $this->db->prepared_query('
+            DELETE FROM requests_artists WHERE RequestID = ?', $this->id
+        );
+        $this->db->prepared_query("
+            REPLACE INTO sphinx_requests_delta (ID) VALUES (?)
+            ", $this->id
+        );
+        (new \Gazelle\Manager\Comment)->remove('requests', $this->id);
+        $this->db->commit();
+
+        foreach ($artisIds as $artistId) {
+            $this->cache->delete_value("artists_requests_$artistId");
+        }
+        $this->flush();
+
+        return $affected != 0;
+    }
+
+    protected function info(): array {
+        if (!$this->info) {
+            $this->info = $this->db->rowAssoc("
+                SELECT UserID,
+                    FillerID,
+                    Title,
+                    CategoryID,
+                    GroupID
+                FROM requests
+                WHERE ID = ?
+                ", $this->id
+            );
+        }
+        return $this->info;
+    }
+
+    public function userId(): int {
+        return $this->info()['UserID'];
+    }
+
+    public function fillerId(): int {
+        return $this->info()['FillerID'];
+    }
+
+    public function title() {
+        return $this->info()['Title'];
+    }
+
+    public function fullTitle() {
+        $title = '';
+        if (CATEGORY[$this->info()['CategoryID'] - 1] === 'Music') {
+            $title = \Artists::display_artists($this->artistList(), false, true);
+        }
+        return $title . $this->title();
+    }
+
+    public function artistList(): array {
+        $key = sprintf(self::CACHE_ARTIST, $this->id);
+        $list = $this->cache->get_value($key);
+        if ($list !== false) {
+            return $list;
+        }
+        $this->db->prepared_query("
+            SELECT ra.ArtistID,
+                aa.Name,
+                ra.Importance
+            FROM requests_artists AS ra
+            INNER JOIN artists_alias AS aa USING (AliasID)
+            WHERE ra.RequestID = ?
+            ORDER BY ra.Importance, aa.Name
+            ", $this->id
+        );
+        $raw = $this->db->to_array();
+        $list = [];
+        foreach ($raw as list($artistId, $artistName, $role)) {
+            $list[$role][] = ['id' => $artistId, 'name' => $artistName];
+        }
+        $this->cache->cache_value($key, $list, 0);
+        return $list;
     }
 
     /**
@@ -60,6 +156,7 @@ class Request extends Base {
      */
     public function refundBounty(int $userId, string $staffName) {
         $bounty = $this->userBounty($userId);
+        $this->db->begin_transaction();
         $this->db->prepared_query("
             DELETE FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
@@ -81,6 +178,8 @@ class Request extends Base {
                 ", $bounty, $message, $userId
             );
         }
+        $this->db->commit();
+        $this->cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
     }
 
     /**
@@ -90,6 +189,7 @@ class Request extends Base {
      */
     public function removeBounty(int $userId, string $staffName) {
         $bounty = $this->userBounty($userId);
+        $this->db->begin_transaction();
         $this->db->prepared_query("
             DELETE FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
@@ -108,6 +208,8 @@ class Request extends Base {
                 ", $message, $userId
             );
         }
+        $this->db->commit();
+        $this->cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
     }
 
     /**
@@ -140,20 +242,13 @@ class Request extends Base {
             ", $bounty, $message, $fillerId
         );
         $this->cache->delete_value("user_stats_$fillerId");
-        // TODO: make it easy to use Twig here
         (new Manager\User)->sendPM($fillerId, 0, "Bounty was reduced on a request you filled",
-            sprintf("With regret, Staff informs you that a reduction of %s bounty"
-                . " was applied to a request you filled on %s.\n\n"
-                . "It has been determined that a person who had voted on this"
-                . " request was manipulating their ratio and as a consequence"
-                . " their request votes have been rescinded. One of the requests"
-                . " affected was this one, and as a result your upload stats"
-                . " have changed. It fills us with sadness to have to undertake"
-                . " such an action, however, buffer they dumped on the request"
-                . " was never real in the first place.\n\n"
-                . "The request: %s\n\nReport handled by %s.",
-                \Format::get_size($bounty), $fillDate, $requestUrl, $staffName
-            )
+            $this->twig->render('request/bounty-reduction.twig', [
+                'bounty'      => $bounty,
+                'fill_date'   => $fillDate,
+                'request_url' => $requestUrl,
+                'staff_name'  => $staffName,
+            ])
         );
     }
 }
