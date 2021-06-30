@@ -186,10 +186,12 @@ class LoginWatch extends Base {
 
     /**
      * Ban the IP addresses pointed to by the IDs that are on login watch.
+     * @param int User doing the banning
+     * @param string why
      * @param array list of IDs to ban.
      * @return number of addresses banned
      */
-    public function setBan(string $reason, array $list): int {
+    public function setBan(int $userId, string $reason, array $list): int {
         if (!$list) {
             return 0;
         }
@@ -204,7 +206,7 @@ class LoginWatch extends Base {
                 INSERT IGNORE INTO ip_bans
                        (user_id, Reason, FromIP, ToIP)
                 VALUES (?,       ?,      ?,      ?)
-                ", $this->userId, $reason, $ipv4, $ipv4
+                ", $userId, $reason, $ipv4, $ipv4
             );
             $n += $this->db->affected_rows();
         }
