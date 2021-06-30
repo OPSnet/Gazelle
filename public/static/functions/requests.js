@@ -52,7 +52,7 @@ function Vote(amount, requestid) {
             var requestTax = $('#request_tax').raw().value;
             $('#total_bounty').raw().value = totalBounty;
             $('#formatted_bounty').raw().innerHTML = get_size(totalBounty);
-            if (requestTax > 0) {
+            if (requestTax > 0) {
                 save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
             } else {
                 save_message("Your vote of " + get_size(amount) + " has been added");

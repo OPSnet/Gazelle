@@ -324,11 +324,11 @@ View::show_header($Title, ['js' => 'requests']);
     </div>
     <div class="linkbox">
 <?php    if (!$BookmarkView) {
-        if (check_perms('site_submit_requests')) { ?>
+        if ($Viewer->permitted('site_submit_requests')) { ?>
         <a href="requests.php?action=new" class="brackets">New request</a>
         <a href="requests.php?type=created" class="brackets">My requests</a>
 <?php        }
-        if (check_perms('site_vote')) { ?>
+        if ($Viewer->permitted('site_vote')) { ?>
         <a href="requests.php?type=voted" class="brackets">Requests I've voted on</a>
 <?php        } ?>
         <a href="bookmarks.php?type=requests" class="brackets">Bookmarked requests</a>
@@ -596,8 +596,8 @@ View::show_header($Title, ['js' => 'requests']);
             </td>
             <td class="m_td_right nobr">
                 <span id="vote_count_<?=$RequestID?>"><?=number_format($VoteCount)?></span>
-<?php         if (!$IsFilled && check_perms('site_vote')) { ?>
-                &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
+<?php         if (!$IsFilled && $Viewer->permitted('site_vote')) { ?>
+                &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $RequestID ?>)" class="brackets"><strong>+</strong></a>
 <?php        } ?>
             </td>
             <td class="m_td_right number_column nobr">

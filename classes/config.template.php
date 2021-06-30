@@ -110,6 +110,7 @@ define('BYTES_PER_FREELEECH_TOKEN', 536870912); // Amount of bytes to use per to
 define('STACKABLE_FREELEECH_TOKENS', true); // Allow stacking tokens
 define('FREELEECH_TOKEN_EXPIRY_DAYS', 30); // Number of days before an activated token expires
 define('REQUEST_TAX', 0.0); //Percentage Tax (0 - 1) to charge users on making requests
+define('REQUEST_MIN', 20 * 1024 * 1024); // Minimum request vote
 define('STARTING_INVITES', 0); //# of invites to give to newly registered users
 define('BLOCK_TOR', false); //Set to true to block Tor users
 define('BLOCK_OPERA_MINI', false); //Set to true to block Opera Mini proxy

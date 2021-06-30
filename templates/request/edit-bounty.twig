@@ -1,7 +1,7 @@
 <div class="thin">
     <div class="header">
         <h2>Edit request bounty</h2>
-        <h3><a href="requests.php?action=view&amp;id={{ id }}">{{ title }}</a></h3>
+        <h3><a href="requests.php?action=view&amp;id={{ request.id }}">{{ request.title }}</a></h3>
     </div>
 
     <div class="box pad">
@@ -22,7 +22,7 @@
 
         <form action="" method="post" id="request_form">
             <div>
-                <input type="hidden" name="id" value="{{ id }}" />
+                <input type="hidden" name="id" value="{{ request.id }}" />
                 <input type="hidden" name="auth" value="{{ auth }}" />
                 <input type="hidden" name="action" value="takebounty" />
             </div>
@@ -35,10 +35,10 @@
                     <td class="label" style="width: 60px;">Refund</td>
                     <td class="label" style="width: 60px;"><strong class="important_text">Remove</strong></td>
                 </tr>
-{% for b in bounty %}
+{% for b in request.bounty %}
                 <tr>
                     <td>{{ b.UserID|user_full }}</td>
-                    <td title="{{ b.Bounty|number_format }}">{{ b.bounty_size }}</td>
+                    <td title="{{ b.Bounty|number_format }}">{{ b.Bounty|octet_size }}</td>
                     <td><input type="radio" title="No change" name="action-{{ b.UserID }}" value="keep" checked="checked" /></td>
                     <td><input type="radio" title="Refund" name="action-{{ b.UserID }}" value="refund" /></td>
                     <td><input type="radio" title="Remove (Danger!)" name="action-{{ b.UserID }}" value="remove" />&nbsp;<input type="checkbox" name="check-{{ b.UserID }}" /></td>
