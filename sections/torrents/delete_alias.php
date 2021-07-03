@@ -1,55 +1,31 @@
 <?php
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$ArtistID = $_GET['artistid'];
-$GroupID = $_GET['groupid'];
-$Importance = $_GET['importance'];
-
-if (!intval($ArtistID) || !intval($GroupID) || !intval($Importance)) {
+$role = (int)$_GET['importance'];
+if (!$role) {
+    error(0);
+}
+$tgMan = new Gazelle\Manager\TGroup;
+$tgroup = $tgMan->findById((int)$_GET['groupid']);
+if (is_null($tgroup)) {
     error(404);
 }
-$GroupName = $DB->scalar('SELECT Name FROM torrents_group WHERE ID = ?', $GroupID);
-if (!$GroupName) {
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_GET['artistid'], 0);
+if (is_null($artist)) {
     error(404);
 }
+$artistId = $artist->id();
+$artistName = $artist->name();
 
-$DB->prepared_query('
-    DELETE FROM torrents_artists
-    WHERE GroupID = ?
-        AND ArtistID = ?
-        AND Importance = ?
-    ', $GroupID, $ArtistID, $Importance
-);
-
-$ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
-
-// Get a count of how many groups or requests use this artist ID
-$ReqCount = $DB->scalar('
-    SELECT count(*)
-    FROM artists_group AS ag
-    INNER JOIN requests_artists AS ra USING (ArtistID)
-    WHERE ag.ArtistID = ?
-    ', $ArtistID
-);
-$GroupCount = $DB->scalar('
-    SELECT count(*)
-    FROM artists_group AS ag
-    INNER JOIN torrents_artists AS ta USING (ArtistID)
-    WHERE ag.ArtistID = ?
-    ', $ArtistID
-);
-if (($ReqCount + $GroupCount) == 0) {
-    // The only group to use this artist
-    Artists::delete_artist($ArtistID);
+if ($tgroup->removeArtist($artistId, $role)) {
+    $tgMan->refresh($tgroup->id());
 }
 
-(new \Gazelle\Manager\TGroup)->refresh($GroupID);
-(new Gazelle\Log)->group($GroupID, $Viewer->id(), "removed artist $ArtistName (".$ArtistTypes[$Importance].')')
-    ->general('Artist ('.$ArtistTypes[$Importance]
-        . ") $ArtistID ($ArtistName) was removed from the group $GroupID ($GroupName) by user "
-        . $Viewer->id().' ('.$Viewer->username().')');
+$label = "$artistId ($artistName) [" . ARTIST_TYPE[$role] . "]";
+(new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), "removed artist $label")
+    ->general("Artist $label removed from group " . $tgroup->label() . " by user " . $Viewer->label());
 
-header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$GroupID}");
+header("Location: " . redirectUrl("torrents.php?id=" . $tgroup->id()));

@@ -28,9 +28,7 @@ foreach ($Artists as $i => $Artist) {
 
 if (count($CleanArtists) > 0) {
     $GroupName = $DB->scalar('
-        SELECT Name
-        FROM torrents_group
-        WHERE ID = ?
+        SELECT Name FROM torrents_group WHERE ID = ?
         ', $GroupID
     );
     $placeholders = placeholders($ArtistIDs);
@@ -53,9 +51,9 @@ if (count($CleanArtists) > 0) {
                 ", $GroupID, $ArtistID, $Importance
             );
             if ($DB->affected_rows()) {
-                $artistInfo = "$ArtistID ({$ArtistNames[$ArtistID]['Name']} as {$ArtistTypes[$Importance]})";
-                $logger->group($GroupID, $Viewer->id(), "Removed artist $artistInfo")
-                    ->general("Artist $artistInfo was removed from the group $GroupID ($GroupName) by user "
+                $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) removed as " . ARTIST_TYPE[$Importance];
+                $logger->group($GroupID, $Viewer->id(), $change)
+                    ->general("$change in group {$GroupID} ({$GroupName}) by user "
                         . $Viewer->id() . " (" . $Viewer->username() . ")"
                     );
                 $Cache->delete_value("artist_groups_$ArtistID");
@@ -79,7 +77,7 @@ if (count($CleanArtists) > 0) {
     }
     else {
         $NewImportance = (int)$_POST['importance'];
-        if ($NewImportance === 0 || !isset($ArtistTypes[$NewImportance])) {
+        if ($NewImportance === 0 || !isset(ARTIST_TYPE[$NewImportance])) {
             error(0);
         }
         $DB->prepared_query("
@@ -89,17 +87,17 @@ if (count($CleanArtists) > 0) {
                 AND ArtistID IN ($placeholders)
             ", $NewImportance, $GroupID, ...$ArtistIDs
         );
+        $logger = new Gazelle\Log;
         foreach ($CleanArtists as $Artist) {
             [$Importance, $ArtistID] = $Artist;
             // Don't bother logging artists whose importance hasn't changed
             if ($Importance === $NewImportance) {
                 // continue;
             }
-            (new Gazelle\Log)->group($GroupID, $Viewer->id(), "Importance changed artist {$ArtistNames[$ArtistID]['Name']} ({$ArtistTypes[$Importance]}) to {$ArtistTypes[$NewImportance]}")
-                ->general("Artist ({$ArtistTypes[$Importance]}) $ArtistID ({$ArtistNames[$ArtistID]['Name']})"
-                    . " importance was changed to {$ArtistTypes[$NewImportance]} in group {$GroupID} ({$GroupName}) by user "
-                    . $Viewer->id() . " (" . $Viewer->username() . ")"
-                );
+            $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) changed role from "
+                . ARTIST_TYPE[$Importance] . " to " . ARTIST_TYPE[$NewImportance];
+            $logger->group($GroupID, $Viewer->id(), $change)
+                ->general("$change in group {$GroupID} ({$GroupName}) by user " . $Viewer->label());
         }
     }
     (new \Gazelle\Manager\TGroup)->refresh($GroupID);

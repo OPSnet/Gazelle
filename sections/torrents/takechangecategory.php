@@ -17,6 +17,8 @@ if (!$OldGroupID || !$NewCategoryID || !$TorrentID || empty($Title)) {
     error(0);
 }
 
+$tgroupMan = new \Gazelle\Manager\TGroup;
+
 switch (CATEGORY[$NewCategoryID - 1]) {
     case 'Music':
         $ArtistName = trim($_POST['artist']);
@@ -24,22 +26,6 @@ switch (CATEGORY[$NewCategoryID - 1]) {
         $ReleaseType = (int)$_POST['releasetype'];
         if (empty($ArtistName) || !$Year || !$ReleaseType) {
             error(0);
-        }
-        [$ArtistID, $AliasID, $Redirect, $ArtistName] = $DB->row('
-            SELECT ArtistID, AliasID, Redirect, Name
-            FROM artists_alias
-            WHERE Name LIKE ?
-            ', $ArtistName
-        );
-        $artistMan = new \Gazelle\Manager\Artist;
-        if (!$DB->has_results()) {
-            [$ArtistID, $AliasID] = $artistMan->create($AliasName);
-            $Redirect = 0;
-        } else {
-            [$ArtistID, $AliasID, $Redirect, $ArtistName] = $DB->next_record();
-            if ($Redirect) {
-                $AliasID = $ArtistID;
-            }
         }
 
         $DB->prepared_query("
@@ -50,8 +36,8 @@ switch (CATEGORY[$NewCategoryID - 1]) {
         );
         $GroupID = $DB->inserted_id();
 
-        $artistMan->setGroupId($GroupID)->setUserId($Viewer->id())
-            ->addToGroup($ArtistID, $AliasID, 1);
+        $tgroup = $tgroupMan->findById($GroupID);
+        $tgroup->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
         break;
     case 'Audiobooks':
     case 'Comedy':
@@ -62,7 +48,7 @@ switch (CATEGORY[$NewCategoryID - 1]) {
         $DB->prepared_query("
             INSERT INTO torrents_group
                    (Name, Year, CategoryID, WikiBody, WikiImage)
-            VALUES (?,    ?,    ?,          '',       ''))
+            VALUES (?,    ?,    ?,          '',       '')
             ", $Title, $Year, $NewCategoryID
         );
         $GroupID = $DB->inserted_id();
@@ -89,9 +75,8 @@ $DB->prepared_query('
 );
 
 // Delete old group if needed
-$tgroupMan = new \Gazelle\Manager\TGroup;
 if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $OldGroupID)) {
-    $torMan->refresh($OldGroupID);
+    $tgroupMan->refresh($OldGroupID);
 } else {
     // TODO: votes etc.
     $DB->prepared_query("
@@ -111,11 +96,11 @@ $DB->prepared_query('
     ', $GroupID, $OldGroupID
 );
 
-$torMan->refresh($GroupID);
+$tgroupMan->refresh($GroupID);
 
 $Cache->delete_value("torrent_download_$TorrentID");
 
 (new Gazelle\Log)->group($GroupID, $Viewer->id(), "category changed from $OldCategoryID to $NewCategoryID, merged from group $OldGroupID")
-    ->general("Torrent $TorrentID was changed to category $NewCategoryID by " . $Viewer->username());
+    ->general("Torrent $TorrentID was changed to category $NewCategoryID by " . $Viewer->label());
 
 header("Location: torrents.php?id=$GroupID");
