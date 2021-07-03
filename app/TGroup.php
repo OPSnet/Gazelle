@@ -213,6 +213,10 @@ class TGroup extends BaseObject {
         return $this->info()['Name'];
     }
 
+    public function label(): string {
+        return $this->id() . " (" . $this->info()['Name'] . ")";
+    }
+
     public function artistName(): string {
         return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
     }
@@ -300,6 +304,86 @@ class TGroup extends BaseObject {
         return $nameCache[$renderMode][$this->id] = implode(' ', $chunk);
     }
 
+    /**
+     * Add artists to a group. The role and name arrays must be the same length, and
+     * are walked down in step, to match the artist with their role in the group
+     *
+     * param \Gazelle\User who is adding
+     * @param array list of artist roles
+     * @param array list of artist names (unknown artists will be created)
+     * @return int number of artists added
+     */
+    public function addArtists(\Gazelle\User $user, array $roles, array $names): int {
+        $userId = $user->id();
+        $artistMan = new \Gazelle\Manager\Artist;
+        $add = [];
+        $args = [];
+        $n = count($names);
+        for ($i = 0; $i < $n; $i++) {
+            $role = $roles[$i];
+            if (!in_array($role, array_keys(ARTIST_TYPE))) {
+                continue;
+            }
+            $name = \Gazelle\Artist::sanitize($names[$i]);
+            if (!$name) {
+                return null;
+            }
+            [$artistId, $aliasId] = $artistMan->fetchArtistIdAndAliasId($name);
+            if ($artistId) {
+                array_push($args, $this->id, $userId, $artistId, $aliasId, $role, (string)$role);
+                $add[] = "$artistId ($name) as " . ARTIST_TYPE[$role];
+            }
+        }
+        if (empty($add)) {
+            return 0;
+        }
+        try {
+            $this->db->prepared_query("
+                INSERT INTO torrents_artists
+                       (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
+                VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)')
+                , ...$args
+            );
+        } catch (\DB_MYSQL_DuplicateKeyException $e) {
+            return 0;
+        }
+
+        $logger = new \Gazelle\Log;
+        $userLabel = "$userId (" .  $user->username() . ")";
+        foreach ($add as $artistLabel) {
+            $logger->group($this->id, $user->id(), "Added artist $artistLabel")
+                ->general("Artist $artistLabel was added to the group " . $this->id . " (" . $this->name() . ") by user $userLabel");
+        }
+        return count($add);
+    }
+
+    public function removeArtist(int $artistId, int $role): bool {
+        $this->db->prepared_query('
+            DELETE FROM torrents_artists
+            WHERE GroupID = ?
+                AND ArtistID = ?
+                AND Importance = ?
+            ', $this->id, $artistId, $role
+        );
+        if (!$this->db->affected_rows()) {
+            return false;
+        }
+        $unused = (bool)$this->db->scalar("
+            SELECT 1
+            FROM artists_group ag
+            LEFT JOIN torrents_artists ta USING (ArtistID)
+            LEFT JOIN requests_artists ra USING (ArtistID)
+            WHERE ta.ArtistID IS NULL
+                AND ra.artistID IS NULL
+                AND ag.ArtistID = ?
+            ", $artistId
+        );
+        if ($unused) {
+            // The last group to use this artist
+            \Artists::delete_artist($artistId);
+        }
+        return true;
+    }
 
     public function torrentList(): array {
         $viewerId = $this->viewer ? $this->viewer->id() : 0;

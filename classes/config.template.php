@@ -476,14 +476,24 @@ define('CACHE_NAMESPACE', [
 
 define('SITE_LAUNCH_YEAR', 2018);
 
-define('ARTIST_MAIN', 1);
-define('ARTIST_GUEST', 2);
-define('ARTIST_REMIXER', 3);
-define('ARTIST_COMPOSER', 4);
+define('ARTIST_MAIN',      1);
+define('ARTIST_GUEST',     2);
+define('ARTIST_REMIXER',   3);
+define('ARTIST_COMPOSER',  4);
 define('ARTIST_CONDUCTOR', 5);
-define('ARTIST_DJ', 6);
-define('ARTIST_PRODUCER', 7);
-define('ARTIST_ARRANGER', 8);
+define('ARTIST_DJ',        6);
+define('ARTIST_PRODUCER',  7);
+define('ARTIST_ARRANGER',  8);
+define('ARTIST_TYPE', [
+    ARTIST_MAIN      => 'Main',
+    ARTIST_GUEST     => 'Guest',
+    ARTIST_REMIXER   => 'Remixer',
+    ARTIST_COMPOSER  => 'Composer',
+    ARTIST_CONDUCTOR => 'Conductor',
+    ARTIST_DJ        => 'DJ/Compiler',
+    ARTIST_PRODUCER  => 'Producer',
+    ARTIST_ARRANGER  => 'Arranger',
+]);
 
 define('ARTIST_SECTION_ARRANGER', 1020);
 define('ARTIST_SECTION_PRODUCER', 1021);

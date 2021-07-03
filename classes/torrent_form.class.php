@@ -612,7 +612,7 @@ class TORRENT_FORM {
         global $LoggedUser, $Twig;
         $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
-        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+        <table id="form-audiobook" cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
             <tr id="title_tr">
                 <td class="label">Author - Title:</td>
@@ -629,7 +629,7 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Format:</td>
                 <td>
-                    <select id="format" name="format" onchange="Format()">
+                    <select id="format" name="format">
                         <option value="">---</option>
 <?php   foreach (FORMAT as $Format) { ?>
                         <option value="<?= $Format ?>"<?= $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
@@ -640,10 +640,10 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Bitrate:</td>
                 <td>
-                    <select id="bitrate" name="bitrate" onchange="Bitrate()">
+                    <select id="bitrate" name="bitrate">
                         <option value="">---</option>
 <?php
-        if (!$Torrent['Bitrate'] || ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], ENCODING))) {
+        if (!$this->NewTorrent && (!$Torrent['Bitrate'] || ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], ENCODING)))) {
             $OtherBitrate = true;
             if (substr($Torrent['Bitrate'], strlen($Torrent['Bitrate']) - strlen(' (VBR)')) == ' (VBR)') {
                 $Torrent['Bitrate'] = substr($Torrent['Bitrate'], 0, strlen($Torrent['Bitrate']) - 6);
@@ -658,8 +658,7 @@ class TORRENT_FORM {
 ?>
                         <option value="<?= $Bitrate ?>"<?=
             ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
-                ? ' selected="selected"' : '' ?>
-            ?><?= $Bitrate ?></option>
+                ? ' selected="selected"' : '' ?>><?= $Bitrate ?></option>
 
 <?php   } ?>
                     </select>

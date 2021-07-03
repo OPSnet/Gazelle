@@ -14,14 +14,14 @@ the cache for the torrent group page.
 ************************************************************************/
 
 $GroupID = (int)$_GET['groupid'];
-if ($GroupID < 1) {
+if (!$GroupID) {
     error(0);
 }
 
 // Get the torrent group name and the body of the last revision
-list($Name, $Image, $Body, $WikiImage, $WikiBody, $Year,
+[$Name, $Image, $Body, $WikiImage, $WikiBody, $Year,
     $RecordLabel, $CatalogueNumber, $ReleaseType, $CategoryID, $VanityHouse, $noCoverArt
-) = $DB->row("
+] = $DB->row("
     SELECT
         tg.Name,
         wt.Image,
@@ -107,13 +107,11 @@ View::show_header('Edit torrent group');
     </div>
 <?php
     $DB->prepared_query("
-        SELECT UserID
-        FROM torrents
-        WHERE GroupID = ?
+        SELECT UserID FROM torrents WHERE GroupID = ?
         ", $GroupID
     );
     //Users can edit the group info if they've uploaded a torrent to the group or have torrents_edit
-    if (in_array($Viewer->id(), $DB->collect('UserID')) || check_perms('torrents_edit')) { ?>
+    if (in_array($Viewer->id(), $DB->collect('UserID')) || $Viewer->permitted('torrents_edit')) { ?>
     <h3>Non-wiki torrent group editing</h3>
     <div class="box pad">
         <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
@@ -142,25 +140,20 @@ View::show_header('Edit torrent group');
                         <input type="text" name="catalogue_number" size="40" value="<?=$CatalogueNumber?>" />
                     </td>
                 </tr>
-<?php if (check_perms('torrents_freeleech')) { ?>
+<?php if ($Viewer->permitted('torrents_freeleech')) { ?>
                 <tr>
                     <td class="label">Torrent <strong>group</strong> leech status</td>
                     <td>
-<?php
-        $Leech = ['Normal', 'Freeleech', 'Neutral Leech'];
-        foreach ($Leech as $Key => $Type) {
-?>
-                        <label><input type="radio" name="freeleechtype" value="<?=$Key?>"<?=($Key == $Torrent['FreeTorrent'] ? ' checked="checked"' : '')?> /> <?=$Type?></label>
-<?php   } ?>
-                         because
+                        <label><input type="radio" name="freeleechtype" value="0" checked="checked" /> Normal</label>
+                        <label><input type="radio" name="freeleechtype" value="1" /> Freeleech</label>
+                        <label><input type="radio" name="freeleechtype" value="2" /> Neutral</label>
+                        &mdash; reason
                         <select name="freeleechreason">
-<?php
-        $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
-        foreach ($FL as $Key => $FLType) {
-?>
-                            <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>
-<?php   } ?>
-                        </select>
+                            <option value="0" selected="selected">N/A</option>
+                            <option value="1" selected="selected">Staff Pick</option>
+                            <option value="2" selected="selected">Perma-FL</option>
+                            <option value="3" selected="selected">Showcase</option>
+                        </select<>
                     </td>
                 </tr>
 <?php } ?>

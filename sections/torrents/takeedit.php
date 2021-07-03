@@ -18,13 +18,15 @@ authorize();
 // it into the database.                                                        //
 //******************************************************************************//
 
+var_dump($_POST);
+var_dump($_POST);
 $TypeID = (int)$_POST['type'];
 $Type = CATEGORY[$TypeID - 1];
 $TorrentID = (int)$_POST['torrentid'];
 $Properties = [];
 $Properties['Name'] = trim($_POST['title'] ?? '');
 $Properties['Format'] = $_POST['format'];
-$Properties['Media'] = $_POST['media'];
+$Properties['Media'] = $_POST['media'] ?? '';
 $Properties['Encoding'] = $_POST['bitrate'];
 $Properties['TorrentDescription'] = trim($_POST['release_desc']);
 $Properties['Scene'] = isset($_POST['scene']) ? '1' : '0';

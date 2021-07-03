@@ -179,7 +179,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
     <br />
 <?php
     } /* category == 1 */
-    if (check_perms('users_mod')) { ?>
+    if ($Viewer->permitted('users_mod')) { ?>
     <h2><a name="category-change">Change category</a></h2>
     <form action="torrents.php" method="post">
         <input type="hidden" name="action" value="changecategory" />

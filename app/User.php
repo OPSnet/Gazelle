@@ -419,6 +419,10 @@ class User extends BaseObject {
         return $this->info()['Username'];
     }
 
+    public function label(): string {
+        return $this->id . " (" . $this->info()['Username'] . ")";
+    }
+
     public function announceKey(): string {
         return $this->info()['torrent_pass'];
     }
