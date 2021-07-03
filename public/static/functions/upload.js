@@ -10,6 +10,8 @@ var AllowedMediaFormat = {
     Cassette:   ['FLAC', 'MP3', 'AAC'],
 };
 
+var AllowedAudiobookFormat = ['FLAC', 'MP3', 'AAC'];
+
 var AllowedBitrate = {
     FLAC: {
         list: ['24bit Lossless', 'Lossless'],
@@ -37,66 +39,19 @@ function MBshow() {
     document.getElementById("popup_background").style.display = "block";
 }
 
-function musicFormInit() {
-    $('#torrent-json-file').change(function () {
-        ParseUploadJson();
-    });
-    $('#musicbrainz_button').click(function () {
-        MBshow();
-    });
-    $('#popup_close').click(function () {
-        MBhide();
-    });
-    $('#media').change(function () {
-        changeMedia();
-    });
-    $('#format').change(function () {
-        setAllowedFormat('#format', '#bitrate');
-    });
-    $('#bitrate').change(function () {
-        setAllowedBitrate('#format', '#bitrate');
-    });
-    $('#add_format').click(function () {
-        addFormatRow();
-    });
-    $('#remove_format').click(function () {
-        removeFormatRow();
-    });
-    $('#other_bitrate_span').click(function () {
-        AltBitrate();
-    });
-    $('#image').change(function () {
-        loadThumbnail();
-    });
-    $('#post').click(function() {
-        return checkFields();
-    });
-    ArtistCount      = 0;
-    ArtistJsonCount  = 0;
-    ExtraFormatCount = 0;
-
-    // the form starts with one logfile field
-    LogCount         = 1;
-}
-
 function Categories() {
     var dynamic_form = $('#dynamic_form');
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
         dynamic_form.raw().innerHTML = response;
-        if ($('#categories').val() == 0) { /* Music */
-            musicFormInit();
-        }
+        uploadFormInit();
     });
     ajax.get('ajax.php?action=upload_section&js=1&categoryid=' + $('#categories').raw().value, function (response) {
         script = document.createElement('script', {'type': 'text/javascript'});
         script.innerHTML = response;
         document.body.append(script);
-        console.log('append done');
         setTimeout(function() {
             dynamic_form.data('loaded', true);
-            if ($('#categories').val() == 0) { /* Music */
-                musicFormInit();
-            }
+            uploadFormInit();
         }, 500);
     });
 }
@@ -118,41 +73,50 @@ function setAllowedFormat(formatField, bitrateField) {
     var media = $('#media').val();
     var fmt = $(formatField).val();
     var btr = $(bitrateField).val();
-    var warning = $('#format_warning');
     $(formatField).empty().append(new Option('---', ''));
-    if (media === '---') {
-        $(bitrateField).empty().append(new Option('---', ''));
-        $('#upload_logs').ghide();
-        $('#other_bitrate_span').ghide();
-        warning.raw().innerHTML = '';
-        return;
+    if ($('#upload_logs').length) {
+        var warning = $('#format_warning');
+        if (media === '---') {
+            $(bitrateField).empty().append(new Option('---', ''));
+            $('#upload_logs').ghide();
+            $('#other_bitrate_span').ghide();
+            warning.raw().innerHTML = '';
+            return;
+        }
+        $.each(AllowedMediaFormat[media], function(k) {
+            $(formatField).append(new Option(AllowedMediaFormat[media][k], AllowedMediaFormat[media][k]));
+        });
+    } else if ($('#form-audiobook').length) {
+        $.each(AllowedAudiobookFormat, function(k) {
+            $(formatField).append(new Option(AllowedAudiobookFormat[k], AllowedAudiobookFormat[k]));
+        });
     }
-    $.each(AllowedMediaFormat[media], function(k) {
-        $(formatField).append(new Option(AllowedMediaFormat[media][k], AllowedMediaFormat[media][k]));
-    });
-    if (fmt === '---' || AllowedMediaFormat[media].indexOf(fmt) == -1) {
+    if (fmt === '---' || (media !== undefined && AllowedMediaFormat[media].indexOf(fmt) == -1)) {
         fmt = 'FLAC';
     }
-    if (fmt === "---" || (['DVD', 'BD'].indexOf(media) == -1 && ['AC3', 'DTS'].indexOf(fmt) > -1)) {
+    if (fmt === "---" || (media !== undefined && (['DVD', 'BD'].indexOf(media) == -1 && ['AC3', 'DTS'].indexOf(fmt) > -1))) {
         fmt = 'FLAC';
         $('#bitrate').val(AllowedBitrate['FLAC'].list[AllowedBitrate['FLAC'].rank[0]]);
     }
     $(formatField).val(fmt);
-    if(formatField === '#format' && fmt === 'FLAC' && media === 'CD') {
-        $('#upload_logs').gshow();
-    }
-    else {
-        $('#upload_logs').ghide();
-    }
-    if ($(formatField).val() === 'AAC') {
-        warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.21" target="_blank">(2.1.21)</a>';
-    } else {
-        warning.raw().innerHTML = '';
+    if ($('#upload_logs').length) {
+        if (formatField === '#format' && fmt === 'FLAC' && media === 'CD') {
+            $('#upload_logs').gshow();
+        }
+        else {
+            $('#upload_logs').ghide();
+        }
+        if ($(formatField).val() === 'AAC') {
+            warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.21" target="_blank">(2.1.21)</a>';
+        } else {
+            warning.raw().innerHTML = '';
+        }
     }
     setAllowedBitrate(formatField, bitrateField);
 }
 
 function setAllowedBitrate(formatField, bitrateField) {
+    var media = $('#media').val();
     var fmt = $(formatField).val();
     var btr = $(bitrateField).val();
     $(bitrateField).empty().append(new Option('---', ''));
@@ -867,6 +831,65 @@ function checkFields() {
     return error == 0;
 }
 
+function musicFormInit() {
+    $('#torrent-json-file').change(function () {
+        ParseUploadJson();
+    });
+    $('#musicbrainz_button').click(function () {
+        MBshow();
+    });
+    $('#popup_close').click(function () {
+        MBhide();
+    });
+    $('#media').change(function () {
+        changeMedia();
+    });
+    $('#format').change(function () {
+        setAllowedFormat('#format', '#bitrate');
+    });
+    $('#bitrate').change(function () {
+        setAllowedBitrate('#format', '#bitrate');
+    });
+    $('#add_format').click(function () {
+        addFormatRow();
+    });
+    $('#remove_format').click(function () {
+        removeFormatRow();
+    });
+    $('#other_bitrate_span').click(function () {
+        AltBitrate();
+    });
+    $('#image').change(function () {
+        loadThumbnail();
+    });
+    $('#post').click(function() {
+        return checkFields();
+    });
+    ArtistCount      = 0;
+    ArtistJsonCount  = 0;
+    ExtraFormatCount = 0;
+
+    // the form starts with one logfile field
+    LogCount         = 1;
+}
+
+function audiobookFormInit() {
+    $('#format').change(function () {
+        setAllowedFormat('#format', '#bitrate');
+    });
+    $('#bitrate').change(function () {
+        setAllowedBitrate('#format', '#bitrate');
+    });
+}
+
+function uploadFormInit() {
+    if ($('#torrent-json-file').length) {
+        musicFormInit();
+    } else if ($('#form-audiobook').length) {
+        audiobookFormInit();
+    }
+}
+
 $(document).ready(function () {
-    musicFormInit();
+    uploadFormInit();
 });

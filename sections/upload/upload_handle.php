@@ -255,35 +255,47 @@ if (!$Err && $isMusicUpload) {
     unset($DupeNames);
 
     // Multiple artists
-    if (empty($Properties['GroupID'])) {
-        $mainArtists = 0;
+    if (!$Err && empty($Properties['GroupID'])) {
         $ArtistForm = [
-            1 => [],
-            2 => [],
-            3 => [],
-            4 => [],
-            5 => [],
-            6 => [],
-            7 => [],
+            ARTIST_MAIN      => [],
+            ARTIST_GUEST     => [],
+            ARTIST_REMIXER   => [],
+            ARTIST_COMPOSER  => [],
+            ARTIST_CONDUCTOR => [],
+            ARTIST_DJ        => [],
+            ARTIST_PRODUCER  => [],
+            ARTIST_ARRANGER  => [],
         ];
+        $ArtistNameByRole = [
+            ARTIST_MAIN      => [],
+            ARTIST_GUEST     => [],
+            ARTIST_REMIXER   => [],
+            ARTIST_COMPOSER  => [],
+            ARTIST_CONDUCTOR => [],
+            ARTIST_DJ        => [],
+            ARTIST_PRODUCER  => [],
+            ARTIST_ARRANGER  => [],
+        ];
+        $ArtistRoleList = [];
+        $ArtistNameList = [];
         for ($i = 0, $end = count($Artists); $i < $end; $i++) {
             $name = Gazelle\Artist::sanitize($Artists[$i]);
-            $role = (int)$Importance[$i];
             if ($name === '') {
                 continue;
             }
-            if (!in_array($name, array_column($ArtistForm[$role], 'name'))) {
+            $role = (int)$Importance[$i];
+            if (!in_array($name, $ArtistNameByRole[$role])) {
+                $ArtistNameByRole[$role][] = $name;
                 $ArtistForm[$role][] = ['name' => $name];
-                if ($role === 1) {
-                    $mainArtists++;
-                }
+                $ArtistRoleList[] = $role;
+                $ArtistNameList[] = $name;
             }
         }
-        if ($mainArtists < 1) {
+        if (empty($ArtistNameByRole[ARTIST_MAIN])) {
             $Err = 'Please enter at least one main artist';
-            $ArtistForm = [];
+        } else {
+            $LogName .= Artists::display_artists($ArtistForm, false, true, false);
         }
-        $LogName .= Artists::display_artists($ArtistForm, false, true, false);
     }
 }
 
@@ -317,22 +329,6 @@ if ($Err) { // Show the upload form, with the data the user entered
     }
 }
 
-if (!empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
-    $DB->prepared_query('
-        SELECT ta.ArtistID, aa.Name, ta.Importance
-        FROM torrents_artists AS ta
-        INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
-        WHERE ta.GroupID = ?
-        ORDER BY ta.Importance ASC, aa.Name ASC
-        ', $Properties['GroupID']
-    );
-    while ([$ArtistID, $ArtistName, $ArtistImportance] = $DB->next_record(MYSQLI_NUM, false)) {
-        $ArtistForm[$ArtistImportance][] = ['id' => $ArtistID, 'name' => display_str($ArtistName)];
-        $ArtistsUnescaped[$ArtistImportance][] = ['name' => $ArtistName];
-    }
-    $LogName .= Artists::display_artists($ArtistsUnescaped, false, true, false);
-}
-
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
@@ -346,14 +342,15 @@ $UnsourcedTorrent = $torMan->setSourceFlag($bencoder);
 $InfoHash = $bencoder->getHexInfoHash();
 $TorData = $bencoder->getData();
 
-$ID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $InfoHash);
-if ($ID) {
-    if ($torrentFiler->exists($ID)) {
-        $Err = '<a href="torrents.php?torrentid='.$ID.'">The exact same torrent file already exists on the site!</a>';
+$torrent = $torMan->findByInfohash($InfoHash);
+if ($torrent) {
+    $torrentId = $torrent->id();
+    if ($torrentFiler->exists($torrentId)) {
+        $Err = "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
     } else {
         // A lost torrent
-        $torrentFiler->put($bencoder->getEncode(), $ID);
-        $Err = '<a href="torrents.php?torrentid='.$ID.'">Thank you for fixing this torrent</a>';
+        $torrentFiler->put($bencoder->getEncode(), $torrentId);
+        $Err = "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>";
     }
 }
 
@@ -469,13 +466,14 @@ if ($isMusicUpload) {
         $ThisInsert['TotalSize'] = $ExtraTotalSize;
 
         $Debug->set_flag('upload: torrent decoded');
-        $ExtraID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $ThisInsert['InfoHash']);
-        if ($ExtraID) {
-            if ($torrentFiler->exists($ExtraID)) {
-                $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">The exact same torrent file already exists on the site!</a>";
+        $torrent = $torMan->findByInfohash($ThisInsert['InfoHash']);
+        if ($torrent) {
+            $torrentId = $torrent->id();
+            if ($torrentFiler->exists($torrentId)) {
+                $Err = "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
             } else {
-                $torrentFiler->put($ThisInsert['TorEnc'], $ExtraID);
-                $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">Thank you for fixing this torrent.</a>";
+                $torrentFiler->put($ThisInsert['TorEnc'], $torrentId);
+                $Err = "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent.</a>";
             }
         }
     }
@@ -500,7 +498,7 @@ $NoRevision = false;
 if ($isMusicUpload) {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
-        $DB->prepared_query("
+        [$GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $TagList] = $DB->row("
             SELECT tg.ID,
                 tg.WikiImage,
                 tg.WikiBody,
@@ -516,10 +514,7 @@ if ($isMusicUpload) {
             GROUP BY tg.ID, tg.WikiImage, tg.WikiBody, tg.RevisionID, tg.Name, tg.Year, tg.ReleaseType
             ", $Properties['GroupID']
         );
-        if ($DB->has_results()) {
-            // Don't escape tg.Name. It's written directly to the log table
-            [$GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $TagList]
-                = $DB->next_record(MYSQLI_NUM, [4]);
+        if ($GroupID) {
             $Properties['TagList'] = explode(',', str_replace([' ', '.', '_'], '.', $TagList));
             if (!$Properties['Image'] && $WikiImage) {
                 $Properties['Image'] = $WikiImage;
@@ -530,60 +525,37 @@ if ($isMusicUpload) {
                     $NoRevision = true;
                 }
             }
-            $Properties['Artist'] = Artists::display_artists(Artists::get_artist($GroupID), false, false);
         }
     }
     if (!isset($GroupID)) {
-        foreach ($ArtistForm as $role => $Artists) {
-            foreach ($Artists as $Num => $Artist) {
-                $DB->prepared_query('
-                    SELECT tg.id,
-                        tg.WikiImage,
-                        tg.WikiBody,
-                        tg.RevisionID
-                    FROM torrents_group AS tg
-                    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
-                    LEFT JOIN artists_group AS ag ON (ta.ArtistID = ag.ArtistID)
-                    WHERE ag.Name = ?
-                        AND tg.Name = ?
-                        AND tg.ReleaseType = ?
-                        AND tg.Year = ?
-                    ', $Artist['name'], $Properties['Title'], $Properties['ReleaseType'], $Properties['Year']
-                );
+        foreach ($ArtistForm[ARTIST_MAIN] as $Num => $Artist) {
+            [$GroupID, $WikiImage, $WikiBody, $RevisionID] = $DB->row("
+                SELECT tg.id,
+                    tg.WikiImage,
+                    tg.WikiBody,
+                    tg.RevisionID
+                FROM torrents_group AS tg
+                LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+                LEFT JOIN artists_group AS ag ON (ta.ArtistID = ag.ArtistID)
+                WHERE ag.Name = ?
+                    AND tg.Name = ?
+                    AND tg.ReleaseType = ?
+                    AND tg.Year = ?
+                ", $Artist['name'], $Properties['Title'], $Properties['ReleaseType'], $Properties['Year']
+            );
 
-                if ($DB->has_results()) {
-                    [$GroupID, $WikiImage, $WikiBody, $RevisionID] = $DB->next_record();
-                    if (!$Properties['Image'] && $WikiImage) {
-                        $Properties['Image'] = $WikiImage;
-                    }
-                    if (strlen($WikiBody) > strlen($Properties['GroupDescription'])) {
-                        $Properties['GroupDescription'] = $WikiBody;
-                        if (!$Properties['Image'] || $Properties['Image'] == $WikiImage) {
-                            $NoRevision = true;
-                        }
-                    }
-                    $ArtistForm = Artists::get_artist($GroupID);
-                    //This torrent belongs in a group
-                    break;
-
-                } else {
-                    // The album hasn't been uploaded. Try to get the artist IDs
-                    $DB->prepared_query("
-                        SELECT ArtistID, AliasID, Name, Redirect FROM artists_alias WHERE Name = ?
-                        ", $Artist['name']
-                    );
-                    if ($DB->has_results()) {
-                        while ([$ArtistID, $AliasID, $AliasName, $Redirect] = $DB->next_record(MYSQLI_NUM, false)) {
-                            if (!strcasecmp($Artist['name'], $AliasName)) {
-                                if ($Redirect) {
-                                    $AliasID = $Redirect;
-                                }
-                                $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
-                                break;
-                            }
-                        }
+            // Does this torrent belongs in a group
+            if ($GroupID) {
+                if (!$Properties['Image'] && $WikiImage) {
+                    $Properties['Image'] = $WikiImage;
+                }
+                if (strlen($WikiBody) > strlen($Properties['GroupDescription'])) {
+                    $Properties['GroupDescription'] = $WikiBody;
+                    if (!$Properties['Image'] || $Properties['Image'] == $WikiImage) {
+                        $NoRevision = true;
                     }
                 }
+                break;
             }
         }
     }
@@ -605,25 +577,6 @@ if (!$IsNewGroup) {
         ', $GroupID
     );
 } else {
-    if ($isMusicUpload) {
-        //array to store which artists we have added already, to prevent adding an artist twice
-        $ArtistsAdded = [];
-        foreach ($ArtistForm as $role => $Artists) {
-            foreach ($Artists as $Num => $Artist) {
-                if (!$Artist['id']) {
-                    if (isset($ArtistsAdded[strtolower($Artist['name'])])) {
-                        $ArtistForm[$role][$Num] = $ArtistsAdded[strtolower($Artist['name'])];
-                    } else {
-                        [$ArtistID, $AliasID] = $artistMan->create($Artist['name']);
-                        $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
-                        $ArtistsAdded[strtolower($Artist['name'])] = $ArtistForm[$role][$Num];
-                    }
-                }
-            }
-        }
-        unset($ArtistsAdded);
-    }
-
     // Create torrent group
     $DB->prepared_query('
         INSERT INTO torrents_group
@@ -634,13 +587,8 @@ if (!$IsNewGroup) {
     );
     $GroupID = $DB->inserted_id();
     if ($isMusicUpload) {
-        $artistMan->setGroupId($GroupID)->setUserId($Viewer->id());
-        foreach ($ArtistForm as $role => $Artists) {
-            foreach ($Artists as $Num => $Artist) {
-                $artistMan->addToGroup($Artist['id'], $Artist['aliasid'], $role);
-                $Cache->increment('stats_album_count');
-            }
-        }
+        $tgroupMan->findById($GroupID)->addArtists($Viewer, $ArtistRoleList, $ArtistNameList);
+        $Cache->increment('stats_album_count', count($ArtistName));
     }
     $Cache->increment('stats_group_count');
 }
@@ -657,8 +605,8 @@ if ($NoRevision) {
 
     // Revision ID
     $DB->prepared_query('
-        UPDATE torrents_group
-        SET RevisionID = ?
+        UPDATE torrents_group SET
+            RevisionID = ?
         WHERE ID = ?
         ', $RevisionID, $GroupID
     );

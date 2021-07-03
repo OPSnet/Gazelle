@@ -39,6 +39,24 @@ class Artist extends \Gazelle\Base {
         return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
     }
 
+    public function fetchArtistIdAndAliasId(string $name): ?array {
+        $this->db->prepared_query('
+            SELECT AliasID, ArtistID, Redirect, Name
+            FROM artists_alias
+            WHERE Name = ?
+            ', $name
+        );
+        while ([$aliasId, $artistId, $redirect, $foundAliasName] = $this->db->next_record(MYSQLI_NUM, false)) {
+            if (!strcasecmp($name, $foundAliasName)) {
+                if ($redirect) {
+                    $aliasId = $redirect;
+                }
+                break;
+            }
+        }
+        return $aliasId ? [$artistId, $aliasId] : $this->create($name);
+    }
+
     public function create($name) {
         $this->db->prepared_query('
             INSERT INTO artists_group (Name)
@@ -79,16 +97,6 @@ class Artist extends \Gazelle\Base {
 
     public function sectionTitle(int $sectionId): string {
         return (new \Gazelle\ReleaseType)->sectionTitle($sectionId);
-    }
-
-    public function addToGroup(int $artistId, int $aliasId, int $role): int {
-        $this->db->prepared_query("
-            INSERT IGNORE INTO torrents_artists
-                   (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
-            VALUES (?,       ?,      ?,        ?,       ?,              ?)
-            ", $this->groupId, $this->userId, $artistId, $aliasId, $role, (string)$role
-        );
-        return $this->db->affected_rows();
     }
 
     public function addToRequest(int $artistId, int $aliasId, int $role): int {
