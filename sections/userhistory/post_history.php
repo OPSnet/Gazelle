@@ -21,7 +21,7 @@ if ($showGrouped) {
     $title = "Post history";
 }
 
-$forumSearch = (new Gazelle\ForumSearch($Viewer))
+$forumSearch = (new Gazelle\Search\Forum($Viewer))
     ->setPosterId($user->id())
     ->setShowGrouped($ownProfile && $showGrouped)
     ->setShowUnread($ownProfile && $showUnread);

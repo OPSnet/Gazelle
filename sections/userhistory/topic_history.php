@@ -8,7 +8,7 @@ $user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User)->findById(
 if (is_null($user)) {
     error(404);
 }
-$forumSearch = new Gazelle\ForumSearch($user);
+$forumSearch = new Gazelle\Search\Forum($user);
 if ($Viewer->id() != $user->id()) {
     $forumSearch->setViewer($Viewer);
 }

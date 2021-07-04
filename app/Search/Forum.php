@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Search;
 
-class ForumSearch extends Base {
+class Forum extends \Gazelle\Base {
 
     protected $permittedForums = [];
     protected $forbiddenForums = [];
@@ -38,14 +38,14 @@ class ForumSearch extends Base {
     /** @var int total number of posts found */
     protected $total = 0;
 
-    public function __construct(User $user) {
+    public function __construct(\Gazelle\User $user) {
         parent::__construct();
         $this->user = $user;
         $this->permittedForums = $this->user->permittedForums();
         $this->forbiddenForums = $this->user->forbiddenForums();
     }
 
-    public function setViewer(User $viewer) {
+    public function setViewer(\Gazelle\User $viewer) {
         $this->viewer = $viewer;
         $this->permittedForums = $this->viewer->permittedForums();
         $this->forbiddenForums = $this->viewer->forbiddenForums();
@@ -353,10 +353,9 @@ class ForumSearch extends Base {
      *
      * @param array a collection of results
      */
-    public function results(array $pageLimit): array {
+    public function results(\Gazelle\Util\Paginator $paginator): array {
         [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
-        [$this->page, $limit] = $pageLimit;
         if ($this->isBodySearch()) {
             $sql = "SELECT t.ID,"
                 . ($this->threadId ? "substring_index(p.Body, ' ', 40)" : 't.Title') . ",
@@ -370,7 +369,7 @@ class ForumSearch extends Base {
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID) $forumPostJoin
             WHERE " . implode(' AND ', $cond) . "
             ORDER BY p.AddedTime DESC
-            LIMIT $limit";
+            LIMIT ? OFFSET ?";
         } else {
             $sql = "SELECT t.ID,
                 t.Title,
@@ -384,8 +383,10 @@ class ForumSearch extends Base {
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID) $forumPostJoin
             WHERE " . implode(' AND ', $cond) . "
             ORDER BY t.LastPostTime DESC
-            LIMIT $limit";
+            LIMIT ? OFFSET ?";
         }
+        $this->page = $paginator->page();
+        array_push($args, $paginator->limit(), $paginator->offset());
         $this->db->prepared_query($sql, ...$args);
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }
