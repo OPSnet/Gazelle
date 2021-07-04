@@ -1,0 +1,103 @@
+{% from 'macro/form.twig' import checked %}
+<div class="header">
+    <h2>Referred users</h2>
+</div>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=referral_users">All</a>
+    <a class="brackets" href="tools.php?action=referral_users&amp;view=pending">Pending</a>
+    <a class="brackets" href="tools.php?action=referral_users&amp;view=processed">Processed</a>
+</div>
+<div class="thin box">
+    <form class="manage_form" name="users" action="" method="get">
+        <input type="hidden" name="action" value="referral_users" />
+        <input type="hidden" name="view" value="{{ view }}" />
+        <div class="pad">
+            <table class="layout">
+                <tr>
+                    <td class="label"><label for="start_date">Start Date</label></td>
+                    <td><input type="text" name="start_date" size="10" value="{{ start_date }}" placeholder="YYYY-MM-DD" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="end_date">End Date</label></td>
+                    <td><input type="text" name="end_date" size="10" value="{{ end_date }}" placeholder="YYYY-MM-DD" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="site">Site</label></td>
+                    <td><input type="text" name="site" size="10" value="{{ site }}" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="username">Username</label></td>
+                    <td><input type="text" name="username" size="10" value="{{ username }}" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="invite">Invite</label></td>
+                    <td><input type="text" name="invite" size="10" value="{{ invite }}" /></td>
+                </tr>
+            </table>
+            <div class="center">
+                <input type="submit" name="submit" value="Submit" class="submit" />
+            </div>
+        </div>
+    </form>
+</div>
+{% if not paginator.total %}
+<div class="center">
+    <h2>No users found</h2>
+</div>
+{% else %}
+{{ paginator.linkbox|raw }}
+<table width="100%">
+    <tr class="colhead">
+        <td>User</td>
+        <td>Site</td>
+        <td>Username</td>
+        <td>Referred</td>
+        <td>Joined</td>
+        <td>Active</td>
+    {% if viewer.permitted('users_view_invites') %}
+        <td>Invite</td>
+    {% endif %}
+    {% if viewer.permitted('admin_manage_referrals') %}
+        <td></td>
+    {% endif %}
+    </tr>
+    {% for u in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <form class="manage_form" name="accounts" action="" method="post">
+            <input type="hidden" name="id" value="{{ u.id }}" />
+            <input type="hidden" name="action" value="referral_users" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <td>{{ u.user_id|user_full }}</td>
+            <td>
+                {{ u.site }}
+            </td>
+            <td>
+                {{ u.username }}
+            </td>
+            <td>
+                {{ u.created|time_diff }}
+            </td>
+            <td>
+                {{ u.joined|time_diff }}
+            </td>
+            <td>
+                <input type="checkbox" name="active" disabled="disabled"{{ checked(u.active) }} />
+            </td>
+        {% if viewer.permitted('users_view_invites') %}
+            <td>
+            {% if not u.active %}
+                <a href="register.php?invite={{ u.invite }}">{{ u.invite }}</a>
+            {% endif %}
+            </td>
+        {% endif %}
+        {% if viewer.permitted('admin_manage_referrals') %}
+            <td>
+                <input type="submit" name="submit" value="Unlink" onclick="return confirm('Are you sure you want to unlink this account? This is an irreversible action!')" />
+            </td>
+        {% endif %}
+        </form>
+    </tr>
+    {% endfor %}
+</table>
+{{ paginator.linkbox|raw }}
+{% endif %}
