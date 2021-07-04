@@ -1,6 +1,6 @@
 <?php
 
-$search = new Gazelle\ForumSearch($Viewer);
+$search = new Gazelle\Search\Forum($Viewer);
 $search->setSearchType($_GET['type'] ?? 'title')
     ->setSearchText(trim($_GET['search']) ?? '');
 
@@ -64,6 +64,9 @@ if ($search->isBodySearch()) {
 if (isset($_GET['forums']) && is_array($_GET['forums'])) {
     $search->setForumList($_GET['forums']);
 }
+
+$paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($search->totalHits());
 
 View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker', 'datetime_picker');
 ?>
@@ -182,10 +185,8 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
             </table>
         </form>
 
-<?php $results = $search->results(Format::page_limit(POSTS_PER_PAGE)); ?>
-    <div class="linkbox">
-        <?= $search->pageLinkbox() ?>
-    </div>
+<?php $results = $search->results($paginator); ?>
+    <?= $paginator->linkbox() ?>
     <table cellpadding="6" cellspacing="1" border="0" class="forum_list border" width="100%">
     <tr class="colhead">
         <td>Forum</td>
@@ -234,9 +235,7 @@ foreach ($results as $r) {
 ?>
     </table>
 
-    <div class="linkbox">
-        <?= $search->pageLinkbox() ?>
-    </div>
+    <?= $paginator->linkbox() ?>
 </div>
 <?php
 View::show_footer();

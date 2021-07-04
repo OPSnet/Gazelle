@@ -11,15 +11,15 @@ class PostHistory extends \Gazelle\Json {
     /** @var \Gazelle\Util\Paginator */
     protected $paginator;
 
-    /** @var \Gazelle\ForumSearch */
+    /** @var \Gazelle\Search\Forum */
     protected $search;
 
     /**
      * Supply a forum search context
      *
-     * @param \Gazelle\ForumSearch
+     * @param \Gazelle\Search\Forum
      */
-    public function setForumSearch(\Gazelle\ForumSearch $search) {
+    public function setForumSearch(\Gazelle\Search\Forum $search) {
         $this->search = $search;
         return $this;
     }

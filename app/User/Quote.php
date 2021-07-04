@@ -71,7 +71,7 @@ class Quote extends \Gazelle\Base {
     /**
      * Configure the conditions for querying the list of unread quotes
      *
-     * NB: the functionality to check forum quotes also appears in the ForumSearch
+     * NB: the functionality to check forum quotes also appears in the Search\Forum
      * class. It is not obvious how to hold the logic in one place only.
      *
      * @return [array conditions, array arguments]
