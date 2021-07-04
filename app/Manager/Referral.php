@@ -211,8 +211,8 @@ class Referral extends \Gazelle\Base {
         $this->cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
-    public function getReferredUsers($startDate, $endDate, $site, $username, $invite, $limit, $view) {
-        if ($startDate == NULL) {
+    public function getReferredUsers($startDate, $endDate, $site, $username, $invite, \Gazelle\Util\Paginator $paginator, $view) {
+        if (empty($startDate)) {
             $startDate = \Gazelle\Util\Time::timeOffset(-(3600 * 24 * 30), true);
         }
 
@@ -225,18 +225,17 @@ class Referral extends \Gazelle\Base {
             $filter[] = 'ru.Active = 1';
         }
 
-        if ($site != NULL) {
+        if (!empty($site)) {
             $filter[] = 'ru.Site LIKE ?';
             $params[] = $site;
         }
 
-        if ($username != NULL) {
+        if (!empty($username)) {
             $filter[] = '(ru.Username LIKE ? OR um.Username LIKE ?)';
-            $params[] = $username;
-            $params[] = $username;
+            array_push($params, $username, $username);
         }
 
-        if ($invite != NULL) {
+        if (!empty($invite)) {
             $filter[] = 'ru.InviteKey LIKE ?';
             $params[] = $invite;
         }
@@ -250,23 +249,32 @@ class Referral extends \Gazelle\Base {
             WHERE $filter
             ", ...$params
         );
+        $paginator->setTotal($results);
+
+        array_push($params, $paginator->limit(), $paginator->offset());
         $this->db->prepared_query("
-            SELECT ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
+            SELECT ru.ID     AS id,
+                ru.UserID    AS user_id,
+                ru.Site      AS site,
+                ru.Username  AS username,
+                ru.Created   AS created,
+                ru.Joined    AS joined,
+                ru.IP        AS ip,
+                ru.Active    AS active,
+                ru.InviteKey AS invite
             FROM referral_users ru
             LEFT JOIN users_main um ON (um.ID = ru.UserID)
             WHERE $filter
             ORDER BY ru.Created DESC
-            LIMIT $limit
+            LIMIT ? OFFSET ?
             ", ...$params
         );
-
-        return ["Results" => $results, "Users" => $this->db->to_array('ID', MYSQLI_ASSOC)];
+        return $this->db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     public function deleteUserReferral($id) {
         $this->db->prepared_query("
-            DELETE FROM referral_users
-            WHERE ID = ?
+            DELETE FROM referral_users WHERE ID = ?
             ", $id
         );
     }
