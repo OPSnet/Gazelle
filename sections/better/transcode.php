@@ -133,7 +133,7 @@ if (in_array($_GET['filter'], ['all', 'uploaded'])) {
         $sqlQL->where('uploader', $userId);
     }
 
-    $sqlQLResult = $sqlQL->query();
+    $sqlQLResult = $sqlQL->sphinxquery();
     $resultCount = $sqlQLResult->get_meta('total');
     if ($resultCount != 0) {
         $results = $sqlQLResult->collect('groupid');
@@ -165,7 +165,7 @@ if (in_array($_GET['filter'], ['all', 'uploaded'])) {
         $sqlQL = transcode_init_sphql();
         $sqlQL->where('groupid', array_map(function ($row) { return $row['GroupID']; }, $snatchedTmp));
 
-        $sqlQLResult = $sqlQL->query();
+        $sqlQLResult = $sqlQL->sphinxquery();
         $resultsTmp = $sqlQLResult->collect('groupid');
         $groupsTmp = Torrents::get_groups(array_values($resultsTmp));
         $groupsTmp = transcode_parse_groups($groupsTmp);
