@@ -41,7 +41,7 @@ class SiteLog extends \Gazelle\Base {
             $this->totalMatches = $this->db->record_count();
             if ($this->totalMatches == LOG_ENTRIES_PER_PAGE) {
                 $sq = new \SphinxqlQuery();
-                $result = $sq->select('id')->from('log, log_delta')->limit(0, 1, 1)->query();
+                $result = $sq->select('id')->from('log, log_delta')->limit(0, 1, 1)->sphinxquery();
                 $this->debug->log_var($result, '$result');
                 $this->totalMatches = min(SPHINX_MAX_MATCHES, $result->get_meta('total_found'));
             } else {
@@ -58,7 +58,7 @@ class SiteLog extends \Gazelle\Base {
             foreach (explode(' ', $searchTerm) as $s) {
                 $sq->where_match($s, 'message');
             }
-            $result = $sq->query();
+            $result = $sq->sphinxquery();
             $this->debug->log_var($result, '$result');
             $this->debug->set_flag('Finished SphQL query');
             if ($this->queryStatus = $result->Errno) {
@@ -147,7 +147,6 @@ class SiteLog extends \Gazelle\Base {
                         } else {
                             $userId = $this->usernames[$user];
                         }
-                        $this->db->set_query_id($Log);
                         $URL = $this->usernames[$user] ? "<a href=\"user.php?id=$userId\">$user</a>".($colon ? ':' : '') : $user;
                     }
                     $message .= " by $URL";

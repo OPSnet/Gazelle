@@ -308,7 +308,7 @@ if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
     $SphQL->limit(0, REQUESTS_PER_PAGE, REQUESTS_PER_PAGE);
 }
 
-$SphQLResult = $SphQL->query();
+$SphQLResult = $SphQL->sphinxquery();
 $NumResults = (int)$SphQLResult->get_meta('total_found');
 if ($NumResults > 0) {
     $SphRequests = $SphQLResult->to_array('id');
@@ -336,6 +336,10 @@ if ($NumResults == 0) {
         $VoteCount = $SphRequest['votes'];
         $Bounty = $SphRequest['bounty'] * 1024; // Sphinx stores bounty in kB
         $Requestor = $userMan->findById((int)$Request['UserID']);
+        if (is_null($Requestor)) {
+            // Should not happen, but easiest place to bail if Sphinx is not synchronized
+            continue;
+        }
         $Filler = $userMan->findById((int)$Request['FillerID']);
 
         if ($Request['CategoryID'] == 0) {

@@ -272,7 +272,7 @@ class Torrent {
      * Internal function that runs the queries needed to get the desired results
      */
     private function run_query() {
-        $SphQLResult = $this->SphQL->query();
+        $SphQLResult = $this->SphQL->sphinxquery();
         if ($SphQLResult->Errno > 0) {
             $this->SphResults = false;
             return;
@@ -285,7 +285,7 @@ class Torrent {
             while ($SphQLResult->get_meta('total') < $TotalCount && $GroupCount < $this->PageSize) {
                 // Make sure we get $PageSize results, or all of them if there are less than $PageSize hits
                 $this->SphQL->where('groupid', $GroupIDs, true);
-                $SphQLResult = $this->SphQL->query();
+                $SphQLResult = $this->SphQL->sphinxquery();
                 if (!$SphQLResult->has_results()) {
                     break;
                 }
@@ -698,7 +698,7 @@ class Torrent {
         }
         $this->SphQLTor->copy_attributes_from($this->SphQL);
         $this->SphQLTor->where('id', array_keys($AllTorrents))->limit(0, $TorrentCount, $TorrentCount);
-        $SphQLResultTor = $this->SphQLTor->query();
+        $SphQLResultTor = $this->SphQLTor->sphinxquery();
         $MatchingTorrentIDs = $SphQLResultTor->to_pair('id', 'id');
         foreach ($AllTorrents as $TorrentID => $GroupID) {
             if (!isset($MatchingTorrentIDs[$TorrentID])) {

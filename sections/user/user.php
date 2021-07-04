@@ -553,7 +553,7 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
         ->order_by('votes', 'desc')
         ->order_by('bounty', 'desc')
         ->limit(0, 100, 100) // Limit to 100 requests
-        ->query();
+        ->sphinxquery();
     if ($SphQLResult->has_results()) {
         $SphRequests = $SphQLResult->to_array('id', MYSQLI_ASSOC);
 ?>

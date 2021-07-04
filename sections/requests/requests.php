@@ -300,7 +300,7 @@ if ($OrderBy !== 'random' && isset($_GET['page']) && intval($_GET['page']) && $_
     $SphQL->limit(0, REQUESTS_PER_PAGE, REQUESTS_PER_PAGE);
 }
 
-$SphQLResult = $SphQL->query();
+$SphQLResult = $SphQL->sphinxquery();
 $NumResults = (int)$SphQLResult->get_meta('total_found');
 if ($NumResults > 0) {
     $SphRequests = $SphQLResult->to_array('id');
