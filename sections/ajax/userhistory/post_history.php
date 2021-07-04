@@ -10,7 +10,7 @@ if (is_null($user)) {
 }
 $ownProfile = ($user->id() === $Viewer->id());
 
-$forumSearch = (new Gazelle\ForumSearch($user))
+$forumSearch = (new Gazelle\Search\Forum($user))
     ->setShowGrouped($ownProfile && (!isset($_GET['group']) || !!$_GET['group']))
     ->setShowUnread($ownProfile && (!isset($_GET['showunread']) || !!$_GET['showunread']));
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
