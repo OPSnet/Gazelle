@@ -291,7 +291,7 @@ class SphinxqlQuery {
      * @param bool GetMeta whether to fetch meta data for the executed query. Default is yes
      * @return SphinxqlResult object
      */
-    public function query($GetMeta = true) {
+    public function sphinxquery($GetMeta = true) {
         $QueryStartTime = microtime(true);
         $this->build_query();
         if (count($this->Errors) > 0) {

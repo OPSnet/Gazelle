@@ -27,7 +27,7 @@ if (!empty($_GET['search'])) {
     $SphQL->where_match($_GET['search'], '(groupname,artistname,year,taglist)');
 }
 
-$SphQLResult = $SphQL->query();
+$SphQLResult = $SphQL->sphinxquery();
 $TorrentCount = $SphQLResult->get_meta('total');
 
 if ($TorrentCount == 0) {
