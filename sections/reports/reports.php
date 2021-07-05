@@ -1,12 +1,10 @@
 <?php
 
-if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
+if (!$Viewer->permitted('admin_reports') && !$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
 
 $userMan = new Gazelle\Manager\User;
-
-[$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
 
 $cond = [];
 $args = [];
@@ -31,18 +29,16 @@ if (isset($_GET['id'])) {
     }
 }
 
-if (!check_perms('admin_reports') && check_perms('site_moderate_forums')) {
+if (!$Viewer->permitted('admin_reports') && $Viewer->permitted('site_moderate_forums')) {
     $cond[] = "r.Type IN ('comment', 'post', 'thread')";
 }
 
 $Where = $cond ? ('WHERE ' . implode(' AND ', $cond))
     : '';
 
-$Results = $DB->scalar("
-    SELECT count(*) FROM reports r $Where
-    ", ...$args
-);
-$Pages = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
+$paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($DB->scalar("SELECT count(*) FROM reports r $Where", ...$args));
+array_push($args, $paginator->limit(), $paginator->offset());
 
 $DB->prepared_query("
     SELECT
@@ -61,7 +57,7 @@ $DB->prepared_query("
     INNER JOIN users_main AS um ON r.UserID = um.ID
     $Where
     ORDER BY ReportedTime DESC
-    LIMIT $Limit
+    LIMIT ? OFFSET ?
     ", ...$args
 );
 $Reports = $DB->get_query_id();
@@ -77,9 +73,7 @@ View::show_header('Reports', 'bbcode,reports');
             <a href="reports.php?action=stats">Stats</a>
         </div>
     </div>
-    <div class="linkbox">
-<?= $Pages ?>
-    </div>
+<?= $paginator->linkbox() ?>
 <?php
 require_once('array.php');
 $DB->set_query_id($Reports);
@@ -252,10 +246,8 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
 <?php
         $DB->set_query_id($Reports);
     }
-    ?>
-    <div class="linkbox">
-<?= $Pages ?>
-    </div>
+?>
+<?= $paginator->linkbox() ?>
 </div>
 <?php
 View::show_footer();
