@@ -1,0 +1,66 @@
+<div class="thin">
+<div class="box pad">
+    <figure class="highcharts-figure"><div id="donation-timeline"></div></figure>
+</div>
+<br />
+
+<div>
+    <form class="search_form" name="donation_log" action="" method="get">
+        <input type="hidden" name="action" value="donation_log" />
+        <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
+            <tr>
+                <td class="label"><strong>Username:</strong></td>
+                <td>
+                    <input type="search" name="username" size="60" value="{{ username }}" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Date Range:</strong></td>
+                <td>
+                    <input type="date" name="after_date" />
+                    <input type="date" name="before_date" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">&nbsp;</td>
+                <td>
+                    <input type="submit" value="Search donation log" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<br />
+{{ paginator.linkbox|raw }}
+<table width="100%">
+    <tr class="colhead">
+        <td>User</td>
+        <td>Fiat Amount</td>
+        <td>Currency</td>
+        <td>Bitcoin</td>
+        <td>Source</td>
+        <td>Reason</td>
+        <td>Time</td>
+    </tr>
+{% set total = 0 %}
+{% for d in donation %}
+    {% set total = total + d.xbt %}
+    <tr>
+        <td>{{ d.UserID|user_full }} ({{ d.AddedBy|user_url }})</td>
+        <td>{{ d.Amount }}</td>
+        <td>{{ d.Currency }}</td>
+        <td>{{ d.xbt|number_format(8) }}</td>
+        <td>{{ d.Source }}</td>
+        <td>{{ d.Reason }}</td>
+        <td>{{ d.Time|time_diff }}</td>
+    </tr>
+{% endfor %}
+<tr class="colhead">
+    <td colspan="2">&nbsp;</td>
+    <td>Page Total</td>
+    <td>{{ total|number_format(8) }}</td>
+    <td>Grand total</td>
+    <td colspan="2">{{ grand_total|number_format(8) }}</td>
+</tr>
+</table>
+{{ paginator.linkbox|raw }}

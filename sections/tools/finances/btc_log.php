@@ -1,11 +1,8 @@
 <?php
 
-if (!check_perms('admin_donor_log')) {
+if (!$Viewer->permitted('admin_donor_log')) {
     error(403);
 }
-
-define('DONATIONS_PER_PAGE', 50);
-[$Page, $Limit] = Format::page_limit(DONATIONS_PER_PAGE);
 
 $dateSearch = !empty($_GET['after_date']) && !empty($_GET['before_date']);
 
@@ -26,12 +23,14 @@ if ($cond) {
     $from .= " WHERE " . implode(' AND ', $cond);
 }
 
-$Results = $DB->scalar("SELECT count(*) $from", ...$args);
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal(
+    $DB->scalar("SELECT count(*) $from", ...$args)
+);
+array_push($args, $paginator->limit(), $paginator->offset());
 
-$args[] = $Limit;
 $DB->prepared_query("
-    SELECT
-        d.UserID,
+    SELECT d.UserID,
         d.Amount,
         d.Currency,
         d.xbt,
@@ -41,15 +40,11 @@ $DB->prepared_query("
         d.AddedBy,
         d.Reason
     $from
-        ORDER BY d.Time DESC
-        LIMIT ?
+    ORDER BY d.Time DESC
+    LIMIT ? OFFSET ?
     ", ...$args
  );
-$Donations = $DB->to_array();
-
-$Total = $DB->scalar("
-    SELECT SUM(Amount) FROM donations
-");
+$donation = $DB->to_array(false, MYSQLI_ASSOC, false);
 
 $DB->prepared_query("
     SELECT date_format(Time,'%b %Y') AS Month,
@@ -59,9 +54,7 @@ $DB->prepared_query("
     ORDER BY Time DESC
     LIMIT 0, 17
 ");
-$Timeline = array_reverse($DB->to_array(false, MYSQLI_ASSOC, false));
-
-$payment = new \Gazelle\Manager\Payment;
+$timeline = array_reverse($DB->to_array(false, MYSQLI_ASSOC, false));
 
 View::show_header('Donation log');
 ?>
@@ -89,92 +82,24 @@ Highcharts.chart('donation-timeline', {
         plotLines: [{
             color: '#800000',
             width: 2,
-            value: <?= $payment->monthlyRental() ?>,
+            value: <?= (new Gazelle\Manager\Payment)->monthlyRental() ?>,
             zIndex: 5,
         }],
     },
     xAxis: {
-        categories: [<?= implode(',', array_map(function ($x) { return "'" . $x['Month'] . "'"; }, $Timeline)) ?>],
+        categories: [<?= implode(',', array_map(function ($x) { return "'" . $x['Month'] . "'"; }, $timeline)) ?>],
     },
     series: [
-        { name: 'Donated',  data: [<?= implode(',', array_map(function ($x) { return  $x['Amount']; }, $Timeline)) ?>] }
+        { name: 'Donated',  data: [<?= implode(',', array_map(function ($x) { return  $x['Amount']; }, $timeline)) ?>] }
     ]
 
 })});
 </script>
-<div class="thin">
-<div class="box pad">
-    <figure class="highcharts-figure"><div id="donation-timeline"></div></figure>
-</div>
-<br />
-
-<div>
-    <form class="search_form" name="donation_log" action="" method="get">
-        <input type="hidden" name="action" value="donation_log" />
-        <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
-            <tr>
-                <td class="label"><strong>Username:</strong></td>
-                <td>
-                    <input type="search" name="username" size="60" value="<?php if (!empty($_GET['username'])) { echo display_str($_GET['username']); } ?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label"><strong>Date Range:</strong></td>
-                <td>
-                    <input type="date" name="after_date" />
-                    <input type="date" name="before_date" max="<?= date('Y-m-d') ?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    <input type="submit" value="Search donation log" />
-                </td>
-                <td>&nbsp;</td>
-            </tr>
-        </table>
-    </form>
-</div>
-<br />
-<div class="linkbox">
 <?php
-    $Pages = Format::get_pages($Page, $Results, DONATIONS_PER_PAGE, 11);
-    echo $Pages;
-?>
-</div>
-<table width="100%">
-    <tr class="colhead">
-        <td>User</td>
-        <td>Fiat Amount</td>
-        <td>Currency</td>
-        <td>Bitcoin</td>
-        <td>Source</td>
-        <td>Reason</td>
-        <td>Time</td>
-    </tr>
-<?php
-    $PageTotal = 0;
-    foreach ($Donations as $Donation) {
-        $PageTotal += $Donation['Amount']; ?>
-        <tr>
-            <td><?=Users::format_username($Donation['UserID'], true)?> (<?=Users::format_username($Donation['AddedBy'])?>)</td>
-            <td><?=display_str($Donation['Amount'])?></td>
-            <td><?=display_str($Donation['Currency'])?></td>
-            <td><?=display_str($Donation['xbt'])?></td>
-            <td><?=display_str($Donation['Source'])?></td>
-            <td><?=display_str($Donation['Reason'])?></td>
-            <td><?=time_diff($Donation['Time'])?></td>
-        </tr>
-<?php
-    } ?>
-<tr class="colhead">
-    <td>Page Total</td>
-    <td><?=$PageTotal?></td>
-    <td>Total</td>
-    <td colspan="3"><?=$Total?></td>
-</tr>
-</table>
-<div class="linkbox">
-    <?=$Pages?>
-</div>
-<?php
+echo $Twig->render('admin/xbt-log.twig', [
+    'donation'    => $donation,
+    'grand_total' => $DB->scalar("SELECT SUM(xbt) FROM donations "),
+    'paginator'   => $paginator,
+    'username'    => $_GET['username'] ?? '',
+]);
 View::show_footer();
