@@ -22,28 +22,27 @@ class StaffPM extends \Gazelle\Base {
         return $this->db->to_array('ID', MYSQLI_ASSOC, false);
     }
 
+    public function countByStatus(\Gazelle\User $viewer, array $status): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM staff_pm_conversations
+            WHERE (Level <= ? OR AssignedToUser = ?)
+                AND Status IN (" . placeholders($status) . ")
+            ", $viewer->primaryClass(), $viewer->id(), ...$status
+        );
+    }
+
     public function heading(\Gazelle\User $viewer): array {
         if (!$viewer->isStaffPMReader()) {
             return [];
         }
         $heading = [
             [
-                'count' => $this->db->scalar("
-                    SELECT count(*) FROM staff_pm_conversations
-                    WHERE Status IN ('Unanswered')
-                        AND (Level <= ? OR AssignedToUser = ?)
-                    ", $viewer->primaryClass(), $viewer->id()
-                ),
+                'count' => $this->countByStatus($viewer, ['Unanswered']),
                 'link'  => "?view=unanswered",
                 'title' => "All unanswered",
             ],
             [
-                'count' => $this->db->scalar("
-                    SELECT count(*) FROM staff_pm_conversations
-                    WHERE Status IN ('Open', 'Unanswered')
-                        AND (Level <= ? OR AssignedToUser = ?)
-                    ", $viewer->primaryClass(), $viewer->id()
-                ),
+                'count' => $this->countByStatus($viewer, ['Open', 'Unanswered']),
                 'title' => "Unresolved",
                 'link'  => "?view=open",
             ],
