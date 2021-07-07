@@ -38,7 +38,6 @@ if (!isset($_GET['id'])) {
 }
 $UserID   = $User->id();
 $Username = $User->username();
-$Userlink = Users::format_username($UserID, false, false, false);
 
 if ($Viewer->id() == $UserID) {
     $ownProfile = true;
@@ -210,18 +209,15 @@ $joinArgs[] = $Action;
 $Join = implode("\n", $Join);
 $cond = $condition ? 'WHERE ' . implode(" AND ", $condition) : '';
 
-$Count = $DB->scalar("
-    SELECT count(DISTINCT(C.ID))
-    FROM $table
-    $Join
-    $cond
-    ", ...array_merge($joinArgs, $condArgs)
+// Posts per page limit stuff
+$paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
+$paginator->setTotal(
+    $DB->scalar("
+        SELECT count(DISTINCT(C.ID)) FROM $table $Join $cond", ...array_merge($joinArgs, $condArgs)
+    )
 );
 
-// Posts per page limit stuff
-$PerPage = $Viewer->postsPerPage();
-[$Page, $Limit] = Format::page_limit($PerPage);
-$Pages = Format::get_pages($Page, $Count, $PerPage, 11);
+array_push($condArgs, $paginator->limit(), $paginator->offset());
 
 $Comments = $DB->prepared_query("
     SELECT C.AuthorID,
@@ -238,7 +234,7 @@ $Comments = $DB->prepared_query("
     $cond
     GROUP BY C.ID
     ORDER BY C.ID DESC
-    LIMIT $Limit
+    LIMIT ? OFFSET ?
     ", ...array_merge($joinArgs, $condArgs)
 );
 
@@ -267,20 +263,18 @@ View::show_header(sprintf($Title, $Username), 'bbcode,comments');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= sprintf($Title, $Userlink) ?></h2>
+        <h2><?= sprintf($Title, Users::format_username($UserID, false, false, false)) ?></h2>
 <?php if ($Links != '') { ?>
         <div class="linkbox">
             <?= $Links ?>
         </div>
 <?php } ?>
     </div>
-    <div class="linkbox">
-        <?= $Pages ?>
-    </div>
-<?php if (!$Count) { ?>
+<?php if (!$paginator->total()) { ?>
     <div class="center">No results.</div>
 <?php
 } else {
+    echo $paginator->linkbox();
     $isAdmin = check_perms('site_admin_forums');
     $commentMan = new Gazelle\Manager\Comment;
     $DB->set_query_id($Comments);
@@ -320,11 +314,9 @@ View::show_header(sprintf($Title, $Username), 'bbcode,comments');
         ]);
         $DB->set_query_id($Comments);
     }
+    echo $paginator->linkbox();
 }
 ?>
-    <div class="linkbox">
-        <?= $Pages ?>
-    </div>
 </div>
 <?php
 View::show_footer();
