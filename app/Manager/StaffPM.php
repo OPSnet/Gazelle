@@ -27,7 +27,16 @@ class StaffPM extends \Gazelle\Base {
             SELECT count(*) FROM staff_pm_conversations
             WHERE (Level <= ? OR AssignedToUser = ?)
                 AND Status IN (" . placeholders($status) . ")
-            ", $viewer->primaryClass(), $viewer->id(), ...$status
+            ", $viewer->effectiveClass(), $viewer->id(), ...$status
+        );
+    }
+
+    public function countAtLevel(\Gazelle\User $viewer, array $status): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM staff_pm_conversations
+            WHERE (Level = ? OR AssignedToUser = ?)
+                AND Status IN (" . placeholders($status) . ")
+            ", $viewer->effectiveClass(), $viewer->id(), ...$status
         );
     }
 
@@ -38,12 +47,12 @@ class StaffPM extends \Gazelle\Base {
         $heading = [
             [
                 'count' => $this->countByStatus($viewer, ['Unanswered']),
-                'link'  => "?view=unanswered",
-                'title' => "All unanswered",
+                'title' => "Unanswered",
+                'link'  => "",
             ],
             [
-                'count' => $this->countByStatus($viewer, ['Open', 'Unanswered']),
-                'title' => "Unresolved",
+                'count' => $this->countByStatus($viewer, ['Open']),
+                'title' => "Waiting for reply",
                 'link'  => "?view=open",
             ],
             [
@@ -52,10 +61,15 @@ class StaffPM extends \Gazelle\Base {
             ],
         ];
         if ($viewer->isStaff()) {
-            $heading[] = [
-                'title' => "Your unanswered",
-                'view'  => "",
-            ];
+            $heading = array_merge([
+                'unanswered' => [
+                    'count'  => $this->countByStatus($viewer, ['Unanswered']),
+                    'status' => ['Unanswered'],
+                    'title'  => 'All unanswered',
+                    'view'   => 'Unanswered',
+                ]],
+                $heading
+            );
         }
         return $heading;
     }

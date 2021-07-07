@@ -4,39 +4,47 @@ $View = empty($_GET['view']) ? '' : display_str($_GET['view']);
 
 $staffpmMan = new Gazelle\Manager\StaffPM;
 $viewMap = [
-    'unanswered' => [
-        'view'   => 'Unanswered',
+    '' => [
         'status' => ['Unanswered'],
-        'count'  => $staffpmMan->countByStatus($Viewer, ['Unanswered']),
+        'count'  => $Viewer->isFLS()
+            ? $staffpmMan->countByStatus($Viewer, ['Unanswered'])
+            : $staffpmMan->countAtLevel($Viewer, ['Unanswered']),
+        'title'  => 'Your Unanswered',
     ],
     'open' => [
-        'view'    => 'Unresolved',
-        'status'  => ['Open', 'Unanswered'],
-        'count'   => $staffpmMan->countByStatus($Viewer, ['Open', 'Unanswered']),
-        'no_sort' => true,
+        'status' => ['Open'],
+        'count'  => $staffpmMan->countByStatus($Viewer, ['Open']),
+        'title'  => 'Waiting for reply',
+        'view'   => 'Unresolved',
     ],
     'resolved' => [
-        'view'    => 'Resolved',
-        'status'  => ['Resolved'],
-        'no_sort' => true,
-    ],
-    'my' => [
-        'view'   => 'Your Unanswered',
-        'status' => ['Unanswered'],
-    ],
-    '' => [
-        'view'   => $Viewer->isStaff() ? 'Your Unanswered' : 'Unanswered',
-        'status' => ['Unanswered'],
+        'status' => ['Resolved'],
+        'title'  => 'Resolved',
+        'view'   => 'Resolved',
     ],
 ];
+if ($Viewer->isStaff()) {
+    $viewMap = array_merge([
+        'unanswered' => [
+            'count'  => $staffpmMan->countByStatus($Viewer, ['Unanswered']),
+            'status' => ['Unanswered'],
+            'title'  => 'All unanswered',
+            'view'   => 'Unanswered',
+        ]],
+        $viewMap
+    );
+}
+
 if (!isset($viewMap[$View])) {
     error(0);
 }
-$cond = ['spc.Status IN (' . placeholders($viewMap[$View]['status']) . ') AND (spc.Level <= ? OR spc.AssignedToUser = ?)'];
-$args = array_merge($viewMap[$View]['status'], [$Viewer->effectiveClass(), $Viewer->id()]);
+$viewingResolved = $viewMap[$View]['title'] === 'Resolved';
+
+$cond = ['(spc.Level <= ? OR spc.AssignedToUser = ?) AND spc.Status IN (' . placeholders($viewMap[$View]['status']) . ')'];
+$args = array_merge([$Viewer->effectiveClass(), $Viewer->id()], $viewMap[$View]['status']);
 
 $Classes = (new Gazelle\Manager\User)->classList();
-if ($viewMap[$View]['view'] === 'Your Unanswered') {
+if ($viewMap[$View]['title'] === 'Your Unanswered') {
     if ($Viewer->effectiveClass() >= $Classes[MOD]['Level']) {
         $cond[] = 'spc.Level >= ?';
         $args[] = $Classes[MOD]['Level'];
@@ -49,21 +57,11 @@ $where = implode(' AND ', $cond);
 
 $paginator = new Gazelle\Util\Paginator(MESSAGES_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($DB->scalar("
-    SELECT count(*)
-    FROM staff_pm_conversations AS spc
-    LEFT JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
-    WHERE $where
+    SELECT count(*) FROM staff_pm_conversations AS spc WHERE $where
     ", ...$args
 ));
 
-if (isset($viewMap[$View]['no_sort'])) {
-    $orderBy = 'spc.Date DESC';
-} else {
-    $orderBy = 'IF(AssignedToUser = ?, 0, 1) ASC, spc.Date DESC';
-    $args[] = $Viewer->id();
-}
-array_push($args, $paginator->limit(), $paginator->offset());
-
+array_push($args, $Viewer->id(), $paginator->limit(), $paginator->offset());
 $StaffPMs = $DB->prepared_query("
     SELECT spc.ID,
         spc.Subject,
@@ -74,42 +72,38 @@ $StaffPMs = $DB->prepared_query("
         spc.Date,
         spc.Unread,
         count(spm.ID) AS NumReplies,
-        spc.ResolverID
+        spc.ResolverID,
+        (   SELECT spmu.UserID FROM staff_pm_messages spmu
+            WHERE spmu.ID = (
+                SELECT max(last.ID) FROM staff_pm_messages last WHERE last.ConvID = spm.ConvID)
+        ) as last_user_id
     FROM staff_pm_conversations AS spc
     LEFT JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
     WHERE $where
     GROUP BY spc.ID
-    ORDER BY $orderBy
+    ORDER BY IF(AssignedToUser = ?, 0, 1) ASC, spc.Date DESC
     LIMIT ? OFFSET ?
     ", ...$args
 );
-
-$Sections = [
-    'unanswered' => "All unanswered",
-    'open'       => "Unresolved",
-    'resolved'   => 'Resolved',
-];
-if ($Viewer->isStaff()) {
-    $Sections = ['' => 'Your unanswered'] + $Sections;
-}
-$viewingResolved = $viewMap[$View]['view'] === 'Resolved';
 
 View::show_header('Staff Inbox');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= $viewMap[$View]['view'] ?> Staff PMs</h2>
+        <h2>Staff PMs &rsaquo; <?= $viewMap[$View]['title'] ?></h2>
         <div class="linkbox">
 <?php
-foreach ($Sections as $Section => $Text) {
-    if (in_array($Section, ['unanswered', 'open'])) {
-        $Text .= '(' . $viewMap[$Section]['count'] . ')';
+foreach ($viewMap as $section => $info) {
+    if (isset($viewMap[$section]['count'])) {
+        $info['title'] .= ' (' . $viewMap[$section]['count'] . ')';
+    } elseif ($section === '') {
+        $info['title'] .= ' (' . $paginator->total() . ')';
     }
-    if ($Section === $View) {
-        $Text = "<strong>$Text</strong>";
+    if ($section === $View) {
+        $info['title'] = "<strong>{$info['title']}</strong>";
     }
     // Make sure the trailing space in this output remains.
-    ?><a href="staffpm.php<?= $Section ? "?view=$Section" : '' ?>" class="brackets"><?= $Text ?></a>&nbsp;<?php
+    ?><a href="staffpm.php<?= empty($section) ? '' : "?view=$section" ?>" class="brackets"><?= $info['title'] ?></a>&nbsp;<?php
 }
 
 if ($Viewer->permitted('admin_staffpm_stats')) {
@@ -148,6 +142,7 @@ if ($Viewer->isFLS()) { ?>
                     <td>Date</td>
                     <td>Assigned to</td>
                     <td>Replies</td>
+                    <td>Last reply</td>
 <?php    if ($viewingResolved) { ?>
                     <td>Resolved by</td>
 <?php    } ?>
@@ -156,7 +151,7 @@ if ($Viewer->isFLS()) { ?>
     // List messages
     $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
     $Row = 'a';
-    while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID] = $DB->next_record()) {
+    while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID, $LastUserID] = $DB->next_record()) {
         $Row = $Row === 'a' ? 'b' : 'a';
 
         // Get assigned
@@ -180,8 +175,9 @@ if ($Viewer->isFLS()) { ?>
                     <td><?= time_diff($Date, 2, true) ?></td>
                     <td><?= $Assigned ?></td>
                     <td><?= max(0, $NumReplies - 1) ?></td>
+                    <td><?= Users::format_username($LastUserID, true) ?></td>
 <?php        if ($viewingResolved) { ?>
-                    <td><?= Users::format_username($ResolverID, true, true, true, true) ?></td>
+                    <td><?= Users::format_username($ResolverID, true) ?></td>
 <?php        } ?>
                 </tr>
 <?php
