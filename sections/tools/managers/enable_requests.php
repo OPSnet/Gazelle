@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_mod')) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -9,11 +9,6 @@ if (!FEATURE_EMAIL_REENABLE) {
     header("Location: tools.php");
     die();
 }
-
-View::show_header("Enable Requests", 'enable_requests');
-
-$RequestsPerPage = 25;
-[$Page, $Limit] = Format::page_limit($RequestsPerPage);
 
 $Where = [];
 $Joins = [];
@@ -87,18 +82,20 @@ $header = new \Gazelle\Util\SortableTableHeader('submitted_timestamp', [
 ]);
 $OrderBy = $header->getOrderBy();
 $OrderDir = $header->getOrderDir();
-
 $joinList = implode(' ', $Joins);
 $whereList = implode(' AND ', $Where);
 
-$NumResults = $DB->scalar("
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($DB->scalar("
     SELECT count(*)
     FROM users_enable_requests AS uer
     INNER JOIN users_info ui ON (ui.UserID = uer.UserID)
     $joinList
     WHERE $whereList
     ", ...$args
-);
+));
+array_push($args, $paginator->limit(), $paginator->offset());
+
 $QueryID = $DB->prepared_query("
     SELECT uer.ID,
            uer.UserID,
@@ -111,15 +108,16 @@ $QueryID = $DB->prepared_query("
            uer.HandledTimestamp,
            uer.Outcome
     FROM users_enable_requests AS uer
-    JOIN users_info ui ON ui.UserID = uer.UserID
+    INNER JOIN users_info ui ON (ui.UserID = uer.UserID)
     $joinList
     WHERE $whereList
     ORDER BY $OrderBy $OrderDir
-    LIMIT $Limit
+    LIMIT ? OFFSET ?
     ", ...$args
 );
-?>
 
+View::show_header("Enable Requests", 'enable_requests');
+?>
 <div class="header">
     <h2>Auto-Enable Requests</h2>
 </div>
@@ -147,7 +145,8 @@ $DB->prepared_query("
     GROUP BY CheckedBy
     ORDER BY 1 DESC
 ");
-while ([$Checked, $UserID] = $DB->next_record()) { ?>
+while ([$Checked, $UserID] = $DB->next_record()) {
+?>
             <tr>
                 <td><?=Users::format_username($UserID)?></td>
                 <td><?=$Checked?></td>
@@ -235,14 +234,10 @@ $DB->set_query_id($QueryID);
         </table>
     </form>
 </div>
-<?php if (!$NumResults) { ?>
+<?php if (!$paginator->total()) { ?>
     <h2 align="center">No new pending auto enable requests<?=isset($_GET['view']) ? ' in this view' : ''?></h2>
 <?php } else { ?>
-    $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
-?>
-    <div class="linkbox">
-        <?= $Pages ?>
-    </div>
+    <?= $paginator->linkbox() ?>
     <table width="100%">
         <tr class="colhead">
             <td class="center"><input type="checkbox" id="check_all" /></td>
@@ -295,13 +290,9 @@ $DB->set_query_id($QueryID);
             </td>
 <?php   } ?>
         </tr>
-    <?php
-    }
-    ?>
+<?php } ?>
     </table>
-    <div class="linkbox">
-        <?= $Pages ?>
-    </div>
+    <?= $paginator->linkbox() ?>
 <div style="padding-bottom: 11px;">
     <input type="submit" id="outcome" value="Approve Selected" />
     <input type="submit" id="outcome" value="Reject Selected" />
