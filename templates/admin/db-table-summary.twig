@@ -1,0 +1,99 @@
+<div class="linkbox">
+    <a href="tools.php?action=database_specifics&amp;mode=show" title="Tables of deleted data are shown separately" class="brackets">Show deleted data</a>
+    <a href="tools.php?action=database_specifics&amp;mode=merge" title="Stats of tables of deleted data are merged with their source table" class="brackets">Merge deleted data</a>
+    <a href="tools.php?action=database_specifics&amp;mode=exclude" title="Tables of deleted data are excluded" class="brackets">Exclude deleted data</a>
+</div>
+<script src="{{ constant('STATIC_SERVER') }}/functions/highcharts.js"></script>
+<script src="{{ constant('STATIC_SERVER') }}/functions/highcharts_custom.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('statistics', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+        plotBorderWidth: null,
+        plotShadow: true,
+    },
+    title: {
+        text: '{{ constant('SITE_NAME') }} database breakdown by {{ graph.title }}',
+        style: {
+            color: '#c0c0c0',
+        },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Tables',
+        data: [
+{% for table, value in graph.data %}
+            { name: '{{ table }}', y: {{ value }} },
+{% endfor %}
+        ]
+    }]
+})});
+</script>
+<div class="box pad center">
+<figure class="highcharts-figure">
+    <div id="statistics"></div>
+</figure>
+</div>
+<br />
+<table>
+<tr class="colhead" style="text-align:right">
+    <td style="text-align:left" class="nobr">{{ header.emit('name')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('rows')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('rowsize')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('datasize')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('indexsize')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('datafree')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('freeratio')|raw }}</td>
+    <td style="text-align:right" class="nobr">{{ header.emit('totalsize')|raw }}</td>
+</tr>
+
+{% set total_rows       = 0 %}
+{% set total_data_size  = 0 %}
+{% set total_index_size = 0 %}
+{% set total_free_size  = 0 %}
+{% for t in list -%}
+    {%- set total_rows       = total_rows       + t.table_rows -%}
+    {%- set total_data_size  = total_data_size  + t.data_length -%}
+    {%- set total_index_dize = total_index_dize + t.index_length -%}
+    {%- set total_free_size  = total_free_size  + t.data_free -%}
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    <td><a href="tools.php?action=database_specifics&amp;table={{ t.table_name }}" title="engine: {{ t.engine }}">
+            {%- if t.engine != 'InnoDB' %}<span style="color: tomato;">{% endif -%}
+            {{- t.table_name -}}
+            {%- if t.engine != 'InnoDB' %}</span>{% endif -%}
+    </a></td>
+    <td class="number_column">{{ t.table_rows|number_format }}</td>
+    <td class="number_column">{{ t.avg_row_length|octet_size }}</td>
+    <td class="number_column">{{ t.data_length|octet_size }}</td>
+    <td class="number_column">{{ t.index_length|octet_size }}</td>
+    <td class="number_column">{{ t.data_free|octet_size }}</td>
+    <td class="number_column"><b>{% if t.data_length %}{{ (t.data_free / t.data_length * 100)|number_format(2) }}{% else %}0{% endif %}</b></td>
+    <td class="number_column">{{ (t.data_length + t.index_length)|octet_size }}</td>
+</tr>
+{% endfor %}
+<tr>
+    <td><b>Grand totals</b></td>
+    <td class="number_column"><b>{{ total_rows|number_format }}</b></td>
+    <td></td>
+    <td class="number_column"><b>{{ total_data_size|octet_size }}</b></td>
+    <td class="number_column"><b>{{ total_index_size|octet_size }}</b></td>
+    <td class="number_column"><b>{{ total_free_size|octet_size }}</b></td>
+    <td class="number_column"><b>{% if total_data_size %}{{ (total_free_size / total_data_size * 100)|number_format(2) }}{% else %}0{% endif %}</b></td>
+    <td class="number_column"><b>{{ (total_data_size + total_index_size)|octet_size }}</b></td>
+</tr>
+</table>
