@@ -6,13 +6,10 @@ if (!check_perms('site_torrents_notify')) {
     error(403);
 }
 
-define('NOTIFICATIONS_PER_PAGE', 50);
-define('NOTIFICATIONS_MAX_SLOWSORT', 10000);
-
 $urlStem = STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName()  . '/images/';
 $imgTag = '<img src="' . $urlStem . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
-    'year'     => ['dbColumn' => 'tnt.Year',      'defaultSort' => 'desc', 'text' => 'Year'],
+    'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],
     'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Time'],
     'size'     => ['dbColumn' => 't.Size',        'defaultSort' => 'desc', 'text' => 'Size'],
     'snatched' => ['dbColumn' => 'tls.Snatched',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
@@ -24,93 +21,50 @@ $OrderBy = $header->getOrderBy();
 $OrderDir = $header->getOrderDir();
 $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
-if (!empty($_GET['filterid']) && is_number($_GET['filterid'])) {
-    $FilterID = $_GET['filterid'];
-} else {
-    $FilterID = false;
+$from = "FROM users_notify_torrents AS unt
+    INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
+    INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)";
+if ($OrderBy == 'tg.Year') {
+    $from .= " INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)";
 }
 
-list($Page, $Limit) = Format::page_limit(NOTIFICATIONS_PER_PAGE);
-
-// Perhaps this should be a feature at some point
-if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['userid']) && $_GET['userid'] != $Viewer->id()) {
-    $UserID = $_GET['userid'];
-    $Sneaky = true;
+if ($Viewer->permitted('users_mod') && (int)($_GET['userid'] ?? 0)) {
+    $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+    if (is_null($user)) {
+        error(404);
+    }
 } else {
-    $Sneaky = false;
-    $UserID = $Viewer->id();
+    $user = $Viewer;
 }
+$UserID = $user->id();
+$ownProfile = $UserID === $Viewer->id();
 
 $cond = ['unt.UserID = ?'];
 $args = [$UserID];
+$FilterID = (int)($_GET['filterid'] ?? 0);
 if ($FilterID) {
     $cond[] = 'FilterID = ?';
     $args[] = $FilterID;
 }
-$clause = implode(' AND ', $cond);
+$where = implode(' AND ', $cond);
 
-// Sorting by release year requires joining torrents_group, which is slow. Using a temporary table
-// makes it speedy enough as long as there aren't too many records to create
-if ($OrderBy == 'tnt.Year') {
-    $TorrentCount = $DB->scalar("
-        SELECT count(*)
-        FROM users_notify_torrents AS unt
-        INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
-        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        WHERE $clause
-        ", ...$args
-    );
-    if ($TorrentCount > NOTIFICATIONS_MAX_SLOWSORT) {
-        error('Due to performance issues, torrent lists with more than '.number_format(NOTIFICATIONS_MAX_SLOWSORT).' items cannot be ordered by release year.');
-    }
-
-    $DB->prepared_query("
-        CREATE TEMPORARY TABLE temp_notify_torrents
-            (TorrentID int, GroupID int, UnRead tinyint, FilterID int, Year smallint, PRIMARY KEY(GroupID, TorrentID), KEY(Year))
-        ENGINE=InnoDB");
-    $DB->prepared_query("
-        INSERT IGNORE INTO temp_notify_torrents (TorrentID, GroupID, UnRead, FilterID)
-        SELECT t.ID, t.GroupID, unt.UnRead, unt.FilterID
-        FROM users_notify_torrents AS unt
-        INNER JOIN torrents AS t ON t.ID=unt.TorrentID
-        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        WHERE $clause
-        ", ...$args
-    );
-    $DB->prepared_query("
-        UPDATE temp_notify_torrents AS tnt
-        INNER JOIN torrents_group AS tg ON (tnt.GroupID = tg.ID)
-        SET tnt.Year = tg.Year
-    ");
-    $DB->prepared_query("
-        SELECT TorrentID, GroupID, UnRead, FilterID
-        FROM temp_notify_torrents AS tnt
-        ORDER BY $OrderBy $OrderDir, GroupID $OrderDir
-        LIMIT $Limit
-    ");
-} else {
-    $from = "
-        FROM users_notify_torrents AS unt
-        INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
-        INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)
-        WHERE $clause
-    ";
-    $TorrentCount = $DB->scalar("
-        SELECT count(*) $from
-        ", ...$args
-    );
-    $DB->prepared_query("
-        SELECT
-            unt.TorrentID,
-            unt.UnRead,
-            unt.FilterID,
-            t.GroupID
-        $from
-        ORDER BY $OrderBy $OrderDir
-        LIMIT $Limit
-        ", ...$args
-    );
-}
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($DB->scalar("
+    SELECT count(*) $from WHERE $where
+    ", ...$args
+));
+array_push($args, $paginator->limit(), $paginator->offset());
+$DB->prepared_query("
+    SELECT unt.TorrentID,
+        unt.UnRead,
+        unt.FilterID,
+        t.GroupID
+    $from
+    WHERE $where
+    ORDER BY $OrderBy $OrderDir
+    LIMIT ? OFFSET ?
+    ", ...$args
+);
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 
 $GroupIDs = $FilterIDs = $UnReadIDs = [];
@@ -121,7 +75,6 @@ foreach ($Results as $Torrent) {
         $UnReadIDs[] = $Torrent['TorrentID'];
     }
 }
-$Pages = Format::get_pages($Page, $TorrentCount, NOTIFICATIONS_PER_PAGE, 9);
 
 if (!empty($GroupIDs)) {
     $GroupIDs = array_keys($GroupIDs);
@@ -135,7 +88,7 @@ if (!empty($GroupIDs)) {
         WHERE ID IN (" . placeholders($FilterIDs) . ")
         ", ...$FilterIDs
     );
-    $Filters = $DB->to_array('ID', MYSQLI_ASSOC, ['Artists']);
+    $Filters = $DB->to_array('ID', MYSQLI_ASSOC, false);
     foreach ($Filters as &$Filter) {
         $Filter['Artists'] = explode('|', trim($Filter['Artists'], '|'));
         foreach ($Filter['Artists'] as &$FilterArtist) {
@@ -157,10 +110,10 @@ if (!empty($GroupIDs)) {
         $Cache->delete_value('user_notify_upload_'.$Viewer->id());
     }
 }
-if ($Sneaky) {
-    View::show_header((new Gazelle\User($UserID))->username() . '\'s notifications', 'notifications');
-} else {
+if ($ownProfile) {
     View::show_header('My notifications', 'notifications');
+} else {
+    View::show_header($user->username() . '\'s notifications', 'notifications');
 }
 ?>
 <div class="thin widethin">
@@ -168,27 +121,16 @@ if ($Sneaky) {
     <h2>Latest notifications</h2>
 </div>
 <div class="linkbox">
-<?php
-if ($FilterID) { ?>
-    <a href="torrents.php?action=notify<?=($Sneaky ? "&amp;userid=$UserID" : '')?>" class="brackets">View all</a>&nbsp;&nbsp;&nbsp;
-<?php
-} elseif (!$Sneaky) { ?>
+<?php if ($FilterID) { ?>
+    <a href="torrents.php?action=notify<?= $ownProfile ? '' : "&amp;userid=$UserID" ?>" class="brackets">View all</a>&nbsp;&nbsp;&nbsp;
+<?php } elseif ($ownProfile) { ?>
     <a href="torrents.php?action=notify_clear&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old</a>&nbsp;&nbsp;&nbsp;
     <a href="#" onclick="clearSelected(); return false;" class="brackets">Clear selected</a>&nbsp;&nbsp;&nbsp;
     <a href="torrents.php?action=notify_catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
-<?php
-} ?>
+<?php } ?>
     <a href="user.php?action=notify" class="brackets">Edit filters</a>&nbsp;&nbsp;&nbsp;
 </div>
-<?php
-if ($TorrentCount > NOTIFICATIONS_PER_PAGE) { ?>
-<div class="linkbox">
-    <?=$Pages?>
-</div>
-<?php
-}
-if (empty($Results)) {
-?>
+<?php if (empty($Results)) { ?>
 <table class="layout border">
     <tr class="rowb">
         <td colspan="8" class="center">
@@ -198,31 +140,32 @@ if (empty($Results)) {
 </table>
 <?php
 } else {
+    echo $paginator->linkbox();
     $FilterGroups = [];
     foreach ($Results as $Result) {
         if (!isset($FilterGroups[$Result['FilterID']])) {
-            $FilterGroups[$Result['FilterID']] = [];
-            $FilterGroups[$Result['FilterID']]['FilterLabel'] = isset($Filters[$Result['FilterID']])
-                ? $Filters[$Result['FilterID']]['Label']
-                : false;
+            $FilterGroups[$Result['FilterID']] = [
+                'FilterLabel' => $Filters[$Result['FilterID']]['Label'] ?? false,
+            ];
         }
         $FilterGroups[$Result['FilterID']][] = $Result;
     }
 
+    $bookmark = new \Gazelle\Bookmark;
     foreach ($FilterGroups as $FilterID => $FilterResults) {
 ?>
 <div class="header">
     <h3>
 <?php
         if ($FilterResults['FilterLabel'] !== false) { ?>
-        Matches for <a href="torrents.php?action=notify&amp;filterid=<?=$FilterID.($Sneaky ? "&amp;userid=$UserID" : '')?>"><?=$FilterResults['FilterLabel']?></a>
+        Matches for <a href="torrents.php?action=notify&amp;filterid=<?=$FilterID . ($ownProfile ? "" : "&amp;userid=$UserID") ?>"><?=$FilterResults['FilterLabel']?></a>
 <?php   } else { ?>
         Matches for unknown filter[<?=$FilterID?>]
 <?php   } ?>
     </h3>
 </div>
 <div class="linkbox notify_filter_links">
-<?php   if (!$Sneaky) { ?>
+<?php   if ($ownProfile) { ?>
     <a href="#" onclick="clearSelected(<?=$FilterID?>); return false;" class="brackets">Clear selected in filter</a>
     <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old in filter</a>
     <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Mark all in filter as read</a>
@@ -233,7 +176,7 @@ if (empty($Results)) {
     <tr class="colhead">
         <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$FilterID?>', this, '.notify_box')" /></td>
         <td class="small cats_col"></td>
-        <td style="width: 100%;" class="nobr">Name<?=$TorrentCount <= NOTIFICATIONS_MAX_SLOWSORT ? ' / ' . $header->emit('year') : ''?></td>
+        <td style="width: 100%;" class="nobr">Name<?= ' / ' . $header->emit('year') ?></td>
         <td>Files</td>
         <td class="nobr"><?= $header->emit('time') ?></td>
         <td class="nobr"><?= $header->emit('size') ?></td>
@@ -243,7 +186,6 @@ if (empty($Results)) {
     </tr>
 <?php
         unset($FilterResults['FilterLabel']);
-        $bookmark = new \Gazelle\Bookmark;
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
             $GroupID = $Result['GroupID'];
@@ -258,6 +200,9 @@ if (empty($Results)) {
             if (!empty($GroupInfo['ExtendedArtists'])) {
                 $MatchingArtists = [];
                 foreach ($GroupInfo['ExtendedArtists'] as $GroupArtists) {
+                    if (is_null($GroupArtists)) {
+                        continue;
+                    }
                     foreach ($GroupArtists as $GroupArtist) {
                         if (isset($Filters[$FilterID]['Artists'][mb_strtolower($GroupArtist['name'], 'UTF-8')])) {
                             $MatchingArtists[] = $GroupArtist['name'];
@@ -308,7 +253,7 @@ if (empty($Results)) {
                     'key'    => $Viewer->announceKey(),
                     't'      => $TorrentInfo,
                     'extra'  => [
-                        !$Sneaky ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
+                        $ownProfile ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
                     ],
                 ]) ?>
                 <strong><?=$DisplayName?></strong>
@@ -346,10 +291,6 @@ if (empty($Results)) {
 </form>
 <?php
     }
+    echo $paginator->linkbox();
 }
-if ($Pages) { ?>
-    <div class="linkbox"><?=$Pages?></div>
-<?php } ?>
-</div>
-<?php
 View::show_footer();
