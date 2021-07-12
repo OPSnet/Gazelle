@@ -634,7 +634,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => MysqlAdapter::INT_TINY,
             ])
             ->addColumn('Date', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->create();
         $this->table('artists_similar', [
@@ -753,7 +753,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['Time'], [
                 'name' => 'Time',
@@ -779,7 +779,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('TimeAdded', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -863,7 +863,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -942,7 +942,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('AddedTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -1329,7 +1329,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Sequence', 'integer', [
                 'null' => false,
@@ -1591,7 +1591,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('LastAttempt', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Attempts', 'integer', [
                 'null' => false,
@@ -1599,7 +1599,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'signed' => false,
             ])
             ->addColumn('BannedUntil', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Bans', 'integer', [
                 'null' => false,
@@ -1931,7 +1931,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('StartTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('EndTime', 'datetime', [
                 'null' => true,
@@ -2082,7 +2082,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('TimeAdded', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -2137,7 +2137,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '12',
             ])
             ->addColumn('SentDate', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('SenderID', 'integer', [
                 'null' => false,
@@ -2688,7 +2688,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Hidden', 'integer', [
                 'null' => false,
@@ -2762,10 +2762,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'values' => ['New', 'InProgress', 'Resolved'],
             ])
             ->addColumn('ReportedTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('LastChangeTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('ModComment', 'text', [
                 'null' => true,
@@ -2973,10 +2973,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Started', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Ended', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => true,
@@ -3004,7 +3004,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => MysqlAdapter::INT_REGULAR,
             ])
             ->addColumn('TimeAdded', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->create();
         $this->table('torrents_recommended', [
@@ -3025,7 +3025,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['Time'], [
                 'name' => 'Time',
@@ -3088,7 +3088,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'identity' => 'enable',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Message', 'text', [
                 'null' => false,
@@ -3685,7 +3685,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('AddedOn', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -3887,7 +3887,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LastPostTime', 'datetime', [
                 'null' => true,
-                'default' => null
             ])
             ->addColumn('AutoLock', 'enum', [
                 'null' => true,
@@ -3952,7 +3951,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Checked', 'integer', [
                 'null' => false,
@@ -4027,7 +4026,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'identity' => 'enable',
             ])
             ->addColumn('Date', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Type', 'enum', [
                 'null' => true,
@@ -4120,10 +4119,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'values' => ['1', '0'],
             ])
             ->addColumn('SentDate', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('ReceivedDate', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('UnRead', 'enum', [
                 'null' => false,
@@ -4194,7 +4193,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('TimeAdded', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -4240,7 +4239,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Image', 'string', [
                 'null' => true,
@@ -4318,7 +4317,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('AddedOn', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -4373,7 +4372,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('AddedTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -4453,7 +4452,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Featured', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Closed', 'enum', [
                 'null' => false,
@@ -4709,7 +4708,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'signed' => false,
             ])
             ->addColumn('TimeFilled', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Visible', 'binary', [
                 'null' => false,
@@ -4959,7 +4958,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Expires', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Reason', 'string', [
                 'null' => false,
@@ -5010,7 +5009,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('ThreadID', 'integer', [
                 'null' => true,
@@ -5116,7 +5115,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Image', 'string', [
                 'null' => true,
@@ -5228,7 +5227,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -5538,10 +5537,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('ResetExpires', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('JoinDate', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Inviter', 'integer', [
                 'null' => true,
@@ -5621,7 +5620,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'values' => ['0', '1'],
             ])
             ->addColumn('RatioWatchEnds', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('RatioWatchDownload', 'biginteger', [
                 'null' => false,
@@ -5635,7 +5634,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => MysqlAdapter::INT_TINY,
             ])
             ->addColumn('BanDate', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('BanReason', 'enum', [
                 'null' => false,
@@ -5807,7 +5806,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('RevisionID', 'integer', [
                 'null' => true,
@@ -6050,10 +6049,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('Started', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Ended', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->create();
         $this->table('users_main', [
@@ -6103,10 +6102,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('LastLogin', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('LastAccess', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('IP', 'string', [
                 'null' => false,
@@ -6430,7 +6429,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('LastPostTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('LastPostAuthorID', 'integer', [
                 'null' => false,
@@ -6447,7 +6446,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => MysqlAdapter::INT_TINY,
             ])
             ->addColumn('CreatedTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['AuthorID'], [
                 'name' => 'AuthorID',
@@ -6625,7 +6624,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('TimeAdded', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -6947,7 +6946,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '6',
             ])
             ->addColumn('last_action', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('FreeTorrent', 'enum', [
                 'null' => false,
@@ -6962,7 +6961,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'values' => ['0', '1', '2', '3', '4', '5', '6', '7'],
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Description', 'text', [
                 'null' => true,
@@ -6983,7 +6982,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => MysqlAdapter::INT_BIG,
             ])
             ->addColumn('LastReseedRequest', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('TranscodedFrom', 'integer', [
                 'null' => false,
@@ -7311,7 +7310,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('TimeAdded', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -7414,10 +7413,10 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'values' => ['New', 'InProgress', 'Resolved'],
             ])
             ->addColumn('ResolvedTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('ReportedTime', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addColumn('Reason', 'text', [
                 'null' => false,
@@ -7918,7 +7917,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'signed' => false,
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
+                'null' => true,
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
