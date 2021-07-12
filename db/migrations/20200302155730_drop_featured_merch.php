@@ -25,10 +25,10 @@ class DropFeaturedMerch extends AbstractMigration
                 'limit' => 255,
             ])
             ->addColumn('Started', 'datetime', [
-                'default' => '0000-00-00 00:00:00',
+                'null' => true
             ])
             ->addColumn('Ended', 'datetime', [
-                'default' => '0000-00-00 00:00:00',
+                'null' => true
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => true,

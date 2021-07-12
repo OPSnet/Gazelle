@@ -56,7 +56,7 @@ class DeleteTorrent extends AbstractMigration
              ->addColumn('Size', 'biginteger', ['length' => 12])
              ->addColumn('FreeTorrent', 'enum', ['values' => ['0','1','2']])
              ->addColumn('FreeLeechType', 'enum', ['values' => ['0','1','2','3','4','5','6','7']])
-             ->addColumn('Time', 'timestamp')
+             ->addColumn('Time', 'timestamp', ['null' => true])
              ->addColumn('Description', 'text', ['null' => true])
              ->addColumn('LastReseedRequest', 'timestamp', ['null' => true])
              ->addColumn('TranscodedFrom', 'integer', ['length' => 10])
@@ -78,43 +78,43 @@ class DeleteTorrent extends AbstractMigration
         $this->table('deleted_torrents_bad_files', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 11])
              ->addColumn('UserID', 'integer', ['length' => 11])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
 
         $this->table('deleted_torrents_bad_folders', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 11])
              ->addColumn('UserID', 'integer', ['length' => 11])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
 
         $this->table('deleted_torrents_bad_tags', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 11])
              ->addColumn('UserID', 'integer', ['length' => 11])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
 
         $this->table('deleted_torrents_cassette_approved', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 10])
              ->addColumn('UserID', 'integer', ['length' => 10])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
 
         $this->table('deleted_torrents_lossymaster_approved', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 10])
              ->addColumn('UserID', 'integer', ['length' => 10])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
 
         $this->table('deleted_torrents_lossyweb_approved', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 10])
              ->addColumn('UserID', 'integer', ['length' => 10])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
 
         $this->table('deleted_torrents_missing_lineage', ['id' => false, 'primary_key' => 'TorrentID'])
              ->addColumn('TorrentID', 'integer', ['length' => 11])
              ->addColumn('UserID', 'integer', ['length' => 11])
-             ->addColumn('TimeAdded', 'timestamp')
+             ->addColumn('TimeAdded', 'timestamp', ['null' => true])
              ->create();
     }
 

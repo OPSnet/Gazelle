@@ -31,8 +31,8 @@ class BonusPointPool extends AbstractMigration
         $this->table('bonus_pool', ['id' => false, 'primary_key' => 'ID'])
             ->addColumn('ID', 'integer', ['limit' => 6, 'signed' => false, 'identity' => true])
             ->addColumn('Name', 'string', ['limit' => 80])
-            ->addColumn('SinceDate', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
-            ->addColumn('UntilDate', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
+            ->addColumn('SinceDate', 'timestamp', ['null' => true])
+            ->addColumn('UntilDate', 'timestamp', ['null' => true])
             ->addColumn('Total', 'float', ['default' => 0])
             ->create();
 
