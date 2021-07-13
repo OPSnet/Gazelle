@@ -1,6 +1,6 @@
 <?php
 
-if (!$Viewer->disableForums()) {
+if ($Viewer->disableForums()) {
     error(403);
 }
 $userMan = new Gazelle\Manager\User;
@@ -10,8 +10,8 @@ if (is_null($user)) {
 }
 
 $ownProfile = $user->id() === $Viewer->id();
-$showUnread = ($ownProfile && (!isset($_GET['showunread']) || !!$_GET['showunread']));
-$showGrouped = ($ownProfile && (!isset($_GET['group']) || !!$_GET['group']));
+$showUnread = $ownProfile && (bool)($_GET['showunread'] ?? false);
+$showGrouped = $ownProfile && (bool)($_GET['group'] ?? false);
 
 if ($showGrouped) {
     $title = 'Grouped '.($showUnread ? 'unread ' : '')."post history";
