@@ -2,16 +2,12 @@
 
 $userMan = new Gazelle\Manager\User;
 
-$PerPage = $Viewer->postsPerPage();
-[$Page, $Limit] = Format::page_limit($PerPage);
-
-View::show_header('Subscriptions','subscriptions,comments,bbcode');
-
 $showAvatars   = $Viewer->showAvatars();
 $showCollapsed = (bool)($_GET['collapse'] ?? true);
 $showUnread    = (bool)($_GET['showunread'] ?? true);
 
-$NumResults = $DB->scalar("
+$paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
+$total = $DB->scalar("
     SELECT sum(total)
     FROM (
         SELECT count(*) AS total
@@ -43,6 +39,7 @@ $NumResults = $DB->scalar("
     ) TOTAL
     ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id()
 );
+$paginator->setTotal($total);
 
 // The monster sql query:
 /*
@@ -120,12 +117,10 @@ UNION ALL
         AND s.UserID = ?
     GROUP BY t.ID
     ORDER BY LastPostTime DESC
-    LIMIT $Limit
-    ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id()
+    LIMIT ? OFFSET ?
+    ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id(), $paginator->limit(), $paginator->offset()
 );
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
-
-$Debug->log_var($Results, 'Results');
 
 $TorrentGroups = $Requests = [];
 foreach ($Results as $Result) {
@@ -138,13 +133,13 @@ foreach ($Results as $Result) {
 
 $TorrentGroups = Torrents::get_groups($TorrentGroups, true, true, false);
 $Requests = Requests::get_requests($Requests);
-$Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
 
+View::show_header('Subscriptions','subscriptions,comments,bbcode');
 ?>
 <div class="thin">
     <div class="header">
         <h2><a href="user.php?id=<?= $Viewer->id() ?>"><?= $Viewer->username()
-            ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
+            ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts' . ($paginator->total() ? ' (' . $paginator->total() . ' new)' : '') : ''?></h2>
         <div class="linkbox">
 <?php if (!$showUnread) { ?>
             <br /><br />
@@ -154,7 +149,7 @@ $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
             <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>&nbsp;
 <?php
 }
-if ($NumResults) {
+if ($paginator->total()) {
 ?>
             <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$showCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
 <?php } ?>
@@ -163,17 +158,12 @@ if ($NumResults) {
             <a href="userhistory.php?action=catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>
         </div>
     </div>
-<?php if (!$NumResults) { ?>
+<?php if (!$paginator->total()) { ?>
     <div class="center">
         No subscriptions<?=$showUnread ? ' with unread posts' : ''?>
     </div>
-<?php } else { ?>
-    <div class="linkbox">
-<?php
-    echo $Pages;
-?>
-    </div>
-<?php
+<?php } else {
+    echo $paginator->linkbox();
     foreach ($Results as $Result) {
         switch ($Result['Page']) {
             case 'artist':
@@ -218,7 +208,8 @@ if ($NumResults) {
                         '" class="tooltip" title="' . display_str($Result['Name']) . '">' .
                         display_str(shortenString($Result['Name'], 75)) .
                     '</a>';
-                $JumpLink = 'forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
+                $JumpLink = "forums.php?action=viewthread&amp;threadid={$Result['PageID']}"
+                    . ($Result['PostID'] ? "&amp;postid={$Result['PostID']}#post{$Result['PostID']}" : '');
                 break;
             default:
                 error(0);
@@ -271,12 +262,10 @@ if ($NumResults) {
 <?php   } ?>
     </table>
 <?php
-    } ?>
-    <div class="linkbox">
-<?=$Pages?>
-    </div>
-<?php
-}?>
+    }
+    echo $paginator->linkbox();
+}
+?>
 </div>
 <?php
 View::show_footer();
