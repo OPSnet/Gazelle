@@ -5,6 +5,7 @@ namespace Gazelle\Json;
 class Inbox extends \Gazelle\Json {
 
     protected $dateColumn;
+    protected $page = 1;
     protected $unreadFirst = false;
     protected $userId;
 
@@ -12,17 +13,8 @@ class Inbox extends \Gazelle\Json {
     protected $args = [];
     protected $join = [];
 
-    public function __construct() {
-        parent::__construct();
-    }
-
     public function setViewerId(int $userId) {
         $this->userId = $userId;
-        return $this;
-    }
-
-    public function setUnreadFirst(bool $unreadFirst) {
-        $this->unreadFirst = $unreadFirst;
         return $this;
     }
 
@@ -40,6 +32,11 @@ class Inbox extends \Gazelle\Json {
                 $this->failure('bad folder');
                 break;
         }
+        return $this;
+    }
+
+    public function setPage(int $page) {
+        $this->page = $page;
         return $this;
     }
 
@@ -68,6 +65,11 @@ class Inbox extends \Gazelle\Json {
         }
     }
 
+    public function setUnreadFirst(bool $unreadFirst) {
+        $this->unreadFirst = $unreadFirst;
+        return $this;
+    }
+
     public function payload(): ?array {
         $total = $this->db->scalar("
             SELECT count(DISTINCT c.ID)
@@ -78,9 +80,9 @@ class Inbox extends \Gazelle\Json {
             WHERE " . implode(' AND ', $this->cond) ."
             ", $this->userId, $this->userId, ...$this->args
         );
-
-        [$page, $limit] = \Format::page_limit(MESSAGES_PER_PAGE);
-        $page = (int)$page;
+        $paginator = new \Gazelle\Util\Paginator(MESSAGES_PER_PAGE, $this->page);
+        $paginator->setTotal($total);
+        array_push($this->args, $paginator->limit(), $paginator->offset());
 
         $orderBy = $this->unreadFirst ? "cu.Unread = '1' DESC, action_date ASC" : 'action_date ASC';
         $this->db->prepared_query("
@@ -98,7 +100,7 @@ class Inbox extends \Gazelle\Json {
             WHERE " . implode(' AND ', $this->cond) ."
             GROUP BY c.ID
             ORDER BY cu.Sticky, {$orderBy}
-            LIMIT {$limit}
+            LIMIT ? OFFSET ?
             ", $this->userId, $this->userId, ...$this->args
         );
 
@@ -135,8 +137,8 @@ class Inbox extends \Gazelle\Json {
         unset($user);
 
         return [
-            'currentPage' => $page,
-            'pages'       => (int)ceil($total / MESSAGES_PER_PAGE),
+            'currentPage' => $paginator->page(),
+            'pages'       => (int)ceil($total / $paginator->limit()),
             'messages'    => $messages,
         ];
     }
