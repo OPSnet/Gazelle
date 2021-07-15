@@ -1,5 +1,5 @@
 <?php
-if (!check_perms('admin_periodic_task_view')) {
+if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
 
@@ -13,9 +13,6 @@ if (!$scheduler->getTask($id)) {
     error(404);
 }
 
-define('TASKS_PER_PAGE', 100);
-list($page, $limit, $offset) = \Gazelle\DB::pageLimit(TASKS_PER_PAGE);
-
 $header = new \Gazelle\Util\SortableTableHeader('launchtime', [
     'id'         => ['defaultSort' => 'desc'],
     'launchtime' => ['defaultSort' => 'desc',  'text' => 'Launch Time'],
@@ -25,24 +22,31 @@ $header = new \Gazelle\Util\SortableTableHeader('launchtime', [
     'errors'     => ['defaultSort' => 'desc',  'text' => 'Errors']
 ]);
 
-$task = $scheduler->getTaskHistory($id, $limit, $offset, $header->getSortKey(), $header->getOrderDir());
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($scheduler->getTotal($id));
+
+$task = $scheduler->getTaskHistory($id, $paginator->limit(), $paginator->offset(), $header->getSortKey(), $header->getOrderDir());
 $stats = $scheduler->getTaskRuntimeStats($id);
 $canEdit = check_perms('admin_periodic_task_manage');
 
 View::show_header('Periodic Task Details');
 ?>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts_custom.js"></script>
 <div class="header">
 <h2>Periodic Task Details - <?=$task->name?></h2>
 </div>
-<?php include(__DIR__ . '/periodic_links.php');
-if ($task->count > 0) { ?>
+<?php require_once('periodic_links.php');
+if (!$task->count) { ?>
+<div class="center">
+    <h2>No history found</h2>
+</div>
+<?php } else { ?>
 <br />
 <div class="box pad">
     <div id="daily-totals" style="width: 100%; height: 350px;"></div>
 </div>
-<div class="linkbox">
-    <?=Format::get_pages($page, $task->count, TASKS_PER_PAGE, 11)?>
-</div>
+<?= $paginator->linkbox() ?>
 <table width="100%" id="tasks">
     <tr class="colhead">
         <td><?=$header->emit('launchtime')?> <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
@@ -94,9 +98,7 @@ if ($task->count > 0) { ?>
     </tr>
 <?php } ?>
 </table>
-
-<script src="<?=STATIC_SERVER?>/functions/highcharts.js"></script>
-<script src="<?=STATIC_SERVER?>/functions/highcharts_custom.js"></script>
+<?= $paginator->linkbox() ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -127,12 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<?php
-} else {
-?>
-<div class="center">
-    <h2>No history found</h2>
-</div>
 <?php
 }
 View::show_footer();

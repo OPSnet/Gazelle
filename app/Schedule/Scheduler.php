@@ -127,6 +127,13 @@ class Scheduler extends \Gazelle\Base {
         return $tasks;
     }
 
+    public function getTotal(int $id): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM periodic_task_history WHERE periodic_task_id = ?
+            ", $id
+        );
+    }
+
     public function getTaskHistory(int $id, int $limit, int $offset, string $sort, string $direction) {
         $sortMap = [
             'id'         => 'periodic_task_history_id',
@@ -141,12 +148,6 @@ class Scheduler extends \Gazelle\Base {
             return null;
         }
         $sort = $sortMap[$sort];
-
-        $rowCount = $this->db->scalar('
-            SELECT count(*)
-            FROM periodic_task_history
-            WHERE periodic_task_id = ?
-            ', $id);
 
         $this->db->prepared_query("
             SELECT periodic_task_history_id, launch_time, status, num_errors, num_items, duration_ms
@@ -173,7 +174,7 @@ class Scheduler extends \Gazelle\Base {
             }
         }
 
-        $task = new TaskHistory($this->getTask($id)['name'], $rowCount);
+        $task = new TaskHistory($this->getTask($id)['name'], $this->getTotal($id));
         foreach ($items as $item) {
             list($historyId, $launchTime, $status, $numErrors, $numItems, $duration) = array_values($item);
             $taskEvents = $historyEvents[$historyId] ?? [];
