@@ -14,8 +14,6 @@
 .npmrc
 .pki/
 .profile
-.vagrant/machines/
-.vagrant/rgloader/
 .wine/
 __MACOSX/
 
