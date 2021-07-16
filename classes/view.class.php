@@ -50,9 +50,10 @@ class View {
             return;
         }
         self::$footerSeen = true;
-        global $Debug, $LoggedUser, $SessionID, $Time, $UserSessions;
-        if (!isset($LoggedUser['ID']) || (isset($Options['recover']) && $Options['recover'] === true)) {
-            require_once('../design/publicfooter.php');
+        global $Viewer;
+        if (!isset($Viewer) || ($Options['recover'] ?? false) === true) {
+            global $Twig;
+            echo $Twig->render('public-footer.twig');
         } else {
             require_once('../design/privatefooter.php');
         }
