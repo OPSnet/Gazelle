@@ -1,5 +1,3 @@
-Vagrantfile
-.vagrant/
 html/
 .docker/data
 .docker/mysql

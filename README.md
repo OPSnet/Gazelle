@@ -25,13 +25,8 @@ depedencies through `pip`:
 * xld-logchecker
 
 ## Gazelle Development
-Gazelle can be run through Docker (container) or Vagrant (Virtual
-Machine). Historically, Vagrant was used, but recently Docker support
-was added and is the preferred method of development.
-
-### Docker (Recommended)
-Install Docker for your preferred system and run the following
-command:
+Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
+for more information on getting Docker set up locally.
 
 `docker-compose up`
 
@@ -40,6 +35,15 @@ Buster. A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
 
+### Ports
+The following ports are forwarded:
+* 80 -> 8080 (web)
+* 3306 -> 36000 (mysql)
+* 34000 -> 34000 (ocelot)
+
+You can access the site by going to `http://localhost:8080`
+
+## Going further
 You may want to install additional packages:
 * `apt update`
 * `apt install less procps vim`
@@ -88,26 +92,6 @@ In order to have Docker run the container using the production mode commands
 for both Composer and NPM, run this when powering it up:
 
 `ENV=prod docker-compose up`
-
-### Vagrant (Legacy)
-This repository comes pre-setup to be run through
-[Vagrant](https://www.vagrantup.com/) for ease of development and
-without having to modify your local machine. You can look through
-the docs for how it works, but to start, you just need to download
-Vagrant and VirtualBox (and it's recommended to get the
-[vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest)
-plugin) and then simply run: ``` vagrant up ```
-
-This will build a Debian Jessie on a Virtual Machine and serve this
-repository through `/var/www` on the machine.
-
-### Forwarded Ports
-Both Docker and Vagrant will forward the following ports:
-* 80 -> 8080 (web)
-* 3306 -> 36000 (mysql)
-* 34000 -> 34000 (ocelot)
-
-You can access the site by going to `http://localhost:8080`
 
 ## Contact and Discussion
 Feel free to join #develop on irc.orpheus.network to discuss any

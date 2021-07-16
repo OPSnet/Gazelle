@@ -61,7 +61,7 @@ $b->start();
 /*
  * Sample usage:
  *
-    vagrant@contrib-jessie:/var/www$ ./boris
+    ./boris
     [1] ops> $db->query('select count(*) from torrents');
     // object(mysqli_result)(
     //   'current_field' => NULL,
