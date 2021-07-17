@@ -4,11 +4,6 @@ class View {
     protected static $footerSeen = false;
 
     /**
-     * @var string Path relative to where (P)HTML templates reside
-     */
-    const IncludePath = __DIR__.'/../design/views/';
-
-    /**
      * This function is to include the header file on a page.
      *
      * @param $PageTitle the title of the page
@@ -29,9 +24,12 @@ class View {
             empty($_REQUEST['type']) ? false : $_REQUEST['type'] // Type
         ];
 
-        global $LoggedUser;
-        if (!isset($LoggedUser['ID']) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
-            require_once('../design/publicheader.php');
+        global $Viewer;
+        if (!isset($Viewer) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
+            global $PageTitle, $Twig;
+            echo $Twig->render('index/public-header.twig', [
+                'page_title' => $PageTitle,
+            ]);
         } else {
             require_once('../design/privateheader.php');
         }
@@ -53,7 +51,7 @@ class View {
         global $Viewer;
         if (!isset($Viewer) || ($Options['recover'] ?? false) === true) {
             global $Twig;
-            echo $Twig->render('public-footer.twig');
+            echo $Twig->render('index/public-footer.twig');
         } else {
             require_once('../design/privatefooter.php');
         }

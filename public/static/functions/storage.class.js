@@ -26,19 +26,6 @@ var cookie = {
     }
 };
 
-/*
-var database = {
-    link: false,
-    database: 'what',
-    connect: function (db_name) {
-        if (db_name === undefined) {
-            db_name = this.database;
-        }
-        window.openDatabase(db_name);
-    }
-};
-*/
-
 var local = {
     get: function (key_name) {
         return localStorage.getItem(key_name);
