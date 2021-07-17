@@ -130,6 +130,13 @@ class Twig {
             );
         }));
 
+        $twig->addFunction(new \Twig\TwigFunction('mtime', function($filename) {
+            return new \Twig\Markup(
+                filemtime(SERVER_ROOT . '/public/static/functions/' . $filename),
+                'UTF-8'
+            );
+        }));
+
         $twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
             return new \Twig\Markup(
                 ($default
