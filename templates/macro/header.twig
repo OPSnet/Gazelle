@@ -1,0 +1,7 @@
+{%- macro css(filename) -%}
+<link type="text/css" rel="stylesheet" href="{{ constant('STATIC_SERVER') }}/styles/public/{{ filename }}?v={{ mtime(filename) }}" />
+{%- endmacro -%}
+
+{%- macro script(filename) -%}
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/{{ filename }}?v={{ mtime(filename) }} "></script>
+{%- endmacro -%}
