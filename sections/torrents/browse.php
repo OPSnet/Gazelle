@@ -122,7 +122,7 @@ if (Format::form('remastertitle', true) == ''
 
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 
-View::show_header('Browse Torrents', 'browse');
+View::show_header('Browse Torrents', ['js' => 'browse']);
 ?>
 <div class="thin widethin">
 <div class="header">

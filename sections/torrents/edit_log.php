@@ -65,8 +65,7 @@ $AdjustmentDetails = ['tracks' => ['crc_mismatches' => 0, 'suspicious_positions'
 if (!empty($Log['AdjustmentDetails'])) {
     $AdjustmentDetails = unserialize($Log['AdjustmentDetails']);
 }
-View::show_header("Edit Log", 'edit_log');
-
+View::show_header("Edit Log", ['js' => 'edit_log']);
 ?>
 <div class="thin">
     <h2 class="center">Edit Log</h2>

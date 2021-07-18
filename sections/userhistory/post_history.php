@@ -29,7 +29,7 @@ $forumSearch = (new Gazelle\Search\Forum($Viewer))
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal($forumSearch->postHistoryTotal());
 
-View::show_header($user->username() . " &rsaquo; $title", 'subscriptions,comments,bbcode');
+View::show_header($user->username() . " &rsaquo; $title", ['js' => 'subscriptions,comments,bbcode']);
 
 echo $Twig->render('user/post-history.twig', [
     'avatar'        => $userMan->avatarMarkup($Viewer, $user),

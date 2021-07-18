@@ -15,7 +15,7 @@ if (isset($_POST['auth'])) {
     }
 }
 
-View::show_header('Apply', 'apply');
+View::show_header('Apply', ['js' => 'apply']);
 echo $Twig->render('applicant/apply.twig', [
     'auth'         => $Viewer->auth(),
     'body'         => new Gazelle\Util\Textarea('body', $body ?? ''),

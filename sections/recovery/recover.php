@@ -3,7 +3,7 @@ if (isset($Viewer)) {
     header("Location: index.php");
     exit;
 }
-View::show_header();
+View::show_header('Recovery');
 ?>
 <style>
 .container{margin:30px auto 140px;width:70%;}

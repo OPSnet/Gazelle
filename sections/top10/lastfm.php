@@ -19,7 +19,7 @@ switch ($Category) {
         break;
 }
 
-View::show_header("Last.fm", "jquery.imagesloaded,jquery.wookmark,top10", "tiles");
+View::show_header('Last.fm', ['js' => 'jquery.imagesloaded,jquery.wookmark,top10', 'css' => 'tiles']);
 ?>
 <div class="thin">
     <div class="header">

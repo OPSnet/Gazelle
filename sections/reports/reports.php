@@ -62,7 +62,7 @@ $DB->prepared_query("
 );
 $Reports = $DB->get_query_id();
 
-View::show_header('Reports', 'bbcode,reports');
+View::show_header('Reports', ['js' => 'bbcode,reports']);
 ?>
 <div class="thin">
     <div class="header">

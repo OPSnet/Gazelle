@@ -70,10 +70,7 @@ if ($UnRead == '1') {
     if ($DB->affected_rows() > 0) {
         $Cache->decrement("inbox_new_$UserID");
     }
-
 }
-
-View::show_header("View conversation $Subject", 'comments,inbox,bbcode,jquery.validate,form_validate');
 
 // Get messages
 $DB->prepared_query("
@@ -88,6 +85,8 @@ $Section = (isset($_GET['section']) && in_array($_GET['section'], array_keys(Inb
     ? $_GET['section']
     : key(Inbox::SECTIONS);
 $Sort = (isset($_GET['sort']) && $_GET['sort'] == 'unread') ? Inbox::UNREAD_FIRST : Inbox::NEWEST_FIRST;
+
+View::show_header("View conversation $Subject", ['js' => 'comments,inbox,bbcode,jquery.validate,form_validate']);
 ?>
 <div class="thin">
     <h2><?=$Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : '')?></h2>

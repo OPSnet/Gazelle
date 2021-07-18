@@ -1,10 +1,13 @@
 </div>
-<?= Gazelle\Util\Textarea::activate() ?>
+<?php
+echo Gazelle\Util\Textarea::activate();
+global $Debug;
+?>
 <div id="footer">
 <?php if (DEBUG_MODE || check_perms('site_debug')) { ?>
     <div id="site_debug">
 <?php
-    global $Cache, $DB, $Debug, $Twig;
+    global $Cache, $DB, $Twig;
     echo $Twig->render('debug/performance.twig', ['list' => $Debug->get_perf()]);
     echo $Twig->render('debug/flag.twig', ['list' => $Debug->get_flags()]);
     echo $Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);

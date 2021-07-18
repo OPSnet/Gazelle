@@ -6,7 +6,7 @@ $DB->prepared_query("
     ORDER BY Sort");
 $groups = $DB->to_array(false, MYSQLI_ASSOC);
 
-View::show_header('Manage Permissions', 'validate');
+View::show_header('Manage Permissions', ['js' => 'validate']);
 
 $Val = new Gazelle\Util\Validator;
 echo $Val->generateJS('permissionsform');

@@ -11,7 +11,7 @@ if (!check_perms('users_mod')) {
 $blogMan = new Gazelle\Manager\StaffBlog;
 $blogMan->visit($Viewer->id());
 
-View::show_header('Staff Blog','bbcode');
+View::show_header('Staff Blog', ['js' => 'bbcode']);
 
 if (check_perms('admin_manage_blog')) {
     if (!empty($_REQUEST['action'])) {

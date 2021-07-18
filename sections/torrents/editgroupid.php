@@ -46,7 +46,7 @@ if (empty($_POST['confirm'])) {
 
     $Artists = Artists::get_artists([$OldGroupID, $GroupID]);
 
-    View::show_header();
+    View::show_header('Edit group ' . display_str($Name));
 ?>
     <div class="thin">
         <div class="header">

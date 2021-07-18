@@ -39,7 +39,7 @@ if (!$threadId) {
     $poll = $forum->pollDataExtended($threadId, $Viewer->id());
 }
 
-View::show_header('News', 'bbcode,news_ajax');
+View::show_header('News', ['js' => 'bbcode,news_ajax']);
 
 echo $Twig->render('index/private-sidebar.twig', [
     'auth'              => $Viewer->auth(),

@@ -13,7 +13,7 @@ if (empty($Month) || empty($Year)) {
 }
 
 $Events = Calendar::get_events($Month, $Year);
-View::show_header("Calendar", "jquery.validate,form_validate,calendar", "calendar");
+View::show_header('Calendar', ['js' => 'jquery.validate,form_validate,calendar', 'css' => 'calendar']);
 
 CalendarView::render_title($Month, $Year);
 ?>

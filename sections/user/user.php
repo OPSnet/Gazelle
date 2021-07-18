@@ -91,7 +91,7 @@ if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_per
     $recovered = null;
 }
 
-View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
+View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
     'auth'    => $Viewer->auth(),
     'freeleech' => [
@@ -105,9 +105,7 @@ echo $Twig->render('user/header.twig', [
     'userMan'      => $userMan,
     'viewer'       => $Viewer,
 ]);
-?>
 
-<?php
 if ($OwnProfile || check_perms('users_mod')) {
     $nextClass = $User->nextClass();
     if ($nextClass) {

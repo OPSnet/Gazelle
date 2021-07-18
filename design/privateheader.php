@@ -66,8 +66,8 @@ $Scripts = [
     'autocomplete',
     'jquery.countdown.min'
 ];
-if (!empty($JSIncludes)) {
-    $Scripts = array_merge($Scripts, explode(',', $JSIncludes));
+if (!empty($option['js'])) {
+    $Scripts = array_merge($Scripts, explode(',', $option['js']));
 }
 
 if (DEBUG_MODE || check_perms('site_debug')) {
@@ -107,7 +107,7 @@ if (!empty($LoggedUser['UseOpenDyslexic'])) {
         STATIC_SERVER?>/styles/opendyslexic/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/opendyslexic/style.css')?>" />
 <?php
 }
-$ExtraCSS = explode(',', $CSSIncludes);
+$ExtraCSS = explode(',', $option['css'] ?? '');
 foreach ($ExtraCSS as $CSS) {
     if (trim($CSS) == '') {
         continue;

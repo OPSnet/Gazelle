@@ -15,7 +15,7 @@ $DB->prepared_query("
     ORDER BY d.Sequence
 ");
 
-View::show_header($Title, 'jquery-ui,dnu_list');
+View::show_header($Title, ['js' => 'jquery-ui,dnu_list']);
 ?>
     <div class="header">
         <h2><?=($Title)?></h2>

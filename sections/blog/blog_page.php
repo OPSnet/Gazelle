@@ -1,6 +1,6 @@
 <?php
 
-View::show_header('Blog','bbcode');
+View::show_header('Blog', ['js' => 'bbcode']);
 
 $action = !empty($_GET['action']) && $_GET['action'] === 'editblog' ? 'Edit' : 'Create';
 if (check_perms('admin_manage_blog')) {
