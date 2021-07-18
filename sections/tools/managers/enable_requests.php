@@ -116,7 +116,7 @@ $QueryID = $DB->prepared_query("
     ", ...$args
 );
 
-View::show_header("Enable Requests", 'enable_requests');
+View::show_header("Enable Requests", ['js' => 'enable_requests']);
 ?>
 <div class="header">
     <h2>Auto-Enable Requests</h2>

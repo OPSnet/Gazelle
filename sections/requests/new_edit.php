@@ -133,12 +133,12 @@ if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
 
 $tagMan = new Gazelle\Manager\Tag;
 $GenreTags = $tagMan->genreList();
-
-View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'requests,form_validate');
+$title = $NewRequest ? 'Create a request' : 'Edit a request';
+View::show_header($title, ['js' => 'requests,form_validate']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=($NewRequest ? 'Create a request' : 'Edit a request')?></h2>
+        <h2><?= $title ?></h2>
     </div>
 
     <div class="box pad">

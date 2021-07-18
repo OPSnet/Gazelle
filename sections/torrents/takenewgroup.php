@@ -21,7 +21,7 @@ if (!$OldGroupID || !$TorrentID || !$Year || empty($Title) || empty($ArtistName)
 
 // double check
 if (empty($_POST['confirm'])) {
-    View::show_header();
+    View::show_header('Split new group');
     echo $Twig->render('torrent/confirm-split.twig', [
         'artist'     => $_POST['artist'],
         'auth'       => $Viewer->auth(),

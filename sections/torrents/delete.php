@@ -40,7 +40,7 @@ if ($Snatches >= 5 && !check_perms('torrents_delete')) { // Should this be torre
     error('You can no longer delete this torrent as it has been snatched by 5 or more users. If you believe there is a problem with this torrent, please report it instead.');
 }
 
-View::show_header('Delete torrent', 'reportsv2');
+View::show_header('Delete torrent', ['js' => 'reportsv2']);
 ?>
 <div class="thin">
     <div class="box box2" style="width: 600px; margin-left: auto; margin-right: auto;">

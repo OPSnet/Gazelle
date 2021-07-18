@@ -129,7 +129,7 @@ $DB->prepared_query("
 );
 $Collages = $DB->to_array();
 
-View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', 'collage');
+View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', ['js' => 'collage']);
 ?>
 <div class="thin">
     <div class="header">

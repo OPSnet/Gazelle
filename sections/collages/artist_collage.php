@@ -34,7 +34,7 @@ for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
     $CollagePages[] = $CollagePage;
 }
 
-View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
+View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
 ?>
 <div class="thin">
 <?= $Twig->render('collage/header.twig', [

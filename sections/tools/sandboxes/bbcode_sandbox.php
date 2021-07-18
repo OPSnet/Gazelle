@@ -3,7 +3,7 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 $Title = "BBCode Sandbox";
-View::show_header($Title, 'bbcode_sandbox');
+View::show_header($Title, ['js' => 'bbcode_sandbox']);
 ?>
 <div class="header">
     <h2><?=$Title?></h2>

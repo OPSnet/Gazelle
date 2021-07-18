@@ -259,7 +259,7 @@ $Links = implode(' ', $ActionLinks)
         : ''
     );
 
-View::show_header(sprintf($Title, $Username), 'bbcode,comments');
+View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
 ?>
 <div class="thin">
     <div class="header">

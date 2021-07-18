@@ -9,7 +9,7 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-View::show_header('Reports V2', 'reportsv2');
+View::show_header('Reports V2', ['js' => 'reportsv2']);
 
 //Grab owner's ID, just for examples
 [$ownerId, $owner] = $DB->row("

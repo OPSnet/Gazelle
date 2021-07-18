@@ -110,11 +110,7 @@ if (!empty($GroupIDs)) {
         $Cache->delete_value('user_notify_upload_'.$Viewer->id());
     }
 }
-if ($ownProfile) {
-    View::show_header('My notifications', 'notifications');
-} else {
-    View::show_header($user->username() . '\'s notifications', 'notifications');
-}
+View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notifications', ['js' => 'notifications']);
 ?>
 <div class="thin widethin">
 <div class="header">

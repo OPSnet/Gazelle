@@ -28,7 +28,7 @@ $DB->prepared_query("
 );
 $Artists = $DB->to_array('ArtistID', MYSQLI_ASSOC);
 
-View::show_header("Manage artist collage " . $collage->name(), 'jquery-ui,jquery.tablesorter,sort');
+View::show_header("Manage artist collage " . $collage->name(), ['js' => 'jquery-ui,jquery.tablesorter,sort']);
 ?>
 
 <div class="thin">

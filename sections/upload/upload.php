@@ -10,7 +10,7 @@
 //**********************************************************************//
 
 ini_set('max_file_uploads', '100');
-View::show_header('Upload', 'upload,validate_upload,valid_tags,musicbrainz,bbcode');
+View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbrainz,bbcode']);
 
 if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
     $DB->prepared_query("

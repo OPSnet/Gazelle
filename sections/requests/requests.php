@@ -316,8 +316,7 @@ if ($NumResults > 0) {
 }
 
 $CurrentURL = Format::get_url(['order', 'sort', 'page']);
-View::show_header($Title, 'requests');
-
+View::show_header($Title, ['js' => 'requests']);
 ?>
 <div class="thin">
     <div class="header">

@@ -73,7 +73,7 @@ if (($Viewer->id() != $Properties['UserID'] && !$Viewer->permitted('torrents_edi
     error(403);
 }
 
-View::show_header('Edit torrent', 'upload,torrent');
+View::show_header('Edit torrent', ['js' => 'upload,torrent']);
 
 if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['CategoryID'] == 1)) {
     if ($Properties['CategoryID'] == 1) {

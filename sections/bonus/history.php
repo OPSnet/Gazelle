@@ -1,7 +1,5 @@
 <?php
 
-View::show_header('Bonus Points Purchase History', 'bonus');
-
 if (isset($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
         error(403);
@@ -37,6 +35,7 @@ if ($poolTotal && $summary['total']) {
     elseif ($total > 10000000) { $adj = 'exceptionally '; }
 }
 
+View::show_header('Bonus Points Purchase History', ['js' => 'bonus']);
 echo $Twig->render('user/bonus-history.twig', [
     'history'      => $Bonus->userHistory($userId, $paginator->limit(), $paginator->offset()),
     'item'         => $Bonus->purchaseHistoryByUser($userId),

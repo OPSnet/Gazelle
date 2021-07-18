@@ -68,7 +68,7 @@ if (isset($_GET['forums']) && is_array($_GET['forums'])) {
 $paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->totalHits());
 
-View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker', 'datetime_picker');
+View::show_header('Forums &rsaquo; Search', ['js' => 'bbcode,forum_search,datetime_picker', 'css' => 'datetime_picker']);
 ?>
 <div class="thin">
     <div class="header">

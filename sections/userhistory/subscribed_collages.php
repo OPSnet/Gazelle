@@ -40,7 +40,7 @@ if ($ShowAll) {
 $DB->prepared_query($sql, $Viewer->id());
 $NumResults = $DB->record_count();
 $CollageSubs = $DB->to_array();
-View::show_header('Subscribed collages','browse,collage');
+View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 
 ?>
 <div class="thin">

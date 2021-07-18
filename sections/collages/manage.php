@@ -31,7 +31,7 @@ $GroupIDs = $DB->collect('GroupID');
 $CollageDataList = $DB->to_array('GroupID', MYSQLI_ASSOC);
 $TorrentList = count($GroupIDs) ? Torrents::get_groups($GroupIDs) : [];
 
-View::show_header("Manage collage: " . $collage->name(), 'jquery-ui,jquery.tablesorter,sort');
+View::show_header("Manage collage: " . $collage->name(), ['js' => 'jquery-ui,jquery.tablesorter,sort']);
 ?>
 <div class="thin">
     <div class="header">

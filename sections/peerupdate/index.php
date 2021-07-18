@@ -6,7 +6,7 @@ if ((!isset($argv[1]) || $argv[1]!=SCHEDULE_KEY) && !check_perms('admin_schedule
 }
 
 if (check_perms('admin_schedule')) {
-    View::show_header();
+    View::show_header('Peer update');
     echo '<pre>';
 }
 

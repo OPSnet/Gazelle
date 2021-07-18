@@ -74,7 +74,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 
 $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('requests', $RequestID);
 
-View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
+View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,subscriptions']);
 ?>
 <div class="thin">
     <div class="header">

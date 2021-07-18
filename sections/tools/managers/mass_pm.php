@@ -8,7 +8,7 @@ $Classes = (new Gazelle\Manager\User)->classList();
 // add the class ID into this array to skip it when presenting the list of classes
 $SkipClassIDs = [USER, MEMBER, POWER, ELITE, TORRENT_MASTER, DONOR, POWER_TM, ELITE_TM];
 
-View::show_header('Compose Mass PM', 'inbox,bbcode,jquery.validate,form_validate');
+View::show_header('Compose Mass PM', ['js' => 'inbox,bbcode,jquery.validate,form_validate']);
 ?>
 <div class="thin">
     <div class="header">

@@ -45,7 +45,7 @@ if (isset($_POST['confirm'])) {
     }
 }
 
-View::show_header('Bonus Points - Title', 'bonus');
+View::show_header('Bonus Points - Title', ['js' => 'bonus']);
 ?>
 <div class="thin">
     <table>

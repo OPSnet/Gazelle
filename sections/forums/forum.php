@@ -71,7 +71,7 @@ foreach ($forumToc as &$thread) {
     unset($thread); // because looping by reference
 }
 
-View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? 'donor' : '');
+View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? ['js' => 'donor'] : []);
 ?>
 <div class="thin">
 <?php

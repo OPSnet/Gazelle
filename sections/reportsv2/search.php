@@ -67,7 +67,7 @@ if ($filter) {
     }
     $page = $reportMan->searchPage($paginator->limit(), $paginator->offset());
 }
-View::show_header('Reports V2', 'reportsv2');
+View::show_header('Reports V2', ['js' => 'reportsv2']);
 ?>
 
 <div class="header">

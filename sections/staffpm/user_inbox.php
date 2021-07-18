@@ -2,9 +2,7 @@
 
 $userMan = new \Gazelle\Manager\User;
 $classList = $userMan->classList();
-View::show_header('Staff PMs', 'staffpm');
-
-// Start page
+View::show_header('Staff PMs', ['js' => 'staffpm']);
 ?>
 <div class="thin">
     <div class="header">

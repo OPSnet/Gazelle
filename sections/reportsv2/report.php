@@ -126,7 +126,7 @@ $LastReseedRequest = $TorrentList['LastReseedRequest'];
 $PersonalFL = $TorrentList['PersonalFL'];
 $IsSnatched = $TorrentList['IsSnatched'];
 
-View::show_header('Report', 'reportsv2,browse,torrent,bbcode');
+View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
 ?>
 
 <div class="thin">

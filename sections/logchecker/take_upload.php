@@ -79,7 +79,7 @@ $DB->prepared_query("
 );
 $Cache->deleteMulti(["torrent_group_{$GroupID}", "torrents_details_{$GroupID}", "tg_{$GroupID}", "tlist_{$GroupID}"]);
 
-View::show_header();
+View::show_header('Logchecker results');
 ?>
 <div class="thin center">
     <br /><a href="logchecker.php?action=<?= $Action ?>">Upload another log file</a>

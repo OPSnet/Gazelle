@@ -2,8 +2,6 @@
 
 /** @var \Gazelle\Bonus $Bonus */
 
-View::show_header('Bonus Points Shop', 'bonus');
-
 if (isset($_GET['complete'])) {
     $label = $_GET['complete'];
     $item = $Bonus->getItem($label);
@@ -14,6 +12,7 @@ if (isset($_GET['complete'])) {
 HTML;
 }
 
+View::show_header('Bonus Points Shop', ['js' => 'bonus']);
 ?>
 <div class="header">
     <h2>Bonus Points Shop</h2>

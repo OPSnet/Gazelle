@@ -8,7 +8,7 @@ if (!$Viewer->writeAccess($forum) || !$Viewer->createAccess($forum)) {
 }
 $userMan = new Gazelle\Manager\User;
 
-View::show_header('Forums &rsaquo; ' . $forum->name() . ' &rsaquo; New Thread', 'comments,bbcode,jquery.validate,form_validate,newpoll');
+View::show_header('Forums &rsaquo; ' . $forum->name() . ' &rsaquo; New Thread', ['js' => 'comments,bbcode,jquery.validate,form_validate,newpoll']);
 echo $Twig->render('forum/new-thread.twig', [
     'can' => [
         'create_poll' => $Viewer->permitted('forums_polls_create'),

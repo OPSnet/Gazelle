@@ -11,7 +11,7 @@ if (!check_perms('site_moderate_requests')) {
     error(403);
 }
 
-View::show_header('Mass PM Snatchers: ' . $GroupName, 'upload');
+View::show_header('Mass PM Snatchers: ' . $GroupName, ['js' => 'upload']);
 ?>
 <div class="thin">
     <div class="header">
