@@ -21,7 +21,7 @@ function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
 $name = $Artist->name() ?? 'artist:' . $ArtistID;
 $Requests = [];
 
-View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions');
+View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscriptions']);
 ?>
 <div class="thin">
     <div class="header">

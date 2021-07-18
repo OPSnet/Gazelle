@@ -3,7 +3,7 @@ if (!$Viewer->isStaffPMReader()) {
     error(403);
 }
 
-View::show_header('Staff PMs', 'staffpm');
+View::show_header('Staff PMs', ['js' => 'staffpm']);
 ?>
 <div class="thin">
     <div class="header">

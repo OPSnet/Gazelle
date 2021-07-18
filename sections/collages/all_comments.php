@@ -25,7 +25,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('collages', $CollageID);
 $Collage = new Gazelle\Collage($CollageID);
 
-View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,subscriptions');
+View::show_header("Comments for collage " . $Collage->name(), ['js' => 'comments,bbcode,subscriptions']);
 ?>
 <div class="thin">
     <div class="header">

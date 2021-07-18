@@ -27,7 +27,7 @@ if (empty($_GET['advanced']) || !check_perms('site_advanced_top10')) {
 }
 $vote->setTopLimit($limit);
 
-View::show_header("Top $limit Voted Groups",'browse,voting');
+View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
 ?>
 <div class="thin">
     <div class="header">

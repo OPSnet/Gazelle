@@ -23,7 +23,7 @@ if (empty($_GET['userid'])) {
 }
 [, $CollageDataList, $TorrentList] = $user->bookmarkList(); // TODO: $TorrentList might not have the correct order, use the $GroupIDs instead
 
-View::show_header('Organize Bookmarks', 'browse,jquery-ui,jquery.tablesorter,sort');
+View::show_header('Organize Bookmarks', ['js' => 'browse,jquery-ui,jquery.tablesorter,sort']);
 
 if (empty($TorrentList)) {
     echo $Twig->render('bookmark/none.twig');

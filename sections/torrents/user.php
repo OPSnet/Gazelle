@@ -326,7 +326,7 @@ $action = display_str($_GET['type']);
 $pages = Format::get_pages($page, $torrentCount, TORRENTS_PER_PAGE);
 $urlStem = "torrents.php?userid={$userId}&amp;type=";
 
-View::show_header($user->username() . "'s $action torrents", 'voting');
+View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
 ?>
 <div class="thin">
     <div class="linkbox">

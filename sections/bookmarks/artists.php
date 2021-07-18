@@ -44,7 +44,7 @@ if ($Viewer->permitted('site_torrents_notify')) {
     }
 }
 
-View::show_header($Title, 'browse');
+View::show_header($Title, ['js' => 'browse']);
 ?>
 <div class="thin">
     <div class="header">

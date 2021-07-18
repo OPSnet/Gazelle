@@ -14,7 +14,7 @@ if ($showFlow) {
 }
 $userflowDetails = $userMan->userflowDetails($paginator->limit(), $paginator->offset());
 
-View::show_header('User Flow', 'highcharts,highcharts_custom');
+View::show_header('User Flow', ['js' => 'highcharts,highcharts_custom']);
 
 if ($showFlow) {
 ?>

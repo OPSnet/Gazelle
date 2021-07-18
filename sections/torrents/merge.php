@@ -35,7 +35,7 @@ $oldName = $DB->scalar("
 if (empty($_POST['confirm'])) {
     $Artists = Artists::get_artists([$oldGroupId, $newGroupId]);
 
-    View::show_header();
+    View::show_header('Merge ' . display_str($oldName));
 ?>
     <div class="center thin">
     <div class="header">

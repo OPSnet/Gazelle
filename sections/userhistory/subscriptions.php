@@ -134,7 +134,7 @@ foreach ($Results as $Result) {
 $TorrentGroups = Torrents::get_groups($TorrentGroups, true, true, false);
 $Requests = Requests::get_requests($Requests);
 
-View::show_header('Subscriptions','subscriptions,comments,bbcode');
+View::show_header('Subscriptions', ['js' => 'subscriptions,comments,bbcode']);
 ?>
 <div class="thin">
     <div class="header">

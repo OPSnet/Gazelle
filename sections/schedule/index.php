@@ -42,7 +42,7 @@ if (PHP_SAPI === 'cli') {
     }
 
     authorize();
-    View::show_header();
+    View::show_header('Scheduler');
     $canEdit = check_perms('admin_periodic_task_manage');
     include(SERVER_ROOT.'/sections/tools/development/periodic_links.php');
     echo('<pre>');

@@ -42,7 +42,7 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
 
     // to cite from merge: "Everything is legit, let's just confim they're not retarded"
     if (empty($_GET['confirm'])) {
-        View::show_header();
+        View::show_header('Group Edit');
 ?>
     <div class="center thin">
     <div class="header">

@@ -120,7 +120,7 @@ switch ($Short) {
         break;
 }
 
-View::show_header('Report a '.$Type['title'], 'bbcode,jquery.validate,form_validate');
+View::show_header('Report a '.$Type['title'], ['js' => 'bbcode,jquery.validate,form_validate']);
 ?>
 <div class="thin">
     <div class="header">

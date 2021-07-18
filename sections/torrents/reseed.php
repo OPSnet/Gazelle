@@ -73,7 +73,7 @@ Thanks!";
 
 $NumUsers = count($usersToNotify);
 
-View::show_header();
+View::show_header('Reseed ' . display_str($Name));
 ?>
 <div class="thin">
     <div class="header">

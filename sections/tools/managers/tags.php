@@ -11,7 +11,7 @@ $Val->setFields([
 ]);
 $tagMan = new \Gazelle\Manager\Tag;
 
-View::show_header('Batch Tag Editor', 'validate');
+View::show_header('Batch Tag Editor', ['js' => 'validate']);
 echo $Val->generateJS('tagform');
 ?>
 

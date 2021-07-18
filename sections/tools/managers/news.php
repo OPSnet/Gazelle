@@ -57,7 +57,7 @@ switch ($_REQUEST['action']) {
         error(0);
         break;
 }
-View::show_header('Manage news', 'bbcode,news_ajax');
+View::show_header('Manage news', ['js' => 'bbcode,news_ajax']);
 ?>
 <div class="thin">
     <div class="header">

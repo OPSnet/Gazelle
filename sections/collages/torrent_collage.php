@@ -3,7 +3,7 @@
 $TorrentList = $Collage->torrentList();
 $GroupIDs = $Collage->groupIds();
 
-View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
+View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
 ?>
 <div class="thin">
 <?= $Twig->render('collage/header.twig', [

@@ -19,7 +19,7 @@ if (isset($_REQUEST['expired'])) {
     }
 }
 
-View::show_header('Recover Password','validate');
+View::show_header('Recover Password', ['js' => 'validate']);
 echo $validator->generateJS('recoverform');
 echo $Twig->render('login/reset-password.twig', [
     'error' => $error,

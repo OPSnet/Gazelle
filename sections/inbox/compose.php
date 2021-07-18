@@ -24,7 +24,7 @@ if (!$Username) {
     error(404);
 }
 
-View::show_header('Compose', 'inbox,bbcode,jquery.validate,form_validate');
+View::show_header('Compose', ['js' => 'inbox,bbcode,jquery.validate,form_validate']);
 echo $Twig->render('inbox/compose.twig', [
     'auth'     => $Viewer->auth(),
     'body'     => $Body ?? '',

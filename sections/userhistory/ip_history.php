@@ -18,7 +18,7 @@ if (trim($_GET['ip'] ?? '') !== '') {
 $paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($ipMan->userTotal($user->id()));
 
-View::show_header($user->username() . " &rsaquo; IP address history", 'iphist');
+View::show_header($user->username() . " &rsaquo; IP address history", ['js' => 'iphist']);
 echo $Twig->render('admin/userhistory-site-ip.twig', [
     'ip'        => $_GET['ip'] ?? '',
     'page'      => $ipMan->userPage($user->id(), $paginator->limit(), $paginator->offset()),

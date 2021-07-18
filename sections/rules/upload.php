@@ -3,7 +3,7 @@
 [,,$Body] = (new Gazelle\Manager\Wiki)->article(RULES_WIKI_PAGE_ID);
 Text::$TOC = true;
 $Body = Text::full_format($Body, false, 3, true);
-View::show_header('Uploading Rules', 'rules');
+View::show_header('Uploading Rules', ['js' => 'rules']);
 ?>
 <div class="thin">
     <?= $Twig->render('rules/toc.twig') ?>

@@ -172,7 +172,7 @@ $DB->prepared_query("
 );
 $Reports = $DB->to_array(false, MYSQLI_NUM);
 
-View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
+View::show_header('Reports V2', ['js' => 'reportsv2,bbcode,torrent']);
 ?>
 <div class="header">
     <h2><?=$Title?></h2>

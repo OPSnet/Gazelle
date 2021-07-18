@@ -2,7 +2,7 @@
 
 use OrpheusNET\Logchecker\Logchecker;
 
-View::show_header('Logchecker', 'upload');
+View::show_header('Logchecker', ['js' => 'upload']);
 
 print <<<HTML
 <div class="linkbox">

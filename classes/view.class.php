@@ -11,7 +11,7 @@ class View {
      *                    the page. ONLY PUT THE RELATIVE LOCATION WITHOUT '.js'
      *                    example: 'somefile,somedir/somefile'
      */
-    public static function show_header($PageTitle = '', $JSIncludes = '', $CSSIncludes = '') {
+    public static function show_header(string $PageTitle, $option = []) {
         global $Document;
 
         if ($PageTitle != '') {
