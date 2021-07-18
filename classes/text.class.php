@@ -823,22 +823,27 @@ class Text {
                     $Str .= \Torrents::bbcodeUrl($Block['Val'], $Block['Attr']);
                     break;
                 case 'torrent':
+                    $GroupID = false;
                     if (preg_match(TGROUP_REGEXP, $Block['Val'], $match)) {
                         if (isset($match['id'])) {
                             $GroupID = $match['id'];
-                            $Groups = Torrents::get_groups([$GroupID], true, true, false);
-                            if ($Groups[$GroupID]) {
-                                $Group = $Groups[$GroupID];
-                                $tagNames = implode(', ',
-                                    array_map(function ($x) { return '#' . htmlentities($x); },
-                                        explode(' ', $Group['TagList'])));
-                                if (strpos($Block['Attr'], 'noartist') === false) {
-                                    $Str .= Artists::display_artists($Group['ExtendedArtists']);
-                                }
-                                $Str .= '<a title="' . $tagNames . '" href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
-                            } else {
-                                $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
+                        }
+                    } elseif ((int)$Block['Val']) {
+                        $GroupID = (int)$Block['Val'];
+                    }
+                    if ($GroupID) {
+                        $Groups = Torrents::get_groups([$GroupID], true, true, false);
+                        if ($Groups[$GroupID]) {
+                            $Group = $Groups[$GroupID];
+                            $tagNames = implode(', ',
+                                array_map(function ($x) { return '#' . htmlentities($x); },
+                                    explode(' ', $Group['TagList'])));
+                            if (strpos($Block['Attr'], 'noartist') === false) {
+                                $Str .= Artists::display_artists($Group['ExtendedArtists']);
                             }
+                            $Str .= '<a title="' . $tagNames . '" href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
+                        } else {
+                            $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
                         }
                     } else {
                         $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
