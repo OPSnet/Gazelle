@@ -39,7 +39,7 @@ $total = $DB->scalar("
     ) TOTAL
     ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id()
 );
-$paginator->setTotal($total);
+$paginator->setTotal($total ?? 0);
 
 // The monster sql query:
 /*
