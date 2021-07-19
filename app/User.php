@@ -8,6 +8,7 @@ class User extends BaseObject {
 
     const CACHE_KEY         = 'u_%d';
     const CACHE_SNATCH_TIME = 'users_snatched_%d_time';
+    const CACHE_NOTIFY      = 'u_notify_%d';
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
     /** @var int */
@@ -1421,15 +1422,16 @@ class User extends BaseObject {
     }
 
     public function notifyFilters(): array {
-        if ($this->forceCacheFlush || ($filters = $this->cache->get_value('notify_filters_' . $this->id)) === false) {
+        $key = sprintf(self::CACHE_NOTIFY, $this->id);
+        if ($this->forceCacheFlush || ($filters = $this->cache->get_value($key)) === false) {
             $this->db->prepared_query('
                 SELECT ID, Label
                 FROM users_notify_filters
                 WHERE UserID = ?
                 ', $this->id
             );
-            $filters = $this->db->to_array('ID');
-            $this->cache->cache_value('notify_filters_' . $this->id, $filters, 2592000);
+            $filters = $this->db->to_pair('ID', 'Label', false);
+            $this->cache->cache_value($key, $filters, 2592000);
         }
         return $filters;
     }
@@ -1442,7 +1444,7 @@ class User extends BaseObject {
         );
         $removed = $this->db->affected_rows();
         if ($removed) {
-            $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
+            $this->cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $removed;
     }
@@ -1499,7 +1501,7 @@ class User extends BaseObject {
             $change = $this->db->affected_rows();
         }
         if ($change) {
-            $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
+            $this->cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
     }
@@ -1530,7 +1532,7 @@ class User extends BaseObject {
             $change = $this->db->affected_rows();
         }
         if ($change) {
-            $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
+            $this->cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
     }

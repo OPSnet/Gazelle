@@ -11,26 +11,69 @@ class View {
      *                    the page. ONLY PUT THE RELATIVE LOCATION WITHOUT '.js'
      *                    example: 'somefile,somedir/somefile'
      */
-    public static function show_header(string $PageTitle, $option = []) {
-        global $Document;
-
-        if ($PageTitle != '') {
-            $PageTitle .= ' :: ';
+    public static function show_header(string $pageTitle, $option = []) {
+        global $Document, $Twig, $Viewer;
+        if ($pageTitle != '') {
+            $pageTitle .= ' :: ';
         }
-        $PageTitle .= SITE_NAME;
-        $PageID = [
-            $Document, // Document
-            empty($_REQUEST['action']) ? false : $_REQUEST['action'], // Action
-            empty($_REQUEST['type']) ? false : $_REQUEST['type'] // Type
-        ];
+        $pageTitle .= SITE_NAME;
+        $PageID = [$Document, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
 
-        global $Viewer;
-        if (!isset($Viewer) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
-            global $PageTitle, $Twig;
+        if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
             echo $Twig->render('index/public-header.twig', [
-                'page_title' => $PageTitle,
+                'page_title' => $pageTitle,
             ]);
         } else {
+            $Style = [
+                'global.css',
+            ];
+            if (!empty($option['css'])) {
+                $Style = array_merge($Style, explode(',', $option['css']));
+            }
+
+            $Scripts = [
+                'jquery',
+                'jquery.autocomplete',
+                'jquery.countdown.min',
+                'script_start',
+                'ajax.class',
+                'global',
+                'autocomplete',
+            ];
+            if (!empty($option['js'])) {
+                $Scripts = array_merge($Scripts, explode(',', $option['js']));
+            }
+
+            if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
+                array_push($Scripts, 'jquery-migrate', 'debug');
+            }
+            if (!isset($LoggedUser['Tooltipster']) || $LoggedUser['Tooltipster']) {
+                array_push($Scripts, 'tooltipster', 'tooltipster_settings');
+                array_push($Style, 'tooltipster/style.css');
+            }
+            if ($Viewer->option('UseOpenDyslexic')) {
+                array_push($Style, 'opendyslexic/style.css');
+            }
+
+            if ($Viewer->permitted('site_torrents_notify')) {
+                $notifMan = new Gazelle\Manager\Notification($Viewer->id());
+                $Notifications = $notifMan->notifications();
+                $NewSubscriptions = isset($Notifications[Gazelle\Manager\Notification::SUBSCRIPTIONS]);
+                if ($notifMan->isSkipped(Gazelle\Manager\Notification::SUBSCRIPTIONS)) {
+                    $NewSubscriptions = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->unread();
+                }
+                if ($notifMan->useNoty()) {
+                    array_push($Scripts, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
+                }
+            }
+
+            echo $Twig->render('index/private-header.twig', [
+                'auth_args'    => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
+                'page_title'   => $pageTitle,
+                'script'       => array_map(function ($s) { return "$s.js"; }, $Scripts),
+                'style'        => $Style,
+                'viewer'       => $Viewer,
+            ]);
             require_once('../design/privateheader.php');
         }
     }
