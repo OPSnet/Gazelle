@@ -170,11 +170,6 @@ if ($Viewer) {
     // Complete the $LoggedUser array
     $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($viewerId, $LoggedUser['CustomPermissions']);
 
-    // Notifications
-    if (isset($LoggedUser['Permissions']['site_torrents_notify'])) {
-        $LoggedUser['Notify'] = $Viewer->notifyFilters();
-    }
-
     // We've never had to disable the wiki privs of anyone.
     if ($LoggedUser['DisableWiki']) {
         unset($LoggedUser['Permissions']['site_edit_wiki']);

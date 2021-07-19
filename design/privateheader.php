@@ -1,86 +1,6 @@
 <?php
 
-use Gazelle\Manager\Notification;
-
 global $LoggedUser, $Viewer;
-$authArgs = '&amp;user=' . $Viewer->id()
-    . '&amp;passkey=' . $Viewer->announceKey()
-    . '&amp;authkey=' . $Viewer->auth()
-    . '&amp;auth=' . $Viewer->rssAuth();
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width">
-    <meta name="referrer" content="none, no-referrer, same-origin" />
-    <title><?=display_str($PageTitle)?></title>
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Torrents" href="opensearch.php?type=torrents" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Artists" href="opensearch.php?type=artists" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Requests" href="opensearch.php?type=requests" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Forums" href="opensearch.php?type=forums" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Log" href="opensearch.php?type=log" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Users" href="opensearch.php?type=users" />
-    <link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Wiki" href="opensearch.php?type=wiki" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_news<?= $authArgs ?>" title="<?=SITE_NAME?> - News" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_blog<?= $authArgs ?>" title="<?=SITE_NAME?> - Blog" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_changelog<?= $authArgs ?>" title="<?=SITE_NAME?> - Change Log" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_<?=$LoggedUser['torrent_pass']?><?= $authArgs ?>" title="<?=SITE_NAME?> - P.T.N." />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_all<?= $authArgs ?>" title="<?=SITE_NAME?> - All Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_music<?= $authArgs ?>" title="<?=SITE_NAME?> - Music Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_apps<?= $authArgs ?>" title="<?=SITE_NAME?> - Application Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_ebooks<?= $authArgs ?>" title="<?=SITE_NAME?> - E-Book Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_abooks<?= $authArgs ?>" title="<?=SITE_NAME?> - Audiobooks Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_evids<?= $authArgs ?>" title="<?=SITE_NAME?> - E-Learning Video Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_comedy<?= $authArgs ?>" title="<?=SITE_NAME?> - Comedy Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_comics<?= $authArgs ?>" title="<?=SITE_NAME?> - Comic Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_mp3<?= $authArgs ?>" title="<?=SITE_NAME?> - MP3 Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_flac<?= $authArgs ?>" title="<?=SITE_NAME?> - FLAC Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_vinyl<?= $authArgs ?>" title="<?=SITE_NAME?> - Vinyl Sourced Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless<?= $authArgs ?>" title="<?=SITE_NAME?> - Lossless Torrents" />
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless24<?= $authArgs ?>" title="<?=SITE_NAME?> - 24bit Lossless Torrents" />
-<?php
-if (isset($LoggedUser['Notify'])) {
-    foreach ($LoggedUser['Notify'] as $Filter) {
-        [$FilterID, $FilterName] = $Filter;
-?>
-    <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_<?=
-        $FilterID?>_<?=$LoggedUser['torrent_pass']?><?= $authArgs ?>&amp;name=<?=
-        urlencode($FilterName)?>" title="<?=SITE_NAME?> - <?=display_str($FilterName)?>" />
-<?php
-    }
-}
-?>
-    <link rel="stylesheet" type="text/css" href="<?=
-        STATIC_SERVER?>/styles/global.css?v=<?=filemtime(SERVER_ROOT.'/sass/global.scss')?>" />
-<?php
-
-$Scripts = [
-    'jquery',
-    'script_start',
-    'ajax.class',
-    'global',
-    'jquery.autocomplete',
-    'autocomplete',
-    'jquery.countdown.min'
-];
-if (!empty($option['js'])) {
-    $Scripts = array_merge($Scripts, explode(',', $option['js']));
-}
-
-if (DEBUG_MODE || check_perms('site_debug')) {
-    $Scripts[] = 'jquery-migrate';
-    $Scripts[] = 'debug';
-}
-if (!isset($LoggedUser['Tooltipster']) || $LoggedUser['Tooltipster']) {
-    $Scripts[] = 'tooltipster';
-    $Scripts[] = 'tooltipster_settings';
-?>
-    <link rel="stylesheet" href="<?=STATIC_SERVER?>/styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/tooltipster/style.scss')?>" type="text/css" media="screen" />
-<?php
-}
 
 if (empty($LoggedUser['StyleURL'])) {
 ?>
@@ -100,52 +20,6 @@ if (empty($LoggedUser['StyleURL'])) {
 ?>
     <link rel="stylesheet" type="text/css" media="screen" href="<?=$StyleURL?>" title="External CSS" />
 <?php
-}
-if (!empty($LoggedUser['UseOpenDyslexic'])) {
-?>
-    <link rel="stylesheet" type="text/css" charset="utf-8" href="<?=
-        STATIC_SERVER?>/styles/opendyslexic/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/opendyslexic/style.css')?>" />
-<?php
-}
-$ExtraCSS = explode(',', $option['css'] ?? '');
-foreach ($ExtraCSS as $CSS) {
-    if (trim($CSS) == '') {
-        continue;
-    }
-?>
-    <link rel="stylesheet" type="text/css" media="screen" href="<?=STATIC_SERVER."/styles/$CSS/style.css?v="
-        . filemtime(SERVER_ROOT."/public/static/styles/$CSS/style.css")?>" />
-<?php
-}
-foreach ($Scripts as $Script) {
-?>
-    <script src="<?= STATIC_SERVER ?>/functions/<?=$Script?>.js?v=<?=filemtime(SERVER_ROOT
-        . '/public/static/functions/'.$Script.'.js')?>" type="text/javascript"></script>
-<?php } ?>
-    <script type="text/javascript">
-        //<![CDATA[
-        var authkey = "<?=$LoggedUser['AuthKey']?>";
-        var userid = <?=$LoggedUser['ID']?>;
-        //]]>
-    </script>
-
-<?php
-
-// Get notifications early to change menu items if needed
-$notifMan = new Notification($LoggedUser['ID']);
-
-$Notifications = $notifMan->notifications();
-$NewSubscriptions = isset($Notifications[Notification::SUBSCRIPTIONS]);
-if ($notifMan->isSkipped(Notification::SUBSCRIPTIONS)) {
-    $NewSubscriptions = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->unread();
-}
-
-if ($notifMan->useNoty()) {
-    foreach (['noty/noty.js', 'noty/layouts/bottomRight.js', 'noty/themes/default.js', 'user_notifications.js'] as $inc) {
-?>
-<script src="<?= STATIC_SERVER . "/functions/$inc" ?>?v=<?= filemtime(SERVER_ROOT . "/public/static/functions/$inc")?>" type="text/javascript"></script>
-<?php
-    }
 }
 
 $activity = new Gazelle\Activity;
@@ -307,7 +181,7 @@ foreach ($navItems as $n) {
 }
 
 global $Twig;
-echo $Twig->render('index/private-header.twig', [
+echo $Twig->render('index/page-header.twig', [
     'action'            => $_REQUEST['action'] ?? null,
     'action_list'       => $activity->actionList(),
     'alert_list'        => $activity->alertList(),

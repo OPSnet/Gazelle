@@ -132,7 +132,7 @@ class Twig {
 
         $twig->addFunction(new \Twig\TwigFunction('mtime', function($filename) {
             return new \Twig\Markup(
-                filemtime(SERVER_ROOT . '/public/static/functions/' . $filename),
+                filemtime(SERVER_ROOT . '/public/static/' . $filename),
                 'UTF-8'
             );
         }));
