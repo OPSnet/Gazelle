@@ -20,9 +20,8 @@
     {% set title = upload.name ~ '<br />(' ~ upload.tags ~ ')<br />uploaded by ' ~ upload.username ~ ' ' ~ upload.uploadDate|time_diff %}
     {% set alt = title|replace({'<br />': ' '}) %}
                 <li class="image_group_{{ upload.groupId }}">
-                <a href="torrents.php?id={{ upload.groupId }}&amp;torrentid={{ upload.torrentId }}>#torrent{{ upload.torrentId }}">
-                <img class="tooltip_interactive" src="{{ upload.imageUrl|image }}" alt="{{ alt }}" title="{{ title }}"
-                    data-title-plain="{{ alt }}" width="118" /></a>
+                <a href="torrents.php?id={{ upload.groupId }}&amp;torrentid={{ upload.torrentId }}#torrent{{ upload.torrentId }}">
+                <img class="tooltip_interactive" src="{{ upload.imageUrl|image }}" alt="{{ alt }}" title="{{ title }}" data-title-plain="{{ alt }}" width="118" /></a>
                 </li>
 {% endfor %}
             </ul>
