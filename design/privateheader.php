@@ -62,6 +62,7 @@ if (check_perms('users_mod') || $LoggedUser['PermissionID'] === FORUM_MOD) {
     }
 }
 
+$notifMan = new Gazelle\Manager\Notification($Viewer->id());
 $activity->setNotification($notifMan);
 $payMan = new Gazelle\Manager\Payment;
 
