@@ -1,168 +1,50 @@
-{% macro active(t) -%}
-    {%- if t %} class="active"{% endif -%}
-{% endmacro %}
-{% macro active_class(t) %}
-    {%- if t %} active{% endif -%}
-{% endmacro -%}
-{% set stats = user.activityStats -%}
+{%- from 'macro/header.twig' import css, script -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width" />
-</head>
-<body id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
-<input id="extracb1" class="hidden" type="checkbox">
-<input id="extracb2" class="hidden" type="checkbox">
-<input id="extracb3" class="hidden" type="checkbox">
-<input id="extracb4" class="hidden" type="checkbox">
-<input id="extracb5" class="hidden" type="checkbox">
-<div id="wrapper">
-<h1 class="hidden">{{ constant('SITE_NAME') }}</h1>
-<div id="header">
-    <div id="logo"><a href="index.php"></a></div>
-    <div id="userinfo">
-    <ul id="userinfo_username">
-        <li id="nav_userinfo" {{ _self.active(document == 'user' and request.id == user.id) }}>
-            <a href="user.php?id={{ user.id }}" class="username">{{ user.username }}</a>
-        </li>
-        <li id="nav_userclass">
-            <span class="hidden userclass">{{ user_class }}</span>
-        </li>
-        <li id="nav_useredit" class="brackets{{ _self.active_class(document == 'user' and action =='edit') }}">
-            <a href="user.php?action=edit&amp;userid={{ user.id }}">Edit</a>
-        </li>
-        <li id="nav_logout" class="brackets">
-            <a href="logout.php?auth={{ auth }}">Logout</a>
-        </li>
-    </ul>
-    <ul id="userinfo_major">
-        <li id="nav_upload" class="brackets{{ _self.active_class(document == 'upload') }}">
-            <a href="upload.php" title="Upload">Upload</a>
-        </li>
-        <li id="nav_bonus" class="brackets{{ _self.active_class(document == 'user' and action == 'bonus') }}">
-            <a href="bonus.php" class='tooltip' title="BP/hour: {{
-                stats.BonusPointsPerHour|number_format(3) }}">Bonus ({{ stats.BonusPoints|number_format }})</a>
-        </li>
-        <li id="nav_invite" class="brackets{{ _self.active_class(document == 'user' and action == 'invite') }}">
-            <a href="user.php?action=invite" class='tooltip' title="Invite a friend!">Invite
-            {% if user.permitted('site_send_unlimited_invites') %} (&infin;){% elseif user.inviteCount %} ({{ user.inviteCount }}){% endif %}</a>
-        </li>
-        <li id="nav_donate" class="brackets{{ _self.active_class(document == 'donate') }}">
-            <a href="donate.php" class='tooltip' title="Donate">Donate ({{ dono_target }}%)</a>
-        </li>
-    </ul>
-    <ul id="userinfo_stats">
-        <li id="stats_seeding">
-            <a href="torrents.php?type=seeding&amp;userid={{ user.id }}">Up</a>:
-            <span class="stat tooltip" title="{{ stats.BytesUploaded|octet_size(5) }}">{{ stats.BytesUploaded|octet_size }}</span>
-        </li>
-        <li id="stats_leeching">
-            <a href="torrents.php?type=leeching&amp;userid={{ user.id }}">Down</a>:
-            <span class="stat tooltip" title="{{ stats.BytesDownloaded|octet_size(5) }}">{{ stats.BytesDownloaded|octet_size }}</span>
-        </li>
-        <li id="stats_ratio">
-            Ratio: <span class="stat">{{ ratio(stats.BytesUploaded, stats.BytesDownloaded) }}</span>
-        </li>
-{% if required_ratio > 0 %}
-        <li id="stats_required">
-            <a href="rules.php?p=ratio">Required</a>:
-            <span class="stat tooltip" title="{{ required_ratio|number_format(5) }}">{{ required_ratio|number_format(2) }}</span>
-        </li>
+<meta name="referrer" content="none, no-referrer, same-origin" />
+<title>{{ page_title }}</title>
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Torrents" href="opensearch.php?type=torrents" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Artists" href="opensearch.php?type=artists" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Requests" href="opensearch.php?type=requests" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Forums" href="opensearch.php?type=forums" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Log" href="opensearch.php?type=log" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Users" href="opensearch.php?type=users" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Wiki" href="opensearch.php?type=wiki" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_news{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - News" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_blog{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Blog" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_changelog{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Change Log" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ viewer.announce_key}}{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - P.T.N." />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_all{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - All Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_music{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Music Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_apps{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Application Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_ebooks{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - E-Book Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_abooks{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Audiobooks Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_evids{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - E-Learning Video Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_comedy{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Comedy Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_comics{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Comic Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_mp3{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - MP3 Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_flac{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - FLAC Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_vinyl{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Vinyl Sourced Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Lossless Torrents" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless24{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - 24bit Lossless Torrents" />
+{% if viewer.permitted('site_torrents_notify') -%}
+    {%- for id, name in viewer.notifyFilters %}
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ id }}_{{ viewer.announce_key }}{{ auth_args|raw }}&amp;name={{ name }}" title="{{ constant('SITE_NAME') }} - {{ name }}" />
+    {%- endfor %}
 {% endif %}
-{% if user.tokenCount %}
-        <li id="fl_tokens">
-            <a href="wiki.php?action=article&amp;id=57">Tokens</a>:
-            <span class="stat">
-                <a href="userhistory.php?action=token_history&amp;userid={{ user.id }}">{{ user.tokenCount|number_format }}</a>
-            </span>
-        </li>
-{% endif %}
-    </ul>
-    <ul id="userinfo_minor"{% if new_subs %} class="highlite"{% endif %}>
-{% for link in nav_links -%}
-        {{ link|raw }}
-{%- endfor %}
-    </ul>
-</div>
-
-<div id="menu">
-    <h4 class="hidden">Site Menu</h4>
-    <ul>
-        <li id="nav_index"{{    _self.active(document == 'index')    }}><a href="index.php">Home</a> </li>
-        <li id="nav_torrents"{{ _self.active(document == 'torrents') }}><a href="torrents.php">Torrents</a> </li>
-        <li id="nav_collages"{{ _self.active(document == 'collages') }}><a href="collages.php">Collages</a> </li>
-        <li id="nav_requests"{{ _self.active(document == 'requests') }}><a href="requests.php">Requests</a> </li>
-        <li id="nav_forums"{{   _self.active(document == 'forums')   }}><a href="forums.php">Forums</a> </li>
-        <li id="nav_irc"{{      _self.active(document == 'chat')     }}><a href="wiki.php?action=article&amp;name=irc">IRC</a> </li>
-        <li id="nav_top10"{{    _self.active(document == 'top10')    }}><a href="top10.php">Top 10</a> </li>
-        <li id="nav_rules"{{    _self.active(document == 'rules')    }}><a href="rules.php">Rules</a> </li>
-        <li id="nav_wiki"{{     _self.active(document == 'wiki')     }}><a href="wiki.php">Wiki</a> </li>
-        <li id="nav_staff"{{    _self.active(document == 'staff')    }}><a href="staff.php" title="Staff">Staff</a> </li>
-    </ul>
-</div>
-
-{% if alert_list or action_list %}
-<div id="alerts">
-    {% if alert_list %}
-    <div class="alertbar">{{ alert_list|join(' &sdot; ')|raw }}</div>
-    {% endif %}
-    {% if action_list %}
-    <div class="alertbar blend">{{ action_list|join(' &sdot; ')|raw }}</div>
-    {% endif %}
-</div>
-{% endif %}
-
-<div id="searchbars">
-    <ul>
-    <li id="searchbar_torrents">
-        <span class="hidden">Torrents: </span>
-        <form class="search_form" name="torrents" action="torrents.php" method="get">
-{% if advanced_search %}
-            <input type="hidden" name="action" value="advanced" />
-{% endif %}
-            <input id="torrentssearch" value="Torrents" placeholder="Torrents" type="text" name="
-                {%- if advanced_search %}groupname{% else %}searchstr{% endif -%}
-                " size="17" spellcheck="false" accesskey="t" />
-        </form>
-    </li>
-    <li id="searchbar_artists">
-        <span class="hidden">Artist: </span>
-        <form class="search_form" name="artists" action="artist.php" method="get">
-            <input id="artistsearch"
-                {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% else %} {% endif -%}
-                value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a" />
-        </form>
-    </li>
-    <li id="searchbar_collages">
-        <span class="hidden">Collage: </span>
-        <form class="search_form" name="artists" action="collages.php" method="get">
-            <input id="collagesearch" value="Collages" placeholder="Collage" type="text" name="search" size="17" spellcheck="false" accesskey="c" />
-        </form>
-    </li>
-    <li id="searchbar_requests">
-        <span class="hidden">Requests: </span>
-        <form class="search_form" name="requests" action="requests.php" method="get">
-            <input id="requestssearch" value="Requests" placeholder="Requests" type="text" name="search" size="17" spellcheck="false" accesskey="r" />
-        </form>
-    </li>
-    <li id="searchbar_forums">
-        <span class="hidden">Forums: </span>
-        <form class="search_form" name="forums" action="forums.php" method="get">
-            <input value="search" type="hidden" name="action" />
-            <input id="forumssearch" value="Forums" placeholder="Forums" type="text" name="search" size="17" accesskey="f" />
-        </form>
-    </li>
-    <li id="searchbar_log">
-        <span class="hidden">Log: </span>
-        <form class="search_form" name="log" action="log.php" method="get">
-            <input id="logsearch" value="Log" placeholder="Log" type="text" name="search" size="17" accesskey="l" />
-        </form>
-    </li>
-    <li id="searchbar_users">
-        <span class="hidden">Users: </span>
-        <form class="search_form" name="users" action="user.php" method="get">
-            <input type="hidden" name="action" value="search" />
-            <input id="userssearch" value="Users" placeholder="Users" type="text" name="search" size="20" spellcheck="false" accesskey="u" />
-        </form>
-    </li>
-    </ul>
-</div>
-</div>
-<div id="content">
+{% for sheet in style %}
+{{ css(sheet) }}
+{% endfor %}
+{% for js in script %}
+{{ script(js) }}
+{% endfor %}
+<script type="text/javascript">
+//<![CDATA[
+var authkey="{{ viewer.auth }}";var userid={{ viewer.id }};
+//]]>
+</script>
