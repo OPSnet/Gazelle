@@ -327,22 +327,6 @@ function parseUrlArgs(string $urlArgs, string $param): array {
 }
 
 /**
- * The text of the pop-up confirmation when burning an FL token.
- *
- * @param integer $seeders - number of seeders for the torrent
- * @return string Warns if there are no seeders on the torrent
- */
-function FL_confirmation_msg($seeders, $size) {
-    $TokensToUse = ceil($size / BYTES_PER_FREELEECH_TOKEN);
-    /* Coder Beware: this text is emitted as part of a Javascript single quoted string.
-     * Any apostrophes should be avoided or escaped appropriately (with \\').
-     */
-    return ($seeders == 0)
-        ? 'Warning! This torrent is not seeded at the moment, are you sure you want to use '.$TokensToUse.' Freeleech token(s) here?'
-        : 'Are you sure you want to use '.$TokensToUse.' Freeleech token(s) here?';
-}
-
-/**
  * Utility function that unserializes an array, and then if the unserialization fails,
  * it'll then return an empty array instead of a null or false which will break downstream
  * things that require an incoming array
