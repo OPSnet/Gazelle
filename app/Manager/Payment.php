@@ -8,35 +8,34 @@ class Payment extends \Gazelle\Base {
 
     const LIST_KEY = 'payment_list';
     const RENT_KEY = 'payment_monthly_rental';
+    const DUE_KEY  = 'payment_due';
 
-    public function create(array $val) {
+    public function create(array $val): int {
         $this->db->prepared_query('
             INSERT INTO payment_reminders
                    (Text, Expiry, AnnualRent, cc, Active)
             VALUES (?,    ?,      ?,          ?,  ?)
-            ', $val['text'], $val['expiry'], $val['rent'], $val['cc'], isset($val['active'])
+            ', $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active']
         );
         $this->flush();
         return $this->db->inserted_id();
     }
 
-    public function modify($id, array $val) {
+    public function modify($id, array $val): int {
         $this->db->prepared_query("
             UPDATE payment_reminders SET
                 Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
             WHERE ID = ?
-            ", $val['text'], $val['expiry'], $val['rent'], $val['cc'], isset($val['active']),
+            ", $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active'],
             $id
         );
         $this->flush();
         return $this->db->affected_rows();
     }
 
-    public function remove($id) {
+    public function remove($id): int {
         $this->db->prepared_query('
-            DELETE
-            FROM payment_reminders
-            WHERE ID = ?
+            DELETE FROM payment_reminders WHERE ID = ?
             ', $id
         );
         $this->flush();
@@ -45,22 +44,29 @@ class Payment extends \Gazelle\Base {
 
     public function flush() {
         $this->cache->deleteMulti([self::LIST_KEY, self::RENT_KEY, 'due_payments']);
+        return $this;
     }
 
-    public function list() {
+    public function list(): array {
         if (($list = $this->cache->get_value(self::LIST_KEY)) === false) {
             $this->db->prepared_query("
-                SELECT ID, Text, Expiry, AnnualRent, cc, Active
+                SELECT ID,
+                    Text,
+                    Expiry,
+                    AnnualRent,
+                    cc,
+                    Active
                 FROM payment_reminders
                 ORDER BY Expiry
             ");
-            $list = $this->db->to_array('ID', MYSQLI_ASSOC);
+            $list = $this->db->to_array('ID', MYSQLI_ASSOC, false);
             $this->cache->cache_value(self::LIST_KEY, $list, 86400 * 30);
         }
 
         // update with latest forex rates
         $XBT = new XBT;
         foreach ($list as &$l) {
+            $l['Active'] = (bool)$l['Active'];
             if ($l['cc'] == 'XBT') {
                 $l['fiatRate'] = 1.0;
                 $l['Rent'] = $l['btcRent'] = sprintf('%0.6f', $l['AnnualRent']);
@@ -87,10 +93,10 @@ class Payment extends \Gazelle\Base {
         return $list;
     }
 
-    public function monthlyRental() {
+    public function monthlyRental(): float {
         if (($rental = $this->cache->get_value(self::RENT_KEY)) === false) {
             $list = $this->list();
-            $rental = 0;
+            $rental = 0.0;
             foreach ($list as $l) {
                 if ($l['Active']) {
                     $rental += $l['btcRent'];
@@ -101,23 +107,24 @@ class Payment extends \Gazelle\Base {
         return $rental;
     }
 
-    public function monthlyPercent(\Gazelle\Manager\Donation $donorMan) {
+    public function monthlyPercent(\Gazelle\Manager\Donation $donorMan): int {
         $monthlyRental = $this->monthlyRental();
         return $monthlyRental == 0.0
             ? 100
-            : min(100, (int)(($donorMan->totalMonth(1) / $monthlyRental) * 100));
+            : min(100, (int)($donorMan->totalMonth(1) / $monthlyRental) * 100);
     }
 
-    public function due() {
-        if (($due = $this->cache->get_value('due_payments')) === false) {
+    public function due(): array {
+        $due = $this->cache->get_value(self::DUE_KEY);
+        if ($due === false) {
             $this->db->prepared_query('
                 SELECT Text, Expiry
                 FROM payment_reminders
                 WHERE Active = 1 AND Expiry < now() + INTERVAL 1 WEEK
                 ORDER BY Expiry
             ');
-            $due = $this->db->to_array(false, MYSQLI_ASSOC);
-            $this->cache->cache_value('due_payments', $due, 3600);
+            $due = $this->db->to_array(false, MYSQLI_ASSOC, false);
+            $this->cache->cache_value(self::DUE_KEY, $due, 3600);
         }
         return $due;
     }
