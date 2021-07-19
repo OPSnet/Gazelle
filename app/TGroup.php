@@ -326,7 +326,7 @@ class TGroup extends BaseObject {
             }
             $name = \Gazelle\Artist::sanitize($names[$i]);
             if (!$name) {
-                return null;
+                return 0;
             }
             [$artistId, $aliasId] = $artistMan->fetchArtistIdAndAliasId($name);
             if ($artistId) {
