@@ -334,21 +334,23 @@ class Better extends \Gazelle\Base
             if ($releaseType > 0) {
                 $displayName .= ' ['.$releaseTypes[$releaseType].']';
             }
-
             $extraInfo = \Torrents::torrent_info($groupTorrents[$torrent]);
             if ($extraInfo) {
                 $displayName .= " - $extraInfo";
             }
-
             $displayName .= '</a>';
 
+            $tokensToUse = ceil($groupTorrents[$torrent]['Size'] / BYTES_PER_FREELEECH_TOKEN);
+            $s = plural($tokensToUse);
             $acc[$torrent] = [
                 'group_id'   => $groupId,
                 'snatched'   => $groupTorrents[$torrent]['IsSnatched'] ?? false,
                 'name'       => $displayName,
                 'tags'       => $tags->format(),
                 'token'      => \Torrents::can_use_token($groupTorrents[$torrent]),
-                'fl_message' => FL_confirmation_msg($groupTorrents[$torrent]['Seeders'], $groupTorrents[$torrent]['Size']),
+                'fl_message' => $groupTorrents[$torrent]['Seeders'] == 0
+                    ? "Warning! This torrent is not seeded at the moment, are you sure you want to use $tokensToUse token$s here?"
+                    : "Use $tokensToUse token$s here?",
             ];
             return $acc;
         }, []);
