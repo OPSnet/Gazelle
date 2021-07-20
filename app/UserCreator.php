@@ -150,9 +150,9 @@ class UserCreator extends Base {
         foreach ($this->email as $e) {
             $this->db->prepared_query('
                 INSERT INTO users_history_emails
-                       (UserID, Email, IP, Time)
+                       (UserID, Email, IP, useragent, Time)
                 VALUES (?,      ?,     ?,  now() - INTERVAL ? SECOND)
-                ', $this->id, $e, $this->ipaddr, $past--
+                ', $this->id, $e, $this->ipaddr, $_SERVER['HTTP_USER_AGENT'], $past--
             );
         }
 

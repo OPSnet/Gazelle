@@ -2,6 +2,7 @@
 
 namespace Gazelle;
 
+use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
 
 class User extends BaseObject {
@@ -926,6 +927,49 @@ class User extends BaseObject {
         ]);
     }
 
+    public function recordEmailChange(string $newEmail, string $ipaddr): int {
+        $this->db->prepared_query("
+            INSERT INTO users_history_emails
+                   (UserID, Email, IP, useragent)
+            VALUES (?,      ?,     ?,  ?)
+            ", $this->id, $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
+        );
+        Irc::sendRaw("PRIVMSG " . $this->username()
+            . " :Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
+        (new Mail)->send($this->email(), 'Email address changed information for ' . SITE_NAME,
+            $this->twig->render('email/email-address-change.twig', [
+                'ipaddr'     => $ipaddr,
+                'new_email'  => $newEmail,
+                'now'        => Date('Y-m-d H:i:s'),
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                'username'   => $this->username(),
+            ])
+        );
+        $this->cache->delete_value('user_email_count_' . $this->id);
+        return $this->db->affected_rows();
+    }
+
+    public function recordPasswordChange(string $ipaddr): int {
+        $this->db->prepared_query("
+            INSERT INTO users_history_passwords
+                   (UserID, ChangerIP, useragent)
+            VALUES (?,      ?,         ?)
+            ", $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
+        );
+        Irc::sendRaw("PRIVMSG " . $this->username()
+            . " :Security alert: Your password was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
+        (new Mail)->send($this->email(), 'Password changed information for ' . SITE_NAME,
+            $this->twig->render('email/password-change.twig', [
+                'ipaddr'     => $ipaddr,
+                'now'        => Date('Y-m-d H:i:s'),
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                'username'   => $this->username(),
+            ])
+        );
+        $this->cache->delete_value('user_pw_count_' . $this->id);
+        return $this->db->affected_rows();
+    }
+
     public function remove() {
         $this->db->prepared_query("
             DELETE FROM users_main WHERE ID = ?
@@ -1148,9 +1192,9 @@ class User extends BaseObject {
         }
         $this->db->prepared_query('
             INSERT INTO users_history_passwords
-                   (UserID, ChangerIP, ChangeTime)
-            VALUES (?,      ?,         now())
-            ', $this->id, $ipaddr
+                   (UserID, ChangerIP, useragent)
+            VALUES (?,      ?,         ?)
+            ', $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
         if ($this->db->affected_rows() !== 1) {
             $this->db->rollback();
@@ -1164,7 +1208,8 @@ class User extends BaseObject {
     public function passwordHistory(): array {
         $this->db->prepared_query("
             SELECT ChangeTime AS date,
-                ChangerIP     AS ipaddr
+                ChangerIP     AS ipaddr,
+                useragent
             FROM users_history_passwords
             WHERE UserID = ?
             ORDER BY ChangeTime DESC
@@ -1265,7 +1310,7 @@ class User extends BaseObject {
         );
         $n += $this->db->affected_rows();
         $this->db->prepared_query("
-            UPDATE users_history_passwords SET ChangerIP = '' WHERE UserID = ?
+            UPDATE users_history_passwords SET ChangerIP = '', useragent = 'reset-ip-history' WHERE UserID = ?
             ", $this->id
         );
         $n += $this->db->affected_rows();
@@ -1291,8 +1336,8 @@ class User extends BaseObject {
         );
         $this->db->prepared_query("
             INSERT INTO users_history_emails
-                   (UserID, Email, IP)
-            VALUES (?,      ?,     ?)
+                   (UserID, Email, IP, useragent)
+            VALUES (?,      ?,     ?, 'email-reset')
             ", $this->id, $email, $ipaddr
         );
         $this->db->prepared_query("
@@ -1644,13 +1689,14 @@ class User extends BaseObject {
     /**
      * Email history
      *
-     * @return array [email address, ip, date]
+     * @return array [email address, ip, date, useragent]
      */
     public function emailHistory(): array {
         $this->db->prepared_query("
             SELECT h.Email,
                 h.Time,
-                h.IP
+                h.IP,
+                h.useragent
             FROM users_history_emails AS h
             WHERE h.UserID = ?
             ORDER BY h.Time DESC
@@ -1671,7 +1717,8 @@ class User extends BaseObject {
                 Email  AS email,
                 UserID AS user_id,
                 Time   AS created,
-                IP     AS ipv4
+                IP     AS ipv4,
+                useragent
             FROM users_history_emails AS uhe
             WHERE uhe.UserID != ?
                 AND uhe.Email in (SELECT DISTINCT Email FROM users_history_emails WHERE UserID = ?)

@@ -187,6 +187,7 @@ if ($Viewer) {
     // Because we <3 our staff
     if (check_perms('site_disable_ip_history')) {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['HTTP_USER_AGENT'] = 'staff-browser';
     }
 
     // IP changed

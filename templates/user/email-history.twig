@@ -2,12 +2,15 @@
 <div class="header">
     <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Email history</h2>
 </div>
+<div class="header">
+<h3>Email History</h3>
+</div>
 <table>
-    <tr><th colspan="3">Email History</th></tr>
     <tr>
         <th>Address</th>
         <th>Registered since</th>
         <th>Registered from</th>
+        <th>Useragent</th>
     </tr>
 {% for i in user.emailHistory  %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -17,6 +20,7 @@
             <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ i.0 }}" class="brackets tooltip" title="Shared with other users?">S</a>
             <a href="https://whatismyipaddress.com/ip/{{ i.0 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
         </td>
+        <td>{{ i.3 }}</td>
     </tr>
 {% endfor %}
 </table>
@@ -33,6 +37,7 @@
         <th>Email</th>
         <th>Registered since</th>
         <th>Registered from</th>
+        <th>Useragent</th>
         <th>Enabled</th>
         <th>Donor</th>
         <th>Warned until</th>
@@ -46,6 +51,7 @@
             <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ r.ipv4 }}" class="brackets tooltip" title="Shared with other users?">S</a>
             <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
         </td>
+        <td>{{ r.useragent }}</td>
         <td>{{ r.user.isEnabled ? 'yes' : 'no' }}</td>
         <td>{{ r.user.isDonor ? 'yes' : 'no' }}</td>
         <td>{{ r.user.isWarned ? r.user.endWarningDate(0) : 'no' }}</td>
