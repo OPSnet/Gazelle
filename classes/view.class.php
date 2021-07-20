@@ -21,7 +21,7 @@ class View {
 
         if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
             echo $Twig->render('index/public-header.twig', [
-                'page_title' => $pageTitle,
+                'page_title' => html_entity_decode($pageTitle),
             ]);
         } else {
             $Style = [
@@ -47,6 +47,7 @@ class View {
             if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
                 array_push($Scripts, 'jquery-migrate', 'debug');
             }
+            global $LoggedUser;
             if (!isset($LoggedUser['Tooltipster']) || $LoggedUser['Tooltipster']) {
                 array_push($Scripts, 'tooltipster', 'tooltipster_settings');
                 array_push($Style, 'tooltipster/style.css');
@@ -69,7 +70,7 @@ class View {
 
             echo $Twig->render('index/private-header.twig', [
                 'auth_args'    => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
-                'page_title'   => $pageTitle,
+                'page_title'   => html_entity_decode($pageTitle),
                 'script'       => array_map(function ($s) { return "$s.js"; }, $Scripts),
                 'style'        => $Style,
                 'viewer'       => $Viewer,
