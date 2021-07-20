@@ -1,0 +1,21 @@
+Dear {{ username }},
+
+At {{ now }} UTC, a request from {{ ipaddr }} was received
+to change your email address for {{ constant('SITE_NAME') }}.
+
+The new address is {{ new_email }} . Please take a moment to
+verify that you did not made a mistake when entering it.
+
+If you made this change then you may safely ignore this message.
+
+If you did not request this change yourself, or do not recognize the
+address, then either someone has guessed your password or you left a
+session logged in somewhere. In either case, you should contact us
+immediately. Come to {{ constant('BOT_SERVER') }} and join the {{ constant('BOT_DISABLED_CHAN') }} channel.
+
+If you receive another email saying your password was changed
+and you did not request it, you account has almost certainly
+been taken over by a third party.
+
+The useragent string sent by the browser was:
+{{ user_agent }}
