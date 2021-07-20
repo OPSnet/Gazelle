@@ -8,10 +8,10 @@
 <title>{{ page_title }}</title>
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-{{ css('style.css') }}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/jquery.js"></script>
+{{ css('public/style.css') }}
+{{ script('jquery.js') }}
 {% if constant('DEBUG_MODE') %}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/jquery-migrate.js"></script>
+{{ script('jquery-migrate.js') }}
 {% endif %}
 {{ script('script_start.js') }}
 {{ script('ajax.class.js') }}
