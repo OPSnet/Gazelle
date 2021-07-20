@@ -96,13 +96,15 @@ class InitialUserSeeder extends AbstractSeed {
                 'UserID' => $adminId,
                 'Email' => 'admin@example.com',
                 'Time' => Literal::from('now()'),
-                'IP' => '127.0.0.1'
+                'IP' => '127.0.0.1',
+                'useragent' => 'initial-seed',
             ],
             [
                 'UserID' => $userId,
                 'Email' => 'user@example.com',
                 'Time' => Literal::from('now()'),
-                'IP' => '127.0.0.1'
+                'IP' => '127.0.0.1',
+                'useragent' => 'initial-seed',
             ]
         ])->saveData();
 

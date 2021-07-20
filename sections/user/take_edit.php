@@ -141,19 +141,12 @@ if (isset($_POST['p_donor_stats'])) {
     $userMan->hideDonor($user);
 }
 
-$CurEmail = $user->email();
-if ($CurEmail != $_POST['email']) {
-    // Non-admins have to authenticate to change email
-    if (!check_perms('users_edit_profiles') && !$user->validatePassword($_POST['cur_pass'])) {
-        error('You did not enter the correct password.');
+$NewEmail = false;
+if ($user->email() != $_POST['email']) {
+    if (!$Viewer->permitted('users_edit_profiles') && !$user->validatePassword($_POST['cur_pass'])) {
+        error('You must enter your current password when changing your email address.');
     }
     $NewEmail = $_POST['email'];
-    $DB->prepared_query("
-        INSERT INTO users_history_emails
-               (UserID, Email, IP)
-        VALUES (?,      ?,     ?)
-        ", $userId, $NewEmail, $_SERVER['REMOTE_ADDR']
-    );
 }
 
 $ResetPassword = false;
@@ -293,7 +286,6 @@ INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
     i.NotifyOnDeleteSeeding = ?,
     i.NotifyOnDeleteSnatched = ?,
     i.NotifyOnDeleteDownloaded = ?,
-    m.Email = ?,
     m.IRCKey = ?,
     m.Paranoia = ?,
     i.NavItems = ?
@@ -312,7 +304,6 @@ $Params = [
     $NotifyOnDeleteSeeding,
     $NotifyOnDeleteSnatched,
     $NotifyOnDeleteDownloaded,
-    $_POST['email'],
     $_POST['irckey'],
     serialize($Paranoia),
     $UserNavItems
@@ -321,18 +312,19 @@ $Params = [
 if ($ResetPassword) {
     $SQL .= ',m.PassHash = ?';
     $Params[] = Gazelle\UserCreator::hashPassword($_POST['new_pass_1']);
-    $DB->prepared_query('
-        INSERT INTO users_history_passwords
-               (UserID, ChangerIP, ChangeTime)
-        VALUES (?,      ?,         now())
-        ', $userId, $LoggedUser['IP']
-    );
+    $user->recordPasswordChange($Viewer->ipaddr());
+}
+
+if ($NewEmail) {
+    $SQL .= ',m.email = ?';
+    $Params[] = $NewEmail;
+    $user->recordEmailChange($NewEmail, $Viewer->ipaddr());
 }
 
 if (isset($_POST['resetpasskey'])) {
     $OldPassKey = $user->announceKey();
     $NewPassKey = randomString();
-    $ChangerIP = $LoggedUser['IP'];
+    $ChangerIP = $Viewer->ipaddr();
     $SQL .= ',m.torrent_pass = ?';
     $Params[] = $NewPassKey;
     $DB->prepared_query('
