@@ -109,7 +109,11 @@
 <div class="box box_info box_userinfo_stats">
     <div class="head colhead_dark">Statistics</div>
     <ul class="stats nobullet">
-        <li>Joined: {{ user.joinDate|time_diff }}</li>
+        <li>Joined: {{ user.joinDate|time_diff }}
+            {%- if (own_profile or viewer.permitted('users_mod')) and user.TFAKey -%}
+            <span class="tooltip" style="color: #008000" title="2FA enabled!"> &#x2714;</span>
+            {%- endif -%}
+        </li>
 {% set visible = user.propertyVisible(preview_user, 'lastseen') %}
 {% if visible %}
         <li{{ class_override(visible) }}>Last seen: {{ user.lastAccess|time_diff }}</li>
