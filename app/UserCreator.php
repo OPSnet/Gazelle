@@ -151,7 +151,7 @@ class UserCreator extends Base {
             $this->db->prepared_query('
                 INSERT INTO users_history_emails
                        (UserID, Email, IP, useragent, Time)
-                VALUES (?,      ?,     ?,  now() - INTERVAL ? SECOND)
+                VALUES (?,      ?,     ?,  ?,         now() - INTERVAL ? SECOND)
                 ', $this->id, $e, $this->ipaddr, $_SERVER['HTTP_USER_AGENT'], $past--
             );
         }
