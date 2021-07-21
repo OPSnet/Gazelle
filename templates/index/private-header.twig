@@ -40,6 +40,11 @@
 {% for sheet in style %}
 {{ css(sheet) }}
 {% endfor %}
+{% if viewer.stylesheetUrl %}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ viewer.stylesheetUrl }}" title="External CSS" />
+{% else -%}
+{{ css(viewer.stylesheetName ~ '/style.css') }}
+{% endif %}
 {% for js in script %}
 {{ script(js) }}
 {% endfor %}

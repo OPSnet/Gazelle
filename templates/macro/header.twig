@@ -1,5 +1,5 @@
 {%- macro css(filename) -%}
-<link type="text/css" rel="stylesheet" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime('styles/' ~ filename) }}" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_css(filename) }}" />
 {%- endmacro -%}
 
 {%- macro script(filename) -%}
