@@ -742,7 +742,18 @@ class User extends BaseObject {
     }
 
     public function stylesheetUrl(): ?string {
-        return $this->info()['StyleURL'];
+        $styleUrl = $this->info()['StyleURL'];
+        if (is_null($styleUrl)) {
+            return null;
+        }
+        $info = parse_url($styleUrl);
+        if (substr($info['path'], -4) === '.css'
+                && $info['query'] . $info['fragment'] === ''
+                && $info['host'] === SITE_HOST
+                && file_exists(SERVER_ROOT . $info['path'])) {
+            return $styleUrl . '?v=' . filemtime(SERVER_ROOT . "/public/{$info['path']}");
+        }
+        return $styleUrl;
     }
 
     public function supportFor() {
