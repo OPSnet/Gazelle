@@ -132,6 +132,18 @@ if (check_perms('admin_periodic_task_view')) {
     }
 }
 
+if (!$Viewer->permitted('site_torrents_notify')) {
+    $hasNewSubscriptions = false;
+    $NewSubscriptions = [];
+} else {
+    $notifMan = new Gazelle\Manager\Notification($Viewer->id());
+    $Notifications = $notifMan->notifications();
+    $hasNewSubscriptions = isset($Notifications[Gazelle\Manager\Notification::SUBSCRIPTIONS]);
+    if ($notifMan->isSkipped(Gazelle\Manager\Notification::SUBSCRIPTIONS)) {
+        $NewSubscriptions = (new Gazelle\Manager\Subscription($Viewer->id()))->unread();
+    }
+}
+
 $parseNavItem = function($val) {
     $val = trim($val);
     return $val === 'false' ? false : $val;
@@ -162,7 +174,7 @@ foreach ($navItems as $n) {
     if ($Key === 'inbox') {
         $Target = Gazelle\Inbox::getLinkQuick(null, $LoggedUser['ListUnreadPMsFirst'] ?? false);
     } elseif ($Key === 'subscriptions') {
-        if ($NewSubscriptions) {
+        if ($hasNewSubscriptions) {
             $extraClass[] = 'new-subscriptions';
         }
         $extraClass[] = Format::add_class($PageID, ['userhistory', 'subscriptions'], 'active', false);
