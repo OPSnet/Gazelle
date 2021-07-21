@@ -132,7 +132,14 @@ class Twig {
 
         $twig->addFunction(new \Twig\TwigFunction('mtime', function($filename) {
             return new \Twig\Markup(
-                filemtime(SERVER_ROOT . '/public/static/' . $filename),
+                base_convert(filemtime(SERVER_ROOT . '/public/static/' . $filename), 10, 36),
+                'UTF-8'
+            );
+        }));
+
+        $twig->addFunction(new \Twig\TwigFunction('mtime_css', function($filename) {
+            return new \Twig\Markup(
+                base_convert(filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)), 10, 36),
                 'UTF-8'
             );
         }));
