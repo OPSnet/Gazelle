@@ -47,25 +47,15 @@ class View {
             if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
                 array_push($Scripts, 'jquery-migrate', 'debug');
             }
-            global $LoggedUser;
-            if (!isset($LoggedUser['Tooltipster']) || $LoggedUser['Tooltipster']) {
+            if ((new Gazelle\Manager\Notification($Viewer->id()))->useNoty()) {
+                array_push($Scripts, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
+            }
+            if ($Viewer->option('Tooltipster') ?? 1) {
                 array_push($Scripts, 'tooltipster', 'tooltipster_settings');
                 array_push($Style, 'tooltipster/style.css');
             }
             if ($Viewer->option('UseOpenDyslexic')) {
                 array_push($Style, 'opendyslexic/style.css');
-            }
-
-            if ($Viewer->permitted('site_torrents_notify')) {
-                $notifMan = new Gazelle\Manager\Notification($Viewer->id());
-                $Notifications = $notifMan->notifications();
-                $NewSubscriptions = isset($Notifications[Gazelle\Manager\Notification::SUBSCRIPTIONS]);
-                if ($notifMan->isSkipped(Gazelle\Manager\Notification::SUBSCRIPTIONS)) {
-                    $NewSubscriptions = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->unread();
-                }
-                if ($notifMan->useNoty()) {
-                    array_push($Scripts, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
-                }
             }
 
             echo $Twig->render('index/private-header.twig', [
