@@ -182,7 +182,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             ", $page, $pageId, current($this->thread)['ID'], $lastPost, $userId
         );
         if ($this->db->affected_rows()) {
-            $this->cache->delete_value("notify_quoted_$userId");
+            $this->cache->delete_value("user_quote_unread_$userId");
         }
 
         // last read

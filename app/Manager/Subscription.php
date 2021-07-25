@@ -57,7 +57,7 @@ class Subscription extends \Gazelle\Base {
                     (?,      ?,        ?,    ?,      ?)
                 ', $Result['ID'], $this->userId, $Page, $PageID, $PostID
             );
-            $this->cache->delete_value("notify_quoted_" . $Result['ID']);
+            $this->cache->delete_value("user_quote_unread_" . $Result['ID']);
             $URL = SITE_URL .  ($Page == 'forums')
                 ? "/forums.php?action=viewthread&postid=$PostID"
                 : "/comments.php?action=jump&postid=$PostID";
@@ -387,7 +387,7 @@ class Subscription extends \Gazelle\Base {
         );
         $Subscribers = $this->db->collect('UserID');
         foreach ($Subscribers as $Subscriber) {
-            $this->cache->delete_value("notify_quoted_$Subscriber");
+            $this->cache->delete_value("user_quote_unread_$Subscriber");
         }
         $this->db->set_query_id($QueryID);
     }

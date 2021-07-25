@@ -43,7 +43,7 @@ class Quote extends \Gazelle\Base {
             WHERE UserID = ?
             ", $this->user->id()
         );
-        $this->cache->delete_value('notify_quoted_' . $this->user->id());
+        $this->cache->delete_value('user_quote_unread_' . $this->user->id());
         return $this->db->affected_rows();
     }
 
@@ -64,7 +64,7 @@ class Quote extends \Gazelle\Base {
                 AND PostID BETWEEN ? AND ?
             ", $this->user->id(), $threadId, $firstPost, $lastPost
         );
-        $this->cache->delete_value('notify_quoted_' . $this->user->id());
+        $this->cache->delete_value('user_quote_unread_' . $this->user->id());
         return $this->db->affected_rows() === 1;
     }
 
