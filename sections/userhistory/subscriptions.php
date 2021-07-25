@@ -7,120 +7,18 @@ $showCollapsed = (bool)($_GET['collapse'] ?? true);
 $showUnread    = (bool)($_GET['showunread'] ?? true);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
-$total = $DB->scalar("
-    SELECT sum(total)
-    FROM (
-        SELECT count(*) AS total
-        FROM users_subscriptions_comments AS s
-        LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
-        LEFT JOIN artists_group AS a ON (s.Page = 'artist' AND a.ArtistID = s.PageID)
-        LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
-        LEFT JOIN comments AS c ON
-            (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
-        LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
-        WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
-            AND (s.Page != 'collages' OR co.Deleted = '0')
-            " . ($showUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
-            AND s.UserID = ?
-        GROUP BY s.PageID
-    UNION ALL
-        SELECT count(*) AS total
-        FROM users_subscriptions AS s
-        LEFT JOIN forums_last_read_topics AS lr ON (lr.UserID = ? AND s.TopicID = lr.TopicID)
-        LEFT JOIN forums_topics AS t ON (t.ID = s.TopicID)
-        LEFT JOIN forums AS f ON (f.ID = t.ForumID)
-        LEFT JOIN forums_posts AS p ON
-            (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
-        LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
-        WHERE " . Forums::user_forums_sql()
-            . ($showUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
-            AND s.UserID = ?
-        GROUP BY t.ID
-    ) TOTAL
-    ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id()
-);
-$paginator->setTotal($total ?? 0);
+$forMan = new Gazelle\Manager\Forum;
+$commMan = new Gazelle\Manager\Comment;
+if ($showUnread) {
+    $total = $forMan->unreadSubscribedForumTotal($Viewer)
+        + $commMan->unreadSubscribedCommentTotal($Viewer);
+} else {
+    $total = $forMan->subscribedForumTotal($Viewer)
+        + $commMan->subscribedCommentTotal($Viewer);
+}
+$paginator->setTotal($total);
 
-// The monster sql query:
-/*
- * Fields:
- * Page (artist, collages, requests, torrents or forums)
- * PageID (ArtistID, CollageID, RequestID, GroupID, TopicID)
- * PostID (of the last read post)
- * ForumID
- * ForumName
- * Name (for artists and collages; carries the topic title for forum subscriptions)
- * LastPost (PostID of the last post)
- * LastPostTime
- * LastReadBody
- * LastReadEditedTime
- * LastReadUserID
- * LastReadUsername
- * LastReadAvatar
- * LastReadEditedUserID
- */
-$DB->prepared_query("
-    SELECT s.Page,
-        s.PageID,
-        lr.PostID,
-        null AS ForumID,
-        null AS ForumName,
-        IF(s.Page = 'artist', a.Name, co.Name) AS Name,
-        c.ID AS LastPost,
-        c.AddedTime AS LastPostTime,
-        c_lr.Body AS LastReadBody,
-        c_lr.EditedTime AS LastReadEditedTime,
-        um.ID AS LastReadUserID,
-        um.Username AS LastReadUsername,
-        ui.Avatar AS LastReadAvatar,
-        c_lr.EditedUserID AS LastReadEditedUserID
-    FROM users_subscriptions_comments AS s
-    LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
-    LEFT JOIN artists_group AS a ON (s.Page = 'artist' AND a.ArtistID = s.PageID)
-    LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
-    LEFT JOIN comments AS c ON
-        (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
-    LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
-    LEFT JOIN users_main AS um ON (um.ID = c_lr.AuthorID)
-    LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
-    WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
-        AND (s.Page != 'collages' OR co.Deleted = '0')
-        " . ($showUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
-        AND s.UserID = ?
-    GROUP BY s.PageID
-UNION ALL
-    SELECT 'forums',
-        s.TopicID,
-        lr.PostID,
-        f.ID,
-        f.Name,
-        t.Title,
-        p.ID,
-        p.AddedTime,
-        p_lr.Body,
-        p_lr.EditedTime,
-        um.ID,
-        um.Username,
-        ui.Avatar,
-        p_lr.EditedUserID
-    FROM users_subscriptions AS s
-    LEFT JOIN forums_last_read_topics AS lr ON (lr.UserID = ? AND s.TopicID = lr.TopicID)
-    LEFT JOIN forums_topics AS t ON (t.ID = s.TopicID)
-    LEFT JOIN forums AS f ON (f.ID = t.ForumID)
-    LEFT JOIN forums_posts AS p ON
-        (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
-    LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
-    LEFT JOIN users_main AS um ON (um.ID = p_lr.AuthorID)
-    LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
-    WHERE " . Forums::user_forums_sql()
-        . ($showUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
-        AND s.UserID = ?
-    GROUP BY t.ID
-    ORDER BY LastPostTime DESC
-    LIMIT ? OFFSET ?
-    ", $Viewer->id(), $Viewer->id(), $Viewer->id(), $Viewer->id(), $paginator->limit(), $paginator->offset()
-);
-$Results = $DB->to_array(false, MYSQLI_ASSOC, false);
+$Results = (new Gazelle\Manager\Subscription)->latestSubscriptionList($Viewer, $showUnread, $paginator->limit(), $paginator->offset());
 
 $TorrentGroups = $Requests = [];
 foreach ($Results as $Result) {

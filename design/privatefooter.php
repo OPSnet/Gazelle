@@ -16,7 +16,7 @@ global $Debug;
     if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
         echo $Twig->render('debug/sphinxql.twig', ['list' => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]);
     }
-    echo $Twig->render('debug/query.twig', ['list' => $Debug->get_queries(), 'time' => $DB->Time]);
+    echo $Twig->render('debug/query.twig', ['list' => $Debug->get_queries_br(), 'time' => $DB->Time]);
     echo $Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => $Cache->Time]);
     echo $Twig->render('debug/var.twig', ['list' => $Debug->get_logged_vars()]);
     echo $Twig->render('debug/ocelot.twig', ['list' => (new Gazelle\Tracker)->requestList()]);
