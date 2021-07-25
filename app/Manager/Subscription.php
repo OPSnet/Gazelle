@@ -171,63 +171,42 @@ class Subscription extends \Gazelle\Base {
      * @return int Number of unread subscribed threads/comments
      */
     public function unread() {
-        $NewSubscriptions = $this->cache->get_value('subscriptions_user_new_' . $this->userId);
-        if ($NewSubscriptions === false) {
-            // forum subscriptions
-            // TODO: refactor this shit and all the other places user_forums_sql is called.
-            $NewForumSubscriptions = $this->db->scalar("
-                SELECT count(*)
-                FROM users_subscriptions AS s
-                LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
-                INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
-                INNER JOIN forums AS f ON (f.ID = t.ForumID)
-                WHERE " . \Forums::user_forums_sql() . "
-                    AND IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", t.LastPostID, IF(l.PostID IS NULL, 0, l.PostID)) < t.LastPostID
-                    AND s.UserID = ?
-                ", $this->userId
-            );
-
-            // comment subscriptions
-            $NewCommentSubscriptions = $this->db->scalar("
-                SELECT count(*)
-                FROM users_subscriptions_comments AS s
-                LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
-                LEFT JOIN comments AS c ON (c.ID = (SELECT MAX(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
-                LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
-                WHERE s.UserID = ?
-                    AND (s.Page != 'collages' OR co.Deleted = '0')
-                    AND IF(lr.PostID IS NULL, 0, lr.PostID) < c.ID
-                ", $this->userId
-            );
-
-            $NewSubscriptions = $NewForumSubscriptions + $NewCommentSubscriptions;
-            $this->cache->cache_value('subscriptions_user_new_' . $this->userId, $NewSubscriptions, 0);
+        $unread = $this->cache->get_value('subscriptions_user_new_' . $this->userId);
+        if ($unread === false) {
+            $user = new \Gazelle\User($this->userId);
+            $unread = (new \Gazelle\Manager\Forum)->unreadSubscribedForumTotal($user)
+                + (new \Gazelle\Manager\Comment)->unreadSubscribedCommentTotal($user);
+            $this->cache->cache_value('subscriptions_user_new_' . $this->userId, $unread, 0);
         }
-        return $NewSubscriptions;
+        return $unread;
     }
 
     /**
      * Returns whether or not the current user has new quote notifications.
      * @return int Number of unread quote notifications
      */
-    public function unreadQuotes() {
-        $QuoteNotificationsCount = $this->cache->get_value('notify_quoted_' . $this->userId);
-        if ($QuoteNotificationsCount === false) {
-            $QuoteNotificationsCount = $this->db->scalar("
+    public function unreadQuotes(): int {
+        $key = 'user_quote_unread_' . $this->userId;
+        $total = $this->cache->get_value($key);
+        if ($total === false) {
+            $forMan = new \Gazelle\Manager\Forum;
+            [$cond, $args] = $forMan->configureForUser(new \Gazelle\User($this->userId));
+            $args[] = $this->userId; // for q.UserID
+            $total = (int)$this->db->scalar("
                 SELECT count(*)
                 FROM users_notify_quoted AS q
                 LEFT JOIN forums_topics AS t ON (t.ID = q.PageID)
                 LEFT JOIN forums AS f ON (f.ID = t.ForumID)
                 LEFT JOIN collages AS c ON (q.Page = 'collages' AND c.ID = q.PageID)
                 WHERE q.UnRead
-                    AND (q.Page != 'forums' OR " . \Forums::user_forums_sql() . ")
+                    AND (q.Page != 'forums' OR " . implode(' AND ', $cond). ")
                     AND (q.Page != 'collages' OR c.Deleted = '0')
                     AND q.UserID = ?
-                ", $this->userId
+                ", ...$args
             );
-            $this->cache->cache_value('notify_quoted_' . $this->userId, $QuoteNotificationsCount, 0);
+            $this->cache->cache_value($key, $total, 0);
         }
-        return (int)$QuoteNotificationsCount;
+        return $total;
     }
 
     /**
@@ -431,7 +410,13 @@ class Subscription extends \Gazelle\Base {
         $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
     }
 
-    public function catchupSubscriptions() {
+    /**
+     * Mark all subscribed forums and comments of the user as read
+     *
+     * @return int number of forums+comments that were caught up
+     */
+    public function catchupSubscriptions(): int {
+        $this->db->begin_transaction();
         $this->db->prepared_query("
             INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
                 SELECT us.UserID, ft.ID, ft.LastPostID
@@ -441,6 +426,7 @@ class Subscription extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $this->userId
         );
+        $n = $this->db->affected_rows();
         $this->db->prepared_query("
             INSERT INTO users_comments_last_read (UserID, Page, PageID, PostID)
                 SELECT s.UserID, s.Page, s.PageID, IFNULL(c.ID, 0)
@@ -451,6 +437,81 @@ class Subscription extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE PostID = IFNULL(c.ID, 0)
             ", $this->userId
         );
+        $n += $this->db->affected_rows();
+        $this->db->commit();
         $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
+        return $n;
+    }
+
+    public function latestSubscriptionList(\Gazelle\User $user, bool $showUnread, int $limit, int $offset): array {
+        $userId = $user->id();
+        $forMan = new \Gazelle\Manager\Forum;
+        [$cond, $args] = $forMan->configureForUser($user);
+        if ($showUnread) {
+            $cond[] = "p.ID > if(t.IsLocked = '1' AND t.IsSticky = '0', p.ID, coalesce(lr.PostID, 0))";
+        }
+        $cond[] = "s.UserID = ?";
+        array_push($args, $userId, $limit, $offset);
+
+        $this->db->prepared_query("
+            SELECT s.Page,
+                s.PageID,
+                lr.PostID,
+                null AS ForumID,
+                null AS ForumName,
+                IF(s.Page = 'artist', a.Name, co.Name) AS Name,
+                c.ID AS LastPost,
+                c.AddedTime AS LastPostTime,
+                c_lr.Body AS LastReadBody,
+                c_lr.EditedTime AS LastReadEditedTime,
+                um.ID AS LastReadUserID,
+                um.Username AS LastReadUsername,
+                ui.Avatar AS LastReadAvatar,
+                c_lr.EditedUserID AS LastReadEditedUserID
+            FROM users_subscriptions_comments AS s
+            LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
+            LEFT JOIN artists_group AS a ON (s.Page = 'artist' AND a.ArtistID = s.PageID)
+            LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
+            LEFT JOIN comments AS c ON
+                (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+            LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
+            LEFT JOIN users_main AS um ON (um.ID = c_lr.AuthorID)
+            LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
+            WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
+                AND (s.Page != 'collages' OR co.Deleted = '0')
+                " . ($showUnread ? ' AND c.ID > coalesce(lr.PostID, 0)' : '') . "
+                AND s.UserID = ?
+            GROUP BY s.PageID
+        UNION ALL
+            SELECT 'forums',
+                s.TopicID,
+                lr.PostID,
+                f.ID,
+                f.Name,
+                t.Title,
+                p.ID,
+                p.AddedTime,
+                p_lr.Body,
+                p_lr.EditedTime,
+                um.ID,
+                um.Username,
+                ui.Avatar,
+                p_lr.EditedUserID
+            FROM users_subscriptions AS s
+            LEFT JOIN forums_last_read_topics AS lr ON (lr.UserID = ? AND s.TopicID = lr.TopicID)
+            LEFT JOIN forums_topics AS t ON (t.ID = s.TopicID)
+            LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+            LEFT JOIN forums_posts AS p ON
+                (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
+            LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
+            LEFT JOIN users_main AS um ON (um.ID = p_lr.AuthorID)
+            LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
+            WHERE " . implode(' AND ', $cond) . "
+            GROUP BY t.ID
+        ORDER BY LastPostTime DESC
+        LIMIT ? OFFSET ?
+            ", $userId, $userId, $userId, ...$args
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

@@ -261,4 +261,94 @@ class Forum extends \Gazelle\Base {
         $this->cache->delete_value(self::CACHE_TOC);
         return $this;
     }
+
+    /**
+     * Configure forum ACLs for a user (what they can see from their class, what they
+     * have explicit permission to access, less what they have been forbidden.
+     * It is expected to implode(' AND ', ...) the first return parameter within a
+     * larger query, and merge the second return parameter into the prepared_query()
+     * call.
+     *
+     * It is a pre-requisite that the `forums` table have the alias f.
+     *
+     * @param Gazelle\User viewer
+     * @return array of [conditions, args]
+     */
+    public function configureForUser(\Gazelle\User $user): array {
+        $permitted = $user->permittedForums();
+        if (!empty($permitted)) {
+            $cond = ['(f.MinClassRead <= ? OR f.ID IN (' . placeholders($permitted) . '))'];
+            $args = array_merge([$user->classLevel()], $permitted);
+        } else {
+            $cond = ['f.MinClassRead <= ?'];
+            $args = [$user->classLevel()];
+        }
+        $forbidden = $user->forbiddenForums();
+        if (!empty($forbidden)) {
+            $cond[] = 'f.ID NOT IN (' . placeholders($forbidden) . ')';
+            $args = array_merge($args, $forbidden);
+        }
+        return [$cond, $args];
+    }
+
+    public function subscribedForumTotal(\Gazelle\User $user): int {
+        [$cond, $args] = $this->configureForUser($user);
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM users_subscriptions AS s
+            LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
+            INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
+            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            WHERE s.UserID = ?
+                AND " . implode(' AND ', $cond),
+            $user->id(), ...$args
+        );
+    }
+
+    public function unreadSubscribedForumTotal(\Gazelle\User $user): int {
+        [$cond, $args] = $this->configureForUser($user);
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM users_subscriptions AS s
+            LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
+            INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
+            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            WHERE if(t.IsLocked = '1' AND t.IsSticky = '0', t.LastPostID, coalesce(l.PostID, 0)) < t.LastPostID
+                AND s.UserID = ?
+                AND " . implode(' AND ', $cond),
+            $user->id(), ...$args
+        );
+    }
+
+    public function latestPostsList(\Gazelle\User $user, bool $showUnread, int $limit, int $offset): array {
+        [$cond, $args] = $this->configureForUser($user);
+        if ($showUnread) {
+            $cond[] = "if(t.IsLocked = '1' AND t.IsSticky = '0', t.LastPostID, flrt.PostID) < t.LastPostID";
+        }
+        array_push($cond,
+            "s.UserID = ?"
+        );
+        array_push($args, $user->id(), $limit, $offset);
+
+        $this->db->prepared_query("
+            SELECT f.ID            AS forumId,
+                f.Name             AS forumName,
+                t.ID               AS threadId,
+                t.Title            AS threadTitle,
+                t.LastPostID       AS lastPostId,
+                (t.IsLocked = '1') AS locked,
+                (p.ID < t.LastPostID AND t.IsLocked != '1') AS new
+            FROM users_subscriptions AS s
+            INNER JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = s.TopicID AND flrt.UserID = ?)
+            INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
+            INNER JOIN forums_posts AS p ON (p.ID = flrt.PostID and p.TopicID = flrt.TopicID)
+            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            WHERE " . implode(' AND ', $cond) . "
+            GROUP BY p.TopicID
+            ORDER BY t.LastPostID DESC
+            LIMIT ? OFFSET ?
+            ", $user->id(), ...$args
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }

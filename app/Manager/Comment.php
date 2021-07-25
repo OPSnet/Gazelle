@@ -203,4 +203,44 @@ class Comment extends \Gazelle\Base {
         }
         return $list;
     }
+
+    /**
+     * How many subscribed entities (artists, collages, requests, torrents)
+     * have new comments on them?
+     *
+     * @param \Gazelle\User the viewer
+     * @return int Number of entities with unread comments
+     */
+    public function unreadSubscribedCommentTotal(\Gazelle\User $user): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM users_subscriptions_comments AS s
+            LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
+            LEFT JOIN comments AS c ON (c.ID = (SELECT MAX(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+            LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
+            WHERE (s.Page != 'collages' OR co.Deleted = '0')
+                AND coalesce(lr.PostID, 0) < c.ID
+                AND s.UserID = ?
+            ", $user->id()
+        );
+    }
+
+    /**
+     * How many total subscribed entities (artists, collages, requests, torrents)
+     *
+     * @param \Gazelle\User the viewer
+     * @return int Number of entities
+     */
+    public function subscribedCommentTotal(\Gazelle\User $user): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM users_subscriptions_comments AS s
+            LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
+            LEFT JOIN comments AS c ON (c.ID = (SELECT MAX(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+            LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
+            WHERE (s.Page != 'collages' OR co.Deleted = '0')
+                AND s.UserID = ?
+            ", $user->id()
+        );
+    }
 }
