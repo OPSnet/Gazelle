@@ -9,7 +9,7 @@ if (empty($_POST['query'])) {
     $textAreaRows = 8;
 } else {
     $query = trim($_POST['query']);
-    if (preg_match('@^(?:explain\s+)?select\b(?:[\s\w()/.,`\'"=*+-])+\bfrom@i', $query) !== 1) {
+    if (preg_match('@^(?:explain\s+)?select\b(?:[\s\w()<>/.,!`\'"=*+-])+\bfrom@i', $query) !== 1) {
         error('Invalid query');
     }
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
