@@ -82,7 +82,7 @@ if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPa
     $lastOnPage = $threadInfo['StickyPostID'];
 }
 
-$quoteCount = $Cache->get_value('notify_quoted_' . $Viewer->id());
+$quoteCount = $Cache->get_value('user_quote_unread_' . $Viewer->id());
 if ($quoteCount === false || $quoteCount > 0) {
     (new Gazelle\User\Quote($Viewer))->clearThread($threadId, $firstOnPage, $lastOnPage);
 }
