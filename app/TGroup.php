@@ -213,12 +213,28 @@ class TGroup extends BaseObject {
         return $this->info()['Name'];
     }
 
+    public function year(): string {
+        return $this->info()['Year'];
+    }
+
     public function label(): string {
         return $this->id() . " (" . $this->info()['Name'] . ")";
     }
 
+    public function isSnatched(): bool {
+        return $info['Flags']['IsSnatched'] ?? false;
+    }
+
     public function artistName(): string {
         return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
+    }
+
+    public function torrentTagList(): array {
+        $tag = [];
+        foreach ($this->info()['tags'] as $t) {
+            $tag[] = "<a href=\"torrents.php?taglist={$t['name']}\">{$t['name']}</a>";
+        }
+        return $tag;
     }
 
     /**
