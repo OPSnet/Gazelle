@@ -270,4 +270,64 @@ class Collage extends \Gazelle\Base {
         }
         return $autocomplete;
     }
+
+    public function subscribedGroupCollageList(int $userId, bool $showRecent): array {
+        $cond = ['s.UserID = ?'];
+        $args = [$userId];
+        if ($showRecent) {
+            $cond[] = 'ct.AddedOn > s.LastVisit';
+            $groupIds = 'group_concat(ct.GroupID ORDER BY ct.AddedOn)';
+        } else {
+            $groupIds = 'group_concat(if(ct.AddedOn > s.LastVisit, ct.GroupID, NULL) ORDER BY ct.AddedOn)';
+        }
+        $this->db->prepared_query("
+            SELECT c.ID       AS collageId,
+                c.Name        AS name,
+                c.NumTorrents AS nrEntries,
+                s.LastVisit   AS lastVisit,
+                $groupIds     AS groupIds
+            FROM collages AS c
+            INNER JOIN users_collage_subs AS s ON (s.CollageID = c.ID)
+            INNER JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
+            WHERE c.Deleted = '0'
+                AND " . implode(' AND ', $cond) . "
+            GROUP BY c.ID
+            ", ...$args
+        );
+        $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$entry) {
+            $entry['groupIds'] = is_null($entry['groupIds']) ? [] : explode(',', $entry['groupIds']);
+        }
+        return $list;
+    }
+
+    public function subscribedArtistCollageList(int $userId, bool $showRecent): array {
+        $cond = ['s.UserID = ?'];
+        $args = [$userId];
+        if ($showRecent) {
+            $cond[] = 'ca.AddedOn > s.LastVisit';
+            $artistIds = 'group_concat(ca.ArtistID ORDER BY ca.AddedOn)';
+        } else {
+            $artistIds = 'group_concat(if(ca.AddedOn > s.LastVisit, ca.ArtistID, NULL) ORDER BY ca.AddedOn)';
+        }
+        $this->db->prepared_query("
+            SELECT c.ID       AS collageId,
+                c.Name        AS name,
+                c.NumTorrents AS nrEntries,
+                s.LastVisit   AS lastVisit,
+                $artistIds    AS artistIds
+            FROM collages AS c
+            INNER JOIN users_collage_subs AS s ON (s.CollageID = c.ID)
+            INNER JOIN collages_artists AS ca ON (ca.CollageID = c.ID)
+            WHERE c.Deleted = '0'
+                AND " . implode(' AND ', $cond) . "
+            GROUP BY c.ID
+            ", ...$args
+        );
+        $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$entry) {
+            $entry['artistIds'] = is_null($entry['artistIds']) ? [] : explode(',', $entry['artistIds']);
+        }
+        return $list;
+    }
 }
