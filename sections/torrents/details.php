@@ -7,6 +7,7 @@ if (is_null($tgroup)) {
 }
 $GroupID = $tgroup->id();
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
+$tgroup = (new Gazelle\Manager\TGroup)->findById($GroupID);
 
 [$TorrentDetails, $TorrentList] = get_group_info($GroupID, $RevisionID);
 
@@ -45,18 +46,24 @@ if ($GroupCategoryID == 1) {
     $AltName .= " [$name] ";
 }
 
-$CoverArt = $Cache->get_value("torrents_cover_art_$GroupID");
-if (!$CoverArt) {
-    $DB->prepared_query('
-        SELECT ID, Image, Summary, UserID, Time
-        FROM cover_art
-        WHERE GroupID = ?
-        ORDER BY Time ASC', $GroupID);
-    $CoverArt = $DB->to_array();
-    if ($DB->has_results()) {
-        $Cache->cache_value("torrents_cover_art_$GroupID", $CoverArt, 0);
+$Tags = [];
+if ($TorrentTags != '') {
+    $TorrentTags = explode('|', $TorrentTags);
+    $TorrentTagIDs = explode('|', $TorrentTagIDs);
+    $TorrentTagUserIDs = explode('|', $TorrentTagUserIDs);
+    $TagPositiveVotes = explode('|', $TagPositiveVotes);
+    $TagNegativeVotes = explode('|', $TagNegativeVotes);
+
+    foreach ($TorrentTags as $TagKey => $TagName) {
+        $Tags[$TagKey]['name'] = $TagName;
+        $Tags[$TagKey]['score'] = ($TagPositiveVotes[$TagKey] - $TagNegativeVotes[$TagKey]);
+        $Tags[$TagKey]['id'] = $TorrentTagIDs[$TagKey];
+        $Tags[$TagKey]['userid'] = $TorrentTagUserIDs[$TagKey];
     }
+    uasort($Tags, 'compare');
 }
+
+$CoverArt = $tgroup->coverArt();
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 $commentPage = new Gazelle\Comment\Torrent($GroupID);
@@ -112,39 +119,35 @@ if (check_perms('site_submit_requests')) {
         <div class="box box_image box_image_albumart box_albumart"><!-- .box_albumart deprecated -->
             <div class="head">
                 <strong><?=(count($CoverArt) > 0 ? 'Covers (' . (count($CoverArt) + 1) . ')' : 'Cover')?></strong>
-<?php
-    if (count($CoverArt) > 0) {
-        if (empty($LoggedUser['ShowExtraCovers'])) {
-            for ($Index = 0; $Index <= count($CoverArt); $Index++) {
-?>
-                <span id="cover_controls_<?=($Index)?>"<?=($Index > 0 ? ' style="display: none;"' : '')?>>
-<?php           if ($Index == count($CoverArt)) { ?>
-                        <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
-                        <a class="brackets show_all_covers" href="#">Show all</a>
-                        <span class="brackets next_cover">Next</span>
-<?php           } elseif ($Index > 0) { ?>
-                        <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
-                        <a class="brackets show_all_covers" href="#">Show all</a>
-                        <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
-<?php           } elseif ($Index == 0 && count($CoverArt) > 0) { ?>
-                        <span class="brackets prev_cover">Prev</span>
-                        <a class="brackets show_all_covers" href="#">Show all</a>
-                        <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
-<?php           } ?>
-                </span>
-<?php
-            }
-        } else {
-?>
+<?php if (!$CoverArt) { ?>
                 <span>
                     <a class="brackets show_all_covers" href="#">Hide</a>
                 </span>
 <?php
-        }
+} elseif ($Viewer->option('ShowExtraCovers')) {
+    for ($Index = 0, $last = count($CoverArt); $Index <= $last; $Index++) {
+?>
+                <span id="cover_controls_<?=($Index)?>"<?=($Index > 0 ? ' style="display: none;"' : '')?>>
+<?php   if ($Index == count($CoverArt)) { ?>
+                        <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
+                        <a class="brackets show_all_covers" href="#">Show all</a>
+                        <span class="brackets next_cover">Next</span>
+<?php   } elseif ($Index > 0) { ?>
+                        <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
+                        <a class="brackets show_all_covers" href="#">Show all</a>
+                        <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
+<?php   } elseif ($Index == 0 && count($CoverArt) > 0) { ?>
+                        <span class="brackets prev_cover">Prev</span>
+                        <a class="brackets show_all_covers" href="#">Show all</a>
+                        <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
+<?php   } ?>
+                </span>
+<?php
     }
+}
+$Index = 0;
 ?>
             </div>
-<?php $Index = 0; ?>
 <div id="covers">
 <div id="cover_div_<?=$Index?>" class="pad">
 <?php if ($WikiImage != '') { ?>
@@ -156,36 +159,34 @@ if (check_perms('site_submit_requests')) {
 $Index++;
 ?>
 </div>
-<?php
-            foreach ($CoverArt as $Cover) {
-                [$ImageID, $Image, $Summary, $AddedBy] = $Cover;
-?>
+<?php foreach ($CoverArt as $c) { ?>
                     <div id="cover_div_<?=$Index?>" class="pad"<?=(empty($LoggedUser['ShowExtraCovers']) ? ' style="display: none;"' : '')?>>
                 <p align="center">
 <?php
-                if (empty($LoggedUser['ShowExtraCovers'])) {
-                    $Src = 'src="" data-gazelle-temp-src="' . ImageTools::process($Image, true) . '"';
-                } else {
-                    $Src = 'src="' . ImageTools::process($Image, true) . '"';
-                }
+    if (empty($LoggedUser['ShowExtraCovers'])) {
+        $Src = 'src="" data-gazelle-temp-src="' . ImageTools::process($c['Image'], true) . '"';
+    } else {
+        $Src = 'src="' . ImageTools::process($c['Image'], true) . '"';
+    }
 ?>
-                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$Summary?>" onclick="lightbox.init('<?=ImageTools::process($Image)?>', 220);" />
+                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?=ImageTools::process($c['Image'])?>', 220);" />
                 </p>
                 <ul class="stats nobullet">
-                    <li>
-                        <?=$Summary?>
-                        <?=(check_perms('users_mod') ? ' added by ' . Users::format_username($AddedBy, false, false, false, false, false) : '')?>
-                        <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('torrents.php?action=remove_cover_art&amp;auth=<?=$Viewer->auth() ?>&amp;id=<?=$ImageID?>&amp;groupid=<?=$GroupID?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
+                    <li><?= $c['Summary'] ?>
+<?php if ($Viewer->permitted('users_mod')) { ?>
+                        added by <?= Users::format_username($c['UserID'], false, false, false, false, false) ?>
+<?php } ?>
+                        <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('ajax.php?action=torrent_remove_cover_art&amp;auth=<?= $Viewer->auth() ?>&amp;id=<?= $c['ID'] ?>&amp;groupid=<?= $GroupID ?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
                     </li>
                 </ul>
             </div>
 <?php
-                $Index++;
-            }
+    $Index++;
+}
 ?>
-        </div>
+</div>
 
-<?php   if (check_perms('site_edit_wiki') && $WikiImage != '') { ?>
+<?php if ($Viewer->permitted('site_edit_wiki') && $WikiImage != '') { ?>
         <div id="add_cover_div">
             <div style="padding: 10px;">
                 <span style="float: right;" class="additional_add_artists">
@@ -202,8 +203,7 @@ $Index++;
                 </form>
             </div>
         </div>
-<?php   } ?>
-
+<?php } ?>
     </div>
 <?php
 if (CATEGORY[$GroupCategoryID - 1] == 'Music') {

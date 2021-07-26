@@ -4,8 +4,9 @@ namespace Gazelle;
 
 class TGroup extends BaseObject {
 
-    const CACHE_KEY                = 'tg_%d';
-    const CACHE_TLIST_KEY          = 'tlist_%d';
+    const CACHE_KEY          = 'tg_%d';
+    const CACHE_TLIST_KEY    = 'tlist_%d';
+    const CACHE_COVERART_KEY = 'tg_cover_%d';
 
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
@@ -240,6 +241,57 @@ class TGroup extends BaseObject {
             $tag[] = "<a href=\"torrents.php?taglist={$t['name']}\">{$t['name']}</a>";
         }
         return $tag;
+    }
+
+    public function addCoverArt(string $image, string $summary, int $userId, \Gazelle\Log $logger): int {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO cover_art
+                   (GroupID, Image, Summary, UserID)
+            VALUES (?,       ?,     ?,       ?)
+            ", $this->id, $image, $summary, $userId
+        );
+        $n = $this->db->affected_rows();
+        if ($n) {
+            $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" added to group");
+            $this->cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
+        }
+        return $n;
+    }
+
+    public function removeCoverArt(int $coverId, int $userId, \Gazelle\Log $logger): int {
+        [$image, $summary] = $this->db->row("
+            SELECT Image, Summary
+            FROM cover_art
+            WHERE ID = ?
+            ", $coverId
+        );
+        $this->db->prepared_query("
+            DELETE FROM cover_art WHERE ID = ?
+            ", $coverId
+        );
+        $n = $this->db->affected_rows();
+        if ($n) {
+            $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" removed from group");
+            $this->cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
+        }
+        return $n;
+    }
+
+    public function coverArt(): array {
+        $key = sprintf(self::CACHE_COVERART_KEY, $this->id);
+        $list = $this->cache->get_value($key);
+        if ($list === false) {
+            $this->db->prepared_query("
+                SELECT ID, Image, Summary, UserID, Time
+                FROM cover_art
+                WHERE GroupID = ?
+                ORDER BY Time ASC
+                ", $this->id
+            );
+            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+            $this->cache->cache_value($key, $list, 0);
+        }
+        return $list;
     }
 
     /**

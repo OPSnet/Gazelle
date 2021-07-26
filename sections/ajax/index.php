@@ -105,6 +105,9 @@ switch ($_GET['action']) {
     case 'torrentgroupalbumart':        // so the album art script can function without breaking the ratelimit
         require('torrentgroupalbumart.php');
         break;
+    case 'torrent_remove_cover_art':
+        require('torrent_remove_cover_art.php');
+        break;
     case 'tcomments':
         require('tcomments.php');
         break;

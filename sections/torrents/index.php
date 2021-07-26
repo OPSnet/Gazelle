@@ -233,9 +233,6 @@ if (!empty($_REQUEST['action'])) {
         case 'add_cover_art':
             require_once('add_cover_art.php');
             break;
-        case 'remove_cover_art':
-            require_once('remove_cover_art.php');
-            break;
         case 'autocomplete_tags':
             require_once('autocomplete_tags.php');
             break;
