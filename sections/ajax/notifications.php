@@ -1,120 +1,60 @@
 <?php
-if (!check_perms('site_torrents_notify')) {
+if (!$Viewer->permitted('site_torrents_notify')) {
     json_die("failure");
 }
 
-define('NOTIFICATIONS_PER_PAGE', 50);
-list($Page, $Limit) = Format::page_limit(NOTIFICATIONS_PER_PAGE);
-
-$cond = ['unt.UserID = ?'];
-$args = [$Viewer->id()];
-if ((int)$_GET['filterid'] > 0) {
-    $cond[] = 'unf.ID = ?';
-    $args[] = (int)$_GET['filterid'];
+$notifier = new Gazelle\Notification\Torrent($Viewer->id());
+if ((int)$_GET['filterid']) {
+    $notifier->setFilter((int)$_GET['filterid']);
 }
-$where = implode(' AND ', $cond);
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($notifier->total());
+$list = $notifier->unreadList($paginator->limit(), $paginator->offset());
+$tgroupList = Torrents::get_groups(array_column($list, 'groupId'));
 
-$TorrentCount = $DB->scalar("
-    SELECT count(*)
-    FROM users_notify_torrents AS unt
-    INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
-    LEFT JOIN users_notify_filters AS unf ON (unf.ID = unt.FilterID)
-    WHERE $where
-    ", ...$args
-);
-
-$args[] = $Limit;
-$Results = $DB->prepared_query("
-    SELECT unt.TorrentID,
-        unt.UnRead,
-        unt.FilterID,
-        unf.Label,
-        t.GroupID
-    FROM users_notify_torrents AS unt
-    INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
-    LEFT JOIN users_notify_filters AS unf ON (unf.ID = unt.FilterID)
-    WHERE $where
-    ORDER BY unt.TorrentID DESC
-    LIMIT ?
-    ", ...$args
-);
-$GroupIDs = array_unique($DB->collect('GroupID'));
-
-if (count($GroupIDs)) {
-    $TorrentGroups = Torrents::get_groups($GroupIDs);
-    $DB->prepared_query('
-        UPDATE users_notify_torrents
-        SET UnRead = ?
-        WHERE UserID = ?
-        ', 0, $Viewer->id()
-    );
-    $Cache->delete_value("user_notify_upload_" . $Viewer->id());
-}
-
-$DB->set_query_id($Results);
-
-$JsonNotifications = [];
-$NumNew = 0;
-
-$FilterGroups = [];
-while ($Result = $DB->next_record(MYSQLI_ASSOC)) {
-    if (!$Result['FilterID']) {
-        $Result['FilterID'] = 0;
+$new = 0;
+$notification = [];
+foreach ($list as $result) {
+    $torrentId = (int)$result['torrentId'];
+    $tgroup    = $tgroupList[$result['groupId']];
+    $info      = $tgroup['Torrents'][$torrentId];
+    if ($result['unread'] == 1) {
+        $new++;
     }
-    if (!isset($FilterGroups[$Result['FilterID']])) {
-        $FilterGroups[$Result['FilterID']] = [];
-        $FilterGroups[$Result['FilterID']]['FilterLabel'] = ($Result['Label'] ? $Result['Label'] : false);
-    }
-    array_push($FilterGroups[$Result['FilterID']], $Result);
-}
-unset($Result);
 
-foreach ($FilterGroups as $FilterID => $FilterResults) {
-    unset($FilterResults['FilterLabel']);
-    foreach ($FilterResults as $Result) {
-        $TorrentID = $Result['TorrentID'];
-        $Group = $TorrentGroups[$Result['GroupID']];
-
-        $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
-        $TorrentInfo = $Group['Torrents'][$TorrentID];
-
-        if ($Result['UnRead'] == 1) {
-            $NumNew++;
-        }
-
-        $JsonNotifications[] = [
-            'torrentId'        => (int)$TorrentID,
-            'groupId'          => (int)$Group['ID'],
-            'groupName'        => $Group['Name'],
-            'groupCategoryId'  => (int)$Group['CategoryID'],
-            'wikiImage'        => $Group['WikiImage'],
-            'torrentTags'      => $Group['TagList'],
-            'size'             => (float)$TorrentInfo['Size'],
-            'fileCount'        => (int)$TorrentInfo['FileCount'],
-            'format'           => $TorrentInfo['Format'],
-            'encoding'         => $TorrentInfo['Encoding'],
-            'media'            => $TorrentInfo['Media'],
-            'scene'            => $TorrentInfo['Scene'] == 1,
-            'groupYear'        => (int)$Group['Year'],
-            'remasterYear'     => (int)$TorrentInfo['RemasterYear'],
-            'remasterTitle'    => $TorrentInfo['RemasterTitle'],
-            'snatched'         => (int)$TorrentInfo['Snatched'],
-            'seeders'          => (int)$TorrentInfo['Seeders'],
-            'leechers'         => (int)$TorrentInfo['Leechers'],
-            'notificationTime' => $TorrentInfo['Time'],
-            'hasLog'           => $TorrentInfo['HasLog'] == 1,
-            'hasCue'           => $TorrentInfo['HasCue'] == 1,
-            'logScore'         => (float)$TorrentInfo['LogScore'],
-            'freeTorrent'      => $TorrentInfo['FreeTorrent'] == 1,
-            'logInDb'          => $TorrentInfo['HasLog'] == 1,
-            'unread'           => $Result['UnRead'] == 1,
-        ];
-    }
+    $notification[] = [
+        'torrentId'        => $torrentId,
+        'groupId'          => (int)$tgroup['ID'],
+        'groupName'        => $tgroup['Name'],
+        'groupCategoryId'  => (int)$tgroup['CategoryID'],
+        'wikiImage'        => $tgroup['WikiImage'],
+        'torrentTags'      => $tgroup['TagList'],
+        'size'             => (float)$info['Size'],
+        'fileCount'        => (int)$info['FileCount'],
+        'format'           => $info['Format'],
+        'encoding'         => $info['Encoding'],
+        'media'            => $info['Media'],
+        'scene'            => $info['Scene'] == 1,
+        'groupYear'        => (int)$tgroup['Year'],
+        'remasterYear'     => (int)$info['RemasterYear'],
+        'remasterTitle'    => $info['RemasterTitle'],
+        'snatched'         => (int)$info['Snatched'],
+        'seeders'          => (int)$info['Seeders'],
+        'leechers'         => (int)$info['Leechers'],
+        'notificationTime' => $info['Time'],
+        'hasLog'           => $info['HasLog'] == 1,
+        'hasCue'           => $info['HasCue'] == 1,
+        'logScore'         => (float)$info['LogScore'],
+        'freeTorrent'      => $info['FreeTorrent'] == 1,
+        'logInDb'          => $info['HasLog'] == 1,
+        'unread'           => $result['unread'] == 1,
+        'filter'           => $result['label'],
+    ];
 }
 
 json_print("success", [
-    'currentPages' => intval($Page),
-    'pages'        => ceil($TorrentCount / NOTIFICATIONS_PER_PAGE),
-    'numNew'       => $NumNew,
-    'results'      => $JsonNotifications,
+    'currentPages' => $paginator->page(),
+    'pages'        => (int)ceil($paginator->total() / ITEMS_PER_PAGE),
+    'numNew'       => $new,
+    'results'      => $notification,
 ]);
