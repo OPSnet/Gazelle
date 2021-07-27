@@ -35,7 +35,7 @@ class SQLMatcher {
         $this->key = $key;
     }
 
-    public function match($field) {
+    public function matchField($field) {
         switch ($this->key) {
             case 'regexp':
                 return "$field REGEXP ?";
@@ -241,7 +241,7 @@ if (!empty($_GET)) {
     ";
 
     if (!empty($_GET['username'])) {
-        $Where[] = $m->match('um1.Username');
+        $Where[] = $m->matchField('um1.Username');
         $Args[] = $_GET['username'];
     }
 
@@ -249,9 +249,9 @@ if (!empty($_GET)) {
         if (isset($_GET['email_history'])) {
             $Distinct = true;
             $Join['he'] = 'INNER JOIN users_history_emails AS he ON (he.UserID = um1.ID)';
-            $Where[] = $m->match('he.Email');
+            $Where[] = $m->matchField('he.Email');
         } else {
-            $Where[] = $m->match('um1.Email');
+            $Where[] = $m->matchField('um1.Email');
         }
         $Args[] = $_GET['email'];
     }
@@ -270,9 +270,9 @@ if (!empty($_GET)) {
         if ($ipHistoryChecked) {
             $Distinct = true;
             $Join['hi'] = 'INNER JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
-            $Where[] = $m->left_match('hi.IP');
+            $Where[] = $m->left_matchField('hi.IP');
         } else {
-            $Where[] = $m->left_match('um1.IP');
+            $Where[] = $m->left_matchField('um1.IP');
         }
         $Args[] = trim($_GET['ip']);
     }
@@ -295,19 +295,19 @@ if (!empty($_GET)) {
         $Join['xfu'] = $trackerLiveSource
             ? 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)'
             : 'INNER JOIN xbt_snatched AS xfu ON (um1.ID = xfu.uid)';
-        $Where[] = $m->left_match('xfu.ip');
+        $Where[] = $m->left_matchField('xfu.ip');
         $Args[] = trim($_GET['tracker_ip']);
     }
 
     if (!empty($_GET['comment'])) {
-        $Where[] = $m->match('ui1.AdminComment');
+        $Where[] = $m->matchField('ui1.AdminComment');
         $Args[] = $_GET['comment'];
     }
 
     if (!empty($_GET['lastfm'])) {
         $Distinct = true;
         $Join['lfm'] = 'INNER JOIN lastfm_users AS lfm ON (lfm.ID = um1.ID)';
-        $Where[] = $m->match('lfm.Username');
+        $Where[] = $m->matchField('lfm.Username');
         $Args[] = $_GET['lastfm'];
     }
 
@@ -463,17 +463,17 @@ if (!empty($_GET)) {
     }
 
     if (isset($_GET['passkey']) && !empty($_GET['passkey'])) {
-        $Where[] = $m->match('um1.torrent_pass');
+        $Where[] = $m->matchField('um1.torrent_pass');
         $Args[] = $_GET['passkey'];
     }
 
     if (isset($_GET['avatar']) && !empty($_GET['avatar'])) {
-        $Where[] = $m->match('ui1.Avatar');
+        $Where[] = $m->matchField('ui1.Avatar');
         $Args[] = $_GET['avatar'];
     }
 
     if (isset($_GET['stylesheet']) && !empty($_GET['stylesheet'])) {
-        $Where[] = $m->match('ui1.StyleID');
+        $Where[] = $m->matchField('ui1.StyleID');
         $Args[] = $_GET['stylesheet'];
     }
 
