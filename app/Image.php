@@ -31,7 +31,6 @@ class Image {
             case IMG_GIF:  return imagegif($this->image);
             case IMG_JPG:  return imagejpeg($this->image, null, 90);
             case IMG_PNG:  return imagepng($this->image);
-            case IMG_WBMP: return imagewbmp($this->image);
             case IMG_WEBP: return imagewebp($this->image);
             case IMG_XPM:  return imagexbm($this->image, null);
         }
@@ -43,7 +42,6 @@ class Image {
             case IMG_GIF:  return 'gif';
             case IMG_JPG:  return 'jpg';
             case IMG_PNG:  return 'png';
-            case IMG_WBMP: return 'wbmp';
             case IMG_WEBP: return 'webp';
             case IMG_XPM:  return 'xpm';
             default:       return 'error';
