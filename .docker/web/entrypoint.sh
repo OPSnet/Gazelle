@@ -53,18 +53,18 @@ if [ ! -d /var/lib/gazelle/torrent ]; then
     chown -R gazelle /var/lib/gazelle
 fi
 
-if [ ! -f /etc/php/7.3/cli/conf.d/99-boris.ini ]; then
+if [ ! -f /etc/php/8.0/cli/conf.d/99-boris.ini ]; then
     echo "Initialize Boris..."
     grep '^disable_functions' /etc/php/7.3/cli/php.ini \
         | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
-        > /etc/php/7.3/cli/conf.d/99-boris.ini
+        > /etc/php/8.0/cli/conf.d/99-boris.ini
 fi
 
 echo "Start services..."
 
 run_service cron
 run_service nginx
-run_service php7.3-fpm
+run_service php8.0-fpm
 
 crontab /var/www/.docker/web/crontab
 

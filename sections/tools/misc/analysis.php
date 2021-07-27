@@ -10,7 +10,7 @@ if (!isset($_GET['case']) || !$Analysis = $Cache->get_value('analysis_'.$_GET['c
 View::show_header('Case Analysis');
 ?>
 <div class="header">
-    <h2>Case Analysis (<a href="<?=display_str($Analysis['url'])?>"><?=$_GET['case']?></a>)</h2>
+    <h2>Case Analysis (<a href="<?=display_str($Analysis['url'] ?? '-none-')?>"><?=$_GET['case']?></a>)</h2>
 </div>
 <div class="linkbox">
     <a href="tools.php?action=analysis_list" class="brackets">Error list</a>
@@ -33,8 +33,8 @@ if (check_perms('site_debug')) {
 if (check_perms('admin_periodic_task_view') && array_key_exists('Script start', $Analysis['perf'])) {
     echo $Twig->render('debug/task.twig', [
         'list' => (new \Gazelle\Schedule\Scheduler)->getTaskSnapshot(
-            $Analysis['perf']['Script start'],
-            $Analysis['perf']['Script end']
+            (float)$Analysis['perf']['Script start'],
+            (float)$Analysis['perf']['Script end']
         )
     ]);
 }
