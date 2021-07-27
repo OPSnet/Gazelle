@@ -5,11 +5,9 @@
 <h2 align="center">There are no users currently on ratio watch ({{ total_disabled|number_format }} are already disabled).</h2>
 {% else %}
 <div class="box pad thin">
-    <p>There are currently {{ total|number_format }} enabled users on Ratio Watch and {{ total_disabled|number_format }} already disabled.</p>
+    <p>There are currently {{ paginator.total|number_format }} enabled users on Ratio Watch and {{ total_disabled|number_format }} already disabled.</p>
 </div>
-<div class="linkbox">
-    {{ pages|raw }}
-</div>
+{{ paginator.linkbox|raw }}
 <table width="100%">
     <tr class="colhead">
         <td>User</td>
@@ -42,7 +40,5 @@
     </tr>
     {% endfor %}
 </table>
-<div class="linkbox">
-    {{ pages|raw }}
-</div>
+{{ paginator.linkbox|raw }}
 {% endif %}
