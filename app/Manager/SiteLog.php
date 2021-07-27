@@ -10,11 +10,13 @@ class SiteLog extends \Gazelle\Base {
     protected $queryError;
     protected $qid;
     protected $usernames;
+    protected $userMan;
 
     public function __construct (\Gazelle\Debug $debug) {
         parent::__construct();
         $this->debug = $debug;
         $this->usernames = [];
+        $this->userMan = new \Gazelle\Manager\User;
     }
 
     public function totalMatches() { return $this->totalMatches; }
@@ -24,7 +26,13 @@ class SiteLog extends \Gazelle\Base {
     public function next() {
         $this->db->set_query_id($this->qid);
         while ($result = $this->db->next_record(MYSQLI_NUM, false)) {
-            yield $result;
+            [$color, $message] = $this->colorize($result[1]);
+            yield [
+                'id'      => $result[0],
+                'time'    => $result[2],
+                'color'   => $color,
+                'message' => $message,
+            ];
             $this->db->set_query_id($this->qid);
         }
     }
@@ -136,18 +144,13 @@ class SiteLog extends \Gazelle\Base {
                         }
                         $URL = "user $userId (<a href=\"user.php?id=$userId\">".substr($messageParts[++$i], 1, -1).'</a>)';
                     } elseif (in_array($messageParts[$i - 1], ['deleted', 'uploaded', 'edited', 'created', 'recovered'])) {
-                        $user = $messageParts[++$i];
-                        if (substr($user, -1) == ':') {
-                            $user = substr($user, 0, -1);
+                        $username = $messageParts[++$i];
+                        if (substr($username, -1) == ':') {
+                            $username = substr($username, 0, -1);
                             $colon = true;
                         }
-                        if (!isset($this->usernames[$user])) {
-                            $userId = $this->usernameLookup($user);
-                            $this->usernames[$user] = $userId ? $userId : '';
-                        } else {
-                            $userId = $this->usernames[$user];
-                        }
-                        $URL = $this->usernames[$user] ? "<a href=\"user.php?id=$userId\">$user</a>".($colon ? ':' : '') : $user;
+                        $userId = $this->usernameLookup($username);
+                        $URL = $userId ? "<a href=\"user.php?id=$userId\">$username</a>".($colon ? ':' : '') : $username;
                     }
                     $message .= " by $URL";
                     break;
@@ -177,14 +180,9 @@ class SiteLog extends \Gazelle\Base {
                     break;
                 case 'marked':
                     if ($i == 1) {
-                        $user = $messageParts[$i - 1];
-                        if (!isset($this->usernames[$user])) {
-                            $userId = $this->usernameLookup($user);
-                            $this->usernames[$user] = $userId ? $userId : '';
-                        } else {
-                            $userId = $this->usernames[$user];
-                        }
-                        $URL = $this->usernames[$user] ? "<a href=\"user.php?id=$userId\">$user</a>" : $user;
+                        $username = $messageParts[$i - 1];
+                        $userId = $this->usernameLookup($username);
+                        $URL = $userId ? "<a href=\"user.php?id=$userId\">$username</a>" : $username;
                         $message = $URL." ".$messageParts[$i];
                     } else {
                         $message .= ' ' .$messageParts[$i];
@@ -207,9 +205,10 @@ class SiteLog extends \Gazelle\Base {
     }
 
     protected function usernameLookup(string $username) {
-        return $this->db->scalar("
-            SELECT ID FROM users_main WHERE Username = ?
-            ", $username
-        );
+        if (!isset($this->usernames[$username])) {
+            $user = $this->userMan->findByUsername($username);
+            $this->usernames[$username] = $user ? $user->id() : false;
+        }
+        return $this->usernames[$username];
     }
 }
