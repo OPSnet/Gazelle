@@ -421,38 +421,17 @@ class Format {
         return " $ClassName";
     }
 
-
-    /**
-     * Modified accessor for the $TorrentLabels array
-     *
-     * Converts $Text to lowercase and strips non-word characters
-     *
-     * @param string $Text Search string
-     * @return string CSS class(es)
-     */
-    public static function find_torrent_label_class($Text) {
-        $Index = mb_eregi_replace('(?:[^\w\d\s]+)', '', strtolower($Text));
-        if (isset(self::$TorrentLabels[$Index])) {
-            return self::$TorrentLabels[$Index];
-        } else {
-            return self::$TorrentLabels['default'];
-        }
-    }
-
     /**
      * Creates a strong element that notes the torrent's state.
      * E.g.: snatched/freeleech/neutral leech/reported
-     *
-     * The CSS class is inferred using find_torrent_label_class($Text)
      *
      * @param string $Text Display text
      * @param string $Class Custom CSS class
      * @return string <strong> element
      */
-    public static function torrent_label($Text, $Class = '') {
-        if (empty($Class)) {
-            $Class = self::find_torrent_label_class($Text);
-        }
+    public static function torrent_label($Text) {
+        $Class = self::$TorrentLabels[mb_ereg_replace('[^\w\d\s]+', '', strtolower($Text))]
+            ?? self::$TorrentLabels['default'];
         return sprintf('<strong class="torrent_label tooltip %1$s" title="%2$s" style="white-space: nowrap;">%2$s</strong>',
                 display_str($Class), display_str($Text));
     }
