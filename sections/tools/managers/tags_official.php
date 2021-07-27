@@ -84,7 +84,11 @@ for ($row = 0; $row < $len; ++$row) {
                     <td>&nbsp;</td>
 <?php
         }
-        if (count($list[$col]) <= $row) {
+        if (!isset($list[$col])) {
+?>
+                    <td colspan="3">&nbsp;</td>
+<?php
+        } elseif (count($list[$col]) <= $row) {
 ?>
                     <td colspan="3">&nbsp;</td>
 <?php   } else { ?>

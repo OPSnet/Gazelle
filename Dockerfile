@@ -4,15 +4,21 @@ WORKDIR /var/www
 
 # Software package layer
 # Nodesource setup comes after yarnpkg because it runs `apt-get update`
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt update \
+    && apt install -y --no-install-recommends \
+        apt-transport-https \
         build-essential \
         ca-certificates \
+        gnupg2 \
+        wget \
+    && wget -qO - https://packages.sury.org/php/apt.gpg | apt-key add - \
+    && echo "deb https://packages.sury.org/php/ buster main" | tee /etc/apt/sources.list.d/php.list \
+    && apt update \
+    && apt install -y --no-install-recommends \
         composer \
         cron \
         curl \
         git \
-        gnupg \
         imagemagick \
         libboost-dev \
         libbz2-dev \
@@ -23,14 +29,15 @@ RUN apt-get update \
         mariadb-client \
         netcat-openbsd \
         nginx \
-        php7.3-cli \
-        php7.3-curl \
-        php7.3-fpm \
-        php7.3-gd \
-        php7.3-mbstring \
-        php7.3-mysql \
-        php7.3-xml \
-        php7.3-zip \
+        php8.0 \
+        php8.0-cli \
+        php8.0-curl \
+        php8.0-fpm \
+        php8.0-gd \
+        php8.0-mbstring \
+        php8.0-mysql \
+        php8.0-xml \
+        php8.0-zip \
         php-apcu \
         php-bcmath \
         php-memcached \
@@ -48,14 +55,17 @@ RUN apt-get update \
     && curl -sL https://deb.nodesource.com/setup_12.x | bash - \
     && apt-get install -y --no-install-recommends \
         nodejs \
-        yarn
+        yarn \
+    && apt autoremove \
+    && rm -rf /var/lib/apt/lists/*
 
 # Python tools layer
 RUN pip3 install chardet eac-logchecker xld-logchecker
 
 # Puppeteer layer
 # This installs the necessary packages to run the bundled version of chromium for puppeteer
-RUN apt-get install -y --no-install-recommends \
+RUN apt update \
+    && apt install -y --no-install-recommends \
         gconf-service \
         libasound2 \
         libatk1.0-0 \
@@ -92,6 +102,7 @@ RUN apt-get install -y --no-install-recommends \
         libnss3 \
         lsb-release \
         xdg-utils \
+    && apt autoremove \
     && rm -rf /var/lib/apt/lists/*
 
 # If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise
@@ -110,10 +121,10 @@ COPY . /var/www
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \
     && chown -R gazelle:gazelle /var/www \
-    && cp /var/www/.docker/web/php.ini /etc/php/7.3/cli/php.ini \
-    && cp /var/www/.docker/web/php.ini /etc/php/7.3/fpm/php.ini \
-    && cp /var/www/.docker/web/xdebug.ini /etc/php/7.3/mods-available/xdebug.ini \
-    && cp /var/www/.docker/web/www.conf /etc/php/7.3/fpm/pool.d/www.conf \
+    && cp /var/www/.docker/web/php.ini /etc/php/8.0/cli/php.ini \
+    && cp /var/www/.docker/web/php.ini /etc/php/8.0/fpm/php.ini \
+    && cp /var/www/.docker/web/xdebug.ini /etc/php/8.0/mods-available/xdebug.ini \
+    && cp /var/www/.docker/web/www.conf /etc/php/8.0/fpm/pool.d/www.conf \
     && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default
