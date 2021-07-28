@@ -1177,7 +1177,7 @@ class Forum extends Base {
             INNER JOIN forums origin USING (CategoryID)
             LEFT JOIN forums_last_read_topics flrt ON (flrt.TopicID = ft.id AND flrt.UserID = ?)
             WHERE origin.ID = ?
-                AND " . implode($cond, ' AND ') . "
+                AND " . implode(' AND ', $cond) . "
             GROUP BY ft.ForumID
             ORDER BY f.Sort
             ", $user->id(), $user->id(), $this->forumId, ...$args

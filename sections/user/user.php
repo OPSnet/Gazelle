@@ -212,77 +212,83 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
-<?php    if (($Override = check_paranoia_here('uploaded'))) { ?>
+<?php if (($Override = check_paranoia_here('uploaded'))) { ?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats['BytesUploaded'])?> uploaded">Data uploaded: <?= display_rank($rank, 'uploaded') ?></li>
 <?php
-    }
-    if (($Override = check_paranoia_here('downloaded'))) { ?>
+}
+if (($Override = check_paranoia_here('downloaded'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats['BytesDownloaded'])?> downloaded">Data downloaded: <?= display_rank($rank, 'downloaded') ?></li>
 <?php
-    }
-    if (($Override = check_paranoia_here('uploads+'))) { ?>
+}
+if (($Override = check_paranoia_here('uploads+'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?> uploads">Torrents uploaded: <?= display_rank($rank, 'uploads') ?></li>
 <?php
-    }
-    if (($Override = check_paranoia_here('requestsfilled_count'))) { ?>
+}
+if (($Override = check_paranoia_here('requestsfilled_count'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($RequestsFilled)?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
 <?php
-    }
-    if (($Override = check_paranoia_here('requestsvoted_bounty'))) { ?>
+}
+if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($TotalSpent)?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
 <?php } ?>
                 <li class="tooltip" title="<?=number_format($User->forumPosts())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
 <?php
-    if (($Override = check_paranoia_here('torrentcomments++'))) { ?>
+if (($Override = check_paranoia_here('torrentcomments++'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent comments: <?= display_rank($rank, 'comment-t') ?></li>
 <?php
-    }
-    if (($Override = check_paranoia_here('collagecontribs+'))) { ?>
+}
+if (($Override = check_paranoia_here('collagecontribs+'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($collageAdditions)?> contributions">Collage contributions: <?= display_rank($rank, 'collage') ?></li>
-<?php }
-    if (($Override = check_paranoia_here('artistsadded'))) { ?>
+<?php
+}
+if (($Override = check_paranoia_here('artistsadded'))) {
+?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?> added">Artists added: <?= display_rank($rank, 'artists') ?></li>
 <?php } ?>
                 <li class="tooltip" title="<?=number_format($releaseVotes)?> votes">Release votes cast: <?= display_rank($rank, 'votes') ?></li>
-<?php
-    if ($OwnProfile || check_perms('admin_bp_history')) { ?>
+<?php if ($OwnProfile || check_perms('admin_bp_history')) { ?>
                 <li class="tooltip<?= !$OwnProfile && check_perms('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= display_rank($rank, 'bonus') ?></li>
 <?php
-    }
-    if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) { ?>
+}
+if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
+?>
                 <li<?= $User->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= $rank->score() === false ? 'Server busy'
-                    : $User->classLevel() >= 900 ? '&nbsp;&infin;' : number_format($rank->score() * $User->rankFactor()) ?></strong></li>
-<?php    } ?>
+                    : ($User->classLevel() >= 900 ? '&nbsp;&infin;' : number_format($rank->score() * $User->rankFactor())) ?></strong></li>
+<?php } ?>
             </ul>
         </div>
-<?php
-    if (check_perms('users_mod') || check_perms('users_view_ips') || check_perms('users_view_keys')) {
-?>
+<?php if (check_perms('users_mod') || check_perms('users_view_ips') || check_perms('users_view_keys')) { ?>
         <div class="box box_info box_userinfo_history">
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
-<?php        if (check_perms('users_view_email')) { ?>
+<?php if (check_perms('users_view_email')) { ?>
                 <li>Emails: <?=number_format($User->emailCount())?> <a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
-        }
-        if (check_perms('users_view_ips')) {
+    }
+    if (check_perms('users_view_ips')) {
 ?>
                 <li>IPs: <?=number_format($User->siteIPCount())?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
-<?php            if (check_perms('users_view_ips') && check_perms('users_mod')) { ?>
+<?php   if (check_perms('users_view_ips') && check_perms('users_mod')) { ?>
                 <li>Tracker IPs: <?=number_format($User->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
-            }
         }
-        if (check_perms('users_view_keys')) {
+    }
+    if (check_perms('users_view_keys')) {
 ?>
                 <li>Announce keys: <?=number_format($User->announceKeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
-        }
-        if (check_perms('users_mod')) {
+    }
+    if (check_perms('users_mod')) {
 ?>
                 <li>Password history: <?=number_format($User->passwordCount())?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
                 <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
-<?php        } ?>
+<?php } ?>
             </ul>
         </div>
 <?php } ?>
@@ -853,5 +859,4 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
     </div>
 </div>
 <?php
-
 View::show_footer();
