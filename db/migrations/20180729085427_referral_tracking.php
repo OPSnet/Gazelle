@@ -33,7 +33,7 @@ class ReferralTracking extends AbstractMigration
             ->addColumn('Username', 'string', ['limit' => 100])
             ->addColumn('Site', 'string', ['limit' => 100])
             ->addColumn('Created', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
-            ->addColumn('Joined', 'timestamp', ['default' => '0000-00-00 00:00:00'])
+            ->addColumn('Joined', 'timestamp', ['null' => true])
             ->addColumn('IP', 'string', ['limit' => 15])
             ->addColumn('InviteKey', 'string', ['limit' => 32])
             ->addColumn('Active', 'boolean', ['default' => false])

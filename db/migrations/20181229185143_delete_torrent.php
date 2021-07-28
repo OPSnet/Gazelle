@@ -58,7 +58,7 @@ class DeleteTorrent extends AbstractMigration
              ->addColumn('FreeLeechType', 'enum', ['values' => ['0','1','2','3','4','5','6','7']])
              ->addColumn('Time', 'timestamp')
              ->addColumn('Description', 'text', ['null' => true])
-             ->addColumn('LastReseedRequest', 'timestamp')
+             ->addColumn('LastReseedRequest', 'timestamp', ['null' => true])
              ->addColumn('TranscodedFrom', 'integer', ['length' => 10])
              ->create();
 

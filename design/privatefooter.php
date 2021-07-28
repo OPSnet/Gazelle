@@ -35,8 +35,9 @@ if (!empty($Options['disclaimer'])) {
 }
 
 $LastActive = false;
-if (count($UserSessions) > 1) {
-    foreach ($UserSessions as $ThisSessionID => $Session) {
+$sessions = (new Gazelle\Session($Viewer->id()))->loadSessions();
+if (count($sessions) > 1) {
+    foreach ($sessions as $ThisSessionID => $Session) {
         if ($ThisSessionID != $SessionID) {
             $LastActive = $Session;
             break;
