@@ -140,12 +140,12 @@
                 <td>{{ db_stats.Com_insert.Value|number_format }} <span style="float: right;">(100.000%)</span></td>
             </tr>
             <tr>
-                <td{% if mem_stats.incr_hits/(mem_stats.incr_hits + mem_stats.incr_misses) < 0.7 %} class="invalid"{% endif %}>Cache increment:</td>
-                <td>{{ mem_stats.incr_hits|number_format }} <span style="float: right;">({{ (mem_stats.incr_hits / (mem_stats.incr_hits + mem_stats.incr_misses) * 100)|number_format(3) }}%)</span></td>
+                <td{% if mem_stats.incr_hits > 0 and mem_stats.incr_hits/(mem_stats.incr_hits + mem_stats.incr_misses) < 0.7 %} class="invalid"{% endif %}>Cache increment:</td>
+                <td>{{ mem_stats.incr_hits|number_format }} <span style="float: right;">({{ (mem_stats.incr_hits / (mem_stats.incr_hits + mem_stats.incr_misses + 1) * 100)|number_format(3) }}%)</span></td>
             </tr>
             <tr>
-                <td{% if mem_stats.decr_hits / (mem_stats.decr_hits + mem_stats.decr_misses) < 0.7 %} class="invalid"{% endif %}>Cache decrement:</td>
-                <td>{{ mem_stats.decr_hits|number_format }} <span style="float: right;">({{ (mem_stats.decr_hits / (mem_stats.decr_hits + mem_stats.decr_misses) * 100)|number_format(3) }}%)</span></td>
+                <td{% if mem_stats.incr_hits > 0 and mem_stats.decr_hits / (mem_stats.decr_hits + mem_stats.decr_misses) < 0.7 %} class="invalid"{% endif %}>Cache decrement:</td>
+                <td>{{ mem_stats.decr_hits|number_format }} <span style="float: right;">({{ (mem_stats.decr_hits / (mem_stats.decr_hits + mem_stats.decr_misses + 1) * 100)|number_format(3) }}%)</span></td>
             </tr>
             <tr><td colspan="2"><strong>CAS/Update (Success)</strong></td></tr>
             <tr>

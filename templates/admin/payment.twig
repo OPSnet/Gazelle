@@ -110,9 +110,9 @@
         </tr>
         <tr>
             <td>Target %</td>
-            <td>{{ (donorMan.totalMonth( 1)/(total / 12) * 100)|number_format(1) }}</td>
-            <td>{{ (donorMan.totalMonth( 3)/(total /  4) * 100)|number_format(1) }}</td>
-            <td>{{ (donorMan.totalMonth(12)/(total     ) * 100)|number_format(1) }}</td>
+            <td>{% if total > 0 %}{{ (donorMan.totalMonth( 1)/(total / 12) * 100)|number_format(1) }}{% else %}100.0%{% endif %}</td>
+            <td>{% if total > 0 %}{{ (donorMan.totalMonth( 3)/(total /  4) * 100)|number_format(1) }}{% else %}100.0%{% endif %}</td>
+            <td>{% if total > 0 %}{{ (donorMan.totalMonth(12)/(total     ) * 100)|number_format(1) }}{% else %}100.0%{% endif %}</td>
         </tr>
     </table>
 </div>

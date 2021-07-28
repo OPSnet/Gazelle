@@ -2,7 +2,7 @@
 
 enforce_login();
 
-switch ($_REQUEST['action']) {
+switch ($_REQUEST['action'] ?? '') {
     case 'artist':
         $page = 'artist';
         $DB->prepared_query("

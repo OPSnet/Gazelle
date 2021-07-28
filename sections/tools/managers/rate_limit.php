@@ -17,8 +17,8 @@ if ($_POST) {
                 ['factor', '1', 'number', 'factor must be set (usually, a number larger than 1.0)', ['minlength' => 1, 'allowperiod' => true]],
                 ['overshoot', '1', 'number', 'overshoot must be set', ['minlength' => 1]],
             ]);
-            if (!$Val->validate($_POST)) {
-                error($Val->errorMessage());
+            if (!$val->validate($_POST)) {
+                error($val->errorMessage());
             }
             $PRL->save($_POST['class'], $_POST['factor'], $_POST['overshoot']);
         } else {
@@ -97,7 +97,7 @@ if (check_perms('admin_rate_limit_manage')) {
             <select name="class">
 <?php
     foreach ($permList as $p) {
-        if ($seen[$p['ID']]) {
+        if ($seen[$p['ID']] ?? true) {
             continue;
         }
 ?>
@@ -117,5 +117,4 @@ if (check_perms('admin_rate_limit_manage')) {
 </form>
 <?php
 }
-
 View::show_footer();

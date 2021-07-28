@@ -25,7 +25,7 @@ class DropSecret extends AbstractMigration
              ->changeColumn('Info', 'text', ['limit' => 65536, 'default' => ''])
              ->changeColumn('AdminComment', 'text', ['limit' => 65536, 'default' => ''])
              ->changeColumn('SiteOptions', 'text', ['limit' => 65536, 'default' => ''])
-             ->changeColumn('Warned', 'timestamp', ['default' => '0000-00-00 00:00:00'])
+             ->changeColumn('Warned', 'timestamp', ['null' => true])
              ->changeColumn('Avatar', 'string', ['limit' => 255, 'default' => ''])
              ->changeColumn('SupportFor', 'string', ['limit' => 255, 'default' => ''])
              // who needs self documenting enum values when you have comments?
