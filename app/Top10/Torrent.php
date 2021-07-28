@@ -16,7 +16,7 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function getTopTorrents($getParameters, $details = 'all', $limit = 10) {
-        $cacheKey = 'top10_v2_' . $details . '_' . md5(implode($getParameters,'')) . '_' . $limit;
+        $cacheKey = 'top10_v2_' . $details . '_' . md5(implode('', $getParameters)) . '_' . $limit;
         $topTorrents = $this->cache->get_value($cacheKey);
 
         if ($topTorrents !== false) {
@@ -182,7 +182,7 @@ class Torrent extends \Gazelle\Base {
 
             // This is to make the prepared query work.
 
-            $where = implode(array_fill(0,  count($tags), "t.Name = ?"), ' OR ');
+            $where = implode(' OR ', array_fill(0,  count($tags), "t.Name = ?"));
             $clause = "
         g.ID IN (
             SELECT tt.GroupID
