@@ -61,8 +61,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
 
     if (!empty($Tags)) {
         $Where[] = '('
-            . implode(
-                $tagSearchAll ? ' AND ' : ' OR ',
+            . implode($tagSearchAll ? ' AND ' : ' OR ',
                 array_fill(0, count($Tags), "c.TagList LIKE concat('%', ?, '%')")
             )
             . ')';

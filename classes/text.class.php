@@ -948,10 +948,7 @@ class Text {
                     if (count($Attr) === 0) {
                         $Str .= self::to_html($Block['Val'], $Rules);
                     } else {
-                        $Padding = implode(
-                            " ",
-                            array_map(function ($x) { return $x . "px"; }, $Attr)
-                        );
+                        $Padding = implode(' ', array_map(function ($x) { return $x . "px"; }, $Attr));
                         $Str .= "<span style='display: inline-block; padding: {$Padding}'>" . self::to_html($Block['Val'], $Rules).'</span>';
                     }
                     break;
