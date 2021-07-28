@@ -25,12 +25,19 @@ DROP FUNCTION binomial_ci;");
 
     public function up()
     {
+        // Message to future archeologists:
+        // If this migration crashes half-way through due running it on a stricter
+        // database engine, you can move forward by uncommenting the following line
+        // and then iterating until things work.
+        // $this->down();
+
         $this->execute("ALTER DATABASE CHARACTER SET 'utf8';");
         $this->execute("ALTER DATABASE COLLATE='utf8_swedish_ci';");
         $this->execute("
 CREATE FUNCTION `binomial_ci`(p int, n int) RETURNS float
     DETERMINISTIC
-RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));");
+RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));
+");
 
         $this->table('lastfm_users', [
                 'id' => false,
@@ -628,7 +635,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->create();
         $this->table('artists_similar', [
@@ -748,7 +754,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['Time'], [
                 'name' => 'Time',
@@ -775,7 +780,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -860,7 +864,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -940,7 +943,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AddedTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -1328,7 +1330,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Sequence', 'integer', [
                 'null' => false,
@@ -1591,7 +1592,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LastAttempt', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Attempts', 'integer', [
                 'null' => false,
@@ -1600,7 +1600,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('BannedUntil', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Bans', 'integer', [
                 'null' => false,
@@ -1933,7 +1932,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('StartTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('EndTime', 'datetime', [
                 'null' => true,
@@ -2085,7 +2083,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -2141,7 +2138,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('SentDate', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('SenderID', 'integer', [
                 'null' => false,
@@ -2693,7 +2689,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Hidden', 'integer', [
                 'null' => false,
@@ -2768,11 +2763,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ReportedTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('LastChangeTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('ModComment', 'text', [
                 'null' => true,
@@ -2981,11 +2974,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Started', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Ended', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => true,
@@ -3014,7 +3005,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->create();
         $this->table('torrents_recommended', [
@@ -3036,7 +3026,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['Time'], [
                 'name' => 'Time',
@@ -3100,7 +3089,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Message', 'text', [
                 'null' => false,
@@ -3698,7 +3686,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AddedOn', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -3900,7 +3887,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LastPostTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('AutoLock', 'enum', [
                 'null' => true,
@@ -3966,7 +3952,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Checked', 'integer', [
                 'null' => false,
@@ -4042,7 +4027,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Type', 'enum', [
                 'null' => true,
@@ -4136,11 +4120,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('SentDate', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('ReceivedDate', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('UnRead', 'enum', [
                 'null' => false,
@@ -4212,7 +4194,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -4259,7 +4240,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Image', 'string', [
                 'null' => true,
@@ -4338,7 +4318,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AddedOn', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -4394,7 +4373,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AddedTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -4475,7 +4453,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Featured', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Closed', 'enum', [
                 'null' => false,
@@ -4732,7 +4709,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeFilled', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Visible', 'binary', [
                 'null' => false,
@@ -4983,7 +4959,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Expires', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Reason', 'string', [
                 'null' => false,
@@ -5035,7 +5010,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('ThreadID', 'integer', [
                 'null' => true,
@@ -5142,7 +5116,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Image', 'string', [
                 'null' => true,
@@ -5255,7 +5228,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -5566,11 +5538,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ResetExpires', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('JoinDate', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Inviter', 'integer', [
                 'null' => true,
@@ -5651,7 +5621,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('RatioWatchEnds', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('RatioWatchDownload', 'biginteger', [
                 'null' => false,
@@ -5666,7 +5635,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('BanDate', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('BanReason', 'enum', [
                 'null' => false,
@@ -5839,7 +5807,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('RevisionID', 'integer', [
                 'null' => true,
@@ -6083,11 +6050,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Started', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Ended', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->create();
         $this->table('users_main', [
@@ -6138,11 +6103,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LastLogin', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('LastAccess', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('IP', 'string', [
                 'null' => false,
@@ -6467,7 +6430,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LastPostTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('LastPostAuthorID', 'integer', [
                 'null' => false,
@@ -6485,7 +6447,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('CreatedTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['AuthorID'], [
                 'name' => 'AuthorID',
@@ -6664,7 +6625,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -6987,7 +6947,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('last_action', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('FreeTorrent', 'enum', [
                 'null' => false,
@@ -7003,7 +6962,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Description', 'text', [
                 'null' => true,
@@ -7025,7 +6983,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LastReseedRequest', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('TranscodedFrom', 'integer', [
                 'null' => false,
@@ -7354,7 +7311,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['TimeAdded'], [
                 'name' => 'TimeAdded',
@@ -7458,11 +7414,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ResolvedTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('ReportedTime', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addColumn('Reason', 'text', [
                 'null' => false,
@@ -7964,7 +7918,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
-                'default' => '0000-00-00 00:00:00',
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -8203,7 +8156,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_album_votes' => 1,
                     'site_edit_wiki' => 1,
                     'torrents_add_artist' => 1,
-                    'MaxCollages' => 0
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8229,7 +8181,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'zip_downloader' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'MaxCollages' => 0
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8257,7 +8208,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'forums_polls_create' => 1,
                     'zip_downloader' => 1,
                     'torrents_add_artist' => 1,
-                    'MaxCollages' => 1,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8290,7 +8240,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_edit' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'MaxCollages' => 3,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8314,7 +8263,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_make_bookmarks' => 1,
                     'forums_polls_create' => 1,
                     'zip_downloader' => 1,
-                    'MaxCollages' => 1,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '10',
@@ -8327,7 +8275,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Values' => serialize([
                     'site_collages_personal' => 1,
                     'site_advanced_top10' => 1,
-                    'MaxCollages' => 1,
                 ]),
                 'DisplayStaff' => '1',
                 'PermittedForums' => '28',
@@ -8339,7 +8286,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Name' => 'Recruiter',
                 'Values' => serialize([
                     'site_send_unlimited_invites' => 1,
-                    'MaxCollages' => 0,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8350,7 +8296,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Level' => 300,
                 'Name' => 'Interviewer',
                 'Values' => serialize([
-                    'MaxCollages' => 0
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '30',
@@ -8361,7 +8306,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Level' => 310,
                 'Name' => 'Torrent Celebrity',
                 'Values' => serialize([
-                    'MaxCollages' => 0
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8385,7 +8329,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_make_bookmarks' => 1,
                     'site_edit_wiki' => 1,
                     'forums_polls_create' => 1,
-                    'MaxCollages' => 5,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '33',
@@ -8398,7 +8341,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Values' => serialize([
                     'site_send_unlimited_invites' => 1,
                     'forums_polls_create' => 1,
-                    'MaxCollages' => 5,
                 ]),
                 'DisplayStaff' => '1',
                 'PermittedForums' => '',
@@ -8409,7 +8351,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Level' => 340,
                 'Name' => 'IRC Team',
                 'Values' => serialize([
-                    'MaxCollages' => 0
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8435,7 +8376,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'users_view_email' => 1,
                     'users_mod' => 1,
                     'admin_advanced_user_search' => 1,
-                    'MaxCollages' => 0,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8447,7 +8387,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Name' => 'Alpha Team',
                 'Values' => serialize([
                     'admin_reports' => 1,
-                    'MaxCollages' => 0,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8458,7 +8397,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Level' => 370,
                 'Name' => 'Bravo Team',
                 'Values' => serialize([
-                    'MaxCollages' => 0
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8486,8 +8424,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_delete' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'torrents_fix_ghosts' => 1,
-                    'MaxCollages' => 2,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '31',
@@ -8513,7 +8449,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_make_bookmarks' => 1,
                     'site_edit_wiki' => 1,
                     'site_can_invite_always' => 1,
-                    'MaxCollages' => 1,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '35',
@@ -8546,7 +8481,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_edit' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'MaxCollages' => 6,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8579,7 +8513,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_edit' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'MaxCollages' => 5,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8613,7 +8546,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_edit' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'MaxCollages' => 6,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8647,7 +8579,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_edit' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'MaxCollages' => 6,
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8658,7 +8589,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'Level' => 605,
                 'Name' => 'Legend',
                 'Values' => serialize([
-                    'MaxCollages' => 1
                 ]),
                 'DisplayStaff' => '0',
                 'PermittedForums' => '',
@@ -8694,8 +8624,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'zip_downloader' => 1,
                     'site_proxy_images' => 1,
                     'site_search_many' => 1,
-                    'site_forums_double_post' => 1,
-                    'project_team' => 1,
                     'site_tag_aliases_read' => 1,
                     'users_edit_titles' => 1,
                     'users_edit_avatars' => 1,
@@ -8706,9 +8634,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_delete' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'torrents_fix_ghosts' => 1,
                     'admin_reports' => 1,
-                    'MaxCollages' => 6,
                 ]),
                 'DisplayStaff' => '1',
                 'PermittedForums' => '',
@@ -8748,8 +8674,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'zip_downloader' => 1,
                     'site_proxy_images' => 1,
                     'site_search_many' => 1,
-                    'site_forums_double_post' => 1,
-                    'project_team' => 1,
                     'site_tag_aliases_read' => 1,
                     'users_edit_titles' => 1,
                     'users_edit_avatars' => 1,
@@ -8777,13 +8701,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_search_fast' => 1,
                     'torrents_add_artist' => 1,
                     'edit_unknowns' => 1,
-                    'torrents_fix_ghosts' => 1,
                     'admin_manage_fls' => 1,
                     'admin_reports' => 1,
                     'admin_advanced_user_search' => 1,
                     'admin_clear_cache' => 1,
                     'admin_whitelist' => 1,
-                    'MaxCollages' => 6,
                 ]),
                 'DisplayStaff' => '1',
                 'PermittedForums' => '',
@@ -8814,12 +8736,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_view_flow' => 1,
                     'site_view_full_log' => 1,
                     'site_view_torrent_snatchlist' => 1,
-                    'site_recommend_own' => 1,
-                    'site_manage_recommendations' => 1,
                     'site_delete_tag' => 1,
                     'zip_downloader' => 1,
-                    'site_forums_double_post' => 1,
-                    'MaxCollages' => 1,
                 ]),
                 'DisplayStaff' => '1',
                 'PermittedForums' => '35',
@@ -8858,16 +8776,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_view_flow' => 1,
                     'site_view_full_log' => 1,
                     'site_view_torrent_snatchlist' => 1,
-                    'site_recommend_own' => 1,
-                    'site_manage_recommendations' => 1,
                     'site_delete_tag' => 1,
                     'site_disable_ip_history' => 1,
                     'zip_downloader' => 1,
                     'site_proxy_images' => 1,
                     'site_search_many' => 1,
                     'site_collages_recover' => 1,
-                    'site_forums_double_post' => 1,
-                    'project_team' => 1,
                     'site_tag_aliases_read' => 1,
                     'users_edit_ratio' => 1,
                     'users_edit_titles' => 1,
@@ -8904,7 +8818,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'edit_unknowns' => 1,
                     'torrents_edit_vanityhouse' => 1,
                     'artist_edit_vanityhouse' => 1,
-                    'torrents_fix_ghosts' => 1,
                     'admin_manage_blog' => 1,
                     'admin_manage_fls' => 1,
                     'admin_reports' => 1,
@@ -8914,7 +8827,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'admin_clear_cache' => 1,
                     'admin_whitelist' => 1,
                     'admin_manage_wiki' => 1,
-                    'MaxCollages' => 5,
                 ]),
                 'DisplayStaff' => '1',
                 'PermittedForums' => '',
@@ -8948,12 +8860,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'site_delete_artist' => 1,
                     'site_moderate_forums' => 1,
                     'site_admin_forums' => 1,
-                    'site_forums_double_post' => 1,
                     'site_view_flow' => 1,
                     'site_view_full_log' => 1,
                     'site_view_torrent_snatchlist' => 1,
-                    'site_recommend_own' => 1,
-                    'site_manage_recommendations' => 1,
                     'site_delete_tag' => 1,
                     'site_disable_ip_history' => 1,
                     'zip_downloader' => 1,
@@ -8997,7 +8906,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'torrents_freeleech' => 1,
                     'torrents_search_fast' => 1,
                     'torrents_hide_dnu' => 1,
-                    'torrents_fix_ghosts' => 1,
                     'admin_manage_news' => 1,
                     'admin_manage_blog' => 1,
                     'admin_manage_polls' => 1,
@@ -9021,7 +8929,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                     'edit_unknowns' => 1,
                     'forums_polls_create' => 1,
                     'forums_polls_moderate' => 1,
-                    'project_team' => 1,
                     'torrents_edit_vanityhouse' => 1,
                     'artist_edit_vanityhouse' => 1,
                     'site_tag_aliases_read' => 1,

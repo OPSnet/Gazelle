@@ -19,6 +19,8 @@ if (!empty($_POST['cid'])) {
     $contest = new Gazelle\Contest((int)$_GET['id']);
 } elseif (!$create) {
     $contest = $contestMan->currentContest();
+} else {
+    $contest = null;
 }
 
 View::show_header('contest admin');

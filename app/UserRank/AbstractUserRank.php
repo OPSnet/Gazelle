@@ -43,6 +43,10 @@ abstract class AbstractUserRank extends \Gazelle\Base {
             ORDER BY 1
         ");
         $raw = $this->db->collect('bucket');
+        if (empty($raw)) {
+            // This occurs only a fresh installation
+            $raw = [0];
+        }
 
         /* We now have a list of at most 100 elements. For a number
          * of metrics the series will follow a sharp exponential
