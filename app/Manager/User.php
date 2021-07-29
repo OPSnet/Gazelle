@@ -1005,4 +1005,58 @@ class User extends \Gazelle\Base {
         }
         return $criteria;
     }
+
+    public function addMassTokens(int $amount, bool $allowLeechDisabled): int {
+        $where = !$allowLeechDisabled ? "um.Enabled = '1' AND um.can_leech = 1" : "um.Enabled = '1'";
+
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            SELECT ID FROM users_main um WHERE $where
+        ");
+        $ids = $this->db->collect('ID');
+        $this->db->prepared_query("
+            UPDATE users_main um
+            INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
+                uf.tokens = uf.tokens + ?
+            WHERE $where
+            ", $amount
+        );
+        $this->db->commit();
+
+        $this->cache->deleteMulti(array_map(function ($id) { return "u_$id"; }, $ids));
+        return count($ids);
+    }
+
+    public function clearMassTokens(int $amount, bool $allowLeechDisabled, bool $onlyDrop): int {
+        $cond = [];
+        if (!$onlyDrop) {
+            $cond[] = "um.Enabled = '1'";
+            if (!$allowLeechDisabled) {
+                $cond[] = "um.can_leech = 1";
+            }
+        }
+        if (count($cond) == 2) {
+            $cond = ["({$cond[0]} AND {$cond[1]})"];
+        }
+        array_push($cond, "uf.tokens > ?");
+        $where = implode(' OR ', $cond);
+
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            SELECT ID FROM users_main um INNER JOIN user_flt uf ON (uf.user_id = um.ID) WHERE $where
+            ", $amount
+        );
+        $ids = $this->db->collect('ID');
+        $this->db->prepared_query("
+            UPDATE users_main um
+            INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
+                uf.tokens = ?
+            WHERE $where
+            ", $amount
+        );
+        $this->db->commit();
+
+        $this->cache->deleteMulti(array_map(function ($id) { return "u_$id"; }, $ids));
+        return count($ids);
+    }
 }

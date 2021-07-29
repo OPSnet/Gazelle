@@ -1,0 +1,56 @@
+<div class="header">
+<h2>Manage global Freeleech tokens</h2>
+</div>
+
+{% if fl_added > 0 %}
+<div class="box pad">
+<strong>{{ amount|number_format }} freeleech token{{ amount|plural }} added
+to {{ fl_added|number_format }} enabled users
+    {%- if not leech_disabled %} with leeching privileges enabled{% endif -%}.</strong>
+</div>
+{% endif %}
+
+{% if fl_cleared > 0 %}
+<div class="box pad">
+<strong>Freeleech tokens reduced to {{ amount|number_format }} for
+{{ fl_cleared|number_format }} enabled users
+    {%- if not leech_disabled %} with leeching privileges enabled{% endif %}.</strong>
+</div>
+{% endif %}
+
+<table><tr><td style="vertical-align:top;" width="50%">
+
+<div class="box pad">
+    <form class="add_form" name="fltokens" action="" method="post">
+        <input type="checkbox" id="allowleechdisabled" name="allowleechdisabled" value="{{ leech_disabled }}" />
+        <label for="allowleechdisabled">Grant tokens to users whose leeching privileges are suspended?</label><br />
+
+        Tokens to add: <input type="text" name="numtokens" size="{{ amount }}" /><br /><br />
+
+        <input type="hidden" name="action" value="tokens" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="submit" name="addtokens" value="Add tokens" />
+    </form>
+</div>
+
+</td><td style="vertical-align:top;" width="50%">
+
+<div class="box pad">
+    <form class="manage_form" name="fltokens" action="" method="post">
+        <span id="droptokens">
+        <input type="checkbox" id="onlydrop" name="onlydrop" value="1" onchange="$('#disabled').gtoggle(); return true;" />
+        <label for="onlydrop">Include disabled users?</label></span><br />
+
+        <span id="disabled">
+        <input type="checkbox" id="allowleechdisabled" name="allowleechdisabled" value="{{ leech_disabled }}" onchange="$('#droptokens').gtoggle(); return true;" />
+        <label for="allowleechdisabled">Include users whose leeching privileges are disabled?</label></span><br /><br />
+
+        Maximum token limit: <input type="text" name="numtokens" size="{{ amount }}" /><br />
+        Members with more tokens will have their total reduced to this limit.<br /><br />
+
+        <input type="hidden" name="action" value="tokens" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="submit" name="cleartokens" value="Set maximum token limit" />
+    </form>
+</div>
+</td></tr></table>
