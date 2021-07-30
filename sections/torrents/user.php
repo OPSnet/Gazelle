@@ -45,14 +45,6 @@ $secondarySort = $header->current()['secondarySort'] ?? '';
 $orderBy = $header->getOrderBy() . ' ' . $header->getOrderDir() . ($secondarySort ? ", $secondarySort" : '');
 $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
-if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
-    $page = $_GET['page'];
-    $limit = ($page - 1) * TORRENTS_PER_PAGE.', '.TORRENTS_PER_PAGE;
-} else {
-    $page = 1;
-    $limit = TORRENTS_PER_PAGE;
-}
-
 $cond = [];
 $args = [];
 if (!empty($_GET['format'])) {
@@ -300,6 +292,10 @@ $torrentCount = $DB->scalar("
     ", ...$args
 );
 
+$paginator = new Gazelle\Util\Paginator(10, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($torrentCount);
+array_push($args, $paginator->limit(), $paginator->offset());
+
 $DB->prepared_query("
     SELECT
         t.GroupID,
@@ -314,17 +310,15 @@ $DB->prepared_query("
     GROUP BY $groupBy
     $havingCondition
     ORDER BY $orderBy
-    LIMIT $limit
+    LIMIT ? OFFSET ?
     ", ...$args
 );
 
-$groupIDs = $DB->collect('GroupID');
+$groupIDs     = $DB->collect('GroupID');
 $torrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
-
-$results = Torrents::get_groups($groupIDs);
-$action = display_str($_GET['type']);
-$pages = Format::get_pages($page, $torrentCount, TORRENTS_PER_PAGE);
-$urlStem = "torrents.php?userid={$userId}&amp;type=";
+$results      = Torrents::get_groups($groupIDs);
+$action       = display_str($_GET['type']);
+$urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
 ?>
@@ -355,32 +349,32 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                 <tr>
                     <td class="label"><strong>Rip specifics:</strong></td>
                     <td class="nobr" colspan="3">
-                        <select id="bitrate" name="bitrate" class="ft_bitrate">
-                            <option value="">Bitrate</option>
-<?php foreach (ENCODING as $bitrateName) { ?>
-                            <option value="<?=display_str($bitrateName); ?>"<?php Format::selected('bitrate', $bitrateName); ?>><?=display_str($bitrateName); ?></option>
-<?php } ?>                </select>
-
-                        <select name="format" class="ft_format">
-                            <option value="">Format</option>
-<?php foreach (FORMAT as $formatName) { ?>
-                            <option value="<?=display_str($formatName); ?>"<?php Format::selected('format', $formatName); ?>><?=display_str($formatName); ?></option>
-<?php } ?>
-                            <option value="perfectflac"<?php Format::selected('filter', 'perfectflac'); ?>>Perfect FLACs</option>
-                        </select>
-                        <select name="media" class="ft_media">
-                            <option value="">Media</option>
-<?php foreach (MEDIA as $mediaName) { ?>
-                            <option value="<?=display_str($mediaName); ?>"<?php Format::selected('media',$mediaName); ?>><?=display_str($mediaName); ?></option>
-<?php } ?>
-                        </select>
                         <select name="releasetype" class="ft_releasetype">
                             <option value="">Release type</option>
 <?php
     $releaseTypes = $releaseMan->list();
     foreach ($releaseTypes as $id=>$type) {
 ?>
-                            <option value="<?=display_str($id); ?>"<?php Format::selected('releasetype',$id); ?>><?=display_str($type); ?></option>
+                            <option value="<?=display_str($id); ?>"<?= ($_GET['releasetype'] ?? '') == $id ? ' selected="selected"' : '' ?>><?=display_str($type); ?></option>
+<?php } ?>
+                        </select>
+                        <select name="media" class="ft_media">
+                            <option value="">Media</option>
+<?php foreach (MEDIA as $mediaName) { ?>
+                            <option value="<?=display_str($mediaName); ?>"<?= ($_GET['media'] ?? '') == $mediaName ? ' selected="selected"' : '' ?>><?=display_str($mediaName); ?></option>
+<?php } ?>
+                        </select>
+                        <select name="format" class="ft_format">
+                            <option value="">Format</option>
+<?php foreach (FORMAT as $formatName) { ?>
+                            <option value="<?=display_str($formatName); ?>"<?= ($_GET['format'] ?? '') == $formatName ? ' selected="selected"' : '' ?>><?=display_str($formatName); ?></option>
+<?php } ?>
+                            <option value="perfectflac"<?= ($_GET['filter'] ?? '') == 'perfectflac' ? ' selected="selected"' : '' ?>>Perfect FLACs</option>
+                        </select>
+                        <select id="bitrate" name="bitrate" class="ft_bitrate">
+                            <option value="">Bitrate</option>
+<?php foreach (ENCODING as $bitrateName) { ?>
+                            <option value="<?=display_str($bitrateName); ?>"<?= ($_GET['bitrate'] ?? '') == $bitrateName ? ' selected="selected"' : '' ?>><?=display_str($bitrateName); ?></option>
 <?php } ?>
                         </select>
                     </td>
@@ -390,25 +384,25 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                     <td class="nobr" colspan="3">
                         <select name="log" class="ft_haslog">
                             <option value="">Has log</option>
-                            <option value="1"<?php Format::selected('log','1'); ?>>Yes</option>
-                            <option value="0"<?php Format::selected('log','0'); ?>>No</option>
-                            <option value="100"<?php Format::selected('log','100'); ?>>100% only</option>
-                            <option value="-1"<?php Format::selected('log','-1'); ?>>&lt;100%/unscored</option>
+                            <option value="1"<?= ($_GET['log'] ?? '') == '1' ? ' selected="selected"' : '' ?>>Yes</option>
+                            <option value="0"<?= ($_GET['log'] ?? '') == '0' ? ' selected="selected"' : '' ?>>No</option>
+                            <option value="100"<?= ($_GET['log'] ?? '') == '100' ? ' selected="selected"' : '' ?>>100% only</option>
+                            <option value="-1"<?= ($_GET['log'] ?? '') == '-1' ? ' selected="selected"' : '' ?>>&lt;100%/unscored</option>
                         </select>
                         <select name="cue" class="ft_hascue">
                             <option value="">Has cue</option>
-                            <option value="1"<?php Format::selected('cue',1); ?>>Yes</option>
-                            <option value="0"<?php Format::selected('cue',0); ?>>No</option>
+                            <option value="1"<?= ($_GET['cue'] ?? '') == '1' ? ' selected="selected"' : '' ?>>Yes</option>
+                            <option value="0"<?= ($_GET['cue'] ?? '') == '0' ? ' selected="selected"' : '' ?>>No</option>
                         </select>
                         <select name="scene" class="ft_scene">
                             <option value="">Scene</option>
-                            <option value="1"<?php Format::selected('scene',1); ?>>Yes</option>
-                            <option value="0"<?php Format::selected('scene',0); ?>>No</option>
+                            <option value="1"<?= ($_GET['scene'] ?? '') == '1' ? ' selected="selected"' : '' ?>>Yes</option>
+                            <option value="0"<?= ($_GET['scene'] ?? '') == '0' ? ' selected="selected"' : '' ?>>No</option>
                         </select>
                         <select name="vanityhouse" class="ft_vanityhouse">
                             <option value="">Vanity House</option>
-                            <option value="1"<?php Format::selected('vanityhouse',1); ?>>Yes</option>
-                            <option value="0"<?php Format::selected('vanityhouse',0); ?>>No</option>
+                            <option value="1"<?= ($_GET['vanityhouse'] ?? '') == '1' ? ' selected="selected"' : '' ?>>Yes</option>
+                            <option value="0"<?= ($_GET['vanityhouse'] ?? '') == '0' ? ' selected="selected"' : '' ?>>No</option>
                         </select>
                     </td>
                 </tr>
@@ -416,8 +410,8 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                     <td class="label"><strong>Tags:</strong></td>
                     <td>
                         <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?php Format::form('tags'); ?>" />&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked'); ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked'); ?> /><label for="tags_type1"> All</label>
+                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?= ($_GET['tags_type'] ?? '') == '1' ? ' selected="selected"' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?= ($_GET['tags_type'] ?? '') == '0' ? ' selected="selected"' : '' ?> /><label for="tags_type1"> All</label>
                     </td>
                 </tr>
 
@@ -425,16 +419,16 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                     <td class="label"><strong>Order by</strong></td>
                     <td>
                         <select name="order" class="ft_order_by">
-                            <option value="time"<?php Format::selected('order', 'time'); ?>>Time</option>
-                            <option value="name"<?php Format::selected('order', 'name'); ?>>Name</option>
-                            <option value="seeders"<?php Format::selected('order', 'seeders'); ?>>Seeders</option>
-                            <option value="leechers"<?php Format::selected('order', 'leechers'); ?>>Leechers</option>
-                            <option value="snatched"<?php Format::selected('order', 'snatched'); ?>>Snatched</option>
-                            <option value="size"<?php Format::selected('order', 'size'); ?>>Size</option>
+                            <option value="time"<?= ($_GET['order'] ?? '') == 'time' ? ' selected="selected"' : '' ?>>Time</option>
+                            <option value="name"<?= ($_GET['order'] ?? '') == 'name' ? ' selected="selected"' : '' ?>>Name</option>
+                            <option value="seeders"<?= ($_GET['order'] ?? '') == 'seeders' ? ' selected="selected"' : '' ?>>Seeders</option>
+                            <option value="leechers"<?= ($_GET['order'] ?? '') == 'leechers' ? ' selected="selected"' : '' ?>>Leechers</option>
+                            <option value="snatched"<?= ($_GET['order'] ?? '') == 'snatched' ? ' selected="selected"' : '' ?>>Snatched</option>
+                            <option value="size"<?= ($_GET['order'] ?? '') == 'size' ? ' selected="selected"' : '' ?>>Size</option>
                         </select>
                         <select name="sort" class="ft_order_way">
-                            <option value="desc"<?php Format::selected('sort', 'desc'); ?>>Descending</option>
-                            <option value="asc"<?php Format::selected('sort', 'asc'); ?>>Ascending</option>
+                            <option value="desc"<?= ($_GET['sort'] ?? '') == 'desc' ? ' selected="selected"' : '' ?>>Descending</option>
+                            <option value="asc"<?= ($_GET['sort'] ?? '') == 'asc' ? ' selected="selected"' : '' ?>>Ascending</option>
                         </select>
                     </td>
                 </tr>
@@ -472,7 +466,7 @@ foreach (CATEGORY as $catKey => $catName) {
     </div>
 <?php } else { ?>
     <h4><?= number_format($torrentCount) ?> torrent<?= plural($torrentCount) ?> found.</h4>
-    <div class="linkbox"><?=$pages?></div>
+    <?= $paginator->linkbox() ?>
     <table class="torrent_table cats m_table" width="100%">
         <tr class="colhead">
             <td class="cats_col"></td>
@@ -485,7 +479,7 @@ foreach (CATEGORY as $catKey => $catName) {
         </tr>
 <?php
     $pageSize = 0;
-    $vote = new \Gazelle\Vote($Viewer->id());
+    $vote = new Gazelle\Vote($Viewer->id());
 
     foreach ($torrentsInfo as $torrentID => $info) {
         [$groupID, , $time] = array_values($info);
@@ -553,9 +547,9 @@ foreach (CATEGORY as $catKey => $catName) {
 <?php
     } /* foreach */ ?>
     </table>
+    <?= $paginator->linkbox() ?>
 <?php
 } /* if ($torrentCount) */ ?>
-    <div class="linkbox"><?= $pages ?></div>
 </div>
 <?php
 View::show_footer();

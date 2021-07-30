@@ -37,6 +37,7 @@
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ id }}_{{ viewer.announce_key }}{{ auth_args|raw }}&amp;name={{ name }}" title="{{ constant('SITE_NAME') }} - {{ name }}" />
     {%- endfor %}
 {% endif %}
+
 {% for sheet in style %}
 {{ css(sheet) }}
 {% endfor %}
