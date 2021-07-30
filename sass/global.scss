@@ -260,6 +260,13 @@ td.nowrap {
     white-space: nowrap;
 }
 
+td.colhead, td.colhead_dark, .colhead td, .colhead th, .colhead_dark td, .colhead_dark th {
+  top: 0;
+  position: sticky;
+  position: -webkit-sticky;
+  z-index: 10;
+}
+
 span.rbt {
     display: block;
     padding: 8px 0 0;
