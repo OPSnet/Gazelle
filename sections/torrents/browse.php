@@ -212,27 +212,28 @@ View::show_header('Browse Torrents', ['js' => 'browse']);
             <tr id="rip_specifics" class="ftr_advanced<?=$HideAdvanced?>">
                 <td class="label">Rip specifics:</td>
                 <td class="nobr ft_ripspecifics" colspan="3">
-                    <select id="bitrate" name="encoding" class="ft_bitrate fti_advanced">
-                        <option value="">Bitrate</option>
-<?php    foreach (ENCODING as $BitrateName) { ?>
-                        <option value="<?=display_str($BitrateName); ?>"<?php Format::selected('encoding', $BitrateName); ?>><?=display_str($BitrateName); ?></option>
-<?php    } ?>            </select>
-
-                    <select name="format" class="ft_format fti_advanced">
-                        <option value="">Format</option>
-<?php    foreach (FORMAT as $FormatName) { ?>
-                        <option value="<?=display_str($FormatName); ?>"<?php Format::selected('format', $FormatName); ?>><?=display_str($FormatName); ?></option>
-<?php    } ?>            </select>
+                    <select name="releasetype" class="ft_releasetype fti_advanced">
+                        <option value="">Release type</option>
+<?php    foreach ($releaseTypes as $ID=>$Type) { ?>
+                        <option value="<?=display_str($ID); ?>"<?php Format::selected('releasetype', $ID); ?>><?=display_str($Type); ?></option>
+<?php    } ?>
+                    </select>
                     <select name="media" class="ft_media fti_advanced">
                         <option value="">Media</option>
 <?php    foreach (MEDIA as $MediaName) { ?>
                         <option value="<?=display_str($MediaName); ?>"<?php Format::selected('media', $MediaName); ?>><?=display_str($MediaName); ?></option>
 <?php    } ?>
                     </select>
-                    <select name="releasetype" class="ft_releasetype fti_advanced">
-                        <option value="">Release type</option>
-<?php    foreach ($releaseTypes as $ID=>$Type) { ?>
-                        <option value="<?=display_str($ID); ?>"<?php Format::selected('releasetype', $ID); ?>><?=display_str($Type); ?></option>
+                    <select name="format" class="ft_format fti_advanced">
+                        <option value="">Format</option>
+<?php    foreach (FORMAT as $FormatName) { ?>
+                        <option value="<?=display_str($FormatName); ?>"<?php Format::selected('format', $FormatName); ?>><?=display_str($FormatName); ?></option>
+<?php    } ?>
+                    </select>
+                    <select id="bitrate" name="encoding" class="ft_bitrate fti_advanced">
+                        <option value="">Bitrate</option>
+<?php    foreach (ENCODING as $BitrateName) { ?>
+                        <option value="<?=display_str($BitrateName); ?>"<?php Format::selected('encoding', $BitrateName); ?>><?=display_str($BitrateName); ?></option>
 <?php    } ?>
                     </select>
                 </td>
