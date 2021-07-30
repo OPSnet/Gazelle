@@ -22,7 +22,7 @@ if (isset($_POST['Username'])) {
 
     $creator = new Gazelle\UserCreator;
     try {
-        $user = $creator->setUserName($username)
+        $user = $creator->setUsername($username)
             ->setEmail($email)
             ->setPassword($password)
             ->setIpaddr('127.0.0.1')

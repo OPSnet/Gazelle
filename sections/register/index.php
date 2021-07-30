@@ -45,7 +45,7 @@ if (!empty($_REQUEST['confirm'])) {
             $email    = trim($_REQUEST['email']);
 
             $creator = new Gazelle\UserCreator;
-            $creator->setUserName($username)
+            $creator->setUsername($username)
                 ->setEmail($email)
                 ->setPassword($_POST['password'])
                 ->setIpaddr($_SERVER['REMOTE_ADDR']);

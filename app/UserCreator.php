@@ -16,7 +16,7 @@ class UserCreator extends Base {
     protected $passHash;
     protected $permissionId;
     protected $announceKey;
-    protected $userName;
+    protected $username;
 
     public function __construct() {
         parent::__construct();
@@ -40,13 +40,13 @@ class UserCreator extends Base {
         if (!$this->passHash) {
             throw new UserCreatorException('password');
         }
-        if (!$this->userName) {
+        if (!$this->username) {
             throw new UserCreatorException('username');
         }
-        if ($this->db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->userName)) {
+        if ($this->db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->username)) {
             throw new UserCreatorException('duplicate');
         }
-        if (!preg_match(USERNAME_REGEXP, $this->userName)) {
+        if (!preg_match(USERNAME_REGEXP, $this->username, $match)) {
             throw new UserCreatorException('username-invalid');
         }
 
@@ -89,7 +89,7 @@ class UserCreator extends Base {
             'PermissionID', 'Enabled', 'Invites', 'ipcc'
         ];
         $mainArgs = [
-            $this->userName, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
+            $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
             $this->permissionId, $this->enabled ? '1' : '0', STARTING_INVITES, \Tools::geoip($this->ipaddr)
         ];
 
@@ -210,7 +210,7 @@ class UserCreator extends Base {
         $this->ipaddr       = null;
         $this->passHash     = null;
         $this->permissionId = null;
-        $this->userName     = null;
+        $this->username     = null;
     }
 
     /**
@@ -298,11 +298,15 @@ class UserCreator extends Base {
     }
 
     /**
-     * Set the user name.
-     * @param string password
+     * Set the username.
+     * @param string username
      */
-    public function setUserName(string $userName) {
-        $this->userName = trim($userName);
+    public function setUsername(string $username) {
+        if (preg_match('/^' . str_replace('/', '', USERNAME_REGEXP) . '$/', trim($username), $match)) {
+            if (!empty($match['username'])) {
+                $this->username = $match['username'];
+            }
+        }
         return $this;
     }
 
