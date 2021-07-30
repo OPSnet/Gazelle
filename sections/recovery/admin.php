@@ -1,9 +1,9 @@
 <?php
-if (!check_perms('admin_recovery')) {
+if (!$Viewer->permitted('admin_recovery')) {
     error(403);
 }
-$recovery = new Gazelle\Recovery;
 
+$recovery = new Gazelle\Recovery;
 if (isset($_GET['task'])) {
     $id = (int)($_GET['id'] ?? 0);
     if ($id) {
@@ -37,21 +37,13 @@ if (isset($_GET['task'])) {
     }
 }
 
-
-$Page = (isset($_GET['page']) && (int)$_GET['page'] > 0)
-    ? (int)$_GET['page'] : 1;
-$Limit  = 100;
-$Offset = $Limit * ($Page-1);
-
-$State = isset($_GET['state']) ? $_GET['state'] : 'pending';
-$Total = $recovery->getTotal($State, $Viewer->id());
-$Info  = $recovery->getList($Limit, $Offset, $State, $Viewer->id());
-
-$Pages = Format::get_pages($Page, $Total, $Limit);
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$State = $_GET['state'] ?? 'pending';
+$paginator->setTotal($recovery->getTotal($State, $Viewer->id()));
+$Info  = $recovery->getList($paginator->limit(), $paginator->offset(), $State, $Viewer->id());
 
 View::show_header('Recovery administration');
 ?>
-
 <div class="thin">
 
 <div class="linkbox">
@@ -73,21 +65,19 @@ View::show_header('Recovery administration');
 <tr><td></td><td colspan="3"><input type="submit" value="Search" /></td></tr>
 </table>
 
-<h3><?= $Total ?> <?= $State ?> recovery requests</h3>
+<h3><?= $paginator->total() ?> <?= $State ?> recovery requests</h3>
 
 <?php if (isset($message)) { ?>
 <h5><?= $message ?></h5>
 <?php } ?>
 
-<div class="linkbox">
-    <?=$Pages?>
-</div>
+<?= $paginator->linkbox() ?>
 
 <div class="box">
     <div class="head">Registrations</div>
     <div class="pad">
         <table>
-            <tr>
+            <tr class="colhead">
                 <th>ID</th>
                 <th>Username</th>
                 <th>Token</th>
@@ -118,9 +108,7 @@ View::show_header('Recovery administration');
     </div>
 </div>
 
-<div class="linkbox">
-    <?=$Pages?>
-</div>
+<?= $paginator->linkbox() ?>
 
 </div>
 <?php
