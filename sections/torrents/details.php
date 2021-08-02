@@ -1,10 +1,11 @@
 <?php
-function compare($X, $Y) {
-    return($Y['score'] - $X['score']);
-}
 header('Access-Control-Allow-Origin: *');
 
-$GroupID = (int)$_GET['id'];
+$tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['id']);
+if (is_null($tgroup)) {
+    error(404);
+}
+$GroupID = $tgroup->id();
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 
 [$TorrentDetails, $TorrentList] = get_group_info($GroupID, $RevisionID);
@@ -12,8 +13,8 @@ $RevisionID = (int)($_GET['revisionid'] ?? 0);
 // Group details
 [$WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
     $GroupRecordLabel, $GroupCatalogueNumber, $ReleaseType, $GroupCategoryID,
-    $GroupTime, $GroupVanityHouse, $TorrentTags, $TorrentTagIDs, $TorrentTagUserIDs,
-    $TagPositiveVotes, $TagNegativeVotes, $GroupFlags] = array_values($TorrentDetails);
+    $GroupTime, $GroupVanityHouse,,,,,, $GroupFlags] = array_values($TorrentDetails);
+$tagList = $tgroup->tagList();
 
 $DisplayName = "<span dir=\"ltr\">$GroupName</span>";
 $AltName = $GroupName; // Goes in the alt text of the image
@@ -42,23 +43,6 @@ if ($GroupCategoryID == 1) {
     $name = $releaseTypes[$ReleaseType];
     $DisplayName .= " [$name] ";
     $AltName .= " [$name] ";
-}
-
-$Tags = [];
-if ($TorrentTags != '') {
-    $TorrentTags = explode('|', $TorrentTags);
-    $TorrentTagIDs = explode('|', $TorrentTagIDs);
-    $TorrentTagUserIDs = explode('|', $TorrentTagUserIDs);
-    $TagPositiveVotes = explode('|', $TagPositiveVotes);
-    $TagNegativeVotes = explode('|', $TagNegativeVotes);
-
-    foreach ($TorrentTags as $TagKey => $TagName) {
-        $Tags[$TagKey]['name'] = $TagName;
-        $Tags[$TagKey]['score'] = ($TagPositiveVotes[$TagKey] - $TagNegativeVotes[$TagKey]);
-        $Tags[$TagKey]['id'] = $TorrentTagIDs[$TagKey];
-        $Tags[$TagKey]['userid'] = $TorrentTagUserIDs[$TagKey];
-    }
-    uasort($Tags, 'compare');
 }
 
 $CoverArt = $Cache->get_value("torrents_cover_art_$GroupID");
@@ -420,24 +404,24 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
 
 <?php } ?>
             </div>
-<?php if (empty($Tags)) { ?>
+<?php if (empty($tagList)) { ?>
             <ul><li>There are no tags to display.</li></ul>
 <?php } else { ?>
             <ul class="stats nobullet">
-<?php   foreach ($Tags as $TagKey => $Tag) { ?>
+<?php   foreach ($tagList as $tid => $t) { ?>
                 <li>
-                    <a href="torrents.php?taglist=<?=$Tag['name']?>" style="float: left; display: block;"><?=display_str($Tag['name'])?></a>
+                    <a href="torrents.php?taglist=<?=$t['name']?>" style="float: left; display: block;"><?=display_str($t['name'])?></a>
                     <div style="float: right; display: block; letter-spacing: -1px;" class="edit_tags_votes">
-                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="brackets tooltip vote_tag_up">&and;</a>
-                    <?=$Tag['score']?>
-                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag down" class="brackets tooltip vote_tag_down">&or;</a>
-<?php       if (check_perms('users_warn')) { ?>
-                    <a href="user.php?id=<?=$Tag['userid']?>" title="View the profile of the user that added this tag" class="brackets tooltip view_tag_user">U</a>
+                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tid ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="tooltip vote_tag_up">&#x25b2;</a>
+                    <?= $t['score'] ?>
+                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tid ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag down" class="tooltip vote_tag_down">&#x25bc;</a>
+<?php       if ($Viewer->permitted('users_warn')) { ?>
+                    <a href="user.php?id=<?= $t['userId'] ?>" title="View the profile of the user that added this tag" class="brackets tooltip view_tag_user">U</a>
 <?php
             }
-            if (empty($LoggedUser['DisableTagging']) && check_perms('site_delete_tag')) {
+            if (!$Viewer->disableTagging() && $Viewer->permitted('site_delete_tag')) {
 ?>
-                    <span class="remove remove_tag"><a href="torrents.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
+                    <span class="remove remove_tag"><a href="torrents.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tid ?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
 <?php       } ?>
                     </div>
                     <br style="clear: both;" />
@@ -447,7 +431,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
 <?php } ?>
         </div>
 
-<?php if (empty($LoggedUser['DisableTagging'])) { ?>
+<?php if (!$Viewer->disableTagging()) { ?>
         <div class="box box_addtag">
             <div class="head"><strong>Add tag</strong></div>
             <div class="body">

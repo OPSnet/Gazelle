@@ -82,14 +82,14 @@ class TGroup extends BaseObject {
                 g.CategoryID,
                 g.Time,
                 g.VanityHouse,
-                group_concat(DISTINCT tags.Name SEPARATOR '|') AS tagNames,
-                group_concat(DISTINCT tags.ID SEPARATOR '|')   AS tagIds,
-                group_concat(tt.UserID SEPARATOR '|')          AS tagVoteUserIds,
-                group_concat(tt.PositiveVotes SEPARATOR '|')   AS tagUpvotes,
-                group_concat(tt.NegativeVotes SEPARATOR '|')   AS tagDownvotes
+                group_concat(t.Name ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)           AS tagNames,
+                group_concat(t.ID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)             AS tagIds,
+                group_concat(t.UserID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)         AS tagVoteUserIds,
+                group_concat(tt.PositiveVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagUpvotes,
+                group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagDownvotes
             FROM torrents_group AS g
             LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
-            LEFT JOIN tags ON (tags.ID = tt.TagID)
+            LEFT JOIN tags as t ON (t.ID = tt.TagID)
         ";
 
         $args = [];
@@ -118,11 +118,11 @@ class TGroup extends BaseObject {
         $info['ReleaseType'] = (int)$info['ReleaseType'];
 
         // Reorganize tag info to be useful
-        $tagIds         = explode('|', $info['tagIds']);
-        $tagNames       = explode('|', $info['tagNames']);
-        $tagVoteUserIds = explode('|', $info['tagVoteUserIds']);
-        $tagUpvotes     = explode('|', $info['tagUpvotes']);
-        $tagDownvotes   = explode('|', $info['tagDownvotes']);
+        $tagNames       = explode(',', $info['tagNames']);
+        $tagIds         = array_map('intval', explode(',', $info['tagIds']));
+        $tagVoteUserIds = array_map('intval', explode(',', $info['tagVoteUserIds']));
+        $tagUpvotes     = array_map('intval', explode(',', $info['tagUpvotes']));
+        $tagDownvotes   = array_map('intval', explode(',', $info['tagDownvotes']));
         $info['tags']   = [];
         for ($n = 0; $n < count($tagIds); ++$n) {
             $info['tags'][$tagIds[$n]] = [
@@ -130,6 +130,7 @@ class TGroup extends BaseObject {
                 'userId'    => $tagVoteUserIds[$n],
                 'upvotes'   => $tagUpvotes[$n],
                 'downvotes' => $tagDownvotes[$n],
+                'score'     => $tagUpvotes[$n] - $tagDownvotes[$n],
             ];
         }
 
@@ -227,6 +228,10 @@ class TGroup extends BaseObject {
 
     public function artistName(): string {
         return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
+    }
+
+    public function tagList(): array {
+        return $this->info()['tags'];
     }
 
     public function torrentTagList(): array {
@@ -664,5 +669,40 @@ class TGroup extends BaseObject {
         $this->db->commit();
         $this->cache->deleteMulti(['tg_' . $this->id, 'torrents_details_' . $this->id]);
         return $n;
+    }
+
+    public function removeTag(\Gazelle\Tag $tag): bool {
+        $tagId = $tag->id();
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            DELETE FROM torrents_tags_votes WHERE GroupID = ? AND TagID = ?
+            ", $this->id, $tag->id()
+        );
+        $this->db->prepared_query("
+            DELETE FROM torrents_tags WHERE GroupID = ? AND TagID = ?
+            ", $this->id, $tagId
+        );
+
+        // Was this the last occurrence?
+        $inUse = $this->db->scalar("
+            SELECT count(*) FROM torrents_tags WHERE TagID = ?
+            ", $tagId
+        ) + $this->db->scalar("
+            SELECT count(*)
+            FROM requests_tags rt
+            INNER JOIN requests r ON (r.ID = rt.RequestID)
+            WHERE r.FillerID = 0 /* TODO: change to DEFAULT NULL */
+                AND rt.TagID = ?
+            ", $tagId
+        );
+        if (!$inUse) {
+            $this->db->prepared_query("
+                DELETE FROM tags WHERE ID = ?
+                ", $tagId
+            );
+        }
+
+        $this->db->commit();
+        return true;
     }
 }
