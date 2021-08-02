@@ -14,6 +14,10 @@ class Torrent extends \Gazelle\Base {
         $this->userId = $userId;
     }
 
+    protected function flush(): void {
+        $this->cache->delete_value('user_notify_upload_' . $this->userId);
+    }
+
     public function setFilter(int $filterId) {
         $cond[] = 'unf.ID = ?';
         $args[] = $filterId;
@@ -53,7 +57,60 @@ class Torrent extends \Gazelle\Base {
             WHERE UserID = ?
             ', 0, $this->userId
         );
-        $this->cache->delete_value("user_notify_upload_" . $this->userId);
+        $this->flush();
         return $list;
+    }
+
+    public function catchup(): int {
+        $this->db->prepared_query("
+            UPDATE users_notify_torrents SET
+                UnRead = 0
+            WHERE UnRead = 1 AND UserID = ?
+            ", $this->userId
+        );
+        if ($this->db->affected_rows()) {
+            $this->flush();
+        }
+        return $this->db->affected_rows();
+    }
+
+    public function catchupFilter(int $filterId): int {
+        $this->db->prepared_query("
+            UPDATE users_notify_torrents SET
+                UnRead = 0
+            WHERE UnRead = 1 UserID = ? AND FilterID = ?
+            ", $this->userId, $filterId
+        );
+        if ($this->db->affected_rows()) {
+            $this->flush();
+        }
+        return $this->db->affected_rows();
+    }
+
+    public function clearFilter(int $filterId): int {
+        $this->db->prepared_query("
+            DELETE FROM users_notify_torrents WHERE UnRead = 0 AND UserID = ? AND FilterID = ?
+            ", $this->userId, $filterId
+        );
+        $this->flush();
+        return $this->db->affected_rows();
+    }
+
+    public function clearRead(): int {
+        $this->db->prepared_query("
+            DELETE FROM users_notify_torrents WHERE UnRead = 0 AND UserID = ?
+            ", $this->userId
+        );
+        $this->flush();
+        return $this->db->affected_rows();
+    }
+
+    public function clearTorrentList(array $torrentIds): int {
+        $this->db->prepared_query("
+            DELETE FROM users_notify_torrents WHERE UserID = ? AND TorrentID IN (" . placeholders($torrentIds) . ")
+            ", $this->userId, ...$torrentIds
+        );
+        $this->flush();
+        return $this->db->affected_rows();
     }
 }

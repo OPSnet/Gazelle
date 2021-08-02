@@ -188,16 +188,12 @@ if (!empty($_REQUEST['action'])) {
             require_once('takeeditrequest.php');
             break;
 
-        case 'notify_clear':
-        case 'notify_clear_item':
-        case 'notify_clear_items':
-        case 'notify_clearitem':
-        case 'notify_clear_filter':
-        case 'notify_cleargroup':
         case 'notify_catchup':
         case 'notify_catchup_filter':
-            authorize();
-            enforce_login();
+        case 'notify_clear':
+        case 'notify_clear_filter':
+        case 'notify_clear_item':
+        case 'notify_clear_items':
             require_once('notify_actions.php');
             break;
 
