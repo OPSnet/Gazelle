@@ -1,45 +1,12 @@
 <?php
-$UserID = $Viewer->id();
-$TagID = $_GET['tagid'];
-$GroupID = $_GET['groupid'];
-$Way = $_GET['way'];
 
-if (!is_number($TagID) || !is_number($GroupID)) {
+$tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+$tagId  = (int)$_GET['tagid'];
+$way    = $_GET['way'];
+
+if (is_null($tgroup) || !$tagId || !in_array($way, ['up', 'down'])) {
     error(404);
 }
-if (!in_array($Way, ['up', 'down'])) {
-    error(404);
-}
+$tgroup->addTagVote($Viewer->id(), $tagId, $way);
 
-$DB->prepared_query("
-    SELECT TagID
-    FROM torrents_tags_votes
-    WHERE TagID = ?
-        AND GroupID = ?
-        AND UserID = ?
-        AND Way = ?
-    ", $TagID, $GroupID, $UserID, $Way
-);
-if (!$DB->has_results()) {
-    if ($Way == 'down') {
-        $Change = 'NegativeVotes = NegativeVotes + 1';
-    } else {
-        $Change = 'PositiveVotes = PositiveVotes + 2';
-    }
-    $DB->prepared_query("
-        UPDATE torrents_tags SET
-            $Change
-        WHERE TagID = ?
-            AND GroupID = ?
-        ", $TagID, $GroupID
-    );
-    $DB->prepared_query("
-        INSERT INTO torrents_tags_votes
-               (GroupID, TagID, UserID, Way)
-        VALUES (?,       ?,     ?,      ?)
-        ", $GroupID, $TagID, $UserID, $Way
-    );
-    $Cache->delete_value("torrents_details_$GroupID");
-}
-
-header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id=$GroupID");
+header("Location: " . redirectUrl("torrents.php?id=" . $tgroup->id()));
