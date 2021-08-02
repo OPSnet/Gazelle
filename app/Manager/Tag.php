@@ -3,6 +3,23 @@
 namespace Gazelle\Manager;
 
 class Tag extends \Gazelle\Base {
+
+    public function findById(int $id) {
+        $tagId = $this->db->scalar("
+            SELECT ID FROM tags WHERE ID = ?
+            ", $id
+        );
+        return $tagId ? new \Gazelle\Tag($tagId) : null;
+    }
+
+    public function findByName(string $name) {
+        $tagId = $this->db->scalar("
+            SELECT ID FROM tags WHERE Name = ?
+            ", $name
+        );
+        return $tagId ? new \Gazelle\Tag($tagId) : null;
+    }
+
     /**
      * Get a tag ready for database input and display.
      * Trim whitespace, force to lower case, internal spaces and dashes become dots,
