@@ -47,11 +47,9 @@ class Tag extends \Gazelle\Base {
      * @param string $tag
      * @return int ID of tag, or null if no such tag
      */
-    public function lookup(string $tag) {
+    public function lookup(string $tag): int {
         return $this->db->scalar("
-            SELECT ID
-            FROM tags
-            WHERE Name = ?
+            SELECT ID FROM tags WHERE Name = ?
             ", $tag
         );
     }
@@ -62,11 +60,9 @@ class Tag extends \Gazelle\Base {
      * @param int $id ID of the tag
      * @return string $name Name of the tag
      */
-    public function name(int $id) {
+    public function name(int $id): ?string {
         return $this->db->scalar("
-            SELECT Name
-            FROM tags
-            WHERE ID = ?
+            SELECT Name FROM tags WHERE ID = ?
             ", $id
         );
     }
@@ -78,7 +74,7 @@ class Tag extends \Gazelle\Base {
      * @param int $userId The id of the user creating the tag.
      * @return int ID of tag
      */
-    public function create(string $name, int $userId) {
+    public function create(string $name, int $userId): int {
         $this->db->prepared_query("
             INSERT INTO tags
                    (Name, UserID)
@@ -97,11 +93,9 @@ class Tag extends \Gazelle\Base {
      * @param string $tag
      * @return int ID of tag, or null if no such tag
      */
-    public function lookupBad(string $tag) {
+    public function lookupBad(string $tag): ?int {
         return $this->db->scalar("
-            SELECT ID
-            FROM tag_aliases
-            WHERE BadTag = ?
+            SELECT ID FROM tag_aliases WHERE BadTag = ?
             ", $tag
         );
     }
@@ -113,7 +107,7 @@ class Tag extends \Gazelle\Base {
      * @param int $userId Who is doing the officializing/
      * @return int $tagId id of the officialized tag.
      */
-    public function officialize(string $tag, int $userId) {
+    public function officialize(string $tag, int $userId): int {
         $tag = $this->sanitize($tag);
         $id = $this->lookup($tag);
         if ($id) {
@@ -143,8 +137,7 @@ class Tag extends \Gazelle\Base {
      * @param array $id list of ids to unofficialize
      * @return int Number of tags that were actually unofficialized
      */
-
-    public function unofficialize(array $id) {
+    public function unofficialize(array $id): int {
         $this->db->prepared_query("
             UPDATE tags SET
                 TagType = 'other'
@@ -160,7 +153,7 @@ class Tag extends \Gazelle\Base {
      * @param int $gather number of rows to gather per iteration
      * @return array [id, name, uses]
      */
-    public function listOfficial($columns, $order = 'name') {
+    public function listOfficial($columns, $order = 'name'): array {
         $orderBy = $order == 'name' ? '2, 3 DESC' : '3 DESC, 2';
         $this->db->prepared_query("
             SELECT ID AS id, Name AS name, Uses AS uses
@@ -309,13 +302,13 @@ class Tag extends \Gazelle\Base {
     }
 
     /**
-     * Add a mapping of a bad tag alias to a acceptble alias
+     * Add a mapping of a bad tag alias to a acceptable alias
      *
      * @param string $bad The bad tag name (to be replaced upon usage by)
      * @param string $good The good name.
      * @return int Number of rows added (0 or 1)
      */
-    public function createAlias(string $bad, string $good) {
+    public function createAlias(string $bad, string $good): int {
         $this->db->prepared_query("
             INSERT INTO tag_aliases
                    (BadTag, AliasTag)
@@ -326,14 +319,14 @@ class Tag extends \Gazelle\Base {
     }
 
     /**
-     * Modify the mapping of a bad tag alias to a acceptble alias
+     * Modify the mapping of a bad tag alias to a acceptable alias
      *
      * @param int $aliasId The id of the alias to change
      * @param string $bad The bad tag name (to be replaced upon usage by)
      * @param string $good The good name.
      * @return int Number of rows changed (0 or 1)
      */
-    public function modifyAlias(int $aliasId, string $bad, string $good) {
+    public function modifyAlias(int $aliasId, string $bad, string $good): int {
         $this->db->prepared_query("
             UPDATE tag_aliases SET
                 BadTag = ?,
@@ -350,7 +343,7 @@ class Tag extends \Gazelle\Base {
      * @param int $aliasId The id of the alias to remove
      * @return int Number of rows deleted (0 or 1)
      */
-    public function removeAlias(int $aliasId) {
+    public function removeAlias(int $aliasId): int {
         $this->db->prepared_query("
             DELETE FROM tag_aliases WHERE ID = ?
             ", $aliasId
@@ -365,7 +358,7 @@ class Tag extends \Gazelle\Base {
      * @param string $tag the name we want to change if has an alias
      * @return string The resolved tag name, its alias or itself
      */
-    public function resolve($name) {
+    public function resolve($name): string {
         $QueryID = $this->db->get_query_id();
         $resolved = $this->db->scalar("
             SELECT AliasTag
@@ -376,20 +369,21 @@ class Tag extends \Gazelle\Base {
         $this->db->set_query_id($QueryID);
         return $resolved ?: $name;
     }
+
     /**
      * Return the list of aliases
      *
      * @param bool $orderByBad true to order by bad, otherwise alias
      * @return array list of [id, bad, alias]
      */
-    public function listAlias(bool $orderByBad) {
+    public function listAlias(bool $orderByBad): array {
         $column = $orderByBad ? 2 : 3;
         $this->db->prepared_query("
             SELECT ID AS id, BadTag AS bad, AliasTag AS alias
             FROM tag_aliases
             ORDER BY $column
         ");
-        return $this->db->to_array('id', MYSQLI_ASSOC);
+        return $this->db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -399,7 +393,7 @@ class Tag extends \Gazelle\Base {
      * @return array [artistId, artistName, torrentGroupId, torrentGroupName]
      * (artist elements may be null)
      */
-    public function torrentLookup(int $tagId) {
+    public function torrentLookup(int $tagId): array {
         $this->db->prepared_query("
             SELECT
                 ag.ArtistID AS artistId,
@@ -423,7 +417,7 @@ class Tag extends \Gazelle\Base {
      * @return array [artistId, artistName, requestId, requestName]
      * (artist elements may be null)
      */
-    public function requestLookup(int $tagId) {
+    public function requestLookup(int $tagId): array {
         $this->db->prepared_query("
             SELECT
                 ag.ArtistID  AS artistId,
@@ -447,7 +441,7 @@ class Tag extends \Gazelle\Base {
      * @param int $requestId The id of the request
      * @return int Number of rows affected
      */
-    public function createRequestTag(int $tagId, int $requestId) {
+    public function createRequestTag(int $tagId, int $requestId): int {
         $this->db->prepared_query("
             INSERT IGNORE INTO requests_tags
                    (TagID, RequestID)
@@ -466,7 +460,7 @@ class Tag extends \Gazelle\Base {
      * @param int $weight The the weight of this addition
      * @return int Number of rows affected
      */
-    public function createTorrentTag(int $tagId, int $groupId, int $userId, int $weight) {
+    public function createTorrentTag(int $tagId, int $groupId, int $userId, int $weight): int {
         $this->db->prepared_query("
             INSERT INTO torrents_tags
                    (TagID, GroupID, UserID, PositiveVotes)
@@ -488,7 +482,7 @@ class Tag extends \Gazelle\Base {
      *
      * @return int Number of rows affected
      */
-    public function createTorrentTagVote(int $tagId, int $groupId, int $userId, string $vote) {
+    public function createTorrentTagVote(int $tagId, int $groupId, int $userId, string $vote): int {
         $this->db->prepared_query("
             INSERT INTO torrents_tags_votes
                    (TagID, GroupID, UserID, Way)
@@ -506,7 +500,7 @@ class Tag extends \Gazelle\Base {
      * @param int $userId The id of the user
      * @return bool True if the user as already voted on this tag
      */
-    public function torrentTagHasVote(int $tagId, int $groupId, int $userId) {
+    public function torrentTagHasVote(int $tagId, int $groupId, int $userId): bool {
         $this->db->prepared_query("
             SELECT 1
             FROM torrents_tags_votes
@@ -525,7 +519,7 @@ class Tag extends \Gazelle\Base {
      * @return array of array of JSON key=>value names
      *      [['value' => 'tag1'], ['value' => 'tag2'], ...]]
      */
-    public function autocompleteAsJson(string $word) {
+    public function autocompleteAsJson(string $word): array {
         $maxKeySize = 4;
         $keySize = min($maxKeySize, max(1, strlen($word)));
         $letters = strtolower(substr($word, 0, $keySize));
