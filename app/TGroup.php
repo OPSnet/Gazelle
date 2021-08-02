@@ -626,4 +626,43 @@ class TGroup extends BaseObject {
         }
         return $result;
     }
+
+    public function addTagVote(int $userId, int $tagId, string $way): int {
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            SELECT TagID
+            FROM torrents_tags_votes
+            WHERE GroupID = ?
+                AND TagID = ?
+                AND UserID = ?
+                AND Way = ?
+            ", $this->id, $tagId, $userId, $way
+        );
+        if ($this->db->has_results()) {
+            $this->db->rollback();
+            return 0;
+        }
+        if ($way == 'down') {
+            $change = 'NegativeVotes = NegativeVotes + 1';
+        } else {
+            $change = 'PositiveVotes = PositiveVotes + 2';
+        }
+        $this->db->prepared_query("
+            UPDATE torrents_tags SET
+                $change
+            WHERE GroupID = ?
+                AND TagID = ?
+            ", $this->id, $tagId
+        );
+        $this->db->prepared_query("
+            INSERT INTO torrents_tags_votes
+                   (GroupID, TagID, UserID, Way)
+            VALUES (?,       ?,     ?,      ?)
+            ", $this->id, $tagId, $userId, $way
+        );
+        $n = $this->db->affected_rows();
+        $this->db->commit();
+        $this->cache->deleteMulti(['tg_' . $this->id, 'torrents_details_' . $this->id]);
+        return $n;
+    }
 }
