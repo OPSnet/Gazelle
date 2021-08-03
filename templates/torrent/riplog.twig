@@ -1,0 +1,75 @@
+{% set total = list|length %}
+{% for log in list %}
+    {% if loop.first %}
+<table>
+<tr class="colhead_dark" style="font-weight: bold">
+    <td>This torrent has {{ total }} log{{ total|plural }} with a total score of {{ log_score }}/100</td>
+</tr>
+    {% endif %}
+<tr class="log_section">
+    <td>
+    {% if viewer.permitted('users_mod') %}
+        <div style="padding: 10px; float: right"><a class="brackets" href="torrents.php?action=editlog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Edit Log</a>
+        <a class="brackets" onclick="return confirm('Are you sure you want to deleted this log? There is NO undo!');"
+            href="torrents.php?action=deletelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Delete Log</a>
+
+        {% if viewer.permitted('torrents_delete') %}
+        <a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
+            href="torrents.php?action=removelogs&amp;torrentid={{ id }}">Remove all logs</a>
+        {% endif %}
+        </div>
+    {% endif %}
+    {% if log.has_riplog %}
+        <div style="padding: 10px; float: left"><a class="brackets" href="view.php?type=riplog&amp;id={{ id }}&amp;logid={{ log.id }}" target="_blank">View Raw Log</a></div>
+    {% endif %}
+    <br />
+    <br />
+
+    {% if (not log.adjusted and not log.checksum) or (log.adjusted and not log.adjusted_checksum) %}
+    <blockquote>
+        <strong>Trumpable For:</strong>
+        <br /><br />
+        Bad/No Checksum(s)
+    </blockquote>
+    {% endif %}
+
+    {% if log.adjustment_details %}
+    <blockquote>Log adjusted by {{ log.AdjustedBy|user_url }} from score {{ log.Score }} to {{ log.AdjustedScore }}
+        {% if log.AdjustmentReason %}
+        <br />Reason: {{ log.AdjustmentReason }}
+        {% endif %}
+        <br /><strong>Adjustment Details:</strong>
+        <ul class="nobullet">
+        {% for label, detail in log.adjustment_details %}
+            {% if label != 'tracks' %}
+            <li>{{ detail }}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </blockquote>
+    {% endif %}
+
+    {% if log.details %}
+    <blockquote><strong>{% if log.adjusted %}Final {% endif %}Log validation report:</strong>
+    <ul class="nobullet">
+        {% for detail in log.details %}
+            <li>{{ detail }}</li>
+        {% endfor %}
+    </ul>
+    </blockquote>
+    {% endif %}
+
+    <blockquote>
+        <pre style="white-space:pre-wrap">{{ log.html_log|raw }}</pre>
+    </blockquote>
+    </td>
+</tr>
+    {% if loop.last %}
+</table>
+    {% endif %}
+{% else %}
+    No logs found!
+    {% if viewer.permitted('torrents_delete') %}
+&nbsp;<a class="brackets" href="torrents.php?action=removelogs&amp;torrentid={{ id }}">Repair DB</a>
+    {% endif %}
+{% endfor %}
