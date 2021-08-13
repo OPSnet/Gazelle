@@ -8,6 +8,7 @@
 .config/
 .docker/data/
 .idea/
+.vscode/
 .local/
 .npm-global/
 .npm/
