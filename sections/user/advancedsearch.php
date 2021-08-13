@@ -270,9 +270,9 @@ if (!empty($_GET)) {
         if ($ipHistoryChecked) {
             $Distinct = true;
             $Join['hi'] = 'INNER JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
-            $Where[] = $m->left_matchField('hi.IP');
+            $Where[] = $m->left_match('hi.IP');
         } else {
-            $Where[] = $m->left_matchField('um1.IP');
+            $Where[] = $m->left_match('um1.IP');
         }
         $Args[] = trim($_GET['ip']);
     }
@@ -295,7 +295,7 @@ if (!empty($_GET)) {
         $Join['xfu'] = $trackerLiveSource
             ? 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)'
             : 'INNER JOIN xbt_snatched AS xfu ON (um1.ID = xfu.uid)';
-        $Where[] = $m->left_matchField('xfu.ip');
+        $Where[] = $m->left_match('xfu.ip');
         $Args[] = trim($_GET['tracker_ip']);
     }
 
