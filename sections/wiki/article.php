@@ -7,7 +7,7 @@ Text::$TOC = true;
 $ArticleID = false;
 if (!empty($_GET['id']) && is_number($_GET['id'])) { //Visiting article via ID
     $ArticleID = (int)$_GET['id'];
-} elseif ($_GET['name'] != '') { //Retrieve article ID via alias.
+} elseif ($_GET['name'] !== '') { //Retrieve article ID via alias.
     $ArticleID = $wikiMan->alias($_GET['name']);
 } else { //No ID, No Name
     error('Unknown article ['.display_str($_GET['id']).']');
