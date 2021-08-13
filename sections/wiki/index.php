@@ -43,7 +43,7 @@ switch ($_REQUEST['action'] ?? 'article') {
         require_once('wiki_browse.php');
         break;
     case 'article':
-        if (!isset($_GET['id'])) {
+        if (!isset($_GET['id']) && !isset($_GET['name'])) {
             $_GET['id'] = INDEX_WIKI_PAGE_ID;
         }
         require_once('article.php');
