@@ -508,7 +508,7 @@ define('RANDOM_TORRENT_MIN_SEEDS', 0);
 define('IP_REGEXP',       '/\b(?:\d{1,3}\.){3}\d{1,3}\b/');
 define('URL_REGEXP_STEM', '((?:f|ht)tps?:\/\/)(?:' . str_replace('/', '', IP_REGEXP) . '|[\w-]+(?:\.[\w-]+)+)(?::\d{1,5})?(?:\/\S*)');
 define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
-define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)$/i');
+define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)?$/i');
 define('IMAGE_REGEXP',    '/\b(' . URL_REGEXP_STEM . '\.(?:gif|png|webm|jpe?g|tiff?)(\?\S*)?)\b/i');
 define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') . (defined('ALT_SITE_URL') ? '|' . preg_quote(ALT_SITE_URL, '/') : '') . ')');
 define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
