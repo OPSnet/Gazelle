@@ -3,9 +3,9 @@
 $wikiMan = new Gazelle\Manager\Wiki;
 
 if (empty($_GET['nojump'])) {
-    $ArticleID = $wikiMan->alias($_GET['search'] ?? '');
-    if ($ArticleID) {
-        header("Location: wiki.php?action=article&id={$ArticleID}");
+    $article = $wikiMan->findByAlias($_GET['search'] ?? '');
+    if ($article) {
+        header("Location: wiki.php?action=article&id=" . $article->id());
         exit;
     }
 }
@@ -27,14 +27,13 @@ $search->setOrderBy($header->getOrderBy())->setOrderDir($header->getOrderDir());
 
 $paginator = new Gazelle\Util\Paginator(WIKI_ARTICLES_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());
-$page =
 
 View::show_header('Search articles');
 echo $Twig->render('wiki/search.twig', [
     'header'    => $header,
     'paginator' => $paginator,
     'page'      => $search->page($paginator->limit(), $paginator->offset()),
-    'alias'     => $wikiMan->normalizeAlias($_GET['search'] ?? ''),
+    'alias'     => \Gazelle\Wiki::normalizeAlias($_GET['search'] ?? ''),
     'order'     => $_GET['order'] ?? 'asc',
     'search'    => $_GET['search'],
     'sort'      => $_GET['sort'] ?? 'title',

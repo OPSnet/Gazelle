@@ -1,7 +1,7 @@
 <?php
 
 View::show_header('Create a wiki article');
-echo $Twig->render('wiki/article.twig', [
+echo $Twig->render('wiki/create.twig', [
     'action'     => 'create',
     'body'       => new Gazelle\Util\Textarea('body', '', 92, 20),
     'class_list' => (new Gazelle\Manager\User)->classList(),

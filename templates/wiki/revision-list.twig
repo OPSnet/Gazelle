@@ -1,0 +1,50 @@
+{% from 'macro/form.twig' import checked, disabled %}
+<div class="thin">
+<div class="header">
+    <h2><a href="wiki.php">Wiki</a> &rsaquo; <a href="wiki.php?action=article&amp;id={{
+        article.id }}">{{ article.title }}</a> &rsaquo; Revision history</h2>
+</div>
+<form action="wiki.php" method="get">
+    <input type="hidden" name="action" id="action" value="compare" />
+    <input type="hidden" name="id" id="id" value="{{ article.id }}" />
+{% for link in article.revisionList %}
+    {% if loop.first %}
+    <table>
+        <tr class="colhead">
+            <td>Revision</td>
+            <td>Title</td>
+            <td>Author</td>
+            <td>Age</td>
+            <td>Old</td>
+            <td>New</td>
+        </tr>
+        <tr>
+            <td>{{ article.revision }}</td>
+            <td>{{ article.title }}</td>
+            <td>{{ article.authorId|user_url }}</td>
+            <td>{{ article.date|time_diff }}</td>
+            <td><input type="radio" name="old" value="{{ article.revision }}" disabled="disabled" /></td>
+            <td><input type="radio" name="new" value="{{ article.revision }}" checked="checked" /></td>
+        </tr>
+    {% endif %}
+        <tr>
+            <td>{{ link.revision }}</td>
+            <td>{{ link.title }}</td>
+            <td>{{ link.author_id|user_url }}</td>
+            <td>{{ link.date|time_diff }}</td>
+            <td><input type="radio" name="old" value="{{ link.revision }}"{{ checked(loop.first) }} /></td>
+            <td><input type="radio" name="new" value="{{ link.revision }}"{{ disabled(loop.last) }} /></td>
+        </tr>
+    {% if loop.last %}
+        <tr>
+            <td class="center" colspan="6">
+                <input type="submit" value="Compare" />
+            </td>
+        </tr>
+    </table>
+    {% endif %}
+{% else %}
+<div class="thin box pad">There are no previous revisions of this article.</div>
+{% endfor %}
+</form>
+</div>
