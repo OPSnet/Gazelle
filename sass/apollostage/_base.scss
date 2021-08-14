@@ -884,7 +884,7 @@ div#flip_view_1 div#similar-artist .name {
     background: rgba(60, 60, 60, 0.7);
     color: $base-text-color;
     margin: 0;
-    padding: 0 5px; 
+    padding: 0 5px;
 }
 
 #covers img {
@@ -1574,11 +1574,17 @@ span[style*='color: blue'] {
 .torrentdetails,
 .wrap_overflow,
 blockquote {
-  background-color: $input-background-color;
   -webkit-hyphens: unset;
   -ms-hyphens: unset;
   hyphens: unset;
   word-wrap: unset;
+}
+
+.filelist_table td,
+.reportinfo_table,
+.torrentdetails,
+blockquote {
+  background-color: $input-background-color;
 }
 
 #bookmarks #torrent_table tr:not(.colhead):not(.colhead_dark) td:nth-child(2) {
