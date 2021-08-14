@@ -58,7 +58,7 @@
     <tr>
         <td><a href="wiki.php?action=article&amp;id={{ article.ID }}">{{ article.Title }}</a></td>
         <td>{{ article.Date|time_diff }}</td>
-        <td>{{ article.ID|user_url }}</td>
+        <td>{{ article.Author|user_url }}</td>
     </tr>
 {% endfor %}
 </table>

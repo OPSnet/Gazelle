@@ -8,6 +8,8 @@ abstract class BaseObject extends Base {
 
     /* used for handling updates */
     protected $updateField = [];
+    protected $updateFieldPassThru = [];
+    protected $updateFieldRaw = [];
 
     public function __construct(int $id) {
         parent::__construct();
@@ -21,8 +23,24 @@ abstract class BaseObject extends Base {
         return $this->id;
     }
 
+    public function dirty(): bool {
+        return !empty($this->updateField)
+            || !empty($this->updateFieldPassThru)
+            || !empty($this->updateFieldRaw);
+    }
+
     public function setUpdate(string $field, $value) {
         $this->updateField[$field] = $value;
+        return $this;
+    }
+
+    public function setUpdatePassThru(string $field, $value) {
+        $this->updateFieldPassThru[$field] = $value;
+        return $this;
+    }
+
+    public function setUpdateRaw(string $field) {
+        $this->updateFieldRaw[] = $field;
         return $this;
     }
 
@@ -31,11 +49,18 @@ abstract class BaseObject extends Base {
     }
 
     public function modify(): bool {
-        if (!$this->updateField) {
+        if (!$this->dirty()) {
             return false;
         }
-        $set = implode(', ', array_map(function ($f) { return "$f = ?"; }, array_keys($this->updateField)));
-        $args = array_values($this->updateField);
+        $set = implode(', ', array_merge(
+            array_map(function ($f) { return "$f = ?"; }, array_keys($this->updateField)),
+            array_keys($this->updateFieldPassThru),
+            $this->updateFieldRaw
+        ));
+        $args = array_merge(
+            array_values($this->updateField),
+            array_values($this->updateFieldPassThru)
+        );
         $args[] = $this->id;
         $this->db->prepared_query(
             "UPDATE " . $this->tableName() . " SET

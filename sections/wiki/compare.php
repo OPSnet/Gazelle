@@ -53,55 +53,29 @@ function diff($OldText, $NewText) {
 
 }
 
-function get_body($ID, $Rev) {
-    global $DB, $Revision, $Body;
-    if ($Rev == $Revision) {
-        $Str = $Body;
-    } else {
-        $Str = $DB->scalar("
-            SELECT Body
-            FROM wiki_revisions
-            WHERE ID = ?
-                AND Revision = ?
-            ", $ID, $Rev
-        );
-        if (is_null($Str)) {
-            error(404);
-        }
-    }
-    return $Str;
+$old = (int)($_GET['old'] ?? 0);
+$new = (int)($_GET['new'] ?? 0);
+if ($old >= $new) {
+    error("Selected older revision is more recent than selected newer revision.");
 }
 
-if (!isset($_GET['old'])
-    || !isset($_GET['new'])
-    || !isset($_GET['id'])
-    || !is_number($_GET['old'])
-    || !is_number($_GET['new'])
-    || !is_number($_GET['id'])
-    || $_GET['old'] > $_GET['new']
-) {
-    error(0);
-}
-
-$ArticleID = (int)$_GET['id'];
 $wikiMan = new Gazelle\Manager\Wiki;
-
-[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID] = $wikiMan->article($ArticleID);
-if ($Read > $Viewer->effectiveClass()) {
+$article = $wikiMan->findById((int)$_GET['id']);
+if (is_null($article)) {
     error(404);
 }
+if (!$article->readable($Viewer)) {
+    error(403);
+}
 
-View::show_header('Compare Article Revisions');
-$Diff2 = get_body($ArticleID, $_GET['new']);
-$Diff1 = get_body($ArticleID, $_GET['old']);
-?>
-<div class="thin">
-    <div class="header">
-        <h2>Compare <a href="wiki.php?action=article&amp;id=<?=$ArticleID?>"><?=$Title?></a> Revisions</h2>
-    </div>
-    <div class="box center_revision" id="center">
-        <div class="body"><?php foreach (diff($Diff1, $Diff2) AS $Line) { echo $Line; } ?></div>
-    </div>
-</div>
-<?php
+View::show_header("Compare Article Revisions $old versus $new");
+echo $Twig->render('wiki/compare.twig', [
+    'article' => $article,
+    'diff'    => diff($article->revisionBody($old), $article->revisionBody($new)),
+    'new'     => $new,
+    'old'     => $old,
+]);
 View::show_footer();
+
+$Diff2 = $article->revisionBody($new);
+$Diff1 = $article->revisionBody($old);
