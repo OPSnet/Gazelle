@@ -192,7 +192,7 @@ function Save_Edit(postid) {
     if (location.href.match(/forums\.php/)) {
         ajax.post("forums.php?action=takeedit","form" + postid, function (response) {
             $('#bar' + postid).raw().innerHTML = "<a href=\"reports.php?action=report&amp;type=post&amp;id="+postid+"\" class=\"brackets\">Report</a>&nbsp;<a href=\"#\">&uarr;</a>";
-            $('#preview' + postid).raw().innerHTML = response;
+            $('#content' + postid).raw().innerHTML = response;
             $('#editbox' + postid).ghide();
             $('#pmbox' + postid).ghide();
             $('#postcontrol-' + postid).gshow();
@@ -200,7 +200,7 @@ function Save_Edit(postid) {
     } else {
         ajax.post("comments.php?action=take_edit","form" + postid, function (response) {
             $('#bar' + postid).raw().innerHTML = "";
-            $('#preview' + postid).raw().innerHTML = response;
+            $('#content' + postid).raw().innerHTML = response;
             $('#editbox' + postid).ghide();
             $('#pmbox' + postid).ghide();
             $('#postcontrol-' + postid).gshow();
