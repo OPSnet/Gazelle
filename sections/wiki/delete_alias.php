@@ -1,10 +1,11 @@
 <?php
 authorize();
 
-$alias = trim($_GET['alias']);
-$wikiMan = new Gazelle\Manager\Wiki;
-$articleId = $wikiMan->alias($alias);
-if (!$wikiMan->editAllowed($articleId, $Viewer->effectiveClass())) {
+$article = (new Gazelle\Manager\Wiki)->findByAlias($_GET['alias'] ?? '');
+if (is_null($article)) {
+    error(404);
+}
+if (!$article->editable($Viewer)) {
     error(403);
 }
-$wikiMan->removeAlias($alias);
+$article->removeAlias($alias);

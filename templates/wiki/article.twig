@@ -1,38 +1,93 @@
-{% from 'macro/class.twig' import class_option %}
 <div class="thin">
-    <div class="box pad">
-{% if action == 'create' %}
-        <h3><a href="wiki.php">Wiki</a> &rsaquo; Create new article</h3>
-{% else %}
-        <h3><a href="wiki.php">Wiki</a> &rsaquo; Edit &rsaquo; {{ title }}</h3>
+<div class="header">
+    <h3><a href="wiki.php">Wiki</a> &rsaquo; {{ article.title }}</h3>
+    <div class="linkbox">
+        <a href="wiki.php?action=browse" class="brackets">Browse</a>
+        <a href="wiki.php?action=create" class="brackets">Create</a>
+{% if article.minClassEdit <= viewer.effectiveClass %}
+        <a href="wiki.php?action=edit&amp;id={{ article.id }}" class="brackets">Edit</a>
 {% endif %}
-        <form class="create_form" name="wiki_article" action="wiki.php" method="post">
-            <input type="hidden" name="action" value="{{ action }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-{% if id %}
-            <input type="hidden" name="id" value="{{ id }}" />
+        <a href="wiki.php?action=revisions&amp;id={{ article.id }}" class="brackets">History</a>
+{% if viewer.permitted('admin_manage_wiki') and article.id != constant('INDEX_WIKI_PAGE_ID') %}
+        <a href="wiki.php?action=delete&amp;id={{ article.id }}&amp;auth={{ Viewer.auth }}" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its aliases and act like it never existed?')">Delete</a>
 {% endif %}
-{% if revision %}
-            <input type="hidden" name="revision" value="{{ revision }}" />
-{% endif %}
-            <div class="pad">
-                <h3>Title</h3>
-                <input type="text" name="title" size="92" maxlength="100" value="{{ title }}" /><br /><br />
-                <h3>Contents</h3>
-                {{ body.field|raw }}
-                {{ body.preview|raw }}
-{% if viewer.permitted('admin_manage_wiki') %}
-                <h3>Access</h3>
-                <p>There are some situations in which the viewing or editing of an article should be restricted to a certain class.</p>
-                <p>
-                <strong>Minimum read class:</strong> <select name="minclassread">{{ class_option(viewer.classLevel, class_list, read) }}</select>
-                <strong>Minimum edit class:</strong> <select name="minclassedit">{{ class_option(viewer.classLevel, class_list, edit) }}</select>
-                </p>
-{% endif %}
-                <p>{{ body.button|raw }}
-                    <input type="submit" value="Submit" />
-                </p>
-            </div>
+    </div>
+</div>
+<div class="sidebar">
+    <div class="box">
+        <div class="head">Search</div>
+        <div class="pad">
+        <form class="search_form" name="articles" action="wiki.php" method="get">
+            <input type="hidden" name="action" value="search" />
+            <input type="search" placeholder="Search articles" name="search" size="20" />
+            <input value="Search" type="submit" class="hidden" />
         </form>
     </div>
+    </div>
+    <div class="box">
+        <div class="head">Table of Contents</div>
+        <div class="body">
+            {{ article.ToC|raw }}
+        </div>
+    </div>
+    <div class="box box_info pad">
+    <ul>
+        <li>
+            <strong>Protection:</strong>
+            <ul>
+                <li>Read: {{ read }}</li>
+                <li>Edit: {{ edit }}</li>
+            </ul>
+         </li>
+        <li>
+            <strong>Details:</strong>
+            <ul>
+                <li>Version: r{{ article.revision }}</li>
+                <li>Last edited by: {{ article.authorId|user_url }}</li>
+                <li>Last updated: {{ article.date|time_diff }}</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Aliases:</strong>
+            <ul>
+{% for name, user_id in article.alias %}
+                <li id="alias_{{ name }}"><a href="wiki.php?action=article&amp;name={{ name }}">{{ article.shortName(name) }}</a>
+    {% if viewer.permitted('admin_manage_wiki') %}
+    <a href="#" onclick="Remove_Alias('{{ name }}'); return false;" class="brackets tooltip" title="Delete alias">X</a>
+    <a href="user.php?id={{ user_id }}" class="brackets tooltip" title="View user">U</a>
+    {% endif %}
+                </li>
+{% endfor %}
+            </ul>
+        </li>
+    </ul>
+    </div>
+{% if article.minClassEdit <= viewer.effectiveClass %}
+    <div class="box box_addalias">
+        <div style="padding: 5px;">
+            <form class="add_form" name="aliases" action="wiki.php" method="post">
+                <input type="hidden" name="action" value="add_alias" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="article" value="{{ article.id }}" />
+                <input
+                    onfocus="if (this.value == 'Add alias') this.value='';"
+                    onblur="if (this.value == '') this.value='Add alias';"
+                    value="Add alias" type="text" name="alias" size="20"
+                />
+                <input type="submit" value="+" />
+            </form>
+        </div>
+    </div>
+{% endif %}
+</div>
+<div class="main_column">
+{% if error %}
+<div class="box thin pad">
+Error: {{ error }}
+</div>
+{% endif %}
+<div class="box wiki_article">
+    <div class="pad">{{ article.body|bb_format }}</div>
+</div>
+</div>
 </div>

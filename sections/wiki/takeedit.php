@@ -1,28 +1,33 @@
 <?php
 authorize();
 
-$articleId = (int)$_POST['id'];
-if (!$articleId) {
+$wikiMan = new Gazelle\Manager\Wiki;
+$article = $wikiMan->findById((int)$_POST['id']);
+if (is_null($article)) {
     error(404);
 }
-$wikiMan = new Gazelle\Manager\Wiki;
 
-$Val = new Gazelle\Util\Validator;
-$Val->setField('title', '1', 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
-if (!$Val->validate($_POST)) {
-    error($Val->errorMessage());
+$validator = new Gazelle\Util\Validator;
+$validator->setField('title', '1', 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
+if (!$validator->validate($_POST)) {
+    error($validator->errorMessage());
 }
 
-[$OldRevision] = $wikiMan->article($articleId);
-if (is_null($OldRevision) || $OldRevision != (int)($_POST['revision'] ?? 0)) {
+if ($article->revision() != (int)($_POST['revision'] ?? 0)) {
     error('This article has already been modified from its original version.');
 }
-[$minRead, $minWrite, $error] = $wikiMan->configureAccess(
-    check_perms('admin_manage_wiki'),
-    $Viewer->effectiveClass(),
-    (int)$_POST['minclassread'],
-    (int)$_POST['minclassedit']
+[$minRead, $minEdit, $error] = $wikiMan->configureAccess(
+    $Viewer, (int)$_POST['minclassread'], (int)$_POST['minclassedit']
 );
+if ($error) {
+    error($error);
+}
 
-$wikiMan->modify($articleId, $_POST['title'], $_POST['body'], $minRead, $minWrite, $Viewer->id());
-header("Location: wiki.php?action=article&id=$articleId");
+$article->setUpdate('Body', trim($_POST['body']))
+    ->setUpdate('Title', trim($_POST['title']))
+    ->setUpdate('Author', $Viewer->id())
+    ->setUpdate('MinClassEdit', $minEdit)
+    ->setUpdate('MinClassRead', $minRead)
+    ->modify();
+
+header("Location: wiki.php?action=article&id=" . $article->id());

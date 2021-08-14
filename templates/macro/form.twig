@@ -2,6 +2,10 @@
     {%- if flag %} checked="checked"{% endif -%}
 {%- endmacro %}
 
+{%- macro disabled(flag) -%}
+    {%- if flag %} disabled="disabled"{% endif -%}
+{%- endmacro %}
+
 {%- macro selected(flag) -%}
     {%- if flag %} selected="selected"{% endif -%}
 {%- endmacro %}

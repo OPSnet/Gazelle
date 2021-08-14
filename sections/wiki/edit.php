@@ -1,25 +1,20 @@
 <?php
 
-$ArticleID = (int)$_GET['id'];
-if (!$ArticleID) {
+$article = (new Gazelle\Manager\Wiki)->findById((int)$_GET['id']);
+if (is_null($article)) {
     error(404);
 }
-$wikiMan = new Gazelle\Manager\Wiki;
-[$Revision, $Title, $Body, $Read, $Edit] = $wikiMan->article($ArticleID);
-if ($Edit > $Viewer->effectiveClass()) {
+
+if (!$article->editable($Viewer)) {
     error('You do not have access to edit this article.');
 }
 
-View::show_header('Edit ' . $Title);
-echo $Twig->render('wiki/article.twig', [
+View::show_header('Edit ' . $article->title());
+echo $Twig->render('wiki/create.twig', [
     'action'     => 'edit',
-    'body'       => new Gazelle\Util\Textarea('body', $Body, 92, 20),
+    'article'    => $article,
+    'body'       => new Gazelle\Util\Textarea('body', $article->body(), 92, 20),
     'class_list' => (new Gazelle\Manager\User)->classList(),
-    'edit'       => $Edit,
-    'read'       => $Read,
-    'id'         => $ArticleID,
-    'revision'   => $Revision,
-    'title'      => $Title,
     'viewer'     => $Viewer,
 ]);
 View::show_footer();

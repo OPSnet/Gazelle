@@ -17,7 +17,7 @@ function class_list($Selected = 0) {
     return $Return;
 }
 
-switch ($_REQUEST['action'] ?? 'article') {
+switch ($_REQUEST['action'] ?? '') {
     case 'create':
         require_once(isset($_POST['action']) ? 'takecreate.php' : 'create.php');
         break;
@@ -42,13 +42,11 @@ switch ($_REQUEST['action'] ?? 'article') {
     case 'browse':
         require_once('wiki_browse.php');
         break;
-    case 'article':
-        if (!isset($_GET['id']) && !isset($_GET['name'])) {
-            $_GET['id'] = INDEX_WIKI_PAGE_ID;
-        }
-        require_once('article.php');
-        break;
     case 'search':
         require_once('search.php');
+        break;
+    case 'article':
+    default:
+        require_once('article.php');
         break;
 }
