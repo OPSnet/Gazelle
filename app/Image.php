@@ -27,23 +27,23 @@ class Image {
 
     function display() {
         switch($this->type) {
-            case IMG_BMP:  return imagebmp($this->image);
-            case IMG_GIF:  return imagegif($this->image);
-            case IMG_JPG:  return imagejpeg($this->image, null, 90);
-            case IMG_PNG:  return imagepng($this->image);
-            case IMG_WEBP: return imagewebp($this->image);
-            case IMG_XPM:  return imagexbm($this->image, null);
+            case IMAGETYPE_BMP:  return imagebmp($this->image);
+            case IMAGETYPE_GIF:  return imagegif($this->image);
+            case IMAGETYPE_JPEG:  return imagejpeg($this->image, null, 90);
+            case IMAGETYPE_PNG:  return imagepng($this->image);
+            case IMAGETYPE_WEBP: return imagewebp($this->image);
+            case IMAGETYPE_XBM:  return imagexbm($this->image, null);
         }
     }
 
     function type(): string {
         switch($this->type) {
-            case IMG_BMP:  return 'bmp';
-            case IMG_GIF:  return 'gif';
-            case IMG_JPG:  return 'jpg';
-            case IMG_PNG:  return 'png';
-            case IMG_WEBP: return 'webp';
-            case IMG_XPM:  return 'xpm';
+            case IMAGETYPE_BMP:  return 'bmp';
+            case IMAGETYPE_GIF:  return 'gif';
+            case IMAGETYPE_JPEG:  return 'jpg';
+            case IMAGETYPE_PNG:  return 'png';
+            case IMAGETYPE_WEBP: return 'webp';
+            case IMAGETYPE_XBM:  return 'xpm';
             default:       return 'error';
         }
     }
