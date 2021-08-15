@@ -134,7 +134,7 @@ if (isset($_GET['type']) && isset($_GET['userid'])) {
         )->modify();
         (new Gazelle\Manager\User)->sendPM($userId, 0, $subject, $Twig->render('user/reset-avatar.twig', [
             'height'    => $maxHeight,
-            'size_kb'   => $sizeKb,
+            'size_kb'   => $maxSizeKb,
             'type'      => $imageType,
             'url'       => $url,
         ]));
