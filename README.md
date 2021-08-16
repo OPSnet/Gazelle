@@ -9,11 +9,7 @@ needs. Gazelle is written in PHP, JavaScript, and MySQL.
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
 * [procps-ng](http://sourceforge.net/projects/procps-ng/) (recommended)
-
-## Gazelle/Ocelot Compile-time Dependencies
-* [Git](http://git-scm.com/) (required)
-* [GCC/G++](http://gcc.gnu.org/) (4.7+ required; 4.8.1+ recommended)
-* [Boost](http://www.boost.org/) (1.55.0+ required)
+* ocelot
 
 _Note: This list may not be exhaustive._
 
@@ -28,7 +24,18 @@ depedencies through `pip`:
 Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
 
-`docker-compose up`
+Setup the ocelot container, by cloning it and running:
+
+```bash
+docker build . -t ocelot
+```
+
+Within the gazelle folder, run the following command:
+
+
+```bash
+docker-compose up
+```
 
 This will build and pull the needed images to run Gazelle on Debian
 Buster. A volume is mounted from the base of the git repository at
