@@ -182,7 +182,7 @@ foreach ($UserIDs as $User) {
     $userMan->sendPM($VoterID, 0,
         "The request \"$FullName\" has been filled",
         "One of your requests&#8202;&mdash;&#8202;[url=requests.php?action=view&amp;id={$RequestID}]$FullName"
-            . "[/url]&#8202;&mdash;&#8202;has been filled. You can view it here: [torrent]{$TorrentID}[/torrent]"
+            . "[/url]&#8202;&mdash;&#8202;has been filled. You can view it here: [pl]{$TorrentID}[/pl]"
     );
 }
 
