@@ -241,7 +241,7 @@ if ($_POST['uploader_pm'] || $weeksWarned > 0 || isset($_POST['delete']) || $Sen
         $message[] = "Message from {$LoggedUser['Username']}: $modNote";
     }
 
-    $message[] = "Report was handled by [user] {$LoggedUser['Username']}[/user].";
+    $message[] = "Report was handled by [user]{$LoggedUser['Username']}[/user].";
     $userMan->sendPM($uploaderId, 0, $rawName, implode("\n\n", $message));
 }
 
