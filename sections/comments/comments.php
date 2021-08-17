@@ -311,6 +311,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
             'show_warn'   => $Viewer->permitted('users_warn') && !$ownProfile && $Viewer->classLevel() >= $author->classLevel(),
             'show_unread' => false,
             'url'         => $commentMan->findById($PostID)->url(),
+            'page'        => $Action
         ]);
         $DB->set_query_id($Comments);
     }
