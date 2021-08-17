@@ -28,7 +28,15 @@ class View {
             'global.css',
         ];
         if (!empty($option['css'])) {
-            $Style = array_merge($Style, explode(',', $option['css']));
+            $Style = array_merge(
+                $Style,
+                array_map(
+                    function ($style) {
+                        return $style . "/style.css";
+                    },
+                    explode(',', $option['css'])
+                )
+            );
         }
 
         $Scripts = [
