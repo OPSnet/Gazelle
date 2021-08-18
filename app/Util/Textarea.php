@@ -41,7 +41,7 @@ class Textarea extends \Gazelle\Base {
     protected $previewManual = false;
 
     /**
-     * @var int extra attributes on the textarea field
+     * @var string[] extra attributes on the textarea field
      */
     protected $extra = [];
 
