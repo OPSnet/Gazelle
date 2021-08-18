@@ -183,7 +183,7 @@ class User extends BaseObject {
         $this->info['Paranoia']    = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: [];
         if (!isset($this->info['SiteOptions']['HttpsTracker'])) {
-            $this->info['SiteOptions'] = true;
+            $this->info['SiteOptions']['HttpsTracker'] = true;
         }
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
 
