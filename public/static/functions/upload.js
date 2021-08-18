@@ -41,19 +41,26 @@ function MBshow() {
 
 function Categories() {
     var dynamic_form = $('#dynamic_form');
-    ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
-        dynamic_form.raw().innerHTML = response;
-        uploadFormInit();
-    });
-    ajax.get('ajax.php?action=upload_section&js=1&categoryid=' + $('#categories').raw().value, function (response) {
-        script = document.createElement('script', {'type': 'text/javascript'});
-        script.innerHTML = response;
-        document.body.append(script);
-        setTimeout(function() {
-            dynamic_form.data('loaded', true);
+    $.when(
+        $.ajax({url: 'ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, dataType: 'text'}),
+        $.ajax({url: 'ajax.php?action=upload_section&js=1&categoryid=' + $('#categories').raw().value, dataType: 'text'})
+    ).then(
+        function (resp1, resp2) {
+            if (resp1[1] !== 'success' || resp2[1] !== 'success') {
+                console.error('Error fetching upload form');
+                return;
+            }
+            dynamic_form.raw().innerHTML = resp1[0];
             uploadFormInit();
-        }, 500);
-    });
+            script = document.createElement('script', {'type': 'text/javascript'});
+            script.innerHTML = resp2[0];
+            document.body.append(script);
+            dynamic_form.data('loaded', true);
+        },
+        function (err) {
+            console.error(err);
+        },
+    );
 }
 
 function Remaster() {
