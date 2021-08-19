@@ -29,6 +29,13 @@ var AllowedBitrate = {
 var MAX_EXTRA_FORMATS = 5;
 var MAX_RIPLOGS = 400;
 
+var ArtistCount      = 0;
+var ArtistJsonCount  = 0;
+var ExtraFormatCount = 0;
+
+// the form starts with one logfile field
+var LogCount         = 1;
+
 
 function MBhide() {
     document.getElementById("musicbrainz_popup").style.display = "none";
@@ -427,7 +434,7 @@ function CheckVA () {
 
 function CheckYear() {
     var media = $('#media').raw().options[$('#media').raw().selectedIndex].text;
-    mediaOld = (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette");
+    var mediaOld = (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette");
     var year = $('#year').val();
     var unknown = $('#unknown').prop('checked');
     if (year < 1982 && year != '' && !mediaOld && !unknown) {
