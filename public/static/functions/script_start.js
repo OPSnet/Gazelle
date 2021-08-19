@@ -84,13 +84,13 @@ function html_entity_decode(str) {
 
 function get_size(size) {
     var steps = 0;
-    while (size >= 1024) {
+    while (steps < 8 && size >= 1024) {
         steps++;
         size = size / 1024;
     }
     var ext;
     switch (steps) {
-        case 1: ext = ' B';
+        case 0: ext = ' B';
                 break;
         case 1: ext = ' KiB';
                 break;
@@ -108,7 +108,6 @@ function get_size(size) {
                 break;
         case 8: ext = ' YiB';
                 break;
-        default: "0.00 MiB";
     }
     return (size.toFixed(2) + ext);
 }
