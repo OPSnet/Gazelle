@@ -1,4 +1,10 @@
+.DS_Store
 html/
 .docker/data
 .docker/mysql
 .docker/sphinxsearch
+.idea/
+.vscode/
+cache/
+node_modules/
+vendor/
