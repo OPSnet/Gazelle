@@ -3886,7 +3886,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'limit' => '10',
             ])
             ->addColumn('LastPostTime', 'datetime', [
-                'null' => false,
+                'null' => true,
+                'default' => null
             ])
             ->addColumn('AutoLock', 'enum', [
                 'null' => true,
