@@ -78,7 +78,10 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('seedbox_view.php');
         break;
     case 'token':
-        require_once(__DIR__ . '/token.php');
+        require_once('token.php');
+        break;
+    case 'vote-history':
+        require_once('vote_history.php');
         break;
     case 'clearcache':
         if (!$Viewer->permitted('admin_clear_cache') || !$Viewer->permitted('users_override_paranoia')) {

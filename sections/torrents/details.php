@@ -280,7 +280,7 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
 <?php
     }
 }
-$vote = (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID);
+$vote = (new Gazelle\Vote($Viewer))->setGroupId($GroupID);
 if ($GroupCategoryID === 1) {
     $decade = $GroupYear - ($GroupYear % 10);
     $decadeEnd = $decade + 9;

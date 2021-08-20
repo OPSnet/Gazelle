@@ -292,6 +292,11 @@ class TGroup extends BaseObject {
         return CATEGORY[$this->info()['CategoryID'] - 1];
     }
 
+    public function cover(): string {
+        return $this->info()['WikiImage']
+            ?? (STATIC_SERVER . '/common/noartwork/' . $this->categoryName());
+    }
+
     public function description(): string {
         return $this->info()['Body'] ?? '';
     }

@@ -145,5 +145,7 @@ echo $Twig->render('user/setting.twig', [
             'count'  => !in_array('requestsvoted_count', $Paranoia),
             'list'   => !in_array('requestsvoted_list', $Paranoia),
         ],
+        'hide_vote_recent'  => $User->hasAttr('hide-vote-recent'),
+        'hide_vote_history' => $User->hasAttr('hide-vote-history'),
     ],
 ]);

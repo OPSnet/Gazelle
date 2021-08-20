@@ -19,6 +19,7 @@ class User extends BaseObject {
 
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
+    protected array $voteSummary;
 
     protected array $lastRead;
     protected array $forumWarning = [];
@@ -378,7 +379,7 @@ class User extends BaseObject {
         return isset($attr[$name]) ? $attr[$name] : null;
     }
 
-    protected function toggleAttr(string $attr, bool $flag): bool {
+    public function toggleAttr(string $attr, bool $flag): bool {
         $attrId = $this->hasAttr($attr);
         $found = !is_null($attrId);
         $toggled = false;
@@ -1972,25 +1973,13 @@ class User extends BaseObject {
 
     public function forumWarning() {
         return $this->getSingleValue('user_forum_warn', '
-            SELECT Comment
-            FROM users_warnings_forums
-            WHERE UserID = ?
-        ');
-    }
-
-    public function releaseVotes(): int {
-        return $this->getSingleValue('user_release_votes', '
-            SELECT count(*)
-            FROM users_votes
-            WHERE UserID = ?
+            SELECT Comment FROM users_warnings_forums WHERE UserID = ?
         ');
     }
 
     public function collagesCreated(): int {
         return $this->getSingleValue('user_collage_create', "
-            SELECT count(*)
-            FROM collages
-            WHERE Deleted = '0' AND UserID = ?
+            SELECT count(*) FROM collages WHERE Deleted = '0' AND UserID = ?
         ");
     }
 

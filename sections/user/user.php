@@ -68,9 +68,9 @@ $Paranoia = ($Preview == 1) ? explode(',', $_GET['paranoia']) : $User->paranoia(
 function check_paranoia_here($Setting) {
     global $Paranoia, $Class, $UserID, $Preview;
     if ($Preview == 1) {
-        return check_paranoia($Setting, $Paranoia, $Class);
+        return check_paranoia($Setting, $Paranoia ?? [], $Class);
     } else {
-        return check_paranoia($Setting, $Paranoia, $Class, $UserID);
+        return check_paranoia($Setting, $Paranoia ?? [], $Class, $UserID);
     }
 }
 
@@ -164,11 +164,12 @@ if ($lastfmInfo)  {
     ]);
 }
 
+$Vote             = new Gazelle\Vote($User);
 $stats            = $User->stats();
 $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
 $ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $User->collageAdditions() : 0;
-$releaseVotes     = $User->releaseVotes();
+$releaseVotes     = $Vote->userTotal(Gazelle\Vote::UPVOTE|Gazelle\Vote::DOWNVOTE);
 $bonusPointsSpent = $User->bonusPointsSpent();
 $torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
@@ -462,6 +463,14 @@ if (check_paranoia_here('uploads')) {
     ]);
 }
 
+if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('view-release-votes')) {
+    echo $Twig->render('user/recent-vote.twig', [
+        'recent'    => $Vote->recent($tgMan),
+        'show_link' => $OwnProfile || !$User->hasAttr('hide-vote-history') || $Viewer->permitted('view-release-votes'),
+        'user_id'   => $UserID,
+    ]);
+}
+
 $Collages = $User->personalCollages();
 $FirstCol = true;
 foreach ($Collages as $CollageInfo) {
@@ -519,7 +528,7 @@ if ($Viewer->permitted('users_edit_usernames')) {
         'auth'     => $Viewer->auth(),
         'comments' => $comments,
         'group_id' => $linkGroupId,
-        'hash'     => sha1($comments),
+        'hash'     => sha1($comments ?? ''),
         'list'     => $list,
         'user_id'  => $UserID,
     ]);

@@ -183,7 +183,7 @@ $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
             </tr>
 <?php
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
-$vote = new Gazelle\Vote($Viewer->id());
+$vote = new Gazelle\Vote($Viewer);
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];

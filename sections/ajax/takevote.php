@@ -9,7 +9,7 @@ $groupId = (int)$_REQUEST['groupid'];
 if (!$groupId) {
     json_error('no such group');
 }
-$vote = new Gazelle\Vote($Viewer->id());
+$vote = new Gazelle\Vote($Viewer);
 $vote->setGroupId($groupId);
 
 if ($_REQUEST['do'] == 'unvote') {
