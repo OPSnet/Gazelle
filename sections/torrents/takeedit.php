@@ -18,8 +18,6 @@ authorize();
 // it into the database.                                                        //
 //******************************************************************************//
 
-var_dump($_POST);
-var_dump($_POST);
 $TypeID = (int)$_POST['type'];
 $Type = CATEGORY[$TypeID - 1];
 $TorrentID = (int)$_POST['torrentid'];
