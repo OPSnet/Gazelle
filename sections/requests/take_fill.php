@@ -53,6 +53,7 @@ if (!$TorrentID) {
 //Torrent exists, check it's applicable
 $DB->prepared_query("
     SELECT
+        t.GroupID,
         t.UserID,
         t.Time,
         tg.ReleaseType,
@@ -74,7 +75,7 @@ $DB->prepared_query("
 if (!$DB->has_results()) {
     $Err[] = print_or_return('invalid torrentid', 404);
 }
-list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber, $GracePeriod) = $DB->next_record();
+list($GroupID, $UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber, $GracePeriod) = $DB->next_record();
 
 $FillerID = $Viewer->id();
 $FillerUsername = $Viewer->username();
@@ -199,9 +200,7 @@ $DB->prepared_query('
 
 $Cache->delete_value("user_stats_$FillerID");
 $Cache->delete_value("request_$RequestID");
-if ($GroupID) {
-    $Cache->delete_value("requests_group_$GroupID");
-}
+$Cache->delete_value("requests_group_$GroupID");
 
 $DB->prepared_query('
     SELECT ArtistID
