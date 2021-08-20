@@ -25,13 +25,13 @@ $DB->prepared_query('
 
 if (!$DB->has_results()) {
     echo "missing";
-    error(0);
+    die();
 }
 
 list($FilledTorrentID) = $DB->next_record();
-if ($FilledTorrentId > 0) {
+if ($FilledTorrentID > 0) {
     echo "filled";
-    error(0);
+    die();
 }
 
 $Amount = (empty($_GET['amount']) || !intval($_GET['amount']) || $_GET['amount'] < $MinimumVote)
@@ -42,7 +42,7 @@ $Bounty = $Amount * (1 - $RequestTax);
 
 if ($LoggedUser['BytesUploaded'] < $Amount) {
     echo 'bankrupt';
-    error(0);
+    die();
 }
 
 // Create vote!

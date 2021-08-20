@@ -239,10 +239,17 @@ function Vote(amount, requestid) {
             if (response == 'bankrupt') {
                 error_message("You do not have sufficient upload credit to add " + get_size(amount) + " to this request");
                 return;
-            } else if (response == 'dupesuccess') {
-                //No increment
+            } else if (response == 'missing') {
+                error_message("Cannot find this request");
+                return;
+            } else if (response == 'filled') {
+                error_message("This request has already been filled");
+                return;
             } else if (response == 'success') {
                 votecount.innerHTML = (parseInt(votecount.innerHTML)) + 1;
+            } else {
+                error_message("Error on saving request vote. Please try again later.");
+                return;
             }
 
             if ($('#total_bounty').results() > 0) {
