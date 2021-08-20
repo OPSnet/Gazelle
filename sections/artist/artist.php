@@ -365,7 +365,7 @@ if ($sections = $Artist->sections()) {
         }
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                            <?= (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID)->links($authKey) ?>
+                            <?= (new Gazelle\Vote($Viewer))->setGroupId($GroupID)->links($authKey) ?>
 <?php   } ?>
                             <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>

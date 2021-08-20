@@ -17,10 +17,12 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $RequestsVoted  = $stats->requestVoteTotal();
     $TotalSpent     = $stats->requestVoteSize();
 }
+
+$Vote = new Gazelle\Vote($User);
+$releaseVotes     = $Vote->userTotal(Gazelle\Vote::UPVOTE|Gazelle\Vote::DOWNVOTE);
 $ForumPosts       = $stats->forumPostTotal();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $stats->uploadTotal() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : null;
-$releaseVotes     = $user->releaseVotes();
 $torrentComments  = $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('torrents') : null;
 $collageContribs  = $user->propertyVisible($Viewer, 'collagecontribs+') ? $user->collagesContributed() : null;
 

@@ -135,6 +135,22 @@
             <label><input type="checkbox" name="p_artistsadded"{{ checked(paranoia.artists) }} /> Show count</label>
         </td>
     </tr>
+    <tr id="para_vote_recent_tr">
+        <td class="label tooltip" title="This option controls the display of the votes you have made on releases. When checked, other users can see your recent votes on your profile page.">
+            <strong>Recent release votes</strong>
+        </td>
+        <td>
+            <label><input type="checkbox" name="pattr_hide_vote_recent"{{ checked(not paranoia.hide_vote_recent) }} /> Show recent release votes</label>
+        </td>
+    </tr>
+    <tr id="para_vote_hist_tr">
+        <td class="label tooltip" title="This option controls the display of the votes you have made on releases. When checked, other users can see the way you voted on releases.">
+            <strong>Release votes history</strong>
+        </td>
+        <td>
+            <label><input type="checkbox" name="pattr_hide_vote_history"{{ checked(not paranoia.hide_vote_history) }} /> Show release votes history</label>
+        </td>
+    </tr>
     <tr id="para_preview_tr">
         <td></td>
         <td><a href="#" id="preview_paranoia" class="brackets">Preview paranoia</a></td>

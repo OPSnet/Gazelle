@@ -1,0 +1,45 @@
+{% if recent %}
+<table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
+<tr class="colhead">
+    <td colspan="5">
+    {%- if show_link -%}
+    <a href="user.php?id={{ user_id }}&amp;action=vote-history">Recent Votes on Releases</a>
+    {%- else -%}
+   Recent Votes on Releases
+    {%- endif -%}
+    </td>
+</tr>
+<tr class="colhead">
+{% for r in recent -%}
+    {% if loop.first %}
+    {% endif %}
+    <td style="width: 20%" font-size: 20pt; padding-top: 14px !important">
+    {%- if r.upvote -%}
+            <div title="Upvoted" class="center tooltip vote_tag_up">&#x25b2;</div>
+    {%- else -%}
+            <div title="Downvoted" class="center tooltip vote_tag_down">&#x25bc;</div>
+    {%- endif -%}
+    </td>
+{%- endfor -%}
+{% if recent|length < 5 -%}
+    {%- for n in range(recent|length + 1, 5) -%}
+    <td>&nbsp;</td>
+    {%- endfor -%}
+{%- endif -%}
+</tr>
+<tr>
+{% for r in recent -%}
+    <td>
+        <a href="torrents.php?id={{ r.group_id }}">
+        <img class="tooltip" title="{{ r.tgroup.artistName }} - {{ r.tgroup.name }}" alt="{{ r.tgroup.artistName }} - {{ r.tgroup.name }}" src="{{ r.tgroup.cover|image }}" width="107" />
+        </a>
+    </td>
+{%- endfor %}
+{% if recent|length < 5 -%}
+    {%- for n in range(recent|length + 1, 5) -%}
+    <td>&nbsp;</td>
+    {%- endfor -%}
+{%- endif -%}
+</tr>
+</table>
+{% endif %}

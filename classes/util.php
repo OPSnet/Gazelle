@@ -553,6 +553,11 @@ function is_valid_date($Date) {
  */
 
 function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
+    if (is_null($Paranoia)) {
+        debug_print_backtrace();
+        exit;
+    }
+
     if ($Property == false) {
         return false;
     }
