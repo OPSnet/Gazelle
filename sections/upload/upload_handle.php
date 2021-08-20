@@ -588,7 +588,7 @@ if (!$IsNewGroup) {
     $GroupID = $DB->inserted_id();
     if ($isMusicUpload) {
         $tgroupMan->findById($GroupID)->addArtists($Viewer, $ArtistRoleList, $ArtistNameList);
-        $Cache->increment('stats_album_count', count($ArtistName));
+        $Cache->increment('stats_album_count', count($ArtistNameList));
     }
     $Cache->increment('stats_group_count');
 }
