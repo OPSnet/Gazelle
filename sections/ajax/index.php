@@ -14,6 +14,7 @@ define('AJAX', true);
 
 /* 'x' requests every 'y' seconds: [5,10] = 5 requests every 10 seconds */
 $LimitedPages = [
+    'add_log'         => [5, 10],
     'add_similar'     => [5, 10],
     'add_tag'         => [5, 10],
     'addtag'          => [5, 10],
@@ -238,6 +239,9 @@ switch ($_GET['action']) {
     case 'add_tag':
     case 'addtag':
         require(__DIR__ . '/../torrents/add_tag.php');
+        break;
+    case 'add_log':
+        require(__DIR__ . '/add_log.php');
         break;
     default:
         // If they're screwing around with the query string
