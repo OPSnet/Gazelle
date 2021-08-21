@@ -7,24 +7,35 @@ step in properly enforcing coding standards throughout the project.
 
 == TABLE OF CONTENTS ==
 
-1.    FILE FORMATTING
-2.    CODE STYLING
-2.1        Code styling for PHP and JavaScript
-2.2        Code styling for CSS
-2.3        Code styling for SQL
-3.    NAMING CONVENTIONS
-3.1        Function names
-3.2        Variable names
-3.3        Class names
-3.4        SQL names
-3.5        Miscellaneous names
-4.    COMMENTS
-5.    USER INTERFACE
-6.    EXAMPLES
-6.1        PHP examples
-6.2        CSS examples
-6.3        SQL examples
+1.    LINTING
+2.    FILE FORMATTING
+3.    CODE STYLING
+3.1        Code styling for PHP and JavaScript
+3.2        Code styling for CSS
+3.3        Code styling for SQL
+4.    NAMING CONVENTIONS
+4.1        Function names
+4.2        Variable names
+4.3        Class names
+4.4        SQL names
+4.5        Miscellaneous names
+5.    COMMENTS
+6.    USER INTERFACE
+7.    EXAMPLES
+7.1        PHP examples
+7.2        CSS examples
+7.3        SQL examples
 
+
+# LINTING
+
+To help ensure adherence to this guide, we have setup linting for PHP and SCSS code. They can
+be run through make:
+
+make lint-php
+make lint-css
+
+These steps are also run on committing.
 
 # FILE FORMATTING
 
