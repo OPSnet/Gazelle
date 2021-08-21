@@ -46,6 +46,12 @@ lint-css:
 	yarn lint:css
 	yarn lint:css-checkstyle
 
+.PHONY: lint-php
+lint-php:
+	yarn lint:php:internal
+	yarn lint:php:phpcs || exit 0
+	composer phpstan
+
 .PHONY: mysqldump
 mysqldump:
 	mysqldump -h 127.0.0.1 -P 36000 -u gazelle --password=password -d gazelle --skip-add-drop-table --skip-add-locks --single-transaction | sed 's/ AUTO_INCREMENT=[0-9]*//g' > db/data/gazelle.sql
@@ -59,10 +65,7 @@ ocelot-reload-reload:
 	pkill -USR1 ocelot
 
 .PHONY: test
-test: lint-css
-	yarn lint:php:internal
-	yarn lint:php:phpcs || exit 0
-	composer phpstan
+test: lint-css lint-php
 	composer test
 
 .PHONY: twig-flush

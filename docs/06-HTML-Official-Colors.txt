@@ -1,3 +1,12 @@
+From: Spine
+To: Developers
+Date: 2020-03-30
+Subject: Orpheus Development Papers #6 - HTML Official Colors
+Version: 1
+
+List of valid colors to be used [color] BBCode tag. This should match the list of
+colors defined in the Text::$ColorName constant.
+
 aliceblue
 antiquewhite
 aqua

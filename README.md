@@ -5,11 +5,12 @@ needs. Gazelle is written in PHP, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
 * [Nginx](http://wiki.nginx.org/Main) (recommended)
-* [PHP 7 or newer](https://www.php.net/) (required)
+* [PHP 7.2+](https://www.php.net/) (required)
+* [NodeJS 12+](https://nodejs.org/en/) (required)
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
 * [procps-ng](http://sourceforge.net/projects/procps-ng/) (recommended)
-* ocelot
+* [ocelot](https://github.com/OPSnet/Ocelot)
 
 _Note: This list may not be exhaustive._
 
@@ -20,13 +21,22 @@ depedencies through `pip`:
 * eac-logchecker
 * xld-logchecker
 
+## Installation
+
+We provide installation notes [here](docs/INSTALL.txt). These notes are provided as a best effort, and are not guaranteed
+to be fully up-to-date or accurate.
+
+Due to the nature of torrenting, we HIGHLY recommend not trying to run this in production if you are not prepared or knowledgeable
+in setting up servers, proxies, and tuning TCP configs to get proper performance and privacy.
+
 ## Gazelle Development
 Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
 
-Setup the ocelot container, by cloning it and running:
+Setup the [ocelot](https://github.com/OPSnet/Ocelot) container image, by doing the following:
 
 ```bash
+git clone https://github.com/OPSnet/ocelot
 docker build . -t ocelot
 ```
 
