@@ -1,6 +1,12 @@
 #!/bin/bash
 
-echo "Waiting for mysql, sleeping for 20 seconds"
-sleep 20
+counter=1
+while ! curl --fail http://web > /dev/null 2>&1; do
+    sleep 1
+    counter=$((counter + 1))
+    if [ $((counter % 20)) -eq 0 ]; then
+        >&2 echo "Still waiting for Web (Count: $counter)."
+    fi
+done
 
-/srv/ocelot
+exec /srv/ocelot
