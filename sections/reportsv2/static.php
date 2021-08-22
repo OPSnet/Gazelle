@@ -146,7 +146,6 @@ $DB->prepared_query("
         tg.CategoryID,
         t.Time,
         t.Description,
-        t.FileList,
         t.Remastered,
         t.RemasterTitle,
         t.RemasterYear,
@@ -159,6 +158,8 @@ $DB->prepared_query("
         t.HasLogDB,
         t.LogScore,
         t.LogChecksum,
+        t.FileList,
+        t.FilePath,
         tls.last_action,
         t.UserID AS UploaderID
     FROM $tables
@@ -172,7 +173,7 @@ $DB->prepared_query("
 );
 $Reports = $DB->to_array(false, MYSQLI_NUM);
 
-View::show_header('Reports V2', ['js' => 'reportsv2,bbcode,torrent']);
+View::show_header('Reports V2', ['js' => 'reportsv2,bbcode,browse,torrent']);
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
@@ -202,9 +203,9 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
         [$ReportID, $ReporterID, $TorrentID, $Type, $UserComment, $ResolverID,
             $Status, $ReportedTime, $LastChangeTime, $ModComment, $Tracks, $Images,
             $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year,
-            $CategoryID, $Time, $Description, $FileList, $Remastered, $RemasterTitle, $RemasterYear,
+            $CategoryID, $Time, $Description, $Remastered, $RemasterTitle, $RemasterYear,
             $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum,
-            $LastAction, $UploaderID
+            $FileList, $FilePath, $LastAction, $UploaderID
         ] = $Report;
         $reporterName = (int)$ReporterID ? $userMan->findById((int)$ReporterID)->username() : 'System';
         $uploaderName = (int)$UploaderID ? $userMan->findById((int)$UploaderID)->username() : 'System';
@@ -275,7 +276,35 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                         <a href="log.php?search=Torrent+<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)
 <?php       } else { ?>
                         <?=$LinkName?>
-                        <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
+                        <br /><a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
+                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
+                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
+                        <a href="#" class="brackets" onclick="show_peers('<?=($TorrentID)?>', 0); return false;">Seeders</a>
+                        <a href="#" class="brackets" onclick="show_files('<?=($TorrentID)?>'); return false;">Contents</a>
+                        <div id="viewlog_<?=$TorrentID?>" class="hidden"></div>
+                        <div id="peers_<?=$TorrentID?>" class="hidden"></div>
+                        <div id="downloads_<?=$TorrentID?>" class="hidden"></div>
+                        <div id="snatches_<?=$TorrentID?>" class="hidden"></div>
+                        <div id="files_<?=$TorrentID?>" class="hidden">
+                            <table class="filelist_table">
+                                <tr class="colhead_dark">
+                                    <td>
+                                        <div class="filelist_title" style="float: left;">File Names</div>
+                                        <div class="filelist_path" style="float: right;"><?= $FilePath ? "/$FilePath/" : '' ?></div>
+                                    </td>
+                                    <td class="nobr" style="text-align: right">
+                                        <strong>Size</strong>
+                                    </td>
+                                </tr>
+<?php
+                $file = explode("\n", $FileList);
+                foreach ($file as $f) {
+                    $info = $torMan->splitMetaFilename($f);
+?>
+                                <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?= Format::get_size($info['size']) ?></td></tr>
+<?php           } ?>
+                            </table>
+                        </div>
                         <br /><span class="report_reporter">reported by <a href="user.php?id=<?=$ReporterID?>"><?= $reporterName ?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></span>
                         <br />uploaded by <a href="user.php?id=<?=$UploaderID?>"><?= $uploaderName  ?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
                         <br />Last action: <?= $LastAction ?: 'Never' ?>
@@ -396,6 +425,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                             t.Time,
                             t.Description,
                             t.Filelist,
+                            t.FilePath,
                             t.Remastered,
                             t.RemasterTitle,
                             t.RemasterYear,
@@ -421,7 +451,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                     );
 
                     [$ExtraGroupName, $ExtraGroupID, $ExtraArtistID, $ExtraArtistName,
-                        $ExtraYear, $ExtraTime, $ExtraDescription, $ExtraFileList, $ExtraRemastered,
+                        $ExtraYear, $ExtraTime, $ExtraDescription, $ExtraFileList, $ExtraFilePath, $ExtraRemastered,
                         $ExtraRemasterTitle, $ExtraRemasterYear, $ExtraMedia, $ExtraFormat,
                         $ExtraEncoding, $ExtraSize, $ExtraHasCue, $ExtraHasLog, $ExtraLogScore,
                         $ExtraLastAction, $ExtraUploaderID, $ExtraUploaderName]
@@ -446,7 +476,35 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 ?>
                         <?=($First ? '' : '<br />')?>
                         <?=$ExtraLinkName?>
-                        <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;torrent_pass=<?php $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
+                        <br /><a href="torrents.php?action=download&amp;id=<?= $ExtraID ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
+                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $ExtraID ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
+                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?= $ExtraID ?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
+                        <a href="#" class="brackets" onclick="show_peers('<?= $ExtraID ?>', 0); return false;">Seeders</a>
+                        <a href="#" class="brackets" onclick="show_files('<?= $ExtraID ?>'); return false;">Contents</a>
+                        <div id="viewlog_<?= $ExtraID ?>" class="hidden"></div>
+                        <div id="peers_<?= $ExtraID ?>" class="hidden"></div>
+                        <div id="downloads_<?= $ExtraID ?>" class="hidden"></div>
+                        <div id="snatches_<?= $ExtraID ?>" class="hidden"></div>
+                        <div id="files_<?= $ExtraID ?>" class="hidden">
+                            <table class="filelist_table">
+                                <tr class="colhead_dark">
+                                    <td>
+                                        <div class="filelist_title" style="float: left;">File Names</div>
+                                        <div class="filelist_path" style="float: right;"><?= $ExtraFilePath ? "/$ExtraFilePath/" : '' ?></div>
+                                    </td>
+                                    <td class="nobr" style="text-align: right">
+                                        <strong>Size</strong>
+                                    </td>
+                                </tr>
+<?php
+                $file = explode("\n", $ExtraFileList);
+                foreach ($file as $f) {
+                    $info = $torMan->splitMetaFilename($f);
+?>
+                                <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?= Format::get_size($info['size']) ?></td></tr>
+<?php           } ?>
+                            </table>
+                        </div>
                         <br />uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> on <span title="<?=
                             time_diff($ExtraTime, 3, false) ?>"><?= $ExtraTime ?> (<?=
                             strtotime($ExtraTime) < strtotime($Time) ? 'older upload' : 'more recent upload' ?>)</span>
@@ -658,6 +716,8 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                     );
                 } elseif (isset($ReportType['extra_log'])) {
                     $Value = $ReportType['extra_log'];
+                } else {
+                    $Value = '';
                 }
 ?>
                         <input type="text" name="log_message" id="log_message<?=$ReportID?>" size="40" value="<?= trim($Value) ?>" />
