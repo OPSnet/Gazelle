@@ -281,9 +281,9 @@ class Artists {
             SELECT RequestID FROM requests_artists WHERE ArtistID = ?
             ", $ArtistID
         );
-        $Requests = $DB->collect(0);
+        $RequestIDs = $DB->collect(0);
         $DB->begin_transaction();
-        foreach ($Requests AS $Request) {
+        foreach ($RequestIDs as $RequestID) {
             $DB->prepared_query('DELETE FROM requests WHERE ID = ?', $RequestID);
             $DB->prepared_query('DELETE FROM requests_artists WHERE RequestID = ?', $RequestID);
             $DB->prepared_query('DELETE FROM requests_tags WHERE RequestID = ?', $RequestID);

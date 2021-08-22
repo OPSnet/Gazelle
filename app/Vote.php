@@ -22,7 +22,7 @@ class Vote extends Base {
     protected $topConfig = [];
     protected $topJoin   = [];
     protected $topWhere  = [];
-    protected $topArg    = [];
+    protected $topArgs   = [];
 
     public function __construct(int $userId) {
         parent::__construct();

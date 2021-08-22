@@ -625,6 +625,7 @@ function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
 
 function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
     global $Cache, $DB;
+    $TorrentCache = null;
     if (!$RevisionID) {
         $TorrentCache = $Cache->get_value("torrents_details_$GroupID");
     }

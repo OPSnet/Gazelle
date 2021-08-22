@@ -131,13 +131,13 @@ class Cache extends \Memcached {
             trigger_error('Cache retrieval failed for empty key');
         }
 
-        if (!empty($_GET['clearcache']) && $this->CanClear && !isset($this->ClearedKeys[$Key]) && !preg_match($this->PersistentKeys, $Key)) {
+        if (!empty($_GET['clearcache']) && $this->CanClear && !isset($this->ClearedKeys[$Key]) && !preg_match($this->PersistentKeysRegexp, $Key)) {
             if ($_GET['clearcache'] === '1') {
                 // Because check_perms() isn't true until LoggedUser is pulled from the cache, we have to remove the entries loaded before the LoggedUser data
                 // Because of this, not user cache data will require a secondary pageload following the clearcache to update
                 if (count($this->CacheHits) > 0) {
                     foreach (array_keys($this->CacheHits) as $HitKey) {
-                        if (!isset($this->ClearedKeys[$HitKey]) && !preg_match($this->PersistentKeys, $Key)) {
+                        if (!isset($this->ClearedKeys[$HitKey]) && !preg_match($this->PersistentKeysRegexp, $Key)) {
                             $this->delete($HitKey);
                             unset($this->CacheHits[$HitKey]);
                             $this->ClearedKeys[$HitKey] = true;
