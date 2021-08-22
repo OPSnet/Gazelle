@@ -4,8 +4,8 @@ WORKDIR /var/www
 
 # Software package layer
 # Nodesource setup comes after yarnpkg because it runs `apt-get update`
-RUN apt update \
-    && apt install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
         apt-transport-https \
         build-essential \
         ca-certificates \
@@ -13,9 +13,8 @@ RUN apt update \
         wget \
     && wget -qO - https://packages.sury.org/php/apt.gpg | apt-key add - \
     && echo "deb https://packages.sury.org/php/ buster main" | tee /etc/apt/sources.list.d/php.list \
-    && apt update \
-    && apt install -y --no-install-recommends \
-        composer \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
         cron \
         curl \
         git \
@@ -56,16 +55,25 @@ RUN apt update \
     && apt-get install -y --no-install-recommends \
         nodejs \
         yarn \
-    && apt autoremove \
+    && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
+
+RUN cd /tmp \
+    # install our own copy of composer as the one included in debian:buster-slim is too old
+    # to work properly with PHP8+
+    && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+    && php composer-setup.php \
+    && php -r "unlink('composer-setup.php');" \
+    && mv composer.phar /usr/local/bin/composer
 
 # Python tools layer
 RUN pip3 install chardet eac-logchecker xld-logchecker
 
 # Puppeteer layer
 # This installs the necessary packages to run the bundled version of chromium for puppeteer
-RUN apt update \
-    && apt install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
         gconf-service \
         libasound2 \
         libatk1.0-0 \
@@ -102,7 +110,7 @@ RUN apt update \
         libnss3 \
         lsb-release \
         xdg-utils \
-    && apt autoremove \
+    && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
 
 # If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise

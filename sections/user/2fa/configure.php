@@ -1,7 +1,10 @@
 <?php
 
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\Writer\PngWriter;
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start(['read_and_close' => true]);
@@ -27,12 +30,17 @@ if (!empty($_SESSION['private_key'])) {
     session_write_close();
 }
 
-$qrCode = new QrCode('otpauth://totp/' . SITE_NAME . "?secret=$secret");
-$qrCode->setSize(400);
-$qrCode->setMargin(20);
-$qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH());
-$qrCode->setForegroundColor(['r' =>   0, 'g' =>   0, 'b' =>   0, 'a' => 0]);
-$qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
+$qrCode = Builder::create()
+    ->writer(new PngWriter())
+    ->writerOptions([])
+    ->data('otpauth://totp/' . SITE_NAME . "?secret=$secret")
+    ->encoding(new Encoding('UTF-8'))
+    ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+    ->size(400)
+    ->margin(20)
+    ->foregroundColor(new Color(0, 0, 0, 0))
+    ->backgroundColor(new Color(255, 255, 255, 0))
+    ->build();
 
 View::show_header('Two-factor Authentication');
 
