@@ -1,19 +1,5 @@
 <?php
 
-//Function used for pagination of peer/snatch/download lists on details.php
-function js_pages($Action, $TorrentID, $NumResults, $CurrentPage) {
-    $NumPages = ceil($NumResults / 100);
-    $PageLinks = [];
-    for ($i = 1; $i <= $NumPages; $i++) {
-        if ($i == $CurrentPage) {
-            $PageLinks[] = $i;
-        } else {
-            $PageLinks[] = "<a href=\"#\" onclick=\"$Action($TorrentID, $i)\">$i</a>";
-        }
-    }
-    return implode(' | ', $PageLinks);
-}
-
 if (!empty($_REQUEST['action'])) {
     switch ($_REQUEST['action']) {
         case 'editlog':

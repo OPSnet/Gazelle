@@ -161,7 +161,7 @@ if ($NumReports > 0) {
         </tr>";
 
     foreach ($Reports as $Report) {
-        if (check_perms('admin_reports')) {
+        if ($Viewer->permitted('admin_reports')) {
             $ReporterID = $Report['ReporterID'];
             $ReporterName = $userMan->findById($ReporterID)->username();
             $ReportLinks = "<a href=\"user.php?id=$ReporterID\">$ReporterName</a> <a href=\"reportsv2.php?view=report&amp;id={$Report['ID']}\">reported it</a>";
@@ -187,8 +187,8 @@ if ($NumReports > 0) {
     $ReportInfo .= "\n\t\t</table>";
 }
 
-$CanEdit = (check_perms('torrents_edit') || (($UserID == $Viewer->id() && !$Viewer->disableWiki()) && !($Remastered && !$RemasterYear)));
-$RegenLink = check_perms('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid=' . $TorrentID . '" class="brackets">Regenerate</a>' : '';
+$CanEdit = ($Viewer->permitted('torrents_edit') || (($UserID == $Viewer->id() && !$Viewer->disableWiki()) && !($Remastered && !$RemasterYear)));
+$RegenLink = $Viewer->permitted('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid=' . $TorrentID . '" class="brackets">Regenerate</a>' : '';
 $FileTable = '
     <table class="filelist_table">
         <tr class="colhead_dark">
@@ -296,7 +296,7 @@ $LastMedia = $Media;
                             'key'    => $Viewer->announceKey(),
                             't'      => $TorrentList,
                             'edit'   => $CanEdit,
-                            'remove' => check_perms('torrents_delete') || $UserID == $Viewer->id(),
+                            'remove' => $Viewer->permitted('torrents_delete') || $UserID == $Viewer->id(),
                             'pl'     => true,
                         ]) ?>
                         &raquo; <a href="#" onclick="$('#torrent_<?=($TorrentID)?>').gtoggle(); return false;"><?=($ExtraInfo)?></a>
@@ -327,18 +327,18 @@ $LastMedia = $Media;
     }
 ?>
                         </blockquote>
-<?php if (check_perms('site_moderate_requests')) { ?>
+<?php if ($Viewer->permitted('site_moderate_requests')) { ?>
                         <div class="linkbox">
                             <a href="torrents.php?action=masspm&amp;id=<?=($GroupID)?>&amp;torrentid=<?=($TorrentID)?>" class="brackets">Mass PM snatchers</a>
                         </div>
 <?php } ?>
                         <div class="linkbox">
-                            <a href="#" class="brackets" onclick="show_peers('<?=($TorrentID)?>', 0); return false;">View peer list</a>
-<?php if (check_perms('site_view_torrent_snatchlist')) { ?>
-                            <a href="#" class="brackets tooltip" onclick="show_downloads('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View download list</a>
-                            <a href="#" class="brackets tooltip" onclick="show_snatches('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatch list</a>
+<?php if ($Viewer->permitted('site_view_torrent_snatchlist')) { ?>
+                            <a href="#" class="brackets tooltip" onclick="show_downloads('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
+                            <a href="#" class="brackets tooltip" onclick="show_snatches('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
 <?php } ?>
-                            <a href="#" class="brackets" onclick="show_files('<?=($TorrentID)?>'); return false;">View file list</a>
+                            <a href="#" class="brackets" onclick="show_peers('<?=($TorrentID)?>', 0); return false;">View seeders</a>
+                            <a href="#" class="brackets" onclick="show_files('<?=($TorrentID)?>'); return false;">View contents</a>
 <?php if ($Reported) { ?>
                             <a href="#" class="brackets" onclick="show_reported('<?=($TorrentID)?>'); return false;">View report information</a>
 <?php } ?>

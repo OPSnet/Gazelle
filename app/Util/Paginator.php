@@ -39,6 +39,10 @@ class Paginator {
         return $this->total;
     }
 
+    public function pages(): int {
+        return (int)ceil($this->total / $this->perPage);
+    }
+
     public function setAnchor(string $anchor) {
         $this->anchor = '#' . $anchor;
         return $this;

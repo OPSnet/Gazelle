@@ -1,5 +1,8 @@
-<h4>Peer List</h4>
-{{ linkbox|raw }}
+{% from 'macro/paginator.twig' import pager %}
+{% for peer in list %}
+    {% if loop.first %}
+<h4>List of Seeders</h4>
+<div class="linkbox">{{ pager('show_peers', torrent_id, paginator.page, paginator.pages)|raw }}</div>
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
         <td>User</td>
@@ -9,8 +12,12 @@
         <td class="number_column">Available %</td>
         <td>IP Address</td>
         <td>Useragent</td>
+        {% if is_admin %}
+        <td><img src="{{ url_stem }}leechers.png" class="tooltip" alt="Downloaded?" title="Downloaded?" /></td>
+        <td><img src="{{ url_stem }}snatched.png" class="tooltip" alt="Snatched?" title="Snatched?" /></td>
+        {% endif %}
     </tr>
-{% for peer in list %}
+    {% endif %}
     <tr>
     {% if is_admin or peer.user_id == user_id %}
         <td>{{ peer.user_id|user_url }}</td>
@@ -35,7 +42,15 @@
         <td>&mdash;</td>
         <td>{{ peer.useragent }}</td>
     {% endif %}
+    {% if is_admin %}
+        <td>{% if peer.is_download %}<span class="tooltip" title="Downloaded!" style="color: #f57c00">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if peer.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #388e3c">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
+    {% endif %}
     </tr>
-{% endfor %}
+    {% if loop.last %}
 </table>
-{{ linkbox|raw }}
+<div class="linkbox">{{ pager('show_peers', torrent_id, paginator.page, paginator.pages)|raw }}</div>
+    {% endif %}
+{% else %}
+<div style="text-align: center">No current seeders</div>
+{% endfor %}

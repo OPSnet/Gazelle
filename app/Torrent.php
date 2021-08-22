@@ -634,7 +634,8 @@ class Torrent extends BaseObject {
 
     public function peerlistPage(int $userId, int $limit, int $offset) {
         $key = sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, $offset);
-        if (($list = $this->cache->get_value($key)) === false) {
+        $list = $this->cache->get_value($key);
+        if ($list === false) {
             // force flush the next page of results
             $this->cache->delete_value(sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, $offset + $limit));
             $this->db->prepared_query("
@@ -647,7 +648,9 @@ class Torrent extends BaseObject {
                     xfu.ip           AS ipv4addr,
                     xfu.uid          AS user_id,
                     t.Size           AS size,
-                    sx.name          AS seedbox
+                    sx.name          AS seedbox,
+                    EXISTS(SELECT 1 FROM users_downloads ud WHERE ud.UserID = xfu.uid AND ud.TorrentID = xfu.fid) AS is_download,
+                    EXISTS(SELECT 1 FROM xbt_snatched xs WHERE xs.uid = xfu.uid AND xs.fid = xfu.fid) AS is_snatched
                 FROM xbt_files_users AS xfu
                 INNER JOIN users_main AS um ON (um.ID = xfu.uid)
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
@@ -658,9 +661,53 @@ class Torrent extends BaseObject {
                 LIMIT ? OFFSET ?
                 ", $userId, $this->id, $userId, $limit, $offset
             );
-            $list = $this->db->to_array(false, MYSQLI_ASSOC);
+            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
             $this->cache->cache_value($key, $list, 300);
         }
         return $list;
+    }
+
+    public function downloadTotal(): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM users_downloads WHERE TorrentID = ?
+            ", $this->id
+        );
+    }
+
+    public function downloadPage(int $limit, int $offset): array {
+        $this->db->prepared_query("
+            SELECT ud.UserID AS user_id,
+                ud.Time      AS timestamp,
+                EXISTS(SELECT 1 FROM xbt_snatched xs WHERE xs.uid = ud.UserID AND xs.fid = ud.TorrentID) AS is_snatched,
+                EXISTS(SELECT 1 FROM xbt_files_users xfu WHERE xfu.uid = ud.UserID AND xfu.fid = ud.TorrentID) AS is_seeding
+            FROM users_downloads ud
+            WHERE ud.TorrentID = ?
+            ORDER BY ud.Time DESC, ud.UserID
+            LIMIT ? OFFSET ?
+            ", $this->id, $limit, $offset
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function snatchTotal(): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM xbt_snatched WHERE fid = ?
+            ", $this->id
+        );
+    }
+
+    public function snatchPage(int $limit, int $offset): array {
+        $this->db->prepared_query("
+            SELECT xs.uid AS user_id,
+                from_unixtime(xs.tstamp) AS timestamp,
+                EXISTS(SELECT 1 FROM users_downloads ud WHERE ud.UserID = xs.uid AND ud.TorrentID = xs.fid) AS is_download,
+                EXISTS(SELECT 1 FROM xbt_files_users xfu WHERE xfu.uid = xs.uid AND xfu.fid = xs.fid) AS is_seeding
+            FROM xbt_snatched xs
+            WHERE xs.fid = ?
+            ORDER BY xs.tstamp DESC
+            LIMIT ? OFFSET ?
+            ", $this->id, $limit, $offset
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

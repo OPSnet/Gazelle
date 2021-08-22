@@ -86,11 +86,11 @@ View::show_header($Title, ['js' => 'browse,comments,torrent,bbcode,cover_art,sub
     <div class="header">
         <h2><?=$DisplayName?></h2>
         <div class="linkbox">
-<?php if (check_perms('site_edit_wiki')) { ?>
+<?php if ($Viewer->permitted('site_edit_wiki')) { ?>
             <a href="torrents.php?action=editgroup&amp;groupid=<?=$GroupID?>" class="brackets">Edit description</a>
 <?php } ?>
             <a href="torrents.php?action=editrequest&amp;groupid=<?=$GroupID?>" class="brackets">Request an Edit</a>
-<?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
+<?php if ($RevisionID && $Viewer->permitted('site_edit_wiki')) { ?>
             <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
 <?php
 }
@@ -107,7 +107,7 @@ if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) {
             <a href="upload.php?groupid=<?=$GroupID?>" class="brackets">Add format</a>
 <?php
 }
-if (check_perms('site_submit_requests')) {
+if ($Viewer->permitted('site_submit_requests')) {
 ?>
             <a href="requests.php?action=new&amp;groupid=<?=$GroupID?>" class="brackets">Request format</a>
 <?php } ?>
@@ -227,7 +227,7 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
 ?>
         <div class="box box_artists">
             <div class="head"><strong>Artists</strong>
-            <?=check_perms('torrents_edit') ? '<span style="float: right;" class="edit_artists"><a onclick="ArtistManager(); return false;" href="#" class="brackets">Edit</a></span>' : ''?>
+            <?=$Viewer->permitted('torrents_edit') ? '<span style="float: right;" class="edit_artists"><a onclick="ArtistManager(); return false;" href="#" class="brackets">Edit</a></span>' : ''?>
             </div>
             <ul class="stats nobullet" id="artist_list">
 <?php   foreach ($section as $s) { ?>
@@ -243,7 +243,7 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
 ?>
                 <li class="<?= $s['class'] ?>">
                     <?= Artists::display_artist($Artist) ?>&lrm;
-<?php               if (check_perms('torrents_edit')) { ?>
+<?php               if ($Viewer->permitted('torrents_edit')) { ?>
                     (<span class="tooltip" title="Artist alias ID"><?= $a->getAlias($Artist['name'])
                         ?></span>)&nbsp;<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?= $GroupID
                         ?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']
@@ -258,7 +258,7 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
 ?>
             </ul>
         </div>
-<?php if (check_perms('torrents_add_artist')) { ?>
+<?php if ($Viewer->permitted('torrents_add_artist')) { ?>
         <div class="box box_addartists">
             <div class="head"><strong>Add artist</strong><span style="float: right;" class="additional_add_artist"><a onclick="AddArtistField(); return false;" href="#" class="brackets">+</a></span></div>
             <div class="body">
@@ -286,7 +286,7 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
         </div>
 <?php
         }
-        if (check_perms('site_collages_create')) {
+        if ($Viewer->permitted('site_collages_create')) {
 ?>
         <div class="box box_info box_addcollage_torrent">
             <div class="head"><strong>Add to collage</strong></div>
@@ -322,7 +322,7 @@ $vote = (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID);
 if ($GroupCategoryID === 1) {
     $decade = $GroupYear - ($GroupYear % 10);
     $decadeEnd = $decade + 9;
-    $advanced = check_perms('site_advanced_top10');
+    $advanced = $Viewer->permitted('site_advanced_top10');
 
     $rankList = [
         'overall' => [
@@ -525,7 +525,7 @@ foreach ($TorrentList as $Torrent) {
             </tr>";
 
         foreach ($Reports as $Report) {
-            $ReportLinks = !check_perms('admin_reports')
+            $ReportLinks = !$Viewer->permitted('admin_reports')
                 ? 'Someone reported it'
                 : sprintf('<a href="user.php?id=%d">%s</a> <a href="reportsv2.php?view=report&amp;id=%d">reported it</a>',
                     $Report['ReporterID'],
@@ -550,9 +550,9 @@ foreach ($TorrentList as $Torrent) {
         $ReportInfo .= "\n\t\t</table>";
     }
 
-    $CanEdit = (check_perms('torrents_edit') || (($UserID == $Viewer->id() && !$LoggedUser['DisableWiki']) && !($Remastered && !$RemasterYear)));
+    $CanEdit = ($Viewer->permitted('torrents_edit') || (($UserID == $Viewer->id() && !$LoggedUser['DisableWiki']) && !($Remastered && !$RemasterYear)));
 
-    $RegenLink = check_perms('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid='.$TorrentID.'" class="brackets">Regenerate</a>' : '';
+    $RegenLink = $Viewer->permitted('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid='.$TorrentID.'" class="brackets">Regenerate</a>' : '';
     $FileTable = '
     <table class="filelist_table">
         <tr class="colhead_dark">
@@ -620,7 +620,7 @@ foreach ($TorrentList as $Torrent) {
             'key'    => $Viewer->announceKey() ,
             't'      => $Torrent,
             'edit'   => $CanEdit,
-            'remove' => check_perms('torrents_delete') || $UserID == $Viewer->id(),
+            'remove' => $Viewer->permitted('torrents_delete') || $UserID == $Viewer->id(),
             'pl'     => true,
             'extra'  => [
                 "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"$Title [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
@@ -681,7 +681,7 @@ foreach ($TorrentList as $Torrent) {
         }
     }
 
-    if (($Seeders == 0 && time() - strtotime($LastActive) >= 345678 && time() - strtotime($LastReseedRequest) >= 864000) || check_perms('users_mod')) { ?>
+    if (($Seeders == 0 && time() - strtotime($LastActive) >= 345678 && time() - strtotime($LastReseedRequest) >= 864000) || $Viewer->permitted('users_mod')) { ?>
                             <br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=$GroupID?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
 <?php } ?>
                             <br /><br />If you download this, your ratio will become <?=
@@ -691,19 +691,19 @@ foreach ($TorrentList as $Torrent) {
                         </blockquote>
                     </div>
                     <div class="linkbox">
-<?php if (check_perms('site_moderate_requests')) { ?>
+<?php if ($Viewer->permitted('site_moderate_requests')) { ?>
                         <a href="torrents.php?action=masspm&amp;id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>" class="brackets">Mass PM snatchers</a>
 <?php } ?>
-                        <a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
 <?php if ($Media === 'CD' && $HasLog && $HasLogDB) { ?>
                         <a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>
 <?php
     }
-    if (check_perms('site_view_torrent_snatchlist')) { ?>
-                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View download list</a>
-                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?=$TorrentID?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatch list</a>
+    if ($Viewer->permitted('site_view_torrent_snatchlist')) { ?>
+                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
+                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?=$TorrentID?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
 <?php } ?>
-                        <a href="#" class="brackets" onclick="show_files('<?=$TorrentID?>'); return false;">View file list</a>
+                        <a href="#" class="brackets tooltip" onclick="show_peers('<?=$TorrentID?>', 0); return false;" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
+                        <a href="#" class="brackets" onclick="show_files('<?=$TorrentID?>'); return false;">View contents</a>
 <?php if ($Reported) { ?>
                         <a href="#" class="brackets" onclick="show_reported('<?=$TorrentID?>'); return false;">View report information</a>
 <?php } ?>
@@ -762,7 +762,7 @@ if (empty($LoggedUser['DisableRequests']) && count($Requests) > 0) {
                     <td><a href="requests.php?action=view&amp;id=<?=$Request['ID']?>"><?=$FormatString?> / <?=$BitrateString?> / <?=$MediaString?></a></td>
                     <td>
                         <span id="vote_count_<?=$Request['ID']?>"><?=count($RequestVotes['Voters'])?></span>
-<?php       if (check_perms('site_vote')) { ?>
+<?php       if ($Viewer->permitted('site_vote')) { ?>
                         &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$Request['ID']?>)" class="brackets">+</a>
 <?php       } ?>
                     </td>
