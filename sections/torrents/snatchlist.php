@@ -1,63 +1,20 @@
 <?php
-if (!isset($_GET['torrentid']) || !is_number($_GET['torrentid']) || !check_perms('site_view_torrent_snatchlist')) {
+
+if (!$Viewer->permitted('site_view_torrent_snatchlist')) {
+    error(403);
+}
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+if (is_null($torrent)) {
     error(404);
 }
-$TorrentID = $_GET['torrentid'];
 
-if (!empty($_GET['page']) && is_number($_GET['page'])) {
-    $Page = $_GET['page'];
-    $Limit = (string)(($Page - 1) * 100) .', 100';
-} else {
-    $Page = 1;
-    $Limit = 100;
-}
+$paginator = new Gazelle\Util\Paginator(PEERS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($torrent->snatchTotal());
 
-$NumResults = $DB->scalar("
-    SELECT count(*) FROM xbt_snatched WHERE fid = ?
-    ", $TorrentID
-);
-$DB->prepared_query("
-    SELECT uid,
-        tstamp
-    FROM xbt_snatched
-    WHERE fid = ?
-    ORDER BY tstamp DESC
-    LIMIT $Limit
-    ", $TorrentID
-);
-$Results = $DB->to_array('uid', MYSQLI_ASSOC);
-?>
-<h4 class="tooltip" title="List of users that have reported a snatch to the tracker">List of Snatchers</h4>
-
-<?php if ($NumResults > 100) { ?>
-<div class="linkbox"><?=js_pages('show_snatches', $_GET['torrentid'], $NumResults, $Page)?></div>
-<?php } ?>
-
-<table>
-    <tr class="colhead_dark" style="font-weight: bold;">
-        <td>User</td>
-        <td>Time</td>
-        <td>User</td>
-        <td>Time</td>
-    </tr>
-    <tr>
-<?php
-$i = 0;
-foreach ($Results as $ID=>$Data) {
-    [$SnatcherID, $Timestamp] = array_values($Data);
-    if ($i % 2 == 0 && $i > 0) {
-?>
-    </tr>
-    <tr>
-<?php } ?>
-        <td><?=Users::format_username($SnatcherID, true, true, true, true)?></td>
-        <td><?=time_diff($Timestamp)?></td>
-<?php
-    $i++;
-}
-?>
-    </tr>
-</table>
-<?php if ($NumResults > 100) { ?>
-<div class="linkbox"><?=js_pages('show_snatches', $_GET['torrentid'], $NumResults, $Page)?></div>
-<?php } ?>
+echo $Twig->render('torrent/snatchlist.twig', [
+    'page'       => $torrent->snatchPage($paginator->limit(), $paginator->offset()),
+    'paginator'  => $paginator,
+    'torrent_id' => $torrent->id(),
+    'url_stem'   => STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/',
+    'viewer_id'  => $Viewer->id(),
+]);
