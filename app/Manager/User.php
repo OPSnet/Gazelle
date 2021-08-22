@@ -212,15 +212,15 @@ class User extends \Gazelle\Base {
      * @return array id => username
      */
     public function staffList(): array {
-            $this->db->prepared_query("
-                SELECT um.ID    AS id
-                FROM users_main AS um
-                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
-                WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
-                ORDER BY p.Level DESC, um.Username ASC
-                ", FORUM_MOD
-            );
-            $list = $this->db->collect(0);
+        $this->db->prepared_query("
+            SELECT um.ID    AS id
+            FROM users_main AS um
+            INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+            WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
+            ORDER BY p.Level DESC, um.Username ASC
+            ", FORUM_MOD
+        );
+        $list = $this->db->collect(0);
         $staff = [];
         foreach ($list as $id) {
             $staff[$id] = $this->findById($id);
