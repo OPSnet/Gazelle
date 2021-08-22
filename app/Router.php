@@ -35,7 +35,7 @@ class Router {
      * @param string $path
      * @param bool $authorize
      */
-    public function addRoute($methods=['GET'], string $action, string $path, bool $authorize = false) {
+    public function addRoute($methods, string $action, string $path, bool $authorize = false) {
         if (is_array($methods)) {
             foreach ($methods as $method) {
                 $this->addRoute($method, $action, $path, $authorize);
