@@ -310,9 +310,7 @@ Your torrent was reported because it contained transcoded audio files.'
             'reason' => '10',
             'title' => 'Low Bitrate',
             'report_messages' => [
-                "Please tell us the actual bitrate and the software used to check."
-            ],
-            'report_messages' => [
+                "Please tell us the actual bitrate and the software used to check.",
                 'Please specify a link to the original torrent.'
             ],
             'report_fields' => [
