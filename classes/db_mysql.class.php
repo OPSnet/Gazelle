@@ -134,6 +134,7 @@ function db_string($String, $DisableWildcards = false) {
 use \Gazelle\Util\Irc;
 
 class DB_MYSQL_Exception extends Exception {}
+class DB_MYSQL_DuplicateKeyException extends DB_MYSQL_Exception {}
 
 //TODO: revisit access levels once Drone is replaced by ZeRobot
 class DB_MYSQL {

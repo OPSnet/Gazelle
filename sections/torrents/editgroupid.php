@@ -32,9 +32,7 @@ if (empty($_POST['confirm'])) {
     );
     if (is_null($Name)) {
         //Trying to move to an empty group? I think not!
-        set_message('The destination torrent group does not exist!');
-        header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?action=edit&id={$OldGroupID}");
-        exit();
+        error('The destination torrent group does not exist!');
     }
     [$CategoryID, $NewName] = $DB->row("
         SELECT CategoryID, Name
