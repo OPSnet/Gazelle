@@ -29,14 +29,14 @@
     "ext-json": "*",
     "ext-mysqli": "*",
     "d11wtq/boris": "^1.0",
-    "endroid/qr-code": "^3.9",
+    "endroid/qr-code": "^4.2",
+    "hashids/hashids": "^4.1",
     "maennchen/zipstream-php": "^2.1",
-    "orpheusnet/bencode-torrent": "^1.1.1",
+    "orpheusnet/bencode-torrent": "^1.2.0",
     "orpheusnet/logchecker": "^0.11.0",
     "robmorgan/phinx": "^0.12.4",
     "robthree/twofactorauth": "^1.7",
     "twig/twig": "^2.12",
-    "vinkla/hashids": "^8.1",
     "whichbrowser/parser": "^2.0"
   },
   "require-dev": {
