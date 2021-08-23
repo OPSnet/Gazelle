@@ -4,8 +4,9 @@ namespace Gazelle\Manager;
 
 class Forum extends \Gazelle\Base {
 
-    protected const CACHE_TOC  = 'forum_toc_mainv3';
-    protected const CACHE_LIST = 'forum_list';
+    protected const CACHE_TOC        = 'forum_toc_mainv3';
+    protected const CACHE_LIST       = 'forum_list';
+    protected const CACHE_TRANSITION = 'forum_transition';
 
     /**
      * Create a forum
@@ -188,8 +189,52 @@ class Forum extends \Gazelle\Base {
         return $toc;
     }
 
+    protected function flushTransition(): void {
+        $this->cache->delete_value(self::CACHE_TRANSITION);
+    }
+
+    public function createTransition(array $args): int {
+        $this->db->prepared_query("
+            INSERT INTO forums_transitions
+                   (source, destination, label, permission_levels, permission_class, permissions, user_ids)
+            VALUES (?,      ?,           ?,     ?,                 ?,                ?,           ?)
+            ", $args['source'], $args['destination'], $args['label'], $args['secondary_classes'],
+            $args['permission_class'], $args['permissions'], $args['user_ids']
+        );
+        $this->flushTransition();
+        return $this->db->inserted_id();
+    }
+
+    public function modifyTransition(array $args): int {
+        $this->db->prepared_query("
+            UPDATE forums_transitions SET
+                source = ?,
+                destination = ?,
+                label = ?,
+                permission_levels = ?,
+                permission_class = ?,
+                permissions = ?,
+                user_ids = ?
+            WHERE forums_transitions_id = ?
+            ", $args['source'], $args['destination'], $args['label'], $args['secondary_classes'],
+               $args['permission_class'], $args['permissions'], $args['user_ids'],
+               $args['id']
+        );
+        $this->flushTransition();
+        return $this->db->affected_rows();
+    }
+
+    public function removeTransition(int $id): int {
+        $this->db->prepared_query("
+            DELETE FROM forums_transitions WHERE forums_transitions_id = ?
+            ", $id
+        );
+        $this->flushTransition();
+        return $this->db->affected_rows();
+    }
+
     public function forumTransitionList(\Gazelle\User $user) {
-        $items = $this->cache->get_value('forum_transitions_v2');
+        $items = $this->cache->get_value(self::CACHE_TRANSITION);
         if (!$items) {
             $queryId = $this->db->get_query_id();
             $this->db->prepared_query("
@@ -208,7 +253,7 @@ class Forum extends \Gazelle\Base {
                 unset($i['user_ids'][''], $i['permissions'][''], $i['permission_levels']['']);
             }
             unset($i);
-            $this->cache->cache_value('forum_transitions', $items, 0);
+            $this->cache->cache_value(self::CACHE_TRANSITION, $items, 0);
         }
 
         $userId = $user->id();
