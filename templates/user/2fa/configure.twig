@@ -15,7 +15,7 @@
 <div class="box box2">
     <div class="center pad">
 	<div>
-        <img src="{{ qrcode.writeDataUri }}">
+        <img src="{{ qrcode.getDataUri }}">
         <div class="twofa_text">Secret Text: <span>{{ secret }}</span></div>
 {% if not valid %}
         <p class="warning">Please ensure you have imported the correct secret key
