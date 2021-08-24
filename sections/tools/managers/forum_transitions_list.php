@@ -39,16 +39,16 @@ function classList($Selected = 0) {
     return $Return;
 }
 
-if (!check_perms('admin_manage_forums')) {
+if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
 
-if (isset($_GET['userid'])) {
-    $userId = $_GET['userid'];
+$user = null;
+if (isset($_REQUEST['userid'])) {
+    $user = (new Gazelle\Manager\User)->find($_REQUEST['userid']);
 } else {
-    $userId = $Viewer->id();
+    $user = $Viewer;
 }
-$user = (new Gazelle\Manager\User)->find($userId);
 if (is_null($user)) {
     error(404);
 }
@@ -74,7 +74,7 @@ View::show_header('Forum Transitions');
         <table class="layout">
             <tr>
                 <td class="label"><label for="userid">User ID (or @username)</label></td>
-                <td><input type="text" name="userid" value="<?=$userId?>" /> <?= $user ? $user->username() : '' ?></td>
+                <td><input type="text" name="userid" value="<?= $userId ?>" /> <?= $user->username() ?></td>
                 <td><input type="submit" name="submit" value="Preview" class="submit" /></td>
             <tr>
         </table>

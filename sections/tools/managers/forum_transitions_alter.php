@@ -39,4 +39,4 @@ if ($_POST['submit'] === 'Delete') {
     }
 }
 
-header('Location: tools.php?action=forum_transitions');
+header('Location: tools.php?action=forum_transitions' . (isset($_REQUEST['userid']) ? "&userid={$_REQUEST['userid']}" : ''));
