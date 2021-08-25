@@ -411,7 +411,7 @@ class Vote extends Base {
                 Total = ?,
                 Ups   = ?,
                 Score = ?
-            ", $this->groupId, $up, $score, $total, $up, $score
+            ", $this->groupId, $ups, $score, $total, $ups, $score
         );
         $this->db->commit();
 
