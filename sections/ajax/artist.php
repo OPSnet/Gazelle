@@ -8,7 +8,7 @@ if (isset($_GET['id'])) {
         json_die("failure", "cannot set both id and artistname");
     }
     $artist = $artistMan->findById((int)$_GET['id'], $revisionId);
-    if (!$artist) {
+    if (is_null($artist)) {
         json_die("failure", "bad id");
     }
 } elseif (isset($_GET['artistname'])) {
