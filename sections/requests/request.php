@@ -420,7 +420,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                     <strong><a href="torrents.php?torrentid=<?=$Request['TorrentID']?>">Yes</a></strong>,
                     by user <?=Users::format_username($Request['FillerID'], false, false, false)?>
 <?php        if ($Viewer->id() == $Request['UserID'] || $Viewer->id() == $Request['FillerID'] || check_perms('site_moderate_requests')) { ?>
-                        <strong><a href="requests.php?action=unfill&amp;id=<?=$RequestID?>" class="brackets">Unfill</a></strong> Unfilling a request without a valid, nontrivial reason will result in a warning.
+                        <strong><a href="requests.php?action=unfill&amp;id=<?=$RequestID?>" class="brackets">Unfill</a></strong> Unfilling a request without a <a href="/rules.php?p=requests">valid, nontrivial reason</a> will result in a warning.
 <?php        } ?>
                 </td>
             </tr>
