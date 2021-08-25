@@ -69,7 +69,7 @@
 {% for list in namespace %}
                 <td style="vertical-align: top">
     {% for field, shape in list %}
-                    <label><input type="checkbox" name="{{ field }}" id="flush-{{ field }}" checked="checked" /> {{ shape|replace({'%d': '*'}) }}</label>
+                    <label><input type="checkbox" name="{{ field }}" id="flush-{{ field }}" /> {{ shape|replace({'%d': '*'}) }}</label>
                     <br />
     {% endfor %}
                 </td>
