@@ -1,8 +1,8 @@
 <?php
 
-[,,$Body] = (new Gazelle\Manager\Wiki)->article(RULES_WIKI_PAGE_ID);
+$article = new Gazelle\Wiki(RULES_WIKI_PAGE_ID);
 Text::$TOC = true;
-$Body = Text::full_format($Body, false, 3, true);
+$Body = Text::full_format($article->body(), false, 3, true);
 View::show_header('Uploading Rules', ['js' => 'rules']);
 ?>
 <div class="thin">
