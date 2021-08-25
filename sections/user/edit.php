@@ -14,7 +14,7 @@ $UserID = (int)$_REQUEST['userid'];
 if (!$UserID) {
     error(404);
 }
-if ($UserID != $Viewer->id() && !check_perms('users_edit_profiles')) {
+if ($UserID != $Viewer->id() && !$Viewer->permitted('users_edit_profiles')) {
     error(403);
 }
 $User = new Gazelle\User($UserID);
@@ -58,6 +58,7 @@ if (!count($UserNavItems)) {
 
 $enabledReward = $User->enabledDonorRewards();
 $profileReward = $User->profileDonorRewards();
+
 $profile = [
     0 => [
         'title' => $InfoTitle,
@@ -87,7 +88,7 @@ echo $Twig->render('user/setting.twig', [
     'auth'             => $Viewer->auth(),
     'avatar'           => $Avatar,
     'download_text'    => $DownloadAlt,
-    'is_mod'           => check_perms('users_mod'),
+    'is_mod'           => $Viewer->permitted('users_mod'),
     'lastfm_username'  => (new Gazelle\Util\LastFM)->username($UserID),
     'logged_user'      => $Viewer->id(),
     'nav_items'        => $NavItems,
@@ -100,9 +101,9 @@ echo $Twig->render('user/setting.twig', [
     'stylesheets'      => (new Gazelle\Stylesheet)->list(),
     'user'             => $User,
     'can' => [
-        'advanced_search' => check_perms('site_advanced_search'),
-        'request_notify'  => check_perms('site_vote'),
-        'torrent_notify'  => check_perms('site_torrents_notify'),
+        'advanced_search' => $Viewer->permitted('site_advanced_search'),
+        'request_notify'  => $Viewer->permitted('site_vote'),
+        'torrent_notify'  => $Viewer->permitted('site_torrents_notify'),
     ],
     'donor' => [
         'enabled' => $enabledReward,

@@ -52,7 +52,7 @@ if ($UserID == $Viewer->id()) {
 $FA_Key = null;
 
 // Image proxy CTs
-$DisplayCustomTitle = (check_perms('site_proxy_images') && !empty($User->title()))
+$DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->title()))
     ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
         function ($m) { return 'src=' . $m[1] . ImageTools::process($m[2]) . $m[3];}, $User->title())
     : $User->title();
@@ -82,7 +82,7 @@ function check_paranoia_here($Setting) {
 $stats = $User->activityStats();
 [$ClassRatio, $Buffer] = $User->buffer();
 
-if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_perms('users_mod'))) {
+if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || $Viewer->permitted('users_mod'))) {
     $recovered = $DB->scalar("
         SELECT final FROM recovery_buffer WHERE user_id = ?
         ", $UserID
@@ -106,7 +106,7 @@ echo $Twig->render('user/header.twig', [
     'viewer'       => $Viewer,
 ]);
 
-if ($OwnProfile || check_perms('users_mod')) {
+if ($OwnProfile || $Viewer->permitted('users_mod')) {
     $nextClass = $User->nextClass();
     if ($nextClass) {
 ?>
@@ -164,7 +164,7 @@ if ($OwnProfile || check_perms('users_mod')) {
 $lastfmInfo = (new Gazelle\Util\LastFM)->userInfo($User);
 if ($lastfmInfo)  {
     echo $Twig->render('user/lastfm.twig', [
-        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$UserID") === false) || check_perms('users_mod'),
+        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$UserID") === false) || $Viewer->permitted('users_mod'),
         'info'        => $lastfmInfo,
         'own_profile' => $OwnProfile,
     ]);
@@ -252,8 +252,8 @@ if (($Override = check_paranoia_here('artistsadded'))) {
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?> added">Artists added: <?= display_rank($rank, 'artists') ?></li>
 <?php } ?>
                 <li class="tooltip" title="<?=number_format($releaseVotes)?> votes">Release votes cast: <?= display_rank($rank, 'votes') ?></li>
-<?php if ($OwnProfile || check_perms('admin_bp_history')) { ?>
-                <li class="tooltip<?= !$OwnProfile && check_perms('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= display_rank($rank, 'bonus') ?></li>
+<?php if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
+                <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= display_rank($rank, 'bonus') ?></li>
 <?php
 }
 if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
@@ -263,28 +263,28 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
 <?php } ?>
             </ul>
         </div>
-<?php if (check_perms('users_mod') || check_perms('users_view_ips') || check_perms('users_view_keys')) { ?>
+<?php if ($Viewer->permitted('users_mod') || $Viewer->permitted('users_view_ips') || $Viewer->permitted('users_view_keys')) { ?>
         <div class="box box_info box_userinfo_history">
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
-<?php if (check_perms('users_view_email')) { ?>
+<?php if ($Viewer->permitted('users_view_email')) { ?>
                 <li>Emails: <?=number_format($User->emailCount())?> <a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
     }
-    if (check_perms('users_view_ips')) {
+    if ($Viewer->permitted('users_view_ips')) {
 ?>
                 <li>IPs: <?=number_format($User->siteIPCount())?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
-<?php   if (check_perms('users_view_ips') && check_perms('users_mod')) { ?>
+<?php   if ($Viewer->permitted('users_view_ips') && $Viewer->permitted('users_mod')) { ?>
                 <li>Tracker IPs: <?=number_format($User->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
         }
     }
-    if (check_perms('users_view_keys')) {
+    if ($Viewer->permitted('users_view_keys')) {
 ?>
                 <li>Announce keys: <?=number_format($User->announceKeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
     }
-    if (check_perms('users_mod')) {
+    if ($Viewer->permitted('users_mod')) {
 ?>
                 <li>Password history: <?=number_format($User->passwordCount())?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
                 <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
@@ -326,22 +326,22 @@ if ($ParanoiaLevel == 0) {
 }
 ?>
                 <li>Paranoia level: <span class="tooltip" title="<?=$ParanoiaLevel?>"><?=$ParanoiaLevelText?></span></li>
-<?php if (check_perms('users_view_email') || $OwnProfile) { ?>
+<?php if ($Viewer->permitted('users_view_email') || $OwnProfile) { ?>
                 <li>Email: <a href="mailto:<?=display_str($User->email())?>"><?=display_str($User->email())?></a>
-<?php   if (check_perms('users_view_email')) { ?>
+<?php   if ($Viewer->permitted('users_view_email')) { ?>
                     <a href="user.php?action=search&amp;email_history=on&amp;email=<?=display_str($User->email())?>" title="Search" class="brackets tooltip">S</a>
 <?php   } ?>
                 </li>
 <?php
 }
-if (check_perms('users_view_ips')) {
+if ($Viewer->permitted('users_view_ips')) {
 ?>
                 <li>IP: <?=Tools::display_ip($User->ipaddr())?></li>
                 <li>Host: <?=Tools::get_host_by_ajax($User->ipaddr())?></li>
 <?php
 }
 
-if (check_perms('users_view_keys') || $OwnProfile) {
+if ($Viewer->permitted('users_view_keys') || $OwnProfile) {
 ?>
                 <li>Passkey: <a href="#" id="passkey" onclick="togglePassKey('<?= display_str($User->announceKey()) ?>'); return false;" class="brackets">View</a></li>
 <?php
@@ -369,18 +369,18 @@ if ($Viewer->permitted('users_view_invites')) {
 <?php
 }
 $appMan = new Gazelle\Manager\Applicant;
-if ($appMan->userIsApplicant($UserID) && (check_perms('admin_manage_applicants') || $OwnProfile)) {
+if ($appMan->userIsApplicant($UserID) && ($Viewer->permitted('admin_manage_applicants') || $OwnProfile)) {
 ?>
                 <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 <?php
 }
-if ($OwnProfile || check_perms('users_mod') || $Viewer->isFLS()) {
+if ($OwnProfile || $Viewer->permitted('users_mod') || $Viewer->isFLS()) {
 ?>
                 <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
                     implode('; ', $User->clients()) ?></li>
                 <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Password age: <?= $User->passwordAge() ?></li>
 <?php }
-if ($OwnProfile || check_perms('users_override_paranoia')) { ?>
+if ($OwnProfile || $Viewer->permitted('users_override_paranoia')) { ?>
     <li>IRC Key: <?=strlen($User->IRCKey()) ? 'Yes' : 'No' ?></li>
 <?php } ?>
             </ul>
@@ -394,11 +394,11 @@ if (check_paranoia_here('snatched')) {
 }
 require('community_stats.php');
 
-if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
+if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
     echo $Twig->render('donation/stats.twig', [
         'is_donor'    => $User->isDonor(),
         'is_self'     => $OwnProfile,
-        'is_mod'      => check_perms('users_mod'),
+        'is_mod'      => $Viewer->permitted('users_mod'),
         'total_rank'  => $User->totalDonorRank(),
         'current'     => $User->donorRankLabel(true),
         'leaderboard' => $donorMan->leaderboardRank($User),
@@ -409,7 +409,7 @@ if (check_perms("users_mod") || $OwnProfile || $User->donorVisible()) {
 ?>
     </div>
     <div class="main_column">
-<?php if (check_perms('users_mod') && $User->onRatioWatch()) { ?>
+<?php if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) { ?>
         <div class="box">
             <div class="head">Ratio watch</div>
             <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($stats['BytesDownloaded'] * $stats['RequiredRatio']) - $stats['BytesUploaded'])?> in the next <?=time_diff($User->ratioWatchExpiry()) ?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($stats['BytesDownloaded'] - $stats['RatioWatchDownload'])?></div>
@@ -510,7 +510,7 @@ foreach ($Collages as $CollageInfo) {
 <?php
 
 // Linked accounts
-if (check_perms('users_edit_usernames')) {
+if ($Viewer->permitted('users_edit_usernames')) {
     [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($User))->info();
     echo $Twig->render('user/linked.twig', [
         'auth'     => $Viewer->auth(),
@@ -522,7 +522,7 @@ if (check_perms('users_edit_usernames')) {
     ]);
 }
 
-if (check_perms('users_view_invites')) {
+if ($Viewer->permitted('users_view_invites')) {
     $tree = new Gazelle\InviteTree($UserID);
     if ($tree->hasInvitees()) {
 ?>
@@ -541,7 +541,7 @@ if (check_perms('users_view_invites')) {
     }
 }
 
-if (check_perms('users_give_donor')) {
+if ($Viewer->permitted('users_give_donor')) {
     echo $Twig->render('donation/history.twig', [
         'history' => $User->donorHistory(),
     ]);
@@ -616,7 +616,7 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
                         </td>
                         <td>
                             <span id="vote_count_<?=$RequestID?>"><?=$VotesCount?></span>
-<?php            if (check_perms('site_vote')) { ?>
+<?php            if ($Viewer->permitted('site_vote')) { ?>
                             &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets">+</a>
 <?php            } ?>
                         </td>
@@ -635,14 +635,14 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
     }
 }
 
-if (check_perms('users_mod') || $Viewer->isStaffPMReader()) {
+if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {
     echo $Twig->render('admin/staffpm-list.twig', [
         'list' => (new Gazelle\Staff($User))->userStaffPmList($Viewer->id()),
     ]);
 }
 
 // Displays a table of forum warnings viewable only to Forum Moderators
-if ($User->isStaff() && check_perms('users_warn')) {
+if ($User->isStaff() && $Viewer->permitted('users_warn')) {
     $ForumWarnings = $User->forumWarning();
     if ($ForumWarnings) {
 ?>
@@ -656,7 +656,7 @@ if ($User->isStaff() && check_perms('users_warn')) {
     }
 }
 
-if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
+if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
         <form class="manage_form" name="user" id="form" action="user.php" method="post">
         <input type="hidden" name="action" value="moderate" />
         <input type="hidden" name="userid" value="<?=$UserID?>" />
@@ -687,19 +687,19 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
     </tr>
 
 <?php
-    if (check_perms('users_edit_usernames')) {
+    if ($Viewer->permitted('users_edit_usernames')) {
         echo $Twig->render('user/edit-username.twig', [
             'username' => $Username,
         ]);
     }
 
-    if (check_perms('users_edit_titles')) {
+    if ($Viewer->permitted('users_edit_titles')) {
         echo $Twig->render('user/edit-title.twig', [
             'title' => $User->title(),
         ]);
     }
 
-    if (check_perms('users_promote_below') || check_perms('users_promote_to', $Viewer->classLevel() - 1)) {
+    if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1)) {
 ?>
             <tr>
                 <td class="label">Primary class:</td>
@@ -711,7 +711,7 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
             if ($CurClass['Secondary']) {
                 continue;
             }
-            elseif (!$OwnProfile && !check_perms('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->effectiveClass()) {
+            elseif (!$OwnProfile && !$Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->effectiveClass()) {
                 break;
             }
             elseif ($CurClass['Level'] > $Viewer->effectiveClass()) {
@@ -731,25 +731,25 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
 <?php
     }
 
-    if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
+    if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
         echo $Twig->render('user/edit-secondary-class.twig', [
             'permission' => $User->secondaryClassesList(),
         ]);
     }
 
-    if (check_perms('users_make_invisible')) {
+    if ($Viewer->permitted('users_make_invisible')) {
         echo $Twig->render('user/edit-peer-visibility.twig', [
             'is_visible' => $User->isVisible(),
         ]);
     }
 
-    if (check_perms('admin_rate_limit_manage')) {
+    if ($Viewer->permitted('admin_rate_limit_manage')) {
         echo $Twig->render('user/edit-rate-limit.twig', [
             'unlimited' => $User->hasUnlimitedDownload(),
         ]);
     }
 
-    if (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $OwnProfile)) {
+    if ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $OwnProfile)) {
         echo $Twig->render('user/edit-buffer.twig', [
             'up'             => $stats['BytesUploaded'],
             'down'           => $stats['BytesDownloaded'],
@@ -759,29 +759,29 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
         ]);
     }
 
-    if (check_perms('users_edit_invites')) {
+    if ($Viewer->permitted('users_edit_invites')) {
         echo $Twig->render('user/edit-invite.twig', [
             'amount' => $User->inviteCount(),
         ]);
     }
 
-    if (check_perms('admin_manage_user_fls')) {
+    if ($Viewer->permitted('admin_manage_user_fls')) {
         echo $Twig->render('user/edit-fltoken.twig', [
             'amount' => $User->tokenCount(),
         ]);
     }
 
-    if (check_perms('admin_manage_fls') || (check_perms('users_mod') && $OwnProfile)) {
+    if ($Viewer->permitted('admin_manage_fls') || ($Viewer->permitted('users_mod') && $OwnProfile)) {
         echo $Twig->render('user/edit-remark.twig', [
             'remark' => $User->supportFor(),
         ]);
     }
 
-    if (check_perms('users_edit_reset_keys')) {
+    if ($Viewer->permitted('users_edit_reset_keys')) {
         echo $Twig->render('user/edit-reset.twig');
     }
 
-    if (check_perms('users_edit_password')) {
+    if ($Viewer->permitted('users_edit_password')) {
         echo $Twig->render('user/edit-password.twig', [
             'key_2fa' => $User->TFAKey(),
             'user_id' => $UserID,
@@ -791,7 +791,7 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
 </table>
 
 <?php
-    if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
+    if ($Viewer->permitted('users_disable_posts') || $Viewer->permitted('users_disable_any')) {
         $fm = new Gazelle\Manager\Forum;
         echo $Twig->render('user/edit-privileges.twig', [
             'email'          => $User->emailHistory(),
@@ -805,8 +805,8 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
                 'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { return $fm->findById($id)->name(); }, $User->permittedForums())),
             ],
             'permission' => [
-                'disable_any' => check_perms('users_disable_any'),
-                'delete_user' => check_perms('users_delete_users'),
+                'disable_any' => $Viewer->permitted('users_disable_any'),
+                'delete_user' => $Viewer->permitted('users_delete_users'),
             ],
             'disable' => [
                 'avatar'  => !$User->showAvatars(),
@@ -831,31 +831,31 @@ if (check_perms('users_mod') || $Viewer->isStaff()) { ?>
         ]);
     }
 
-    if (check_perms('users_give_donor')) {
+    if ($Viewer->permitted('users_give_donor')) {
         echo $Twig->render('donation/admin-panel.twig', [
             'user' => $User,
         ]);
     }
 
-    if (check_perms('users_warn')) {
+    if ($Viewer->permitted('users_warn')) {
         echo $Twig->render('user/edit-warn.twig', [
             'is_warned' => $User->isWarned(),
             'until'     => $User->warningExpiry(),
         ]);
     }
 
-    if (check_perms('users_disable_any')) {
+    if ($Viewer->permitted('users_disable_any')) {
         echo $Twig->render('user/edit-lock.twig', [
             'is_locked'  => $User->isLocked(),
             'staff_lock' => STAFF_LOCKED,
-            'can_logout' => check_perms('users_logout'),
+            'can_logout' => $Viewer->permitted('users_logout'),
         ]);
     }
 
     echo $Twig->render('user/edit-submit.twig');
 ?>
         </form>
-<?php } /* check_perms('users_mod') */ ?>
+<?php } /* $Viewer->permitted('users_mod') */ ?>
     </div>
 </div>
 <?php

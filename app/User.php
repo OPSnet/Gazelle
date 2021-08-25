@@ -1753,7 +1753,7 @@ class User extends BaseObject {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            [$filled, $bounty] = $this->db->next_record(MYSQLI_NUM);
+            [$filled, $bounty] = $this->db->next_record(MYSQLI_NUM, false);
         } else {
             $filled = $bounty = 0;
         }
@@ -1768,7 +1768,7 @@ class User extends BaseObject {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            [$voted, $bounty] = $this->db->next_record(MYSQLI_NUM);
+            [$voted, $bounty] = $this->db->next_record(MYSQLI_NUM, false);
         } else {
             $voted = $bounty = 0;
         }
@@ -1784,7 +1784,7 @@ class User extends BaseObject {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            [$created, $bounty] = $this->db->next_record(MYSQLI_NUM);
+            [$created, $bounty] = $this->db->next_record(MYSQLI_NUM, false);
         } else {
             $created = $bounty = 0;
         }
@@ -2248,7 +2248,7 @@ class User extends BaseObject {
                 ", $this->id, $this->id, $this->id
             );
             $stats = ['download' => 0, 'snatch' => 0];
-            while ([$key, $count] = $this->db->next_record(MYSQLI_ASSOC)) {
+            while ([$key, $count] = $this->db->next_record(MYSQLI_ASSOC, false)) {
                 $stats[$key] = $count;
             }
             $stats = $this->cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
@@ -2369,7 +2369,7 @@ class User extends BaseObject {
                 WHERE um.ID = ?
                 ", $this->id
             );
-            $stats = $this->db->next_record(MYSQLI_ASSOC);
+            $stats = $this->db->next_record(MYSQLI_ASSOC, false);
             $stats['BytesUploaded'] = (int)$stats['BytesUploaded'];
             $stats['BytesDownloaded'] = (int)$stats['BytesDownloaded'];
             $stats['BonusPoints'] = (float)$stats['BonusPoints'];
@@ -2814,7 +2814,17 @@ class User extends BaseObject {
                 WHERE UserID = ?
                 ', $UserID
             );
-            $Rewards = $this->db->next_record(MYSQLI_ASSOC);
+            if ($this->db->has_results()) {
+                $Rewards = $this->db->next_record(MYSQLI_ASSOC, false);
+            } else {
+                $Rewards = [
+                    'IconMouseOverText'   => null,
+                    'AvatarMouseOverText' => null,
+                    'CustomIcon'          => null,
+                    'CustomIconLink'      => null,
+                    'SecondAvatar'        => null,
+                ];
+            }
             $this->db->set_query_id($QueryID);
 
             $DonorInfo = [
@@ -2966,18 +2976,31 @@ class User extends BaseObject {
             $QueryID = $this->db->get_query_id();
             $this->db->prepared_query('
                 SELECT ProfileInfo1,
-                    ProfileInfoTitle1,
                     ProfileInfo2,
-                    ProfileInfoTitle2,
                     ProfileInfo3,
-                    ProfileInfoTitle3,
                     ProfileInfo4,
+                    ProfileInfoTitle1,
+                    ProfileInfoTitle2,
+                    ProfileInfoTitle3,
                     ProfileInfoTitle4
                 FROM donor_rewards
                 WHERE UserID = ?
                 ', $this->id
             );
-            $Results = $this->db->next_record();
+            if ($this->db->has_results()) {
+                $Results = $this->db->next_record(MYSQLI_ASSOC, false);
+            } else {
+                $Results = [
+                    'ProfileInfo1' => null,
+                    'ProfileInfo2' => null,
+                    'ProfileInfo3' => null,
+                    'ProfileInfo4' => null,
+                    'ProfileInfoTitle1' => null,
+                    'ProfileInfoTitle2' => null,
+                    'ProfileInfoTitle3' => null,
+                    'ProfileInfoTitle4' => null,
+                ];
+            }
             $this->db->set_query_id($QueryID);
             $this->cache->cache_value($key, $Results, 0);
         }
