@@ -391,18 +391,17 @@ class TGroup extends BaseObject {
         $artistMan = new \Gazelle\Manager\Artist;
         $add = [];
         $args = [];
+        $seen = [];
         $n = count($names);
         for ($i = 0; $i < $n; $i++) {
             $role = $roles[$i];
-            if (!in_array($role, array_keys(ARTIST_TYPE))) {
+            $name = \Gazelle\Artist::sanitize($names[$i]);
+            if (!$name || !in_array($role, array_keys(ARTIST_TYPE))) {
                 continue;
             }
-            $name = \Gazelle\Artist::sanitize($names[$i]);
-            if (!$name) {
-                return 0;
-            }
             [$artistId, $aliasId] = $artistMan->fetchArtistIdAndAliasId($name);
-            if ($artistId) {
+            if ($artistId && !isset($seen["$artistId:$aliasId"])) {
+                $seen["$artistId:$aliasId"] = true;
                 array_push($args, $this->id, $userId, $artistId, $aliasId, $role, (string)$role);
                 $add[] = "$artistId ($name) as " . ARTIST_TYPE[$role];
             }
@@ -410,16 +409,12 @@ class TGroup extends BaseObject {
         if (empty($add)) {
             return 0;
         }
-        try {
-            $this->db->prepared_query("
-                INSERT INTO torrents_artists
-                       (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
-                VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)')
-                , ...$args
-            );
-        } catch (\DB_MYSQL_DuplicateKeyException $e) {
-            return 0;
-        }
+        $this->db->prepared_query("
+            INSERT IGNORE INTO torrents_artists
+                   (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
+            VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)')
+            , ...$args
+        );
 
         $logger = new \Gazelle\Log;
         $userLabel = "$userId (" .  $user->username() . ")";
