@@ -276,6 +276,7 @@ function AddArtistField() {
         6: 4,
         3: 5,
         7: 6,
+        8: 7,
     };
     selected = mapping[$("#AddArtists select:last-child").val()];
     var x = $('#AddArtists').raw();
