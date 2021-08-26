@@ -111,7 +111,7 @@ class Payment extends \Gazelle\Base {
         $monthlyRental = $this->monthlyRental();
         return $monthlyRental == 0.0
             ? 100
-            : min(100, (int)($donorMan->totalMonth(1) / $monthlyRental) * 100);
+            : min(100, (int)(($donorMan->totalMonth(1) / $monthlyRental) * 100));
     }
 
     public function due(): array {
