@@ -250,15 +250,15 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
                 <div class="box pad">
                     <form action="collages.php" method="post">
 <?php
-            $collageList = $collageMan->addToCollageDefault($Viewer, $GroupID);
+            $collageList = $collageMan->addToCollageDefault($Viewer->id(), $GroupID);
             if (empty($collageList)) {
 ?>
                     <div>Search for a collage name:</div>
 <?php       } else { ?>
                     <select style="max-width: 100%" name="collage_combo">
                         <option value="0">Choose recent...</option>
-<?php           foreach ($collageList as $id => $name) { ?>
-                        <option value="<?= $id ?>"><?= $name ?></option>
+<?php           foreach ($collageList as $id => $collageName) { ?>
+                        <option value="<?= $id ?>"><?= display_str($collageName) ?></option>
 <?php           } ?>
                     </select>
                     <div>or search for collage name:</div>

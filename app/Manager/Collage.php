@@ -111,9 +111,7 @@ class Collage extends \Gazelle\Base {
     public function personalCollageName(string $name): string {
         $new = $name . "'s personal collage";
         $this->db->prepared_query('
-            SELECT ID
-            FROM collages
-            WHERE Name = ?
+            SELECT ID FROM collages WHERE Name = ?
             ', $new
         );
         $i = 1;
@@ -121,9 +119,7 @@ class Collage extends \Gazelle\Base {
         while ($this->db->has_results()) {
             $new = "$basename no. " . ++$i;
             $this->db->prepared_query('
-                SELECT ID
-                FROM collages
-                WHERE Name = ?
+                SELECT ID FROM collages WHERE Name = ?
                 ', $new
             );
         }
@@ -142,12 +138,13 @@ class Collage extends \Gazelle\Base {
             ORDER BY c.Updated DESC
             ", ...$idList
         );
-        return $this->db->to_pair('id', 'name');
+        return $this->db->to_pair('id', 'name', false);
     }
 
-    public function addToArtistCollageDefault(\Gazelle\User $user, int $artistId): array {
-        $key = sprintf(self::CACHE_DEFAULT_ARTIST, $user->id());
-        if (($default = $this->cache->get_value($key)) === false) {
+    public function addToArtistCollageDefault(int $userId, int $artistId): array {
+        $key = sprintf(self::CACHE_DEFAULT_ARTIST, $userId);
+        $default = $this->cache->get_value($key);
+        if ($default === false) {
             // Ensure that some of the creator's collages are in the result
             $this->db->prepared_query("
                 SELECT c.ID
@@ -160,10 +157,10 @@ class Collage extends \Gazelle\Base {
                         SELECT 1 FROM collages_artists WHERE CollageID = c.ID AND ArtistID = ?
                     )
                 ORDER BY c.Updated DESC
-                LIMIT 3
-                ", $user->id(), COLLAGE_ARTISTS_ID, $artistId
+                LIMIT 5
+                ", $userId, COLLAGE_ARTISTS_ID, $artistId
             );
-            $list = $this->db->collect(0);
+            $list = $this->db->collect(0, false);
             if (empty($list)) {
                 // Prevent empty IN operator: WHERE ID IN ()
                 $list = [0];
@@ -171,7 +168,7 @@ class Collage extends \Gazelle\Base {
 
             // Ensure that some of the other collages the user has worked on are present
             $this->db->prepared_query("
-                SELECT DISTINCT c.ID
+                SELECT c.ID
                 FROM collages c
                 INNER JOIN collages_artists ca ON (ca.CollageID = c.ID AND ca.UserID = ?)
                 WHERE c.Locked = '0'
@@ -181,9 +178,10 @@ class Collage extends \Gazelle\Base {
                     AND NOT EXISTS (
                         SELECT 1 FROM collages_artists WHERE CollageID = c.ID AND ArtistID = ?
                     )
-                    AND c.ID NOT IN (" . placeholders($list) . ")
-                ORDER BY c.Updated DESC LIMIT 5
-                ", $user->id(), $user->id(), COLLAGE_ARTISTS_ID, $artistId, ...$list
+                GROUP BY c.ID
+                ORDER BY max(ca.AddedOn) DESC
+                LIMIT 5
+                ", $userId, $userId, COLLAGE_ARTISTS_ID, $artistId
             );
             $default = $this->idsToNames(array_merge($list, $this->db->collect(0)));
             $this->cache->cache_value($key, $default, 86400);
@@ -191,9 +189,10 @@ class Collage extends \Gazelle\Base {
         return $default;
     }
 
-    public function addToCollageDefault(\Gazelle\User $user, int $groupId): array {
-        $key = sprintf(self::CACHE_DEFAULT_GROUP, $user->id());
-        if (($default = $this->cache->get_value($key)) === false) {
+    public function addToCollageDefault(int $userId, int $groupId): array {
+        $key = sprintf(self::CACHE_DEFAULT_GROUP, $userId);
+        $default = $this->cache->get_value($key);
+        if ($default === false) {
             // All of their personal collages are in the result
             $this->db->prepared_query("
                 SELECT c.ID
@@ -205,25 +204,26 @@ class Collage extends \Gazelle\Base {
                     AND NOT EXISTS (
                         SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
                     )
-                ", $user->id(), COLLAGE_PERSONAL_ID, $groupId
+                ORDER BY c.Updated DESC
+                ", $userId, COLLAGE_PERSONAL_ID, $groupId
             );
-            $list = $this->db->collect(0) ?: [0];
+            $list = $this->db->collect(0, false) ?: [0];
 
-            // Ensure that some of the other collages the user has worked on are present
+            // Ensure that some (theirs and by others) of the other collages the user has worked on are present
             $this->db->prepared_query("
-                SELECT DISTINCT c.ID
+                SELECT c.ID
                 FROM collages c
                 INNER JOIN collages_torrents ca ON (ca.CollageID = c.ID AND ca.UserID = ?)
                 WHERE c.Locked = '0'
                     AND c.Deleted = '0'
-                    AND ca.UserID = ?
                     AND c.CategoryID != ?
                     AND NOT EXISTS (
                         SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
                     )
-                    AND c.ID NOT IN (" . placeholders($list) . ")
-                ORDER BY c.Updated DESC LIMIT 8
-                ", $user->id(), $user->id(), COLLAGE_ARTISTS_ID, $groupId, ...$list
+                GROUP BY c.ID
+                ORDER BY max(ca.AddedOn) DESC
+                LIMIT 5
+                ", $userId, COLLAGE_PERSONAL_ID, $groupId
             );
             unset($list[0]);
             $default = $this->idsToNames(array_merge($list, $this->db->collect(0)));
