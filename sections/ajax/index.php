@@ -49,7 +49,24 @@ $LimitedPages = [
 $RequireTokenPages = [
     'download',
     'upload',
+    'add_log',
+    'add_tag',
+    'request_fill',
 ];
+
+// RED uses the non '_' endpoint, maintaining compat with them here
+$Aliases = [
+    'addtag' => 'add_tag',
+    'requestfill' => 'request_fill',
+];
+
+$Action = $_GET['action'] ?? '';
+if (isset($Aliases[$action])) {
+    $Action = $Aliases[$action];
+}
+if (!$Action) {
+    json_die("failure");
+}
 
 $UserID = $Viewer->id();
 
@@ -59,8 +76,8 @@ if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) 
 
 header('Content-Type: application/json; charset=utf-8');
 // Enforce rate limiting everywhere except info.php
-if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && isset($LimitedPages[$_GET['action']])) {
-    [$rate, $interval] = $LimitedPages[$_GET['action']];
+if (!check_perms('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
+    [$rate, $interval] = $LimitedPages[$Action];
     if (($UserRequests = $Cache->get_value('ajax_requests_'.$UserID)) === false) {
         $UserRequests = 0;
         $Cache->cache_value('ajax_requests_'.$UserID, '0', $interval);
@@ -72,11 +89,11 @@ if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && isset($Limite
     }
 }
 
-if (!isset($FullToken) && in_array($_GET['action'], $RequireTokenPages)) {
+if (!isset($FullToken) && in_array($Action, $RequireTokenPages)) {
     json_die("failure", "This page requires an api token");
 }
 
-switch ($_GET['action']) {
+switch ($Action) {
     // things (that may be) used on the site
     case 'upload_section':
         // Gets one of the upload forms
@@ -233,14 +250,10 @@ switch ($_GET['action']) {
     case 'download':
         require(__DIR__ . '/../torrents/download.php');
         break;
-
-    // RED uses the non '_' endpoint, maintaining compat with them here
     case 'request_fill':
-    case 'requestfill':
         json_print('success', require(__DIR__ . '/../requests/take_fill.php'));
         break;
     case 'add_tag':
-    case 'addtag':
         require(__DIR__ . '/../torrents/add_tag.php');
         break;
     case 'add_log':
