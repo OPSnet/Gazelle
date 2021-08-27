@@ -29,7 +29,9 @@ if (!$RequestID) {
     error(0);
 }
 
-authorize();
+if (!defined('AJAX')) {
+    authorize();
+}
 
 //VALIDATION
 $Err = [];
