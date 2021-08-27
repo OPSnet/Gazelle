@@ -63,7 +63,7 @@ class Contest extends \Gazelle\Base {
             LEFT JOIN contest_has_bonus_pool cbp USING (contest_id)
             ORDER BY c.date_begin DESC
          ");
-         return array_map(function ($id) {return new \Gazelle\Contest($id);}, $this->db->collect(0));
+         return array_map(fn($id) => new \Gazelle\Contest($id), $this->db->collect(0));
     }
 
     /**
@@ -79,7 +79,7 @@ class Contest extends \Gazelle\Base {
             /* AND ... we may want to think about excluding certain past contests */
             ORDER BY c.date_begin ASC
         ");
-        return array_map(function ($id) {return new \Gazelle\Contest($id);}, $this->db->collect(0));
+        return array_map(fn($id) => new \Gazelle\Contest($id), $this->db->collect(0));
     }
 
     /* --- SCHEDULED TASKS --- */
@@ -113,7 +113,7 @@ class Contest extends \Gazelle\Base {
                 AND cbp.status = ?
             ", 'ready'
         );
-        $contests = array_map(function ($id) {return new \Gazelle\Contest($id);}, $this->db->collect(0));
+        $contests = array_map(fn($id) => new \Gazelle\Contest($id), $this->db->collect(0));
         $totalParticipants = 0;
         foreach ($contests as $contest) {
             $totalParticipants += $contest->doPayout($twig);

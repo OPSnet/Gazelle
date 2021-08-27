@@ -260,8 +260,8 @@ class Forum extends \Gazelle\Base {
         $info['EffectiveClass']  = $user->effectiveClass();
         $info['ExtraClasses']    = array_keys($user->secondaryClasses());
         $info['Permissions']     = array_keys($user->info()['Permission']);
-        $info['ExtraClassesOff'] = array_flip(array_map(function ($i) { return -$i; }, $info['ExtraClasses']));
-        $info['PermissionsOff']  = array_flip(array_map(function ($i) { return "-$i"; }, array_keys($user->info()['Permission'])));
+        $info['ExtraClassesOff'] = array_flip(array_map(fn($i) => -$i, $info['ExtraClasses']));
+        $info['PermissionsOff']  = array_flip(array_map(fn($i) => "-$i", array_keys($user->info()['Permission'])));
 
         return array_filter($items, function ($item) use ($info, $userId) {
             if (count(array_intersect_key($item['permission_levels'], $info['ExtraClassesOff'])) > 0) {

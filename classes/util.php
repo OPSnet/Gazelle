@@ -785,7 +785,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
     }
     foreach ($TorrentList as &$torrent) {
         $torrent['ripLogIds'] = empty($torrent['ripLogIds'])
-            ? [] : array_map(function ($x) { return (int)$x; },  explode(',', $torrent['ripLogIds']));
+            ? [] : array_map('intval', explode(',', $torrent['ripLogIds']));
         $torrent['LogCount'] = count($torrent['ripLogIds']);
     }
 

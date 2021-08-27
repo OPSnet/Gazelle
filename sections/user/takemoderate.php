@@ -51,8 +51,8 @@ $username = trim($_POST['Username']);
 $title = trim($_POST['Title']);
 $adminComment = trim($_POST['AdminComment']);
 $secondaryClasses = array_filter(
-    array_map(function ($id) { return (int)$id; }, $_POST['secondary_classes'] ?? [] ),
-    function ($id) { return $id > 0; }
+    array_map('intval', $_POST['secondary_classes'] ?? [] ),
+    fn($id) => $id > 0
 );
 sort($secondaryClasses);
 $visible = isset($_POST['Visible']) ? '1' : '0';
@@ -367,7 +367,7 @@ if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
 
 if (check_perms('users_mod')) {
     $fMan = new Gazelle\Manager\Forum;
-    $restricted = array_map(function ($id) {return (int)$id;}, array_unique(explode(',', trim($_POST['RestrictedForums']))));
+    $restricted = array_map('intval', array_unique(explode(',', trim($_POST['RestrictedForums']))));
     sort($restricted);
     $restrictedIds = [];
     $restrictedNames = [];
@@ -385,7 +385,7 @@ if (check_perms('users_mod')) {
         $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
     }
 
-    $permitted = array_map(function ($id) {return (int)$id;}, array_unique(explode(',', trim($_POST['PermittedForums']))));
+    $permitted = array_map('intval', array_unique(explode(',', trim($_POST['PermittedForums']))));
     sort($permitted);
     $permittedIds = [];
     $permittedNames = [];

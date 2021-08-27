@@ -283,7 +283,7 @@ class User extends \Gazelle\Base {
             FROM users_main
             WHERE CustomPermissions NOT IN ('', 'a:0:{}')
         ");
-        return array_map(function ($perm) {return unserialize($perm);},
+        return array_map(fn($perm) => unserialize($perm),
             $this->db->to_pair('ID', 'CustomPermissions', false)
         );
     }
@@ -1023,7 +1023,7 @@ class User extends \Gazelle\Base {
         );
         $this->db->commit();
 
-        $this->cache->deleteMulti(array_map(function ($id) { return "u_$id"; }, $ids));
+        $this->cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
     }
 
@@ -1056,7 +1056,7 @@ class User extends \Gazelle\Base {
         );
         $this->db->commit();
 
-        $this->cache->deleteMulti(array_map(function ($id) { return "u_$id"; }, $ids));
+        $this->cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
     }
 }

@@ -17,7 +17,7 @@ if (isset($_GET['tokens'])) {
     $args = [];
     $ck = [];
     foreach ($Tokens as $Token) {
-        [$UserID, $TorrentID] = array_map(function ($n) {return (int)$n;}, explode(':', $Token));
+        [$UserID, $TorrentID] = array_map('intval', explode(':', $Token));
         if (!$UserID || !$TorrentID) {
             continue;
         }

@@ -32,7 +32,7 @@ Highcharts.chart('user-flow', {
     },
     credits: { enabled: false },
     xAxis: {
-        categories: [<?= implode(',', array_map(function ($x) { return "'$x'"; }, array_keys($userflow))) ?>],
+        categories: [<?= implode(',', array_map(fn($x) => "'$x'", array_keys($userflow))) ?>],
     },
     tooltip: {
         headerFormat: '<b>{point.x}</b><br/>',

@@ -177,7 +177,7 @@ if ($threadInfo['NoPoll'] == 0) {
 <?php
         } else {
             //Staff forum, output voters, not percentages
-            $names = array_map(function ($s) { return $s->username(); }, $userMan->staffList());
+            $names = array_map(fn($s) => $s->username(), $userMan->staffList());
             $staffCount = count($names);
             $votes = $forum->staffVote($threadId);
             $StaffVotes = [];

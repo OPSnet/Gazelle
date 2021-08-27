@@ -712,7 +712,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php
                 if ($ExtraIDs) {
                     $Value = implode(' ',
-                        array_map(function ($id) {return "torrents.php?torrentid=$id"; }, explode(' ', $ExtraIDs))
+                        array_map(fn($id) => "torrents.php?torrentid=$id", explode(' ', $ExtraIDs))
                     );
                 } elseif (isset($ReportType['extra_log'])) {
                     $Value = $ReportType['extra_log'];

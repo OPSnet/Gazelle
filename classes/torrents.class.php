@@ -851,9 +851,7 @@ class Torrents {
             ", $torrent['GroupID']
         );
         $groupId = $group['ID'];
-        $tagNames = implode(', ',
-            array_map(function ($x) { return '#' . htmlentities($x); },
-                explode('|', $group['tagNames'])));
+        $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode('|', $group['tagNames'])));
         $year = in_array('noyear', $attr) || in_array('title', $attr)
             ? '' : (' [' . $group['Year'] . ']');
         $releaseType = (in_array('noreleasetype', $attr) || in_array('title', $attr))

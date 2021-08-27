@@ -352,9 +352,7 @@ class Text {
                     return null;
                 }
                 $Group = Torrents::get_groups([$GroupID], true, true, false)[$GroupID];
-                $tagNames = implode(', ',
-                    array_map(function ($x) { return '#' . htmlentities($x); },
-                        explode(' ', $Group['TagList'])));
+                $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode(' ', $Group['TagList'])));
                 return Artists::display_artists($Group['ExtendedArtists'])
                     . sprintf('<a title="%s" href="%s?%s%s">%s</a>',
                         $tagNames, $info['path'], $info['query'], $fragment, $Group['Name']);
@@ -835,9 +833,7 @@ class Text {
                         $Groups = Torrents::get_groups([$GroupID], true, true, false);
                         if ($Groups[$GroupID]) {
                             $Group = $Groups[$GroupID];
-                            $tagNames = implode(', ',
-                                array_map(function ($x) { return '#' . htmlentities($x); },
-                                    explode(' ', $Group['TagList'])));
+                            $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode(' ', $Group['TagList'])));
                             if (strpos($Block['Attr'], 'noartist') === false) {
                                 $Str .= Artists::display_artists($Group['ExtendedArtists']);
                             }
@@ -948,7 +944,7 @@ class Text {
                     if (count($Attr) === 0) {
                         $Str .= self::to_html($Block['Val'], $Rules);
                     } else {
-                        $Padding = implode(' ', array_map(function ($x) { return $x . "px"; }, $Attr));
+                        $Padding = implode(' ', array_map(fn($x) => "{$x}px", $Attr));
                         $Str .= "<span style='display: inline-block; padding: {$Padding}'>" . self::to_html($Block['Val'], $Rules).'</span>';
                     }
                     break;
@@ -1238,9 +1234,7 @@ class Text {
                 $NewElement = $Document->createElement('pad');
                 $CopyNode($Element, $NewElement);
                 $Padding = explode(' ', trim(explode(':', (explode(';', $Element->getAttribute('style'))[1])[1])));
-                $NewElement->setAttribute('pad', implode('|', array_map(function($x) {
-                    return rtrim($x, 'px');
-                }, $Padding)));
+                $NewElement->setAttribute('pad', implode('|', array_map(fn($x) => rtrim($x, 'px'), $Padding)));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }

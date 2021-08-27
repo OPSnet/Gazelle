@@ -105,7 +105,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirstall',
             function ($text) {
-                return implode(' ', array_map(function ($w) {return ucfirst($w);}, explode(' ', $text)));
+                return implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)));
             }
         ));
 

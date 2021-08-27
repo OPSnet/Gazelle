@@ -35,7 +35,7 @@ if ($Charts == false) {
         foreach ($Stats as $Stat) {
             $Chart[$Stat] = array_map(function($a) use ($Stat) { return sprintf("[%d, %s]", strtotime($a['Time']) * 1000, $a[$Stat]); }, $Chart['Stats']);
         }
-        $Chart['Buffer'] = array_map(function($a) { return sprintf("[%d, %s]", strtotime($a['Time']) * 1000, $a['Uploaded'] - $a['Downloaded']); }, $Chart['Stats']);
+        $Chart['Buffer'] = array_map(fn($a) => sprintf("[%d, %s]", strtotime($a['Time']) * 1000, $a['Uploaded'] - $a['Downloaded']), $Chart['Stats']);
         unset($Chart['Stats']);
         unset($Chart);
     }

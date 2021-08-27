@@ -26,8 +26,7 @@ View::show_header('Registration log');
 echo $Twig->render('admin/registration.twig', [
     'after'  => $_REQUEST['after_date'] ?? null,
     'before' => $_REQUEST['before_date'] ?? null,
-    'list'   => array_map(function ($u) { return new Gazelle\User($u); },
-        $registration->page($paginator->limit(), $paginator->offset())),
+    'list'   => array_map(fn($u) => new Gazelle\User($u), $registration->page($paginator->limit(), $paginator->offset())),
     'paginator' => $paginator,
 ]);
 View::show_footer();

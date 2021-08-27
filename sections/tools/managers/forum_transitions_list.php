@@ -55,7 +55,7 @@ if (is_null($user)) {
 $userId = $user->id();
 
 $forumMan = new Gazelle\Manager\Forum;
-$forumList = array_map(function ($f) {return new Gazelle\Forum($f);}, $forumMan->forumList());
+$forumList = array_map(fn($f) => new Gazelle\Forum($f), $forumMan->forumList());
 $items = $forumMan->forumTransitionList($user);
 
 View::show_header('Forum Transitions');

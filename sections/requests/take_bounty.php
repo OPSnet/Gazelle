@@ -72,7 +72,7 @@ foreach ($remove as $userId) {
 if ($request || $remove) {
     $Cache->deleteMulti(array_merge(
         ["request_$requestId", "request_votes_$requestId"],
-        array_map(function ($x) {return "user_stats_$x";}, $refund)
+        array_map(fn($x) => "user_stats_$x", $refund)
     ));
     Requests::update_sphinx_requests($requestId);
 }

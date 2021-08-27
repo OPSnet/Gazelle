@@ -16,7 +16,7 @@ if (empty($_POST['query'])) {
 }
 
 function print_row($Row, $Class) {
-    echo "<tr class='{$Class}'>".implode("\n", array_map(function ($Value) { return "<td>".(($Value === null) ? "NULL" : $Value)."</td>"; }, $Row))."</tr>";
+    echo "<tr class='{$Class}'>".implode("\n", array_map(fn($v) => "<td>".($v === null ? "NULL" : $v)."</td>", $Row))."</tr>";
 }
 
 $Title = 'DB Sandbox';
