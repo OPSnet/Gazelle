@@ -288,9 +288,7 @@ class Debug {
     }
 
     public function get_includes() {
-        return array_map(function ($inc) { return str_replace(SERVER_ROOT . '/', '', $inc); },
-            get_included_files()
-        );
+        return array_map(fn($inc) => str_replace(SERVER_ROOT . '/', '', $inc), get_included_files());
     }
 
     public function get_logged_vars() {

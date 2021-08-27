@@ -479,7 +479,7 @@ class Bonus extends Base {
                 WHERE user_id in (" . placeholders($ids) . ")
                 ", $points, ...$ids
             );
-            $this->cache->deleteMulti(array_map(function ($k) { return "user_stats_$k"; }, $ids));
+            $this->cache->deleteMulti(array_map(fn($k) => "user_stats_$k", $ids));
         }
         return count($ids);
     }

@@ -555,6 +555,6 @@ class Tag extends \Gazelle\Base {
             $suggestions = $this->db->to_array(false, MYSQLI_NUM, false);
             $this->cache->cache_value($key, $suggestions, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
         }
-        return array_map(function ($v) { return ['value' => $v[0]]; }, $suggestions);
+        return array_map(fn($v) => ['value' => $v[0]], $suggestions);
     }
 }

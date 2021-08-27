@@ -87,10 +87,10 @@ Highcharts.chart('donation-timeline', {
         }],
     },
     xAxis: {
-        categories: [<?= implode(',', array_map(function ($x) { return "'" . $x['Month'] . "'"; }, $timeline)) ?>],
+        categories: [<?= implode(',', array_map(fn($x) => "'" . $x['Month'] . "'", $timeline)) ?>],
     },
     series: [
-        { name: 'Donated',  data: [<?= implode(',', array_map(function ($x) { return  $x['Amount']; }, $timeline)) ?>] }
+        { name: 'Donated',  data: [<?= implode(',', array_map(fn($x) =>  $x['Amount'], $timeline)) ?>] }
     ]
 
 })});
