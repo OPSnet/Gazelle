@@ -230,7 +230,7 @@ class View {
         echo $Twig->render('index/private-header.twig', [
             'auth_args'    => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
             'page_title'   => html_entity_decode($pageTitle),
-            'script'       => array_map(function ($s) { return "$s.js"; }, $Scripts),
+            'script'       => array_map(fn($s) => "$s.js", $Scripts),
             'style'        => $Style,
             'viewer'       => $Viewer,
         ]);

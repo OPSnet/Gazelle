@@ -53,7 +53,7 @@ abstract class BaseObject extends Base {
             return false;
         }
         $set = implode(', ', array_merge(
-            array_map(function ($f) { return "$f = ?"; }, array_keys($this->updateField)),
+            array_map(fn($f) => "$f = ?", array_keys($this->updateField)),
             array_keys($this->updateFieldPassThru),
             $this->updateFieldRaw
         ));
