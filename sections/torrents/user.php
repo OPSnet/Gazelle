@@ -292,7 +292,7 @@ $torrentCount = $DB->scalar("
     ", ...$args
 );
 
-$paginator = new Gazelle\Util\Paginator(10, (int)($_GET['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($torrentCount);
 array_push($args, $paginator->limit(), $paginator->offset());
 
