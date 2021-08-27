@@ -198,7 +198,7 @@ class Inbox extends Base {
             : '';
         $search = '';
         $searchWords = (!empty($this->searchTerm))
-            ? array_map(function($val) { return "%$val%"; }, explode(' ', $this->searchTerm))
+            ? array_map(fn($val) => "%$val%", explode(' ', $this->searchTerm))
             : [];
         if ($searching) {
             for ($i = 0, $wc = count($searchWords); $i < $wc; $i++) {

@@ -214,7 +214,7 @@ class User extends BaseObject {
                 $this->info['secondary_class'][$p['ID']] = $p['Name'];
                 $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
                 $secondaryClassLevel[$p['ID']] = $p['Level'];
-                $allowed = array_map(function ($id) {return (int)$id;}, explode(',', $p['PermittedForums']) ?: []);
+                $allowed = array_map('intval', explode(',', $p['PermittedForums']) ?: []);
                 foreach ($allowed as $forumId) {
                     if ($forumId) {
                         $forumAccess[$forumId] = true;
@@ -242,13 +242,13 @@ class User extends BaseObject {
             $this->info['Permission'][$name] = (bool)$value;
         }
 
-        $allowed = array_map(function ($id) {return (int)$id;}, explode(',', $this->info['PermittedForums']) ?: []);
+        $allowed = array_map('intval', explode(',', $this->info['PermittedForums']) ?: []);
         foreach ($allowed as $forumId) {
             if ($forumId) {
                 $forumAccess[$forumId] = true;
             }
         }
-        $forbidden = array_map(function ($id) {return (int)$id;}, explode(',', $this->info['RestrictedForums'])) ?: [];
+        $forbidden = array_map('intval', explode(',', $this->info['RestrictedForums'])) ?: [];
         foreach ($forbidden as $forumId) {
             // forbidden may override permitted
             if ($forumId) {
@@ -3136,7 +3136,7 @@ class User extends BaseObject {
                        (UserID, " . implode(', ', $insert) . ")
                 VALUES (?, " . placeholders($insert) . ")
                 ON DUPLICATE KEY UPDATE
-                " . implode(', ', array_map(function ($c) { return "$c = ?";}, $insert)),
+                " . implode(', ', array_map(fn($c) => "$c = ?", $insert)),
                 $UserID, ...array_merge($args, $args)
             );
         }

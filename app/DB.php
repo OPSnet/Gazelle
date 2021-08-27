@@ -57,8 +57,8 @@ class DB extends Base {
             $column[] = $t1[$i][0];
         }
         $columnList = implode(', ', $column);
-        $conditionList = implode(' AND ', array_map(function ($c) {return "{$c[0]} = ?";}, $condition));
-        $argList = array_map(function ($c) {return $c[1];}, $condition);
+        $conditionList = implode(' AND ', array_map(fn($c) => "{$c[0]} = ?", $condition));
+        $argList = array_map(fn($c) => $c[1], $condition);
 
         $sql = "INSERT INTO $softDeleteTable
                   ($columnList)

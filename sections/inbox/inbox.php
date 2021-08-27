@@ -108,7 +108,7 @@ View::show_header('Inbox');
             }
 ?>
                     </td>
-                    <td><?= Users::format_username($SenderID, true, true, true, true) ?></td>
+                    <td><?= Users::format_username((int)$SenderID, true, true, true, true) ?></td>
                     <td><?= time_diff($Date) ?></td>
 <?php            if (check_perms('users_mod')) { ?>
                     <td><?= (($ForwardedID && $ForwardedID != $Viewer->id()) ? Users::format_username($ForwardedID, false, false, false) : '') ?></td>

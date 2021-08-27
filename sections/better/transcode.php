@@ -163,7 +163,7 @@ if (in_array($_GET['filter'], ['all', 'uploaded'])) {
         $snatched = array_slice($snatched, TORRENTS_PER_PAGE);
 
         $sqlQL = transcode_init_sphql();
-        $sqlQL->where('groupid', array_map(function ($row) { return $row['GroupID']; }, $snatchedTmp));
+        $sqlQL->where('groupid', array_map(fn($row) => $row['GroupID'], $snatchedTmp));
 
         $sqlQLResult = $sqlQL->sphinxquery();
         $resultsTmp = $sqlQLResult->collect('groupid');
