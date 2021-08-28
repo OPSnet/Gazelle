@@ -62,7 +62,7 @@ $Aliases = [
 
 $Action = $_GET['action'] ?? '';
 if (isset($Aliases[$action])) {
-    $Action = $Aliases[$action];
+    $_GET['action'] = $Action = $Aliases[$action];
 }
 if (!$Action) {
     json_die("failure");

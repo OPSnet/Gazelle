@@ -218,13 +218,18 @@ $SphQL = new SphinxqlQuery();
 $SphQL->raw_query("UPDATE requests, requests_delta SET torrentid = $TorrentID, fillerid = $FillerID WHERE id = $RequestID", false);
 
 if (defined('AJAX')) {
-    return [
+    $data = [
         'requestId' => $RequestID,
         'torrentId' => $TorrentID,
         'fillerId' => $FillerID,
         'fillerName' => $FillerUsername,
         'bounty' => $RequestVotes['TotalBounty'],
     ];
+    if ($_GET['action'] === 'request_fill') {
+        json_print('success', $data);
+    } else {
+        return $data;
+    }
 } else {
     header("Location: requests.php?action=view&id=$RequestID");
 }
