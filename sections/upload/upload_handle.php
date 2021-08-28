@@ -133,16 +133,16 @@ switch ($Type) {
         $Validate->setFields([
             ['groupid', '0', 'number', 'Group ID was not numeric'],
             ['media', '1','inarray','Please select a valid media.', ['inarray'=>MEDIA]],
-            ['remaster_title', '0','string','Remaster title must be between 2 and 80 characters.', ['range' => [2, 80]]],
-            ['remaster_record_label', '0','string','Remaster record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
-            ['remaster_catalogue_number', '0','string','Remaster catalogue number must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ['remaster_title', '0','string','Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['remaster_record_label', '0','string','Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['remaster_catalogue_number', '0','string','Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
         ]);
         if (!$Properties['GroupID']) {
             $Validate->setFields([
                 ['year', '1','number','The year of the original release must be entered.', ['length'=>40]],
                 ['releasetype', '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($releaseTypes)]],
-                ['record_label', '0','string','Record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
-                ['catalogue_number', '0','string','Catalogue Number must be between 2 and 80 characters.', ['range' => [2, 80]]],
+                ['record_label', '0','string','Record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
+                ['catalogue_number', '0','string','Catalogue Number must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ]);
             if ($Properties['Media'] == 'CD' && !$Properties['Remastered']) {
                 $Validate->setField('year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength'=>1982]);
