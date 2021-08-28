@@ -533,7 +533,7 @@ foreach (CATEGORY as $catKey => $catName) {
                     ]) ?>
                     <?= $displayName ?>
 <?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-                <?= $vote->setGroupId($groupID)->setTwig($Twig)->links($Viewer->auth()) ?>
+                <?= $vote->setGroupId($groupID)->links($Viewer->auth()) ?>
 <?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userId.'&amp;tags=')?></div>
                 </div>

@@ -27,16 +27,16 @@ View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscr
     <div class="header">
         <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
         <div class="linkbox">
-<?php if (check_perms('torrents_edit')) { ?>
+<?php if ($Viewer->permitted('torrents_edit')) { ?>
             <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
 <?php } ?>
             <a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
-<?php if (check_perms('site_submit_requests')) { ?>
+<?php if ($Viewer->permitted('site_submit_requests')) { ?>
             <a href="requests.php?action=new&amp;artistid=<?=$ArtistID?>" class="brackets">Add request</a>
 <?php
 }
 
-if (check_perms('site_torrents_notify')) {
+if ($Viewer->permitted('site_torrents_notify')) {
     $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $authKey);
     if ($Viewer->hasArtistNotification($name)) {
 ?>
@@ -55,7 +55,7 @@ if ($bookmark->isArtistBookmarked($Viewer->id(), $ArtistID)) { ?>
             <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?=
                 $ArtistID ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 
-<?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
+<?php if ($RevisionID && $Viewer->permitted('site_edit_wiki')) { ?>
             <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#info" class="brackets">Info</a>
@@ -64,7 +64,7 @@ if ($bookmark->isArtistBookmarked($Viewer->id(), $ArtistID)) { ?>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#artistcomments" class="brackets">Comments</a>
             <a href="artist.php?action=history&amp;artistid=<?= $ArtistID ?>" class="brackets">View history</a>
-<?php if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
+<?php if ($Viewer->permitted('site_delete_artist') && $Viewer->permitted('torrents_delete')) { ?>
             &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid=<?=$ArtistID?>&amp;auth=<?= $authKey ?>" class="brackets">Delete</a>
 <?php } ?>
         </div>
@@ -160,14 +160,14 @@ Tags::reset();
 
 <?php
 echo $Twig->render('artist/similar.twig', [
-    'admin'        => check_perms('site_delete_tag'),
+    'admin'        => $Viewer->permitted('site_delete_tag'),
     'artist_id'    => $ArtistID,
     'auth'         => $authKey,
     'autocomplete' => $Viewer->hasAutocomplete('other'),
     'similar'      => $Artist->similarArtists(),
 ]);
 
-if (check_perms('zip_downloader')) {
+if ($Viewer->permitted('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
         [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
         $ZIPList = explode(':', $ZIPList);
@@ -224,7 +224,7 @@ foreach (ZIP_OPTION as $Option) {
             </div>
         </div>
 <?php
-} /* if (check_perms('zip_downloader')) */ ?>
+} /* if ($Viewer->permitted('zip_downloader')) */ ?>
 
     </div>
     <div class="main_column">
@@ -364,7 +364,7 @@ if ($sections = $Artist->sections()) {
         }
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                            <?= (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID)->setTwig($Twig)->links($authKey) ?>
+                            <?= (new Gazelle\Vote($Viewer->id()))->setGroupId($GroupID)->links($authKey) ?>
 <?php   } ?>
                             <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>
@@ -528,7 +528,7 @@ if ($Requests) {
             </td>
             <td class="nobr">
                 <span id="vote_count_<?=$RequestID?>"><?=$Request['Votes']?></span>
-<?php       if (check_perms('site_vote')) { ?>
+<?php       if ($Viewer->permitted('site_vote')) { ?>
                 <input type="hidden" id="auth" name="auth" value="<?=$authKey?>" />
                 &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
 <?php       } ?>

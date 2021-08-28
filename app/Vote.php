@@ -13,7 +13,6 @@ class Vote extends Base {
     protected const VOTED_USER    = 'user_voted_%d';
     protected const VOTED_GROUP   = 'group_voted_%d';
 
-    protected $twig;
     protected $groupId;
     protected $groupVote;
     protected $userId;
@@ -46,12 +45,8 @@ class Vote extends Base {
     }
 
     public function setGroupId(int $groupId) {
+        $this->groupVote = null;
         $this->groupId = $groupId;
-        return $this;
-    }
-
-    public function setTwig(\Twig\Environment $twig) {
-        $this->twig = $twig;
         return $this;
     }
 
@@ -266,14 +261,12 @@ class Vote extends Base {
     }
 
     public function links(string $auth): string {
-        return $this->twig
-            ? $this->twig->render('vote/links.twig', [
-                'auth'     => $auth,
-                'group_id' => $this->groupId,
-                'score'    => $this->score($this->total(), $this->totalUp()),
-                'vote'     => $this->userVote[$this->groupId] ?? 0,
-            ])
-            : 'twig handler not set';
+        return $this->twig->render('vote/links.twig', [
+            'auth'     => $auth,
+            'group_id' => $this->groupId,
+            'score'    => $this->score($this->total(), $this->totalUp()),
+            'vote'     => $this->userVote[$this->groupId] ?? 0,
+        ]);
     }
 
     public function total(): int {
