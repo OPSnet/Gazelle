@@ -116,7 +116,7 @@ json_print('success', [
     'bbDescription'   => $Request['Description'],
     'description'     => Text::full_format($Request['Description']),
     'musicInfo'       => $CategoryName != "Music"
-        ? new stdClass : Requests::get_artist_by_type($requestId),
+        ? null : Requests::get_artist_by_type($requestId),
     'catalogueNumber' => $Request['CatalogueNumber'],
     'releaseType'     => $Request['ReleaseType'],
     'releaseTypeName' => $ReleaseName,
