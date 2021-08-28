@@ -122,9 +122,9 @@ switch ($Type) {
             ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
             ['media', '1', 'inarray', 'Not a valid media.', ['inarray' => MEDIA]],
             ['release_desc', '0', 'string', 'Invalid release description.', ['range' => [0, 1000000]]],
-            ['remaster_title', '0', 'string', 'Remaster title must be between 2 and 80 characters.', ['range' => [2, 80]]],
-            ['remaster_record_label', '0', 'string', 'Remaster record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
-            ['remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ['remaster_title', '0', 'string', 'Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['remaster_record_label', '0', 'string', 'Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
         ]);
 
         if (!empty($Properties['Remastered']) && !$Properties['UnknownRelease']) {
