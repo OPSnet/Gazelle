@@ -50,7 +50,7 @@ $JsonTorrentDetails = [
     'vanityHouse'     => ($TorrentDetails['VanityHouse'] == 1),
     'isBookmarked'    => (new \Gazelle\Bookmark)->isTorrentBookmarked($Viewer->id(), $GroupID),
     'musicInfo'       => ($CategoryName != "Music")
-        ? []
+        ? null
         : Artists::get_artist_by_type($GroupID),
     'tags'            => explode('|', $TorrentDetails['tagNames']),
 ];
