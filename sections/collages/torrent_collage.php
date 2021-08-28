@@ -9,11 +9,11 @@ View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
 <?= $Twig->render('collage/header.twig', [
     'auth'        => $Viewer->auth(),
     'bookmarked'  => $bookmark->isCollageBookmarked($Viewer->id(), $CollageID),
-    'can_create'  => check_perms('site_collages_create'),
-    'can_delete'  => check_perms('site_collages_delete') || $Collage->isOwner($Viewer->id()),
-    'can_edit'    => check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$Collage->isLocked()),
-    'can_manage'  => check_perms('site_collages_manage') && !$Collage->isLocked(),
-    'can_sub'     => check_perms('site_collages_subscribe'),
+    'can_create'  => $Viewer->permitted('site_collages_create'),
+    'can_delete'  => $Viewer->permitted('site_collages_delete') || $Collage->isOwner($Viewer->id()),
+    'can_edit'    => $Viewer->permitted('site_collages_delete') || ($Viewer->permitted('site_edit_wiki') && !$Collage->isLocked()),
+    'can_manage'  => $Viewer->permitted('site_collages_manage') && !$Collage->isLocked(),
+    'can_sub'     => $Viewer->permitted('site_collages_subscribe'),
     'id'          => $CollageID,
     'name'        => $Collage->name(),
     'object'      => 'torrent',
@@ -27,7 +27,7 @@ View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
     'auth'           => $Viewer->auth(),
     'can_add'        => !$Collage->isLocked()
         && (
-            ($Collage->categoryId() != 0 && check_perms('site_collages_manage'))
+            ($Collage->categoryId() != 0 && $Viewer->permitted('site_collages_manage'))
             ||
             ($Collage->categoryId() == 0 && $Collage->isOwner($Viewer->id()))
         ),
@@ -50,7 +50,7 @@ View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
     'user_id'        => $Collage->ownerId(),
 ]);
 
-if (check_perms('zip_downloader')) {
+if ($Viewer->permitted('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
         [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
         if (is_null($ZIPList)) {
@@ -251,7 +251,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         }
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                    <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($Viewer->auth()) ?>
+                    <?= $vote->etGroupId($GroupID)->links($Viewer->auth()) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
@@ -349,7 +349,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 ]) ?>
                 <strong><?= $DisplayName ?></strong>
 <?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-                <?= $vote->setGroupId($GroupID)->setTwig($Twig)->links($Viewer->auth()) ?>
+                <?= $vote->setGroupId($GroupID)->links($Viewer->auth()) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
