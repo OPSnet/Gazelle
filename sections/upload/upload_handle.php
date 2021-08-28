@@ -823,7 +823,7 @@ if (defined('AJAX')) {
     if ($RequestID) {
         define('NO_AJAX_ERROR', true);
         $FillResponse = require_once(__DIR__ . '/../requests/take_fill.php');
-        if (!isset($FillResponse['requestid'])) {
+        if (!isset($FillResponse['requestId'])) {
             $FillResponse = [
                 'status' => 400,
                 'error' => $FillResponse,
