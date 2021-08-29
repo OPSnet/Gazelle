@@ -4,7 +4,7 @@
 // This page relies on the TORRENT_FORM class. All it does is call      //
 // the necessary functions.                                             //
 //----------------------------------------------------------------------//
-// $Properties, $Err and $UploadForm are set in upload_handle.php, and  //
+// $Properties, $Err and $uploadCategory are set in upload_handle.php, and  //
 // are only used when the form doesn't validate and this page must be   //
 // called again.                                                        //
 //**********************************************************************//
@@ -36,7 +36,7 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
     );
     if ($DB->has_results()) {
         $Properties = $DB->next_record();
-        $UploadForm = CATEGORY[$Properties['CategoryID'] - 1];
+        $uploadCategory = CATEGORY[$Properties['CategoryID'] - 1];
         $Properties['CategoryName'] = CATEGORY[$Properties['CategoryID'] - 1];
         $Properties['Artists'] = Artists::get_artist($_GET['groupid']);
     } else {
@@ -61,7 +61,7 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
         ", (int)$_GET['requestid']
     );
     $Properties = $DB->next_record();
-    $UploadForm = CATEGORY[$Properties['CategoryID'] - 1];
+    $uploadCategory = CATEGORY[$Properties['CategoryID'] - 1];
     $Properties['CategoryName'] = CATEGORY[$Properties['CategoryID'] - 1];
     $Properties['Artists'] = Requests::get_artists($_GET['requestid']);
     $Properties['TagList'] = implode(', ', Requests::get_tags($_GET['requestid'])[$_GET['requestid']]);
@@ -94,9 +94,9 @@ $NewDNU = $DB->scalar("
     WHERE UserID = ?
     ", $Updated, $Viewer->id()
 );
-$HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
+$HideDNU = $Viewer->permitted('torrents_hide_dnu') && !$NewDNU;
 ?>
-<div class="<?=(check_perms('torrents_hide_dnu') ? 'box pad' : '')?>" style="margin: 0px auto; width: 700px;">
+<div class="<?= $Viewer->permitted('torrents_hide_dnu') ? 'box pad' : '' ?>" style="margin: 0px auto; width: 700px;">
     <h3 id="dnu_header">Do Not Upload List</h3>
     <p><?=$NewDNU ? '<strong class="important_text">' : '' ?>Last updated: <?=time_diff($Updated)?><?=$NewDNU ? '</strong>' : '' ?></p>
     <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the comment.
@@ -128,26 +128,26 @@ $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
 </div><?=($HideDNU ? '<br />' : '')?>
 <?php
 $GenreTags = (new Gazelle\Manager\Tag)->genreList();
-$TorrentForm = new TORRENT_FORM($Properties, $Err);
-$TorrentForm->head();
-switch ($UploadForm) {
+$uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err);
+$uploadForm->head();
+switch ($uploadCategory) {
     case 'Music':
-        $TorrentForm->music_form($GenreTags);
+        $uploadForm->music_form($GenreTags);
         break;
 
     case 'Audiobooks':
     case 'Comedy':
-        $TorrentForm->audiobook_form();
+        $uploadForm->audiobook_form();
         break;
 
     case 'Applications':
     case 'Comics':
     case 'E-Books':
     case 'E-Learning Videos':
-        $TorrentForm->simple_form($Properties['CategoryID']);
+        $uploadForm->simple_form($Properties['CategoryID']);
         break;
     default:
-        $TorrentForm->music_form($GenreTags);
+        $uploadForm->music_form($GenreTags);
 }
-$TorrentForm->foot();
+$uploadForm->foot();
 View::show_footer();
