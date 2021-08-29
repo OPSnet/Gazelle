@@ -6,5 +6,5 @@ if (is_null($tgroup)) {
 }
 
 json_print("success", [
-    'wikiImage' => $tgroup->info()['WikiImage'],
+    'wikiImage' => $tgroup->image(),
 ]);
