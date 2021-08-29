@@ -12,10 +12,13 @@
  **                                                                            **
  ********************************************************************************/
 
-use Gazelle\Util\Textarea;
-use OrpheusNET\Logchecker\Logchecker;
+namespace Gazelle\Util;
 
-class TORRENT_FORM {
+use \OrpheusNET\Logchecker\Logchecker;
+
+class uploadForm extends \Gazelle\Base {
+    var $user;
+
     var $UploadForm = '';
     var $NewTorrent = false;
     var $Torrent = [];
@@ -27,8 +30,10 @@ class TORRENT_FORM {
     const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
     const JSON_INPUT_ACCEPT = ['application/json', '.json'];
 
-    function __construct($Torrent = false, $Error = false, $NewTorrent = true) {
+    function __construct(\Gazelle\User $user, $Torrent = false, $Error = false, $NewTorrent = true) {
+        parent::__construct();
 
+        $this->user = $user;
         $this->NewTorrent = $NewTorrent;
         $this->Torrent = $Torrent;
         $this->Error = $Error;
@@ -52,23 +57,22 @@ class TORRENT_FORM {
     function albumReleaseJS() {
         $groupDesc = new Textarea('album_desc', '');
         $relDesc   = new Textarea('release_desc', '');
-        return Gazelle\Util\Textarea::factory();
+        return Textarea::factory();
     }
 
     function descriptionJS() {
         $groupDesc = new Textarea('desc', '');
-        return Gazelle\Util\Textarea::factory();
+        return Textarea::factory();
     }
 
     function head() {
-        global $LoggedUser;
 ?>
 
 <div class="thin">
 <?php   if ($this->NewTorrent) { ?>
     <div style="text-align: center;">
         Your personal announce URL is:<br />
-        <div style="margin: 0 auto;"><input type="text" value="<?= (new \Gazelle\User($LoggedUser['ID']))->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
+        <div style="margin: 0 auto;"><input type="text" value="<?= $this->user->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
     </div>
 <?php
         }
@@ -80,7 +84,7 @@ class TORRENT_FORM {
         <div>
             <input type="hidden" id="torrent-new" name="torrent-new" value="<?= $this->NewTorrent ? 1 : 0 ?>" />
             <input type="hidden" name="submit" value="true" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $this->user->auth() ?>" />
 <?php       if (!$this->NewTorrent) { ?>
                 <input type="hidden" name="action" value="takeedit" />
                 <input type="hidden" name="torrentid" value="<?=display_str($this->TorrentID)?>" />
@@ -139,7 +143,7 @@ class TORRENT_FORM {
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php
         if (!$this->NewTorrent) {
-            if (check_perms('torrents_freeleech')) {
+            if ($this->user->permitted('torrents_freeleech')) {
                 $leech = ["Normal", "Free", "Neutral"];
                 $reason = ["N/A", "Staff Pick", "Perma-FL", "Vanity House"];
 ?>
@@ -182,16 +186,14 @@ class TORRENT_FORM {
     } //function foot
 
     function music_form($GenreTags) {
-        global $DB, $LoggedUser;
-        $QueryID = $DB->get_query_id();
+        $QueryID = $this->db->get_query_id();
         $Torrent = $this->Torrent;
         $IsRemaster = !empty($Torrent['Remastered']);
         $UnknownRelease = !$this->NewTorrent && $IsRemaster && !$Torrent['RemasterYear'];
 
         if ($Torrent['GroupID']) {
-            $DB->prepared_query("
-                SELECT
-                    ID,
+            $this->db->prepared_query("
+                SELECT ID,
                     RemasterYear,
                     RemasterTitle,
                     RemasterRecordLabel,
@@ -206,8 +208,8 @@ class TORRENT_FORM {
                     RemasterCatalogueNumber DESC
                 ", $Torrent['GroupID']
             );
-            if ($DB->has_results()) {
-                $GroupRemasters = $DB->to_array(false, MYSQLI_BOTH, false);
+            if ($this->db->has_results()) {
+                $GroupRemasters = $this->db->to_array(false, MYSQLI_BOTH, false);
             }
         }
 
@@ -221,7 +223,6 @@ class TORRENT_FORM {
         $LossymasterApproved = $Torrent['LossymasterApproved'];
         $LossywebApproved = $Torrent['LossywebApproved'];
         $releaseTypes = (new \Gazelle\ReleaseType)->list();
-        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <div id="musicbrainz_popup" style="display: none;">
             <a href="#null" id="popup_close">x</a>
@@ -235,7 +236,7 @@ class TORRENT_FORM {
         <table cellpadding="3" cellspacing="1" border="0" class="layout border<?php if ($this->NewTorrent) { echo ' slice'; } ?>" width="100%">
 <?php   if (!$this->NewTorrent) { ?>
             <tr><td colspan="2"><h3>Edit <?=
-                Artists::display_artists(Artists::get_artist($Torrent['GroupID']))
+                \Artists::display_artists(\Artists::get_artist($Torrent['GroupID']))
                 . '<a href="/torrents.php?id=' . $Torrent['GroupID'] . '">' . display_str($Torrent['Title']) . "</a>"
             ?></h3></td></tr>
 <?php   } else { ?>
@@ -277,7 +278,7 @@ class TORRENT_FORM {
                     foreach ($Artists as $Artist) {
 ?>
                     <input type="text" id="artist_<?= $n++ ?>" name="artists[]" size="45" value="<?= display_str($Artist['name']) ?>" onblur="CheckVA();"<?=
-                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
+                        $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
                     <select id="importance" name="importance[]"<?=$this->Disabled?>>
                         <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
                         <option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -305,7 +306,7 @@ class TORRENT_FORM {
             } else {
 ?>
                     <input type="text" id="artist_0" name="artists[]" size="45" onblur="CheckVA();"<?=
-                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
+                        $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
                     <select id="importance_0" name="importance[]"<?=$this->Disabled?>>
                         <option value="1">Main</option>
                         <option value="2">Guest</option>
@@ -364,7 +365,7 @@ class TORRENT_FORM {
                     <input type="checkbox" id="remaster" name="remaster"<?php if ($IsRemaster) { echo ' checked="checked"'; } ?> onclick="Remaster();<?php if ($this->NewTorrent) { ?> CheckYear();<?php } ?>" />
                     <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
                     <div id="remaster_true"<?php if (!$IsRemaster) { echo ' class="hidden"';} ?>>
-<?php    if (check_perms('edit_unknowns') || $LoggedUser['ID'] == $Torrent['UserID']) { ?>
+<?php    if ($this->user->permitted('edit_unknowns') || $this->user->id() == $Torrent['UserID']) { ?>
                         <br />
                         <input type="checkbox" id="unknown" name="unknown"<?php if ($UnknownRelease) { echo ' checked="checked"'; } ?> onclick="<?php if ($this->NewTorrent) { ?>CheckYear(); <?php } ?>ToggleUnknown();" /> <label for="unknown">Unknown Release</label>
 <?php    } ?>
@@ -430,7 +431,7 @@ class TORRENT_FORM {
                     <label for="scene">Select this only if this is a "scene release".<br />If you ripped it yourself, it is <strong>not</strong> a scene release. If you are not sure, <strong class="important_text">do not</strong> select it; you will be penalized. For information on the scene, visit <a href="https://en.wikipedia.org/wiki/Warez_scene" target="_blank">Wikipedia</a>.</label>
                 </td>
             </tr>
-<?php   if (check_perms('torrents_edit_vanityhouse') && $this->NewTorrent) { ?>
+<?php   if ($this->user->permitted('torrents_edit_vanityhouse') && $this->NewTorrent) { ?>
             <tr>
                 <td class="label">Vanity House:</td>
                 <td>
@@ -523,7 +524,7 @@ class TORRENT_FORM {
             <tr id="extra_format_placeholder"></tr>
 <?php
         }
-        if (!$this->NewTorrent && check_perms('users_mod')) {
+        if (!$this->NewTorrent && $this->user->permitted('users_mod')) {
 ?>
             <tr>
                 <td class="label">Log/cue:</td>
@@ -563,7 +564,6 @@ class TORRENT_FORM {
 <?php
         }
         if ($this->NewTorrent) {
-            global $Twig;
 ?>
             <tr>
                 <td class="label">Tags:</td>
@@ -577,8 +577,8 @@ class TORRENT_FORM {
                     </select>
 <?php       } ?>
                     <input type="text" id="tags" name="tags" size="40" value="<?= display_str($Torrent['TagList']) ?>"<?=
-                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
-                    <br /><?= $Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
+                        $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
+                    <br /><?= $this->twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>
@@ -604,13 +604,11 @@ class TORRENT_FORM {
             </tr>
         </table>
 <?php
-        $DB->set_query_id($QueryID);
+        $this->db->set_query_id($QueryID);
     }
 
     function audiobook_form() {
         $Torrent = $this->Torrent;
-        global $LoggedUser, $Twig;
-        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <table id="form-audiobook" cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
@@ -673,8 +671,8 @@ class TORRENT_FORM {
                 <td class="label">Tags:</td>
                 <td>
                     <input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
-                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
-                    <br /><?= $Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
+                        $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
+                    <br /><?= $this->twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>
@@ -704,8 +702,6 @@ class TORRENT_FORM {
 
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
-        global $LoggedUser;
-        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
@@ -722,7 +718,7 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Tags:</td>
                 <td><input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
-                    $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /></td>
+                    $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /></td>
             </tr>
             <tr>
                 <td class="label">Image (optional):</td>
