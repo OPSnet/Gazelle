@@ -443,8 +443,8 @@ class TGroup extends BaseObject {
                 continue;
             }
             [$artistId, $aliasId] = $artistMan->fetchArtistIdAndAliasId($name);
-            if ($artistId && !isset($seen["$artistId:$aliasId"])) {
-                $seen["$artistId:$aliasId"] = true;
+            if ($artistId && !isset($seen["$role:$artistId"])) {
+                $seen["$role:$artistId"] = true;
                 array_push($args, $this->id, $userId, $artistId, $aliasId, $role, (string)$role);
                 $add[] = "$artistId ($name) as " . ARTIST_TYPE[$role];
             }
