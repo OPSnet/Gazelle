@@ -27,7 +27,7 @@ foreach ($list as $result) {
         'groupId'          => (int)$tgroup['ID'],
         'groupName'        => $tgroup['Name'],
         'groupCategoryId'  => (int)$tgroup['CategoryID'],
-        'wikiImage'        => $tgroup['WikiImage'],
+        'wikiImage'        => $tgroup['Image'],
         'torrentTags'      => $tgroup['TagList'],
         'size'             => (float)$info['Size'],
         'fileCount'        => (int)$info['FileCount'],
