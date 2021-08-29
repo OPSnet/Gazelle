@@ -251,7 +251,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         }
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                    <?= $vote->etGroupId($GroupID)->links($Viewer->auth()) ?>
+                    <?= $vote->setGroupId($GroupID)->links($Viewer->auth()) ?>
 <?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
