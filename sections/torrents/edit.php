@@ -8,8 +8,6 @@
 // most members.                                                        //
 //**********************************************************************//
 
-require(__DIR__ . '/../../classes/torrent_form.class.php');
-
 $TorrentID = (int)$_GET['id'];
 if ($TorrentID < 1) {
     error(0);
@@ -67,21 +65,19 @@ if (!$Properties) {
     error(404);
 }
 
-$UploadForm = CATEGORY[$Properties['CategoryID'] - 1];
-
 if (($Viewer->id() != $Properties['UserID'] && !$Viewer->permitted('torrents_edit')) || $Viewer->disableWiki()) {
     error(403);
 }
 
 View::show_header('Edit torrent', ['js' => 'upload,torrent']);
 
-if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['CategoryID'] == 1)) {
+if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $Properties['CategoryID'] == 1)) {
     if ($Properties['CategoryID'] == 1) {
 ?>
 <div class="linkbox">
     <a class="brackets" href="#group-change">Change Group</a>
     <a class="brackets" href="#group-split">Split Off into New Group</a>
-<?php   if (check_perms('users_mod')) { ?>
+<?php   if ($Viewer->permitted('users_mod')) { ?>
     <a class="brackets" href="#category-change">Change Category</a>
 <?php   } ?>
 </div>
@@ -89,36 +85,35 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
     }
 }
 
-if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || check_perms('edit_unknowns')) {
+if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || $Viewer->permitted('edit_unknowns')) {
     if (!isset($Err)) {
         $Err = false;
     }
-    $TorrentForm = new TORRENT_FORM($Properties, $Err, false);
-
-    $TorrentForm->head();
-    switch ($UploadForm) {
+    $uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err, false);
+    $uploadForm->head();
+    switch (CATEGORY[$Properties['CategoryID'] - 1]) {
         case 'Music':
-            $TorrentForm->music_form('');
+            $uploadForm->music_form('');
             break;
 
         case 'Audiobooks':
         case 'Comedy':
-            $TorrentForm->audiobook_form();
+            $uploadForm->audiobook_form();
             break;
 
         case 'Applications':
         case 'Comics':
         case 'E-Books':
         case 'E-Learning Videos':
-            $TorrentForm->simple_form($Properties['CategoryID']);
+            $uploadForm->simple_form($Properties['CategoryID']);
             break;
 
         default:
-            $TorrentForm->music_form('');
+            $uploadForm->music_form('');
     }
-    $TorrentForm->foot();
+    $uploadForm->foot();
 }
-if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['CategoryID'] == 1)) {
+if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $Properties['CategoryID'] == 1)) {
 ?>
 <div class="thin">
 <?php if ($Properties['CategoryID'] == 1) { ?>
@@ -240,6 +235,6 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
 <?php } ?>
 </div>
 <?php
-} // if check_perms('torrents_edit')
+} // if $Viewer->permitted('torrents_edit')
 
 View::show_footer();
