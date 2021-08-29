@@ -6,8 +6,6 @@ Should the advanced search really only show if they match 3 perms?
 Make sure all constants are defined in config.php and not in random files
 *****************************************************************/
 
-enforce_login();
-
 switch ($_REQUEST['action'] ?? '') {
     case 'notify':
         require_once('notify_edit.php');
@@ -24,7 +22,7 @@ switch ($_REQUEST['action'] ?? '') {
         header('Location: user.php?action=notify');
         break;
     case 'search':// User search
-        if (check_perms('admin_advanced_user_search') && check_perms('users_view_ips') && check_perms('users_view_email')) {
+        if ($Viewer->permitted('admin_advanced_user_search') && $Viewer->permitted('users_view_ips') && $Viewer->permitted('users_view_email')) {
             require_once('advancedsearch.php');
         }
         else {
@@ -85,7 +83,7 @@ switch ($_REQUEST['action'] ?? '') {
         require_once(__DIR__ . '/token.php');
         break;
     case 'clearcache':
-        if (!check_perms('admin_clear_cache') || !check_perms('users_override_paranoia')) {
+        if (!$Viewer->permitted('admin_clear_cache') || !$Viewer->permitted('users_override_paranoia')) {
             error(403);
         }
         $UserID = $_REQUEST['id'];

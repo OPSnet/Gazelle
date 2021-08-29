@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 if (!isset($_REQUEST['action'])) {
     require_once(isset($_GET['view']) ? 'static.php' : 'views.php');
 } else {

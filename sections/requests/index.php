@@ -1,7 +1,6 @@
 <?php
-enforce_login();
 
-if (!empty($LoggedUser['DisableRequests'])) {
+if ($Viewer->disableRequests()) {
     error('Your request privileges have been removed.');
 }
 

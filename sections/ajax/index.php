@@ -1,14 +1,4 @@
 <?php
-/*
-AJAX Switch Center
-
-This page acts as an AJAX "switch" - it's called by scripts, and it includes the required pages.
-
-The required page is determined by $_GET['action'].
-
-*/
-
-enforce_login();
 
 define('AJAX', true);
 

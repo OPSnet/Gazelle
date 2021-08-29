@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
     $file = $_FILES['log'];
     $isPaste = false;

@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 if (!array_key_exists('type', $_GET) && !array_key_exists('id', $_GET)) {
     error(404);

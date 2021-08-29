@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 function class_list($Selected = 0) {
     global $Viewer;

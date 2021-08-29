@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 switch ($_REQUEST['action'] ?? '') {
     case 'add':
         require_once('add.php');

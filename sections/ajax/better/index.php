@@ -1,6 +1,5 @@
 <?php
 
-enforce_login();
 switch ($_GET['method'] ?? '') {
     case 'transcode':
         require_once('transcode.php');

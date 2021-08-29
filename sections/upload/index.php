@@ -1,9 +1,9 @@
 <?php
-enforce_login();
-if (!check_perms('site_upload')) {
+
+if (!$Viewer->permitted('site_upload')) {
     error("Your userclass does not allow you to upload.");
 }
-if ($LoggedUser['DisableUpload']) {
+if ($Viewer->disableUpload()) {
     error('Your upload privileges have been revoked.');
 }
 

@@ -26,16 +26,10 @@ if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
-        && proxyCheck($_SERVER['REMOTE_ADDR'])
-        && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'],
-                FILTER_VALIDATE_IP,
-                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+    && proxyCheck($_SERVER['REMOTE_ADDR'])
+    && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)
+) {
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
-}
-else if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
-        && filter_var($_SERVER['HTTP_CF_CONNECTING_IP'], FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
 }
 
 ob_start(); //Start a buffer, mainly in case there is a mysql error
@@ -64,20 +58,28 @@ function log_token_attempt(DB_MYSQL $db, int $userId): void {
     }
 }
 
-//-- Load user information
-// User info is broken up into many sections
-// Heavy - Things that the site never has to look at if the user isn't logged in (as opposed to things like the class, donor status, etc)
-// Light - Things that appear in format_user
-// Stats - Uploaded and downloaded - can be updated by a script if you want super speed
-// Session data - Information about the specific session
-// Enabled - if the user's enabled or not
-// Permissions
+/**
+ * Make sure $_GET['auth'] is the same as the user's authorization key
+ * Should be used for any user action that relies solely on GET.
+ *
+ * @param bool Are we using ajax?
+ * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
+ */
+function authorize($Ajax = false): bool {
+    global $Viewer;
+    if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
+        return true;
+    }
+    Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $Viewer->username() . " just failed authorize on "
+        . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+    error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
+    return false;
+}
 
 // Set the document we are loading
 $Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
 $userMan = new Gazelle\Manager\User;
 $ipv4Man = new Gazelle\Manager\IPv4;
-$LoggedUser = [];
 $SessionID = false;
 $FullToken = null;
 $Viewer = null;
@@ -103,10 +105,9 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         json_die('failure', 'invalid authorization type, must be "token"');
     }
 
-    $userId = (int)substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32);
-    $Viewer = $userMan->findById($userId);
-    if (is_null($Viewer) || !$Viewer->hasApiToken($FullToken)) {
-        log_token_attempt($DB, $userId);
+    $Viewer = $userMan->findById((int)substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32));
+    if (is_null($Viewer) || !$Viewer->hasApiToken($FullToken) || $Viewer->isDisabled() || $Viewer->isLocked()) {
+        log_token_attempt($DB, $Viewer ? $Viewer->id() : 0);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
@@ -126,6 +127,11 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
             header('Location: login.php');
             exit;
         }
+        if ($Viewer->isDisabled() && !in_array($Document, ['index', 'login'])) {
+            $Viewer->logoutEverywhere();
+            header('Location: login.php');
+            exit;
+        }
         $session = new Gazelle\Session($Viewer->id());
         if (!$session->valid($SessionID)) {
             $Viewer->logout($SessionID);
@@ -134,172 +140,106 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         }
         $session->refresh($SessionID);
     }
+} elseif ($Document === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
+    $Viewer = $userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
+    if (is_null($Viewer) || !$Viewer->isEnabled() || $Viewer->isLocked()) {
+        header('HTTP/1.1 403 Forbidden');
+        exit;
+    }
+} elseif (!in_array($Document, ['index', 'login'])) {
+    header('Location: login.php');
+    exit;
 }
-if ($Viewer) {
+
+if (!is_null($Viewer)) {
     $viewerId = $Viewer->id();
-    if ($Viewer->isDisabled()) {
-        if (isset($SessionID)) {
-            $Viewer->logout($SessionID);
-            header('Location: login.php');
-            exit;
-        } else {
-            log_token_attempt($DB, $viewerId);
-            header('Content-type: application/json');
-            json_die('failure', 'invalid token');
-        }
-    }
-
-    $LightInfo = Users::user_info($viewerId);
-    if (empty($LightInfo['Username'])) { // Ghost
-        if (isset($FullToken)) {
-            $Viewer->flush();
-            log_token_attempt($DB, $viewerId);
-            header('Content-type: application/json');
-            json_die('failure', 'invalid token');
-        } else {
-            $Viewer->logout();
-            header('Location: login.php');
-            exit;
-        }
-    }
-
-    $HeavyInfo = Users::user_heavy_info($viewerId);
-    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $Viewer->activityStats());
-
-    // No conditions will force a logout from this point, can hit the DB more.
-    // Complete the $LoggedUser array
+    $LoggedUser = array_merge(Users::user_heavy_info($viewerId), Users::user_info($viewerId), $Viewer->activityStats());
     $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($viewerId, $LoggedUser['CustomPermissions']);
-
-    // We've never had to disable the wiki privs of anyone.
-    if ($LoggedUser['DisableWiki']) {
+    if ($Viewer->disableWiki()) {
         unset($LoggedUser['Permissions']['site_edit_wiki']);
     }
-
-    // $LoggedUser['RatioWatch'] as a bool to disable things for users on Ratio Watch
     $LoggedUser['RatioWatch'] = (
         time() < strtotime($LoggedUser['RatioWatchEnds'])
         && ($LoggedUser['BytesDownloaded'] * $LoggedUser['RequiredRatio']) > $LoggedUser['BytesUploaded']
     );
 
     // Change necessary triggers in external components
-    $Cache->CanClear = check_perms('admin_clear_cache');
+    $Cache->CanClear = $Viewer->permitted('admin_clear_cache');
 
     // Because we <3 our staff
-    if (check_perms('site_disable_ip_history')) {
+    if ($Viewer->permitted('site_disable_ip_history')) {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['HTTP_USER_AGENT'] = 'staff-browser';
     }
-
-    // IP changed
-    if ($LoggedUser['IP'] != $_SERVER['REMOTE_ADDR'] && !check_perms('site_disable_ip_history')) {
+    if ($Viewer->ipaddr() != $_SERVER['REMOTE_ADDR'] && !$Viewer->permitted('site_disable_ip_history')) {
         if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
-        $Viewer->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
+        $Viewer->updateIP($Viewer->ipaddr(), $_SERVER['REMOTE_ADDR']);
+    }
+    if ($Viewer->isLocked() && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+        $Document = 'locked';
     }
 }
 
-if (DEBUG_MODE || check_perms('site_debug')) {
-    $Twig->addExtension(new Twig\Extension\DebugExtension());
-}
-
-function enforce_login() {
-    global $Viewer, $FullToken, $Document, $SessionID;
-    if (!isset($Viewer)) {
-        header('Location: login.php');
-        exit;
-    }
-    if (!$SessionID && ($Document !== 'ajax' || empty($FullToken))) {
-        setcookie('redirect', $_SERVER['REQUEST_URI'], [
-            'expires'  => time() + 60 * 30,
-            'path'     => '/',
-            'secure'   => !DEBUG_MODE,
-            'httponly' => DEBUG_MODE,
-            'samesite' => 'Lax',
-        ]);
-        $Viewer->logout();
-    }
-}
-
-/**
- * Make sure $_GET['auth'] is the same as the user's authorization key
- * Should be used for any user action that relies solely on GET.
- *
- * @param bool Are we using ajax?
- * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
- */
-function authorize($Ajax = false): bool {
-    global $Viewer;
-    if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
-        return true;
-    }
-    Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $Viewer->username() . " just failed authorize on "
-        . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
-    error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
-    return false;
-}
-
-// We cannot error earlier, as we need the user info for headers and stuff
+// We could not error until we had the user info for headers and stuff
 if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
     error(404);
 }
 
 $Debug->set_flag('load page');
+if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
+    $Twig->addExtension(new Twig\Extension\DebugExtension());
+}
 
-// load the appropriate /sections/*/index.php
-$Cache->cache_value('php_' . getmypid(),
-    [
-        'start' => sqltime(),
-        'document' => $Document,
-        'query' => $_SERVER['QUERY_STRING'],
-        'get' => $_GET,
-        'post' => array_diff_key(
-            $_POST,
-            array_fill_keys(['password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true)
-        )
-    ], 600
-);
+// for sections/tools/development/process_info.php
+$Cache->cache_value('php_' . getmypid(), [
+    'start'    => sqltime(),
+    'document' => $Document,
+    'query'    => $_SERVER['QUERY_STRING'],
+    'get'      => $_GET,
+    'post'     => array_diff_key(
+        $_POST,
+        array_fill_keys(['password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true)
+    )
+], 600);
 
-if ($Viewer && $Viewer->isLocked() && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
-    require_once('/../sections/locked/index.php');
+$Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
+$file = realpath(__DIR__ . '/../sections/' . $Document . '/index.php');
+if (!file_exists($file)) {
+    error(404);
 } else {
-    $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
-    $file = realpath(__DIR__ . '/../sections/' . $Document . '/index.php');
-    if (!file_exists($file)) {
-        error(404);
-    } else {
-        try {
-            require_once($file);
-        }
-        catch (\DB_MYSQL_Exception $e) {
-            if (DEBUG_MODE || check_perms('site_debug')) {
+    try {
+        require_once($file);
+    }
+    catch (\DB_MYSQL_Exception $e) {
+        if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
 ?>
 <h3>Database error</h3>
 <code><?= $e->getMessage() ?></code>
 <pre><?= str_replace(SERVER_ROOT .'/', '', $e->getTraceAsString()) ?></pre>
 <?php
-                View::show_footer();
-            } else {
-                error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
-            }
+            View::show_footer();
+        } else {
+            error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
         }
     }
+}
 
-    if ($Router->hasRoutes()) {
-        $action = $_REQUEST['action'] ?? '';
-        try {
-            /** @noinspection PhpIncludeInspection */
-            require_once($Router->getRoute($action));
-        }
-        catch (Gazelle\Exception\RouterException $exception) {
-            error(404);
-        }
-        catch (Gazelle\Exception\InvalidAccessException $exception) {
-            error(403);
-        }
-        catch (\DB_MYSQL_Exception $e) {
-            error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
-        }
+if ($Router->hasRoutes()) {
+    $action = $_REQUEST['action'] ?? '';
+    try {
+        /** @noinspection PhpIncludeInspection */
+        require_once($Router->getRoute($action));
+    }
+    catch (Gazelle\Exception\RouterException $exception) {
+        error(404);
+    }
+    catch (Gazelle\Exception\InvalidAccessException $exception) {
+        error(403);
+    }
+    catch (\DB_MYSQL_Exception $e) {
+        error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
     }
 }
 
@@ -316,6 +256,4 @@ if (!defined('SKIP_NO_CACHE_HEADERS')) {
 ob_end_flush();
 
 $Debug->set_flag('and send to user');
-
-//Attribute profiling
 $Debug->profile();

@@ -2,23 +2,6 @@
 
 use \Gazelle\Util\Irc;
 
-// The torrent_pass is not passed if we're using AJAX, and optional if we're
-// going through the site regularly as we can validate based on cookie. In
-// these cases, we want to then enforce_login, but if the user IS using a torrent
-// pass, we have to assume it is coming from a seedbox or other non-authenticated
-// environment so we cannot enforce_login.
-if (defined('AJAX') || !isset($_REQUEST['torrent_pass'])) {
-    enforce_login();
-} else {
-    $Viewer = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['torrent_pass']);
-}
-
-if (is_null($Viewer)) {
-    json_or_error('missing user', 404);
-} elseif (!$Viewer->isEnabled() || $Viewer->isLocked()) {
-    header('HTTP/1.1 403 Forbidden');
-    exit;
-}
 $torrentId = (int)$_REQUEST['id'];
 if (!$torrentId) {
     json_or_error(0, 'missing torrentid');

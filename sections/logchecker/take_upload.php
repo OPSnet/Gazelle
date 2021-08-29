@@ -2,7 +2,6 @@
 
 use OrpheusNET\Logchecker\Logchecker;
 
-enforce_login();
 ini_set('upload_max_filesize', 1000000);
 
 if (empty($_POST['torrentid'])) {

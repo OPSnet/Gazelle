@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 $userMan = new \Gazelle\Manager\User;
 $classList = $userMan->classList();
 

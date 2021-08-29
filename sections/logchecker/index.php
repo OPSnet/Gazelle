@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 switch ($_REQUEST['action'] ?? 'test') {
     case 'take_test':

@@ -1,21 +1,9 @@
 <?php
 
-/*****************************************************************
-    Tools switch center
-
-    This page acts as a switch for the tools pages.
-
-    TODO!
-    -Unify all the code standards and file names (tool_list.php,tool_add.php,tool_alter.php)
-
- *****************************************************************/
+// TODO: Unify all the code standards and file names (tool_list.php,tool_add.php,tool_alter.php)
 
 if (isset($argv[1])) {
     $_REQUEST['action'] = $argv[1];
-} else {
-    if (empty($_REQUEST['action']) || ($_REQUEST['action'] != 'ocelot')) {
-        enforce_login();
-    }
 }
 
 if (!isset($_REQUEST['action'])) {
