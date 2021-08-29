@@ -1,11 +1,9 @@
 <?php
 
-enforce_login();
-
 if (empty($_GET['query'])) {
     json_die("failure", "no query");
 }
-if (!check_perms('site_collages_create')) {
+if (!$Viewer->permitted('site_collages_create')) {
     json_die("failure", "forbidden");
 }
 

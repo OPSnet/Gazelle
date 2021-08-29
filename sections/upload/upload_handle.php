@@ -3,19 +3,9 @@
 use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 
-//******************************************************************************//
-//--------------- Take upload --------------------------------------------------//
-// This pages handles the backend of the torrent upload function. It checks     //
-// the data, and if it all validates, it builds the torrent file, then writes   //
-// the data to the database and the torrent to the disk.                        //
-//******************************************************************************//
-
 ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
 define('QUERY_EXCEPTION', true); // Shut up debugging
-
-enforce_login();
-
 if (!defined('AJAX')) {
     authorize();
 }

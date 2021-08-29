@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 $StaffIDs = $Cache->get_value('staff_ids');
 if (!is_array($StaffIDs)) {

@@ -3,191 +3,117 @@
 if (!empty($_REQUEST['action'])) {
     switch ($_REQUEST['action']) {
         case 'editlog':
-            enforce_login();
             require_once('edit_log.php');
             break;
-
         case 'deletelog':
-            enforce_login();
             require_once('delete_log.php');
             break;
-
         case 'take_editlog':
-            enforce_login();
             require_once('take_edit_log.php');
             break;
-
         case 'rescore_log':
-            enforce_login();
             require_once('rescore_log.php');
             break;
-
         case 'viewlog':
-            enforce_login();
             require_once('log_ajax.php');
             break;
-
         case 'removelogs':
-            enforce_login();
             require_once('remove_logs.php');
             break;
-
         case 'edit':
-            enforce_login();
             require_once('edit.php');
             break;
-
         case 'editgroup':
-            enforce_login();
             require_once('editgroup.php');
             break;
-
         case 'editgroupid':
-            enforce_login();
             require_once('editgroupid.php');
             break;
-
         case 'changecategory':
-            enforce_login();
             require_once('takechangecategory.php');
             break;
         case 'grouplog':
-            enforce_login();
             require_once('grouplog.php');
             break;
         case 'takeedit':
-            enforce_login();
             require_once('takeedit.php');
             break;
-
         case 'newgroup':
-            enforce_login();
             require_once('takenewgroup.php');
             break;
-
         case 'peerlist':
-            enforce_login();
             require_once('peerlist.php');
             break;
-
         case 'snatchlist':
-            enforce_login();
             require_once('snatchlist.php');
             break;
-
         case 'download':
             require_once('download.php');
             break;
-
         case 'downloadlist':
-            enforce_login();
             require_once('downloadlist.php');
             break;
-
         case 'redownload':
-            enforce_login();
             require_once('redownload.php');
             break;
-
         case 'revert':
         case 'takegroupedit':
-            enforce_login();
             require_once('takegroupedit.php');
             break;
-
         case 'nonwikiedit':
-            enforce_login();
             require_once('nonwikiedit.php');
             break;
-
         case 'rename':
-            enforce_login();
             require_once('rename.php');
             break;
-
         case 'merge':
-            enforce_login();
             require_once('merge.php');
             break;
-
         case 'add_alias':
-            enforce_login();
             require_once('add_alias.php');
             break;
-
         case 'delete_alias':
-            enforce_login();
-            authorize();
             require_once('delete_alias.php');
             break;
-
         case 'history':
-            enforce_login();
             require_once('history.php');
             break;
-
         case 'delete':
-            enforce_login();
             require_once('delete.php');
             break;
-
         case 'takedelete':
-            enforce_login();
             require_once('takedelete.php');
             break;
-
         case 'masspm':
-            enforce_login();
             require_once('masspm.php');
             break;
-
         case 'reseed':
-            enforce_login();
             require_once('reseed.php');
             break;
-
         case 'takemasspm':
-            enforce_login();
             require_once('takemasspm.php');
             break;
-
         case 'vote_tag':
-            enforce_login();
-            authorize();
             require_once('vote_tag.php');
             break;
-
         case 'add_tag':
-            enforce_login();
             require_once('add_tag.php');
             break;
-
         case 'delete_tag':
-            enforce_login();
-            authorize();
             require_once('delete_tag.php');
             break;
-
         case 'notify':
-            enforce_login();
             require_once('notify.php');
             break;
-
         case 'manage_artists':
-            enforce_login();
             require_once('manage_artists.php');
             break;
-
         case 'editrequest':
-            enforce_login();
             require_once('editrequest.php');
             break;
-
         case 'takeeditrequest':
-            enforce_login();
             require_once('takeeditrequest.php');
             break;
-
         case 'notify_catchup':
         case 'notify_catchup_filter':
         case 'notify_clear':
@@ -196,13 +122,10 @@ if (!empty($_REQUEST['action'])) {
         case 'notify_clear_items':
             require_once('notify_actions.php');
             break;
-
         case 'collector':
             // NB: called from better.php
-            enforce_login();
             require_once('collector.php');
             break;
-
         case 'regen_filelist':
             $torrentId = (int)($_REQUEST['torrentid'] ?? 0);
             if ($torrentId && check_perms('users_mod')) {
@@ -219,7 +142,6 @@ if (!empty($_REQUEST['action'])) {
             require_once('autocomplete_tags.php');
             break;
         default:
-            enforce_login();
 
             if (!empty($_GET['id'])) {
                 require_once('details.php');
@@ -239,20 +161,14 @@ if (!empty($_REQUEST['action'])) {
             break;
     }
 } else {
-    enforce_login();
-
     if (!empty($_GET['id'])) {
         require_once('details.php');
     } elseif (isset($_GET['torrentid'])) {
         $torrentId = (int)$_GET['torrentid'];
         $GroupID = $DB->scalar("
-            SELECT GroupID
-            FROM torrents
-            WHERE ID = ?
+            SELECT GroupID FROM torrents WHERE ID = ?
             UNION
-            SELECT GroupID
-            FROM deleted_torrents
-            WHERE ID = ?
+            SELECT GroupID FROM deleted_torrents WHERE ID = ?
             ", $torrentId, $torrentId
         );
         if ($GroupID) {

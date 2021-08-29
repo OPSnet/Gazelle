@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 $contestMan = new Gazelle\Manager\Contest;
 

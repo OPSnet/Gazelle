@@ -1,11 +1,9 @@
 <?php
 
-enforce_login();
-
 switch ($_REQUEST['action'] ?? '') {
     case 'artist':
         $page = 'artist';
-        $DB->prepared_query("
+        $id = $DB->scalar("
             SELECT r1.ArtistID
             FROM artists_group AS r1
             INNER JOIN torrents_artists ta ON (ta.ArtistID = r1.ArtistID AND ta.Importance IN ('1', '3', '4', '5', '6', '7')) /* exclude as guest */
@@ -21,7 +19,7 @@ switch ($_REQUEST['action'] ?? '') {
 
     case 'collage':
         $page = 'collages';
-        $DB->prepared_query("
+        $id = $DB->scalar("
             SELECT r1.ID
             FROM collages AS r1
             INNER JOIN collages_torrents ct ON (ct.CollageID = r1.ID)
@@ -39,7 +37,7 @@ switch ($_REQUEST['action'] ?? '') {
     case 'torrent':
     default:
         $page = 'torrents';
-        $DB->prepared_query("
+        $id = $DB->scalar("
             SELECT r1.ID
             FROM torrents_group AS r1
             INNER JOIN torrents t ON (r1.ID = t.GroupID)
@@ -53,8 +51,7 @@ switch ($_REQUEST['action'] ?? '') {
         break;
 }
 
-if (!$DB->has_results()) {
+if (is_null($id)) {
     error(404); /* only likely to happen on a brand new installation */
 }
-list($id) = $DB->next_record();
 header("Location: $page.php?id=$id");

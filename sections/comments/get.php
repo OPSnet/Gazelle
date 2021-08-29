@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 $postId = (int)$_GET['postid'];
 if (!$postId) {

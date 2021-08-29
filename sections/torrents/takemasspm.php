@@ -1,13 +1,6 @@
 <?php
-//******************************************************************************//
-//--------------- Take mass PM -------------------------------------------------//
-// This pages handles the backend of the 'Send Mass PM' function. It checks     //
-// the data, and if it all validates, it sends a PM to everyone who snatched    //
-// the torrent.                                                                 //
-//******************************************************************************//
 
 authorize();
-enforce_login();
 
 $TorrentID = (int)$_POST['torrentid'];
 $GroupID = (int)$_POST['groupid'];

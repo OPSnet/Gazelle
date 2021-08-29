@@ -1,29 +1,23 @@
 <?php
-// Already done in /sections/ajax/index.php
-//enforce_login();
 
-if (!check_perms('site_top10')) {
-    print json_encode(['status' => 'failure']);
-    die();
+if (!$Viewer->permitted('site_top10')) {
+    json_die('failure');
 }
 
-
-if (empty($_GET['type']) || $_GET['type'] == 'torrents') {
-    include(SERVER_ROOT.'/sections/ajax/top10/torrents.php');
-} else {
-    switch ($_GET['type']) {
-        case 'users':
-            include(SERVER_ROOT.'/sections/ajax/top10/users.php');
-            break;
-        case 'tags':
-            include(SERVER_ROOT.'/sections/ajax/top10/tags.php');
-            break;
-        case 'history':
-            include(SERVER_ROOT.'/sections/ajax/top10/history.php');
-            break;
-        default:
-            print json_encode(['status' => 'failure']);
-            break;
-    }
+switch ($_GET['type'] ?? 'torrents') {
+    case 'users':
+        require_once('users.php');
+        break;
+    case 'tags':
+        require_once('tags.php');
+        break;
+    case 'history':
+        require_once('history.php');
+        break;
+    case 'torrents':
+        require_once('torrents.php');
+        break;
+    default:
+        print json_encode(['status' => 'failure']);
+        break;
 }
-?>

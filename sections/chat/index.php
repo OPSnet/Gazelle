@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 View::show_header('IRC');
 
 $IRCKey = $Viewer->IRCKey();

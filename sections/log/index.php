@@ -1,6 +1,5 @@
 <?php
 
-enforce_login();
 $search = $_GET['search'] ?? '';
 
 $siteLog = new Gazelle\Manager\SiteLog($Debug);

@@ -2,7 +2,6 @@
 
 use Gazelle\Exception\BonusException;
 
-enforce_login();
 authorize();
 
 if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
@@ -16,8 +15,7 @@ if ($match[1] === 'token') {
         $message = $e->getMessage();
         error("Purchase not concluded ($message).");
     }
-}
-else {
+} else {
     if (empty($_GET['user'])) {
         error('You have to enter a username to give tokens to.');
     }
