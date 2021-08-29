@@ -1,26 +1,25 @@
 <?php
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 
-$UploadForm = CATEGORY[$_GET['categoryid']];
-$TorrentForm = new TORRENT_FORM();
+$uploadForm = new Gazelle\Util\UploadForm($Viewer);
 $emitJS = isset($_GET['js']);
 
-switch ($UploadForm) {
+switch (CATEGORY[$_GET['categoryid']]) {
     case 'Music':
         if ($emitJS) {
-            echo $TorrentForm->albumReleaseJS();
+            echo $uploadForm->albumReleaseJS();
         } else {
             $tagMan = new Gazelle\Manager\Tag;
-            $TorrentForm->music_form($tagMan->genreList());
+            $uploadForm->music_form($tagMan->genreList());
         }
         break;
 
     case 'Audiobooks':
     case 'Comedy':
         if ($emitJS) {
-            echo $TorrentForm->albumReleaseJS();
+            echo $uploadForm->albumReleaseJS();
         } else {
-            $TorrentForm->audiobook_form();
+            $uploadForm->audiobook_form();
         }
         break;
 
@@ -29,9 +28,9 @@ switch ($UploadForm) {
     case 'E-Books':
     case 'E-Learning Videos':
         if ($emitJS) {
-            echo $TorrentForm->descriptionJS();
+            echo $uploadForm->descriptionJS();
         } else {
-            $TorrentForm->simple_form($_GET['categoryid']);
+            $uploadForm->simple_form($_GET['categoryid']);
         }
         break;
     default:
