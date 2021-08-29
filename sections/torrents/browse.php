@@ -515,7 +515,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
         <td colspan="2" class="td_info big_info">
 <?php    if ($LoggedUser['CoverArt']) { ?>
             <div class="group_image float_left clear">
-                <?php ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupInfo['CategoryID']) ?>
+                <?php ImageTools::cover_thumb($GroupInfo['Image'], $GroupInfo['CategoryID']) ?>
             </div>
 <?php    } ?>
             <div class="group_info clear">
@@ -635,7 +635,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
         <td class="td_info big_info">
 <?php   if ($LoggedUser['CoverArt']) { ?>
             <div class="group_image float_left clear">
-                <?=ImageTools::cover_thumb($GroupInfo['WikiImage'], $CategoryID) ?>
+                <?=ImageTools::cover_thumb($GroupInfo['Image'], $CategoryID) ?>
             </div>
 <?php   } ?>
             <div class="group_info clear">
