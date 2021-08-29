@@ -1,6 +1,5 @@
 <?php
 
-enforce_login();
 define('ANNOUNCEMENT_FORUM_ID', 12);
 
 switch ($_REQUEST['action'] ?? '') {

@@ -1,15 +1,7 @@
 <?php
 
-//******************************************************************************//
-//--------------- Take edit ----------------------------------------------------//
-// This pages handles the backend of the 'edit torrent' function. It checks     //
-// the data, and if it all validates, it edits the values in the database       //
-// that correspond to the torrent in question.                                  //
-//******************************************************************************//
-
 use OrpheusNET\Logchecker\Logchecker;
 
-enforce_login();
 authorize();
 
 //******************************************************************************//

@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 if ($Viewer->disableForums()) {
     error(403);
 }

@@ -2,8 +2,7 @@
 
 use \Gazelle\Manager\Notification;
 
-enforce_login();
-if (!check_perms('admin_manage_news')) {
+if (!$Viewer->permitted('admin_manage_news')) {
     error(403);
 }
 
