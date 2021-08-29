@@ -1,5 +1,5 @@
 <?php
-enforce_login();
+
 if (!empty($_POST['leaderboard'])) {
     $contest = new Gazelle\Contest((int)$_POST['leaderboard']);
 }
@@ -21,7 +21,7 @@ if ($contest->banner()) {
 <?php } ?>
 <div class="linkbox">
     <a href="contest.php" class="brackets">Intro</a>
-    <?=(check_perms('admin_manage_contest')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
+    <?=($Viewer->permitted('admin_manage_contest')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
 </div>
 
 <div class="thin">
@@ -29,7 +29,7 @@ if ($contest->banner()) {
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
 
 <?php
-if (check_perms('admin_manage_contest')) {
+if ($Viewer->permitted('admin_manage_contest')) {
     echo $Twig->render('contest/switcher.twig', [
         'current' => $contest->id(),
         'prior'   => $contestMan->priorContests(),

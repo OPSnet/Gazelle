@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 switch ($_REQUEST['action'] ?? null) {
     case 'users':

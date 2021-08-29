@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 switch ($_GET['p'] ?? '') {
     case 'chat':
         require('chat.php');

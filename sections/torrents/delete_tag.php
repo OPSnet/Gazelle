@@ -1,5 +1,6 @@
 <?php
 
+authorize();
 if ($Viewer->disableTagging() || !$Viewer->permitted('site_delete_tag')) {
     error(403);
 }

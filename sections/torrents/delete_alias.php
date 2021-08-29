@@ -1,5 +1,6 @@
 <?php
 
+authorize();
 if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }

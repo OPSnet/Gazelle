@@ -1,5 +1,4 @@
 <?php
-enforce_login();
 
 if ($Viewer->disableBonusPoints()) {
     error('Your points have been disabled.');

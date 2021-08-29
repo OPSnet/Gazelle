@@ -1,7 +1,5 @@
 <?php
 
-enforce_login();
-
 switch ($_GET['method'] ?? '') {
     case 'missing':
         require_once('missing.php');

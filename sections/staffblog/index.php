@@ -2,9 +2,7 @@
 
 use Gazelle\Util\Irc;
 
-enforce_login();
-
-if (!check_perms('users_mod')) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -13,7 +11,7 @@ $blogMan->visit($Viewer->id());
 
 View::show_header('Staff Blog', ['js' => 'bbcode']);
 
-if (check_perms('admin_manage_blog')) {
+if ($Viewer->permitted('admin_manage_blog')) {
     if (!empty($_REQUEST['action'])) {
         switch ($_REQUEST['action']) {
             case 'editblog':
@@ -84,7 +82,7 @@ if (check_perms('admin_manage_blog')) {
 
 echo $Twig->render('staffblog/list.twig', [
     'auth'   => $Viewer->auth(),
-    'editor' => check_perms('admin_manage_blog'),
+    'editor' => $Viewer->permitted('admin_manage_blog'),
     'list'   => $blogMan->blogList(),
 ]);
 
