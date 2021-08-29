@@ -15,6 +15,7 @@ class TGroup extends BaseObject {
     protected $revisionId = 0;
     protected $showFallbackImage = true;
     protected $viewer;
+    protected array $releaseTypes;
 
     public function tableName(): string {
         return 'torrents_group';
@@ -22,6 +23,7 @@ class TGroup extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
+        $this->releaseTypes = (new \Gazelle\ReleaseType)->list();
     }
 
     public function flush() {
@@ -73,7 +75,7 @@ class TGroup extends BaseObject {
             }
         }
         $sql = 'SELECT '
-            . ($this->revisionId ? 'w.Body, w.Image,' : 'g.WikiBody, g.WikiImage,')
+            . ($this->revisionId ? 'w.Body, w.Image,' : 'g.WikiBody AS Body, g.WikiImage AS Image,')
             . " g.ID,
                 g.Name,
                 g.Year,
@@ -110,8 +112,8 @@ class TGroup extends BaseObject {
         foreach (['CatalogueNumber', 'RecordLabel'] as $nullable) {
             $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
         }
-        if (!$info['WikiImage']) {
-            $info['WikiImage'] = $this->showFallbackImage
+        if (!$info['Image']) {
+            $info['Image'] = $this->showFallbackImage
                 ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])
                 : null;
         }
@@ -211,8 +213,20 @@ class TGroup extends BaseObject {
         return $this->info()['CategoryID'];
     }
 
+    public function description(): ?string {
+        return $this->info()['Body'];
+    }
+
+    public function image(): ?string {
+        return $this->info()['Image'];
+    }
+
     public function name(): string {
         return $this->info()['Name'];
+    }
+
+    public function releaseType(): int {
+        return $this->info()['ReleaseType'];
     }
 
     public function year(): string {
@@ -241,6 +255,35 @@ class TGroup extends BaseObject {
             $tag[] = "<a href=\"torrents.php?taglist={$t['name']}\">{$t['name']}</a>";
         }
         return $tag;
+    }
+
+    protected function displayNameSuffix(): array {
+        return array_map(fn($x) => "[$x]",
+            array_filter([
+                $this->year(),
+                $this->info()['VanityHouse'] ? 'Vanity House' : '',
+                $this->categoryId() === 1 ? $this->releaseTypes[$this->releaseType()] : '',
+            ], fn($x) => !empty($x))
+        );
+    }
+
+    public function displayNameHtml(): string {
+        return implode(' ', [
+            implode(" \xE2\x80\x93 ",
+                array_filter([
+                    $this->artistHtml(),
+                    '<span dir="ltr">' . $this->name() . '</span>',
+                ], fn($x) => !empty($x))
+            ),
+            ...$this->displayNameSuffix()
+        ]);
+    }
+
+    public function displayNameText(): string {
+        return implode(' ', [
+            implode(" - ", array_filter([$this->artistName(), $this->name()], fn($x) => !empty($x))),
+            ...$this->displayNameSuffix()
+        ]);
     }
 
     public function addCoverArt(string $image, string $summary, int $userId, \Gazelle\Log $logger): int {
@@ -320,7 +363,7 @@ class TGroup extends BaseObject {
         $djCount = count($roleList['dj']);
         $mainCount = count($roleList['main']);
         if ($composerCount + $mainCount + $conductorCount + $djCount == 0) {
-            return $nameCache[$renderMode][$this->id] = sprintf('(torrent id:%d)', $this->id);
+            return $nameCache[$renderMode][$this->id] = '';
         }
 
         $and = $renderMode === self::ARTIST_DISPLAY_HTML ? ' &amp; ' : ' & ';

@@ -5,65 +5,23 @@ $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['id']);
 if (is_null($tgroup)) {
     error(404);
 }
+$tgroup->setViewer($Viewer);
 $GroupID = $tgroup->id();
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
-$tgroup = (new Gazelle\Manager\TGroup)->findById($GroupID);
 
 [$TorrentDetails, $TorrentList] = get_group_info($GroupID, $RevisionID);
 
 // Group details
-[$WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
+[, $WikiImage,,,,
     $GroupRecordLabel, $GroupCatalogueNumber, $ReleaseType, $GroupCategoryID,
     $GroupTime, $GroupVanityHouse,,,,,, $GroupFlags] = array_values($TorrentDetails);
 $tagList = $tgroup->tagList();
 
-$DisplayName = "<span dir=\"ltr\">$GroupName</span>";
-$AltName = $GroupName; // Goes in the alt text of the image
-$Title = $GroupName; // goes in <title>
-$WikiBody = Text::full_format($WikiBody);
+$GroupYear = $tgroup->year();
+$title     = $tgroup->displayNameText();
+$coverArt  = $tgroup->coverArt();
 
 $Artists = Artists::get_artist($GroupID);
-
-if ($Artists) {
-    $DisplayName = Artists::display_artists($Artists, true) . "$DisplayName";
-    $AltName = display_str(Artists::display_artists($Artists, false)) . $AltName;
-    $Title = $AltName;
-}
-
-if ($GroupYear > 0) {
-    $DisplayName .= " [$GroupYear]";
-    $AltName .= " [$GroupYear]";
-    $Title .= " [$GroupYear]";
-}
-if ($GroupVanityHouse) {
-    $DisplayName .= ' [Vanity House]';
-    $AltName .= ' [Vanity House]';
-}
-$releaseTypes = (new Gazelle\ReleaseType)->list();
-if ($GroupCategoryID == 1) {
-    $name = $releaseTypes[$ReleaseType];
-    $DisplayName .= " [$name] ";
-    $AltName .= " [$name] ";
-}
-
-$Tags = [];
-if ($TorrentTags != '') {
-    $TorrentTags = explode('|', $TorrentTags);
-    $TorrentTagIDs = explode('|', $TorrentTagIDs);
-    $TorrentTagUserIDs = explode('|', $TorrentTagUserIDs);
-    $TagPositiveVotes = explode('|', $TagPositiveVotes);
-    $TagNegativeVotes = explode('|', $TagNegativeVotes);
-
-    foreach ($TorrentTags as $TagKey => $TagName) {
-        $Tags[$TagKey]['name'] = $TagName;
-        $Tags[$TagKey]['score'] = ($TagPositiveVotes[$TagKey] - $TagNegativeVotes[$TagKey]);
-        $Tags[$TagKey]['id'] = $TorrentTagIDs[$TagKey];
-        $Tags[$TagKey]['userid'] = $TorrentTagUserIDs[$TagKey];
-    }
-    uasort($Tags, 'compare');
-}
-
-$CoverArt = $tgroup->coverArt();
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 $commentPage = new Gazelle\Comment\Torrent($GroupID);
@@ -80,11 +38,11 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 $collageMan = new Gazelle\Manager\Collage;
 $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('torrents', $GroupID);
 
-View::show_header($Title, ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
+View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=$DisplayName?></h2>
+        <h2><?= $tgroup->displayNameHtml() ?></h2>
         <div class="linkbox">
 <?php if ($Viewer->permitted('site_edit_wiki')) { ?>
             <a href="torrents.php?action=editgroup&amp;groupid=<?=$GroupID?>" class="brackets">Edit description</a>
@@ -94,8 +52,7 @@ View::show_header($Title, ['js' => 'browse,comments,torrent,bbcode,cover_art,sub
             <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
 <?php
 }
-$bookmark = new \Gazelle\Bookmark;
-if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) {
+if ((new Gazelle\Bookmark)->isTorrentBookmarked($Viewer->id(), $GroupID)) {
 ?>
             <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="remove_bookmark brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
 <?php } else { ?>
@@ -118,17 +75,17 @@ if ($Viewer->permitted('site_submit_requests')) {
     <div class="sidebar">
         <div class="box box_image box_image_albumart box_albumart"><!-- .box_albumart deprecated -->
             <div class="head">
-                <strong><?=(count($CoverArt) > 0 ? 'Covers (' . (count($CoverArt) + 1) . ')' : 'Cover')?></strong>
-<?php if (!$CoverArt) { ?>
+                <strong><?=(count($coverArt) > 0 ? 'Covers (' . (count($coverArt) + 1) . ')' : 'Cover')?></strong>
+<?php if (!$coverArt) { ?>
                 <span>
                     <a class="brackets show_all_covers" href="#">Hide</a>
                 </span>
 <?php
 } elseif ($Viewer->option('ShowExtraCovers')) {
-    for ($Index = 0, $last = count($CoverArt); $Index <= $last; $Index++) {
+    for ($Index = 0, $last = count($coverArt); $Index <= $last; $Index++) {
 ?>
                 <span id="cover_controls_<?=($Index)?>"<?=($Index > 0 ? ' style="display: none;"' : '')?>>
-<?php   if ($Index == count($CoverArt)) { ?>
+<?php   if ($Index == count($coverArt)) { ?>
                         <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
                         <a class="brackets show_all_covers" href="#">Show all</a>
                         <span class="brackets next_cover">Next</span>
@@ -136,7 +93,7 @@ if ($Viewer->permitted('site_submit_requests')) {
                         <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
                         <a class="brackets show_all_covers" href="#">Show all</a>
                         <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
-<?php   } elseif ($Index == 0 && count($CoverArt) > 0) { ?>
+<?php   } elseif ($Index == 0 && count($coverArt) > 0) { ?>
                         <span class="brackets prev_cover">Prev</span>
                         <a class="brackets show_all_covers" href="#">Show all</a>
                         <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
@@ -151,7 +108,7 @@ $Index = 0;
 <div id="covers">
 <div id="cover_div_<?=$Index?>" class="pad">
 <?php if ($WikiImage != '') { ?>
-            <p align="center"><img width="100%" src="<?=ImageTools::process($WikiImage, true)?>" alt="<?=$AltName?>" onclick="lightbox.init('<?=ImageTools::process($WikiImage)?>', 220);" /></p>
+            <p align="center"><img width="100%" src="<?=ImageTools::process($WikiImage, true)?>" alt="<?= $title ?>" onclick="lightbox.init('<?=ImageTools::process($WikiImage)?>', 220);" /></p>
 <?php } else { ?>
             <p align="center"><img width="100%" src="<?=STATIC_SERVER?>/common/noartwork/<?=CATEGORY_ICON[$GroupCategoryID - 1]?>" alt="<?=CATEGORY[$GroupCategoryID - 1]?>" class="brackets tooltip" title="<?=CATEGORY[$GroupCategoryID - 1]?>" height="220" border="0" /></p>
 <?php
@@ -159,7 +116,7 @@ $Index = 0;
 $Index++;
 ?>
 </div>
-<?php foreach ($CoverArt as $c) { ?>
+<?php foreach ($coverArt as $c) { ?>
                     <div id="cover_div_<?=$Index?>" class="pad"<?=(empty($LoggedUser['ShowExtraCovers']) ? ' style="display: none;"' : '')?>>
                 <p align="center">
 <?php
@@ -236,7 +193,7 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
 <?php
             foreach ($Artists[$s['offset']] as $Artist) {
                 try {
-                    $a = new \Gazelle\Artist($Artist['id']);
+                    $a = new Gazelle\Artist($Artist['id']);
                 } catch (Gazelle\Exception\ResourceNotFoundException $e) {
                     continue;
                 }
@@ -387,12 +344,12 @@ echo $Twig->render('vote/box.twig', [
     'viewer'   => $Viewer,
 ]);
 
-$DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$Viewer->id());
+$DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
 ?>
         <div class="box box_tags">
             <div class="head">
                 <strong>Tags</strong>
-<?php if (!empty($DeletedTag)) { ?>
+<?php if ($DeletedTag) { ?>
                     <form style="display: none;" id="undo_tag_delete_form" name="tags" action="torrents.php" method="post">
                         <input type="hidden" name="action" value="add_tag" />
                         <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
@@ -473,7 +430,6 @@ $LastRemasterRecordLabel = '';
 $LastRemasterCatalogueNumber = '';
 
 $EditionID = 0;
-
 $Edition = [];
 foreach ($TorrentList as $t) {
     if ($t['is_deleted'] == 0) {
@@ -484,11 +440,10 @@ foreach ($TorrentList as $t) {
             $r ? $t['RemasterCatalogueNumber'] : $GroupCatalogueNumber,
             $r ? $t['RemasterTitle'] : $GroupName
         ]);
-        if (isset($Edition[$key])) {
-            $Edition[$key]++;
-        } else {
-            $Edition[$key] = 1;
+        if (!isset($Edition[$key])) {
+            $Edition[$key] = 0;
         }
+        $Edition[$key]++;
     }
 }
 
@@ -500,9 +455,8 @@ foreach ($TorrentList as $Torrent) {
         $RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
         $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
         $Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
-        $FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
-        $MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
-        $LastReseedRequest, $HasFile, $LogCount, $is_deleted, $PersonalFL, $IsSnatched] = array_values($Torrent);
+        $FilePath, $UserID, $LastActive,,,,,,,,, $LastReseedRequest,, $LogCount, $is_deleted,, $IsSnatched
+    ] = array_values($Torrent);
 
     if ($is_deleted && count($TorrentList) > 1) {
         continue;
@@ -623,7 +577,8 @@ foreach ($TorrentList as $Torrent) {
             'remove' => $Viewer->permitted('torrents_delete') || $UserID == $Viewer->id(),
             'pl'     => true,
             'extra'  => [
-                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"$Title [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
+                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . $tgroup->displayNameText()
+                    . " [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
             ],
         ]);
 ?>
@@ -909,7 +864,12 @@ if (!empty($similar)) {
 
         <div class="box torrent_description">
             <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?=(!empty($ReleaseType) ? $releaseTypes[$ReleaseType].' info' : 'Info' )?></strong></div>
-            <div class="body"><?php if ($WikiBody != '') { echo $WikiBody; } else { echo 'There is no information on this torrent.'; } ?></div>
+            <div class="body">
+<?php if (!empty($tgroup->description())) { ?>
+                <?= Text::full_format($tgroup->description()) ?>
+<?php } else { ?>
+                There is no information on this torrent.
+<?php } ?>
         </div>
 <?php
 echo $paginator->linkbox();
