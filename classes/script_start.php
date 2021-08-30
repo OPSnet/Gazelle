@@ -146,7 +146,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         header('HTTP/1.1 403 Forbidden');
         exit;
     }
-} elseif (!in_array($Document, ['index', 'login'])) {
+} elseif (!in_array($Document, ['index', 'login', 'register'])) {
     header('Location: login.php');
     exit;
 }
