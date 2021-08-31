@@ -146,6 +146,12 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         header('HTTP/1.1 403 Forbidden');
         exit;
     }
+} elseif (
+    (in_array($Document, ['schedule', 'peerupdate', 'tools']) && PHP_SAPI === 'cli')
+    || ($Document === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
+) {
+    // We want to allow through CLI calls to the above $Document types, as well as calls to the ocelot aciton if
+    // using the TRACKER_SECRET. We don't have a viewer in these cases, so it'll be left to null.
 } elseif (!in_array($Document, ['index', 'login', 'register'])) {
     header('Location: login.php');
     exit;
