@@ -870,6 +870,7 @@ if (!empty($similar)) {
 <?php } else { ?>
                 There is no information on this torrent.
 <?php } ?>
+            </div>
         </div>
 <?php
 echo $paginator->linkbox();
@@ -891,7 +892,6 @@ echo $Twig->render('reply.twig', [
     'user'     => $Viewer,
 ]);
 ?>
-        </div>
     </div>
 </div>
 <?php
