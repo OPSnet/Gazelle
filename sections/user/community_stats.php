@@ -9,43 +9,50 @@ if (($Comments = $Cache->get_value('user_nrcomment_' . $UserID)) === false) {
     $Cache->cache_value('user_nrcomment_' . $UserID, $Comments, 3600);
 }
 
-if (($participationStats = $Cache->get_value('user_participation_stats_' . $UserID)) === false) {
-    $DB->prepared_query("
+$participationStats = $Cache->get_value('user_participation_stats_' . $UserID);
+$participationStats = false;
+if ($participationStats  === false) {
+    $NumCollages = $DB->scalar("
         SELECT count(*)
         FROM collages
         WHERE Deleted = '0'
-            AND UserID = ?", $UserID);
-    list($NumCollages) = $DB->next_record();
+            AND UserID = ?
+        ", $UserID
+    );
 
-    $DB->prepared_query("
+    $NumCollageContribs = $DB->scalar("
         SELECT count(DISTINCT ct.CollageID)
         FROM collages_torrents AS ct
         INNER JOIN collages c ON (c.ID = ct.CollageID)
         WHERE c.Deleted = '0'
-            AND ct.UserID = ?", $UserID);
-    list($NumCollageContribs) = $DB->next_record();
+            AND ct.UserID = ?
+        ", $UserID
+    );
 
-    $DB->prepared_query("
+    $UniqueGroups = $DB->scalar("
         SELECT IFNULL(Groups, 0)
         FROM users_summary
-        WHERE UserID = ?", $UserID);
-    list($UniqueGroups) = $DB->next_record();
+        WHERE UserID = ?
+        ", $UserID
+    );
 
-    $DB->prepared_query("
+    $PerfectFLACs = $DB->scalar("
         SELECT IFNULL(PerfectFlacs, 0)
         FROM users_summary
-        WHERE UserID = ?", $UserID);
-    list($PerfectFLACs) = $DB->next_record();
+        WHERE UserID = ?
+        ", $UserID
+    );
 
-    $DB->prepared_query("
+    $ForumTopics = $DB->scalar("
         SELECT count(*)
         FROM forums_topics
-        WHERE AuthorID = ?", $UserID);
-    list($ForumTopics) = $DB->fetch_record();
+        WHERE AuthorID = ?
+        ", $UserID
+    );
     $participationStats = [$NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopics];
     $Cache->cache_value('user_participation_stats_' . $UserID, $participationStats, 3600);
 }
-list($NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopics) = $participationStats;
+[$NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopics] = $participationStats;
 ?>
         <div class="box box_info box_userinfo_community">
             <div class="head colhead_dark">Community</div>
@@ -93,55 +100,33 @@ list($NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopi
     }
 
     //Let's see if we can view requests because of reasons
-    $ViewAll    = check_paranoia_here('requestsfilled_list');
-    $ViewCount  = check_paranoia_here('requestsfilled_count');
-    $ViewBounty = check_paranoia_here('requestsfilled_bounty');
-
-    if ($ViewCount && !$ViewBounty && !$ViewAll) { ?>
-                <li>Requests filled: <?=number_format($RequestsFilled)?></li>
-<?php
-    } elseif (!$ViewCount && $ViewBounty && !$ViewAll) { ?>
-                <li>Requests filled: <?=Format::get_size($TotalBounty)?> collected</li>
-<?php
-    } elseif ($ViewCount && $ViewBounty && !$ViewAll) { ?>
-                <li>Requests filled: <?=number_format($RequestsFilled)?> for <?=Format::get_size($TotalBounty)?></li>
-<?php
-    } elseif ($ViewAll) { ?>
-                <li>
-                    <span<?=($ViewCount === 2 ? ' class="paranoia_override"' : '')?>>Requests filled: <?=number_format($RequestsFilled)?></span>
-                    <span<?=($ViewBounty === 2 ? ' class="paranoia_override"' : '')?>> for <?=Format::get_size($TotalBounty) ?></span>
-                    <a href="requests.php?type=filled&amp;userid=<?=$UserID?>" class="brackets<?=(($ViewAll === 2) ? ' paranoia_override' : '')?>">View</a>
-                </li>
-<?php
-    }
-
-    //Let's see if we can view requests because of reasons
     $ViewAll    = check_paranoia_here('requestsvoted_list');
     $ViewCount  = check_paranoia_here('requestsvoted_count');
     $ViewBounty = check_paranoia_here('requestsvoted_bounty');
+    $requestCreatedSize = Format::get_size($User->stats()->requestCreatedSize());
+    $requestCreatedTotal = number_format($User->stats()->requestCreatedTotal());
+    $requestVoteSize = Format::get_size($User->stats()->requestVoteSize());
+    $requestVoteTotal = number_format($User->stats()->requestVoteTotal());
 
     if ($ViewCount && !$ViewBounty && !$ViewAll) { ?>
-                <li>Requests created: <?=number_format($RequestsCreated)?></li>
-                <li>Requests voted: <?=number_format($RequestsVoted)?></li>
-<?php
-    } elseif (!$ViewCount && $ViewBounty && !$ViewAll) { ?>
-                <li>Requests created: <?=Format::get_size($RequestsCreatedSpent)?> spent</li>
-                <li>Requests voted: <?=Format::get_size($TotalSpent)?> spent</li>
-<?php
-    } elseif ($ViewCount && $ViewBounty && !$ViewAll) { ?>
-                <li>Requests created: <?=number_format($RequestsCreated)?> for <?=Format::get_size($RequestsCreatedSpent)?></li>
-                <li>Requests voted: <?=number_format($RequestsVoted)?> for <?=Format::get_size($TotalSpent)?></li>
-<?php
-    } elseif ($ViewAll) { ?>
+                <li>Requests created: <?= $requestCreatedTotal ?></li>
+                <li>Requests voted: <?= $requestVoteTotal ?></li>
+<?php } elseif (!$ViewCount && $ViewBounty && !$ViewAll) { ?>
+                <li>Requests created: <?= $requestCreatedSize ?> spent</li>
+                <li>Requests voted: <?= $requestVoteSize ?> spent</li>
+<?php } elseif ($ViewCount && $ViewBounty && !$ViewAll) { ?>
+                <li>Requests created: <?= $requestCreatedTotal  ?> for <?= $requestCreatedSize ?></li>
+                <li>Requests voted: <?= $requestVoteTotal ?> for <?= $requestVoteSize ?></li>
+<?php } elseif ($ViewAll) { ?>
                 <li>
-                    <span<?=($ViewCount === 2 ? ' class="paranoia_override"' : '')?>>Requests created: <?=number_format($RequestsCreated)?></span>
-                    <span<?=($ViewBounty === 2 ? ' class="paranoia_override"' : '')?>> for <?=Format::get_size($RequestsCreatedSpent)?></span>
-                    <a href="requests.php?type=created&amp;userid=<?=$UserID?>" class="brackets<?=($ViewAll === 2 ? ' paranoia_override' : '')?>">View</a>
+                    <span<?= $ViewCount === 2 ? ' class="paranoia_override"' : '' ?>>Requests created: <?= $requestCreatedTotal ?></span>
+                    <span<?= $ViewBounty === 2 ? ' class="paranoia_override"' : '' ?>> for <?= $requestCreatedSize ?></span>
+                    <a href="requests.php?type=created&amp;userid=<?= $UserID ?>" class="brackets<?= $ViewAll === 2 ? ' paranoia_override' : '' ?>">View</a>
                 </li>
                 <li>
-                    <span<?=($ViewCount === 2 ? ' class="paranoia_override"' : '')?>>Requests voted: <?=number_format($RequestsVoted)?></span>
-                    <span<?=($ViewBounty === 2 ? ' class="paranoia_override"' : '')?>> for <?=Format::get_size($TotalSpent)?></span>
-                    <a href="requests.php?type=voted&amp;userid=<?=$UserID?>" class="brackets<?=($ViewAll === 2 ? ' paranoia_override' : '')?>">View</a>
+                    <span<?= $ViewCount === 2 ? ' class="paranoia_override"' : '' ?>>Requests voted: <?= $requestVoteTotal ?></span>
+                    <span<?= $ViewBounty === 2 ? ' class="paranoia_override"' : '' ?>> for <?= $requestVoteSize ?></span>
+                    <a href="requests.php?type=voted&amp;userid=<?= $UserID ?>" class="brackets<?= $ViewAll === 2 ? ' paranoia_override' : '' ?>">View</a>
                 </li>
 <?php
     }

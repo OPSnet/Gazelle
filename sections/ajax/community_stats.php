@@ -28,19 +28,18 @@ if ($leechingVisible || $seedingVisible) {
     }
 }
 if ($user->propertyVisible($Viewer, 'snatched+')) {
-    [$Snatched, $UniqueSnatched] = $user->snatchCounts();
-    $CommStats['snatched'] = number_format($Snatched);
+    $CommStats['snatched'] = number_format($user->stats()->snatchTotal());
+    $UniqueSnatched = $user->stats()->snatchUnique();
     if ($user->permitted('site_view_torrent_snatchlist')) {
         $CommStats['usnatched'] = number_format($UniqueSnatched);
     }
     if ($seedingVisible && $user->propertyVisible($Viewer, 'snatched+')) {
-        $CommStats['seedingperc'] = 100 * min(1, round($Seeding / $UniqueSnatched, 2));
+        $CommStats['seedingperc'] = $UniqueSnatched ? round(100 * min(1, $Seeding / $UniqueSnatched), 2) : 0;
     }
 }
-if ($user->id() == $Viewer->id() || $Viewer->permitted('site_view_torrent_snatchlist')) {
-    [$NumDownloads, $UniqueDownloads] = $user->downloadCounts();
-    $CommStats['downloaded'] = number_format($NumDownloads);
-    $CommStats['udownloaded'] = number_format($UniqueDownloads);
+if ($user->id() == $Viewer->id() || $user->propertyVisible($Viewer, 'download') || $Viewer->permitted('site_view_torrent_snatchlist')) {
+    $CommStats['downloaded'] = number_format($user->stats()->downloadTotal());
+    $CommStats['udownloaded'] = number_format($user->stats()->downloadUnique());
 }
 
 json_die('success', $CommStats);

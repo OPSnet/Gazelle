@@ -7,7 +7,7 @@ if (!isset($_GET['userid'])) {
     if (!$userId) {
         error(0);
     }
-    if ($userId !== $Viewer->id() && !check_perms('admin_fl_history')) {
+    if ($userId !== $Viewer->id() && !$Viewer->permitted('admin_fl_history')) {
         error(403);
     }
 }
@@ -19,7 +19,7 @@ if (!$user) {
 
 $torMan = new Gazelle\Manager\Torrent;
 if ($_GET['expire'] ?? 0) {
-    if (!check_perms('admin_fl_history')) {
+    if (!$Viewer->permitted('admin_fl_history')) {
         error(403);
     }
     $torrent = $torMan->findById((int)$_GET['torrentid']);
@@ -31,7 +31,7 @@ if ($_GET['expire'] ?? 0) {
 }
 
 $paginator = new Gazelle\Util\Paginator(25, (int)($_GET['page'] ?? 1));
-$paginator->setTotal((new Gazelle\Stats\User)->flTokenTotal($user));
+$paginator->setTotal((new Gazelle\Stats\User($user->id())->flTokenTotal());
 
 View::show_header($user->username() . ' &rsaquo; Freeleech token history');
 
@@ -41,7 +41,7 @@ $user->setTorrentManager($torMan)
     );
 
 echo $Twig->render('user/history-freeleech.twig', [
-    'admin'       => check_perms('admin_fl_history'),
+    'admin'       => $Viewer->permitted('admin_fl_history'),
     'auth'        => $Viewer->auth(),
     'own_profile' => $Viewer->id() == $userId,
     'paginator'   => $paginator,
