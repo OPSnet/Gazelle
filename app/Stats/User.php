@@ -3,158 +3,190 @@
 namespace Gazelle\Stats;
 
 class User extends \Gazelle\Base {
-    /**
-     * The annual flow of users: people registered and disabled
-     * @return array keyed by month [month, joined, disabled]
-     */
-    public function flow(): array {
-        if (!$flow = $this->cache->get_value('stat-user-timeline')) {
-            /* Mysql does not implement a full outer join, so if there is a month with
-             * no joiners, any banned users in that same month will not appear.
-             * Mysql does not implement sequence generators as in Postgres, so if there
-             * is a month without any joiners or banned, it will not appear at all.
-             * Deal with it. - Spine
-             */
-            $this->db->prepared_query("
-                SELECT J.Mon, J.n as Joined, coalesce(D.n, 0) as Disabled
-                FROM (
-                    SELECT DATE_FORMAT(JoinDate,'%Y%m') as M, DATE_FORMAT(JoinDate, '%b %Y') AS Mon, count(*) AS n
-                    FROM users_info
-                    WHERE JoinDate BETWEEN last_day(now()) - INTERVAL 13 MONTH + INTERVAL 1 DAY
-                        AND last_day(now()) - INTERVAL 1 MONTH
-                    GROUP BY M) J
-                LEFT JOIN (
-                    SELECT DATE_FORMAT(BanDate, '%Y%m') AS M, DATE_FORMAT(BanDate, '%b %Y') AS Mon, count(*) AS n
-                    FROM users_info
-                    WHERE BanDate BETWEEN last_day(now()) - INTERVAL 13 MONTH + INTERVAL 1 DAY
-                        AND last_day(now()) - INTERVAL 1 MONTH
-                    GROUP By M
-                ) D USING (M)
-                ORDER BY J.M;
-            ");
-            $flow = $this->db->to_array('Mon');
-            $this->cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
-        }
-        return $flow ?: [];
-    }
 
     /**
-     * Count of users aggregated by primary class
-     * @return array [class name, user count]
-     */
-    public function classDistribution(): array {
-        if (!$dist = $this->cache->get_value('stat-user-class')) {
-            $this->db->prepared_query("
-                SELECT p.Name, count(*) AS Users
-                FROM users_main AS m
-                INNER JOIN permissions AS p ON (m.PermissionID = p.ID)
-                WHERE m.Enabled = '1'
-                GROUP BY p.Name
-                ORDER BY Users DESC
-            ");
-            $dist = $this->db->to_array('Name');
-            $this->cache->cache_value('stat-user-class', $dist, 86400);
-        }
-        return $dist ?: [];
-    }
-
-    /**
-     * Count of users aggregated by OS platform
-     * @return array [platform, user count]
-     */
-    public function platformDistribution(): array {
-        if (!$dist = $this->cache->get_value('stat-user-platform')) {
-            $this->db->prepared_query("
-                SELECT OperatingSystem, count(*) AS Users
-                FROM users_sessions
-                GROUP BY OperatingSystem
-                ORDER BY Users DESC
-            ");
-            $dist = $this->db->to_array();
-            $this->cache->cache_value('stat-user-platform', $dist, 86400);
-        }
-        return $dist ?: [];
-    }
-
-    /**
-     * Count of users aggregated by browser
-     * @return array [browser, user count]
-     */
-    public function browserDistribution(): array {
-        if (!$dist = $this->cache->get_value('stat-user-browser')) {
-            $this->db->prepared_query("
-                SELECT Browser, count(*) AS Users
-                FROM users_sessions
-                GROUP BY Browser
-                ORDER BY Users DESC
-            ");
-            $dist = $this->db->to_array();
-            $this->cache->cache_value('stat-user-browser', $dist, 86400);
-        }
-        return $dist ?: [];
-    }
-
-    /**
-     * Country aggregates.
-     * TODO: this is really fucked
+     * This class offloads all the counting operations you might
+     * want to do with a User (so that the User class does not
+     * grow to an unmanageable size).
      *
-     * @return array List of country
-     * @return array Country rank
-     * @return array Country user total
-     * @return int Country with least users
-     * @return int Country with most users
-     * @return int Log increments
+     * Counting things relating to collections of users are found
+     * in the Users (plural) class.
      */
-    public function geodistribution(): array {
-        if (![$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements] = $this->cache->get_value('geodistribution')) {
-            $this->db->prepared_query("
-                SELECT Code, Users FROM users_geodistribution
-            ");
-            $Data = $this->db->to_array();
-            $Count = $this->db->record_count() - 1;
 
-            if ($Count < 30) {
-                $CountryMinThreshold = $Count;
-            } else {
-                $CountryMinThreshold = 30;
-            }
+    protected int $id;
 
-            $CountryMax = ceil(log(Max(1, $Data[0][1])) / log(2)) + 1;
-            $CountryMin = floor(log(Max(1, $Data[$CountryMinThreshold][1])) / log(2));
+    /* Some queries return two or more items of interest: these cache the
+     * results so that the underlying call is only made once.
+     */
+    protected array $download;
+    protected array $requestBounty;
+    protected array $requestCreated;
+    protected array $requestVote;
+    protected array $snatch;
 
-            $CountryRegions = ['RS' => ['RS-KM']]; // Count Kosovo as Serbia as it doesn't have a TLD
-            foreach ($Data as $Key => $Item) {
-                [$Country, $UserCount] = $Item;
-                $Countries[] = $Country;
-                $CountryUsers[] = number_format((((log($UserCount) / log(2)) - $CountryMin) / ($CountryMax - $CountryMin)) * 100, 2);
-                $Rank[] = round((1 - ($Key / $Count)) * 100);
-
-                if (isset($CountryRegions[$Country])) {
-                    foreach ($CountryRegions[$Country] as $Region) {
-                        $Countries[] = $Region;
-                        $Rank[] = end($Rank);
-                    }
-                }
-            }
-
-            for ($i = $CountryMin; $i <= $CountryMax; $i++) {
-                $LogIncrements[] = \Format::human_format(pow(2, $i));
-            }
-            $this->cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 86400 * 3);
-        }
-        return [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements];
+    public function __construct(int $id) {
+        parent::__construct();
+        $this->id = $id;
     }
 
     /**
      * How many FL tokens has someone used?
      *
-     * @param \Gazelle\User
      * @return int Number of tokens used
      */
-    public function flTokenTotal(\Gazelle\User $user): int {
+    public function flTokenTotal(): int {
         return $this->db->scalar("
             SELECT count(*) FROM users_freeleeches WHERE UserID = ?
-            ", $user->id()
+            ", $this->id
         );
     }
+
+    public function perfectFlacTotal(): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM torrents
+            WHERE Format = 'FLAC'
+                AND (
+                    (Media = 'CD' AND LogChecksum = '1' AND HasCue = '1' AND HasLogDB = '1' AND LogScore = 100)
+                    OR
+                    (Media in ('BD', 'Cassette', 'DAT', 'DVD', 'SACD', 'Soundboard', 'WEB', 'Vinyl'))
+                )
+                AND UserID = ?
+            ", $this->id
+        );
+    }
+
+    public function uniqueGroupsTotal(): int {
+        return $this->db->scalar("
+            SELECT count(DISTINCT GroupID)
+            FROM torrents
+            WHERE UserID = ?
+            ", $this->id
+        );
+    }
+
+    protected function download(): array {
+        if (!isset($this->download)) {
+            $this->download = $this->db->rowAssoc("
+                SELECT count(*) AS total,
+                    count(DISTINCT ud.TorrentID) AS 'unique'
+                FROM users_downloads AS ud
+                INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
+                WHERE ud.UserID = ?
+                ", $this->id
+            );
+            if (empty($this->download)) {
+                $this->download = ['total' => 0, 'unique' => 0];
+            }
+        }
+        return $this->download;
+    }
+
+    public function downloadTotal(): int {
+        return $this->download()['total'];
+    }
+
+    public function downloadUnique(): int {
+        return $this->download()['unique'];
+    }
+
+    protected function requestBounty(): array {
+        if (!isset($this->requestBounty)) {
+            $this->requestBounty = $this->db->rowAssoc("
+                SELECT coalesce(sum(rv.Bounty), 0) AS size,
+                    count(DISTINCT r.ID) AS total
+                FROM requests AS r
+                LEFT JOIN requests_votes AS rv ON (r.ID = rv.RequestID)
+                WHERE r.FillerID = ?
+                ", $this->id
+            );
+            if (empty($this->requestBounty)) {
+                $this->requestBounty = ['size' => 0, 'total' => 0];
+            }
+        }
+        return $this->requestBounty;
+    }
+
+    public function requestBountySize(): int {
+        return $this->requestBounty()['size'];
+    }
+
+    public function requestBountyTotal(): int {
+        return $this->requestBounty()['total'];
+    }
+
+    protected function requestCreated() {
+        if (!isset($this->requestCreated)) {
+            $this->db->prepared_query("
+                SELECT coalesce(sum(rv.Bounty), 0) AS size,
+                    count(*) AS total
+                FROM requests AS r
+                LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
+                WHERE r.UserID = ?
+                ", $this->id
+            );
+            if (empty($this->requestCreated)) {
+                $this->requestCreated = ['size' => 0, 'total' => 0];
+            }
+        }
+        return $this->requestCreated;
+    }
+
+    public function requestCreatedSize(): int {
+        return $this->requestCreated()['size'];
+    }
+
+    public function requestCreatedTotal(): int {
+        return $this->requestCreated()['total'];
+    }
+
+    public function requestVote(): array {
+        if (!isset($this->requestVote)) {
+            $this->requestVote = $this->db->rowAssoc("
+                SELECT coalesce(sum(rv.Bounty), 0) AS size,
+                    count(*) AS total
+                FROM requests_votes rv
+                WHERE rv.UserID = ?
+                ", $this->id
+            );
+            if (empty($this->requestVote)) {
+                $this->requestVote = ['size' => 0, 'total' => 0];
+            }
+        }
+        return $this->requestVote;
+    }
+
+    public function requestVoteSize(): int {
+        return $this->requestVote()['size'];
+    }
+
+    public function requestVoteTotal(): int {
+        return $this->requestVote()['total'];
+    }
+
+    protected function snatch(): array {
+        if (!isset($this->snatch)) {
+            $this->snatch = $this->db->rowAssoc("
+                SELECT count(*) AS total,
+                    count(DISTINCT x.fid) AS 'unique'
+                FROM xbt_snatched AS x
+                INNER JOIN torrents AS t ON (t.ID = x.fid)
+                WHERE x.uid = ?
+                ", $this->id
+            );
+            if (empty($this->snatch)) {
+                $this->snatch = ['total' => 0, 'unique' => 0];
+            }
+        }
+        return $this->snatch;
+    }
+
+    public function snatchTotal(): int {
+        return $this->snatch()['total'];
+    }
+
+    public function snatchUnique(): int {
+        return $this->snatch()['unique'];
+    }
+
 }
