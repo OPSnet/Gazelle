@@ -57,19 +57,7 @@ $DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->
         function ($m) { return 'src=' . $m[1] . ImageTools::process($m[2]) . $m[3];}, $User->title())
     : $User->title();
 
-if ($Preview == 1) {
-    $Paranoia = explode(',', $_GET['paranoia']);
-} else {
-    $Paranoia = $User->paranoia();
-}
-$ParanoiaLevel = 0;
-foreach ($Paranoia as $P) {
-    $ParanoiaLevel++;
-    if (strpos($P, '+') !== false) {
-        $ParanoiaLevel++;
-    }
-}
-
+$Paranoia = ($Preview == 1) ? explode(',', $_GET['paranoia']) : $User->paranoia();
 function check_paranoia_here($Setting) {
     global $Paranoia, $Class, $UserID, $Preview;
     if ($Preview == 1) {
@@ -170,21 +158,8 @@ if ($lastfmInfo)  {
     ]);
 }
 
-if (check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty')) {
-    [$RequestsFilled, $TotalBounty] = $User->requestsBounty();
-} else {
-    $RequestsFilled = $TotalBounty = 0;
-}
-if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsvoted_bounty')) {
-    [$RequestsVoted, $TotalSpent] = $User->requestsVotes();
-    [$RequestsCreated, $RequestsCreatedSpent] = $User->requestsCreated();
-} else {
-    $RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
-}
-
-$Uploads = check_paranoia_here('uploads+') ? $User->uploadCount() : 0;
-$ArtistsAdded = check_paranoia_here('artistsadded') ? $User->artistsAdded() : 0;
-
+$Uploads          = check_paranoia_here('uploads+') ? $User->uploadCount() : 0;
+$ArtistsAdded     = check_paranoia_here('artistsadded') ? $User->artistsAdded() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $User->collageAdditions() : 0;
 $releaseVotes     = $User->releaseVotes();
 $bonusPointsSpent = $User->bonusPointsSpent();
@@ -195,9 +170,9 @@ $rank = new Gazelle\UserRank(
         'uploaded'   => $stats['BytesUploaded'],
         'downloaded' => $stats['BytesDownloaded'],
         'uploads'    => $Uploads,
-        'requests'   => $RequestsFilled,
+        'requests'   => $User->stats()->requestBountyTotal(),
         'posts'      => $User->forumPosts(),
-        'bounty'     => $TotalSpent,
+        'bounty'     => $User->stats()->requestBountySize(),
         'artists'    => $ArtistsAdded,
         'collage'    => $collageAdditions,
         'votes'      => $releaseVotes,
@@ -228,12 +203,12 @@ if (($Override = check_paranoia_here('uploads+'))) {
 }
 if (($Override = check_paranoia_here('requestsfilled_count'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($RequestsFilled)?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($User->stats()->requestBountyTotal())?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($TotalSpent)?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->stats()->requestBountySize())?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
 <?php } ?>
                 <li class="tooltip" title="<?=number_format($User->forumPosts())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
 <?php
@@ -310,22 +285,8 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
 <?php } ?>
                     </ul>
                 </li>
-<?php
-}
-// An easy way for people to measure the paranoia of a user, for e.g. contest eligibility
-if ($ParanoiaLevel == 0) {
-    $ParanoiaLevelText = 'Off';
-} elseif ($ParanoiaLevel == 1) {
-    $ParanoiaLevelText = 'Very Low';
-} elseif ($ParanoiaLevel <= 5) {
-    $ParanoiaLevelText = 'Low';
-} elseif ($ParanoiaLevel <= 20) {
-    $ParanoiaLevelText = 'High';
-} else {
-    $ParanoiaLevelText = 'Very high';
-}
-?>
-                <li>Paranoia level: <span class="tooltip" title="<?=$ParanoiaLevel?>"><?=$ParanoiaLevelText?></span></li>
+<?php } ?>
+                <li>Paranoia level: <span class="tooltip" title="<?= $User->paranoiaLevel() ?>"><?= $User->paranoiaLabel() ?></span></li>
 <?php if ($Viewer->permitted('users_view_email') || $OwnProfile) { ?>
                 <li>Email: <a href="mailto:<?=display_str($User->email())?>"><?=display_str($User->email())?></a>
 <?php   if ($Viewer->permitted('users_view_email')) { ?>
