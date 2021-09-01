@@ -12,30 +12,22 @@ class User extends BaseObject {
     const CACHE_NOTIFY      = 'u_notify_%d';
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
-    /** @var int */
-    protected $forceCacheFlush = false;
-
-    /** @var array hash of last post id per thread */
-    protected $lastRead;
-
-    /** @var array queue of forum warnings to persist */
-    protected $forumWarning = [];
-
-    /** @var array queue of staff notes to persist */
-    protected $staffNote = [];
-
-    protected $info;
-    protected $lastReadForum;
-    protected $donorHeart;
-    protected $donorVisible;
-
-    /** @var \Gazelle\Manager\Torrent to look up torrents associated with a user (snatched, uploaded, ...) */
-    protected $torMan;
-
-    /** @var \Gazelle\Manager\TorrentLabel to look up torrents associated with a user (snatched, uploaded, ...) */
-    protected $labelMan;
-
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
+
+    protected bool $forceCacheFlush = false;
+    protected int $lastReadForum;
+
+    protected array $lastRead;
+    protected array $forumWarning = [];
+    protected array $staffNote = [];
+    protected array $info = [];
+
+    protected bool $donorVisible;
+    protected string $donorHeart;
+
+    protected Stats\User $stats;
+    protected Manager\Torrent $torMan;
+    protected Manager\TorrentLabel $labelMan;
 
     public function tableName(): string {
         return 'users_main';
@@ -43,6 +35,16 @@ class User extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
+    }
+
+    /**
+     * Delegate stats methods to the Stats\User class
+     */
+    public function stats(): \Gazelle\Stats\User {
+        if (!isset($this->stats)) {
+            $this->stats = new Stats\User($this->id);
+        }
+        return $this->stats;
     }
 
     /**
@@ -86,12 +88,13 @@ class User extends BaseObject {
     }
 
     public function info(): ?array {
-        if ($this->info) {
+        if (!empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
-        if (($this->info = $this->cache->get_value($key)) !== false) {
-            return $this->info;
+        $info = $this->cache->get_value($key);
+        if ($info !== false) {
+            return $this->info = $info;
         }
         $qid = $this->db->get_query_id();
         $this->db->prepared_query("
@@ -507,7 +510,7 @@ class User extends BaseObject {
     }
 
     public function donorVisible(): bool {
-        if (is_null($this->donorVisible)) {
+        if (!isset($this->donorVisible)) {
             $this->donorVisible = (bool)$this->db->scalar("
                 SELECT 1 FROM users_donor_ranks WHERE Hidden = '0' AND UserID = ?
                 ", $this->id
@@ -517,7 +520,7 @@ class User extends BaseObject {
     }
 
     public function donorHeart(): string {
-        if (is_null($this->donorHeart)) {
+        if (!isset($this->donorHeart)) {
             if (!$this->isDonor()) {
                 $this->donorHeart = '';
             } else {
@@ -642,6 +645,31 @@ class User extends BaseObject {
         return $this->info()['Paranoia'];
     }
 
+    public function paranoiaLevel(): int {
+        $paranoia = $this->paranoia();
+        $level = count($paranoia);
+        foreach ($paranoia as $p) {
+            if (strpos($p, '+') !== false) {
+                $level++;
+            }
+        }
+        return $level;
+    }
+
+    public function paranoiaLabel(): string {
+        $level = $this->paranoiaLevel();
+        if ($level > 20) {
+            return 'Very high';
+        } elseif ($level > 5) {
+            return 'High';
+        } elseif ($level > 1) {
+            return 'Low';
+        } elseif ($level == 1) {
+            return 'Very Low';
+        }
+        return 'Off';
+    }
+
     // The following are used throughout the site:
     // uploaded, ratio, downloaded: stats
     // lastseen: approximate time the user last used the site
@@ -719,7 +747,7 @@ class User extends BaseObject {
         if (!in_array($property, $paranoia) && !in_array("$property+", $paranoia)) {
             return PARANOIA_ALLOWED;
         }
-        if ($viewer->permitted('users_override_paranoia') || $viewer->permitted(PARANOIA_OVERRIDE[$property])) {
+        if ($viewer->permitted('users_override_paranoia') || $viewer->permitted(PARANOIA_OVERRIDE[$property] ?? '')) {
             return PARANOIA_OVERRIDDEN;
         }
         return PARANOIA_HIDE;
@@ -727,6 +755,10 @@ class User extends BaseObject {
 
     public function ratioWatchExpiry(): ?string {
         return $this->info()['RatioWatchEnds'];
+    }
+
+    public function requiredRatio(): float {
+        return $this->info()['RequiredRatio'];
     }
 
     public function staffNotes() {
@@ -898,7 +930,7 @@ class User extends BaseObject {
      * @param int post id (or 0 if they have not read it).
      */
     public function lastReadInThread(int $threadId): int {
-        if (!$this->lastRead) {
+        if (!isset($this->lastRead)) {
             $this->db->prepared_query("
                 SELECT TopicID, PostID FROM forums_last_read_topics WHERE UserID = ?
                 ", $this->id
@@ -914,12 +946,11 @@ class User extends BaseObject {
      * @return int epoch of catchup
      */
     public function forumCatchupEpoch() {
-        if (!$this->lastReadForum) {
-            $this->lastReadForum = $this->db->scalar("
-                SELECT last_read FROM user_read_forum WHERE user_id = ?
+        if (!isset($this->lastReadForum)) {
+            $this->lastReadForum = (int)$this->db->scalar("
+                SELECT unix_timestamp(last_read) FROM user_read_forum WHERE user_id = ?
                 ", $this->id
             );
-            $this->lastReadForum = strtotime($this->lastReadForum) ?? 0;
         }
         return $this->lastReadForum;
     }
@@ -929,7 +960,7 @@ class User extends BaseObject {
     }
 
     public function flush() {
-        $this->info = null;
+        $this->info = [];
         $this->cache->deleteMulti([
             "u_" . $this->id,
             "user_info_" . $this->id,
@@ -1744,53 +1775,6 @@ class User extends BaseObject {
         return $dupe;
     }
 
-    public function requestsBounty() {
-        $this->db->prepared_query('
-            SELECT COUNT(DISTINCT r.ID), SUM(rv.Bounty)
-            FROM requests AS r
-            LEFT JOIN requests_votes AS rv ON (r.ID = rv.RequestID)
-            WHERE r.FillerID = ?
-            ', $this->id
-        );
-        if ($this->db->has_results()) {
-            [$filled, $bounty] = $this->db->next_record(MYSQLI_NUM, false);
-        } else {
-            $filled = $bounty = 0;
-        }
-        return [$filled, $bounty];
-    }
-
-    public function requestsVotes() {
-        $this->db->prepared_query('
-            SELECT count(*), coalesce(sum(Bounty), 0)
-            FROM requests_votes
-            WHERE UserID = ?
-            ', $this->id
-        );
-        if ($this->db->has_results()) {
-            [$voted, $bounty] = $this->db->next_record(MYSQLI_NUM, false);
-        } else {
-            $voted = $bounty = 0;
-        }
-        return [$voted, $bounty];
-    }
-
-    public function requestsCreated() {
-        $this->db->prepared_query('
-            SELECT count(*), coalesce(sum(rv.Bounty), 0)
-            FROM requests AS r
-            LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
-            WHERE r.UserID = ?
-            ', $this->id
-        );
-        if ($this->db->has_results()) {
-            [$created, $bounty] = $this->db->next_record(MYSQLI_NUM, false);
-        } else {
-            $created = $bounty = 0;
-        }
-        return [$created, $bounty];
-    }
-
     public function clients(): array {
         $this->db->prepared_query('
             SELECT DISTINCT useragent FROM xbt_files_users WHERE uid = ?
@@ -2088,18 +2072,6 @@ class User extends BaseObject {
         ];
     }
 
-    public function snatchCounts(): array {
-        $this->db->prepared_query('
-            SELECT count(*), count(DISTINCT x.fid)
-            FROM xbt_snatched AS x
-            INNER JOIN torrents AS t ON (t.ID = x.fid)
-            WHERE x.uid = ?
-            ', $this->id
-        );
-        [$total, $unique] = $this->db->next_record(MYSQLI_NUM, false);
-        return [(int)$total, (int)$unique];
-    }
-
     public function recentSnatches(int $limit = 5) {
         if (($recent = $this->cache->get_value('user_recent_snatch_' . $this->id)) === false) {
             $this->db->prepared_query("
@@ -2182,18 +2154,6 @@ class User extends BaseObject {
             $this->cache->cache_value('user_recent_up_' . $this->id, $recent, 86400 * 3);
         }
         return $recent;
-    }
-
-    public function downloadCounts() {
-        $this->db->prepared_query('
-            SELECT count(*), count(DISTINCT ud.TorrentID)
-            FROM users_downloads AS ud
-            INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
-            WHERE ud.UserID = ?
-            ', $this->id
-        );
-        [$total, $unique] = $this->db->next_record(MYSQLI_NUM, false);
-        return [(int)$total, (int)$unique];
     }
 
     public function torrentDownloadCount($torrentId) {
@@ -2388,8 +2348,8 @@ class User extends BaseObject {
         $criteria = end($demotion);
 
         $stats = $this->activityStats();
-        [$votes, $bounty] = $this->requestsVotes();
-        $effectiveUpload = $stats['BytesUploaded'] + $bounty;
+        $ustats = new Stats\User($this->id);
+        $effectiveUpload = $stats['BytesUploaded'] + $ustats->requestBountyTotal();
         if ($criteria) {
             $ratio = $criteria['Ratio'];
         } else {
@@ -2406,11 +2366,11 @@ class User extends BaseObject {
         }
 
         $stats = $this->activityStats();
-        [$votes, $bounty] = $this->requestsVotes();
+        $ustats = new Stats\User($this->id);
         $progress = [
             'Class' => (new Manager\User)->userclassName($criteria['To']),
             'Requirements' => [
-                'Upload' => [$stats['BytesUploaded'] + $bounty, $criteria['MinUpload'], 'bytes'],
+                'Upload' => [$stats['BytesUploaded'] + $ustats->requestBountySize(), $criteria['MinUpload'], 'bytes'],
                 'Ratio' => [$stats['BytesDownloaded'] == 0 ? '∞'
                     : $stats['BytesUploaded'] / $stats['BytesDownloaded'], $criteria['MinRatio'], 'float'],
                 'Time' => [
