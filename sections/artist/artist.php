@@ -3,7 +3,11 @@
 $ArtistID = (int)($_GET['id'] ?? 0);
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 $artistMan = new Gazelle\Manager\Artist;
-$Artist = $artistMan->findById($ArtistID, $RevisionID);
+if ($RevisionID) {
+    $Artist = $artistMan->findByIdAndRevision($ArtistID, $RevisionID);
+} else {
+    $Artist = $artistMan->findById($ArtistID);
+}
 if (is_null($Artist)) {
     error(404);
 }
