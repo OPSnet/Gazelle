@@ -23,18 +23,40 @@ class Artist extends \Gazelle\Base {
         }
     }
 
-    public function findById(int $id, int $revisionId) {
+    public function findById(int $id) {
         $artistId = $this->db->scalar("
             SELECT ArtistID FROM artists_group WHERE ArtistID = ?
             ", $id
         );
+        return is_null($artistId) ? null : new \Gazelle\Artist($artistId);
+    }
+
+    public function findByIdAndRevision(int $id, int $revisionId) {
+        $artistId = $this->db->scalar("
+            SELECT ArtistID
+            FROM artists_group
+            WHERE ArtistID = ?
+                AND RevisionID = ?
+            ", $id, $revisionId
+        );
         return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
     }
 
-    public function findByName(string $name, int $revisionId) {
+    public function findByName(string $name) {
         $artistId = $this->db->scalar("
             SELECT ArtistID FROM artists_group WHERE Name = ?
             ", trim($name)
+        );
+        return is_null($artistId) ? null : new \Gazelle\Artist($artistId);
+    }
+
+    public function findByNameAndRevision(string $name, int $revisionId) {
+        $artistId = $this->db->scalar("
+            SELECT ArtistID
+            FROM artists_group
+            WHERE Name = ?
+                AND RevisionID = ?
+            ", trim($name), $revisionId
         );
         return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
     }
@@ -58,6 +80,7 @@ class Artist extends \Gazelle\Base {
     }
 
     public function create($name) {
+        $this->db->begin_transaction();
         $this->db->prepared_query('
             INSERT INTO artists_group (Name)
             VALUES (?)
@@ -71,6 +94,7 @@ class Artist extends \Gazelle\Base {
             ', $artistId, $name
         );
         $aliasId = $this->db->inserted_id();
+        $this->db->commit();
 
         $this->cache->increment('stats_artist_count');
 

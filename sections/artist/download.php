@@ -6,7 +6,7 @@ if (!$Viewer->permitted('zip_downloader')) {
 if (!isset($_REQUEST['preference']) || count($_REQUEST['list']) === 0) {
     error(0);
 }
-$artist = (new Gazelle\Manager\Artist)->findById((int)($_REQUEST['artistid'] ?? 0), 0);
+$artist = (new Gazelle\Manager\Artist)->findById((int)($_REQUEST['artistid'] ?? 0));
 if (is_null($artist)) {
     error(404);
 }

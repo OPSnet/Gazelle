@@ -2,14 +2,14 @@
 
 authorize();
 
-if (!check_perms('site_delete_tag')) {
+if (!$Viewer->permitted('site_delete_tag')) {
     error(403);
 }
 $similarId = (int)$_GET['similarid'];
 if (!$similarId) {
     error(0);
 }
-$artist = (new Gazelle\Manager\Artist)->findById((int)($_GET['artistid'] ?? 0), 0);
+$artist = (new Gazelle\Manager\Artist)->findById((int)($_GET['artistid'] ?? 0));
 if (is_null($artist)) {
     error(404);
 }
