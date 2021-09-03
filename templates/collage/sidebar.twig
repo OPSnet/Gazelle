@@ -96,13 +96,14 @@ collage by {{ user_id|user_url }}
     </div>
 </div>
 {% endif %}
-<h3>Comments</h3>
+<div class="head"><strong>Comments</strong></div>
 {% for comment in comments %}
 <div class="box comment">
-    <div class="head">
+    <div class="pad head">
         {{ comment.author_id|user_url }} {{ comment.added|time_diff }}
-        <br />
-        <a href="reports.php?action=report&amp;type=collages_comment&amp;id={{ comment.id }}" class="brackets">Report</a>
+        <span style="float: right"> 
+            <a href="reports.php?action=report&amp;type=collages_comment&amp;id={{ comment.id }}" class="brackets">Report</a>
+        </span>
     </div>
     <div class="pad">{{ comment.body|bb_format }}</div>
 </div>

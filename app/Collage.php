@@ -96,7 +96,8 @@ class Collage extends BaseObject {
                 ca.ArtistID,
                 ag.Name,
                 IF(wa.Image is NULL, '', wa.Image) as Image,
-                ca.UserID
+                ca.UserID,
+                ca.Sort
             FROM collages_artists    AS ca
             INNER JOIN artists_group AS ag USING (ArtistID)
             LEFT JOIN wiki_artists   AS wa USING (RevisionID)
@@ -104,7 +105,7 @@ class Collage extends BaseObject {
             ORDER BY ca.Sort
             ", $this->id
         );
-        $artists = $this->db->to_array('ArtistID', MYSQLI_ASSOC);
+        $artists = $this->db->to_array('ArtistID', MYSQLI_ASSOC, false);
 
         // synch collage total with reality
         $count = count($artists);
@@ -122,10 +123,12 @@ class Collage extends BaseObject {
         foreach ($artists as $artist) {
             if (!isset($this->artists[$artist['ArtistID']])) {
                 $this->artists[$artist['ArtistID']] = [
-                    'count' => 0,
-                    'id'    => $artist['ArtistID'],
-                    'image' => $artist['Image'],
-                    'name'  => $artist['Name'],
+                    'count'    => 0,
+                    'id'       => $artist['ArtistID'],
+                    'image'    => $artist['Image'],
+                    'name'     => $artist['Name'],
+                    'sequence' => $artist['Sort'],
+                    'user_id'  => $artist['UserID'],
                 ];
             }
             $this->artists[$artist['ArtistID']]['count']++;
@@ -135,7 +138,6 @@ class Collage extends BaseObject {
             }
             $this->contributors[$artist['UserID']]++;
         }
-        uasort($this->artists, function ($x, $y) { return $y['count'] <=> $x['count']; });
         arsort($this->contributors);
         return $this;
     }
