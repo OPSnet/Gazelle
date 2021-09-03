@@ -22,7 +22,7 @@ if (!$collage) {
     error(404);
 }
 
-if (!check_perms('site_collages_delete')) {
+if (!$Viewer->permitted('site_collages_delete')) {
     if ($collage->isLocked()) {
         error('This collage is locked');
     }
@@ -59,7 +59,7 @@ $artistMan = new Gazelle\Manager\Artist;
 $ID = [];
 foreach ($URL as $u) {
     preg_match(ARTIST_REGEXP, $u, $match);
-    $artist = $artistMan->findById((int)$match['id'], 0);
+    $artist = $artistMan->findById((int)$match['id']);
     if (is_null($artist)) {
         error("The artist " . htmlspecialchars($u) . " does not exist.");
     }
@@ -67,7 +67,7 @@ foreach ($URL as $u) {
 }
 
 /* would the addition overshoot the allowed number of entries? */
-if (!check_perms('site_collages_delete')) {
+if (!$Viewer->permitted('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
         if ($collage->countByUser($Viewer->id()) + count($ID) > $maxGroupsPerUser) {
