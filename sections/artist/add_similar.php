@@ -5,7 +5,7 @@ if (!defined('AJAX')) {
 }
 
 $artistMan = new Gazelle\Manager\Artist;
-$artist = $artistMan->findById((int)($_POST['artistid'] ?? 0), 0);
+$artist = $artistMan->findById((int)($_POST['artistid'] ?? 0));
 if (is_null($artist)) {
     if (defined('AJAX')) {
         json_die('failure', 'no such artist');
@@ -13,9 +13,9 @@ if (is_null($artist)) {
         error(404);
     }
 }
-$similar = $artistMan->findByName(trim($_POST['artistname'] ?? ''), 0);
+$similar = $artistMan->findByName(trim($_POST['artistname'] ?? ''));
 if (is_null($similar)) {
-    $similar = $artistMan->findById((int)($_POST['similarid'] ?? 0), 0);
+    $similar = $artistMan->findById((int)($_POST['similarid'] ?? 0));
     if (is_null($similar)) {
         if (defined('AJAX')) {
             json_die('failure', 'no such similar artist name');
