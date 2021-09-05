@@ -1,20 +1,15 @@
 <?php
 //**********************************************************************//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Edit form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// This page relies on the TORRENT_FORM class. All it does is call        //
-// the necessary functions.                                                //
+// This page relies on the Util\UploadForm class. All it does is call   //
+// the necessary functions.                                             //
 //----------------------------------------------------------------------//
-// At the bottom, there are grouping functions which are off limits to    //
+// At the bottom, there are grouping functions which are off limits to  //
 // most members.                                                        //
 //**********************************************************************//
 
-$TorrentID = (int)$_GET['id'];
-if ($TorrentID < 1) {
-    error(0);
-}
-
-$DB->prepared_query('
-    SELECT
+$Properties = $DB->rowAssoc("
+    SELECT t.ID,
         t.Media,
         t.Format,
         t.Encoding AS Bitrate,
@@ -57,11 +52,9 @@ $DB->prepared_query('
     LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
     LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.id)
     WHERE t.ID = ?
-    ', $TorrentID
+    ", (int)$_GET['id']
 );
-
-[$Properties] = $DB->to_array(false, MYSQLI_BOTH);
-if (!$Properties) {
+if (is_null($Properties)) {
     error(404);
 }
 
@@ -90,6 +83,7 @@ if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || $Viewer->per
         $Err = false;
     }
     $uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err, false);
+    $uploadForm->setCategoryId($Properties['CategoryID']);
     $uploadForm->head();
     switch (CATEGORY[$Properties['CategoryID'] - 1]) {
         case 'Music':
@@ -123,7 +117,7 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="editgroupid" />
         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
+        <input type="hidden" name="torrentid" value="<?= $Properties['ID'] ?>" />
         <input type="hidden" name="oldgroupid" value="<?=$Properties['GroupID']?>" />
         <table class="layout">
             <tr>
@@ -143,7 +137,7 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     <form class="split_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="newgroup" />
         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
+        <input type="hidden" name="torrentid" value="<?= $Properties['ID'] ?>" />
         <input type="hidden" name="oldgroupid" value="<?=$Properties['GroupID']?>" />
         <table class="layout">
             <tr>
@@ -179,7 +173,7 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     <form action="torrents.php" method="post">
         <input type="hidden" name="action" value="changecategory" />
         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
+        <input type="hidden" name="torrentid" value="<?= $Properties['ID'] ?>" />
         <input type="hidden" name="oldgroupid" value="<?=$Properties['GroupID']?>" />
         <input type="hidden" name="oldartistid" value="<?=$Properties['ArtistID']?>" />
         <input type="hidden" name="oldcategoryid" value="<?=$Properties['CategoryID']?>" />

@@ -19,11 +19,11 @@ use \OrpheusNET\Logchecker\Logchecker;
 class uploadForm extends \Gazelle\Base {
     var $user;
 
-    var $UploadForm = '';
+    protected int $categoryId = 0;
+
     var $NewTorrent = false;
     var $Torrent = [];
     var $Error = false;
-    var $TorrentID = false;
     var $Disabled = '';
     var $DisabledFlag = false;
 
@@ -38,15 +38,15 @@ class uploadForm extends \Gazelle\Base {
         $this->Torrent = $Torrent;
         $this->Error = $Error;
 
-        global $UploadForm, $TorrentID;
-
-        $this->UploadForm = $UploadForm;
-        $this->TorrentID = $TorrentID;
-
         if ($this->Torrent && $this->Torrent['GroupID']) {
             $this->Disabled = ' disabled="disabled"';
             $this->DisabledFlag = true;
         }
+    }
+
+    public function setCategoryId(int $categoryId) {
+        $this->categoryId = $categoryId;
+        return $this;
     }
 
     /**
@@ -66,124 +66,23 @@ class uploadForm extends \Gazelle\Base {
     }
 
     function head() {
-?>
-
-<div class="thin">
-<?php   if ($this->NewTorrent) { ?>
-    <div style="text-align: center;">
-        Your personal announce URL is:<br />
-        <div style="margin: 0 auto;"><input type="text" value="<?= $this->user->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
-    </div>
-<?php
-        }
-        if ($this->Error) {
-?>
-    <p style="color: red; text-align: center;"><?= $this->Error ?></p>
-<?php   } ?>
-    <form class="create_form" name="torrent" action="" enctype="multipart/form-data" method="post" id="upload_table" onsubmit="$('#post').raw().disabled = 'disabled';">
-        <div>
-            <input type="hidden" id="torrent-new" name="torrent-new" value="<?= $this->NewTorrent ? 1 : 0 ?>" />
-            <input type="hidden" name="submit" value="true" />
-            <input type="hidden" name="auth" value="<?= $this->user->auth() ?>" />
-<?php       if (!$this->NewTorrent) { ?>
-                <input type="hidden" name="action" value="takeedit" />
-                <input type="hidden" name="torrentid" value="<?=display_str($this->TorrentID)?>" />
-                <input type="hidden" name="type" id="edittype" value="<?=display_str($this->Torrent['CategoryID'])?>" />
-<?php
-            } else {
-                if ($this->Torrent && $this->Torrent['GroupID']) {
-?>
-                <input type="hidden" name="groupid" value="<?=display_str($this->Torrent['GroupID'])?>" />
-                <input type="hidden" name="type" value="<?=array_search($this->UploadForm, CATEGORY)?>" />
-<?php
-                }
-                if ($this->Torrent && $this->Torrent['RequestID']) {
-?>
-                <input type="hidden" name="requestid" value="<?=display_str($this->Torrent['RequestID'])?>" />
-<?php
-                }
-            }
-?>
-        </div>
-<?php   if ($this->NewTorrent) { ?>
-        <table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
-            <tr>
-                <td class="label">Torrent file:</td>
-                <td>
-                    <input id="file" type="file" name="file_input" size="50" accept="<?= implode(',', self::TORRENT_INPUT_ACCEPT); ?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">JSON file:</td>
-                <td>
-                    <input type="file" id="torrent-json-file" accept="<?= implode(',', self::JSON_INPUT_ACCEPT); ?>" />
-                    <br />(If you are not cross-seeding from another site, you can safely leave this field empty).
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Type:</td>
-                <td>
-                    <select id="categories" name="type" onchange="Categories()"<?=$this->Disabled?>>
-<?php       foreach (CATEGORY as $Index => $Cat) { ?>
-                        <option value="<?= $Index ?>"<?= $Cat == $this->Torrent['CategoryName'] ? ' selected="selected"' : '' ?>><?= display_str($Cat) ?></option>
-<?php       } ?>
-                    </select>
-                </td>
-            </tr>
-        </table>
-<?php   }/*if*/ ?>
-        <div id="dynamic_form">
-<?php
-    } // function head
+        echo $this->twig->render('upload/header.twig', [
+            'announce'    => $this->user->announceUrl(),
+            'auth'        => $this->user->auth(),
+            'category_id' => $this->categoryId,
+            'error'       => $this->Error,
+            'is_disabled' => $this->DisabledFlag,
+            'is_new'      => (int)$this->NewTorrent,
+            'info'        => $this->Torrent,
+        ]);
+    }
 
     function foot() {
-        $Torrent = $this->Torrent;
-?>
-        </div>
-        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
-<?php
-        if (!$this->NewTorrent) {
-            if ($this->user->permitted('torrents_freeleech')) {
-                $leech = ["Normal", "Free", "Neutral"];
-                $reason = ["N/A", "Staff Pick", "Perma-FL", "Vanity House"];
-?>
-            <tr id="freetorrent">
-                <td class="label">Leech Type</td>
-                <td>
-                    <select name="freeleechtype">
-<?php           foreach ($leech as $Key => $Name) { ?>
-                        <option value="<?= $Key ?>"<?=($Key == $Torrent['FreeTorrent'] ? ' selected="selected"' : '')?>><?= $Name ?></option>
-<?php           } ?>
-                    </select>
-                    because
-                    <select name="freeleechreason">
-<?php           foreach ($reason as $Key => $Name) { ?>
-                        <option value="<?= $Key ?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?= $Name ?></option>
-<?php           } ?>
-                    </select>
-                </td>
-            </tr>
-<?php
-            }
-        }
-?>
-            <tr>
-                <td colspan="2" style="text-align: center;">
-                    <p>Be sure that your torrent is approved by the <a href="rules.php?p=upload" target="_blank">rules</a>. Not doing this will result in a <strong class="important_text">warning</strong> or <strong class="important_text">worse</strong>.</p>
-<?php   if ($this->NewTorrent) { ?>
-                    <p>After uploading the torrent, you will have a one hour grace period during which no one other than you can fill requests with this torrent.<br />Make use of this time wisely, and <a href="requests.php" target="_blank">search the list of requests</a>.</p>
-<?php   } ?>
-                    <div style="width: 60%; margin: 0 auto;">
-                    <ul id="check" class="nobullet" style="display: none; padding: 12px; text-align: left; border: 2px solid orangered;"></ul>
-                    </div>
-                    <input id="post" type="submit"<?php if ($this->NewTorrent) { echo ' value="Upload torrent"'; } else { echo ' value="Edit torrent"';} ?> />
-                </td>
-            </tr>
-        </table>
-    </form>
-</div>
-<?php
-    } //function foot
+        echo $this->twig->render('upload/footer.twig', [
+            'is_new' => (int)$this->NewTorrent,
+            'info'   => $this->Torrent,
+        ]);
+    }
 
     function music_form($GenreTags) {
         $QueryID = $this->db->get_query_id();
@@ -383,7 +282,7 @@ class uploadForm extends \Gazelle\Base {
                 if ($Line != $LastLine) {
                     $LastLine = $Line;
 ?>
-                            <option value="<?=$Index?>"<?=(($Remaster['ID'] == $this->TorrentID) ? ' selected="selected"' : '')?>><?=$Line?></option>
+                            <option value="<?=$Index?>"<?=(($Remaster['ID'] == $this->Torrent['ID']) ? ' selected="selected"' : '')?>><?=$Line?></option>
 <?php
                 }
             }
