@@ -1880,14 +1880,6 @@ class User extends BaseObject {
         return $this->info()['DisableInvites'] ? 0 : $this->info()['Invites'];
     }
 
-    public function invitedCount(): int {
-        return $this->getSingleValue('user_invites', '
-            SELECT count(*)
-            FROM users_info
-            WHERE Inviter = ?
-        ');
-    }
-
     public function pendingInviteCount(): int {
         return $this->getSingleValue('user_inv_pending', '
             SELECT count(*)
@@ -2047,12 +2039,6 @@ class User extends BaseObject {
 
     public function collageAdditions(): int {
         return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
-    }
-
-    public function forumPosts(): int {
-        return $this->getSingleValue('user_forum_posts', "
-            SELECT count(*) FROM forums_posts WHERE AuthorID = ?
-        ");
     }
 
     public function peerCounts(): array {
@@ -2316,7 +2302,7 @@ class User extends BaseObject {
     }
 
     public function activityStats(): array {
-        if (($stats = $this->cache->get_value('user_stats_' . $this->id)) === false) {
+        if (($stats = $this->cache->get_value('user_stats_activity_' . $this->id)) === false) {
             $this->db->prepared_query("
                 SELECT
                     uls.Uploaded AS BytesUploaded,

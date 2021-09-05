@@ -16,7 +16,7 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $RequestsVoted  = $user->stats()->requestVoteTotal();
     $TotalSpent     = $user->stats()->requestVoteSize();
 }
-$ForumPosts       = $user->forumPosts();
+$ForumPosts       = $user->stats()->forumPostTotal();
 $activityStats    = $user->activityStats();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $user->uploadCount() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $user->artistsAdded() : null;
@@ -104,12 +104,12 @@ json_print("success", [
         'bountySpent'     => $TotalSpent,
         'releaseVotes'    => $releaseVotes,
         'perfectFlacs'    => $user->propertyVisible($Viewer, 'perfectflacs+') ? $user->stats()->perfectFlacTotal() : null,
-        'groups'          => $user->propertyVisible($Viewer, 'uniquegroups+') ? $user->stats()->uniqueGroupsTotal() : null,
+        'groups'          => $user->propertyVisible($Viewer, 'uniquegroups+') ? $user->stats()->uniqueGroupTotal() : null,
         'uploaded'        => $Uploads,
         'seeding'         => $user->propertyVisible($Viewer, 'seeding+') ? $user->seedingCounts() : null,
         'leeching'        => $user->propertyVisible($Viewer, 'leeching+') ? $user->leechingCounts() : null,
         'snatched'        => $user->propertyVisible($Viewer, 'snatched+') ? $user->stats()->snatchTotal() : null,
-        'invited'         => $user->propertyVisible($Viewer, 'invitedcount') ? $user->invitedCount() : null,
+        'invited'         => $user->propertyVisible($Viewer, 'invitedcount') ? $user->stats()->invitedTotal() : null,
         'artistsAdded'    => $ArtistsAdded,
     ]
 ]);
