@@ -171,7 +171,7 @@ $rank = new Gazelle\UserRank(
         'downloaded' => $stats['BytesDownloaded'],
         'uploads'    => $Uploads,
         'requests'   => $User->stats()->requestBountyTotal(),
-        'posts'      => $User->forumPosts(),
+        'posts'      => $User->stats()->forumPostTotal(),
         'bounty'     => $User->stats()->requestBountySize(),
         'artists'    => $ArtistsAdded,
         'collage'    => $collageAdditions,
@@ -210,7 +210,7 @@ if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
 ?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->stats()->requestBountySize())?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
 <?php } ?>
-                <li class="tooltip" title="<?=number_format($User->forumPosts())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
+                <li class="tooltip" title="<?=number_format($User->stats()->forumPostTotal())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
 <?php
 if (($Override = check_paranoia_here('torrentcomments++'))) {
 ?>
@@ -353,7 +353,39 @@ if (check_paranoia_here('snatched')) {
         'list' => $User->tagSnatchCounts(),
     ]);
 }
-require('community_stats.php');
+
+echo $Twig->render('user/sidebar-stats.twig', [
+    'stats'        => $User->stats(),
+    'user_id'      => $UserID,
+    'can_leech'    => $User->canLeech(),
+    'viewer'       => $Viewer,
+    'upload_total' => $Uploads,
+    'visible'  => [
+        'collages+'            => check_paranoia_here('collages+'),
+        'collages'             => check_paranoia_here('collages'),
+        'collagescontrib+'     => check_paranoia_here('collagecontribs+'),
+        'collagecontribs'      => check_paranoia_here('collagecontribs'),
+        'downloaded'           => check_paranoia_here('downloaded'),
+        'invitedcount'         => check_paranoia_here('invitedcount'),
+        'leeching+'            => check_paranoia_here('leeching+'),
+        'leeching'             => check_paranoia_here('leeching'),
+        'perfectflacs+'        => check_paranoia_here('perfectflacs+'),
+        'perfectflacs'         => check_paranoia_here('perfectflacs'),
+        'seeding+'             => check_paranoia_here('seeding+'),
+        'seeding'              => check_paranoia_here('seeding'),
+        'snatched+'            => check_paranoia_here('snatched+'),
+        'snatched'             => check_paranoia_here('snatched'),
+        'torrentcomments+'     => check_paranoia_here('torrentcomments+'),
+        'torrentcomments'      => check_paranoia_here('torrentcomments'),
+        'requestsvoted_list'   => check_paranoia_here('requestsvoted_list'),
+        'requestsvoted_count'  => check_paranoia_here('requestsvoted_count'),
+        'requestsvoted_bounty' => check_paranoia_here('requestsvoted_bounty'),
+        'uniquegroups+'        => check_paranoia_here('uniquegroups+'),
+        'uniquegroups'         => check_paranoia_here('uniquegroups'),
+        'uploads+'             => check_paranoia_here('uploads+'),
+        'uploads'              => check_paranoia_here('uploads'),
+    ],
+]);
 
 if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
     echo $Twig->render('donation/stats.twig', [

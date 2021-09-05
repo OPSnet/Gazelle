@@ -31,7 +31,7 @@ if ($_GET['expire'] ?? 0) {
 }
 
 $paginator = new Gazelle\Util\Paginator(25, (int)($_GET['page'] ?? 1));
-$paginator->setTotal((new Gazelle\Stats\User($user->id())->flTokenTotal());
+$paginator->setTotal((new Gazelle\Stats\User($user->id()))->flTokenTotal());
 
 View::show_header($user->username() . ' &rsaquo; Freeleech token history');
 
