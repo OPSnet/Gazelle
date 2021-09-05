@@ -129,6 +129,10 @@ $HideDNU = $Viewer->permitted('torrents_hide_dnu') && !$NewDNU;
 <?php
 $GenreTags = (new Gazelle\Manager\Tag)->genreList();
 $uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err);
+if (isset($categoryId)) {
+    // we have been require'd from upload_handle
+    $uploadForm->setCategoryId($categoryId);
+}
 $uploadForm->head();
 switch ($uploadCategory) {
     case 'Music':
