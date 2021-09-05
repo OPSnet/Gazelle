@@ -313,7 +313,7 @@ if ($Err) { // Show the upload form, with the data the user entered
     if (defined('AJAX')) {
         json_error($Err);
     } else {
-        $UploadForm = $Type;
+        $categoryId = $TypeID - 1;
         require(__DIR__ . '/upload.php');
         die();
     }
@@ -474,7 +474,7 @@ if ($Err) {
     if (defined('AJAX')) {
         json_error($Err);
     } else {
-        $UploadForm = $Type;
+        $categoryId = $TypeID - 1;
         // TODO: Repopulate the form correctly
         require(__DIR__ . '/upload.php');
         die();
