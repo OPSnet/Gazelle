@@ -80,6 +80,7 @@ $DB->prepared_query("
     ORDER BY ID
     ",$ConvID
 );
+$conversation = $DB->to_array(false, MYSQLI_NUM, false);
 
 $Section = (isset($_GET['section']) && in_array($_GET['section'], array_keys(Inbox::SECTIONS)))
     ? $_GET['section']
@@ -97,7 +98,8 @@ View::show_header("View conversation $Subject", ['js' => 'comments,inbox,bbcode,
     </div>
 <?php
 
-while ([$SentDate, $SenderID, $Body, $MessageID] = $DB->next_record()) { ?>
+foreach ($conversation as list($SentDate, $SenderID, $Body, $MessageID)) {
+?>
     <div class="box vertical_space">
         <div class="head" style="overflow: hidden;">
             <div style="float: left;">
