@@ -17,7 +17,7 @@ if (!defined('AJAX')) {
 
 $Err = null;
 $Properties = [];
-$Type = CATEGORY[(int)$_POST['type']];
+$Type = CATEGORY[(int)$_POST['type'] - 1];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
 $Properties['Title'] = trim($_POST['title']);
@@ -42,7 +42,7 @@ $Properties['Year'] = trim($_POST['year']);
 $_POST['year'] = $Properties['Year'];
 $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
-$Properties['ReleaseType'] = $_POST['releasetype'];
+$Properties['ReleaseType'] = $_POST['releasetype'] ?? null;
 $Properties['Scene'] = !empty($_POST['scene']) ? '1' : '0';
 $Properties['Format'] = trim($_POST['format']);
 $Properties['Media'] = trim($_POST['media'] ?? '');
@@ -51,14 +51,16 @@ if ($Properties['Encoding'] === 'Other') {
     $_POST['other_bitrate'] = trim($_POST['other_bitrate'] ?? '');
 }
 $Properties['MultiDisc'] = $_POST['multi_disc'] ?? null;
-$Properties['TagList'] = array_unique(array_map('trim', explode(',', $_POST['tags']))); // Musicbranes loves to send duplicates
+if (isset($_POST['tags'])) {
+    $Properties['TagList'] = array_unique(array_map('trim', explode(',', $_POST['tags']))); // Musicbranes loves to send duplicates
+}
 $Properties['Image'] = trim($_POST['image'] ?? '');
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
 $Properties['VanityHouse'] = (int)($_POST['vanity_house'] ?? null && check_perms('torrents_edit_vanityhouse'));
 $Properties['TorrentDescription'] = trim($_POST['release_desc'] ?? '');
-if ($_POST['album_desc']) {
+if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
-} elseif ($_POST['desc']) {
+} elseif (isset($_POST['desc'])) {
     $Properties['GroupDescription'] = trim($_POST['desc'] ?? '');
 }
 $Properties['GroupID'] = $_POST['groupid'] ?? null;
@@ -93,9 +95,9 @@ if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
     ]);
 }
 
-if ($_POST['album_desc']) {
+if (isset($_POST['album_desc'])) {
     $Validate->setField('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
-} elseif ($_POST['desc']) {
+} elseif (isset($_POST['desc'])) {
     $Validate->setField('desc', '1','string','The description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
 }
 
@@ -582,6 +584,7 @@ if (!$IsNewGroup) {
     }
     $Cache->increment('stats_group_count');
 }
+$tgroup = $tgroupMan->findById($GroupID);
 
 // Description
 if ($NoRevision) {
@@ -696,7 +699,7 @@ $BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media
 $Announce = '';
 
 if ($isMusicUpload) {
-    $Announce .= Artists::display_artists($ArtistForm, false);
+    $Announce .= $tgroup->artistName() . ' - ';
 }
 $Announce .= $Properties['Title'] . ' ';
 $Details = "";
