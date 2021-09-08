@@ -43,7 +43,6 @@ $qrCode = Builder::create()
     ->build();
 
 View::show_header('Two-factor Authentication');
-
 echo $Twig->render('user/2fa/configure.twig', [
     'valid'    => $valid,
     'qrcode'   => $qrCode,
