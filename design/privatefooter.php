@@ -1,17 +1,15 @@
 </div>
 <?php
 echo Gazelle\Util\Textarea::activate();
-global $Debug;
+global $Debug, $Viewer;
 ?>
 <div id="footer">
-<?php if (DEBUG_MODE || check_perms('site_debug')) { ?>
+<?php if (DEBUG_MODE || $Viewer->permitted('site_debug')) { ?>
     <div id="site_debug">
 <?php
     global $Cache, $DB, $Twig;
     echo $Twig->render('debug/performance.twig', ['list' => $Debug->get_perf()]);
     echo $Twig->render('debug/flag.twig', ['list' => $Debug->get_flags()]);
-    echo $Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
-    echo $Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
     echo $Twig->render('debug/error.twig', ['list' => $Debug->get_errors()]);
     if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
         echo $Twig->render('debug/sphinxql.twig', ['list' => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]);
