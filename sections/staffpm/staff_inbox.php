@@ -85,6 +85,7 @@ $StaffPMs = $DB->prepared_query("
     LIMIT ? OFFSET ?
     ", ...$args
 );
+$list = $DB->to_array(false, MYSQLI_NUM, false);
 
 View::show_header('Staff Inbox');
 ?>
@@ -151,7 +152,7 @@ if ($Viewer->isFLS()) { ?>
     // List messages
     $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
     $Row = 'a';
-    while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID, $LastUserID] = $DB->next_record()) {
+    foreach ($list as list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID, $LastUserID)) {
         $Row = $Row === 'a' ? 'b' : 'a';
 
         // Get assigned
