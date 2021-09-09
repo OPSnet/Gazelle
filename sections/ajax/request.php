@@ -27,7 +27,7 @@ $Requestor = $userMan->findById($Request['UserID']);
 $Filler = $userMan->findById($Request['FillerID']);
 //Convenience variables
 $IsFilled = !empty($Request['TorrentID']);
-$CanVote = !$IsFilled && check_perms('site_vote');
+$CanVote = !$IsFilled && $Viewer->permitted('site_vote');
 
 if ($CategoryID == 0) {
     $CategoryName = 'Unknown';
@@ -44,7 +44,7 @@ if ($CategoryName == 'Music') {
 $RequestVotes = Requests::get_votes_array($requestId);
 $VoteCount = count($RequestVotes['Voters']);
 $UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);
-$CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
+$CanEdit = ($UserCanEdit || $Viewer->permitted('site_moderate_requests'));
 
 $JsonTopContributors = [];
 $VoteMax = ($VoteCount < 5 ? $VoteCount : 5);
