@@ -17,6 +17,28 @@ class DB extends Base {
         return $this;
     }
 
+    public function globalStatus(): array {
+        $this->db->prepared_query('SHOW GLOBAL STATUS');
+        return $this->db->to_array('Variable_name', MYSQLI_ASSOC, false);
+    }
+
+    public function globalVariables(): array {
+        $this->db->prepared_query('SHOW GLOBAL VARIABLES');
+        return $this->db->to_array('Variable_name', MYSQLI_ASSOC, false);
+    }
+
+    public function selectQuery(string $tableName): string {
+        $this->db->prepared_query("
+            SELECT concat(column_name, ' /* ', data_type, ' */') AS c
+            FROM information_schema.columns
+            WHERE table_schema = ?
+                AND table_name = ?
+            ORDER BY ordinal_position
+            ", SQLDB, $tableName
+        );
+        return "SELECT " . implode(",\n    ", $this->db->collect(0)) . "\nFROM $tableName\nWHERE --";
+    }
+
     /**
      * Soft delete a row from a table <t> by inserting it into deleted_<t> and then delete from <t>
      * @param string $schema the schema name

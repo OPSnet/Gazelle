@@ -11,7 +11,8 @@
 <table id="debug_query" class="debug_table hidden">
     {% endif %}
     <tr valign="top">
-        <td class="debug_data debug_query_data">{{ query.0|raw }}</td>
+        <td class="debug_data debug_query_data">{{ query.0|raw }}
+        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{ query.0|replace({'<br />': "\n"})|b64 }}">Inspect</a></td>
         <td class="rowa debug_info debug_query_time" style="width: 130px;" align="right">{{ query.1|number_format(5) }} ms</td>
         <td class="rowa debug_info debug_query_warnings">
         {% for warning in query.2 %}
