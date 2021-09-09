@@ -1,7 +1,7 @@
 <?php
 
 authorize();
-if (!check_perms('site_album_votes')) {
+if (!$Viewer->permitted('site_album_votes')) {
     json_error('forbidden');
 }
 

@@ -66,7 +66,7 @@ if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) 
 
 header('Content-Type: application/json; charset=utf-8');
 // Enforce rate limiting everywhere except info.php
-if (!check_perms('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
+if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     [$rate, $interval] = $LimitedPages[$Action];
     if (($UserRequests = $Cache->get_value('ajax_requests_'.$UserID)) === false) {
         $UserRequests = 0;
