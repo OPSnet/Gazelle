@@ -326,9 +326,7 @@ class Debug {
     public function get_queries_br() {
         $list = [];
         foreach (self::$db->Queries as $q) {
-            $q[0] = preg_replace('/\s+/', ' ', nl2br(
-                htmlspecialchars(trim($q[0]), ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_DISALLOWED | ENT_HTML5,  'UTF-8')
-            ));
+            $q[0] = preg_replace('/\s+/', ' ', nl2br(trim($q[0])));
             $list[] = $q;
         }
         return $list;

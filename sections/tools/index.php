@@ -11,7 +11,7 @@ if (!isset($_REQUEST['action'])) {
     die();
 }
 
-if (preg_match('/^(?:sandbox|update_geoip)/', $_REQUEST['action']) && !isset($argv[1]) && !check_perms('site_debug')) {
+if (preg_match('/^(?:sandbox|update_geoip)/', $_REQUEST['action']) && !isset($argv[1]) && !$Viewer->permitted('site_debug')) {
     error(403);
 }
 
@@ -261,10 +261,6 @@ switch ($_REQUEST['action']) {
         require_once('data/economic_stats.php');
         break;
 
-    case 'database_specifics':
-        require_once('data/database_specifics.php');
-        break;
-
     case 'special_users':
         require_once('data/special_users.php');
         break;
@@ -274,6 +270,9 @@ switch ($_REQUEST['action']) {
         break;
 
     // Development
+    case 'database_specifics':
+        require_once('development/database_specifics.php');
+        break;
     case 'service_stats':
         require_once('development/service_stats.php');
         break;
