@@ -5,7 +5,7 @@ ini_set('memory_limit', -1);
 if (empty($_GET['userid'])) {
     $user = $Viewer;
 } else {
-    if (!check_perms('users_override_paranoia')) {
+    if (!$Viewer->permitted('users_override_paranoia')) {
         error(403);
     }
     $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));

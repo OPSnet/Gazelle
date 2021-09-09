@@ -3,7 +3,7 @@
 if (empty($_GET['userid'])) {
     $UserID = $Viewer->id();
 } else {
-    if (!check_perms('users_override_paranoia')) {
+    if (!$Viewer->permitted('users_override_paranoia')) {
         print json_encode(['status' => 'failure']);
         die();
     }
@@ -13,8 +13,6 @@ if (empty($_GET['userid'])) {
         die();
     }
 }
-
-$Sneaky = ($UserID != $Viewer->id());
 
 $DB->prepared_query("
     SELECT ag.ArtistID, ag.Name
