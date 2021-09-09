@@ -7,7 +7,7 @@ if (!strlen($search)) {
     json_die("failure", "no search terms");
 }
 
-$condition = check_perms('site_advanced_search')
+$condition = $Viewer->permitted('site_advanced_search')
     ? "Username LIKE concat('%', ?, '%')"
     : "Username = ?";
 
