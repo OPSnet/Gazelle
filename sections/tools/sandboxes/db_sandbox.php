@@ -1,18 +1,26 @@
 <?php
 
-if (!check_perms('admin_site_debug')) {
+if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
 
-if (empty($_POST['query'])) {
-    $query = null;
-    $textAreaRows = 8;
-} else {
+$execute = false;
+if (isset($_GET['debug'])) {
+    $query = base64_decode($_GET['debug']);
+    $textAreaRows = max(8, substr_count($query, "\n") + 2);
+} elseif (isset($_GET['table'])) {
+    $query = (new Gazelle\DB)->selectQuery($_GET['table']);
+    $textAreaRows = max(8, substr_count($query, "\n") + 2);
+} elseif (!empty($_POST['query'])) {
     $query = trim($_POST['query']);
-    if (preg_match('@^(?:explain\s+)?select\b(?:[\s\w()<>/.,!`\'"=*+-])+\bfrom@i', $query) !== 1) {
+    if (preg_match('@^(?:show(\s+[\w%\';]+)+|(?:explain\s+)?select\b(?:[\s\w()<>/.,!`\'"=*+-])+\bfrom)@i', $query) !== 1) {
         error('Invalid query');
     }
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
+    $execute = true;
+} else {
+    $query = null;
+    $textAreaRows = 8;
 }
 
 function print_row($Row, $Class) {
@@ -23,6 +31,9 @@ $Title = 'DB Sandbox';
 View::show_header($Title);
 
 ?>
+<div class="linkbox">
+    <a href="tools.php?action=database_specifics" class="brackets">Schema info</a>
+</div>
 <div class="header">
     <h2><?=$Title?></h2>
 </div>
@@ -34,7 +45,7 @@ View::show_header($Title);
 </div>
 <?php
 
-if (!empty($query)) {
+if ($execute) {
     try {
         $success = true;
         $DB->prepared_query($query);

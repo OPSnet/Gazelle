@@ -1,10 +1,12 @@
 <div class="linkbox">
-    <a href="tools.php?action=database_specifics" class="brackets">Database specifics</a>
+    <a href="tools.php?action=database_specifics" class="brackets">Schema info</a>
+    <a href="tools.php?action=db_sandbox" class="brackets">DB sandbox</a>
 </div>
 
 <div class="pad"><div class="box pad">
-    <h3>Table definition</h3>
+    <h3>Table {{ table_name }} definition</h3>
     <pre>{{ definition }}</pre>
+    <a href="tools.php?action=db_sandbox&amp;table={{ table_name }}" class="brackets">Inspect</a>
 </div></div>
 
 <div class="pad"><div class="box pad">

@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_database_specifics')) {
+if (!$Viewer->permitted('site_database_specifics')) {
     error(403);
 }
 
@@ -12,6 +12,7 @@ if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) 
     $siteInfo = new Gazelle\SiteInfo;
     echo $Twig->render('admin/db-table.twig', [
         'definition' => $DB->row('SHOW CREATE TABLE ' . $tableName)[1],
+        'table_name' => $tableName,
         'table_read' => $siteInfo->tableRowsRead($tableName),
         'index_read' => $siteInfo->indexRowsRead($tableName),
     ]);
