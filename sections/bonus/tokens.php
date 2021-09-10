@@ -1,5 +1,7 @@
 <?php
 
+/** @var \Gazelle\Bonus $viewerBonus */
+
 use Gazelle\Exception\BonusException;
 
 authorize();
@@ -10,7 +12,7 @@ if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
 
 if ($match[1] === 'token') {
     try {
-        $Bonus->purchaseToken($Viewer->id(), $Label);
+        $viewerBonus->purchaseToken($Label);
     } catch (BonusException $e) {
         $message = $e->getMessage();
         error("Purchase not concluded ($message).");
@@ -26,7 +28,7 @@ if ($match[1] === 'token') {
         error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
     try {
-        $Bonus->purchaseTokenOther($Viewer->id(), $user->id(), $Label);
+        $viewerBonus->purchaseTokenOther($user->id(), $Label);
     } catch (BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');

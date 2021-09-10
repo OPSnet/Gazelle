@@ -457,7 +457,15 @@ class User extends BaseObject {
     }
 
     public function bonusPointsPerHour(): int {
-        return (new \Gazelle\Bonus)->userHourlyRate($this->id);
+        return (new \Gazelle\Bonus($this))->hourlyRate();
+    }
+
+    public function bonusPointsSpent(): int {
+        return (int)$this->getSingleValue('user_bp_spent', '
+            SELECT sum(Price)
+            FROM bonus_history
+            WHERE UserID = ?
+        ');
     }
 
     public function downloadedSize(): int {
@@ -1976,14 +1984,6 @@ class User extends BaseObject {
         return $this->getSingleValue('user_release_votes', '
             SELECT count(*)
             FROM users_votes
-            WHERE UserID = ?
-        ');
-    }
-
-    public function bonusPointsSpent(): int {
-        return (int)$this->getSingleValue('user_bp_spent', '
-            SELECT sum(Price)
-            FROM bonus_history
             WHERE UserID = ?
         ');
     }

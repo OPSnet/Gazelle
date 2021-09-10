@@ -20,7 +20,6 @@ $ForumPosts       = $user->stats()->forumPostTotal();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $user->stats()->uploadTotal() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $user->stats()->artistAddedTotal() : null;
 $releaseVotes     = $user->releaseVotes();
-$bonusPointsSpent = $user->bonusPointsSpent();
 $torrentComments  = $user->propertyVisible($Viewer, 'torrentcomments++') ? $user->torrentCommentCount() : null;
 $collageContribs  = $user->propertyVisible($Viewer, 'collagecontribs+') ? $user->collagesContributed() : null;
 
@@ -36,7 +35,7 @@ $rank = new Gazelle\UserRank(
         'artists'    => $ArtistsAdded ?? 0,
         'collage'    => $collageContribs ?? 0,
         'votes'      => $releaseVotes,
-        'bonus'      => $bonusPointsSpent,
+        'bonus'      => $user->bonusPointsSpent(),
         'comment-t'  => $torrentComments ?? 0,
     ]
 );
