@@ -5,84 +5,58 @@ namespace Gazelle;
 use \Gazelle\Exception\BonusException;
 
 class Bonus extends Base {
-    const CACHE_ITEM = 'bonus_item';
-    const CACHE_OPEN_POOL = 'bonus_pool';
+    const CACHE_OPEN_POOL = 'bonus_pool'; // also defined in Manager\Bonus
     const CACHE_PURCHASE = 'bonus_purchase_%d';
     const CACHE_SUMMARY = 'bonus_summary_%d';
     const CACHE_HISTORY = 'bonus_history_%d_%d';
     const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
-    protected $items;
+    protected User $user;
+    protected int $userId;
 
-    public function __construct() {
+    public function __construct(User $user) {
         parent::__construct();
+        $this->user = $user;
+        $this->userId = $user->id();
     }
 
-    protected function items() {
-        $this->items = $this->cache->get_value(self::CACHE_ITEM);
-        if ($this->items === false) {
-            $discount = $this->discount();
-            $this->db->prepared_query("
-                SELECT ID,
-                 Price * (greatest(0, least(100, 100 - ?)) / 100) as Price,
-                    Amount, MinClass, FreeClass, Label, Title, sequence,
-                    IF (Label REGEXP '^other-', 'ConfirmOther', 'null') AS JS_next_function,
-                    IF (Label REGEXP '^title-bb-[yn]', 'NoOp', 'ConfirmPurchase') AS JS_on_click
-                FROM bonus_item
-                ORDER BY sequence
-                ", $discount
-            );
-            $this->items = $this->db->has_results() ? $this->db->to_array('Label') : [];
-            $this->cache->cache_value(self::CACHE_ITEM, $this->items, 86400 * 30);
-        }
-        return $this->items;
+    public function tableName(): string {
+        return 'bonus_history';
     }
 
-    /**
-     * Return the global discount rate for the shop
-     *
-     * @return int Discount rate (0: normal price, 100: everything is free :)
-     */
-    public function discount(): int {
-        return (int)(new Manager\SiteOption)->findValueByName('bonus-discount') ?? 0;
-    }
-
-    public function flushUserCache($userId) {
+    public function flush() {
         $this->cache->deleteMulti([
-            'u_' . $userId,
-            'user_info_heavy_' . $userId,
-            'user_stats_' . $userId,
+            'u_' . $this->user->id(),
+            'user_info_heavy_' . $this->user->id(),
+            'user_stats_' . $this->user->id(),
+            sprintf(self::CACHE_HISTORY, $this->userId, 0),
+            sprintf(self::CACHE_POOL_HISTORY, $this->userId),
         ]);
     }
 
-    public function flushPriceCache() {
-        $this->items = [];
-        $this->cache->delete_value(self::CACHE_ITEM);
+    protected function items(): array {
+        return (new Manager\Bonus)->itemList();
     }
 
-    public function getList() {
-        return $this->items();
-    }
-
-    public function getListForUser(User $user) {
+    public function getListForUser(): array {
         $items = $this->items();
         $allowed = [];
         foreach ($items as $item) {
-            if ($item['Label'] === 'seedbox' && $user->hasAttr('feature-seedbox')) {
+            if ($item['Label'] === 'seedbox' && $this->user->hasAttr('feature-seedbox')) {
                 continue;
             } elseif (
                 $item['Label'] === 'invite'
-                && (check_perms('site_send_unlimited_invites') || !$user->canPurchaseInvite())
+                && (check_perms('site_send_unlimited_invites') || !$this->user->canPurchaseInvite())
             ) {
                 continue;
             }
-            $item['Price'] = $this->getEffectivePrice($item['Label'], $user->id());
+            $item['Price'] = $this->getEffectivePrice($item['Label']);
             $allowed[] = $item;
         }
         return $allowed;
     }
 
-    public function getItem($label) {
+    public function getItem($label): ?array {
         $items = $this->items();
         return array_key_exists($label, $items) ? $items[$label] : null;
     }
@@ -105,21 +79,20 @@ class Bonus extends Base {
         return BONUS_AWARD_OTHER;
     }
 
-    public function getEffectivePrice($label, $userId): int {
+    public function getEffectivePrice($label): int {
         $item = $this->items()[$label];
-        $user = new User($userId);
         if (preg_match('/^collage-\d$/', $label)) {
-            return $item['Price'] * pow(2, $user->paidPersonalCollages());
+            return $item['Price'] * pow(2, $this->user->paidPersonalCollages());
         }
-        return $user->effectiveClass() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
+        return $this->user->effectiveClass() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
 
-    public function getListOther($balance) {
+    public function getListOther($balance): array {
         $items = $this->items();
-        $list_other = [];
+        $other = [];
         foreach ($items as $label => $item) {
             if (preg_match('/^other-\d$/', $label) && $balance >= $item['Price']) {
-                $list_other[] = [
+                $other[] = [
                     'Label' => $item['Label'],
                     'Name'  => $item['Title'],
                     'Price' => $item['Price'],
@@ -127,26 +100,49 @@ class Bonus extends Base {
                 ];
             }
         }
-        return $list_other;
+        return $other;
     }
 
-    public function getOpenPool() {
-        $key = self::CACHE_OPEN_POOL;
-        if (($pool = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
-                SELECT bonus_pool_id, name, total
-                FROM bonus_pool
-                WHERE now() BETWEEN since_date AND until_date
-                ORDER BY since_date
-                LIMIT 1
-            ");
-            $pool = $this->db->next_record(MYSQLI_ASSOC);
-            $this->cache->cache_value($key, $pool, 3600);
+    public function summary() {
+        $key = sprintf(self::CACHE_SUMMARY, $this->userId);
+        $summary = $this->cache->get_value($key);
+        if ($summary === false) {
+            $summary = $this->db->rowAssoc('
+                SELECT count(*) AS nr,
+                    coalesce(sum(price), 0) AS total
+                FROM bonus_history
+                WHERE UserID = ?
+                ', $this->userId
+            );
+            $this->cache->cache_value($key, $summary, 86400 * 7);
         }
-        return $pool ?? [];
+        return $summary;
     }
 
-    public function donate(int $poolId, int $value, int $userId, int $effectiveClass) {
+    public function history(int $limit, int $offset): array {
+        $page = $offset / $limit;
+        $key = sprintf(self::CACHE_HISTORY, $this->userId, $page);
+        $history = $this->cache->get_value($key);
+        if ($history === false) {
+            $this->db->prepared_query('
+                SELECT i.Title, h.Price, h.PurchaseDate, h.OtherUserID
+                FROM bonus_history h
+                INNER JOIN bonus_item i ON (i.ID = h.ItemID)
+                WHERE h.UserID = ?
+                ORDER BY PurchaseDate DESC
+                LIMIT ? OFFSET ?
+                ', $this->userId, $limit, $offset
+            );
+            $history = $this->db->to_array();
+            $this->cache->cache_value($key, $history, 86400 * 3);
+            /* since we had to fetch this page, invalidate the next one */
+            $this->cache->delete_value(sprintf(self::CACHE_HISTORY, $this->userId, $page+1));
+        }
+        return $history;
+    }
+
+    public function donate(int $poolId, int $value) {
+        $effectiveClass = $this->user->effectiveClass();
         if ($effectiveClass < 250) {
             $taxedValue = $value * BONUS_POOL_TAX_STD;
         }
@@ -160,58 +156,18 @@ class Bonus extends Base {
             $taxedValue = $value * BONUS_POOL_TAX_STAFF;
         }
 
-        if (!$this->removePoints($userId, $value)) {
+        if (!$this->removePoints($value)) {
             return false;
         }
-        (new BonusPool($poolId))->contribute($userId, $value, $taxedValue);
+        $this->user->flush();
+        (new \Gazelle\BonusPool($poolId))->contribute($this->userId, $value, $taxedValue);
 
-        $this->cache->deleteMulti([
-            self::CACHE_OPEN_POOL,
-            sprintf(self::CACHE_POOL_HISTORY, $userId),
-            'u_' . $userId,
-            'user_info_heavy_' . $userId,
-            'user_stats_' . $userId,
-        ]);
+        $this->cache->delete(self::CACHE_OPEN_POOL);
         return true;
     }
 
-    public function userSummary($userId) {
-        $key = sprintf(self::CACHE_SUMMARY, $userId);
-        $summary = $this->cache->get_value($key);
-        if ($summary === false) {
-            $this->db->prepared_query('
-                SELECT count(*) AS nr, coalesce(sum(price), 0) AS total FROM bonus_history WHERE UserID = ?
-                ', $userId
-            );
-            $summary = $this->db->next_record(MYSQLI_ASSOC);
-            $this->cache->cache_value($key, $summary, 86400 * 7);
-        }
-        return $summary;
-    }
-
-    public function userHistory(int $userId, int $limit, int $offset): array {
-        $page = $offset / $limit;
-        $key = sprintf(self::CACHE_HISTORY ,$userId, $page);
-        if (($history = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query('
-                SELECT i.Title, h.Price, h.PurchaseDate, h.OtherUserID
-                FROM bonus_history h
-                INNER JOIN bonus_item i ON (i.ID = h.ItemID)
-                WHERE h.UserID = ?
-                ORDER BY PurchaseDate DESC
-                LIMIT ? OFFSET ?
-                ', $userId, $limit, $offset
-            );
-            $history = $this->db->to_array();
-            $this->cache->cache_value($key, $history, 86400 * 3);
-            /* since we had to fetch this page, invalidate the next one */
-            $this->cache->delete_value(sprintf(self::CACHE_HISTORY ,$userId, $page+1));
-        }
-        return $history;
-    }
-
-    public function userPoolHistory($userId) {
-        $key = sprintf(self::CACHE_POOL_HISTORY, $userId);
+    public function poolHistory(): array {
+        $key = sprintf(self::CACHE_POOL_HISTORY, $this->userId);
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
@@ -221,7 +177,7 @@ class Bonus extends Base {
                 WHERE c.user_id = ?
                 GROUP BY p.until_date, p.name
                 ORDER BY p.until_date, p.name
-                ', $userId
+                ', $this->userId
             );
             $history = $this->db->to_array();
             $this->cache->cache_value($key, $history, 86400 * 3);
@@ -235,9 +191,10 @@ class Bonus extends Base {
      * @param int user_id
      * @return array of [title, total]
      */
-    public function purchaseHistoryByUser(int $userId): array {
-        $key = sprintf(self::CACHE_PURCHASE, $userId);
-        if (($history = $this->cache->get_value($key)) === false) {
+    public function purchaseHistoryByUser(): array {
+        $key = sprintf(self::CACHE_PURCHASE, $this->userId);
+        $history = $this->cache->get_value($key);
+        if ($history === false) {
             $this->db->prepared_query("
                 SELECT bi.ID as id,
                     bi.Title AS title,
@@ -248,7 +205,7 @@ class Bonus extends Base {
                 WHERE bh.UserID = ?
                 GROUP BY bi.Title
                 ORDER BY bi.sequence
-                ", $userId
+                ", $this->userId
             );
             $history = $this->db->to_array('id', MYSQLI_ASSOC, false);
             $this->cache->cache_value($key, $history, 86400 * 3);
@@ -256,12 +213,12 @@ class Bonus extends Base {
         return $history;
     }
 
-    public function purchaseInvite($userId) {
-        $item = $this->items()['invite'];
-        $price = $item['Price'];
-        if (!(new User($userId))->canPurchaseInvite()) {
+    public function purchaseInvite() {
+        if (!$this->user->canPurchaseInvite()) {
             throw new BonusException('invite:minclass');
         }
+        $item = $this->items()['invite'];
+        $price = $item['Price'];
         $this->db->prepared_query('
             UPDATE user_bonus ub
             INNER JOIN users_main um ON (um.ID = ub.user_id) SET
@@ -269,44 +226,43 @@ class Bonus extends Base {
                 um.Invites = um.Invites + 1
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $userId
+            ', $price, $price, $this->userId
         );
         if ($this->db->affected_rows() != 2) {
             throw new BonusException('invite:nofunds');
         }
-        $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->flushUserCache($userId);
+        $this->addPurchaseHistory($item['ID'], $price);
+        $this->flush();
         return true;
     }
 
-    public function purchaseTitle($userId, $label, $title) {
+    public function purchaseTitle($label, $title) {
         $item  = $this->items()[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
 
-        $user = new User($userId);
         try {
-            $user->setTitle($title);
+            $this->user->setTitle($title);
         } catch (Exception\UserException $e) {
             throw new BonusException('title:too-long');
         }
 
         /* if the price is 0, nothing changes so avoid hitting the db */
-        $price = $this->getEffectivePrice($label, $userId);
+        $price = $this->getEffectivePrice($label);
         if ($price > 0) {
-            if (!$this->removePoints($userId, $price)) {
+            if (!$this->removePoints($price)) {
                 throw new BonusException('title:nofunds');
             }
         }
 
-        $user->modify();
-        $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->flushUserCache($userId);
+        $this->user->modify();
+        $this->addPurchaseHistory($item['ID'], $price);
+        $this->flush();
         return true;
     }
 
-    public function purchaseCollage($userId, $label) {
+    public function purchaseCollage($label) {
         $item  = $this->items()[$label];
-        $price = $this->getEffectivePrice($label, $userId);
+        $price = $this->getEffectivePrice($label);
         $this->db->prepared_query('
             UPDATE user_bonus ub
             INNER JOIN users_info ui ON (ui.UserID = ub.user_id) SET
@@ -314,27 +270,27 @@ class Bonus extends Base {
                 ui.collages = ui.collages + 1
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $userId
+            ', $price, $price, $this->userId
         );
         $rows = $this->db->affected_rows();
         if (!(($price > 0 && $rows === 2) || ($price === 0 && $rows === 1))) {
             throw new BonusException('collage:nofunds');
         }
-        $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->flushUserCache($userId);
+        $this->addPurchaseHistory($item['ID'], $price);
+        $this->flush();
         return true;
     }
 
-    public function unlockSeedbox(int $userId) {
-        $item  = $this->items['seedbox'];
-        $price = $this->getEffectivePrice('seedbox', $userId);
+    public function unlockSeedbox() {
+        $item  = $this->items()['seedbox'];
+        $price = $this->getEffectivePrice('seedbox');
         $this->db->begin_transaction();
         $this->db->prepared_query('
             UPDATE user_bonus ub SET
                 ub.points = ub.points - ?
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $userId
+            ', $price, $price, $this->userId
         );
         if ($this->db->affected_rows() != 1) {
             $this->db->rollback();
@@ -345,7 +301,7 @@ class Bonus extends Base {
                 INSERT INTO user_has_attr
                        (UserID, UserAttrID)
                 VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
-                ", $userId, 'feature-seedbox'
+                ", $this->userId, 'feature-seedbox'
             );
         } catch (\DB_MYSQL_DuplicateKeyException $e) {
             // no point in buying a second time
@@ -353,17 +309,17 @@ class Bonus extends Base {
             throw new BonusException('seedbox:already-purchased');
         }
         $this->db->commit();
-        $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->flushUserCache($userId);
+        $this->addPurchaseHistory($item['ID'], $price);
+        $this->flush();
         return true;
     }
 
-    public function purchaseToken($userId, $label) {
+    public function purchaseToken($label): int {
         $item = $this->items()[$label];
         if (!$item) {
             throw new BonusException('selfToken:badlabel');
         }
-        $amount = $item['Amount'];
+        $amount = (int)$item['Amount'];
         $price  = $item['Price'];
         $this->db->prepared_query('
             UPDATE user_bonus ub
@@ -372,25 +328,25 @@ class Bonus extends Base {
                 uf.tokens = uf.tokens + ?
             WHERE ub.user_id = ?
                 AND ub.points >= ?
-            ', $price, $amount, $userId, $price
+            ', $price, $amount, $this->userId, $price
         );
         if ($this->db->affected_rows() != 2) {
             throw new BonusException('selfToken:funds');
         }
-        $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->flushUserCache($userId);
-        return (int)$amount;
+        $this->addPurchaseHistory($item['ID'], $price);
+        $this->flush();
+        return $amount;
     }
 
-    public function purchaseTokenOther($fromID, $toID, $label) {
-        if ($fromID === $toID) {
+    public function purchaseTokenOther($toID, $label) {
+        if ($this->userId === $toID) {
             throw new BonusException('otherToken:self');
         }
         $item = $this->items()[$label];
         if (!$item) {
             throw new BonusException('otherToken:badlabel');
         }
-        $amount = $item['Amount'];
+        $amount = (int)$item['Amount'];
         $price  = $item['Price'];
 
         /* Take the bonus points from the giver and give tokens
@@ -413,32 +369,31 @@ class Bonus extends Base {
                 AND other.ID = ?
                 AND self.ID = ?
                 AND ub.points >= ?
-            ", $price, $amount, $toID, $fromID, $price
+            ", $price, $amount, $toID, $this->userId, $price
         );
         if ($this->db->affected_rows() != 2) {
             throw new BonusException('otherToken:no-gift-funds');
         }
-        $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);
+        $this->addPurchaseHistory($item['ID'], $price, $toID);
         $this->cache->deleteMulti([
-            'u_' . $fromID,
+            'u_' . $this->userId,
             'u_' . $toID,
-            'user_info_heavy_' . $fromID,
+            'user_info_heavy_' . $this->userId,
             'user_info_heavy_' . $toID,
-            'user_stats_' . $fromID,
+            'user_stats_' . $this->userId,
             'user_stats_' . $toID,
         ]);
-        $this->sendPmToOther($fromID, $toID, $amount);
+        $this->sendPmToOther($toID, $amount);
 
-        return (int)$amount;
+        return $amount;
     }
 
-    public function sendPmToOther($fromID, $toID, $amount) {
-        global $Twig;
+    public function sendPmToOther($toID, $amount) {
         (new Manager\User)->sendPM($toID, 0,
             "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
-            $Twig->render('bonus/token-other.twig', [
+            $this->twig->render('bonus/token-other.twig', [
                 'TO'       => (new User($toID))->username(),
-                'FROM'     => (new User($fromID))->username(),
+                'FROM'     => $this->user->username(),
                 'AMOUNT'   => $amount,
                 'PLURAL'   => plural($amount),
                 'WIKI_ID'  => 57,
@@ -446,149 +401,88 @@ class Bonus extends Base {
         );
     }
 
-    private function addPurchaseHistory($itemId, $userId, $price, $otherUserId = null) {
+    private function addPurchaseHistory($itemId, $price, $otherUserId = null): int {
         $this->cache->deleteMulti([
-            sprintf(self::CACHE_PURCHASE, $userId),
-            sprintf(self::CACHE_SUMMARY, $userId),
-            sprintf(self::CACHE_HISTORY, $userId, 0)
+            sprintf(self::CACHE_PURCHASE, $this->userId),
+            sprintf(self::CACHE_SUMMARY, $this->userId),
+            sprintf(self::CACHE_HISTORY, $this->userId, 0)
         ]);
         $this->db->prepared_query("
             INSERT INTO bonus_history
                    (ItemID, UserID, Price, OtherUserID)
             VALUES (?,      ?,      ?,     ?)
-            ", $itemId, $userId, $price, $otherUserId
+            ", $itemId, $this->userId, $price, $otherUserId
         );
         return $this->db->affected_rows();
     }
 
-    public function setPoints($userId, $points) {
-        $this->db->prepared_query('UPDATE user_bonus SET points = ? WHERE user_id = ?', $points, $userId);
-        $this->flushUserCache($userId);
-    }
-
-    public function addPoints($userId, $points) {
-        $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE user_id = ?', $points, $userId);
-        $this->flushUserCache($userId);
-    }
-
-    public function addMultiPoints(int $points, array $ids = []): int {
-        if ($ids) {
-            $this->db->prepared_query("
-                UPDATE user_bonus SET
-                    points = points + ?
-                WHERE user_id in (" . placeholders($ids) . ")
-                ", $points, ...$ids
-            );
-            $this->cache->deleteMulti(array_map(fn($k) => "user_stats_$k", $ids));
-        }
-        return count($ids);
-    }
-
-    public function addGlobalPoints(int $points): int {
+    public function setPoints(int $points): int {
         $this->db->prepared_query("
-            SELECT um.ID
-            FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-            WHERE ui.DisablePoints = '0'
-                AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
-        ");
-        return $this->addMultiPoints($points, $this->db->collect('ID', false));
-    }
-
-    public function addActivePoints(int $points, string $since): int {
-        $this->db->prepared_query("
-            SELECT um.ID
-            FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            INNER JOIN user_last_access ula ON (ula.user_id = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-            WHERE ui.DisablePoints = '0'
-                AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
-                AND ula.last_access >= ?
-            ", $since
+            UPDATE user_bonus SET
+                points = ?
+            WHERE user_id = ?
+            ", $points, $this->userId
         );
-        return $this->addMultiPoints($points, $this->db->collect('ID', false));
+        $this->flush();
+        return $this->db->affected_rows();
     }
 
-    public function addUploadPoints(int $points, string $since): int {
-        $this->db->prepared_query($sql = "
-            SELECT DISTINCT um.ID
-            FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            INNER JOIN torrents t ON (t.UserID = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-            WHERE ui.DisablePoints = '0'
-                AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
-                AND t.Time >= ?
-            ", $since
-        );
-        return $this->addMultiPoints($points, $this->db->collect('ID', false));
-    }
-
-    public function addSeedPoints(int $points): int {
+    public function addPoints(int $points): int {
         $this->db->prepared_query("
-            SELECT DISTINCT um.ID
-            FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            INNER JOIN xbt_files_users xfu ON (xfu.uid = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-            WHERE ui.DisablePoints = '0'
-                AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
-                AND xfu.active = 1 and xfu.remaining = 0 and xfu.connectable = 1 and timespent > 0
-        ");
-        return $this->addMultiPoints($points, $this->db->collect('ID', false));
+            UPDATE user_bonus SET
+                points = points + ?
+            WHERE user_id = ?
+            ", $points, $this->userId
+        );
+        $this->flush();
+        return $this->db->affected_rows();
     }
 
-    public function removePointsForUpload($userId, array $torrentDetails) {
-        list($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = $torrentDetails;
+    public function removePointsForUpload(array $torrentDetails): int {
+        [$Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum] = $torrentDetails;
         $value = $this->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum);
-        return $this->removePoints($userId, $value, true);
+        return $this->removePoints($value, true);
     }
 
-    public function removePoints($userId, $points, $force = false) {
+    public function removePoints($points, $force = false): bool {
         if ($force) {
-        // allow points to go negative
+            // allow points to go negative
             $this->db->prepared_query('
                 UPDATE user_bonus SET points = points - ? WHERE user_id = ?
-                ', $points, $userId
+                ', $points, $this->userId
             );
         } else {
             // Fail if points would go negative
             $this->db->prepared_query('
                 UPDATE user_bonus SET points = points - ? WHERE points >= ?  AND user_id = ?
-                ', $points, $points, $userId
+                ', $points, $points, $this->userId
             );
             if ($this->db->affected_rows() != 1) {
                 return false;
             }
         }
-        $this->flushUserCache($userId);
+        $this->flush();
         return true;
     }
 
-    public function userHourlyRate(int $userId): float {
+    public function hourlyRate(): float {
         return $this->db->scalar("
-            SELECT coalesce(sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)), 0) as Rate
-            FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
+            SELECT sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders))
+            FROM (
+                SELECT DISTINCT uid,fid
+                FROM xbt_files_users
+                WHERE active = 1 AND remaining = 0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+            ) AS xfu
             INNER JOIN xbt_files_history AS xfh USING (uid, fid)
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-            ", $userId, $userId
-        );
+            ", $this->userId, $this->userId
+        ) ?? 0.0;
     }
 
-    public function userTotals($userId) {
+    public function userTotals() {
         [$total, $size, $hourly, $daily, $weekly, $monthly, $yearly, $ppGB] = $this->db->row("
             SELECT
                 count(xfu.uid) as TotalTorrents,
@@ -609,12 +503,12 @@ class Bonus extends Base {
             WHERE
                 xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-            ", $userId, $userId
+            ", $this->userId, $this->userId
         );
         return [(int)$total, (float)$size, (float)$hourly, (float)$daily, (float)$weekly, (float)$monthly, (float)$yearly, (float)$ppGB];
     }
 
-    public function userDetails($userId, $orderBy, $orderWay, $limit, $offset) {
+    public function userDetails($orderBy, $orderWay, $limit, $offset) {
         $this->db->prepared_query("
             SELECT
                 t.ID,
@@ -652,98 +546,8 @@ class Bonus extends Base {
             ORDER BY $orderBy $orderWay
             LIMIT ?
             OFFSET ?
-            ", $userId, $userId, $limit, $offset
+            ", $this->userId, $this->userId, $limit, $offset
         );
         return [$this->db->collect('GroupID'), $this->db->to_array('ID', MYSQLI_ASSOC)];
-    }
-
-    public function givePoints(\Gazelle\Schedule\Task $task = null) {
-        //------------------------ Update Bonus Points -------------------------//
-        // calcuation:
-        // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))
-        // Size (convert from bytes to GB) is in torrents
-        // Seedtime (convert from hours to days) is in xbt_snatched
-        // Seeders is in torrents
-
-        // precalculate the users we update this run
-        if ($task) {
-            $task->debug('begin');
-        } else {
-            echo "begin\n";
-        }
-        $this->db->prepared_query("
-            CREATE TEMPORARY TABLE xbt_unique (
-                uid int(11) NOT NULL,
-                fid int(11) NOT NULL,
-                PRIMARY KEY (uid, fid)
-            )
-            SELECT DISTINCT uid, fid
-            FROM xbt_files_users xfu
-            INNER JOIN users_main AS um ON (um.ID = xfu.uid)
-            INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
-            INNER JOIN torrents   AS t  ON (t.ID = xfu.fid)
-            WHERE xfu.active = 1
-                AND xfu.remaining = 0
-                AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
-                AND um.Enabled = '1'
-                AND ui.DisablePoints = '0'
-                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-        ");
-        if ($task) {
-            $task->debug('xbt_unique constructed');
-        } else {
-            echo "xbt_unique constructed\n";
-        }
-
-        $userId = 1;
-        $chunk = 150;
-        $processed = 0;
-        $more = true;
-        while ($more) {
-            /* update a block of users at a time, to minimize locking contention */
-            $this->db->prepared_query("
-                INSERT INTO user_bonus
-                SELECT
-                    xfu.uid AS ID,
-                    sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)) as new
-                FROM xbt_unique xfu
-                INNER JOIN xbt_files_history AS xfh USING (uid, fid)
-                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                WHERE xfu.uid BETWEEN ? AND ?
-                    AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-                GROUP BY
-                    xfu.uid
-                ON DUPLICATE KEY UPDATE points = points + VALUES(points)
-                ", $userId, $userId + $chunk - 1
-            );
-            $processed += $this->db->affected_rows();
-
-            /* flush their stats */
-            $this->db->prepared_query("
-                SELECT concat('user_stats_', xfu.uid) as ck
-                FROM xbt_unique xfu
-                WHERE xfu.uid BETWEEN ? AND ?
-                ", $userId, $userId + $chunk - 1
-            );
-            if ($this->db->has_results()) {
-                $this->cache->deleteMulti($this->db->collect('ck', false));
-            }
-            if ($task) {
-                $task->debug('chunk done', $userId);
-            } else {
-                echo "chunk done $userId\n";
-            }
-
-            /* see if there are some more users to process */
-            $userId += $chunk;
-            $more = $this->db->scalar("
-                SELECT 1
-                FROM xbt_unique
-                WHERE uid >= ?
-                ", $userId
-            );
-        }
-        return $processed;
     }
 }

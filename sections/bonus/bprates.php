@@ -32,10 +32,10 @@ if (is_null($user)) {
     error(404);
 }
 $userId = $user->id();
+$bonus = new Gazelle\Bonus($user);
 
-$Bonus = new Gazelle\Bonus;
 [$totalTorrents, $totalSize, $totalHourlyPoints, $totalDailyPoints, $totalWeeklyPoints, $totalMonthlyPoints, $totalYearlyPoints, $totalPointsPerGB
-] = $Bonus->userTotals($userId);
+] = $bonus->userTotals();
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($totalTorrents);
@@ -102,7 +102,7 @@ View::show_header($Title);
 <?php
 
 if ($totalTorrents) {
-    [$groupIDs, $torrentStats] = $Bonus->userDetails($userId, $header->getOrderBy(), $header->getOrderDir(),
+    [$groupIDs, $torrentStats] = $bonus->userDetails($header->getOrderBy(), $header->getOrderDir(),
         $limit, $offset);
     $groups = Torrents::get_groups($groupIDs, true, true, false);
     foreach ($torrentStats as $stats) {

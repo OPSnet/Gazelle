@@ -1,5 +1,7 @@
 <?php
 
+/** @var \Gazelle\Bonus $viewerBonus */
+
 use Gazelle\Exception\BonusException;
 
 if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST['BBCode'])) {
@@ -31,7 +33,7 @@ if (isset($_POST['confirm'])) {
         error(403);
     }
     try {
-        $Bonus->purchaseTitle($Viewer->id(), $Label, $_POST['title']);
+        $viewerBonus->purchaseTitle($Label, $_POST['title']);
         header('Location: bonus.php?complete=' . urlencode($Label));
     } catch (BonusException $e) {
         switch ($e->getMessage()) {

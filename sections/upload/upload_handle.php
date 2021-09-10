@@ -1,5 +1,7 @@
 <?php
 
+/** @var \Gazelle\Manager\Bonus $bonus */
+
 use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 
@@ -696,8 +698,8 @@ $torrentFiler->put($bencoder->getEncode(), $TorrentID);
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
 // Running total for amount of BP to give
-$Bonus = new Gazelle\Bonus;
-$BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
+$bonusMan = new Gazelle\Manager\Bonus;
+$BonusPoints = $bonusMan->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
     $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
 
 //******************************************************************************//
@@ -745,7 +747,7 @@ $Debug->set_flag('upload: announced on irc');
 //--------------- Upload Extra torrents ----------------------------------------//
 
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-    $BonusPoints += $Bonus->getTorrentValue($ExtraTorrent['Format'], $Properties['Media'], $ExtraTorrent['Encoding']);
+    $BonusPoints += $bonusMan->getTorrentValue($ExtraTorrent['Format'], $Properties['Media'], $ExtraTorrent['Encoding']);
 
     $DB->prepared_query("
         INSERT INTO torrents
@@ -794,7 +796,7 @@ $Viewer->stats()->increment('upload_total', 1 + count($ExtraTorrentsInsert));
 //--------------- Give Bonus Points  -------------------------------------------//
 
 if (!$Viewer->disableBonusPoints()) {
-    $Bonus->addPoints($Viewer->id(), $BonusPoints);
+    (new Gazelle\Bonus($Viewer))->addPoints($BonusPoints);
 }
 
 //******************************************************************************//

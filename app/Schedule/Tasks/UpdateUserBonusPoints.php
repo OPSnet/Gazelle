@@ -6,7 +6,6 @@ class UpdateUserBonusPoints extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $bonus = new \Gazelle\Bonus;
-        $this->processed = $bonus->givePoints($this);
+        $this->processed = (new \Gazelle\Manager\Bonus)->givePoints($this);
     }
 }

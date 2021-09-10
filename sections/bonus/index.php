@@ -4,18 +4,17 @@ if ($Viewer->disableBonusPoints()) {
     error('Your points have been disabled.');
 }
 
-$Bonus = new \Gazelle\Bonus;
-
 const DEFAULT_PAGE = 'store.php';
 
 switch ($_GET['action'] ?? '') {
     case 'purchase':
         /* handle validity and cost as early as possible */
         if (isset($_REQUEST['label']) && preg_match('/^[a-z]{1,15}(-\w{1,15}){0,4}/', $_REQUEST['label'])) {
+            $viewerBonus = new \Gazelle\Bonus($Viewer);
             $Label = $_REQUEST['label'];
-            $Item = $Bonus->getItem($Label);
+            $Item = $viewerBonus->getItem($Label);
             if ($Item) {
-                $Price = $Bonus->getEffectivePrice($Label, $Viewer->id());
+                $Price = $viewerBonus->getEffectivePrice($Label);
                 if ($Price > $Viewer->bonusPointsTotal()) {
                     error('You cannot afford this item.');
                 }
@@ -57,7 +56,7 @@ switch ($_GET['action'] ?? '') {
         require_once('history.php');
         break;
     case 'cacheflush':
-        $Bonus->flushPriceCache();
+        (new \Gazelle\Manager\Bonus)->flushPriceCache();
         header("Location: bonus.php");
         exit;
     case 'donate':

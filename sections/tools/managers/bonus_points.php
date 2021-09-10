@@ -16,10 +16,10 @@ if (isset($_REQUEST['add_points'])) {
         error('Please enter a positive number of points.');
     }
 
-    $bonus = new \Gazelle\Bonus;
-    $activeCount = $bonus->addActivePoints($active, $since);
-    $uploadCount = $bonus->addUploadPoints($upload, $since);
-    $seedCount   = $bonus->addSeedPoints($seed);
+    $bonusMan = new Gazelle\Manager\Bonus;
+    $activeCount = $bonusMan->addActivePoints($active, $since);
+    $uploadCount = $bonusMan->addUploadPoints($upload, $since);
+    $seedCount   = $bonusMan->addSeedPoints($seed);
     if ($activeCount) {
         $message .= '<strong>' . number_format($active) . ' bonus points added to ' . number_format($activeCount) . ' active users.</strong><br />';
     }

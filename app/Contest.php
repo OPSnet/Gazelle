@@ -251,7 +251,6 @@ class Contest extends Base {
         $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
         fprintf($report, "# user=%0.2f contest=%0.2f entry=%0.f\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
 
-        $bonus = new Bonus;
         $userMan = new Manager\User;
         $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         foreach ($participants as $p) {
@@ -283,7 +282,7 @@ class Contest extends Base {
                     'entries'         => $p['total_entries'] == 1 ? 'entry' : 'entries',
                 ])
             );
-            $bonus->addPoints($p['ID'], $totalGain);
+            (new Bonus(new User($p['ID'])))->addPoints($totalGain);
             $this->db->prepared_query("
                 UPDATE users_info SET
                     AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
