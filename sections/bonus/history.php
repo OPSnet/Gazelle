@@ -15,14 +15,15 @@ if (isset($_GET['userid'])) {
     $header = 'Bonus Points Spending History';
     $whoSpent = 'You have spent';
 }
+$bonus = new Gazelle\Bonus(new Gazelle\User($userId));
 
 $poolTotal = 0;
-$poolSummary = $Bonus->userPoolHistory($userId);
+$poolSummary = $bonus->poolHistory();
 foreach ($poolSummary as $p) {
     $poolTotal += $p['total'];
 }
 
-$summary = $Bonus->userSummary($userId);
+$summary = $bonus->summary();
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($summary['nr']);
 
@@ -36,8 +37,8 @@ if ($poolTotal && $summary['total']) {
 }
 
 echo $Twig->render('user/bonus-history.twig', [
-    'history'      => $Bonus->userHistory($userId, $paginator->limit(), $paginator->offset()),
-    'item'         => $Bonus->purchaseHistoryByUser($userId),
+    'history'      => $bonus->history($paginator->limit(), $paginator->offset()),
+    'item'         => $bonus->purchaseHistoryByUser(),
     'summary'      => $summary,
     'pool_summary' => $poolSummary,
     'pool_total'   => $poolTotal,

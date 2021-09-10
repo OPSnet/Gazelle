@@ -1,16 +1,6 @@
 <?php
 
-/** @var \Gazelle\Bonus $Bonus */
-
-if (isset($_GET['complete'])) {
-    $label = $_GET['complete'];
-    $item = $Bonus->getItem($label);
-    print <<<HTML
-<div class="alertbar blend">
-    {$item['Title']} purchased!
-</div>
-HTML;
-}
+$bonus = new Gazelle\Bonus($Viewer);
 
 View::show_header('Bonus Points Shop', ['js' => 'bonus']);
 ?>
@@ -26,8 +16,14 @@ View::show_header('Bonus Points Shop', ['js' => 'bonus']);
 <?php } ?>
 </div>
 
+<?php if (isset($_GET['complete'])) { ?>
+<div class="alertbar blend">
+    <?= $bonus->getItem($_GET['complete'])['Title'] ?> purchased!
+</div>
 <?php
-if (isset($_GET['action']) && $_GET['action'] == 'donate') {
+}
+
+if (($_GET['action'] ?? '') == 'donate') {
     authorize();
     $value = (int)$_POST['donate'];
     if ($Viewer->id() != $_POST['userid']) {
@@ -37,7 +33,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
 <div class="alertbar blend">Warning! You cannot donate negative or no points!</div>
 <?php } elseif ($Viewer->bonusPointsTotal() < $value) { ?>
 <div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int)$Viewer->bonusPointsTotal()) ?> points.</div>
-<?php } elseif ($Bonus->donate((int)$_POST['poolid'], $value, $Viewer->id(), $Viewer->effectiveClass())) { ?>
+<?php } elseif ((new Gazelle\Bonus($Viewer))->donate((int)$_POST['poolid'], $value)) { ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
 <?php } else { ?>
 <div class="alertbar blend">No bonus points donated, insufficient funds.</div>
@@ -46,8 +42,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
 }
 
 $points = (int)$Viewer->bonusPointsTotal();
+$bonusMan = new Gazelle\Manager\Bonus;
 $auth = $Viewer->auth();
-$pool = $Bonus->getOpenPool();
+$pool = $bonusMan->getOpenPool();
 if ($pool) {
     echo $Twig->render('bonus/bonus-pool.twig', [
         'auth'    => $auth,
@@ -61,8 +58,8 @@ echo $Twig->render('bonus/store.twig', [
     'admin'    => $Viewer->permitted('admin_bp_history'),
     'auth'     => $auth,
     'class'    => $Viewer->classLevel(),
-    'discount' => $Bonus->discount(),
-    'list'     => $Bonus->getListForUser($Viewer),
+    'discount' => $bonusMan->discount(),
+    'list'     => $bonus->getListForUser(),
     'points'   => $points,
     'user_id'  => $Viewer->id(),
 ]);

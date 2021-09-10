@@ -15,7 +15,7 @@
  *
  *   $db         - database connection
  *   $cache      - memcache connection
- *   $bonus      - \Gazelle\Bonus instance
+ *   $bonus      - \Gazelle\Manager\Bonus instance
  *   $stylesheet - \Gazelle\Stylesheet instance
  *
  * More can be added when implemented.
@@ -46,7 +46,7 @@ $preload = [
     'db'          => $DB,
     'debug'       => $Debug,
     'twig'        => $Twig,
-    'bonus'       => new \Gazelle\Bonus,
+    'bonus'       => new \Gazelle\Manager\Bonus,
     'collMan'     => new \Gazelle\Manager\Collage,
     'forMan'      => new \Gazelle\Manager\Forum,
     'tagMan'      => new \Gazelle\Manager\Tag,
