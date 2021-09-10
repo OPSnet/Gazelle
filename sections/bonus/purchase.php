@@ -1,6 +1,6 @@
 <?php
 
-/** @var \Gazelle\Bonus $Bonus */
+/** @var \Gazelle\Bonus $viewerBonus */
 
 use Gazelle\Exception\BonusException;
 
@@ -10,7 +10,7 @@ $label = $_REQUEST['label'];
 switch($label) {
     case 'collage-1':
         try {
-            if ($Bonus->purchaseCollage($Viewer->id(), $label)) {
+            if ($bonus->purchaseCollage($label)) {
                 header("Location: bonus.php?complete=$label");
                 exit;
             }
@@ -23,7 +23,7 @@ switch($label) {
         break;
     case 'seedbox':
         try {
-            if ($Bonus->unlockSeedbox($Viewer->id())) {
+            if ($bonus->unlockSeedbox()) {
                 header("Location: bonus.php?complete=$label");
                 exit;
             }

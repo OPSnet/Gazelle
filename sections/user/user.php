@@ -8,7 +8,8 @@ if (is_null($User)) {
 }
 $UserID = $User->id();
 $Username = $User->username();
-$Bonus = new Gazelle\Bonus;
+$userBonus = new Gazelle\Bonus($User);
+$viewerBonus = new Gazelle\Bonus($Viewer);
 $donorMan = new Gazelle\Manager\Donation;
 
 if (!empty($_POST)) {
@@ -25,7 +26,7 @@ if (!empty($_POST)) {
         error(403);
     }
     try {
-        $FL_OTHER_tokens = $Bonus->purchaseTokenOther($Viewer->id(), $UserID, $match[1]);
+        $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($UserID, $match[1]);
     } catch (Gazelle\Exception\BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
@@ -47,7 +48,7 @@ if ($UserID == $Viewer->id()) {
     $OwnProfile = false;
     //Don't allow any kind of previewing on others' profiles
     $Preview = 0;
-    $FL_Items = $Bonus->getListOther($Viewer->bonusPointsTotal());
+    $FL_Items = $viewerBonus->getListOther($Viewer->bonusPointsTotal());
 }
 $FA_Key = null;
 
@@ -85,7 +86,7 @@ echo $Twig->render('user/header.twig', [
         'item'  => $FL_Items,
         'other' => $FL_OTHER_tokens ?? null,
     ],
-    'hourly_rate'  => $Bonus->userHourlyRate($UserID),
+    'hourly_rate'  => $userBonus->hourlyRate(),
     'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer,
     'recovered'    => $recovered,
     'user'         => $User,
