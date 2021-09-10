@@ -21,7 +21,7 @@
 {% else %}
     {% if info.GroupID %}
             <input type="hidden" name="groupid" value="{{ info.GroupID }}" />
-            <input type="hidden" name="type" value="{{ category_id + 1 }}" />
+            <input type="hidden" name="type" value="{{ category_id }}" />
     {% endif %}
     {% if info.RequestID %}
             <input type="hidden" name="requestid" value="{{ info.RequestID }}" />
