@@ -17,7 +17,7 @@ if (!defined('AJAX')) {
 
 $Err = null;
 $Properties = [];
-$Type = CATEGORY[(int)$_POST['type'] - 1];
+$Type = CATEGORY[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
 $Properties['Title'] = trim($_POST['title']);
