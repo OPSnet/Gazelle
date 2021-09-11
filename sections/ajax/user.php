@@ -18,8 +18,8 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
 }
 $ForumPosts       = $user->stats()->forumPostTotal();
 $activityStats    = $user->activityStats();
-$Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $user->uploadCount() : null;
-$ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $user->artistsAdded() : null;
+$Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $user->stats()->uploadTotal() : null;
+$ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $user->stats()->artistAddedTotal() : null;
 $releaseVotes     = $user->releaseVotes();
 $bonusPointsSpent = $user->bonusPointsSpent();
 $torrentComments  = $user->propertyVisible($Viewer, 'torrentcomments++') ? $user->torrentCommentCount() : null;
@@ -106,8 +106,8 @@ json_print("success", [
         'perfectFlacs'    => $user->propertyVisible($Viewer, 'perfectflacs+') ? $user->stats()->perfectFlacTotal() : null,
         'groups'          => $user->propertyVisible($Viewer, 'uniquegroups+') ? $user->stats()->uniqueGroupTotal() : null,
         'uploaded'        => $Uploads,
-        'seeding'         => $user->propertyVisible($Viewer, 'seeding+') ? $user->seedingCounts() : null,
-        'leeching'        => $user->propertyVisible($Viewer, 'leeching+') ? $user->leechingCounts() : null,
+        'seeding'         => $user->propertyVisible($Viewer, 'seeding+') ? $user->stats()->seedingTotal() : null,
+        'leeching'        => $user->propertyVisible($Viewer, 'leeching+') ? $user->stats()->leechTotal() : null,
         'snatched'        => $user->propertyVisible($Viewer, 'snatched+') ? $user->stats()->snatchTotal() : null,
         'invited'         => $user->propertyVisible($Viewer, 'invitedcount') ? $user->stats()->invitedTotal() : null,
         'artistsAdded'    => $ArtistsAdded,

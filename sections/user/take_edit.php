@@ -181,7 +181,6 @@ $Options['DisableSmileys']      = (!empty($_POST['disablesmileys']) ? 1 : 0);
 $Options['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0);
 $Options['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
 $Options['Tooltipster']         = (!empty($_POST['usetooltipster']) ? 1 : 0);
-$Options['AutoloadCommStats']   = (check_perms('users_mod') && !empty($_POST['autoload_comm_stats']) ? 1 : 0);
 $Options['DisableAvatars']      = (!empty($_POST['disableavatars']) ? (int)$_POST['disableavatars'] : 0);
 $Options['Identicons']          = (!empty($_POST['identicons']) ? (int)$_POST['identicons'] : 0);
 $Options['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);

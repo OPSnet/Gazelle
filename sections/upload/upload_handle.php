@@ -583,6 +583,7 @@ if (!$IsNewGroup) {
         $Cache->increment('stats_album_count', count($ArtistNameList));
     }
     $Cache->increment('stats_group_count');
+    $Viewer->stats()->increment('unique_group_total');
 }
 $tgroup = $tgroupMan->findById($GroupID);
 
@@ -639,11 +640,16 @@ $DB->prepared_query("
        $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
+$TorrentID = $DB->inserted_id();
+$torrent = $torMan->findById($TorrentID);
+if ($torrent->isPerfectFlac()) {
+    $Viewer->stats()->increment('perfect_flac_total');
+} elseif ($torrent->isPerfecterFlac()) {
+    $Viewer->stats()->increment('perfecter_flac_total');
+}
 $torMan->flushFoldernameCache($DirName);
 $folderCheck = [$DirName => true];
-
 $Cache->increment('stats_torrent_count');
-$TorrentID = $DB->inserted_id();
 
 $DB->prepared_query('
     INSERT INTO torrents_leech_stats (TorrentID)
@@ -781,6 +787,8 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
     (new Gazelle\Log)->torrent($GroupID, $ExtraTorrentID, $Viewer->id(), "uploaded ($sizeMiB MiB)")
         ->general("Torrent $ExtraTorrentID ($LogName) ($sizeMiB  MiB) was uploaded by " . $Viewer->username());
 }
+
+$Viewer->stats()->increment('upload_total', 1 + count($ExtraTorrentsInsert));
 
 //******************************************************************************//
 //--------------- Give Bonus Points  -------------------------------------------//
