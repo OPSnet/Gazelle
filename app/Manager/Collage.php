@@ -15,6 +15,7 @@ class Collage extends \Gazelle\Base {
             ", $user->id(), $categoryId, trim($name), trim($description), trim($tagList)
         );
         $id = $this->db->inserted_id();
+        (new \Gazelle\Stats\User($user->id()))->increment('collage_total');
         $logger->general("Collage $id ($name) was created by " . $user->username());
         return new \Gazelle\Collage($id);
     }
