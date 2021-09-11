@@ -173,50 +173,6 @@ function RandomIRCKey() {
     irckey.value = randIRCKey;
 }
 
-function commStats(userid) {
-    $('.user_commstats').html('Loading...');
-    ajax.get('ajax.php?action=community_stats&userid=' + userid, function(JSONresponse) {
-        var response = JSON.parse(JSONresponse) || false;
-        if (!response || response.status == 'failure') {
-            $('.user_commstats').html('An error occurred');
-            return;
-        }
-        displayCommStats(response.response);
-    });
-}
-
-function displayCommStats(stats) {
-    var baseid = '#user_commstats_';
-    for (x in stats) {
-        if (stats[x] === false) {
-            continue;
-        }
-        switch (x) {
-            case 'leeching':
-                $(baseid + x).html(stats[x]);
-                break;
-            case 'seeding':
-                $(baseid + x).html(stats[x]);
-                break;
-            case 'downloaded':
-                $(baseid + x).html(stats[x]);
-                break;
-            case 'snatched':
-                $(baseid + x).html(stats[x]);
-                break;
-            case 'usnatched':
-                $(baseid + x).html('(' + stats[x] + ' distinct)');
-                break;
-            case 'udownloaded':
-                $(baseid + x).html('(' + stats[x] + ' distinct)');
-                break;
-            case 'seedingperc':
-                $(baseid + x).html('(' + stats[x] + '%)');
-                break;
-        }
-    }
-}
-
 $(document).ready(function() {
     $("#random_password").click(function() {
         var length = 32,

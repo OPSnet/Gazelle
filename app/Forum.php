@@ -222,6 +222,8 @@ class Forum extends Base {
             ", $threadId, $userId, $body
         );
         $postId = $this->db->inserted_id();
+        $this->updateTopic($userId, $threadId, $postId);
+        (new Stats\User($userId))->increment('forum_thread_total');
         $this->cache->cache_value(sprintf(self::CACHE_CATALOG, $threadId, 0), [
             $postId => [
                 'ID'           => $postId,
@@ -232,7 +234,6 @@ class Forum extends Base {
                 'EditedTime'   => null,
             ]
         ]);
-        $this->updateTopic($userId, $threadId, $postId);
         $this->db->set_query_id($qid);
         return $threadId;
     }
@@ -398,6 +399,7 @@ class Forum extends Base {
         );
         $postId = $this->db->inserted_id();
         $this->updateTopic($userId, $threadId, $postId);
+        (new Stats\User($userId))->increment('forum_post_total');
         $this->db->set_query_id($qid);
         $info = $this->threadInfo($threadId);
         $catId = (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);

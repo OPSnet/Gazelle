@@ -2,7 +2,7 @@
 
 namespace Gazelle\Stats;
 
-class User extends \Gazelle\Base {
+class User extends \Gazelle\BaseObject {
 
     /**
      * This class offloads all the counting operations you might
@@ -14,36 +14,21 @@ class User extends \Gazelle\Base {
      */
 
     protected const CACHE_COMMENT_TOTAL = 'user_nrcomment_%d';
-    protected const CACHE_GENERAL = 'user_stats_%d';
+    protected const CACHE_GENERAL = 'user_statx_%d';
 
-    protected int $id;
-
-    /* Some queries return two or more items of interest: these cache the
-     * results so that the underlying call is only made once.
-     */
+    // Cache the underlying db calls
     protected array $commentTotal;
-    protected array $download;
-    protected array $general;
-    protected array $requestBounty;
-    protected array $requestCreated;
-    protected array $requestVote;
-    protected array $snatch;
+    protected array $general = [];
 
-    public function __construct(int $id) {
-        parent::__construct();
-        $this->id = $id;
+    public function tableName(): string {
+        return 'user_summary';
     }
 
-    /**
-     * How many FL tokens has someone used?
-     *
-     * @return int Number of tokens used
-     */
-    public function flTokenTotal(): int {
-        return $this->db->scalar("
-            SELECT count(*) FROM users_freeleeches WHERE UserID = ?
-            ", $this->id
-        );
+    public function flush() {
+        $this->cache->deleteMulti([
+            sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
+            sprintf(self::CACHE_GENERAL, $this->id),
+        ]);
     }
 
     /**
@@ -72,162 +57,93 @@ class User extends \Gazelle\Base {
         return $this->commentTotal[$page] ?? 0;
     }
 
-    protected function download(): array {
-        if (!isset($this->download)) {
-            $this->download = $this->db->rowAssoc("
-                SELECT count(*) AS total,
-                    count(DISTINCT ud.TorrentID) AS 'unique'
-                FROM users_downloads AS ud
-                INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
-                WHERE ud.UserID = ?
-                ", $this->id
-            );
-        }
-        return $this->download;
-    }
-
-    public function downloadTotal(): int {
-        return $this->download()['total'];
-    }
-
-    public function downloadUnique(): int {
-        return $this->download()['unique'];
-    }
-
-    protected function requestBounty(): array {
-        if (!isset($this->requestBounty)) {
-            $this->requestBounty = $this->db->rowAssoc("
-                SELECT coalesce(sum(rv.Bounty), 0) AS size,
-                    count(DISTINCT r.ID) AS total
-                FROM requests AS r
-                LEFT JOIN requests_votes AS rv ON (r.ID = rv.RequestID)
-                WHERE r.FillerID = ?
-                ", $this->id
-            );
-        }
-        return $this->requestBounty;
-    }
-
-    public function requestBountySize(): int {
-        return $this->requestBounty()['size'];
-    }
-
-    public function requestBountyTotal(): int {
-        return $this->requestBounty()['total'];
-    }
-
-    protected function requestCreated() {
-        if (!isset($this->requestCreated)) {
-            $this->requestCreated = $this->db->rowAssoc("
-                SELECT coalesce(sum(rv.Bounty), 0) AS size,
-                    count(*) AS total
-                FROM requests AS r
-                LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
-                WHERE r.UserID = ?
-                ", $this->id
-            );
-        }
-        return $this->requestCreated;
-    }
-
-    public function requestCreatedSize(): int {
-        return $this->requestCreated()['size'];
-    }
-
-    public function requestCreatedTotal(): int {
-        return $this->requestCreated()['total'];
-    }
-
-    public function requestVote(): array {
-        if (!isset($this->requestVote)) {
-            $this->requestVote = $this->db->rowAssoc("
-                SELECT coalesce(sum(rv.Bounty), 0) AS size,
-                    count(*) AS total
-                FROM requests_votes rv
-                WHERE rv.UserID = ?
-                ", $this->id
-            );
-        }
-        return $this->requestVote;
-    }
-
-    public function requestVoteSize(): int {
-        return $this->requestVote()['size'];
-    }
-
-    public function requestVoteTotal(): int {
-        return $this->requestVote()['total'];
-    }
-
-    protected function snatch(): array {
-        if (!isset($this->snatch)) {
-            $this->snatch = $this->db->rowAssoc("
-                SELECT count(*) AS total,
-                    count(DISTINCT x.fid) AS 'unique'
-                FROM xbt_snatched AS x
-                INNER JOIN torrents AS t ON (t.ID = x.fid)
-                WHERE x.uid = ?
-                ", $this->id
-            );
-        }
-        return $this->snatch;
-    }
-
-    public function snatchTotal(): int {
-        return $this->snatch()['total'];
-    }
-
-    public function snatchUnique(): int {
-        return $this->snatch()['unique'];
-    }
-
+    /**
+     * @see \Gazelle\Stats\Users::refresh()
+     */
     public function general(): array {
-        if (!isset($this->general)) {
+        if (empty($this->general)) {
             $key = sprintf(self::CACHE_GENERAL, $this->id);
             $general = $this->cache->get_value($key);
-            $general = false;
             if ($general === false) {
                 $general = $this->db->rowAssoc("
-                    SELECT Groups    AS unique_group_total,
-                        PerfectFlacs AS perfect_flac_total
-                    FROM users_summary
-                    WHERE UserID = ?
+                    SELECT artist_added_total,
+                        collage_total,
+                        collage_contrib,
+                        download_total,
+                        download_unique,
+                        fl_token_total,
+                        forum_post_total,
+                        forum_thread_total,
+                        invited_total,
+                        leech_total,
+                        perfect_flac_total,
+                        perfecter_flac_total,
+                        request_bounty_total,
+                        request_bounty_size,
+                        request_created_total,
+                        request_created_size,
+                        request_vote_total,
+                        request_vote_size,
+                        seeding_total,
+                        snatch_total,
+                        snatch_unique,
+                        unique_group_total,
+                        upload_total
+                    FROM user_summary
+                    WHERE user_id = ?
                     ", $this->id
                 ) ?? [
-                     'unique_group_total' => 0,
-                     'perfect_flac_total' => 0,
+                    'artist_added_total'    => 0,
+                    'collage_total'         => 0,
+                    'collage_contrib'       => 0,
+                    'download_total'        => 0,
+                    'download_unique'       => 0,
+                    'fl_token_total'        => 0,
+                    'forum_post_total'      => 0,
+                    'forum_thread_total'    => 0,
+                    'invited_total'         => 0,
+                    'leech_total'           => 0,
+                    'perfect_flac_total'    => 0,
+                    'perfecter_flac_total'  => 0,
+                    'request_bounty_total'  => 0,
+                    'request_bounty_size'   => 0,
+                    'request_created_total' => 0,
+                    'request_created_size'  => 0,
+                    'request_vote_total'    => 0,
+                    'request_vote_size'     => 0,
+                    'seedingh_total'        => 0,
+                    'snatch_total'          => 0,
+                    'snatch_unique'         => 0,
+                    'unique_group_total'    => 0,
+                    'upload_total'          => 0,
                 ];
-                $general = array_merge($general, [
-                    'collage_total' => $this->db->scalar("
-                        SELECT count(*) FROM collages WHERE Deleted = '0' AND UserID = ?
-                        ", $this->id
-                    ),
-                    'collage_contrib' => $this->db->scalar("
-                        SELECT count(DISTINCT ct.CollageID)
-                        FROM collages_torrents AS ct
-                        INNER JOIN collages c ON (c.ID = ct.CollageID)
-                        WHERE c.Deleted = '0'
-                            AND ct.UserID = ?
-                        ", $this->id
-                    ),
-                    'invited_total' => $this->db->scalar("
-                        SELECT count(*) FROM users_info WHERE Inviter = ?
-                        ", $this->id
-                    ),
-                    'forum_post_total' => $this->db->scalar("
-                        SELECT count(*) FROM forums_posts WHERE AuthorID = ?
-                        ", $this->id
-                    ),
-                    'forum_thread_total' => $this->db->scalar("
-                        SELECT count(*) FROM forums_topics WHERE AuthorID = ?
-                        ", $this->id
-                    ),
-                ]);
-                $this->cache->cache_value($key, $general, 3600);
+                $this->cache->cache_value($key, $general, 300);
             }
             $this->general = $general;
         }
         return $this->general;
+    }
+
+    /**
+     * Some statistics can be updated immediately, such as download_total.
+     * Others, like download_unique need a possibly expensive check.
+     * In any case, those stats will be updated within the hour.
+     * If we can update immediately, though, we can do it here.
+     */
+    public function increment(string $name, int $incr = 1): int {
+        $this->db->prepared_query("
+            UPDATE user_summary SET
+                $name = $name + ?
+            WHERE user_id = ?
+            ", $incr, $this->id
+        );
+        $this->general = [];
+        $this->cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
+        return $this->db->affected_rows();
+    }
+
+    public function artistAddedTotal(): int {
+        return $this->general()['artist_added_total'];
     }
 
     public function collageTotal(): int {
@@ -236,6 +152,18 @@ class User extends \Gazelle\Base {
 
     public function collageContrib(): int {
         return $this->general()['collage_contrib'];
+    }
+
+    public function downloadTotal(): int {
+        return $this->general()['download_total'];
+    }
+
+    public function downloadUnique(): int {
+        return $this->general()['download_unique'];
+    }
+
+    public function flTokenTotal(): int {
+        return $this->general()['fl_token_total'];
     }
 
     public function forumPostTotal(): int {
@@ -250,11 +178,59 @@ class User extends \Gazelle\Base {
         return $this->general()['invited_total'];
     }
 
+    public function leechTotal(): int {
+        return $this->general()['leech_total'];
+    }
+
     public function perfectFlacTotal(): int {
         return $this->general()['perfect_flac_total'];
     }
 
+    public function perfecterFlacTotal(): int {
+        return $this->general()['perfecter_flac_total'];
+    }
+
+    public function requestBountySize(): int {
+        return $this->general()['request_bounty_size'];
+    }
+
+    public function requestBountyTotal(): int {
+        return $this->general()['request_bounty_total'];
+    }
+
+    public function requestCreatedSize(): int {
+        return $this->general()['request_created_size'];
+    }
+
+    public function requestCreatedTotal(): int {
+        return $this->general()['request_created_total'];
+    }
+
+    public function requestVoteSize(): int {
+        return $this->general()['request_vote_size'];
+    }
+
+    public function requestVoteTotal(): int {
+        return $this->general()['request_vote_total'];
+    }
+
+    public function seedingTotal(): int {
+        return $this->general()['seeding_total'];
+    }
+
+    public function snatchTotal(): int {
+        return $this->general()['snatch_total'];
+    }
+
+    public function snatchUnique(): int {
+        return $this->general()['snatch_unique'];
+    }
+
     public function uniqueGroupTotal(): int {
         return $this->general()['unique_group_total'];
+    }
+
+    public function uploadTotal(): int {
+        return $this->general()['upload_total'];
     }
 }

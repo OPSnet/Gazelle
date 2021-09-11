@@ -438,7 +438,7 @@ foreach ($TorrentList as $t) {
             $r ? $t['RemasterYear'] : $GroupYear,
             $r ? $t['RemasterRecordLabel'] : $GroupRecordLabel,
             $r ? $t['RemasterCatalogueNumber'] : $GroupCatalogueNumber,
-            $r ? $t['RemasterTitle'] : $GroupName
+            $r ? $t['RemasterTitle'] : $tgroup->name(),
         ]);
         if (!isset($Edition[$key])) {
             $Edition[$key] = 0;
@@ -525,7 +525,7 @@ foreach ($TorrentList as $Torrent) {
     }
     $FileTable .= '</table>';
 
-    $ExtraInfo = Torrents::torrent_info($Torrent, false, false, true, $GroupName);
+    $ExtraInfo = Torrents::torrent_info($Torrent, false, false, true, $tgroup->name());
 
     if ($GroupCategoryID == 1
         && ($RemasterTitle != $LastRemasterTitle
@@ -557,7 +557,7 @@ foreach ($TorrentList as $Torrent) {
             $RemasterYear ?: $GroupYear,
             $RemasterRecordLabel ?: $GroupRecordLabel,
             $RemasterCatalogueNumber ?: $GroupCatalogueNumber,
-            $RemasterTitle ?: $GroupName]);
+            $RemasterTitle ?: $tgroup->name()]);
         if (!array_key_exists($key, $Edition)) {
 ?>
                     <i>deleted</i>
@@ -860,8 +860,11 @@ if (!empty($similar)) {
             </tr>
 <?php } /* foreach */ ?>
         </table>
-<?php } /* count($similar) */ ?>
+<?php
+} /* count($similar) */
 
+$releaseTypes = (new Gazelle\ReleaseType)->list();
+?>
         <div class="box torrent_description">
             <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?=(!empty($ReleaseType) ? $releaseTypes[$ReleaseType].' info' : 'Info' )?></strong></div>
             <div class="body">

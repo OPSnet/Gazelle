@@ -62,16 +62,4 @@
             <label for="usetooltipster">Enable styled tooltips</label>
         </td>
     </tr>
-{% if is_mod %}
-    <tr id="site_autostats_tr">
-        <td class="label tooltip" title="This is a staff-only feature to bypass the &quot;Show stats&quot; button for seeding, leeching, snatched, and downloaded stats on profile pages.">
-            <strong>Reveal user stats</strong>
-        </td>
-        <td>
-            <input type="checkbox" id="autoload_comm_stats" name="autoload_comm_stats"{{ checked(option.AutoloadCommStats) }} />
-            <label for="autoload_comm_stats">Automatically fetch the snatch and peer stats on member profile pages.</label>
-        </td>
-    </tr>
-{% endif %}
 </table>
-

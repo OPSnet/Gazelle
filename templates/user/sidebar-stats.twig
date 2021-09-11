@@ -48,25 +48,45 @@
         </li>
 {% endif %}
 
-{% if visible['requestsvoted_count'] and not visible['requestsvoted_bounty'] and not visible['requestsvoted_list'] %}
-        <li>Requests created: {{ stats.requestCreatedTotal|number_format }}</li>
-        <li>Requests voted: {{ stats.requestVotedTotal|number_format }}</li>
-{% elseif not visible['requestsvoted_count'] and visible['requestsvoted_bounty'] and not visible['requestsvoted_list'] %}
-        <li>Requests created: {{ stats.requestCreatedSize|octet_size }} spent</li>
-        <li>Requests voted: {{ stats.requestVotedSize|octet_size }} spent</li>
-{% elseif visible['requestsvoted_count'] and visible['requestsvoted_bounty'] and not visible['requestsvoted_list'] %}
-        <li>Requests created: {{ stats.requestCreatedTotal|number_format }} for {{ stats.requestCreatedSize|octet_size }}</li>
-        <li>Requests voted: {{ stats.requestVotedTotal|number_format }} for {{ stats.requestVotedSize|octet_size }}</li>
-{% elseif visible['requestsvoted_list'] %}
+{% if visible['requestsvoted_count'] or visible['requestsvoted_bounty'] %}
         <li>
-            <span{{ _self.class_override(visible['requestsvoted_list']) }}>Requests created: {{ stats.requestCreatedTotal|number_format }}</span>
-            <span{{ _self.class_override(visible['requestsvoted_list']) }}> for {{ stats.requestCreatedSize|octet_size }}</span>
+    {% if visible['requestsvoted_count'] %}
+            <span{{ _self.class_override(visible['requestsvoted_count']) }}>Requests created: {{ stats.requestCreatedTotal|number_format }}
+        {% if visible['requestsvoted_bounty'] %} for {{ stats.requestCreatedSize|octet_size }}{% endif %}
+    {% else %} 
+            <span{{ _self.class_override(visible['requestsvoted_bounty']) }}>Requests created: {{ stats.requestCreatedSize|octet_size }}
+    {% endif %}
+            </span>
+    {% if visible['requestsvoted_list'] %}
             <a href="requests.php?type=created&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['requestsvoted_list']) }}">View</a>
+    {% endif %}
         </li>
         <li>
-            <span{{ _self.class_override(visible['requestsvoted_list']) }}>Requests voted: {{ stats.requestVotedTotal|number_format }}</span>
-            <span{{ _self.class_override(visible['requestsvoted_list']) }}> for {{ stats.requestVotedSize|octet_size }}</span>
-            <a href="requests.php?type=voted&amp;userid={{ user_id }}" class="brackets"{{ _self.override(visible['requestsvoted_list']) }}>View</a>
+    {% if visible['requestsvoted_count'] %}
+            <span{{ _self.class_override(visible['requestsvoted_count']) }}>Requests voted: {{ stats.requestVoteTotal|number_format }}
+        {% if visible['requestsvoted_bounty'] %} for {{ stats.requestVoteSize|octet_size }}{% endif %}
+    {% else %} 
+            <span{{ _self.class_override(visible['requestsvoted_bounty']) }}>Requests voted: {{ stats.requestVoteSize|octet_size }}
+    {% endif %}
+            </span>
+    {% if visible['requestsvoted_list'] %}
+            <a href="requests.php?type=voted&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['requestsvoted_list']) }}">View</a>
+    {% endif %}
+        </li>
+{% endif %}
+
+{% if visible['requestsfilled_count'] or visible['requestsfilled_bounty'] %}
+        <li>
+    {% if visible['requestsfilled_count'] %}
+            <span{{ _self.class_override(visible['requestsfilled_count']) }}>Requests filled: {{ stats.requestBountyTotal|number_format }}
+        {% if visible['requestsfilled_bounty'] %} for {{ stats.requestBountySize|octet_size }}{% endif %}
+    {% else %} 
+            <span{{ _self.class_override(visible['requestsfilled_bounty']) }}>Requests filled: {{ stats.requestBountySize|octet_size }}
+    {% endif %}
+            </span>
+    {% if visible['requestsfilled_list'] %}
+            <a href="requests.php?type=filled&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['requestsfilled_list']) }}">View</a>
+    {% endif %}
         </li>
 {% endif %}
 
@@ -100,16 +120,13 @@
 {% endif %}
 
 {% if visible['downloaded'] %}
-        <li id="comm_downloaded"{{ _self.class_override(visible['downloaded']) }}>Downloaded:
-            <span class="user_commstats" id="user_commstats_downloaded"><a href="#" class="brackets" onclick="commStats({{ user_id }}); return false;">Show stats</a></span>
-            <span id="user_commstats_udownloaded"></span>
+        <li id="comm_downloaded"{{ _self.class_override(visible['downloaded']) }}>Downloaded: {{ stats.downloadTotal|number_format }}
             <a href="torrents.php?type=downloaded&amp;userid={{ user_id }}" class="brackets">View</a>
         </li>
 {% endif %}
 
 {% if visible['leeching+'] %}
-        <li id="comm_leeching"{{ _self.class_override(visible['leeching+']) }}>Leeching:
-            <span class="user_commstats" id="user_commstats_leeching"><a href="#" class="brackets" onclick="commStats({{ user_id }}); return false;">Show stats</a></span>
+        <li id="comm_leeching"{{ _self.class_override(visible['leeching+']) }}>Leeching: {{ stats.leechTotal|number_format }}
     {% if visible['leeching'] %}
             <a href="torrents.php?type=leeching&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['leeching']) }}">View</a>
     {% endif %}
@@ -119,13 +136,8 @@
         </li>
 {% endif %}
 
-{% if visible['snatched+'] %}
-        <li id="comm_snatched"{{ _self.class_override(visible['snatched+']) }}>Snatched:
-            <span class="user_commstats" id="user_commstats_snatched"><a href="#" class="brackets" onclick="commStats({{ user_id }}); return false;">Show stats</a></span>
-    {% if viewer.permitted('site_view_torrent_snatchlist') %}
-            <span id="user_commstats_usnatched"{{ _self.class_override(viewer.permitted('site_view_torrent_snatchlist') and viewer.id != user_id) }}></span>
-    {% endif %}
-
+{% if visible['snatched+'] or viewer.permitted('site_view_torrent_snatchlist') %}
+        <li id="comm_snatched"{{ _self.class_override(visible['snatched']) }}>Snatched: {{ stats.snatchTotal|number_format }} ({{ stats.snatchUnique|number_format }} unique)
     {% if visible['snatched'] %}
             <a href="torrents.php?type=snatched&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['snatched']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
@@ -137,12 +149,7 @@
 {% endif %}
 
 {% if visible['seeding+'] %}
-        <li id="comm_seeding"{{ _self.class_override(visible['seeding+']) }}>Seeding:
-            <span class="user_commstats" id="user_commstats_seeding"><a href="#" class="brackets" onclick="commStats({{ user_id }}); return false;">Show stats</a></span>
-    {% if visible['snatched+'] %}
-            <span{{ _self.class_override(visible['snatched+']) }} id="user_commstats_seedingperc"></span>
-    {% endif %}
-
+        <li id="comm_seeding"{{ _self.class_override(visible['seeding+']) }}>Seeding: {{ stats.seedingTotal|number_format }}
     {% if visible['seeding'] %}
             <a href="torrents.php?type=seeding&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['seeding']) }}">View</a>
         {% if viewer.permitteed('zip_downloader') %}
@@ -157,6 +164,3 @@
 {% endif %}
     </ul>
 </div>
-{% if viewer.option('AutoloadCommStats') %}
-<script type="text/javascript">commStats({{ user_id }});</script>
-{% endif %}

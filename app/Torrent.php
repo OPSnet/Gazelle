@@ -194,6 +194,35 @@ class Torrent extends BaseObject {
         return $this->info()['Remastered'];
     }
 
+    public function isPerfectFlac(): bool {
+        return (bool)$this->db->scalar("
+            SELECT 1
+            FROM torrents t
+            WHERE t.Format = 'FLAC'
+                AND (
+                    (t.Media = 'CD' AND t.LogScore = 100)
+                    OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT'))
+                )
+                AND ID = ?
+            ", $this->id
+        );
+    }
+
+    public function isPerfecterFlac(): bool {
+        return (bool)$this->db->scalar("
+            SELECT 1
+            FROM torrents t
+            WHERE t.Format = 'FLAC'
+                AND (
+                    (t.Media = 'CD' AND t.LogScore = 100)
+                    OR t.Media IN ('Cassette', 'DAT')
+                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless')
+                )
+                AND ID = ?
+            ", $this->id
+        );
+    }
+
     /**
      * Combine torrent media into a standardized file name
      *

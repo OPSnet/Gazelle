@@ -1188,6 +1188,7 @@ class User extends BaseObject {
         if (!$affected) {
             return 0;
         }
+        $this->stats()->increment('download_total');
         $this->cache->delete_value('user_rlim_' . $this->id);
         $key = sprintf(self::CACHE_SNATCH_TIME, $this->id);
         $nextUpdate = $this->cache->get_value($key);
@@ -1810,38 +1811,6 @@ class User extends BaseObject {
         ');
     }
 
-    public function uploadCount(): int {
-        return $this->getSingleValue('user_upload_count', '
-            SELECT count(*) FROM torrents WHERE UserID = ?
-        ');
-    }
-
-    public function leechingCounts(): int {
-        return $this->getSingleValue('user_leeching_count', '
-            SELECT count(*)
-            FROM xbt_files_users AS x
-            INNER JOIN torrents AS t ON (t.ID = x.fid)
-            WHERE x.remaining > 0
-                AND x.uid = ?
-        ');
-    }
-
-    public function seedingCounts(): int {
-        return $this->getSingleValue('user_seeding_count', '
-            SELECT count(*)
-            FROM xbt_files_users AS x
-            INNER JOIN torrents AS t ON (t.ID = x.fid)
-            WHERE x.remaining = 0
-                AND x.uid = ?
-        ');
-    }
-
-    public function artistsAdded(): int {
-        return $this->getSingleValue('user_artists_count', '
-            SELECT count(*) FROM torrents_artists WHERE UserID = ?
-        ');
-    }
-
     public function passwordCount(): int {
         return $this->getSingleValue('user_pw_count', '
             SELECT count(*) FROM users_history_passwords WHERE UserID = ?
@@ -2039,23 +2008,6 @@ class User extends BaseObject {
 
     public function collageAdditions(): int {
         return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
-    }
-
-    public function peerCounts(): array {
-        $this->db->prepared_query("
-            SELECT IF(remaining = 0, 'seed', 'leech') AS Type, count(*)
-            FROM xbt_files_users AS x
-            INNER JOIN torrents AS t ON (t.ID = x.fid)
-            WHERE x.active = 1
-                AND x.uid = ?
-            GROUP BY Type
-            ", $this->id
-        );
-        $result = $this->db->to_array(0, MYSQLI_NUM, false);
-        return [
-            'seeding' => (isset($result['seed']) ? (int)$result['seed'][1] : 0),
-            'leeching' => (isset($result['leech']) ? (int)$result['leech'][1] : 0)
-        ];
     }
 
     public function recentSnatches(int $limit = 5) {
@@ -2302,7 +2254,7 @@ class User extends BaseObject {
     }
 
     public function activityStats(): array {
-        if (($stats = $this->cache->get_value('user_stats_activity_' . $this->id)) === false) {
+        if (($stats = $this->cache->get_value('user_stats_' . $this->id)) === false) {
             $this->db->prepared_query("
                 SELECT
                     uls.Uploaded AS BytesUploaded,
@@ -2364,7 +2316,7 @@ class User extends BaseObject {
                     $criteria['Weeks'] * 7 * 24 * 60 * 60,
                     'time'
                 ],
-                'Torrents' => [$this->uploadCount(), $criteria['MinUploads'], 'int'],
+                'Torrents' => [$ustats->uploadTotal(), $criteria['MinUploads'], 'int'],
             ]
         ];
 

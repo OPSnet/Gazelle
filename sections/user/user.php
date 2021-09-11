@@ -158,8 +158,8 @@ if ($lastfmInfo)  {
     ]);
 }
 
-$Uploads          = check_paranoia_here('uploads+') ? $User->uploadCount() : 0;
-$ArtistsAdded     = check_paranoia_here('artistsadded') ? $User->artistsAdded() : 0;
+$Uploads          = check_paranoia_here('uploads+') ? $User->stats()->uploadTotal() : 0;
+$ArtistsAdded     = check_paranoia_here('artistsadded') ? $User->stats()->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $User->collageAdditions() : 0;
 $releaseVotes     = $User->releaseVotes();
 $bonusPointsSpent = $User->bonusPointsSpent();
@@ -361,29 +361,32 @@ echo $Twig->render('user/sidebar-stats.twig', [
     'viewer'       => $Viewer,
     'upload_total' => $Uploads,
     'visible'  => [
-        'collages+'            => check_paranoia_here('collages+'),
-        'collages'             => check_paranoia_here('collages'),
-        'collagescontrib+'     => check_paranoia_here('collagecontribs+'),
-        'collagecontribs'      => check_paranoia_here('collagecontribs'),
-        'downloaded'           => check_paranoia_here('downloaded'),
-        'invitedcount'         => check_paranoia_here('invitedcount'),
-        'leeching+'            => check_paranoia_here('leeching+'),
-        'leeching'             => check_paranoia_here('leeching'),
-        'perfectflacs+'        => check_paranoia_here('perfectflacs+'),
-        'perfectflacs'         => check_paranoia_here('perfectflacs'),
-        'seeding+'             => check_paranoia_here('seeding+'),
-        'seeding'              => check_paranoia_here('seeding'),
-        'snatched+'            => check_paranoia_here('snatched+'),
-        'snatched'             => check_paranoia_here('snatched'),
-        'torrentcomments+'     => check_paranoia_here('torrentcomments+'),
-        'torrentcomments'      => check_paranoia_here('torrentcomments'),
-        'requestsvoted_list'   => check_paranoia_here('requestsvoted_list'),
-        'requestsvoted_count'  => check_paranoia_here('requestsvoted_count'),
-        'requestsvoted_bounty' => check_paranoia_here('requestsvoted_bounty'),
-        'uniquegroups+'        => check_paranoia_here('uniquegroups+'),
-        'uniquegroups'         => check_paranoia_here('uniquegroups'),
-        'uploads+'             => check_paranoia_here('uploads+'),
-        'uploads'              => check_paranoia_here('uploads'),
+        'collages+'             => check_paranoia_here('collages+'),
+        'collages'              => check_paranoia_here('collages'),
+        'collagescontrib+'      => check_paranoia_here('collagecontribs+'),
+        'collagecontribs'       => check_paranoia_here('collagecontribs'),
+        'downloaded'            => check_paranoia_here('downloaded'),
+        'invitedcount'          => check_paranoia_here('invitedcount'),
+        'leeching+'             => check_paranoia_here('leeching+'),
+        'leeching'              => check_paranoia_here('leeching'),
+        'perfectflacs+'         => check_paranoia_here('perfectflacs+'),
+        'perfectflacs'          => check_paranoia_here('perfectflacs'),
+        'seeding+'              => check_paranoia_here('seeding+'),
+        'seeding'               => check_paranoia_here('seeding'),
+        'snatched+'             => check_paranoia_here('snatched+'),
+        'snatched'              => check_paranoia_here('snatched'),
+        'torrentcomments+'      => check_paranoia_here('torrentcomments+'),
+        'torrentcomments'       => check_paranoia_here('torrentcomments'),
+        'requestsfilled_list'   => check_paranoia_here('requestsfilled_list'),
+        'requestsfilled_count'  => check_paranoia_here('requestsfilled_count'),
+        'requestsfilled_bounty' => check_paranoia_here('requestsfilled_bounty'),
+        'requestsvoted_list'    => check_paranoia_here('requestsvoted_list'),
+        'requestsvoted_count'   => check_paranoia_here('requestsvoted_count'),
+        'requestsvoted_bounty'  => check_paranoia_here('requestsvoted_bounty'),
+        'uniquegroups+'         => check_paranoia_here('uniquegroups+'),
+        'uniquegroups'          => check_paranoia_here('uniquegroups'),
+        'uploads+'              => check_paranoia_here('uploads+'),
+        'uploads'               => check_paranoia_here('uploads'),
     ],
 ]);
 
@@ -794,8 +797,8 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
             'forum' => [
                 'restricted'       => implode(', ', $User->forbiddenForums()),
                 'permitted'        => implode(', ', $User->permittedForums()),
-                'restricted_names' => implode(', ', array_map(function ($id) use ($fm) { return $fm->findById($id)->name(); }, $User->forbiddenForums())),
-                'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { return $fm->findById($id)->name(); }, $User->permittedForums())),
+                'restricted_names' => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->forbiddenForums())),
+                'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->permittedForums())),
             ],
             'permission' => [
                 'disable_any' => $Viewer->permitted('users_disable_any'),

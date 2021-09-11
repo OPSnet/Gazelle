@@ -125,13 +125,13 @@ class UserCreator extends Base {
         );
 
         if ($inviterId) {
-            (new \Gazelle\Manager\InviteSource)->resolveInviteSource($this->inviteKey, $this->id);
+            (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $this->id);
+            (new InviteTree($inviterId))->add($this->id);
+            (new Stats\User($inviterId))->increment('invited_total');
             $this->db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
                 ", $this->inviteKey
             );
-            $inviteTree = new InviteTree($inviterId);
-            $inviteTree->add($this->id);
         }
 
         $this->db->prepared_query("
