@@ -197,9 +197,6 @@ switch ($Action) {
     case 'news_ajax':
         require('news_ajax.php');
         break;
-    case 'community_stats':
-        require('community_stats.php');
-        break;
     case 'user_recents':
         require('user_recents.php');
         break;
