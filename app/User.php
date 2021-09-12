@@ -7,7 +7,7 @@ use Gazelle\Util\Mail;
 
 class User extends BaseObject {
 
-    const CACHE_KEY         = 'u_%d';
+    const CACHE_KEY         = 'u_%d_v2';
     const CACHE_SNATCH_TIME = 'users_snatched_%d_time';
     const CACHE_NOTIFY      = 'u_notify_%d';
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
@@ -268,7 +268,7 @@ class User extends BaseObject {
             ", $this->id
         );
         $this->info['attr'] = $this->db->to_pair('Name', 'ID', false);
-        $this->cache->cache_value($key, $this->info, 86400);
+        $this->cache->cache_value($key, $this->info, 3600);
         return $this->info;
     }
 
@@ -435,6 +435,22 @@ class User extends BaseObject {
     public function announceUrl(): string {
         return ($this->info()['SiteOptions']['HttpsTracker'] ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL)
             . '/' . $this->announceKey() . '/announce';
+    }
+
+    public function bonusPointsTotal(): int {
+        return $this->info()['BonusPoints'];
+    }
+
+    public function bonusPointsPerHour(): int {
+        return (new \Gazelle\Bonus)->userHourlyRate($this->id);
+    }
+
+    public function downloadedSize(): int {
+        return $this->info()['Downloaded'];
+    }
+
+    public function uploadedSize(): int {
+        return $this->info()['Uploaded'];
     }
 
     public function disableBonusPoints(): bool {
@@ -1262,10 +1278,9 @@ class User extends BaseObject {
     }
 
     public function onRatioWatch(): bool {
-        $stats = $this->activityStats();
         return $this->info()['RatioWatchEndsEpoch'] !== false
             && time() > $this->info()['RatioWatchEndsEpoch']
-            && $stats['BytesUploaded'] <= $stats['BytesDownloaded'] * $stats['RequiredRatio'];
+            && $this->uploadedSize() <= $this->downloadedSize() * $this->requiredRatio();
     }
 
     public function resetRatioWatch(): bool {
@@ -2253,31 +2268,6 @@ class User extends BaseObject {
         return $factor;
     }
 
-    public function activityStats(): array {
-        if (($stats = $this->cache->get_value('user_stats_' . $this->id)) === false) {
-            $this->db->prepared_query("
-                SELECT
-                    uls.Uploaded AS BytesUploaded,
-                    uls.Downloaded AS BytesDownloaded,
-                    coalesce(ub.points, 0) as BonusPoints,
-                    um.RequiredRatio
-                FROM users_main um
-                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
-                WHERE um.ID = ?
-                ", $this->id
-            );
-            $stats = $this->db->next_record(MYSQLI_ASSOC, false);
-            $stats['BytesUploaded'] = (int)$stats['BytesUploaded'];
-            $stats['BytesDownloaded'] = (int)$stats['BytesDownloaded'];
-            $stats['BonusPoints'] = (float)$stats['BonusPoints'];
-            $stats['BonusPointsPerHour'] = (new \Gazelle\Bonus)->userHourlyRate($this->id);
-            $stats['RequiredRatio'] = (float)$stats['RequiredRatio'];
-            $this->cache->cache_value('user_stats_' . $this->id, $stats, 3600);
-        }
-        return $stats;
-    }
-
     public function buffer(): array {
         $class = $this->primaryClass();
         $demotion = array_filter((new Manager\User)->demotionCriteria(), function ($v) use ($class) {
@@ -2285,16 +2275,14 @@ class User extends BaseObject {
         });
         $criteria = end($demotion);
 
-        $stats = $this->activityStats();
-        $ustats = new Stats\User($this->id);
-        $effectiveUpload = $stats['BytesUploaded'] + $ustats->requestBountyTotal();
+        $effectiveUpload = $this->uploadedSize() + (new Stats\User($this->id))->requestBountyTotal();
         if ($criteria) {
             $ratio = $criteria['Ratio'];
         } else {
-            $ratio = $stats['RequiredRatio'];
+            $ratio = $this->requiredRatio();
         }
 
-        return [$ratio, $ratio == 0 ? $effectiveUpload : $effectiveUpload / $ratio - $stats['BytesDownloaded']];
+        return [$ratio, $ratio == 0 ? $effectiveUpload : $effectiveUpload / $ratio - $this->downloadedSize()];
     }
 
     public function nextClass() {
@@ -2303,14 +2291,13 @@ class User extends BaseObject {
             return null;
         }
 
-        $stats = $this->activityStats();
         $ustats = new Stats\User($this->id);
         $progress = [
             'Class' => (new Manager\User)->userclassName($criteria['To']),
             'Requirements' => [
-                'Upload' => [$stats['BytesUploaded'] + $ustats->requestBountySize(), $criteria['MinUpload'], 'bytes'],
-                'Ratio' => [$stats['BytesDownloaded'] == 0 ? '∞'
-                    : $stats['BytesUploaded'] / $stats['BytesDownloaded'], $criteria['MinRatio'], 'float'],
+                'Upload' => [$this->uploadedSize() + $ustats->requestBountySize(), $criteria['MinUpload'], 'bytes'],
+                'Ratio' => [$this->downloadedSize() == 0 ? '∞'
+                    : $this->uploadedSize() / $this->downloadedSize(), $criteria['MinRatio'], 'float'],
                 'Time' => [
                     $this->joinDate(),
                     $criteria['Weeks'] * 7 * 24 * 60 * 60,

@@ -111,7 +111,7 @@ class User extends \Gazelle\BaseObject {
                     'request_created_size'  => 0,
                     'request_vote_total'    => 0,
                     'request_vote_size'     => 0,
-                    'seedingh_total'        => 0,
+                    'seeding_total'         => 0,
                     'snatch_total'          => 0,
                     'snatch_unique'         => 0,
                     'unique_group_total'    => 0,

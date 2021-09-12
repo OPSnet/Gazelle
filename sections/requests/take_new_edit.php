@@ -16,7 +16,7 @@ if (!$NewRequest) {
 }
 
 if ($NewRequest) {
-    if (!check_perms('site_submit_requests') || $LoggedUser['BytesUploaded'] < 250 * 1024 * 1024) {
+    if (!check_perms('site_submit_requests') || $Viewer->uploadedSize() < 250 * 1024 * 1024) {
         error(403);
     }
 } else {

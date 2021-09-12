@@ -47,24 +47,24 @@
                 {{ user.inviter.id|user_full }}
             </td>
             <td style="vertical-align: top">
-                {{- user.activityStats.BytesUploaded|octet_size -}}
+                {{- user.uploadedSize|octet_size -}}
         {%- if user.inviter -%}
                 <br />
-                {{- user.inviter.activityStats.BytesUploaded|octet_size -}}
+                {{- user.inviter.uploadedSize|octet_size -}}
         {%- endif -%}
             </td>
             <td style="vertical-align: top">
-                {{- user.ActivityStats.BytesDownloaded|octet_size -}}
+                {{- user.downloadedSize|octet_size -}}
         {%- if user.inviter -%}
                 <br />
-                {{- user.inviter.activityStats.BytesDownloaded|octet_size -}}
+                {{- user.inviter.downloadedSize|octet_size -}}
         {%- endif -%}
             </td>
             <td style="vertical-align: top">
-                {{- ratio(user.activityStats.BytesUploaded, user.ActivityStats.BytesDownloaded) -}}
+                {{- ratio(user.uploadedSize, user.downloadedSize) -}}
         {%- if user.inviter -%}
                 <br />
-                {{- ratio(user.inviter.activityStats.BytesUploaded, user.inviter.ActivityStats.BytesDownloaded) -}}
+                {{- ratio(user.inviter.uploadedSize, user.inviter.downloadedSize) -}}
         {%- endif -%}
             </td>
             <td style="vertical-align: top">
