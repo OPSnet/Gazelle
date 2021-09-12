@@ -640,8 +640,7 @@ foreach ($TorrentList as $Torrent) {
                             <br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=$GroupID?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
 <?php } ?>
                             <br /><br />If you download this, your ratio will become <?=
-                                Format::get_ratio_html($LoggedUser['BytesUploaded'],
-                                    $LoggedUser['BytesDownloaded'] + $Size);
+                                Format::get_ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize() + $Size);
                             ?>.
                         </blockquote>
                     </div>

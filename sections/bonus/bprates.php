@@ -45,7 +45,7 @@ View::show_header($Title);
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
-    <h3>Points: <?= number_format($user->activityStats()['BonusPoints']) ?></h3>
+    <h3>Points: <?= number_format($user->bonusPointsTotal()) ?></h3>
 </div>
 <div class="linkbox">
     <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>

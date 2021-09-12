@@ -393,17 +393,17 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                         <input type="hidden" id="requestid" name="id" value="<?=$RequestID?>" />
                         <input type="hidden" id="auth" name="auth" value="<?= $Viewer->auth() ?>" />
                         <input type="hidden" id="amount" name="amount" value="0" />
-                        <input type="hidden" id="current_uploaded" value="<?=$LoggedUser['BytesUploaded']?>" />
-                        <input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
-                        <input type="hidden" id="current_rr" value="<?=(float)$LoggedUser['RequiredRatio']?>" />
+                        <input type="hidden" id="current_uploaded" value="<?=$Viewer->uploadedSize()?>" />
+                        <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
+                        <input type="hidden" id="current_rr" value="<?=$Viewer->requiredRatio()?>" />
                         <input id="total_bounty" type="hidden" value="<?=$RequestVotes['TotalBounty']?>" />
                         <?= $RequestTax > 0
                             ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span></strong><br />'
                             : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">0.00 MiB</span></strong> of bounty, your new stats will be: <br />
-                        Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
-                        Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'],$LoggedUser['BytesDownloaded'])?></span>
+                        Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
+                        Ratio: <span id="new_ratio"><?=Format::get_ratio_html($Viewer->uploadedSize(),$Viewer->downloadedSize())?></span>
                         <input type="button" id="button" value="Vote!" disabled="disabled" onclick="Vote();" />
                     </form>
                 </td>

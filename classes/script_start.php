@@ -159,15 +159,11 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 
 if (!is_null($Viewer)) {
     $viewerId = $Viewer->id();
-    $LoggedUser = array_merge(Users::user_heavy_info($viewerId), Users::user_info($viewerId), $Viewer->activityStats());
+    $LoggedUser = array_merge(Users::user_heavy_info($viewerId), Users::user_info($viewerId));
     $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($viewerId, $LoggedUser['CustomPermissions']);
     if ($Viewer->disableWiki()) {
         unset($LoggedUser['Permissions']['site_edit_wiki']);
     }
-    $LoggedUser['RatioWatch'] = (
-        time() < strtotime($LoggedUser['RatioWatchEnds'])
-        && ($LoggedUser['BytesDownloaded'] * $LoggedUser['RequiredRatio']) > $LoggedUser['BytesUploaded']
-    );
 
     // Change necessary triggers in external components
     $Cache->CanClear = $Viewer->permitted('admin_clear_cache');

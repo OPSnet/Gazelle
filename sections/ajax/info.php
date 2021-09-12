@@ -2,12 +2,12 @@
 //calculate ratio
 //returns 0 for DNE and -1 for infinity, because we don't want strings being returned for a numeric value in our java
 $Ratio = 0;
-if ($LoggedUser['BytesUploaded'] == 0 && $LoggedUser['BytesDownloaded'] == 0) {
+if ($Viewer->uploadedSize() == 0 && $Viewer->downloadedSize() == 0) {
     $Ratio = 0;
-} elseif ($LoggedUser['BytesDownloaded'] == 0) {
+} elseif ($Viewer->downloadedSize() == 0) {
     $Ratio = -1;
 } else {
-    $Ratio = number_format(max($LoggedUser['BytesUploaded'] / $LoggedUser['BytesDownloaded'] - 0.005, 0), 2); //Subtract .005 to floor to 2 decimals
+    $Ratio = number_format(max($Viewer->uploadedSize() / $Viewer->downloadedSize() - 0.005, 0), 2); //Subtract .005 to floor to 2 decimals
 }
 
 $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
@@ -25,12 +25,12 @@ json_print("success", [
         'newSubscriptions' => (new \Gazelle\Manager\Subscription($Viewer->id()))->unread() > 0,
     ],
     'userstats' => [
-        'uploaded' => (int)$LoggedUser['BytesUploaded'],
-        'downloaded' => (int)$LoggedUser['BytesDownloaded'],
+        'uploaded' => $Viewer->uploadedSize(),
+        'downloaded' => $Viewer->downloadedSize(),
         'ratio' => (float)$Ratio,
-        'requiredratio' => (float)$LoggedUser['RequiredRatio'],
-        'bonusPoints' => (int)$LoggedUser['BonusPoints'],
-        'bonusPointsPerHour' => (float)number_format($LoggedUser['BonusPointsPerHour'], 2),
+        'requiredratio' => $Viewer->requiredRatio(),
+        'bonusPoints' => $Viewer->bonusPointsTotal(),
+        'bonusPointsPerHour' => (float)number_format($Viewer->bonusPointsPerHour(), 2),
         'class' => $ClassLevels[$LoggedUser['Class']]['Name']
     ]
 ]);
