@@ -14,7 +14,7 @@ if (!$NewRequest) {
     }
 }
 
-if ($NewRequest && ($LoggedUser['BytesUploaded'] < 250 * 1024 * 1024 || !check_perms('site_submit_requests'))) {
+if ($NewRequest && ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !check_perms('site_submit_requests'))) {
     error('You do not have enough uploaded to make a request.');
 }
 
@@ -389,16 +389,16 @@ View::show_header($title, ['js' => 'requests,form_validate']);
                     <td class="label">Bounty information</td>
                     <td>
                         <input type="hidden" id="amount" name="amount" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
-                        <input type="hidden" id="current_uploaded" value="<?=$LoggedUser['BytesUploaded']?>" />
-                        <input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
+                        <input type="hidden" id="current_uploaded" value="<?=$Viewer->uploadedSize()?>" />
+                        <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
                         <input type='hidden' id='request_tax' value="<?=$RequestTax?>" />
                         <?= $RequestTax > 0
                             ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span></strong><br />'
                             : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">100.00 MiB</span></strong> of bounty, your new stats will be: <br />
-                        Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
-                        Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'], $LoggedUser['BytesDownloaded'])?></span>
+                        Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
+                        Ratio: <span id="new_ratio"><?=Format::get_ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize())?></span>
                     </td>
                 </tr>
                 <tr>

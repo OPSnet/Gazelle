@@ -17,7 +17,6 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $TotalSpent     = $user->stats()->requestVoteSize();
 }
 $ForumPosts       = $user->stats()->forumPostTotal();
-$activityStats    = $user->activityStats();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $user->stats()->uploadTotal() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $user->stats()->artistAddedTotal() : null;
 $releaseVotes     = $user->releaseVotes();
@@ -28,8 +27,8 @@ $collageContribs  = $user->propertyVisible($Viewer, 'collagecontribs+') ? $user-
 $rank = new Gazelle\UserRank(
     new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
     [
-        'uploaded'   => $activityStats['BytesUploaded'],
-        'downloaded' => $activityStats['BytesDownloaded'],
+        'uploaded'   => $user->uploadedSize(),
+        'downloaded' => $user->downloadedSize(),
         'uploads'    => $Uploads ?? 0,
         'requests'   => $RequestsFilled ?? 0,
         'posts'      => $ForumPosts,
@@ -42,8 +41,8 @@ $rank = new Gazelle\UserRank(
     ]
 );
 
-$uploaded = $user->propertyVisible($Viewer, 'uploaded') ? $activityStats['BytesUploaded'] : null;
-$downloaded = $user->propertyVisible($Viewer, 'downloaded') ? $activityStats['BytesDownloaded'] : null;
+$uploaded = $user->propertyVisible($Viewer, 'uploaded') ? $user->uploadedSize() : null;
+$downloaded = $user->propertyVisible($Viewer, 'downloaded') ? $user->downloadedSize() : null;
 if (is_null($uploaded) || is_null($downloaded)) {
     $ratio = null;
 } else {

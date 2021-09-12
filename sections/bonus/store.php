@@ -35,8 +35,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
 <div class="alertbar blend">User error, no bonus points donated.</div>
 <?php } elseif ($value <= 0) { ?>
 <div class="alertbar blend">Warning! You cannot donate negative or no points!</div>
-<?php } elseif ($LoggedUser['BonusPoints'] < $value) { ?>
-<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int)$LoggedUser['BonusPoints']) ?> points.</div>
+<?php } elseif ($Viewer->bonusPointsTotal() < $value) { ?>
+<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int)$Viewer->bonusPointsTotal()) ?> points.</div>
 <?php } elseif ($Bonus->donate((int)$_POST['poolid'], $value, $Viewer->id(), $Viewer->effectiveClass())) { ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
 <?php } else { ?>
@@ -45,7 +45,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     }
 }
 
-$points = (int)$LoggedUser['BonusPoints'];
+$points = (int)$Viewer->bonusPointsTotal();
 $auth = $Viewer->auth();
 $pool = $Bonus->getOpenPool();
 if ($pool) {
