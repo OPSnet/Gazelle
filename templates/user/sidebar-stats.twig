@@ -137,7 +137,7 @@
 {% endif %}
 
 {% if visible['snatched+'] or viewer.permitted('site_view_torrent_snatchlist') %}
-        <li id="comm_snatched"{{ _self.class_override(visible['snatched']) }}>Snatched: {{ stats.snatchTotal|number_format }} ({{ stats.snatchUnique|number_format }} unique)
+        <li id="comm_snatched"{{ _self.class_override(visible['snatched+']) }}>Snatched: {{ stats.snatchTotal|number_format }} ({{ stats.snatchUnique|number_format }} unique)
     {% if visible['snatched'] %}
             <a href="torrents.php?type=snatched&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['snatched']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
