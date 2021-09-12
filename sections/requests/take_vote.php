@@ -40,7 +40,7 @@ $Amount = (empty($_GET['amount']) || !intval($_GET['amount']) || $_GET['amount']
 
 $Bounty = $Amount * (1 - $RequestTax);
 
-if ($LoggedUser['BytesUploaded'] < $Amount) {
+if ($Viewer->uploadedSize() < $Amount) {
     echo 'bankrupt';
     die();
 }

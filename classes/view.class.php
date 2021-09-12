@@ -77,7 +77,7 @@ class View {
         }
 
         $activity = new Gazelle\Activity;
-        if ($LoggedUser['RatioWatch']) {
+        if ($Viewer->onRatioWatch()) {
             $activity->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: You have '
                 . time_diff($LoggedUser['RatioWatchEnds'], 3)
                 . ' to get your ratio over your required ratio or your leeching abilities will be disabled.'
@@ -243,7 +243,7 @@ class View {
             'document'          => $Document,
             'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
             'nav_links'         => $navLinks,
-            'required_ratio'    => $LoggedUser['RequiredRatio'],
+            'required_ratio'    => $Viewer->requiredRatio(),
             'subscriptions'     => $NewSubscriptions,
             'user'              => $Viewer,
             'user_class'        => (new Gazelle\Manager\User)->userclassName($Viewer->primaryClass()),

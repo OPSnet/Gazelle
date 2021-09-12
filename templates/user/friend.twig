@@ -6,8 +6,8 @@
     {{ paginator.linkbox|raw }}
 {% for friend in list %}
     {% set allspan = viewer.showAvatars ? 3 : 2 %}
-    {% set uploaded = friend.user.activityStats.BytesUploaded %}
-    {% set downloaded = friend.user.activityStats.BytesDownloaded %}
+    {% set uploaded = friend.user.uploadedSize %}
+    {% set downloaded = friend.user.downloadedSize %}
 <form class="manage_form" name="friends" action="friends.php" method="post">
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <table class="friends_table vertical_margin">

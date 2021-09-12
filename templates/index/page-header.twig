@@ -4,7 +4,6 @@
 {% macro active_class(t) %}
     {%- if t %} active{% endif -%}
 {% endmacro -%}
-{% set stats = user.activityStats -%}
 </head>
 <body id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
 <input id="extracb1" class="hidden" type="checkbox">
@@ -37,7 +36,7 @@
         </li>
         <li id="nav_bonus" class="brackets{{ _self.active_class(document == 'user' and action == 'bonus') }}">
             <a href="bonus.php" class='tooltip' title="BP/hour: {{
-                stats.BonusPointsPerHour|number_format(3) }}">Bonus ({{ stats.BonusPoints|number_format }})</a>
+                user.bonusPointsPerHour|number_format(3) }}">Bonus ({{ user.bonusPointsTotal|number_format }})</a>
         </li>
         <li id="nav_invite" class="brackets{{ _self.active_class(document == 'user' and action == 'invite') }}">
             <a href="user.php?action=invite" class='tooltip' title="Invite a friend!">Invite
@@ -50,14 +49,14 @@
     <ul id="userinfo_stats">
         <li id="stats_seeding">
             <a href="torrents.php?type=seeding&amp;userid={{ user.id }}">Up</a>:
-            <span class="stat tooltip" title="{{ stats.BytesUploaded|octet_size(5) }}">{{ stats.BytesUploaded|octet_size }}</span>
+            <span class="stat tooltip" title="{{ user.uploadedSize|octet_size(5) }}">{{ user.uploadedSize|octet_size }}</span>
         </li>
         <li id="stats_leeching">
             <a href="torrents.php?type=leeching&amp;userid={{ user.id }}">Down</a>:
-            <span class="stat tooltip" title="{{ stats.BytesDownloaded|octet_size(5) }}">{{ stats.BytesDownloaded|octet_size }}</span>
+            <span class="stat tooltip" title="{{ user.downloadedSize|octet_size(5) }}">{{ user.downloadedSize|octet_size }}</span>
         </li>
         <li id="stats_ratio">
-            Ratio: <span class="stat">{{ ratio(stats.BytesUploaded, stats.BytesDownloaded) }}</span>
+            Ratio: <span class="stat">{{ ratio(user.uploadedSize, user.downloadedSize) }}</span>
         </li>
 {% if required_ratio > 0 %}
         <li id="stats_required">

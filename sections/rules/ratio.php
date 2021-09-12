@@ -4,7 +4,7 @@ View::show_header('Ratio Requirements');
 <div class="thin">
 <?php
 echo $Twig->render('rules/toc.twig');
-$b   = $LoggedUser['BytesDownloaded'];
+$b   = $Viewer->downloadedSize();
 $GiB = 1024 * 1024 * 1024;
 echo $Twig->render('rules/ratio.twig', [
     'level_1'  => ($b <    5 * $GiB) ? 'a' : 'b',

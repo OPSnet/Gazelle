@@ -16,7 +16,7 @@ switch ($_GET['action'] ?? '') {
             $Item = $Bonus->getItem($Label);
             if ($Item) {
                 $Price = $Bonus->getEffectivePrice($Label, $Viewer->id());
-                if ($Price > $LoggedUser['BonusPoints']) {
+                if ($Price > $Viewer->bonusPointsTotal()) {
                     error('You cannot afford this item.');
                 }
                 switch($Label)  {

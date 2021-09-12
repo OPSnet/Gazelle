@@ -47,7 +47,7 @@ if ($UserID == $Viewer->id()) {
     $OwnProfile = false;
     //Don't allow any kind of previewing on others' profiles
     $Preview = 0;
-    $FL_Items = $Bonus->getListOther($LoggedUser['BonusPoints']);
+    $FL_Items = $Bonus->getListOther($Viewer->bonusPointsTotal());
 }
 $FA_Key = null;
 
@@ -67,7 +67,6 @@ function check_paranoia_here($Setting) {
     }
 }
 
-$stats = $User->activityStats();
 [$ClassRatio, $Buffer] = $User->buffer();
 
 if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || $Viewer->permitted('users_mod'))) {
@@ -167,8 +166,8 @@ $torrentComments  = check_paranoia_here('torrentcomments++') ? $User->torrentCom
 $rank = new Gazelle\UserRank(
     new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
     [
-        'uploaded'   => $stats['BytesUploaded'],
-        'downloaded' => $stats['BytesDownloaded'],
+        'uploaded'   => $User->uploadedSize(),
+        'downloaded' => $User->downloadedSize(),
         'uploads'    => $Uploads,
         'requests'   => $User->stats()->requestBountyTotal(),
         'posts'      => $User->stats()->forumPostTotal(),
@@ -188,12 +187,12 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
 <?php if (($Override = check_paranoia_here('uploaded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats['BytesUploaded'])?> uploaded">Data uploaded: <?= display_rank($rank, 'uploaded') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->uploadedSize())?> uploaded">Data uploaded: <?= display_rank($rank, 'uploaded') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('downloaded'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats['BytesDownloaded'])?> downloaded">Data downloaded: <?= display_rank($rank, 'downloaded') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->downloadedSize())?> downloaded">Data downloaded: <?= display_rank($rank, 'downloaded') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('uploads+'))) {
@@ -408,7 +407,7 @@ if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
 <?php if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) { ?>
         <div class="box">
             <div class="head">Ratio watch</div>
-            <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($stats['BytesDownloaded'] * $stats['RequiredRatio']) - $stats['BytesUploaded'])?> in the next <?=time_diff($User->ratioWatchExpiry()) ?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($stats['BytesDownloaded'] - $stats['RatioWatchDownload'])?></div>
+            <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($User->downloadedSize() * $User->requiredRatio()) - $User->uploadedSize())?> in the next <?=time_diff($User->ratioWatchExpiry()) ?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($User->downloadedSize() - $stats['RatioWatchDownload'])?></div>
         </div>
 <?php } ?>
         <div class="box">
@@ -747,9 +746,9 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $OwnProfile)) {
         echo $Twig->render('user/edit-buffer.twig', [
-            'up'             => $stats['BytesUploaded'],
-            'down'           => $stats['BytesDownloaded'],
-            'bonus'          => $stats['BonusPoints'],
+            'up'             => $User->uploadedSize(),
+            'down'           => $User->downloadedSize(),
+            'bonus'          => $User->bonusPointsTotal(),
             'collages'       => $User->paidPersonalCollages(),
             'donor_collages' => $User->personalDonorCollages(),
         ]);
