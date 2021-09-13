@@ -220,9 +220,9 @@ function parse_user_agent(): array {
  * @param string $Log If true, the user is given a link to search $Log in the site log.
  */
 function error($Error, $NoHTML = false, $Log = false) {
-    global $Debug;
+    global $Debug, $Viewer;
     require_once(__DIR__ . '/../sections/error/index.php');
-    $Debug->profile();
+    $Debug->profile($Viewer);
     die();
 }
 

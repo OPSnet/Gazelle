@@ -46,7 +46,7 @@ class Debug {
         return self::$startTime;
     }
 
-    public function profile($Automatic = '') {
+    public function profile(User $user, $Automatic = '') {
         $Reason = [];
 
         if (!empty($Automatic)) {
@@ -77,8 +77,7 @@ class Debug {
         }
 
         if (isset($_REQUEST['profile'])) {
-            global $LoggedUser;
-            $Reason[] = 'Requested by ' . $LoggedUser['Username'];
+            $Reason[] = 'Requested by ' . $user->username();
         }
 
         if (isset($Reason[0])) {
