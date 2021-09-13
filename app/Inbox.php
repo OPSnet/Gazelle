@@ -23,7 +23,7 @@ class Inbox extends Base {
             'dateField' => 'cu.SentDate',
         ],
     ];
-    // These two need to match values of $LoggedUser['ListUnreadPMsFirst']
+    // These two need to match values of user option('ListUnreadPMsFirst')
     const UNREAD_FIRST = true;
     const NEWEST_FIRST = false;
 
@@ -51,14 +51,14 @@ class Inbox extends Base {
     /**
      * Inbox constructor
      *
-     * @param int       $userId             usually $LoggedUser['ID']
+     * @param int       $userId
      * @param bool      $unreadFirstDefault the user's inbox sort setting
      * @param array     $params             associative config array, usually $_GET
      */
-    public function __construct($userId, $unreadFirstDefault = self::NEWEST_FIRST, array $params = []) {
+    public function __construct(int $userId, $unreadFirstDefault = self::NEWEST_FIRST, array $params = []) {
         parent::__construct();
         $this->userId = $userId;
-        $this->unreadFirstDefault = (bool) $unreadFirstDefault;
+        $this->unreadFirstDefault = (bool)$unreadFirstDefault;
         if (empty($params)) {
             $params = $_GET;
         }
