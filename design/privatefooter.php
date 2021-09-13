@@ -70,16 +70,11 @@ if ($Y != SITE_LAUNCH_YEAR) {
 <div id="lightbox" class="lightbox hidden"></div>
 <div id="curtain" class="curtain hidden"></div>
 <?php
-global $LoggedUser;
-if (isset($LoggedUser['ID'])) {
-    $notifications = (new Gazelle\Manager\Notification())->registeredNotifications($LoggedUser['ID']);
-    foreach ($notifications as $type => $n) {
+$notifications = (new Gazelle\Manager\Notification())->registeredNotifications($Viewer->id());
+foreach ($notifications as $type => $n) {
 ?>
 <span class="noty-notification" style="display: none;" data-noty-type="<?= $type ?>" data-noty-id="<?= $n['id'] ?>" data-noty-importance="<?= $n['importance'] ?>" data-noty-url="<?= $n['url'] ?>"><?= $n['message'] ?></span>
-<?php
-    }
-}
-?>
+<?php } ?>
 <!-- Extra divs, for stylesheet developers to add imagery -->
 <div id="extra1"><span></span></div>
 <div id="extra2"><span></span></div>
