@@ -258,4 +258,6 @@ if (!defined('SKIP_NO_CACHE_HEADERS')) {
 ob_end_flush();
 
 $Debug->set_flag('and send to user');
-$Debug->profile($Viewer);
+if (!is_null($Viewer)) {
+    $Debug->profile($Viewer);
+}
