@@ -7,7 +7,7 @@ $UserID = $Viewer->id();
 try {
     $Inbox = new Inbox(
         $Viewer->id(),
-        $LoggedUser['ListUnreadPMsFirst'] ?? false
+        $Viewer->option('ListUnreadPMsFirst') ?? false
     );
 } catch (Throwable $e) {
     error(404);
@@ -22,12 +22,14 @@ View::show_header('Inbox');
 <div class="thin">
     <h2><?= $Inbox->title() ?></h2>
     <div class="linkbox">
-<?php foreach (array_keys(Inbox::SECTIONS) as $Section) {
+<?php
+foreach (array_keys(Inbox::SECTIONS) as $Section) {
     if ($Inbox->section() != $Section) {
 ?>
         <a href="<?= $Inbox->getLink($Section) ?>" class="brackets">
             <?= $Inbox->title($Section) ?>
-        </a><?php
+        </a>
+<?php
     }
 }
 ?>
@@ -70,7 +72,7 @@ View::show_header('Inbox');
                     <td width="50%">Subject</td>
                     <td><?= ($Inbox->section() === 'sentbox') ? 'Receiver' : 'Sender' ?></td>
                     <td>Date</td>
-<?php        if (check_perms('users_mod')) { ?>
+<?php        if ($Viewer->permitted('users_mod')) { ?>
                     <td>Forwarded to</td>
 <?php        } ?>
                 </tr>
@@ -110,7 +112,7 @@ View::show_header('Inbox');
                     </td>
                     <td><?= Users::format_username((int)$SenderID, true, true, true, true) ?></td>
                     <td><?= time_diff($Date) ?></td>
-<?php            if (check_perms('users_mod')) { ?>
+<?php            if ($Viewer->permitted('users_mod')) { ?>
                     <td><?= (($ForwardedID && $ForwardedID != $Viewer->id()) ? Users::format_username($ForwardedID, false, false, false) : '') ?></td>
 <?php            } ?>
                 </tr>

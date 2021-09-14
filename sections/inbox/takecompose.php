@@ -8,7 +8,7 @@ if (empty($_POST['toid'])) {
     error(404);
 }
 
-if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$_POST['toid']])) {
+if ($Viewer->option('DisablePM') && !isset($StaffIDs[$_POST['toid']])) {
     error(403);
 }
 
@@ -58,5 +58,5 @@ if (!empty($Err)) {
     } else {
         $userMan->sendPM($ToID, $Viewer->id(), $Subject, $Body);
     }
-    header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
+    header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
 }

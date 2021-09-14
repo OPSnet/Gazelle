@@ -10,7 +10,7 @@ $ReceiverID = (int)$_POST['receiverid'];
 if (!$ConvID || !$ReceiverID) {
     error(404);
 }
-if (!check_perms('users_mod') && !isset($StaffIDs[$ReceiverID])) {
+if (!$Viewer->permitted('users_mod') && !isset($StaffIDs[$ReceiverID])) {
     error(403);
 }
 $found = $DB->scalar("
@@ -56,5 +56,5 @@ if ($found) {
         ", $ReceiverID, $UserID, $ConvID
     );
     $Cache->delete_value("inbox_new_$ReceiverID");
-    header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
+    header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
 }

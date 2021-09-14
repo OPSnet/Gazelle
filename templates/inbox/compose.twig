@@ -1,11 +1,11 @@
 <div class="thin">
     <div class="header">
-        <h2>Send a message to <a href="user.php?id={{ toid }}">{{ username }}</a></h2>
+        <h2>Send a message to <a href="user.php?id={{ recipient.id }}">{{ recipient.username }}</a></h2>
     </div>
     <form class="send_form" name="message" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose" />
-            <input type="hidden" name="toid" value="{{ toid }}" />
+            <input type="hidden" name="toid" value="{{ recipient.id }}" />
             <input type="hidden" name="auth" value="{{ auth }}" />
             <div id="quickpost">
                 <h3>Subject</h3>
