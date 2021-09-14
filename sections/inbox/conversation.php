@@ -87,37 +87,6 @@ $Section = (isset($_GET['section']) && in_array($_GET['section'], array_keys(Inb
     : key(Inbox::SECTIONS);
 $Sort = (isset($_GET['sort']) && $_GET['sort'] == 'unread') ? Inbox::UNREAD_FIRST : Inbox::NEWEST_FIRST;
 
-View::show_header("View conversation $Subject", ['js' => 'comments,inbox,bbcode,jquery.validate,form_validate']);
-?>
-<div class="thin">
-    <h2><?=$Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : '')?></h2>
-    <div class="linkbox">
-        <a href="<?= Inbox::getLinkQuick($Section, $Sort); ?>" class="brackets">
-            Back to <?= $Section ?>
-        </a>
-    </div>
-<?php
-
-foreach ($conversation as list($SentDate, $SenderID, $Body, $MessageID)) {
-?>
-    <div class="box vertical_space">
-        <div class="head" style="overflow: hidden;">
-            <div style="float: left;">
-                <strong><?=$Users[(int)$SenderID]['UserStr']?></strong> <?=time_diff($SentDate)?>
-<?php
-    if ($SenderID > 0) { ?>
-                    - <a href="#quickpost" onclick="Quote('<?=$MessageID?>','<?=$Users[(int)$SenderID]['Username']?>');" class="brackets">Quote</a>
-<?php
-    } ?>
-            </div>
-            <div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
-        </div>
-        <div class="body" id="message<?=$MessageID?>">
-            <?=Text::full_format($Body)?>
-        </div>
-    </div>
-<?php
-}
 $DB->prepared_query("
     SELECT UserID
     FROM pm_conversations_users
@@ -127,6 +96,34 @@ $DB->prepared_query("
     ", $UserID, $ConvID
 );
 $ReceiverIDs = $DB->collect('UserID');
+
+View::show_header("View conversation $Subject", ['js' => 'comments,inbox,bbcode,jquery.validate,form_validate']);
+?>
+<div class="thin">
+    <h2><?=$Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : '')?></h2>
+    <div class="linkbox">
+        <a href="<?= Inbox::getLinkQuick($Section, $Sort); ?>" class="brackets">
+            Back to <?= $Section ?>
+        </a>
+    </div>
+
+<?php foreach ($conversation as list($SentDate, $SenderID, $Body, $MessageID)) { ?>
+    <div class="box vertical_space">
+        <div class="head" style="overflow: hidden;">
+            <div style="float: left;">
+                <strong><?=$Users[(int)$SenderID]['UserStr']?></strong> <?=time_diff($SentDate)?>
+<?php if ($SenderID > 0) { ?>
+                    - <a href="#quickpost" onclick="Quote('<?=$MessageID?>','<?=$Users[(int)$SenderID]['Username']?>');" class="brackets">Quote</a>
+<?php } ?>
+            </div>
+            <div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
+        </div>
+        <div class="body" id="message<?=$MessageID?>">
+            <?=Text::full_format($Body)?>
+        </div>
+    </div>
+<?php
+}
 
 if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverIDs, array_keys($StaffIDs)))) {
 ?>
@@ -145,9 +142,7 @@ if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverI
             </div>
         </div>
     </form>
-<?php
-}
-?>
+<?php } ?>
     <h3>Manage conversation</h3>
     <form class="manage_form" name="messages" action="inbox.php" method="post">
         <div class="box pad">
@@ -169,7 +164,6 @@ if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverI
                     <td>
                         <input type="checkbox" id="delete" name="delete" />
                     </td>
-
                 </tr>
                 <tr>
                     <td class="center" colspan="6"><input type="submit" value="Manage conversation" /></td>
@@ -177,13 +171,7 @@ if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverI
             </table>
         </div>
     </form>
-<?php
-$FLS = $DB->scalar("
-    SELECT SupportFor FROM users_info WHERE UserID = ?
-    ", $UserID
-);
-if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID == $UserID)) {
-?>
+<?php if (($Viewer->permitted('users_mod') || $Viewer->isFLS()) && (!$ForwardedID || $ForwardedID == $UserID)) { ?>
     <h3>Forward conversation</h3>
     <form class="send_form" name="forward" action="inbox.php" method="post">
         <div class="box pad">
@@ -199,18 +187,12 @@ if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID =
         }
 ?>
                 <option value="<?=$StaffID?>"><?=$StaffName?></option>
-<?php
-    }
-?>
+<?php } ?>
             </select>
             <input type="submit" value="Forward" />
         </div>
     </form>
-<?php
-}
-
-//And we're done!
-?>
+<?php } ?>
 </div>
 <?php
 View::show_footer();
