@@ -7,7 +7,7 @@ use Gazelle\Util\Mail;
 
 class User extends BaseObject {
 
-    const CACHE_KEY         = 'u_%d_v2';
+    const CACHE_KEY         = 'u_%d';
     const CACHE_SNATCH_TIME = 'users_snatched_%d_time';
     const CACHE_NOTIFY      = 'u_notify_%d';
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
