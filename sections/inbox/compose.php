@@ -2,34 +2,23 @@
 
 use Gazelle\Inbox;
 
-$ToID = (int)$_GET['toid'];
-if (!$ToID) {
+$recipient = (new Gazelle\Manager\User)->findById((int)$_GET['toid']);
+if (is_null($recipient)) {
     error(404);
 }
-if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$ToID])) {
+if ($Viewer->disablePm() && !isset($StaffIDs[$recipient->id()])) {
     error(403);
 }
-if (empty($Return)) {
-    if ($ToID == $Viewer->id()) {
-        error('You cannot start a conversation with yourself!');
-        header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
-    }
+if (empty($Return) && $recipient->id() == $Viewer->id()) {
+    error('You cannot start a conversation with yourself!');
+    header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
 }
 
-$Username = $DB->scalar("
-    SELECT Username FROM users_main WHERE ID = ?
-    ", $ToID
-);
-if (!$Username) {
-    error(404);
-}
-
-View::show_header('Compose', ['js' => 'inbox,bbcode,jquery.validate,form_validate']);
+View::show_header('Compose message', ['js' => 'inbox,bbcode,jquery.validate,form_validate']);
 echo $Twig->render('inbox/compose.twig', [
-    'auth'     => $Viewer->auth(),
-    'body'     => $Body ?? '',
-    'subject'  => $Subject ?? '',
-    'toid'     => $ToID,
-    'username' => $Username,
+    'auth'      => $Viewer->auth(),
+    'body'      => $Body ?? '',
+    'subject'   => $Subject ?? '',
+    'recipient' => $recipient,
 ]);
 View::show_footer();
