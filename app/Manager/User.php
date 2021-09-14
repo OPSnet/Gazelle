@@ -966,7 +966,6 @@ class User extends \Gazelle\Base {
                 'To' => ULTIMATE_TM,
                 'MinUpload' => 2 * 1024 * 1024 * 1024 * 1024,
                 'MinRatio' => 1.05,
-                'MinUploads' => 2000,
                 'Weeks' => 12,
                 'Extra' => [
                     '"Perfecter" FLACs' => [

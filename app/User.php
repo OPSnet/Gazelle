@@ -2306,11 +2306,10 @@ class User extends BaseObject {
             return null;
         }
 
-        $ustats = new Stats\User($this->id);
         $progress = [
             'Class' => (new Manager\User)->userclassName($criteria['To']),
             'Requirements' => [
-                'Upload' => [$this->uploadedSize() + $ustats->requestBountySize(), $criteria['MinUpload'], 'bytes'],
+                'Upload' => [$this->uploadedSize() + $this->stats()->requestBountySize(), $criteria['MinUpload'], 'bytes'],
                 'Ratio' => [$this->downloadedSize() == 0 ? '∞'
                     : $this->uploadedSize() / $this->downloadedSize(), $criteria['MinRatio'], 'float'],
                 'Time' => [
@@ -2318,10 +2317,12 @@ class User extends BaseObject {
                     $criteria['Weeks'] * 7 * 24 * 60 * 60,
                     'time'
                 ],
-                'Torrents' => [$ustats->uploadTotal(), $criteria['MinUploads'], 'int'],
             ]
         ];
 
+        if (isset($criteria['MinUploads'])) {
+            $progress['Requirements']['Torrents'] = [$this->stats()->uploadTotal(), $criteria['MinUploads'], 'int'];
+        }
         if (isset($criteria['Extra'])) {
             foreach ($criteria['Extra'] as $req => $info) {
                 $query = str_replace('users_main.ID', '?', $info['Query']);
