@@ -21,10 +21,6 @@ class Torrent extends BaseObject {
         return 'torrents';
     }
 
-    public function __construct(int $id) {
-        parent::__construct($id);
-    }
-
     public function flush() {
     }
 
@@ -49,6 +45,13 @@ class Torrent extends BaseObject {
     public function setShowSnatched(int $showSnatched) {
         $this->showSnatched = $showSnatched;
         return $this;
+    }
+
+    /**
+     * How many tokens are required to download for free?
+     */
+    public function tokenCount(): int {
+        return ceil($this->size() / BYTES_PER_FREELEECH_TOKEN);
     }
 
     /**
@@ -148,6 +151,82 @@ class Torrent extends BaseObject {
         return $info;
     }
 
+    protected function labelElement($class, $text): string {
+        return sprintf('<strong class="torrent_label tooltip %s" title="%s" style="white-space: nowrap;">%s</strong>',
+            $class, $text, $text
+        );
+    }
+
+    public function label(): string {
+        $info = $this->info();
+        $label = [];
+        if (!empty($info['Media'])) {
+            $label[] = $info['Media'];
+        }
+        if (!empty($info['Format'])) {
+            $label[] = $info['Format'];
+        }
+        if (!empty($info['Encoding'])) {
+            $label[] = $info['Encoding'];
+        }
+        if ($info['Media'] === 'CD') {
+            if ($info['HasLog']) {
+                $label[] = ($info['HasLogDB'] ? "{$info['LogScore']}% " : '') . 'Log';
+            }
+            if ($info['HasCue']) {
+                $label[] = 'Cue';
+            }
+        }
+        if ($info['Scene']) {
+            $label[] = 'Scene';
+        }
+
+        if ($this->isSnatched($this->viewerId)) {
+            $label[] = $this->labelElement('tl_snatched', 'Snatched!');
+        }
+        if (isset($info['FreeTorrent'])) {
+            if ($info['FreeTorrent'] == '1') {
+                $label[] = $this->labelElement('tl_free', 'Freeleech!');
+            } elseif ($info['FreeTorrent'] == '2') {
+                $label[] = $this->labelElement('tl_free tl_neutral', 'Neutral Leech!');
+            }
+        } elseif ($info['PersonalFL']) {
+            $label[] = $this->labelElement('tl_free tl_personal', 'Personal Freeleech!');
+        }
+        if (isset($info['Reported']) && $info['Reported']) {
+            $label[] = $this->labelElement('tl_reported', 'Reported');
+        }
+        if ($info['Media'] === 'CD' && $info['HasLog'] && $info['HasLogDB'] && !$info['LogChecksum']) {
+            $label[] = $this->labelElement('tl_notice', 'Bad/Missing Checksum');
+        }
+        if ($this->hasBadTags()) {
+            $label[] = $this->labelElement('tl_reported tl_bad_tags', 'Bad Tags');
+        }
+        if ($this->hasBadFolders()) {
+            $label[] = $this->labelElement('tl_reported tl_bad_folders', 'Bad Folders');
+        }
+        if ($this->hasBadFiles()) {
+            $label[] = $this->labelElement('tl_reported tl_bad_filenames', 'Bad File Names');
+        }
+        if ($this->hasMissingLineage()) {
+            $label[] = $this->labelElement('tl_reported tl_missing_lineage', 'Missing Lineage');
+        }
+        if ($this->hasCassetteApproved()) {
+            $label[] = $this->labelElement('tl_approved tl_cassette', 'Cassette Approved');
+        }
+        if ($this->hasLossymasterApproved()) {
+            $label[] = $this->labelElement('tl_approved tl_lossy_master', 'Lossy Master Approved');
+        }
+        if ($this->hasLossywebApproved()) {
+            $label[] = $this->labelElement('tl_approved tl_lossy_web', 'Lossy WEB Approved');
+        }
+        return implode(' / ', $label);
+    }
+
+    public function unseeded(): bool {
+        return $this->info()['Seeders'] === 0;
+    }
+
     /**
      * Get the encoding of this upload
      */
@@ -178,6 +257,41 @@ class Torrent extends BaseObject {
      */
     public function group(): TGroup {
         return new TGroup($this->info()['GroupID']);
+    }
+
+    public function hasBadFiles(): bool {
+        return $this->info()['BadFiles'];
+    }
+
+    public function hasBadFolders(): bool {
+        return $this->info()['BadFolders'];
+    }
+
+    public function hasBadTags(): bool {
+        return $this->info()['BadTags'];
+    }
+
+    public function hasCassetteApproved(): bool {
+        return $this->info()['CassetteApproved'];
+    }
+
+    public function hasLossymasterApproved(): bool {
+        return $this->info()['LossymasterApproved'];
+    }
+
+    public function hasLossywebApproved(): bool {
+        return $this->info()['LossywebApproved'];
+    }
+
+    public function hasMissingLineage(): bool {
+        return $this->info()['MissingLineage'];
+    }
+
+    /**
+     * The size (in bytes) of this upload
+     */
+    public function size(): int {
+        return $this->info()['Size'];
     }
 
     /**
