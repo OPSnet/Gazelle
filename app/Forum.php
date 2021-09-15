@@ -207,6 +207,8 @@ class Forum extends Base {
     public function addThread(int $userId, string $title, string $body) {
         // LastPostID is updated in updateTopic()
         $qid = $this->db->get_query_id();
+        $db = new DB;
+        $db->relaxConstraints(true);
         $this->db->prepared_query("
             INSERT INTO forums_topics
                    (ForumID, Title, AuthorID, LastPostAuthorID)
@@ -223,6 +225,7 @@ class Forum extends Base {
         );
         $postId = $this->db->inserted_id();
         $this->updateTopic($userId, $threadId, $postId);
+        $db->relaxConstraints(false);
         (new Stats\User($userId))->increment('forum_thread_total');
         $this->cache->cache_value(sprintf(self::CACHE_CATALOG, $threadId, 0), [
             $postId => [
