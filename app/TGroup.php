@@ -112,7 +112,26 @@ class TGroup extends BaseObject {
         if (!$revisionId) {
             $cached = $this->cache->get_value($key);
             if (is_array($cached)) {
-                // return $cached;
+                if (!$cached['Image']) {
+                    $cached['Image'] = $this->showFallbackImage
+                        ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])
+                        : null;
+                }
+                $cached['Flags'] = [];
+                $cached['Flags']['IsSnatched'] = ($this->viewer && $this->viewer->option('ShowSnatched'))
+                    ? $this->db->scalar("
+                        SELECT 1
+                        FROM torrents_group tg
+                        WHERE exists(
+                                SELECT 1
+                                FROM torrents t
+                                INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
+                                WHERE t.GroupID = tg.ID
+                            )
+                            AND tg.ID = ?
+                        ", $this->id)
+                    : false;
+                return $cached;
             }
         }
         $sql = 'SELECT '
@@ -157,11 +176,6 @@ class TGroup extends BaseObject {
         foreach (['CatalogueNumber', 'RecordLabel'] as $nullable) {
             $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
         }
-        if (!$info['Image']) {
-            $info['Image'] = $this->showFallbackImage
-                ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])
-                : null;
-        }
         $info['VanityHouse'] = ($info['VanityHouse'] == 1);
         $info['ReleaseType'] = (int)$info['ReleaseType'];
 
@@ -185,10 +199,15 @@ class TGroup extends BaseObject {
         if (!$this->revisionId) {
             $this->cache->cache_value($key, $info, 0);
         }
+        if (!$info['Image']) {
+            $info['Image'] = $this->showFallbackImage
+                ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])
+                : null;
+        }
         $info['Flags'] = [];
         $info['Flags']['IsSnatched'] = ($this->viewer && $this->viewer->option('ShowSnatched'))
             ? $this->db->scalar("
-                SELECT 1 
+                SELECT 1
                 FROM torrents_group tg
                 WHERE exists(
                         SELECT 1
@@ -199,6 +218,7 @@ class TGroup extends BaseObject {
                     AND tg.ID = ?
                 ", $this->id)
             : false;
+
         return $info;
     }
 
@@ -304,6 +324,10 @@ class TGroup extends BaseObject {
         return $this->info()['ReleaseType'];
     }
 
+    public function releaseTypeName(): string {
+        return $this->releaseTypes[$this->releaseType()];
+    }
+
     public function year(): string {
         return $this->info()['Year'];
     }
@@ -332,12 +356,24 @@ class TGroup extends BaseObject {
         return $tag;
     }
 
+    public function displayTorrentLink(int $torrentId): string {
+        return implode(" \xE2\x80\x93 ",
+            array_filter([
+                $this->artistHtml(),
+                sprintf(
+                    '<a href="torrents.php?id=%d&amp;torrentid=%d#torrent%d" dir="ltr">%s</a>',
+                        $this->id(), $torrentId, $torrentId, $this->name()
+                ),
+            ], fn($x) => !empty($x))
+        );
+    }
+
     protected function displayNameSuffix(): array {
         return array_map(fn($x) => "[$x]",
             array_filter([
                 $this->year(),
                 $this->isShowcase() ? 'Vanity House' : '',
-                $this->categoryId() === 1 ? $this->releaseTypes[$this->releaseType()] : '',
+                $this->categoryId() === 1 ? $this->releaseTypeName() : '',
             ], fn($x) => !empty($x))
         );
     }
