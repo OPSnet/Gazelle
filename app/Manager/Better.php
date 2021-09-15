@@ -6,6 +6,13 @@ class Better extends \Gazelle\Base
 {
     protected $releaseTypes;
 
+    private $badMap = [
+        'files'   => 'torrents_bad_files',
+        'folders' => 'torrents_bad_folders',
+        'lineage' => 'torrents_missing_lineage',
+        'tags'    => 'torrents_bad_tags',
+    ];
+
     public function __construct(\Gazelle\ReleaseType $releaseMan) {
         parent::__construct();
         $this->releaseTypes = $releaseMan->list();
@@ -287,23 +294,19 @@ class Better extends \Gazelle\Base
         return [$results, $resultCount, $mode];
     }
 
-    public function singleSeeded() {
+    public function singleSeeded(int $viewerId): array {
+        $torMan = new Torrent;
+        $torMan->setViewerId($viewerId);
         $this->db->prepared_query("
-            SELECT t.ID, t.GroupID
+            SELECT t.ID
             FROM torrents t
-            INNER JOIN torrents_leech_stats tls On (t.ID = tls.TorrentID)
+            INNER JOIN torrents_leech_stats tls ON (t.ID = tls.TorrentID)
             WHERE t.Format = 'FLAC'
-              AND tls.Seeders = 1
-              ORDER BY t.LogScore DESC, rand()
-              LIMIT 50
-            "
-        );
-
-        $torrents = $this->db->to_array('ID', MYSQLI_ASSOC);
-        $groups = \Torrents::get_groups(array_column($torrents, 'GroupID'));
-        return array_map(function ($torrent) use ($groups) {
-            return ['ID' => $torrent['ID'], 'Group' => $groups[$torrent['GroupID']]];
-        }, $torrents);
+                AND tls.Seeders = 1
+            ORDER BY t.LogScore DESC, rand()
+            LIMIT 50
+        ");
+        return array_map(function ($id) use ($torMan) { return $torMan->findById($id); }, $this->db->collect(0));
     }
 
     public function twigGroups(array $results) {
@@ -355,12 +358,4 @@ class Better extends \Gazelle\Base
             return $acc;
         }, []);
     }
-
-    private $badMap = [
-        'tags' => 'torrents_bad_tags',
-        'folders' => 'torrents_bad_folders',
-        'files' => 'torrents_bad_files',
-        'lineage' => 'torrents_missing_lineage'
-    ];
-
 }

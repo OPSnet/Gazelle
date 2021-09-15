@@ -48,12 +48,30 @@ class Torrent extends \Gazelle\Base {
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
 
+    protected int $viewerId;
+
+    /**
+     * Set the viewer context, for snatched indicators etc.
+     * If this is set, and Torrent object created will have it set
+     */
+    public function setViewerId(int $viewerId) {
+        $this->viewerId = $viewerId;
+        return $this;
+    }
+
     public function findById(int $torrentId) {
         $id = $this->db->scalar("
             SELECT ID FROM torrents WHERE ID = ?
             ", $torrentId
         );
-        return $id ? new \Gazelle\Torrent($id) : null;
+        if (!$id) {
+            return null;
+        }
+        $torrent = new \Gazelle\Torrent($id);
+        if (isset($this->viewerId)) {
+            $torrent->setViewerId($this->viewerId);
+        }
+        return $torrent;
     }
 
     public function findByInfohash(string $hash) {
@@ -61,7 +79,13 @@ class Torrent extends \Gazelle\Base {
             SELECT ID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );
-        return $id ? new \Gazelle\Torrent($id) : null;
+        if (!$id) {
+            return null;
+        }
+        $torrent = new \Gazelle\Torrent($id);
+        if (isset($this->viewerId)) {
+            $torrent->setViewerId($this->viewerId);
+        }
     }
 
     /**
