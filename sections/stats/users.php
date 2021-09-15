@@ -1,6 +1,6 @@
 <?php
 
-$statsUser = new Gazelle\Stats\User;
+$statsUser = new Gazelle\Stats\Users;
 $flow      = $statsUser->flow();
 $classDist = $statsUser->classDistribution();
 $platDist  = $statsUser->platformDistribution();
