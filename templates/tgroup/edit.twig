@@ -1,0 +1,131 @@
+{% from 'macro/form.twig' import checked, selected %}
+<div class="thin">
+    <div class="header">
+        <h2>Edit <a href="torrents.php?id={{ tgroup.id }}">{{ tgroup.name }}</a></h2>
+    </div>
+    <div class="box pad">
+        <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
+            <div>
+                <input type="hidden" name="action" value="takegroupedit" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
+                <h3>Image:</h3>
+                <input type="text" name="image" size="92" value="{{ tgroup.image }}" /><br />
+{% if constant('IMAGE_HOST_BANNED') %}
+                <br /><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ') }}
+                    are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>
+{% endif %}
+                <br />Or if the release has no known official artwork (e.g. jam band live recording), check the following:<br />
+                <label><input type="checkbox" name="no_cover_art" value="1"{{ checked(tgroup.noCoverArt) }} /> No release cover art</label><br /><br />
+
+                <h3>Torrent group description:</h3>
+                {{ body.emit|raw }}
+{% if tgroup.categoryId == 1 %}
+                <h3>Release type:
+                    <select id="releasetype" name="releasetype">
+    {% for key, value in release_type %}
+                        <option value="{{ key }}"{{ selected(key == tgroup.releaseType) }}>{{ value }}</option>
+    {% endfor %}
+                    </select>
+                </h3>
+    {% if viewer.permitted('torrents_edit_vanityhouse') %}
+                <h3>
+                    <label><input type="checkbox" name="vanity_house" value="1" {{ checked(tgroup.isShowcase) }}/> Showcase</label>
+                </h3>
+    {% endif %}
+{% endif %}
+
+                <h3>Edit summary:</h3>
+                <input type="text" name="summary" size="92" /><br />
+                <div style="text-align: center;">
+                    <input type="submit" value="Submit" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+{% if tgroup.isOwner(viewer.id) or viewer.permitted('torrents_edit') %}
+    <h3>Non-wiki torrent group editing</h3>
+    <div class="box pad">
+        <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
+            <input type="hidden" name="action" value="nonwikiedit" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
+            <table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
+                <tr>
+                    <td colspan="2" class="center">This is for editing the information related to the <strong>Original Release</strong> only.</td>
+                </tr>
+                <tr>
+                    <td class="label">Year</td>
+                    <td>
+                        <input type="text" name="year" size="10" value="{{ tgroup.id }}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Record label</td>
+                    <td>
+                        <input type="text" name="record_label" size="40" value="{{ tgroup.recordLabel }}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Catalogue number</td>
+                    <td>
+                        <input type="text" name="catalogue_number" size="40" value="{{ tgroup.catalogueNumber }}" />
+                    </td>
+                </tr>
+    {% if viewer.permitted('torrents_freeleech') %}
+                <tr>
+                    <td class="label">Torrent <strong>group</strong> leech status</td>
+                    <td>
+                        <label><input type="radio" name="freeleechtype" value="0" checked="checked" /> Normal</label>
+                        <label><input type="radio" name="freeleechtype" value="1" /> Freeleech</label>
+                        <label><input type="radio" name="freeleechtype" value="2" /> Neutral</label>
+                        &mdash; reason
+                        <select name="freeleechreason">
+                            <option value="0" selected="selected">N/A</option>
+                            <option value="1" selected="selected">Staff Pick</option>
+                            <option value="2" selected="selected">Perma-FL</option>
+                            <option value="3" selected="selected">Showcase</option>
+                        </select<>
+                    </td>
+                </tr>
+    {% endif %}
+            </table>
+            <input type="submit" value="Edit" />
+        </form>
+    </div>
+{% endif %}
+
+{% if viewer.permitted('torrents_edit') %}
+    <h3>Rename (will not merge)</h3>
+    <div class="box pad">
+        <form class="rename_form" name="torrent_group" action="torrents.php" method="post">
+            <div>
+                <input type="hidden" name="action" value="rename" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
+                <input type="text" name="name" size="92" value="{{ tgroup.name }}" />
+                <div style="text-align: center;">
+                    <input type="submit" value="Rename" />
+                </div>
+            </div>
+        </form>
+    </div>
+    <h3>Merge with another group</h3>
+    <div class="box pad">
+        <form class="merge_form" name="torrent_group" action="torrents.php" method="post">
+            <div>
+                <input type="hidden" name="action" value="merge" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
+                <h3>Target torrent group ID:
+                    <input type="text" name="targetgroupid" size="10" />
+                </h3>
+                <div style="text-align: center;">
+                    <input type="submit" value="Merge" />
+                </div>
+            </div>
+        </form>
+    </div>
+{% endif %}
+</div>
