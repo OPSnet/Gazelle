@@ -81,6 +81,7 @@ class uploadForm extends \Gazelle\Base {
         echo $this->twig->render('upload/footer.twig', [
             'is_new' => (int)$this->NewTorrent,
             'info'   => $this->Torrent,
+            'viewer' => $this->user,
         ]);
     }
 

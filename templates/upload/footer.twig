@@ -1,5 +1,26 @@
+{% from 'macro/form.twig' import selected %}
 </div>
 <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+{% if not is_new and viewer.permitted('torrents_freeleech') %}
+    <tr id="freetorrent">
+        <td class="label">Leech Type</td>
+        <td>
+            <select name="freeleechtype">
+    {% for leech in ["Normal", "Free", "Neutral"] %}
+                <option value="{{ loop.index0 }}"{{ selected(loop.index0 == info.FreeTorrent) }}>{{ leech }}</option>
+    {% endfor %}
+            </select>
+            because
+            <select name="freeleechreason">
+    {% for reason in ["N/A", "Staff Pick", "Perma-FL", "Showcase"] %}
+                <option value="{{ loop.index0 }}"{{ selected(loop.index0 == info.FreeLeechType) }}>{{ reason }}</option>
+    {% endfor %}
+            </select>
+        </td>
+    </tr>
+{% else %}
+    <tr><td>1</td><td>2</td></tr>
+{% endif %}
     <tr>
         <td colspan="2" style="text-align: center;">
             <p>Make sure that your torrent adheres to the <a href="rules.php?p=upload" target="_blank">rules</a>. Not doing so will result in a <strong class="important_text">warning</strong> or <strong class="important_text">worse</strong>.</p>
@@ -10,8 +31,7 @@
             <div style="width: 60%; margin: 0 auto;">
             <ul id="check" class="nobullet" style="display: none; padding: 12px; text-align: left; border: 2px solid orangered;"></ul>
             </div>
-            <input id="post" type="submit" value="{% if is_new %}Upload{% else %}Edit{% endif %} torrent" />
-        </td>
+        <input id="post" type="submit" value="{% if is_new %}Upload{% else %}Edit{% endif %} torrent" />
     </tr>
 </table>
 </form>
