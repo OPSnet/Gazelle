@@ -27,6 +27,47 @@ class TGroup extends BaseObject {
     }
 
     public function flush() {
+        $this->cache->deleteMulti([
+            sprintf(self::CACHE_KEY, $this->id),
+            sprintf(self::CACHE_TLIST_KEY, $this->id),
+            sprintf(self::CACHE_COVERART_KEY, $this->id),
+            'torrents_details_' . $this->id,
+        ]);
+    }
+
+    /**
+     * When the image of a release group is changed, we need to flush other things
+     */
+    public function imageFlush() {
+        $this->db->prepared_query("
+            SELECT CollageID FROM collages_torrents WHERE GroupID = ?
+            ", $this->id
+        );
+        if ($this->db->has_results()) {
+            $this->cache->deleteMulti(array_map(fn ($id) => "collagev2_$id", $this->db->collect(0, false)));
+        }
+
+        $this->db->prepared_query("
+            SELECT DISTINCT UserID
+            FROM torrents AS t
+            LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
+            WHERE tg.ID = ?
+            ", $this->id
+        );
+        if ($this->db->has_results()) {
+            $this->cache->deleteMulti(array_map(fn ($id) => "user_recent_up_$id", $this->db->collect(0, false)));
+        }
+
+        $this->db->prepared_query("
+            SELECT DISTINCT xs.uid
+            FROM xbt_snatched xs
+            INNER JOIN torrents t ON (t.ID = xs.fid)
+            WHERE t.GroupID = ?
+            ", $this->id
+        );
+        if ($this->db->has_results()) {
+            $this->cache->deleteMulti(array_map(fn ($id) => "user_recent_snatch_$id", $this->db->collect(0, false)));
+        }
     }
 
     public function setViewer(User $viewer) {
@@ -75,24 +116,28 @@ class TGroup extends BaseObject {
             }
         }
         $sql = 'SELECT '
-            . ($this->revisionId ? 'w.Body, w.Image,' : 'g.WikiBody AS Body, g.WikiImage AS Image,')
-            . " g.ID,
-                g.Name,
-                g.Year,
-                g.RecordLabel,
-                g.CatalogueNumber,
-                g.ReleaseType,
-                g.CategoryID,
-                g.Time,
-                g.VanityHouse,
+            . ($this->revisionId ? 'w.Body, w.Image,' : 'tg.WikiBody AS Body, tg.WikiImage AS Image,')
+            . " tg.ID,
+                tg.Name,
+                tg.Year,
+                tg.RecordLabel,
+                tg.CatalogueNumber,
+                tg.ReleaseType,
+                tg.CategoryID,
+                tg.Time,
+                tg.VanityHouse,
                 group_concat(t.Name ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)           AS tagNames,
                 group_concat(t.ID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)             AS tagIds,
                 group_concat(t.UserID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)         AS tagVoteUserIds,
                 group_concat(tt.PositiveVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagUpvotes,
-                group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagDownvotes
-            FROM torrents_group AS g
-            LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
+                group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagDownvotes,
+                (tgha.TorrentGroupID IS NOT NULL) AS noCoverArt
+            FROM torrents_group AS tg
+            LEFT JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
             LEFT JOIN tags as t ON (t.ID = tt.TagID)
+            LEFT JOIN torrent_group_has_attr AS tgha ON (tgha.TorrentGroupID = tg.ID
+                AND tgha.TorrentGroupAttrID = (SELECT tga.ID FROM torrent_group_attr tga WHERE tga.Name = 'no-cover-art')
+            )
         ";
 
         $args = [];
@@ -102,7 +147,7 @@ class TGroup extends BaseObject {
             $args[] = $this->id;
             $args[] = $this->revisionId;
         }
-        $sql .= " WHERE g.ID = ? GROUP BY g.ID";
+        $sql .= " WHERE tg.ID = ? GROUP BY tg.ID";
         $args[] = $this->id;
 
         $info = $this->db->rowAssoc($sql, ...$args);
@@ -209,20 +254,50 @@ class TGroup extends BaseObject {
         return $roleList;
     }
 
+    public function body(): string {
+        return $this->info()['Body'];
+    }
+
+    public function catalogNumber(): ?string {
+        return $this->info()['CatalogNumber'];
+    }
+
     public function categoryId(): int {
         return $this->info()['CategoryID'];
     }
 
-    public function description(): ?string {
+    public function description(): string {
         return $this->info()['Body'];
+    }
+
+    public function hasNoCoverArt(): bool {
+        return $this->info()['noCoverArt'] ?? false;
     }
 
     public function image(): ?string {
         return $this->info()['Image'];
     }
 
+    public function isOwner(int $userId): bool {
+        return (bool)$this->db->scalar("
+            SELECT 1
+            FROM torrents t
+            WHERE t.GroupID = ?
+                AND t.UserID = ?
+            ", $this->id, $userId
+        );
+    }
+
+    public function isShowcase(): bool {
+        return $this->info()['VanityHouse'];
+    }
+
     public function name(): string {
         return $this->info()['Name'];
+    }
+
+    public function recordLabel(): ?string {
+        return $this->info()['RecordLabel'];
     }
 
     public function releaseType(): int {
@@ -261,7 +336,7 @@ class TGroup extends BaseObject {
         return array_map(fn($x) => "[$x]",
             array_filter([
                 $this->year(),
-                $this->info()['VanityHouse'] ? 'Vanity House' : '',
+                $this->isShowcase() ? 'Vanity House' : '',
                 $this->categoryId() === 1 ? $this->releaseTypes[$this->releaseType()] : '',
             ], fn($x) => !empty($x))
         );
@@ -335,6 +410,25 @@ class TGroup extends BaseObject {
             $this->cache->cache_value($key, $list, 0);
         }
         return $list;
+    }
+
+    public function toggleNoCoverArt(bool $noCoverArt): int {
+        if ($noCoverArt) {
+            $this->db->prepared_query("
+                INSERT INTO torrent_group_has_attr
+                   (TorrentGroupID, TorrentGroupAttrID)
+                VALUES (?, (SELECT ID FROM torrent_group_attr WHERE Name = 'no-cover-art'))
+                ", $this->id
+            );
+        } else {
+            $this->db->prepared_query("
+                DELETE FROM torrent_group_has_attr
+                WHERE TorrentGroupAttrID = (SELECT ID FROM torrent_group_attr WHERE Name = 'no-cover-art')
+                    AND TorrentGroupID = ?
+                ", $this->id
+            );
+        }
+        return $this->db->affected_rows();
     }
 
     /**
@@ -757,7 +851,7 @@ class TGroup extends BaseObject {
         );
         $n = $this->db->affected_rows();
         $this->db->commit();
-        $this->cache->deleteMulti(['tg_' . $this->id, 'torrents_details_' . $this->id]);
+        $this->flush();
         return $n;
     }
 
@@ -794,5 +888,39 @@ class TGroup extends BaseObject {
 
         $this->db->commit();
         return true;
+    }
+
+    public function createRevision(int $userId, string $image, string $body, string $summary): int {
+        $this->db->prepared_query("
+            INSERT INTO wiki_torrents
+                   (PageID, Body, Image, UserID, Summary)
+            VALUES (?,      ?,    ?,     ?,      ?)
+            ", $this->id, $body, $image, $userId, trim($summary)
+        );
+        $revisionId = $this->db->inserted_id();
+        (new \Gazelle\Manager\TGroup)->refresh($this->id);
+        return $revisionId;
+    }
+
+    public function revertRevision(int $userId, int $revisionId): ?array {
+        $revert = $this->db->row("
+            SELECT Body, Image
+            FROM wiki_torrents
+            WHERE PageID = ? AND RevisionID = ?
+            ", $this->id, $revisionId
+        );
+        if (is_null($revert)) {
+            return null;
+        }
+        $this->db->prepared_query("
+            INSERT INTO wiki_torrents
+                   (PageID, Body, Image, UserID, Summary)
+            SELECT  ?,      Body, Image, ?,      ?
+            FROM wiki_torrents
+            WHERE RevisionID = ?
+            ", $this->id, $userId, "Reverted to revision $revisionId",
+                $revisionId
+        );
+        return $revert;
     }
 }

@@ -106,7 +106,6 @@ class TGroup extends \Gazelle\Base {
         }
     }
 
-
     /**
      * Return the N most recent lossless uploads
      * Note that if both a Lossless and 24bit Lossless are uploaded at the same time,
