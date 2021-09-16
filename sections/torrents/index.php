@@ -26,6 +26,10 @@ if (!empty($_REQUEST['action'])) {
         case 'editgroup':
             require_once('editgroup.php');
             break;
+        case 'revert':
+        case 'takegroupedit':
+            require_once('take_editgroup.php');
+            break;
         case 'editgroupid':
             require_once('editgroupid.php');
             break;
@@ -55,10 +59,6 @@ if (!empty($_REQUEST['action'])) {
             break;
         case 'redownload':
             require_once('redownload.php');
-            break;
-        case 'revert':
-        case 'takegroupedit':
-            require_once('takegroupedit.php');
             break;
         case 'nonwikiedit':
             require_once('nonwikiedit.php');
