@@ -33,10 +33,6 @@ class User extends BaseObject {
         return 'users_main';
     }
 
-    public function __construct(int $id) {
-        parent::__construct($id);
-    }
-
     /**
      * Delegate stats methods to the Stats\User class
      */
@@ -2281,6 +2277,47 @@ class User extends BaseObject {
             $factor *= 0.75;
         }
         return $factor;
+    }
+
+    /**
+     * Add request bounty and update stats immediately.
+     * Negative bounty can be added (!) in the case of a request unfill.
+     */
+    public function addBounty(int $bounty): int {
+        if ($bounty > 0) {
+            // adding
+            $this->db->prepared_query("
+                UPDATE users_leech_stats SET
+                    Uploaded = Uploaded + ?
+                WHERE UserID = ?
+                ", $bounty, $this->id
+            );
+        } else {
+            $this->flush();
+            $uploaded = $this->uploadedSize();
+            if ($bounty > $uploaded) {
+                // If we can't take it all out of upload, zero that out and add whatever is left as download.
+                $this->db->prepared_query("
+                    UPDATE users_leech_stats SET
+                        Uploaded = 0,
+                        Downloaded = Downloaded + ?
+                    WHERE UserID = ?
+                    ", $bounty - $uploaded, $this->id()
+                );
+            } else {
+                $this->db->prepared_query("
+                    UPDATE users_leech_stats SET
+                        Uploaded = Uploaded - ?
+                    WHERE UserID = ?
+                    ", $bounty, $this->id()
+                );
+            }
+        }
+        $nr = $this->db->affected_rows();
+        $this->stats()->increment('request_bounty_total', $bounty > 0 ? 1 : -1);
+        $this->stats()->increment('request_bounty_size', $bounty);
+        $this->stats()->increment('upload_total', $bounty);
+        return $nr;
     }
 
     public function buffer(): array {
