@@ -83,7 +83,6 @@ class Torrent extends BaseObject {
     public function info(): array {
         $key = sprintf(self::CACHE_KEY, $this->id);
         $info = $this->cache->get_value($key);
-        $info = false;
         if ($info === false) {
             $template = "SELECT t.GroupID, t.UserID, t.Media, t.Format, t.Encoding,
                     t.Remastered, t.RemasterYear, t.RemasterTitle, t.RemasterCatalogueNumber, t.RemasterRecordLabel,
@@ -150,6 +149,20 @@ class Torrent extends BaseObject {
     }
 
     /**
+     * Get the encoding of this upload
+     */
+    public function encoding(): string {
+        return $this->info()['Encoding'];
+    }
+
+    /**
+     * Get the format of this upload
+     */
+    public function format(): string {
+        return $this->info()['Format'];
+    }
+
+    /**
      * Group ID this torrent belongs to
      *
      * @return int group id
@@ -168,12 +181,24 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * The uploader of this torrent
-     *
-     * @return User uploader
+     * Does it have logs?
      */
-    public function uploader(): User {
-        return new User($this->info()['UserID']);
+    public function hasCue(): bool {
+        return $this->info()['HasCue'];
+    }
+
+    /**
+     * Does it have logs?
+     */
+    public function hasLog(): bool {
+        return $this->info()['HasLog'];
+    }
+
+    /**
+     * Does it have uploaded logs?
+     */
+    public function hasLogDb(): bool {
+        return $this->info()['HasLogDB'];
     }
 
     /**
@@ -186,12 +211,49 @@ class Torrent extends BaseObject {
     }
 
     /**
+     * The log score of this torrent
+     */
+    public function logChecksum(): bool {
+        return $this->info()['LogChecksum'];
+    }
+
+    /**
+     * The log score of this torrent
+     */
+    public function logScore(): int {
+        return $this->info()['LogScore'];
+    }
+
+    /**
+     * The media of this torrent
+     */
+    public function media(): string {
+        return $this->info()['Media'];
+    }
+
+    /**
      * Is this a remastered release?
      *
      * @return bool remastered
      */
     public function isRemastered(): bool {
         return $this->info()['Remastered'];
+    }
+
+    /**
+     * Was it uploaded less than an hour ago? (Request fill grace period)
+     */
+    public function uploadGracePeriod(): bool {
+        return strtotime($this->info()['Time']) > date('U') - 3600;
+    }
+
+    /**
+     * The uploader of this torrent
+     *
+     * @return User uploader
+     */
+    public function uploader(): User {
+        return new User($this->info()['UserID']);
     }
 
     public function isPerfectFlac(): bool {
