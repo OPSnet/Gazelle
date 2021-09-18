@@ -90,8 +90,8 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'token_count',
-            function (int $size) {
-                return (int)ceil($size / BYTES_PER_FREELEECH_TOKEN);
+            function ($size) {
+                return (int)ceil((int)$size / BYTES_PER_FREELEECH_TOKEN);
             }
         ));
 
