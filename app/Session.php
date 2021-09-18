@@ -10,8 +10,8 @@ class Session extends Base {
         return explode('|~|', Crypto::decrypt($cookie, ENCKEY)) ?? [];
     }
 
-    protected $sessions;
-    protected $userId;
+    protected array $sessions;
+    protected int $userId;
 
     public function __construct(int $userId) {
         parent::__construct();
@@ -157,5 +157,16 @@ class Session extends Base {
             ', $this->userId
         );
         return $this->db->affected_rows();
+    }
+
+    public function lastActive(string $sessionId): ?array {
+        if (count($this->sessions) > 1) {
+            foreach ($this->sessions as $id => $session) {
+                if ($id != $sessionId) {
+                    return $session;
+                }
+            }
+        }
+        return null;
     }
 }

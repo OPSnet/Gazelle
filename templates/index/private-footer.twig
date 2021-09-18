@@ -1,0 +1,61 @@
+</div>
+<div id="footer">
+{% if constant('DEBUG_MODE') or viewer.permitted('site_debug') %}
+    <div id="site_debug">
+    {%- include 'debug/performance.twig' with {'list': debug.get_perf} only %}
+    {%- include 'debug/flag.twig' with {'list': debug.get_flags} only %}
+    {%- include 'debug/error.twig' with {'list': debug.get_errors} only %}
+    {%- if sphinxql %}
+        {%- include 'debug/sphinxql.twig' with {'list': sphinxql.list, 'time': sphinxql.time} only %}
+    {%- endif %}
+    {%- include 'debug/query.twig' with {'list': debug.get_queries_br, 'time': db_time} only %}
+    {%- include 'debug/cache.twig' with {'list': debug.get_cache_keys, 'time': cache_time} only %}
+    {%- include 'debug/var.twig' with {'list': debug.get_logged_vars} only %}
+    {%- include 'debug/ocelot.twig' with {'list': debug.requestList} only %}
+    </div>
+{% endif %}
+
+{% if disclaimer %}
+<br />
+<div id="disclaimer_container" class="thin" style="width: 95%; text-align: justify; margin: 0px auto 20px auto;">
+None of the files shown here are hosted on this server. The links are provided
+solely by this site's users. These BitTorrent files are meant for the
+distribution of backup files. By downloading the BitTorrent file, you are
+claiming that you own the original file. The administrator of
+({{ constant('SITE_URL') }}) holds NO RESPONSIBILITY if these files are misused
+in any way and cannot be held responsible for what its users post, or any other
+actions of it.</div>
+{% endif %}
+
+{% if last_active %}
+<p><a href="user.php?action=sessions">
+    <span class="tooltip" title="Manage sessions">Last activity: {{ last_active.LastUpdate|time_diff }}</span>
+    <span class="tooltip" title="Manage sessions"> from {{ last_active.IP }}</span>
+</a></p>
+{% endif %}
+
+<p>
+<strong>Time:</strong> <span>{{ time_ms|number_format(5) }} ms</span>
+<strong>Used:</strong> <span>{{ memory|octet_size }}</span>
+<strong>Load:</strong> <span>{{ load.0|number_format(2) }} {{ load.1|number_format(2) }} {{ load.2|number_format(2) }}</span>
+<strong>Date:</strong> <span id="site_date">{{ date }}</span> <span id="site_time">{{ time }}</span>
+</p>
+<p>Site and design &copy; {{ launch }} {{ constant('SITE_NAME') }} | <a href='https://github.com/OPSnet/Gazelle'>Project Gazelle</a></p>
+</div>
+
+</div>
+<div id="lightbox" class="lightbox hidden"></div>
+<div id="curtain" class="curtain hidden"></div>
+
+{% for type, n in notification %}
+<span class="noty-notification" style="display: none;" data-noty-type="{{ type }}" data-noty-id="{{ n.id }}" data-noty-importance="{{ n.importance }}" data-noty-url="{{ n.url }}">{{ n.message }}</span>
+{% endfor %}
+<!-- Extra divs, for stylesheet developers to add imagery -->
+<div id="extra1"><span></span></div>
+<div id="extra2"><span></span></div>
+<div id="extra3"><span></span></div>
+<div id="extra4"><span></span></div>
+<div id="extra5"><span></span></div>
+<div id="extra6"><span></span></div>
+</body>
+</html>

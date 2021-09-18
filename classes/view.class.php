@@ -263,12 +263,36 @@ class View {
             return;
         }
         self::$footerSeen = true;
-        global $Viewer;
+        global $Twig, $Viewer;
         if (!isset($Viewer) || ($Options['recover'] ?? false) === true) {
-            global $Twig;
             echo $Twig->render('index/public-footer.twig');
         } else {
-            require_once('../design/privatefooter.php');
+            echo Gazelle\Util\Textarea::activate();
+            global $Cache, $DB, $Debug, $SessionID;
+
+            $launch = date('Y');
+            if ($launch != SITE_LAUNCH_YEAR) {
+                $launch = SITE_LAUNCH_YEAR . "-$launch";
+            }
+
+            echo $Twig->render('index/private-footer.twig', [
+                'cache_time'   => $Cache->Time,
+                'db_time'      => $DB->Time,
+                'debug'        => $Debug,
+                'disclaimer'   => isset($Options['disclaimer']),
+                'last_active'  => (new Gazelle\Session($Viewer->id()))->lastActive($SessionID),
+                'launch'       => $launch,
+                'load'         => sys_getloadavg(),
+                'notification' => (new Gazelle\Manager\Notification())->registeredNotifications($Viewer->id()),
+                'memory'       => memory_get_usage(true),
+                'date'         => date('Y-m-d'),
+                'time'         => date('H:i'),
+                'time_ms'      => (microtime(true) - $Debug->startTime()) * 1000,
+                'viewer'       => $Viewer,
+                'sphinxql'     => class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)
+                    ? ['list'  => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]
+                    : [],
+            ]);
         }
     }
 }
