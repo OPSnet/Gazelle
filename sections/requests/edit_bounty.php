@@ -9,9 +9,7 @@ if (is_null($request)) {
     error(404);
 }
 
-View::show_header('Edit request bounty');
 echo $Twig->render('request/edit-bounty.twig', [
     'auth'    => $Viewer->auth(),
     'request' => $request,
 ]);
-View::show_footer();

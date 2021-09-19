@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected %}
-
+{{ header('Staff PM', {'js': 'staffpm,bbcode'}) }}
 <div class="thin">
     <div class="header">
         <h2>Staff PM &rsaquo; {{ pm.subject }}</h2>
@@ -111,3 +111,4 @@
     </div>
 </div>
 </div>
+{{ footer() }}

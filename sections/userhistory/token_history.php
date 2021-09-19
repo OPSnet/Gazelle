@@ -33,8 +33,6 @@ if ($_GET['expire'] ?? 0) {
 $paginator = new Gazelle\Util\Paginator(25, (int)($_GET['page'] ?? 1));
 $paginator->setTotal((new Gazelle\Stats\User($user->id()))->flTokenTotal());
 
-View::show_header($user->username() . ' &rsaquo; Freeleech token history');
-
 $user->setTorrentManager($torMan)
     ->setTorrentLabelManager(
         (new Gazelle\Manager\TorrentLabel)->showMedia(true)->showEdition(true)
@@ -47,5 +45,3 @@ echo $Twig->render('user/history-freeleech.twig', [
     'paginator'   => $paginator,
     'user'        => $user,
 ]);
-
-View::show_footer();

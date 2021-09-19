@@ -42,7 +42,6 @@ $qrCode = Builder::create()
     ->backgroundColor(new Color(255, 255, 255, 0))
     ->build();
 
-View::show_header('Two-factor Authentication');
 echo $Twig->render('user/2fa/configure.twig', [
     'valid'    => $valid,
     'qrcode'   => $qrCode,
@@ -50,4 +49,3 @@ echo $Twig->render('user/2fa/configure.twig', [
     'user_id'  => $Viewer->id(),
     'utc_time' => gmdate('Y-m-d H:i:s', time()),
 ]);
-View::show_footer();

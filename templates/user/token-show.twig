@@ -1,3 +1,5 @@
+{{ header('Review API Token') }}
+{% if error %}
 <div class="box pad">
     <p>
         This is the only time this token value you will be shown to you, so be sure to copy it down!
@@ -18,3 +20,4 @@
         <a href='user.php?action=edit&userid={{ id }}'>Go back to user settings</a>
     </div>
 </div>
+{{ footer() }}

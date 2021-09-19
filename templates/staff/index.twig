@@ -1,3 +1,4 @@
+{{ header('Staff') }}
 {% if user.permitted('admin_manage_applicants') %}
 <div class="linkbox">
     <a href="apply.php">Role applications</a>
@@ -61,3 +62,4 @@
     <br />
 {% endfor %}
 </div>
+{{ footer() }}

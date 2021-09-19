@@ -14,11 +14,9 @@ if (empty($Return) && $recipient->id() == $Viewer->id()) {
     header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
 }
 
-View::show_header('Compose message', ['js' => 'inbox,bbcode,jquery.validate,form_validate']);
 echo $Twig->render('inbox/compose.twig', [
     'auth'      => $Viewer->auth(),
     'body'      => $Body ?? '',
     'subject'   => $Subject ?? '',
     'recipient' => $recipient,
 ]);
-View::show_footer();

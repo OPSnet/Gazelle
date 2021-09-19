@@ -9,8 +9,6 @@ if (!$article->readable($Viewer)) {
     error(403);
 }
 
-View::show_header("Revisions of " . $article->title());
 echo $Twig->render('wiki/revision-list.twig', [
     'article' => $article,
 ]);
-View::show_footer();

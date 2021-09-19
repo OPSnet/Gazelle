@@ -54,10 +54,8 @@ if (isset($_POST['username'])) {
     }
 }
 
-View::show_header('Login');
 echo $Twig->render('login/login.twig', [
     'delta' => $watch->bannedEpoch() - time(),
     'error' => $login->error(),
     'watch' => $watch,
 ]);
-View::show_footer();

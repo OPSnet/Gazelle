@@ -1,7 +1,7 @@
 {% from 'macro/ipv4.twig' import ajax_ipv4 %}
-
+{{ header('Dupe IPs') }}
 {% if list is empty %}
-<h2 align="center">There are currently no users with more than {{ overlap }} IP overlaps.</h2>
+<h2 align="center">There are currently no users with more than {{ constant('IP_OVERLAPS')) }} IP overlaps.</h2>
 {% else %}
 {{ paginator.linkbox|raw }}
 <table width="100%">
@@ -24,3 +24,4 @@
 </table>
 {{ paginator.linkbox|raw }}
 {% endif %}
+{{ footer() }}

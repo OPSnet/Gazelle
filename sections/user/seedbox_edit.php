@@ -3,6 +3,7 @@
 if (!$Viewer->hasAttr('feature-seedbox') && !$Viewer->permitted('users_view_ips')) {
     error(403);
 }
+
 if (!isset($_POST['action'])) {
     $userId = (int)($_GET['userid'] ?? $Viewer->id());
 } else {
@@ -18,7 +19,6 @@ if ($Viewer->id() != $userId && !$Viewer->permitted('users_view_ips')) {
 }
 
 $seedbox = new Gazelle\Seedbox($userId);
-View::show_header($user->username() . ' &rsaquo; Seedboxes');
 
 if (isset($_POST['mode'])) {
     switch ($_POST['mode']) {
@@ -72,11 +72,9 @@ if (isset($_POST['mode'])) {
     }
 }
 
-echo $Twig->render('seedbox/config.twig',[
-    'auth'    => $Viewer->auth(),
-    'free'    => $seedbox->freeList(),
-    'host'    => $seedbox->hostList(),
-    'user_id' => $userId,
+echo $Twig->render('seedbox/config.twig', [
+    'auth' => $Viewer->auth(),
+    'free' => $seedbox->freeList(),
+    'host' => $seedbox->hostList(),
+    'user' => $user,
 ]);
-
-View::show_footer();

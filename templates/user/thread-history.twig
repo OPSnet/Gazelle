@@ -1,3 +1,4 @@
+{{ header(user.username ~ " &rsaquo; Threads created", {'js': 'subscriptions,comments,bbcode'}) }}
 <div class="thin">
     <div class="header">
         <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Threads created</h2>
@@ -27,3 +28,4 @@
         {{ paginator.linkbox|raw }}
 {% endif %}
 </div>
+{{ footer() }}

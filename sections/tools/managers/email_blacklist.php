@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_view_email')) {
+if (!$Viewer->permitted('users_view_email')) {
     error(403);
 }
 
@@ -15,7 +15,6 @@ if (!empty($_POST['comment'])) {
 $paginator = new Gazelle\Util\Paginator(LOG_ENTRIES_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($emailBlacklist->total());
 
-View::show_header('Manage email blacklist');
 echo $Twig->render('admin/email-blacklist.twig', [
     'comment'   => $_POST['comment'] ?? '',
     'email'     => $_POST['email'] ?? '',
@@ -23,4 +22,3 @@ echo $Twig->render('admin/email-blacklist.twig', [
     'paginator' => $paginator,
     'viewer'    => $Viewer,
 ]);
-View::show_footer();

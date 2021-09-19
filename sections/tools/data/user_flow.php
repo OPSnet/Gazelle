@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_view_flow')) {
+if (!$Viewer->permitted('site_view_flow')) {
     error(403);
 }
 $showFlow = !isset($_GET['page']) || (int)$_GET['page'] === 1;
@@ -55,4 +55,3 @@ echo $Twig->render('admin/userflow.twig', [
     'show_flow' => $showFlow,
     'details'   => $userflowDetails,
 ]);
-View::show_footer();

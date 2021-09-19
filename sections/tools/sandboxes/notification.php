@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_view_notifications')) {
+if (!$Viewer->permitted('admin_view_notifications')) {
     error(403);
 }
 
@@ -58,7 +58,6 @@ if (isset($_POST['torrentid'])) {
     }
 }
 
-View::show_header("Notifications Sandbox");
 echo $Twig->render('admin/notification-sandbox.twig', [
     'notified_id' => $notifiedId,
 
@@ -77,4 +76,3 @@ echo $Twig->render('admin/notification-sandbox.twig', [
     'sql'    => $sql,
     'args'   => $args,
 ]);
-View::show_footer();

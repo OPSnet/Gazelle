@@ -1,7 +1,8 @@
+{{ header(constant('SITE_NAME' ~ ' Change Log') }}
 <div class="thin">
     <h2>{{ constant('SITE_NAME') }} Change Log</h2>
     {{ paginator.linkbox|raw }}
-{% if is_mod %}
+{% if viewer.permitted('users_mod') %}
     <div class="box box2 edit_changelog">
         <div class="head">
             <strong>Manually submit a new change to the change log</strong>
@@ -9,7 +10,7 @@
         <div class="pad">
             <form method="post" action="">
                 <input type="hidden" name="perform" value="add" />
-                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                 <div class="field_div" id="cl_message">
                     <span class="label">Commit message:</span>
                     <br />
@@ -18,7 +19,7 @@
                 <div class="field_div" id="cl_author">
                     <span class="label">Author:</span>
                     <br />
-                    <input type="text" name="author" value="{{ author }}" />
+                    <input type="text" name="author" value="{{ viewer.username }}" />
                 </div>
                 <div class="submit_div" id="cl_submit">
                     <input type="submit" value="Submit" />
@@ -31,11 +32,11 @@
     <div class="box box2 change_log_entry">
         <div class="head">
             <span>{{ change.date }} by {{ change.author }}</span>
-    {% if is_mod %}
+    {% if viewer.permitted('users_mod') %}
             <span style="float: right;">
                 <form id="delete_{{ change.id }}" method="post" action="">
                     <input type="hidden" name="perform" value="remove" />
-                    <input type="hidden" name="auth" value="{{ auth }}" />
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                     <input type="hidden" name="change_id" value="{{ change.id }}" />
                 </form>
                 <a href="#" onclick="$('#delete_{{ change.id }}').raw().submit(); return false;" class="brackets">Delete</a>
@@ -49,3 +50,4 @@
 {% endfor %}
 {{ paginator.linkbox|raw }}
 </div>
+{{ footer() }}

@@ -3,8 +3,8 @@
 if (!$Viewer->permitted('admin_manage_invite_source')) {
     error(403);
 }
-$manager = new Gazelle\Manager\InviteSource;
 
+$manager = new Gazelle\Manager\InviteSource;
 if (!empty($_POST['name'])) {
     authorize();
     $manager->create(trim($_POST['name']));
@@ -17,9 +17,7 @@ if ($remove) {
     }
 }
 
-View::show_header('Invite Sources');
 echo $Twig->render('admin/invite-source-config.twig', [
     'auth' => $Viewer->auth(),
     'list' => $manager->listByUse(),
 ]);
-View::show_footer();

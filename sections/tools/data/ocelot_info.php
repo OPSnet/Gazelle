@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('users_mod')) {
+
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -30,7 +31,6 @@ if (!isset($_GET['userid'])) {
     }
 }
 
-View::show_header('Tracker info');
 echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
     'announce_key' => $TorrentPass,
@@ -38,4 +38,3 @@ echo $Twig->render('admin/tracker-info.twig', [
     'peer_stats'   => $UserPeerStats ?? null,
     'user_id'      => $_GET['userid'] ?? null,
 ]);
-View::show_footer();

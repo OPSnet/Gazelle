@@ -1,12 +1,11 @@
 <?php
+
 if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
 $userMan = new Gazelle\Manager\User;
 $amount = (int)($_POST['numtokens'] ?? 0);
-View::show_header('Manage freeleech tokens');
-
 $flAdded = false;
 $flCleared = false;
 if (isset($_POST['addtokens'])) {
@@ -31,4 +30,3 @@ echo $Twig->render('admin/freeleech-tokens.twig', [
     'leech_disabled' => $_POST['allowleechdisabled'] ?? true,
     'only_drop'      => $_POST['onlydrop'] ?? false,
 ]);
-View::show_footer();

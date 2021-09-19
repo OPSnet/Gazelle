@@ -15,14 +15,12 @@ if (isset($_POST['auth'])) {
     }
 }
 
-View::show_header('Apply', ['js' => 'apply']);
 echo $Twig->render('applicant/apply.twig', [
     'auth'         => $Viewer->auth(),
     'body'         => new Gazelle\Util\Textarea('body', $body ?? ''),
     'error'        => $error ?? null,
     'list'         => (new Gazelle\Manager\ApplicantRole)->list(),
     'role'         => $role ?? null,
-    'is_admin'     => check_perms('admin_manage_applicants'),
+    'is_admin'     => $Viewer->permitted('admin_manage_applicants'),
     'is_applicant' => $appMan->userIsApplicant($Viewer->id()),
 ]);
-View::show_footer();

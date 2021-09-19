@@ -1,5 +1,5 @@
 <?php
-if (!check_perms('site_collages_recover')) {
+if (!$Viewer->permitted('site_collages_recover')) {
     error(403);
 }
 
@@ -27,8 +27,6 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
     }
 }
 
-View::show_header('Collage recovery!');
 echo $Twig->render('collage/recover.twig', [
     'auth' => $Viewer->auth(),
 ]);
-View::show_footer();

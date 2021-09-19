@@ -32,7 +32,6 @@ if (!empty($_REQUEST['password'])) {
         $success = true;
     }
 }
-View::show_header('Recover Password');
 
 echo $Twig->render('login/new-password.twig', [
     'error'     => $error,
@@ -40,5 +39,3 @@ echo $Twig->render('login/new-password.twig', [
     'success'   => $success,
     'validator' => $validator,
 ]);
-
-View::show_footer(['recover' => true]);

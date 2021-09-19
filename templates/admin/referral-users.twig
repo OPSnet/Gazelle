@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked %}
+{{ header('Referred Users') }}
 <div class="header">
     <h2>Referred users</h2>
 </div>
@@ -101,3 +102,4 @@
 </table>
 {{ paginator.linkbox|raw }}
 {% endif %}
+{{ footer() }}

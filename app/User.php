@@ -336,7 +336,7 @@ class User extends BaseObject {
      * @param array permission names
      * @return bool permission granted
      */
-    public function permittedAny(array $permission): bool {
+    public function permittedAny(string ...$permission): bool {
         foreach ($permission as $p) {
             if ($this->info()['Permission'][$p] ?? false) {
                 return true;

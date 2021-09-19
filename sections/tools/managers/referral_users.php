@@ -1,4 +1,5 @@
 <?php
+
 if (!$Viewer->permitted('admin_view_referrals')) {
     error(403);
 }
@@ -36,7 +37,6 @@ if (!empty($EndDate)) {
 $View = $_GET['view'] ?? 'all';
 $paginator = new \Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 
-View::show_header('Referred Users');
 echo $Twig->render('admin/referral-users.twig', [
     'invite'     => $Invite,
     'list'       => $ReferralManager->getReferredUsers($StartDate, $EndDate, $Site, $Username, $Invite, $paginator, $View),
@@ -48,4 +48,3 @@ echo $Twig->render('admin/referral-users.twig', [
     'view'       => $View,
     'viewer'     => $Viewer,
 ]);
-View::show_footer();

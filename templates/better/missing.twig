@@ -1,4 +1,4 @@
-<br />
+{{ header('Missing Search') }}
 <div class="thin">
     <h2>Missing</h2>
     {% include 'better/links.twig' only %}
@@ -67,3 +67,5 @@
     </div>
     {{ paginator.linkbox|raw }}
 </div>
+{{ footer() }}
+View::show_footer();

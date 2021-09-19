@@ -9,7 +9,6 @@ if (!$article->editable($Viewer)) {
     error('You do not have access to edit this article.');
 }
 
-View::show_header('Edit ' . $article->title());
 echo $Twig->render('wiki/create.twig', [
     'action'     => 'edit',
     'article'    => $article,
@@ -17,4 +16,3 @@ echo $Twig->render('wiki/create.twig', [
     'class_list' => (new Gazelle\Manager\User)->classList(),
     'viewer'     => $Viewer,
 ]);
-View::show_footer();

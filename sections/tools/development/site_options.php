@@ -1,11 +1,12 @@
 <?php
-if (!check_perms('admin_manage_permissions') && !check_perms('users_mod')) {
+
+if (!$Viewer->permittedAny('admin_manage_permissions', 'users_mod')) {
     error(403);
 }
 
 $siteOption = new Gazelle\Manager\SiteOption;
 
-if (check_perms('admin_manage_permissions') && isset($_POST['submit'])) {
+if ($Viewer->permitted('admin_manage_permissions') && isset($_POST['submit'])) {
     authorize();
 
     $name = trim($_POST['name']);
@@ -33,10 +34,8 @@ if (check_perms('admin_manage_permissions') && isset($_POST['submit'])) {
     }
 }
 
-View::show_header('Site Options');
 echo $Twig->render('admin/site-option.twig', [
     'auth'     => $Viewer->auth(),
-    'is_admin' => check_perms('admin_manage_permissions'),
+    'is_admin' => $Viewer->permitted('admin_manage_permissions'),
     'list'     => $siteOption->list(),
 ]);
-View::show_footer();

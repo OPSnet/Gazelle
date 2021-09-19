@@ -1,6 +1,6 @@
 <?php
-// Props to Leto of StC.
-if (!check_perms('users_view_invites') && !check_perms('users_disable_users') && !check_perms('users_edit_invites') && !check_perms('users_disable_any')) {
+
+if (!$Viewer->permittedAny('users_view_invites', 'users_disable_users', 'users_edit_invites', 'users_disable_any')) {
     error(403);
 }
 
@@ -67,9 +67,7 @@ if ($_POST['id']) {
     }
 }
 
-View::show_header('Manipulate Invite Tree');
 echo $Twig->render('user/invite-tree-bulkedit.twig', [
     'auth'    => $Viewer->auth(),
     'message' => $message,
 ]);
-View::show_footer();

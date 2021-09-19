@@ -1,5 +1,6 @@
-{% from 'macro/form.twig' import select_invite_source %}
+{% from 'macro/form.twig' import select_invite_source -%}
 
+{{ header('Invites') }}
 <div class="thin">
 <div class="header">
     <h2>{{ user.id|user_url }} &rsaquo; Invites</h2>
@@ -168,3 +169,4 @@
 {% endif %}
 </div>
 </div>
+{{ footer() }}

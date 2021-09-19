@@ -14,9 +14,7 @@ if (!$collage->isArtist()) {
     error(404);
 }
 
-View::show_header("Manage artist collage " . $collage->name(), ['js' => 'jquery-ui,jquery.tablesorter,sort']);
 echo $Twig->render('collage/manage-artists.twig', [
     'collage' => $collage,
     'viewer'  => $Viewer,
 ]);
-View::show_footer();

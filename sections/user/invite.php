@@ -36,8 +36,6 @@ $heading = new \Gazelle\Util\SortableTableHeader('joined', [
     'ratio'      => ['dbColumn' => '(uls.Uploaded / uls.Downloaded)', 'defaultSort' => 'desc', 'text' => 'Ratio'],
 ]);
 
-View::show_header('Invites');
-
 echo $Twig->render('user/invited.twig', [
     'auth'           => $user->auth(),
     'edit_source'    => ($_GET['edit'] ?? '') === 'source',
@@ -52,4 +50,3 @@ echo $Twig->render('user/invited.twig', [
     'view_pool'      => $user->permitted('users_view_invites'),
     'wiki_article'   => 116,
 ]);
-View::show_footer();

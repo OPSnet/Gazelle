@@ -123,6 +123,20 @@ class Twig {
             }
         ));
 
+        $twig->addFunction(new \Twig\TwigFunction('header', function ($title, $options = '') {
+            return new \Twig\Markup(
+                \View::show_header($title, $options),
+                'UTF-8'
+            );
+        }));
+
+        $twig->addFunction(new \Twig\TwigFunction('footer', function ($options = []) {
+            return new \Twig\Markup(
+                \View::show_footer($options),
+                'UTF-8'
+            );
+        }));
+
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
             return new \Twig\Markup(
                 \ImageTools::process($icon, false, 'donoricon', $userId),

@@ -1,5 +1,5 @@
 <?php
-if (!check_perms('users_mod') || !check_perms('admin_clear_cache')) {
+if (!$Viewer->permittedAny('users_mod', 'admin_clear_cache')) {
     error(403);
 }
 
@@ -12,7 +12,7 @@ $begin = microtime(true);
 if (!empty($_REQUEST['key'])) {
     $Keys = preg_split('/\s+/', trim($_REQUEST['key']));
     if (isset($_REQUEST['flush']) && ($_REQUEST['check'] ?? '') === 'on') {
-        if (!check_perms('admin_clear_cache')) {
+        if (!$Viewer->permitted('admin_clear_cache')) {
             error(403);
         }
         $delete = $Cache->deleteMulti($Keys);
@@ -23,7 +23,7 @@ if (!empty($_REQUEST['key'])) {
     } elseif (isset($_REQUEST['view']) || isset($_REQUEST['json'])) {
         foreach ($Keys as $Key) {
             foreach (CACHE_PERMISSION as $name => $permission) {
-                if (strpos($Key, $name) !== false && !check_perms($permission)) {
+                if (strpos($Key, $name) !== false && !$Viewer->permitted($permission)) {
                     error(403);
                 }
             }
@@ -59,10 +59,8 @@ if (isset($_REQUEST['json'])) {
     exit;
 }
 
-View::show_header('Cache Inspector');
-
 echo $Twig->render('admin/cache-management.twig', [
-    'can_flush'     => check_perms('admin_clear_cache'),
+    'can_flush'     => $Viewer->permitted('admin_clear_cache'),
     'delta'         => $delta,
     'flushed'       => $flushed,
     'key'           => $_REQUEST['key'] ?? '',
@@ -70,4 +68,3 @@ echo $Twig->render('admin/cache-management.twig', [
     'namespace'     => CACHE_NAMESPACE,
     'result'        => $result,
 ]);
-View::show_footer();

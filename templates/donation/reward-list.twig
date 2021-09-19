@@ -1,3 +1,4 @@
+{{ header('Donor Rewards') }}
 <div class="header">
     <h2>Donor Rewards</h2>
     {{ paginator.linkbox|raw }}
@@ -51,5 +52,5 @@
 </table>
     {% endif %}
 {% endfor %}
-
 {{ paginator.linkbox|raw }}
+{{ footer() }}

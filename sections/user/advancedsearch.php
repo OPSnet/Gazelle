@@ -515,7 +515,6 @@ $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 $Secondaries = array_filter($ClassLevels, function ($class) { return $class['Secondary'] == '1'; });
 usort($Secondaries, function($c1, $c2) { return strcmp($c1['Name'], $c2['Name']); });
 
-View::show_header('User search');
 echo $Twig->render('admin/advanced-user-search.twig', [
     'paginator'     => $paginator,
     'show_invited'  => $showInvited,
@@ -595,4 +594,3 @@ echo $Twig->render('admin/advanced-user-search.twig', [
     'order_by'      => array_shift($WayVals),
     'order_current' => ($_GET['way'] ?? 'Descending'),
 ]);
-View::show_footer();

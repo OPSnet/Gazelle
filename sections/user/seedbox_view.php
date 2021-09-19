@@ -1,9 +1,9 @@
 <?php
-use Gazelle\Util\Paginator;
 
 if (!$Viewer->hasAttr('feature-seedbox') && !$Viewer->permitted('users_view_ips')) {
     error(403);
 }
+
 if (!isset($_POST['action'])) {
     $userId = (int)($_GET['userid'] ?? $Viewer->id());
 } else {
@@ -41,7 +41,7 @@ if (isset($_POST['action']) || isset($_REQUEST['viewby'])) {
     }
 }
 
-$paginator = new Paginator(TORRENTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
 $paginator->setTotal($seedbox->total());
 
 View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
@@ -84,4 +84,3 @@ echo $Twig->render('seedbox/view.twig', [
     'user_id' => $userId,
     'viewby'  => $seedbox->viewBy(),
 ]);
-View::show_footer();

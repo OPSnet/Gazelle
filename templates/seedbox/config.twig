@@ -1,9 +1,10 @@
+{{ header(user.username ~ ' &rsaquo; Seedboxes') }}
 <div class="thin">
 <div class="header">
-    <h2>{{ user_id|user_url }} &rsaquo; Seedboxes &rsaquo; Configure</h2>
+    <h2>{{ user.id|user_url }} &rsaquo; Seedboxes &rsaquo; Configure</h2>
     <div class="linkbox">
-        <a href="user.php?action=seedbox&amp;userid={{ user_id }}" class="brackets">Configure</a>
-        <a href="user.php?action=seedbox-view&amp;userid={{ user_id }}" class="brackets">View</a>
+        <a href="user.php?action=seedbox&amp;userid={{ user.id }}" class="brackets">Configure</a>
+        <a href="user.php?action=seedbox-view&amp;userid={{ user.id }}" class="brackets">View</a>
     </div>
 </div>
 <div class="box pad">
@@ -29,11 +30,11 @@
     <h3>Seeding locations</h3>
     {% for h in host %}
         {% if loop.first %}
-    <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user_id }}" method="post">
+    <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user.id }}" method="post">
         <input type="hidden" name="action" value="seedbox" />
         <input type="hidden" name="mode" value="update" />
         <input type="hidden" name="auth" value="{{ auth }}" />
-        <input type="hidden" name="userid" value="{{ user_id }}" />
+        <input type="hidden" name="userid" value="{{ user.id }}" />
         <table>
         <tr>
             <th>Name</th>
@@ -76,11 +77,11 @@
     it is not frozen or has crashed.</p>
     {% for f in free %}
         {% if loop.first %}
-    <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user_id }}" method="post">
+    <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user.id }}" method="post">
         <input type="hidden" name="action" value="seedbox" />
         <input type="hidden" name="mode" value="remove" />
         <input type="hidden" name="auth" value="{{ auth }}" />
-        <input type="hidden" name="userid" value="{{ user_id }}" />
+        <input type="hidden" name="userid" value="{{ user.id }}" />
     <ul class="stats nobullet">
         {% endif %}
         <li>
@@ -97,3 +98,4 @@
 </div>
 {% endif %}
 </div>
+{{ footer() }}

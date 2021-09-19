@@ -1,6 +1,5 @@
 <?php
 
-View::show_header('Create a wiki article');
 echo $Twig->render('wiki/create.twig', [
     'action'     => 'create',
     'body'       => new Gazelle\Util\Textarea('body', '', 92, 20),
@@ -9,4 +8,3 @@ echo $Twig->render('wiki/create.twig', [
     'read'       => 0,
     'viewer'     => $Viewer,
 ]);
-View::show_footer();

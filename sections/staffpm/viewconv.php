@@ -18,7 +18,6 @@ if ($staffPM->author()->id() === $Viewer->id() && $staffPM->isUnread()) {
 }
 $userMan = new Gazelle\Manager\User;
 
-View::show_header('Staff PM', ['js' => 'staffpm,bbcode']);
 echo $Twig->render('staffpm/message.twig', [
     'common'      => $manager->commonAnswerList(),
     'heading'     => $manager->heading($Viewer),
@@ -29,4 +28,3 @@ echo $Twig->render('staffpm/message.twig', [
     'fls'         => $userMan->flsList(),
     'viewer'      => $Viewer,
 ]);
-View::show_footer();

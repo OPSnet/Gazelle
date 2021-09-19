@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_view_email')) {
+if (!$Viewer->permitted('users_view_email')) {
     error(403);
 }
 
@@ -9,8 +9,6 @@ if (is_null($user)) {
     error(404);
 }
 
-View::show_header($user->username() . " &rasquo; Email History");
 echo $Twig->render('user/email-history.twig', [
     'user' => $user,
 ]);
-View::show_footer();

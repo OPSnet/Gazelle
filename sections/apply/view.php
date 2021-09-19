@@ -1,5 +1,5 @@
 <?php
-$IS_STAFF = check_perms('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
+$IS_STAFF = $Viewer->permitted('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
 if (isset($_POST['id']) && is_number($_POST['id'])) {
     authorize();
     $ID = (int)$_POST['id'];
@@ -38,7 +38,6 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
     }
 }
 $Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
-View::show_header('View Applications', ['js' => 'apply']);
 echo $Twig->render('applicant/view.twig', [
     'app'      => $app ?? null,
     'auth'     => $Viewer->auth(),
@@ -49,4 +48,3 @@ echo $Twig->render('applicant/view.twig', [
     'resolved' => $Resolved,
     'user_id'  => $Viewer->id(),
 ]);
-View::show_footer();

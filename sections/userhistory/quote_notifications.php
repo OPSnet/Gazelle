@@ -17,7 +17,6 @@ $total = $userQuote->total();
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal($total);
 
-View::show_header('Quote Notifications');
 echo $Twig->render('user/quote-notification.twig', [
     'page'      => $userQuote->page($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
@@ -25,4 +24,3 @@ echo $Twig->render('user/quote-notification.twig', [
     'total'     => $total,
     'user'      => $Viewer,
 ]);
-View::show_footer();

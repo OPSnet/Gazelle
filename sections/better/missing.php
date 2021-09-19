@@ -26,7 +26,7 @@ $types = [
 ];
 
 if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
-    if (check_perms('users_override_paranoia')) {
+    if ($Viewer->permitted('users_override_paranoia')) {
         $userId = $_GET['userid'];
     } else {
         error(403);
@@ -41,15 +41,13 @@ $search = $_GET['search'] ?? '';
 
 $better = new Gazelle\Manager\Better(new Gazelle\ReleaseType);
 
-if (check_perms('admin_reports') && in_array($type, $attrTypes) && $remove = (int)($_GET['remove'] ?? 0)) {
+if ($Viewer->permitted('admin_reports') && in_array($type, $attrTypes) && $remove = (int)($_GET['remove'] ?? 0)) {
     $better->removeAttribute($type, $remove);
 }
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 [$results, $resultCount, $mode] = $better->missing($type, $filter, $search, $paginator->limit(), $paginator->offset(), $userId);
 $paginator->setTotal($resultCount);
-
-View::show_header('Missing Search');
 
 $filters = array_reduce($filters, function ($acc, $item) use ($filter) {
     $acc[$item] = $item === $filter;
@@ -93,9 +91,7 @@ echo $Twig->render('better/missing.twig', [
     'torrent_ids'    => $mode !== 'torrents' ? null : implode(',', array_keys($results)),
     'paginator'      => $paginator,
     'perms'          => [
-        'zip_downloader' => check_perms('zip_downloader'),
-        'admin_reports'  => check_perms('admin_reports'),
+        'zip_downloader' => $Viewer->permitted('zip_downloader'),
+        'admin_reports'  => $Viewer->permitted('admin_reports'),
     ],
 ]);
-
-View::show_footer();

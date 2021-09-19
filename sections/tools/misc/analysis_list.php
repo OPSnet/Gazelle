@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_analysis')) {
+if (!$Viewer->permitted('site_analysis')) {
     error(403);
 }
 
@@ -13,8 +13,7 @@ $items = array_map(function($key) {
     return $value;
 }, $keys);
 usort($items, function ($a, $b) { return $a['time'] > $b['time'] ? -1 : ($a['time'] === $b['time'] ? 0 : 1); });
-View::show_header('Analysis List');
+
 echo $Twig->render('admin/error-analysis.twig', [
     'list' => $items,
 ]);
-View::show_footer();

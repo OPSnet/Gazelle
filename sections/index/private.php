@@ -39,8 +39,6 @@ if (!$threadId) {
     $poll = $forum->pollDataExtended($threadId, $Viewer->id());
 }
 
-View::show_header('News', ['js' => 'bbcode,news_ajax']);
-
 echo $Twig->render('index/private-sidebar.twig', [
     'auth'              => $Viewer->auth(),
     'blog'              => new Gazelle\Manager\Blog,
@@ -65,4 +63,3 @@ echo $Twig->render('index/private-main.twig', [
     'latest'  => $tgroupMan->latestUploads(5),
     'news'    => $newsMan->headlines(),
 ]);
-View::show_footer(['disclaimer'=>true]);

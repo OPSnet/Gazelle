@@ -1,3 +1,4 @@
+{{ header('Tracker IP address history &rsaquo; ' ~ (user ? user.username : "IP address " ~ ipaddr")) }}
 <div class="thin">
     <div class="header">
 {% if user  %}
@@ -77,3 +78,4 @@ function ShowIPs(rowname) {
     $('tr[name="'+rowname+'"]').gtoggle();
 }
 </script>
+{{ footer() }}

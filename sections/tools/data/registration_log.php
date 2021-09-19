@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_view_ips') || !check_perms('users_view_email')) {
+if (!$Viewer->permittedAny('users_view_ips', 'users_view_email')) {
     error(403);
 }
 
@@ -22,11 +22,9 @@ if ($_REQUEST['after_date']) {
 $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($registration->total());
 
-View::show_header('Registration log');
 echo $Twig->render('admin/registration.twig', [
     'after'  => $_REQUEST['after_date'] ?? null,
     'before' => $_REQUEST['before_date'] ?? null,
     'list'   => array_map(fn($u) => new Gazelle\User($u), $registration->page($paginator->limit(), $paginator->offset())),
     'paginator' => $paginator,
 ]);
-View::show_footer();
