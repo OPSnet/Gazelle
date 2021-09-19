@@ -20,8 +20,7 @@ if ($NewRequest && ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->per
 
 $RequestTaxPercent = REQUEST_TAX * 100;
 
-if (!$NewRequest) {
-if (empty($ReturnEdit)) {
+if (!$NewRequest && !isset($ReturnEdit)) {
     $Request = Requests::get_request($RequestID);
     if ($Request === false) {
         error(404);
@@ -93,7 +92,6 @@ if (empty($ReturnEdit)) {
 
     $Tags = implode(', ', $Request['Tags']);
 }
-}
 
 if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
     $ArtistName = $DB->scalar("
@@ -144,14 +142,14 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
         <a href="/user.php?id=<?= $Request['UserID'] ?>"><?= $requester->username() ?></a>'s request.
         Be careful when making changes!</strong>
     </div>
-<?php    } ?>
+<?php } ?>
 
     <div class="box pad">
         <form action="" method="post" id="request_form" onsubmit="Calculate();">
             <div>
-<?php    if (!$NewRequest) { ?>
+<?php if (!$NewRequest) { ?>
                 <input type="hidden" name="requestid" value="<?=$RequestID?>" />
-<?php    } ?>
+<?php } ?>
                 <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                 <input type="hidden" name="action" value="<?=($NewRequest ? 'takenew' : 'takeedit')?>" />
             </div>
@@ -160,16 +158,16 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr>
                     <td colspan="2" class="center">Please make sure your request follows <a href="rules.php?p=requests">the request rules</a>!</td>
                 </tr>
-<?php    if ($NewRequest || $CanEdit) { ?>
+<?php if ($NewRequest || $CanEdit) { ?>
                 <tr>
                     <td class="label">
                         Type
                     </td>
                     <td>
                         <select id="categories" name="type" onchange="Categories();">
-<?php        foreach (CATEGORY as $Cat) { ?>
+<?php    foreach (CATEGORY as $Cat) { ?>
                             <option value="<?=$Cat?>"<?=(!empty($CategoryName) && ($CategoryName === $Cat) ? ' selected="selected"' : '')?>><?=$Cat?></option>
-<?php        } ?>
+<?php    } ?>
                         </select>
                     </td>
                 </tr>
@@ -246,33 +244,33 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="text" name="oclc" size="15" value="<?=(!empty($Request['OCLC']) ? $Request['OCLC'] : '')?>" />
                     </td>
                 </tr>
-<?php    } ?>
+<?php } ?>
                 <tr id="year_tr">
                     <td class="label">Year</td>
                     <td>
                         <input type="text" name="year" size="5" value="<?=(!empty($Year) ? $Year : '')?>" />
                     </td>
                 </tr>
-<?php    if ($NewRequest || $CanEdit) { ?>
+<?php if ($NewRequest || $CanEdit) { ?>
                 <tr id="image_tr">
                     <td class="label">Image</td>
                     <td>
                         <input type="text" name="image" size="45" value="<?=(!empty($Image) ? $Image : '')?>" />
-<?php if (IMAGE_HOST_BANNED) { ?>
+<?php       if (IMAGE_HOST_BANNED) { ?>
                         <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
                             ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
-<?php } ?>
+<?php       } ?>
                     </td>
                 </tr>
-<?php    } ?>
+<?php   } ?>
                 <tr>
                     <td class="label">Tags</td>
                     <td>
                         <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;">
                             <option>---</option>
-<?php    foreach ($GenreTags as $Genre) { ?>
+<?php   foreach ($GenreTags as $Genre) { ?>
                             <option value="<?= display_str($Genre) ?>"><?= display_str($Genre) ?></option>
-<?php    } ?>
+<?php   } ?>
                         </select>
                         <input type="text" id="tags" name="tags" size="45" value="<?= empty($Tags) ? '' : display_str($Tags) ?>"<?=
                             $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
@@ -282,17 +280,17 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         There is a list of official tags to the left of the text box. Please use these tags instead of "unofficial" tags (e.g. use the official "<strong class="important_text_alt">drum.and.bass</strong>" tag, instead of an unofficial "<strong class="important_text">dnb</strong>" tag.).
                     </td>
                 </tr>
-<?php    if ($NewRequest || ($CanEdit && $ownRequest)) { ?>
+<?php   if ($NewRequest || $CanEdit || $ownRequest) { ?>
                 <tr id="releasetypes_tr">
                     <td class="label">Release type</td>
                     <td>
                         <select id="releasetype" name="releasetype">
                             <option value="0">---</option>
 <?php
-        $releaseTypes = (new Gazelle\ReleaseType)->list();
-        foreach ($releaseTypes as $Key => $Val) {
+            $releaseTypes = (new Gazelle\ReleaseType)->list();
+            foreach ($releaseTypes as $Key => $Val) {
 ?>                            <option value="<?=$Key?>"<?=!empty($ReleaseType) ? ($Key == $ReleaseType ? ' selected="selected"' : '') : '' ?>><?=$Val?></option>
-<?php   } ?>
+<?php       } ?>
                         </select>
                     </td>
                 </tr>
@@ -301,41 +299,47 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                     <td>
                         <input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', <?=($NewRequest ? 1 : 0)?>);"<?=!empty($FormatArray) && (count($FormatArray) === count(FORMAT)) ? ' checked="checked"' : ''; ?> /><label for="toggle_formats"> All</label>
                         <span style="float: right;"><strong>NB: You cannot require a log or cue unless FLAC is an allowed format</strong></span>
-<?php        foreach (FORMAT as $Key => $Val) {
-            if ($Key % 8 === 0) {
-                echo '<br />';
-            } ?>
+<?php
+            foreach (FORMAT as $Key => $Val) {
+                if ($Key % 8 === 0) {
+                    echo '<br />';
+                }
+?>
                         <input type="checkbox" name="formats[]" value="<?=$Key?>" onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_formats').raw().checked = false; }" id="format_<?=$Key?>"
                             <?=(!empty($FormatArray) && in_array($Key, $FormatArray) ? ' checked="checked"' : '')?> /><label for="format_<?=$Key?>"> <?=$Val?></label>
-<?php        } ?>
+<?php       } ?>
                     </td>
                 </tr>
                 <tr id="bitrates_tr">
                     <td class="label">Allowed bitrates</td>
                     <td>
                         <input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', <?=($NewRequest ? 1 : 0)?>);"<?=(!empty($BitrateArray) && (count($BitrateArray) === count(ENCODING)) ? ' checked="checked"' : '')?> /><label for="toggle_bitrates"> All</label>
-<?php        foreach (ENCODING as $Key => $Val) {
-            if ($Key % 8 === 0) {
-                echo '<br />';
-            } ?>
+<?php
+            foreach (ENCODING as $Key => $Val) {
+                if ($Key % 8 === 0) {
+                    echo '<br />';
+                }
+?>
                         <input type="checkbox" name="bitrates[]" value="<?=$Key?>" id="bitrate_<?=$Key?>"
                             <?=(!empty($BitrateArray) && in_array($Key, $BitrateArray) ? ' checked="checked" ' : '')?>
                         onchange="if (!this.checked) { $('#toggle_bitrates').raw().checked = false; }" /><label for="bitrate_<?=$Key?>"> <?=$Val?></label>
-<?php        } ?>
+<?php       } ?>
                     </td>
                 </tr>
                 <tr id="media_tr">
                     <td class="label">Allowed media</td>
                     <td>
                         <input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', <?=($NewRequest ? 1 : 0)?>);"<?=(!empty($MediaArray) && (count($MediaArray) === count(MEDIA)) ? ' checked="checked"' : '')?> /><label for="toggle_media"> All</label>
-<?php        foreach (MEDIA as $Key => $Val) {
-            if ($Key % 8 === 0) {
-                echo '<br />';
-            } ?>
+<?php
+            foreach (MEDIA as $Key => $Val) {
+                if ($Key % 8 === 0) {
+                    echo '<br />';
+                }
+?>
                         <input type="checkbox" name="media[]" value="<?=$Key?>" id="media_<?=$Key?>"
                             <?=(!empty($MediaArray) && in_array($Key, $MediaArray) ? ' checked="checked" ' : '')?>
                         onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_media').raw().checked = false; }" /><label for="media_<?=$Key?>"> <?=$Val?></label>
-<?php        } ?>
+<?php   } ?>
                     </td>
                 </tr>
                 <tr id="logcue_tr" class="hidden">
@@ -349,7 +353,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="checkbox" id="needcue" name="needcue" <?=(!empty($NeedCue) ? 'checked="checked" ' : '')?>/><label for="needcue"> Require cue file</label>
                     </td>
                 </tr>
-<?php    } ?>
+<?php  } ?>
                 <tr>
                     <td class="label">Description</td>
                     <td>
@@ -398,8 +402,8 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
                         <input type='hidden' id='request_tax' value="<?=REQUEST_TAX?>" />
                         <?= REQUEST_TAX > 0
-                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span></strong><br />'
-                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span>'
+                            ? 'Bounty after tax: <strong><span id="bounty_after_tax">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span></strong><br />'
+                            : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">100.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
