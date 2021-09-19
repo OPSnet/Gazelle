@@ -4,21 +4,14 @@
  * This is the page that displays the request to the end user after being created.
  */
 
-if (empty($_GET['id']) || !intval($_GET['id'])) {
-    error(0);
-}
-
-$RequestID = $_GET['id'];
-$RequestTaxPercent = (REQUEST_TAX * 100);
-
-//First things first, lets get the data for the request.
-
+$RequestID = (int)($_GET['id'] ?? 0);
 $Request = Requests::get_request($RequestID);
 if ($Request === false) {
     error(404);
 }
 
 //Convenience variables
+$RequestTaxPercent = (REQUEST_TAX * 100);
 $IsFilled = !empty($Request['TorrentID']);
 $CanVote = !$IsFilled && $Viewer->permitted('site_vote');
 
@@ -76,7 +69,6 @@ $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedC
 
 View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,subscriptions']);
 ?>
-<div class="thin">
     <div class="header">
         <h2><a href="requests.php">Requests</a> &rsaquo; <?=$CategoryName?> &rsaquo; <?=$DisplayLink?></h2>
         <div class="linkbox">
@@ -163,12 +155,14 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
         } elseif (!empty($ArtistForm[4]) && !empty($ArtistForm[1]) && (count($ArtistForm[4]) > 0) && (count($ArtistForm[1]) > 0)) {
             print '                <li class="artists_main"><strong>Performers:</strong></li>';
         }
-        foreach ($ArtistForm[1] as $Artist) {
+        if (!empty($ArtistForm[1]) && count($ArtistForm[1]) > 0) {
+            foreach ($ArtistForm[1] as $Artist) {
 ?>
                 <li class="artists_main">
                     <?=Artists::display_artist($Artist)?>
                 </li>
 <?php
+            }
         }
         if (!empty($ArtistForm[2]) && count($ArtistForm[2]) > 0) {
 ?>
@@ -398,8 +392,8 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                         <input type="hidden" id="current_rr" value="<?=$Viewer->requiredRatio()?>" />
                         <input id="total_bounty" type="hidden" value="<?=$RequestVotes['TotalBounty']?>" />
                         <?= REQUEST_TAX > 0
-                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span></strong><br />'
-                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - REQUEST_TAX))?> MiB</span>'
+                            ? 'Bounty after tax: <strong><span id="bounty_after_tax">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span></strong><br />'
+                            : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">0.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
@@ -478,6 +472,5 @@ echo $Twig->render('reply.twig', [
 ?>
         </div>
     </div>
-</div>
 <?php
 View::show_footer();
