@@ -3,6 +3,7 @@
 if ($Viewer->disableForums()) {
     error(403);
 }
+
 $userMan = new Gazelle\Manager\User;
 $user = empty($_GET['userid']) ? $Viewer : $userMan->findById((int)$_GET['userid']);
 if (is_null($user)) {
@@ -29,11 +30,9 @@ $forumSearch = (new Gazelle\Search\Forum($Viewer))
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal($forumSearch->postHistoryTotal());
 
-View::show_header($user->username() . " &rsaquo; $title", ['js' => 'subscriptions,comments,bbcode']);
-
 echo $Twig->render('user/post-history.twig', [
     'avatar'        => $userMan->avatarMarkup($Viewer, $user),
-    'is_fmod'       => check_perms('site_moderate_forums'),
+    'is_fmod'       => $Viewer->permitted('site_moderate_forums'),
     'own_profile'   => $ownProfile,
     'paginator'     => $paginator,
     'posts'         => $forumSearch->postHistoryPage($paginator->limit(), $paginator->offset()),
@@ -45,5 +44,3 @@ echo $Twig->render('user/post-history.twig', [
     'user'          => $user,
     'viewer'        => $Viewer,
 ]);
-
-View::show_footer();

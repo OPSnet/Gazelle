@@ -1,13 +1,13 @@
 <?php
 
-if (!check_perms('users_view_invites')) {
+if (!$Viewer->permitted('users_view_invites')) {
     error(403);
 }
 
 $inviteMan = new Gazelle\Manager\Invite;
 
 $removed = null;
-if (!empty($_POST['invitekey']) && check_perms('users_edit_invites')) {
+if (!empty($_POST['invitekey']) && $Viewer->permitted('users_edit_invites')) {
     authorize();
     $removed = $inviteMan->removeInviteKey($_POST['invitekey']);
 }
@@ -21,7 +21,6 @@ $pending = $inviteMan->totalPending();
 $paginator = new Gazelle\Util\Paginator(INVITES_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($inviteMan->totalPending());
 
-View::show_header('Invite Pool');
 echo $Twig->render('invite/pool.twig', [
     'auth'      => $Viewer->auth(),
     'paginator' => $paginator,
@@ -29,6 +28,5 @@ echo $Twig->render('invite/pool.twig', [
     'pending'   => $pending,
     'removed'   => $removed,
     'search'    => $search,
-    'can_edit'  => check_perms('users_edit_invites'),
+    'can_edit'  => $Viewer->permitted('users_edit_invites'),
 ]);
-View::show_footer();

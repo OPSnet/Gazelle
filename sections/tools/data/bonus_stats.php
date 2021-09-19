@@ -1,10 +1,8 @@
 <?php
 
-if (!check_perms('admin_bp_history')) {
+if (!$Viewer->permitted('admin_bp_history')) {
     error(403);
 }
-
-View::show_header('Bonus Points Statistics');
 
 $bonus = new Gazelle\Stats\Bonus;
 $day = [];
@@ -22,5 +20,3 @@ echo $Twig->render('admin/bonus-stats.twig', [
     'week'  => $week,
     'month' => $month,
 ]);
-
-View::show_footer();

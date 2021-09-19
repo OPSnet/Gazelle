@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked, selected %}
+{{ header('Search articles') }}
 <div class="thin">
     <div class="header">
         <h2><a href="wiki.php">Wiki</a> &rsaquo; Search articles</h2>
@@ -64,3 +65,4 @@
 </table>
     {{ paginator.linkbox|raw }}
 </div>
+{{ footer() }}

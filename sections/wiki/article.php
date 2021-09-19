@@ -23,7 +23,6 @@ if (!$article->readable($Viewer)) {
 }
 $classList = (new Gazelle\Manager\User)->classLevelList();
 
-View::show_header($article->title(), ['js' => 'wiki,bbcode']);
 echo $Twig->render('wiki/article.twig', [
     'article' => $article,
     'edit'    => $classList[$article->minClassEdit()]['Name'],
@@ -31,4 +30,3 @@ echo $Twig->render('wiki/article.twig', [
     'error'   => $error,
     'viewer'  => $Viewer,
 ]);
-View::show_footer();

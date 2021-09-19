@@ -1,3 +1,4 @@
+{{ header(user.username ~ ' &rsaquo; Freeleech token history') }}
 <div class="header">
     <h2><a href="{{ user.url }}">{{ user.username }}</a> &rsaquo; Freeleech token history</h2>
 </div>
@@ -33,5 +34,5 @@
     </tr>
 {% endfor %}
 </table>
-
 {{ paginator.linkbox|raw }}
+{{ footer() }}

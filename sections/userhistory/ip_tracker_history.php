@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_mod') || !check_perms('users_view_ips')) {
+if (!$Viewer->permittedAny('users_mod', 'users_view_ips')) {
     error(403);
 }
 
@@ -20,14 +20,12 @@ if ($user) {
 $paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($snatchInfo->total());
 
-View::show_header('Tracker IP address history &rsaquo; ' . ($user ? $user->username() : "IP address $ipaddr"));
 echo $Twig->render('admin/history-ip-tracker.twig', [
     'details'   => $snatchInfo->page($paginator->limit(), $paginator->offset()),
     'ipaddr'    => $ipaddr,
-    'is_mod'    => check_perms('users_mod'),
+    'is_mod'    => $Viewer->permitted('users_mod'),
     'paginator' => $paginator,
     'summary'   => $snatchInfo->summary(),
     'urlstem'   => $_SERVER['SCRIPT_NAME'] . '?action=tracker_ips&',
     'user'      => $user,
 ]);
-View::show_footer();

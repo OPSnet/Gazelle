@@ -6,14 +6,12 @@ if (!$collageId) {
 }
 $collage = new Gazelle\Collage($collageId);
 
-if ($collage->isDeleted() && !$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
+if ($collage->isDeleted() && !$collage->isOwner($Viewer->id()) && !$Viewer->permitted('site_collages_delete')) {
     error(403);
 }
 
-View::show_header('Delete collage');
 echo $Twig->render('collage/delete.twig', [
     'auth'        => $Viewer->auth(),
     'id'          => $collage->id(),
     'is_personal' => $collage->isPersonal(),
 ]);
-View::show_footer();

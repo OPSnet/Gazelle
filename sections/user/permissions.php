@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_manage_permissions')) {
+if (!$Viewer->permitted('admin_manage_permissions')) {
     error(403);
 }
 
@@ -18,9 +18,7 @@ if (isset($_POST['action'])) {
     );
 }
 
-View::show_header($user->username() . " &rsaquo; Permissions");
 echo $Twig->render('user/privilege-list.twig', [
-    'auth'    => $Viewer->auth(),
-    'user'    => $user,
+    'auth' => $Viewer->auth(),
+    'user' => $user,
 ]);
-View::show_footer();

@@ -1,7 +1,7 @@
 <?php
 
-if (!check_perms('users_warn')) {
-    error(404);
+if (!$Viewer->permitted('users_warn')) {
+    error(403);
 }
 
 $postId = (int)$_POST['postid'];
@@ -14,7 +14,6 @@ if (is_null($user)) {
     error(404);
 }
 
-View::show_header('Warn User');
 echo $Twig->render('forum/warn.twig', [
     'auth'     => $Viewer->auth(),
     'body'     => $forum->postBody($postId),
@@ -22,4 +21,3 @@ echo $Twig->render('forum/warn.twig', [
     'post_id'  => $postId,
     'user'     => $user,
 ]);
-View::show_footer();

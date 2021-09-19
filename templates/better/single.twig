@@ -1,4 +1,4 @@
-<br />
+{{ header('Single seeder FLACs') }}
 <div class="thin">
     <h2>Single Seeded</h2>
     {% include 'better/links.twig' only %}
@@ -13,4 +13,4 @@
         {% include 'better/torrents.twig' with {results: results, auth_key: auth_key, torrent_pass: torrent_pass, tokens: tokens} only %}
     </div>
 </div>
-
+{{ footer() }}

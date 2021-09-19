@@ -1,5 +1,6 @@
-{% from 'macro/form.twig' import checked, selected %}
+{% from 'macro/form.twig' import checked, selected -%}
 
+{{ header('User search') }}
 <div class="thin">
 <form class="search_form" name="users" action="user.php" method="get">
 <input type="hidden" name="action" value="search" />
@@ -468,4 +469,5 @@ Results ordered <select name="order">
 {% endfor %}
     </table>
 </div>
-{{  paginator.linkbox|raw }}
+{{ paginator.linkbox|raw }}
+{{ footer() }}
