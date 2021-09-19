@@ -1,12 +1,11 @@
 <?php
 
-/** @var \Gazelle\Bonus $viewerBonus */
-
 use Gazelle\Exception\BonusException;
 
 authorize();
 
 $label = $_REQUEST['label'];
+$bonus = new Gazelle\Bonus($Viewer);
 switch($label) {
     case 'collage-1':
         try {
