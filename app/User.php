@@ -456,8 +456,8 @@ class User extends BaseObject {
         return $this->info()['BonusPoints'];
     }
 
-    public function bonusPointsPerHour(): int {
-        return (new \Gazelle\Bonus($this))->hourlyRate();
+    public function bonusPointsPerHour(): float {
+        return (new Bonus($this))->hourlyRate();
     }
 
     public function bonusPointsSpent(): int {
