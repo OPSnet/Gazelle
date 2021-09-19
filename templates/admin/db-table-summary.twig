@@ -1,3 +1,4 @@
+{{ header('Database Specifics') }}
 <div class="linkbox">
     <a href="tools.php?action=db_sandbox" class="brackets">DB sandbox</a>
     <a href="tools.php?action=database_specifics&amp;mode=show" title="Tables of deleted data are shown separately" class="brackets">Show deleted data</a>
@@ -98,3 +99,4 @@ Highcharts.chart('statistics', {
     <td class="number_column"><b>{{ (total_data_size + total_index_size)|octet_size }}</b></td>
 </tr>
 </table>
+{{ footer() }}

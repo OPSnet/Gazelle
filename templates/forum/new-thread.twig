@@ -1,14 +1,15 @@
 {% from 'macro/form.twig' import checked %}
+{{ header('Forums &rsaquo; ' ~ name ~ ' &rsaquo; New Thread', {'js': 'comments,bbcode,jquery.validate,form_validate,newpoll'}) }};
 <div class="thin">
     <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php?action=viewforum&amp;forumid={{ id }}">{{ name }}</a> &rsaquo; <span id="newthreadtitle">New Thread</span></h2>
     <div class="hidden" id="newthreadpreview">
         <div class="linkbox">
             <div class="center">
                 <a href="#" onclick="return false;" class="brackets">Report thread</a>
-                <a href="#" onclick="return false;" class="brackets">{{ is_subbed ? 'Unsubscribe' : 'Subscribe' }}</a>
+                <a href="#" onclick="return false;" class="brackets">{{ viewer.option('AutoSubscribe') ? 'Unsubscribe' : 'Subscribe' }}</a>
             </div>
         </div>
-{% if can.create_poll %}
+{% if viewer.permitted('forums_polls_create') %}
         <div class="box thin clear hidden" id="pollpreview">
             <div class="head colhead_dark"><strong>Poll</strong> <a href="#" onclick="$('#threadpoll').gtoggle(); return false;" class="brackets">View</a></div>
             <div class="pad" id="threadpoll">
@@ -21,14 +22,14 @@
 {% endif %}
         <table class="forum_post box vertical_margin" style="text-align: left;">
             <colgroup>
-{% if can.see_avatars %}
+{% if viewer.showAvatars %}
                 <col class="col_avatar" />
 {% endif %}
                 <col class="col_post_body" />
             </colgroup>
             <tr class="colhead_dark">
-                <td colspan="{{ can.see_avatars ? 2 : 1 }}">
-                    <span style="float: left;"><a href="#newthreadpreview">#XXXXXX</a> by <strong>{{ user_id|user_full }}</strong>
+                <td colspan="{{ viewer.showAvatars ? 2 : 1 }}">
+                    <span style="float: left;"><a href="#newthreadpreview">#XXXXXX</a> by <strong>{{ viewer.id|user_full }}</strong>
                     Just now
                     </span>
                     <span id="barpreview" style="float: right;">
@@ -39,7 +40,7 @@
                 </td>
             </tr>
             <tr>
-{% if can.see_avatars %}
+{% if viewer.showAvatars %}
                 <td class="avatar" valign="top">
                     {{ avatar|raw }}
                 </td>
@@ -53,7 +54,7 @@
     <div class="box pad">
         <form class="create_form" name="forum_thread" action="" id="newthreadform" method="post">
             <input type="hidden" name="action" value="new" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="forum" value="{{ id }}" />
             <table id="newthreadtext" class="layout">
                 <tr>
@@ -67,11 +68,11 @@
                 <tr>
                     <td></td>
                     <td>
-                        <input id="subscribebox" type="checkbox" name="subscribe"{{ checked(is_subbed) }} onchange="$('#subscribeboxpreview').raw().checked=this.checked;" />
+                        <input id="subscribebox" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} onchange="$('#subscribeboxpreview').raw().checked=this.checked;" />
                         <label for="subscribebox">Subscribe to topic</label>
                     </td>
                 </tr>
-{% if can.create_poll %}
+{% if viewer.permitted('forums_polls_create') %}
                 <tr>
                     <td colspan="2" class="center">
                         <strong>Poll Settings</strong>
@@ -93,7 +94,7 @@
 {% endif %}
             </table>
             <div id="subscribediv" class="hidden">
-                <input id="subscribeboxpreview" type="checkbox" name="subscribe"{{ checked(is_subbed) }} />
+                <input id="subscribeboxpreview" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} />
                 <label for="subscribebox">Subscribe to topic</label>
             </div>
             <div id="buttons" class="center">
@@ -104,3 +105,4 @@
         </form>
     </div>
 </div>
+{{ footer() }}

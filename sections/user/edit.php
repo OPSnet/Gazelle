@@ -79,16 +79,12 @@ foreach (range(1, 4) as $level) {
     }
 }
 
-View::show_header($User->username() . " &rsaquo; Settings",
-     ['js' => 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles']
- );
-$Val = new Gazelle\Util\Validator;
-echo $Val->generateJS('userform');
 echo $Twig->render('user/setting.twig', [
     'auth'             => $Viewer->auth(),
     'avatar'           => $Avatar,
     'download_text'    => $DownloadAlt,
     'is_mod'           => $Viewer->permitted('users_mod'),
+    'js'               => (new Gazelle\Util\Validator)->generateJS('userform'),
     'lastfm_username'  => (new Gazelle\Util\LastFM)->username($UserID),
     'logged_user'      => $Viewer->id(),
     'nav_items'        => $NavItems,
@@ -151,4 +147,3 @@ echo $Twig->render('user/setting.twig', [
         ],
     ],
 ]);
-View::show_footer();

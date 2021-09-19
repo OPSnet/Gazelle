@@ -1,7 +1,9 @@
 <?php
-if (!check_perms('users_mod')) {
+
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
+
 $message = "";
 if (isset($_REQUEST['add_points'])) {
     authorize();
@@ -32,10 +34,8 @@ if (isset($_REQUEST['add_points'])) {
     }
 }
 
-View::show_header('Add tokens sitewide');
 echo $Twig->render('admin/bonus-points.twig', [
     'auth'    => $Viewer->auth(),
     'message' => $message,
     'since'   =>  date("Y-m-d", strtotime("-120 day", time())),
 ]);
-View::show_footer();

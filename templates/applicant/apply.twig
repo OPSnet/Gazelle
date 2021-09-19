@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import selected %}
+{{ header('Apply', {'js': 'apply'}) }}
 <div class="thin">
     <div class="header">
         <h3>Apply for a role at {{ constant('SITE_NAME') }}</h3>
@@ -73,4 +74,4 @@
 </form>
 {% endif %}
 </div>
-
+{{ footer() }}

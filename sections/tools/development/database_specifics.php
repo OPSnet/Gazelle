@@ -75,7 +75,6 @@ foreach ($Tables as $name => $info) {
     }
 }
 
-View::show_header('Database Specifics');
 echo $Twig->render('admin/db-table-summary.twig', [
     'graph' => [
         'data'  => $data,
@@ -84,4 +83,3 @@ echo $Twig->render('admin/db-table-summary.twig', [
     'header' => $header,
     'list'   => $Tables,
 ]);
-View::show_footer();

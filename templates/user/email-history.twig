@@ -1,3 +1,4 @@
+{{ header(user.username ~ " &rasquo; Email History") }}
 <div class="thin">
 <div class="header">
     <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Email history</h2>
@@ -63,3 +64,4 @@
 {% endfor %}
 <br />
 </div>
+{{ footer() }}

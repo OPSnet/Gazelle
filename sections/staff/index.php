@@ -3,7 +3,6 @@
 $userMan = new \Gazelle\Manager\User;
 $classList = $userMan->classList();
 
-View::show_header('Staff');
 echo $Twig->render('staff/index.twig', [
     'hidden'=> true,
     'reply' => new Gazelle\Util\Textarea('quickpost', ''),
@@ -16,4 +15,3 @@ echo $Twig->render('staff/index.twig', [
         'sysop' => $classList[SYSOP]['Level'],
     ],
 ]);
-View::show_footer();

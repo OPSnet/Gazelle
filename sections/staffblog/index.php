@@ -85,5 +85,3 @@ echo $Twig->render('staffblog/list.twig', [
     'editor' => $Viewer->permitted('admin_manage_blog'),
     'list'   => $blogMan->blogList(),
 ]);
-
-View::show_footer();

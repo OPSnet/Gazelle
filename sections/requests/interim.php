@@ -17,10 +17,8 @@ if ($action === 'unfill') {
     error(0);
 }
 
-View::show_header(ucwords($action) . ' Request');
 echo $Twig->render('request/interim.twig', [
     'auth'     => $Viewer->auth(),
     'id'       => $request->id(),
     'action'   => $action,
 ]);
-View::show_footer();

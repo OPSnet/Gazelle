@@ -1,3 +1,4 @@
+{{ header("Manage artist collage " ~ collage.name, {'js': 'jquery-ui,jquery.tablesorter,sort'}) }}
 <div class="thin">
     <div class="header">
         <h2>Manage collage <a href="collages.php?id={{ collage.id }}">{{ collage.name }}</a></h2>
@@ -68,3 +69,4 @@
         </div>
     </form>
 </div>
+{{ footer() }}

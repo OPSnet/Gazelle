@@ -1,4 +1,9 @@
 {% from 'macro/class.twig' import class_option %}
+{% if action == 'create' %}
+{{ header('Create a wiki article') }}
+{% else %}
+{{ header('Edit ' ~ article.title }}
+{% endif %}
 <div class="thin">
     <div class="box pad">
 {% if action == 'create' %}
@@ -34,3 +39,4 @@
         </form>
     </div>
 </div>
+{{ footer() }}

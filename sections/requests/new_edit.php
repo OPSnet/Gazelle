@@ -40,7 +40,7 @@ if (empty($ReturnEdit)) {
     $IsFilled = !empty($Request['TorrentID']);
     $ownRequest = $Viewer->id() == $Request['UserID'];
     $CanEdit = (!$IsFilled && $ownRequest && $VoteCount < 2)
-        || $Viewer->permittedAny(['site_edit_requests', 'site_moderate_requests']);
+        || $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests');
     if (!$CanEdit) {
         error(403);
     }
