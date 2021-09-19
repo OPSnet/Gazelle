@@ -8,10 +8,8 @@ $userMan = new Gazelle\Manager\User;
 $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($userMan->totalRatioWatchUsers());
 
-View::show_header('Ratio Watch');
 echo $Twig->render('admin/ratio-watch.twig', [
     'paginator'      => $paginator,
     'total_disabled' => $userMan->totalBannedForRatio(),
     'users'          => $userMan->ratioWatchUsers($paginator->limit(), $paginator->offset()),
 ]);
-View::show_footer();

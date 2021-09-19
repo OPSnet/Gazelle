@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_manage_ipbans')) {
+if (!$Viewer->permitted('admin_manage_ipbans')) {
     error(403);
 }
 $IPv4Man = new \Gazelle\Manager\IPv4;
@@ -50,7 +50,6 @@ if (!empty($_REQUEST['ip']) && preg_match(IP_REGEXP, $_REQUEST['ip'])) {
 $paginator = new Gazelle\Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($IPv4Man->total());
 
-View::show_header('IP Address Bans');
 echo $Twig->render('admin/ipaddr-bans.twig', [
     'ip'        => $_REQUEST['ip'] ?? '',
     'notes'     => $_REQUEST['notes'] ?? '',
@@ -59,4 +58,3 @@ echo $Twig->render('admin/ipaddr-bans.twig', [
     'paginator' => $paginator,
     'viewer'    => $Viewer,
 ]);
-View::show_footer();

@@ -1,3 +1,6 @@
+{{ header(user.username ~ " &rsaquo; Settings",
+     {'js': 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles'}) }}
+{{ js|raw }}
 <div class="thin">
     <div class="header">
         <h2>{{ user.id|user_url }} &rsaquo; Settings</h2>
@@ -68,3 +71,4 @@
     </div>
     </form>
 </div>
+{{ footer() }}

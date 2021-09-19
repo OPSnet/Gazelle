@@ -154,4 +154,3 @@ switch ($uploadCategory) {
         $uploadForm->music_form($GenreTags);
 }
 $uploadForm->foot();
-View::show_footer();

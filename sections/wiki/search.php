@@ -28,7 +28,6 @@ $search->setOrderBy($header->getOrderBy())->setOrderDir($header->getOrderDir());
 $paginator = new Gazelle\Util\Paginator(WIKI_ARTICLES_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());
 
-View::show_header('Search articles');
 echo $Twig->render('wiki/search.twig', [
     'header'    => $header,
     'paginator' => $paginator,
@@ -39,4 +38,3 @@ echo $Twig->render('wiki/search.twig', [
     'sort'      => $_GET['sort'] ?? 'title',
     'type'      => $Type,
 ]);
-View::show_footer();

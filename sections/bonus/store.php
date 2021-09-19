@@ -21,7 +21,7 @@ View::show_header('Bonus Points Shop', ['js' => 'bonus']);
     <a href="wiki.php?action=article&amp;name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php?action=bprates" class="brackets">Bonus Point Rates</a>
     <a href="bonus.php?action=history" class="brackets">History</a>
-<?php if (check_perms('admin_bp_history')) { ?>
+<?php if ($Viewer->permitted('admin_bp_history')) { ?>
     <a href="bonus.php?action=cacheflush" title="Trigger price recalculation after changing 'bonus-discount' site option" class="brackets">Cache flush</a>
 <?php } ?>
 </div>
@@ -58,7 +58,7 @@ if ($pool) {
 }
 
 echo $Twig->render('bonus/store.twig', [
-    'admin'    => check_perms('admin_bp_history'),
+    'admin'    => $Viewer->permitted('admin_bp_history'),
     'auth'     => $auth,
     'class'    => $Viewer->classLevel(),
     'discount' => $Bonus->discount(),
@@ -66,5 +66,3 @@ echo $Twig->render('bonus/store.twig', [
     'points'   => $points,
     'user_id'  => $Viewer->id(),
 ]);
-
-View::show_footer();

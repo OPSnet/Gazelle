@@ -1,3 +1,4 @@
+{{ header('Special Users List') }}
 <div class="thin">
 {% if list is empty %}
     <h2 align="center">There are no users with custom permissions.</h2>
@@ -24,4 +25,4 @@
     </table>
 {% endif %}
 </div>
-<br />
+{{ footer() }}

@@ -1,3 +1,12 @@
+{{ header('Privilege Matrix') }}
+<div class="thin">
+<div class="header">
+    <div class="linkbox">
+        <a href="tools.php?action=permissions&amp;id=new" class="brackets">Create a new permission set</a>
+        <a href="tools.php?action=permissions" class="brackets">Privilege Manager</a>
+        <a href="tools.php" class="brackets">Back to tools</a>
+    </div>
+</div>
 <table width="100%">
     <tr class="colhead">
         <td rowspan="2" style="vertical-align: bottom">Primary Class {{ star|raw }} <br /><br />Privilege</td>
@@ -28,3 +37,6 @@
 red</span> are orphaned privileges that were found in the database
 (in the <tt>permissions.Values</tt> column) but no longer connected to anything
 in the code. They should be cleaned out by hand.</div>
+
+</div>
+{{ footer() }}

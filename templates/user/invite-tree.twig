@@ -1,3 +1,4 @@
+{{ header(user.username ~ ' &rsaquo; Invites &rsaquo; Tree') }}
 <div class="thin">
     <div class="header">
         <h2>{{ user.id|user_url|raw }} &rsaquo; <a href="user.php?action=invite&amp;userid={{ user.id }}">Invites</a> &rsaquo; Tree</h2>
@@ -53,3 +54,4 @@ and {{ info.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and d
         </div>
     </div>
 </div>
+{{ footer() }}

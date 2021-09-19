@@ -2,7 +2,7 @@
 
 use Gazelle\Util\Textarea;
 
-if (!check_perms('admin_manage_applicants')) {
+if (!$Viewer->permitted('admin_manage_applicants')) {
     error(403);
 }
 
@@ -43,7 +43,6 @@ if (isset($_POST['auth'])) {
     }
 }
 
-View::show_header('Applicant administration');
 echo $Twig->render('applicant/admin.twig', [
     'auth'     => $Viewer->auth(),
     'edit_id'  => $editId,
@@ -53,4 +52,3 @@ echo $Twig->render('applicant/admin.twig', [
     'text'     => new Textarea('description', $editId ? $appRole->description() : ''),
     'user_id'  => $Viewer->id(),
 ]);
-View::show_footer();
