@@ -698,8 +698,8 @@ $torrentFiler->put($bencoder->getEncode(), $TorrentID);
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
 // Running total for amount of BP to give
-$bonusMan = new Gazelle\Manager\Bonus;
-$BonusPoints = $bonusMan->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
+$bonus = new Gazelle\Bonus($Viewer);
+$BonusPoints = $bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
     $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
 
 //******************************************************************************//
@@ -747,7 +747,7 @@ $Debug->set_flag('upload: announced on irc');
 //--------------- Upload Extra torrents ----------------------------------------//
 
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-    $BonusPoints += $bonusMan->getTorrentValue($ExtraTorrent['Format'], $Properties['Media'], $ExtraTorrent['Encoding']);
+    $BonusPoints += $bonus->getTorrentValue($ExtraTorrent['Format'], $Properties['Media'], $ExtraTorrent['Encoding']);
 
     $DB->prepared_query("
         INSERT INTO torrents
