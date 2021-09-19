@@ -40,7 +40,6 @@ $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedC
 
 View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
 ?>
-<div class="thin">
     <div class="header">
         <h2><?= $tgroup->displayNameHtml() ?></h2>
         <div class="linkbox">
@@ -895,6 +894,5 @@ echo $Twig->render('reply.twig', [
 ]);
 ?>
     </div>
-</div>
 <?php
 View::show_footer();
