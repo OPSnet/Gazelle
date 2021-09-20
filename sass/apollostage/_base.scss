@@ -22,6 +22,11 @@ textarea:focus {
   overflow: hidden;
 }
 
+.sidebar {
+  flex: 1;
+  width: 250px;
+}
+
 .clear::after,
 .profileinfo::before {
   content: '';
@@ -431,10 +436,6 @@ strong.important_text_alt {
   flex: 3;
 }
 
-.sidebar {
-  flex: 1;
-}
-
 .box,
 .box2 {
   background-color: $form-background-color;
@@ -506,9 +507,12 @@ table.box2 {
   width: auto;
 }
 
-.forum_post .body img,
-.sidebar img {
+.forum_post .body img {
   max-width: 100%;
+}
+
+.sidebar img {
+  width: 200px;
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
@@ -861,11 +865,6 @@ table.box2 {
 .sidebar ol.nobullet,
 .sidebar ul.nobullet {
   padding-left: 0;
-}
-
-.sidebar img {
-  height: auto;
-  width: auto;
 }
 
 #covers .pad,
@@ -1643,9 +1642,6 @@ blockquote {
   background: $secondary-table-background-color;
 }
 
-.sidebar {
-  order: 5;
-}
 .thin:last-child {
   display: flex;
   flex-wrap: wrap;
