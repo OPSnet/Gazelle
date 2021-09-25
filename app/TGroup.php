@@ -112,7 +112,7 @@ class TGroup extends BaseObject {
         if (!$revisionId) {
             $cached = $this->cache->get_value($key);
             if (is_array($cached)) {
-                if (!$cached['Image']) {
+                if (!isset($cached['Image'])) {
                     $cached['Image'] = $this->showFallbackImage
                         ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])
                         : null;
@@ -287,7 +287,7 @@ class TGroup extends BaseObject {
     }
 
     public function description(): string {
-        return $this->info()['Body'];
+        return $this->info()['Body'] ?? '';
     }
 
     public function hasNoCoverArt(): bool {
