@@ -39,7 +39,6 @@ Since this is a new installation, you can log in directly without having to conf
     }
 }
 ?>
-</div>
 </form>
 </div>
 </div>
