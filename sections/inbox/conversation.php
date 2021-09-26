@@ -1,139 +1,65 @@
 <?php
 
-use Gazelle\Inbox;
-
-$ConvID = (int)$_GET['id'];
-if (!$ConvID) {
+$pm = (new Gazelle\Manager\PM($Viewer))->findById((int)$_GET['id']);
+if (is_null($pm)) {
     error(404);
 }
+$pm->markRead();
+$postTotal = $pm->postTotal();
 
-$UserID = $Viewer->id();
-[$InInbox, $InSentbox] = $DB->row("
-    SELECT InInbox, InSentbox
-    FROM pm_conversations_users
-    WHERE UserID = ?
-        AND ConvID = ?
-    ", $UserID, $ConvID
-);
-if (is_null($InInbox)) {
-    error(403);
-}
+$inbox = new Gazelle\Inbox($Viewer);
+$inbox->setFolder($_GET['section'] ?? 'inbox');
 
-if (!$InInbox && !$InSentbox) {
-    error(404);
-}
+$paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? ceil($postTotal / POSTS_PER_PAGE)));
+$paginator->setTotal($postTotal);
 
-// Get information on the conversation
-[$Subject, $Sticky, $UnRead, $ForwardedID] = $DB->row("
-    SELECT
-        c.Subject,
-        cu.Sticky,
-        cu.UnRead,
-        cu.ForwardedTo
-    FROM pm_conversations AS c
-    INNER JOIN pm_conversations_users AS cu ON (c.ID = cu.ConvID)
-    WHERE cu.UserID = ?
-        AND cu.ConvID = ?
-    ", $UserID, $ConvID
-);
+$postList = $pm->postList($paginator->limit(), $paginator->offset());
+$senderList = $pm->senderList();
+$recipientList = $pm->recipientList();
+$staffPMList = (new Gazelle\Manager\User)->staffPMList();
 
-$DB->prepared_query("
-    SELECT um.ID, Username
-    FROM pm_messages AS pm
-    INNER JOIN users_main AS um ON (um.ID = pm.SenderID)
-    WHERE pm.ConvID = ?
-    ", $ConvID
-);
-$ConverstionParticipants = $DB->to_array();
-
-$Users = [
-    0 => ['UserStr' => 'System', 'Username' => 'System'],
-];
-foreach ($ConverstionParticipants as $Participant) {
-    $PMUserID = (int)$Participant['ID'];
-    $Users[$PMUserID] = [
-        'UserStr' => Users::format_username($PMUserID, true, true, true, true),
-        'Username' => $Participant['Username'],
-    ];
-}
-
-if ($UnRead == '1') {
-    $DB->prepared_query("
-        UPDATE pm_conversations_users SET
-            UnRead = '0'
-        WHERE UnRead = '1'
-            AND UserID = ?
-            AND ConvID = ?
-        ", $UserID, $ConvID
-    );
-    // Clear the caches of the inbox and sentbox
-    if ($DB->affected_rows() > 0) {
-        $Cache->decrement("inbox_new_$UserID");
-    }
-}
-
-// Get messages
-$DB->prepared_query("
-    SELECT SentDate, SenderID, Body, ID
-    FROM pm_messages
-    WHERE ConvID = ?
-    ORDER BY ID
-    ",$ConvID
-);
-$conversation = $DB->to_array(false, MYSQLI_NUM, false);
-
-$Section = (isset($_GET['section']) && in_array($_GET['section'], array_keys(Inbox::SECTIONS)))
-    ? $_GET['section']
-    : key(Inbox::SECTIONS);
-$Sort = (isset($_GET['sort']) && $_GET['sort'] == 'unread') ? Inbox::UNREAD_FIRST : Inbox::NEWEST_FIRST;
-
-$DB->prepared_query("
-    SELECT UserID
-    FROM pm_conversations_users
-    WHERE ForwardedTo IN (0, UserID)
-        AND UserID != ?
-        AND ConvID = ?
-    ", $UserID, $ConvID
-);
-$ReceiverIDs = $DB->collect('UserID');
-
-View::show_header("View conversation $Subject", ['js' => 'comments,inbox,bbcode,jquery.validate,form_validate']);
+View::show_header("View conversation " . $pm->subject(), ['js' => 'comments,inbox,bbcode,jquery.validate,form_validate']);
 ?>
 <div class="thin">
-    <h2><?=$Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : '')?></h2>
+    <h2><?= $pm->subject() . ($pm->forwardedTo() ? (" (Forwarded to " . $pm->forwardedTo()->username() . ")") : '') ?></h2>
     <div class="linkbox">
-        <a href="<?= Inbox::getLinkQuick($Section, $Sort); ?>" class="brackets">
-            Back to <?= $Section ?>
+        <a href="<?= $inbox->folderLink($inbox->folder(), $inbox->showUnreadFirst()) ?>" class="brackets">
+            Return to <?= $inbox->folder() ?>
         </a>
     </div>
+<?= $paginator->linkbox(); ?>
 
-<?php foreach ($conversation as list($SentDate, $SenderID, $Body, $MessageID)) { ?>
+<?php foreach ($postList as $post) { ?>
     <div class="box vertical_space">
         <div class="head" style="overflow: hidden;">
             <div style="float: left;">
-                <strong><?=$Users[(int)$SenderID]['UserStr']?></strong> <?=time_diff($SentDate)?>
-<?php if ($SenderID > 0) { ?>
-                    - <a href="#quickpost" onclick="Quote('<?=$MessageID?>','<?=$Users[(int)$SenderID]['Username']?>');" class="brackets">Quote</a>
+                <strong>
+<?php if (!isset($senderList[$post['sender_id']])) { ?>
+                System</strong> <?=time_diff($post['sent_date'])?>
+<?php } else { ?>
+                <?= $senderList[$post['sender_id']]->username() ?></strong> <?=time_diff($post['sent_date'])?>
+                    - <a href="#quickpost" onclick="Quote('<?= $post['id'] ?>','<?= $senderList[$post['sender_id']]->username() ?>');" class="brackets">Quote</a>
 <?php } ?>
             </div>
             <div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
         </div>
-        <div class="body" id="message<?=$MessageID?>">
-            <?=Text::full_format($Body)?>
+        <div class="body" id="message<?= $post['id'] ?>">
+            <?= Text::full_format($post['body']) ?>
         </div>
     </div>
 <?php
 }
+echo $paginator->linkbox();
 
-if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverIDs, array_keys($StaffIDs)))) {
+if ($recipientList) {
 ?>
     <h3>Reply</h3>
     <form class="send_form" name="reply" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose" />
             <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-            <input type="hidden" name="toid" value="<?=implode(',', $ReceiverIDs)?>" />
-            <input type="hidden" name="convid" value="<?=$ConvID?>" />
+            <input type="hidden" name="toid" value="<?=implode(',', $recipientList)?>" />
+            <input type="hidden" name="convid" value="<?= $pm->id() ?>" />
             <textarea id="quickpost" class="required" name="body" cols="90" rows="10" onkeyup="resize('quickpost');"></textarea> <br />
             <div id="preview" class="box vertical_space body hidden"></div>
             <div id="buttons" class="center">
@@ -147,14 +73,14 @@ if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverI
     <form class="manage_form" name="messages" action="inbox.php" method="post">
         <div class="box pad">
             <input type="hidden" name="action" value="takeedit" />
-            <input type="hidden" name="convid" value="<?=$ConvID?>" />
+            <input type="hidden" name="convid" value="<?= $pm->id() ?>" />
             <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
 
             <table class="layout" width="100%">
                 <tr>
-                    <td class="label"><label for="sticky">Sticky</label></td>
+                    <td class="label"><label for="pin">Pinned</label></td>
                     <td>
-                        <input type="checkbox" id="sticky" name="sticky"<?php if ($Sticky) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" id="pin" name="pin"<?php if ($pm->isPinned()) { echo ' checked="checked"'; } ?> />
                     </td>
                     <td class="label"><label for="mark_unread">Mark as unread</label></td>
                     <td>
@@ -171,18 +97,18 @@ if (!empty($ReceiverIDs) && (!$Viewer->disablePm() || array_intersect($ReceiverI
             </table>
         </div>
     </form>
-<?php if (($Viewer->permitted('users_mod') || $Viewer->isFLS()) && (!$ForwardedID || $ForwardedID == $UserID)) { ?>
+<?php if ($Viewer->isStaffPMReader() && (!$pm->forwardedTo() || $pm->forwardedTo()->id() == $Viewer->id())) { ?>
     <h3>Forward conversation</h3>
     <form class="send_form" name="forward" action="inbox.php" method="post">
         <div class="box pad">
             <input type="hidden" name="action" value="forward" />
-            <input type="hidden" name="convid" value="<?=$ConvID?>" />
+            <input type="hidden" name="convid" value="<?= $pm->id() ?>" />
             <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <label for="receiverid">Forward to</label>
             <select id="receiverid" name="receiverid">
 <?php
-    foreach ($StaffIDs as $StaffID => $StaffName) {
-        if ($StaffID == $Viewer->id() || in_array($StaffID, $ReceiverIDs)) {
+    foreach ($staffPMList as $StaffID => $StaffName) {
+        if ($StaffID == $Viewer->id() || in_array($StaffID, $recipientList)) {
             continue;
         }
 ?>

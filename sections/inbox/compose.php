@@ -6,12 +6,12 @@ $recipient = (new Gazelle\Manager\User)->findById((int)$_GET['toid']);
 if (is_null($recipient)) {
     error(404);
 }
-if ($Viewer->disablePm() && !isset($StaffIDs[$recipient->id()])) {
+if ($Viewer->disablePm() && !$recipient->isStaff()) {
     error(403);
 }
-if (empty($Return) && $recipient->id() == $Viewer->id()) {
+if (!isset($Return) && $recipient->id() == $Viewer->id()) {
     error('You cannot start a conversation with yourself!');
-    header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
+    header('Location: inbox.php');
 }
 
 echo $Twig->render('inbox/compose.twig', [

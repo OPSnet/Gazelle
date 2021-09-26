@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Inbox;
-
 authorize();
 
 $UserID = $Viewer->id();
@@ -35,7 +33,7 @@ if (isset($_POST['delete'])) {
             Sticky = ?
         WHERE UserID = ?
             AND ConvID = ?
-        ", isset($_POST['sticky']) ? '1' : '0', $UserID, $ConvID
+        ", isset($_POST['pin']) ? '1' : '0', $UserID, $ConvID
     );
     if (isset($_POST['mark_unread'])) {
         $DB->prepared_query("
@@ -51,4 +49,4 @@ if (isset($_POST['delete'])) {
         }
     }
 }
-header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
+header("Location: inbox.php");
