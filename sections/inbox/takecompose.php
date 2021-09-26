@@ -1,62 +1,38 @@
 <?php
 
-use Gazelle\Inbox;
-
 authorize();
 
-if (empty($_POST['toid'])) {
+$recipient = (new Gazelle\Manager\User)->findById((int)$_POST['toid']);
+if (is_null($recipient)) {
     error(404);
 }
-
-if ($Viewer->option('DisablePM') && !isset($StaffIDs[$_POST['toid']])) {
+if ($Viewer->option('DisablePM') && !$recipient->isStaffPMReader()) {
     error(403);
 }
 
-$ConvID = (int)($_POST['convid'] ?? 0);
-if (!$ConvID) {
-    // A new conversation
-    $Subject = trim($_POST['subject']);
-    if (empty($Subject)) {
-        $Err = 'You cannot send a message without a subject.';
-    }
-} else {
-    // A reply to an ongoing conversation
-    $Subject = '';
-    if (!$DB->scalar("
-        SELECT UserID
-        FROM pm_conversations_users
-        WHERE UserID = ?
-            AND ConvID = ?
-            ", $Viewer->id(), $ConvID
-    )) {
-        error(403);
-    }
+$body = trim($_POST['body'] ?? '');
+if ($body === '') {
+    error('You cannot send a message without a body.');
 }
-$ToID = $DB->scalar("
-    SELECT ID
-    FROM users_main
-    WHERE ID = ?
-    ", (int)$_POST['toid']
+
+$userMan = new Gazelle\Manager\User;
+$pmMan = new Gazelle\Manager\PM($Viewer);
+$pm = $pmMan->findById((int)$_POST['convid']);
+if ($pm) {
+    $userMan->replyPM($recipient->id(), $Viewer->id(), $pm->subject(), $body, $pm->id());
+} else {
+    $subject = trim($_POST['subject']);
+    if (empty($subject)) {
+        error('You cannot send a message without a subject.');
+    }
+    $userMan->sendPM($recipient->id(), $Viewer->id(), $subject, $body);
+}
+
+(new Gazelle\Manager\Notification)->push($recipient->id(),
+    "Message from " . $Viewer->username() . ", Subject: $subject",
+    $body,
+    SITE_URL . '/inbox.php',
+    Gazelle\Manager\Notification::INBOX
 );
-if (!$ToID) {
-    $Err = 'Recipient does not exist.';
-}
 
-$Body = trim($_POST['body']);
-if ($Body === '' || $Body === false) {
-    $Err = 'You cannot send a message without a body.';
-}
-
-if (!empty($Err)) {
-    error($Err);
-    $Return = true;
-    require(__DIR__ . '/compose.php');
-} else {
-    $userMan = new Gazelle\Manager\User;
-    if ($ConvID) {
-        $userMan->replyPM($ToID, $Viewer->id(), $Subject, $Body, $ConvID);
-    } else {
-        $userMan->sendPM($ToID, $Viewer->id(), $Subject, $Body);
-    }
-    header('Location: ' . Inbox::getLinkQuick('inbox', $Viewer->option('ListUnreadPMsFirst') ?? false, Inbox::RAW));
-}
+header("Location: inbox.php");

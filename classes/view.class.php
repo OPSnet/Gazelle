@@ -206,7 +206,7 @@ class View {
 
             $extraClass = [];
             if ($Key === 'inbox') {
-                $Target = Gazelle\Inbox::getLinkQuick(null, $LoggedUser['ListUnreadPMsFirst'] ?? false);
+                $Target = 'inbox.php';
             } elseif ($Key === 'subscriptions') {
                 if ($hasNewSubscriptions) {
                     $extraClass[] = 'new-subscriptions';
