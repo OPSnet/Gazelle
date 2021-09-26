@@ -274,10 +274,6 @@ class TGroup extends BaseObject {
         return $roleList;
     }
 
-    public function body(): string {
-        return $this->info()['Body'];
-    }
-
     public function catalogNumber(): ?string {
         return $this->info()['CatalogNumber'];
     }
