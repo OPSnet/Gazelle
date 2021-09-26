@@ -76,7 +76,7 @@ class Torrent extends \Gazelle\Base {
 
     public function findByInfohash(string $hash) {
         $id = $this->db->scalar("
-            SELECT ID FROM torrents WHERE info_hash = UNHEX(?)
+            SELECT id FROM torrents WHERE info_hash = unhex(?)
             ", $hash
         );
         if (!$id) {
@@ -86,6 +86,7 @@ class Torrent extends \Gazelle\Base {
         if (isset($this->viewerId)) {
             $torrent->setViewerId($this->viewerId);
         }
+        return $torrent;
     }
 
     /**
