@@ -14,7 +14,7 @@
         </tr>
     {% endif %}
         <tr>
-            <td><a href="staffpm.php?action=viewconv&amp;id={{ pm.id }}">{{ pm.subject }}</a></td>
+            <td><a href="staffpm.php?action=viewconv&amp;id={{ pm.pm_id }}">{{ pm.subject }}</a></td>
             <td>{{ pm.date|time_diff(2) }}</td>
             <td>{% if assigned_to_user %}{{ pm.user_id|user_url }}{% else %}{{ pm.reader }}{% endif %}</td>
             <td>{{ pm.replies }}</td>
