@@ -1,0 +1,99 @@
+{% from 'macro/form.twig' import checked -%}
+{{ header('Inbox') }}
+<div class="thin">
+    <h2>{{ inbox.title }}</h2>
+    <div class="linkbox">
+{% for folder in inbox.folderList %}
+    {% if folder != inbox.folder %}
+        <a href="{{ inbox.folderLink(folder, inbox.showUnreadFirst) }}" class="brackets">{{ inbox.foldertitle(folder) }}</a>
+    {% endif %}
+{% endfor %}
+    </div>
+    <div class="box pad">
+{% if not messageList and not inbox.searchTerm %}
+    <h2>Your {{ inbox.folder }} is empty.</h2>
+{% else %}
+    <form class="search_form" name="{{ inbox.folder }}" action="inbox.php" method="get" id="searchbox">
+        <div>
+            <input type="hidden" name="section" value="{{ inbox.folder }}" />
+            <label><input type="radio" name="searchtype" value="user"{{ checked(inbox.searchField == 'user') }} /> User</label>
+            <label><input type="radio" name="searchtype" value="subject"{{ checked(inbox.searchField == 'subject') }} /> Subject</label>
+            <label><input type="radio" name="searchtype" value="message"{{ checked(inbox.searchField == 'message') }} /> Message</label>
+            <input type="search" name="search" placeholder="{{ inbox.searchField|default('Search in ' ~ inbox.folder) }}" style="width: 98%;" />
+        </div>
+    </form><br />
+    <form class="manage_form" name="messages" action="inbox.php" method="post" id="messageform">
+        <input type="hidden" name="action" value="masschange" />
+        <input type="hidden" name="section" value="{{ inbox.folder }}" />
+        <input type="hidden" name="sort" value="{{ inbox.showUnreadFirst }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="submit" name="read" value="Mark as read" />&nbsp;
+        <input type="submit" name="unread" value="Mark as unread" />&nbsp;
+        <input type="submit" name="pin" value="Pin/Unpin message(s)" title="Unpin message are pinned, pin messages are unpinned" />&nbsp;
+        <input type="submit" name="delete" value="Delete message(s)" />
+        <span style="float: right;">
+    {% if filter in ['user', 'system'] %}
+            {# FIXME: using setFilter is not idempotent, need a better technique #}
+            <a href="{{ inbox.setFilter('all').folderLink(inbox.folder, inbox.showUnreadFirst) }}" class="brackets">All PMs</a>
+        {% if filter == 'system' %}                
+            <a href="{{ inbox.setFilter('user').folderLink(inbox.folder, inbox.showUnreadFirst) }}" class="brackets">Hide notifications</a>
+        {% else %}
+            <a href="{{ inbox.setFilter('system').folderLink(inbox.folder, inbox.showUnreadFirst) }}" class="brackets">Notifications only</a>
+        {% endif %}
+    {% else %}
+            <a href="{{ inbox.folderLink(inbox.folder, inbox.showUnreadFirst) }}&amp;filter=system" class="brackets">Notifications only</a>
+            <a href="{{ inbox.folderLink(inbox.folder, inbox.showUnreadFirst) }}&amp;filter=user" class="brackets">Hide notifications</a>
+    {% endif %}
+            <a href="{{ inbox.folderLink(inbox.folder, not inbox.showUnreadFirst)
+            }}" class="brackets tooltip" title="Temporary toggle switch for sorting PMs. To permanently change the sorting behavior, edit the setting in your profile.">List
+            {% if inbox.showUnreadFirst %}latest{% else %}unread{% endif %} first</a>
+        </span>
+
+    {{ paginator.linkbox|raw }}
+
+        <table class="message_table checkboxes">
+            <tr class="colhead">
+                <td width="10"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
+                <td width="50%">Subject</td>
+                <td>{% if inbox.folder == 'sentbox' %}Receiver{% else  %}Sender{% endif %}</td>
+                <td>Date</td>
+    {% if viewer.permitted('users_mod') %}
+                <td>Forwarded to</td>
+    {% endif %}
+            </tr>
+    {% for pm in messageList %}
+            <tr class="{% if pm.isUnread %}unreadpm{% else %}{{ cycle(['a', 'b'], loop.index0) }}{% endif %}">
+                <td class="center"><input type="checkbox" name="messages[]" value="{{ pm.id }}" /></td>
+                <td>
+        {% if pm.isRead %}<strong>{% endif %}
+        {% if pm.isPinned %}<span title="Pinned">&#x1f4cc; </span>{% endif %}
+        <a href="inbox.php?action=viewconv&amp;id={{ pm.id -}}
+            {%- if inbox.folder != 'inbox' %}&amp;section={{ inbox.folder }}{% endif -%}
+            {%- if inbox.showUnreadFirst %}&amp;sort=unread{% else %}&amp;sort=latest{% endif -%}">
+        {{- pm.subject }}</a>
+        {% if pm.isRead %}</strong>{% endif %}
+                </td>
+                <td>{{ pm.senderId|user_full }}</td>
+                <td class="nobr">{{ pm.sentDate|time_diff }}</td>
+        {% if viewer.permitted('users_mod') %}
+                <td>
+            {% if pm.forwardedTo and pm.forwardedTo.id != viewer.id %}{{ pm.forwardedTo.id|user_url }}{% endif %}
+                </td>
+        {% endif %}
+            </tr>
+    {% else %}
+            <tr class="a">
+                <td colspan="5">No results.</td>
+            </tr>
+    {% endfor %}
+        </table>
+        <input type="submit" name="read" value="Mark as read" />&nbsp;
+        <input type="submit" name="unread" value="Mark as unread" />&nbsp;
+        <input type="submit" name="pin" value="Pin/Unpin message(s)" title="Unpin message are pinned, pin messages are unpinned" />&nbsp;
+        <input type="submit" name="delete" value="Delete message(s)" />
+    </form>
+{% endif %}
+</div>
+{{ paginator.linkbox|raw }}
+</div>
+{{ footer() }}

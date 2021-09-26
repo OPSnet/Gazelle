@@ -182,9 +182,10 @@ class Cache extends \Memcached {
         if (empty($Key)) {
             trigger_error('Cache deletion failed for empty key');
         }
-        $this->delete($Key);
+        $ret = $this->delete($Key);
         unset($this->CacheHits[$Key]);
         $this->Time += (microtime(true) - $StartTime) * 1000;
+        return $ret;
     }
 
     public function increment_value($Key, $Value = 1) {

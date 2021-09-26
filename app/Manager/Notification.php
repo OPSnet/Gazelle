@@ -313,9 +313,7 @@ class Notification extends \Gazelle\Base {
     public function loadInbox() {
         $count = $this->user->inboxUnreadCount();
         if ($count > 0) {
-            $this->create(self::INBOX, 'You have ' . article($count) . ' new message' . plural($count),
-                Inbox::getLinkQuick('inbox', $this->user->option('ListUnreadPMsFirst')), self::INFO
-            );
+            $this->create(self::INBOX, 'You have ' . article($count) . ' new message' . plural($count), "inbox.php", self::INFO);
         }
     }
 
