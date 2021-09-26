@@ -4,6 +4,8 @@ namespace Gazelle\Manager;
 
 class User extends \Gazelle\Base {
 
+    protected const CACHE_STAFF = 'pm_staff_list';
+
     public const DISABLE_MANUAL     = 1;
     public const DISABLE_INACTIVITY = 3;
     public const DISABLE_TREEBAN    = 4;
@@ -95,6 +97,22 @@ class User extends \Gazelle\Base {
             ", $key
         );
         return $userId ? new \Gazelle\User($userId) : null;
+    }
+
+    public function staffPMList(): array {
+        $list = $this->cache->get_value(self::CACHE_STAFF);
+        if ($list === false) {
+            $this->db->prepared_query("
+                SELECT um.ID, um.Username
+                FROM users_main AS um
+                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+                WHERE p.DisplayStaff = '1'
+                ORDER BY um.Username
+            ");
+            $list = $this->db->to_pair('ID', 'Username', false);
+            $this->cache->cache_value(self::CACHE_STAFF, $list, 86400);
+        }
+        return $list;
     }
 
     /**
@@ -546,7 +564,6 @@ class User extends \Gazelle\Base {
 
         $qid = $this->db->get_query_id();
         $this->db->begin_transaction();
-
         $this->db->prepared_query("
             INSERT INTO pm_conversations (Subject) VALUES (?)
             ", $subject
@@ -631,7 +648,7 @@ class User extends \Gazelle\Base {
                 ", $toId
             )
         );
-
+        $this->cache->deleteMulti(["pm_{$convId}_{$fromId}", "pm_{$convId}_{$toId}"]);
         $senderName = $this->db->scalar("
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId
