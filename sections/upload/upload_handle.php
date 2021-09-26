@@ -336,7 +336,7 @@ $UnsourcedTorrent = $torMan->setSourceFlag($bencoder);
 $InfoHash = $bencoder->getHexInfoHash();
 $TorData = $bencoder->getData();
 
-$torrent = $torMan->findByInfohash($InfoHash);
+$torrent = $torMan->findByInfohash(bin2hex($InfoHash));
 if ($torrent) {
     $torrentId = $torrent->id();
     if ($torrentFiler->exists($torrentId)) {
@@ -460,7 +460,7 @@ if ($isMusicUpload) {
         $ThisInsert['TotalSize'] = $ExtraTotalSize;
 
         $Debug->set_flag('upload: torrent decoded');
-        $torrent = $torMan->findByInfohash($ThisInsert['InfoHash']);
+        $torrent = $torMan->findByInfohash(bin2hex($ThisInsert['InfoHash']));
         if ($torrent) {
             $torrentId = $torrent->id();
             if ($torrentFiler->exists($torrentId)) {
