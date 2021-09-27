@@ -291,29 +291,21 @@ if (isset($_GET['year'])) {
     }
 }
 
-if ($OrderBy !== 'random' && isset($_GET['page']) && intval($_GET['page']) && $_GET['page'] > 0) {
-    $Page = $_GET['page'];
-    $Offset = ($Page - 1) * REQUESTS_PER_PAGE;
-    $SphQL->limit($Offset, REQUESTS_PER_PAGE, $Offset + REQUESTS_PER_PAGE);
-} else {
-    $Page = 1;
+$paginator = new Gazelle\Util\Paginator(REQUESTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+if ($OrderBy === 'random') {
     $SphQL->limit(0, REQUESTS_PER_PAGE, REQUESTS_PER_PAGE);
+} else {
+    $Offset = ($paginator->page() - 1) * REQUESTS_PER_PAGE;
+    $SphQL->limit($Offset, REQUESTS_PER_PAGE, $Offset + REQUESTS_PER_PAGE);
 }
 
 $SphQLResult = $SphQL->sphinxquery();
 $NumResults = (int)$SphQLResult->get_meta('total_found');
+
 if ($NumResults > 0) {
     $SphRequests = $SphQLResult->to_array('id');
-    if ($OrderBy === 'random') {
-        $NumResults = count($SphRequests);
-    }
-    if ($NumResults > REQUESTS_PER_PAGE) {
-        if (($Page - 1) * REQUESTS_PER_PAGE > $NumResults) {
-            $Page = 0;
-        }
-        $PageLinks = Format::get_pages($Page, $NumResults, REQUESTS_PER_PAGE);
-    }
 }
+$paginator->setTotal($NumResults);
 
 $CurrentURL = Format::get_url(['order', 'sort', 'page']);
 View::show_header($Title, ['js' => 'requests']);
@@ -500,11 +492,7 @@ View::show_header($Title, ['js' => 'requests']);
             </tr>
         </table>
     </form>
-<?php        if (isset($PageLinks)) { ?>
-    <div class="linkbox">
-        <?= $PageLinks ?>
-    </div>
-<?php        } ?>
+<?= $paginator->linkbox() ?>
     <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
         <tr class="colhead_dark">
             <td style="width: 38%;" class="m_th_left nobr">
@@ -541,7 +529,7 @@ View::show_header($Title, ['js' => 'requests']);
                 Nothing found!
             </td>
         </tr>
-<?php        } elseif ($Page === 0) { ?>
+<?php        } elseif ($paginator->total() == 0) { ?>
         <tr class="rowb">
             <td colspan="8">
                 The requested page contains no matches!
@@ -633,11 +621,7 @@ View::show_header($Title, ['js' => 'requests']);
     } // if ($BookmarkView && $NumResults < 1)
 ?>
     </table>
-<?php if (isset($PageLinks)) { ?>
-    <div class="linkbox">
-        <?=$PageLinks?>
-    </div>
-<?php } ?>
+<?= $paginator->linkbox() ?>
 </div>
 <?php
 View::show_footer();
