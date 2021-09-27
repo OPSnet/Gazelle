@@ -3,11 +3,7 @@
 $ArtistID = (int)($_GET['id'] ?? 0);
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 $artistMan = new Gazelle\Manager\Artist;
-if ($RevisionID) {
-    $Artist = $artistMan->findByIdAndRevision($ArtistID, $RevisionID);
-} else {
-    $Artist = $artistMan->findById($ArtistID);
-}
+$Artist = $artistMan->findById($ArtistID, $RevisionID);
 if (is_null($Artist)) {
     error(404);
 }
@@ -696,6 +692,7 @@ echo $Twig->render('reply.twig', [
 ?>
         </div>
     </div>
+</div>
 </div>
 <?php
 View::show_footer();
