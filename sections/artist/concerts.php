@@ -2,7 +2,7 @@
 $Concerts = '';
 ob_start();
 
-$ArtistEvents = (new Gazelle\Util\LastFM)->artistEventList($ArtistID, $Name);
+$ArtistEvents = (new Gazelle\Util\LastFM)->artistEventList($ArtistID, $name);
 $Hidden = false;
 if ($ArtistEvents === false) { // Something went wrong
     echo '<br />An error occurred when retrieving concert info.<br />';
@@ -16,7 +16,7 @@ if ($ArtistEvents === false) { // Something went wrong
             make_concert_link($Event);
         }
     } else { // Single event
-        make_concert_link($ArtistEvents['events']['event'], $Name);
+        make_concert_link($ArtistEvents['events']['event'], $name);
     }
     echo '</ul>';
 }
