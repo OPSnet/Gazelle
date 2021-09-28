@@ -24,16 +24,14 @@ switch ($_REQUEST['action'] ?? '') {
     case 'search':// User search
         if ($Viewer->permitted('admin_advanced_user_search') && $Viewer->permitted('users_view_ips') && $Viewer->permitted('users_view_email')) {
             require_once('advancedsearch.php');
-        }
-        else {
+        } else {
             require_once('search.php');
         }
         break;
     case 'edit':
         if (isset($_REQUEST['userid'])) {
             require_once('edit.php');
-        }
-        else {
+        } else {
             header("Location: user.php?action=edit&userid=" . $Viewer->id());
         }
         break;

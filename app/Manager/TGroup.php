@@ -4,17 +4,26 @@ namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\Base {
 
+    protected const ID_KEY = 'zz_tg_%d';
+
     const CACHE_KEY_FEATURED       = 'featured_%d';
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
 
     const FEATURED_AOTM     = 0;
     const FEATURED_SHOWCASE = 1;
 
-    public function findById(int $groupId) {
-        $id = $this->db->scalar("
-            SELECT ID FROM torrents_group WHERE ID = ?
-            ", $groupId
-        );
+    public function findById(int $tgroupId): ?\Gazelle\TGroup {
+        $key = sprintf(self::ID_KEY, $tgroupId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM torrents_group WHERE ID = ?
+                ", $tgroupId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
         return $id ? new \Gazelle\TGroup($id) : null;
     }
 

@@ -279,7 +279,7 @@ class Forum extends Base {
         $this->cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $forumId),
             sprintf(self::CACHE_FORUM, $this->forumId),
-            "thread_forum_{$threadId}", "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
+            "zz_ft_{$threadId}", "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $forumId),
         ]);

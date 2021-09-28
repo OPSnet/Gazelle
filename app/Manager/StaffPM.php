@@ -4,12 +4,21 @@ namespace Gazelle\Manager;
 
 class StaffPM extends \Gazelle\Base {
 
-    public function findById (int $id) {
-        $staffPM = $this->db->scalar("
-            SELECT ID FROM staff_pm_conversations WHERE ID = ?
-            ", $id
-        );
-        return is_null($staffPM) ? null : new \Gazelle\StaffPM($staffPM);
+    protected const ID_KEY = 'zz_spm_%d';
+
+    public function findById(int $pmId): ?\Gazelle\StaffPM {
+        $key = sprintf(self::ID_KEY, $pmId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM staff_pm_conversations WHERE ID = ?
+                ", $pmId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\StaffPM($id) : null;
     }
 
     public function commonAnswerList(): array {
