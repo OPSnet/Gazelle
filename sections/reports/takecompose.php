@@ -6,7 +6,7 @@ if (empty($_POST['toid'])) {
     error(404);
 }
 
-if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$_POST['toid']])) {
+if ($Viewer->disablePm() && !isset($StaffIDs[$_POST['toid']])) {
     error(403);
 }
 
