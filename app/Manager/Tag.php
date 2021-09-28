@@ -4,20 +4,28 @@ namespace Gazelle\Manager;
 
 class Tag extends \Gazelle\Base {
 
-    public function findById(int $id) {
-        $tagId = $this->db->scalar("
-            SELECT ID FROM tags WHERE ID = ?
-            ", $id
-        );
-        return $tagId ? new \Gazelle\Tag($tagId) : null;
+    protected const ID_KEY = 'zz_tag_%d';
+
+    public function findById(int $tagId): ?\Gazelle\Tag {
+        $key = sprintf(self::ID_KEY, $tagId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM tags WHERE ID = ?
+                ", $tagId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\Tag($id) : null;
     }
 
     public function findByName(string $name) {
-        $tagId = $this->db->scalar("
+        return $this->findById((int)$this->db->scalar("
             SELECT ID FROM tags WHERE Name = ?
             ", $name
-        );
-        return $tagId ? new \Gazelle\Tag($tagId) : null;
+        ));
     }
 
     /**
