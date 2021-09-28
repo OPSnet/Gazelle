@@ -3,6 +3,7 @@
 namespace Gazelle\Manager;
 
 class Artist extends \Gazelle\Base {
+    protected const ID_KEY = 'zz_a_%d';
     protected const ROLE_KEY = 'artist_role';
 
     protected $role;
@@ -23,42 +24,48 @@ class Artist extends \Gazelle\Base {
         }
     }
 
-    public function findById(int $id) {
-        $artistId = $this->db->scalar("
-            SELECT ArtistID FROM artists_group WHERE ArtistID = ?
-            ", $id
-        );
-        return is_null($artistId) ? null : new \Gazelle\Artist($artistId);
+    public function findById(int $artistId): ?\Gazelle\Artist {
+        $key = sprintf(self::ID_KEY, $artistId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ArtistID FROM artists_group WHERE ArtistID = ?
+                ", $artistId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\Artist($id) : null;
     }
 
-    public function findByIdAndRevision(int $id, int $revisionId) {
-        $artistId = $this->db->scalar("
+    public function findByIdAndRevision(int $artistId, int $revisionId): ?\Gazelle\Artist {
+        $id = $this->db->scalar("
             SELECT ArtistID
             FROM artists_group
             WHERE ArtistID = ?
                 AND RevisionID = ?
-            ", $id, $revisionId
+            ", $artistId, $revisionId
         );
-        return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
+        return $id ? new \Gazelle\Artist($id, $revisionId) : null;
     }
 
-    public function findByName(string $name) {
-        $artistId = $this->db->scalar("
+    public function findByName(string $name): ?\Gazelle\Artist {
+        return $this->findById((int)$this->db->scalar("
             SELECT ArtistID FROM artists_group WHERE Name = ?
             ", trim($name)
-        );
-        return is_null($artistId) ? null : new \Gazelle\Artist($artistId);
+        ));
     }
 
-    public function findByNameAndRevision(string $name, int $revisionId) {
-        $artistId = $this->db->scalar("
+    public function findByNameAndRevision(string $name, int $revisionId): ?\Gazelle\Artist {
+        $id = $this->db->scalar("
             SELECT ArtistID
             FROM artists_group
             WHERE Name = ?
                 AND RevisionID = ?
             ", trim($name), $revisionId
         );
-        return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
+        return $id ? new \Gazelle\Artist($id, $revisionId): null;
     }
 
     public function fetchArtistIdAndAliasId(string $name): ?array {

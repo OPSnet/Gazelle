@@ -5,6 +5,8 @@ namespace Gazelle\Manager;
 class User extends \Gazelle\Base {
 
     protected const CACHE_STAFF = 'pm_staff_list';
+    protected const ID_KEY = 'zz_u_%d';
+    protected const USERNAME_KEY = 'zz_uname_%s';
 
     public const DISABLE_MANUAL     = 1;
     public const DISABLE_INACTIVITY = 3;
@@ -27,33 +29,40 @@ class User extends \Gazelle\Base {
 
     /**
      * Get a User object based on their ID
-     *
-     * @param int userId
-     * @return \Gazelle\User object or null if not found
      */
     public function findById(int $userId): ?\Gazelle\User {
-        static $idCache;
-        if (!isset($idCache[$userId])) {
-            $idCache[$userId] = (int)$this->db->scalar("
+        $key = sprintf(self::ID_KEY, $userId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
                 SELECT ID FROM users_main WHERE ID = ?
                 ", $userId
             );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
         }
-        return $idCache[$userId] ? new \Gazelle\User($idCache[$userId]) : null;
+        return $id ? new \Gazelle\User($id) : null;
     }
 
     /**
      * Get a User object based on their username
-     *
-     * @param string username
-     * @return \Gazelle\User object or null if not found
+     * This happens often enough for it to be worth caching the username-id mapping.
      */
     public function findByUsername(string $username): ?\Gazelle\User {
-        $userId = (int)$this->db->scalar("
-            SELECT ID FROM users_main WHERE Username = ?
-            ", trim($username)
-        );
-        return $userId ? new \Gazelle\User($userId) : null;
+        $username = trim($username);
+        $key = sprintf(self::USERNAME_KEY, $username);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM users_main WHERE Username = ?
+                ", $username
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $username, 0);
+            }
+        }
+        return $id ? new \Gazelle\User($id) : null;
     }
 
     /**
@@ -64,10 +73,9 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findByEmail(string $email): ?\Gazelle\User {
-        $userId = (int)$this->db->scalar("
-            SELECT ID FROM users_main WHERE Email = ?  ", $email
-        );
-        return $userId ? new \Gazelle\User($userId) : null;
+        return $this->findById((int)$this->db->scalar("
+            SELECT ID FROM users_main WHERE Email = ?  ", trim($email)
+        ));
     }
 
     /**
@@ -77,10 +85,9 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findByAnnounceKey(string $announceKey): ?\Gazelle\User {
-        $userId = (int)$this->db->scalar("
+        return $this->findById((int)$this->db->scalar("
             SELECT ID FROM users_main WHERE torrent_pass = ?  ", $announceKey
-        );
-        return $userId ? new \Gazelle\User($userId) : null;
+        ));
     }
 
     /**
@@ -90,13 +97,10 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findByResetKey(string $key): ?\Gazelle\User {
-        $userId = (int)$this->db->scalar("
-            SELECT ui.UserID
-            FROM users_info ui
-            WHERE ui.ResetKey = ?
+        return $this->findById((int)$this->db->scalar("
+            SELECT ui.UserID FROM users_info ui WHERE ui.ResetKey = ?
             ", $key
-        );
-        return $userId ? new \Gazelle\User($userId) : null;
+        ));
     }
 
     public function staffPMList(): array {

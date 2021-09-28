@@ -7,6 +7,9 @@ class Forum extends \Gazelle\Base {
     protected const CACHE_TOC        = 'forum_toc_mainv3';
     protected const CACHE_LIST       = 'forum_list';
     protected const CACHE_TRANSITION = 'forum_transition';
+    protected const ID_KEY           = 'zz_f_%d';
+    protected const ID_THREAD_KEY    = 'zz_ft_%d';
+    protected const ID_POST_KEY      = 'zz_fp_%d';
 
     /**
      * Create a forum
@@ -27,14 +30,20 @@ class Forum extends \Gazelle\Base {
 
     /**
      * Instantiate a forum by its ID
-     *
-     * @param int id The forum ID.
-     * @return \Gazelle\Forum object or null
      */
-    public function findById(int $forumId) {
-        return $this->db->scalar("SELECT 1 FROM forums WHERE ID = ?", $forumId)
-            ? new \Gazelle\Forum($forumId)
-            : null;
+    public function findById(int $forumId): ?\Gazelle\Forum {
+        $key = sprintf(self::ID_KEY, $forumId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM forums WHERE ID = ?
+                ", $forumId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\Forum($id) : null;
     }
 
     /**
@@ -44,17 +53,18 @@ class Forum extends \Gazelle\Base {
      * @return \Gazelle\Forum object
      */
     public function findByThreadId(int $threadId) {
-        if (!($forumId = $this->cache->get_value("thread_forum_" . $threadId))) {
-            $forumId = $this->db->scalar("
+        $key = sprintf(self::ID_THREAD_KEY, $threadId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
                 SELECT ForumID FROM forums_topics WHERE ID = ?
                 ", $threadId
             );
-            $this->cache->cache_value("thread_forum_" . $threadId, $forumId, 0);
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
         }
-        if (is_null($forumId)) {
-            throw new \Gazelle\Exception\ResourceNotFoundException($threadId);
-        }
-        return new \Gazelle\Forum($forumId);
+        return $id ? new \Gazelle\Forum($id) : null;
     }
 
     /**
@@ -64,17 +74,21 @@ class Forum extends \Gazelle\Base {
      * @return \Gazelle\Forum object
      */
     public function findByPostId(int $postId) {
-        $forumId = $this->db->scalar("
-            SELECT t.ForumID
-            FROM forums_topics t
-            INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)
-            WHERE p.ID = ?
-            ", $postId
-        );
-        if (is_null($forumId)) {
-            return null;
+        $key = sprintf(self::ID_POST_KEY, $postId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT t.ForumID
+                FROM forums_topics t
+                INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)
+                WHERE p.ID = ?
+                ", $postId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
         }
-        return new \Gazelle\Forum($forumId);
+        return $id ? new \Gazelle\Forum($id) : null;
     }
 
     /**

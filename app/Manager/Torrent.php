@@ -30,6 +30,8 @@ class Torrent extends \Gazelle\Base {
     **** This is a bit cumbersome and subject to change
     */
 
+    protected const ID_KEY = 'zz_t_%d';
+
     const FEATURED_AOTM     = 0;
     const FEATURED_SHOWCASE = 1;
 
@@ -59,11 +61,18 @@ class Torrent extends \Gazelle\Base {
         return $this;
     }
 
-    public function findById(int $torrentId) {
-        $id = $this->db->scalar("
-            SELECT ID FROM torrents WHERE ID = ?
-            ", $torrentId
-        );
+    public function findById(int $torrentId): ?\Gazelle\Torrent {
+        $key = sprintf(self::ID_KEY, $torrentId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $tid = $this->db->scalar("
+                SELECT ID FROM torrents WHERE ID = ?
+                ", $torrentId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
         if (!$id) {
             return null;
         }
@@ -75,18 +84,10 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function findByInfohash(string $hash) {
-        $id = $this->db->scalar("
+        return $this->findById((int)$this->db->scalar("
             SELECT id FROM torrents WHERE info_hash = unhex(?)
             ", $hash
-        );
-        if (!$id) {
-            return null;
-        }
-        $torrent = new \Gazelle\Torrent($id);
-        if (isset($this->viewerId)) {
-            $torrent->setViewerId($this->viewerId);
-        }
-        return $torrent;
+        ));
     }
 
     /**

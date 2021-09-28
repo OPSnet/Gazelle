@@ -6,6 +6,7 @@ class Collage extends \Gazelle\Base {
 
     protected const CACHE_DEFAULT_ARTIST = 'collage_default_artist_%d';
     protected const CACHE_DEFAULT_GROUP = 'collage_default_group_%d';
+    protected const ID_KEY = 'zz_c_%d';
 
     public function create(\Gazelle\User $user, int $categoryId, string $name, string $description, string $tagList, \Gazelle\Log $logger) {
         $this->db->prepared_query("
@@ -20,18 +21,26 @@ class Collage extends \Gazelle\Base {
         return new \Gazelle\Collage($id);
     }
 
-    public function findById(int $id): ?\Gazelle\Collage {
-        return $this->db->scalar("SELECT ID FROM collages WHERE ID = ?", $id)
-            ? new \Gazelle\Collage($id)
-            : null;
+    public function findById(int $collageId): ?\Gazelle\Collage {
+        $key = sprintf(self::ID_KEY, $collageId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM collages WHERE ID = ?
+                ", $collageId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\Collage($id) : null;
     }
 
     public function findByName(string $name): ?\Gazelle\Collage {
-        $id = $this->db->scalar("
+        return $this->findById((int)$this->db->scalar("
             SELECT ID FROM collages WHERE Name = ?
             ", $name
-        );
-        return $id ? new \Gazelle\Collage($id) : null;
+        ));
     }
 
     public function recoverById(int $id) {
