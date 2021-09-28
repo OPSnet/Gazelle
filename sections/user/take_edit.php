@@ -163,7 +163,7 @@ if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST[
     }
 }
 
-if ($LoggedUser['DisableAvatar'] && $_POST['avatar'] != $user->avatar()) {
+if ($Viewer->disableAvatar() && $_POST['avatar'] != $user->avatar()) {
     error('Your avatar privileges have been revoked.');
 }
 

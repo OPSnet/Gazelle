@@ -544,7 +544,7 @@ if ($Viewer->permitted('users_give_donor')) {
 }
 
 // Requests
-if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_list')) {
+if (!$Viewer->disableRequests() && check_paranoia_here('requestsvoted_list')) {
     $SphQL = new SphinxqlQuery();
     $SphQLResult = $SphQL->select('id, votes, bounty')
         ->from('requests, requests_delta')

@@ -503,7 +503,7 @@ foreach ($TorrentList as $Torrent) {
         $ReportInfo .= "\n\t\t</table>";
     }
 
-    $CanEdit = ($Viewer->permitted('torrents_edit') || (($UserID == $Viewer->id() && !$LoggedUser['DisableWiki']) && !($Remastered && !$RemasterYear)));
+    $CanEdit = ($Viewer->permitted('torrents_edit') || (($UserID == $Viewer->id() && !$Viewer->disableWiki()) && !($Remastered && !$RemasterYear)));
 
     $RegenLink = $Viewer->permitted('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid='.$TorrentID.'" class="brackets">Regenerate</a>' : '';
     $FileTable = '
@@ -680,7 +680,7 @@ foreach ($TorrentList as $Torrent) {
         </table>
 <?php
 $Requests = get_group_requests($GroupID);
-if (empty($LoggedUser['DisableRequests']) && count($Requests) > 0) {
+if ($Viewer->disableRequests() && count($Requests) > 0) {
     $i = 0;
 ?>
         <div class="box">
