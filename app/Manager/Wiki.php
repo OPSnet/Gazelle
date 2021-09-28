@@ -4,16 +4,25 @@ namespace Gazelle\Manager;
 
 class Wiki extends \Gazelle\Base {
 
+    protected const ID_KEY = 'zz_w_%d';
+
     /**
      * Find a wiki article based on its id.
      *
      * @return \Gazelle\Wiki|null id of article if it exists
      */
-    public function findById(int $id): ?\Gazelle\Wiki {
-        $id = $this->db->scalar("
-            SELECT ID FROM wiki_articles WHERE ID = ?
-            ", $id
-        );
+    public function findById(int $wikiId): ?\Gazelle\Wiki {
+        $key = sprintf(self::ID_KEY, $wikiId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM wiki_articles WHERE ID = ?
+                ", $wikiId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
         return $id ? new \Gazelle\Wiki($id) : null;
     }
 
@@ -23,11 +32,10 @@ class Wiki extends \Gazelle\Base {
      * @return \Gazelle\Wiki|null id of article if it exists
      */
     public function findByTitle(string $title): ?\Gazelle\Wiki {
-        $id = $this->db->scalar("
+        return $this->findById((int)$this->db->scalar("
             SELECT ID FROM wiki_articles WHERE Title = ?
             ", trim($title)
-        );
-        return $id ? new \Gazelle\Wiki($id) : null;
+        ));
     }
 
     /**
@@ -36,11 +44,10 @@ class Wiki extends \Gazelle\Base {
      * @return \Gazelle\Wiki|null id of article if it exists
      */
     public function findByAlias(string $alias): ?\Gazelle\Wiki {
-        $id = $this->db->scalar("
+        return $this->findById((int)$this->db->scalar("
             SELECT ArticleID FROM wiki_aliases WHERE Alias = ?
-            ", $alias
-        );
-        return $id ? new \Gazelle\Wiki($id) : null;
+            ", trim($alias)
+        ));
     }
 
     /**
