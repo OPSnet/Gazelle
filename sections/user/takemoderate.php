@@ -255,8 +255,8 @@ $args = [];
 $Classes = $userMan->classList();
 if ($Classes[$class]['Level'] != $cur['Class']
     && (
-        ($Classes[$class]['Level'] < $LoggedUser['Class'] && $Viewer->permitted('users_promote_below'))
-        || ($Classes[$class]['Level'] <= $LoggedUser['Class'] && $Viewer->permitted('users_promote_to'))
+        ($Classes[$class]['Level'] < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
+        || ($Classes[$class]['Level'] <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
 )) {
     $set[] = 'PermissionID = ?';
     $args[] = $class;

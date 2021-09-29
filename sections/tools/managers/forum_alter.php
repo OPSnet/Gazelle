@@ -12,7 +12,7 @@ $forum = new \Gazelle\Forum($forumId);
 if ($_POST['submit'] == 'Delete') {
     $forum->remove();
 } else { //Edit & Create, Shared Validation
-    if ($_POST['minclassread'] > $LoggedUser['Class'] || $_POST['minclasswrite'] > $LoggedUser['Class'] || $_POST['minclasscreate'] > $LoggedUser['Class']) {
+    if ($_POST['minclassread'] > $Viewer->classLevel() || $_POST['minclasswrite'] > $Viewer->classLevel() || $_POST['minclasscreate'] > $Viewer->classLevel()) {
         error(403);
     }
 
@@ -34,7 +34,7 @@ if ($_POST['submit'] == 'Delete') {
         $forum->create($_POST);
     } elseif ($_POST['submit'] == 'Edit') {
         $minClassRead = $forum->minClassRead();
-        if (!$minClassRead || $minClassRead > $LoggedUser['Class']) {
+        if (!$minClassRead || $minClassRead > $Viewer->classLevel()) {
             error(403);
         }
         $forum->modify($_POST);

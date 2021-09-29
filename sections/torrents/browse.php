@@ -587,7 +587,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
         <td class="td_info" colspan="3">
             <?= $Twig->render('torrent/action.twig', [
                 'can_fl' => Torrents::can_use_token($Data),
-                'key'    => $LoggedUser['torrent_pass'],
+                'key'    => $Viewer->announceKey(),
                 't'      => $Data,
             ]) ?>
             &raquo; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Data)?>
@@ -641,7 +641,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Data),
-                    'key'    => $LoggedUser['torrent_pass'],
+                    'key'    => $Viewer->announceKey(),
                     't'      => $Data,
                 ]) ?>
                 <?=$DisplayName?>

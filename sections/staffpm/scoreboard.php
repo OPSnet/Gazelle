@@ -42,7 +42,7 @@ $BaseSQL = sprintf("
     ", $EXTRA, $IN, placeholders($SupportStaff)
 );
 
-$DB->prepared_query($BaseSQL, 1, 1, $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, 1, 1, $Viewer->classLevel(), ...$SupportStaff);
 $Results = $DB->to_array();
 
 View::show_header('Staff Inbox');
@@ -83,7 +83,7 @@ View::show_header('Staff Inbox');
             </table>
             <br /><br />
 <?php
-$DB->prepared_query($BaseSQL, 7, 7, $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, 7, 7, $Viewer->classLevel(), ...$SupportStaff);
 $Results = $DB->to_array();
 ?>
             <strong>Inbox actions in the last week</strong>
@@ -103,7 +103,7 @@ $Results = $DB->to_array();
             </table>
         <br /><br />
 <?php
-$DB->prepared_query($BaseSQL, 30, 30, $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, 30, 30, $Viewer->classLevel(), ...$SupportStaff);
 $Results = $DB->to_array();
 ?>
             <strong>Inbox actions in the last month</strong>
@@ -124,7 +124,7 @@ $Results = $DB->to_array();
         </td>
         <td style="vertical-align: top;">
 <?php
-$DB->prepared_query($BaseSQL, 365000, 365000, $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, 365000, 365000, $Viewer->classLevel(), ...$SupportStaff);
 $Results = $DB->to_array();
 ?>
             <strong>Inbox actions total</strong>

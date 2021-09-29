@@ -238,10 +238,10 @@ if ($_POST['uploader_pm'] || $weeksWarned > 0 || isset($_POST['delete']) || $Sen
     }
 
     if ($_POST['uploader_pm']) {
-        $message[] = "Message from {$LoggedUser['Username']}: $modNote";
+        $message[] = "Message from " . $Viewer->username() . ": $modNote";
     }
 
-    $message[] = "Report was handled by [user]{$LoggedUser['Username']}[/user].";
+    $message[] = "Report was handled by [user]" . $Viewer->username() . "[/user].";
     $userMan->sendPM($uploaderId, 0, $rawName, implode("\n\n", $message));
 }
 

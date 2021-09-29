@@ -17,7 +17,7 @@ $user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
     error("No user ID given");
 }
-if ($user->primaryClass() > $LoggedUser['Class']) {
+if ($user->primaryClass() > $Viewer->classLevel()) {
     error(403);
 }
 
@@ -47,7 +47,7 @@ if ($WarningLength !== 'verbal') {
     $message = "You have received a verbal warning for [url=$URL]this post[/url].";
     $warned = "Verbally warned";
 }
-$adminComment = date('Y-m-d') . " - $warned by {$LoggedUser['Username']} for $URL\nReason: $Reason";
+$adminComment = date('Y-m-d') . " - $warned by " . $Viewer->username() . " for $URL\nReason: $Reason";
 
 $extraMessage = trim($_POST['privatemessage'] ?? '');
 if (strlen($extraMessage)) {
