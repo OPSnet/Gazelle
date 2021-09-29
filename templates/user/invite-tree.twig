@@ -1,11 +1,3 @@
-{{ header(user.username ~ ' &rsaquo; Invites &rsaquo; Tree') }}
-<div class="thin">
-    <div class="header">
-        <h2>{{ user.id|user_url|raw }} &rsaquo; <a href="user.php?action=invite&amp;userid={{ user.id }}">Invites</a> &rsaquo; Tree</h2>
-    </div>
-    <div class="box pad">
-        <div class="invitetree pad">
-
 {% if info.total == 0 %}
 <p>Nobody turned up to the gig.</p>
 {% else %}
@@ -50,8 +42,3 @@ and {{ info.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and d
 
 {% endif %}
 {{ markup|raw }}
-
-        </div>
-    </div>
-</div>
-{{ footer() }}
