@@ -170,7 +170,7 @@ class Twig {
                 . sprintf(
                     '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s">%s</label><br />',
                     "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key, $key,
-                    \Permissions::list()[$key] ?? "!unknown($key)!"
+                    \Gazelle\Manager\Privilege::privilegeList()[$key] ?? "!unknown($key)!"
                 ),
                 'UTF-8'
             );
