@@ -527,10 +527,10 @@ if ($Viewer->permitted('users_view_invites')) {
                 Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
             </div>
             <div id="invitetree" class="hidden">
-                <?= $Twig->render('user/invite-tree.twig', [
-                    'info' => $tree->details(),
-                    'user' => $User,
-                ]) ?>
+                <?= $Twig->render('user/invite-tree.twig', array_merge(
+                    ['user' => $User],
+                    (new Gazelle\InviteTree($UserID))->details(),
+                )) ?>
             </div>
         </div>
 <?php

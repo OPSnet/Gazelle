@@ -1,0 +1,18 @@
+{{ header(user.username ~ ' &rsaquo; Invites &rsaquo; Tree') }}
+<div class="thin">
+    <div class="header">
+        <h2>{{ user.id|user_url|raw }} &rsaquo; <a href="user.php?action=invite&amp;userid={{ user.id }}">Invites</a> &rsaquo; Tree</h2>
+    </div>
+    <div class="box pad">
+        <div class="invitetree pad">
+{% include 'user/invite-tree.twig' with {
+    'classes': classes,
+    'depth': depth,
+    'info': info,
+    'markup': markup,
+    'user': user
+} only %}
+       </div>
+   </div>
+</div>
+{{ footer() }}
