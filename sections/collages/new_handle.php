@@ -26,12 +26,13 @@ if (!$Err && $categoryId === '0') {
 }
 
 if (!$Err) {
-    [$ID, $Deleted] = $collageMan->exists($name);
-    if ($ID) {
-        if ($Deleted) {
+    $check = $collageMan->findByName($name);
+    if ($check) {
+        if ($check->isDeleted()) {
             $Err = 'That collection already exists but needs to be recovered; please <a href="staffpm.php">contact</a> the staff team!';
         } else {
-            $Err = "That collection already exists: <a href=\"/collages.php?id=$ID\">$ID</a>.";
+            $checkId = $check->id();
+            $Err = "That collection already exists: <a href=\"/collages.php?id=$checkId\">$checkId</a>.";
         }
     }
 }

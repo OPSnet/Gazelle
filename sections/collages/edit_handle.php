@@ -20,9 +20,9 @@ if (!$isPersonal) {
 $collageMan = new Gazelle\Manager\Collage;
 if (isset($_POST['name'])) {
     $name = trim($_POST['name']);
-    [$ID, $Deleted] = $collageMan->exists($name);
-    if ($ID && $ID != $collage->id()) {
-        if ($Deleted) {
+    $check = $collageMan->findByName($name);
+    if ($check && $check->id() !== $collage->id()) {
+        if ($check->isDeleted()) {
             $Err = 'A collage with that name already exists but needs to be recovered, please <a href="staffpm.php">contact</a> the staff team!';
         } else {
             $Err = "A collage with that name already exists: <a href=\"/collages.php?id=$ID\">$name</a>.";

@@ -20,22 +20,6 @@ class Collage extends \Gazelle\Base {
         return new \Gazelle\Collage($id);
     }
 
-    /**
-     * Does another collage already have this name (deleted or otherwise)
-     *
-     * @param string Name of collage to search
-     * @return array [ID of other collage, Deleted 0/1] or null if no match
-     */
-    public function exists(string $name): ?array {
-        return $this->db->row("
-            SELECT ID, Deleted
-            FROM collages
-            WHERE Name = ?
-            LIMIT 1
-            ", trim($name)
-        );
-    }
-
     public function findById(int $id): ?\Gazelle\Collage {
         return $this->db->scalar("SELECT ID FROM collages WHERE ID = ?", $id)
             ? new \Gazelle\Collage($id)
