@@ -31,6 +31,6 @@ json_print("success", [
         'requiredratio' => $Viewer->requiredRatio(),
         'bonusPoints' => $Viewer->bonusPointsTotal(),
         'bonusPointsPerHour' => (float)number_format($Viewer->bonusPointsPerHour(), 2),
-        'class' => $ClassLevels[$LoggedUser['Class']]['Name']
+        'class' => $Viewer->userclassName(),
     ]
 ]);
