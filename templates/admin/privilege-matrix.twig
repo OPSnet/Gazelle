@@ -9,24 +9,24 @@
 </div>
 <table width="100%">
     <tr class="colhead">
-        <td rowspan="2" style="vertical-align: bottom">Primary Class {{ star|raw }} <br /><br />Privilege</td>
+        <td rowspan="2" style="vertical-align: bottom">Primary Class {{ star }} <br /><br />Privilege</td>
 {% for c in class_list %}
         <td style="padding: 0;"><div class="rot90-container"><div class="rot90">
-            <a href="tools.php?action=permissions&amp;id={{ c.id }}">{{ c.name }}</a>
+            <a href="tools.php?action=permissions&amp;id={{ c.ID }}">{{ c.Name }}</a>
         </div></div></td>
 {% endfor %}
     </tr>
     <tr class="colhead">
 {% for c in class_list %}
-        <td style="padding: 0; text-align: center; font-weight: normal;">{{ c.primary ? star|raw : '' }}</td>
+        <td style="padding: 0; text-align: center; font-weight: normal;">{% if c.Secondary == 0 %}{{ star }}{% endif %}</td>
 {% endfor %}
     </tr>
 {% for p in privilege %}
     <tr>
         <td{{ p.orphan ? ' title="This is an orphaned privilege" style="color: orangered; font-weight: bold;"' : '' }} title="{{ p.description }}">{{ p.name }}</td>
 {% for c in class_list %}
-        <td style="text-align: center;" title="{{ c.name }} {{ c.id in p.can ? 'can' : 'cannot' }} {{ p.description }}">
-            <a href="tools.php?action=permissions&amp;id={{ c.id }}">{{ c.id in p.can ? tick : '&middot;' }}</a></td>
+        <td style="text-align: center;" title="{{ c.Name }} {{ c.ID in p.can ? 'can' : 'cannot' }} {{ p.description }}">
+            <a href="tools.php?action=permissions&amp;id={{ c.ID }}">{{ c.ID in p.can ? tick : '&middot;' }}</a></td>
 {% endfor %}
     </tr>
 {% endfor %}

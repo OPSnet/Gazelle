@@ -65,7 +65,7 @@ class Torrent extends \Gazelle\Base {
         $key = sprintf(self::ID_KEY, $torrentId);
         $id = $this->cache->get_value($key);
         if ($id === false) {
-            $tid = $this->db->scalar("
+            $id = $this->db->scalar("
                 SELECT ID FROM torrents WHERE ID = ?
                 ", $torrentId
             );
