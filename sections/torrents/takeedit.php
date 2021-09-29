@@ -374,7 +374,8 @@ $name = $DB->scalar("
 );
 $changeLog = implode(', ', $change);
 (new Gazelle\Log)->torrent($current['GroupID'], $TorrentID, $Viewer->id(), $changeLog)
-    ->general("Torrent $TorrentID ($name) in group {$current['GroupID']} was edited by {$LoggedUser['Username']} ($changeLog)");
+    ->general("Torrent $TorrentID ($name) in group {$current['GroupID']} was edited by "
+        . $Viewer->username() . " ($changeLog)");
 
 $Cache->deleteMulti(["torrents_details_{$current['GroupID']}", "torrent_download_$TorrentID"]);
 
