@@ -1,0 +1,77 @@
+{{ header('Rate Limiting') }}
+{% set is_admin = viewer.permitted('admin_rate_limit_manage') %}
+<div class="header">
+    <h2>Torrent Download Rate Limiting</h2>
+</div>
+
+<div class="box pad">
+<p>This manager allows you to limit the number of torrent files the
+various user classes are allowed to download without snatching. The factor is the ratio
+of <code>downloaded / snatched</code>, where downloaded are files generated from [DL]
+links, and snatched are torrents leeched completely. Once the factor is exceeded, only
+<code>overshoot</code> further downloads are allowed per 24 hour rolling window.</p>
+
+<p>If a user class is not defined in this page, no rate limiting applies to that
+class.</p>
+
+{% if is_admin %}
+<p>You can whitelist a specific user by setting a flag in the User Information section
+through the staff tools on their profile page.</p>
+{% endif %}
+</div>
+
+<form class="manage_form" name="accounts" action="/tools.php?action=rate_limit" method="post">
+<table>
+    <tr class="colhead">
+        <td>Userclass</td>
+        <td>Factor</td>
+        <td>Overshoot</td>
+{% if is_admin %}
+        <td>Action</td>
+{% endif %}
+    </tr>
+{% set seen = [] %}
+{% for info in rate_list %}
+    {% set seen = seen|merge({(info.ID): info.ID}) %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>{{ info.Name }}</td>
+        <td>{{ info.factor }}</td>
+        <td>{{ info.overshoot }}</td>
+    {% if is_admin %}
+        <td>
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="submit" name="remove-{{ info.ID }}" value="Remove"
+                onclick="return confirm('Are you sure you want to remove this rate limit? This is an irreversible action!')" />
+        </td>
+    {% endif %}
+    </tr>
+{% endfor %}
+{% if is_admin %}
+    <tr class="colhead">
+        <td>Create</td>
+        <td>Factor</td>
+        <td>Overshoot</td>
+        <td></td>
+    </tr>
+    <tr class="rowa">
+        <td>
+            <select name="class">
+    {% for p in class_list %}
+        {% if not seen[p.ID] and p.Secondary == 0 %}
+            <option value="{{ p.ID }}">{{ p.Name }}</option>
+        {% endif %}
+    {% endfor %}
+            </select>
+        </td>
+        <td><input type="text" size="6" name="factor" value="" placeholder="1.0" /></td>
+        <td><input type="text" size="6" name="overshoot" /></td>
+        <td>
+            <input type="hidden" name="task" value="add" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="submit" name="submit" value="Create" />
+        </td>
+    </tr>
+</table>
+</form>
+{% endif %}
+{{ footer() }}

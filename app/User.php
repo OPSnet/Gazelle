@@ -294,7 +294,7 @@ class User extends BaseObject {
      * @return bool was there a change?
      */
     public function modifyPermissionList(array $current): bool {
-        $permissionList = array_keys(\Permissions::list());
+        $permissionList = array_keys(\Gazelle\Manager\Privilege::privilegeList());
         $default = $this->defaultPermissionList();
         $delta = [];
         foreach ($permissionList as $p) {
