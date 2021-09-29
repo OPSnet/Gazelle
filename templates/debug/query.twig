@@ -1,11 +1,11 @@
+{% set nr = list|length %}
 {% for query in list %}
     {% if loop.first %}
-        {% set nr = list|length %}
 <table class="layout" width="100%">
     <tr>
         <td align="left"><strong><a href="#" id="debug-view-query" class="brackets">View</a>
-        {{ nr|number_format }} {% if list|length == 1 %}Query{% else %}Queries{% endif %}
-        ({{ time|number_format(5) }} ms):</strong></td>
+        {{ nr|number_format }} {% if nr == 1 %}Query{% else %}Queries{% endif %}
+        ({{ time|number_format(2) }} ms)</strong> (mean: {{ (time/nr)|number_format(5) }} ms):</td>
     </tr>
 </table>
 <table id="debug_query" class="debug_table hidden">
