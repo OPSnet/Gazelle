@@ -38,7 +38,7 @@ foreach ($toc as $category => $forumList) {
             . ($f['IsSticky'] ? '_sticky' : '');
 
         echo $Twig->render('forum/main.twig', [
-            'creator'        => $f['MinClassCreate'] <= $LoggedUser['Class'],
+            'creator'        => $f['MinClassCreate'] <= $Viewer->classLevel(),
             'category'       => $category,
             'category_id'    => $f['categoryId'],
             'cut_title'      => shortenString($f['Title'] ?? '', 50, true),
