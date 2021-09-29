@@ -36,6 +36,5 @@ if ($_POST['submit'] == 'Delete') {
         $Payment->modify($_POST['id'], $values);
     }
 }
-$Cache->delete_value('due_payments');
 
 header('Location: tools.php?action=payment_list');
