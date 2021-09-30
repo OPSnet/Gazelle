@@ -62,7 +62,7 @@ function log_token_attempt(DB_MYSQL $db, int $userId): void {
  * Make sure $_GET['auth'] is the same as the user's authorization key
  * Should be used for any user action that relies solely on GET.
  *
- * @param bool Are we using ajax?
+ * @param bool $Ajax Are we using ajax?
  * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
  */
 function authorize($Ajax = false): bool {
