@@ -238,7 +238,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
         </td>
         <td class="td_info big_info">
-<?php       if ($LoggedUser['CoverArt']) { ?>
+<?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
                 <?php ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupCategoryID) ?>
             </div>

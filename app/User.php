@@ -472,6 +472,10 @@ class User extends BaseObject {
         return $this->info()['Uploaded'];
     }
 
+    public function disableAvatar(): bool {
+        return $this->info()['DisableAvatar'];
+    }
+
     public function disableBonusPoints(): bool {
         return $this->info()['DisablePoints'];
     }

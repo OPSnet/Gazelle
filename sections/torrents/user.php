@@ -520,7 +520,7 @@ foreach (CATEGORY as $catKey => $catName) {
                 <div title="<?=$torrentTags->title()?>" class="tooltip <?=Format::css_category($groupCategoryID)?> <?=$torrentTags->css_name()?>"></div>
             </td>
             <td class="td_info big_info">
-<?php    if ($LoggedUser['CoverArt']) { ?>
+<?php    if ($Viewer->option('CoverArt')) { ?>
                 <div class="group_image float_left clear">
                     <?php ImageTools::cover_thumb($results[$groupID]['WikiImage'], $groupCategoryID) ?>
                 </div>

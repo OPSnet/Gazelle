@@ -188,6 +188,7 @@ $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
                 <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
+$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
     $GroupName = $Group['Name'];
@@ -236,11 +237,10 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     ob_start();
     if (count($Torrents) > 1 || $GroupCategoryID == 1) {
         // Grouped torrents
-        $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1);
 ?>
-        <tr class="group groupid_<?=$GroupID?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $GroupID ?>">
+        <tr class="group groupid_<?=$GroupID?>_header discog" id="group_<?= $GroupID ?>">
             <td class="td_collapse m_td_left center">
-                <div id="showimg_<?= $GroupID ?>" class="<?= ($ShowGroups ? 'hide' : 'show') ?>_torrents">
+                <div id="showimg_<?= $GroupID ?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
                     <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);"
                        title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collape all groups on this page."></a>
                 </div>
@@ -289,7 +289,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             ) {
                 $EditionID++;
 ?>
-                <tr class="group_torrent groupid_<?= $GroupID ?> edition<?= $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1 ? ' hidden' : '') ?>">
+                <tr class="group_torrent groupid_<?= $GroupID ?> edition<?= $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                     <td colspan="7" class="edition_info"><strong><a href="#"
                         onclick="toggle_edition(<?= $GroupID ?>, <?= $EditionID ?>, this, event)"
                         class="tooltip"
@@ -305,7 +305,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             $LastRemasterCatalogueNumber = $Torrent['RemasterCatalogueNumber'];
             $LastMedia = $Torrent['Media'];
 ?>
-            <tr class="group_torrent torrent_row groupid_<?= $GroupID ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1 ? ' hidden' : '') ?>">
+            <tr class="group_torrent torrent_row groupid_<?= $GroupID ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                 <?= $Twig->render('torrent/action.twig', [
                     'can_fl' => Torrents::can_use_token($Torrent),
