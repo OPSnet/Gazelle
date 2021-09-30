@@ -28,6 +28,6 @@ class PM extends \Gazelle\Base {
                 $this->cache->cache_value($key, $id, 0);
             }
         }
-        return $id ? new \Gazelle\PM($id, $this->user->id()) : null;
+        return $id ? new \Gazelle\PM($id, $this->user) : null;
     }
 }
