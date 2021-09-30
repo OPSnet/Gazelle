@@ -259,7 +259,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
         <td class="center cats_col m_hidden"><div title="<?=$torrentTags->title()?>" class="tooltip <?=Format::css_category($group['CategoryID'])?> <?=$torrentTags->css_name()?>"></div></td>
         <td class="td_info big_info">
-<?php   if (isset($LoggedUser['CoverArt']) && $LoggedUser['CoverArt']) { ?>
+<?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
                 <?php ImageTools::cover_thumb($group['WikiImage'], $group['CategoryID']) ?>
             </div>
