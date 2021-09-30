@@ -2,7 +2,6 @@
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
-use Gazelle\Manager\IPv4;
 use Gazelle\Util\{Type, Time, Irc};
 
 /**
@@ -34,8 +33,8 @@ if (PHP_INT_SIZE === 4) {
 /**
  * Awful anglo-centric hack for handling plurals ;-)
  *
- * @param $n the number
- * @return '' if 1, otherwise 's'
+ * @param int $n the number
+ * @return string '' if 1, otherwise 's'
  */
 function plural(int $n) {
     return $n == 1 ? '' : 's';
@@ -44,9 +43,9 @@ function plural(int $n) {
 /**
  * Awful anglo-centric hack for handling articles
  *
- * @param $n the number
- * @param $article string to use if you don't want the default 'a'
- * @return 'a' (or $article) if $n == 1, otherwise $n
+ * @param int $n the number
+ * @param string $article string to use if you don't want the default 'a'
+ * @return string 'a' (or $article) if $n == 1, otherwise $n
  */
 function article(int $n, $article = 'a') {
     return $n == 1 ? $article : $n;
@@ -128,7 +127,7 @@ function reverse_display_str($Str) {
 /**
  * Sanitize a string for use as a filename.
  *
- * @param string name to escape
+ * @param string $name to escape
  * @return string contents with all OS meta-characters removed.
  */
 function safeFilename(string $name): string {
@@ -138,9 +137,8 @@ function safeFilename(string $name): string {
 /**
  * This function formats a string containing a torrent's remaster information.
  *
- * @param boolean Remastered - whether the torrent contains remaster information
- * @param string  RemasterTitle - the title of the remaster information
- * @param string  RemasterYear - the year of the remaster information
+ * @param string  $RemasterTitle - the title of the remaster information
+ * @param string  $RemasterYear - the year of the remaster information
  * @return string remaster info
  */
 function remasterInfo($RemasterTitle, $RemasterYear): string {
@@ -159,7 +157,7 @@ function remasterInfo($RemasterTitle, $RemasterYear): string {
 /**
  * Determine the redirect header to use based on the client HTTP_REFERER or fallback
  *
- * @param string fallback URL if HTTP_REFERER is empty
+ * @param string $fallback URL to use HTTP_REFERER is empty
  * @return string redirect URL
  */
 function redirectUrl(string $fallback): string {
@@ -217,7 +215,7 @@ function parse_user_agent(): array {
  *    403, 404, 0 (invalid input), -1 (invalid request)
  *    If you use your own string for Error, it becomes the error description.
  * @param boolean $NoHTML If true, the header/footer won't be shown, just the description.
- * @param string $Log If true, the user is given a link to search $Log in the site log.
+ * @param boolean $Log If true, the user is given a link to search $Log in the site log.
  */
 function error($Error, $NoHTML = false, $Log = false) {
     global $Debug, $Viewer;
@@ -305,8 +303,8 @@ function add_json_info($Json) {
  * parsed: ['li[]' => ['14', '31, '58', '68', '69', '5']]
  * out: ['14', '31, '58', '68', '69', '5']
  *
- * @param string query string from url
- * @param string url param to extract
+ * @param string $urlArgs query string from url
+ * @param string $param url param to extract
  * @return array hydrated equivalent
  */
 function parseUrlArgs(string $urlArgs, string $param): array {
@@ -341,7 +339,8 @@ function unserialize_array($array) {
 
 /**
  * Utility function for determining if checkbox should be checked if some $value is set or not
- * @param $value
+ * @param array $array
+ * @param string $value
  * @return string
  */
 function isset_array_checked($array, $value) {
@@ -387,7 +386,7 @@ function is_utf8($Str) {
  * Detect the encoding of a string and transform it to UTF-8.
  *
  * @param string $str
- * @return UTF-8 encoded version of $str
+ * @return string UTF-8 encoded version of $str
  */
 function make_utf8($str) {
     if (is_null($str) || $str === '' || is_utf8($str)) {
@@ -494,7 +493,7 @@ function time_diff($TimeStamp, $Levels = 2, $Span = true, $Lowercase = false, $S
  * Given a number of hours, convert it to a human readable time of
  * years, months, days, etc.
  *
- * @param $Hours
+ * @param int $Hours
  * @param int $Levels
  * @param bool $Span
  * @return string
@@ -557,13 +556,13 @@ function is_valid_date($Date) {
  * Return whether currently logged in user can see $Property on a user with $Paranoia, $UserClass and (optionally) $UserID
  * If $Property is an array of properties, returns whether currently logged in user can see *all* $Property ...
  *
- * @param $Property The property to check, or an array of properties.
- * @param $Paranoia The paranoia level to check against.
- * @param $UserClass The user class to check against (Staff can see through paranoia of lower classed staff)
- * @param $UserID Optional. The user ID of the person being viewed
+ * @param mixed $Property The property to check, or an array of properties.
+ * @param string|array $Paranoia The paranoia level to check against.
+ * @param int $UserClass The user class to check against (Staff can see through paranoia of lower classed staff)
+ * @param int|false $UserID Optional. The user ID of the person being viewed
  * @return mixed   1 representing the user has normal access
-                   2 representing that the paranoia was overridden,
-                   false representing access denied.
+ *                 2 representing that the paranoia was overridden,
+ *                 false representing access denied.
  */
 
 function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {

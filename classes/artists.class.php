@@ -4,7 +4,7 @@ class Artists {
      * Given an array of GroupIDs, return their associated artists.
      *
      * @param array $GroupIDs
-     * @return an array of the following form:
+     * @return array an array of the following form:
      *    GroupID => {
      *        [ArtistType] => {
      *            id, name, aliasid
@@ -126,10 +126,11 @@ class Artists {
      * Format an array of artists for display.
      * TODO: Revisit the logic of this, see if we can helper-function the copypasta.
      *
-     * @param array Artists an array of the form output by get_artists
+     * @param array $Artists an array of the form output by get_artists
      * @param boolean $MakeLink if true, the artists will be links, if false, they will be text.
      * @param boolean $IncludeHyphen if true, appends " - " to the end.
-     * @param $Escape if true, output will be escaped. Think carefully before setting it false.
+     * @param boolean $Escape if true, output will be escaped. Think carefully before setting it false.
+     * @return string
      */
     public static function display_artists($Artists, $MakeLink = true, $IncludeHyphen = true, $Escape = true) {
         if (!empty($Artists)) {
@@ -253,6 +254,7 @@ class Artists {
     public static function display_artist($Artist, $MakeLink = true, $Escape = true) {
         if ($MakeLink && !$Escape) {
             error('Invalid parameters to Artists::display_artist()');
+            return '';
         } elseif ($MakeLink) {
             return '<a href="artist.php?id='.$Artist['id'].'" dir="ltr">'.display_str($Artist['name']).'</a>';
         } elseif ($Escape) {
