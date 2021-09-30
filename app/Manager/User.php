@@ -6,7 +6,7 @@ class User extends \Gazelle\Base {
 
     protected const CACHE_STAFF = 'pm_staff_list';
     protected const ID_KEY = 'zz_u_%d';
-    protected const USERNAME_KEY = 'zz_uname_%s';
+    protected const USERNAME_KEY = 'zz_unam_%s';
 
     public const DISABLE_MANUAL     = 1;
     public const DISABLE_INACTIVITY = 3;
@@ -59,7 +59,7 @@ class User extends \Gazelle\Base {
                 ", $username
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $username, 0);
+                $this->cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\User($id) : null;
