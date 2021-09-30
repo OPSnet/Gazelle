@@ -454,6 +454,7 @@ $bookmark = new \Gazelle\Bookmark;
 <?php
 
 // Start printing torrent list
+$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 $tgroupMan = new Gazelle\Manager\TGroup;
 foreach ($Results as $GroupID) {
     $tgroup = $tgroupMan->findById($GroupID);
@@ -500,11 +501,8 @@ foreach ($Results as $GroupID) {
         $DisplayName .= ' [' . $releaseTypes[$ReleaseType] . ']';
 ?>
     <tr class="group groupid_<?=$GroupID?>_header<?=$SnatchedGroupClass?>">
-<?php
-$ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1);
-?>
         <td class="td_collapse center m_td_left">
-            <div id="showimg_<?=$GroupID?>" class="<?=($ShowGroups ? 'hide' : 'show')?>_torrents">
+            <div id="showimg_<?=$GroupID?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
                 <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$GroupID?>, this, event)" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups on this page."></a>
             </div>
         </td>
@@ -513,7 +511,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
             </div>
         </td>
         <td colspan="2" class="td_info big_info">
-<?php    if ($LoggedUser['CoverArt']) { ?>
+<?php    if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
                 <?php ImageTools::cover_thumb($GroupInfo['Image'], $GroupInfo['CategoryID']) ?>
             </div>
@@ -572,7 +570,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
                 $EditionID++;
 
 ?>
-    <tr class="group_torrent groupid_<?=$GroupID?> edition<?=$SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1 ? ' hidden' : '')?>">
+    <tr class="group_torrent groupid_<?=$GroupID?> edition<?=$SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td colspan="9" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Data, $GroupInfo)?></strong></td>
     </tr>
 <?php
@@ -583,7 +581,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
             $LastRemasterCatalogueNumber = $Data['RemasterCatalogueNumber'];
             $LastMedia = $Data['Media'];
 ?>
-    <tr class="group_torrent groupid_<?=$GroupID?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1 ? ' hidden' : '')?>">
+    <tr class="group_torrent groupid_<?=$GroupID?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
             <?= $Twig->render('torrent/action.twig', [
                 'can_fl' => Torrents::can_use_token($Data),
@@ -633,7 +631,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
             <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($CategoryID)?> <?=$TorrentTags->css_name()?>"></div>
         </td>
         <td class="td_info big_info">
-<?php   if ($LoggedUser['CoverArt']) { ?>
+<?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
                 <?=ImageTools::cover_thumb($GroupInfo['Image'], $CategoryID) ?>
             </div>
