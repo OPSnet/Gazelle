@@ -3,7 +3,7 @@ class Requests {
     /**
      * Update the sphinx requests delta table for a request.
      *
-     * @param $RequestID
+     * @param int $RequestID
      */
     public static function update_sphinx_requests($RequestID) {
         global $Cache, $DB;
@@ -57,7 +57,7 @@ class Requests {
      *
      * @param array $RequestIDs
      * @param boolean $Return if set to false, data won't be returned (ie. if we just want to prime the cache.)
-     * @return The array of requests.
+     * @return array The array of requests.
      * Format: array(RequestID => Associative array)
      * To see what's exactly inside each associate array, peek inside the function. It won't bite.
      */
@@ -137,16 +137,14 @@ class Requests {
             }
         }
 
-        if ($Return) { // If we're interested in the data, and not just caching it
-            return $Found;
-        }
+        return $Return ? $Found : [];
     }
 
     /**
      * Return a single request. Wrapper for get_requests
      *
      * @param int $RequestID
-     * @return request array or false if request doesn't exist. See get_requests for a description of the format
+     * @return array|false request array or false if request doesn't exist. See get_requests for a description of the format
      */
     public static function get_request($RequestID) {
         $Request = self::get_requests([$RequestID]);
@@ -187,7 +185,7 @@ class Requests {
 
     /**
      * Return artists of a group as an array of types (main, composer, guest, ...)
-     * @param int $GroupID
+     * @param int $RequestID
      * @return array - associative array with the keys:
      *    (composers, dj, artists, with, conductor, remixedBy, producer)
      *    If there are no artists of a given type, the array will be empty,

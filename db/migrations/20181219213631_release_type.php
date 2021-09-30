@@ -28,7 +28,7 @@ class ReleaseType extends AbstractMigration
      */
     public function up()
     {
-        $table = $this->table('release_type', ['id' => false, 'primary_key' => 'ID'])
+        $this->table('release_type', ['id' => false, 'primary_key' => 'ID'])
                       ->addColumn('ID', 'integer', ['limit' => 10, 'identity' => true])
                       ->addColumn('Name', 'string', ['limit' => 50])
                       ->addIndex(['Name'], ['unique' => true])

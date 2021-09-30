@@ -58,7 +58,7 @@ class Wiki extends BaseObject {
 
     /**
      * Normalize an alias
-     * @param string $str
+     * @param string $alias
      * @return string
      */
     static public function normalizeAlias(string $alias): string {
@@ -167,9 +167,8 @@ class Wiki extends BaseObject {
     /**
      * Add an alias to an existing article
      *
-     * @param int article id
-     * @param string alias
-     * @param int user id of the person adding the alias
+     * @param string $alias
+     * @param int $userId user id of the person adding the alias
      * @throws \DB_MYSQL_DuplicateKeyException if alias already exists on another article
      */
     public function addAlias(string $alias, int $userId): int {
@@ -186,7 +185,7 @@ class Wiki extends BaseObject {
     /**
      * Remove an alias of an article.
      *
-     * @param string the alias to remove
+     * @param string $alias the alias to remove
      */
     public function removeAlias(string $alias): int {
         if (!isset($this->info['alias'][$alias])) {

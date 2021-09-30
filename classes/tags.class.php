@@ -156,7 +156,7 @@ class Tags {
      * @param int $Max Max number of items to get
      * @param string $Link  Page query where more items of this tag type can be found
      * @param string $ArtistName Optional artist
-     * @return set of HTML <li> elements
+     * @return string set of HTML <li> elements
      */
     public static function topAsHTML($Max = 5, $Link = 'torrents.php?taglist=', $ArtistName = '') {
         if (empty(self::$All)) {

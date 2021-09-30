@@ -3,7 +3,7 @@ class Users {
     /**
      * Get user info, is used for the current user and usernames all over the site.
      *
-     * @param $UserID int   The UserID to get info for
+     * @param int $UserID The UserID to get info for
      * @return array with the following keys:
      *    int     ID
      *    string  Username
