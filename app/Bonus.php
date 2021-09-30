@@ -188,7 +188,6 @@ class Bonus extends Base {
     /**
      * Get the total purchases of all items by a user
      *
-     * @param int user_id
      * @return array of [title, total]
      */
     public function purchaseHistoryByUser(): array {

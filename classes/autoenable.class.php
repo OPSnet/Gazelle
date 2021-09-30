@@ -76,12 +76,12 @@ class AutoEnable {
                 'samesite' => 'Lax',
             ]);
             $Output = self::RECEIVED_MESSAGE;
-            $user->addStaffNote()->modify("Enable request " . $DB->inserted_id() . " received from $IP");
+            $user->addStaffNote("Enable request " . $DB->inserted_id() . " received from $IP")->modify();
         }
         return $Output;
     }
 
-    /*
+    /**
      * Handle requests
      *
      * @param int|int[] $IDs An array of IDs, or a single ID
@@ -269,11 +269,14 @@ class AutoEnable {
     /**
      * Build the search query, from the searchbox inputs
      *
-     * @param int $UserID The user ID
+     * @param string $Username The username for the user
      * @param string $IP The IP
-     * @param string $SubmittedTimestamp The timestamp representing when the request was submitted
-     * @param int $HandledUserID The ID of the user that handled the request
-     * @param string $HandledTimestamp The timestamp representing when the request was handled
+     * @param string $SubmittedTimestamp1 The timestamp representing when the request was submitted
+     * @param string $SubmittedTimestamp2 The timestamp representing when the request was submitted
+     * @param string $HandledUsername The username of the user that handled the request
+     * @param string $HandledBetween Filter type for timestamps
+     * @param string $HandledTimestamp1 The timestamp representing when the request was handled
+     * @param string $HandledTimestamp2 The timestamp representing when the request was handled
      * @param int $OutcomeSearch The outcome of the request
      * @param boolean $Checked Should checked requests be included?
      * @return array The WHERE conditions for the query

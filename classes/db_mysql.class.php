@@ -226,7 +226,7 @@ class DB_MYSQL {
      *                            or TRUE for other successful DML queries
      *                            or FALSE on failure.
      *
-     * @param $Query
+     * @param string $Query
      * @param int $AutoHandle
      * @return mysqli_result|bool
      */
@@ -318,7 +318,7 @@ class DB_MYSQL {
      * multiple times with different bound parameters, you'll want to call
      * the two functions separately instead of this function.
      *
-     * @param $Query
+     * @param string $Query
      * @param mixed ...$Parameters
      * @return bool|mysqli_result
      */

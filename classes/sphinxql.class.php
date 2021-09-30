@@ -93,7 +93,6 @@ class Sphinxql extends mysqli {
      *
      * @param string $Msg message to display
      * @param bool $Halt halt page processing. Default is to continue processing the page
-     * @return Sphinxql object
      */
     public function error($Msg, $Halt = false) {
         $ErrorMsg = 'SphinxQL ('.$this->Ident.'): '.strval($Msg);
@@ -140,7 +139,7 @@ class Sphinxql extends mysqli {
      * Register sent queries globally for later retrieval by debug functions
      *
      * @param string $QueryString query text
-     * @param param $QueryProcessTime time building and processing the query
+     * @param float $QueryProcessTime time building and processing the query
      */
     public static function register_query($QueryString, $QueryProcessTime) {
         self::$Queries[] = [$QueryString, $QueryProcessTime];

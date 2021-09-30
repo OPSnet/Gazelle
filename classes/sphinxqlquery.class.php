@@ -19,7 +19,7 @@ class SphinxqlQuery {
      *
      * @param string $Server server address or hostname
      * @param int $Port listening port
-     * @param string $Socket Unix socket address, overrides $Server:$Port
+     * @param string|false $Socket Unix socket address, overrides $Server:$Port
      */
     public function __construct($Server = SPHINXQL_HOST, $Port = SPHINXQL_PORT, $Socket = SPHINXQL_SOCK) {
         $this->Sphinxql = Sphinxql::init_connection($Server, $Port, $Socket);
@@ -30,7 +30,7 @@ class SphinxqlQuery {
      * Specify what data the Sphinx query is supposed to return
      *
      * @param string $Fields Attributes and expressions
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function select($Fields) {
         $this->Select = $Fields;
@@ -41,7 +41,7 @@ class SphinxqlQuery {
      * Specify the indexes to use in the search
      *
      * @param string $Indexes comma separated list of indexes
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function from($Indexes) {
         $this->Indexes = $Indexes;
@@ -54,7 +54,7 @@ class SphinxqlQuery {
      * @param string $Attribute attribute which the filter will apply to
      * @param mixed $Values scalar or array of numerical values. Array uses boolean OR in query condition
      * @param bool $Exclude whether to exclude or include matching documents. Default mode is to include matches
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function where($Attribute, $Values, $Exclude = false) {
         if (empty($Attribute) || !isset($Values)) {
@@ -95,7 +95,7 @@ class SphinxqlQuery {
      * @param string $Attribute attribute which the filter will apply to
      * @param int|null $Value upper limit for matches
      * @param bool $Inclusive whether to use <= or <
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function where_lt($Attribute, $Value, $Inclusive = false) {
         if (empty($Attribute) || $Value === null || !is_number($Value)) {
@@ -112,7 +112,7 @@ class SphinxqlQuery {
      * @param string $Attribute attribute which the filter will apply to
      * @param int|null $Value lower limit for matches
      * @param bool $Inclusive whether to use >= or >
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function where_gt($Attribute, $Value, $Inclusive = false) {
         if (empty($Attribute) || $Value === null || !is_number($Value)) {
@@ -128,7 +128,7 @@ class SphinxqlQuery {
      *
      * @param string $Attribute attribute which the filter will apply to
      * @param array $Values pair of numerical values that defines the filter range
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function where_between($Attribute, $Values) {
         if (empty($Attribute) || empty($Values) || count($Values) != 2 || !is_number($Values[0]) || !is_number($Values[1])) {
@@ -145,7 +145,7 @@ class SphinxqlQuery {
      *
      * @param string $Expr query expression
      * @param string $Field field to match $Expr against. Default is *, which means all available fields
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function where_match($Expr, $Field = '*', $Escape = true) {
         if (empty($Expr)) {
@@ -165,10 +165,10 @@ class SphinxqlQuery {
     /**
      * Specify the order of the matches. Calling this function multiple times sets secondary priorities
      *
-     * @param string $Attribute attribute to use for sorting.
+     * @param string|false $Attribute attribute to use for sorting.
      *     Passing an empty attribute value will clear the current sort settings
-     * @param string $Mode sort method to apply to the selected attribute
-     * @return current SphinxqlQuery object
+     * @param string|false $Mode sort method to apply to the selected attribute
+     * @return $this current SphinxqlQuery object
      */
     public function order_by($Attribute = false, $Mode = false) {
         if (empty($Attribute)) {
@@ -182,9 +182,9 @@ class SphinxqlQuery {
     /**
      * Specify how the results are grouped
      *
-     * @param string $Attribute group matches with the same $Attribute value.
+     * @param string|false $Attribute group matches with the same $Attribute value.
      *     Passing an empty attribute value will clear the current group settings
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function group_by($Attribute = false) {
         if (empty($Attribute)) {
@@ -198,10 +198,10 @@ class SphinxqlQuery {
     /**
      * Specify the order of the results within groups
      *
-     * @param string $Attribute attribute to use for sorting.
+     * @param string|false $Attribute attribute to use for sorting.
      *     Passing an empty attribute will clear the current group sort settings
-     * @param string $Mode sort method to apply to the selected attribute
-     * @return current SphinxqlQuery object
+     * @param string|false $Mode sort method to apply to the selected attribute
+     * @return $this current SphinxqlQuery object
      */
     public function order_group_by($Attribute = false, $Mode = false) {
         if (empty($Attribute)) {
@@ -218,7 +218,7 @@ class SphinxqlQuery {
      * @param int $Offset number of matches to discard
      * @param int $Limit number of matches to return
      * @param int $MaxMatches number of results to store in the Sphinx server's memory. Must be >= ($Offset+$Limit)
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function limit($Offset, $Limit, $MaxMatches = SPHINX_MAX_MATCHES) {
         $this->Limits = "$Offset, $Limit";
@@ -231,7 +231,7 @@ class SphinxqlQuery {
      *
      * @param string $Name setting name
      * @param mixed $Value value
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function set($Name, $Value) {
         $this->Options[$Name] = $Value;
@@ -288,7 +288,7 @@ class SphinxqlQuery {
     /**
      * Construct and send the query. Register the query in the global Sphinxql object
      *
-     * @param bool GetMeta whether to fetch meta data for the executed query. Default is yes
+     * @param bool $GetMeta whether to fetch meta data for the executed query. Default is yes
      * @return SphinxqlResult object
      */
     public function sphinxquery($GetMeta = true) {
@@ -309,8 +309,8 @@ class SphinxqlQuery {
     /**
      * Run a manually constructed query
      *
-     * @param string Query query expression
-     * @param bool GetMeta whether to fetch meta data for the executed query. Default is yes
+     * @param string $Query query expression
+     * @param bool $GetMeta whether to fetch meta data for the executed query. Default is yes
      * @return SphinxqlResult object
      */
     public function raw_query($Query, $GetMeta = true) {
@@ -321,7 +321,7 @@ class SphinxqlQuery {
     /**
      * Run a pre-processed query. Only used internally
      *
-     * @param bool GetMeta whether to fetch meta data for the executed query
+     * @param bool $GetMeta whether to fetch meta data for the executed query
      * @return SphinxqlResult object
      */
     private function send_query($GetMeta) {
@@ -363,7 +363,7 @@ class SphinxqlQuery {
     /**
      * Fetch and store meta data for the last executed query
      *
-     * @return meta data
+     * @return array meta data
      */
     private function get_meta() {
         return $this->raw_query("SHOW META", false)->to_pair(0, 1);
@@ -373,10 +373,11 @@ class SphinxqlQuery {
      * Copy attribute filters from another SphinxqlQuery object
      *
      * @param SphinxqlQuery $SphQLSource object to copy the filters from
-     * @return current SphinxqlQuery object
+     * @return $this current SphinxqlQuery object
      */
     public function copy_attributes_from($SphQLSource) {
         $this->Filters = $SphQLSource->Filters;
+        return $this;
     }
 
     /**

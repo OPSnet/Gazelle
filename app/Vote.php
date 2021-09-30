@@ -99,7 +99,6 @@ class Vote extends Base {
 
     /**
      * Gets where this album ranks overall.
-     * @param int $GroupID GroupID of the album
      * @return int Rank
      */
     public function rankOverall() {
@@ -120,8 +119,7 @@ class Vote extends Base {
 
     /**
      * Gets where this album ranks in its year.
-     * @param int $GroupID GroupID of the album
-     * @param int $Year Year it was released
+     * @param int $year Year it was released
      * @return int Rank for its year
      */
     public function rankYear(int $year) {
@@ -145,8 +143,7 @@ class Vote extends Base {
 
     /**
      * Gets where this album ranks in its decade.
-     * @param int $GroupID GroupID of the album
-     * @param int $Year Year it was released
+     * @param int $year Year it was released
      * @return int Rank for its year
      */
     public function rankDecade(int $year) {
@@ -288,7 +285,6 @@ class Vote extends Base {
 
     /**
      * Returns an array with torrent group vote data
-     * @param string|int $GroupID
      * @return array (Upvotes, Total Votes)
      */
     public function loadGroup(): array {
@@ -310,7 +306,6 @@ class Vote extends Base {
 
     /**
      * Returns an array with User Vote data: GroupID and vote type
-     * @param string|int $UserID
      * @return array [groupId => 0|1]
      */
     public function userVotes() {
@@ -366,7 +361,7 @@ class Vote extends Base {
     }
 
     protected function summary(): array {
-        [$total, $ups] = $this->db->row(" 
+        [$total, $ups] = $this->db->row("
             SELECT count(*) AS Total,
                 coalesce(sum(if(v.Type = 'Up', 1, 0)), 0) AS Ups
             FROM users_votes AS v

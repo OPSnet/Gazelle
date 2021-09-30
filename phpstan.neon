@@ -1,5 +1,5 @@
 parameters:
-    level: 1
+    level: 2
     bootstrapFiles:
         - classes/config.template.php
     scanFiles:
@@ -15,7 +15,7 @@ parameters:
         - sections
     parallel:
         maximumNumberOfProcesses: 1
-    
+
     # The ignored error in theory should not occur on PHP 7.3 with php-gd, but
     # we have had it happen nevertheless on some developer machines. Given its
     # our only ignored error, we are fine having this error happen optionally

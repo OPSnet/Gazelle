@@ -6,10 +6,9 @@ class View {
     /**
      * This function is to include the header file on a page.
      *
-     * @param $PageTitle the title of the page
-     * @param $JSIncludes is a comma-separated list of JS files to be included on
-     *                    the page. ONLY PUT THE RELATIVE LOCATION WITHOUT '.js'
-     *                    example: 'somefile,somedir/somefile'
+     * @param string $pageTitle the title of the page
+     * @param array $option associative array which has two keys 'css' and 'js'
+     *                      where each value is a comma separated list of files to include
      */
     public static function show_header(string $pageTitle, $option = []) {
         global $Document, $LoggedUser, $Twig, $Viewer;
@@ -253,10 +252,10 @@ class View {
     /**
      * This function is to include the footer file on a page.
      *
-     * @param $Options an optional array that you can pass information to the
-     *                 header through as well as setup certain limitations
-     *                   Here is a list of parameters that work in the $Options array:
-     *                 ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
+     * @param array $Options an optional array that you can pass information to the
+     *                       header through as well as setup certain limitations
+     *                         Here is a list of parameters that work in the $Options array:
+     *                       ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
      */
     public static function show_footer($Options = []) {
         if (self::$footerSeen) {

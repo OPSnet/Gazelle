@@ -12,7 +12,7 @@ class Torrents {
      *    Artists::get_artists($GroupID), in result[$GroupID]['ExtendedArtists']
      * @param boolean $Torrents if true, each group contains a list of torrents, in result[$GroupID]['Torrents']
      *
-     * @return array each row of the following format:
+     * @return void|array each row of the following format:
      * GroupID => (
      *    ID
      *    Name
@@ -242,7 +242,7 @@ class Torrents {
      * Supplements a torrent array with information that only concerns certain users and therefore cannot be cached
      *
      * @param array $Torrent torrent array preferably in the form used by Torrents::get_groups() or get_group_info()
-     * @param int $TorrentID
+     * @param array $Flags flags for the torrent
      */
     public static function torrent_properties(&$Torrent, &$Flags) {
         $Torrent['PersonalFL'] = empty($Torrent['FreeTorrent']) && self::has_token($Torrent['ID']);
@@ -327,7 +327,7 @@ class Torrents {
                 WHERE ta.ArtistID IS NOT NULL
                     AND ag.ArtistID = ?', $ArtistID);
             list($GroupCount) = $DB->next_record();
-            if (($ReqCount + $GroupCount) == 0) {
+            if (($ReqCount + $GroupCount) === 0) {
                 //The only group to use this artist
                 Artists::delete_artist($ArtistID);
             } else {
@@ -594,8 +594,8 @@ class Torrents {
     /**
      * Check if the logged in user can use a freeleech token on this torrent
      *
-     * @param int $Torrent
-     * @return boolen True if user is allowed to use a token
+     * @param array $Torrent
+     * @return boolean True if user is allowed to use a token
      */
     public static function can_use_token($Torrent) {
         global $LoggedUser;

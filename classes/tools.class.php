@@ -4,8 +4,8 @@ class Tools {
     /**
      * Geolocate an IP address using the database
      *
-     * @param $IP the ip to fetch the country for
-     * @return the country of origin
+     * @param string|int $IP the ip to fetch the country for
+     * @return string the country of origin
      */
     public static function geoip($IP) {
         static $IPs = [];
@@ -26,8 +26,8 @@ class Tools {
     /**
      * Gets the hostname for an IP address
      *
-     * @param $IP the IP to get the hostname for
-     * @return hostname fetched
+     * @param string $IP the IP to get the hostname for
+     * @return string string hostname fetched
      */
     public static function get_host_by_ip($IP) {
         $testar = explode('.', $IP);
@@ -47,8 +47,8 @@ class Tools {
     /**
      * Gets an hostname using AJAX
      *
-     * @param $IP the IP to fetch
-     * @return a span with JavaScript code
+     * @param string $IP the IP to fetch
+     * @return string a span with JavaScript code
      */
     public static function get_host_by_ajax($IP) {
         static $IPs = [];
@@ -93,7 +93,7 @@ class Tools {
     /**
      * Format an IP address with links to IP history.
      *
-     * @param string IP
+     * @param string $IP
      * @return string The HTML
      */
     public static function display_ip($IP) {

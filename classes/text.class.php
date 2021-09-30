@@ -718,7 +718,7 @@ class Text {
      *
      * @param int $ItemLevel Current item level
      * @param int $Level Current list level
-     * @param str $List reference to an XHTML string
+     * @param string $List reference to an XHTML string
      * @param int $i Iterator digit
      * @param int $Offset If the list doesn't start at level 1
      */
@@ -1233,7 +1233,7 @@ class Text {
             elseif (preg_match("/display:[ ]*inline\-block;[ ]*padding:/", $Element->getAttribute('style')) !== false) {
                 $NewElement = $Document->createElement('pad');
                 $CopyNode($Element, $NewElement);
-                $Padding = explode(' ', trim(explode(':', (explode(';', $Element->getAttribute('style'))[1])[1])));
+                $Padding = explode(' ', trim(explode(':', (explode(';', $Element->getAttribute('style'))[1]))[1]));
                 $NewElement->setAttribute('pad', implode('|', array_map(fn($x) => rtrim($x, 'px'), $Padding)));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
@@ -1358,7 +1358,7 @@ class Text {
      * Use sparingly.
      *
      * @param string $Str the string to unsanitize
-     * @return unsanitized string
+     * @return string unsanitized string
      */
     protected static function undisplay_str($Str) {
         return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
@@ -1372,9 +1372,9 @@ class Text {
             $Cache->cache_value($cacheKey, $name, 86400 + rand(1, 3600));
         }
         return $name
-            ? $url
+            ? ($url
                 ? sprintf('<a href="%s">%s</a>', $url, $name)
-                : sprintf('<a href="collages.php?id=%d">%s</a>', $id, $name)
+                : sprintf('<a href="collages.php?id=%d">%s</a>', $id, $name))
             : "[collage]{$id}[/collage]";
     }
 

@@ -48,7 +48,7 @@ class SphinxqlResult {
      * Collect and return all available data for the matches optionally indexed by a specified key
      *
      * @param string $Key key to use as indexing value
-     * @param string $ResultType method to use when fetching data from the mysqli_result object. Default is MYSQLI_ASSOC
+     * @param int $ResultType method to use when fetching data from the mysqli_result object. Default is MYSQLI_ASSOC
      * @return array with all available data for the matches
      */
     public function to_array($Key, $ResultType = MYSQLI_ASSOC) {
@@ -84,7 +84,7 @@ class SphinxqlResult {
      * Return specified portions of the current Sphinxql result object's meta data
      *
      * @param mixed $Keys scalar or array with keys to return. Default is false, which returns all meta data
-     * @return array with meta data
+     * @return mixed array with meta data if $Keys is false, else the value of the specified key(s)
      */
     public function get_meta($Keys = false) {
         if ($Keys !== false) {

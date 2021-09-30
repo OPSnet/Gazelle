@@ -165,7 +165,7 @@ class Time {
      * function then either surrounds the amount with a span or just returns the string. Giving a less than or equal
      * 0 hours to the function will return the string 'Never'.
      *
-     * @param $hours
+     * @param int $hours
      * @param int $levels
      * @param bool $span
      * @return string

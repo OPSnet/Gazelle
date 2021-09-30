@@ -8,7 +8,7 @@ class Permissions {
      * Check to see if a user has the permission to perform an action
      * This is called by check_perms in util.php, for convenience.
      *
-     * @param string PermissionName
+     * @param string $PermissionName
      * @param int $MinClass Return false if the user's class level is below this.
      *
      * @return bool
@@ -51,7 +51,7 @@ class Permissions {
     /**
      * Get a user's permissions.
      *
-     * @param $UserID
+     * @param int $UserID
      * @param array|false $CustomPermissions
      *    Pass in the user's custom permissions if you already have them.
      *    Leave false if you don't have their permissions. The function will fetch them.

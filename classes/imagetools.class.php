@@ -109,8 +109,8 @@ class ImageTools {
 
     /**
      * Stores a link with a (thumbnail) link
-     * @param type $Link
-     * @param type $Processed
+     * @param string $Link
+     * @param mixed $Processed
      */
     private static function store($Link, $Processed) {
         self::$Storage[$Link] = $Processed;
@@ -118,7 +118,7 @@ class ImageTools {
 
     /**
      * Retrieves an entry from our storage
-     * @param type $Link
+     * @param string $Link
      * @return boolean|string Returns false if no match
      */
     private static function get_stored($Link) {
@@ -155,9 +155,10 @@ class ImageTools {
     /**
      * Create image proxy URL
      * @param string $Url image URL
-     * @param bool/string $CheckSize - accepts one of false, "avatar", "avatar2", or "donoricon"
-     * @param bool/string/number $UserID - user ID for avatars and donor icons
-     * @return image proxy URL
+     * @param bool|string $CheckSize - accepts one of false, "avatar", "avatar2", or "donoricon"
+     * @param bool|string|number $UserID - user ID for avatars and donor icons
+     * @param string $ExtraInfo
+     * @return string image proxy URL
      */
     public static function proxy_url($Url, $CheckSize, $UserID, &$ExtraInfo) {
         if ($UserID) {
@@ -180,8 +181,8 @@ class ImageTools {
      * Determine the image URL. This takes care of the image proxy and thumbnailing.
      * @param string $Url
      * @param bool $Thumb
-     * @param bool/string $CheckSize - accepts one of false, "avatar", "avatar2", or "donoricon"
-     * @param bool/string/number $UserID - user ID for avatars and donor icons
+     * @param bool|string $CheckSize - accepts one of false, "avatar", "avatar2", or "donoricon"
+     * @param bool|string|number $UserID - user ID for avatars and donor icons
      * @return string
      */
     public static function process($Url, $Thumb = false, $CheckSize = false, $UserID = false) {

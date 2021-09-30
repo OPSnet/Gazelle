@@ -37,7 +37,7 @@ class Format {
     /**
      * Gets the CSS class corresponding to a ratio
      *
-     * @param $Ratio ratio to get the css class for
+     * @param float $Ratio ratio to get the css class for
      * @return string the CSS class corresponding to the ratio range
      */
     public static function get_ratio_color($Ratio) {
@@ -332,7 +332,7 @@ class Format {
      *
      * @param string $Index the name of the form field
      * @param boolean $Return if set to true, value is returned instead of echoed.
-     * @return Sanitized value of field index if $Return == true
+     * @return void|string Sanitized value of field index if $Return == true
      */
     public static function form($Index, $Return = false) {
         if (!empty($_GET[$Index])) {
@@ -375,7 +375,7 @@ class Format {
      *                 2-dimensional array: At least one array must be identical to $Target
      * @param string $ClassName CSS class name to return
      * @param bool $AddAttribute Whether to include the "class" attribute in the output
-     * @param string $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to $LoggedUser[ID]
+     * @param string|false $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to $LoggedUser[ID]
      *
      * @return string class name on match, otherwise an empty string
      */
@@ -426,8 +426,7 @@ class Format {
      * E.g.: snatched/freeleech/neutral leech/reported
      *
      * @param string $Text Display text
-     * @param string $Class Custom CSS class
-     * @return string <strong> element
+     * @return string Text wrapped in <strong>
      */
     public static function torrent_label($Text) {
         $Class = self::$TorrentLabels[mb_ereg_replace('[^\w\d\s]+', '', strtolower($Text))]
