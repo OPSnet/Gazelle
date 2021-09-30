@@ -168,8 +168,8 @@ echo $Twig->render('artist/similar.twig', [
 ]);
 
 if ($Viewer->permitted('zip_downloader')) {
-    if (isset($LoggedUser['Collector'])) {
-        [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
+    if ($Viewer->option('Collector')) {
+        [$ZIPList, $ZIPPrefs] = $Viewer->option('Collector');
         $ZIPList = explode(':', $ZIPList);
     } else {
         $ZIPList = ['00', '11'];
@@ -270,7 +270,7 @@ if ($sections = $Artist->sections()) {
     <table class="torrent_table grouped release_table m_table">
 <?php
     $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
-    $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 0) == 1 ? 1 : 0;
+    $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 
     foreach ($sections as $sectionId => $groupList) {
         $sectionClosed = !isset($LoggedUser['SortHide']) || (array_key_exists($sectionId, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$sectionId] == 0)
@@ -345,7 +345,7 @@ if ($sections = $Artist->sections()) {
                         </div>
                     </td>
                     <td colspan="5" class="td_info big_info">
-<?php   if (isset($LoggedUser['CoverArt']) && $LoggedUser['CoverArt']) { ?>
+<?php   if ($Viewer->option('CoverArt')) { ?>
                         <div class="group_image float_left clear">
                             <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
                         </div>
@@ -608,7 +608,7 @@ function flipView() {
         document.getElementById('flip_view_1').style.display = 'none';
         document.getElementById('flip_view_2').style.display = 'block';
         document.getElementById('flipper_title').innerHTML = 'Similar Artist Cloud';
-        document.getElementById('flip_to').innerHTML = 'Switch to map';
+        document.getElementById('flip_to').innerHTML = 'switch to map';
         if (!cloudLoaded) {
             require("<?= STATIC_SERVER ?>/functions/tagcanvas.js", function () {
                 require("<?= STATIC_SERVER ?>/functions/artist_cloud.js", function () {});
@@ -619,7 +619,7 @@ function flipView() {
         document.getElementById('flip_view_1').style.display = 'block';
         document.getElementById('flip_view_2').style.display = 'none';
         document.getElementById('flipper_title').innerHTML = 'Similar Artist Map';
-        document.getElementById('flip_to').innerHTML = 'Switch to cloud';
+        document.getElementById('flip_to').innerHTML = 'switch to cloud';
     }
 }
 
