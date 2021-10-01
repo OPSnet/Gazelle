@@ -41,8 +41,8 @@
             <a href="{{ inbox.setFilter('system').folderLink(inbox.folder, inbox.showUnreadFirst) }}" class="brackets">Notifications only</a>
         {% endif %}
     {% else %}
-            <a href="{{ inbox.folderLink(inbox.folder, inbox.showUnreadFirst) }}&amp;filter=system" class="brackets">Notifications only</a>
             <a href="{{ inbox.folderLink(inbox.folder, inbox.showUnreadFirst) }}&amp;filter=user" class="brackets">Hide notifications</a>
+            <a href="{{ inbox.folderLink(inbox.folder, inbox.showUnreadFirst) }}&amp;filter=system" class="brackets">Notifications only</a>
     {% endif %}
             <a href="{{ inbox.folderLink(inbox.folder, not inbox.showUnreadFirst)
             }}" class="brackets tooltip" title="Temporary toggle switch for sorting PMs. To permanently change the sorting behavior, edit the setting in your profile.">List

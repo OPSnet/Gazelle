@@ -1,7 +1,7 @@
 {{ header('Compose message', {'js': 'inbox,bbcode,jquery.validate,form_validate'}) }}
 <div class="thin">
     <div class="header">
-        <h2>Send a message to <a href="user.php?id={{ recipient.id }}">{{ recipient.username }}</a></h2>
+        <h2>Send a message to {{ recipient.id|user_url }}</a></h2>
     </div>
     <form class="send_form" name="message" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
