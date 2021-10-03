@@ -46,7 +46,7 @@ class Bonus extends Base {
                 continue;
             } elseif (
                 $item['Label'] === 'invite'
-                && (check_perms('site_send_unlimited_invites') || !$this->user->canPurchaseInvite())
+                && ($this->user->permitted('site_send_unlimited_invites') || !$this->user->canPurchaseInvite())
             ) {
                 continue;
             }
