@@ -35,8 +35,8 @@ class LockOldThreads extends \Gazelle\Schedule\Task
                 $this->cache->begin_transaction("thread_$id".'_info');
                 $this->cache->update_row(false, ['IsLocked' => '1']);
                 $this->cache->commit_transaction(3600 * 24 * 30);
-                $this->cache->expire_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
-                $this->cache->expire_value("thread_$id".'_info', 3600 * 24 * 30);
+                $this->cache->delete_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
+                $this->cache->delete_value("thread_$id".'_info', 3600 * 24 * 30);
                 $forumMan->findByThreadId($id)->addThreadNote($id, 0, 'Locked automatically by schedule');
                 $this->processed++;
             }
