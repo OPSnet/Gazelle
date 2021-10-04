@@ -13,9 +13,9 @@ class Mail {
     /**
      * Send an email.
      *
-     * @param string Recipient address
-     * @param string Subject
-     * @param string Body
+     * @param string $to Recipient address
+     * @param string $subject
+     * @param string $body
      */
     public function send(string $to, string $subject, string $body) {
         $from = $this->from . '@' . SITE_HOST;
