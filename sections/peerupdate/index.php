@@ -15,7 +15,7 @@ ini_set('max_execution_time', 300);
 ob_end_flush();
 gc_enable();
 
-$Cache->InternalCache = false; // We don't want PHP to cache all results internally
+$Cache->disableLocalCache();
 $DB->prepared_query('
     CREATE TEMPORARY TABLE tmp_torrents_peerlists (
         TorrentID int NOT NULL PRIMARY KEY,

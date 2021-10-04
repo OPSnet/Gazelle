@@ -72,7 +72,7 @@ abstract class Collector extends Base  {
     public function __construct(\Gazelle\User $user, $title, $orderBy) {
         parent::__construct();
 
-        $this->cache->InternalCache = false; // The internal cache is almost completely useless for this
+        $this->cache->disableLocalCache(); // The internal cache is almost completely useless for this
         $this->title = $title;
         $this->user = $user;
         $this->orderBy = $orderBy;
@@ -196,7 +196,6 @@ abstract class Collector extends Base  {
      * it will be added to the list of errors. If the torrent does not
      * match the minimum format/encoding requirements, it will be skipped.
      *
-     * @param string $data bencoded torrent without announce url
      * @param array $info file info stored as an array with at least the keys
      *     Artist, Name, Year, Media, Format, Encoding and TorrentID
      * @param string $folderName folder name
@@ -228,7 +227,7 @@ abstract class Collector extends Base  {
     /**
      * Add a file to the list of files that did not match the user's format or quality requirements
      *
-     * @param array containing keys Artist, Name and Year
+     * @param array $info containing keys Artist, Name and Year
      */
     public function skip($info) {
         $this->skipped[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
@@ -238,7 +237,7 @@ abstract class Collector extends Base  {
     /**
      * Add a file to the list of files for which the torrent data is corrupt.
      *
-     * @param array containing keys Artist, Name and Year
+     * @param array $info containing keys Artist, Name and Year
      */
     public function fail($info) {
         $this->error[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
@@ -257,8 +256,6 @@ abstract class Collector extends Base  {
 
     /**
      * Add a summary to the archive and include a list of files that could not be added. Close the zip archive
-     *
-     * @param bool $FilterStats whether to include filter stats in the report
      */
     public function emit() {
         $this->fill();
@@ -272,11 +269,9 @@ abstract class Collector extends Base  {
 
     /**
      * Produce a summary text over the collector results
-     *
-     * @param bool $FilterStats whether to include filter stats in the report
      * @return string summary text
      */
-    public function summary() {
+    public function summary(): string {
         return $this->twig->render('collector.twig', [
             'added'   => $this->totalAdded,
             'total'   => $this->totalFound,

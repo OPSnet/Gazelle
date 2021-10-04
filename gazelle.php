@@ -1,7 +1,10 @@
 <?php
 
-if (PHP_VERSION_ID < 70300) {
-    die("Gazelle (Orpheus fork) requires PHP 7.3 or later to function properly");
+if (PHP_VERSION_ID < 70400) {
+    die("Gazelle (Orpheus fork) requires PHP 7.4 or later to function properly");
+}
+if (!extension_loaded('memcached')) {
+    die('memcached Extension not loaded.');
 }
 date_default_timezone_set('UTC');
 

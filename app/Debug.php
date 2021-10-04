@@ -239,7 +239,7 @@ class Debug {
 
     public function get_cache_keys() {
         $list = [];
-        $keys = array_keys(self::$cache->CacheHits);
+        $keys = array_keys(self::$cache->hits());
         foreach ($keys as $key) {
             $list[$key] = print_r(self::$cache->get_value($key, true), true);
         }
