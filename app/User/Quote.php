@@ -15,7 +15,7 @@ class Quote extends \Gazelle\Base {
     /**
      * Toggle whether only unread quotes should be listed
      *
-     * @param bool false if only unread should be shown, true to show everything
+     * @param bool $showAll false if only unread should be shown, true to show everything
      */
     public function setShowAll(bool $showAll) {
         $this->showAll = $showAll;
@@ -34,7 +34,7 @@ class Quote extends \Gazelle\Base {
     /**
      * Mark all unread quotes as having been seen by a user
      *
-     * return int Number of quotes cleared
+     * @return int Number of quotes cleared
      */
     public function clear(): int {
         $this->db->prepared_query("
@@ -50,9 +50,9 @@ class Quote extends \Gazelle\Base {
     /**
      * Mark the user as having seen their quoted posts in a thread
      *
-     * @param int threadId The ID of the thread
-     * @param int firstPost The first post in the thread
-     * @param int lastPost The most recent post in the thread
+     * @param int $threadId The ID of the thread
+     * @param int $firstPost The first post in the thread
+     * @param int $lastPost The most recent post in the thread
      */
     public function clearThread(int $threadId, int $firstPost, int $lastPost): bool {
         $this->db->prepared_query("
@@ -74,7 +74,7 @@ class Quote extends \Gazelle\Base {
      * NB: the functionality to check forum quotes also appears in the Search\Forum
      * class. It is not obvious how to hold the logic in one place only.
      *
-     * @return [array conditions, array arguments]
+     * @return array [array conditions, array arguments]
      * The conditions should be AND'ed together in a WHERE clause and the
      * arguments passed to a db query.
      */
@@ -135,8 +135,8 @@ class Quote extends \Gazelle\Base {
     /**
      * Get a page of quotes
      *
-     * @param int Number of quotes in the page (limit)
-     * @param int How far from the beginning of the list (offset)
+     * @param int $limit Number of quotes in the page (limit)
+     * @param int $offset How far from the beginning of the list (offset)
      * @return array of quote results, each having
      *  jump: url that points to the quote' => "torrents.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
      *  link: html href that points to the context (artist, collage, forum, request, torrent)
