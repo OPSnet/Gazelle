@@ -90,7 +90,7 @@ class ImageTools {
     /**
      * Checks to see if a link has a thumbnail
      * @param string $Url Link to an image
-     * @return string|false Matched host or false
+     * @return bool
      */
     private static function thumbnailable($Url) {
         $ParsedUrl = parse_url($Url);

@@ -12,9 +12,9 @@ class CacheMultiFlush extends \Gazelle\Base {
      * Flush a list of user cache keys. The shape is provided as sprintf format,
      * and each UserID is flushed for each shape.
      *
-     * @param string namespace Identify source table to be scanned
-     * @param array shape List of keys, e.g. ['user_info_%d', 'user_info_heavy_%d']
-     * @return number of keys flushed
+     * @param string $namespace Identify source table to be scanned
+     * @param array $shape List of keys, e.g. ['user_info_%d', 'user_info_heavy_%d']
+     * @return int number of keys flushed
      */
     public function multiFlush(string $namespace, array $shape): int {
         $table = CACHE_DB[$namespace]['table'];

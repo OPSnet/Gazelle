@@ -294,7 +294,7 @@ class Format {
             $Number = $Number / 1000;
         }
         switch ($Steps) {
-            case 0: return round($Number); break;
+            case 0: return (string)round($Number); break;
             case 1: return round($Number, 2).'k'; break;
             case 2: return round($Number, 2).'M'; break;
             case 3: return round($Number, 2).'G'; break;

@@ -562,7 +562,7 @@ class Torrents {
      * Check if the logged in user has an active freeleech token
      *
      * @param int $TorrentID
-     * @return true if an active token exists
+     * @return bool true if an active token exists
      */
     public static function has_token($TorrentID) {
         global $Cache, $DB, $LoggedUser;

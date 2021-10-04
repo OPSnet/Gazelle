@@ -289,7 +289,7 @@ class SphinxqlQuery {
      * Construct and send the query. Register the query in the global Sphinxql object
      *
      * @param bool $GetMeta whether to fetch meta data for the executed query. Default is yes
-     * @return SphinxqlResult object
+     * @return SphinxqlResult|false object
      */
     public function sphinxquery($GetMeta = true) {
         $QueryStartTime = microtime(true);
@@ -311,7 +311,7 @@ class SphinxqlQuery {
      *
      * @param string $Query query expression
      * @param bool $GetMeta whether to fetch meta data for the executed query. Default is yes
-     * @return SphinxqlResult object
+     * @return SphinxqlResult|false object
      */
     public function raw_query($Query, $GetMeta = true) {
         $this->QueryString = $Query;
@@ -322,7 +322,7 @@ class SphinxqlQuery {
      * Run a pre-processed query. Only used internally
      *
      * @param bool $GetMeta whether to fetch meta data for the executed query
-     * @return SphinxqlResult object
+     * @return SphinxqlResult|false object
      */
     private function send_query($GetMeta) {
         if (!$this->QueryString) {

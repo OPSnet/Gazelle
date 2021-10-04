@@ -121,8 +121,8 @@ class Validator {
      *
      * TODO: date fields are not actually validated, need to figure out what the proper validation syntax should be.
      *
-     * @param  array $ValidateArray
-     * @return true if validated, false if error (fetch with errorMessage method)
+     * @param array $ValidateArray
+     * @return bool true if validated, false if error (fetch with errorMessage method)
      */
     function validate($ValidateArray) {
         reset($this->Fields);

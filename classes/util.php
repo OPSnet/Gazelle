@@ -366,10 +366,10 @@ function placeholders(array $list, $placeholder = '?') {
  * Magical function.
  *
  * @param string $Str function to detect encoding on.
- * @return true if the string is in UTF-8.
+ * @return bool true if the string is in UTF-8.
  */
 function is_utf8($Str) {
-    return preg_match('%^(?:
+    return (bool)preg_match('%^(?:
         [\x09\x0A\x0D\x20-\x7E]              // ASCII
         | [\xC2-\xDF][\x80-\xBF]             // non-overlong 2-byte
         | \xE0[\xA0-\xBF][\x80-\xBF]         // excluding overlongs
