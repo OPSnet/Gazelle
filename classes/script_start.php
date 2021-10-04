@@ -166,7 +166,9 @@ if (!is_null($Viewer)) {
     }
 
     // Change necessary triggers in external components
-    $Cache->CanClear = $Viewer->permitted('admin_clear_cache');
+    if ($Viewer->permitted('admin_clear_cache')) {
+        $Cache->enableCacheClear();
+    }
 
     // Because we <3 our staff
     if ($Viewer->permitted('site_disable_ip_history')) {

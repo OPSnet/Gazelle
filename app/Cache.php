@@ -27,28 +27,26 @@ memcached -d -m 8192 -l 10.10.0.1 -t8 -C
 
 |*************************************************************************/
 
-if (!extension_loaded('memcached')) {
-    die('memcached Extension not loaded.');
-}
-
 class Cache extends \Memcached {
     /**
      * Torrent Group cache version
      */
     const GROUP_VERSION = 6;
 
-    public $CacheHits = [];
-    public $MemcacheDBArray = [];
-    public $MemcacheDBKey = '';
-    protected $InTransaction = false;
-    public $Time = 0;
-    private $Servers = [];
-    private $ClearedKeys = [];
-    private $PersistentKeysRegexp =
+    protected array $CacheHits = [];
+    protected array $ClearedKeys = [];
+    protected array $Servers = [];
+    protected array $MemcacheDBArray = [];
+    protected string $MemcacheDBKey = '';
+
+    protected bool $InTransaction = false;
+    protected bool $CanClear = false;
+    protected bool $InternalCache = true;
+
+    protected string $PersistentKeysRegexp =
         '/^(?:global_notification$|(?:ajax_requests|notifications_one_reads_|query_lock|stats|top10(?:tor|votes)|users_snatched)_)/';
 
-    public $CanClear = false;
-    public $InternalCache = true;
+    public $Time = 0;
 
     /**
      * Constructor. Takes a array of $Servers with a host, port, and optionally a weight.
@@ -61,7 +59,7 @@ class Cache extends \Memcached {
      *
      * @see Memcached::getServerList()
      */
-    function __construct() {
+    public function __construct() {
         parent::__construct(CACHE_ID);
         $this->Servers = MEMCACHE_HOST_LIST;
         $ServerList = [];
@@ -80,15 +78,31 @@ class Cache extends \Memcached {
         }
     }
 
-    //---------- Caching functions ----------//
-
-    // Allows us to set an expiration on otherwise permanently cached values
-    // Useful for disabled users, locked threads, basically reducing ram usage
-    public function expire_value($Key, $Duration = 2592000) {
-        $StartTime = microtime(true);
-        $this->set($Key, $this->get($Key), $Duration);
-        $this->Time += (microtime(true) - $StartTime) * 1000;
+    public function enableCacheClear() {
+        $this->CanClear = true;
+        return $this;
     }
+
+    public function disableCacheClear() {
+        $this->CanClear = false;
+        return $this;
+    }
+
+    public function enableLocalCache() {
+        $this->InternalCache = true;
+        return $this;
+    }
+
+    public function disableLocalCache() {
+        $this->InternalCache = false;
+        return $this;
+    }
+
+    public function hits(): array {
+        return $this->CacheHits;
+    }
+
+    //---------- Caching functions ----------//
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 30 days
     public function cache_value($Key, $Value, $Duration = 2592000) {

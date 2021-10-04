@@ -45,8 +45,6 @@ class Donation extends \Gazelle\Base {
 
     public function donate(\Gazelle\User $user, array $Args) {
         $QueryID = $this->db->get_query_id();
-        $this->cache->InternalCache = false;
-
         if (!isset($Args['Amount'])) {
             $xbtAmount = 0.0;
             $fiatAmount = 0.0;

@@ -5,15 +5,15 @@ require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new Gazelle\Cache;
-$InternalCache = false;
+$Cache->disableLocalCache();
 
-$DB    = new DB_MYSQL;
+$DB = new DB_MYSQL;
 Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
 $Debug = new Gazelle\Debug($Cache, $DB);
 
 $torMan = new Gazelle\Manager\Torrent;
-$max = $DB->scalar("SELECT MAX(ID) FROM torrents");
-$id = 0;
+$max = $DB->scalar("SELECT max(ID) FROM torrents");
+$id = $argv[1] ?? 0;
 
 while ($id < $max) {
     $id++;
