@@ -290,7 +290,7 @@ class User extends BaseObject {
     /**
      * Set the custom permissions for this user
      *
-     * @param array a list of "perm_<permission_name>" custom permissions
+     * @param array $current a list of "perm_<permission_name>" custom permissions
      * @return bool was there a change?
      */
     public function modifyPermissionList(array $current): bool {
@@ -312,14 +312,14 @@ class User extends BaseObject {
         );
         $this->cache->delete_value("u_" . $this->id);
         $this->cache->delete_value("user_info_heavy_" . $this->id);
-        $this->info = false;
+        $this->info = [];
         return $this->db->affected_rows() === 1;
     }
 
     /**
      * Does the user have a specific permission?
      *
-     * @param string permission name
+     * @param string $permission name
      * @return bool permission granted
      */
     public function permitted(string $permission): bool {
@@ -329,10 +329,10 @@ class User extends BaseObject {
     /**
      * Does the user have any of the specified permissions?
      *
-     * @param array permission names
+     * @param string[] $permission names
      * @return bool permission granted
      */
-    public function permittedAny(string ...$permission): bool {
+    public function permittedAny(...$permission): bool {
         foreach ($permission as $p) {
             if ($this->info()['Permission'][$p] ?? false) {
                 return true;
@@ -622,7 +622,7 @@ class User extends BaseObject {
     /**
      * Create the recovery keys for the user
      *
-     * @param string 2FA seed (to validate challenges)
+     * @param string $key 2FA seed (to validate challenges)
      * @return int 1 if update succeeded
      */
     public function create2FA($key): int {
@@ -652,7 +652,7 @@ class User extends BaseObject {
      * A user is attempting to login with 2FA via a recovery key
      * If we have the key on record, burn it and let them in.
      *
-     * @param string Recovery key from user
+     * @param string $key Recovery key from user
      * @return bool Valid key, they may log in.
      */
     public function burn2FARecovery(string $key): bool {
@@ -751,8 +751,8 @@ class User extends BaseObject {
     /**
      * What right does the viewer have to see a list of properties of this user?
      *
-     * @param Gazelle\User viewer Who is looking?
-     * @param array Property What properties are they looking for?
+     * @param \Gazelle\User $viewer Who is looking?
+     * @param array $property What properties are they looking for?
      * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
     function propertyVisibleMulti(User $viewer, array $property): int {
@@ -773,8 +773,8 @@ class User extends BaseObject {
     /**
      * What right does the viewer have to see a property of this user?
      *
-     * @param Gazelle\User viewer Who is looking?
-     * @param array Property What property are they looking for?
+     * @param \Gazelle\User $viewer Who is looking?
+     * @param string $property What property are they looking for?
      * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
     function propertyVisible(User $viewer, string $property): int {
@@ -863,7 +863,7 @@ class User extends BaseObject {
     /**
      * Checks whether user has autocomplete enabled
      *
-     * @param string Where the is the input requested (search, other)
+     * @param string $Type Where the is the input requested (search, other)
      * @return boolean
      */
     public function hasAutocomplete($Type): bool {
@@ -912,7 +912,8 @@ class User extends BaseObject {
     /**
      * Checks whether user has any overrides to a forum
      *
-     * @param int forum id
+     * @param int $forumId
+     * @param int $forumMinClassLevel
      * @return bool has access
      */
     public function forumAccess(int $forumId, int $forumMinClassLevel): bool {
@@ -923,7 +924,7 @@ class User extends BaseObject {
     /**
      * Checks whether user has the permission to create a forum.
      *
-     * @param \Gazelle\Forum the forum
+     * @param \Gazelle\Forum $forum
      * @return boolean true if user has permission
      */
     public function createAccess(Forum $forum): bool {
@@ -933,7 +934,7 @@ class User extends BaseObject {
     /**
      * Checks whether user has the permission to read a forum.
      *
-     * @param \Gazelle\Forum the forum
+     * @param \Gazelle\Forum $forum
      * @return boolean true if user has permission
      */
     public function readAccess(Forum $forum): bool {
@@ -943,7 +944,7 @@ class User extends BaseObject {
     /**
      * Checks whether user has the permission to write to a forum.
      *
-     * @param \Gazelle\Forum the forum
+     * @param \Gazelle\Forum $forum
      * @return boolean true if user has permission
      */
     public function writeAccess(Forum $forum): bool {
@@ -953,7 +954,7 @@ class User extends BaseObject {
     /**
      * Checks whether the user is up to date on the forum
      *
-     * @param \Gazelle\Forum
+     * @param \Gazelle\Forum $forum
      * @return bool the user is up to date
      */
     public function hasReadLastPost(Forum $forum): bool {
@@ -965,8 +966,7 @@ class User extends BaseObject {
     /**
      * What is the last post this user has read in a thread?
      *
-     * @param int thread id
-     * @param int post id (or 0 if they have not read it).
+     * @param int $threadId
      */
     public function lastReadInThread(int $threadId): int {
         if (!isset($this->lastRead)) {
@@ -1062,7 +1062,7 @@ class User extends BaseObject {
     /**
      * Record a forum warning for this user
      *
-     * @param string reason for the warning.
+     * @param string $reason reason for the warning.
      */
      public function addForumWarning(string $reason) {
         $this->forumWarning[] = $reason;
@@ -1072,7 +1072,7 @@ class User extends BaseObject {
     /**
      * Record a staff not for this user
      *
-     * @param string staff note
+     * @param string $note staff note
      */
     public function addStaffNote(string $note) {
         $this->staffNote[] = $note;
@@ -1082,7 +1082,7 @@ class User extends BaseObject {
     /**
      * Set the user custom title
      *
-     * @param string The text of the title (may contain BBcode)
+     * @param string $title The text of the title (may contain BBcode)
      */
     public function setTitle(string $title) {
         $title = trim($title);
@@ -1243,7 +1243,7 @@ class User extends BaseObject {
     /**
      * Validate a user password
      *
-     * @param string password
+     * @param string $plaintext password
      * @return bool  true on correct password
      */
     public function validatePassword(string $plaintext): bool {
@@ -2186,7 +2186,7 @@ class User extends BaseObject {
 
     /**
      * Generates a check list of release types, ordered by the user or default
-     * @param array $option
+     * @param array $options
      * @param array $releaseType
      */
     public function releaseOrder(array $options, array $releaseType) {
@@ -2224,8 +2224,8 @@ class User extends BaseObject {
     /**
      * Get a page of FL token uses by user
      *
-     * @param int How many? (To fill a page)
-     * @param int From where (which page)
+     * @param int $limit How many? (To fill a page)
+     * @param int $offset From where (which page)
      * @return array [torrent_id, group_id, created, expired, downloaded, uses, group_name, format, encoding, size]
      */
     public function tokenPage(int $limit, int $offset): array {
@@ -2496,7 +2496,6 @@ class User extends BaseObject {
      * Checks whether a user is allowed to purchase an invite. Lower classes are capped,
      * users above this class will always return true.
      *
-     * @param integer $minClass Minimum class level necessary to purchase invites
      * @return boolean false if insufficient funds, otherwise true
      */
     public function canPurchaseInvite(): bool {
@@ -2506,7 +2505,7 @@ class User extends BaseObject {
     /**
      * Remove an active invitation
      *
-     * @param string invite key
+     * @param string $key invite key
      * @return bool success
      */
     public function removeInvite(string $key) {
@@ -2538,9 +2537,7 @@ class User extends BaseObject {
     /**
      * Initiate a password reset
      *
-     * @param int $UserID The user ID
-     * @param string $Username The username
-     * @param string $Email The email address
+     * @param \Twig\Environment $twig
      */
     public function resetPassword($twig) {
         $resetKey = randomString();
@@ -2579,7 +2576,7 @@ class User extends BaseObject {
     /**
      * Forcibly clear a password reset
      *
-     * @return 1 if the user was cleared
+     * @return int 1 if the user was cleared
      */
     public function clearPasswordReset(): int {
         $this->db->prepared_query("
@@ -2594,7 +2591,6 @@ class User extends BaseObject {
 
     /**
      * Returns an array with User Bookmark data: group IDs, collage data, torrent data
-     * @param string|int $UserID
      * @return array Group IDs, Bookmark Data, Torrent List
      */
     public function bookmarkList(): array {
@@ -2844,7 +2840,7 @@ class User extends BaseObject {
     /**
      * When did the user last donate?
      *
-     * @return date of last donation
+     * @return string date of last donation
      */
     public function lastDonation() {
         return $this->donorInfo()['Time'];
@@ -3001,7 +2997,7 @@ class User extends BaseObject {
     /**
      * Update donor rewards
      *
-     * @param array rewards
+     * @param array $field
      */
     public function updateReward(array $field) {
         $Rank = $this->donorRank();
@@ -3086,7 +3082,7 @@ class User extends BaseObject {
         $this->cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
     }
 
-    public function modifyCollectorDefaults(array $collector): int {
+    public function modifyCollectorDefaults(array $collector): bool {
         if (serialize($this->option('Collector')) != serialize($collector)) {
             $this->info['SiteOptions']['Collector'] = $collector;
             $this->db->prepared_query("

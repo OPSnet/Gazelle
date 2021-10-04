@@ -69,10 +69,10 @@ class Textarea extends \Gazelle\Base {
     /**
      * Create a textarea
      *
-     * @param string name  name attribute
-     * @param string value default text attribute
-     * @param string cols  cols attribute
-     * @param string rows  rows attribute
+     * @param string $name  name attribute
+     * @param string $value default text attribute
+     * @param int $cols  cols attribute
+     * @param int $rows  rows attribute
      */
     public function __construct(string $name, string $value, int $cols = 72, int $rows = 10) {
         parent::__construct();

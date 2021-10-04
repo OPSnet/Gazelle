@@ -49,7 +49,7 @@ class Tracker {
 
         $MaxAttempts = 3;
         $Err = false;
-        if (self::send_request($Get, $MaxAttempts, $Err) === false) {
+        if ($this->send_request($Get, $MaxAttempts, $Err) === false) {
             Irc::sendRaw("PRIVMSG #tracker :$MaxAttempts $Err $Get");
             global $Cache;
             if ($Cache->get_value('ocelot_error_reported') === false) {
@@ -64,10 +64,10 @@ class Tracker {
     /**
      * Get global peer stats from the tracker
      *
-     * @return array(0 => $Leeching, 1 => $Seeding) or false if request failed
+     * @return array|false (0 => $Leeching, 1 => $Seeding) or false if request failed
      */
-    public function global_peer_count(): ?array {
-        $Stats = self::get_stats(self::STATS_MAIN);
+    public function global_peer_count() {
+        $Stats = $this->get_stats(self::STATS_MAIN);
         if (isset($Stats['leechers tracked']) && isset($Stats['seeders tracked'])) {
             $Leechers = $Stats['leechers tracked'];
             $Seeders = $Stats['seeders tracked'];
@@ -81,10 +81,10 @@ class Tracker {
      * Get peer stats for a user from the tracker
      *
      * @param string $TorrentPass The user's pass key
-     * @return array(0 => $Leeching, 1 => $Seeding) or false if the request failed
+     * @return false|array (0 => $Leeching, 1 => $Seeding) or false if the request failed
      */
-    public function user_peer_count(string $TorrentPass): ?array {
-        $Stats = self::get_stats(self::STATS_USER, ['key' => $TorrentPass]);
+    public function user_peer_count(string $TorrentPass) {
+        $Stats = $this->get_stats(self::STATS_USER, ['key' => $TorrentPass]);
         if ($Stats === false) {
             return false;
         }
@@ -101,17 +101,17 @@ class Tracker {
     /**
      * Get whatever info the tracker has to report
      *
-     * @return results from get_stats()
+     * @return array results from get_stats()
      */
     public function info() {
-        return self::get_stats(self::STATS_MAIN);
+        return $this->get_stats(self::STATS_MAIN);
     }
 
     /**
      * Send a stats request to the tracker and process the results
      *
      * @param int $Type Stats type to get
-     * @param array $Params Parameters required by stats type
+     * @param false|array $Params Parameters required by stats type
      * @return array with stats in named keys or empty if the request failed
      */
     private function get_stats($Type, $Params = false): array {
@@ -126,7 +126,7 @@ class Tracker {
         } else {
             return [];
         }
-        $Response = self::send_request($Get);
+        $Response = $this->send_request($Get);
         if ($Response === false) {
             return [];
         }
@@ -144,7 +144,7 @@ class Tracker {
      * @param string $Get GET string to send to the tracker
      * @param int $MaxAttempts Maximum number of failed attempts before giving up
      * @param bool $Err Variable to use as storage for the error string if the request fails
-     * @return tracker response message or false if the request failed
+     * @return false|string tracker response message or false if the request failed
      */
     private function send_request($Get, $MaxAttempts = 1, &$Err = false) {
         if (defined('DISABLE_TRACKER') && DISABLE_TRACKER === true) {

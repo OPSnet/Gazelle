@@ -1,0 +1,1731 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Offset 'CategoryID' does not exist on array\\('DisplayArtists' \\=\\> string\\)\\.$#"
+			count: 1
+			path: app/API/Request.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool Is the viewer staff\\?\\)\\: Unexpected token \"Is\", expected variable at offset 144$#"
+			count: 1
+			path: app/Applicant.php
+
+		-
+			message: "#^Method Gazelle\\\\Manager\\\\Artist\\:\\:findById\\(\\) invoked with 2 parameters, 1 required\\.$#"
+			count: 1
+			path: app/Artist.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Gazelle\\\\Gazelle\\\\Exception\\\\ResourceNotFoundException is not subtype of Throwable$#"
+			count: 1
+			path: app/Artist.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Gazelle\\\\Gazelle\\\\Exception\\\\ResourceNotFoundException\\|Gazelle\\\\UnexpectedValueException is not subtype of Throwable$#"
+			count: 1
+			path: app/Artist.php
+
+		-
+			message: "#^Method Gazelle\\\\Bonus\\:\\:removePointsForUpload\\(\\) should return int but returns bool\\.$#"
+			count: 1
+			path: app/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string \\(on of artist, collage, request, torrent\\)\\)\\: Unexpected token \"\\(\", expected variable at offset 113$#"
+			count: 1
+			path: app/Bookmark.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string \\(on of artist, collage, request, torrent\\)\\)\\: Unexpected token \"\\(\", expected variable at offset 125$#"
+			count: 1
+			path: app/Bookmark.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$UserID$#"
+			count: 1
+			path: app/Bookmark.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userID$#"
+			count: 3
+			path: app/Bookmark.php
+
+		-
+			message: "#^PHPDoc tag @return has invalid value \\(\\[table, column\\]\\)\\: Unexpected token \"\\[\", expected type at offset 199$#"
+			count: 1
+			path: app/Bookmark.php
+
+		-
+			message: "#^Access to an undefined property Gazelle\\\\User\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(ascending int True to sort ASC, False to sort DESC\\)\\: Unexpected token \"int\", expected variable at offset 305$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User id\\)\\: Unexpected token \"User\", expected variable at offset 146$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int limit Number of entries to return \\(default 5, \\-1 for all\\)\\)\\: Unexpected token \"limit\", expected variable at offset 50$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int limit Number of entries to return \\(default 5, \\-1 for all\\)\\)\\: Unexpected token \"limit\", expected variable at offset 53$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\an is incompatible with native type array\\.$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @return with type int is incompatible with native type bool\\.$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Collage\\:\\:torrentList\\(\\) has invalid type Gazelle\\\\an\\.$#"
+			count: 1
+			path: app/Collage.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array containing keys Artist, Name and Year\\)\\: Unexpected token \"containing\", expected variable at offset 109$#"
+			count: 1
+			path: app/Collector.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array containing keys Artist, Name and Year\\)\\: Unexpected token \"containing\", expected variable at offset 131$#"
+			count: 1
+			path: app/Collector.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$FilterStats$#"
+			count: 2
+			path: app/Collector.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$data$#"
+			count: 1
+			path: app/Collector.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array \\[total comments, page, comment list, last read\\]\\)\\: Unexpected token \"\\[\", expected variable at offset 59$#"
+			count: 1
+			path: app/CommentViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int PostID of the last read post\\)\\: Unexpected token \"PostID\", expected variable at offset 125$#"
+			count: 1
+			path: app/CommentViewer.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Tools$#"
+			count: 1
+			path: app/CommentViewer.php
+
+		-
+			message: "#^Call to an undefined method Gazelle\\\\Contest\\\\AbstractContest\\:\\:leaderboard\\(\\)\\.$#"
+			count: 2
+			path: app/Contest.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$relax true if foreign key checks should be skipped\\)\\: Unexpected token \"\\$relax\", expected type at offset 49$#"
+			count: 1
+			path: app/DB.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array List of group IDs\\)\\: Unexpected token \"List\", expected variable at offset 84$#"
+			count: 1
+			path: app/Editor/UserBookmark.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array List of group IDs\\)\\: Unexpected token \"List\", expected variable at offset 92$#"
+			count: 1
+			path: app/Editor/UserBookmark.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array id rip log identifier \\[torrentId, logId\\]\\)\\: Unexpected token \"id\", expected variable at offset 57$#"
+			count: 1
+			path: app/File/RipLog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(boolean True \\(TODO\\: record individual unlink successes in the case of a wildcard\\)\\: Unexpected token \"True\", expected variable at offset 240$#"
+			count: 1
+			path: app/File/RipLog.php
+
+		-
+			message: "#^Method Gazelle\\\\File\\\\RipLogHTML\\:\\:path\\(\\) should return Gazelle\\\\File\\\\Fully but returns string\\.$#"
+			count: 1
+			path: app/File/RipLogHTML.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array id rip log identifier \\[torrentId, logId\\]\\)\\: Unexpected token \"id\", expected variable at offset 67$#"
+			count: 1
+			path: app/File/RipLogHTML.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(boolean True \\(TODO\\: record individual unlink successes in the case of a wildcard\\)\\: Unexpected token \"True\", expected variable at offset 250$#"
+			count: 1
+			path: app/File/RipLogHTML.php
+
+		-
+			message: "#^Return type \\(Gazelle\\\\File\\\\Fully\\) of method Gazelle\\\\File\\\\RipLogHTML\\:\\:path\\(\\) should be compatible with return type \\(string\\) of method Gazelle\\\\File\\:\\:path\\(\\)$#"
+			count: 1
+			path: app/File/RipLogHTML.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\File\\\\RipLogHTML\\:\\:path\\(\\) has invalid type Gazelle\\\\File\\\\Fully\\.$#"
+			count: 1
+			path: app/File/RipLogHTML.php
+
+		-
+			message: "#^Method Gazelle\\\\File\\\\Torrent\\:\\:path\\(\\) should return Gazelle\\\\File\\\\Fully but returns string\\.$#"
+			count: 1
+			path: app/File/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int id of torrent\\)\\: Unexpected token \"id\", expected variable at offset 59$#"
+			count: 1
+			path: app/File/Torrent.php
+
+		-
+			message: "#^Return type \\(Gazelle\\\\File\\\\Fully\\) of method Gazelle\\\\File\\\\Torrent\\:\\:path\\(\\) should be compatible with return type \\(string\\) of method Gazelle\\\\File\\:\\:path\\(\\)$#"
+			count: 1
+			path: app/File/Torrent.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\File\\\\Torrent\\:\\:path\\(\\) has invalid type Gazelle\\\\File\\\\Fully\\.$#"
+			count: 1
+			path: app/File/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array answer An array of answers \\(between 2 and 25\\)\\)\\: Unexpected token \"answer\", expected variable at offset 180$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array answers The answers\\)\\: Unexpected token \"answers\", expected variable at offset 104$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array hash of values \\(keyed on lowercase column names\\)\\)\\: Unexpected token \"hash\", expected variable at offset 46$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array vots An array of votes \\(1 per answer\\)\\)\\: Unexpected token \"vots\", expected variable at offset 246$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool set Sticky if true, otherwise unsticky\\)\\: Unexpected token \"set\", expected variable at offset 207$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int The last read post id \\(or 0 if thread has never been read before\\)\\)\\: Unexpected token \"The\", expected variable at offset 193$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int forumId The ID of the forum\\)\\: Unexpected token \"forumId\", expected variable at offset 380$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int forumId Where is it being moved to\\?\\)\\: Unexpected token \"forumId\", expected variable at offset 112$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int how many posts per page\\)\\: Unexpected token \"how\", expected variable at offset 96$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int id The forum ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 61$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int id The post ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 70$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int id The thread ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 88$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int item The answer to remove \\(1\\-based\\)\\)\\: Unexpected token \"item\", expected variable at offset 104$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int locked Is the thread locked\\?\\)\\: Unexpected token \"locked\", expected variable at offset 344$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int perPage The number of topics per page\\)\\: Unexpected token \"perPage\", expected variable at offset 143$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postID the ID of the post to remove\\)\\: Unexpected token \"postID\", expected variable at offset 64$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The ID of the last post the user has read\\)\\: Unexpected token \"postId\", expected variable at offset 195$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The ID of the post\\)\\: Unexpected token \"postId\", expected variable at offset 162$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The post ID\\)\\: Unexpected token \"postId\", expected variable at offset 132$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The post in the thread\\)\\: Unexpected token \"postId\", expected variable at offset 207$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The post\\)\\: Unexpected token \"postId\", expected variable at offset 102$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The post\\)\\: Unexpected token \"postId\", expected variable at offset 118$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int postId The post\\)\\: Unexpected token \"postId\", expected variable at offset 141$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int rank Where in the list of sticky threads does it appear\\? \\(Larger numbers are higher\\)\\)\\: Unexpected token \"rank\", expected variable at offset 241$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int sticky Is the thread stuck at the top of the first page\\?\\)\\: Unexpected token \"sticky\", expected variable at offset 166$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int stickyPostId If a sticky post, the count will be less one\\)\\: Unexpected token \"stickyPostId\", expected variable at offset 169$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int the thread where the poll is defined\\)\\: Unexpected token \"the\", expected variable at offset 99$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int the user id\\)\\: Unexpected token \"the\", expected variable at offset 69$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int thread id\\)\\: Unexpected token \"thread\", expected variable at offset 68$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int thread id\\)\\: Unexpected token \"thread\", expected variable at offset 92$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId In which thread\\?\\)\\: Unexpected token \"threadId\", expected variable at offset 91$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The ID of the thread\\)\\: Unexpected token \"threadId\", expected variable at offset 114$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The ID of the thread\\)\\: Unexpected token \"threadId\", expected variable at offset 147$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread ID\\)\\: Unexpected token \"threadId\", expected variable at offset 91$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread ID\\.\\)\\: Unexpected token \"threadId\", expected variable at offset 151$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread to edit\\)\\: Unexpected token \"threadId\", expected variable at offset 66$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread to lock\\)\\: Unexpected token \"threadId\", expected variable at offset 85$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread to remove\\)\\: Unexpected token \"threadId\", expected variable at offset 160$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 108$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 112$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 137$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 169$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 59$#"
+			count: 2
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 64$#"
+			count: 2
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 66$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 92$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId The thread\\)\\: Unexpected token \"threadId\", expected variable at offset 96$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId Where are they voting\\?\\)\\: Unexpected token \"threadId\", expected variable at offset 91$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int threadId the thread\\)\\: Unexpected token \"threadId\", expected variable at offset 62$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message:
+				"""
+					#^PHPDoc tag @param has invalid value \\(int toClose toggle open/closed for voting
+					\\(\\)\\: Unexpected token "toClose", expected variable at offset 197$#
+				"""
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int toFeature non\\-zero to feature on front page\\)\\: Unexpected token \"toFeature\", expected variable at offset 135$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userID The author\\)\\: Unexpected token \"userID\", expected variable at offset 62$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userID The author\\)\\: Unexpected token \"userID\", expected variable at offset 72$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userID The editor making the change\\)\\: Unexpected token \"userID\", expected variable at offset 48$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userID The editor making the change\\)\\: Unexpected token \"userID\", expected variable at offset 83$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userID The stickier\\)\\: Unexpected token \"userID\", expected variable at offset 76$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId   The moderator\\)\\: Unexpected token \"userId\", expected variable at offset 97$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId The ID of the user catching up\\)\\: Unexpected token \"userId\", expected variable at offset 90$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId The ID of the user catching up\\)\\: Unexpected token \"userId\", expected variable at offset 91$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId The author\\)\\: Unexpected token \"userId\", expected variable at offset 133$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId The user ID\\.\\)\\: Unexpected token \"userId\", expected variable at offset 113$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId The user id reading the forum\\)\\: Unexpected token \"userId\", expected variable at offset 88$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId Who is voting\\?\\)\\: Unexpected token \"userId\", expected variable at offset 51$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int vote What are they voting for\\?\\)\\: Unexpected token \"vote\", expected variable at offset 141$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int which page are we on\\)\\: Unexpected token \"which\", expected variable at offset 138$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string answer The new answer\\)\\: Unexpected token \"answer\", expected variable at offset 105$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string body The body of the first post in thread\\)\\: Unexpected token \"body\", expected variable at offset 152$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string body The body of the post\\)\\: Unexpected token \"body\", expected variable at offset 149$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string body The new contents\\)\\: Unexpected token \"body\", expected variable at offset 139$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string body The new contents\\)\\: Unexpected token \"body\", expected variable at offset 178$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string notes  The multi\\-line text\\)\\: Unexpected token \"notes\", expected variable at offset 141$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string question The poll question\\)\\: Unexpected token \"question\", expected variable at offset 133$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string title The new title of the thread\\)\\: Unexpected token \"title\", expected variable at offset 394$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string title The title of the thread\\)\\: Unexpected token \"title\", expected variable at offset 101$#"
+			count: 1
+			path: app/Forum.php
+
+		-
+			message: "#^Method Gazelle\\\\InviteTree\\:\\:details\\(\\) should return array but returns string\\.$#"
+			count: 1
+			path: app/InviteTree.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int version\\)\\: Unexpected token \"version\", expected variable at offset 198$#"
+			count: 1
+			path: app/Json.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\Search\\\\Forum\\)\\: Unexpected token \"\\\\n     \", expected variable at offset 83$#"
+			count: 1
+			path: app/Json/PostHistory.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\Util\\\\Paginator\\)\\: Unexpected token \"\\\\n     \", expected variable at offset 74$#"
+			count: 1
+			path: app/Json/PostHistory.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\a is not subtype of native type Gazelle\\\\User\\|null\\.$#"
+			count: 1
+			path: app/Login.php
+
+		-
+			message: "#^PHPDoc tag @return with type true is incompatible with native type Gazelle\\\\User\\|null\\.$#"
+			count: 1
+			path: app/Login.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Login\\:\\:attemptLogin\\(\\) has invalid type Gazelle\\\\a\\.$#"
+			count: 1
+			path: app/Login.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array list of IDs to ban\\.\\)\\: Unexpected token \"list\", expected variable at offset 165$#"
+			count: 1
+			path: app/LoginWatch.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array list of IDs to clear\\.\\)\\: Unexpected token \"list\", expected variable at offset 78$#"
+			count: 1
+			path: app/LoginWatch.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User doing the banning\\)\\: Unexpected token \"User\", expected variable at offset 97$#"
+			count: 1
+			path: app/LoginWatch.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string why\\)\\: Unexpected token \"why\", expected variable at offset 141$#"
+			count: 1
+			path: app/LoginWatch.php
+
+		-
+			message: "#^PHPDoc tag @return with type float\\|int is not subtype of native type int\\.$#"
+			count: 2
+			path: app/LoginWatch.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$page int The page number to fetch \\(50 entries\\) defaults to 1\\)\\: Unexpected token \"\\$page\", expected type at offset 928$#"
+			count: 1
+			path: app/Manager/Applicant.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$resolved int Should resolved applications be included \\(defaults to no\\)\\.\\)\\: Unexpected token \"\\$resolved\", expected type at offset 1004$#"
+			count: 1
+			path: app/Manager/Applicant.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$userId int If non\\-zero, return applications of this userId\\)\\: Unexpected token \"\\$userId\", expected type at offset 1091$#"
+			count: 1
+			path: app/Manager/Applicant.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\a is incompatible with native type array\\.$#"
+			count: 1
+			path: app/Manager/Applicant.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Manager\\\\Applicant\\:\\:list\\(\\) has invalid type Gazelle\\\\Manager\\\\a\\.$#"
+			count: 1
+			path: app/Manager/Applicant.php
+
+		-
+			message:
+				"""
+					#^PHPDoc tag @param has invalid value \\(array
+					     \\- id         The id of the news article
+					     \\- title      The title of the article
+					     \\- body       The body of the article
+					     \\- threadId   The associated threadId
+					     \\- important  The level of importance\\)\\: Unexpected token "\\\\n     \\* ", expected variable at offset 69$#
+				"""
+			count: 1
+			path: app/Manager/Blog.php
+
+		-
+			message:
+				"""
+					#^PHPDoc tag @param has invalid value \\(array
+					     \\- userId     The UserID of the author
+					     \\- title      The title of the article
+					     \\- body       The body of the article
+					     \\- threadId   The associated threadId
+					     \\- important  The level of importance\\)\\: Unexpected token "\\\\n     \\* ", expected variable at offset 52$#
+				"""
+			count: 1
+			path: app/Manager/Blog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int ID of the blog article\\)\\: Unexpected token \"ID\", expected variable at offset 61$#"
+			count: 1
+			path: app/Manager/Blog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int ID of the blog article\\)\\: Unexpected token \"ID\", expected variable at offset 87$#"
+			count: 1
+			path: app/Manager/Blog.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\ID is not subtype of native type Gazelle\\\\Blog\\.$#"
+			count: 1
+			path: app/Manager/Blog.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Manager\\\\Blog\\:\\:create\\(\\) has invalid type Gazelle\\\\Manager\\\\ID\\.$#"
+			count: 1
+			path: app/Manager/Blog.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$clientID$#"
+			count: 1
+			path: app/Manager/ClientWhitelist.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string name of the user\\)\\: Unexpected token \"name\", expected variable at offset 186$#"
+			count: 1
+			path: app/Manager/Collage.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\User the viewer\\)\\: Unexpected token \"the\", expected variable at offset 121$#"
+			count: 1
+			path: app/Manager/Comment.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\User the viewer\\)\\: Unexpected token \"the\", expected variable at offset 149$#"
+			count: 1
+			path: app/Manager/Comment.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Body$#"
+			count: 1
+			path: app/Manager/Comment.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$CollageID$#"
+			count: 1
+			path: app/Manager/Comment.php
+
+		-
+			message: "#^Class Gazelle\\\\Manager\\\\Thread referenced with incorrect case\\: Gazelle\\\\Manager\\\\thread\\.$#"
+			count: 1
+			path: app/Manager/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\User viewer\\)\\: Unexpected token \"viewer\", expected variable at offset 462$#"
+			count: 1
+			path: app/Manager/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array hash of values \\(keyed on lowercase column names\\)\\)\\: Unexpected token \"hash\", expected variable at offset 46$#"
+			count: 1
+			path: app/Manager/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int id The post ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 72$#"
+			count: 1
+			path: app/Manager/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int id The thread ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 74$#"
+			count: 1
+			path: app/Manager/Forum.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\Thread is incompatible with native type int\\|null\\.$#"
+			count: 1
+			path: app/Manager/Forum.php
+
+		-
+			message: "#^Binary operation \"\\+\" between string and 1 results in an error\\.$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId The person doing the band \\(0 for system\\)\\)\\: Unexpected token \"userId\", expected variable at offset 144$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string from The first address \\(dotted quad a\\.b\\.c\\.d\\)\\)\\: Unexpected token \"from\", expected variable at offset 213$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string reason Why ban\\?\\)\\: Unexpected token \"reason\", expected variable at offset 352$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string to The last adddress in the range \\(may equal \\$from\\)\\)\\: Unexpected token \"to\", expected variable at offset 279$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\record is incompatible with native type int\\.$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Manager\\\\IPv4\\:\\:createBan\\(\\) has invalid type Gazelle\\\\Manager\\\\record\\.$#"
+			count: 1
+			path: app/Manager/IPv4.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int limit\\)\\: Unexpected token \"limit\", expected variable at offset 66$#"
+			count: 1
+			path: app/Manager/Invite.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int offset\\)\\: Unexpected token \"offset\", expected variable at offset 90$#"
+			count: 1
+			path: app/Manager/Invite.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string email address fragment\\)\\: Unexpected token \"email\", expected variable at offset 76$#"
+			count: 1
+			path: app/Manager/Invite.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string invite key\\)\\: Unexpected token \"invite\", expected variable at offset 56$#"
+			count: 1
+			path: app/Manager/Invite.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$body    The body of the article\\)\\: Unexpected token \"\\$body\", expected type at offset 150$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$body    The body of the article\\)\\: Unexpected token \"\\$body\", expected type at offset 181$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$id      The article ID\\)\\: Unexpected token \"\\$id\", expected type at offset 95$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$id ID of article\\)\\: Unexpected token \"\\$id\", expected type at offset 69$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$id The id of the news article\\)\\: Unexpected token \"\\$id\", expected type at offset 64$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$title   The title of the article\\)\\: Unexpected token \"\\$title\", expected type at offset 102$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$title   The title of the article\\)\\: Unexpected token \"\\$title\", expected type at offset 133$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$userId  The UserID of the author\\)\\: Unexpected token \"\\$userId\", expected type at offset 54$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\ID is incompatible with native type int\\.$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Manager\\\\News\\:\\:create\\(\\) has invalid type Gazelle\\\\Manager\\\\ID\\.$#"
+			count: 1
+			path: app/Manager/News.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int Group ID\\)\\: Unexpected token \"Group\", expected variable at offset 79$#"
+			count: 1
+			path: app/Manager/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User ID of uploader\\)\\: Unexpected token \"User\", expected variable at offset 82$#"
+			count: 1
+			path: app/Manager/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @return with type float\\|int is not subtype of native type int\\.$#"
+			count: 2
+			path: app/Manager/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int ID of option\\)\\: Unexpected token \"ID\", expected variable at offset 94$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Mandatory comment\\)\\: Unexpected token \"Mandatory\", expected variable at offset 148$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Mandatory comment\\)\\: Unexpected token \"Mandatory\", expected variable at offset 201$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Name of option\\)\\: Unexpected token \"Name\", expected variable at offset 128$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Name of option\\)\\: Unexpected token \"Name\", expected variable at offset 64$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Name of option\\)\\: Unexpected token \"Name\", expected variable at offset 75$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Value of option\\)\\: Unexpected token \"Value\", expected variable at offset 111$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Value of option\\)\\: Unexpected token \"Value\", expected variable at offset 164$#"
+			count: 1
+			path: app/Manager/SiteOption.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int ID of the vistort\\)\\: Unexpected token \"ID\", expected variable at offset 70$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int blog id\\)\\: Unexpected token \"blog\", expected variable at offset 148$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int user id\\)\\: Unexpected token \"user\", expected variable at offset 107$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int user id\\)\\: Unexpected token \"user\", expected variable at offset 70$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string body of the blog post\\)\\: Unexpected token \"body\", expected variable at offset 67$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string title of the blog post\\)\\: Unexpected token \"title\", expected variable at offset 68$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^Property Gazelle\\\\Manager\\\\StaffBlog\\:\\:\\$blogId \\(int\\) does not accept null\\.$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^Property Gazelle\\\\Manager\\\\StaffBlog\\:\\:\\$body \\(string\\) does not accept null\\.$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^Property Gazelle\\\\Manager\\\\StaffBlog\\:\\:\\$title \\(string\\) does not accept null\\.$#"
+			count: 1
+			path: app/Manager/StaffBlog.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Page$#"
+			count: 1
+			path: app/Manager/Subscription.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$PageID$#"
+			count: 1
+			path: app/Manager/Subscription.php
+
+		-
+			message: "#^Parameter \\$PageID of method Gazelle\\\\Manager\\\\Subscription\\:\\:flush\\(\\) has invalid typehint type Gazelle\\\\Manager\\\\type\\.$#"
+			count: 1
+			path: app/Manager/Subscription.php
+
+		-
+			message: "#^Method Gazelle\\\\Manager\\\\TGroup\\:\\:findByTorrentInfohash\\(\\) should return int but returns Gazelle\\\\TGroup\\|null\\.$#"
+			count: 1
+			path: app/Manager/TGroup.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int groupId\\)\\: Unexpected token \"groupId\", expected variable at offset 107$#"
+			count: 1
+			path: app/Manager/TGroup.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string space\\-separated list of tags\\)\\: Unexpected token \"space\\-separated\", expected variable at offset 102$#"
+			count: 1
+			path: app/Manager/Tag.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string tidy list of space\\-separated tags\\)\\: Unexpected token \"tidy\", expected variable at offset 152$#"
+			count: 1
+			path: app/Manager/Tag.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$gather$#"
+			count: 1
+			path: app/Manager/Tag.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$tag$#"
+			count: 3
+			path: app/Manager/Tag.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userID$#"
+			count: 1
+			path: app/Manager/Tag.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int torrent id\\)\\: Unexpected token \"torrent\", expected variable at offset 127$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int torrent id\\)\\: Unexpected token \"torrent\", expected variable at offset 88$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int torrentId\\)\\: Unexpected token \"torrentId\", expected variable at offset 153$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string base path in the torrent\\)\\: Unexpected token \"base\", expected variable at offset 90$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string filelist\\)\\: Unexpected token \"filelist\", expected variable at offset 80$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string meta filename formatted as \"\\.EXT sSIZEs NAME DELIMITER\"\\)\\: Unexpected token \"meta\", expected variable at offset 91$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$File$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Name$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Size$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\with is incompatible with native type array\\.$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Manager\\\\Torrent\\:\\:splitMetaFilename\\(\\) has invalid type Gazelle\\\\Manager\\\\with\\.$#"
+			count: 1
+			path: app/Manager/Torrent.php
+
+		-
+			message: "#^Method Gazelle\\\\Manager\\\\User\\:\\:find\\(\\) should return Gazelle\\\\User but returns null\\.$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$fromId with type string is incompatible with native type int\\.$#"
+			count: 2
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$toId with type string is incompatible with native type int\\.$#"
+			count: 2
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\User viewed Which avatar is being viewed\\)\\: Unexpected token \"viewed\", expected variable at offset 194$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\User viewer Who is doing the viewing, to determine how to fallback if no avatar is available\\)\\: Unexpected token \"viewer\", expected variable at offset 79$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array userIds \\(use \\[\\$userId\\] to disable a single user\\)\\.\\)\\: Unexpected token \"userIds\", expected variable at offset 63$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User ID\\)\\: Unexpected token \"User\", expected variable at offset 90$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int limit of resultset\\)\\: Unexpected token \"limit\", expected variable at offset 67$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int offset of resultset\\)\\: Unexpected token \"offset\", expected variable at offset 104$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int permission id\\)\\: Unexpected token \"permission\", expected variable at offset 96$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int reason for disabling\\)\\: Unexpected token \"reason\", expected variable at offset 163$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int user id\\)\\: Unexpected token \"user\", expected variable at offset 82$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(mixed name \\(numeric ID or @username\\)\\)\\: Unexpected token \"name\", expected variable at offset 93$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string announceKey\\)\\: Unexpected token \"announceKey\", expected variable at offset 80$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string key\\)\\: Unexpected token \"key\", expected variable at offset 87$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string staff note\\)\\: Unexpected token \"staff\", expected variable at offset 134$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string username\\)\\: Unexpected token \"username\", expected variable at offset 115$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$convId$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^Return typehint of method Gazelle\\\\Manager\\\\User\\:\\:avatarMarkup\\(\\) has invalid type Gazelle\\\\Manager\\\\HTML\\.$#"
+			count: 1
+			path: app/Manager/User.php
+
+		-
+			message: "#^Method Gazelle\\\\Manager\\\\Wiki\\:\\:create\\(\\) should return int but returns Gazelle\\\\Wiki\\.$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int author id\\)\\: Unexpected token \"author\", expected variable at offset 193$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int can the viewer administrate the wiki\\)\\: Unexpected token \"can\", expected variable at offset 115$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int minimum class to modify\\)\\: Unexpected token \"minimum\", expected variable at offset 151$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int minimum class to read\\)\\: Unexpected token \"minimum\", expected variable at offset 111$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int the proposed edit class\\)\\: Unexpected token \"the\", expected variable at offset 243$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int the proposed read class\\)\\: Unexpected token \"the\", expected variable at offset 201$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int viewer class\\)\\: Unexpected token \"viewer\", expected variable at offset 170$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string body\\)\\: Unexpected token \"body\", expected variable at offset 88$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string title\\)\\: Unexpected token \"title\", expected variable at offset 61$#"
+			count: 1
+			path: app/Manager/Wiki.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\?int original year\\)\\: Unexpected token \"original\", expected variable at offset 77$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\?int remaster year\\)\\: Unexpected token \"remaster\", expected variable at offset 110$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Feed an RSS feed object\\)\\: Unexpected token \"an\", expected variable at offset 186$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array List of tags\\)\\: Unexpected token \"List\", expected variable at offset 75$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message:
+				"""
+					#^PHPDoc tag @param has invalid value \\(array array of artist roles and lists of artist \\( of artists \\(id, id, id\\)
+					 \\[main \\=\\> \\[1, 2, 3\\], guest \\=\\> \\[4, 5, 6\\], \\.\\.\\.\\]\\)\\: Unexpected token "array", expected variable at offset 93$#
+				"""
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool debug on/off\\)\\: Unexpected token \"debug\", expected variable at offset 71$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int Group ID of the release\\)\\: Unexpected token \"Group\", expected variable at offset 100$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int Torrent ID of the releas\\)\\: Unexpected token \"Torrent\", expected variable at offset 142$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int user id of the uploader\\)\\: Unexpected token \"user\", expected variable at offset 294$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Feed item\\)\\: Unexpected token \"Feed\", expected variable at offset 226$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string category\\)\\: Unexpected token \"category\", expected variable at offset 91$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string column The name of the DB column to look at\\)\\: Unexpected token \"column\", expected variable at offset 92$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string dimension the value \\(if empty, column matches empty string\\)\\)\\: Unexpected token \"dimension\", expected variable at offset 157$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string encoding\\)\\: Unexpected token \"encoding\", expected variable at offset 93$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string format\\)\\: Unexpected token \"format\", expected variable at offset 91$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string media\\)\\: Unexpected token \"media\", expected variable at offset 90$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string release type \\(Album, EP, \\.\\.\\.\\)\\)\\: Unexpected token \"release\", expected variable at offset 97$#"
+			count: 1
+			path: app/Notification/Upload.php
+
+		-
+			message: "#^Method Gazelle\\\\Recovery\\:\\:checkEmail\\(\\) should return array but returns null\\.$#"
+			count: 1
+			path: app/Recovery.php
+
+		-
+			message: "#^Method Gazelle\\\\ReportV2\\:\\:unclaim\\(\\) should return 1 but returns \\-1\\.$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User ID of moderator\\)\\: Unexpected token \"User\", expected variable at offset 63$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User ID of moderator\\)\\: Unexpected token \"User\", expected variable at offset 90$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int User ID\\)\\: Unexpected token \"User\", expected variable at offset 52$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string The resolve message\\)\\: Unexpected token \"The\", expected variable at offset 105$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string The resolve message\\)\\: Unexpected token \"The\", expected variable at offset 132$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string The resolve message\\)\\: Unexpected token \"The\", expected variable at offset 56$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string comment\\)\\: Unexpected token \"comment\", expected variable at offset 70$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string report type\\)\\: Unexpected token \"report\", expected variable at offset 67$#"
+			count: 1
+			path: app/ReportV2.php
+
+		-
+			message: "#^Method SphinxqlQuery\\:\\:raw_query\\(\\) invoked with 3 parameters, 1\\-2 required\\.$#"
+			count: 1
+			path: app/Request.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$staffName with type int is incompatible with native type string\\.$#"
+			count: 3
+			path: app/Request.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int log ID\\)\\: Unexpected token \"log\", expected variable at offset 80$#"
+			count: 1
+			path: app/RipLog.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int torrent ID\\)\\: Unexpected token \"torrent\", expected variable at offset 50$#"
+			count: 1
+			path: app/RipLog.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Gazelle\\\\Gazelle\\\\Exception\\\\ResourceNotFoundException is not subtype of Throwable$#"
+			count: 1
+			path: app/RipLog.php
+
+		-
+			message: "#^Method Gazelle\\\\Schedule\\\\Scheduler\\:\\:createRunner\\(\\) should return Gazelle\\\\Schedule\\\\Task but returns null\\.$#"
+			count: 1
+			path: app/Schedule/Scheduler.php
+
+		-
+			message: "#^Method Gazelle\\\\Search\\\\Forum\\:\\:isBodySearch\\(\\) should return true but returns bool\\.$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array a collection of results\\)\\: Unexpected token \"a\", expected variable at offset 83$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array list of forum IDs\\)\\: Unexpected token \"list\", expected variable at offset 87$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool do we split\\? \\(e\\.g\\. not on thread title lookups\\)\\)\\: Unexpected token \"do\", expected variable at offset 98$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool set whether only unread posts are wanted\\)\\: Unexpected token \"set\", expected variable at offset 99$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool set whether post history is grouped\\)\\: Unexpected token \"set\", expected variable at offset 108$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int From whence in the list \\(offset\\)\\)\\: Unexpected token \"From\", expected variable at offset 132$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int Number of threads to fetch \\(limit\\)\\)\\: Unexpected token \"Number\", expected variable at offset 79$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int number of rows\\)\\: Unexpected token \"number\", expected variable at offset 151$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(mixed The values to bind to the placeholders\\)\\: Unexpected token \"The\", expected variable at offset 142$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(mixed The values to bind to the placeholders\\)\\: Unexpected token \"The\", expected variable at offset 149$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(mixed The values to bind to the placeholders\\)\\: Unexpected token \"The\", expected variable at offset 151$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string The SQL condition with one or more placeholders\\)\\: Unexpected token \"The\", expected variable at offset 74$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string The SQL condition with one or more placeholders\\)\\: Unexpected token \"The\", expected variable at offset 81$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string The SQL condition with one or more placeholders\\)\\: Unexpected token \"The\", expected variable at offset 83$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string date \\(yyyy/mm/dd\\)\\)\\: Unexpected token \"date\", expected variable at offset 90$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string date \\(yyyy/mm/dd\\)\\)\\: Unexpected token \"date\", expected variable at offset 91$#"
+			count: 2
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string date \\(yyyy/mm/dd\\)\\)\\: Unexpected token \"date\", expected variable at offset 92$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string mode \\(if 'body' then search in post bodies, anything else defaults to thread title\\)\\)\\: Unexpected token \"mode\", expected variable at offset 85$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string text\\)\\: Unexpected token \"text\", expected variable at offset 105$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string username\\)\\: Unexpected token \"username\", expected variable at offset 72$#"
+			count: 1
+			path: app/Search/Forum.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\Manager\\\\Torrent to display to release details\\)\\: Unexpected token \"to\", expected variable at offset 180$#"
+			count: 1
+			path: app/Seedbox.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\Manager\\\\TorrentLAbel to decorate the release details\\)\\: Unexpected token \"to\", expected variable at offset 253$#"
+			count: 1
+			path: app/Seedbox.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\Util\\\\Paginator to help figure out where we are\\)\\: Unexpected token \"to\", expected variable at offset 110$#"
+			count: 1
+			path: app/Seedbox.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int Number of rows changed\\.\\)\\: Unexpected token \"Number\", expected variable at offset 150$#"
+			count: 1
+			path: app/Seedbox.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string ipv4addr\\)\\: Unexpected token \"ipv4addr\", expected variable at offset 305$#"
+			count: 1
+			path: app/Seedbox.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string useragent\\)\\: Unexpected token \"useragent\", expected variable at offset 335$#"
+			count: 1
+			path: app/Seedbox.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\User viewer\\)\\: Unexpected token \"viewer\", expected variable at offset 268$#"
+			count: 1
+			path: app/StaffPM.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int length number of intervals\\)\\: Unexpected token \"length\", expected variable at offset 478$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int length number of intervals\\)\\: Unexpected token \"length\", expected variable at offset 542$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int n\\)\\: Unexpected token \"n\", expected variable at offset 100$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int n\\)\\: Unexpected token \"n\", expected variable at offset 79$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int n\\)\\: Unexpected token \"n\", expected variable at offset 81$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int n\\)\\: Unexpected token \"n\", expected variable at offset 92$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int offset number of intervals back in time\\)\\: Unexpected token \"offset\", expected variable at offset 420$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int offset number of intervals back in time\\)\\: Unexpected token \"offset\", expected variable at offset 484$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string interval Mysql interval \\(HOUR, DAY, MONTH, YEAR\\.\\.\\.\\)\\)\\: Unexpected token \"interval\", expected variable at offset 350$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string interval Mysql interval \\(HOUR, DAY, MONTH, YEAR\\.\\.\\.\\)\\)\\: Unexpected token \"interval\", expected variable at offset 414$#"
+			count: 1
+			path: app/Stats/Bonus.php
+
+		-
+			message: "#^Cannot access offset 'totalBounty' on false\\.$#"
+			count: 1
+			path: app/Stats/Economic.php
+
+		-
+			message: "#^Cannot access offset 'totalDownload' on false\\.$#"
+			count: 1
+			path: app/Stats/Economic.php
+
+		-
+			message: "#^Cannot access offset 'totalEnabled' on false\\.$#"
+			count: 1
+			path: app/Stats/Economic.php
+
+		-
+			message: "#^Cannot access offset 'totalUpload' on false\\.$#"
+			count: 1
+			path: app/Stats/Economic.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string page name \\[artist, collages requests torrents\\]\\)\\: Unexpected token \"page\", expected variable at offset 90$#"
+			count: 1
+			path: app/Stats/User.php
+
+		-
+			message: "#^PHPDoc tag @return with type int is incompatible with native type array\\.$#"
+			count: 1
+			path: app/Stats/Users.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array list of artist names \\(unknown artists will be created\\)\\)\\: Unexpected token \"list\", expected variable at offset 279$#"
+			count: 1
+			path: app/TGroup.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array list of artist roles\\)\\: Unexpected token \"list\", expected variable at offset 238$#"
+			count: 1
+			path: app/TGroup.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool false means the property will be null instead of placeholder URL\\)\\: Unexpected token \"false\", expected variable at offset 157$#"
+			count: 1
+			path: app/TGroup.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int Group ID\\)\\: Unexpected token \"Group\", expected variable at offset 90$#"
+			count: 1
+			path: app/TGroup.php
+
+		-
+			message: "#^Method Gazelle\\\\Thread\\:\\:__construct\\(\\) with return type void returns mixed but should not return anything\\.$#"
+			count: 1
+			path: app/Thread.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$visibility with type int is incompatible with native type string\\.$#"
+			count: 2
+			path: app/Thread.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$note_id$#"
+			count: 1
+			path: app/Thread.php
+
+		-
+			message: "#^Method Gazelle\\\\Torrent\\:\\:hasToken\\(\\) should return true but returns bool\\.$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^Method Gazelle\\\\Torrent\\:\\:tokenCount\\(\\) should return int but returns float\\.$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array Torrent metadata\\)\\: Unexpected token \"Torrent\", expected variable at offset 90$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool whether to use \\.txt or \\.torrent as file extension\\)\\: Unexpected token \"whether\", expected variable at offset 126$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int torrent ID\\)\\: Unexpected token \"torrent\", expected variable at offset 168$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int user id\\)\\: Unexpected token \"user\", expected variable at offset 124$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userId\\)\\: Unexpected token \"userId\", expected variable at offset 99$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int userid Who is removing the torrent\\)\\: Unexpected token \"userid\", expected variable at offset 54$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string reason Why is this being deleted\\? \\(For the log\\)\\)\\: Unexpected token \"reason\", expected variable at offset 110$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string trackerReason The deletion reason for ocelot to report to users\\.\\)\\: Unexpected token \"trackerReason\", expected variable at offset 179$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$AnnounceURL$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$TorrentData$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$TorrentID$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userID$#"
+			count: 2
+			path: app/Torrent.php
+
+		-
+			message: "#^PHPDoc tag @return with type Gazelle\\\\DB is incompatible with native type array\\.$#"
+			count: 1
+			path: app/Torrent.php
+
+		-
+			message: "#^Part \\$attr \\(array\\<int, string\\>&nonEmpty\\) of encapsed string cannot be cast to string\\.$#"
+			count: 1
+			path: classes/torrents.class.php
+

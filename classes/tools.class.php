@@ -74,7 +74,7 @@ class Tools {
      * Used as the server-side counterpart to get_host_by_ajax.
      *
      * @param string $IP The IP address to look up.
-     * @return string the host.
+     * @return string|false the host.
      */
     public static function lookup_ip($IP) {
         $Output = explode(' ',shell_exec('host -W 1 '.escapeshellarg($IP)));

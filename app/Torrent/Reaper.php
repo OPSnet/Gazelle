@@ -37,7 +37,7 @@ class Reaper extends \Gazelle\Base {
         foreach ($torrents as $id) {
             $t = $torMan->findById($id);
             $torrent = $t->info();
-            $group   = $t->group->info();
+            $group   = $t->group()->info();
             $name = $group['Name'] . " " . $labelMan->load($torrent)->edition();
 
             $artistName = $t->group()->artistName();
@@ -45,7 +45,7 @@ class Reaper extends \Gazelle\Base {
                 $name = "$artistName - $name";
             }
 
-            [$success, $message] = $t->remove('inactivity (unseeded)');
+            [$success, $message] = $t->remove(0, 'inactivity (unseeded)');
             if (!$success) {
                 continue;
             }

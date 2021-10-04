@@ -113,7 +113,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         if (($table = $this->cache->get_value($this->cacheKey())) === false) {
             $cacheLock = $this->cacheKey() . '_lock';
             if ($this->cache->get_value($cacheLock) !== false) {
-                return false;
+                return 0;
             }
             $this->cache->cache_value($cacheLock, true, 300);
             $table = $this->build();

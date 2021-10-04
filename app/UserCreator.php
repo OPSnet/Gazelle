@@ -236,7 +236,7 @@ class UserCreator extends Base {
 
     /**
      * Set the initial admin comment. Not mandatory for creation
-     * param string $adminComment
+     * @param string $adminComment
      */
     public function setAdminComment(string $adminComment) {
         $this->adminComment[] = trim($adminComment);
@@ -250,7 +250,7 @@ class UserCreator extends Base {
      * invitation was used, calling this method afterwards will override
      * the invitation email).
      *
-     * @param string email
+     * @param string $email
      */
     public function setEmail(string $email) {
         $this->email[] = trim($email);
@@ -263,7 +263,7 @@ class UserCreator extends Base {
      * value, otherwise regular creation will wind up stumbling over
      * it and causing a duplicate key error.
      *
-     * @param int id of the user
+     * @param int $id of the user
      */
     public function setId(int $id) {
         $this->id = $id;
@@ -272,7 +272,7 @@ class UserCreator extends Base {
 
     /**
      * Set the invite key (only required if this is a creation via an invitation)
-     * @param string inviteKey
+     * @param string $inviteKey
      */
     public function setInviteKey(string $inviteKey) {
         $this->inviteKey = trim($inviteKey);
@@ -281,7 +281,7 @@ class UserCreator extends Base {
 
     /**
      * Set the user IPv4 address.
-     * @param string ipaddr
+     * @param string $ipaddr
      */
     public function setIpaddr(string $ipaddr) {
         $this->ipaddr = trim($ipaddr);
@@ -290,7 +290,7 @@ class UserCreator extends Base {
 
     /**
      * Set the password. Will be hashed before being stored.
-     * @param string password
+     * @param string $password
      */
     public function setPassword(string $password) {
         $this->passHash = self::hashPassword($password);
@@ -299,7 +299,7 @@ class UserCreator extends Base {
 
     /**
      * Set the username.
-     * @param string username
+     * @param string $username
      */
     public function setUsername(string $username) {
         if (preg_match('/^' . str_replace('/', '', USERNAME_REGEXP) . '$/', trim($username), $match)) {

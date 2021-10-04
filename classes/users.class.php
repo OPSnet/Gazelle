@@ -269,7 +269,7 @@ class Users {
      *
      * @param int $UserID the UserID to set the options for
      * @param array $NewOptions the new options to set
-     * @return false if $NewOptions is empty, true otherwise
+     * @return bool false if $NewOptions is empty, true otherwise
      */
     public static function update_site_options($UserID, $NewOptions) {
         if (!is_number($UserID)) {
