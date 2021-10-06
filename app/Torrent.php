@@ -24,6 +24,10 @@ class Torrent extends BaseObject {
     public function flush() {
     }
 
+    public function url(): string {
+        return "torrents.php?groupId=" . $this->groupId() . '&torrentid=' . $this->id . '#' . $this->id;
+    }
+
     /**
      * Set the viewer context, for snatched indicators etc.
      *

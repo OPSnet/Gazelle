@@ -1,0 +1,34 @@
+{% set name = torrent.group.displayNameText %}
+{{ header('Mass PM Snatchers: ' ~ name, {'js': 'upload'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Send PM To all snatchers of "{{ name }}"</h2>
+    </div>
+    <form class="send_form" name="mass_message" action="torrents.php" method="post">
+        <input type="hidden" name="action" value="takemasspm" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
+        <table class="layout">
+            <tr>
+                <td class="label">Subject</td>
+                <td>
+                    <input type="text" name="subject" value="" size="59" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Message</td>
+                <td>
+                    {{ textarea.preview|raw }}
+                    {{ textarea.field|raw }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    {{ textarea.button|raw }}
+                    <input type="submit" value="Send Mass PM" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+{{ footer() }}
