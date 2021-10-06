@@ -7,7 +7,7 @@ class Recovery extends \Gazelle\Schedule\Task
     public function run()
     {
         $recovery = new \Gazelle\Recovery;
-        if (defined('RECOVERY_AUTOVALIDATE') && RECOVERY_AUTOVALIDATE) {
+        if (RECOVERY && defined('RECOVERY_AUTOVALIDATE') && RECOVERY_AUTOVALIDATE) {
             $recovery->validatePending();
         }
         $recovery->boostUpload();
