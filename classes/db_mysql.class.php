@@ -604,6 +604,9 @@ class DB_MYSQL {
     }
 
     public function begin_transaction() {
+        if (!$this->LinkID) {
+            $this->connect();
+        }
         mysqli_begin_transaction($this->LinkID);
     }
 
