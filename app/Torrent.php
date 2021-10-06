@@ -252,8 +252,6 @@ class Torrent extends BaseObject {
 
     /**
      * Get the torrent group in which this torrent belongs.
-     *
-     * @return TGroup group instance
      */
     public function group(): TGroup {
         return new TGroup($this->info()['GroupID']);
@@ -285,6 +283,10 @@ class Torrent extends BaseObject {
 
     public function hasMissingLineage(): bool {
         return $this->info()['MissingLineage'];
+    }
+
+    public function lastReseedRequest(): ?string {
+        return $this->info()['LastReseedRequest'];
     }
 
     /**
@@ -324,6 +326,10 @@ class Torrent extends BaseObject {
         return $this->info()['info_hash'];
     }
 
+    public function lastActiveDate(): ?string {
+        return $this->info()['last_action'];
+    }
+
     /**
      * The log score of this torrent
      */
@@ -347,27 +353,34 @@ class Torrent extends BaseObject {
 
     /**
      * Is this a remastered release?
-     *
-     * @return bool remastered
      */
     public function isRemastered(): bool {
         return $this->info()['Remastered'];
+    }
+
+    public function uploadDate(): string {
+        return $this->info()['Time'];
     }
 
     /**
      * Was it uploaded less than an hour ago? (Request fill grace period)
      */
     public function uploadGracePeriod(): bool {
-        return strtotime($this->info()['Time']) > date('U') - 3600;
+        return strtotime($this->uploadDate()) > date('U') - 3600;
+    }
+
+    /**
+     * The uploader ID of this torrent
+     */
+    public function uploaderId(): int {
+        return $this->info()['UserID'];
     }
 
     /**
      * The uploader of this torrent
-     *
-     * @return User uploader
      */
     public function uploader(): User {
-        return new User($this->info()['UserID']);
+        return new User($this->uploaderId());
     }
 
     public function isPerfectFlac(): bool {
@@ -656,6 +669,61 @@ class Torrent extends BaseObject {
             }
         }
         return isset($bucket[$this->id]);
+    }
+
+    /**
+     * Issue a reseed request (via PM) to the uploader and 100
+     * most recent enabled snatchers
+     *
+     * @return int number of people messaged
+     */
+    public function issueReseedRequest(User $viewer): int {
+        $this->db->prepared_query('
+            UPDATE torrents SET
+                LastReseedRequest = now()
+            WHERE ID = ?
+            ', $this->id
+        );
+
+        $this->db->prepared_query("
+            SELECT s.uid      AS id,
+                'snatched'    AS action,
+                from_unixtime(max(s.tstamp)) AS tdate
+            FROM xbt_snatched AS s
+            INNER JOIN users_main AS u ON (s.uid = u.ID)
+            WHERE s.fid = ?
+                AND u.Enabled = ?
+            GROUP BY s.uid
+            ORDER BY s.tstamp DESC
+            LIMIT 100
+            ", $this->id, '1'
+        );
+        $notify = $this->db->to_array('id', MYSQLI_ASSOC, false);
+        $notify[$this->uploaderId()] = [
+            'action' => 'uploaded',
+            'tdate'  => $this->uploadDate(),
+        ];
+
+        $userMan   = new Manager\User;
+        $groupId   = $this->groupId();
+        $name      = $this->group()->displayNameText();
+        $torrentId = $this->id();
+
+        foreach ($notify as $userId => $info) {
+            $userMan->sendPM($userId, 0,
+                "Re-seed request for torrent $name",
+                $this->twig->render('torrent/reseed-pm.twig', [
+                    'action'     => $info['action'],
+                    'date'       => $info['tdate'],
+                    'group_id'   => $groupId,
+                    'torrent_id' => $torrentId,
+                    'name'       => $name,
+                    'user'       => new User($userId),
+                    'viewer'     => $viewer,
+                ])
+            );
+        }
+        return count($notify);
     }
 
     /**
