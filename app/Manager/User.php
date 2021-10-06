@@ -662,6 +662,23 @@ class User extends \Gazelle\Base {
         );
     }
 
+    public function sendSnatchPM(\Gazelle\User $viewer, \Gazelle\Torrent  $torrent, string $subject, string $body): int {
+        $this->db->prepared_query('
+            SELECT uid FROM xbt_snatched WHERE fid = ?
+            ', $torrent->id()
+        );
+
+        $snatchers = $this->db->collect(0, false);
+        foreach ($snatchers as $userId) {
+            $this->sendPM($userId, 0, $subject, $body);
+        }
+        $total = count($snatchers);
+        (new \Gazelle\Log)->general($viewer->username()." sent a mass PM to $total snatcher" . plural($total)
+            . " of torrent " . $torrent->id() . " (" . $torrent->group()->displayNameText() . ")"
+        );
+        return $total;
+    }
+
     public function sendRemovalPM(int $torrentId, int $uploaderId, string $name, string $Log, int $trumpId, bool $pmUploader): int {
         $subject = 'Torrent deleted: ' . $name;
         $message = 'A torrent %s '
@@ -1056,7 +1073,7 @@ class User extends \Gazelle\Base {
             }
         }
         if (count($cond) == 2) {
-            $cond = ["({$cond[0]} AND {$cond[1]})"];
+            $cond = ['(' . implode(' AND ', $cond) . ')'];
         }
         array_push($cond, "uf.tokens > ?");
         $where = implode(' OR ', $cond);
