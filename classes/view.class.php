@@ -279,7 +279,6 @@ class View {
         }
 
         global $Cache, $DB, $Debug, $SessionID;
-        echo Gazelle\Util\Textarea::activate();
         echo $Twig->render('index/private-footer.twig', [
             'cache_time'   => $Cache->Time,
             'db_time'      => $DB->Time,
@@ -291,6 +290,7 @@ class View {
             'notification' => (new Gazelle\Manager\Notification())->registeredNotifications($Viewer->id()),
             'memory'       => memory_get_usage(true),
             'date'         => date('Y-m-d'),
+            'textarea_js'  => Gazelle\Util\Textarea::activate(),
             'time'         => date('H:i'),
             'time_ms'      => (microtime(true) - $Debug->startTime()) * 1000,
             'viewer'       => $Viewer,
