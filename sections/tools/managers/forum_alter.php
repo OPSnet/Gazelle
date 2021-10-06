@@ -4,11 +4,11 @@ authorize();
 if (!check_perms('admin_manage_forums')) {
     error(403);
 }
-$forumId = (int)$_POST['id'];
-if (in_array($_POST['submit'], ['Edit', 'Delete']) && $forumId < 1) {
+$forumMan = new Gazelle\Manager\Forum;
+$forum = $forumMan->findById((int)$_POST['id']);
+if (is_null($forum) and in_array($_POST['submit'], ['Edit', 'Delete'])) {
     error(0);
 }
-$forum = new \Gazelle\Forum($forumId);
 if ($_POST['submit'] == 'Delete') {
     $forum->remove();
 } else { //Edit & Create, Shared Validation
@@ -16,8 +16,8 @@ if ($_POST['submit'] == 'Delete') {
         error(403);
     }
 
-    $Val = new Gazelle\Util\Validator;
-    $Val->setFields([
+    $validator = new Gazelle\Util\Validator;
+    $validator->setFields([
         ['name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40]],
         ['description', '0', 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]],
         ['sort', '1', 'number', 'Sort must be set'],
@@ -26,12 +26,12 @@ if ($_POST['submit'] == 'Delete') {
         ['minclasswrite', '1', 'number', 'MinClassWrite must be set'],
         ['minclasscreate', '1', 'number', 'MinClassCreate must be set'],
     ]);
-    if (!$Val->validate($_POST)) {
-        error($Val->errorMessage());
+    if (!$validator->validate($_POST)) {
+        error($validator->errorMessage());
     }
 
     if ($_POST['submit'] == 'Create') {
-        $forum->create($_POST);
+        $forumMan->create($_POST);
     } elseif ($_POST['submit'] == 'Edit') {
         $minClassRead = $forum->minClassRead();
         if (!$minClassRead || $minClassRead > $Viewer->classLevel()) {
@@ -43,5 +43,4 @@ if ($_POST['submit'] == 'Delete') {
         error(403);
     }
 }
-
-header('Location: tools.php?action=forum');
+header("Location: tools.php?action=forum");

@@ -1,0 +1,106 @@
+{% from 'macro/form.twig' import checked, selected -%}
+{% from 'macro/class.twig' import class_option -%}
+{{ header('Forum Management') }}
+<div class="header">
+    <script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
+    <h2>Forum control panel</h2>
+</div>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=categories">Forum Categories</a>
+    <a class="brackets" href="tools.php?action=forum_transitions">Forum Transitions</a>
+</div>
+<table>
+    <tr class="colhead">
+        <td>Category</td>
+        <td>Sort</td>
+        <td>Name</td>
+        <td>Description</td>
+        <td colspan="2">Min class<br />Read/Write/Create</td>
+        <td>Auto-lock</td>
+        <td>Auto-lock<br />weeks</td>
+        <td>Submit</td>
+    </tr>
+{% for forum_list in toc %}
+    {% for f in forum_list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <form class="manage_form" name="forums" action="" method="post">
+            <input type="hidden" name="id" value="{{ f.ID }}>" />
+            <input type="hidden" name="action" value="forum_alter" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <td>
+                <select name="categoryid">
+        {% for id, name in category %}
+                    <option value="{{ id }}"{{ selected(id == f.categoryId) }}>{{ name }}</option>
+        {% endfor %}
+            </td>
+            <td>
+                <input type="text" size="2" name="sort" value="{{ f.Sort }}" />
+            </td>
+            <td>
+                <input type="text" size="10" name="name" value="{{ f.Name }}" />
+            </td>
+            <td>
+                <input type="text" size="16" name="description" value="{{ f.Description }}" />
+            </td>
+            <td>R<br />W<br />C</td>
+            <td>
+                <select name="minclassread">{{ class_option(1000, class_list, f.MinClassRead) }}</select><br />
+                <select name="minclasswrite">{{ class_option(1000, class_list, f.MinClassWrite) }}</select><br />
+                <select name="minclasscreate">{{ class_option(1000, class_list, f.MinClassCreate) }}</select><br />
+            </td>
+            <td>
+                <input type="checkbox" name="autolock"{{ checked(f.AutoLock) }} />
+            </td>
+            <td>
+                <input type="text" size="4" name="autolockweeks" value="{{ f.AutoLockWeeks }}" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this forum? This is an irreversible action!')"/>
+            </td>
+        </form>
+    </tr>
+    {% endfor %}
+{% endfor %}
+    <tr class="colhead">
+        <td colspan="9">Create forum</td>
+    </tr>
+    <tr class="rowa">
+        <form class="create_form" name="forum" action="" method="post">
+            <input type="hidden" name="action" value="forum_alter" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <td>
+                <select name="categoryid">
+{% for id, name in category %}
+                    <option value="{{ id }}">{{ name }}</option>
+{% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="text" size="3" name="sort" />
+            </td>
+            <td>
+                <input type="text" size="10" name="name" />
+            </td>
+            <td>
+                <input type="text" size="20" name="description" />
+            </td>
+            <td>R<br />W<br />C</td>
+            <td>
+                <select name="minclassread">{{ class_option(1000, class_list, 0) }}</select><br />
+                <select name="minclasswrite">{{ class_option(1000, class_list, 0) }}</select><br />
+                <select name="minclasscreate">{{ class_option(1000, class_list, 0) }}</select><br />
+            </td>
+            <td>
+                <input type="checkbox" name="autolock" />
+            </td>
+            <td>
+                <input type="text" size="4" name="autolockweeks" value="52" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Create" />
+            </td>
+        </form>
+    </tr>
+</table>
+{{ footer() }}
