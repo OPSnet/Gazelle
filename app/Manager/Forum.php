@@ -410,4 +410,48 @@ class Forum extends \Gazelle\Base {
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
+
+    public function lockOldThreads(): int {
+        $this->db->prepared_query("
+            SELECT t.ID, t.ForumID
+            FROM forums_topics AS t
+            INNER JOIN forums AS f ON (t.ForumID = f.ID)
+            WHERE t.IsLocked = '0'
+                AND t.IsSticky = '0'
+                AND f.AutoLock = '1'
+                AND t.LastPostTime + INTERVAL f.AutoLockWeeks WEEK < now()
+        ");
+        $ids = $this->db->collect('ID');
+        $forumIDs = $this->db->collect('ForumID');
+
+        $forumMan = new \Gazelle\Manager\Forum;
+        if (count($ids) > 0) {
+            $placeholders = placeholders($ids);
+            $this->db->prepared_query("
+                UPDATE forums_topics SET
+                    IsLocked = '1'
+                WHERE ID IN ($placeholders)
+            ", ...$ids);
+
+            $this->db->prepared_query("
+                DELETE FROM forums_last_read_topics
+                WHERE TopicID IN ($placeholders)
+            ", ...$ids);
+
+            foreach ($ids as $id) {
+                $this->cache->begin_transaction("thread_$id".'_info');
+                $this->cache->update_row(false, ['IsLocked' => '1']);
+                $this->cache->commit_transaction(3600 * 24 * 30);
+                $this->cache->delete_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
+                $this->cache->delete_value("thread_$id".'_info', 3600 * 24 * 30);
+                $forumMan->findByThreadId($id)->addThreadNote($id, 0, 'Locked automatically by schedule');
+            }
+
+            $forumIDs = array_flip(array_flip($forumIDs));
+            foreach ($forumIDs as $forumID) {
+                $this->cache->delete_value("forums_$forumID");
+            }
+        }
+        return count($ids);
+    }
 }
