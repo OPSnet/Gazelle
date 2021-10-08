@@ -226,7 +226,6 @@ class Cache extends \Memcached {
         $Value = $this->get($Key);
         if (!is_array($Value)) {
             $this->InTransaction = false;
-            $this->MemcacheDBKey = [];
             $this->MemcacheDBKey = '';
             return false;
         }
@@ -238,7 +237,6 @@ class Cache extends \Memcached {
 
     public function cancel_transaction() {
         $this->InTransaction = false;
-        $this->MemcacheDBKey = [];
         $this->MemcacheDBKey = '';
     }
 
