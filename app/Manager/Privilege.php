@@ -3,15 +3,47 @@
 namespace Gazelle\Manager;
 
 class Privilege extends \Gazelle\Base {
-    protected const ID_KEY = 'zz_per_%d';
-
-    const CACHE_KEY = 'privilege_list';
+    protected const ID_KEY = 'zz_prv_%d';
+    protected const CACHE_KEY = 'privilege_list';
 
     protected array $info = [];
+
+    public function findById(int $privilegeId): ?\Gazelle\Privilege {
+        $key = sprintf(self::ID_KEY, $privilegeId);
+        $id = $this->cache->get_value($key);
+        if ($id === false) {
+            $id = $this->db->scalar("
+                SELECT ID FROM permissions WHERE ID = ?
+                ", $privilegeId
+            );
+            if (!is_null($id)) {
+                $this->cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\Privilege($id) : null;
+    }
+
+    public function findByLevel(int $level): ?\Gazelle\Privilege {
+        $id = $this->db->scalar("
+            SELECT ID FROM permissions WHERE Level = ?
+            ", $level
+        );
+        return $id ? new \Gazelle\Privilege($id) : null;
+    }
 
     public function flush() {
         $this->info = [];
         return $this;
+    }
+
+    public function create(string $name, int $level, bool $secondary, string $forums, array $values, mixed $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
+        $this->db->prepared_query('
+            INSERT INTO permissions
+                   (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
+            VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
+            ', $name, $level, $secondary, $forums, serialize($values), $staffGroup, $badge, $displayStaff ? '1' : '0'
+        );
+        return new \Gazelle\Privilege($this->db->inserted_id());
     }
 
     protected function info() {
@@ -157,6 +189,7 @@ class Privilege extends \Gazelle\Base {
             'torrents_freeleech' => 'Can make torrents freeleech',
             'torrents_search_fast' => 'Rapid search (for scripts)',
             'torrents_hide_dnu' => 'Hide the Do Not Upload list by default',
+            'admin_add_log' => 'Can add log files to any upload',
             'admin_manage_news' => 'Can manage site news',
             'admin_manage_blog' => 'Can manage the site blog',
             'admin_manage_contest' => 'Can manage contests',

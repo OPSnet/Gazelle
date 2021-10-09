@@ -730,6 +730,46 @@ class Torrent extends BaseObject {
         return count($notify);
     }
 
+    public function addLogDb(Logfile $logfile, string $version): int {
+        $this->db->prepared_query('
+            INSERT INTO torrents_logs
+                   (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
+            VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                 ?)
+            ', $this->id, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
+                $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
+                \OrpheusNET\Logchecker\Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
+        );
+        return $this->db->inserted_id();
+    }
+
+    public function updateLogScore(LogfileSummary $summary): int {
+        $this->db->prepared_query("
+            UPDATE torrents SET
+                HasLogDB = '1',
+                LogScore = ?,
+                LogChecksum = ?
+            WHERE ID = ?
+            ", $summary->overallScore(), $summary->checksumStatus(),
+                $this->id
+        );
+        $groupId = $this->groupId();
+        $this->cache->deleteMulti([
+            "torrent_group_" . $groupId,
+            "torrents_details_" . $groupId,
+            "tg_" . $groupId,
+            "tlist_" . $groupId,
+        ]);
+        return $this->db->affected_rows();
+    }
+
+    public function removeLogDb(): int {
+        $this->db->prepared_query('
+            DELETE FROM torrents_logs WHERE TorrentID = ?
+            ', $this->id
+        );
+        return $this->db->affected_rows();
+    }
+
     /**
      * Remove a torrent.
      *
