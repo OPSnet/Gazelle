@@ -1,0 +1,59 @@
+{% from 'macro/form.twig' import checked, selected -%}
+{{ header('Manage Permissions', {'js': 'validate'}) }}
+{{ js|raw }}
+<form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
+    <input type="hidden" name="action" value="permissions" />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="id" value="{{ privilege.id }}" />
+    <div class="linkbox">
+        <a href="tools.php?action=permissions" class="brackets">Back to permission list</a>
+        <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
+        <a href="tools.php" class="brackets">Back to tools</a>
+    </div>
+    <table class="permission_head layout">
+        <tr>
+            <td class="label">Permission name</td>
+            <td><input type="text" name="name" id="name" value="{{ privilege.name }}" /></td>
+        </tr>
+        <tr>
+            <td class="label">Class level</td>
+            <td><input type="text" name="level" id="level" value="{{ privilege.level }}" /></td>
+        </tr>
+        <tr>
+            <td class="label">Secondary class</td>
+            <td><input type="checkbox" name="secondary" value="1"{{ checked(privilege.isSecondary) }} /></td>
+        </tr>
+        <tr>
+            <td class="label">Show on staff page</td>
+            <td><input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }} /></td>
+        </tr>
+        <tr>
+            <td class="label">Staff page group</td>
+            <td>
+                <select name="staffgroup" id="staffgroup">
+{% for group in group_list %}
+                    <option value="{{ group.ID }}"{{ selected(group.ID == privilege.staffGroup) }}>{{ group.Name }}</option>
+{% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Additional forums</td>
+            <td><input type="text" size="30" name="forums" value="{{ privilege.forums }}" /></td>
+        </tr>
+{% if privilege.isSecondary %}
+        <tr>
+            <td class="label">Badge</td>
+            <td><input type="text" size="30" name="badge" value="{{ privilege.badge }}" /></td>
+        </tr>
+{% endif %}
+{% if privilege.id %}
+        <tr>
+            <td class="label">Current users in this class</td>
+            <td>{{ privilege.userTotal|number_format }}&nbsp;<a href="/user.php?action=search&class[]={{ privilege.id }}" class="brackets">View</a></td>
+        </tr>
+{% endif %}
+    </table>
+{% include 'admin/privilege-list.twig' with {'default': null, 'user': privilege.values} only %}
+</form>
+{{ footer() }}

@@ -1,0 +1,10 @@
+{{ header('Logchecker results') }}
+<div class="thin center">
+    <br /><a href="logchecker.php?action={{ action }}">Upload another log file</a>
+</div>
+{% for logfile in summary %}
+<div class="thin">
+    {% include 'logchecker/report.twig' with {'logfile': logfile} only %}
+</div>
+{% endfor %}
+{{ footer() }}

@@ -9,84 +9,48 @@
                     {{ privilege(default, user, 'site_leech') }}
                     {{ privilege(default, user, 'site_upload') }}
                     {{ privilege(default, user, 'site_vote') }}
+                    {{ privilege(default, user, 'site_album_votes') }}
                     {{ privilege(default, user, 'site_submit_requests') }}
                     {{ privilege(default, user, 'site_edit_requests') }}
-                    {{ privilege(default, user, 'site_advanced_search') }}
+                    {{ privilege(default, user, 'site_moderate_requests') }}
+                    {{ privilege(default, user, 'site_admin_requests') }}
                     {{ privilege(default, user, 'site_top10') }}
+                    {{ privilege(default, user, 'site_advanced_top10') }}
                     {{ privilege(default, user, 'site_torrents_notify') }}
+                    {{ privilege(default, user, 'site_make_bookmarks') }}
+                    {{ privilege(default, user, 'site_edit_wiki') }}
+                    {{ privilege(default, user, 'zip_downloader') }}
+
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr class="colhead">
+                <td>Collages</td>
+            </tr>
+            <tr>
+                <td>
                     {{ privilege(default, user, 'site_collages_create') }}
                     {{ privilege(default, user, 'site_collages_manage') }}
                     {{ privilege(default, user, 'site_collages_delete') }}
                     {{ privilege(default, user, 'site_collages_subscribe') }}
                     {{ privilege(default, user, 'site_collages_personal') }}
                     {{ privilege(default, user, 'site_collages_renamepersonal') }}
-                    {{ privilege(default, user, 'site_advanced_top10') }}
-                    {{ privilege(default, user, 'site_album_votes') }}
-                    {{ privilege(default, user, 'site_make_bookmarks') }}
-                    {{ privilege(default, user, 'site_edit_wiki') }}
-                    {{ privilege(default, user, 'site_can_invite_always') }}
-                    {{ privilege(default, user, 'site_send_unlimited_invites') }}
-                    {{ privilege(default, user, 'site_moderate_requests') }}
-                    {{ privilege(default, user, 'site_admin_requests') }}
-                    {{ privilege(default, user, 'site_delete_artist') }}
-                    {{ privilege(default, user, 'site_view_flow') }}
-                    {{ privilege(default, user, 'site_view_full_log') }}
-                    {{ privilege(default, user, 'site_view_torrent_snatchlist') }}
-                    {{ privilege(default, user, 'site_delete_tag') }}
-                    {{ privilege(default, user, 'site_disable_ip_history') }}
-                    {{ privilege(default, user, 'zip_downloader') }}
-                    {{ privilege(default, user, 'site_debug') }}
-                    {{ privilege(default, user, 'site_analysis') }}
-                    {{ privilege(default, user, 'site_database_specifics') }}
-                    {{ privilege(default, user, 'site_proxy_images') }}
-                    {{ privilege(default, user, 'site_search_many') }}
                     {{ privilege(default, user, 'site_collages_recover') }}
-                    {{ privilege(default, user, 'site_tag_aliases_read') }}
-                    {{ privilege(default, user, 'site_user_stats') }}
-                    {{ privilege(default, user, 'site_unlimit_ajax') }}
-                    {{ privilege(default, user, 'site_archive_ajax') }}
                 </td>
             </tr>
         </table>
-    </div>
-    <div class="permission_container">
         <table>
             <tr class="colhead">
-                <td>Users</td>
+                <td>Invitations</td>
             </tr>
             <tr>
                 <td>
-                    * Only applies to users with the same or lower class level<br />
-                    {{ privilege(default, user, 'users_edit_usernames') }}
-                    {{ privilege(default, user, 'users_edit_ratio') }}
-                    {{ privilege(default, user, 'users_edit_own_ratio') }}
-                    {{ privilege(default, user, 'users_edit_titles') }}
-                    {{ privilege(default, user, 'users_edit_avatars') }}
-                    {{ privilege(default, user, 'users_edit_invites') }}
-                    {{ privilege(default, user, 'users_edit_watch_hours') }}
-                    {{ privilege(default, user, 'users_edit_reset_keys') }}
-                    {{ privilege(default, user, 'users_edit_profiles') }}
-                    {{ privilege(default, user, 'users_view_friends') }}
-                    {{ privilege(default, user, 'users_reset_own_keys') }}
-                    {{ privilege(default, user, 'users_edit_password') }}
-                    {{ privilege(default, user, 'users_promote_below') }}
-                    {{ privilege(default, user, 'users_promote_to') }}
-                    {{ privilege(default, user, 'users_give_donor') }}
-                    {{ privilege(default, user, 'users_warn') }}
-                    {{ privilege(default, user, 'users_disable_users') }}
-                    {{ privilege(default, user, 'users_disable_any') }}
-                    {{ privilege(default, user, 'users_delete_users') }}
-                    {{ privilege(default, user, 'users_view_invites') }}
-                    {{ privilege(default, user, 'users_view_seedleech') }}
-                    {{ privilege(default, user, 'users_view_uploaded') }}
-                    {{ privilege(default, user, 'users_view_keys') }}
-                    {{ privilege(default, user, 'users_view_ips') }}
-                    {{ privilege(default, user, 'users_view_email') }}
+                    {{ privilege(default, user, 'site_can_invite_always') }}
+                    {{ privilege(default, user, 'site_send_unlimited_invites') }}
                     {{ privilege(default, user, 'users_invite_notes') }}
-                    {{ privilege(default, user, 'users_override_paranoia') }}
-                    {{ privilege(default, user, 'users_make_invisible') }}
-                    {{ privilege(default, user, 'users_logout') }}
-                    {{ privilege(default, user, 'users_mod') }}
+                    {{ privilege(default, user, 'users_edit_invites') }}
+                    {{ privilege(default, user, 'users_view_invites') }}
                 </td>
             </tr>
         </table>
@@ -106,8 +70,59 @@
                 </td>
             </tr>
         </table>
+        <table>
+            <tr class="colhead">
+                <td>Housekeeping</td>
+            </tr>
+            <tr>
+                <td>
+                    {{ privilege(default, user, 'admin_dnu') }}
+                    {{ privilege(default, user, 'admin_manage_wiki') }}
+                    {{ privilege(default, user, 'site_delete_artist') }}
+                    {{ privilege(default, user, 'users_make_invisible') }}
+                    {{ privilege(default, user, 'users_warn') }}
+                    {{ privilege(default, user, 'users_logout') }}
+                    {{ privilege(default, user, 'users_disable_users') }}
+                    {{ privilege(default, user, 'users_disable_any') }}
+                    {{ privilege(default, user, 'users_delete_users') }}
+                </td>
+            </tr>
+        </table>
     </div>
+
     <div class="permission_container">
+        <table>
+            <tr class="colhead">
+                <td>Users</td>
+            </tr>
+            <tr>
+                <td>
+                    * Only applies to users with the same or lower class level<br />
+                    {{ privilege(default, user, 'users_mod') }}
+                    {{ privilege(default, user, 'users_edit_usernames') }}
+                    {{ privilege(default, user, 'users_edit_ratio') }}
+                    {{ privilege(default, user, 'users_edit_own_ratio') }}
+                    {{ privilege(default, user, 'users_edit_titles') }}
+                    {{ privilege(default, user, 'users_edit_avatars') }}
+                    {{ privilege(default, user, 'users_edit_watch_hours') }}
+                    {{ privilege(default, user, 'users_edit_reset_keys') }}
+                    {{ privilege(default, user, 'users_edit_profiles') }}
+                    {{ privilege(default, user, 'users_reset_own_keys') }}
+                    {{ privilege(default, user, 'users_edit_password') }}
+                    {{ privilege(default, user, 'users_promote_below') }}
+                    {{ privilege(default, user, 'users_promote_to') }}
+                    {{ privilege(default, user, 'users_give_donor') }}
+                    {{ privilege(default, user, 'users_view_seedleech') }}
+                    {{ privilege(default, user, 'users_view_uploaded') }}
+                    {{ privilege(default, user, 'users_view_keys') }}
+                    {{ privilege(default, user, 'users_view_ips') }}
+                    {{ privilege(default, user, 'users_view_email') }}
+                    {{ privilege(default, user, 'users_view_friends') }}
+                    {{ privilege(default, user, 'users_override_paranoia') }}
+                    {{ privilege(default, user, 'admin_advanced_user_search') }}
+                </td>
+            </tr>
+        </table>
         <table>
             <tr class="colhead">
                 <td>Torrents</td>
@@ -123,12 +138,51 @@
                     {{ privilege(default, user, 'edit_unknowns') }}
                     {{ privilege(default, user, 'torrents_edit_vanityhouse') }}
                     {{ privilege(default, user, 'artist_edit_vanityhouse') }}
-                    {{ privilege(default, user, 'torrents_hide_dnu') }}
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr class="colhead">
+                <td>Development</td>
+            </tr>
+            <tr>
+                <td>
+                    {{ privilege(default, user, 'site_debug') }}
+                    {{ privilege(default, user, 'site_analysis') }}
+                    {{ privilege(default, user, 'site_database_specifics') }}
+                    {{ privilege(default, user, 'admin_periodic_task_manage') }}
+                    {{ privilege(default, user, 'admin_periodic_task_view') }}
+                    {{ privilege(default, user, 'admin_schedule') }}
+                    {{ privilege(default, user, 'admin_site_debug') }}
+                    {{ privilege(default, user, 'admin_clear_cache') }}
                 </td>
             </tr>
         </table>
     </div>
+
     <div class="permission_container">
+        <table>
+            <tr class="colhead">
+                <td>Staff roles</td>
+            </tr>
+            <tr>
+                <td>
+                    {{ privilege(default, user, 'admin_add_log') }}
+                    {{ privilege(default, user, 'site_advanced_search') }}
+                    {{ privilege(default, user, 'site_search_many') }}
+                    {{ privilege(default, user, 'site_user_stats') }}
+                    {{ privilege(default, user, 'site_view_flow') }}
+                    {{ privilege(default, user, 'site_view_full_log') }}
+                    {{ privilege(default, user, 'site_view_torrent_snatchlist') }}
+                    {{ privilege(default, user, 'site_delete_tag') }}
+                    {{ privilege(default, user, 'site_disable_ip_history') }}
+                    {{ privilege(default, user, 'site_proxy_images') }}
+                    {{ privilege(default, user, 'site_tag_aliases_read') }}
+                    {{ privilege(default, user, 'site_unlimit_ajax') }}
+                    {{ privilege(default, user, 'site_archive_ajax') }}
+                </td>
+            </tr>
+        </table>
         <table>
             <tr class="colhead">
                 <td>Administrative</td>
@@ -140,37 +194,29 @@
                     {{ privilege(default, user, 'admin_manage_contest') }}
                     {{ privilege(default, user, 'admin_manage_polls') }}
                     {{ privilege(default, user, 'admin_manage_fls') }}
+                    {{ privilege(default, user, 'admin_manage_permissions') }}
                     {{ privilege(default, user, 'admin_manage_invite_source') }}
+                    {{ privilege(default, user, 'admin_manage_stylesheets') }}
+                    {{ privilege(default, user, 'admin_manage_ipbans') }}
                     {{ privilege(default, user, 'admin_manage_user_fls') }}
                     {{ privilege(default, user, 'admin_manage_applicants') }}
+                    {{ privilege(default, user, 'admin_view_referrals') }}
                     {{ privilege(default, user, 'admin_manage_referrals') }}
-                    {{ privilege(default, user, 'admin_view_notifications') }}
                     {{ privilege(default, user, 'admin_view_payments') }}
                     {{ privilege(default, user, 'admin_manage_payments') }}
                     {{ privilege(default, user, 'admin_manage_navigation') }}
-                    {{ privilege(default, user, 'admin_periodic_task_manage') }}
-                    {{ privilege(default, user, 'admin_periodic_task_view') }}
+                    {{ privilege(default, user, 'admin_view_notifications') }}
                     {{ privilege(default, user, 'admin_rate_limit_manage') }}
                     {{ privilege(default, user, 'admin_rate_limit_view') }}
-                    {{ privilege(default, user, 'admin_view_referrals') }}
                     {{ privilege(default, user, 'admin_reports') }}
                     {{ privilege(default, user, 'admin_bp_history') }}
                     {{ privilege(default, user, 'admin_fl_history') }}
-                    {{ privilege(default, user, 'admin_advanced_user_search') }}
                     {{ privilege(default, user, 'admin_create_users') }}
                     {{ privilege(default, user, 'admin_donor_log') }}
-                    {{ privilege(default, user, 'admin_manage_stylesheets') }}
-                    {{ privilege(default, user, 'admin_manage_ipbans') }}
-                    {{ privilege(default, user, 'admin_dnu') }}
-                    {{ privilege(default, user, 'admin_clear_cache') }}
                     {{ privilege(default, user, 'admin_global_notification') }}
                     {{ privilege(default, user, 'admin_whitelist') }}
-                    {{ privilege(default, user, 'admin_manage_permissions') }}
                     {{ privilege(default, user, 'admin_recovery') }}
-                    {{ privilege(default, user, 'admin_schedule') }}
-                    {{ privilege(default, user, 'admin_site_debug') }}
                     {{ privilege(default, user, 'admin_login_watch') }}
-                    {{ privilege(default, user, 'admin_manage_wiki') }}
                     {{ privilege(default, user, 'admin_update_geoip') }}
                     {{ privilege(default, user, 'admin_staffpm_stats') }}
                 </td>
