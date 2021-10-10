@@ -373,7 +373,7 @@ class Torrents {
 
         $Cache->delete_value("torrents_details_$GroupID");
         $Cache->delete_value("torrent_group_$GroupID");
-        $Cache->delete_value("tg_$GroupID");
+        $Cache->delete_value("tg2_$GroupID");
         $Cache->delete_value("tlist_$GroupID");
         $Cache->delete_value("groups_artists_$GroupID");
         $DB->set_query_id($QueryID);

@@ -113,7 +113,7 @@ class AddLog extends \Gazelle\Json {
         $this->cache->deleteMulti([
             "torrent_group_{$groupId}",
             "torrents_details_{$groupId}",
-            "tg_{$groupId}",
+            "tg2_{$groupId}",
             "tlist_{$groupId}"
         ]);
 

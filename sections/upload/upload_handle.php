@@ -952,5 +952,5 @@ if (!in_array('notifications', $paranoia)) {
 // Clear cache and allow deletion of this torrent now
 $Cache->deleteMulti(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
 if (!$IsNewGroup) {
-    $Cache->deleteMulti(["torrent_group_$GroupID", "detail_files_$GroupID", "tg_$GroupID", "tlist_$GroupID"]);
+    $Cache->deleteMulti(["torrent_group_$GroupID", "detail_files_$GroupID", "tg2_$GroupID", "tlist_$GroupID"]);
 }
