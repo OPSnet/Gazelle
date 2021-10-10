@@ -69,6 +69,7 @@ $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedC
 
 View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,subscriptions']);
 ?>
+<div class="thin">
     <div class="header">
         <h2><a href="requests.php">Requests</a> &rsaquo; <?=$CategoryName?> &rsaquo; <?=$DisplayLink?></h2>
         <div class="linkbox">
@@ -472,5 +473,6 @@ echo $Twig->render('reply.twig', [
 ?>
         </div>
     </div>
+</div>
 <?php
 View::show_footer();
