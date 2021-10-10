@@ -205,9 +205,6 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         unset($ExtendedArtists[3]);
         $DisplayName .= Artists::display_artists($ExtendedArtists);
     }
-    elseif (count($GroupArtists) > 0) {
-        $DisplayName .= Artists::display_artists(['1' => $GroupArtists]);
-    }
 
     $DisplayName .= "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">$GroupName</a>";
     if ($GroupYear > 0) {

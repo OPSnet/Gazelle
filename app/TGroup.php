@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class TGroup extends BaseObject {
 
-    const CACHE_KEY          = 'tg_%d';
+    const CACHE_KEY          = 'tg2_%d';
     const CACHE_TLIST_KEY    = 'tlist_%d';
     const CACHE_COVERART_KEY = 'tg_cover_%d';
 
@@ -15,6 +15,7 @@ class TGroup extends BaseObject {
     protected $revisionId = 0;
     protected $showFallbackImage = true;
     protected $viewer;
+    protected array $info;
     protected array $releaseTypes;
 
     public function tableName(): string {
@@ -27,6 +28,7 @@ class TGroup extends BaseObject {
     }
 
     public function flush() {
+        $this->info = [];
         $this->cache->deleteMulti([
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),
@@ -107,6 +109,9 @@ class TGroup extends BaseObject {
      * @return array of many things
      */
     public function info(int $revisionId = 0): ?array {
+        if (!empty($this->info)) {
+            return $this->info;
+        }
         $key = sprintf(self::CACHE_KEY, $this->id);
         $this->revisionId = $revisionId;
         if (!$revisionId) {
@@ -131,7 +136,8 @@ class TGroup extends BaseObject {
                             AND tg.ID = ?
                         ", $this->id)
                     : false;
-                return $cached;
+                $this->info = $cached;
+                return $this->info;
             }
         }
         $sql = 'SELECT '
@@ -196,6 +202,57 @@ class TGroup extends BaseObject {
             ];
         }
 
+        // artists
+        $this->db->prepared_query("
+            SELECT ta.Importance,
+                ta.ArtistID,
+                aa.Name,
+                ta.AliasID
+            FROM torrents_artists AS ta
+            INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
+            WHERE ta.GroupID = ?
+            ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
+            ", $this->id
+        );
+        $map = [
+            1 => 'main',
+            2 => 'guest',
+            3 => 'remixer',
+            4 => 'composer',
+            5 => 'conductor',
+            6 => 'dj',
+            7 => 'producer',
+            8 => 'arranger',
+        ];
+        $roleList = [
+            'main'      => [],
+            'guest'     => [],
+            'remixer'   => [],
+            'composer'  => [],
+            'conductor' => [],
+            'dj'        => [],
+            'producer'  => [],
+            'arranger'  => [],
+        ];
+        while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
+            $roleList[$map[$role]][] = [
+                'id'      => $artistId,
+                'aliasid' => $aliasId,
+                'name'    => $artistName,
+            ];
+        }
+        $info['artist'] = $roleList;
+
+        $this->db->prepared_query("
+            SELECT t.ID
+            FROM torrents t
+            WHERE t.GroupID = ?
+            ORDER BY t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+                t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
+            ", $this->id
+        );
+        $info['torrent_list'] = $this->db->collect(0, false);
+
         if (!$this->revisionId) {
             $this->cache->cache_value($key, $info, 0);
         }
@@ -219,59 +276,17 @@ class TGroup extends BaseObject {
                 ", $this->id)
             : false;
 
-        return $info;
+        $this->info = $info;
+        return $this->info;
     }
 
     /**
      * Get artist list
      *
-     * return array artists group by role
+     * return array artists grouped by role
      */
     public function artistRole(): array {
-        $key = 'shortv2_groups_artists_' . $this->id;
-        $roleList = $this->cache->get_value($key);
-        if ($roleList === false) {
-            $this->db->prepared_query("
-                SELECT ta.Importance,
-                    ta.ArtistID,
-                    aa.Name,
-                    ta.AliasID
-                FROM torrents_artists AS ta
-                INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
-                WHERE ta.GroupID = ?
-                ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
-                ", $this->id
-            );
-            $map = [
-                1 => 'main',
-                2 => 'guest',
-                3 => 'remixer',
-                4 => 'composer',
-                5 => 'conductor',
-                6 => 'dj',
-                7 => 'producer',
-                8 => 'arranger',
-            ];
-            $roleList = [
-                'main'      => [],
-                'guest'     => [],
-                'remixer'   => [],
-                'composer'  => [],
-                'conductor' => [],
-                'dj'        => [],
-                'producer'  => [],
-                'arranger'  => [],
-            ];
-            while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
-                $roleList[$map[$role]][] = [
-                    'id'      => $artistId,
-                    'aliasid' => $aliasId,
-                    'name'    => $artistName,
-                ];
-            }
-            $this->cache->cache_value($key, $roleList, 3600);
-        }
-        return $roleList;
+        return $this->info()['artist'];
     }
 
     public function catalogNumber(): ?string {
@@ -350,6 +365,10 @@ class TGroup extends BaseObject {
             $tag[] = "<a href=\"torrents.php?taglist={$t['name']}\">{$t['name']}</a>";
         }
         return $tag;
+    }
+
+    public function torrentIdList(): array {
+        return $this->info()['torrent_list'];
     }
 
     public function displayTorrentLink(int $torrentId): string {
