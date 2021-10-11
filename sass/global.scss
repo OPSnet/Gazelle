@@ -1,14 +1,19 @@
-.box h3 {
-    font-size: 140%;
-}
-.box h4 {
-    font-size: 130%;
-}
-.box h5 {
-    font-size: 120%;
-}
-.box h6 {
-    font-size: 110%;
+.box {
+    h3 {
+        font-size: 140%;
+    }
+
+    h4 {
+        font-size: 130%;
+    }
+
+    h5 {
+        font-size: 120%;
+    }
+
+    h6 {
+        font-size: 110%;
+    }
 }
 
 pre br {
@@ -24,14 +29,16 @@ ul.rules {
     list-style-type: none;
 }
 
-div.rule_short {
-    font-weight: bold;
-    font-size: 10pt;
-}
+div {
+    &.rule_short {
+        font-weight: bold;
+        font-size: 10pt;
+    }
 
-div.rule_wrap {
-    display: inline-table;
-    width: 96%;
+    &.rule_wrap {
+        display: inline-table;
+        width: 96%;
+    }
 }
 
 a.rule_link {
@@ -59,25 +66,27 @@ ul.collage_images {
     display: table;
 }
 
-ul.collage_images li {
-    border: none;
-    float: left;
-    margin: 0;
-    width: 118px;
-    height: 118px;
-    list-style: none;
-    list-style-type: none;
-}
+ul.collage_images {
+    li {
+        border: none;
+        float: left;
+        margin: 0;
+        width: 118px;
+        height: 118px;
+        list-style: none;
+        list-style-type: none;
 
-ul.collage_images li a {
-    display: block;
-    height: 118px;
-    overflow: hidden;
-}
+        a {
+            display: block;
+            height: 118px;
+            overflow: hidden;
+        }
+    }
 
-ul.collage_images img {
-    height: 118px;
-    width: 118px;
+    img {
+        height: 118px;
+        width: 118px;
+    }
 }
 
 .selected a {
@@ -106,13 +115,7 @@ ul.collage_images img {
     color: blue;
 }
 
-.line_unchanged {
-
-}
-
-.log1 {
-
-}
+.line_unchanged, .log1 {}
 
 .log2 {
     color: yellow;
@@ -123,11 +126,11 @@ ul.collage_images img {
 }
 
 .log4 {
-     font-weight: bold;
+    font-weight: bold;
 }
 
 .log5 {
-     text-decoration: underline;
+    text-decoration: underline;
 }
 
 .good {
@@ -154,16 +157,14 @@ pre {
     overflow: auto;
 }
 
-.hidden {
+.hidden, .disable_grouping {
     display: none;
 }
 
-.disable_grouping {
-    display: none;
-}
-
-form textarea, form input {
-    max-width: 100%;
+form {
+    textarea, input {
+        max-width: 100%;
+    }
 }
 
 a.beta {
@@ -171,14 +172,16 @@ a.beta {
     color: #ff0000;
 }
 
-strong.important_text {
-    color: red;
-    font-weight: bold;
-}
+strong {
+    &.important_text {
+        color: red;
+        font-weight: bold;
+    }
 
-strong.important_text_alt {
-    color: green;
-    font-weight: bold;
+    &.important_text_alt {
+        color: green;
+        font-weight: bold;
+    }
 }
 
 .invalid, .warning, .error, .new {
@@ -186,31 +189,34 @@ strong.important_text_alt {
 }
 
 /* Make [+] on add multiple artists stay at the bottom (on torrent details page) */
-div#AddArtists {
-    position: relative;
-}
 
-div#AddArtists a {
-    position: absolute;
-    right: 0pt;
-    bottom: 0pt;
-}
+div {
+    &#AddArtists {
+        position: relative;
 
-div#flip_view_1 {
-    position: relative; 
-}
+        a {
+            position: absolute;
+            right: 0pt;
+            bottom: 0pt;
+        }
+    }
 
-div#flip_view_1 div#similar-artist {
-    position: absolute;
-    z-index: 1;
-    font-size: 13pt;
-    white-space: nowrap;
-}
+    &#flip_view_1 {
+        position: relative;
 
-div#flip_view_1 .similar-artist-graph {
-    position: relative;
-    height: 0;
-    width: 100%;
+        div#similar-artist {
+            position: absolute;
+            z-index: 1;
+            font-size: 13pt;
+            white-space: nowrap;
+        }
+
+        .similar-artist-graph {
+            position: relative;
+            height: 0;
+            width: 100%;
+        }
+    }
 }
 
 .clear:after {
@@ -226,7 +232,7 @@ div#flip_view_1 .similar-artist-graph {
 }
 
 #forums #quickpost {
-    width: 95%
+    width: 95%;
 }
 
 .rippywrap {
@@ -240,55 +246,77 @@ div#flip_view_1 .similar-artist-graph {
     bottom: 0px;
     right: 0px;
     user-select: none;
+
+    div.rippy {
+        z-index: 25;
+        height: 111px;
+        width: 190px;
+        position: fixed;
+        bottom: 0px;
+        right: 0px;
+        user-select: none;
+    }
 }
 
-.rippywrap div.rippy {
-    z-index: 25;
-    height: 111px;
-    width: 190px;
-    position: fixed;
-    bottom: 0px;
-    right: 0px;
-    user-select: none;
+td {
+    &.label {
+        vertical-align: top;
+    }
+
+    &.nowrap {
+        white-space: nowrap;
+    }
+
+    &.colhead, &.colhead_dark {
+        top: 0;
+        position: sticky;
+        position: -webkit-sticky;
+        z-index: 10;
+    }
 }
 
-td.label {
-    vertical-align: top;
+.colhead {
+    td, th {
+        top: 0;
+        position: sticky;
+        position: -webkit-sticky;
+        z-index: 10;
+    }
 }
 
-td.nowrap {
-    white-space: nowrap;
+.colhead_dark {
+    td, th {
+        top: 0;
+        position: sticky;
+        position: -webkit-sticky;
+        z-index: 10;
+    }
 }
 
-td.colhead, td.colhead_dark, .colhead td, .colhead th, .colhead_dark td, .colhead_dark th {
-  top: 0;
-  position: sticky;
-  position: -webkit-sticky;
-  z-index: 10;
-}
+span {
+    &.rbt {
+        display: block;
+        padding: 8px 0 0;
+        background: url('../rippy/rippy_top.gif') no-repeat top;
+    }
 
-span.rbt {
-    display: block;
-    padding: 8px 0 0;
-    background: url('../rippy/rippy_top.gif') no-repeat top;
-}
+    &.rbm {
+        display: block;
+        background: url('../rippy/rippy_middle.gif') repeat bottom;
+        padding: 0 5px;
+    }
 
-span.rbm {
-    display: block;
-    background: url('../rippy/rippy_middle.gif') repeat bottom;
-    padding: 0 5px;
-}
+    &.rbb {
+        display: block;
+        padding: 4px 0px 18px;
+        margin-bottom: 5px;
+        background: url('../rippy/rippy_bottom.gif') no-repeat bottom;
+    }
 
-span.rbb {
-    display: block;
-    padding: 4px 0px 18px;
-    margin-bottom: 5px;
-    background: url('../rippy/rippy_bottom.gif') no-repeat bottom;
-}
-
-span.secondary_class {
-    font-size: 85%;
-    font-weight: bold;
+    &.secondary_class {
+        font-size: 85%;
+        font-weight: bold;
+    }
 }
 
 .breadcrumbs {
@@ -300,16 +328,20 @@ span.secondary_class {
     font-style: italic;
 }
 
-#manage_collage_table.ui-sortable .drag {
-    cursor: n-resize;
-}
+#manage_collage_table {
+    &.ui-sortable {
+        .drag {
+            cursor: n-resize;
+        }
 
-#manage_collage_table.ui-sortable .ui-sortable-helper.drag {
-    cursor: grabbing;
-}
+        .ui-sortable-helper.drag {
+            cursor: grabbing;
+        }
+    }
 
-#manage_collage_table .ui-sortable-helper td, #manage_collage_table .ui-sortable-placeholder {
-    border: 0;
+    .ui-sortable-helper td, .ui-sortable-placeholder {
+        border: 0;
+    }
 }
 
 .drag_drop_save {
@@ -319,11 +351,11 @@ span.secondary_class {
 
 .headerSort {
     cursor: pointer;
-}
 
-.headerSort span {
-    background: url("../common/table-order.png") no-repeat scroll right -38px transparent;
-    padding: 0px 20px 0 0;
+    span {
+        background: url("../common/table-order.png") no-repeat scroll right -38px transparent;
+        padding: 0px 20px 0 0;
+    }
 }
 
 .headerSortDown span {
@@ -334,10 +366,14 @@ span.secondary_class {
     background: url("../common/table-order.png") no-repeat scroll right -79px transparent;
 }
 
-.headerSort.sorter-false,
-.headerSort.sorter-false span {
+.headerSort.sorter-false {
     background-image: none;
     cursor: default;
+
+    span {
+        background-image: none;
+        cursor: default;
+    }
 }
 
 .album_votes {
@@ -360,14 +396,11 @@ ul.votedalbums li {
     margin: 0;
 }
 
-tr.torrent .bookmark>a:before {
-    text-decoration: none;
-    font-weight: normal;
-}
-
-tr.torrent .bookmark>a:after {
-    text-decoration: none;
-    font-weight: normal;
+tr.torrent .bookmark > a {
+    &:before, &:after {
+        text-decoration: none;
+        font-weight: normal;
+    }
 }
 
 #sortable {
@@ -375,42 +408,46 @@ tr.torrent .bookmark>a:after {
     margin: 0;
     padding: 0;
     width: 50%;
-}
 
-#sortable li {
-    padding: 0px;
-    font-size: 1.2em;
-    height: 1.5em;
+    li {
+        padding: 0px;
+        font-size: 1.2em;
+        height: 1.5em;
+    }
 }
-
 
 .ui-state-highlight {
-    background: #007DC6 /*{bgColorHighlight}*/;
+    background: #007DC6;
     opacity: 0.15;
     width: 50%;
-
 }
 
-.navigation_list, .navigation_list ol {
+.navigation_list {
     list-style-position: inside;
     margin-top: 10px;
     margin-bottom: 20px;
-}
 
-.navigation_list > li {
-    list-style-type: upper-roman !important;
-}
+    ol {
+        list-style-position: inside;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
 
-.navigation_list li li {
-    list-style-type: upper-alpha;
-}
+    > li {
+        list-style-type: upper-roman !important;
+    }
 
-.navigation_list li li li {
-    list-style-type: decimal;
-}
+    li li {
+        list-style-type: upper-alpha;
 
-.navigation_list li li li li {
-    list-style-type: lower-alpha;
+        li {
+            list-style-type: decimal;
+
+            li {
+                list-style-type: lower-alpha;
+            }
+        }
+    }
 }
 
 .torrent_table .group .votes_info_td strong {
@@ -422,7 +459,7 @@ tr.torrent .bookmark>a:after {
 }
 
 .text_preview {
-    min-height: 100px
+    min-height: 100px;
 }
 
 #lastfm_compatibilitybar_container {
@@ -440,43 +477,56 @@ tr.torrent .bookmark>a:after {
     white-space: nowrap;
 }
 
-.votespan.brackets:before {
-    content: "(";
+.votespan.brackets {
+    &:before {
+        content: "(";
+    }
+
+    &:after {
+        content: ")";
+    }
 }
 
-.votespan.brackets:after {
-    content: ")";
+.brackets {
+    &:before {
+        content: "[";
+    }
+
+    &:after {
+        content: "]";
+    }
 }
 
-.brackets:before {
-    content: "[";
+#userinfo .brackets {
+    &:before, &:after {
+        content: "";
+    }
 }
 
-.brackets:after {
-    content: "]";
-}
-
-#userinfo .brackets:before, #userinfo .brackets:after {
-    content: "";
-}
 .group_image {
     overflow: hidden;
 }
+
 .float_left {
     float: left;
 }
+
 .float_right {
     float: right;
 }
+
 .float_clear {
     clear: both;
 }
-.group_image + .group_info {
-    margin-left: 100px;
-}
 
-.group_image img {
-    cursor: pointer;
+.group_image {
+    + .group_info {
+        margin-left: 100px;
+    }
+
+    img {
+        cursor: pointer;
+    }
 }
 
 .user_title {
@@ -491,34 +541,49 @@ tr.torrent .bookmark>a:after {
  * Fix long release descriptions overflowing containers (all browsers).
  * Fix flowing issues in the report resolving pages.
  */
-.wrap_overflow, .filelist_table td, .reportinfo_table, .torrentdetails blockquote {
+
+.wrap_overflow, .filelist_table td, .reportinfo_table {
     word-break: normal;
     word-wrap: break-word;
     hyphens: auto;
 }
-/* Non-web-standard for webkit */
+
 .torrentdetails blockquote {
+    word-break: normal;
+    word-wrap: break-word;
+    hyphens: auto;
     word-break: break-word;
 }
+
+/* Non-web-standard for webkit */
+
 /* Fix long filename tables overflowing (Chrome only). */
+
 .filelist_table td:first-child {
     word-break: break-all;
 }
+
 /* Fix long overflow for Opera (doesn't support word-break). */
+
 .reportinfo_table {
     table-layout: fixed;
 }
+
 /* Wrap release info for consistent DOM and to limit table expansion. */
+
 .no_overflow {
     width: 100%;
     overflow: hidden;
 }
+
 /* Stylesheet gallery in user profile editing */
+
 #css_gallery {
     display: none;
     overflow: hidden;
     margin-top: 10px;
 }
+
 .preview_wrapper {
     position: relative;
     display: inline-block;
@@ -526,15 +591,18 @@ tr.torrent .bookmark>a:after {
     height: 120px;
     margin: 0 10px;
 }
+
 .preview_image {
     display: block;
     height: 80px;
     cursor: pointer;
     overflow: hidden;
+
+    img {
+        width: 100%;
+    }
 }
-.preview_image img {
-    width: 100%;
-}
+
 .preview_name {
     text-align: center;
     margin-top: 5px;
@@ -542,9 +610,10 @@ tr.torrent .bookmark>a:after {
 
 .option_group {
     margin-bottom: 10px;
-}
-.option_group:last-child {
-    margin-bottom: 0px;
+
+    &:last-child {
+        margin-bottom: 0px;
+    }
 }
 
 .autocomplete-suggestions {
@@ -553,14 +622,17 @@ tr.torrent .bookmark>a:after {
     background: #FFF;
     width: auto !important;
 }
+
 .autocomplete-suggestion {
     padding: 2px 5px;
     white-space: nowrap;
     cursor: pointer;
 }
+
 .autocomplete-selected {
     background: #F0F0F0;
 }
+
 .autocomplete-suggestions strong {
     font-weight: normal;
     color: #3399FF;
@@ -570,9 +642,11 @@ tr.torrent .bookmark>a:after {
     table-layout: fixed;
     width: 100%;
 }
+
 .process_info_pid {
     width: 70px;
 }
+
 .process_info_data {
     overflow: auto;
 }
@@ -587,20 +661,20 @@ tr.torrent .bookmark>a:after {
 
 #settings_sections {
     position: absolute;
-}
 
-#settings_sections.fixed {
-    position: fixed;
-    top: 0px;
-}
+    &.fixed {
+        position: fixed;
+        top: 0px;
+    }
 
-#settings_sections #submit, #settings_sections #settings_search {
-    box-sizing: border-box;
-    width: 100%;
-}
+    #submit, #settings_search {
+        box-sizing: border-box;
+        width: 100%;
+    }
 
-#settings_sections h2 {
-    text-align: left;
+    h2 {
+        text-align: left;
+    }
 }
 
 .donor_icon {
@@ -646,11 +720,7 @@ tr.torrent .bookmark>a:after {
     margin-bottom: 10px;
 }
 
-.vote_tag_up, .vote_artist_up, .vote_album_up {
-    font-weight: bolder;
-}
-
-.vote_tag_down, .vote_artist_down, .vote_album_down {
+.vote_tag_up, .vote_artist_up, .vote_album_up, .vote_tag_down, .vote_artist_down, .vote_album_down {
     font-weight: bolder;
 }
 
@@ -666,21 +736,27 @@ tr.torrent .bookmark>a:after {
 
 .field_div {
     margin-bottom: 10px;
+
+    &:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .label {
+        float: left;
+        padding: 0 5px;
+        text-align: right;
+        width: 150px;
+    }
 }
 
-.field_div:last-of-type {
-    margin-bottom: 0;
-}
-
-.field_div .label,
 .submit_div .label {
     float: left;
     padding: 0 5px;
     text-align: right;
     width: 150px;
 }
-.field_div .input,
-.submit_div .input {
+
+.field_div .input, .submit_div .input {
     padding: 0 5px;
 }
 
@@ -701,20 +777,15 @@ tr.torrent .bookmark>a:after {
     max-width: 675px;
 }
 
-#collage #reply_box img,
-#forums #reply_box img {
+#collage #reply_box img, #forums #reply_box img {
     max-width: 650px;
 }
 
-#artistcomments #reply_box img,
-#request_comments #reply_box img,
-#torrent_comments #reply_box img {
+#artistcomments #reply_box img, #request_comments #reply_box img, #torrent_comments #reply_box img {
     max-width: 400px;
 }
 
-#artistcomments img,
-#request_comments img,
-#torrent_comments img {
+#artistcomments img, #request_comments img, #torrent_comments img {
     max-width: 417px;
 }
 
@@ -722,11 +793,7 @@ tr.torrent .bookmark>a:after {
     max-width: 825px;
 }
 
-#artist_information img,
-.box_request_desc img,
-.news_post img,
-.torrent_description img,
-.wiki_article img {
+#artist_information img, .box_request_desc img, .news_post img, .torrent_description img, .wiki_article img {
     max-width: 570px;
 }
 
@@ -734,11 +801,14 @@ tr.torrent .bookmark>a:after {
     max-width: 540px;
 }
 
-#inbox #preview img,
-#staffpm #reply_box img,
-#wiki .create_form img,
-#wiki .edit_form img {
+#inbox #preview img, #staffpm #reply_box img {
     max-width: 805px;
+}
+
+#wiki {
+    .create_form img, .edit_form img {
+        max-width: 805px;
+    }
 }
 
 #inbox .body img {
@@ -757,16 +827,18 @@ tr.torrent .bookmark>a:after {
     max-width: 616px;
 }
 
-@media (min-width:1024px) {
-        #reportsv2 .manage_form {
-                width: 1020px;
-                margin-left: -102px
-        }
+@media (min-width: 1024px) {
+    #reportsv2 .manage_form {
+        width: 1020px;
+        margin-left: -102px;
+    }
 }
 
 /* make Safari treat <input type="search" /> as a regular text box */
+
 input[type="search"] {
     -webkit-appearance: textfield;
+
     /*font-size: medium;
     background: #fff;*/
 }
@@ -783,42 +855,52 @@ input[type="search"] {
     border-top: 1px solid #c7c7c7;
 }
 
-.avatar_container img {
-    max-height: 400px;
-      max-width: 150px;
+.avatar_container {
+    img {
+        max-height: 400px;
+        max-width: 150px;
+    }
+
+    > {
+        div {
+            width: 0;
+            overflow: visible;
+            display: inline-block;
+            vertical-align: top;
+            transition: opacity 500ms;
+        }
+
+        :last-child {
+            opacity: 0;
+        }
+
+        :first-child {
+            opacity: 1;
+        }
+    }
+
+    &:hover > {
+        :first-child {
+            opacity: 0;
+        }
+
+        :last-child {
+            opacity: 1;
+        }
+    }
 }
-.avatar_container > div {
-    width: 0;
-    overflow: visible;
-    display: inline-block;
-    vertical-align: top;
-    transition: opacity 500ms;
-}
-.avatar_container > :last-child {
-    opacity: 0;
-}
-.avatar_container > :first-child {
-    opacity: 1;
-}
-.avatar_container:hover > :first-child {
-    opacity: 0;
-}
-.avatar_container:hover > :last-child {
-      opacity: 1;
-}
-#user .avatar_container > :last-child {
-    margin-right: 150px
-}
-#user .avatar_container:hover > :last-child {
-    margin-right: 150px
+
+#user .avatar_container {
+    > :last-child, &:hover > :last-child {
+        margin-right: 150px;
+    }
 }
 
 @media only screen and (min-width: 768px) {
-    .avatar_container > :last-child {
-    margin-right: 150px
-    }
-    .avatar_container:hover > :last-child {
-    margin-right: 150px
+    .avatar_container {
+        > :last-child, &:hover > :last-child {
+            margin-right: 150px;
+        }
     }
 }
 
@@ -827,28 +909,29 @@ input[type="search"] {
 }
 
 .rot90-container {
-  position: relative;
-  display: inline-block;
-  height: 120px;
-  min-width: 20px;
+    position: relative;
+    display: inline-block;
+    height: 120px;
+    min-width: 20px;
 }
+
 .rot90 {
-  white-space: nowrap;
-  text-align: left;
-  overflow: hidden;
-  height: 20px;
-  line-height: 20px;
-  width: 120px;
-  position: absolute;
-  bottom: -10px;
-  transform: rotate(-90deg);
-  transform-origin: top left;
+    white-space: nowrap;
+    text-align: left;
+    overflow: hidden;
+    height: 20px;
+    line-height: 20px;
+    width: 120px;
+    position: absolute;
+    bottom: -10px;
+    transform: rotate(-90deg);
+    transform-origin: top left;
 }
 
 #user .twofa_text {
     font-size: 14px;
     margin-top: 10px;
-    font-weight: 600
+    font-weight: 600;
 }
 
 .debug_table {
@@ -862,20 +945,20 @@ input[type="search"] {
     margin: 0 auto 10px auto;
     border-color: #606060;
     background: #dddddd;
-}
 
-.xdebug-error th, .xdebug-error td {
-    padding: 4px;
-    color: #202020;
-}
+    th, td {
+        padding: 4px;
+        color: #202020;
+    }
 
-.xdebug-error th {
-    background: #d0d0d0;
-    color: #202020;
-}
+    th {
+        background: #d0d0d0;
+        color: #202020;
+    }
 
-.xdebug-error span {
-    display: none;
+    span {
+        display: none;
+    }
 }
 
 .xdebug-error_description th {

@@ -5,33 +5,39 @@
 /**
  * Grid container
  */
+
 .tiles {
     list-style-type: none;
-    position: relative; /** Needed to ensure items are laid out relative to this container **/
+    position: relative;
+
+    /** Needed to ensure items are laid out relative to this container **/
     margin: 0;
     padding: 0;
+
+    li {
+        background-color: #ffffff;
+        border: 1px solid #dedede;
+        border-radius: 2px;
+        display: none;
+
+        /** Hide items initially to avoid a flicker effect **/
+        cursor: pointer;
+        padding: 4px;
+
+        &.inactive {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        img {
+            display: block;
+        }
+    }
 }
 
 /**
  * Grid items
  */
-.tiles li {
-    background-color: #ffffff;
-    border: 1px solid #dedede;
-    border-radius: 2px;
-    display: none; /** Hide items initially to avoid a flicker effect **/
-    cursor: pointer;
-    padding: 4px;
-}
-
-.tiles li.inactive {
-    visibility: hidden;
-    opacity: 0;
-}
-
-.tiles li img {
-    display: block;
-}
 
 .large_tile {
     max-width: 252px;
@@ -40,6 +46,7 @@
 /**
  * Grid item text
  */
+
 .tiles li p {
     color: #666;
     font-size: 12px;
@@ -49,6 +56,7 @@
 /**
  * Placerholder css
  */
+
 .wookmark-placeholder {
     border-radius: 2px;
     background-color: #eee;

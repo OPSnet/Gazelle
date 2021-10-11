@@ -7,30 +7,32 @@ body {
 a {
     color: #178c36;
     text-decoration: none;
+
+    &:hover {
+        color: #1fd54f;
+        text-decoration: underline;
+    }
 }
 
-a:hover {
-    color: #1fd54f;
-    text-decoration:underline;
-}
+input {
+    &[type="text"], &[type="password"] {
+        padding: 1px 3px 0px 3px;
+        font-family: "tahoma", "arial", "helvetica", "sans-serif";
+        font-size: 8pt;
+        width: 200px;
+    }
 
-input[type="text"], input[type="password"] {
-    padding: 1px 3px 0px 3px;
-    font-family: "tahoma", "arial", "helvetica", "sans-serif";
-    font-size: 8pt;
-    width: 200px;
-}
+    &[type="text"]:valid, &[type="password"]:valid {
+        border-style: none;
+    }
 
-input[type="text"]:valid, input[type="password"]:valid {
-    border-style: none;
-}
-
-input[type="text"]:invalid, input[type="password"]:invalid {
-    border-top-style: none;
-    border-bottom-style: none;
-    border-left-style: none;
-    border-right-style: solid 2px;
-    border-color: red;
+    &[type="text"]:invalid, &[type="password"]:invalid {
+        border-top-style: none;
+        border-bottom-style: none;
+        border-left-style: none;
+        border-right-style: solid 2px;
+        border-color: red;
+    }
 }
 
 #head, #foot {
@@ -94,13 +96,13 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 .enter {
     width: 100%;
     margin: 20px 0;
-}
 
-.enter a {
-    display: block;
-    width: max-content;
-    margin: 0 auto;
-    font-size: 1.2em;
+    a {
+        display: block;
+        width: max-content;
+        margin: 0 auto;
+        font-size: 1.2em;
+    }
 }
 
 #foot {
@@ -119,15 +121,17 @@ input[type="text"]:invalid, input[type="password"]:invalid {
     margin: 0 auto;
 }
 
-.main label {
-    font-size: 0.85em;
-    width: 90px;
-    display: inline-block;
-    line-height: 1.8em;
-}
+.main {
+    label {
+        font-size: 0.85em;
+        width: 90px;
+        display: inline-block;
+        line-height: 1.8em;
+    }
 
-.main .submit {
-    margin: 10px 0 0 80px;
+    .submit {
+        margin: 10px 0 0 80px;
+    }
 }
 
 .auth_form a {
@@ -137,14 +141,16 @@ input[type="text"]:invalid, input[type="password"]:invalid {
     margin-left: 80px;
 }
 
-.referral label {
-    width: 130px;
-    display: inline-block;
-    line-height: 1.8em;
-}
+.referral {
+    label {
+        width: 130px;
+        display: inline-block;
+        line-height: 1.8em;
+    }
 
-.referral > .submit {
-    margin: 10px 0;
+    > .submit {
+        margin: 10px 0;
+    }
 }
 
 #referral-code {
