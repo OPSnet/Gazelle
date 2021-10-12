@@ -2,7 +2,7 @@
 if (!$Viewer->permitted('admin_manage_payments')) {
     error(403);
 }
-$Payment = new \Gazelle\Manager\Payment;
+$Payment = new Gazelle\Manager\Payment;
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {

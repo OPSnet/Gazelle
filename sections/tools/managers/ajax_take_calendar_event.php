@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-if (!check_perms("users_mod")) {
+if (!$Viewer->permitted("users_mod")) {
     error(404);
 }
 

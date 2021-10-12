@@ -2,11 +2,11 @@
 
 use Gazelle\Util\Arrays;
 
-authorize();
-
-if (!check_perms('admin_manage_navigation')) {
+if (!$Viewer->permitted('admin_manage_navigation')) {
     error(403);
 }
+
+authorize();
 
 $P = Arrays::trim($_POST);
 

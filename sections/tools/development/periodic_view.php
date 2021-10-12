@@ -1,32 +1,33 @@
 <?php
+
 function formatBool(bool $val) {
     return $val ? 'Yes' : 'No';
 }
 
-if (!check_perms('admin_periodic_task_view')) {
+if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\Schedule\Scheduler;
 
 if ($_REQUEST['mode'] === 'run_now' && isset($_REQUEST['id'])) {
     authorize();
-    if (!check_perms('admin_schedule')) {
+    if (!$Viewer->permitted('admin_schedule')) {
         error(403);
     }
     $scheduler->runNow(intval($_REQUEST['id']));
 }
 
 $tasks = $scheduler->getTaskDetails();
-$canEdit = check_perms('admin_periodic_task_manage');
-$canLaunch = check_perms('admin_schedule');
+$canEdit = $Viewer->permitted('admin_periodic_task_manage');
+$canLaunch = $Viewer->permitted('admin_schedule');
 
 View::show_header('Periodic Task Status');
 ?>
 <div class="header">
     <h2>Periodic Task Status</h2>
 </div>
-<?php include(__DIR__ . '/periodic_links.php'); ?>
+<?php require_once('periodic_links.php'); ?>
 <table width="100%" id="tasks">
     <tr class="colhead">
         <td>Name</td>

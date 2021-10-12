@@ -1,8 +1,8 @@
 <?php
-if (!check_perms('admin_dnu')) {
+
+if (!$Viewer->permitted('admin_dnu')) {
     error(403);
 }
-$Title = 'Manage the "Do Not Upload" list';
 
 $DB->prepared_query("
     SELECT
@@ -15,6 +15,7 @@ $DB->prepared_query("
     ORDER BY d.Sequence
 ");
 
+$Title = 'Manage the "Do Not Upload" list';
 View::show_header($Title, ['js' => 'jquery-ui,dnu_list']);
 ?>
     <div class="header">

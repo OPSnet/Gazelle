@@ -1,8 +1,8 @@
 <?php
 
-use \Gazelle\Manager\Notification;
+use Gazelle\Manager\Notification;
 
-if (!check_perms("admin_global_notification")) {
+if (!$Viewer->permitted("admin_global_notification")) {
     error(404);
 }
 $notification = new Notification;

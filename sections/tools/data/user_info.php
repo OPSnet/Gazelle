@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_view_ips')) {
+if (!$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 

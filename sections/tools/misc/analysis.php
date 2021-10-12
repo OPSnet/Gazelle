@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('site_analysis')) {
+
+if (!$Viewer->permitted('site_analysis')) {
     error(403);
 }
 
@@ -23,16 +24,16 @@ echo $Twig->render('debug/include.twig', ['list' => $Analysis['includes']]);
 echo $Twig->render('debug/error.twig', ['list' => $Analysis['errors']]);
 echo $Twig->render('debug/sphinxql.twig', ['list' => $Analysis['searches'], 'time' => $Analysis['searches_time']]);
 echo $Twig->render('debug/query.twig', ['list' => $Analysis['queries'], 'time' => $Analysis['queries_time']]);
-if (check_perms('admin_clear_cache')) {
+if ($Viewer->permitted('admin_clear_cache')) {
     echo $Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => $Analysis['cache_time']]);
 }
-if (check_perms('site_debug')) {
+if ($Viewer->permitted('site_debug')) {
     echo $Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
     echo $Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
 }
-if (check_perms('admin_periodic_task_view') && array_key_exists('Script start', $Analysis['perf'])) {
+if ($Viewer->permitted('admin_periodic_task_view') && array_key_exists('Script start', $Analysis['perf'])) {
     echo $Twig->render('debug/task.twig', [
-        'list' => (new \Gazelle\Schedule\Scheduler)->getTaskSnapshot(
+        'list' => (new Gazelle\Schedule\Scheduler)->getTaskSnapshot(
             (float)$Analysis['perf']['Script start'],
             (float)$Analysis['perf']['Script end']
         )

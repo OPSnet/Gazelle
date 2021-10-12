@@ -75,7 +75,7 @@ if (!$ShowChecked || count($Where) == 0) {
 }
 
 // How can things be ordered?
-$header = new \Gazelle\Util\SortableTableHeader('submitted_timestamp', [
+$header = new Gazelle\Util\SortableTableHeader('submitted_timestamp', [
     'submitted_timestamp' => ['dbColumn' => 'uer.Timestamp', 'defaultSort' => 'desc', 'text' => 'Age'],
     'handled_timestamp'   => ['dbColumn' => 'uer.Outcome',   'defaultSort' => 'desc', 'text' => ($ShowChecked) ? ' / Checked Date' : ''],
     'outcome'             => ['dbColumn' => 'uer.HandledTimestamp', 'defaultSort' => 'desc', 'text' => 'Outcome'],

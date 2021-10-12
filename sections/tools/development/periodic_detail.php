@@ -1,4 +1,5 @@
 <?php
+
 if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
@@ -8,12 +9,12 @@ if (!$id) {
     error(0);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\Schedule\Scheduler;
 if (!$scheduler->getTask($id)) {
     error(404);
 }
 
-$header = new \Gazelle\Util\SortableTableHeader('launchtime', [
+$header = new Gazelle\Util\SortableTableHeader('launchtime', [
     'id'         => ['defaultSort' => 'desc'],
     'launchtime' => ['defaultSort' => 'desc',  'text' => 'Launch Time'],
     'duration'   => ['defaultSort' => 'desc',  'text' => 'Duration'],
@@ -27,7 +28,7 @@ $paginator->setTotal($scheduler->getTotal($id));
 
 $task = $scheduler->getTaskHistory($id, $paginator->limit(), $paginator->offset(), $header->getSortKey(), $header->getOrderDir());
 $stats = $scheduler->getTaskRuntimeStats($id);
-$canEdit = check_perms('admin_periodic_task_manage');
+$canEdit = $Viewer->permitted('admin_periodic_task_manage');
 
 View::show_header('Periodic Task Details');
 ?>

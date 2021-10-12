@@ -1,7 +1,9 @@
 <?php
-if (!check_perms('admin_donor_log')) {
+
+if (!$Viewer->permitted('admin_donor_log')) {
     error(403);
 }
+
 $Title = "Bitcoin Donation Balance";
 $Balance = 0;
 View::show_header($Title);

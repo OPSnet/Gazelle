@@ -1,15 +1,16 @@
 <?php
-    if (!check_perms('admin_manage_permissions')) {
-        error(403);
-    }
 
-    $DB->prepared_query("
-        SELECT ID, Sort, Name
-        FROM staff_groups
-        ORDER BY Sort");
-    $Groups = $DB->to_array(false, MYSQLI_ASSOC);
+if (!$Viewer->permitted('admin_manage_permissions')) {
+    error(403);
+}
 
-    View::show_header('Staff Group Management');
+$DB->prepared_query("
+    SELECT ID, Sort, Name
+    FROM staff_groups
+    ORDER BY Sort");
+$Groups = $DB->to_array(false, MYSQLI_ASSOC);
+
+View::show_header('Staff Group Management');
 ?>
 <div class="header">
     <h2>Staff Group Management</h2>

@@ -1,11 +1,11 @@
 <?php
 set_time_limit(0);
 
-authorize();
-
-if (!check_perms("admin_global_notification")) {
+if (!$Viewer->permitted("admin_global_notification")) {
     error(403);
 }
+
+authorize();
 
 if (!is_number($_POST['class_id']) || empty($_POST['subject']) || empty($_POST['body'])) {
     error("Error in message form");

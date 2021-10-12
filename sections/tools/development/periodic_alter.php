@@ -1,12 +1,12 @@
 <?php
 authorize();
 
-if (!check_perms('admin_periodic_task_manage')) {
+if (!$Viewer->permitted('admin_periodic_task_manage')) {
     error(403);
 }
 
 $p = $_POST;
-$scheduler = new \Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\Schedule\Scheduler;
 
 if ($p['submit'] == 'Delete') {
     if (!is_number($p['id']) || $p['id'] == '') {

@@ -35,7 +35,7 @@ if (!empty($EndDate)) {
 }
 
 $View = $_GET['view'] ?? 'all';
-$paginator = new \Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 
 echo $Twig->render('admin/referral-users.twig', [
     'invite'     => $Invite,

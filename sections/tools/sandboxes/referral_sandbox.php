@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('admin_manage_referrals')) {
+
+if (!$Viewer->permitted('admin_manage_referrals')) {
     error(403);
 }
 
@@ -13,7 +14,7 @@ $hasResult = false;
 if (isset($_POST['url'])) {
     authorize();
     $url = $_POST['url'];
-    $proxy = new \Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
+    $proxy = new Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
     $hasResult = true;
     $failedLogin = false;
 

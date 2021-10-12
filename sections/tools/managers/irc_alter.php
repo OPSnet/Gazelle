@@ -1,9 +1,10 @@
 <?php
-authorize();
 
-if (!check_perms('admin_manage_forums')) {
+if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
+
+authorize();
 
 $_POST['submit'] = $_POST['submit'] ?? 'Create';
 

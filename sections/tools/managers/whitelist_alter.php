@@ -1,11 +1,12 @@
 <?php
-authorize();
 
-if (!check_perms('admin_whitelist')) {
+if (!$Viewer->permitted('admin_whitelist')) {
     error(403);
 }
 
-$whitelist = new \Gazelle\Manager\ClientWhitelist;
+authorize();
+
+$whitelist = new Gazelle\Manager\ClientWhitelist;
 
 if ($_POST['submit'] == 'Delete') {
     $clientId = (int)$_POST['id'];
@@ -23,7 +24,7 @@ if ($_POST['submit'] == 'Delete') {
     $peer    = trim($_POST['peer_id']);
     $vstring = trim($_POST['client']);
 
-    $tracker = new \Gazelle\Tracker;
+    $tracker = new Gazelle\Tracker;
     if ($_POST['submit'] == 'Edit') {
         $clientId = (int)$_POST['id'];
         if ($clientId < 1) {

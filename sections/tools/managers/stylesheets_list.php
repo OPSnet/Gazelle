@@ -1,10 +1,10 @@
 <?php
 
-if (!check_perms('admin_manage_stylesheets')) {
+if (!$Viewer->permitted('admin_manage_stylesheets')) {
     error(403);
 }
 
-$header = new \Gazelle\Util\SortableTableHeader('id', [
+$header = new Gazelle\Util\SortableTableHeader('id', [
     'id'      => ['dbColumn' => 's.ID',     'defaultSort' => 'asc'],
     'name'    => ['dbColumn' => 's.Name',   'defaultSort' => 'asc',  'text' => 'Name'],
     'enabled' => ['dbColumn' => 'ui_count', 'defaultSort' => 'desc', 'text' => 'Enabled Users'],

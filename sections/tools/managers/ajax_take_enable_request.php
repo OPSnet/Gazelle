@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('users_mod')) {
+
+if (!$Viewer->permitted('users_mod')) {
     json_error(403);
 }
 

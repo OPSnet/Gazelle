@@ -1,6 +1,6 @@
 <?php
 
-use \Gazelle\Manager\Notification;
+use Gazelle\Manager\Notification;
 
 if (!$Viewer->permitted('admin_manage_news')) {
     error(403);

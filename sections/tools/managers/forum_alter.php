@@ -1,9 +1,11 @@
 <?php
-authorize();
 
-if (!check_perms('admin_manage_forums')) {
+if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
+
+authorize();
+
 $forumMan = new Gazelle\Manager\Forum;
 $forum = $forumMan->findById((int)$_POST['id']);
 if (is_null($forum) and in_array($_POST['submit'], ['Edit', 'Delete'])) {

@@ -3,7 +3,7 @@ if (!($Viewer->permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage'))
     error(403);
 }
 
-$PRL = new \Gazelle\PermissionRateLimit;
+$PRL = new Gazelle\PermissionRateLimit;
 if ($_POST) {
     authorize();
     if (isset($_POST['task'])) {

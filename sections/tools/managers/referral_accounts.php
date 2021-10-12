@@ -1,4 +1,5 @@
 <?php
+
 function type_list($Types, $Selected = 0) {
     $Ret = '';
     foreach ($Types as $id => $name) {
@@ -11,7 +12,7 @@ function type_list($Types, $Selected = 0) {
     return $Ret;
 }
 
-if (!check_perms('admin_manage_referrals')) {
+if (!$Viewer->permitted('admin_manage_referrals')) {
     error(403);
 }
 

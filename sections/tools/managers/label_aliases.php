@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_mod') && !$LoggedUser['ExtraClasses'][DELTA_TEAM]) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -13,8 +13,7 @@ if (isset($_POST['newalias'])) {
         VALUES (?,        ?)
         ", trim($_POST['BadLabel']), trim($_POST['AliasLabel'])
     );
-}
-elseif (isset($_POST['changealias']) && isset($_POST['aliasid']) && (int)$_POST['aliasid'] > 0) {
+} elseif (isset($_POST['changealias']) && isset($_POST['aliasid']) && (int)$_POST['aliasid'] > 0) {
     $aliasId = (int)$_POST['aliasid'];
     if (isset($_POST['save'])) {
         $DB->prepared_query("

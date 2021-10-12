@@ -1,7 +1,9 @@
 <?php
-if (!check_perms('admin_site_debug')) {
+
+if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
+
 View::show_header('PHP Processes');
 preg_match('/.*\/(.*)/', PHP_BINARY, $match, PREG_UNMATCHED_AS_NULL);
 $binary = $match[1] ?? 'php-fpm';
