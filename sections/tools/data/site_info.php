@@ -1,12 +1,8 @@
 <?php
 
-View::show_header('Site Information');
-
-if ((!defined('DEBUG_MODE') || DEBUG_MODE !== true) && !check_perms('admin_site_debug')) {
+if ((!defined('DEBUG_MODE') || DEBUG_MODE !== true) && !$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
-
-$info = new Gazelle\SiteInfo;
 
 function uid ($id) {
     return sprintf("%s(%d)", posix_getpwuid($id)['name'], $id);
@@ -15,6 +11,10 @@ function uid ($id) {
 function gid ($id) {
     return sprintf("%s(%d)", posix_getgrgid($id)['name'], $id);
 }
+
+$info = new Gazelle\SiteInfo;
+
+View::show_header('Site Information');
 
 if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
     $config = new Gazelle\UserRank\Configuration(RANKING_WEIGHT);

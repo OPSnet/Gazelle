@@ -1,9 +1,10 @@
 <?php
-if (!check_perms('admin_periodic_task_manage')) {
+
+if (!$Viewer->permitted('admin_periodic_task_manage')) {
     error(403);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\Schedule\Scheduler;
 $tasks = $scheduler->getTasks();
 $canEdit = true;
 
@@ -13,7 +14,7 @@ View::show_header('Periodic Task Manager');
     <h2>Periodic Task Manager</h2>
 </div>
 <?php
-include(SERVER_ROOT.'/sections/tools/development/periodic_links.php');
+require_once('periodic_links.php');
 
 if (isset($err)) { ?>
 <strong class="important_text"><?=$err?></strong>
@@ -107,5 +108,4 @@ foreach ($tasks as $task) {
     </tr>
 </table>
 <?php
-    View::show_footer();
-?>
+View::show_footer();

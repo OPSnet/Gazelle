@@ -1,13 +1,14 @@
 <?php
 /* This file displays the list of available tools in the staff toolbox. */
 
-if (!check_perms('users_mod')) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
 function All(array $permlist) {
+    global $Viewer;
     foreach ($permlist as $p) {
-        if (!check_perms($p)) {
+        if (!$Viewer->permitted($p)) {
             return false;
         }
     }
@@ -15,8 +16,9 @@ function All(array $permlist) {
 }
 
 function Any(array $permlist) {
+    global $Viewer;
     foreach ($permlist as $p) {
-        if (check_perms($p)) {
+        if ($Viewer->permitted($p)) {
             return true;
         }
     }

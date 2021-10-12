@@ -26,12 +26,12 @@ Tools necessary for economic management
     a. number of users changed by ratio being changed
     b. project effects with intelligent mathematical analysis of a 24, 48 or 72 hour freeleech
 */
-if (!check_perms('site_view_flow')) {
+if (!$Viewer->permitted('site_view_flow')) {
     error(403);
 }
 
 View::show_header('Economy');
-$Eco = new \Gazelle\Stats\Economic;
+$Eco = new Gazelle\Stats\Economic;
 $totalEnabled = $Eco->get('totalEnabled');
 $totalPeerUsers = $Eco->get('totalPeerUsers');
 $totalTorrents = $Eco->get('totalTorrents');

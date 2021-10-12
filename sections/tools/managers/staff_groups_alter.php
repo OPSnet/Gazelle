@@ -1,9 +1,10 @@
 <?php
-authorize();
 
-if (!check_perms('admin_manage_permissions')) {
+if (!$Viewer->permitted('admin_manage_permissions')) {
     error(403);
 }
+
+authorize();
 
 View::show_header('Staff Group Management');
 

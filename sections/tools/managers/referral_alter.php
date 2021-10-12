@@ -1,9 +1,10 @@
 <?php
-authorize();
 
-if (!check_perms('admin_manage_referrals')) {
+if (!$Viewer->permitted('admin_manage_referrals')) {
     error(403);
 }
+
+authorize();
 
 $ReferralManager = new Gazelle\Manager\Referral;
 

@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_create_users')) {
+if (!$Viewer->permitted('admin_create_users')) {
     error(403);
 }
 

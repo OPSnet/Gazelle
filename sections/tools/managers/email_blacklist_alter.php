@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('users_view_email')) {
+
+if (!$Viewer->permitted('users_view_email')) {
     error(403);
 }
 

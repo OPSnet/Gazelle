@@ -1,20 +1,21 @@
 <?php
-if (!check_perms('admin_periodic_task_view')) {
+
+if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\Schedule\Scheduler;
 $stats = $scheduler->getRuntimeStats();
 $Debug->log_var($stats, 'nice');
 
-$canEdit = check_perms('admin_periodic_task_manage');
+$canEdit = $Viewer->permitted('admin_periodic_task_manage');
 
 View::show_header('Periodic Task Statistics');
 ?>
 <div class="header">
 <h2>Periodic Task Statistics</h2>
 </div>
-<?php include(SERVER_ROOT.'/sections/tools/development/periodic_links.php'); ?>
+<?php require_once('periodic_links.php'); ?>
 
 <div class="box pad">
     <table>

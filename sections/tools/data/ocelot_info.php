@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$tracker = new \Gazelle\Tracker;
+$tracker = new Gazelle\Tracker;
 if (!isset($_GET['userid'])) {
     $MainStats = $tracker->info();
     $main = [];

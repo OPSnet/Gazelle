@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('admin_manage_navigation')) {
+
+if (!$Viewer->permitted('admin_manage_navigation')) {
     error(403);
 }
 
