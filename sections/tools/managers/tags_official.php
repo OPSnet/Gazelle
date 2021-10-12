@@ -1,9 +1,10 @@
 <?php
-if (!check_perms('users_mod')) {
+
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$tagMan = new \Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag;
 
 $unofficialName = [];
 $new = 0;

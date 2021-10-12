@@ -1,10 +1,10 @@
 <?php
 
-if (!check_perms('admin_manage_forums')) {
+if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
 
-$forumMan = new \Gazelle\Manager\Forum;
+$forumMan = new Gazelle\Manager\Forum;
 
 echo $Twig->render('admin/forum-management.twig', [
     'auth'       => $Viewer->auth(),

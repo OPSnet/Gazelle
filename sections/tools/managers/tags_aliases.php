@@ -1,11 +1,11 @@
 <?php
-if (!(check_perms('users_mod') || check_perms('site_tag_aliases_read'))) {
+if (!($Viewer->permittedAny('users_mod', 'site_tag_aliases_read'))) {
     error(403);
 }
 
-$tagMan = new \Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag;
 $action = null;
-if (check_perms('users_mod')) {
+if ($Viewer->permitted('users_mod')) {
     if (isset($_POST['newalias'])) {
         $action = 'addition';
         $result = $tagMan->createAlias($_POST['badtag'], $_POST['aliastag']);
@@ -47,7 +47,7 @@ View::show_header('Tag Aliases');
     <tr class="colhead">
         <td>Proper tag</td>
         <td>Renamed from</td>
-<?php    if (check_perms('users_mod')) { ?>
+<?php    if ($Viewer->permitted('users_mod')) { ?>
         <td>Submit</td>
 <?php    } ?>
     </tr>
@@ -61,7 +61,7 @@ View::show_header('Tag Aliases');
             <td>
                 <input type="text" name="badtag" />
             </td>
-<?php    if (check_perms('users_mod')) { ?>
+<?php    if ($Viewer->permitted('users_mod')) { ?>
             <td>
                 <input type="submit" value="Add alias" />
             </td>
@@ -70,7 +70,7 @@ View::show_header('Tag Aliases');
     </tr>
 <?= $Twig->render('tag/alias.twig', [
     'alias' => $tagMan->listAlias(($_GET['order'] ?? 'badtags') === 'badtags'),
-    'is_mod' => check_perms('users_mod'),
+    'is_mod' => $Viewer->permitted('users_mod'),
 ]) ?>
 </table>
 <?php

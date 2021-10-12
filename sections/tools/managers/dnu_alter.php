@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('admin_dnu')) {
+
+if (!$Viewer->permitted('admin_dnu')) {
     error(403);
 }
 

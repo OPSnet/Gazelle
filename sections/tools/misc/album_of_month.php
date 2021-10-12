@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('users_mod')) {
+
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -101,7 +102,7 @@ if (isset($_POST['GroupID'])) {
             }
 
             //Add album of the month and create forum
-            $forum = new \Gazelle\Forum(AOTM_FORUM_ID);
+            $forum = new Gazelle\Forum(AOTM_FORUM_ID);
             $DB->prepared_query('
                 INSERT INTO featured_albums
                        (GroupID, ThreadID, Type)

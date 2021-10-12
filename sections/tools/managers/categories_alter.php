@@ -1,9 +1,11 @@
 <?php
-authorize();
 
-if (!check_perms('admin_manage_forums')) {
+if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
+
+authorize();
+
 if ($_POST['submit'] == 'Delete') { //Delete
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
         error(0);

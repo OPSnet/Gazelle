@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_debug')) {
+if (!$Viewer->permitted('site_debug')) {
     error(403);
 }
 

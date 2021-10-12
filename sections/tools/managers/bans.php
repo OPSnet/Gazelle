@@ -3,7 +3,7 @@
 if (!$Viewer->permitted('admin_manage_ipbans')) {
     error(403);
 }
-$IPv4Man = new \Gazelle\Manager\IPv4;
+$IPv4Man = new Gazelle\Manager\IPv4;
 
 if (isset($_POST['submit'])) {
     authorize();
@@ -31,7 +31,7 @@ if (isset($_POST['submit'])) {
     }
 }
 
-$header = new \Gazelle\Util\SortableTableHeader('created', [
+$header = new Gazelle\Util\SortableTableHeader('created', [
     'fromip'     => ['dbColumn' => 'i.FromIP',    'defaultSort' => 'asc',  'text' => 'From'],
     'toip'       => ['dbColumn' => 'i.ToIP',      'defaultSort' => 'asc',  'text' => 'To'],
     'reason'     => ['dbColumn' => 'i.Reason',    'defaultSort' => 'asc',  'text' => 'Reason'],

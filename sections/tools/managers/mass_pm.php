@@ -1,5 +1,6 @@
 <?php
-if (!check_perms("admin_global_notification")) {
+
+if (!$Viewer->permitted("admin_global_notification")) {
     error(404);
 }
 

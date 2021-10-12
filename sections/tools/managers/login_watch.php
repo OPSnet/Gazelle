@@ -40,7 +40,7 @@ if (isset($clear)) {
     $nrClear = $watch->setClear($clear);
 }
 
-$headerInfo = new \Gazelle\Util\SortableTableHeader('last_attempt', [
+$headerInfo = new Gazelle\Util\SortableTableHeader('last_attempt', [
     'ipaddr'       => ['dbColumn' => 'inet_aton(w.IP)', 'defaultSort' => 'asc',  'text' => 'IP'],
     'user'         => ['dbColumn' => 'coalesce(um.username, w.capture)', 'defaultSort' => 'asc', 'text' => 'User'],
     'attempts'     => ['dbColumn' => 'w.Attempts',      'defaultSort' => 'desc', 'text' => 'Attempts'],
