@@ -1,12 +1,6 @@
-<?php
-
-$article = new Gazelle\Wiki(RULES_WIKI_PAGE_ID);
-Text::$TOC = true;
-$Body = Text::full_format($article->body(), false, 3, true);
-View::show_header('Uploading Rules', ['js' => 'rules']);
-?>
+{{ header('Uploading Rules', {'js': 'rules'}) }}
 <div class="thin">
-    <?= $Twig->render('rules/toc.twig') ?>
+    {% include 'rules/toc.twig' %}
     <div class="header">
         <h2>Uploading Rules</h2>
     </div>
@@ -21,12 +15,11 @@ View::show_header('Uploading Rules', ['js' => 'rules']);
     <br />
     <div class="before_rules">
         <div class="box pad" style="padding: 10px 10px 10px 20px;">
-            <?= Text::parse_toc(0, true) ?>
+            {{ toc|raw }}
         </div>
     </div>
     <div id="actual_rules">
-        <?= $Body ?>
+        {{ body|raw }}
     </div>
 </div>
-<?php
-View::show_footer();
+{{ footer() }}
