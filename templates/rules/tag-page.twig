@@ -1,0 +1,11 @@
+{{ header('Tagging rules') }}
+<div class="thin">
+{% include 'rules/toc.twig' %}
+<div class="header">
+    <h2 id="general">Tagging rules</h2>
+</div>
+<div class="box pad rule_summary" style="padding: 10px 10px 10px 20px;">
+    {% include 'rules/tag.twig' with {'on_upload': false} %}
+</div>
+</div>
+{{ footer() }}
