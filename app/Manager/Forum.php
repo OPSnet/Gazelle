@@ -121,20 +121,40 @@ class Forum extends \Gazelle\Base {
     }
 
     /**
-     * Get list of forums keyed by category
+     * Get list of forums categories
      */
     public function categoryList() {
-        if (($categories = $this->cache->get_value('forums_categories')) === false) {
+        $categories = $this->cache->get_value('forums_categories');
+        if ($categories === false) {
             $this->db->prepared_query("
-                SELECT ID, Name FROM forums_categories ORDER BY Sort, Name
+                SELECT fc.ID,
+                    fc.Name
+                FROM forums_categories fc
+                ORDER BY fc.Sort,
+                    fc.Name
             ");
-            $categories = [];
-            while ([$id, $name] = $this->db->next_record(MYSQLI_NUM, false)) {
-                $categories[$id] = $name;
-            }
+            $categories = $this->db->to_pair('ID', 'Name');
             $this->cache->cache_value('forums_categories', $categories, 0);
         }
         return $categories;
+    }
+
+    /**
+     * Get list of forums categories by usage
+     */
+    public function categoryUsageList(): array {
+        $this->db->prepared_query("
+            SELECT fc.ID AS id,
+                fc.Name  AS name,
+                fc.Sort  AS sequence,
+                IFNULL(f.total, 0) as total
+            FROM forums_categories as fc
+            LEFT JOIN (
+                SELECT f.CategoryID, count(*) AS total FROM forums f GROUP BY f.CategoryID
+            ) AS f ON (f.CategoryID = fc.ID)
+            ORDER BY fc.Sort
+        ");
+        return $this->db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     public function forumList(): array {

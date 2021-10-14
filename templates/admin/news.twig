@@ -1,0 +1,44 @@
+{{ header('Manage news', {'js': 'bbcode,news_ajax'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{% if create %}Create a{% else %}edit{% endif %} news post</h2>
+    </div>
+    <form class="{% if create %}create_form{% else %}edit_form{% endif %}" name="news_post" action="tools.php" method="post">
+        <div class="box pad">
+            <input type="hidden" name="action" value="{% if create %}takenewnews{% else %}takeeditnews{% endif %}" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+{% if id %}
+            <input type="hidden" name="id" value="{{ id }}" />
+{% endif %}
+            <h3>Title</h3>
+            <input type="text" name="title" size="95" value="{{ title }}" />
+            <br />
+            <h3>Body</h3>
+                {{ body.preview|raw }}
+                {{ body.field|raw }}
+            <div class="center">
+                {{ body.button|raw }}
+                <input type="submit" value="{% if create %}Create{% else %}Edit{% endif %} news post" />
+            </div>
+        </div>
+    </form>
+{% if create %}
+    <h2>News archive</h2>
+    {% for article in list %}
+    <div class="box vertical_space news_post">
+        <div class="head">
+            <strong>{{ article.1 }}</strong> - posted {{ article.3|time_diff }}
+            - <a href="tools.php?action=editnews&amp;id={{ article.0 }}" class="brackets">Edit</a>
+            <a href="tools.php?action=deletenews&amp;id={{ article.0 }}&amp;auth={{ auth }}" class="brackets">Delete</a>
+        </div>
+        <div class="pad">{{ article.2|bb_format }}</div>
+    </div>
+    {% endfor %}
+    <div id="more_news" class="box">
+        <div class="head">
+            <em><span><a href="#" onclick="news_ajax(event, 3, 0, 1, '{{ auth }}'); return false;">Click to load more news</a>.</span></em>
+        </div>
+    </div>
+{% endif %}
+</div>
+{{ footer() }}
