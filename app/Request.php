@@ -68,19 +68,28 @@ class Request extends BaseObject {
     protected function info(): array {
         if (!isset($this->info)) {
             $this->info = $this->db->rowAssoc("
-                SELECT UserID,
-                    FillerID,
-                    Title,
-                    CategoryID,
-                    GroupID,
-                    TorrentID,
-                    LogCue,
-                    Checksum,
-                    BitrateList,
-                    FormatList,
-                    MediaList
-                FROM requests
-                WHERE ID = ?
+                SELECT r.UserID,
+                    r.FillerID,
+                    r.CategoryID,
+                    r.Title,
+                    r.Description,
+                    r.Year,
+                    r.Image,
+                    r.ReleaseType,
+                    r.RecordLabel,
+                    r.GroupID,
+                    r.TorrentID,
+                    r.LogCue,
+                    r.Checksum,
+                    r.BitrateList,
+                    r.FormatList,
+                    r.MediaList,
+                    group_concat(t.Name ORDER BY t.Name) as tagList
+                FROM requests r
+                INNER JOIN requests_tags AS rt ON (rt.RequestID = r.ID)
+                INNER JOIN tags AS t ON (rt.TagID = t.ID)
+                WHERE r.ID = ?
+                GROUP BY r.ID
                 ", $this->id
             );
             $this->info['need_encoding'] = explode('|', $this->info['BitrateList']);
@@ -97,8 +106,20 @@ class Request extends BaseObject {
         );
     }
 
+    public function catalogueNumber(): ?string {
+        return $this->info()['CatalogueNumber'];
+    }
+
     public function categoryId(): int {
         return $this->info()['CategoryID'];
+    }
+
+    public function description(): string {
+        return $this->info()['Description'];
+    }
+
+    public function image(): ?string {
+        return $this->info()['Image'];
     }
 
     public function userId(): int {
@@ -139,6 +160,18 @@ class Request extends BaseObject {
         return in_array($media, $this->info()['need_media']);
     }
 
+    public function recordLabel(): ?string {
+        return $this->info()['RecordLabel'];
+    }
+
+    public function releaseType(): int {
+        return $this->info()['ReleaseType'];
+    }
+
+    public function tagNameList(): array {
+        return explode(',', $this->info()['tagList']);
+    }
+
     public function title(): string {
         return $this->info()['Title'];
     }
@@ -153,6 +186,10 @@ class Request extends BaseObject {
 
     public function torrentId(): ?int {
         return $this->info()['TorrentID'];
+    }
+
+    public function year(): int {
+        return $this->info()['Year'];
     }
 
     public function artistList(): array {
