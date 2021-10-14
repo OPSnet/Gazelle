@@ -265,63 +265,6 @@ class Users {
     }
 
     /**
-     * Updates the site options in the database
-     *
-     * @param int $UserID the UserID to set the options for
-     * @param array $NewOptions the new options to set
-     * @return bool false if $NewOptions is empty, true otherwise
-     */
-    public static function update_site_options($UserID, $NewOptions) {
-        if (!is_number($UserID)) {
-            error(0);
-        }
-        if (empty($NewOptions)) {
-            return false;
-        }
-
-        global $Cache, $DB;
-        $QueryID = $DB->get_query_id();
-
-        // Get SiteOptions
-        $DB->query("
-            SELECT SiteOptions
-            FROM users_info
-            WHERE UserID = $UserID");
-        list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
-        $SiteOptions = unserialize_array($SiteOptions);
-        if (!isset($SiteOptions['HttpsTracker'])) {
-            $SiteOptions['HttpsTracker'] = true;
-        }
-
-        // Get HeavyInfo
-        $HeavyInfo = Users::user_heavy_info($UserID);
-
-        // Insert new/replace old options
-        $SiteOptions = array_merge($SiteOptions, $NewOptions);
-        $HeavyInfo = array_merge($HeavyInfo, $NewOptions);
-
-        // Update DB
-        $DB->prepared_query('
-            UPDATE users_info
-            SET SiteOptions = ?
-            WHERE UserID = ?
-            ', $UserID, serialize($SiteOptions)
-        );
-        $DB->set_query_id($QueryID);
-
-        // Update cache
-        $Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
-
-        // Update global $LoggedUser if the options are changed for the current
-        global $LoggedUser;
-        if ($LoggedUser['ID'] == $UserID) {
-            $LoggedUser = array_merge($LoggedUser, $NewOptions);
-            $LoggedUser['ID'] = $UserID; // We don't want to allow userid switching
-        }
-        return true;
-    }
-
-    /**
      * Returns a username string for display
      *
      * @param int|string $UserID

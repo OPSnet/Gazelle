@@ -236,28 +236,28 @@ function toggleTorrentSearch(mode) {
     if (mode == 0) {
         var link = $('#ft_toggle').raw();
         $('#ft_container').gtoggle();
-        link.innerHTML = link.textContent == 'Hide' ? 'Show' : 'Hide';
+        if (link.textContent.substr(0, 4) == 'Hide') {
+            link.innerHTML = 'Show search form';
+            $('#ft_type').ghide();
+        } else {
+            link.innerHTML = 'Hide search form';
+            $('#ft_type').gshow();
+        }
     }
     if (mode == 'basic') {
         $('.fti_advanced').disable();
         $('.fti_basic').enable();
         $('.ftr_advanced').ghide(true);
         $('.ftr_basic').gshow();
-        $('#ft_advanced_link').gshow();
-        $('#ft_advanced_text').ghide();
-        $('#ft_basic_link').ghide();
-        $('#ft_basic_text').gshow();
-        $('#ft_type').raw().value = 'basic';
+        $('#ft_type').attr('onclick', "return toggleTorrentSearch('advanced')");
+        $('#ft_type').raw().innerHTML = 'Switch to advanced';
     } else if (mode == 'advanced') {
         $('.fti_advanced').enable();
         $('.fti_basic').disable();
         $('.ftr_advanced').gshow();
         $('.ftr_basic').ghide();
-        $('#ft_advanced_link').ghide();
-        $('#ft_advanced_text').gshow();
-        $('#ft_basic_link').gshow();
-        $('#ft_basic_text').ghide();
-        $('#ft_type').raw().value = 'advanced';
+        $('#ft_type').attr('onclick', "return toggleTorrentSearch('basic')");
+        $('#ft_type').raw().innerHTML = 'Switch to basic';
     }
     return false;
 }

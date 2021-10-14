@@ -1,5 +1,5 @@
 <?php
-$torrent = new \Gazelle\Top10\Torrent(FORMAT, $LoggedUser);
+$torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $details = isset($_GET['details']) && in_array($_GET['details'], ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year']) ? $_GET['details'] : 'all';
 
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;

@@ -5,25 +5,31 @@
             <strong>Torrent Settings</strong>
         </td>
     </tr>
-{% if can.advanced_search %}
-    <tr id="tor_searchtype_tr">
-        <td class="label tooltip" title="This option allows you to choose whether the default torrent search menu will be basic (fewer options) or advanced (more options).">
-            <strong>Default search type</strong>
+
+    <tr id="tor_showfilt_tr">
+        <td class="label tooltip" title="Displaying filter controls will show torrent filtering options in the torrent search menu by default. Displaying filters for official tags will list clickable filters for official tags in the torrent search menu by default.">
+            <strong>Torrent search form</strong>
         </td>
         <td>
             <ul class="options_list nobullet">
                 <li>
-                    <input type="radio" name="searchtype" id="search_type_simple" value="0"{{ checked(option.SearchType == 0) }} />
-                    <label for="search_type_simple">Simple</label>
+                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(option.ShowTorFilter) }} />
+                    <label for="showtfilter">Show search form at top page (otherwise it is just a click away)</label>
                 </li>
+{% if can.advanced_search %}
                 <li>
-                    <input type="radio" name="searchtype" id="search_type_advanced" value="1"{{ checked(option.SearchType == 1) }} />
-                    <label for="search_type_advanced">Advanced</label>
+                    <input type="checkbox" name="search_type_advanced" id="search_type"{{ checked(option.SearchType) }} />
+                    <label for="search_type">Show advanced search form (more filtering options)</label>
+                </li>
+{% endif %}
+                <li>
+                    <input type="checkbox" name="showtags" id="showtags"{{ checked(option.ShowTags) }} />
+                    <label for="showtags">Show top official tags at bottom of form</label>
                 </li>
             </ul>
         </td>
     </tr>
-{% endif %}
+
     <tr id="tor_group_tr">
         <td style="vertical-align: top;" class="label"><strong>Torrent grouping</strong></td>
         <td>
@@ -126,23 +132,7 @@
             <label for="novotelinks">Disable voting links</label>
         </td>
     </tr>
-    <tr id="tor_showfilt_tr">
-        <td class="label tooltip" title="Displaying filter controls will show torrent filtering options in the torrent search menu by default. Displaying filters for official tags will list clickable filters for official tags in the torrent search menu by default.">
-            <strong>Torrent search filters</strong>
-        </td>
-        <td>
-            <ul class="options_list nobullet">
-                <li>
-                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(option.ShowTorFilter) }} />
-                    <label for="showtfilter">Display filter controls</label>
-                </li>
-                <li>
-                    <input type="checkbox" name="showtags" id="showtags"{{ checked(option.ShowTags) }} />
-                    <label for="showtags">Display official tag filters</label>
-                </li>
-            </ul>
-        </td>
-    </tr>
+
     <tr id="tor_snatched_tr">
         <td class="label tooltip" title="Enabling the snatched torrents indicator will display &quot;Snatched!&quot; next to torrents you've snatched.">
             <strong>Snatched torrents indicator</strong>
