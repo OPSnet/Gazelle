@@ -54,14 +54,14 @@ Highcharts.chart('statistics', {
 <br />
 <table>
 <tr class="colhead" style="text-align:right">
-    <td style="text-align:left" class="nobr">{{ header.emit('name')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('rows')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('rowsize')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('datasize')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('indexsize')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('datafree')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('freeratio')|raw }}</td>
-    <td style="text-align:right" class="nobr">{{ header.emit('totalsize')|raw }}</td>
+    <td style="text-align:left" class="nobr">{{ header|column('name') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('rows') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('rowsize') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('datasize') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('indexsize') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('datafree') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('freeratio') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('totalsize') }}</td>
 </tr>
 
 {% set total_rows       = 0 %}

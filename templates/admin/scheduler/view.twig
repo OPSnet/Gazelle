@@ -1,0 +1,67 @@
+{{ header('Periodic Task Status') }}
+<div class="header">
+    <h2>Periodic Task Status</h2>
+</div>
+{% include 'admin/scheduler/links.twig' with {'can_edit': viewer.permitted('admin_periodic_task_manage')} only %}
+<table width="100%" id="tasks">
+    <tr class="colhead">
+        <td>Name</td>
+        <td>Interval</td>
+        <td>Last Run <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
+        <td>Duration</td>
+        <td>Next Run</td>
+        <td>Status</td>
+        <td>Runs</td>
+        <td>Processed</td>
+        <td>Errors</td>
+        <td>Events</td>
+        <td></td>
+    </tr>
+{% for t in task_list %}
+    {% set color = '' %}
+    {% set prefix = '' %}
+    {% if not t.is_sane %}
+        {% set color = 'color:tomato;' %}
+        {% set prefix = 'Insane: ' %}
+    {% endif %}
+    {% if not t.is_enabled and not t.run_now %}
+        {% set color = 'color:sandybrown;' %}
+        {% set prefix = prefix ~ 'Disabled: ' %}
+    {% endif %}
+    {% if t.run_now %}
+        {% set color = 'color:green;' %}
+        {% set prefix = prefix ~ 'Run Now: ' %}
+    {% endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td title="{{ t.description }}">
+            <a style="{{ color }}" href="tools.php?action=periodic&amp;mode=detail&amp;id={{ t.periodic_task_id }}">{{ prefix }}{{ t.name }}</a>
+        </td>
+        <td>{{ t.period|time_interval }}</td>
+        <td>
+            <span class="reltime">{% if t.last_run %}{{ t.last_run|time_diff }}{% else %}Never{% endif %}</span>
+            <span class="abstime hidden">{{ t.last_run|default('Never') }}</span>
+        </td>
+        <td>{{ t.duration }}ms</td>
+        <td>
+            {% if not t.is_enabled %}
+            Never
+            {% else %}
+            <span class="reltime">{{ t.next_run|time_diff }}</span>
+            <span class="abstime hidden">{{ t.next_run }}</span>
+            {% endif %}
+        </td>
+        <td>{{ t.status|default('-') }}</td>
+        <td class="number_column">{{ t.runs|number_format }}</td>
+        <td class="number_column">{{ t.processed|number_format }}</td>
+        <td class="number_column">{{ t.errors|number_format }}</td>
+        <td class="number_column">{{ t.events|number_format }}</td>
+        <td>
+{% if viewer.permitted('admin_schedule') %}
+            <a class="brackets" href="tools.php?action=periodic&amp;mode=run_now&amp;auth={{ viewer.auth }}&amp;id={{ t.periodic_task_id }}">Run Now</a>
+            <a class="brackets" href="schedule.php?auth={{ viewer.auth }}&amp;id={{ t.periodic_task_id }}">Debug</a>
+    {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+</table>
+{{ footer() }}

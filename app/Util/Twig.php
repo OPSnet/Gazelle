@@ -39,6 +39,13 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'column',
+            function (\Gazelle\Util\SortableTableHeader $header, string $name) {
+                return new \Twig\Markup($header->emit($name), 'UTF-8');
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'image',
             function ($i) {
                 return new \Twig\Markup(\ImageTools::process($i, true), 'UTF-8');
@@ -85,6 +92,13 @@ class Twig {
             'time_diff',
             function ($time) {
                 return new \Twig\Markup(time_diff($time), 'UTF-8');
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'time_interval',
+            function (int $seconds) {
+                return new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8');
             }
         ));
 

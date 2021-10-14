@@ -43,9 +43,16 @@ if (PHP_SAPI === 'cli') {
 
     authorize();
     View::show_header('Scheduler');
-    $canEdit = check_perms('admin_periodic_task_manage');
-    include(SERVER_ROOT.'/sections/tools/development/periodic_links.php');
-    echo('<pre>');
+?>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=periodic&amp;mode=view">Status</a>
+    <a class="brackets" href="tools.php?action=periodic&amp;mode=stats">Statistics</a>
+<?php if (check_perms('admin_periodic_task_manage')) { ?>
+    <a class="brackets" href="tools.php?action=periodic&amp;mode=edit">Edit</a>
+<?php } ?>
+</div>
+<pre>
+<?php
     $scheduler = new \Gazelle\Schedule\Scheduler;
     if (isset($_GET['id'])) {
         $scheduler->runTask(intval($_GET['id']), true);
