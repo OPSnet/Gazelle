@@ -342,7 +342,10 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'bbcode_sandbox':
-        require_once('sandboxes/bbcode_sandbox.php');
+        if (!$Viewer->permitted('users_mod')) {
+            error(403);
+        }
+        echo $Twig->render('admin/sandbox/bbcode.twig');
         break;
     case 'db_sandbox':
         require_once('sandboxes/db_sandbox.php');

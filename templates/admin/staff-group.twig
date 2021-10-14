@@ -1,0 +1,49 @@
+{{ header('Staff Group Management') }}
+<div class="header">
+    <h2>Staff Group Management</h2>
+</div>
+<table>
+    <tr class="colhead">
+        <td>Sort</td>
+        <td>Name</td>
+        <td>Submit</td>
+    </tr>
+{% for g in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <form class="manage_form" name="accounts" action="" method="post">
+            <input type="hidden" name="id" value="{{ g.id }}" />
+            <input type="hidden" name="action" value="staff_groups_alter" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <td>
+                <input type="text" size="10" name="sort" value="{{ g.sequence }}" />
+            </td>
+            <td>
+                <input type="text" size="30" name="name" value="{{ g.name }}" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this group? This is an irreversible action!')" />
+            </td>
+        </form>
+    </tr>
+{% endfor %}
+    <tr class="colhead">
+        <td colspan="3">Create Group</td>
+    </tr>
+    <tr class="rowa">
+        <form class="create_form" name="groups" action="" method="post">
+            <input type="hidden" name="action" value="staff_groups_alter" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <td>
+                <input type="text" size="10" name="sort" />
+            </td>
+            <td>
+                <input type="text" size="30" name="name" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Create" />
+            </td>
+        </form>
+    </tr>
+</table>
+{{ footer() }}
