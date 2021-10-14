@@ -4,67 +4,60 @@
 // This page relies on the TORRENT_FORM class. All it does is call      //
 // the necessary functions.                                             //
 //----------------------------------------------------------------------//
-// $Properties, $Err and $uploadCategory are set in upload_handle.php, and  //
-// are only used when the form doesn't validate and this page must be   //
-// called again.                                                        //
+// $Properties, $Err and $uploadCategory are set in upload_handle.php,  //
+// and are only used when the form doesn't validate and this page must  //
+// be called again.                                                     //
 //**********************************************************************//
 
 ini_set('max_file_uploads', '100');
-View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbrainz,bbcode']);
 
-if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
-    $DB->prepared_query("
-        SELECT
-            tg.ID as GroupID,
-            tg.CategoryID,
-            tg.Name AS Title,
-            tg.Year,
-            tg.RecordLabel,
-            tg.CatalogueNumber,
-            tg.WikiImage AS Image,
-            tg.WikiBody AS GroupDescription,
-            tg.ReleaseType,
-            tg.VanityHouse,
-            group_concat(t.Name SEPARATOR ', ') AS TagList
-        FROM torrents_group AS tg
-        INNER JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
-        INNER JOIN tags t ON (t.ID = tt.TagID)
-        WHERE tg.ID = ?
-        GROUP BY tg.ID, tg.CategoryID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber,
-            tg.WikiImage, tg.WikiBody, tg.ReleaseType, tg.VanityHouse
-        ", (int)$_GET['groupid']
-    );
-    if ($DB->has_results()) {
-        $Properties = $DB->next_record();
-        $uploadCategory = CATEGORY[$Properties['CategoryID'] - 1];
-        $Properties['CategoryName'] = CATEGORY[$Properties['CategoryID'] - 1];
-        $Properties['Artists'] = Artists::get_artist($_GET['groupid']);
-    } else {
-        unset($_GET['groupid']);
+if (!isset($Properties)) {
+    $requestId = (int)($_GET['requestid'] ?? 0);
+    $uploadCategory = false;
+    if ((int)($_GET['groupid'] ?? 0)) {
+        $addTgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+        if (is_null($addTgroup)) {
+            unset($_GET['groupid']);
+        } else {
+            $uploadCategory = $addTgroup->categoryId();
+            $Properties = [
+                'GroupID'          => $addTgroup->id(),
+                'ReleaseType'      => $addTgroup->releaseType(),
+                'Title'            => $addTgroup->name(),
+                'Year'             => $addTgroup->year(),
+                'Image'            => $addTgroup->image(),
+                'GroupDescription' => $addTgroup->description(),
+                'RecordLabel'      => $addTgroup->recordLabel(),
+                'CatalogueNumber'  => $addTgroup->catalogueNumber(),
+                'VanityHouse'      => $addTgroup->isShowcase(),
+                'Artists'          => Artists::get_artist($addTgroup->id()),
+                'TagList'          => implode(', ', $addTgroup->tagNameList()),
+            ];
+            if ($requestId) {
+                $Properties['RequestID'] = $requestId;
+            }
+        }
+    } elseif ($requestId) {
+        $addRequest = (new Gazelle\Manager\Request)->findById($requestId);
+        if ($addRequest) {
+            $uploadCategory = $addRequest->categoryId();
+            $Properties = [
+                'RequestID'        => $requestId,
+                'ReleaseType'      => $addRequest->releaseType(),
+                'Title'            => $addRequest->title(),
+                'Year'             => $addRequest->year(),
+                'Image'            => $addRequest->image(),
+                'GroupDescription' => $addRequest->description(),
+                'RecordLabel'      => $addRequest->recordLabel(),
+                'CatalogueNumber'  => $addRequest->catalogueNumber(),
+                'Artists'          => Artists::get_artist($addRequest->id()),
+                'TagList'          => implode(', ', $addRequest->tagNameList()),
+            ];
+        }
     }
-    if (!empty($_GET['requestid']) && is_number($_GET['requestid'])) {
-        $Properties['RequestID'] = $_GET['requestid'];
+    if ($uploadCategory) {
+        $Properties['CategoryName'] = CATEGORY[$uploadCategory - 1];
     }
-} elseif (empty($Properties) && !empty($_GET['requestid']) && is_number($_GET['requestid'])) {
-    $DB->prepared_query("
-        SELECT
-            ID AS RequestID,
-            CategoryID,
-            Title,
-            Year,
-            RecordLabel,
-            CatalogueNumber,
-            ReleaseType,
-            Image
-        FROM requests
-        WHERE ID = ?
-        ", (int)$_GET['requestid']
-    );
-    $Properties = $DB->next_record();
-    $uploadCategory = CATEGORY[$Properties['CategoryID'] - 1];
-    $Properties['CategoryName'] = CATEGORY[$Properties['CategoryID'] - 1];
-    $Properties['Artists'] = Requests::get_artists($_GET['requestid']);
-    $Properties['TagList'] = implode(', ', Requests::get_tags($_GET['requestid'])[$_GET['requestid']]);
 }
 
 if (!empty($ArtistForm)) {
@@ -79,8 +72,7 @@ if (empty($Err)) {
 }
 
 $DB->prepared_query("
-    SELECT
-        Name,
+    SELECT Name,
         Comment,
         Time
     FROM do_not_upload
@@ -95,6 +87,7 @@ $NewDNU = $DB->scalar("
     ", $Updated, $Viewer->id()
 );
 $HideDNU = $Viewer->permitted('torrents_hide_dnu') && !$NewDNU;
+View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbrainz,bbcode']);
 ?>
 <div class="<?= $Viewer->permitted('torrents_hide_dnu') ? 'box pad' : '' ?>" style="margin: 0px auto; width: 700px;">
     <h3 id="dnu_header">Do Not Upload List</h3>

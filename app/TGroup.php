@@ -289,8 +289,8 @@ class TGroup extends BaseObject {
         return $this->info()['artist'];
     }
 
-    public function catalogNumber(): ?string {
-        return $this->info()['CatalogNumber'];
+    public function catalogueNumber(): ?string {
+        return $this->info()['CatalogueNumber'];
     }
 
     public function categoryId(): int {
@@ -357,6 +357,10 @@ class TGroup extends BaseObject {
 
     public function tagList(): array {
         return $this->info()['tags'];
+    }
+
+    public function tagNameList(): array {
+        return array_map(fn($t) => $t['name'], $this->tagList());
     }
 
     public function torrentTagList(): array {
