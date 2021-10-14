@@ -1,19 +1,18 @@
 <?php
 
 use Gazelle\Util\SortableTableHeader;
+$torMan = new Gazelle\Manager\Torrent;
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
-    $t = (new Gazelle\Manager\Torrent)->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
+    $t = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
     if ($t) {
         header("Location: torrents.php?id=" . $t->groupId() . "&torrentid=" . $t->id());
         exit;
     }
 }
 
-$torMan = new Gazelle\Manager\Torrent;
-
-$urlStem = STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName()  . '/images/';
-$imgTag = '<img src="' . $urlStem . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+$imgTag = '<img src="' . STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName() . '/images/'
+    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['defaultSort' => 'desc', 'text' => 'Year'],
     'time'     => ['defaultSort' => 'desc', 'text' => 'Time'],
@@ -25,94 +24,61 @@ $headerMap = [
 $header = new SortableTableHeader('time', $headerMap);
 $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
-// Setting default search options
-if (!empty($_GET['setdefault'])) {
-    $UnsetList = ['page', 'setdefault'];
-    $UnsetRegexp = '/(&|^)('.implode('|', $UnsetList).')=.*?(&|$)/i';
-
-    $SiteOptions = unserialize_array($DB->scalar("
-        SELECT SiteOptions FROM users_info WHERE UserID = ?
-        ", $Viewer->id()
-    ));
-    if (!isset($SiteOptions['HttpsTracker'])) {
-        $SiteOptions['HttpsTracker'] = true;
+if (isset($_GET['setdefault'])) {
+    // Setting default search options, remove page and setdefault params
+    $clear = '/(?:&|^)(?:page|setdefault)=.*?(?:&|$)/';
+    $Viewer->modifyOption('DefaultSearch', preg_replace($clear, '', $_SERVER['QUERY_STRING']));
+} elseif (isset($_GET['cleardefault'])) {
+    // Clearing default search options
+    $Viewer->modifyOption('DefaultSearch', null);
+} elseif (empty($_SERVER['QUERY_STRING']) && $Viewer->option('DefaultSearch')) {
+    // Use default search options
+    $page = $_GET['page'] ?? false;
+    parse_str($Viewer->option('DefaultSearch'), $_GET);
+    if ($page !== false) {
+        $_GET['page'] = $page;
     }
-
-    $SiteOptions['DefaultSearch'] = preg_replace($UnsetRegexp, '', $_SERVER['QUERY_STRING']);
-    $DB->prepared_query("
-        UPDATE users_info SET
-            SiteOptions = ?
-        WHERE UserID = ?
-        ", serialize($SiteOptions), $Viewer->id()
-    );
-    $Cache->begin_transaction('user_info_heavy_'.$Viewer->id());
-    $Cache->update_row(false, ['DefaultSearch' => $SiteOptions['DefaultSearch']]);
-    $Cache->commit_transaction(0);
-
-// Clearing default search options
-} elseif (!empty($_GET['cleardefault'])) {
-    $SiteOptions = unserialize_array($DB->scalar("
-        SELECT SiteOptions FROM users_info WHERE UserID = ?
-        ", $Viewer->id()
-    ));
-    $SiteOptions['DefaultSearch'] = '';
-
-    $DB->prepared_query("
-        UPDATE users_info SET
-            SiteOptions = ?
-        WHERE UserID = ?
-        ", serialize($SiteOptions), $Viewer->id()
-    );
-    $Cache->begin_transaction('user_info_heavy_'.$Viewer->id());
-    $Cache->update_row(false, ['DefaultSearch' => '']);
-    $Cache->commit_transaction(0);
-
-// Use default search options
-} elseif (empty($_SERVER['QUERY_STRING']) || (count($_GET) === 1 && isset($_GET['page']))) {
-    if (!empty($LoggedUser['DefaultSearch'])) {
-        if (!empty($_GET['page'])) {
-            $Page = $_GET['page'];
-            parse_str($LoggedUser['DefaultSearch'], $_GET);
-            $_GET['page'] = $Page;
-        } else {
-            parse_str($LoggedUser['DefaultSearch'], $_GET);
-        }
-    }
-}
-// Terms were not submitted via the search form
-if (isset($_GET['searchsubmit'])) {
-    $GroupResults = !empty($_GET['group_results']);
-} else {
-    $GroupResults = !isset($LoggedUser['DisableGrouping2']) || $LoggedUser['DisableGrouping2'] == 0;
 }
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $Search = new Gazelle\Search\Torrent($GroupResults, $header->getSortKey(), $header->getOrderDir(), $paginator->page(), TORRENTS_PER_PAGE);
 $Results = $Search->query($_GET);
 $RealNumResults = $NumResults = $Search->record_count();
-if (!check_perms('site_search_many')) {
+if (!$Viewer->permitted('site_search_many')) {
     $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
 }
 $paginator->setTotal($NumResults);
 
-$HideFilter = isset($LoggedUser['ShowTorFilter']) && $LoggedUser['ShowTorFilter'] == 0;
-// This is kinda ugly, but the enormous if paragraph was really hard to read
-$AdvancedSearch = !empty($_GET['action']) && $_GET['action'] == 'advanced';
-$AdvancedSearch |= !empty($LoggedUser['SearchType']) && (empty($_GET['action']) || $_GET['action'] == 'advanced');
-$AdvancedSearch &= check_perms('site_advanced_search');
-if ($AdvancedSearch) {
-    $Action = 'action=advanced';
-    $HideBasic = ' hidden';
-    $HideAdvanced = '';
+// Terms were not submitted via the search form
+if (isset($_GET['searchsubmit'])) {
+    $GroupResults = !empty($_GET['group_results']);
 } else {
-    $Action = 'action=basic';
-    $HideBasic = '';
-    $HideAdvanced = ' hidden';
+    $GroupResults = ($Viewer->option('DisableGrouping2') ?? 0) === 0;
+}
+
+/* if the user has the privilege of advanced search, we prioritze the url param 'action'
+ * if it is present, otherwise we fall back to their personal preference.
+ */
+$AdvancedSearch = $Viewer->permitted('site_advanced_search')
+    && ($_GET['action'] ?? ['basic ', 'advanced'][$Viewer->option('SearchType') ?? 0]) == 'advanced';
+
+if ($AdvancedSearch) {
+    $hideAdvanced = '';
+    $searchMode = 'advanced';
+    $toggleSearchMode = 'basic';
+} else {
+    $hideAdvanced = ' hidden';
+    $searchMode = 'basic';
+    $toggleSearchMode = 'advanced';
+}
+
+$showSearchForm = $Viewer->option('ShowTorFilter');
+if (is_null($showSearchForm)) {
+    $showSearchForm = true;
 }
 
 if (Format::form('remastertitle', true) == ''
     && Format::form('remasteryear', true) == ''
-    && Format::form('remasterrecordlabel', true) == ''
     && Format::form('remastercataloguenumber', true) == ''
 ) {
     $Hidden = ' hidden';
@@ -131,38 +97,43 @@ View::show_header('Browse Torrents', ['js' => 'browse']);
 <form class="search_form" name="torrents" method="get" action="" onsubmit="$(this).disableUnset();">
 <div class="box filter_torrents">
     <div class="head">
-        <strong>
-            <span id="ft_basic_text" class="<?=$HideBasic?>">Basic /</span>
-            <span id="ft_basic_link" class="<?=$HideAdvanced?>"><a href="#" onclick="return toggleTorrentSearch('basic');">Basic</a> /</span>
-            <span id="ft_advanced_text" class="<?=$HideAdvanced?>">Advanced</span>
-            <span id="ft_advanced_link" class="<?=$HideBasic?>"><a href="#" onclick="return toggleTorrentSearch('advanced');">Advanced</a></span>
-            Search
-        </strong>
+<?php if (!$showSearchForm) { ?>
         <span style="float: right;">
-            <a href="#" onclick="return toggleTorrentSearch(0);" id="ft_toggle" class="brackets"><?=$HideFilter ? 'Show' : 'Hide'?></a>
+<?php   if ($Viewer->permitted('site_advanced_search')) { ?>
+            <a id="ft_type" href="#" class="brackets tooltip hidden" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch('<?= $toggleSearchMode ?>');">Switch to <?= $toggleSearchMode ?></a>
+<?php   } ?>
+            <a href="#" id="ft_toggle" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);">Show search form</a>
         </span>
+<?php } else { ?>
+        <span style="float: right;">
+<?php   if ($Viewer->permitted('site_advanced_search')) { ?>
+            <a id="ft_type" href="#" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch('<?= $toggleSearchMode ?>');">Switch to <?= $toggleSearchMode ?></a>
+<?php   } ?>
+            <a href="#" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);" id="ft_toggle" class="brackets">Hide search form</a>
+        </span>
+<?php } ?>&nbsp;
     </div>
-    <div id="ft_container" class="pad<?=$HideFilter ? ' hidden' : ''?>">
+    <div id="ft_container" class="pad<?= $showSearchForm ? '' : ' hidden'?>">
         <table class="layout">
-            <tr id="artist_name" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="artist_name" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">Artist name:</td>
                 <td colspan="3" class="ft_artistname">
                     <input type="search" spellcheck="false" size="40" name="artistname" class="inputtext smaller fti_advanced" value="<?php Format::form('artistname'); ?>" />
                 </td>
             </tr>
-            <tr id="album_torrent_name" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="album_torrent_name" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">Album/Torrent name:</td>
                 <td colspan="3" class="ft_groupname">
                     <input type="search" spellcheck="false" size="40" name="groupname" class="inputtext smaller fti_advanced" value="<?php Format::form('groupname'); ?>" />
                 </td>
             </tr>
-            <tr id="record_label" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="record_label" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">Record label:</td>
                 <td colspan="3" class="ft_recordlabel">
                     <input type="search" spellcheck="false" size="40" name="recordlabel" class="inputtext smaller fti_advanced" value="<?php Format::form('recordlabel'); ?>" />
                 </td>
             </tr>
-            <tr id="catalogue_number_year" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="catalogue_number_year" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">Catalogue number:</td>
                 <td class="ft_cataloguenumber">
                     <input type="search" size="40" name="cataloguenumber" class="inputtext smallest fti_advanced" value="<?php Format::form('cataloguenumber'); ?>" />
@@ -172,10 +143,10 @@ View::show_header('Browse Torrents', ['js' => 'browse']);
                     <input type="search" name="year" class="inputtext smallest fti_advanced" value="<?php Format::form('year'); ?>" size="4" />
                 </td>
             </tr>
-            <tr id="edition_expand" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="edition_expand" class="ftr_advanced<?=$hideAdvanced?>">
                 <td colspan="4" class="center ft_edition_expand"><a href="#" class="brackets" onclick="ToggleEditionRows(); return false;">Click here to toggle searching for specific remaster information</a></td>
             </tr>
-            <tr id="edition_title" class="ftr_advanced<?=$HideAdvanced . $Hidden?>">
+            <tr id="edition_title" class="ftr_advanced<?=$hideAdvanced . $Hidden?>">
                 <td class="label">Edition title:</td>
                 <td class="ft_remastertitle">
                     <input type="search" spellcheck="false" size="40" name="remastertitle" class="inputtext smaller fti_advanced" value="<?php Format::form('remastertitle'); ?>" />
@@ -185,31 +156,31 @@ View::show_header('Browse Torrents', ['js' => 'browse']);
                     <input type="search" name="remasteryear" class="inputtext smallest fti_advanced" value="<?php Format::form('remasteryear'); ?>" size="4" />
                 </td>
             </tr>
-            <tr id="edition_label" class="ftr_advanced<?=$HideAdvanced . $Hidden?>">
+            <tr id="edition_label" class="ftr_advanced<?=$hideAdvanced . $Hidden?>">
                 <td class="label">Edition release label:</td>
                 <td colspan="3" class="ft_remasterrecordlabel">
                     <input type="search" spellcheck="false" size="40" name="remasterrecordlabel" class="inputtext smaller fti_advanced" value="<?php Format::form('remasterrecordlabel'); ?>" />
                 </td>
             </tr>
-            <tr id="edition_catalogue" class="ftr_advanced<?=$HideAdvanced . $Hidden?>">
+            <tr id="edition_catalogue" class="ftr_advanced<?=$hideAdvanced . $Hidden?>">
                 <td class="label">Edition catalogue number:</td>
                 <td colspan="3" class="ft_remastercataloguenumber">
                     <input type="search" size="40" name="remastercataloguenumber" class="inputtext smallest fti_advanced" value="<?php Format::form('remastercataloguenumber'); ?>" />
                 </td>
             </tr>
-            <tr id="file_list" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="file_list" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">File list:</td>
                 <td colspan="3" class="ft_filelist">
                     <input type="search" spellcheck="false" size="40" name="filelist" class="inputtext fti_advanced" value="<?php Format::form('filelist'); ?>" />
                 </td>
             </tr>
-            <tr id="torrent_description" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="torrent_description" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label"><span title="Search torrent descriptions (not group information)" class="tooltip">Torrent description:</span></td>
                 <td colspan="3" class="ft_description">
                     <input type="search" spellcheck="false" size="40" name="description" class="inputtext fti_advanced" value="<?php Format::form('description'); ?>" />
                 </td>
             </tr>
-            <tr id="rip_specifics" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="rip_specifics" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">Rip specifics:</td>
                 <td class="nobr ft_ripspecifics" colspan="3">
                     <select name="releasetype" class="ft_releasetype fti_advanced">
@@ -238,7 +209,7 @@ View::show_header('Browse Torrents', ['js' => 'browse']);
                     </select>
                 </td>
             </tr>
-            <tr id="misc" class="ftr_advanced<?=$HideAdvanced?>">
+            <tr id="misc" class="ftr_advanced<?=$hideAdvanced?>">
                 <td class="label">Miscellaneous:</td>
                 <td class="nobr ft_misc" colspan="3">
                     <select name="haslog" class="ft_haslog fti_advanced">
@@ -273,7 +244,7 @@ View::show_header('Browse Torrents', ['js' => 'browse']);
                     </select>
                 </td>
             </tr>
-            <tr id="search_terms" class="ftr_basic<?=$HideBasic?>">
+            <tr id="search_terms" class="ftr_basic<?= $AdvancedSearch ? ' hidden' : '' ?>">
                 <td class="label">Search terms:</td>
                 <td colspan="3" class="ftb_searchstr">
                     <input type="search" spellcheck="false" size="40" name="searchstr" class="inputtext fti_basic" value="<?php Format::form('searchstr'); ?>" />
@@ -338,7 +309,7 @@ foreach (CATEGORY as $CatKey => $CatName) {
 ?>
             </tr>
         </table>
-        <table class="layout cat_list<?php if (empty($LoggedUser['ShowTags'])) { ?> hidden<?php } ?>" id="taglist">
+        <table class="layout cat_list<?= (bool)$Viewer->option('ShowTags') ? '' : ' hidden' ?>" id="taglist">
             <tr>
 <?php
 $tagMan = new Gazelle\Manager\Tag;
@@ -369,17 +340,17 @@ if ($x % 7 != 0) { // Padding
                     <a class="brackets" href="random.php?action=artist">Random Artist</a>
                 </td>
                 <td class="label">
-                    <a class="brackets" href="#" onclick="$('#taglist').gtoggle(); if (this.innerHTML == 'View tags') { this.innerHTML = 'Hide tags'; } else { this.innerHTML = 'View tags'; }; return false;"><?=(empty($LoggedUser['ShowTags']) ? 'View tags' : 'Hide tags')?></a>
+                    <a class="brackets" href="#" onclick="$('#taglist').gtoggle(); if (this.innerHTML == 'Show tags') { this.innerHTML = 'Hide tags'; } else { this.innerHTML = 'Show tags'; }; return false;"><?= (bool)$Viewer->option('ShowTags') ? 'Hide tags' : 'Show tags' ?></a>
                 </td>
             </tr>
         </table>
         <div class="submit ft_submit">
             <span style="float: left;"><!--
                 --><?=number_format($RealNumResults)?> Results
-                <?=!check_perms('site_search_many') ? "(Showing first $NumResults matches)" : ""?>
+                <?=!$Viewer->permitted('site_search_many') ? "(Showing first $NumResults matches)" : ""?>
             </span>
             <input type="submit" value="Filter torrents" />
-            <input type="hidden" name="action" id="ft_type" value="<?=($AdvancedSearch ? 'advanced' : 'basic')?>" />
+            <input type="hidden" name="action" id="ft_type" value="<?= $searchMode ?>" />
             <input type="hidden" name="searchsubmit" value="1" />
             <input type="button" value="Reset" onclick="location.href = 'torrents.php<?php if (isset($_GET['action']) && $_GET['action'] === 'advanced') { ?>?action=advanced<?php } ?>'" />
             &nbsp;&nbsp;
@@ -388,7 +359,7 @@ if ($x % 7 != 0) { // Padding
 <?php
     }
 
-    if (!empty($LoggedUser['DefaultSearch'])) {
+    if ($Viewer->option('DefaultSearch')) {
 ?>
             <input type="submit" name="cleardefault" value="Clear default" />
 <?php    } ?>
@@ -528,7 +499,7 @@ foreach ($Results as $GroupID) {
                 </span>
 <?php    } ?>
                 <br />
-                <div class="tags"><?=$TorrentTags->format('torrents.php?'.$Action.'&amp;taglist=')?></div>
+                <div class="tags"><?= $TorrentTags->format("torrents.php?action={$searchMode}&amp;taglist=") ?></div>
             </div>
         </td>
         <td class="td_time nobr"><?=time_diff($GroupTime, 1)?></td>
@@ -644,7 +615,7 @@ foreach ($Results as $GroupID) {
                 ]) ?>
                 <?=$DisplayName?>
                 <div class="torrent_info"><?=$ExtraInfo?></div>
-                <div class="tags"><?=$TorrentTags->format("torrents.php?$Action&amp;taglist=")?></div>
+                <div class="tags"><?=$TorrentTags->format("torrents.php?action={$searchMode}&amp;taglist=")?></div>
             </div>
         </td>
         <td class="td_file_count"><?=$Data['FileCount']?></td>

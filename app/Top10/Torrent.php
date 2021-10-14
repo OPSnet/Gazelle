@@ -4,15 +4,13 @@ namespace Gazelle\Top10;
 
 class Torrent extends \Gazelle\Base {
 
-    /** @var Array */
-    private $formats;
+    protected array $formats;
+    protected \Gazelle\User $viewer;
 
-    private $currentUser;
-
-    public function __construct (array $formats, $currentUser) {
+    public function __construct (array $formats, \Gazelle\User $viewer) {
         parent::__construct();
         $this->formats = $formats;
-        $this->currentUser = $currentUser;
+        $this->viewer = $viewer;
     }
 
     public function getTopTorrents($getParameters, $details = 'all', $limit = 10) {
@@ -85,14 +83,11 @@ class Torrent extends \Gazelle\Base {
         return $topTorrents;
     }
 
-    public function showFreeleechTorrents($freeleechParameters) {
+    public function showFreeleechTorrents($freeleechParameters): bool {
         if (isset($freeleechParameters)) {
-            return $freeleechParameters == 'hide' ? 1 : 0;
-        } else if (isset($this->currentUser['DisableFreeTorrentTop10'])) {
-           return $this->currentUser['DisableFreeTorrentTop10'];
-        } else {
-            return 0;
+            return $freeleechParameters == 'hide';
         }
+        return (bool)$this->viewer->option('DisableFreeTorrentTop10');
     }
 
     private function orderBy($details) {
@@ -160,7 +155,7 @@ class Torrent extends \Gazelle\Base {
     }
 
     private function freeleechWhere($getParameters) {
-        $disableFreeTorrentTop10 = isset($this->currentUser['DisableFreeTorrentTop10']) ? $this->currentUser['DisableFreeTorrentTop10'] : 0;
+        $disableFreeTorrentTop10 = $this->viewer->option('DisableFreeTorrentTop10') ?? false;
 
         if (isset($getParameters['freeleech'])) {
             $disableFreeTorrentTop10 = ($getParameters['freeleech'] == 'hide' ? 1 : 0);

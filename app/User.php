@@ -1100,6 +1100,23 @@ class User extends BaseObject {
         return $this->setUpdate('Title', null);
     }
 
+    public function modifyOption(string $name, $value) {
+        $options = $this->info()['SiteOptions'];
+        if (is_null($value)) {
+            unset($options[$name]);
+        } else {
+            $options[$name] = $value;
+        }
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                SiteOptions = ?
+            WHERE UserID = ?
+            ", serialize($options), $this->id
+        );
+        $this->flush();
+        return $this;
+    }
+
     public function modify(): bool {
         $changed = false;
         if (!empty($this->forumWarning)) {
