@@ -117,13 +117,13 @@ $Index++;
 ?>
 </div>
 <?php foreach ($coverArt as $c) { ?>
-                    <div id="cover_div_<?=$Index?>" class="pad"<?=(empty($LoggedUser['ShowExtraCovers']) ? ' style="display: none;"' : '')?>>
+                    <div id="cover_div_<?=$Index?>" class="pad"<?= $Viewer->option('ShowExtraCovers') ? '' : ' style="display: none;"' ?>>
                 <p align="center">
 <?php
-    if (empty($LoggedUser['ShowExtraCovers'])) {
-        $Src = 'src="" data-gazelle-temp-src="' . ImageTools::process($c['Image'], true) . '"';
-    } else {
+    if ($Viewer->option('ShowExtraCovers')) {
         $Src = 'src="' . ImageTools::process($c['Image'], true) . '"';
+    } else {
+        $Src = 'src="" data-gazelle-temp-src="' . ImageTools::process($c['Image'], true) . '"';
     }
 ?>
                     <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?=ImageTools::process($c['Image'])?>', 220);" />

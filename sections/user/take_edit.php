@@ -13,13 +13,13 @@ $userId = $user->id();
 if ($userId == $Viewer->id()) {
     $ownProfile = true;
 } else {
-    if (!check_perms('admin_bp_history')) {
+    if (!$Viewer->permitted('admin_bp_history')) {
         error(403);
     }
     $ownProfile = false;
 }
 
-if (!$ownProfile && !check_perms('users_edit_profiles')) {
+if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
     Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->username()
         . ' (' . SITE_URL . '/user.php?id=' . $Viewer->id()
         . ') just tried to edit the profile of ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']);
@@ -41,9 +41,6 @@ $validator->setFields([
     ],
     ['new_pass_2', 1, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']],
 ]);
-if (check_perms('site_advanced_search')) {
-    $validator->setField('searchtype', 1, "number", "You forgot to select your default search preference.", ['range' => [0, 1]]);
-}
 if (!$validator->validate($_POST)) {
     error($validator->errorMessage());
 }
@@ -167,9 +164,6 @@ if ($Viewer->disableAvatar() && $_POST['avatar'] != $user->avatar()) {
     error('Your avatar privileges have been revoked.');
 }
 
-if (!empty($LoggedUser['DefaultSearch'])) {
-    $Options['DefaultSearch'] = $LoggedUser['DefaultSearch'];
-}
 $Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
 $Options['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
 $Options['PostsPerPage']        = (int)$_POST['postsperpage'];
@@ -195,8 +189,10 @@ $Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
 $Options['AutoComplete']        = $_POST['autocomplete'];
 $Options['HttpsTracker']        = (!empty($_POST['httpstracker']) ? 1 : 0);
 
-if (isset($LoggedUser['DisableFreeTorrentTop10'])) {
-    $Options['DisableFreeTorrentTop10'] = $LoggedUser['DisableFreeTorrentTop10'];
+foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
+    if ($Viewer->option($opt)) {
+        $Options[$opt] = $Viewer->option($opt);
+    }
 }
 
 if (empty($_POST['sorthide'])) {
@@ -209,8 +205,8 @@ if (empty($_POST['sorthide'])) {
     }
 }
 
-if (check_perms('site_advanced_search')) {
-    $Options['SearchType'] = $_POST['searchtype'];
+if ($Viewer->permitted('site_advanced_search')) {
+    $Options['SearchType'] = (int)!empty($_POST['search_type_advanced']);
 } else {
     unset($Options['SearchType']);
 }

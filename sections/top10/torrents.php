@@ -1,6 +1,6 @@
 <?php
 
-$torrent = new \Gazelle\Top10\Torrent(FORMAT, $LoggedUser);
+$torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan = new Gazelle\Manager\Torrent;
 
 if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
@@ -64,14 +64,13 @@ if (check_perms('site_advanced_top10')) {
 <?php
 }
 
-$disableFreeleechTorrentTop10 = (isset($LoggedUser['DisableFreeTorrentTop10']) ? $LoggedUser['DisableFreeTorrentTop10'] : 0);
+$disableFreeleechTorrentTop10 = $Viewer->option('DisableFreeTorrentTop10') ?? false;
 
 if (isset($_GET['freeleech'])) {
     $newPreference = (($_GET['freeleech'] == 'hide') ? 1 : 0);
-
     if ($newPreference != $disableFreeleechTorrentTop10) {
         $disableFreeleechTorrentTop10 = $newPreference;
-        Users::update_site_options($Viewer->id(), ['DisableFreeTorrentTop10' => $disableFreeleechTorrentTop10]);
+        $Viewer->modifyOption('DisableFreeTorrentTop10', $disableFreeleechTorrentTop10);
     }
 }
 
@@ -149,7 +148,7 @@ View::show_footer();
 
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $LoggedUser, $groupBy, $torMan, $Viewer;
+    global $groupBy, $torMan, $Viewer;
 ?>
         <h3>Top <?="$limit $caption"?>
 <?php
