@@ -5,11 +5,7 @@
 <noscript><span class="warning-login">{{ constant('SITE_NAME') }} requires JavaScript to function properly.
 Please enable JavaScript in your browser.</span><br /><br /></noscript>
 
-<div id="logo">
-<a href="/" style="margin-left: 0;"><img src="{{
-    constant('STATIC_SERVER') }}/styles/public/images/loginlogo.png" alt="{{
-    constant('SITE_NAME') }}" title="{{ constant('SITE_NAME') }}" /></a>
-</div>
+{% include 'logo.twig' %}
 
 <div class="main">
 <div class="auth">

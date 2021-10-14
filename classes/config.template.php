@@ -540,3 +540,5 @@ define('RANKING_WEIGHT', [
     'bonus'      => [ 6, 'BonusPoints'],
     'comment-t'  => [18, 'CommentTorrent'],
 ]);
+
+define('SHOW_LOGO', true);

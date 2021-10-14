@@ -1,9 +1,10 @@
-<?php
-View::show_header('Registration Complete');
-?>
-<div style="width: 500px;">
+{{ header('Registration Complete') }}
+{% include 'logo.twig' %}
+
+<div style="width: 100%">
+<div style="width: 30%; margin: auto;">
     <strong>Congratulations! Your account has been created.</strong><br />
     You can now log into your account using the <a href="login.php">login</a> page.
 </div>
-<?php
-View::show_footer();
+</div>
+{{ footer() }}

@@ -1,61 +1,55 @@
 <?php
 
-use Gazelle\Util\Mail;
-
-// needs to be defined here for fall-through to step1
-$Val = new Gazelle\Util\Validator;
-$Val->setFields([
-    ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEXP]],
-    ['email', true, 'email', 'You did not enter a valid email address.'],
-    ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
-    ['confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']],
-    ['readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.'],
-    ['readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.'],
-    ['agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.'],
-]);
-
-if (!empty($_REQUEST['confirm'])) {
+if (isset($_REQUEST['confirm'])) {
     // Confirm registration
-    $user = (new Gazelle\Manager\User)->findById(
-        (int)$DB->scalar("
-            SELECT ID FROM users_main WHERE Enabled = '0' AND torrent_pass = ?
-        ", $_REQUEST['confirm']
-        )
-    );
-
-    if ($user) {
-        $DB->prepared_query("
-            UPDATE users_main SET
-                Enabled = '1'
-            WHERE ID = ?
-            ", $user->id()
-        );
+    $user = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['confirm']);
+    if ($user && $user->setUpdate('Enabled', '1')->modify()) {
         $user->flush();
         $Cache->increment('stats_user_count');
-        require('step2.php');
+        echo $Twig->render('register/complete.twig');
     }
 
-} elseif (OPEN_REGISTRATION || !empty($_REQUEST['invite'])) {
-    if (!empty($_POST['submit'])) {
-        // User has submitted registration form
+} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite'])) {
+    if ($_REQUEST['invite']) {
+        // If they haven't submitted the form, check to see if their invite is good
+        if (!$DB->scalar("
+            SELECT InviteKey FROM invites WHERE InviteKey = ?
+            ", $_GET['invite']
+        )) {
+            echo $Twig->render('register/no-invite.twig');
+            exit;
+        }
+    }
 
-        $Err = $Val->validate($_REQUEST) ? false : $Val->errorMessage();
-        if (!$Err) {
-            $username = trim($_REQUEST['username']);
-            $email    = trim($_REQUEST['email']);
+    $validator = new Gazelle\Util\Validator;
+    $validator->setFields([
+        ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEXP]],
+        ['email', true, 'email', 'You did not enter a valid email address.'],
+        ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
+        ['confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']],
+        ['readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.'],
+        ['readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.'],
+        ['agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.'],
+    ]);
+
+    if (isset($_POST['submit'])) {
+        $error = $validator->validate($_POST) ? false : $validator->errorMessage();
+        if (!$error) {
+            $username = trim($_POST['username']);
+            $email    = trim($_POST['email']);
 
             $creator = new Gazelle\UserCreator;
             $creator->setUsername($username)
                 ->setEmail($email)
                 ->setPassword($_POST['password'])
                 ->setIpaddr($_SERVER['REMOTE_ADDR']);
-            if ($_REQUEST['invite']) {
-                $creator->setInviteKey($_REQUEST['invite']);
+            if ($_POST['invite']) {
+                $creator->setInviteKey($_POST['invite']);
             }
 
             try {
                 $user = $creator->create();
-                (new Mail)->send($user->email(), 'New account confirmation at '.SITE_NAME,
+                (new Gazelle\Util\Mail)->send($user->email(), 'New account confirmation at '.SITE_NAME,
                     $Twig->render('email/registration.twig', [
                         'username'     => $username,
                         'announce_key' => $user->announceKey(),
@@ -63,64 +57,58 @@ if (!empty($_REQUEST['confirm'])) {
                 );
                 (new Gazelle\Manager\User)->sendPM( $user->id(), 0,
                     "Welcome to " . SITE_NAME,
-                    $Twig->render('user/welcome.twig', [
+                    $Twig->render('register/welcome.twig', [
                         'username'     => $username,
                         'announce_url' => $user->announceUrl(),
                     ])
                 );
                 (new Gazelle\Tracker)->update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
-                $Sent = 1;
+                $emailSent = true;
             }
             catch (Gazelle\Exception\UserCreatorException $e) {
                 switch ($e->getMessage()) {
                     case 'email':
-                        $Err = 'No email address given';
+                        $error = 'No email address given';
                         break;
                     case 'ipaddr':
-                        $Err = 'No IP address given';
+                        $error = 'No IP address given';
                         break;
                     case 'invitation':
-                        View::show_header('No invitation found');
-                        echo $Twig->render('login/no-invite.twig', [
-                            'static' => STATIC_SERVER,
-                            'key'    => $_GET['invite']
-                        ]);
+                        echo $Twig->render('register/no-invite.twig');
                         exit;
                         break;
                     case 'password':
-                        $Err = 'No password given';
+                        $error = 'No password given';
                         break;
                     case 'username':
-                        $Err = 'No username given';
+                        $error = 'No username given';
                         break;
                     case 'username-invalid':
-                        $Err = 'Specified username is forbidden';
+                        $error = 'Specified username is forbidden';
                         break;
                 }
             }
-            if (!$Err) {
-                $NewInstall = $creator->newInstall();
+            if (!$error) {
+                $newInstall = $creator->newInstall();
             }
         }
-    } elseif ($_GET['invite']) {
-        // If they haven't submitted the form, check to see if their invite is good
-        if (!$DB->scalar("
-            SELECT InviteKey FROM invites WHERE InviteKey = ?
-            ", $_GET['invite']
-        )) {
-            View::show_header('No invitation found');
-            echo $Twig->render('login/no-invite.twig', [
-                'static' => STATIC_SERVER,
-                'key'    => $_GET['invite']]);
-            exit;
-        }
     }
-    require('step1.php');
+    echo $Twig->render('register/create.twig', [
+        'error'     => $error,
+        'js'        => $validator->generateJS('registerform'),
+        'sent'      => $emailSent ?? false,
+        'invite'    => $_REQUEST['invite'] ?? null,
+        'is_new'    => $newInstall ?? false,
+        'username'  => $_REQUEST['username'],
+        'email'     => $_REQUEST['email'] ?? $InviteEmail,
+        'readrules' => $_REQUEST['readrules'],
+        'readwiki'  => $_REQUEST['readwiki'],
+        'agereq'    => $_REQUEST['agereq'],
+    ]);
 
 } elseif (!OPEN_REGISTRATION) {
-    if (isset($_GET['welcome'])) {
-        require('code.php');
-    } else {
-        require('closed.php');
-    }
+    echo $Twig->render(isset($_GET['welcome'])
+        ? 'register/code.twig'
+        : 'register/closed.twig'
+    );
 }
