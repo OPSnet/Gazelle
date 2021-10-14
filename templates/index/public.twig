@@ -1,8 +1,5 @@
 {{ header('This is a mirage') }}
-<div id="logo">
-<img src="{{ constant('STATIC_SERVER') }}/styles/public/images/loginlogo.png" alt="{{
-    constant('SITE_NAME') }}" title="{{ constant('SITE_NAME') }}" />
-</div>
+{% include 'logo.twig' %}
 
 <div class="main">
 <div class="para">Orpheus with his lute made trees<br />
