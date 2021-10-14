@@ -52,12 +52,12 @@
     </tr>
     <tr class="colhead">
         <td title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range.">
-            {{ header.emit('fromip')|raw }}
+            {{ header|column('fromip') }}
         </td>
-        <td>{{ header.emit('toip')|raw }}</td>
-        <td>{{ header.emit('reason')|raw }}</td>
-        <td>{{ header.emit('username')|raw }}</td>
-        <td>{{ header.emit('created')|raw }}</td>
+        <td>{{ header|column('toip') }}</td>
+        <td>{{ header|column('reason') }}</td>
+        <td>{{ header|column('username') }}</td>
+        <td>{{ header|column('created') }}</td>
         <td>&nbsp;</td>
     </tr>
 {% for ban in list %}
