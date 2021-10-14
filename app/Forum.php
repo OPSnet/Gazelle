@@ -447,6 +447,19 @@ class Forum extends Base {
         }
     }
 
+    /* How many posts precede this post in the thread? Used as a basis for
+     * calculating on which page a post falls.
+     */
+    public function priorPostTotal(int $postId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM forums_posts
+            WHERE TopicID = (SELECT TopicID FROM forums_posts WHERE ID = ?)
+                AND ID <= ?
+            ", $postId, $postId
+        );
+    }
+
     /* Update the topic following the creation of a thread.
      * (Most recent thread and sets last poster).
      *
@@ -753,10 +766,10 @@ class Forum extends Base {
      * Edit a poll
      * TODO: feature and unfeature a poll.
      *
-     * @param int threadId In which thread?
-     * @param int toFeature non-zero to feature on front page
-     * @param int toClose toggle open/closed for voting
-     (*/
+     * @param int $threadId In which thread?
+     * @param int $toFeature non-zero to feature on front page
+     * @param int $toClose toggle open/closed for voting
+     */
     public function moderatePoll(int $threadId, int $toFeature, int $toClose) {
         [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
         if ($toFeature && !$Featured) {
