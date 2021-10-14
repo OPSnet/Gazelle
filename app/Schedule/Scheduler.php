@@ -95,13 +95,15 @@ class Scheduler extends \Gazelle\Base {
         $this->clearCache();
     }
 
-    public function getTaskDetails(int $days = 7) {
+    public function getTaskDetails(int $days = 7): array {
         $this->db->prepared_query("
             SELECT pt.periodic_task_id, name, description, period, is_enabled, is_sane, run_now,
                    coalesce(stats.runs, 0) runs, coalesce(stats.processed, 0) processed,
                    coalesce(stats.errors, 0) errors, coalesce(events.events, 0) events,
-                   coalesce(pth.launch_time, '') last_run, coalesce(pth.duration_ms, 0) duration,
-                   coalesce(pth.status, '') status
+                   coalesce(pth.launch_time, '') last_run,
+                   coalesce(pth.duration_ms, 0) duration,
+                   coalesce(pth.status, '') status,
+                   if(pth.launch_time is null, now(), pth.launch_time + INTERVAL period SECOND) AS next_run
             FROM periodic_task pt
             LEFT JOIN
             (
@@ -123,8 +125,7 @@ class Scheduler extends \Gazelle\Base {
             ORDER BY pt.run_now DESC, pt.is_enabled DESC, pt.period, pt.periodic_task_id
         ", $days, $days);
 
-        $tasks = $this->db->has_results() ? $this->db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
-        return $tasks;
+        return $this->db->to_array('periodic_task_id', MYSQLI_ASSOC, false);
     }
 
     public function getTotal(int $id): int {
@@ -184,7 +185,7 @@ class Scheduler extends \Gazelle\Base {
         return $task;
     }
 
-    private function constructAxes(array $data, string $key, array $axes, bool $time) {
+    private function constructAxes(array $data, string $key, array $axes, bool $time): array {
         $result = [];
 
         foreach ($axes as $axis) {
@@ -200,17 +201,12 @@ class Scheduler extends \Gazelle\Base {
                 'name' => $name,
                 'data' => array_map(
                     function ($v) use ($id, $key, $time) {
-                        if ($time) {
-                            return sprintf('[%d, %d]', strtotime($v[$key]) * 1000, $v[$id]);
-                        }
-
-                        return sprintf("['%s', %d]", $v[$key], $v[$id]);
+                        return [$time ? strtotime($v[$key]) * 1000 : $v[$key], (int)$v[$id]];
                     },
                     $data
                 )
             ];
         }
-
         return $result;
     }
 
@@ -226,7 +222,7 @@ class Scheduler extends \Gazelle\Base {
             GROUP BY 1
             ORDER BY 1
         ");
-        $hourly = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
+        $hourly = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC, false), 'date', ['duration', 'processed'], true);
 
         $this->db->prepared_query("
             SELECT date(pth.launch_time) AS date,
@@ -240,7 +236,7 @@ class Scheduler extends \Gazelle\Base {
             ORDER BY 1
             ", $days
         );
-        $daily = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
+        $daily = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC, false), 'date', ['duration', 'processed'], true);
 
         $this->db->prepared_query("
             SELECT pt.name,
@@ -254,17 +250,9 @@ class Scheduler extends \Gazelle\Base {
             ORDER BY 1
             ", $days
         );
-        $tasks = $this->constructAxes($this->db->to_array('name', MYSQLI_ASSOC), 'name', ['duration_avg', 'processed_avg'], false);
+        $tasks = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC, false), 'name', ['duration_avg', 'processed_avg'], false);
 
-        // where the fuck was i going with this
-        $averages = [
-            'hourly' => 0,
-            'daily' => 0,
-            'weekly' => 0,
-            'monthly' => 0
-        ];
-
-        $this->db->prepared_query("
+        $totals = $this->db->rowAssoc("
             SELECT count(pth.periodic_task_history_id) AS runs,
                    sum(pth.duration_ms) AS duration,
                    sum(pth.num_items) AS processed,
@@ -277,14 +265,12 @@ class Scheduler extends \Gazelle\Base {
               AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             ", $days
         );
-        $totals = $this->db->next_record(MYSQLI_ASSOC);
 
         return [
             'hourly' => $hourly,
-            'daily' => $daily,
-            'tasks' => $tasks,
-            'averages' => $averages,
-            'totals' => $totals
+            'daily'  => $daily,
+            'tasks'  => $tasks,
+            'totals' => $totals,
         ];
     }
 

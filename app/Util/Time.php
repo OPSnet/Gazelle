@@ -223,6 +223,52 @@ class Time {
         }
     }
 
+
+    /**
+     * Converts a numeric amount of seconds (though we round down via floor for all levels) into a more human readeable
+     * string representing the number of weeks, days, hours, minutes, seconds.
+     *
+     * @return string
+     */
+    public static function convertSeconds(int $seconds): string {
+        if ($seconds <= 0) {
+            return '0s';
+        }
+
+        $sec = $seconds % 60;
+        $minutes = (int)floor($seconds / 60);
+
+        if ($minutes >= 60) {
+            $minute = $minutes % 60;
+            $hours  = (int)floor($minutes / 60);
+        } else {
+            $minute = $minutes;
+            $hours  = 0;
+        }
+
+        if ($hours >= 24) {
+            $hour = $hours % 24;
+            $days = (int)floor($hours / 24);
+        } else {
+            $hour = $hours;
+            $days  = 0;
+        }
+
+        if ($days >= 7) {
+            $day = $days % 7;
+            $week = (int)floor($days / 7);
+        } else {
+            $day = $days;
+            $week  = 0;
+        }
+
+        return ($week ? "{$week}w" : '')
+            . ($day ? "{$day}d" : '')
+            . ($hour ? "{$hour}h" : '')
+            . ($minute ? "{$minute}m" : '')
+            . ($sec ? "{$sec}s" : '');
+    }
+
     /**
      * Utility function to generate a timestamp to insert into the database, given some offset and
      * whether or not we will be 'fuzzy' (midnight for time) with the timestamp.

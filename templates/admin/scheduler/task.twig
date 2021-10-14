@@ -1,0 +1,103 @@
+{{ header('Periodic Task Details') }}
+<div class="header">
+<h2>Periodic Task Details - {{ task.name }}</h2>
+</div>
+{% include 'admin/scheduler/links.twig' with {'can_edit': viewer.permitted('admin_periodic_task_manage')} only %}
+{{ paginator.linkbox|raw }}
+{% for item in task.items %}
+    {% if loop.first %}
+<br />
+<div class="box pad">
+    <div id="daily-totals" style="width: 100%; height: 350px;"></div>
+</div>
+
+<table width="100%" id="tasks">
+    <tr class="colhead">
+        <td>{{ header|column('launchtime') }} <a id="dtoggle" class="brackets" href="#">Toggle</a></td>
+        <td>{{ header|column('duration') }}</td>
+        <td width="10%">{{ header|column('status') }}</td>
+        <td width="10%">{{ header|column('items') }}</td>
+        <td width="10%">{{ header|column('errors') }}</td>
+    </tr>
+    {% endif %}
+    <tr class="rowa">
+        <td>
+            <span class="reltime">{{ item.launchTime|time_diff }}</span>
+            <span class="abstime hidden">{{ item.launchTime }}</span>
+        </td>
+        <td>{{ item.duration }}ms</td>
+        <td>{{ item.status }}</td>
+        <td>{{ item.numItems|number_format }}</td>
+        <td>{{ item.numErrors|number_format }}</td>
+    </tr>
+    {% for event in item.events %}
+        {% if loop.first %}
+    <tr class="rowb">
+        <td colspan="5">
+            <table>
+                <tr class="colhead">
+                    <td>Event Time</td>
+                    <td>Severity</td>
+                    <td>Event</td>
+                    <td>Reference</td>
+                </tr>
+        {% endif %}
+                <tr>
+                    <td>
+                        <span class="reltime">{{ event.timestamp|time_diff }}</span>
+                        <span class="abstime hidden">{{ event.timestamp }}</span>
+                    </td>
+                    <td>{{ event.severity }}</td>
+                    <td>{{ event.event }}</td>
+                    <td>{{ event.reference }}</td>
+                </tr>
+        {% if loop.last %}
+            </table>
+        </td>
+    </tr>
+        {% endif %}
+    {% endfor %}
+    {% if loop.last %}
+</table>
+{{ paginator.linkbox|raw }}
+
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/highcharts.js"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/highcharts_custom.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    initialiseChart('daily-totals', 'Daily', [
+        {
+            name: 'Duration',
+            yAxis: 0,
+            data: {{ duration|raw }}
+        },
+        {
+            name: 'Processed',
+            yAxis: 1,
+            data: {{ processed|raw }}
+        }
+    ], {
+        yAxis: [
+            {
+                title: { text: 'Duration' }
+            },
+            {
+                title: { text: 'Items' },
+                opposite: true
+            }
+        ]
+    });
+    document.getElementById('dtoggle').onclick = function () {
+        $('#tasks .reltime').gtoggle();
+        $('#tasks .abstime').gtoggle();
+        return false;
+    };
+});
+</script>
+    {% endif %}
+{% else %}
+<div class="center">
+    <h2>No history found</h2>
+</div>
+{% endfor %}
+{{ footer() }}

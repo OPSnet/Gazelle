@@ -125,13 +125,13 @@
 <div class="box pad">
     <table class="invite_table m_table" width="100%">
         <tr class="colhead">
-            <td class="m_th_left nobr">{{ heading.emit('username')|raw }}</td>
-            <td class="nobr">{{ heading.emit('email')|raw }}</td>
-            <td class="nobr">{{ heading.emit('joined')|raw }}</td>
-            <td class="nobr">{{ heading.emit('lastseen')|raw }}</td>
-            <td class="m_th_right nobr">{{ heading.emit('uploaded')|raw }}</td>
-            <td class="m_th_right nobr">{{ heading.emit('downloaded')|raw }}</td>
-            <td class="m_th_right nobr">{{ heading.emit('ratio')|raw }}</td>
+            <td class="m_th_left nobr">{{ heading|column('username') }}</td>
+            <td class="nobr">{{ heading|column('email') }}</td>
+            <td class="nobr">{{ heading|column('joined') }}</td>
+            <td class="nobr">{{ heading|column('lastseen') }}</td>
+            <td class="m_th_right nobr">{{ heading|column('uploaded') }}</td>
+            <td class="m_th_right nobr">{{ heading|column('downloaded') }}</td>
+            <td class="m_th_right nobr">{{ heading|column('ratio') }}</td>
 {% if is_site_inviter %}
             <td class="nobr">Source</td>
 {% endif %}

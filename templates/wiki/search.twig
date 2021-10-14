@@ -51,8 +51,8 @@
     {{ paginator.linkbox|raw }}
 <table width="100%">
     <tr class="colhead">
-        <td class="nobr">{{ header.emit('title')|raw }}</td>
-        <td class="nobr">{{ header.emit('edited')|raw }}</td>
+        <td class="nobr">{{ header|column('title') }}</td>
+        <td class="nobr">{{ header|column('edited') }}</td>
         <td>Last edited by</td>
     </tr>
 {% for article in page %}
