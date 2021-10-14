@@ -1,5 +1,5 @@
 <?php
-//TODO: Normalize thread_*_info don't need to waste all that ram on things that are already in other caches
+
 /**********|| Page to show individual threads || ********************************\
 
 Things to expect in $_GET:
@@ -31,17 +31,6 @@ if ($_GET['postid']) {
         print json_encode(['status' => 'failure']);
     }
 }
-$forumId = $forum->id();
-if (isset($_GET['pp'])) {
-    $PerPage = $_GET['pp'];
-} else {
-    $PerPage = $Viewer->postsPerPage();
-}
-
-$threadInfo = $forum->threadInfo($threadId);
-if (empty($threadInfo)) {
-    json_die('failure', 'no such thread exists');
-}
 
 // Make sure they're allowed to look at the page
 if (!$Viewer->readAccess($forum)) {
@@ -49,28 +38,31 @@ if (!$Viewer->readAccess($forum)) {
     exit;
 }
 
+$threadInfo = $forum->threadInfo($threadId);
+if (empty($threadInfo)) {
+    json_die('failure', 'no such thread exists');
+}
+$forumId = $forum->id();
+$perPage = $_GET['pp'] ?? $Viewer->postsPerPage();
+
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
-if ($threadInfo['Posts'] <= $PerPage) {
+if ($threadInfo['Posts'] <= $perPage) {
     $PostNum = 1;
 } else {
-    if (isset($_GET['post']) && is_number($_GET['post'])) {
-        $PostNum = $_GET['post'];
+    if ((int)$_GET['post']) {
+        $PostNum = (int)$_GET['post'];
     } elseif ($postId) {
-        $PostNum = $DB->scalar("
-            SELECT count(*) FROM forums_posts WHERE TopicID = ? AND ID <= ?
-            ", $threadId, $postId
-        );
+        $PostNum = $forum->priorPostTotal($postId);
     } else {
         $PostNum = 1;
     }
 }
-[$Page] = Format::page_limit($PerPage, min($threadInfo['Posts'], $PostNum));
-if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
-    $Page = ceil($threadInfo['Posts'] / $PerPage);
-}
+
+$paginator = new Gazelle\Util\Paginator($perPage, (int)($_GET['page'] ?? ceil($PostNum / $perPage)));
+$paginator->setTotal($threadInfo['Posts']);
 
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
-$CatalogueID = floor(($PerPage * ($Page - 1)) / THREAD_CATALOGUE);
+$CatalogueID = floor(($perPage * ($paginator->page() - 1)) / THREAD_CATALOGUE);
 if (!$Catalogue = $Cache->get_value("thread_$threadId"."_catalogue_$CatalogueID")) {
     $DB->prepared_query("
         SELECT
@@ -91,13 +83,13 @@ if (!$Catalogue = $Cache->get_value("thread_$threadId"."_catalogue_$CatalogueID"
         $Cache->cache_value("thread_$threadId"."_catalogue_$CatalogueID", $Catalogue, 0);
     }
 }
-$Thread = array_slice($Catalogue, ($PerPage * ($Page - 1)) % THREAD_CATALOGUE, $PerPage, true);
+$Thread = array_slice($Catalogue, ($perPage * ($paginator->page() - 1)) % THREAD_CATALOGUE, $perPage, true);
 
 if ($_GET['updatelastread'] !== '0') {
     $LastPost = end($Thread);
     $LastPost = $LastPost['ID'];
     reset($Thread);
-    if ($threadInfo['Posts'] <= $PerPage * $Page && $threadInfo['StickyPostID'] > $LastPost) {
+    if ($threadInfo['Posts'] <= $perPage * $paginator->page() && $threadInfo['StickyPostID'] > $LastPost) {
         $LastPost = $threadInfo['StickyPostID'];
     }
     //Handle last read
@@ -121,15 +113,7 @@ if ($_GET['updatelastread'] !== '0') {
     }
 }
 
-//Handle subscriptions
-$subscription = new \Gazelle\Manager\Subscription($Viewer->id());
-$UserSubscriptions = $subscription->subscriptions();
-
-if (in_array($threadId, $UserSubscriptions)) {
-    $Cache->delete_value('subscriptions_user_new_'.$Viewer->id());
-}
-
-$JsonPoll = [];
+$JsonPoll = null;
 if ($threadInfo['NoPoll'] == 0) {
     [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
     if (!empty($Votes)) {
@@ -141,27 +125,25 @@ if ($threadInfo['NoPoll'] == 0) {
     }
 
     //Polls lose the you voted arrow thingy
-    $UserResponse = $DB->scalar("
-        SELECT Vote
-        FROM forums_polls_votes
-        WHERE UserID = ?
-            AND TopicID = ?
-        ", $Viewer->id(), $threadId
-    );
+    $UserResponse = $forum->pollVote($Viewer->id(), $threadId);
     if ($UserResponse > 0) {
-        $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
+        $Answers[$UserResponse] = '&raquo; ' . $Answers[$UserResponse];
     } else {
         if (!empty($UserResponse) && $forum->hasRevealVotes()) {
-            $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
+            $Answers[$UserResponse] = '&raquo; ' . $Answers[$UserResponse];
         }
     }
 
-    $JsonPoll['closed'] = ($Closed == 1);
-    $JsonPoll['featured'] = $Featured;
-    $JsonPoll['question'] = $Question;
-    $JsonPoll['maxVotes'] = (int)$MaxVotes;
-    $JsonPoll['totalVotes'] = $TotalVotes;
-    $JsonPollAnswers = [];
+    $JsonPoll = [
+        'answers'    => [],
+        'closed'     => $Closed == 1,
+        'featured'   => (bool)$Featured,
+        'question'   => $Question,
+        'maxVotes'   => $MaxVotes,
+        'totalVotes' => $TotalVotes,
+        'voted'      => $UserResponse !== null || $Closed || $threadInfo['isLocked'],
+        'vote'       => $UserResponse ? $UserResponse - 1 : null,
+    ];
 
     foreach ($Answers as $i => $Answer) {
         if (!empty($Votes[$i]) && $TotalVotes > 0) {
@@ -171,20 +153,12 @@ if ($threadInfo['NoPoll'] == 0) {
             $Ratio = 0;
             $Percent = 0;
         }
-        $JsonPollAnswers[] = [
+        $JsonPoll['answers'][] = [
             'answer'  => $Answer,
             'ratio'   => $Ratio,
             'percent' => $Percent,
         ];
     }
-
-    if ($UserResponse !== null || $Closed || $threadInfo['isLocked'] || $Viewer->writeAccess($forum)) {
-        $JsonPoll['voted'] = True;
-    } else {
-        $JsonPoll['voted'] = False;
-    }
-
-    $JsonPoll['answers'] = $JsonPollAnswers;
 }
 
 // Squeeze in stickypost
@@ -232,18 +206,23 @@ foreach ($Thread as $Key => $Post) {
     ];
 }
 
+$subscribed = in_array($threadId, (new Gazelle\Manager\Subscription($Viewer->id()))->subscriptions());
+if ($subscribed) {
+    $Cache->delete_value('subscriptions_user_new_' . $Viewer->id());
+}
+
 print json_encode([
     'status' => 'success',
     'response' => [
         'forumId'     => $forumId,
         'forumName'   => $forum->name(),
         'threadId'    => $threadId,
-        'threadTitle' => display_str($threadInfo['Title']),
-        'subscribed'  => in_array($threadId, $UserSubscriptions),
+        'threadTitle' => $threadInfo['Title'],
+        'subscribed'  => $subscribed,
         'locked'      => $threadInfo['isLocked'] == 1,
         'sticky'      => $threadInfo['isSticky'] == 1,
-        'currentPage' => $Page,
-        'pages'       => ceil($threadInfo['Posts'] / $PerPage),
+        'currentPage' => $paginator->page(),
+        'pages'       => $paginator->pages(),
         'poll'        => empty($JsonPoll) ? null : $JsonPoll,
         'posts'       => $JsonPosts,
     ]
