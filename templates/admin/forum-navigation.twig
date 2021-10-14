@@ -1,0 +1,85 @@
+{% from 'macro/form.twig' import checked -%}
+{{ header('Navigation link manager') }}
+<div class="header">
+    <h2>Navigation link manager</h2>
+</div>
+<table>
+    <tr class="colhead">
+        <td>Tag</td>
+        <td>Title</td>
+        <td>Target</td>
+        <td>Tests</td>
+        <td>Test User</td>
+        <td>Mandatory</td>
+        <td>Default</td>
+        <td>Submit</td>
+    </tr>
+{% for item in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    <form class="manage_form" name="navitems" action="" method="post">
+        <input type="hidden" name="id" value="{{ item.id }}" />
+        <input type="hidden" name="action" value="navigation_alter" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <td>
+            <input type="text" name="tag" value="{{ item.tag }}" />
+        </td>
+        <td>
+            <input type="text" name="title" value="{{ item.title }}" />
+        </td>
+        <td>
+            <input type="text" name="target" value="{{ item.target }}" />
+        </td>
+        <td>
+            <input type="text" name="tests" value="{{ item.tests }}" />
+        </td>
+        <td>
+            <input type="checkbox" name="testuser"{{ checked(item.test_user) }} />
+        </td>
+        <td>
+            <input type="checkbox" name="mandatory"{{ checked(item.mandatory) }} />
+        </td>
+        <td>
+            <input type="checkbox" name="default"{{ checked(item.initial) }} />
+        </td>
+        <td>
+            <input type="submit" name="submit" value="Edit" />
+            <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this link? This is an irreversible action!')" />
+        </td>
+    </form>
+    </tr>
+{% endfor %}
+    <tr>
+        <td colspan="5">Create Link</td>
+    </tr>
+    <tr class="rowa">
+    <form class="manage_form" name="navitems" action="" method="post">
+        <input type="hidden" name="action" value="navigation_alter" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <td>
+            <input type="text" name="tag" />
+        </td>
+        <td>
+            <input type="text" name="title" />
+        </td>
+        <td>
+            <input type="text" name="target" />
+        </td>
+        <td>
+            <input type="text" name="tests" />
+        </td>
+        <td>
+            <input type="checkbox" name="testuser" />
+        </td>
+        <td>
+            <input type="checkbox" name="mandatory" />
+        </td>
+        <td>
+            <input type="checkbox" name="default" />
+        </td>
+        <td>
+            <input type="submit" name="submit" value="Create" />
+        </td>
+    </form>
+    </tr>
+</table>
+{{ footer() }}

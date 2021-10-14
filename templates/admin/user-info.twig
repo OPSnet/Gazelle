@@ -1,0 +1,16 @@
+{{ header(user.username ~ ' &rsaquo; Email and IP summary') }}
+<div class="box pad center">
+<h2>{{ user.user_url }} &rsaquo; Email and IP summary</h2>
+
+<table>
+<tr><th>Now</th><td colspan="2">{{ now }}</td></tr>
+<tr><th>Last seen</th><td colspan="2">{{ user.lastAccess|time_diff }}</td></tr>
+<tr><th>Joined</th><td colspan="2">{{ user.joinDate }}</td></tr>
+
+{% include 'admin/user-info-email.twig' with {'info': user.emailHistory } only %}
+{% include 'admin/user-info-email.twig' with {'info': user.siteIPv4Summary, 'title': 'Site IPv4 Information' } only %}
+{% include 'admin/user-info-email.twig' with {'info': user.trackerIPv4Summary, 'title': 'Tracker IPv4 Information' } only %}
+
+</table>
+</div>
+{{ footer() }}

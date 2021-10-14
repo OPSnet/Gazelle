@@ -39,41 +39,10 @@ if (isset($_POST['Username'])) {
                 break;
         }
     }
-    header ("Location: user.php?id=" . $user->id());
+    header ("Location: " . $user->url());
     exit;
 }
 
-View::show_header('Create a User');
-?>
-<div class="header">
-    <h2>Create a User</h2>
-</div>
-
-<div class="thin box pad">
-<form class="create_form" name="user" method="post" action="">
-    <input type="hidden" name="action" value="create_user" />
-    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-    <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center">
-        <tr valign="top">
-            <td align="right" class="label">Username:</td>
-            <td align="left"><input type="text" name="Username" id="username" class="inputtext" /></td>
-        </tr>
-        <tr valign="top">
-            <td align="right" class="label">Email address:</td>
-            <td align="left"><input type="email" name="Email" id="email" class="inputtext" /></td>
-        </tr>
-        <tr valign="top">
-            <td align="right" class="label">Password:</td>
-            <td align="left"><input type="password" name="Password" id="password" class="inputtext" /></td>
-        </tr>
-        <tr>
-            <td colspan="2" align="right">
-                <input type="submit" name="submit" value="Create User" class="submit" />
-            </td>
-        </tr>
-    </table>
-</form>
-</div>
-<?php
-
-View::show_footer();
+echo $Twig->render('admin/user-create.twig', [
+    'auth' => $Viewer->auth(),
+]);

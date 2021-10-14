@@ -1,0 +1,33 @@
+{{ header('Case Analysis') }}
+?>
+<div class="header">
+    <h2>Case Analysis (<a href="{{ analysis.url }}">{{ case }}</a>)</h2>
+</div>
+<div class="linkbox">
+    <a href="tools.php?action=analysis_list" class="brackets">Error list</a>
+</div>
+<pre id="debug_report">{{ analysis.message }}</pre>
+
+{% include 'debug/performance.twig' with {'list': analysis.perf} only %}
+{% include 'debug/flag.twig' with {'list': analysis.flags} only %}
+{% include 'debug/include.twig' with {'list': analysis.includes} only %}
+{% include 'debug/error.twig' with {'list': analysis.errors} only %}
+{% include 'debug/sphinxql.twig' with {'list': analysis.searches, 'time': analysis.searches_time} only %}
+{% include 'debug/query.twig' with {'list': analysis.queries, 'time': analysis.queries_time} only %}
+
+{% if viewer.permitted('admin_clear_cache') %}
+    {% include 'debug/cache.twig' with {'list': debug.get_cache_keys, 'time': analysis.cache_time} only %}
+{% endif %}
+
+{% if viewer.permitted('site_debug') %}
+    {% include 'debug/class.twig' with {'list': debug.get_classes} only %}
+    {% include 'debug/extension.twig' with {'list': debug.get_extensions} only %}
+{% endif %}
+
+{% if schedule %}
+    {% include 'debug/task.twig' with {'list': schedule} only %}
+{% endif %}
+
+{% include 'debug/var.twig' with {'list': analysis.vars} only %}
+<hr />
+{{ footer() }}

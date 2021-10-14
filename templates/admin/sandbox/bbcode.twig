@@ -1,14 +1,6 @@
-<?php
-
-if (!$Viewer->permitted('users_mod')) {
-    error(403);
-}
-
-$Title = "BBCode Sandbox";
-View::show_header($Title, ['js' => 'bbcode_sandbox']);
-?>
+{{ header('BBCode Sandbox', {'js': 'bbcode_sandbox'}) }}
 <div class="header">
-    <h2><?=$Title?></h2>
+    <h2>BBCode Sandbox</h2>
 </div>
 <div class="thin">
     <textarea id="sandbox" class="wbbarea" style="width: 98%;" onkeyup="resize('sandbox');" name="body" cols="90" rows="8"></textarea>
@@ -23,5 +15,4 @@ View::show_header($Title, ['js' => 'bbcode_sandbox']);
         </table>
     </div>
 </div>
-<?php
-View::show_footer();
+{{ footer() }}

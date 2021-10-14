@@ -7,8 +7,6 @@ if (!$Viewer->permitted('site_database_specifics')) {
 // View table definition
 if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) {
     $tableName = $match[1];
-
-    View::show_header('Database Specifics - ' . $tableName);
     $siteInfo = new Gazelle\SiteInfo;
     echo $Twig->render('admin/db-table.twig', [
         'definition' => $DB->row('SHOW CREATE TABLE ' . $tableName)[1],
@@ -16,7 +14,6 @@ if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) 
         'table_read' => $siteInfo->tableRowsRead($tableName),
         'index_read' => $siteInfo->indexRowsRead($tableName),
     ]);
-    View::show_footer();
     exit;
 }
 
