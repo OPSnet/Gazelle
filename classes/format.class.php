@@ -128,37 +128,6 @@ class Format {
     }
 
 
-    /**
-     * Finds what page we're on and gives it to us, as well as the LIMIT clause for SQL
-     * Takes in $_GET['page'] as an additional input
-     *
-     * @param int $PerPage Results to show per page
-     * @param int $DefaultResult Optional, which result's page we want if no page is specified
-     * If this parameter is not specified, we will default to page 1
-     *
-     * @return array<int, string> What page we are on, and what to use in the LIMIT section of a query
-     * e.g. "SELECT [...] LIMIT $Limit;"
-     */
-    public static function page_limit($PerPage, $DefaultResult = 1) {
-        if (!isset($_GET['page'])) {
-            $Page = (int)ceil($DefaultResult / $PerPage);
-            if ($Page == 0) {
-                $Page = 1;
-            }
-            $Limit = $PerPage;
-        } else {
-            if (!is_number($_GET['page'])) {
-                error(0);
-            }
-            $Page = $_GET['page'];
-            if ($Page <= 0) {
-                $Page = 1;
-            }
-            $Limit = $PerPage * $Page - $PerPage . ", $PerPage";
-        }
-        return [$Page, $Limit];
-    }
-
     /* Get pages
      * Returns a page list, given certain information about the pages.
      *
