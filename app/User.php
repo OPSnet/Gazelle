@@ -1001,7 +1001,7 @@ class User extends BaseObject {
     public function flush() {
         $this->info = [];
         $this->cache->deleteMulti([
-            "u_" . $this->id,
+            sprintf(self::CACHE_KEY, $this->id),
             "user_info_" . $this->id,
             "user_info_heavy_" . $this->id,
             "user_stats_" . $this->id,
@@ -3097,23 +3097,5 @@ class User extends BaseObject {
         }
         $this->db->set_query_id($QueryID);
         $this->cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
-    }
-
-    public function modifyCollectorDefaults(array $collector): bool {
-        if (serialize($this->option('Collector')) != serialize($collector)) {
-            $this->info['SiteOptions']['Collector'] = $collector;
-            $this->db->prepared_query("
-                UPDATE users_info SET
-                    SiteOptions = ?
-                WHERE UserID = ?
-                ", serialize($this->info['SiteOptions']), $this->id
-            );
-            $success = $this->db->affected_rows() == 1;
-            if ($success) {
-                $this->flush();
-            }
-            return $success;
-        }
-        return false;
     }
 }

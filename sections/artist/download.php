@@ -15,7 +15,7 @@ $collector = new Gazelle\Collector\Artist($Viewer, $artist, (int)$_REQUEST['pref
 if (!$collector->prepare($_REQUEST['list'])) {
     error("Nothing to gather, choose some encodings and bitrates!");
 }
-$Viewer->modifyCollectorDefaults([implode(':', $_REQUEST['list']), $_REQUEST['preference']]);
+$Viewer->modifyOption('Collector', [implode(':', $_REQUEST['list']), $_REQUEST['preference']]);
 
 header('X-Accel-Buffering: no');
 $collector->emit();
