@@ -5,9 +5,8 @@ require_once(__DIR__ . '/util.php');
 class Text {
     /**
      * Array of valid tags; tag => max number of attributes
-     * @var array $ValidTags
      */
-    private static $ValidTags = [
+    private static array $ValidTags = [
         '###'        => 1,
         '##'         => 1,
         '#'          => 1,
@@ -52,9 +51,8 @@ class Text {
 
     /**
      * Array of smilies; code => image file in STATIC_SERVER/common/smileys
-     * @var array $Smileys
      */
-    private static $Smileys = [
+    private static array $Smileys = [
         '&gt;.&gt;'  => 'eyesright.gif',
         '&lt;3'      => 'heart.gif',
         ':&#39;('    => 'crying.gif',
@@ -106,7 +104,7 @@ class Text {
         ':/'         => 'hmm.gif',
     ];
 
-    private static $ColorName = [
+    private static array $ColorName = [
         'aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque',
         'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood',
         'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk',
@@ -135,11 +133,8 @@ class Text {
 
     /**
      * Processed version of the $Smileys array, see {@link smileys}
-     * @var array $ProcessedSmileys
      */
-    private static $ProcessedSmileys = [];
-
-    private static $viewer;
+    private static array $ProcessedSmileys = [];
 
     /**
      * Whether or not to turn images into URLs (used inside [quote] tags).
@@ -147,63 +142,61 @@ class Text {
      * transition, i.e. images will only be displayed as images if $NoImg <= 0.
      * By setting this variable to a negative number you can delay the
      * transition to a deeper level of quotes.
-     * @var int $NoImg
      */
-    private static $NoImg = 0;
+    private static int $NoImg = 0;
 
     /**
      * Internal counter for the level of recursion in to_html
-     * @var int $Levels
      */
-    private static $Levels = 0;
+    private static int $Levels = 0;
 
     /**
      * The maximum amount of nesting allowed (exclusive)
      * In reality n-1 nests are shown.
-     * @var int $MaximumNests
      */
-    private static $MaximumNests = 10;
+    private static int $MaximumNests = 10;
 
     /**
      * Used to detect and disable parsing (e.g. TOC) within quotes
-     * @var int $InQuotes
      */
-    private static $InQuotes = 0;
+    private static int $InQuotes = 0;
 
     /**
      * Used to [hide] quote trains starting with the specified depth (inclusive)
-     * @var int $NestsBeforeHide
      *
      * This defaulted to 5 but was raised to 10 to effectively "disable" it until
      * an optimal number of nested [quote] tags is chosen. The variable $MaximumNests
      * effectively overrides this variable, if $MaximumNests is less than the value
      * of $NestsBeforeHide.
      */
-    private static $NestsBeforeHide = 10;
+    private static int $NestsBeforeHide = 10;
 
     /**
      * Array of headlines for Table Of Contents (TOC)
      * @var array $HeadLines
      */
-    private static $Headlines;
+    private static array $Headlines = [];
 
     /**
      * Counter for making headline URLs unique
-     * @var int $HeadLines
      */
-    private static $HeadlineID = 0;
+    private static int $HeadlineID = 0;
 
     /**
      * Depth
-     * @var array $HeadlineLevels
      */
-    private static $HeadlineLevels = ['1', '2', '3', '4'];
+    private static array $HeadlineLevels = ['1', '2', '3', '4'];
 
     /**
      * TOC enabler
-     * @var bool $TOC
      */
-    public static $TOC = false;
+    public static bool $TOC = false;
+
+    private static \Gazelle\User $viewer;
+
+    public static function init(\Gazelle\User $viewer) {
+        self::$viewer = $viewer;
+    }
 
     /**
      * Output BBCode as XHTML
@@ -214,7 +207,6 @@ class Text {
      */
     public static function full_format($Str, $OutputTOC = true, $Min = 3, $Rules = false) {
         $Str = display_str($Str);
-        self::$Headlines = [];
 
         //Inline links
         $URLPrefix = '(\[url\]|\[url\=|\[img\=|\[img\])';
@@ -312,7 +304,7 @@ class Text {
         }
         parse_str($info['query'] ?? '', $args);
         $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
-        global $Cache, $DB, $LoggedUser;
+        global $Cache, $DB;
         switch ($info['path']) {
             case '/artist.php':
                 $name = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
@@ -775,7 +767,6 @@ class Text {
                 continue;
             }
             if (self::$Levels < self::$MaximumNests) {
-            global $LoggedUser;
             switch ($Block['Type']) {
                 case 'b':
                     $Str .= '<strong>'.self::to_html($Block['Val'], $Rules).'</strong>';
@@ -954,7 +945,7 @@ class Text {
                     $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
                     break;
                 case 'mature':
-                    if ($LoggedUser['EnableMatureContent']) {
+                    if (self::$viewer->option('EnableMatureContent')) {
                         if (!empty($Block['Attr'])) {
                             $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
                             $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
@@ -964,7 +955,7 @@ class Text {
                         }
                     }
                     else {
-                        $Str .= '<span class="mature_blocked" style="font-style: italic;"><a href="wiki.php?action=article&amp;id=1063">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href="user.php?action=edit&amp;userid=' . $LoggedUser['ID'] . '">settings</a>.</span>';
+                        $Str .= '<span class="mature_blocked" style="font-style: italic;"><a href="wiki.php?action=article&amp;id=1063">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href="user.php?action=edit&amp;userid=' . self::$viewer->id() . '">settings</a>.</span>';
                     }
                     break;
                 case 'img':
@@ -1151,8 +1142,7 @@ class Text {
     }
 
     private static function smileys($Str) {
-        global $LoggedUser;
-        if (!empty($LoggedUser['DisableSmileys'])) {
+        if (self::$viewer->option('DisableSmileys')) {
             return $Str;
         }
         if (count(self::$ProcessedSmileys) == 0 && count(self::$Smileys) > 0) {
@@ -1380,16 +1370,13 @@ class Text {
 
     protected static function bbcodeForumUrl($val) {
         $cacheKey = 'bbcode_forum_' . $val;
-        global $Cache, $DB, $LoggedUser;
+        global $Cache, $DB;
         [$id, $name] = $Cache->get_value($cacheKey);
         if (is_null($id)) {
             [$id, $name] = (int)$val > 0
                 ? $DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
                 : $DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
             $Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
-        }
-        if (!self::$viewer) {
-            self::$viewer = new Gazelle\User($LoggedUser['ID']);
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($id))) {
             $name = 'restricted';
@@ -1405,7 +1392,7 @@ class Text {
         }
 
         $cacheKey = 'bbcode_thread_' . $thread;
-        global $Cache, $DB, $LoggedUser;
+        global $Cache, $DB;
         [$id, $name, $isLocked, $forumId] = $Cache->get_value($cacheKey);
         if (is_null($forumId)) {
             if ($thread) {
@@ -1423,9 +1410,6 @@ class Text {
                 );
             }
             $Cache->cache_value($cacheKey, [$id, $name, $isLocked, $forumId], 86400 + rand(1, 3600));
-        }
-        if (!self::$viewer) {
-            self::$viewer = new Gazelle\User($LoggedUser['ID']);
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($forumId))) {
             return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $id, 'restricted');

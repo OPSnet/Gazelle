@@ -344,13 +344,13 @@ class Format {
      *                 2-dimensional array: At least one array must be identical to $Target
      * @param string $ClassName CSS class name to return
      * @param bool $AddAttribute Whether to include the "class" attribute in the output
-     * @param string|false $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to $LoggedUser[ID]
+     * @param string|false $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to $Viewer->id()
      *
      * @return string class name on match, otherwise an empty string
      */
     public static function add_class($Target, $Tests, $ClassName, $AddAttribute, $UserIDKey = false) {
-        global $LoggedUser;
-        if ($UserIDKey && isset($_REQUEST[$UserIDKey]) && $LoggedUser['ID'] != $_REQUEST[$UserIDKey]) {
+        global $Viewer;
+        if ($UserIDKey && isset($_REQUEST[$UserIDKey]) && $Viewer->id() != $_REQUEST[$UserIDKey]) {
             return '';
         }
         $Pass = true;
