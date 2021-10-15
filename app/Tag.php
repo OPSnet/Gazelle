@@ -22,6 +22,14 @@ class Tag extends BaseObject {
         return 'tags';
     }
 
+    public function url(): string {
+        return 'torrents.php?taglist=' . $this->name();
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
+    }
+
     public function flush() {
     }
 

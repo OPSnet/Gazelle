@@ -1135,7 +1135,7 @@ class Text {
                 }
                 return !isset($cache[$username])
                     ? "@$username"
-                    : sprintf('<a href="user.php?id=%d">@%s</a>', $cache[$username]->id(), $cache[$username]->username());
+                    : sprintf('<a href="%s">@%s</a>', $cache[$username]->url(), $cache[$username]->username());
             },
             $text
         );

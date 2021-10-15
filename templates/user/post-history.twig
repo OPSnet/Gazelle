@@ -1,7 +1,7 @@
 {{ header(user.username ~ " &rsaquo; " ~ title, {'js': 'subscriptions,comments,bbcode'}) }}
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; {{ title }}</h2>
+        <h2><a href="{{ user.url }}">{{ user.username }}</a> &rsaquo; {{ title }}</h2>
         <div class="linkbox">
             <br /><br />
 {% if not own_profile %}

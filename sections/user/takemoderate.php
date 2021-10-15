@@ -274,15 +274,12 @@ if ($Classes[$class]['Level'] != $cur['Class']
 if ($username !== $cur['Username'] && $Viewer->permitted('users_edit_usernames')) {
     if (in_array($username, ['0', '1'])) {
         error('You cannot set a username of "0" or "1".');
-        header("Location: user.php?id=$userId");
         exit;
     } elseif (strtolower($username) !== strtolower($cur['Username'])) {
         $found = $userMan->findByUsername($username);
         if ($found) {
             $id = $found->id();
-            error("Username already in use by <a href=\"user.php?id=$id\">$username</a>");
-            header("Location: user.php?id=$id");
-            exit;
+            error('Username already in use by <a href="' . $found->url() . "\">$username</a>");
         }
         $set[] = 'Username = ?';
         $args[] = $username;
@@ -294,8 +291,6 @@ if ($title != $cur['Title'] && $Viewer->permitted('users_edit_titles')) {
     // Using the unescaped value for the test to avoid confusion
     if (mb_strlen($_POST['Title']) > 1024) {
         error("Custom titles have a maximum length of 1,024 characters.");
-        header("Location: user.php?id=$userId");
-        exit;
     } else {
         $set[] = 'Title = ?';
         $args[] = $title;
@@ -684,4 +679,4 @@ if (isset($_POST['invite_source_update'])) {
     }
 }
 
-header("location: user.php?id=$userId");
+header('Location: ' . $user->url());

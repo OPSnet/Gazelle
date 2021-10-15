@@ -29,4 +29,4 @@ $label = "$artistId ($artistName) [" . ARTIST_TYPE[$role] . "]";
 (new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), "removed artist $label")
     ->general("Artist $label removed from group " . $tgroup->label() . " by user " . $Viewer->label());
 
-header("Location: " . redirectUrl("torrents.php?id=" . $tgroup->id()));
+header('Location: ' . redirectUrl($tgroup->url()));

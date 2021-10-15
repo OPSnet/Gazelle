@@ -18,6 +18,8 @@ abstract class BaseObject extends Base {
 
     abstract public function tableName(): string;
     abstract public function flush();
+    abstract public function url(): string;
+    abstract public function link(): string;
 
     public function id(): int {
         return $this->id;

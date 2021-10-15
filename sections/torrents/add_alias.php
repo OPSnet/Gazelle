@@ -11,4 +11,4 @@ if ($tgroup->addArtists($Viewer, $_POST['importance'], $_POST['aliasname'])) {
     $tgMan->refresh($tgroup->id());
 }
 
-header('Location: ' . redirectUrl("torrents.php?id=" . $tgroup->id()));
+header('Location: ' . redirectUrl($tgroup->url()));

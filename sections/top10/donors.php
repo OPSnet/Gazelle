@@ -68,8 +68,7 @@ switch ($limit) {
 ?>
     <tr class="row<?= $index % 2 ? 'a' : 'b' ?>">
         <td class="center"><?=$index + 1?></td>
-        <td><?=$info['Hidden'] && !$isMod
-            ? 'Hidden' : ('<a href="user.php?id=' . $donor->id() . '">' . $donor->username() . '</a>') ?></td>
+        <td><?=$info['Hidden'] && !$isMod ? 'Hidden' : $donor->link() ?></td>
         <td style="text-align: left;"><?= $isMod || $index < 51 ? $info['TotalRank'] : 'Hidden' ?></td>
         <td style="text-align: left;"><?= $info['Hidden'] && !$isMod ? 'Hidden' : $donor->donorRankLabel() ?></td>
         <td style="text-align: left;"><?= $info['Hidden'] && !$isMod ? 'Hidden' : $donor->lastDonation() ?></td>

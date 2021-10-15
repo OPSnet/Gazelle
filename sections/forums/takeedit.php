@@ -26,9 +26,8 @@ if ($Viewer->id() != $forumPost['user-id']) {
         (new Gazelle\Manager\User)->sendPM($forumPost['user-id'], 0,
             "Your post #$postId has been edited",
             sprintf('One of your posts has been edited by [url=%s]%s[/url]: [url]%s[/url]',
-                "user.php?id=" . $Viewer->id(),
-                $Viewer->username(),
-                SITE_URL . "/forums.php?action=viewthread&postid=$postId#post$postId"
+                $Viewer->url(), $Viewer->username(),
+                "/forums.php?action=viewthread&postid=$postId#post$postId"
             )
         );
     }
@@ -39,4 +38,4 @@ $forum->editPost($Viewer->id(), $postId, $_POST['body']);
 // This gets sent to the browser, which echoes it in place of the old body
 echo Text::full_format($forum->postBody($postId));
 ?>
-<br /><br /><span class="last_edited">Last edited by <a href="user.php?id=<?=$Viewer->id()?>"><?=$Viewer->username()?></a> Just now</span>
+<br /><br /><span class="last_edited">Last edited by <?= $Viewer->link() ?> Just now</span>

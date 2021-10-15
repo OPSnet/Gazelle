@@ -28,6 +28,10 @@ class Torrent extends BaseObject {
         return "torrents.php?groupId=" . $this->groupId() . '&torrentid=' . $this->id . '#' . $this->id;
     }
 
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->group()->name()));
+    }
+
     /**
      * Set the viewer context, for snatched indicators etc.
      *

@@ -333,7 +333,7 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
     <a class="brackets" href="<?= $urlStem ?>leeching" title="Torrents you have downloaded and partially snatched">leeching</a>
     </div>
     <div class="header">
-        <h2><a href="user.php?id=<?=$userId?>"><?= $user->username() ?></a>'s <?= str_replace('-', ' and ', $action) ?> torrents</h2>
+        <h2><?= $user->link() ?>'s <?= str_replace('-', ' and ', $action) ?> torrents</h2>
     </div>
     <div>
         <form class="search_form" name="torrents" action="" method="get">

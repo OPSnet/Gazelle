@@ -22,7 +22,7 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
     } else {
         $collageId = $collage->flush()->id();
         (new Gazelle\Log)->general("Collage $collageId was recovered by " . $Viewer->username());
-        header("Location: collages.php?id=$collageId");
+        header('Location: ' . $collage->url());
         exit;
     }
 }

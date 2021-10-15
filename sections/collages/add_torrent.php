@@ -79,4 +79,4 @@ foreach ($groupIds as $groupId) {
     $collage->addTorrent($groupId, $Viewer->id());
 }
 $collageMan->flushDefaultGroup($Viewer->id());
-header("Location: collages.php?id=" . $collage->id());
+header('Location: ' . $collage->url());

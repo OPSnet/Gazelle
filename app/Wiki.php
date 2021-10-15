@@ -43,6 +43,14 @@ class Wiki extends BaseObject {
         return 'wiki_articles';
     }
 
+    public function url(): string {
+        return 'wiki.php?action=article&id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
+    }
+
     public function flush() {
         $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
     }

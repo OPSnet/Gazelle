@@ -40,6 +40,14 @@ class Collage extends BaseObject {
 
     public function tableName(): string { return 'collages'; }
 
+    public function url(): string {
+        return 'collages.php?id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
+    }
+
     /**
      * Collage constructor.
      * @param int $id collage id

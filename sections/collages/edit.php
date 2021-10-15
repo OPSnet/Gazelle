@@ -22,7 +22,7 @@ if (!empty($Err)) {
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Edit collage <a href="collages.php?id=<?=$collageID?>"><?=$collage->name()?></a></h2>
+        <h2>Edit collage <?= $collage->link() ?></h2>
     </div>
     <form class="edit_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="edit_handle" />

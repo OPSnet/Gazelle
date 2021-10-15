@@ -10,4 +10,4 @@ if (is_null($tgroup) || !$tagId || !in_array($way, ['up', 'down'])) {
 }
 $tgroup->addTagVote($Viewer->id(), $tagId, $way);
 
-header("Location: " . redirectUrl("torrents.php?id=" . $tgroup->id()));
+header('Location: ' . redirectUrl($tgroup->url()));

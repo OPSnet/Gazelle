@@ -118,14 +118,11 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                                     }
                                     break;
                                 case 'collage':
-                                    $Name = $DB->scalar("
-                                        SELECT Name FROM collages WHERE ID = ?
-                                        ", $ThingID
-                                    );
-                                    if (!$Name) {
+                                    $collage = (Gazelle\Manager\Collage)->findById($ThingID);
+                                    if (is_null($collage)) {
                                         echo 'No collage with the reported ID found';
                                     } else {
-                                        echo "<a href=\"collages.php?id=$ThingID\">" . display_str($Name) . '</a>';
+                                        echo $collage->link();
                                     }
                                     break;
                                 case 'thread':

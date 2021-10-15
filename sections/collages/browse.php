@@ -28,7 +28,7 @@ $Args = [];
 
 $BookmarkView = !empty($_GET['bookmarks']);
 if ($BookmarkView) {
-    $userLink = '<a href="user.php?id=' . $Viewer->id() . '">' . $Viewer->username() . '</a>';
+    $userLink = $Viewer->link();
     $Categories = array_keys(COLLAGE);
     $Join = 'INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)';
     $Where[] = "bc.UserID = ?";
@@ -49,7 +49,7 @@ if ($BookmarkView) {
 }
 
 if (isset($_GET['action']) && $_GET['action'] === 'mine') {
-    $userLink = '<a href="user.php?id=' . $Viewer->id() . '">' . $Viewer->username() . '</a>';
+    $userLink = $Viewer->link();
     $Where[] = 'c.CategoryID = 0 AND c.UserID = ?';
     $Args[] = $Viewer->id();
 } else {
@@ -87,7 +87,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
             $Args[] = $user->id();
             $contrib = true;
         }
-        $userLink = '<a href="user.php?id=' . $user->id() . '">' . $user->username() . '</a>';
+        $userLink = $user->link();
     }
 
     // Don't filter on categories if all are selected

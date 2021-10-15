@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_manage_invite_source')) {
 
 $user = (new Gazelle\Manager\User)->find(trim($_POST['user'] ?? ''));
 if ($user) {
-    header("Location: user.php?id=" . $user->id() . "#invite_source");
+    header('Location: ' . $user->url() . "#invite_source");
     exit;
 }
 

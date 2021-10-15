@@ -15,4 +15,4 @@ try {
     error('The alias you attempted to add is already assigned to an article.');
 }
 
-header('Location: wiki.php?action=article&id=' . $article->id());
+header('Location: ' . $article->url());

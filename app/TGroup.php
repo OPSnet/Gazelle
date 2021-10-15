@@ -22,6 +22,19 @@ class TGroup extends BaseObject {
         return 'torrents_group';
     }
 
+    public function url(): string {
+        return 'torrents.php?id=' . $this->id;
+    }
+
+    public function link(): string {
+        return implode(" \xE2\x80\x93 ",
+            array_filter([
+                $this->artistHtml(),
+                '<span dir="ltr">' . sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())) . '</span>',
+            ], fn($x) => !empty($x))
+        );
+    }
+
     public function __construct(int $id) {
         parent::__construct($id);
         $this->releaseTypes = (new \Gazelle\ReleaseType)->list();

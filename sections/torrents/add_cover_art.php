@@ -24,4 +24,4 @@ for ($i = 0, $end = count($imageList); $i < $end; $i++) {
     $tgroup->addCoverArt($image, trim($summaryList[$i]), $Viewer->id(), $logger);
 }
 
-header("Location: " . redirectUrl("torrents.php?id=" . $tgroup->id()));
+header('Location: ' . redirectUrl($tgroup->url()));

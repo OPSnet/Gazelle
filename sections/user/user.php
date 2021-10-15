@@ -312,7 +312,7 @@ if ($Viewer->permitted('users_view_invites')) {
         $Invited = '<span style="font-style: italic;">Nobody</span>';
     } else {
         $inviter = $userMan->findById($User->inviter()->id());
-        $Invited = '<a href="user.php?id=' . $inviter->id() . '">' . $User->inviter()->username() . "</a>";
+        $Invited = $inviter->link();
         if ($Viewer->permitted('admin_manage_invite_source')) {
             $source = (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID);
             if (is_null($source) && ($inviter->isInterviewer() || $inviter->isRecruiter())) {

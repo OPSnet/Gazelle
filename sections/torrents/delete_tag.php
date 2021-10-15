@@ -24,4 +24,4 @@ if ($tgroup->removeTag($tag)) {
         $logger->general("Unused tag \"" . $tag->name() . "\" removed by user " . $Viewer->label());
     }
 }
-header("Location: " . redirectUrl("torrents.php?id=" . $tgroup->id()));
+header('Location: ' . redirectUrl($tgroup->url()));

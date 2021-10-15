@@ -13,6 +13,8 @@ class Thread extends BaseObject {
     protected $story;   // the array of notes in the conversation
 
     public function tableName(): string { return 'thread'; }
+    public function url(): string { return ''; }
+    public function link(): string { return ''; }
     public function flush() {}
 
     protected const CACHE_KEY = "thread_%d";

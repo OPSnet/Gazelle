@@ -29,6 +29,14 @@ class StaffPM extends BaseObject {
         return 'staff_pm_conversations';
     }
 
+    public function url(): string {
+        return 'staffpm.php?action=viewconv&id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject()));
+    }
+
     public function flush() {
         // no-op
     }

@@ -24,6 +24,14 @@ class User extends \Gazelle\BaseObject {
         return 'user_summary';
     }
 
+    public function url(): string {
+        return 'user.php?action=stats&userid=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats');
+    }
+
     public function flush() {
         $this->cache->deleteMulti([
             sprintf(self::CACHE_COMMENT_TOTAL, $this->id),

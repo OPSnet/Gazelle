@@ -35,7 +35,7 @@ View::show_header("Manage collage: " . $collage->name(), ['js' => 'jquery-ui,jqu
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Manage collage <a href="collages.php?id=<?=$CollageID?>"><?= $collage->name() ?></a></h2>
+        <h2>Manage collage <?= $collage->link() ?></h2>
     </div>
     <table width="100%" class="layout">
         <tr class="colhead"><td id="sorting_head">Sorting</td></tr>

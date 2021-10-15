@@ -33,6 +33,14 @@ class User extends BaseObject {
         return 'users_main';
     }
 
+    public function url(): string {
+        return 'user.php?id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), $this->username());
+    }
+
     /**
      * Delegate stats methods to the Stats\User class
      */
@@ -77,10 +85,6 @@ class User extends BaseObject {
     public function setTorrentLabelManager(Manager\TorrentLabel $labelMan) {
         $this->labelMan = $labelMan;
         return $this;
-    }
-
-    public function url(): string {
-        return SITE_URL . "/user.php?id=" . $this->id;
     }
 
     public function info(): ?array {

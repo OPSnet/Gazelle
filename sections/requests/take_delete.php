@@ -15,7 +15,7 @@ $title = $request->fullTitle();
 if ($request->userId() !== $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($request->userId(), 0,
         'A request you created has been deleted',
-        "The request \"$title\" was deleted by [url=user.php?id=" . $Viewer->id() . "]"
+        "The request \"$title\" was deleted by [url=" . $Viewer->url() . "]"
             . $Viewer->username() . "[/url] for the reason: [quote]{$reason}[/quote]"
     );
 }
