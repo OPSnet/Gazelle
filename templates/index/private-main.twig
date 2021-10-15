@@ -6,8 +6,8 @@
                 <img src="{{ contest.banner }}" alt="{{ contest.name }}" title="{{ contest.name }}" />
             </a>
     {% endif %}
-            <h5>The <a href="/contest.php?action=leaderboard">{{ contest.name }}</a> {{ contest.is_over ? 'ended' : 'ends in' }} {{ contest.dateEnd|time_diff }}</h5>
-        </div>
+            <h5>The <a href="/contest.php?action=leaderboard">{{ contest.name }}</a> {{ contest.isOpen ? 'ends in' : 'ended' }} {{ contest.dateEnd|time_diff }}</h5>
+        </div>{{ dump(contest) }}
 {% endif %}
 
         <div id="last_uploads" class="box news_post">
