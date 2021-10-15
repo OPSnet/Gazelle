@@ -23,7 +23,7 @@
         {% set rank = rank + 1 %}
     <tr>
         <td>{{ rank|number_format }}</td>
-        <td class="nowrap"><a href="/user.php?id={{ entry.user_id }}">{{ entry.username}}</a>{% if entry.user_id == viewer %} (that's you!){% endif %}</td>
+        <td class="nowrap"><a href="user.php?id={{ entry.user_id }}">{{ entry.username}}</a>{% if entry.user_id == viewer %} (that's you!){% endif %}</td>
         <td>{{ entry.last_entry_link|raw }}</td>
         <td class="nowrap">{{ entry.last_upload|time_diff }} </td>
         <td>{{ entry.entry_count }}</td>

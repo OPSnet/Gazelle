@@ -36,8 +36,8 @@ View::show_header('Subscriptions', ['js' => 'subscriptions,comments,bbcode']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="user.php?id=<?= $Viewer->id() ?>"><?= $Viewer->username()
-            ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts' . ($paginator->total() ? ' (' . $paginator->total() . ' new)' : '') : ''?></h2>
+        <h2><?= $Viewer->link() ?> ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts'
+            . ($paginator->total() ? ' (' . $paginator->total() . ' new)' : '') : ''?></h2>
         <div class="linkbox">
 <?php if (!$showUnread) { ?>
             <br /><br />

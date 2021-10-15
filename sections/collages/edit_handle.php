@@ -25,7 +25,7 @@ if (isset($_POST['name'])) {
         if ($check->isDeleted()) {
             $Err = 'A collage with that name already exists but needs to be recovered, please <a href="staffpm.php">contact</a> the staff team!';
         } else {
-            $Err = "A collage with that name already exists: <a href=\"/collages.php?id=$ID\">$name</a>.";
+            $Err = "A collage with that name already exists: <?= $check->link() ?>.";
         }
         $ErrNoEscape = true;
         require('edit.php');
@@ -76,4 +76,4 @@ if (check_perms('site_collages_delete')) {
 }
 
 $collage->modify();
-header('Location: collages.php?id=' . $collage->id());
+header('Location: ' . $collage->url());

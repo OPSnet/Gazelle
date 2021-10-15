@@ -118,13 +118,13 @@
         </tr>
         {% endif %}
         <tr>
-            <td><a href="/apply.php?action=view&amp;id={{ a.ID }}">{{ a.Role }}</a></td>
+            <td><a href="apply.php?action=view&amp;id={{ a.ID }}">{{ a.Role }}</a></td>
         {% if is_staff %}
-            <td><a href="/user.php?id={{ a.UserID }}">{{ a.Username }}</a></td>
+            <td><a href="user.php?id={{ a.UserID }}">{{ a.Username }}</a></td>
         {% endif %}
             <td>{{ a.Created|time_diff }}</td>
             <td>{{ a.nr_notes|number_format }}</td>
-            <td><a href="/user.php?id={{ a.last_UserID }}">{{ a.last_Username }}</a></td>
+            <td><a href="user.php?id={{ a.last_UserID }}">{{ a.last_Username }}</a></td>
             <td>{% if a.last_Created %}{{ a.last_Created|time_diff }}{% endif %}</td>
         </tr>
         {% if loop.last %}

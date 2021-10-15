@@ -70,7 +70,7 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $info['uploaderI
                 $Cache->increment('user_flood_' . $userId);
             } else {
                 Irc::sendChannel(
-                    "user.php?id=" . $userId
+                    SITE_URL . "/" . $Viewer->url()
                     . " (" . $Viewer->username() . ")"
                     . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
                     . " accessing "

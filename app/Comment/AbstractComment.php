@@ -21,6 +21,14 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return 'comments';
     }
 
+    public function url(): string {
+        return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}";
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), "Post #" . $this->id);
+    }
+
     public function __construct(int $pageId) {
         parent::__construct(0);
         $this->pageId = $pageId;
@@ -40,10 +48,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
     public function total(): int {
         return $this->total;
-    }
-
-    public function url(): string {
-        return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}";
     }
 
     public function flush() {

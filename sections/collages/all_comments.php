@@ -29,10 +29,7 @@ View::show_header("Comments for collage " . $Collage->name(), ['js' => 'comments
 ?>
 <div class="thin">
     <div class="header">
-        <h2>
-            <a href="collages.php">Collages</a> &rsaquo;
-            <a href="collages.php?id=<?=$CollageID?>"><?=$Collage->name()?></a>
-        </h2>
+        <h2><a href="collages.php">Collages</a> &rsaquo; <?= $Collage->link() ?></h2>
         <div class="linkbox">
             <a href="#" id="subscribelink_collages<?=$CollageID?>" class="brackets" onclick="SubscribeComments('collages', <?=$CollageID?>); return false;"><?=
                 $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>

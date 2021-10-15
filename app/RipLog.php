@@ -7,6 +7,15 @@ class RipLog extends BaseObject {
     protected $info;
 
     public function tableName(): string { return 'torrents_logs'; }
+
+    public function url(): string {
+        return 'view.php?type=riplog&id=' . $this->torrentId . '.' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), "Log #" . $this->id);
+    }
+
     public function flush() {}
 
     /**

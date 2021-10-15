@@ -30,4 +30,4 @@ $article->setUpdate('Body', trim($_POST['body']))
     ->setUpdate('MinClassRead', $minRead)
     ->modify();
 
-header("Location: wiki.php?action=article&id=" . $article->id());
+header('Location: ' . $article->url());

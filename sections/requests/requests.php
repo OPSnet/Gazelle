@@ -600,7 +600,7 @@ View::show_header($Title, ['js' => 'requests']);
             </td>
             <td>
 <?php        if ($IsFilled) { ?>
-                <a href="user.php?id=<?= $Filler->id() ?>"><?= $Filler->username() ?></a>
+                <?= $Filler->link() ?>
 <?php        } else { ?>
                 &mdash;
 <?php        } ?>

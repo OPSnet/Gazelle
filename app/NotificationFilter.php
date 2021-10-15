@@ -42,6 +42,14 @@ class NotificationFilter extends BaseObject {
         return 'users_notify_filters';
     }
 
+    public function url(): string {
+        return 'user.php?action=notify';
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), $this->url());
+    }
+
     public function flush() {
         return $this;
     }

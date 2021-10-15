@@ -45,11 +45,11 @@ View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,sub
         <h2><?= $tgroup->displayNameHtml() ?></h2>
         <div class="linkbox">
 <?php if ($Viewer->permitted('site_edit_wiki')) { ?>
-            <a href="torrents.php?action=editgroup&amp;groupid=<?=$GroupID?>" class="brackets">Edit description</a>
+            <a href="<?= $tgroup->url() ?>&amp;action=editgroup" class="brackets">Edit description</a>
 <?php } ?>
-            <a href="torrents.php?action=editrequest&amp;groupid=<?=$GroupID?>" class="brackets">Request an Edit</a>
+            <a href="<?= $tgroup->url() ?>&amp;action=editrequest" class="brackets">Request an Edit</a>
 <?php if ($RevisionID && $Viewer->permitted('site_edit_wiki')) { ?>
-            <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
+            <a href="<?= $tgroup->url() ?>&amp;action=revert&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
 <?php
 }
 if ((new Gazelle\Bookmark)->isTorrentBookmarked($Viewer->id(), $GroupID)) {
@@ -68,8 +68,8 @@ if ($Viewer->permitted('site_submit_requests')) {
 ?>
             <a href="requests.php?action=new&amp;groupid=<?=$GroupID?>" class="brackets">Request format</a>
 <?php } ?>
-            <a href="torrents.php?action=history&amp;groupid=<?=$GroupID?>" class="brackets">View history</a>
-            <a href="torrents.php?action=grouplog&amp;groupid=<?=$GroupID?>" class="brackets">View log</a>
+            <a href="<?= $tgroup->url() ?>&amp;action=history" class="brackets">View history</a>
+            <a href="<?= $tgroup->url() ?>&amp;action=grouplog&amp;" class="brackets">View log</a>
         </div>
     </div>
     <div class="sidebar">
@@ -479,12 +479,10 @@ foreach ($TorrentList as $Torrent) {
             </tr>";
 
         foreach ($Reports as $Report) {
+            $reporter = new Gazelle\User($Report['ReporterID']);
             $ReportLinks = !$Viewer->permitted('admin_reports')
                 ? 'Someone reported it'
-                : sprintf('<a href="user.php?id=%d">%s</a> <a href="reportsv2.php?view=report&amp;id=%d">reported it</a>',
-                    $Report['ReporterID'],
-                    (new Gazelle\User($Report['ReporterID']))->username(),
-                    $Report['ID']);
+                : ($reporter->link() . " <a href=\"reportsv2.php?view=report&amp;id={$Report['ID']}\">reported it</a>");
 
             if (isset($Types[$GroupCategoryID][$Report['Type']])) {
                 $ReportType = $Types[$GroupCategoryID][$Report['Type']];
@@ -611,8 +609,7 @@ foreach ($TorrentList as $Torrent) {
                 }
                 $group = $torrent->group();
 ?>
-            <li><a href="/torrents.php?id=<?= $torrent->groupId() ?>&amp;torrentid=<?= $torrent->id() ?>"><?=
-                $group->artistName() ?> - <?= $group->name() ?></a> (torrent id=<?= $torrent->id() ?>)</li>
+            <li><a href="<?= $torrent->url() ?>"><?= $group->artistName() ?> - <?= $group->name() ?></a> (torrent id=<?= $torrent->id() ?>)</li>
 <?php       } ?>
         </ul>
 <?php

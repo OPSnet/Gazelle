@@ -37,7 +37,7 @@ View::show_header("View conversation " . $pm->subject(), ['js' => 'comments,inbo
 <?php if (!isset($senderList[$post['sender_id']])) { ?>
                 System</strong> <?=time_diff($post['sent_date'])?>
 <?php } else { ?>
-                <a href="user.php?id=<?= $senderList[$post['sender_id']]->id() ?>"><?= $senderList[$post['sender_id']]->username() ?></a></strong> <?=time_diff($post['sent_date'])?>
+                <?= $senderList[$post['sender_id']]->link() ?></strong> <?=time_diff($post['sent_date'])?>
                     - <a href="#quickpost" onclick="Quote('<?= $post['id'] ?>','<?= $senderList[$post['sender_id']]->username() ?>');" class="brackets">Quote</a>
 <?php } ?>
             </div>

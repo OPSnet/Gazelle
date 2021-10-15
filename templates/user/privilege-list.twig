@@ -11,7 +11,7 @@ function reset() {
 //]]>
 </script>
 <div class="header">
-    <h2><a href="user.php?id={{ user.id }}" class="username">{{ user.username }}</a> &rsaquo; Permissions</h2>
+    <h2><a href="{{ user.url }}" class="username">{{ user.username }}</a> &rsaquo; Permissions</h2>
     <div class="linkbox">
         <a href="#" onclick="reset(); return false;" class="brackets">Defaults</a>
         <a href="tools.php?action=permissions&id={{ user.primaryClass }}" class="brackets">Primary permissions</a>

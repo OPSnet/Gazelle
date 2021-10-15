@@ -9,6 +9,14 @@ class Privilege extends BaseObject {
         return 'permissions';
     }
 
+    public function url(): string {
+        return '';
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), $this->url());
+    }
+
     public function flush() {
         $this->info = [];
     }

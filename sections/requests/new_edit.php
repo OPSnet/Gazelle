@@ -138,8 +138,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
     $requester = new Gazelle\User($Request['UserID']);
 ?>
     <div class="box pad">
-        <strong class="important_text">Warning! You are editing
-        <a href="/user.php?id=<?= $Request['UserID'] ?>"><?= $requester->username() ?></a>'s request.
+        <strong class="important_text">Warning! You are editing <?= $requester->link() ?>'s request.
         Be careful when making changes!</strong>
     </div>
 <?php } ?>

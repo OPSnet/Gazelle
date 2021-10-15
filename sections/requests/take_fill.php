@@ -72,5 +72,5 @@ if (defined('AJAX')) {
         return $data;
     }
 } else {
-    header("Location: requests.php?action=view&id=" . $request->id());
+    header('Location: ' . $request->url());
 }

@@ -133,6 +133,6 @@ switch ($_REQUEST['action'] ?? '') {
         if (isset($_REQUEST['id'])) {
             require_once('user.php');
         } else {
-            header("Location: user.php?id=" . $Viewer->id());
+            header('Location: ' . $Viewer->url());
         }
 }

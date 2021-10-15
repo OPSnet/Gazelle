@@ -21,7 +21,7 @@ if ($userId == $Viewer->id()) {
 
 if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
     Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->username()
-        . ' (' . SITE_URL . '/user.php?id=' . $Viewer->id()
+        . ' (' . SITE_URL . '/' . $Viewer->url()
         . ') just tried to edit the profile of ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']);
     error(403);
 }

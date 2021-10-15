@@ -5,7 +5,7 @@ $wikiMan = new Gazelle\Manager\Wiki;
 if (empty($_GET['nojump'])) {
     $article = $wikiMan->findByAlias($_GET['search'] ?? '');
     if ($article) {
-        header("Location: wiki.php?action=article&id=" . $article->id());
+        header('Location: ' . $article->url());
         exit;
     }
 }

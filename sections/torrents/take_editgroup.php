@@ -97,4 +97,4 @@ if ($logInfo) {
     (new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), implode(', ', $logInfo));
 }
 
-header("Location: torrents.php?id=$GroupID");
+header('Location: ' . $tgroup->url());
