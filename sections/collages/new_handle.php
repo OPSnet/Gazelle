@@ -32,7 +32,7 @@ if (!$Err) {
             $Err = 'That collection already exists but needs to be recovered; please <a href="staffpm.php">contact</a> the staff team!';
         } else {
             $checkId = $check->id();
-            $Err = "That collection already exists: <a href=\"/collages.php?id=$checkId\">$checkId</a>.";
+            $Err = "That collection already exists: <?= $check->link() ?>.";
         }
     }
 }
@@ -64,4 +64,4 @@ if ($Viewer->option('AutoSubscribe')) {
     (new Gazelle\Manager\Subscription($Viewer->id()))->subscribeComments('collages', $collage->id());
 }
 
-header("Location: collages.php?id=" . $collage->id());
+header('Location: ' . $collage->url());

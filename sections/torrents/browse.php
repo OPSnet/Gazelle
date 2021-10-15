@@ -6,7 +6,7 @@ $torMan = new Gazelle\Manager\Torrent;
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $t = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
     if ($t) {
-        header("Location: torrents.php?id=" . $t->groupId() . "&torrentid=" . $t->id());
+        header('Location: ' . $t->url());
         exit;
     }
 }

@@ -7,7 +7,7 @@ function notify ($Channel, $Message) {
     Irc::sendRaw("PRIVMSG "
         . $Channel . " :" . $Message . " error by "
         . ($Viewer
-                ? SITE_URL . "/user.php?id=" . $Viewer->id() . " (" . $Viewer->username() . ")"
+                ? SITE_URL . "/" . $Viewer->url() . " (" . $Viewer->username() . ")"
                 : $_SERVER['REMOTE_ADDR']
           )
         . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"

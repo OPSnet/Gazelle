@@ -76,4 +76,4 @@ if ($request || $remove) {
     Requests::update_sphinx_requests($request->id());
 }
 
-header("Location: requests.php?action=view&id=" . $request->id());
+header('Location: ' . $request->url());

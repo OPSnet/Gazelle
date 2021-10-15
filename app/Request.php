@@ -13,6 +13,14 @@ class Request extends BaseObject {
         return 'requests';
     }
 
+    public function url(): string {
+        return 'requests.php?action=view&id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
+    }
+
     public function flush() {
         if ($this->info()['GroupID']) {
             $this->cache->delete_value("requests_group_" . $this->info()['GroupID']);
@@ -399,8 +407,7 @@ class Request extends BaseObject {
         if ($this->db->affected_rows() == 1) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("%s Refund of %s bounty (%s b) on %s by %s\n\n",
-                sqltime(), \Format::get_size($bounty), $bounty,
-                'requests.php?action=view&id=' . $this->id, $staffName
+                sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
             );
             $this->db->prepared_query("
                 UPDATE users_info ui
@@ -432,8 +439,7 @@ class Request extends BaseObject {
         if ($this->db->affected_rows() == 1) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("%s Removal of %s bounty (%s b) on %s by %s\n\n",
-                sqltime(), \Format::get_size($bounty), $bounty,
-                'requests.php?action=view&id=' . $this->id, $staffName
+                sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
             );
             $this->db->prepared_query("
                 UPDATE users_info ui SET
@@ -462,9 +468,8 @@ class Request extends BaseObject {
         if (!$fillerId) {
             return;
         }
-        $requestUrl = 'requests.php?action=view&id=' . $this->id;
         $message = sprintf("%s Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
-            sqltime(), \Format::get_size($bounty), $bounty, $requestUrl, $staffName
+            sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
         );
         $this->db->prepared_query("
             UPDATE users_info ui
@@ -480,7 +485,7 @@ class Request extends BaseObject {
             $this->twig->render('request/bounty-reduction.twig', [
                 'bounty'      => $bounty,
                 'fill_date'   => $fillDate,
-                'request_url' => $requestUrl,
+                'request_url' => $this->url(),
                 'staff_name'  => $staffName,
             ])
         );

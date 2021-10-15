@@ -141,17 +141,14 @@ if (!empty($_REQUEST['action'])) {
         case 'autocomplete_tags':
             require_once('autocomplete_tags.php');
             break;
-        default:
 
+        default:
             if (!empty($_GET['id'])) {
                 require_once('details.php');
-            } elseif (isset($_GET['torrentid']) && is_number($_GET['torrentid'])) {
-                $GroupID = $DB->scalar("
-                    SELECT GroupID FROM torrents WHERE ID = ?
-                    ", $_GET['torrentid']
-                );
-                if ($GroupID) {
-                    header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
+            } elseif (isset($_GET['torrentid'])) {
+                $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+                if ($torrent) {
+                    header('Location: ' . $torrent->url());
                 } else {
                     header("Location: log.php?search=Torrent+" . $_GET['torrentid']);
                 }

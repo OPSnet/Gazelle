@@ -2,7 +2,7 @@
 <div class="thin">
     <div class="header">
         <h2>
-            <a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Quote notifications
+            <a href="{{ user.url }}">{{ user.username }}</a> &rsaquo; Quote notifications
             {% if total and not show_all %} ({{ total }} new){% endif %}
         </h2>
         <div class="linkbox pager">
