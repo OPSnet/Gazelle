@@ -11,7 +11,7 @@ class View {
      *                      where each value is a comma separated list of files to include
      */
     public static function show_header(string $pageTitle, $option = []) {
-        global $Document, $LoggedUser, $Twig, $Viewer;
+        global $Document, $Twig, $Viewer;
         if ($pageTitle != '') {
             $pageTitle .= ' :: ';
         }
@@ -78,7 +78,7 @@ class View {
         $activity = new Gazelle\Activity;
         if ($Viewer->onRatioWatch()) {
             $activity->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: You have '
-                . time_diff($LoggedUser['RatioWatchEnds'], 3)
+                . time_diff($Viewer->ratioWatchExpiry(), 3)
                 . ' to get your ratio over your required ratio or your leeching abilities will be disabled.'
             );
         } elseif (!$Viewer->canLeech()) {
@@ -237,12 +237,9 @@ class View {
             'action'            => $_REQUEST['action'] ?? null,
             'action_list'       => $activity->actionList(),
             'alert_list'        => $activity->alertList(),
-            'auth'              => $Viewer->auth(),
-            'advanced_search'   => isset($LoggedUser['SearchType']) && $LoggedUser['SearchType'],
             'document'          => $Document,
             'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
             'nav_links'         => $navLinks,
-            'required_ratio'    => $Viewer->requiredRatio(),
             'subscriptions'     => $NewSubscriptions,
             'user'              => $Viewer,
             'user_class'        => (new Gazelle\Manager\User)->userclassName($Viewer->primaryClass()),

@@ -184,6 +184,8 @@ if (!is_null($Viewer)) {
     if ($Viewer->isLocked() && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
         $Document = 'locked';
     }
+
+    \Text::init($Viewer);
 }
 
 // We could not error until we had the user info for headers and stuff
