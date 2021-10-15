@@ -582,8 +582,8 @@ function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
         }
         return $all;
     } else {
-        global $LoggedUser;
-        if (($UserID !== false) && ($LoggedUser['ID'] == $UserID)) {
+        global $Viewer;
+        if (($UserID !== false) && ($Viewer->id() == $UserID)) {
             return PARANOIA_ALLOWED;
         }
 

@@ -293,8 +293,6 @@ class Users {
             // Don't override paranoia for mods who don't want to show their donor heart
             $OverrideParanoia = false;
         }
-        global $LoggedUser;
-        $ShowDonorIcon = $OverrideParanoia || $user->propertyVisible($userMan->findById($LoggedUser['ID']), 'hide_donor_heart');
 
         $Username = $user->username();
         if ($IsDonorForum) {
@@ -307,12 +305,14 @@ class Users {
         } else {
             $Str = "<a href=\"user.php?id=$UserID\">$Username</a>";
         }
+
+        global $Viewer;
         if ($Badges) {
             $DonorRank = $user->donorRank();
             if ($DonorRank == 0 && $user->isDonor()) {
                 $DonorRank = 1;
             }
-            if ($ShowDonorIcon && $DonorRank > 0) {
+            if ($DonorRank > 0 && ($OverrideParanoia || $user->propertyVisible($Viewer, 'hide_donor_heart'))) {
                 $EnabledRewards = $user->enabledDonorRewards();
                 $DonorRewards = $user->donorRewards();
                 $IconText = ($EnabledRewards['HasDonorIconMouseOverText'] && !empty($DonorRewards['IconMouseOverText']))
@@ -343,7 +343,7 @@ class Users {
 
         $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
             . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
-            . ($LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
+            . ($Viewer->id() == $UserID ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
             . '" class="tooltip" /></a>' : '';
         $Str .= ($IsEnabled && $user->isDisabled())
             ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>'
