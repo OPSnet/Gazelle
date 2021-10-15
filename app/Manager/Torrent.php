@@ -432,4 +432,75 @@ class Torrent extends \Gazelle\Base {
 
         return $info;
     }
+
+    public function storeTop10(string $type, string $key, int $days) {
+        $this->db->prepared_query("
+            INSERT INTO top10_history (Type) VALUES (?)
+            ", $type
+        );
+        $historyID = $this->db->inserted_id();
+
+        $top10 = $this->cache->get_value('top10tor_v2_' . $key . '_10');
+        if ($top10 === false) {
+            $this->db->prepared_query("
+                SELECT
+                    t.ID,
+                    g.ID,
+                    ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
+                FROM torrents AS t
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
+                WHERE tls.Seeders > 0 AND t.Time > (now() - INTERVAL ? DAY
+                GROUP BY (tls.Seeders + tls.Leechers) DESC
+                ORDER BY t.ID, g.ID
+                LIMIT ?
+                ", $days, 10
+            );
+            $top10 = $this->db->to_array(MYSQLI_NUM, false);
+        }
+
+        $groupIds = array_column($top10, 1);
+        // exclude artists because it's retarded
+        $groups = \Torrents::get_groups($groupIds, true, false);
+        $artists = \Artists::get_artists($groupIds);
+        global $Debug;
+        foreach ($top10 as $i => $torrent) {
+            [$torrentID, $groupID, $data] = $torrent;
+            $group = $groups[$groupID];
+
+            $displayName = '';
+
+            if (!empty($artists[$groupID])) {
+                $displayName = \Artists::display_artists($artists[$groupID], false, true);
+            }
+
+            $displayName .= $group['Name'];
+
+            if ($group['CategoryID'] == 1 && $group['Year'] > 0) {
+                $displayName .= " [${group['Year']}]";
+            }
+
+            $torrentDetails = $group['Torrents'][$torrentID];
+            // some flags are less flaggy than other flags
+            unset($torrentDetails['IsSnatched']);
+            unset($torrentDetails['FreeTorrent']);
+            unset($torrentDetails['PersonalFL']);
+            //                                                    media, edition, flags
+            $extraInfo = \Torrents::torrent_info($torrentDetails, true,  true,    false);
+            if ($extraInfo != '') {
+                $extraInfo = "- [$extraInfo]";
+            }
+
+            $titleString = "$displayName $extraInfo";
+
+            $Debug->log_var($group, 'group');
+            $this->db->prepared_query('
+                INSERT INTO top10_history_torrents
+                    (HistoryID, Rank, TorrentID, TitleString, TagString)
+                VALUES
+                    (?,         ?,    ?,         ?,           ?)
+                ', $historyID, $i, $torrentID, $titleString, $group['TagList']
+            );
+        }
+    }
 }
