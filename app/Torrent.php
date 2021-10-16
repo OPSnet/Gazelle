@@ -238,8 +238,26 @@ class Torrent extends BaseObject {
     /**
      * Get the encoding of this upload
      */
+    public function description(): string {
+        return $this->info()['Description'];
+    }
+
+    /**
+     * Get the encoding of this upload
+     */
     public function encoding(): string {
         return $this->info()['Encoding'];
+    }
+
+    public function fileTotal(): int {
+        return $this->info()['FileCount'];
+    }
+
+    /**
+     * Get the files of this upload
+     */
+    public function filelist(): array {
+        return $this->info()['FileList'];
     }
 
     /**
@@ -249,10 +267,12 @@ class Torrent extends BaseObject {
         return $this->info()['Format'];
     }
 
+    public function freeleechStatus(): string {
+        return $this->info()['FreeTorrent'];
+
+    }
     /**
      * Group ID this torrent belongs to
-     *
-     * @return int group id
      */
     public function groupId(): int {
         return $this->info()['GroupID'];
@@ -293,15 +313,23 @@ class Torrent extends BaseObject {
         return $this->info()['MissingLineage'];
     }
 
-    public function lastReseedRequest(): ?string {
-        return $this->info()['LastReseedRequest'];
+    public function isFreeleech(): bool {
+        return $this->info()['FreeTorrent'] == '1';
     }
 
     /**
-     * The size (in bytes) of this upload
+     * Is this a remastered release?
      */
-    public function size(): int {
-        return $this->info()['Size'];
+    public function isRemastered(): bool {
+        return $this->info()['Remastered'];
+    }
+
+    public function isScene(): bool {
+        return $this->info()['Scene'];
+    }
+
+    public function lastReseedRequest(): ?string {
+        return $this->info()['LastReseedRequest'];
     }
 
     /**
@@ -339,6 +367,13 @@ class Torrent extends BaseObject {
     }
 
     /**
+     * The size (in bytes) of this upload
+     */
+    public function leecherTotal(): int {
+        return $this->info()['Leechers'];
+    }
+
+    /**
      * The log score of this torrent
      */
     public function logChecksum(): bool {
@@ -359,11 +394,43 @@ class Torrent extends BaseObject {
         return $this->info()['Media'];
     }
 
+    public function path(): string {
+        return $this->info()['FilePath'];
+    }
+
+    public function remasterCatalogueNumber(): ?string {
+        return $this->info()['RemasterCatalogueNumber'];
+    }
+
+    public function remasterRecordLabel(): ?string {
+        return $this->info()['RemasterRecordLabel'];
+    }
+
+    public function remasterTitle(): ?string {
+        return $this->info()['RemasterTitle'];
+    }
+
+    public function ripLogIdList(): array {
+        return $this->info()['ripLogIds'];
+    }
+
+    public function remasterYear(): ?int {
+        return $this->info()['RemasterYear'];
+    }
+
+    public function seederTotal(): int {
+        return $this->info()['Seeders'];
+    }
+
     /**
-     * Is this a remastered release?
+     * The size (in bytes) of this upload
      */
-    public function isRemastered(): bool {
-        return $this->info()['Remastered'];
+    public function size(): int {
+        return $this->info()['Size'];
+    }
+
+    public function snatchTotal(): int {
+        return $this->info()['Snatched'];
     }
 
     public function uploadDate(): string {
@@ -1009,13 +1076,6 @@ class Torrent extends BaseObject {
             ", $this->id, $limit, $offset
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function snatchTotal(): int {
-        return $this->db->scalar("
-            SELECT count(*) FROM xbt_snatched WHERE fid = ?
-            ", $this->id
-        );
     }
 
     public function snatchPage(int $limit, int $offset): array {
