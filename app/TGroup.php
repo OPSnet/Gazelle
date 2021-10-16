@@ -285,12 +285,16 @@ class TGroup extends BaseObject {
                         INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
                         WHERE t.GroupID = tg.ID
                     )
-                    AND tg.ID = ?
+                    eND tg.ID = ?
                 ", $this->id)
             : false;
 
         $this->info = $info;
         return $this->info;
+    }
+
+    public function artistName(): string {
+        return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
     }
 
     /**
@@ -336,6 +340,14 @@ class TGroup extends BaseObject {
         return $this->info()['VanityHouse'];
     }
 
+    public function isSnatched(): bool {
+        return $info['Flags']['IsSnatched'] ?? false;
+    }
+
+    public function label(): string {
+        return $this->id() . " (" . $this->info()['Name'] . ")";
+    }
+
     public function name(): string {
         return $this->info()['Name'];
     }
@@ -352,28 +364,20 @@ class TGroup extends BaseObject {
         return $this->releaseTypes[$this->releaseType()];
     }
 
-    public function year(): string {
-        return $this->info()['Year'];
-    }
-
-    public function label(): string {
-        return $this->id() . " (" . $this->info()['Name'] . ")";
-    }
-
-    public function isSnatched(): bool {
-        return $info['Flags']['IsSnatched'] ?? false;
-    }
-
-    public function artistName(): string {
-        return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
-    }
-
     public function tagList(): array {
         return $this->info()['tags'];
     }
 
     public function tagNameList(): array {
         return array_map(fn($t) => $t['name'], $this->tagList());
+    }
+
+    public function time(): string {
+        return $this->info()['Time'];
+    }
+
+    public function year(): ?int {
+        return $this->info()['Year'];
     }
 
     public function torrentTagList(): array {
