@@ -7,7 +7,7 @@
             </a>
     {% endif %}
             <h5>The <a href="/contest.php?action=leaderboard">{{ contest.name }}</a> {{ contest.isOpen ? 'ends in' : 'ended' }} {{ contest.dateEnd|time_diff }}</h5>
-        </div>{{ dump(contest) }}
+        </div>
 {% endif %}
 
         <div id="last_uploads" class="box news_post">
