@@ -41,12 +41,12 @@ class Inbox extends Base {
         return $this;
     }
 
-    public function searchField(): ?string {
-        return $this->searchField ?? null;
+    public function searchField(): string {
+        return $this->searchField;
     }
 
-    public function searchTerm(): string {
-        return $this->searchTerm;
+    public function searchTerm(): ?string {
+        return isset($this->searchTerm) ? $this->searchTerm : null;
     }
 
     public function showUnreadFirst(): bool {
