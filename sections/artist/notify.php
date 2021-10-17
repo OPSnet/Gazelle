@@ -1,12 +1,12 @@
 <?php
-authorize();
-if (!check_perms('site_torrents_notify')) {
+
+if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);
 }
+authorize();
 
-try {
-    $artist = new Gazelle\Artist((int)$_GET['artistid']);
-} catch (Gazelle\Exception\ResourceNotFoundException $e) {
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_GET['artistid']);
+if (is_null($artist)) {
     error(404);
 }
 $Viewer->addArtistNotification($artist);

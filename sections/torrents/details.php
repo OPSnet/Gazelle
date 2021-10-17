@@ -191,10 +191,10 @@ if (CATEGORY[$GroupCategoryID - 1] == 'Music') {
 <?php       if (!empty($Artists[$s['offset']]) && count($Artists[$s['offset']]) > 0) { ?>
                 <li class="<?= $s['class'] ?>"><strong class="artists_label"><?= $s['title'] ?></strong></li>
 <?php
+            $artistMan = new Gazelle\Manager\Artist;
             foreach ($Artists[$s['offset']] as $Artist) {
-                try {
-                    $a = new Gazelle\Artist($Artist['id']);
-                } catch (Gazelle\Exception\ResourceNotFoundException $e) {
+                $a = $artistMan->findById($Artist['id']);
+                if (is_null($a)) {
                     continue;
                 }
 ?>

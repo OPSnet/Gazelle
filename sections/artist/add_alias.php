@@ -1,14 +1,15 @@
 <?php
-authorize();
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
+authorize();
 
-$ArtistID = (int)$_POST['artistid'];
-if ($ArtistID < 1) {
-    error(0);
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
+if (is_null($artist)) {
+    error(404);
 }
+$ArtistID = $artist->id();
 $Redirect = (int)$_POST['redirect'];
 $aliasName = \Gazelle\Artist::sanitize($_POST['name']);
 if (is_null($aliasName) || empty($aliasName)) {
@@ -23,7 +24,6 @@ if (is_null($aliasName) || empty($aliasName)) {
  * 3. For foo, there's two, same ArtistID, diff names, no redirect
  */
 
-$artist = new \Gazelle\Artist($ArtistID);
 $DB->prepared_query("
     SELECT AliasID, ArtistID, Name, Redirect
     FROM artists_alias

@@ -7,11 +7,10 @@ requests and torrents. It is called when $_GET['action'] == 'delete'.
 
 ************************************************************************/
 
-authorize();
-
-if (!check_perms('site_delete_artist') || !check_perms('torrents_delete')) {
+if (!$Viewer->permitted('site_delete_artist') || !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
+authorize();
 
 $ArtistID = (int)$_GET['artistid'];
 if (!$ArtistID) {

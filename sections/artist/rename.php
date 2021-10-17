@@ -17,17 +17,15 @@
 
 authorize();
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$ArtistID = (int)$_POST['artistid'];
-try {
-    $artist = new Gazelle\Artist($ArtistID);
-}
-catch (\Exception $e) {
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
+if (is_null($artist)) {
     error(404);
 }
+$ArtistID = $artist->id();
 
 $oldName = $artist->name();
 $newName = Gazelle\Artist::sanitize($_POST['name']);
