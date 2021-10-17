@@ -6,10 +6,12 @@ class Recovery extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $recovery = new \Gazelle\Recovery;
-        if (RECOVERY && defined('RECOVERY_AUTOVALIDATE') && RECOVERY_AUTOVALIDATE) {
-            $recovery->validatePending();
+        if (RECOVERY) {
+            $recovery = new \Gazelle\Recovery;
+            if (RECOVERY_AUTOVALIDATE) {
+                $recovery->validatePending();
+            }
+            $recovery->boostUpload();
         }
-        $recovery->boostUpload();
     }
 }
