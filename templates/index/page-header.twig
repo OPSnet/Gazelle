@@ -4,7 +4,7 @@
 {% macro active_class(t) %}
     {%- if t %} active{% endif -%}
 {% endmacro -%}
-{% set auth = viewer.auth -%}
+{% set auth = user.auth -%}
 </head>
 <body id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
 <input id="extracb1" class="hidden" type="checkbox">
