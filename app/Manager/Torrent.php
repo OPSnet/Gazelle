@@ -443,16 +443,16 @@ class Torrent extends \Gazelle\Base {
         $top10 = $this->cache->get_value('top10tor_v2_' . $key . '_10');
         if ($top10 === false) {
             $this->db->prepared_query("
-                SELECT
-                    t.ID,
-                    g.ID,
-                    ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
-                FROM torrents AS t
+                SELECT t.ID,
+                    tg.ID,
+                    (t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers) AS Data
+                FROM torrents AS tg
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
-                WHERE tls.Seeders > 0 AND t.Time > (now() - INTERVAL ? DAY
-                GROUP BY (tls.Seeders + tls.Leechers) DESC
-                ORDER BY t.ID, g.ID
+                INNER JOIN torrents_group AS g      ON (tg.ID = t.GroupID)
+                WHERE tls.Seeders > 0
+                    AND t.Time > now() - INTERVAL ? DAY
+                GROUP BY tls.Seeders + tls.Leechers DESC
+                ORDER BY t.ID, tg.ID
                 LIMIT ?
                 ", $days, 10
             );
