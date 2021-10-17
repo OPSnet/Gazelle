@@ -44,7 +44,6 @@ class Artist extends Base {
      * Artist constructor.
      * @param  int  $id
      * @param  int|null  $revisionId
-     * @throws Gazelle\Exception\ResourceNotFoundException
      */
     public function __construct(int $id, $revisionId = null) {
         parent::__construct();
@@ -77,9 +76,6 @@ class Artist extends Base {
                 WHERE $cond
                 ", $args
             );
-            if (is_null($this->name)) {
-                throw new Exception\ResourceNotFoundException($id);
-            }
             $this->similar = $this->loadSimilar();
             $this->homonyms = $this->homonymCount();
             $this->cache->cache_value($cacheKey, [

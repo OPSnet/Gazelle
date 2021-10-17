@@ -1,13 +1,11 @@
 <?php
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-try {
-    $artist = new Gazelle\Artist((int)$_GET['artistid']);
-}
-catch (Exception $e) {
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_GET['artistid']);
+if (is_null($artist)) {
     error("Cannot find an artist with the ID {$artistId}: See the <a href=\"log.php?search=Artist+$artistId\">site log</a>.");
 }
 $artistId = $artist->id();
@@ -64,7 +62,7 @@ View::show_header('Edit artist');
         <td class="label" style="vertical-align: top;"><label for="vanity_house">Vanity House</label></td>
         <td>
             <input type="checkbox" id="vanity_house" name="vanity_house" value="1"<?=
-                check_perms('artist_edit_vanityhouse') ? '' : ' disabled="disabled"' ?><?=($vanityHouse ? ' checked="checked"' : '')?> /><br /><br />
+                $Viewer->permitted('artist_edit_vanityhouse') ? '' : ' disabled="disabled"' ?><?=($vanityHouse ? ' checked="checked"' : '')?> /><br /><br />
         </td>
     </tr>
     <tr>
@@ -80,7 +78,7 @@ View::show_header('Edit artist');
 </table>
 </form>
 
-<?php if (check_perms('torrents_edit')) { ?>
+<?php if ($Viewer->permitted('torrents_edit')) { ?>
 
 <form class="merge_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="change_artistid" />
@@ -211,7 +209,7 @@ foreach($nonRedirAliases as $r) {
     </table>
 </form>
 
-<?php } /* check_perms('torrents_edit') */ ?>
+<?php } /* $Viewer->permitted('torrents_edit') */ ?>
 </div>
 <?php
 

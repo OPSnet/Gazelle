@@ -3,20 +3,20 @@
 The page that handles the backend of the 'edit artist' function.
 \*********************************************************************/
 
-authorize();
-
-if (!$_REQUEST['artistid'] || !is_number($_REQUEST['artistid'])) {
-    error(404);
-}
-
-if (!check_perms('site_edit_wiki')) {
+if (!$Viewer->permitted('site_edit_wiki')) {
     error(403);
 }
 
+authorize();
+
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
+if (is_null($artist)) {
+    error(404);
+}
+$artistId = $artist->id();
+
 // Variables for database input
 $userId   = $Viewer->id();
-$artistId = $_REQUEST['artistid'];
-$artist   = new \Gazelle\Artist($artistId);
 $summary  = [];
 
 if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
@@ -77,7 +77,7 @@ if (!$revisionId) { // edit
 // Update artists table (technically, we don't need the revisionId column, but we can use it for a join which is nice and fast)
 $column = ['RevisionID = ?'];
 $args   = [$revisionId];
-if (check_perms('artist_edit_vanityhouse')) {
+if ($Viewer->permitted('artist_edit_vanityhouse')) {
     $column[] = 'VanityHouse = ?';
     $args[] = isset($_POST['vanity_house']) ? 1 : 0;
 }
