@@ -1,30 +1,25 @@
 <?php
-authorize();
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
+authorize();
+
+$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
+if (is_null($artist)) {
+    error('Please select a valid artist to change.');
+}
+$ArtistID = $artist->id();
+$ArtistName = $artist->name();
+
 if (!empty($_POST['newartistid']) && !empty($_POST['newartistname'])) {
     error('Please enter a valid artist ID number or a valid artist name.');
 }
-$ArtistID = (int)$_POST['artistid'];
 $NewArtistID = (int)$_POST['newartistid'];
 $NewArtistName = $_POST['newartistname'];
 
-
-if (!is_number($ArtistID) || !$ArtistID) {
-    error('Please select a valid artist to change.');
-}
 if (empty($NewArtistName) && (!$NewArtistID || !is_number($NewArtistID))) {
     error('Please enter a valid artist ID number or a valid artist name.');
-}
-
-$ArtistName = $DB->scalar("
-    SELECT Name FROM artists_group WHERE ArtistID = ?
-    ", $ArtistID
-);
-if (is_null($ArtistName)) {
-    error('An error has occurred.');
 }
 
 if ($NewArtistID > 0) {
@@ -177,10 +172,9 @@ if (isset($_POST['confirm'])) {
         }
     }
 
-    $artist = new \Gazelle\Artist($ArtistID);
     $artist->flushCache();
-    $artist = new \Gazelle\Artist($NewArtistID);
-    $artist->flushCache();
+    $newArtist = new \Gazelle\Artist($NewArtistID);
+    $newArtist->flushCache();
     $Cache->delete_value("artist_groups_$ArtistID");
     $Cache->delete_value("artist_groups_$NewArtistID");
 
