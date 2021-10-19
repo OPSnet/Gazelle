@@ -58,7 +58,7 @@ $tgroupMan->refresh($GroupID);
 if ($DB->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $OldGroupID)) {
     $tgroupMan->refresh($OldGroupID);
 } else {
-    Torrents::delete_group($OldGroupID);
+    Torrents::delete_group($OldGroupID, $Viewer);
 }
 
 $Cache->delete_value("torrent_download_$TorrentID");

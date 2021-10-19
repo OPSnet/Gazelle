@@ -3,10 +3,10 @@
 * Temp handler for changing the category for a single torrent.
 ****************************************************************/
 
-authorize();
-if (!check_perms('users_mod')) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
+authorize();
 
 $OldGroupID = (int)$_POST['oldgroupid'];
 $TorrentID = (int)$_POST['torrentid'];
@@ -85,7 +85,7 @@ if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $OldGroupID)) {
         WHERE Page = 'torrents' AND PageID = ?
         ", $GroupID, $OldGroupID
     );
-    Torrents::delete_group($OldGroupID);
+    Torrents::delete_group($OldGroupID, $Viewer);
     $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
 }
 

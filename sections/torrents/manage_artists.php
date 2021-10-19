@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('torrents_edit')) {
+
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 authorize();
@@ -72,7 +73,7 @@ if (count($CleanArtists) > 0) {
         $Items = $DB->collect('ArtistID');
         $EmptyArtists = array_diff($ArtistIDs, $Items);
         foreach ($EmptyArtists as $ArtistID) {
-            Artists::delete_artist($ArtistID);
+            Artists::delete_artist($ArtistID, $Viewer);
         }
     }
     else {

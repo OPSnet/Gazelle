@@ -234,9 +234,10 @@ foreach (ZIP_OPTION as $Option) {
 <?php
 if ($sections = $Artist->sections()) {
     /* Move the sections to the way the viewer wants to see them. */
-    if (isset($LoggedUser['SortHide'])) {
+    $sortHide = $Viewer->option('SortHide') ?? [];
+    if ($sortHide) {
         $reorderedSections = [];
-        foreach (array_keys($LoggedUser['SortHide']) as $reltype) {
+        foreach (array_keys($sortHide) as $reltype) {
             if (isset($artistReleaseType[$reltype])) {
                 $reorderedSections[$reltype] = $sections[$reltype];
                 unset($artistReleaseType[$reltype]);
@@ -250,7 +251,7 @@ if ($sections = $Artist->sections()) {
     }
 
     foreach (array_keys($sections) as $sectionId) {
-        if (isset($LoggedUser['SortHide'][$sectionId]) && $LoggedUser['SortHide'][$sectionId] == 1) {
+        if (($sortHide[$sectionId] ?? 0) == 1) {
             $ToggleStr = " onclick=\"$('.releases_$sectionId').gshow(); return true;\"";
         } else {
             $ToggleStr = '';
@@ -273,11 +274,8 @@ if ($sections = $Artist->sections()) {
     $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 
     foreach ($sections as $sectionId => $groupList) {
-        $sectionClosed = !isset($LoggedUser['SortHide']) || (array_key_exists($sectionId, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$sectionId] == 0)
-            ? 0 : 1;
-
-        $sectionHidden = $sectionClosed ? ' hidden' : '';
-        $groupsHidden = ($sectionClosed || $groupsClosed) ? ' hidden' : '';
+        $sectionClosed = (bool)($sortHide[$sectionId] ?? 0);
+        $groupsHidden = ($groupsClosed || $sectionClosed) ? ' hidden' : '';
 ?>
                 <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
@@ -338,7 +336,8 @@ if ($sections = $Artist->sections()) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 ?>
-            <tr class="releases_<?= $sectionId ?> group groupid_<?=$GroupID?>_header discog<?= $sectionHidden . ($isSnatched ? ' snatched_group' : '') ?>">
+            <tr class="releases_<?= $sectionId ?> group groupid_<?=$GroupID?>_header discog<?=
+                ($sectionClosed ? ' hidden' : '') . ($isSnatched ? ' snatched_group' : '') ?>">
                     <td class="td_collapse center m_td_left">
                         <div id="showimg_<?=$GroupID?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
                             <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>

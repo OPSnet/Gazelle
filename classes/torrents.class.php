@@ -257,7 +257,7 @@ class Torrents {
      *
      * @param int $GroupID
      */
-    public static function delete_group($GroupID) {
+    public static function delete_group($GroupID, \Gazelle\User $user) {
         global $Cache, $DB;
         $QueryID = $DB->get_query_id();
 
@@ -329,7 +329,7 @@ class Torrents {
             list($GroupCount) = $DB->next_record();
             if (($ReqCount + $GroupCount) === 0) {
                 //The only group to use this artist
-                Artists::delete_artist($ArtistID);
+                Artists::delete_artist($ArtistID, $user);
             } else {
                 //Not the only group, still need to clear cache
                 $Cache->delete_value("artist_groups_$ArtistID");

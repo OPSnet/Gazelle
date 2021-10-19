@@ -270,7 +270,7 @@ class Artists {
      *
      * @param int $ArtistID
      */
-    public static function delete_artist($ArtistID) {
+    public static function delete_artist($ArtistID, \Gazelle\User $user) {
         global $Cache, $DB;
         $QueryID = $DB->get_query_id();
         $Name = $DB->scalar("
@@ -298,20 +298,13 @@ class Artists {
         $DB->prepared_query('DELETE FROM wiki_artists WHERE PageID = ?', $ArtistID);
 
         (new \Gazelle\Manager\Comment)->remove('artist', $ArtistID);
+        (new \Gazelle\Log)->general("Artist $ArtistID ($Name) was deleted by " . $user->username());
         $DB->commit();
 
         $Cache->delete_value('artist_' . $ArtistID);
         $Cache->delete_value('artist_groups_' . $ArtistID);
         $Cache->decrement('stats_artist_count');
-        // Record in log
 
-        global $LoggedUser;
-        if (!empty($LoggedUser['Username'])) {
-            $Username = $LoggedUser['Username'];
-        } else {
-            $Username = 'System';
-        }
-        (new Gazelle\Log)->general("Artist $ArtistID ($Name) was deleted by $Username");
         $DB->set_query_id($QueryID);
     }
 }
