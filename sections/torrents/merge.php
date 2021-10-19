@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('torrents_edit')) {
+
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
@@ -191,7 +192,7 @@ if (empty($_POST['confirm'])) {
         ", $newGroupId, $oldGroupId
     );
 
-    Torrents::delete_group($oldGroupId);
+    Torrents::delete_group($oldGroupId, $Viewer);
     (new \Gazelle\Manager\TGroup)->refresh($newGroupId);
 
     $Cache->deleteMulti([

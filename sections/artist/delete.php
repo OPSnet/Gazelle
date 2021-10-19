@@ -79,7 +79,7 @@ if ($DB->has_results()) {
 }
 
 if ($Count == 0) {
-    Artists::delete_artist($ArtistID);
+    Artists::delete_artist($ArtistID, $Viewer);
 ?>
     <div class="thin box pad">
         Artist "<?=$Name?>" deleted!

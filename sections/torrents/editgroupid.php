@@ -5,7 +5,7 @@
 * torrent.
 ****************************************************************/
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
@@ -106,7 +106,7 @@ if (empty($_POST['confirm'])) {
         );
         $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
         $Cache->delete_value("torrent_comments_$GroupID");
-        Torrents::delete_group($OldGroupID);
+        Torrents::delete_group($OldGroupID, $Viewer);
     }
 
     (new Gazelle\Log)->group($GroupID, $Viewer->id(), "merged group $OldGroupID")
