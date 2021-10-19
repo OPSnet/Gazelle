@@ -657,8 +657,9 @@ class TGroup extends BaseObject {
         );
         if ($unused) {
             // The last group to use this artist
-            \Artists::delete_artist($artistId);
+            \Artists::delete_artist($artistId, $this->viewer);
         }
+        $this->flush();
         return true;
     }
 
