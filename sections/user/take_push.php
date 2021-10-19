@@ -1,15 +1,15 @@
 <?php
 
-authorize();
-$UserID = (int)$_GET['userid'];
-if (!$UserID) {
-    error(404);
-}
-if (!check_perms('users_mod') && $_GET['userid'] != $Viewer->id()) {
+$user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+if (is_null($user)) {
     error(403);
 }
+if (!$Viewer->permitted('users_mod') && $user->id() != $Viewer->id()) {
+    error(403);
+}
+authorize();
 
-$notification = new Gazelle\Manager\Notification;
-$notification->push($UserID, 'Push!', 'You have been pushed by ' . $Viewer->username());
+(new Gazelle\Manager\Notification)->push($user->id(),
+    'Push!', 'You have been pushed by ' . $Viewer->username());
 
-header("Location: user.php?action=edit&userid={$UserID}");
+header('Location: ' . $user->url() . '&action=edit');
