@@ -1,5 +1,5 @@
 <?php
-if (isset($_GET['userid']) && check_perms('users_mod')) {
+if (isset($_GET['userid']) && $Viewer->permitted('users_mod')) {
     if (!is_number($_GET['userid'])) {
         error(403);
     }
@@ -96,17 +96,17 @@ if (!$OwnProfile) {
         <a href="reports.php?action=report&amp;type=user&amp;id=<?=$UserID?>" class="brackets">Report user</a>
 <?php
 }
-if (check_perms('admin_reports')) {
+if ($Viewer->permitted('admin_reports')) {
 ?>
         <a href="reportsv2.php?view=reporter&amp;id=<?=$UserID?>" class="brackets">Reports</a>
 <?php
 }
-if (check_perms('users_mod')) {
+if ($Viewer->permitted('users_mod')) {
 ?>
         <a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
 <?php
 }
-if (check_perms('users_mod') || ($Viewer->id() == $UserID && check_perms('site_user_stats'))) {
+if ($Viewer->permitted('users_mod') || ($Viewer->id() == $UserID && $Viewer->permitted('site_user_stats'))) {
 ?>
         <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?php

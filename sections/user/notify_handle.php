@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('site_torrents_notify')) {
+
+if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);
 }
 authorize();

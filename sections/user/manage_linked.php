@@ -1,10 +1,10 @@
 <?php
 
-authorize();
-
-if (!check_perms('users_edit_usernames')) {
+if (!$Viewer->permitted('users_edit_usernames')) {
     error(403);
 }
+authorize();
+
 $userId = (int)$_REQUEST['userid'];
 if (!$userId) {
     error(404);

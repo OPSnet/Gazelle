@@ -1,7 +1,9 @@
 <?php
-if (!check_perms('site_torrents_notify')) {
+
+if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);
 }
+
 View::show_header('Manage notifications', ['js' => 'jquery.validate,form_validate']);
 ?>
 <div class="thin">
