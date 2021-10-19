@@ -286,9 +286,10 @@ class Users {
             return "Unknown [$UserID]";
         }
 
+        global $Viewer;
         $Classes = $userMan->classList();
         if ($user->primaryClass() < $Classes[MOD]['Level']) {
-            $OverrideParanoia = check_perms('users_override_paranoia', $user->primaryClass());
+            $OverrideParanoia = $Viewer->permitted('users_override_paranoia', $user->primaryClass());
         } else {
             // Don't override paranoia for mods who don't want to show their donor heart
             $OverrideParanoia = false;
@@ -306,7 +307,6 @@ class Users {
             $Str = "<a href=\"user.php?id=$UserID\">$Username</a>";
         }
 
-        global $Viewer;
         if ($Badges) {
             $DonorRank = $user->donorRank();
             if ($DonorRank == 0 && $user->isDonor()) {
@@ -373,7 +373,7 @@ class Users {
         if ($Title) {
             // Image proxy CTs
             $userTitle = $user->title();
-            if (check_perms('site_proxy_images') && !empty($userTitle)) {
+            if ($Viewer->permitted('site_proxy_images') && !empty($userTitle)) {
                 $userTitle = preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
                     function($Matches) {
                         return 'src=' . $Matches[1] . ImageTools::process($Matches[2]) . $Matches[3];
