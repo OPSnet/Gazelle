@@ -33,7 +33,7 @@
 {% else %}
     {{ paginator.linkbox|raw }}
     {% for p in posts %}
-    <table class="forum_post vertical_margin{% if viewer.showAvatars %} noavatar{% endif %}" id="post<?=$PostID ?>">
+    <table class="forum_post vertical_margin{% if viewer.showAvatars %} noavatar{% endif %}" id="post{{ p.post_id }}">
         <colgroup>
         {% if viewer.showAvatars %}
             <col class="col_avatar" />
@@ -59,7 +59,7 @@
                 </span>
             {% endif %}
         {% endif %}
-                <span id="bar<?=$PostID ?>" style="float: right;">
+                <span id="bar{{ p.post_id }}" style="float: right;">
         {% if own_profile and not p.thread_id in subscriptions %}
                     <a href="#" onclick="Subscribe({{ p.thread_id }}); $('.subscribelink{{ p.thread_id }}').remove(); return false;" class="brackets subscribelink{{ p.thread_id }}">Subscribe</a>
                     &nbsp;
