@@ -9,7 +9,7 @@
  * replicated on the auto page (reports.php).
  */
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
@@ -679,7 +679,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php           } ?>
                                 </select>
                             </span> |
-<?php           if (check_perms('users_mod')) { ?>
+<?php           if ($Viewer->permitted('users_mod')) { ?>
                             <span class="tooltip" title="Delete torrent?">
                                 <input type="checkbox" name="delete" id="delete<?=$ReportID?>" />&nbsp;<label for="delete<?=$ReportID?>"><strong>Delete</strong></label>
                             </span> |

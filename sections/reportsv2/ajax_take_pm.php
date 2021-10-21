@@ -5,7 +5,7 @@
 
 authorize();
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     die();
 }
 

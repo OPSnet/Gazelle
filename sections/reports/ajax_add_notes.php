@@ -1,7 +1,7 @@
 <?php
 
 $postId = (int)$_POST['id'];
-if (!($postId && check_perms('site_moderate_forums'))) {
+if (!($postId && $Viewer->permitted('site_moderate_forums'))) {
     json_error('no post id');
 }
 
