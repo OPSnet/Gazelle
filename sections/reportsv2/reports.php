@@ -4,7 +4,7 @@
  * that actually populate the page and shows the proper header and footer.
  * The important function is AddMore().
  */
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 

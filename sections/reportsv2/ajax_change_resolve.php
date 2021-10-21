@@ -4,7 +4,7 @@
  * every time you change the resolve type on one of the two reports pages.
  */
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
