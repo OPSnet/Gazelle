@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_moderate_forums') || empty($_POST['id']) || empty($_POST['remove'])) {
+if (!$Viewer->permitted('site_moderate_forums') || empty($_POST['id']) || empty($_POST['remove'])) {
     json_error('bad parameters');
 }
 

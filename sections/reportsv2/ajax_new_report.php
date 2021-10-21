@@ -5,7 +5,7 @@
  * replicated on static.php.
  */
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
@@ -342,7 +342,7 @@ foreach ($TypeList as $Type => $Data) {
 <?php } ?>
             </select>
             <span id="options<?=$ReportID?>">
-<?php if (check_perms('users_mod')) { ?>
+<?php if ($Viewer->permitted('users_mod')) { ?>
                 <span class="tooltip" title="Delete torrent?">
                     <label for="delete<?=$ReportID?>"><strong>Delete</strong></label>
                     <input type="checkbox" name="delete" id="delete<?=$ReportID?>" />

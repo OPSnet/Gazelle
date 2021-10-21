@@ -4,7 +4,7 @@ use Gazelle\Util\Irc;
 
 authorize();
 
-if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
+if (!$Viewer->permitted('admin_reports') && !$Viewer->permitted('site_moderate_forums')) {
     json_error('forbidden');
 }
 
@@ -13,7 +13,7 @@ $Type = $DB->scalar("
     SELECT Type FROM reports WHERE ID = ?
     ", $ReportID
 );
-if (!check_perms('admin_reports') && check_perms('site_moderate_forums') && !in_array($Type, ['comment', 'post', 'thread'])) {
+if (!$Viewer->permitted('admin_reports') && $Viewer->permitted('site_moderate_forums') && !in_array($Type, ['comment', 'post', 'thread'])) {
     json_error('forbidden');
 }
 

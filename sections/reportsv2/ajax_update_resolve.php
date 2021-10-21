@@ -1,7 +1,7 @@
 <?php
 // perform the back end of updating a resolve type
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 authorize();

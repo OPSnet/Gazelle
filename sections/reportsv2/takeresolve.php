@@ -6,7 +6,7 @@
  * a collision occurs or a POST attack is detected.
  */
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 authorize();
@@ -154,7 +154,7 @@ $adminMessage = trim($_POST['admin_message']);
 $logMessage = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
 
 //Log and delete
-if (!(isset($_POST['delete']) && check_perms('users_mod'))) {
+if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
 } else {
     $Log = "Torrent $torrentId ($rawName) uploaded by " . $uploader->username()

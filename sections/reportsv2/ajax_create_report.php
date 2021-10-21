@@ -10,7 +10,7 @@
  * It should not be used on site as is, except in its current use (Switch) as it is lacking for any purpose but this.
  */
 
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 

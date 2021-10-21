@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
+if (!$Viewer->permitted('admin_reports') && !$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
 View::show_header('Other reports stats');
@@ -17,7 +17,7 @@ View::show_header('Other reports stats');
 <div class="thin float_clear">
     <div class="two_columns pad">
 <?php
-if (check_perms('admin_reports')) {
+if ($Viewer->permitted('admin_reports')) {
 $DB->prepared_query("
     SELECT um.Username,
         count(*) AS Reports
@@ -153,7 +153,7 @@ $Results = $DB->to_array();
     } ?>
         </table>
 <?php
-} /* if (check_perms('admin_reports')) */ ?>
+} /* if ($Viewer->permitted('admin_reports')) */ ?>
     </div>
     <div class="two_columns pad">
 <?php

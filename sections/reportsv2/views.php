@@ -5,7 +5,7 @@
  * and the current in-progress reports by staff member.
  * All the different views are self explanatory by their names.
  */
-if (!check_perms('admin_reports')) {
+if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
