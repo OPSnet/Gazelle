@@ -146,4 +146,4 @@ switch ($uploadCategory) {
     default:
         $uploadForm->music_form($GenreTags);
 }
-$uploadForm->foot();
+$uploadForm->foot(true);

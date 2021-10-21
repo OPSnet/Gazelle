@@ -77,11 +77,12 @@ class uploadForm extends \Gazelle\Base {
         ]);
     }
 
-    function foot() {
+    function foot(bool $showFooter) {
         echo $this->twig->render('upload/footer.twig', [
-            'is_new' => (int)$this->NewTorrent,
-            'info'   => $this->Torrent,
-            'viewer' => $this->user,
+            'is_new'      => (int)$this->NewTorrent,
+            'info'        => $this->Torrent,
+            'show_footer' => $showFooter,
+            'viewer'      => $this->user,
         ]);
     }
 
