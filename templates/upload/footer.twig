@@ -18,8 +18,6 @@
             </select>
         </td>
     </tr>
-{% else %}
-    <tr><td>1</td><td>2</td></tr>
 {% endif %}
     <tr>
         <td colspan="2" style="text-align: center;">
@@ -36,4 +34,6 @@
 </table>
 </form>
 </div>
-{{ footer() }}
+{% if show_footer %}
+    {{- footer() }}
+{% endif %}

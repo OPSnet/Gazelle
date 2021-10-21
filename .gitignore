@@ -26,6 +26,7 @@ __MACOSX/
 /classes/config.php
 /mix-manifest.json
 /mix.js.map
+/yarn-error.log
 
 /public/static/styles/**/*.css
 /public/static/styles/**/*.css.map

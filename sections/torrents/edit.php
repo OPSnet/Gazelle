@@ -105,7 +105,7 @@ if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || $Viewer->per
         default:
             $uploadForm->music_form('');
     }
-    $uploadForm->foot();
+    $uploadForm->foot(false);
 }
 if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $Properties['CategoryID'] == 1)) {
 ?>
