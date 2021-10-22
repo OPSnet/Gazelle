@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('site_admin_forums')) {
+
+if (!$Viewer->permitted('site_admin_forums')) {
     error(403);
 }
 
