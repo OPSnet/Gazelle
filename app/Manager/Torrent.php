@@ -445,9 +445,9 @@ class Torrent extends \Gazelle\Base {
                 SELECT t.ID,
                     tg.ID,
                     (t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers) AS Data
-                FROM torrents AS tg
+                FROM torrents AS t
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                INNER JOIN torrents_group AS g      ON (tg.ID = t.GroupID)
+                INNER JOIN torrents_group AS tg     ON (tg.ID = t.GroupID)
                 WHERE tls.Seeders > 0
                     AND t.Time > now() - INTERVAL ? DAY
                 GROUP BY tls.Seeders + tls.Leechers DESC
