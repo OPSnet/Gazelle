@@ -8,7 +8,7 @@ if ($Cache->get_value('torrent_'.$TorrentID.'_lock')) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
-if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !check_perms('torrents_delete_fast')) {
+if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !$Viewer->permitted('torrents_delete_fast')) {
     error('You have recently deleted ' . USER_TORRENT_DELETE_MAX
         . ' torrents. Please contact a staff member if you need to delete more.');
 }
@@ -28,15 +28,15 @@ if (!$UserID) {
     error('Torrent already deleted.');
 }
 
-if ($Viewer->id() != $UserID && !check_perms('torrents_delete')) {
+if ($Viewer->id() != $UserID && !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
 
-if (time_ago($Time) > 3600 * 24 * 7 && !check_perms('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
+if (time_ago($Time) > 3600 * 24 * 7 && !$Viewer->permitted('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
     error('You can no longer delete this torrent as it has been uploaded for over a week. If you now think there is a problem, please report the torrent instead.');
 }
 
-if ($Snatches >= 5 && !check_perms('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
+if ($Snatches >= 5 && !$Viewer->permitted('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
     error('You can no longer delete this torrent as it has been snatched by 5 or more users. If you believe there is a problem with this torrent, please report it instead.');
 }
 
@@ -72,7 +72,7 @@ View::show_header('Delete torrent', ['js' => 'reportsv2']);
         </div>
     </div>
 </div>
-<?php if (check_perms('admin_reports')) { ?>
+<?php if ($Viewer->permitted('admin_reports')) { ?>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 <?php
     $reportMan = new Gazelle\Manager\ReportV2;
@@ -291,5 +291,5 @@ View::show_header('Delete torrent', ['js' => 'reportsv2']);
     </div>
 </div>
 <?php
-} /* check_perms('admin_reports') */
+} /* $Viewer->permitted('admin_reports') */
 View::show_footer();

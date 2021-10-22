@@ -128,7 +128,7 @@ if (!empty($_REQUEST['action'])) {
             break;
         case 'regen_filelist':
             $torrentId = (int)($_REQUEST['torrentid'] ?? 0);
-            if ($torrentId && check_perms('users_mod')) {
+            if ($torrentId && $Viewer->permitted('users_mod')) {
                 (new Gazelle\Manager\Torrent)->regenerateFilelist($torrentId);
                 header("Location: torrents.php?torrentid=$torrentId");
                 exit;

@@ -8,7 +8,7 @@ if (!$groupId) {
 }
 
 //Usual perm checks
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     if (!$DB->scalar("
         SELECT ID FROM torrents WHERE GroupID = ? AND UserID = ?
         ", $groupId, $Viewer->id()
@@ -18,7 +18,7 @@ if (!check_perms('torrents_edit')) {
 }
 
 $log = [];
-if (isset($_POST['freeleechtype']) && check_perms('torrents_freeleech')) {
+if (isset($_POST['freeleechtype']) && $Viewer->permitted('torrents_freeleech')) {
     if (in_array($_POST['freeleechtype'], ['0', '1', '2'])) {
         $Free = $_POST['freeleechtype'];
     } else {

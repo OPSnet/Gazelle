@@ -2,7 +2,7 @@
 
 use OrpheusNET\Logchecker\Logchecker;
 
-if (!check_perms('users_mod')) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -18,4 +18,4 @@ $logfile = new Gazelle\Logfile($logpath, basename($logpath));
 
 $torrent->rescoreLog($logId, $logfile, Logchecker::getLogcheckerVersion());
 
-header("Location: torrents.php?torrentid=" . $torrent->id());
+header('Location: ' . $torrent->url());
