@@ -128,40 +128,25 @@ class Torrent {
      */
     private $SphResults;
 
-    /**
-     * Requested page
-     */
-    private $Page;
-
-    /**
-     * Number of results per page
-     */
-    private $PageSize;
-
-    /**
-     * Number of results
-     */
-    private $NumResults = 0;
-
-    /**
-     * Array with info from all matching torrent groups
-     */
-    private $Groups = [];
+    private int $Page;
+    private int $PageSize;
+    private int $NumResults = 0;
+    private array $Groups = [];
 
     /**
      * True if the NOT operator can be used. Sphinx needs at least one positive search condition
      */
-    private $EnableNegation = false;
+    private bool $EnableNegation = false;
 
     /**
      * Whether any filters were used
      */
-    private $Filtered = false;
+    private bool $Filtered = false;
 
     /**
      * Whether the random sort order is selected
      */
-    private $Random = false;
+    private bool $Random = false;
 
     /**
      * Storage for fulltext search terms
@@ -171,40 +156,31 @@ class Torrent {
      *     'operator' => self::SPH_BOOL_AND | self::SPH_BOOL_OR
      * ]], ...
      */
-    private $Terms = [];
+    private array $Terms = [];
 
     /**
      * Unprocessed search terms for retrieval
      */
-    private $RawTerms = [];
+    private array $RawTerms = [];
 
     /**
      * Storage for used torrent-specific attribute filters
      * ['Field name' => 'Search expression', ...]
      */
-    private $UsedTorrentAttrs = [];
+    private array $UsedTorrentAttrs = [];
 
     /**
      * Storage for used torrent-specific fulltext fields
      * ['Field name' => 'Search expression', ...]
      */
-    private $UsedTorrentFields = [];
+    private array $UsedTorrentFields = [];
 
-    /**
-     * @var boolean whether results should be groups by group id
-     */
-    private $GroupResults;
+    private bool $GroupResults;
 
     /**
      * Initialize and configure a Search\Torrent object
-     *
-     * @param bool $GroupResults whether results should be grouped by group id
-     * @param string $OrderBy attribute to use for sorting the results
-     * @param string $OrderWay Whether to use ascending or descending order
-     * @param int $Page Page number to display
-     * @param int $PageSize Number of results per page
      */
-    public function __construct($GroupResults, $OrderBy, $OrderWay, $Page, $PageSize) {
+    public function __construct(bool $GroupResults, string $OrderBy, string $OrderWay, int $Page, int $PageSize, bool $searchMany) {
         if ($GroupResults && !isset(self::$SortOrdersGrouped[$OrderBy])
                 || !$GroupResults && !isset(self::$SortOrders[$OrderBy])
                 || !in_array($OrderWay, ['asc', 'desc'])
@@ -214,14 +190,8 @@ class Torrent {
             $Debug->analysis('Bad arguments in Search\Torrent constructor', $ErrMsg, 3600*24);
             error('-1');
         }
-        if (!is_number($Page) || $Page < 1) {
-            $Page = 1;
-        }
-        if (check_perms('site_search_many')) {
-            $this->Page = $Page;
-        } else {
-            $this->Page = min($Page, SPHINX_MAX_MATCHES / $PageSize);
-        }
+        $this->Page = $searchMany ? $Page : min($Page, SPHINX_MAX_MATCHES / $PageSize);
+
         $ResultLimit = $PageSize;
         $this->PageSize = $PageSize;
         $this->GroupResults = $GroupResults;

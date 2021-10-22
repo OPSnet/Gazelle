@@ -8,11 +8,11 @@ $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
 if (is_null($torrent)) {
     error('No torrent is selected.');
 }
-if ($torrent->hasLog()) {
-    error('Invalid torrent id.');
+if ($torrent->media() !== 'CD') {
+    error('Media of torrent precludes adding a log.');
 }
-if ($torrent->uploaderId() != $ViewerId() && !$Viewer->permitted('admin_add_log')) {
-    error('Invalid torrent id.');
+if ($torrent->uploaderId() != $Viewer->id() && !$Viewer->permitted('admin_add_log')) {
+    error('Not your upload.');
 }
 
 // Some browsers will report an empty file when you submit, prune those out

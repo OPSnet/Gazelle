@@ -84,10 +84,10 @@ abstract class Json extends Base {
     }
 
     protected function debug() {
-        if (!check_perms('site_debug')) {
+        global $Debug, $Viewer;
+        if (!$Viewer->permitted('site_debug')) {
             return [];
         }
-        global $Debug;
         $info = ['debug' => ['queries'  => $Debug->get_queries()]];
         if (class_exists('Sphinxql')) {
             $info['searches'] = \Sphinxql::$Queries;

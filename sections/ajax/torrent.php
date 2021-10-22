@@ -9,15 +9,15 @@ if ($torrentId && $torrentHash) {
     $json->failure('bad parameters');
     exit;
 } elseif ($torrentHash) {
-    if (!$json->findByInfohash($torrentHash)) {
-        exit;
-    }
+    $torrent = (new Gazelle\Manager\Torrent)->findByInfohash($torrentHash);
 } else {
-    if (!$json->findById($torrentId)) {
-        exit;
-    }
+    $torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
+}
+if (is_null($torrent)) {
+    $json->failure('bad parameters');
 }
 
 $json->setVersion(5)
-    ->setViewerId($Viewer->id())
+    ->setTorrent($torrent)
+    ->setViewer($Viewer)
     ->emit();

@@ -1,19 +1,19 @@
 <?php
 
-$json = new \Gazelle\Json\AddLog;
-$torrentid = (int)($_GET['id'] ?? 0);
+$json = new Gazelle\Json\AddLog;
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_GET['id'] ?? 0));
 
-if (empty($torrentid)) {
+if (is_null($torrent)) {
     $json->failure('bad parameters');
     exit;
-} else if ($json->findTorrentById($torrentid) === null) {
-    exit;
-} else if (empty($_FILES) || empty($_FILES['logfiles'])) {
+}
+if (empty($_FILES) || empty($_FILES['logfiles'])) {
     $json->failure('no log files uploaded');
     exit;
 }
 
 $json->setVersion(1)
-    ->setViewerId($Viewer->id())
+    ->setTorrent($torrent)
+    ->setViewer($Viewer)
     ->setLogFiles($_FILES['logfiles'])
     ->emit();

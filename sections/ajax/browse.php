@@ -1,20 +1,22 @@
 <?php
 
-if (!empty($_GET['order_way']) && $_GET['order_way'] == 'asc') {
-    $OrderWay = 'asc';
-} else {
-    $OrderWay = 'desc';
-}
-
 if (empty($_GET['order_by']) || !isset(Gazelle\Search\Torrent::$SortOrders[$_GET['order_by']])) {
     $OrderBy = 'time';
 } else {
     $OrderBy = $_GET['order_by'];
 }
+$OrderWay = ($_GET['order_way'] ?? 'asc');
 
 $GroupResults = !isset($_GET['group_results']) || $_GET['group_results'] != '0';
-$Page = !empty($_GET['page']) ? (int)$_GET['page'] : 1;
-$Search = new Gazelle\Search\Torrent($GroupResults, $OrderBy, $OrderWay, $Page, TORRENTS_PER_PAGE);
+$Page = (int)($_GET['page'] ?? 1);
+$Search = new Gazelle\Search\Torrent(
+    $GroupResults,
+    $OrderBy,
+    $OrderWay,
+    $Page,
+    TORRENTS_PER_PAGE,
+    $Viewer->permitted('site_search_many')
+);
 $Results = $Search->query($_GET);
 $Groups = $Search->get_groups();
 $NumResults = $Search->record_count();
@@ -218,7 +220,7 @@ foreach ($Results as $Key => $GroupID) {
 }
 
 json_print('success', [
-    'currentPage' => intval($Page),
-    'pages' => ceil($NumResults / TORRENTS_PER_PAGE),
+    'currentPage' => $Page,
+    'pages' => (int)ceil($NumResults / TORRENTS_PER_PAGE),
     'results' => $JsonGroups
 ]);

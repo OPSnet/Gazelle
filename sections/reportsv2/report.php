@@ -149,7 +149,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
 
 $FirstUnknown = ($Remastered && !$RemasterYear);
 $Reported = false;
-$Reports = $torMan->reportList($TorrentID);
+$Reports = $torMan->reportList($Viewer, $TorrentID);
 $NumReports = count($Reports);
 if ($NumReports > 0) {
     require_once(__DIR__ . '/../reports/array.php');

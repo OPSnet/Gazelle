@@ -3,7 +3,14 @@
 namespace Gazelle;
 
 class Collage extends BaseObject {
-    protected $items;
+
+    const CACHE_KEY    = 'collage_%d';
+    const DISPLAY_KEY  = 'collage_display_%d';
+    const SUBS_KEY     = 'collage_subs_user_%d';
+    const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
+
+    protected User $viewer;
+
     protected $ownerId;
     protected $categoryId;
     protected $entryTable;
@@ -21,7 +28,6 @@ class Collage extends BaseObject {
     protected $tags; // these are added at creation
     protected $torrentTags; // these are derived from the torrents added to the collage
     protected $updated;
-    protected $viewerId;
     protected $userSubscriptions;
 
     /* these are only loaded on a torrent collage display */
@@ -32,11 +38,6 @@ class Collage extends BaseObject {
     protected $lockedForUser;
     protected $artists;
     protected $contributors;
-
-    const CACHE_KEY    = 'collage_%d';
-    const DISPLAY_KEY  = 'collage_display_%d';
-    const SUBS_KEY     = 'collage_subs_user_%d';
-    const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
     public function tableName(): string { return 'collages'; }
 
@@ -233,16 +234,16 @@ class Collage extends BaseObject {
         return $this;
     }
 
-    public function setViewerId(int $viewerId) {
-        $this->viewerId = $viewerId;
+    public function setViewer(User $viewer) {
+        $this->viewer = $viewer;
         $this->lockedForUser = false;
-        if (!check_perms('site_collages_delete')) {
+        if (!$this->viewer->permitted('site_collages_delete')) {
             if ($this->categoryId === '0') {
-                if (!check_perms('site_collages_personal') || !$this->isOwner($this->viewerId)) {
+                if (!$this->viewer->permitted('site_collages_personal') || !$this->isOwner($this->viewer->id())) {
                     $this->lockedForUser = true;
                 }
             }
-            $groupsByUser = $this->contributors[$this->viewerId] ?? 0;
+            $groupsByUser = $this->contributors[$this->viewer->id()] ?? 0;
             if ($this->locked
                 || ($this->maxGroups > 0 && count($this->groupIds) >= $this->maxGroups)
                 || ($this->maxGroupsPerUser > 0 && $groupsByUser >= $this->maxGroupsPerUser)
@@ -468,7 +469,7 @@ class Collage extends BaseObject {
      * @return an of torrent groups, and an array of user ids (who added the torrents)
      */
     public function torrentList(): array {
-        if (is_null($this->viewerId)) {
+        if (is_null($this->viewer)) {
             throw new Exception\CollageUserNotSetException;
         }
         return $this->torrents;
