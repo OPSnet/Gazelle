@@ -40,21 +40,28 @@ if (isset($_GET['setdefault'])) {
     }
 }
 
-$paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$Search = new Gazelle\Search\Torrent($GroupResults, $header->getSortKey(), $header->getOrderDir(), $paginator->page(), TORRENTS_PER_PAGE);
-$Results = $Search->query($_GET);
-$RealNumResults = $NumResults = $Search->record_count();
-if (!$Viewer->permitted('site_search_many')) {
-    $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
-}
-$paginator->setTotal($NumResults);
-
 // Terms were not submitted via the search form
 if (isset($_GET['searchsubmit'])) {
     $GroupResults = !empty($_GET['group_results']);
 } else {
     $GroupResults = ($Viewer->option('DisableGrouping2') ?? 0) === 0;
 }
+
+$paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$Search = new Gazelle\Search\Torrent(
+    $GroupResults,
+    $header->getSortKey(),
+    $header->getOrderDir(),
+    $paginator->page(),
+    TORRENTS_PER_PAGE,
+    $Viewer->permitted('site_search_many')
+);
+$Results = $Search->query($_GET);
+$RealNumResults = $NumResults = $Search->record_count();
+if (!$Viewer->permitted('site_search_many')) {
+    $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
+}
+$paginator->setTotal($NumResults);
 
 /* if the user has the privilege of advanced search, we prioritze the url param 'action'
  * if it is present, otherwise we fall back to their personal preference.
@@ -528,7 +535,7 @@ foreach ($Results as $GroupID) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
             $SnatchedTorrentClass = $Data['IsSnatched'] ? ' snatched_torrent' : '';
-            $Reported = $torMan->hasReport($TorrentID);
+            $Reported = $torMan->hasReport($Viewer, $TorrentID);
 
             if (isset(CATEGORY_GROUPED[$CategoryID - 1])
                     && ($Data['RemasterTitle'] != $LastRemasterTitle

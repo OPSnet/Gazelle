@@ -200,7 +200,7 @@ foreach ($topVotes as $groupID => $group) {
         unset($firstUnknown);
 
         foreach ($torrents as $torrentID => $torrent) {
-            $reported = $torMan->hasReport($torrentID);
+            $reported = $torMan->hasReport($Viewer, $torrentID);
             if ($torrent['Remastered'] && !$torrent['RemasterYear']) {
                 $firstUnknown = !isset($firstUnknown);
             }

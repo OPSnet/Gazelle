@@ -250,7 +250,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         $torrentDetails     = $group['Torrents'][$torrentID];
         $torrentInformation = Torrents::torrent_info($torrentDetails);
         $torrentTags        = new Tags($group['TagList']);
-        $reported           = $torMan->hasReport($torrentID);
+        $reported           = $torMan->hasReport($Viewer, $torrentID);
 
         global $Twig;
 ?>

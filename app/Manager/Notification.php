@@ -280,7 +280,7 @@ class Notification extends \Gazelle\Base {
     }
 
     public function loadCollages() {
-        if (!check_perms('site_collages_subscribe')) {
+        if (!$this->user->permitted('site_collages_subscribe')) {
             return;
         }
         $new = $this->user->collageUnreadCount();
@@ -361,7 +361,7 @@ class Notification extends \Gazelle\Base {
     }
 
     public function loadStaffBlog() {
-        if (!check_perms('users_mod')) {
+        if (!$this->user->permitted('users_mod')) {
             return;
         }
         if (($readTime = $this->cache->get_value('staff_blog_read_' . $this->userId)) === false) {
@@ -418,7 +418,7 @@ class Notification extends \Gazelle\Base {
     }
 
     public function loadTorrents() {
-        if (!check_perms('site_torrents_notify')) {
+        if (!$this->user->permitted('site_torrents_notify')) {
             return;
         }
         $new = $this->user->unreadTorrentNotifications();

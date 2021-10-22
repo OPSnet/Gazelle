@@ -4,16 +4,21 @@ namespace Gazelle\Json;
 
 class Torrent extends \Gazelle\Json {
     protected \Gazelle\Torrent $torrent;
+    protected \Gazelle\User $user;
     protected bool $showSnatched = false;
-    protected $userId;
 
     public function __construct() {
         parent::__construct();
         $this->setMode(JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
     }
 
-    public function setViewerId(int $userId) {
-        $this->userId = $userId;
+    public function setTorrent(\Gazelle\Torrent $torrent) {
+        $this->torrent = $torrent;
+        return $this;
+    }
+
+    public function setViewer(\Gazelle\User $user) {
+        $this->user = $user;
         return $this;
     }
 
@@ -22,33 +27,13 @@ class Torrent extends \Gazelle\Json {
         return $this;
     }
 
-    public function findById(int $id) {
-        $torrent = (new \Gazelle\Manager\Torrent)->findById($id);
-        if (is_null($torrent)) {
-            $this->failure("bad id parameter");
-            return null;
-        }
-        $this->torrent = $torrent;
-        return $this;
-    }
-
-    public function findByInfohash(string $hash) {
-        $torrent = (new \Gazelle\Manager\Torrent)->findByInfohash($hash);
-        if (is_null($torrent)) {
-            $this->failure("bad hash parameter");
-            return null;
-        }
-        $this->torrent = $torrent;
-        return $this;
-    }
-
     public function payload(): ?array {
-        if (!$this->userId) {
+        if (is_null($this->user)) {
             $this->failure('viewer not set');
             return null;
         }
 
-        $torrent = $this->torrent->setViewerId($this->userId)->setShowSnatched($this->showSnatched);
+        $torrent = $this->torrent->setViewerId($this->user->id())->setShowSnatched($this->showSnatched);
         $group = $torrent->group();
 
         // TODO: implement as a Gazelle class
@@ -71,13 +56,13 @@ class Torrent extends \Gazelle\Json {
                 'categoryName'    => $categoryName,
                 'time'            => $group->time(),
                 'vanityHouse'     => $group->isShowcase(),
-                'isBookmarked'    => (new \Gazelle\Bookmark)->isTorrentBookmarked($this->userId, $group->id()),
+                'isBookmarked'    => (new \Gazelle\Bookmark)->isTorrentBookmarked($this->user->id(), $group->id()),
                 'tags'            => $group->tagNameList(),
                 'musicInfo'       => ($categoryName != "Music")
                     ? null : \Artists::get_artist_by_type($group->id()),
             ],
             'torrent' => array_merge(
-                !is_null($torrent->infohash()) || $torrent->uploaderId() == $this->userId
+                !is_null($torrent->infohash()) || $torrent->uploaderId() == $this->user->id()
                     ? [ 'infoHash' => $torrent->infohash() ]
                     : [],
                 [
@@ -105,7 +90,7 @@ class Torrent extends \Gazelle\Json {
                     'leechers'      => $torrent->leecherTotal(),
                     'snatched'      => $torrent->snatchTotal(),
                     'freeTorrent'   => $torrent->freeleechStatus(),
-                    'reported'      => $torMan->hasReport($torrent->id()),
+                    'reported'      => $torMan->hasReport($this->user, $torrent->id()),
                     'time'          => $torrent->uploadDate(),
                     'description'   => $torrent->description(),
                     'fileList'      => implode('|||',
