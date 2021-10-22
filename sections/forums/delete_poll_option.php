@@ -1,10 +1,9 @@
 <?php
 
-authorize();
-
-if (!check_perms('site_moderate_forums')) {
+if (!$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
+authorize();
 
 $option = (int)$_GET['vote'];
 if (!$option) {

@@ -2,8 +2,6 @@
 
 use Gazelle\Util\Irc;
 
-authorize();
-
 /* Creating a new thread
  *   Form variables:
  *      $_POST['forum']
@@ -17,6 +15,8 @@ authorize();
 if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
+authorize();
+
 
 if (isset($_POST['forum'])) {
     $forum = (new Gazelle\Manager\Forum)->findById((int)$_POST['forum']);
@@ -31,13 +31,13 @@ if (isset($_POST['forum'])) {
 
 // If you're not sending anything, go back
 if (empty($_POST['body']) || empty($_POST['title'])) {
-    header("Location: " . $_SERVER['HTTP_REFERER'] ?? "forums.php?action=viewforum&forumid={$_POST['forum']}");
+    header('Location: ' . redirectUrl("forums.php?action=viewforum&forumid={$_POST['forum']}"));
     exit;
 }
 $Title = shortenString(trim($_POST['title']), 150, true, false);
 $Body = trim($_POST['body']);
 
-if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forums_polls_create')) {
+if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted('forums_polls_create')) {
     $needPoll = false;
 } else {
     $needPoll = true;
