@@ -83,21 +83,21 @@ if (!empty($_POST['action'])) {
         );
         [$FirstID, $Name] = $DB->next_record(MYSQLI_NUM, false);
         if (is_null($FirstID)) {
-            if ($Viewer->option('SearchType')) {
+            if ($Viewer->permitted('site_advanced_search') && $Viewer->option('SearchType')) {
                 header('Location: torrents.php?action=advanced&artistname=' . urlencode($_GET['artistname']));
             } else {
                 header('Location: torrents.php?searchstr=' . urlencode($_GET['artistname']));
             }
-            die();
+            exit;
         }
         if ($DB->record_count() === 1 || !strcasecmp($Name, $NameSearch)) {
             header("Location: artist.php?id=$FirstID");
-            die();
+            exit;
         }
         while ([$ID, $Name] = $DB->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($Name, $NameSearch)) {
                 header("Location: artist.php?id=$ID");
-                die();
+                exit;
             }
         }
         header("Location: artist.php?id=$FirstID");

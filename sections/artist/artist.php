@@ -235,29 +235,24 @@ foreach (ZIP_OPTION as $Option) {
 if ($sections = $Artist->sections()) {
     /* Move the sections to the way the viewer wants to see them. */
     $sortHide = $Viewer->option('SortHide') ?? [];
-    if ($sortHide) {
-        $reorderedSections = [];
-        foreach (array_keys($sortHide) as $reltype) {
-            if (isset($artistReleaseType[$reltype])) {
-                $reorderedSections[$reltype] = $sections[$reltype];
-                unset($artistReleaseType[$reltype]);
-            }
-        }
-        /* Any left-over release types */
-        foreach (array_keys($artistReleaseType) as $reltype) {
+    $reorderedSections = [];
+    foreach (array_keys($sortHide) as $reltype) {
+        if (isset($artistReleaseType[$reltype])) {
             $reorderedSections[$reltype] = $sections[$reltype];
+            unset($artistReleaseType[$reltype]);
         }
-        $sections = $reorderedSections;
     }
+    /* Any left-over release types */
+    foreach (array_keys($artistReleaseType) as $reltype) {
+        $reorderedSections[$reltype] = $sections[$reltype];
+    }
+    $sections = $reorderedSections;
 
     foreach (array_keys($sections) as $sectionId) {
-        if (($sortHide[$sectionId] ?? 0) == 1) {
-            $ToggleStr = " onclick=\"$('.releases_$sectionId').gshow(); return true;\"";
-        } else {
-            $ToggleStr = '';
-        }
+        $collapseSection = ($sortHide[$sectionId] ?? 0) == 1;
 ?>
-        <a href="#torrents_<?= $artistMan->sectionLabel($sectionId) ?>" class="brackets"<?= $ToggleStr ?>><?=
+        <a href="#torrents_<?= $artistMan->sectionLabel($sectionId) ?>" class="brackets"<?=
+            $collapseSection ? " onclick=\"$('.releases_$sectionId').gshow(); return true;\"" : '' ?>><?=
             $artistMan->sectionTitle($sectionId) ?></a>
 <?php
     }
@@ -280,8 +275,8 @@ if ($sections = $Artist->sections()) {
                 <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?=
-                        $artistMan->sectionTitle($sectionId) ?></strong> (<a href="#" onclick="$('.releases_<?=
-                        $sectionId ?>').gtoggle(true); return false;">View</a>)</td>
+                        $artistMan->sectionTitle($sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
+                        $sectionId ?>').gtoggle(true); return false;" title="Show/hide this section">Toggle</a></td>
                     <td>Size</td>
                     <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                     <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
