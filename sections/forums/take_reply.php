@@ -1,9 +1,9 @@
 <?php
-authorize();
 
 if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
+authorize();
 
 $threadId = (int)($_POST['thread'] ?? 0);
 $forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
@@ -12,7 +12,7 @@ if (is_null($forum)) {
 }
 $ThreadInfo = $forum->threadInfo($threadId);
 
-if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $ThreadInfo['isLocked'] && !check_perms('site_moderate_forums')) {
+if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $ThreadInfo['isLocked'] && !$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
 

@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('users_warn')) {
+
+if (!$Viewer->permitted('users_warn')) {
     error(403);
 }
 if (empty($_POST['reason'])) {

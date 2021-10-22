@@ -12,13 +12,12 @@ the front page.
 
 \*********************************************************************/
 
+if (!$Viewer->permitted('site_moderate_forums') && empty($_POST['transition'])) {
+    error(403);
+}
 authorize();
 
 $forumMan = new Gazelle\Manager\Forum;
-
-if (!check_perms('site_moderate_forums') && empty($_POST['transition'])) {
-    error(403);
-}
 $threadId = (int)$_POST['threadid'];
 $forum = $forumMan->findByThreadId($threadId);
 if (is_null($forum)) {
@@ -29,7 +28,7 @@ if (!$Viewer->writeAccess($forum)) {
 }
 
 if (isset($_POST['delete'])) {
-    if (!check_perms('site_admin_forums')) {
+    if (!$Viewer->permitted('site_admin_forums')) {
         error(403);
     }
     $forum->removeThread($threadId);
@@ -86,7 +85,7 @@ if (isset($_POST['transition'])) {
     }
 }
 
-if ($locked && check_perms('site_moderate_forums')) {
+if ($locked && $Viewer->permitted('site_moderate_forums')) {
     $forum->clearUserLastRead($threadId);
 }
 

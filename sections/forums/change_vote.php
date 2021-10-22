@@ -11,7 +11,7 @@ $forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
 if (is_null($forum)) {
     error(404);
 }
-if (!check_perms('site_moderate_forums') && !$forum->hasRevealVotes()) {
+if (!$Viewer->permitted('site_moderate_forums') && !$forum->hasRevealVotes()) {
     error(403);
 }
 
