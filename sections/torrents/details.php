@@ -465,7 +465,7 @@ foreach ($TorrentList as $Torrent) {
         $UnknownCounter++;
     }
 
-    $Reports = $torMan->reportList($TorrentID);
+    $Reports = $torMan->reportList($Viewer, $TorrentID);
     $NumReports = count($Reports);
     $Reported = $NumReports > 0;
     if ($Reported) {

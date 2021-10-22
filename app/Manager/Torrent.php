@@ -338,10 +338,9 @@ class Torrent extends \Gazelle\Base {
      * Get the reports associated with a torrent
      * Non-admin users do not see Edited reports
      *
-     * @param int torrent id
      * @return array of array of [ID, ReporterID, Type, UserComment, ReportedTime]
      */
-    public function reportList(int $torrentId): array {
+    public function reportList(\Gazelle\User $viewer, int $torrentId): array {
         $key = sprintf(self::CACHE_REPORTLIST, $torrentId);
         $list = $this->cache->get_value($key);
         if ($list === false) {
@@ -361,7 +360,7 @@ class Torrent extends \Gazelle\Base {
             $this->db->set_query_id($qid);
             $this->cache->cache_value($key, $list, 0);
         }
-        return check_perms('admin_reports')
+        return $viewer->permitted('admin_reports')
             ? $list
             : array_filter($list, function ($report) { return $report['Type'] !== 'edited'; });
     }
@@ -372,8 +371,8 @@ class Torrent extends \Gazelle\Base {
      * @param int torrent id
      * @return bool Yes there are
      */
-    public function hasReport(int $torrentId): bool {
-        return count($this->reportList($torrentId)) > 0;
+    public function hasReport(\Gazelle\User $viewer, int $torrentId): bool {
+        return count($this->reportList($viewer, $torrentId)) > 0;
     }
 
     /**

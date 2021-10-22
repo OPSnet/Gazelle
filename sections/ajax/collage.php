@@ -106,7 +106,7 @@ if ($CollageCategoryID != COLLAGE_ARTISTS_ID) {
                     'leechers'                => (int)$Torrent['Leechers'],
                     'snatched'                => (int)$Torrent['Snatched'],
                     'freeTorrent'             => ($Torrent['FreeTorrent'] == 1),
-                    'reported'                => $torMan->hasReport((int)$Torrent['ID']),
+                    'reported'                => $torMan->hasReport($Viewer, (int)$Torrent['ID']),
                     'time'                    => $Torrent['Time']
                 ];
             }

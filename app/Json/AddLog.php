@@ -4,25 +4,28 @@ namespace Gazelle\Json;
 
 use Gazelle\File\RipLog;
 use Gazelle\File\RipLogHTML;
-use Gazelle\Manager\Torrent;
 use Gazelle\Logfile;
 use Gazelle\LogfileSummary;
 use OrpheusNET\Logchecker\Logchecker;
 
 class AddLog extends \Gazelle\Json {
-    /** @var \Gazelle\Torrent */
-    protected $torrent;
-    protected $userId;
-    protected $showSnatched = false;
-    protected $files;
+    protected \Gazelle\Torrent $torrent;
+    protected \Gazelle\User $user;
+    protected bool $showSnatched = false;
+    protected array $files;
 
     public function __construct() {
         parent::__construct();
         $this->setMode(JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
     }
 
-    public function setViewerId(int $userId) {
-        $this->userId = $userId;
+    public function setTorrent(\Gazelle\Torrent $torrent) {
+        $this->torrent = $torrent;
+        return $this;
+    }
+
+    public function setViewer(\Gazelle\User $user) {
+        $this->user = $user;
         return $this;
     }
 
@@ -31,38 +34,27 @@ class AddLog extends \Gazelle\Json {
         return $this;
     }
 
-    public function findTorrentById(int $id) {
-        $this->torrent = (new Torrent())->findById($id);
-        if (!$this->torrent) {
-            $this->failure("bad id parameter");
+    public function payload(): ?array {
+        if (is_null($this->torrent)) {
+            $this->failure('torrent not found');
             return null;
         }
-        return $this;
-    }
-
-    public function payload(): ?array {
-        if (!$this->userId) {
+        if (is_null($this->user)) {
             $this->failure('viewer not set');
             return null;
         }
-
-        if ($this->userId !== $this->torrent->info()['UserID'] && !check_perms('users_mod')) {
+        if ($this->user->id() !== $this->torrent->uploaderId() && !$this->user->permitted('users_mod')) {
             $this->failure('Not the torrent owner or moderator');
             return null;
         }
 
-        $logfileSummary = new LogfileSummary();
-        $ripFiler = new RipLog();
-        $htmlFiler = new RipLogHTML();
+        $logfileSummary = new LogfileSummary;
+        $ripFiler = new RipLog;
+        $htmlFiler = new RipLogHTML;
 
-        $torrentId = $this->torrent->id();
-        $groupId = $this->torrent->info()['GroupID'];
-
-        $count = count($this->files['name']);
-
+        $torrentId    = $this->torrent->id();
         $logSummaries = [];
-
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 0; $total = count($this->files['name']), $i < $total; $i++) {
             if (!$this->files['size'][$i]) {
                 continue;
             }
@@ -86,15 +78,14 @@ class AddLog extends \Gazelle\Json {
             $htmlFiler->put($logfile->text(), [$torrentId, $logId]);
 
             $logSummaries[] = [
-                'score' => $logfile->score(),
-                'checksum' => $logfile->checksumState(),
-                'ripper' => $logfile->ripper(),
+                'score'         => $logfile->score(),
+                'checksum'      => $logfile->checksumState(),
+                'ripper'        => $logfile->ripper(),
                 'ripperVersion' => $logfile->ripperVersion(),
-                'language' => $logfile->language(),
-                'details' => $logfile->detailsAsString()
+                'language'      => $logfile->language(),
+                'details'       => $logfile->detailsAsString()
             ];
         }
-
 
         [$score, $checksum] = $this->db->row("
             SELECT min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
@@ -110,6 +101,7 @@ class AddLog extends \Gazelle\Json {
             $score, $checksum, '1', $torrentId
         );
 
+        $groupId = $this->torrent->groupId();
         $this->cache->deleteMulti([
             "torrent_group_{$groupId}",
             "torrents_details_{$groupId}",
@@ -118,11 +110,11 @@ class AddLog extends \Gazelle\Json {
         ]);
 
         return [
-            'torrentId' => $torrentId,
-            'score' => $score,
-            'checksum' => $checksum,
+            'torrentId'         => $torrentId,
+            'score'             => $score,
+            'checksum'          => $checksum,
             'logcheckerVersion' => Logchecker::getLogcheckerVersion(),
-            'logSummaries' => $logSummaries
+            'logSummaries'      => $logSummaries
         ];
     }
 }

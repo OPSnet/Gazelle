@@ -135,20 +135,9 @@ class TGroup extends BaseObject {
                         ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])
                         : null;
                 }
-                $cached['Flags'] = [];
-                $cached['Flags']['IsSnatched'] = ($this->viewer && $this->viewer->option('ShowSnatched'))
-                    ? $this->db->scalar("
-                        SELECT 1
-                        FROM torrents_group tg
-                        WHERE exists(
-                                SELECT 1
-                                FROM torrents t
-                                INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
-                                WHERE t.GroupID = tg.ID
-                            )
-                            AND tg.ID = ?
-                        ", $this->id)
-                    : false;
+                $cached['Flags'] = [
+                    'IsSnatched' => $this->fetchIsSnatched(),
+                ];
                 $this->info = $cached;
                 return $this->info;
             }
@@ -274,23 +263,27 @@ class TGroup extends BaseObject {
                 ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])
                 : null;
         }
-        $info['Flags'] = [];
-        $info['Flags']['IsSnatched'] = ($this->viewer && $this->viewer->option('ShowSnatched'))
-            ? $this->db->scalar("
-                SELECT 1
-                FROM torrents_group tg
-                WHERE exists(
-                        SELECT 1
-                        FROM torrents t
-                        INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
-                        WHERE t.GroupID = tg.ID
-                    )
-                    eND tg.ID = ?
-                ", $this->id)
-            : false;
-
+        $info['Flags'] = [
+            'IsSnatched' => $this->fetchIsSnatched(),
+        ];
         $this->info = $info;
         return $this->info;
+    }
+
+    protected function fetchIsSnatched(): bool {
+        return $this->viewer && $this->viewer->option('ShowSnatched') && (bool)$this->db->scalar("
+            SELECT 1
+            FROM torrents_group tg
+            WHERE exists(
+                SELECT 1
+                FROM torrents t
+                INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
+                WHERE t.GroupID = tg.ID
+                    AND xs.uid = ?
+                )
+                AND tg.ID = ?
+            ", $this->viewer->id(), $this->id
+        );
     }
 
     public function artistName(): string {

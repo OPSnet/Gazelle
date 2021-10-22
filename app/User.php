@@ -2539,7 +2539,7 @@ class User extends BaseObject {
             $this->db->rollback();
             return false;
         }
-        if (check_perms('site_send_unlimited_invites')) {
+        if ($this->permitted('site_send_unlimited_invites')) {
             $this->db->commit();
             return true;
         }
