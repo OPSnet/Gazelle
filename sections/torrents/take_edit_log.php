@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('users_mod')) {
+if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
@@ -69,4 +69,4 @@ foreach ($TrackDeductions as $Deduction) {
 
 $torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $Viewer->id(), $AdjustmentReason, $AdjustmentDetails);
 
-header("Location: torrents.php?torrentid=" . $torrent->id());
+header('Location: ' . $torrent->url());

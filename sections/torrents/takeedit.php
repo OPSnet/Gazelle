@@ -49,7 +49,7 @@ if ($Properties['Remastered']) {
     $Properties['RemasterCatalogueNumber'] = '';
 }
 
-if (check_perms('torrents_freeleech')) {
+if ($Viewer->permitted('torrents_freeleech')) {
     $Free = $_POST['freeleechtype'] ?? '0';
     if (!in_array($Free, ['0', '1', '2'])) {
         error(0);
@@ -79,15 +79,15 @@ if (!$UserID) {
     error(404);
 }
 
-if ($Viewer->id() != $UserID && !check_perms('torrents_edit')) {
+if ($Viewer->id() != $UserID && !$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-if ($Remastered == '1' && !$RemasterYear && !check_perms('edit_unknowns')) {
+if ($Remastered == '1' && !$RemasterYear && !$Viewer->permitted('edit_unknowns')) {
     error(403);
 }
 
-if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && !check_perms('edit_unknowns')) {
+if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && !$Viewer->permitted('edit_unknowns')) {
     //It's Unknown now, and it wasn't before
     if ($Viewer->id() != $UserID) {
         error(403);
@@ -157,7 +157,7 @@ switch ($Type) {
 
 $Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 if (!$Err && $Properties['Remastered'] && !$Properties['RemasterYear']) {
-    if ($Viewer->id() !== $UserID && !check_perms('edit_unknowns')) {
+    if ($Viewer->id() !== $UserID && !$Viewer->permitted('edit_unknowns')) {
         $Err = "You may not edit someone else's upload to unknown release.";
     }
 }
@@ -259,12 +259,12 @@ if ($logfiles) {
     $args = array_merge($args, [$score, $checksum, '1']);
 }
 
-if (check_perms('torrents_freeleech')) {
+if ($Viewer->permitted('torrents_freeleech')) {
     $set = array_merge($set, ['FreeTorrent = ?', 'FreeLeechType = ?']);
     $args = array_merge($args, [$Properties['FreeLeech'], $Properties['FreeLeechType']]);
 }
 
-if (check_perms('users_mod')) {
+if ($Viewer->permitted('users_mod')) {
     $set = array_merge($set, ['HasLog = ?', 'HasCue = ?']);
     if ($Properties['Format'] == 'FLAC' && $Properties['Media'] == 'CD') {
         $args = array_merge($args, [$Properties['HasLog'], $Properties['HasCue']]);
@@ -360,7 +360,7 @@ $DB->prepared_query("
 
 $DB->commit();
 
-if (check_perms('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
+if ($Viewer->permitted('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
     Torrents::freeleech_torrents($TorrentID, $Properties['FreeLeech'], $Properties['FreeLeechType']);
 }
 (new \Gazelle\Manager\TGroup)->refresh($current['GroupID']);

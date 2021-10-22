@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('torrents_delete')) {
+if (!$Viewer->permitted('torrents_delete')) {
     error(403);
 }
 
@@ -19,4 +19,4 @@ $GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
 (new Gazelle\Log)->torrent($GroupID, $TorrentID, $Viewer->id(), "All logs removed from torrent");
 
 $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID", "tg2_$GroupID", "tlist_$GroupID"]);
-header('Location: ' . $_SERVER['HTTP_REFERER'] ?? "torrents.php?torrentid={$TorrentID}");
+header('Location: ' . redirectUrl("torrents.php?torrentid={$TorrentID}"));
