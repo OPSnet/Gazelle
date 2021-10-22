@@ -47,7 +47,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 }
 
 $GroupIDs = array_values($GroupIDs);
-$CollageCovers = isset($LoggedUser['CollageCovers']) ? (int)$LoggedUser['CollageCovers'] : 25;
+$CollageCovers = $Viewer->option('CollageCovers') ?? 25;
 $title = $user->username() . " &rsaquo; Bookmarked torrent groups";
 
 View::show_header($title, ['js' => 'browse,collage']);

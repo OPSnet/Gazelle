@@ -15,7 +15,7 @@ if ($Collage->isDeleted()) {
 else {
     $Collage->setViewer($Viewer);
     $NumGroups = $Collage->numEntries();
-    $CollageCovers = isset($LoggedUser['CollageCovers']) ? $LoggedUser['CollageCovers'] : 25 * abs(($LoggedUser['HideCollage'] ?? 0) - 1);
+    $CollageCovers = ($Viewer->option('CollageCovers') ?? 25) * !(int)($Viewer->option('HideCollage'));
     $CollagePages = [];
     $bookmark = new Gazelle\Bookmark;
     require_once($Collage->isArtist() ? 'artist_collage.php' : 'torrent_collage.php');
