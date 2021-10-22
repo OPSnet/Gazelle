@@ -33,10 +33,22 @@ if ($Type == "resolve") {
     }
 
     // Handle request
-    AutoEnable::handle_requests($IDs, $Status, $Comment);
+    AutoEnable::handle_requests($Viewer, $IDs, $Status, $Comment);
 } else if ($Type == "unresolve") {
-    $ID = (int) $_GET['id'];
-    AutoEnable::unresolve_request($ID);
+
+    $user = (new \Gazelle\Manager\User)->findById(
+        $DB->scalar("
+            SELECT UserID
+            FROM users_enable_requests
+            WHERE Outcome = ?
+                AND ID = ?
+            ", self::DISCARDED, (int)$_GET['id']
+        )
+    );
+    if (is_null($user)) {
+        error(404);
+    }
+    AutoEnable::unresolve_request($Viewer, $user, (int)$_GET['id']);
 } else {
     json_error("Invalid type");
 }

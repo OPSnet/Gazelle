@@ -88,7 +88,7 @@ class AutoEnable {
      * @param int $Status The status to mark the requests as
      * @param string $Comment The staff member comment
      */
-    public static function handle_requests($IDs, $Status, $Comment) {
+    public static function handle_requests(\Gazelle\User $viewer, $IDs, $Status, $Comment) {
         if ($Status != self::APPROVED && $Status != self::DENIED && $Status != self::DISCARDED) {
             error(404);
         }
@@ -104,7 +104,7 @@ class AutoEnable {
             }
         }
 
-        global $Cache, $DB, $LoggedUser;
+        global $Cache, $DB;
         $DB->prepared_query("
             SELECT Email, ID, UserID
             FROM users_enable_requests
@@ -155,7 +155,7 @@ class AutoEnable {
             [$ID, $UserID] = $User;
             (new \Gazelle\User($UserID))->addStaffNote(
                 "Enable request $ID " . strtolower(self::get_outcome_string($Status))
-                    . ' by [user]' . $LoggedUser['Username'] . '[/user]' . (!empty($Comment) ? "\nReason: $Comment" : "")
+                    . ' by [user]' . $viewer->username() . '[/user]' . (!empty($Comment) ? "\nReason: $Comment" : "")
             )->modify();
         }
 
@@ -166,7 +166,7 @@ class AutoEnable {
                 CheckedBy = ?,
                 Outcome = ?
             WHERE ID IN (" . placeholders($IDs) . ")
-            ", $LoggedUser['ID'], $Status, ...$IDs
+            ", $viewer->id(), $Status, ...$IDs
         );
         $Cache->decrement_value(self::CACHE_KEY_NAME, count($IDs));
     }
@@ -176,31 +176,15 @@ class AutoEnable {
      *
      * @param int $ID The request ID
      */
-    public static function unresolve_request($ID) {
-        $ID = (int) $ID;
-        if (!$ID) {
-            error(404);
-        }
-        global $Cache, $DB, $LoggedUser;
-        $user = (new \Gazelle\Manager\User)->findById(
-            $DB->scalar("
-                SELECT UserID
-                FROM users_enable_requests
-                WHERE Outcome = ?
-                    AND ID = ?
-                ", self::DISCARDED, $ID
-            )
-        );
-        if (is_null($user)) {
-            error(404);
-        }
+    public static function unresolve_request(\Gazelle\User $viewer, \Gazelle\User $user, $ID) {
+        global $Cache, $DB;
 
-        $user->addStaffNote("Enable request $ID unresolved by [user]" . $LoggedUser['Username'] . '[/user]')->modify();
+        $user->addStaffNote("Enable request $ID unresolved by [user]" . $viewer->username() . '[/user]')->modify();
         $DB->prepared_query("
             UPDATE users_enable_requests SET
                 Outcome = NULL,
                 HandledTimestamp = NULL,
-                CheckedBy = NULL
+                CheckedBy = NUL
             WHERE ID = ?
             ", $ID
         );
@@ -243,7 +227,7 @@ class AutoEnable {
         if (!$UserID) {
             $Err = "Invalid token.";
         } else {
-            $DB->query("
+            $DB->prepared_query("
                 UPDATE users_enable_requests SET Token = NULL WHERE Token = ?
                 ", $Token
             );
