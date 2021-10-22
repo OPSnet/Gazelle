@@ -83,7 +83,7 @@ if (!empty($_POST['action'])) {
         );
         [$FirstID, $Name] = $DB->next_record(MYSQLI_NUM, false);
         if (is_null($FirstID)) {
-            if (isset($LoggedUser['SearchType']) && $LoggedUser['SearchType']) {
+            if ($Viewer->option('SearchType')) {
                 header('Location: torrents.php?action=advanced&artistname=' . urlencode($_GET['artistname']));
             } else {
                 header('Location: torrents.php?searchstr=' . urlencode($_GET['artistname']));

@@ -16,11 +16,6 @@ $forumId = $forum->id();
 if (!$Viewer->readAccess($forum)) {
     error(403);
 }
-if (!$Viewer->permitted('site_moderate_forums')) {
-    if (isset($LoggedUser['CustomForums'][$forumId]) && $LoggedUser['CustomForums'][$forumId] === 0) {
-        error(403);
-    }
-}
 
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $forumToc = $forum->tableOfContentsForum($page);
