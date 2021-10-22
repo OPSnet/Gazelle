@@ -169,7 +169,7 @@ class Users extends \Gazelle\Base {
                     SELECT c.UserID, count(*) as collage_total
                     FROM collages c
                     WHERE c.Deleted = '0'
-                    GROUP BY c.UserID 
+                    GROUP BY c.UserID
                     ) CT USING (UserID)
                 LEFT JOIN (
                     SELECT ct.UserID, count(DISTINCT ct.CollageID) as collage_contrib
@@ -238,7 +238,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, perfect_flac_total, perfecter_flac_total, unique_group_total, upload_total)
                 SELECT t.UserID,
                     sum(if(
-                        t.Format = 'FLAC' 
+                        t.Format = 'FLAC'
                         AND (
                             (t.Media = 'CD' AND t.LogScore = 100)
                             OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT'))
@@ -350,5 +350,36 @@ class Users extends \Gazelle\Base {
         $processed = $this->db->affected_rows();
         $this->db->commit();
         return $processed;
+    }
+
+    public function registerActivity(string $tableName, int $days): int {
+        if ($days > 0) {
+            $this->db->prepared_query("
+                 DELETE FROM $tableName WHERE Time < now() - INTERVAL ? DAY
+                 ", $days
+            );
+        }
+        $this->db->prepared_query("
+            INSERT INTO $tableName (UserID, Uploaded, Downloaded, BonusPoints, Torrents, PerfectFLACs)
+            SELECT um.ID, uls.Uploaded, uls.Downloaded, coalesce(ub.points, 0), COUNT(t.ID) AS Torrents, COALESCE(p.Perfects, 0) AS PerfectFLACs
+            FROM users_main um
+            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+            LEFT JOIN user_bonus ub ON (ub.user_id = um.ID)
+            LEFT JOIN torrents t ON (t.UserID = um.ID)
+            LEFT JOIN
+            (
+                SELECT UserID, count(*) AS Perfects
+                FROM torrents
+                WHERE Format = 'FLAC'
+                    AND (
+                        Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT')
+                        OR
+                        (Media = 'CD' AND LogScore = 100)
+                    )
+                GROUP BY UserID
+            ) p ON (p.UserID = um.ID)
+            GROUP BY um.ID
+        ");
+        return $this->db->affected_rows();
     }
 }
