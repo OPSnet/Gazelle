@@ -13,7 +13,7 @@ if (empty($NewName)) {
     error('Torrent groups must have a name');
 }
 
-if (!check_perms('torrents_edit')) {
+if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
