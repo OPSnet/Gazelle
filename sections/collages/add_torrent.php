@@ -2,7 +2,7 @@
 
 authorize();
 
-if (!($_REQUEST['action'] == 'add_torrent' || $_REQUEST['action'] == 'add_torrent_batch')) {
+if (!in_array($_REQUEST['action'], ['add_torrent', 'add_torrent_batch'])) {
     error(403);
 }
 
@@ -18,11 +18,11 @@ if (!$collage) {
     error(404);
 }
 
-if (!check_perms('site_collages_delete')) {
+if (!$Viewer->permitted('site_collages_delete')) {
     if ($collage->isLocked()) {
         error('This collage is locked');
     }
-    if ($collage->categoryId() == 0 && !$collage->isOwner($Viewer->id())) {
+    if ($collage->isPersonal() && !$collage->isOwner($Viewer->id())) {
         error('You cannot edit someone else\'s personal collage.');
     }
     if ($collage->maxGroups() > 0 && $collage->numEntries() >= $collage->maxGroups()) {
@@ -37,7 +37,7 @@ if ($_REQUEST['action'] == 'add_torrent') {
         // From a collage page
         $URL[] = trim($_POST['url']);
     } elseif (isset($_POST['groupid'])) {
-        // From a relase page
+        // From a release page
         $URL[] = SITE_URL . '/torrents.php?id=' . (int)$_POST['groupid'];
     }
 } elseif ($_REQUEST['action'] == 'add_torrent_batch') {
@@ -61,7 +61,7 @@ foreach ($URL as $u) {
     $groupIds[] = $tgroup->id();
 }
 
-if (!check_perms('site_collages_delete')) {
+if (!$Viewer->permitted('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
         if ($collage->countByUser($Viewer->id()) + count($ID) > $maxGroupsPerUser) {
