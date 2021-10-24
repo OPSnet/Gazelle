@@ -2,11 +2,11 @@
 View::show_header('Create a collage');
 
 $ChangeJS = '';
-if (!check_perms('site_collages_renamepersonal')) {
+if (!$Viewer->permitted('site_collages_renamepersonal')) {
     $ChangeJS = " onchange=\"if ( this.options[this.selectedIndex].value == '0') { $('#namebox').ghide(); $('#personal').gshow(); } else { $('#namebox').gshow(); $('#personal').ghide(); }\"";
 }
 
-$NoName = !check_perms('site_collages_renamepersonal') && $Category === '0';
+$NoName = !$Viewer->permitted('site_collages_renamepersonal') && $Category === '0';
 
 $personalAllowed = $Viewer->canCreatePersonalCollage();
 ?>

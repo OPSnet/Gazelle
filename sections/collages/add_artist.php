@@ -26,7 +26,7 @@ if (!$Viewer->permitted('site_collages_delete')) {
     if ($collage->isLocked()) {
         error('This collage is locked');
     }
-    if ($collage->categoryId() == 0 && !$collage->isOwner($Viewer->id())) {
+    if ($collage->isPersonal() && !$collage->isOwner($Viewer->id())) {
         error("You cannot edit someone else's personal collage.");
     }
     if ($collage->maxGroups() > 0 && $collage->numEntries() >= $collage->maxGroups()) {

@@ -230,7 +230,7 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', ['j
     <div class="linkbox">
 <?php
     if (!$BookmarkView) {
-        if (check_perms('site_collages_create')) {
+        if ($Viewer->permitted('site_collages_create')) {
 ?>
         <a href="collages.php?action=new" class="brackets">New collage</a>
 <?php
@@ -244,22 +244,21 @@ View::show_header($BookmarkView ? 'Bookmarked collages' : 'Browse collages', ['j
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
 <?php
         }
-        if (check_perms('site_collages_subscribe')) {
+        if ($Viewer->permitted('site_collages_subscribe')) {
 ?>
         <a href="userhistory.php?action=subscribed_collages" class="brackets">Subscribed collages</a>
 <?php   } ?>
         <a href="bookmarks.php?type=collages" class="brackets">Bookmarked collages</a>
         <a href="random.php?action=collage" class="brackets">Random collage</a>
 <?php
-        if (check_perms('site_collages_create') || check_perms('site_collages_personal') || check_perms('site_collages_recover')) {
-           if (check_perms('site_collages_recover')) {
+        if ($Viewer->permitted('site_collages_recover')) {
 ?>
         <a href="collages.php?action=recover" class="brackets">Recover collage</a>
-<?php      } ?>
+<?php   } ?>
         <br />
-<?php   }
+<?php
     }
-    if (check_perms('site_collages_create') || check_perms('site_collages_personal')) {
+    if ($Viewer->permittedAny('site_collages_create', 'site_collages_personal')) {
 ?>
         <a href="collages.php?userid=<?=$Viewer->id()?>" class="brackets">Collages you started</a>
         <a href="collages.php?userid=<?=$Viewer->id()?>&amp;contrib=1" class="brackets">Collages you contributed to</a>

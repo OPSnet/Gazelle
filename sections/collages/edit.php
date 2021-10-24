@@ -6,7 +6,7 @@ if ($collageID < 1) {
 }
 $collage = new Gazelle\Collage($collageID);
 
-if ($collage->categoryId() == 0 && !$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
+if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !$Viewer->permitted('site_collages_delete')) {
     error(403);
 }
 
@@ -30,21 +30,21 @@ if (!empty($Err)) {
         <input type="hidden" name="collageid" value="<?=$collageID?>" />
         <table id="edit_collage" class="layout">
 <?php
-if (check_perms('site_collages_delete') || ($collage->isPersonal() && $collage->isOwner($Viewer->id()) && check_perms('site_collages_renamepersonal'))) { ?>
+if ($Viewer->permitted('site_collages_delete') || ($collage->isPersonal() && $collage->isOwner($Viewer->id()) && $Viewer->permitted('site_collages_renamepersonal'))) { ?>
             <tr>
                 <td class="label">Name</td>
                 <td><input type="text" name="name" size="60" value="<?=$collage->name()?>" /></td>
             </tr>
 <?php
 }
-if ($collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
+if (!$collage->isPersonal() || $Viewer->permitted('site_collages_delete')) { ?>
             <tr>
                 <td class="label"><strong>Category</strong></td>
                 <td>
                     <select name="category">
 <?php
     foreach (COLLAGE as $CatID => $CatName) {
-        if (!check_perms('site_collages_delete') && $CatID == 0) {
+        if (!$Viewer->permitted('site_collages_delete') && $CatID == 0) {
             // Only mod-type get to make things personal
             continue;
         }
@@ -73,7 +73,7 @@ if ($collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
             </tr>
 <?php
 }
-if (check_perms('site_collages_delete')) {
+if ($Viewer->permitted('site_collages_delete')) {
 ?>
             <tr>
                 <td class="label">Locked</td>
