@@ -8,7 +8,7 @@ $categoryId = (int)$_POST['category'];
 $collageMan = new Gazelle\Manager\Collage;
 
 $Val = new Gazelle\Util\Validator;
-if ($categoryId > 0 || check_perms('site_collages_renamepersonal')) {
+if ($categoryId > 0 || $Viewer->permitted('site_collages_renamepersonal')) {
     $Val->setField('name', '1', 'string', 'The name must be between 3 and 100 characters', ['range' => [3, 100]]);
     $name = trim($_POST['name']);
 } else {
@@ -20,7 +20,7 @@ $Err = $Val->validate($_POST) ? false : $Val->errorMessage();
 if (!$Err && $categoryId === '0') {
     if (!$Viewer->canCreatePersonalCollage()) {
         $Err = 'You may not create a personal collage.';
-    } elseif (check_perms('site_collages_renamepersonal') && !stristr($name, $Viewer->username())) {
+    } elseif ($Viewer->permitted('site_collages_renamepersonal') && !stristr($name, $Viewer->username())) {
         $Err = 'The title of your personal collage must include your username.';
     }
 }

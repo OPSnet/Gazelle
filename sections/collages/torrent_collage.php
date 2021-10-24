@@ -27,9 +27,9 @@ View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
     'auth'           => $Viewer->auth(),
     'can_add'        => !$Collage->isLocked()
         && (
-            ($Collage->categoryId() != 0 && $Viewer->permitted('site_collages_manage'))
+            (!$Collage->isPersonal() && $Viewer->permitted('site_collages_manage'))
             ||
-            ($Collage->categoryId() == 0 && $Collage->isOwner($Viewer->id()))
+            ($Collage->isPersonal() && $Collage->isOwner($Viewer->id()))
         ),
     'can_post'       => !$Viewer->disablePosting(),
     'category_id'    => $Collage->categoryId(),
@@ -40,7 +40,7 @@ View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
     'description'    => Text::full_format($Collage->description()),
     'entries'        => $Collage->numEntries(),
     'id'             => $CollageID,
-    'is_personal'    => $Collage->categoryId() == 0,
+    'is_personal'    => $Collage->isPersonal(),
     'object'         => 'torrent',
     'object_name'    => 'torrent group',
     'subscribers'    => $Collage->numSubscribers(),

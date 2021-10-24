@@ -9,10 +9,10 @@ if (!$id) {
 $collage = new Gazelle\Collage($id);
 $isPersonal = $collage->isPersonal();
 if (!$isPersonal) {
-    if (!check_perms('site_collages_manage')) {
+    if (!$Viewer->permitted('site_collages_manage')) {
         error(403);
     }
-} elseif (!$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
+} elseif (!$collage->isOwner($Viewer->id()) && !$Viewer->permitted('site_collages_delete')) {
     // only owner or mod+ can edit personal collages
     error(403);
 }
@@ -32,7 +32,7 @@ if (isset($_POST['name'])) {
         exit;
     }
     if ($collage->isOwner($Viewer->id())) {
-        if (!check_perms('site_collages_renamepersonal') && !stristr($name, $Viewer->username())) {
+        if (!$Viewer->permitted('site_collages_renamepersonal') && !stristr($name, $Viewer->username())) {
             error("Your personal collage's title must include your username.");
         }
     }
@@ -44,26 +44,26 @@ $collage->setUpdate('Description', trim($_POST['description']))
 if (isset($_POST['featured'])
     && (
         ($collage->isPersonal() && $collage->isOwner($Viewer->id()))
-        || check_perms('site_collages_delete')
+        || $Viewer->permitted('site_collages_delete')
     )
 ) {
     $collage->setFeatured();
 }
 
-if (($collage->isPersonal() && $collage->isOwner($Viewer->id()) && check_perms('site_collages_renamepersonal'))
-    || check_perms('site_collages_delete')
+if (($collage->isPersonal() && $collage->isOwner($Viewer->id()) && $Viewer->permitted('site_collages_renamepersonal'))
+    || $Viewer->permitted('site_collages_delete')
 ) {
     $collage->setUpdate('Name', trim($_POST['name']));
 }
 
 if (isset($_POST['category']) && isset(COLLAGE[$_POST['category']]) && (int)$_POST['category'] !== $collage->categoryId()) {
-    if ($collage->isPersonal() && !check_perms('site_collages_delete')) {
+    if ($collage->isPersonal() && !$Viewer->permitted('site_collages_delete')) {
         error(403);
     }
     $collage->setUpdate('CategoryID', (int)$_POST['category']);
 }
 
-if (check_perms('site_collages_delete')) {
+if ($Viewer->permitted('site_collages_delete')) {
     if (isset($_POST['locked']) != $collage->isLocked()) {
         $collage->setToggleLocked();
     }

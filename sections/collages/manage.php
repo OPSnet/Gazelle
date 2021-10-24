@@ -5,7 +5,7 @@ if (!$CollageID) {
 }
 $collage = new Gazelle\Collage($CollageID);
 
-if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !check_perms('site_collages_delete')) {
+if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !$Viewer->permitted('site_collages_delete')) {
     error(403);
 }
 if ($collage->isArtist()) {
