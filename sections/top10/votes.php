@@ -6,7 +6,7 @@ $torMan = new Gazelle\Manager\Torrent;
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
-if (empty($_GET['advanced']) || !check_perms('site_advanced_top10')) {
+if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
     $limit = (int)($_GET['limit'] ?? 25);
 } else {
     $limit = 25;
@@ -34,7 +34,7 @@ View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
         <h2>Top <?=$limit?> Voted Groups</h2>
         <?php Gazelle\Top10::renderLinkbox("votes"); ?>
     </div>
-<?php if (check_perms('site_advanced_top10')) { ?>
+<?php if ($Viewer->permitted('site_advanced_top10')) { ?>
     <form class="search_form" name="votes" action="" method="get">
         <input type="hidden" name="advanced" value="1" />
         <input type="hidden" name="type" value="votes" />
