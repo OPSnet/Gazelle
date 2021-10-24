@@ -11,7 +11,7 @@ View::show_header('Top 10 Donors');
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
-$isMod = check_perms("users_mod");
+$isMod = $Viewer->permitted("users_mod");
 
 $userMan = new Gazelle\Manager\User;
 $donorMan = new Gazelle\Manager\Donation;
