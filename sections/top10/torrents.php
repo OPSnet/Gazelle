@@ -3,7 +3,7 @@
 $torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan = new Gazelle\Manager\Torrent;
 
-if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
+if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
     $limit = 10;
 } else {
@@ -22,7 +22,7 @@ View::show_header("Top $limit Torrents");
     </div>
 <?php
 
-if (check_perms('site_advanced_top10')) {
+if ($Viewer->permitted('site_advanced_top10')) {
 ?>
     <form class="search_form" name="torrents" action="" method="get">
         <input type="hidden" name="advanced" value="1" />
@@ -89,15 +89,12 @@ if (!empty($groupByToggleQuery)) {
 }
 
 $groupByToggleQuery .= 'groups=' . $groupByToggleName;
-
 ?>
     <div style="text-align: right;" class="linkbox">
         <a href="top10.php?<?=$freeleechToggleQuery?>" class="brackets"><?=ucfirst($freeleechToggleName)?> freeleech in Top 10</a>
-<?php
-if (check_perms('users_mod')) { ?>
-            <a href="top10.php?<?=$groupByToggleQuery?>" class="brackets"><?=ucfirst($groupByToggleName)?> top groups</a>
-<?php
-} ?>
+<?php if ($Viewer->permitted('users_mod')) { ?>
+        <a href="top10.php?<?=$groupByToggleQuery?>" class="brackets"><?=ucfirst($groupByToggleName)?> top groups</a>
+<?php } ?>
     </div>
 <?php
 

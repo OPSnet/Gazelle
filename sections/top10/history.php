@@ -1,10 +1,9 @@
 <?php
-if (!check_perms('users_mod')) {
+
+if (!$Viewer->permitted('users_mod')) {
     error(404);
 }
-// if (!check_perms('site_top10_history')) {
-//     error(403);
-// }
+
 View::show_header('Top 10 Torrents history!');
 ?>
 <div class="thin">
