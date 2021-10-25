@@ -43,7 +43,7 @@ class AddLog extends \Gazelle\Json {
             $this->failure('viewer not set');
             return null;
         }
-        if ($this->user->id() !== $this->torrent->uploaderId() && !$this->user->permitted('users_mod')) {
+        if ($this->user->id() !== $this->torrent->uploaderId() && !$this->user->permitted('admin_add_log')) {
             $this->failure('Not the torrent owner or moderator');
             return null;
         }
