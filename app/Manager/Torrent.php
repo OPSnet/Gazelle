@@ -41,7 +41,7 @@ class Torrent extends \Gazelle\Base {
     const CACHE_KEY_FEATURED       = 'featured_%d';
     const CACHE_FOLDERNAME         = 'foldername_%s';
     const CACHE_REPORTLIST         = 'reports_torrent_%d';
-
+    const FOLDER_SALT              = "v1\x01";
     const FILELIST_DELIM_UTF8 = "\xC3\xB7";
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
@@ -92,16 +92,23 @@ class Torrent extends \Gazelle\Base {
 
     /**
      * How many other uploads share the same folder path?
+     * NB: Ignore single files that are not in a directory
      *
-     * @param string base path in the torrent
+     * @param string $folder base path in the torrent
      * @return array of Gazelle\Torrent objects;
      */
     public function findAllByFoldername(string $folder): array {
-        $key = sprintf(self::CACHE_FOLDERNAME, md5($folder));
+        if ($folder === '') {
+            return [];
+        }
+        $key = sprintf(self::CACHE_FOLDERNAME, md5(self::FOLDER_SALT . $folder));
         $list = $this->cache->get_value($key);
         if ($list === false) {
             $this->db->prepared_query("
-                SELECT ID FROM torrents WHERE FilePath = ?
+                SELECT t.ID
+                FROM torrents t
+                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
+                WHERE t.FilePath = ?
                 ", $folder
             );
             $list = $this->db->collect(0);
