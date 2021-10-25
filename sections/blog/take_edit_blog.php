@@ -1,9 +1,9 @@
 <?php
-authorize();
 
-if (!check_perms('admin_manage_blog')) {
+if (!$Viewer->permitted('admin_manage_blog')) {
     error(403);
 }
+authorize();
 
 if (empty($_POST['blogid']) || empty($_POST['body']) || empty($_POST['title'])) {
     error('You must provide a blog id, title, and body when editing a blog entry.');
@@ -18,15 +18,13 @@ if ($ThreadID > 0) {
     )) {
         error('No such thread exists!');
     }
-}
-elseif ($ThreadID === '') {
+} elseif ($ThreadID === '') {
     $forum = new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
     $ThreadID = $forum->addThread($Viewer->id(), $_POST['title'], $_POST['body']);
     if ($ThreadID < 1) {
         error(0);
     }
-}
-else {
+} else {
     $ThreadID = null;
 }
 
@@ -41,8 +39,7 @@ if ($BlogID) {
         'threadId'  => $ThreadID,
     ]);
     if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-        $subMan = new Gazelle\Manager\Subscription($Viewer->id());
-        $subMan->subscribe($ThreadID);
+        (new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($ThreadID);
     }
 }
 

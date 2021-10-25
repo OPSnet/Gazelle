@@ -3,7 +3,7 @@
 View::show_header('Blog', ['js' => 'bbcode']);
 
 $action = !empty($_GET['action']) && $_GET['action'] === 'editblog' ? 'Edit' : 'Create';
-if (check_perms('admin_manage_blog')) {
+if ($Viewer->permitted('admin_manage_blog')) {
     $textarea = new Gazelle\Util\Textarea('body', $action === 'Edit' ? $blog->title() : '');
     if ($action === 'Edit' && !empty($_GET['id'])) {
         $blog = new Gazelle\Blog((int)$_GET['id']);
@@ -63,7 +63,7 @@ if ($action === 'Create') { /* default for non-staff */
     <div id="blog<?=$BlogID?>" class="box blog_post">
         <div class="head">
             <strong><?=$Title?></strong> - posted <?=time_diff($BlogTime);?> by <a href="user.php?id=<?=$AuthorID?>"><?=$Author?></a>
-<?php    if (check_perms('admin_manage_blog')) { ?>
+<?php    if ($Viewer->permitted('admin_manage_blog')) { ?>
                 - <a href="blog.php?action=editblog&amp;id=<?=$BlogID?>" class="brackets">Edit</a>
                 <a href="blog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Delete</a>
 <?php    } ?>
@@ -73,7 +73,7 @@ if ($action === 'Create') { /* default for non-staff */
 <?php    if ($ThreadID) { ?>
                 <br /><br />
                 <em><a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadID?>">Discuss this post here</a></em>
-<?php        if (check_perms('admin_manage_blog')) { ?>
+<?php        if ($Viewer->permitted('admin_manage_blog')) { ?>
                     <span style="float: right"><a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?= $Viewer->auth() ?>"
                         class="brackets">Remove link</a></span>
 <?php

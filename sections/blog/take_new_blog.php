@@ -1,13 +1,12 @@
 <?php
 
-use Gazelle\Manager\Notification;
 use Gazelle\Util\Irc;
 
-authorize();
-
-if (!check_perms('admin_manage_blog')) {
+if (!$Viewer->permitted('admin_manage_blog')) {
     error(403);
 }
+authorize();
+
 
 if (empty($_POST['title']) || empty($_POST['body'])) {
     error('You must have a title and body for the blog post.');
@@ -19,15 +18,13 @@ if ($ThreadID > 0) {
     if (!$DB->scalar("SELECT ForumID FROM forums_topics WHERE ID = ?", $ThreadID)) {
         error('No such thread exists!');
     }
-}
-elseif ($ThreadID === '') {
+} elseif ($ThreadID === '') {
     $forum = new \Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
     $ThreadID = $forum->addThread($Viewer->id(), $_POST['title'], $_POST['body']);
     if ($ThreadID < 1) {
         error(0);
     }
-}
-else {
+} else {
     $ThreadID = null;
 }
 
@@ -41,10 +38,9 @@ $blog = $blogMan->create([
 ]);
 
 if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-    $subMan = new Gazelle\Manager\Subscription($Viewer->id());
-    $subMan->subscribe($ThreadID);
+    (new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($ThreadID);
 }
-$notification = new Notification($Viewer->id());
+$notification = new Gazelle\Manager\Notification($Viewer->id());
 $notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), SITE_URL . '/index.php', Notification::BLOG);
 
 Irc::sendRaw("PRIVMSG " . BOT_CHAN . " :New blog article: " . $blog->title());
