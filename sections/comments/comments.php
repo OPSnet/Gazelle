@@ -275,7 +275,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
 <?php
 } else {
     echo $paginator->linkbox();
-    $isAdmin = check_perms('site_admin_forums');
+    $isAdmin = $Viewer->permitted('site_admin_forums');
     $commentMan = new Gazelle\Manager\Comment;
     $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {

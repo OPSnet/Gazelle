@@ -1,9 +1,9 @@
 <?php
 
-authorize();
-if (!check_perms('site_moderate_forums')) {
+if (!$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
+authorize();
 
 try {
     $comment = (new Gazelle\Manager\Comment)->findById((int)($_REQUEST['postid'] ?? 0));

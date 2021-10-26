@@ -1,9 +1,9 @@
 <?php
 
-authorize();
 if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.', true);
 }
+authorize();
 
 $body = trim($_POST['body'] ?? '');
 if (!strlen($body)) {
@@ -15,7 +15,7 @@ try {
 } catch (\Gazelle\Exception\ResourceNotFoundException $e) {
     error(404, true);
 }
-if ($comment->userId() != $Viewer->id() && !check_perms('site_moderate_forums')) {
+if ($comment->userId() != $Viewer->id() && !$Viewer->permitted('site_moderate_forums')) {
     error(403, true);
 }
 
