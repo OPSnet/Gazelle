@@ -283,7 +283,8 @@ function add_json_info($Json) {
             ],
         ]);
     }
-    if (!isset($Json['debug']) && check_perms('site_debug')) {
+    global $Viewer;
+    if (!isset($Json['debug']) && $Viewer->permitted('site_debug')) {
         global $Debug;
         $info = ['debug' => ['queries' => $Debug->get_queries()]];
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
@@ -591,7 +592,7 @@ function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
         if ($May)
             return PARANOIA_ALLOWED;
 
-        if (check_perms('users_override_paranoia', $UserClass)) {
+        if ($Viewer->permitted('users_override_paranoia', $UserClass)) {
             return PARANOIA_OVERRIDDEN;
         }
         $Override=false;
@@ -600,21 +601,21 @@ function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
             case 'ratio':
             case 'uploaded':
             case 'lastseen':
-                if (check_perms('users_mod', $UserClass))
+                if ($Viewer->permitted('users_mod', $UserClass))
                     return PARANOIA_OVERRIDDEN;
                 break;
             case 'snatched': case 'snatched+':
-                if (check_perms('users_view_torrents_snatchlist', $UserClass))
+                if ($Viewer->permitted('users_view_torrents_snatchlist', $UserClass))
                     return PARANOIA_OVERRIDDEN;
                 break;
             case 'uploads': case 'uploads+':
             case 'seeding': case 'seeding+':
             case 'leeching': case 'leeching+':
-                if (check_perms('users_view_seedleech', $UserClass))
+                if ($Viewer->permitted('users_view_seedleech', $UserClass))
                     return PARANOIA_OVERRIDDEN;
                 break;
             case 'invitedcount':
-                if (check_perms('users_view_invites', $UserClass))
+                if ($Viewer->permitted('users_view_invites', $UserClass))
                     return PARANOIA_OVERRIDDEN;
                 break;
         }
