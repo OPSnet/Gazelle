@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('users_warn')) {
+
+if (!$Viewer->permitted('users_warn')) {
     error(404);
 }
 foreach (['reason', 'privatemessage', 'body', 'length', 'postid'] as $var) {
