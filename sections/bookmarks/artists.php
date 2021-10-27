@@ -82,7 +82,7 @@ foreach ($ArtistList as $Artist) {
                 <a href="artist.php?id=<?=$ArtistID?>"><?=$Name?></a>
                 <span style="float: right;">
 <?php
-    if (check_perms('site_torrents_notify')) {
+    if ($Viewer->permitted('site_torrents_notify')) {
         if (stripos($Notify['Artists'], "|$Name|") === false) {
 ?>
                     <a href="artist.php?action=notify&amp;artistid=<?=$ArtistID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Notify of new uploads</a>

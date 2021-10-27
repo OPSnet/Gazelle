@@ -12,7 +12,7 @@ if (empty($_GET['userid'])) {
     $user = $Viewer;
     $ownProfile = true;
 } else {
-    if (!check_perms('users_override_paranoia')) {
+    if (!$Viewer->permitted('users_override_paranoia')) {
         error(403);
     }
     $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
