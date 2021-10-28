@@ -32,7 +32,7 @@ if (isset($_POST['delete'])) {
         error(403);
     }
     $forum->removeThread($threadId);
-    header("Location: forums.php?action=viewforum&forumid=" . $forum->id());
+    header('Location: ' . $forum->url());
     exit;
 }
 

@@ -412,10 +412,6 @@ class Notification extends \Gazelle\Base {
         }
     }
 
-    public function clearSubscriptions() {
-        $this->subscription->clear();
-    }
-
     public function loadTorrents() {
         if (!$this->user->permitted('site_torrents_notify')) {
             return;

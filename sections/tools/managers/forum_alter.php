@@ -39,7 +39,7 @@ if ($_POST['submit'] == 'Delete') {
         if (!$minClassRead || $minClassRead > $Viewer->classLevel()) {
             error(403);
         }
-        $forum->modify($_POST);
+        $forum->modifyForum($_POST);
     }
     else {
         error(403);

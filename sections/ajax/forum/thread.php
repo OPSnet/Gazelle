@@ -20,22 +20,23 @@ if ($_GET['postid']) {
     $postId = (int)$_GET['postid'];
     $forum = $forumMan->findByPostId($postId);
     if (is_null($forum)) {
-        print json_encode(['status' => 'failure']);
+        print json_die('failure', 'bad post id');
     }
-    $threadId = $forum->findThreadIdByPostId($postId);
+    $threadId = $forumMan->findThreadIdByPostId($postId);
 } elseif (isset($_GET['threadid'])) {
     $postId = false;
     $threadId = (int)$_GET['threadid'];
     $forum = $forumMan->findByThreadId($threadId);
     if (is_null($forum)) {
-        print json_encode(['status' => 'failure']);
+        print json_die('failure', 'bad thread id');
     }
+} else {
+    print json_die('failure', 'no post or thread id');
 }
 
 // Make sure they're allowed to look at the page
 if (!$Viewer->readAccess($forum)) {
-    print json_encode(['status' => 'failure']);
-    exit;
+    print json_die('failure', 'access denied');
 }
 
 $threadInfo = $forum->threadInfo($threadId);

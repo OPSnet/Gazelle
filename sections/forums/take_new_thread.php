@@ -17,7 +17,6 @@ if ($Viewer->disablePosting()) {
 }
 authorize();
 
-
 if (isset($_POST['forum'])) {
     $forum = (new Gazelle\Manager\Forum)->findById((int)$_POST['forum']);
     if (is_null($forum)) {
@@ -31,7 +30,7 @@ if (isset($_POST['forum'])) {
 
 // If you're not sending anything, go back
 if (empty($_POST['body']) || empty($_POST['title'])) {
-    header('Location: ' . redirectUrl("forums.php?action=viewforum&forumid={$_POST['forum']}"));
+    header('Location: ' . redirectUrl($forum->url()));
     exit;
 }
 $Title = shortenString(trim($_POST['title']), 150, true, false);

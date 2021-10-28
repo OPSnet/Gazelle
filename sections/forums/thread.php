@@ -23,11 +23,11 @@ if (isset($_GET['postid'])) {
     }
     if (!isset($_GET['threadid'])) {
         header("Location: forums.php?action=viewthread&threadid="
-            . $forum->findThreadIdByPostId($postId) . "&postid=$postId#post$postId"
+            . $forumMan->findThreadIdByPostId($postId) . "&postid=$postId#post$postId"
         );
         exit;
     }
-    $threadId = $forum->findThreadIdByPostId($postId);
+    $threadId = $forumMan->findThreadIdByPostId($postId);
 } elseif (isset($_GET['threadid'])) {
     $postId = false;
     $threadId = (int)$_GET['threadid'];
@@ -381,9 +381,7 @@ foreach ($thread as $Key => $Post) {
 </table>
 <?php } ?>
 <div class="breadcrumbs">
-    <a href="forums.php">Forums</a> &rsaquo;
-    <a href="forums.php?action=viewforum&amp;forumid=<?=$threadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
-    <?= display_str($threadInfo['Title']) ?>
+    <a href="forums.php">Forums</a> &rsaquo; <?= $forum->link() ?> &rsaquo; <?= display_str($threadInfo['Title']) ?>
 </div>
 <?php
 echo $paginator->linkbox();

@@ -1,7 +1,6 @@
 <div class="thin">
     <h2>
-        <a href="forums.php">Forums</a> &rsaquo;
-        <a href="forums.php?action=viewforum&amp;forumid={{ forum.id }}">{{ forum.name }}</a> &rsaquo; {{ thread_title }}
+        <a href="forums.php">Forums</a> &rsaquo; {{ forum.link|raw }} &rsaquo; {{ thread_title }}
     </h2>
     <div class="linkbox">
 {% for d in dept_list %}
