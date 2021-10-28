@@ -421,7 +421,7 @@ class TGroup extends BaseObject {
 
     public function displayNameText(): string {
         return implode(' ', [
-            implode(" - ", array_filter([$this->artistName(), $this->name()], fn($x) => !empty($x))),
+            implode(" \xE2\x80\x93 ", array_filter([$this->artistName(), $this->name()], fn($x) => !empty($x))),
             ...$this->displayNameSuffix()
         ]);
     }

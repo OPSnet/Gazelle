@@ -1,26 +1,18 @@
 <?php
 
-authorize();
-
-[$artistId, $name] = $DB->row("
-    SELECT ArtistID, concat(Name, IF(VanityHouse = 0, '', ' [Vanity House]')) as Name
-    FROM artists_group
-    WHERE ArtistID = ?
-    ", (int)$_POST['artistid']
-);
-if (!$artistId) {
+$artist = (new Gazelle\Manager\Artist)->findById((int)($_POST['artistid'] ?? 0));
+if (!$artist) {
     error(404);
 }
+authorize();
 
-$forum = new \Gazelle\Forum(EDITING_FORUM_ID);
-$threadId = $forum->addThread(
+$threadId = (new Gazelle\Forum(EDITING_FORUM_ID))->addThread(
     SYSTEM_USER_ID,
-    "Editing request — Artist: $name",
-    $Twig->render('forum/request-edit.twig', [
-        'username' => $Viewer->username(),
-        'url'      => 'artist.php?id=' . $artistId,
-        'name'     => $name,
-        'details'  => trim($_POST['edit_details']),
+    "Editing request \xE2\x80\x93 Artist: " . $artist->name(),
+    $Twig->render('forum/edit-request-body.twig', [
+        'link'    => '[artist]' . $artist->name() . '[/artist]',
+        'details' => trim($_POST['edit_details']),
+        'viewer'  => $Viewer,
     ])
 );
 
