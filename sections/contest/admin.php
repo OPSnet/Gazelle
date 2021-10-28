@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_manage_contest')) {
+if (!$Viewer->permitted('admin_manage_contest')) {
     error(403);
 }
 

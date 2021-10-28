@@ -11,5 +11,8 @@ switch ($_GET['action'] ?? '') {
         require('admin.php');
         break;
     default:
-        require('intro.php');
+        echo $Twig->render('contest/intro.twig', [
+            'contest' => $contestMan->currentContest(),
+            'viewer'  => $Viewer,
+        ]);
 }
