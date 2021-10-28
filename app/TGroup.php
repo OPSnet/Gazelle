@@ -140,6 +140,11 @@ class TGroup extends BaseObject {
                 $cached['Flags'] = [
                     'IsSnatched' => $this->fetchIsSnatched(),
                 ];
+                if (!isset($cached['artist'])) {
+                    $artistRole = new ArtistRole\TGroup($this->id);
+                    $cached['artist'] = $artistRole->roleList();
+                    $cached['role_id'] = $artistRole->idList();
+                }
                 $this->info = $cached;
                 $this->info['from_cache'] = true;
                 return $this->info;

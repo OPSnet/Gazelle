@@ -27,7 +27,7 @@ switch($Type) {
         $Viewer->markAllReadStaffPM();
         break;
     case 'Subscriptions':
-        $notifMan->clearSubscriptions($Viewer->id());
+        (new Gazelle\Subscription($Viewer))->clear();
         break;
     case 'Torrents':
         $Viewer->clearTorrentNotifications();

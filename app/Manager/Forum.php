@@ -111,6 +111,16 @@ class Forum extends \Gazelle\Base {
     }
 
     /**
+     * Get the thread ID from a post ID.
+     */
+    public function findThreadIdByPostId(int $postId): ?int {
+        return self::$db->scalar("
+            SELECT TopicID FROM forums_posts WHERE ID = ?
+            ", $postId
+        );
+    }
+
+    /**
      * Get list of forum names
      */
     public function nameList() {

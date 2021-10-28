@@ -176,6 +176,7 @@ class Quote extends \Gazelle\BaseUser {
         );
 
         $page = [];
+        $forumMan = new \Gazelle\Manager\Forum;
         $releaseType = new \Gazelle\ReleaseType;
         foreach ($quoteList as $q) {
             $context = [];
@@ -195,11 +196,10 @@ class Quote extends \Gazelle\BaseUser {
                 ];
                 break;
             case 'forums':
+                $forum = $forumMan->findbyId($q['ForumID']);
                 $context = [
-                    'jump' => "forums.php?action=viewthread&amp;threadid={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link' => sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d" class="tooltip" title="%s">%s</a>',
-                        $q['ForumID'], display_str($q['ForumTitle']), shortenString($q['ForumTitle'], 75)
-                    ),
+                    'jump' => $forum->threadPostUrl($q['PageID'], $q['PostID']),
+                    'link' => $forum->link(),
                     'title' => 'Forums',
                 ];
                 break;
