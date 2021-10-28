@@ -1,5 +1,5 @@
 <?php
-$GroupID = (int)$_GET['groupid'];
+$GroupID = (int)$_GET['id'];
 if (!$GroupID) {
     error(404);
 }
