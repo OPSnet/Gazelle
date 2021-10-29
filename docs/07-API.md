@@ -1839,5 +1839,6 @@ __NOTE__: Must use either `fltype` or `fltokens`, should not use both
 - C# - https://github.com/frankston/WhatAPI
 - PHP - https://github.com/GLaDOSDan/whatcd-php
 - PHP - https://github.com/Jleagle/php-gazelle
+- Go - https://github.com/charles-haynes/whatapi
 - Go - https://github.com/kdvh/whatapi
 - Scala - https://github.com/bkkcanuck/askwhat
