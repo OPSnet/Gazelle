@@ -139,7 +139,7 @@ class Wiki extends BaseObject {
             ", $this->id
         );
         $this->setUpdateRaw('Date = now()')
-            ->setUpdatePassThru('Revision = 1 + (SELECT max(Revision) FROM wiki_articles WHERE ID = ?)', $this->id());
+            ->setUpdatePassThru('Revision = 1 + (SELECT max(Revision) FROM wiki_articles WHERE ID = ?)', $this->id);
         return parent::modify();
     }
 

@@ -534,7 +534,7 @@ class Artist extends Base {
     }
 
     public function addSimilar(Artist $similar, int $userId) {
-        $artistId = $this->id();
+        $artistId = $this->id;
         $similarArtistId = $similar->id();
         // Let's see if there's already a similar artists field for these two
         $similarId = $this->db->scalar("
@@ -543,7 +543,7 @@ class Artist extends Base {
             INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID)
             WHERE s1.ArtistID = ?
                 AND s2.ArtistID = ?
-            ", $this->id(), $similar->id()
+            ", $this->id, $similar->id()
         );
         $this->db->begin_transaction();
         if ($similarId) { // The similar artists field already exists, just update the score
