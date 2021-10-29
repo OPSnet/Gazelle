@@ -782,7 +782,7 @@ class Torrent extends BaseObject {
         $userMan   = new Manager\User;
         $groupId   = $this->groupId();
         $name      = $this->group()->displayNameText();
-        $torrentId = $this->id();
+        $torrentId = $this->id;
 
         foreach ($notify as $userId => $info) {
             $userMan->sendPM($userId, 0,

@@ -338,7 +338,7 @@ class TGroup extends BaseObject {
     }
 
     public function label(): string {
-        return $this->id() . " (" . $this->info()['Name'] . ")";
+        return $this->id . " (" . $this->info()['Name'] . ")";
     }
 
     public function name(): string {
@@ -391,7 +391,7 @@ class TGroup extends BaseObject {
                 $this->artistHtml(),
                 sprintf(
                     '<a href="torrents.php?id=%d&amp;torrentid=%d#torrent%d" dir="ltr">%s</a>',
-                        $this->id(), $torrentId, $torrentId, $this->name()
+                        $this->id, $torrentId, $torrentId, $this->name()
                 ),
             ], fn($x) => !empty($x))
         );

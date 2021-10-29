@@ -782,7 +782,7 @@ class User extends BaseObject {
      * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
     function propertyVisible(User $viewer, string $property): int {
-        if ($this->id() === $viewer->id()) {
+        if ($this->id === $viewer->id()) {
             return PARANOIA_ALLOWED;
         }
 
@@ -2327,14 +2327,14 @@ class User extends BaseObject {
                         Uploaded = 0,
                         Downloaded = Downloaded + ?
                     WHERE UserID = ?
-                    ", $bounty - $uploaded, $this->id()
+                    ", $bounty - $uploaded, $this->id
                 );
             } else {
                 $this->db->prepared_query("
                     UPDATE users_leech_stats SET
                         Uploaded = Uploaded - ?
                     WHERE UserID = ?
-                    ", $bounty, $this->id()
+                    ", $bounty, $this->id
                 );
             }
         }
@@ -3028,7 +3028,7 @@ class User extends BaseObject {
         $args = [];
 
         $QueryID = $this->db->get_query_id();
-        $UserID = $this->id();
+        $UserID = $this->id;
 
         if ($Rank >= 2 || $HasAll) {
             if (isset($field['donor_icon_mouse_over_text'])) {
