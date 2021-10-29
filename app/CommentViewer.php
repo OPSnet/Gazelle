@@ -4,18 +4,13 @@ namespace Gazelle;
 
 abstract class CommentViewer extends Base {
 
-    /** @var \Gazelle\User */
-    protected $viewer;
+    protected User $viewer;
+    protected string $page;
+    protected string $baseLink;
 
-    /** @var string */
-    protected $page;
-
-    /** @var string */
-    protected $baseLink;
-
-    public function __construct(int $viewerId) {
+    public function __construct(User $viewer) {
         parent::__construct();
-        $this->viewer = new User($viewerId);
+        $this->viewer = $viewer;
     }
 
     /**
@@ -52,7 +47,7 @@ abstract class CommentViewer extends Base {
             'avatar'      => $userMan->avatarMarkup($this->viewer, $author),
             'body'        => $Body,
             'editor'      => $userMan->findById($EditedUserID),
-            'edit_time'   => time_diff($EditedTime, 2, true, true),
+            'edit_time'   => $EditedTime,
             'id'          => $PostID,
             'is_admin'    => $this->viewer->permitted('site_admin_forums'),
             'heading'     => $Header,

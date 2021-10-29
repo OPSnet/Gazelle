@@ -16,7 +16,6 @@ $Router->addPost('take_warn',        __DIR__ . '/take_warn.php');
 $Router->addPost('takeedit',         __DIR__ . '/takeedit.php');
 $Router->addPost('warn',             __DIR__ . '/warn.php');
 
-$Router->addGet('ajax_get_edit',      __DIR__ . '/ajax_get_edit.php');
 $Router->addGet('catchup',            __DIR__ . '/catchup.php');
 $Router->addGet('change_vote',        __DIR__ . '/change_vote.php');
 $Router->addGet('delete',             __DIR__ . '/delete.php');

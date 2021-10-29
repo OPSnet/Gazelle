@@ -835,6 +835,7 @@ class Forum extends Base {
         );
 
         // Edit the post
+        $this->db->begin_transaction();
         $this->db->prepared_query("
             UPDATE forums_posts SET
                 EditedUserID = ?,
@@ -847,13 +848,20 @@ class Forum extends Base {
         // Store edit history
         $this->db->prepared_query("
             INSERT INTO comments_edits
-                   (EditUser, PostID, Body, Page, EditTime)
-            VALUES (?,        ?,      ?,   'forums', now())
+                   (EditUser, PostID, Body, Page)
+            VALUES (?,        ?,      ?,   'forums')
             ", $userId, $postId, $oldBody
         );
+        $this->db->commit();
+
+        // Update the cache
         $info = $this->threadInfo($threadId);
-        $catId = (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
-        $this->cache->deleteMulti(["thread_{$threadId}_catalogue_{$catId}", "thread_{$threadId}_info"]);
+        $this->cache->deleteMulti([
+            "edit_forum_" . $this->forumId,
+            "thread_{$threadId}_info",
+            "thread_{$threadId}_catalogue_"
+                . (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE),
+        ]);
         return $postId;
     }
 
@@ -865,10 +873,11 @@ class Forum extends Base {
      * @param string body The new contents
      */
     public function editPost(int $userId, int $postId, string $body): int {
+        $this->db->begin_transaction();
         $this->db->prepared_query("
             INSERT INTO comments_edits
-                   (EditUser, PostID, Body, Page, EditTime)
-            VALUES (?,        ?,      (SELECT Body from forums_posts WHERE ID = ?), 'forums', now())
+                   (EditUser, PostID, Body, Page)
+            VALUES (?,        ?,      (SELECT Body from forums_posts WHERE ID = ?), 'forums')
             ", $userId, $postId, $postId
         );
         $this->db->prepared_query("
@@ -879,11 +888,13 @@ class Forum extends Base {
             WHERE ID = ?
             ", $userId, trim($body), $postId
         );
+        $this->db->commit();
+
         $post = $this->postInfo($postId);
         $this->cache->deleteMulti([
-            "forums_edits_$postId",
-            "thread_{$post['thread-id']}_catalogue_" . (int)floor((POSTS_PER_PAGE * $post['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
+            "edit_forum_$postId",
             "thread_{$post['thread-id']}_info",
+            "thread_{$post['thread-id']}_catalogue_" . (int)floor((POSTS_PER_PAGE * $post['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
         ]);
         return $this->db->affected_rows();
     }
