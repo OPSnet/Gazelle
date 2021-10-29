@@ -251,9 +251,12 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
 
         // Update the cache
-        $this->cache->delete_value("{$page}_comments_{$this->pageId}_catalogue_"
-            . floor((($commentPage - 1) * TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE)
-        );
+        $this->cache->deleteMulti([
+            "edit_{$page}_" . $this->id,
+            "{$page}_comments_" . $this->pageId,
+            "{$page}_comments_{$this->pageId}_catalogue_"
+                . (int)floor((($commentPage - 1) * TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE),
+        ]);
 
         if ($page == 'collages') {
             // On collages, we also need to clear the collage key (collage_$CollageID), because it has the comments in it... (why??)
@@ -297,6 +300,11 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         $subscription->flush($page, $this->pageId);
         $subscription->flushQuotes($page, $this->pageId);
 
+        $this->cache->deleteMulti([
+            "edit_{$page}_" . $this->id,
+            "{$page}_comments_" . $this->pageId,
+        ]);
+
         //We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
         $current = floor((TORRENT_COMMENTS_PER_PAGE * $commentPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         $last = floor((TORRENT_COMMENTS_PER_PAGE * $commentPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
@@ -304,7 +312,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         for ($i = $current; $i <= $last; ++$i) {
             $this->cache->delete_value($keyStem . $i);
         }
-        $this->cache->delete_value("{$page}_comments_" . $this->pageId);
 
         if ($page === 'collages') {
             // On collages, we also need to clear the collage key (collage_$CollageID), because it has the comments in it... (why??)
