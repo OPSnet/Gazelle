@@ -18,6 +18,7 @@ $LimitedPages = [
     'inbox'           => [2, 60],
     'news_ajax'       => [2, 60],
     'notifications'   => [2, 60],
+    'post_edit'       => [2, 10],
     'raw_bbcode'      => [5, 10],
     'request'         => [4, 60],
     'request_fill'    => [5, 10],
@@ -123,6 +124,9 @@ switch ($Action) {
         break;
     case 'forum':
         require('forum/index.php');
+        break;
+    case 'post_edit':
+        require('post_edit.php');
         break;
     case 'top10':
         require('top10/index.php');

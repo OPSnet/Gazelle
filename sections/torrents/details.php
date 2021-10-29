@@ -873,7 +873,7 @@ $releaseTypes = (new Gazelle\ReleaseType)->list();
         </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Torrent($Viewer->id(), $GroupID);
+$comments = new Gazelle\CommentViewer\Torrent($Viewer, $GroupID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
 

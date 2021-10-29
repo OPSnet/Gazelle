@@ -151,8 +151,9 @@ class Comment extends \Gazelle\Base {
     }
 
     public function loadEdits(string $page, int $postId): array {
-        $key = "{$page}_edits_{$postId}";
-        if (($edits = $this->cache->get_value($key)) === false) {
+        $key = "edit_{$page}_{$postId}";
+        $edits = $this->cache->get_value($key);
+        if ($edits === false) {
             $this->db->prepared_query("
                 SELECT EditUser, EditTime, Body
                 FROM comments_edits
@@ -161,7 +162,7 @@ class Comment extends \Gazelle\Base {
                 ORDER BY EditTime DESC
                 ", $page, $postId
             );
-            $edits = $this->db->to_array();
+            $edits = $this->db->to_array(false, MYSQLI_NUM, false);
             $this->cache->cache_value($key, $edits, 0);
         }
         return $edits;

@@ -290,7 +290,7 @@ function Newthread_Preview(mode) {
 }
 
 function LoadEdit(type, post, depth) {
-    ajax.get("forums.php?action=ajax_get_edit&postid=" + post + "&depth=" + depth + "&type=" + type, function(response) {
+    ajax.get("ajax.php?action=post_edit&postid=" + post + "&depth=" + depth + "&type=" + type, function(response) {
             $('#content' + post).raw().innerHTML = response;
         }
     );

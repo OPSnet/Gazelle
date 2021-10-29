@@ -672,7 +672,7 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Artist($Viewer->id(), $ArtistID);
+$comments = new Gazelle\CommentViewer\Artist($Viewer, $ArtistID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setPreviewManual(true);

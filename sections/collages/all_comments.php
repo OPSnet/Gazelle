@@ -37,7 +37,7 @@ View::show_header("Comments for collage " . $Collage->name(), ['js' => 'comments
     </div>
 <?php
 echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Collage($Viewer->id(), $CollageID);
+$comments = new Gazelle\CommentViewer\Collage($Viewer, $CollageID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setPreviewManual(true);
