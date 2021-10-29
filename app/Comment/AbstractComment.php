@@ -237,7 +237,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             INSERT INTO comments_edits
                    (Page, PostID, Body, EditUser)
             VALUES (?,    ?,      ?,    ?)
-            ", $page, $this->id(), $body, $this->field('EditedUserID')
+            ", $page, $this->id, $body, $this->field('EditedUserID')
         );
         $this->db->commit();
 
