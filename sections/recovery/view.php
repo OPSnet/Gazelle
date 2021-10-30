@@ -1,5 +1,6 @@
 <?php
-if (!check_perms('admin_recovery')) {
+
+if (!$Viewer->permitted('admin_recovery')) {
     error(403);
 }
 $recovery = new Gazelle\Recovery;
