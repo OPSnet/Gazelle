@@ -4,46 +4,15 @@ namespace Gazelle\Util;
 
 class Textarea extends \Gazelle\Base {
 
-    /**
-     * @static
-     * @var array of textareas
-     */
-    protected static $list = [];
+    protected static array $list = [];
 
-    /**
-     * @var int Unique ID
-     */
-    protected $id;
-
-    /**
-     * @var string name and id of element
-     */
-    protected $name;
-
-    /**
-     * @var string initial textarea value
-     */
-    protected $value;
-
-    /**
-     * @var int rows
-     */
-    protected $rows;
-
-    /**
-     * @var int columns
-     */
-    protected $cols;
-
-    /**
-     * @var bool the id (preview_wrap_<n>) is handled manually in the markup
-     */
-    protected $previewManual = false;
-
-    /**
-     * @var string[] extra attributes on the textarea field
-     */
-    protected $extra = [];
+    protected int $id;
+    protected int $rows;
+    protected int $cols;
+    protected string $name;
+    protected string $value;
+    protected bool $previewManual = false;
+    protected array $extra = [];
 
     /**
      * This method must be called once to enable activation.
@@ -92,11 +61,6 @@ class Textarea extends \Gazelle\Base {
         return "preview_wrap_" . $this->id;
     }
 
-    public function setAutoResize() {
-        $this->extra[] = "onkeyup=\"resize('{$this->name}')\"";
-        return $this;
-    }
-
     public function setDisabled() {
         $this->extra[] = "disabled=\"disabled\"";
         return $this;
@@ -131,6 +95,7 @@ class Textarea extends \Gazelle\Base {
             'id="' . $this->name . '"',
             'cols="' . $this->cols . '"',
             'rows="' . $this->rows . '"',
+            'onkeyup="resize(\'' . $this->name . '\')"',
         ]);
         return '<div id="textarea_wrap_' . $this->id . '" class="field_div textarea_wrap">'
             . '<textarea ' . implode(' ', $attr ) . '>' . $this->value . '</textarea></div>';
