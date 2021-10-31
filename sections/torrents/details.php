@@ -878,7 +878,7 @@ $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
 
 $textarea = new Gazelle\Util\Textarea('quickpost', '');
-$textarea->setAutoResize()->setPreviewManual(true);
+$textarea->setPreviewManual(true);
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $Viewer->auth() ,

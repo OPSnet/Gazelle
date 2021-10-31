@@ -1,0 +1,73 @@
+{% from 'macro/form.twig' import checked, selected %}
+{{ header('Edit collage') }}
+
+{% if error %}
+<div class="save_message error">{{ error }}</div>
+{% endif %}
+
+<div class="thin">
+    <div class="header">
+        <h2>Edit collage {{ collage.link|raw }}</h2>
+    </div>
+    <form class="edit_form" name="collage" action="collages.php" method="post">
+        <input type="hidden" name="action" value="edit_handle" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="collageid" value="{{ collage.id }}" />
+        <table id="edit_collage" class="layout">
+{% if can_rename %}
+            <tr>
+                <td class="label">Name</td>
+                <td><input type="text" name="name" size="60" value="{{ collage.name }}" /></td>
+            </tr>
+{% endif %}
+{% if not collage.isPersonal or viewer.permitted('site_collages_delete') %}
+            <tr>
+                <td class="label"><strong>Category</strong></td>
+                <td>
+                    <select name="category">
+    {% for id, name in constant('COLLAGE') %}
+        {% if id > 0 or (id == 0 and viewer.permitted('site_collages_delete')) %}
+        <option value="{{ id }}"{{ selected(id == collage.categoryId) }}>{{ name }}</option>
+        {% endif %}
+    {% endfor %}
+                    </select>
+                </td>
+            </tr>
+{% endif %}
+            <tr>
+                <td class="label">Description</td>
+                <td>
+                    {{ description.emit|raw }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Tags</td>
+                <td><input type="text" name="tags" size="60" value="{{ collage.tags|join(', ') }}" /></td>
+            </tr>
+{% if collage.isPersonal %}
+            <tr>
+                <td class="label"><span class="tooltip" title="A &quot;featured&quot; personal collage will be listed first on your profile, along with a preview of the included torrents.">Featured</span></td>
+                <td><input type="checkbox" name="featured"{{ checked(collage.isFeatured) }} /></td>
+            </tr>
+{% endif %}
+{% if viewer.permitted('site_collages_delete') %}
+            <tr>
+                <td class="label">Locked</td>
+                <td><input type="checkbox" name="locked"{{ checked(collage.isLocked) }} /></td>
+            </tr>
+            <tr>
+                <td class="label">Max groups</td>
+                <td><input type="text" name="maxgroups" size="5" value="{{ collage.maxGroups }}" /></td>
+            </tr>
+            <tr>
+                <td class="label">Max groups per user</td>
+                <td><input type="text" name="maxgroupsperuser" size="5" value="{{ collage.maxGroupsPerUser }}" /></td>
+            </tr>
+{% endif %}
+            <tr>
+                <td colspan="2" class="center"><input type="submit" value="Edit collage" /></td>
+            </tr>
+        </table>
+    </form>
+</div>
+{{ footer() }}
