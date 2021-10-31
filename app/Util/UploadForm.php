@@ -491,7 +491,7 @@ class uploadForm extends \Gazelle\Base {
                 $groupDesc->setDisabled();
             }
 ?>
-            <?= $groupDesc->setAutoResize()->emit() ?>
+            <?= $groupDesc->emit() ?>
                     <p class="min_padding">Contains background information such as album history and maybe a review.</p>
                 </td>
             </tr>
@@ -499,7 +499,7 @@ class uploadForm extends \Gazelle\Base {
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-                <?= (new Textarea('release_desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->setAutoResize()->emit() ?>
+                <?= (new Textarea('release_desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->emit() ?>
                     <p class="min_padding">Contains information like encoder settings or details of the ripping process. <strong class="important_text">Do not paste the ripping log here.</strong></p>
                 </td>
             </tr>
@@ -585,7 +585,7 @@ class uploadForm extends \Gazelle\Base {
                 $groupDesc->setDisabled();
             }
 ?>
-            <?= $groupDesc->setAutoResize()->emit() ?>
+            <?= $groupDesc->emit() ?>
                     <p class="min_padding">Contains information like the track listing, a review, a link to Discogs or MusicBrainz, etc.</p>
                 </td>
             </tr>
@@ -593,7 +593,7 @@ class uploadForm extends \Gazelle\Base {
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-                <?= (new Textarea('release_desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->setAutoResize()->emit() ?>
+                <?= (new Textarea('release_desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->emit() ?>
                     <p class="min_padding">Contains information like encoder settings. For analog rips, this frequently contains lineage information.</p>
                 </td>
             </tr>
@@ -633,7 +633,7 @@ class uploadForm extends \Gazelle\Base {
             <tr>
                 <td class="label">Description:</td>
                 <td>
-                    <?= (new Textarea('desc', display_str($Torrent['TorrentDescription']), 60, 5))->setAutoResize()->emit() ?>
+                    <?= (new Textarea('desc', display_str($Torrent['TorrentDescription']), 60, 5))->emit() ?>
                 </td>
             </tr>
 <?php   } ?>

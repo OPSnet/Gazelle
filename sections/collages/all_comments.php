@@ -40,7 +40,7 @@ echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Collage($Viewer->id(), $CollageID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
-$textarea->setAutoResize()->setPreviewManual(true);
+$textarea->setPreviewManual(true);
 echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
