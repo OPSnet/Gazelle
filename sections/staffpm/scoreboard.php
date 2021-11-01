@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('admin_staffpm_stats')) {
+if (!$Viewer->permitted('admin_staffpm_stats')) {
     error(403);
 }
 
