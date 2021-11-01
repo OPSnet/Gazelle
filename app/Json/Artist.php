@@ -152,27 +152,33 @@ class Artist extends \Gazelle\Json {
             }
         }
 
+        $name = $this->artist->name();
+        if (is_null($name)) {
+            global $Debug;
+            $Debug->analysis("Artist has null name", $artistId, 3600 * 168);
+        }
         return [
-            'id' => $artistId,
-            'name' => $this->artist->name(),
-            'notificationsEnabled' => $this->user->hasArtistNotification($this->artist->name()),
-            'hasBookmarked' => $bookmark->isArtistBookmarked($this->user->id(), $artistId),
-            'image' => $this->artist->image(),
-            'body' => \Text::full_format($this->artist->body()),
-            'bodyBbcode' => $this->artist->body(),
-            'vanityHouse' => $this->artist->vanityHouse(),
-            'tags' => array_values($Tags),
+            'id'             => $artistId,
+            'name'           => $name,
+            'notificationsEnabled' =>
+                is_null($name) ? false : $this->user->hasArtistNotification($name),
+            'hasBookmarked'  => $bookmark->isArtistBookmarked($this->user->id(), $artistId),
+            'image'          => $this->artist->image(),
+            'body'           => \Text::full_format($this->artist->body()),
+            'bodyBbcode'     => $this->artist->body(),
+            'vanityHouse'    => $this->artist->vanityHouse(),
+            'tags'           => array_values($Tags),
             'similarArtists' => $JsonSimilar,
             'statistics' => [
-                'numGroups' => count($groupList),
+                'numGroups'   => count($groupList),
                 'numTorrents' => $NumTorrents,
-                'numSeeders' => $NumSeeders,
+                'numSeeders'  => $NumSeeders,
                 'numLeechers' => $NumLeechers,
                 'numSnatches' => $NumSnatches,
                 'numRequests' => count($JsonRequests),
             ],
             'torrentgroup' => $JsonTorrents,
-            'requests' => $JsonRequests,
+            'requests'     => $JsonRequests,
         ];
     }
 
