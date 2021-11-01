@@ -284,7 +284,7 @@ function add_json_info($Json) {
         ]);
     }
     global $Viewer;
-    if (!isset($Json['debug']) && $Viewer->permitted('site_debug')) {
+    if (!isset($Json['debug']) && $Viewer instanceof \Gazelle\User && $Viewer->permitted('site_debug')) {
         global $Debug;
         $info = ['debug' => ['queries' => $Debug->get_queries()]];
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
