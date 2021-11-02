@@ -38,7 +38,7 @@ echo $Twig->render('user/post-history.twig', [
     'posts'         => $forumSearch->postHistoryPage($paginator->limit(), $paginator->offset()),
     'show_grouped'  => $showGrouped,
     'show_unread'   => $showUnread,
-    'subscriptions' => (new \Gazelle\Manager\Subscription($user->id()))->subscriptions(),
+    'subscriptions' => (new \Gazelle\Subscription($user))->subscriptionList(),
     'title'         => $title,
     'url_stem'      => 'userhistory.php?action=posts&amp;userid=' . $user->id() . '&amp;',
     'user'          => $user,

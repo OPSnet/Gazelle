@@ -32,7 +32,9 @@ switch ($_GET['action'] ?? '') {
         require_once('comments_subscribe.php');
         break;
     case 'catchup':
-        require_once('catchup.php');
+        authorize();
+        (new Gazelle\Subscription($Viewer))->catchupSubscriptions();
+        header('Location: userhistory.php?action=subscriptions');
         break;
     case 'collage_subscribe':
         require_once('collage_subscribe.php');

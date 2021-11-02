@@ -36,7 +36,7 @@ $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage-
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
 $collageMan = new Gazelle\Manager\Collage;
-$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('torrents', $GroupID);
+$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $GroupID);
 
 View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
 ?>

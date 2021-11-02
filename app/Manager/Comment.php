@@ -59,9 +59,8 @@ class Comment extends \Gazelle\Base {
         if ($page == 'collages') {
             $this->cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
-        $subscription = new Subscription($userId);
-        $subscription->flush($page, $pageId);
-        $subscription->quoteNotify($body, $postId, $page, $pageId);
+        (new \Gazelle\Subscription(new \Gazelle\User($userId)))->quoteNotify($body, $postId, $page, $pageId);
+        (new Subscription)->flush($page, $pageId);
 
         $className = $this->className($page);
         return (new $className($pageId))->setPostId($postId);
@@ -130,10 +129,8 @@ class Comment extends \Gazelle\Base {
             ", $page, $pageId
         );
 
-        // Delete quote notifications
-        $subscription = new \Gazelle\Manager\Subscription;
-        $subscription->move($page, $pageId, null);
-        $subscription->flushQuotes($page, $pageId);
+        // literally, move the comment thread to nowhere i.e. delete
+        (new \Gazelle\Manager\Subscription)->move($page, $pageId, null);
 
         $this->db->prepared_query("
             DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?
@@ -203,45 +200,5 @@ class Comment extends \Gazelle\Base {
             }
         }
         return $list;
-    }
-
-    /**
-     * How many subscribed entities (artists, collages, requests, torrents)
-     * have new comments on them?
-     *
-     * @param \Gazelle\User the viewer
-     * @return int Number of entities with unread comments
-     */
-    public function unreadSubscribedCommentTotal(\Gazelle\User $user): int {
-        return $this->db->scalar("
-            SELECT count(*)
-            FROM users_subscriptions_comments AS s
-            LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
-            LEFT JOIN comments AS c ON (c.ID = (SELECT MAX(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
-            LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
-            WHERE (s.Page != 'collages' OR co.Deleted = '0')
-                AND coalesce(lr.PostID, 0) < c.ID
-                AND s.UserID = ?
-            ", $user->id()
-        );
-    }
-
-    /**
-     * How many total subscribed entities (artists, collages, requests, torrents)
-     *
-     * @param \Gazelle\User the viewer
-     * @return int Number of entities
-     */
-    public function subscribedCommentTotal(\Gazelle\User $user): int {
-        return $this->db->scalar("
-            SELECT count(*)
-            FROM users_subscriptions_comments AS s
-            LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
-            LEFT JOIN comments AS c ON (c.ID = (SELECT MAX(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
-            LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
-            WHERE (s.Page != 'collages' OR co.Deleted = '0')
-                AND s.UserID = ?
-            ", $user->id()
-        );
     }
 }

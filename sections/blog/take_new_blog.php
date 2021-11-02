@@ -38,7 +38,7 @@ $blog = $blogMan->create([
 ]);
 
 if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-    (new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($ThreadID);
+    (new Gazelle\Subscription($Viewer))->subscribe($ThreadID);
 }
 $notification = new Gazelle\Manager\Notification($Viewer->id());
 $notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);
