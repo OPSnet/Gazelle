@@ -22,7 +22,7 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('collages', $CollageID);
+$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('collages', $CollageID);
 $Collage = new Gazelle\Collage($CollageID);
 
 View::show_header("Comments for collage " . $Collage->name(), ['js' => 'comments,bbcode,subscriptions']);

@@ -296,9 +296,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
         $this->db->commit();
 
-        $subscription = new \Gazelle\Manager\Subscription;
-        $subscription->flush($page, $this->pageId);
-        $subscription->flushQuotes($page, $this->pageId);
+        (new \Gazelle\Manager\Subscription)->flush($page, $this->pageId);
 
         $this->cache->deleteMulti([
             "edit_{$page}_" . $this->id,

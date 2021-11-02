@@ -71,7 +71,7 @@ class View {
             $Notifications = $notifMan->notifications();
             $hasNewSubscriptions = isset($Notifications[Gazelle\Manager\Notification::SUBSCRIPTIONS]);
             if ($notifMan->isSkipped(Gazelle\Manager\Notification::SUBSCRIPTIONS)) {
-                $NewSubscriptions = (new Gazelle\Manager\Subscription($Viewer->id()))->unread();
+                $NewSubscriptions = (new Gazelle\Subscription($Viewer))->unread();
             }
         }
 

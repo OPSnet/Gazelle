@@ -92,7 +92,7 @@ if ($lastRead < $lastOnPage) {
     $forum->userCatchupThread($Viewer->id(), $threadId, $lastOnPage);
 }
 
-$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribed($threadId);
+$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribed($threadId);
 if ($isSubscribed) {
     $Cache->delete_value('subscriptions_user_new_'.$Viewer->id());
 }
