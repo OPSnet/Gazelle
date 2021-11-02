@@ -30,12 +30,12 @@ if ($ThreadInfo['LastPostAuthorID'] == $Viewer->id() && isset($_POST['merge'])) 
     ++$ThreadInfo['Posts'];
 }
 
-$subscription = new Gazelle\Manager\Subscription($Viewer->id());
+$subscription = new Gazelle\Subscription($Viewer);
+$subscription->quoteNotify($Body, $PostID, 'forums', $threadId);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
     $subscription->subscribe($threadId);
 }
-$subscription->flush('forums', $threadId);
-$subscription->quoteNotify($Body, $PostID, 'forums', $threadId);
+(new Gazelle\Manager\Subscription)->flush('forums', $threadId);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId&page="
     . (int)ceil($ThreadInfo['Posts'] / $Viewer->postsPerPage())

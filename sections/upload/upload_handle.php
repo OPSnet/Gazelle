@@ -867,7 +867,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 if ($Viewer->option('AutoSubscribe')) {
-    (new Gazelle\Manager\Subscription($Viewer->id()))->subscribeComments('torrents', $GroupID);
+    (new Gazelle\Subscription($Viewer))->subscribeComments('torrents', $GroupID);
 }
 
 // Manage notifications

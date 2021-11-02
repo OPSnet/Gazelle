@@ -599,7 +599,7 @@ class Collage extends BaseObject {
         return $this;
     }
 
-    public function remove(User $user, Manager\Subscription $subMan, Log $logger, string $reason): int {
+    public function remove(): int {
         $this->db->prepared_query("
             SELECT GroupID FROM collages_torrents WHERE CollageID = ?
             ", $this->id
@@ -629,14 +629,8 @@ class Collage extends BaseObject {
                 ", $this->id
             );
             $rows = $this->db->affected_rows();
-
-            $subMan->flush('collages', $this->id);
-            $subMan->flushQuotes('collages', $this->id);
         }
         $this->flush();
-        $logger->general(sprintf("Collage %d (%s) was deleted by %s: %s",
-            $this->id, $this->name, $user->name, $reason
-        ));
         return $rows;
     }
 

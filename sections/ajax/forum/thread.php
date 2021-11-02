@@ -206,7 +206,7 @@ foreach ($Thread as $Key => $Post) {
     ];
 }
 
-$subscribed = in_array($threadId, (new Gazelle\Manager\Subscription($Viewer->id()))->subscriptions());
+$subscribed = (new Gazelle\Subscription($Viewer))->isSubscribed($threadId);
 if ($subscribed) {
     $Cache->delete_value('subscriptions_user_new_' . $Viewer->id());
 }

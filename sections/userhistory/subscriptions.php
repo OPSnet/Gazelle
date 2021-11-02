@@ -8,17 +8,15 @@ $showUnread    = (bool)($_GET['showunread'] ?? true);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $forMan = new Gazelle\Manager\Forum;
-$commMan = new Gazelle\Manager\Comment;
+$subscribe = new Gazelle\Subscription($Viewer);
 if ($showUnread) {
-    $total = $forMan->unreadSubscribedForumTotal($Viewer)
-        + $commMan->unreadSubscribedCommentTotal($Viewer);
+    $total = $forMan->unreadSubscribedForumTotal($Viewer) + $subscribe->unreadCommentTotal();
 } else {
-    $total = $forMan->subscribedForumTotal($Viewer)
-        + $commMan->subscribedCommentTotal($Viewer);
+    $total = $forMan->subscribedForumTotal($Viewer) + $subscribe->commentTotal();
 }
 $paginator->setTotal($total);
 
-$Results = (new Gazelle\Manager\Subscription)->latestSubscriptionList($Viewer, $showUnread, $paginator->limit(), $paginator->offset());
+$Results = (new Gazelle\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
 
 $TorrentGroups = $Requests = [];
 foreach ($Results as $Result) {

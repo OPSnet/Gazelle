@@ -70,7 +70,7 @@ if ($needPoll) {
 }
 
 if (isset($_POST['subscribe'])) {
-    (new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($threadId);
+    (new Gazelle\Subscription($Viewer))->subscribe($threadId);
 }
 
 header("Location: forums.php?action=viewthread&threadid=$threadId");

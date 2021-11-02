@@ -12,7 +12,7 @@ $Artist->loadArtistRole();
 $bookmark = new Gazelle\Bookmark;
 $collageMan = new Gazelle\Manager\Collage;
 $authKey = $Viewer->auth();
-$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('artist', $ArtistID);
+$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
 
 $torMan = new Gazelle\Manager\Torrent;
 $torMan->setViewer($Viewer);

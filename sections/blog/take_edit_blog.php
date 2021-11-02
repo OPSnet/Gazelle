@@ -39,7 +39,7 @@ if ($BlogID) {
         'threadId'  => $ThreadID,
     ]);
     if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-        (new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($ThreadID);
+        (new Gazelle\Subscription($Viewer))->subscribe($ThreadID);
     }
 }
 

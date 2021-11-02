@@ -15,4 +15,4 @@ if (!$Viewer->readAccess($forum)) {
     error(403);
 }
 
-(new Gazelle\Manager\Subscription($Viewer->id()))->subscribe($threadId);
+(new Gazelle\Subscription($Viewer))->subscribe($threadId);

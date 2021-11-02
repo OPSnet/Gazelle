@@ -65,7 +65,7 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('requests', $RequestID);
+$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('requests', $RequestID);
 
 View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,subscriptions']);
 ?>

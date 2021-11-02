@@ -55,7 +55,7 @@ class Notification extends \Gazelle\Base {
 
     protected $user;
     protected $userId;
-    protected $subscription;
+    protected \Gazelle\Subscription $subscription;
     protected $notifications;
     protected $settings;
     protected $skipped;
@@ -77,7 +77,7 @@ class Notification extends \Gazelle\Base {
         $this->notifications = [];
         $this->settings = $this->settings();
         $this->skipped = $skip;
-        $this->subscription = new Subscription($this->userId);
+        $this->subscription = new \Gazelle\Subscription($this->user);
         if ($autoSkip) {
             foreach ($this->settings as $key => $value) {
                 // Skip disabled and traditional settings

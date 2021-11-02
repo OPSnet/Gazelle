@@ -1,10 +1,8 @@
 <?php
-// perform the back end of subscribing to topics
-authorize();
 
-if (!in_array($_GET['page'], ['artist', 'collages', 'requests', 'torrents']) || !is_number($_GET['pageid'])) {
+if (!in_array($_GET['page'], ['artist', 'collages', 'requests', 'torrents']) || !(int)($_GET['pageid'] ?? 0)) {
     error(0);
 }
+authorize();
 
-$subMan = new \Gazelle\Manager\Subscription($Viewer->id());
-$subMan->subscribeComments($_GET['page'], $_GET['pageid']);
+(new Gazelle\Subscription($Viewer))->subscribeComments($_GET['page'], (int)$_GET['pageid']);

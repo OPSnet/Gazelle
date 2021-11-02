@@ -20,17 +20,17 @@ json_print("success", [
     'notifications' => [
         'messages'         => $Viewer->inboxUnreadCount(),
         'notifications'    => $Viewer->unreadTorrentNotifications(),
-        'newAnnouncement'  => (new \Gazelle\Manager\News)->latest() < (new \Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
-        'newBlog'          => (new \Gazelle\Manager\Blog)->latest() < (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
-        'newSubscriptions' => (new \Gazelle\Manager\Subscription($Viewer->id()))->unread() > 0,
+        'newAnnouncement'  => (new Gazelle\Manager\News)->latest() < (new Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
+        'newBlog'          => (new Gazelle\Manager\Blog)->latest() < (new Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
+        'newSubscriptions' => (new Gazelle\Subscription($Viewer))->unread() > 0,
     ],
     'userstats' => [
-        'uploaded' => $Viewer->uploadedSize(),
-        'downloaded' => $Viewer->downloadedSize(),
-        'ratio' => (float)$Ratio,
-        'requiredratio' => $Viewer->requiredRatio(),
-        'bonusPoints' => $Viewer->bonusPointsTotal(),
+        'uploaded'           => $Viewer->uploadedSize(),
+        'downloaded'         => $Viewer->downloadedSize(),
+        'ratio'              => (float)$Ratio,
+        'requiredratio'      => $Viewer->requiredRatio(),
+        'bonusPoints'        => $Viewer->bonusPointsTotal(),
         'bonusPointsPerHour' => (float)number_format($Viewer->bonusPointsPerHour(), 2),
-        'class' => $Viewer->userclassName(),
+        'class'              => $Viewer->userclassName(),
     ]
 ]);

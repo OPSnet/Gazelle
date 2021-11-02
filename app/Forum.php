@@ -320,12 +320,9 @@ class Forum extends Base {
         );
         $this->adjustForumStats($this->forumId);
 
-        // subscriptions
-        $subscription = new \Gazelle\Manager\Subscription;
-        $subscription->flushQuotes('forums', $threadId);
-        $subscription->move('forums', $threadId, null);
+        (new Manager\Subscription)->move('forums', $threadId, null);
 
-        (new \Gazelle\Manager\Forum)->flushToc();
+        (new Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
             "thread_{$threadId}",
             sprintf(self::CACHE_FORUM, $this->forumId),
@@ -1008,9 +1005,7 @@ class Forum extends Base {
 
         $this->adjustForumStats($forumId);
 
-        $subscription = new \Gazelle\Manager\Subscription;
-        $subscription->flush('forums', $threadId);
-        $subscription->flushQuotes('forums', $threadId);
+        (new \Gazelle\Manager\Subscription)->flush('forums', $threadId);
 
         // We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
         $begin = (int)floor((POSTS_PER_PAGE * (int)$forumPost['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE);
