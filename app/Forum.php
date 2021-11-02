@@ -922,26 +922,25 @@ class Forum extends Base {
      *
      * NB: kebab-case chosen for grepability
      */
-    public function postInfo(int $postId) {
-        $this->db->prepared_query('
+    public function postInfo(int $postId): array {
+        return $this->db->rowAssoc("
             SELECT
-                f.MinClassWrite         AS "min-class-write",
-                t.ForumID               AS "forum-id",
-                t.id                    AS "thread-id",
-                t.islocked              AS "thread-locked",
-                ceil(t.numposts / ?)    AS "thread-pages" ,
+                f.MinClassWrite         AS 'min-class-write',
+                t.ForumID               AS 'forum-id',
+                t.id                    AS 'thread-id',
+                t.islocked              AS 'thread-locked',
+                ceil(t.numposts / ?)    AS 'thread-pages' ,
                 (SELECT ceil(sum(if(fp.ID <= p.ID, 1, 0)) / ?) FROM forums_posts fp WHERE fp.TopicID = t.ID)
-                                        AS "page",
-                p.AuthorID              AS "user-id",
-                (p.ID = t.StickyPostID) AS "is-sticky",
-                p.Body                  AS "body"
+                                        AS 'page',
+                p.AuthorID              AS 'user-id',
+                (p.ID = t.StickyPostID) AS 'is-sticky',
+                p.Body                  AS 'body'
             FROM forums_topics      t
             INNER JOIN forums       f ON (t.forumid = f.id)
             INNER JOIN forums_posts p ON (p.topicid = t.id)
             WHERE p.ID = ?
-            ', POSTS_PER_PAGE, POSTS_PER_PAGE, $postId
-        );
-        return $this->db->next_record(MYSQLI_ASSOC, false);
+            ", POSTS_PER_PAGE, POSTS_PER_PAGE, $postId
+        ) ?? [];
     }
 
     /**
