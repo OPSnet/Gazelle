@@ -25,7 +25,7 @@ if ($user->primaryClass() > $Viewer->classLevel()) {
 $forum = new Gazelle\Forum((int)($_POST['forumid']));
 $postId = (int)($_POST['postid'] ?? 0);
 $forumPost = $forum->postInfo($postId);
-if (is_null($forumPost)) {
+if (empty($forumPost)) {
     error("No forum post #$postId found");
 }
 $threadId = $forumPost['thread-id'];
