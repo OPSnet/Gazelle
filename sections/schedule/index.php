@@ -37,7 +37,7 @@ if (PHP_SAPI === 'cli') {
         $scheduler->run();
     }
 } else {
-    if (!check_perms('admin_schedule')) {
+    if (!isset($Viewer) || !$Viewer->permitted('admin_schedule')) {
         error(403);
     }
 
@@ -47,7 +47,7 @@ if (PHP_SAPI === 'cli') {
 <div class="linkbox">
     <a class="brackets" href="tools.php?action=periodic&amp;mode=view">Status</a>
     <a class="brackets" href="tools.php?action=periodic&amp;mode=stats">Statistics</a>
-<?php if (check_perms('admin_periodic_task_manage')) { ?>
+<?php if ($Viewer->permitted('admin_periodic_task_manage')) { ?>
     <a class="brackets" href="tools.php?action=periodic&amp;mode=edit">Edit</a>
 <?php } ?>
 </div>
@@ -62,7 +62,7 @@ if (PHP_SAPI === 'cli') {
 }
 
 echo "-------------------------\n\n";
-if (check_perms('admin_schedule')) {
+if ($Viewer->permitted('admin_schedule')) {
     echo '</pre>';
     View::show_footer();
 }
