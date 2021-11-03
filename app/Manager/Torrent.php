@@ -509,4 +509,109 @@ class Torrent extends \Gazelle\Base {
             );
         }
     }
+
+    public function updatePeerlists(): array {
+        $this->cache->disableLocalCache();
+        $this->db->prepared_query("
+            CREATE TEMPORARY TABLE tmp_torrents_peerlists (
+                TorrentID int NOT NULL PRIMARY KEY,
+                GroupID   int,
+                Seeders   int,
+                Leechers  int,
+                Snatches  int
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+        ");
+        $this->db->prepared_query("
+            INSERT INTO tmp_torrents_peerlists
+            SELECT t.ID, t.GroupID, tls.Seeders, tls.Leechers, tls.Snatched
+            FROM torrents t
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+        ");
+
+        $this->db->prepared_query("
+            CREATE TEMPORARY TABLE tpc_temp (
+                TorrentID int,
+                GroupID   int,
+                Seeders   int,
+                Leechers  int,
+                Snatched  int,
+                PRIMARY KEY (GroupID, TorrentID)
+            )
+        ");
+        $this->db->prepared_query("
+            INSERT INTO tpc_temp
+            SELECT t2.*
+            FROM torrents_peerlists AS t1
+            INNER JOIN tmp_torrents_peerlists AS t2 USING (TorrentID)
+            WHERE t1.Seeders != t2.Seeders
+                OR t1.Leechers != t2.Leechers
+                OR t1.Snatches != t2.Snatches
+        ");
+
+        $StepSize = 30000;
+        $this->db->prepared_query("
+            SELECT TorrentID, GroupID, Seeders, Leechers, Snatched
+            FROM tpc_temp
+            ORDER BY GroupID ASC, TorrentID ASC
+            LIMIT ?
+            ", $StepSize
+        );
+
+        $RowNum = 0;
+        $LastGroupID = 0;
+        $UpdatedKeys = $UncachedGroups = 0;
+        [$TorrentID, $GroupID, $Seeders, $Leechers, $Snatches] = $this->db->next_record(MYSQLI_NUM, false);
+        while ($TorrentID) {
+            if ($LastGroupID != $GroupID) {
+                $CachedData = $this->cache->get_value("torrent_group_$GroupID");
+                if ($CachedData !== false) {
+                    if (isset($CachedData["ver"]) && $CachedData["ver"] == \Gazelle\Cache::GROUP_VERSION) {
+                        $CachedStats = &$CachedData["d"]["Torrents"];
+                    }
+                } else {
+                    $UncachedGroups++;
+                }
+                $LastGroupID = $GroupID;
+            }
+            while ($LastGroupID == $GroupID) {
+                $RowNum++;
+                if (isset($CachedStats) && is_array($CachedStats[$TorrentID])) {
+                    $OldValues = &$CachedStats[$TorrentID];
+                    $OldValues["Seeders"] = $Seeders;
+                    $OldValues["Leechers"] = $Leechers;
+                    $OldValues["Snatched"] = $Snatches;
+                    $Changed = true;
+                    unset($OldValues);
+                }
+                if (!($RowNum % $StepSize)) {
+                    $this->db->prepared_query("
+                        SELECT TorrentID, GroupID, Seeders, Leechers, Snatched
+                        FROM tpc_temp
+                        WHERE (GroupID > ? OR (GroupID = ? AND TorrentID > ?))
+                        ORDER BY GroupID ASC, TorrentID ASC
+                        LIMIT ?
+                        ", $GroupID, $GroupID, $TorrentID, $StepSize
+                    );
+                }
+                $LastGroupID = $GroupID;
+                [$TorrentID, $GroupID, $Seeders, $Leechers, $Snatches] = $this->db->next_record(MYSQLI_NUM, false);
+            }
+            if ($Changed) {
+                $this->cache->cache_value("torrent_group_$LastGroupID", $CachedData, 0);
+                unset($CachedStats);
+                $UpdatedKeys++;
+                $Changed = false;
+            }
+        }
+
+        $this->db->begin_transaction();
+        $this->db->prepared_query("DELETE FROM torrents_peerlists");
+        $this->db->prepared_query("
+            INSERT INTO torrents_peerlists
+            SELECT *
+            FROM tmp_torrents_peerlists
+        ");
+        $this->db->commit();
+        return [$UpdatedKeys, $UncachedGroups];
+    }
 }
