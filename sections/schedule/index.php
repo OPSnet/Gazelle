@@ -62,7 +62,7 @@ if (PHP_SAPI === 'cli') {
 }
 
 echo "-------------------------\n\n";
-if ($Viewer->permitted('admin_schedule')) {
+if (isset($Viewer) && $Viewer->permitted('admin_schedule')) {
     echo '</pre>';
     View::show_footer();
 }
