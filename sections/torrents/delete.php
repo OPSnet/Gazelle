@@ -195,7 +195,7 @@ View::show_header('Delete torrent', ['js' => 'reportsv2']);
                     <a href="log.php?search=Torrent+<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)
 <?php } else { ?>
                     <?=$LinkName?>
-                    <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->annouceKey() ?>" class="brackets tooltip" title="Download">DL</a>
+                    <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" class="brackets tooltip" title="Download">DL</a>
                     uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> <?=time_diff($Time)?>
                     <br />
 <?php
