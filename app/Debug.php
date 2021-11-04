@@ -89,22 +89,12 @@ class Debug {
         return false;
     }
 
-    public function analysis($Message, $Report = '', $Time = 43200) {
-        $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
-        if (PHP_SAPI === 'cli'
-            || in_array($RequestURI, ['tools.php?action=db_sandbox'])
-        ) {
-            // Don't spam IRC from Boris or these pages
-            return;
-        }
-        if (empty($Report)) {
-            $Report = $Message;
-        }
-        $Identifier = randomString(5);
+    public function saveCase(string $message): string {
+        $ident = randomString(5);
         self::$cache->cache_value(
-            'analysis_'.$Identifier, [
+            'analysis_'.$ident, [
                 'URI'      => isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
-                'message'  => $Report,
+                'message'  => $message,
                 'time'     => time(),
                 'errors'   => $this->get_errors(true),
                 'flags'    => $this->get_flags(),
@@ -119,10 +109,35 @@ class Debug {
                 'cache'         => $this->get_cache_keys(),
                 'cache_time'    => self::$cache->Time,
             ],
-            $Time
+            86400 * 2
         );
+        return $ident;
+    }
+
+    public function analysis($Message, $Report = '', $Time = 43200) {
+        $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
+        if (PHP_SAPI === 'cli'
+            || in_array($RequestURI, ['tools.php?action=db_sandbox'])
+        ) {
+            // Don't spam IRC from Boris or these pages
+            return;
+        }
+        if (empty($Report)) {
+            $Report = $Message;
+        }
+        $case = $this->saveCase($Report);
         global $Document;
-        Irc::sendRaw('PRIVMSG '.LAB_CHAN." :{$Message} $Document ".SITE_URL."/tools.php?action=analysis&case=$Identifier ".SITE_URL.'/'.$RequestURI);
+        Irc::sendRaw('PRIVMSG '.LAB_CHAN." :{$Message} $Document "
+            . SITE_URL."/tools.php?action=analysis&case=$case "
+            . SITE_URL.'/'.$RequestURI
+        );
+    }
+
+    public function saveError(\Exception $e) {
+        $this->saveCase(
+            $e->getMessage() . "\n"
+            . str_replace(SERVER_ROOT .'/', '', $e->getTraceAsString())
+        );
     }
 
     public function get_cpu_time() {
