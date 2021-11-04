@@ -312,7 +312,10 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'analysis':
-        require_once('misc/analysis.php');
+        require_once('development/analysis.php');
+        break;
+    case 'analysis_list':
+        require_once('development/analysis_list.php');
         break;
     case 'dupe_ips':
         require_once('misc/dupe_ip.php');
@@ -322,9 +325,6 @@ switch ($_REQUEST['action']) {
         break;
     case 'manipulate_tree':
         require_once('misc/manipulate_tree.php');
-        break;
-    case 'analysis_list':
-        require_once('misc/analysis_list.php');
         break;
     case 'monthalbum':
         require_once('misc/album_of_month.php');
