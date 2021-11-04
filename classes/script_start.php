@@ -210,6 +210,15 @@ $Cache->cache_value('php_' . getmypid(), [
     )
 ], 600);
 
+function shutdown() {
+    $error = error_get_last();
+    if ($error['type'] ?? 0 == E_ERROR) {
+        global $Debug;
+        $Debug->saveCase(str_replace(SERVER_ROOT .'/', '', $error['message']));
+    }
+}
+register_shutdown_function('shutdown');
+
 $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
 $file = realpath(__DIR__ . '/../sections/' . $Document . '/index.php');
 if (!file_exists($file)) {
@@ -227,8 +236,12 @@ if (!file_exists($file)) {
 <?php
             View::show_footer();
         } else {
+            $Debug->saveError($e);
             error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
         }
+    }
+    catch (\Exception $e) {
+        $Debug->saveError($e);
     }
 }
 
@@ -238,14 +251,18 @@ if ($Router->hasRoutes()) {
         /** @noinspection PhpIncludeInspection */
         require_once($Router->getRoute($action));
     }
-    catch (Gazelle\Exception\RouterException $exception) {
+    catch (\Gazelle\Exception\RouterException $exception) {
         error(404);
     }
-    catch (Gazelle\Exception\InvalidAccessException $exception) {
+    catch (\Gazelle\Exception\InvalidAccessException $exception) {
         error(403);
     }
     catch (\DB_MYSQL_Exception $e) {
+        $Debug->saveError($e);
         error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+    }
+    catch (\Exception $e) {
+        $Debug->saveError($e);
     }
 }
 
