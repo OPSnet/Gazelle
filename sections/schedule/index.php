@@ -59,10 +59,6 @@ if (PHP_SAPI === 'cli') {
     } else {
         $scheduler->run();
     }
-}
-
-echo "-------------------------\n\n";
-if (isset($Viewer) && $Viewer->permitted('admin_schedule')) {
     echo '</pre>';
     View::show_footer();
 }
