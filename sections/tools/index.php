@@ -59,6 +59,9 @@ switch ($_REQUEST['action']) {
     case 'dnu_alter':
         require_once('managers/dnu_alter.php');
         break;
+    case 'dupe_ips':
+        require_once('managers/dupe_ip.php');
+        break;
 
     case 'email_blacklist':
         require_once('managers/email_blacklist.php');
@@ -312,19 +315,16 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'analysis':
-        require_once('misc/analysis.php');
+        require_once('development/analysis.php');
         break;
-    case 'dupe_ips':
-        require_once('misc/dupe_ip.php');
+    case 'analysis_list':
+        require_once('development/analysis_list.php');
         break;
     case 'create_user':
         require_once('misc/create_user.php');
         break;
     case 'manipulate_tree':
         require_once('misc/manipulate_tree.php');
-        break;
-    case 'analysis_list':
-        require_once('misc/analysis_list.php');
         break;
     case 'monthalbum':
         require_once('misc/album_of_month.php');
