@@ -10,7 +10,7 @@
  */
 
 if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
-    if (check_perms('users_override_paranoia')) {
+    if ($Viewer->permitted('users_override_paranoia')) {
         $userId = $_GET['userid'];
     } else {
         error(403);
@@ -279,7 +279,7 @@ function selected($val) {
             Number of missing transcodes: <?=number_format($counter['miss_total'])?><br />
             Number of missing V0 / 320 transcodes: <?=number_format($counter['miss_V0 (VBR)'])?> / <?=number_format($counter['miss_320'])?>
 <?php
-if (check_perms('zip_downloader') && count($counter['ids']) > 1) {
+if ($Viewer->permitted('zip_downloader') && count($counter['ids']) > 1) {
     $idList = implode(',', $counter['ids']);
 ?>
             <br />

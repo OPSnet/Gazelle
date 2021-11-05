@@ -22,7 +22,7 @@ if (empty($_GET['userid'])) {
     $user = $Viewer;
     $ownProfile = true;
 } else {
-    if (!check_perms('admin_bp_history')) {
+    if (!$Viewer->permitted('admin_bp_history')) {
         error(403);
     }
     $user = $userMan->findById((int)($_GET['userid'] ?? 0));
@@ -50,7 +50,7 @@ View::show_header($Title);
 <div class="linkbox">
     <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php" class="brackets">Bonus Point Shop</a>
-    <a href="bonus.php?action=history<?= check_perms('admin_bp_history') && !$ownProfile ? "&amp;userid=$userId" : '' ?>" class="brackets">History</a>
+    <a href="bonus.php?action=history<?= $Viewer->permitted('admin_bp_history') && !$ownProfile ? "&amp;userid=$userId" : '' ?>" class="brackets">History</a>
 </div>
 <table>
     <thead>
