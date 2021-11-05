@@ -58,7 +58,7 @@ if (isset($_POST['tags'])) {
 }
 $Properties['Image'] = trim($_POST['image'] ?? '');
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
-$Properties['VanityHouse'] = (int)($_POST['vanity_house'] ?? null && check_perms('torrents_edit_vanityhouse'));
+$Properties['VanityHouse'] = (int)($_POST['vanity_house'] ?? null && $Viewer->permitted('torrents_edit_vanityhouse'));
 $Properties['TorrentDescription'] = trim($_POST['release_desc'] ?? '');
 if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
