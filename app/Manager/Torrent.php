@@ -511,47 +511,66 @@ class Torrent extends \Gazelle\Base {
      * Freeleech / neutral leech / normalise a set of torrents
      *
      * @param array $TorrentIDs An array of torrent IDs to iterate over
-     * @param string $FreeNeutral 0 = normal, 1 = fl, 2 = nl
-     * @param string $FreeLeechType 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
-     * @param bool $AllFL true = all torrents are made FL, false = only lossless torrents are made FL
+     * @param string $leechLevel 0 = normal, 1 = FL, 2 = NL
+     * @param string $reason 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
+     * @param bool $all true = all torrents are made FL, false = only lossless torrents are made FL
+     * @param bool $limitLarge true and level is FL => torrents over 1GiB are NL
      */
-    public function setFreeleech(\Gazelle\User $user, array $TorrentIDs, string $FreeNeutral, $FreeLeechType, bool $AllFL): int {
+    public function setFreeleech(\Gazelle\User $user, array $TorrentIDs, string $leechLevel, $reason, bool $all, bool $limitLarge): int {
         $QueryID = $this->db->get_query_id();
-        $condition = $AllFL || $FreeLeechType == '0' ? '' : "AND Encoding IN ('24bit Lossless', 'Lossless')";
+        $condition = '';
+        if ($reason == '0') {
+            if (!$all) {
+                $condition .= " AND Encoding IN ('24bit Lossless', 'Lossless')";
+            }
+            if ($limitLarge) {
+                $condition .= " AND Size <= 1073741824"; // 1GiB
+            }
+        }
+
         $placeholders = placeholders($TorrentIDs);
-        $this->db->prepared_query("
+        $this->db->begin_transaction();
+        $this->db->prepared_query($sql = "
             UPDATE torrents SET
                 FreeTorrent = ?, FreeLeechType = ?
             WHERE ID IN ($placeholders)
                 $condition
-            ", $FreeNeutral, $FreeLeechType, ...$TorrentIDs
+            ", $leechLevel, $reason, ...$TorrentIDs
         );
         $affected = $this->db->affected_rows();
 
+        if ($reason == '0' && $limitLarge) {
+            $this->db->prepared_query("
+                UPDATE torrents SET
+                    FreeTorrent = ?, FreeLeechType = ?
+                WHERE ID IN ($placeholders)
+                    AND Size > 1073741824
+                ", '2', $reason, ...$TorrentIDs
+            );
+            $affected += $this->db->affected_rows();
+        }
+
         $this->db->prepared_query("
-            SELECT ID, GroupID, info_hash
-            FROM torrents
-            WHERE ID IN ($placeholders)
-            ORDER BY GroupID ASC
+            SELECT ID, GroupID, info_hash FROM torrents WHERE ID IN ($placeholders) ORDER BY GroupID ASC
             ", ...$TorrentIDs
         );
         $Torrents = $this->db->to_array(false, MYSQLI_NUM, false);
         $GroupIDs = $this->db->collect('GroupID', false);
+        $this->db->commit();
         $this->db->set_query_id($QueryID);
+
+        $tgMan = new TGroup;
+        foreach ($GroupIDs as $id) {
+            $tgMan->refresh($id);
+        }
 
         $groupLog = new \Gazelle\Log;
         $tracker = new \Gazelle\Tracker;
-        foreach ($Torrents as $Torrent) {
-            [$TorrentID, $GroupID, $InfoHash] = $Torrent;
-            $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral]);
+        foreach ($Torrents as list($TorrentID, $GroupID, $InfoHash)) {
+            $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $leechLevel]);
             $this->cache->delete_value("torrent_download_$TorrentID");
-            $groupLog->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $FreeLeechType")
-                ->general($user->username() . " marked torrent $TorrentID freeleech type $FreeLeechType");
-        }
-
-        $tgroupMan = new \Gazelle\Manager\TGroup;
-        foreach ($GroupIDs as $id) {
-            $tgroupMan->refresh($id);
+            $groupLog->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $reason")
+                ->general($user->username() . " marked torrent $TorrentID freeleech type $reason");
         }
 
         return $affected;

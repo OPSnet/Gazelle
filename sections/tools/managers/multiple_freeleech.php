@@ -1,123 +1,72 @@
 <?php
 
-if (!$Viewer->permitted('users_mod')) {
+if (!$Viewer->permitted('admin_freeleech')) {
     error(403);
 }
 
-if (isset($_POST['torrents'])) {
+// use a while to early-exit in case of an error
+while (isset($_POST['torrents'])) {
+
+    $reason = $_POST['reason'];
+    if (!in_array($reason, ['0', '1', '2', '3'])) {
+        $message = "Invalid or freeleech reason";
+        break;
+    }
+
+    $leechType = $_POST['leech_type'];
+    if (!in_array($leechType, ['0', '1', '2'])) {
+        $message = "Invalid freeleech type";
+        break;
+    }
+
+    $tgMan = new Gazelle\Manager\TGroup;
     $GroupIDs = [];
     $Elements = explode("\r\n", $_POST['torrents']);
     foreach ($Elements as $Element) {
-        // Get all of the torrent IDs
-        if (strpos($Element, "torrents.php") !== false) {
-            $Data = explode("id=", $Element);
-            if (!empty($Data[1])) {
-                $GroupIDs[] = (int) $Data[1];
+        if (preg_match(TGROUP_REGEXP, $Element, $match)) {
+            $tgroup = $tgMan->findById((int)$match['id']);
+            if ($tgroup) {
+                $GroupIDs[] = $tgroup->id();
             }
-        } else if (strpos($Element, "collages.php") !== false) {
-            $Data = explode("id=", $Element);
-            if (!empty($Data[1])) {
-                $CollageID = (int) $Data[1];
-                $DB->prepared_query('
-                    SELECT GroupID
-                    FROM collages_torrents
-                    WHERE CollageID = ?
-                    ', $CollageID);
-                $GroupIDs = array_merge($GroupIDs, $DB->collect('GroupID'));
+        } elseif (preg_match('/\/collages\.php\?.*?\bid=(?P<id>\d+)$/', $Element, $match)) {
+            $collage = (new Gazelle\Manager\Collage)->findById((int)$match['id']);
+            if ($collage) {
+                $DB->prepared_query("
+                    SELECT GroupID FROM collages_torrents WHERE CollageID = ?
+                    ", $collage->id()
+                );
+                array_push($GroupIDs, ...$DB->collect('GroupID', false));
             }
         }
     }
-
-    if (sizeof($GroupIDs) == 0) {
-        $Err = 'Please enter properly formatted URLs';
-    } else {
-        $FreeLeechType = $_POST['freeleechtype'];
-        $FreeLeechReason = $_POST['freeleechreason'];
-
-        if (!in_array($FreeLeechType, ['0', '1', '2']) || !in_array($FreeLeechReason, ['0', '1', '2', '3'])) {
-            $Err = 'Invalid freeleech type or freeleech reason';
-        } else {
-            // Get the torrent IDs
-            $DB->prepared_query("
-                SELECT ID
-                FROM torrents
-                WHERE GroupID IN (" . placeholders($GroupIDs) . ")
-                ", ...$GroupIDs
-            );
-            $TorrentIDs = $DB->collect('ID');
-
-            if (sizeof($TorrentIDs) == 0) {
-                $Err = 'Invalid group IDs';
-            } else {
-                $LargeTorrents = [];
-                if (isset($_POST['NLOver']) && $FreeLeechType == '1') {
-                    // Only use this checkbox if freeleech is selected
-                    $Size = (int) $_POST['size'];
-                    $Units = trim($_POST['scale']);
-
-                    if (empty($Size) || !in_array($Units, ['k', 'm', 'g'])) {
-                        $Err = 'Invalid size or units';
-                    } else {
-                        $DB->prepared_query("
-                             SELECT ID
-                             FROM torrents
-                             WHERE Size > ?
-                                  AND ID IN (" . placeholders($TorrentIDs) . ")",
-                              Format::get_bytes($Size . $Units), ...$TorrentIDs
-                        );
-                        $LargeTorrents = $DB->collect('ID');
-                        $TorrentIDs = array_diff($TorrentIDs, $LargeTorrents);
-                    }
-                }
-
-                $torMan = new Gazelle\Manager\Torrent;
-                if ($TorrentIDs) {
-                    $torMan->setFreeleech($Viewer, $TorrentIDs, $FreeLeechType, $FreeLeechReason, false);
-                }
-                if ($LargeTorrents) {
-                    $torMan->setFreeleech($Viewer, $LargeTorrents, '2', $FreeLeechReason, false);
-                }
-
-                $Err = 'Done!';
-            }
-        }
+    if (empty($GroupIDs)) {
+        $message = "There were no groups found in provided links";
+        break;
     }
+
+    $DB->prepared_query("
+        SELECT DISTINCT ID FROM torrents WHERE GroupID IN (" . placeholders($GroupIDs) . ")",
+        ...$GroupIDs
+    );
+    $torrentIds = $DB->collect(0, false);
+    if (empty($torrentIds)) {
+        $message = "There were no torrents in the groups found in the provided links";
+        break;
+    }
+
+    $affected = (new Gazelle\Manager\Torrent)
+        ->setFreeleech($Viewer, $torrentIds, $reason, $leechType, isset($_POST['all']), isset($_POST['limit']));
+    $message = "Done! ($affected changed)";
+    break;
 }
 
-View::show_header('Multiple Freeleech');
-?>
-<div class="thin">
-    <div class="box pad box2">
-<?php  if (isset($Err)) { ?>
-        <strong class="important_text"><?=$Err?></strong><br />
-<?php  } ?>
-        Paste a list of collage or torrent group URLs
-    </div>
-    <div class="box pad">
-        <form class="send_form center" action="" method="post">
-            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-            <textarea name="torrents" style="width: 95%; height: 200px;"><?=$_POST['torrents']?></textarea><br /><br />
-            Mark torrents as:&nbsp;
-            <select name="freeleechtype">
-                <option value="1" <?=$_POST['freeleechtype'] == '1' ? 'selected' : ''?>>FL</option>
-                <option value="2" <?=$_POST['freeleechtype'] == '2' ? 'selected' : ''?>>NL</option>
-                <option value="0" <?=$_POST['freeleechtype'] == '0' ? 'selected' : ''?>>Normal</option>
-            </select>
-            &nbsp;for reason&nbsp;<select name="freeleechreason">
-<?php   $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
-        foreach ($FL as $Key => $FLType) { ?>
-                            <option value="<?=$Key?>" <?=$_POST['freeleechreason'] == $Key ? 'selected' : ''?>><?=$FLType?></option>
-<?php   } ?>
-            </select><br /><br />
-            <input type="checkbox" name="NLOver" checked />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
-            <select name="scale">
-                <option value="k" <?=$_POST['scale'] == 'k' ? 'selected' : ''?>>KiB</option>
-                <option value="m" <?=$_POST['scale'] == 'm' ? 'selected' : ''?>>MiB</option>
-                <option value="g" <?=!isset($_POST['scale']) || $_POST['scale'] == 'g' ? 'selected' : ''?>>GiB</option>
-            </select><br /><br />
-            <input type="submit" value="Submit" />
-        </form>
-    </div>
-</div>
-<?php
-View::show_footer();
+echo $Twig->render('admin/freeleech.twig', [
+    'all'         => $_POST['all'] ?? 0,
+    'error'       => $message,
+    'leech_type'  => $_POST['leech_type'] ?? '0',
+    'limit'       => $_POST['limit'] ?? 1,
+    'list'        => new Gazelle\Util\Textarea('torrents', $_POST['torrents'] ?? ''),
+    'reason'      => $_POST['reason'] ?? '0',
+    'reason_list' => ['0' => 'N/A', '1' => 'Staff Pick', '2' => 'Perma-FL', '3' => 'Showcase'],
+    'viewer'      => $Viewer,
+]);

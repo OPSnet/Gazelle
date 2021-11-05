@@ -36,7 +36,7 @@ if (isset($_POST['freeleechtype']) && $Viewer->permitted('torrents_freeleech')) 
         ", $groupId
     );
     (new Gazelle\Manager\Torrent)
-        ->setFreeleech($Viewer, $DB->collect('ID', false), $Free, $FreeType, false);
+        ->setFreeleech($Viewer, $DB->collect('ID', false), $Free, $FreeType, false, false);
 }
 
 $year = (int)trim($_POST['year']);
