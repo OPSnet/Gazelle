@@ -182,9 +182,11 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
     </tr>
 <?php
         unset($FilterResults['FilterLabel']);
+        $torMan = new Gazelle\Manager\Torrent;
+        $torMan->setViewer($Viewer);
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
-            $torrent = $torMan->findById($Result['TorrentID']);
+            $torrent = $torMan->findById($TorrentID);
             if (is_null($torrent)) {
                 continue;
             }
