@@ -46,7 +46,7 @@ if ($privilege && empty($_REQUEST['secondary']) == $privilege->isSecondary() && 
 
 $name         = $_REQUEST['name'];
 $forums       = $_REQUEST['forums'];
-$staffGroup   = $_REQUEST['staffgroup'] ?? null;
+$staffGroup   = isset($_REQUEST['staffgroup']);
 $displayStaff = isset($_REQUEST['displaystaff']);
 $level        = (int)$_REQUEST['level'];
 $secondary    = (int)isset($_REQUEST['secondary']);
