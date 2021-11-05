@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_proxy_images')) {
+if (!$Viewer->permitted('site_proxy_images')) {
     header('Content-type: image/png');
     Gazelle\Image::render('403 forbidden');
     exit;
