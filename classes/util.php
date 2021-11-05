@@ -792,9 +792,6 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
     if ($PersonalProperties) {
         // Fetch all user specific torrent and group properties
         $TorrentDetails['Flags'] = ['IsSnatched' => false];
-        foreach ($TorrentList as &$Torrent) {
-            Torrents::torrent_properties($Torrent, $TorrentDetails['Flags']);
-        }
     }
 
     return [$TorrentDetails, $TorrentList];

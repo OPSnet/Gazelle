@@ -450,13 +450,20 @@ foreach ($TorrentList as $t) {
 $LastMedia = null;
 $UnknownCounter = 0;
 $torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 foreach ($TorrentList as $Torrent) {
     [$TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
         $RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
         $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
-        $Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
-        $FilePath, $UserID, $LastActive,,,,,,,,, $LastReseedRequest,, $LogCount, $is_deleted,, $IsSnatched
+        $Snatched,, $TorrentTime, $Description, $FileList,
+        $FilePath, $UserID, $LastActive,,,,,,,,, $LastReseedRequest,, $LogCount, $is_deleted
     ] = array_values($Torrent);
+    $torrent = $torMan->findById($TorrentID);
+    if (is_null($torrent)) {
+        continue;
+    }
+    $IsSnatched = $torrent->isSnatched($Viewer->id());
+    $Torrent['PersonalFL'] = $torrent->isFreeleechPersonal();
 
     if ($is_deleted && count($TorrentList) > 1) {
         continue;
@@ -568,7 +575,7 @@ foreach ($TorrentList as $Torrent) {
         }
     } else {
         echo $Twig->render('torrent/action.twig', [
-            'can_fl' => Torrents::can_use_token($Torrent),
+            'can_fl' => $Viewer->canSpendFLToken($torrent),
             'key'    => $Viewer->announceKey() ,
             't'      => $Torrent,
             'edit'   => $CanEdit,
