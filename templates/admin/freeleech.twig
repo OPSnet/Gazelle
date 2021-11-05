@@ -1,0 +1,42 @@
+{% from 'macro/form.twig' import checked, selected -%}
+{{ header('Multiple Freeleech') }}
+<div class="thin">
+<h3>Multiple Freeleech</h3>
+
+<div class="box pad box2">
+{% if error %}
+    <strong class="important_text">{{ error }}</strong><br /><br />
+{% endif %}
+    <div>
+    Paste a list of collage or torrent group URLs<br /><br />
+    <pre>    {{ constant('SITE_URL') }}/collages.php?id=nnn
+    {{ constant('SITE_URL') }}/torrents.php?id=nnn</pre>
+    <br />Use the Preview button to verify that the urls point to the expected targets.
+    </div>
+</div>
+
+<div class="box pad">
+    <form class="send_form center" action="" method="post">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        {{ list.emit|raw }}
+        <br /><br />
+        Mark torrents as:&nbsp;
+        <select name="leech_type">
+            <option value="1"{{ selected(leech_type == '1') }}>FL</option>
+            <option value="2"{{ selected(leech_type == '2') }}>NL</option>
+            <option value="0"{{ selected(leech_type == '0') }}>Normal</option>
+        </select>
+        &nbsp;for reason&nbsp;<select name="reason">
+{% for key, label in reason_list %}
+            <option value="{{ key }}"{{ selected(key == reason) }}>{{ label }}</option>
+{% endfor %}
+        </select><br /><br />
+        <label><input type="checkbox" name="limit"{{ checked(limit) }} />&nbsp;NL Torrents over 1GiB</label>
+        <br /><br />
+        <label><input type="checkbox" name="all"{{ checked(all) }} />&nbsp;Include lossy torrents</label>
+        <br /><br />
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+</div>
+{{ footer() }}

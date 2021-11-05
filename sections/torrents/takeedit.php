@@ -362,7 +362,7 @@ $DB->commit();
 
 if ($Viewer->permitted('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
     (new Gazelle\Manager\Torrent)
-        ->setFreeleech($Viewer, [$TorrentID], $Properties['FreeLeech'], $Properties['FreeLeechType'], true);
+        ->setFreeleech($Viewer, [$TorrentID], $Properties['FreeLeech'], $Properties['FreeLeechType'], true, false);
 }
 (new \Gazelle\Manager\TGroup)->refresh($current['GroupID']);
 

@@ -83,19 +83,19 @@ Category('Administration', [
 ]);
 
 Category('Announcements', [
-    Item('Album of the Month',  'tools.php?action=monthalbum',          All(['users_mod'])),
+    Item('Album of the Month',  'tools.php?action=monthalbum',          All(['admin_freeleech'])),
     Item('Calendar',            'tools.php?action=calendar',            Calendar::can_view()),
     Item('Change log',          'tools.php?action=change_log',          All(['users_mod'])),
     Item('Global notification', 'tools.php?action=global_notification', All(['admin_global_notification'])),
     Item('Mass PM',             'tools.php?action=mass_pm',             All(['admin_global_notification'])),
     Item('News post',           'tools.php?action=news',                All(['admin_manage_news'])),
-    Item('Vanity House',        'tools.php?action=vanityhouse',         All(['users_mod'])),
+    Item('Vanity House',        'tools.php?action=vanityhouse',         All(['admin_freeleech'])),
 ]);
 
 Category('Rewards', [
     Item('Manage bonus points',         'tools.php?action=bonus_points',       All(['users_mod'])),
-    Item('Manage freeleech tokens',     'tools.php?action=tokens',             All(['users_mod'])),
-    Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['users_mod'])),
+    Item('Manage freeleech tokens',     'tools.php?action=tokens',             All(['admin_freeleech'])),
+    Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['admin_freeleech'])),
 ]);
 
 Category('Stylesheets', [
