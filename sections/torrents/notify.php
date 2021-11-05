@@ -184,6 +184,10 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         unset($FilterResults['FilterLabel']);
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
+            $torrent = $torMan->findById($Result['TorrentID']);
+            if (is_null($torrent)) {
+                continue;
+            }
             $GroupID = $Result['GroupID'];
             $GroupInfo = $TorrentGroups[$Result['GroupID']];
             if (!isset($GroupInfo['Torrents'][$TorrentID]) || !isset($GroupInfo['ID'])) {
@@ -245,7 +249,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 <?php       } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($TorrentInfo),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $TorrentInfo,
                     'extra'  => [

@@ -294,9 +294,9 @@ class Better extends \Gazelle\Base
         return [$results, $resultCount, $mode];
     }
 
-    public function singleSeeded(int $viewerId): array {
+    public function singleSeeded(\Gazelle\User $viewer): array {
         $torMan = new Torrent;
-        $torMan->setViewerId($viewerId);
+        $torMan->setViewer($viewer);
         $this->db->prepared_query("
             SELECT t.ID
             FROM torrents t
@@ -311,8 +311,11 @@ class Better extends \Gazelle\Base
 
     public function twigGroups(array $results) {
         $releaseTypes = $this->releaseTypes;
-        return array_reduce($results, function ($acc, $item) use ($releaseTypes) {
-            $torrent = $item['ID'];
+        global $Viewer; // TODO: this function is a mess, make it worse until it can be made better
+        $torMan = (new \Gazelle\Manager\Torrent)->setViewer($Viewer);
+        return array_reduce($results, function ($acc, $item) use ($releaseTypes, $Viewer, $torMan) {
+            $torrentId = $item['ID'];
+            $torrent = $torMan->findById($torrentId);
             $group = $item['Group'];
             $groupId = $group['ID'];
             $groupYear = $group['Year'];
@@ -330,28 +333,28 @@ class Better extends \Gazelle\Base
             } else {
                 $displayName = '';
             }
-            $displayName .= "<a href=\"torrents.php?id=$groupId&amp;torrentid=$torrent#torrent$torrent\">$groupName";
+            $displayName .= "<a href=\"torrents.php?id=$groupId&amp;torrentid=$torrentId#torrent$torrentId\">$groupName";
             if ($groupYear > 0) {
                 $displayName .= " [$groupYear]";
             }
             if ($releaseType > 0) {
                 $displayName .= ' ['.$releaseTypes[$releaseType].']';
             }
-            $extraInfo = \Torrents::torrent_info($groupTorrents[$torrent]);
+            $extraInfo = \Torrents::torrent_info($groupTorrents[$torrentId]);
             if ($extraInfo) {
                 $displayName .= " - $extraInfo";
             }
             $displayName .= '</a>';
 
-            $tokensToUse = ceil($groupTorrents[$torrent]['Size'] / BYTES_PER_FREELEECH_TOKEN);
+            $tokensToUse = $torrent->tokenCount();
             $s = plural($tokensToUse);
-            $acc[$torrent] = [
+            $acc[$torrentId] = [
                 'group_id'   => $groupId,
-                'snatched'   => $groupTorrents[$torrent]['IsSnatched'] ?? false,
+                'snatched'   => $groupTorrents[$torrentId]['IsSnatched'] ?? false,
                 'name'       => $displayName,
                 'tags'       => $tags->format(),
-                'token'      => \Torrents::can_use_token($groupTorrents[$torrent]),
-                'fl_message' => $groupTorrents[$torrent]['Seeders'] == 0
+                'token'      => $Viewer->canSpendFLToken($torrent),
+                'fl_message' => $groupTorrents[$torrentId]['Seeders'] == 0
                     ? "Warning! This torrent is not seeded at the moment, are you sure you want to use $tokensToUse token$s here?"
                     : "Use $tokensToUse token$s here?",
             ];

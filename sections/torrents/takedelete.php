@@ -5,7 +5,7 @@ $t = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
 if (is_null($t)) {
     error(404);
 }
-$t->setViewerId($Viewer->id());
+$t->setViewer($Viewer);
 $tgroup  = $t->group();
 $group   = $tgroup->info();
 $torrent = $t->info();

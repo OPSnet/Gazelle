@@ -56,6 +56,7 @@ if (isset($_POST['GroupID'])) {
                     WHERE Encoding = 'Lossless' AND GroupID = ?", $Album['ID']);
                 $TorrentIDs = $DB->collect('ID');
 
+                $LargeTorrents = [];
                 if (isset($_POST['NLOver']) && $FreeLeechType == '1') {
                     // Only use this checkbox if freeleech is selected
                     $Size = (int) $_POST['size'];
@@ -76,12 +77,12 @@ if (isset($_POST['GroupID'])) {
                     }
                 }
 
-                if (count($TorrentIDs) > 0) {
-                    Torrents::freeleech_torrents($TorrentIDs, $FreeLeechType, $FreeLeechReason);
+                $torMan = new Gazelle\Manager\Torrent;
+                if ($TorrentIDs) {
+                    $torMan->setFreeleech($Viewer, $TorrentIDs, $FreeLeechType, $FreeLeechReason, false);
                 }
-
-                if (isset($LargeTorrents) && count($LargeTorrents) > 0) {
-                    Torrents::freeleech_torrents($LargeTorrents, '2', $FreeLeechReason);
+                if ($LargeTorrents) {
+                    $torMan->setFreeleech($Viewer, $LargeTorrents, '2', $FreeLeechReason, false);
                 }
             }
 

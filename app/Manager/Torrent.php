@@ -2,9 +2,6 @@
 
 namespace Gazelle\Manager;
 
-use Gazelle\Exception\TorrentManagerIdNotSetException;
-use Gazelle\Exception\TorrentManagerUserNotSetException;
-
 class Torrent extends \Gazelle\Base {
     /*
      **** To display a torrent name, edition and flags, at the minimum the code looks like:
@@ -50,14 +47,14 @@ class Torrent extends \Gazelle\Base {
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
 
-    protected int $viewerId;
+    protected \Gazelle\User $viewer;
 
     /**
      * Set the viewer context, for snatched indicators etc.
      * If this is set, and Torrent object created will have it set
      */
-    public function setViewerId(int $viewerId) {
-        $this->viewerId = $viewerId;
+    public function setViewer(\Gazelle\User $viewer) {
+        $this->viewer = $viewer;
         return $this;
     }
 
@@ -77,8 +74,8 @@ class Torrent extends \Gazelle\Base {
             return null;
         }
         $torrent = new \Gazelle\Torrent($id);
-        if (isset($this->viewerId)) {
-            $torrent->setViewerId($this->viewerId);
+        if (isset($this->viewer)) {
+            $torrent->setViewer($this->viewer);
         }
         return $torrent;
     }
@@ -508,6 +505,56 @@ class Torrent extends \Gazelle\Base {
                 ', $historyID, $i, $torrentID, $titleString, $group['TagList']
             );
         }
+    }
+
+    /**
+     * Freeleech / neutral leech / normalise a set of torrents
+     *
+     * @param array $TorrentIDs An array of torrent IDs to iterate over
+     * @param string $FreeNeutral 0 = normal, 1 = fl, 2 = nl
+     * @param string $FreeLeechType 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
+     * @param bool $AllFL true = all torrents are made FL, false = only lossless torrents are made FL
+     */
+    public function setFreeleech(\Gazelle\User $user, array $TorrentIDs, string $FreeNeutral, $FreeLeechType, bool $AllFL): int {
+        $QueryID = $this->db->get_query_id();
+        $condition = $AllFL || $FreeLeechType == '0' ? '' : "AND Encoding IN ('24bit Lossless', 'Lossless')";
+        $placeholders = placeholders($TorrentIDs);
+        $this->db->prepared_query("
+            UPDATE torrents SET
+                FreeTorrent = ?, FreeLeechType = ?
+            WHERE ID IN ($placeholders)
+                $condition
+            ", $FreeNeutral, $FreeLeechType, ...$TorrentIDs
+        );
+        $affected = $this->db->affected_rows();
+
+        $this->db->prepared_query("
+            SELECT ID, GroupID, info_hash
+            FROM torrents
+            WHERE ID IN ($placeholders)
+            ORDER BY GroupID ASC
+            ", ...$TorrentIDs
+        );
+        $Torrents = $this->db->to_array(false, MYSQLI_NUM, false);
+        $GroupIDs = $this->db->collect('GroupID', false);
+        $this->db->set_query_id($QueryID);
+
+        $groupLog = new \Gazelle\Log;
+        $tracker = new \Gazelle\Tracker;
+        foreach ($Torrents as $Torrent) {
+            [$TorrentID, $GroupID, $InfoHash] = $Torrent;
+            $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral]);
+            $this->cache->delete_value("torrent_download_$TorrentID");
+            $groupLog->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $FreeLeechType")
+                ->general($user->username() . " marked torrent $TorrentID freeleech type $FreeLeechType");
+        }
+
+        $tgroupMan = new \Gazelle\Manager\TGroup;
+        foreach ($GroupIDs as $id) {
+            $tgroupMan->refresh($id);
+        }
+
+        return $affected;
     }
 
     public function updatePeerlists(): array {

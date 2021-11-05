@@ -15,7 +15,7 @@ class Torrent extends BaseObject {
     protected $snatchBucket;
     protected $tokenCache;
     protected $updateTime;
-    protected $viewerId;
+    protected User $viewer;
 
     public function tableName(): string {
         return 'torrents';
@@ -38,8 +38,8 @@ class Torrent extends BaseObject {
      * @param int $userID The ID of the User
      * @return $this to allow method chaining
      */
-    public function setViewerId(int $viewerId) {
-        $this->viewerId = $viewerId;
+    public function setViewer(User $viewer) {
+        $this->viewer = $viewer;
         return $this;
     }
 
@@ -148,9 +148,9 @@ class Torrent extends BaseObject {
             $this->cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
         }
 
-        if ($this->viewerId) {
-            $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewerId);
-            $info['IsSnatched'] = $this->showSnatched && $this->isSnatched($this->viewerId);
+        if ($this->viewer) {
+            $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewer->id());
+            $info['IsSnatched'] = $this->showSnatched && $this->viewer->option('ShowSnatched') && $this->isSnatched($this->viewer->id());
         } else {
             $info['PersonalFL'] = false;
             $info['IsSnatched'] = false;
@@ -189,7 +189,7 @@ class Torrent extends BaseObject {
             $label[] = 'Scene';
         }
 
-        if ($this->isSnatched($this->viewerId)) {
+        if ($this->isSnatched($this->viewer->id())) {
             $label[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
         if (isset($info['FreeTorrent'])) {
@@ -315,6 +315,10 @@ class Torrent extends BaseObject {
 
     public function isFreeleech(): bool {
         return $this->info()['FreeTorrent'] == '1';
+    }
+
+    public function isFreeleechPersonal(): bool {
+        return $this->info()['PersonalFL'];
     }
 
     /**

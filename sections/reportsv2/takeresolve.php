@@ -89,6 +89,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
 }
 
 $torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 $reportMan = new Gazelle\Manager\ReportV2;
 $Types = $reportMan->types();
 if (!isset($_POST['resolve_type'])) {

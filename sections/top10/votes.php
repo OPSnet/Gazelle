@@ -3,6 +3,7 @@
 $vote = new Gazelle\Vote($Viewer->id());
 $tagMan = new Gazelle\Manager\Tag;
 $torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
@@ -133,13 +134,18 @@ foreach ($topVotes as $groupID => $group) {
 
     if (count($torrents) > 1 || $groupCategoryID == 1) {
         // Grouped torrents
+        // TODO: Gazelle\TGroup knows how to do this, so remove this garbage
         $groupSnatched = false;
-        foreach ($torrents as &$torrent) {
-            if (($torrent['IsSnatched'] = Torrents::has_snatched($torrent['ID'])) && !$groupSnatched) {
+        foreach ($torrents as &$tinfo) {
+            $torrent = $torMan->findById($torrentID);
+            if (is_null($torrent)) {
+                continue;
+            }
+            if (($tinfo['IsSnatched'] = $torrent->isSnatched($Viewer->id())) && !$groupSnatched) {
                 $groupSnatched = true;
             }
         }
-        unset($torrent);
+        unset($tinfo);
         $snatchedGroupClass = $groupSnatched ? ' snatched_group' : '';
 ?>
                 <tr class="group groupid_<?=$groupID?>_header discog<?=$snatchedGroupClass?>" id="group_<?=$groupID?>">
@@ -199,67 +205,75 @@ foreach ($topVotes as $groupID => $group) {
         $editionID = 0;
         unset($firstUnknown);
 
-        foreach ($torrents as $torrentID => $torrent) {
+        foreach ($torrents as $torrentID => $tinfo) {
+            $torrent = $torMan->findById($torrentID);
+            if (is_null($torrent)) {
+                continue;
+            }
             $reported = $torMan->hasReport($Viewer, $torrentID);
-            if ($torrent['Remastered'] && !$torrent['RemasterYear']) {
+            if ($tinfo['Remastered'] && !$tinfo['RemasterYear']) {
                 $firstUnknown = !isset($firstUnknown);
             }
-            $snatchedTorrentClass = $torrent['IsSnatched'] ? ' snatched_torrent' : '';
+            $snatchedTorrentClass = $tinfo['IsSnatched'] ? ' snatched_torrent' : '';
 
-            if ($torrent['RemasterTitle'] != $lastRemasterTitle
-                || $torrent['RemasterYear'] != $lastRemasterYear
-                || $torrent['RemasterRecordLabel'] != $lastRemasterRecordLabel
-                || $torrent['RemasterCatalogueNumber'] != $lastRemasterCatalogueNumber
+            if ($tinfo['RemasterTitle'] != $lastRemasterTitle
+                || $tinfo['RemasterYear'] != $lastRemasterYear
+                || $tinfo['RemasterRecordLabel'] != $lastRemasterRecordLabel
+                || $tinfo['RemasterCatalogueNumber'] != $lastRemasterCatalogueNumber
                 || (isset($firstUnknown) && $firstUnknown)
-                || $torrent['Media'] != $lastMedia
+                || $tinfo['Media'] != $lastMedia
                 ) {
                 $editionID++;
 ?>
         <tr class="group_torrent groupid_<?=$groupID?> edition<?=$snatchedGroupClass?> hidden">
-            <td colspan="7" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$groupID?>, <?=$editionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($torrent, $group)?></strong></td>
+            <td colspan="7" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$groupID?>, <?=$editionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($tinfo, $group)?></strong></td>
         </tr>
 <?php
             }
-            $lastRemasterTitle = $torrent['RemasterTitle'];
-            $lastRemasterYear = $torrent['RemasterYear'];
-            $lastRemasterRecordLabel = $torrent['RemasterRecordLabel'];
-            $lastRemasterCatalogueNumber = $torrent['RemasterCatalogueNumber'];
-            $lastMedia = $torrent['Media'];
+            $lastRemasterTitle = $tinfo['RemasterTitle'];
+            $lastRemasterYear = $tinfo['RemasterYear'];
+            $lastRemasterRecordLabel = $tinfo['RemasterRecordLabel'];
+            $lastRemasterCatalogueNumber = $tinfo['RemasterCatalogueNumber'];
+            $lastMedia = $tinfo['Media'];
 ?>
         <tr class="group_torrent torrent_row groupid_<?=$groupID?> edition_<?=$editionID?><?=$snatchedTorrentClass . $snatchedGroupClass?> hidden">
             <td colspan="3">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($torrent),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    't'      => $tinfo,
                 ]) ?>
-                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$groupID?>&amp;torrentid=<?=$torrentID?>"><?=Torrents::torrent_info($torrent)?><?php if ($reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
+                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$groupID?>&amp;torrentid=<?=$torrentID?>"><?=Torrents::torrent_info($tinfo)?><?php if ($reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
             </td>
-            <td class="number_column nobr"><?=Format::get_size($torrent['Size'])?></td>
-            <td class="number_column"><?=number_format($torrent['Snatched'])?></td>
-            <td class="number_column<?=($torrent['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($torrent['Seeders'])?></td>
-            <td class="number_column"><?=number_format($torrent['Leechers'])?></td>
+            <td class="number_column nobr"><?=Format::get_size($tinfo['Size'])?></td>
+            <td class="number_column"><?=number_format($tinfo['Snatched'])?></td>
+            <td class="number_column<?=($tinfo['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($tinfo['Seeders'])?></td>
+            <td class="number_column"><?=number_format($tinfo['Leechers'])?></td>
         </tr>
 <?php
         }
     } else { //if (count($torrents) > 1 || $groupCategoryID == 1)
         // Viewing a type that does not require grouping
         $torrentID = key($torrents);
-        $torrent = current($torrents);
-        $torrent['IsSnatched'] = Torrents::has_snatched($torrentID);
+        $torrent = $torMan->findById($torrentID);
+        if (is_null($torrent)) {
+            continue;
+        }
+        $tinfo = current($torrents);
+        $tinfo['IsSnatched'] = $torrent->isSnatched($Viewer->id());
 
         $displayName = $number .' - <a href="torrents.php?id='.$groupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$groupName.'</a>';
-        if ($torrent['IsSnatched']) {
+        if ($tinfo['IsSnatched']) {
             $displayName .= ' ' . Format::torrent_label('Snatched!');
         }
-        if ($torrent['FreeTorrent'] == '1') {
+        if ($tinfo['FreeTorrent'] == '1') {
             $displayName .= ' ' . Format::torrent_label('Freeleech!');
-        } elseif ($torrent['FreeTorrent'] == '2') {
+        } elseif ($tinfo['FreeTorrent'] == '2') {
             $displayName .= ' ' . Format::torrent_label('Neutral leech!');
-        } elseif (Torrents::has_token($torrentID)) {
+        } elseif ($torrent->hasToken($Viewer->id())) {
             $displayName .= ' ' . Format::torrent_label('Personal freeleech!');
         }
-        $snatchedTorrentClass = $torrent['IsSnatched'] ? ' snatched_torrent' : '';
+        $snatchedTorrentClass = $tinfo['IsSnatched'] ? ' snatched_torrent' : '';
 ?>
         <tr class="torrent torrent_row<?=$snatchedTorrentClass . $snatchedGroupClass?>" id="group_<?=$groupID?>">
             <td></td>
@@ -275,9 +289,9 @@ foreach ($topVotes as $groupID => $group) {
 <?php        } ?>
                 <div class="group_info clear">
                     <?= $Twig->render('torrent/action.twig', [
-                        'can_fl' => Torrents::can_use_token($torrent),
+                        'can_fl' => $Viewer->canSpendFLToken($torrent),
                         'key'    => $Viewer->announceKey(),
-                        't'      => $torrent,
+                        't'      => $tinfo,
                         'extra'  => [
                             "<a href=\"#\" id=\"bookmarklink_torrent_<?=$groupID?>\" " . $isBookmarked
                                 ? "class=\"remove_bookmark\" onclick=\"Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;\">Remove bookmark</a>"
@@ -288,10 +302,10 @@ foreach ($topVotes as $groupID => $group) {
                     <div class="tags"><?=$torrentTags->format()?></div>
                 </div>
             </td>
-            <td class="number_column nobr"><?=Format::get_size($torrent['Size'])?></td>
-            <td class="number_column"><?=number_format($torrent['Snatched'])?></td>
-            <td class="number_column<?=($torrent['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($torrent['Seeders'])?></td>
-            <td class="number_column"><?=number_format($torrent['Leechers'])?></td>
+            <td class="number_column nobr"><?=Format::get_size($tinfo['Size'])?></td>
+            <td class="number_column"><?=number_format($tinfo['Snatched'])?></td>
+            <td class="number_column<?=($tinfo['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($tinfo['Seeders'])?></td>
+            <td class="number_column"><?=number_format($tinfo['Leechers'])?></td>
         </tr>
 <?php
     } //if (count($torrents) > 1 || $groupCategoryID == 1)

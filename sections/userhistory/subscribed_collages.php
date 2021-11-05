@@ -9,6 +9,9 @@ $collMan = new Gazelle\Manager\Collage;
 $groupSubs = $collMan->subscribedGroupCollageList($Viewer->id(), !$ShowAll);
 $artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), !$ShowAll);
 
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
+
 View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
 <div class="thin">
@@ -84,6 +87,10 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                 $EditionID = 0;
                 unset($FirstUnknown);
                 foreach ($Torrents as $TorrentID => $t) {
+                    $torrent = $torMan->findById($TorrentID);
+                    if (is_null($torrent)) {
+                        continue;
+                    }
                     if ($t['Remastered'] && !$t['RemasterYear']) {
                         $FirstUnknown = !isset($FirstUnknown);
                     }
@@ -101,7 +108,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     <tr class="group_torrent groupid_<?= $s['collageId'] . $GroupID?> edition_<?=$EditionID?> hidden<?= ($t['IsSnatched'] ? ' snatched_torrent' : '') . $SnatchedGroupClass?>">
         <td colspan="2">
             <?= $Twig->render('torrent/action.twig', [
-                'can_fl' => Torrents::can_use_token($t),
+                'can_fl' => $Viewer->canSpendFLToken($torrent),
                 'key'    => $Viewer->announceKey(),
                 't'      => $t,
             ]) ?>
@@ -117,6 +124,10 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
             } else {
                 // Viewing a type that does not require grouping
                 $TorrentID = key($Torrents);
+                $torrent = $torMan->findById($TorrentID);
+                if (is_null($torrent)) {
+                    continue;
+                }
                 $Torrent = current($Torrents);
 
                 $DisplayName = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">{$Group['Name']}</a>";
@@ -141,7 +152,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 <?php           } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>

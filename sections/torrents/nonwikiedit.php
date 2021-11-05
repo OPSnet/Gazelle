@@ -31,7 +31,12 @@ if (isset($_POST['freeleechtype']) && $Viewer->permitted('torrents_freeleech')) 
         error(404);
     }
     $log[] = "freeleech type=$Free reason=$FreeType";
-    Torrents::freeleech_groups($groupId, $Free, $FreeType);
+    $DB->prepared_query("
+        SELECT ID FROM torrents WHERE GroupID = ?
+        ", $groupId
+    );
+    (new Gazelle\Manager\Torrent)
+        ->setFreeleech($Viewer, $DB->collect('ID', false), $Free, $FreeType, false);
 }
 
 $year = (int)trim($_POST['year']);
