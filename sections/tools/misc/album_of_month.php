@@ -79,10 +79,10 @@ if (isset($_POST['GroupID'])) {
 
                 $torMan = new Gazelle\Manager\Torrent;
                 if ($TorrentIDs) {
-                    $torMan->setFreeleech($Viewer, $TorrentIDs, $FreeLeechType, $FreeLeechReason, false);
+                    $torMan->setFreeleech($Viewer, $TorrentIDs, $FreeLeechType, $FreeLeechReason, false, true);
                 }
                 if ($LargeTorrents) {
-                    $torMan->setFreeleech($Viewer, $LargeTorrents, '2', $FreeLeechReason, false);
+                    $torMan->setFreeleech($Viewer, $LargeTorrents, '2', $FreeLeechReason, false, true);
                 }
             }
 
