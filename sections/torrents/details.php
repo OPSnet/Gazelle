@@ -720,7 +720,7 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
                     <td><a href="requests.php?action=view&amp;id=<?=$Request['ID']?>"><?=$FormatString?> / <?=$BitrateString?> / <?=$MediaString?></a></td>
                     <td>
                         <span id="vote_count_<?=$Request['ID']?>"><?=count($RequestVotes['Voters'])?></span>
-<?php       if ($Viewer->permitted('site_vote')) { ?>
+<?php       if ($Viewer->permitted('site_album_votes')) { ?>
                         &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$Request['ID']?>)" class="brackets">+</a>
 <?php       } ?>
                     </td>

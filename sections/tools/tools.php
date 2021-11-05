@@ -155,7 +155,6 @@ Category('External data', [
     Item('Email blacklist',        'tools.php?action=email_blacklist', All(['users_view_email'])),
     Item('IP address bans',        'tools.php?action=ip_ban',          All(['admin_manage_ipbans'])),
     Item('Duplicate IP addresses', 'tools.php?action=dupe_ips',        All(['users_view_ips'])),
-    Item('Update GeoIP',           'tools.php?action=update_geoip',    All(['admin_update_geoip'])),
 ]);
 
 Category('Finances', [
