@@ -530,7 +530,7 @@ if ($Requests) {
             </td>
             <td class="nobr">
                 <span id="vote_count_<?=$RequestID?>"><?=$Request['Votes']?></span>
-<?php       if ($Viewer->permitted('site_vote')) { ?>
+<?php       if ($Viewer->permitted('site_album_votes')) { ?>
                 <input type="hidden" id="auth" name="auth" value="<?=$authKey?>" />
                 &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
 <?php       } ?>
