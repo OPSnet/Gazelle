@@ -148,7 +148,7 @@ class Torrent extends BaseObject {
             $this->cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
         }
 
-        if ($this->viewer) {
+        if (isset($this->viewer)) {
             $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewer->id());
             $info['IsSnatched'] = $this->showSnatched && $this->viewer->option('ShowSnatched') && $this->isSnatched($this->viewer->id());
         } else {
@@ -189,7 +189,7 @@ class Torrent extends BaseObject {
             $label[] = 'Scene';
         }
 
-        if ($this->isSnatched($this->viewer->id())) {
+        if (isset($this->viewer) && $this->isSnatched($this->viewer->id())) {
             $label[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
         if (isset($info['FreeTorrent'])) {
