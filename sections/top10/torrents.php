@@ -2,6 +2,7 @@
 
 $torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
@@ -220,12 +221,11 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     $bookmark = new \Gazelle\Bookmark;
     foreach ($details as $index => $detail) {
         [$torrentID, $groupID, $data] = $detail;
+        $torrent = $torMan->findById($torrentID);
         $group = $groups[$groupID];
-        global $Debug;
-        $Debug->log_var($group, $groupID);
 
         $isBookmarked = $bookmark->isTorrentBookmarked($Viewer->id(), $groupID);
-        $isSnatched = Torrents::has_snatched($torrentID);
+        $isSnatched = $torrent->isSnatched($Viewer->id());
 
         // generate torrent's title
         $displayName = '';
@@ -262,7 +262,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
 <?php   } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($torrentDetails),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $torrentDetails,
                 ]) ?>

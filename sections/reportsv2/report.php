@@ -6,6 +6,7 @@
 
 $reportMan = new Gazelle\Manager\ReportV2;
 $torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 $userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
 
@@ -29,8 +30,8 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
         exit;
     }
     $Artists = Artists::get_artist($GroupID);
-    $torrent = (new Gazelle\Manager\Torrent)->findById($TorrentID);
-    $TorrentList = $torrent->setViewerId($Viewer->id())->info();
+    $torrent = $torMan->findById($TorrentID);
+    $TorrentList = $torrent->info();
     $group = $torrent->group()->info();
     $GroupID = $group['ID'];
     $GroupName = $group['Name'];
@@ -123,8 +124,8 @@ $CassetteApproved = $TorrentList['CassetteApproved'];
 $LossymasterApproved = $TorrentList['LossymasterApproved'];
 $LossywebApproved = $TorrentList['LossywebApproved'];
 $LastReseedRequest = $TorrentList['LastReseedRequest'];
-$PersonalFL = $TorrentList['PersonalFL'];
-$IsSnatched = $TorrentList['IsSnatched'];
+$PersonalFL = $torrent->isFreeleechPersonal();
+$IsSnatched = $torrent->isSnatched($Viewer->id());
 
 View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
 ?>
@@ -137,7 +138,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
         <h3><?=$DisplayName?></h3>
     </div>
     <div class="thin">
-        <table class="torrent_table details<?=($TorrentList['IsSnatched'] ? ' snatched' : '')?>" id="torrent_details">
+        <table class="torrent_table details<?=($IsSnatched ? ' snatched' : '')?>" id="torrent_details">
             <tr class="colhead_dark">
                 <td width="80%"><strong>Reported torrent</strong></td>
                 <td><strong>Size</strong></td>
@@ -292,7 +293,7 @@ $LastMedia = $Media;
                 <tr class="torrent_row releases_<?=($ReleaseType)?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=($IsSnatched ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
                     <td>
                         <?= $Twig->render('torrent/action.twig', [
-                            'can_fl' => Torrents::can_use_token($TorrentList),
+                            'can_fl' => $Viewer->canSpendFLToken($torrent),
                             'key'    => $Viewer->announceKey(),
                             't'      => $TorrentList,
                             'edit'   => $CanEdit,

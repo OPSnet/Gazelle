@@ -14,6 +14,9 @@ $collageMan = new Gazelle\Manager\Collage;
 $authKey = $Viewer->auth();
 $isSubscribed = (new Gazelle\Manager\Subscription($Viewer->id()))->isSubscribedComments('artist', $ArtistID);
 
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
+
 function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catalogueNumber, $media]);
 }
@@ -371,6 +374,11 @@ if ($sections = $Artist->sections()) {
         $UnknownCounter = 0;
 
         foreach ($Torrents as $TorrentID => $Torrent) {
+            $torrent = $torMan->findById($TorrentID);
+            if (is_null($torrent)) {
+                continue;
+            }
+            $Torrent['PersonalFL'] = $torrent->isFreeleechPersonal();
             $torrentEdition = torrentEdition(
                 $Torrent['RemasterTitle'], $Torrent['RemasterYear'], $Torrent['RemasterRecordLabel'],
                 $Torrent['RemasterCatalogueNumber'], $Torrent['Media']
@@ -388,12 +396,12 @@ if ($sections = $Artist->sections()) {
 <?php
             }
             $prevEdition = $torrentEdition;
-            $SnatchedTorrentClass = ($Torrent['IsSnatched'] ? ' snatched_torrent' : '');
+            $SnatchedTorrentClass = ($torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '');
 ?>
         <tr class="releases_<?=$sectionId?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
             <td class="td_info" colspan="2">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                     'extra'  => [

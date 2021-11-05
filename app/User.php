@@ -2243,6 +2243,20 @@ class User extends BaseObject {
     }
 
     /**
+     * Can the user spend a token (or more) to set this torrent Freeleech?
+     * Note: The torrent object MUST be instantiated with setViewer() set
+     * to the user.
+     */
+    public function canSpendFLToken(Torrent $torrent): bool {
+        return $this->canLeech()
+            && !$torrent->isFreeleech()
+            && !$torrent->isFreeleechPersonal()
+            && (STACKABLE_FREELEECH_TOKENS || $torrent->tokenCount() == 1)
+            && $this->tokenCount() >= $torrent->tokenCount()
+            ;
+    }
+
+    /**
      * Get a page of FL token uses by user
      *
      * @param int $limit How many? (To fill a page)

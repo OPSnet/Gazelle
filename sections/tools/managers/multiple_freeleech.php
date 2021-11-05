@@ -4,8 +4,6 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-View::show_header('Multiple Freeleech');
-
 if (isset($_POST['torrents'])) {
     $GroupIDs = [];
     $Elements = explode("\r\n", $_POST['torrents']);
@@ -51,6 +49,7 @@ if (isset($_POST['torrents'])) {
             if (sizeof($TorrentIDs) == 0) {
                 $Err = 'Invalid group IDs';
             } else {
+                $LargeTorrents = [];
                 if (isset($_POST['NLOver']) && $FreeLeechType == '1') {
                     // Only use this checkbox if freeleech is selected
                     $Size = (int) $_POST['size'];
@@ -71,12 +70,12 @@ if (isset($_POST['torrents'])) {
                     }
                 }
 
-                if (sizeof($TorrentIDs) > 0) {
-                    Torrents::freeleech_torrents($TorrentIDs, $FreeLeechType, $FreeLeechReason);
+                $torMan = new Gazelle\Manager\Torrent;
+                if ($TorrentIDs) {
+                    $torMan->setFreeleech($Viewer, $TorrentIDs, $FreeLeechType, $FreeLeechReason, false);
                 }
-
-                if (isset($LargeTorrents) && sizeof($LargeTorrents) > 0) {
-                    Torrents::freeleech_torrents($LargeTorrents, '2', $FreeLeechReason);
+                if ($LargeTorrents) {
+                    $torMan->setFreeleech($Viewer, $LargeTorrents, '2', $FreeLeechReason, false);
                 }
 
                 $Err = 'Done!';
@@ -84,6 +83,8 @@ if (isset($_POST['torrents'])) {
         }
     }
 }
+
+View::show_header('Multiple Freeleech');
 ?>
 <div class="thin">
     <div class="box pad box2">

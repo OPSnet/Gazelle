@@ -82,12 +82,12 @@ if (isset($_POST['GroupID'])) {
                     }
                 }
 
-                if (count($TorrentIDs) > 0) {
-                    Torrents::freeleech_torrents($TorrentIDs, $FreeLeechType, $FreeLeechReason);
+                $torMan = new Gazelle\Manager\Torrent;
+                if ($TorrentIDs) {
+                    $torMan->setFreeleech($Viewer, $TorrentIDs, $FreeLeechType, $FreeLeechReason, false);
                 }
-
-                if (isset($LargeTorrents) && count($LargeTorrents) > 0) {
-                    Torrents::freeleech_torrents($LargeTorrents, '2', $FreeLeechReason);
+                if ($LargeTorrents) {
+                    $torMan->setFreeleech($Viewer, $LargeTorrents, '2', $FreeLeechReason, false);
                 }
             }
 

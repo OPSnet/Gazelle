@@ -34,6 +34,8 @@ if ($NumResults == 0) {
 $bookmark = new Gazelle\Bookmark;
 $releaseMan = new Gazelle\ReleaseType;
 
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 $JsonGroups = [];
 foreach ($Results as $Key => $GroupID) {
     $GroupInfo = $Groups[$GroupID];
@@ -91,6 +93,10 @@ foreach ($Results as $Key => $GroupID) {
         $JsonTorrents = [];
         foreach ($Torrents as $TorrentID => $Data) {
             // All of the individual torrents in the group
+            $torrent = $torMan->findById($TorrentID);
+            if (is_null($torrent)) {
+                continue;
+            }
 
             if ($Data['Remastered'] && !$Data['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
@@ -171,8 +177,8 @@ foreach ($Results as $Key => $GroupID) {
                 'isFreeleech' => $Data['FreeTorrent'] == '1',
                 'isNeutralLeech' => $Data['FreeTorrent'] == '2',
                 'isPersonalFreeleech' => $Data['PersonalFL'],
-                'canUseToken' => Torrents::can_use_token($Data),
-                'hasSnatched' => $Data['IsSnatched']
+                'canUseToken' => $Viewer->canSpendFLToken($torrent),
+                'hasSnatched' => $torrent->isSnatched($Viewer->id()),
             ];
         }
 
@@ -197,6 +203,10 @@ foreach ($Results as $Key => $GroupID) {
         // Viewing a type that does not require grouping
         $TorrentID = key($Torrents);
         $Data = current($Torrents);
+        $torrent = $torMan->findById($torrent);
+        if (is_null($torrent)) {
+            continue;
+        }
 
         $JsonGroups[] = [
             'groupId' => (int)$GroupID,
@@ -213,8 +223,8 @@ foreach ($Results as $Key => $GroupID) {
             'isFreeleech' => $Data['FreeTorrent'] == '1',
             'isNeutralLeech' => $Data['FreeTorrent'] == '2',
             'isPersonalFreeleech' => $Data['PersonalFL'],
-            'canUseToken' => Torrents::can_use_token($Data),
-            'hasSnatched' => $Data['IsSnatched']
+            'canUseToken' => $Viewer->canSpendFLToken($torrent),
+            'hasSnatched' => $torrent->isSnatched($Viewer->id()),
         ];
     }
 }

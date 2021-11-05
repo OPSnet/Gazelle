@@ -33,7 +33,7 @@ class Torrent extends \Gazelle\Json {
             return null;
         }
 
-        $torrent = $this->torrent->setViewerId($this->user->id())->setShowSnatched($this->showSnatched);
+        $torrent = $this->torrent->setViewer($this->user)->setShowSnatched($this->showSnatched);
         $group = $torrent->group();
 
         // TODO: implement as a Gazelle class

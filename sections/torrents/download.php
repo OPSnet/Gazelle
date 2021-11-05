@@ -2,10 +2,12 @@
 
 use \Gazelle\Util\Irc;
 
-$torrentId = (int)$_REQUEST['id'];
-if (!$torrentId) {
-    json_or_error(0, 'missing torrentid');
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_REQUEST['id'] ?? 0));
+if (!$torrent) {
+    json_or_error('could not find torrent', 404);
 }
+$torrent->setViewer($Viewer);
+$torrentId = $torrent->id();
 
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
  * To prevent this retardation from blowing bandwidth etc., let's block it
@@ -18,45 +20,13 @@ if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERV
     json_or_error($Msg, $Msg, true);
 }
 
-$key = "tdown_$torrentId";
-if (($info = $Cache->get_value($key)) === false) {
-    $info = $DB->rowAssoc("
-        SELECT t.ID as TorrentID,
-            t.GroupID,
-            t.Media,
-            t.Format,
-            t.Encoding,
-            if(t.RemasterYear = 0, tg.Year, t.RemasterYear) AS Year,
-            t.Size,
-            t.FreeTorrent,
-            t.info_hash,
-            t.UserID AS uploaderId,
-            tg.CategoryID,
-            tg.Name,
-            tg.WikiImage
-        FROM torrents AS t
-        INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-        WHERE t.ID = ?
-        ", $torrentId
-    );
-    if (!isset($info['Media'])) {
-        json_or_error('invalid torrentid', 404);
-    }
-    $artists = Artists::get_artist($info['GroupID']);
-    $info['Artist'] = Artists::display_artists($artists, false, false, false);
-    $Cache->cache_value($key, $info, 0);
-}
-if (is_null($info)) {
-    json_or_error('could not find torrent', 404);
-}
-
 /* If this is not their torrent, then see if they have downloaded too
  * many files, compared to completely snatched items. If that is too
  * high, and they have already downloaded too many files recently, then
  * stop them. Exception: always allowed if they are using FL tokens.
  */
 $userId = $Viewer->id();
-if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $info['uploaderId'] != $userId) {
+if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
     $PRL = new \Gazelle\PermissionRateLimit;
     if (!$PRL->safeFactor($Viewer)) {
         if (!$PRL->safeOvershoot($Viewer)) {
@@ -90,23 +60,24 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $info['uploaderI
  * have enough. If so, deduct the number required, note it in the freeleech
  * table and update their cache key.
  */
-if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
-    if (!$Viewer->canLeech()) {
-        json_or_error('You cannot use tokens while leeching is disabled.');
+
+if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
+    if (!$Viewer->canSpendFLToken($torrent)) {
+        json_or_error('You cannot use tokens here (leeching disabled or already freeleech).');
     }
 
     // First make sure this isn't already FL, and if it is, do nothing
-    if (!Torrents::has_token($torrentId)) {
-        if (!STACKABLE_FREELEECH_TOKENS && $info['Size'] >= BYTES_PER_FREELEECH_TOKEN) {
+    if (!$torrent->hasToken($userId)) {
+        $tokenCount = $torrent->tokenCount();
+        if (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1) {
             json_or_error('This torrent is too large. Please use the regular DL link.');
         }
-        $tokensToUse = (int)ceil($info['Size'] / BYTES_PER_FREELEECH_TOKEN);
         $DB->begin_transaction();
         $DB->prepared_query('
             UPDATE user_flt SET
                 tokens = tokens - ?
             WHERE tokens >= ? AND user_id = ?
-            ', $tokensToUse, $tokensToUse, $userId
+            ', $tokenCount, $tokenCount, $userId
         );
         if ($DB->affected_rows() == 0) {
             $DB->rollback();
@@ -114,7 +85,7 @@ if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
         }
 
         // Let the tracker know about this
-        if (!(new Gazelle\Tracker)->update_tracker('add_token', ['info_hash' => rawurlencode($info['info_hash']), 'userid' => $userId])) {
+        if (!(new Gazelle\Tracker)->update_tracker('add_token', ['info_hash' => rawurlencode($torrent->infohash()), 'userid' => $userId])) {
             $DB->rollback();
             json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
         }
@@ -125,7 +96,7 @@ if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
                 Time = VALUES(Time),
                 Expired = FALSE,
                 Uses = Uses + ?
-            ", $userId, $torrentId, $tokensToUse, $tokensToUse
+            ", $userId, $torrentId, $tokenCount, $tokenCount
         );
         $DB->commit();
         $Cache->deleteMulti(["u_$userId", "user_info_heavy_$userId", "users_tokens_$userId"]);
@@ -134,11 +105,9 @@ if ($_REQUEST['usetoken'] && $info['FreeTorrent'] == '0') {
 
 $Viewer->registerDownload($torrentId);
 
-if ($info['CategoryID'] == '1' && $info['WikiImage'] != '' && $info['uploaderId'] != $userId) {
+if ($torrent->group()->categoryId() == 1 && $torrent->group()->image() != '' && $torrent->uploaderId() != $userId) {
     $Cache->delete_value("user_recent_snatch_$userId");
 }
-
-$torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
 
 $downloadAsText = ($Viewer->option('DownloadAlt') === '1');
 header('Content-Type: ' . ($downloadAsText ? 'text/plain' : 'application/x-bittorrent') . '; charset=utf-8');

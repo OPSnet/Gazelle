@@ -2,6 +2,7 @@
 
 use Gazelle\Util\SortableTableHeader;
 $torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $t = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
@@ -465,7 +466,7 @@ foreach ($Results as $GroupID) {
     $TorrentTags = new Tags(implode(' ', (array_column($GroupInfo['tags'], 'name'))));
 
     $DisplayName = $tgroup->artistHtml() . ' - ';
-    $SnatchedGroupClass = $GroupInfo['Flags']['IsSnatched'] ? ' snatched_group' : '';
+    $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
 
     if ($GroupResults && (count($Torrents) > 1 || isset(CATEGORY_GROUPED[$CategoryID - 1]))) {
         // These torrents are in a group
@@ -526,6 +527,10 @@ foreach ($Results as $GroupID) {
         $FirstUnknown = null;
 
         foreach ($Torrents as $TorrentID => $Data) {
+            $torrent = $torMan->findById($TorrentID);
+            if (is_null($torrent)) {
+                continue;
+            }
             // All of the individual torrents in the group
             if ($Data['is_deleted']) {
                 continue;
@@ -534,7 +539,7 @@ foreach ($Results as $GroupID) {
             if ($Data['Remastered'] && !$Data['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-            $SnatchedTorrentClass = $Data['IsSnatched'] ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '';
             $Reported = $torMan->hasReport($Viewer, $TorrentID);
 
             if (isset(CATEGORY_GROUPED[$CategoryID - 1])
@@ -562,7 +567,7 @@ foreach ($Results as $GroupID) {
     <tr class="group_torrent groupid_<?=$GroupID?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
             <?= $Twig->render('torrent/action.twig', [
-                'can_fl' => Torrents::can_use_token($Data),
+                'can_fl' => $Viewer->canSpendFLToken($torrent),
                 'key'    => $Viewer->announceKey(),
                 't'      => $Data,
             ]) ?>
@@ -584,6 +589,10 @@ foreach ($Results as $GroupID) {
         // Viewing a type that does not require grouping
 
         $TorrentID = key($Torrents);
+        $torrent = $torMan->findById($TorrentID);
+        if (is_null($torrent)) {
+            continue;
+        }
         $Data = current($Torrents);
         $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$TorrentID#torrent$TorrentID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">$GroupName</a>";
         if (isset(CATEGORY_GROUPED[$CategoryID - 1])) {
@@ -616,7 +625,7 @@ foreach ($Results as $GroupID) {
 <?php   } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($Data),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $Data,
                 ]) ?>

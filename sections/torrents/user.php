@@ -320,6 +320,9 @@ $results      = Torrents::get_groups($groupIDs);
 $action       = display_str($_GET['type']);
 $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
+
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
 ?>
 <div class="thin">
@@ -482,6 +485,10 @@ foreach (CATEGORY as $catKey => $catName) {
     $vote = new Gazelle\Vote($Viewer->id());
 
     foreach ($torrentsInfo as $torrentID => $info) {
+        $torrent = $torMan->findById($torrentID);
+        if (is_null($torrent)) {
+            continue;
+        }
         [$groupID, , $time] = array_values($info);
 
         $groupCategoryID = $results[$groupID]['CategoryID'];
@@ -491,7 +498,7 @@ foreach (CATEGORY as $catKey => $catName) {
         $torrents = isset($results[$groupID]['Torrents']) ? $results[$groupID]['Torrents'] : [];
         $artists = $results[$groupID]['Artists'];
         $extendedArtists = $results[$groupID]['ExtendedArtists'];
-        $torrent = $torrents[$torrentID];
+        $tinfo = $torrents[$torrentID];
 
         if (!empty($extendedArtists[1]) || !empty($extendedArtists[4]) || !empty($extendedArtists[5])) {
             unset($extendedArtists[2]);
@@ -510,12 +517,12 @@ foreach (CATEGORY as $catKey => $catName) {
             $displayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 
-        $extraInfo = Torrents::torrent_info($torrent);
+        $extraInfo = Torrents::torrent_info($tinfo);
         if ($extraInfo) {
             $displayName .= " - $extraInfo";
         }
 ?>
-        <tr class="torrent torrent_row<?=($torrent['IsSnatched'] ? ' snatched_torrent' : '') . ($groupFlags['IsSnatched'] ? ' snatched_group' : '')?>">
+        <tr class="torrent torrent_row<?=($tinfo['IsSnatched'] ? ' snatched_torrent' : '') . ($groupFlags['IsSnatched'] ? ' snatched_group' : '')?>">
             <td class="center cats_col">
                 <div title="<?=$torrentTags->title()?>" class="tooltip <?=Format::css_category($groupCategoryID)?> <?=$torrentTags->css_name()?>"></div>
             </td>
@@ -527,9 +534,9 @@ foreach (CATEGORY as $catKey => $catName) {
 <?php    } ?>
                 <div class="group_info clear">
                     <?= $Twig->render('torrent/action.twig', [
-                        'can_fl' => Torrents::can_use_token($torrent),
+                        'can_fl' => $Viewer->canSpendFLToken($torrent),
                         'key'    => $Viewer->announceKey(),
-                        't'      => $torrent,
+                        't'      => $tinfo,
                     ]) ?>
                     <?= $displayName ?>
 <?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
@@ -539,10 +546,10 @@ foreach (CATEGORY as $catKey => $catName) {
                 </div>
             </td>
             <td class="td_time nobr"><?=time_diff($time, 1)?></td>
-            <td class="td_size number_column nobr"><?=Format::get_size($torrent['Size'])?></td>
-            <td class="td_snatched m_td_right number_column"><?=number_format($torrent['Snatched'])?></td>
-            <td class="td_seeders m_td_right number_column<?=(($torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($torrent['Seeders'])?></td>
-            <td class="td_leechers m_td_right number_column"><?=number_format($torrent['Leechers'])?></td>
+            <td class="td_size number_column nobr"><?=Format::get_size($tinfo['Size'])?></td>
+            <td class="td_snatched m_td_right number_column"><?=number_format($tinfo['Snatched'])?></td>
+            <td class="td_seeders m_td_right number_column<?=(($tinfo['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($tinfo['Seeders'])?></td>
+            <td class="td_leechers m_td_right number_column"><?=number_format($tinfo['Leechers'])?></td>
         </tr>
 <?php
     } /* foreach */ ?>

@@ -188,6 +188,9 @@ $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
                 <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setViewer($Viewer);
+
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
@@ -273,7 +276,10 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         unset($FirstUnknown);
 
         foreach ($Torrents as $TorrentID => $Torrent) {
-
+            $torrent = $torMan->findById($TorrentID);
+            if (!$torrent) {
+                continue;
+            }
             if ($Torrent['Remastered'] && !$Torrent['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
@@ -308,7 +314,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <tr class="group_torrent torrent_row groupid_<?= $GroupID ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
@@ -326,6 +332,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     else {
         // Viewing a type that does not require grouping
         $TorrentID = key($Torrents);
+        $torrent = $torMan->findById($TorrentID);
         $Torrent = current($Torrents);
 
         $DisplayName = '<a href="torrents.php?id=' . $GroupID . '" class="tooltip" title="View torrent group" dir="ltr">' . $GroupName . '</a>';
@@ -353,7 +360,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             </td>
             <td>
                 <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => Torrents::can_use_token($Torrent),
+                    'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
