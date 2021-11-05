@@ -203,7 +203,7 @@ foreach ($Results as $Key => $GroupID) {
         // Viewing a type that does not require grouping
         $TorrentID = key($Torrents);
         $Data = current($Torrents);
-        $torrent = $torMan->findById($torrent);
+        $torrent = $torMan->findById($TorrentID);
         if (is_null($torrent)) {
             continue;
         }
