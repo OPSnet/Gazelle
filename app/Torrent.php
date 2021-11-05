@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class Torrent extends BaseObject {
 
-    const CACHE_KEY                = 't_%d';
+    const CACHE_KEY                = 't2_%d';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
 
@@ -98,7 +98,8 @@ class Torrent extends BaseObject {
             $template = "SELECT t.GroupID, t.UserID, t.Media, t.Format, t.Encoding,
                     t.Remastered, t.RemasterYear, t.RemasterTitle, t.RemasterCatalogueNumber, t.RemasterRecordLabel,
                     t.Scene, t.HasLog, t.HasCue, t.HasLogDB, t.LogScore, t.LogChecksum,
-                    hex(t.info_hash) as info_hash, t.FileCount, t.FileList, t.FilePath, t.Size,
+                    hex(t.info_hash) as info_hash, t.info_hash as info_hash_raw,
+                    t.FileCount, t.FileList, t.FilePath, t.Size,
                     t.FreeTorrent, t.FreeLeechType, t.Time, t.Description, t.LastReseedRequest,
                     tls.Seeders, tls.Leechers, tls.Snatched, tls.last_action,
                     tbt.TorrentID AS BadTags, tbf.TorrentID AS BadFolders, tfi.TorrentID AS BadFiles, ml.TorrentID  AS MissingLineage,
@@ -364,6 +365,15 @@ class Torrent extends BaseObject {
      */
     public function infohash(): string {
         return $this->info()['info_hash'];
+    }
+
+    /**
+     * The infohash of this torrent (binary)
+     *
+     * @return string raw infohash
+     */
+    public function infohashBinary(): string {
+        return $this->info()['info_hash_raw'];
     }
 
     public function lastActiveDate(): ?string {
