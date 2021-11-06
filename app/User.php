@@ -1961,38 +1961,6 @@ class User extends BaseObject {
         return substr($age, 0, strpos($age, " ago"));
     }
 
-    public function artistCommentCount(): int {
-        return $this->getSingleValue('user_comment_artist', "
-            SELECT count(*)
-            FROM comments
-            WHERE Page = 'artists' AND AuthorID = ?
-        ");
-    }
-
-    public function collageCommentCount(): int {
-        return $this->getSingleValue('user_comment_collage', "
-            SELECT count(*)
-            FROM comments
-            WHERE Page = 'collages' AND AuthorID = ?
-        ");
-    }
-
-    public function requestCommentCount(): int {
-        return $this->getSingleValue('user_comment_request', "
-            SELECT count(*)
-            FROM comments
-            WHERE Page = 'requests' AND AuthorID = ?
-        ");
-    }
-
-    public function torrentCommentCount(): int {
-        return $this->getSingleValue('user_comment_torrent', "
-            SELECT count(*)
-            FROM comments
-            WHERE Page = 'torrents' AND AuthorID = ?
-        ");
-    }
-
     public function forumWarning() {
         return $this->getSingleValue('user_forum_warn', '
             SELECT Comment
