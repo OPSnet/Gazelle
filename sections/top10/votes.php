@@ -27,6 +27,7 @@ if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
     }
 }
 $vote->setTopLimit($limit);
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
 ?>
@@ -137,7 +138,7 @@ foreach ($topVotes as $groupID => $group) {
         // TODO: Gazelle\TGroup knows how to do this, so remove this garbage
         $groupSnatched = false;
         foreach ($torrents as &$tinfo) {
-            $torrent = $torMan->findById($torrentID);
+            $torrent = $torMan->findById($tinfo['ID']);
             if (is_null($torrent)) {
                 continue;
             }
@@ -160,7 +161,7 @@ foreach ($topVotes as $groupID => $group) {
                     <td class="big_info">
 <?php        if ($Viewer->option('CoverArt')) { ?>
                         <div class="group_image float_left clear">
-                            <?php ImageTools::cover_thumb($wikiImage, $groupCategoryID) ?>
+                            <?= $imgProxy->thumbnail($wikiImage, $groupCategoryID) ?>
                         </div>
 <?php        } ?>
                         <div class="group_info clear">
@@ -284,7 +285,7 @@ foreach ($topVotes as $groupID => $group) {
             <td class="nobr big_info">
 <?php        if ($Viewer->option('CoverArt')) { ?>
                 <div class="group_image float_left clear">
-                    <?php ImageTools::cover_thumb($wikiImage, $groupCategoryID) ?>
+                    <?= $imgProxy->thumbnail($wikiImage, $groupCategoryID) ?>
                 </div>
 <?php        } ?>
                 <div class="group_info clear">

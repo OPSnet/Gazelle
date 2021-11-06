@@ -130,12 +130,13 @@ class User extends \Gazelle\Base {
         static $cache = [];
         $viewedId = $viewed->id();
         if (!isset($cache[$viewedId])) {
+            $imgProxy = (new \Gazelle\Util\ImageProxy)->setViewer($viewer);
             switch ($viewer->avatarMode()) {
                 case 1:
                     $avatar = STATIC_SERVER . '/common/avatars/default.png';
                     break;
                 case 2:
-                    $avatar = \ImageTools::process($viewed->avatar(), false, 'avatar', $viewedId)
+                    $avatar = $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
                         ?: (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
                             ->setSize(AVATAR_WIDTH)
                             ->avatar($viewed->username());
@@ -146,7 +147,7 @@ class User extends \Gazelle\Base {
                         ->avatar($viewed->username());
                     break;
                 default:
-                    $avatar = \ImageTools::process($viewed->avatar(), false, 'avatar', $viewedId)
+                    $avatar = $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
                         ?: STATIC_SERVER . '/common/avatars/default.png';
                     break;
             }
@@ -157,7 +158,7 @@ class User extends \Gazelle\Base {
             }
             $attr = implode(' ', $attrs);
             $cache[$viewedId] = "<div class=\"avatar_container\"><div><img $attr class=\"avatar_0\" src=\"$avatar\" /></div>"
-                . ($second ? ("<div><img $attr class=\"avatar_1\" src=\"" . \ImageTools::process($second, false, 'avatar2', $viewedId) . '" /></div>') : '')
+                . ($second ? ("<div><img $attr class=\"avatar_1\" src=\"" . $imgProxy->process($second, 'avatar2', $viewedId) . '" /></div>') : '')
                 . "</div>";
         }
         return $cache[$viewedId];

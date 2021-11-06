@@ -95,6 +95,7 @@ if (Format::form('remastertitle', true) == ''
 }
 
 $releaseTypes = (new Gazelle\ReleaseType)->list();
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 View::show_header('Browse Torrents', ['js' => 'browse']);
 ?>
@@ -492,7 +493,7 @@ foreach ($Results as $GroupID) {
         <td colspan="2" class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?php ImageTools::cover_thumb($GroupInfo['Image'], $GroupInfo['CategoryID']) ?>
+                <?= $imgProxy->thumbnail($GroupInfo['Image'], $GroupInfo['CategoryID']) ?>
             </div>
 <?php    } ?>
             <div class="group_info clear">
@@ -620,7 +621,7 @@ foreach ($Results as $GroupID) {
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?=ImageTools::cover_thumb($GroupInfo['Image'], $CategoryID) ?>
+                <?= $imgProxy->thumbnail($GroupInfo['Image'], $CategoryID) ?>
             </div>
 <?php   } ?>
             <div class="group_info clear">

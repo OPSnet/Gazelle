@@ -214,8 +214,9 @@ class TGroup extends \Gazelle\Base {
                 ", $type
             );
             if (!is_null($featured)) {
+                global $Viewer; // FIXME this wrong
                 $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
-                $featured['image']       = \ImageTools::process($featured['WikiImage'], true);
+                $featured['image']       = (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($featured['WikiImage']);
             }
             $this->cache->cache_value($key, $featured, 86400 * 7);
         }

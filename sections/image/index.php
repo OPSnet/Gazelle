@@ -7,65 +7,43 @@ if (!$Viewer->permitted('site_proxy_images')) {
 }
 
 $url = isset($_GET['i']) ? urldecode($_GET['i']) : null;
-$key = 'imagev4_' . md5($url);
+$key = 'img_' . md5($url);
 
-// use a while loop to allow early exit
-while (($imageData = $Cache->get_value($key)) === false) {
+$imageData = $Cache->get_value($key);
+if ($imageData === false) {
     if (!preg_match(IMAGE_REGEXP, $url)) {
-        $imageData = null;
-        $error = 'bad parameters';
-        break;
+        header('Content-type: image/png');
+        Gazelle\Image::render('bad url');
+        exit;
     }
 
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL            => $url,
-        CURLOPT_HEADER         => false,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 10,
-        CURLOPT_USERAGENT      => FAKE_USERAGENT,
-    ]);
-    if (defined('HTTP_PROXY')) {
-        curl_setopt_array($curl, [
-            CURLOPT_HTTPPROXYTUNNEL => true,
-            CURLOPT_PROXY           => HTTP_PROXY,
-        ]);
+    $curl = new Gazelle\Util\Curl;
+    if (!$curl->fetch($url)) {
+        header('Content-type: image/png');
+        Gazelle\Image::render("HTTP " . $curl->responseCode());
+        exit;
     }
 
-    $imageData = curl_exec($curl);
-    $rescode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    curl_close($curl);
-    if ($rescode != 200) {
-        $error = "HTTP $rescode";
-        break;
-    }
-
-    $len = strlen($imageData);
-    if (isset($_GET['c']) && $len > 0 && $len <= 262144) {
-        $Cache->cache_value($key, $imageData, 86400 * 3);
-    }
-    break; // all good
-}
-
-if (!isset($error)) {
+    $imageData = $curl->result();
     $image = new Gazelle\Image($imageData);
     if ($image->error()) {
-        $error = 'corrupt';
+        header('Content-type: image/png');
+        Gazelle\Image::render('corrupt');
+        exit;
+    } elseif ($image->invisible()) {
+        header('Content-type: image/png');
+        Gazelle\Image::render('invisible');
+        exit;
+    } elseif ($image->verysmall()) {
+        header('Content-type: image/png');
+        Gazelle\Image::render('too small');
+        exit;
+    } else {
+        $len = strlen($imageData);
+        if (isset($_GET['c']) && $len > 0 && $len <= 262144) {
+            $Cache->cache_value($key, $imageData, 86400 * 3);
+        }
     }
-    elseif ($image->invisible()) {
-        $error = 'invisible';
-    }
-    elseif ($image->verysmall()) {
-        $error = 'too small';
-    }
-}
-
-if (isset($error)) {
-    $Cache->delete_value($key);
-    header('Content-type: image/png');
-    Gazelle\Image::render($error);
-    exit;
 }
 
 if (isset($_GET['type']) && isset($_GET['userid'])) {

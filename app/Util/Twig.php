@@ -48,7 +48,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'image',
             function ($i) {
-                return new \Twig\Markup(\ImageTools::process($i, true), 'UTF-8');
+                return new \Twig\Markup((new ImageProxy)->process($i), 'UTF-8');
             }
         ));
 
@@ -153,7 +153,7 @@ class Twig {
 
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
             return new \Twig\Markup(
-                \ImageTools::process($icon, false, 'donoricon', $userId),
+                (new ImageProxy)->process($icon, 'donoricon', $userId),
                 'UTF-8'
             );
         }));

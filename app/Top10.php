@@ -60,10 +60,12 @@ class Top10
     private static function renderTile($url, $name, $image) {
         if (!empty($image)) {
             $name = display_str($name);
+            global $Viewer; // FIXME
+            $image = (new Util\ImageProxy)->setViewer($Viewer)->process($image);
 ?>
             <li>
                 <a href="<?=$url?><?=$name?>">
-                    <img class="tooltip large_tile" alt="<?=$name?>" title="<?=$name?>" src="<?=\ImageTools::process($image)?>" />
+                    <img class="tooltip large_tile" alt="<?=$name?>" title="<?=$name?>" src="<?= $image ?>" />
                 </a>
             </li>
 <?php
@@ -87,7 +89,7 @@ class Top10
 
     private static function renderList($url, $name, $image) {
         if (!empty($image)) {
-            $image = \ImageTools::process($image);
+            $image = (new Util\ImageProxy)->process($image);
             $title = "title=\"&lt;img class=&quot;large_tile&quot; src=&quot;$image&quot; alt=&quot;&quot; /&rsaquo;\"";
             $name = display_str($name);
 ?>
