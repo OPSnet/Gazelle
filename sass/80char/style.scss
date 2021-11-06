@@ -1287,16 +1287,12 @@ div[class~=tooltipster-content] > a {
     color: red;
 }
 
-/* workaround for calendar display issue */
-div.sidebar #event_div {
-    margin-left: -50px;
-}
 #collage #search_terms input[type=search], #torrents .layout input[type=search] {
-background: #FFFFFF;
-display: inline-block;
-padding: 3px;
-margin: 3px;
-color: #000000;
-text-decoration: none;
-border: none;
+  background: #FFFFFF;
+  display: inline-block;
+  padding: 3px;
+  margin: 3px;
+  color: #000000;
+  text-decoration: none;
+  border: none;
 }

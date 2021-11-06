@@ -1075,12 +1075,6 @@ div[class~=tooltipster-content] > a {
   border-right: 0;
 }
 
-/* workaround for calendar display issue */
-
-div.sidebar #event_div {
-  margin-left: -232px;
-}
-
 ol {
   margin-left: 1em;
 }
