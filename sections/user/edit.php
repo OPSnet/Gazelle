@@ -48,7 +48,7 @@ if (!isset($options['HttpsTracker'])) {
 }
 $Paranoia = unserialize($Paranoia) ?: [];
 
-$NavItems = Users::get_nav_items();
+$NavItems = (new Gazelle\Manager\User)->forumNavItemList();
 $UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
 if (!count($UserNavItems)) {
     $UserNavItems = array_keys(array_filter($NavItems, function($v) {

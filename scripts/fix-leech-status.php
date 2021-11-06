@@ -31,6 +31,6 @@ foreach ($users as $u) {
         WHERE ID = ?
         ', $u['ID']
     );
-    $Cache->delete_value("user_info_heavy_" . $u['ID']);
+    $Cache->delete_value("u_" . $u['ID']);
     echo $u['ID'] . "\n";
 }

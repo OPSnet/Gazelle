@@ -129,12 +129,12 @@ class Applicant extends Base {
     /**
      * Save the applicant thread note (see Thread class)
      */
-    public function saveNote($posterId, $body, $visibility) {
-        $this->thread->saveNote($posterId, $body, $visibility);
+    public function saveNote(User $poster, $body, $visibility) {
+        $this->thread->saveNote($poster->id(), $body, $visibility);
         $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->cache->delete_value(self::CACHE_KEY_NEW_REPLY);
         $this->cache->delete_value(self::CACHE_KEY_NEW_COUNT);
-        if ($visibility == 'public' && \Permissions::has_permission($posterId, 'admin_manage_applicants')) {
+        if ($visibility == 'public' && $poster->permitted('admin_manage_applicants')) {
             (new Manager\User)->sendPM(
                 $this->userId(),
                 0,
@@ -148,7 +148,7 @@ You can view the reply [url=%s]here[/url].
 ~%s Staff <3
 END_MSG
                     , (new User($this->userId()))->username()
-                    , (new User($posterId))->username()
+                    , $poster->username()
                     , $this->roleTitle()
                     , 'apply.php?action=view&id=' . $this->id
                     , SITE_NAME

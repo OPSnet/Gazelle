@@ -94,6 +94,7 @@ View::show_header('Edit artist');
         <div class="pad">
         <ul class="nobullet">
 <?php
+$userMan = new Gazelle\Manager\User;
 $nonRedirAliases = $artist->redirects();
 $alias = [];
 foreach($nonRedirAliases as $r) {
@@ -110,9 +111,16 @@ foreach($nonRedirAliases as $r) {
         $alias[$r['aliasId']] = $r['aliasName'];
     }
 ?>
-<?php if ($r['userId']) { ?>
-                &nbsp;<a href="user.php?id=<?= $r['userId'] ?>" class="brackets tooltip">Added by <?= Users::user_info($r['userId'])['Username'] ?></a>
-<?php } ?>
+<?php
+    if ($r['userId']) {
+        $adder = $userMan->findById($r['userId']);
+        if ($adder) {
+?>
+                &nbsp;<a href="user.php?id=<?= $r['userId'] ?>" class="brackets tooltip">Added by <?= $adder->username() ?></a>
+<?php
+        }
+    }
+?>
                 &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid=<?=$r['aliasId']?>&amp;auth=<?= $Viewer->auth() ?>" title="Delete this alias" class="brackets tooltip">X</a>
 <?php if (!$r['redirectId']) { ?>
                 &nbsp;<?= "\xE2\x98\x85" ?>

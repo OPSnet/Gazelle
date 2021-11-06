@@ -25,7 +25,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
     }
     elseif (isset($_POST['note_reply'])) {
         $app->saveNote(
-            $Viewer->id(),
+            $Viewer,
             $_POST['note_reply'],
             $IS_STAFF && $_POST['visibility'] == 'staff' ? 'staff' : 'public'
         );

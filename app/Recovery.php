@@ -418,6 +418,7 @@ class Recovery extends Base {
     }
 
     public function boostUpload() {
+        $userMan = new Manager\User;
         $sql = sprintf("
             SELECT HIST.Username, HIST.mapped_id, HIST.UserID, HIST.Uploaded, HIST.Downloaded, HIST.Bounty, HIST.nr_torrents, HIST.userclass,
                 round(
@@ -521,11 +522,12 @@ class Recovery extends Base {
             );
 
             /* no buffer for you if < 1MB */
-            if ($final >= 1.0) {
-                $to = \Users::user_info($siteUserId);
+            $to = $userMan->findById($siteUserId);
+            if ($to && $final >= 1.0) {
+                $username = $to->username();
                 if (RECOVERY_BUFFER) {
                     $Body = <<<END_MSG
-Dear {$to['Username']},
+Dear {$username},
 
 Your activity on the previous site has been rewarded.
 $reclaimMsg
@@ -550,14 +552,14 @@ go out and use it. You never know what tomorrow will bring.
 END_MSG;
                 } else {
                 $Body = <<<END_MSG
-Dear {$to['Username']},
+Dear {$username},
 
 $reclaimMsg
 
 --OPS Staff
 END_MSG;
                 }
-                (new Manager\User)->sendPM($siteUserId, 0, "Your buffer stats have been updated", $Body);
+                $userMan->sendPM($siteUserId, 0, "Your buffer stats have been updated", $Body);
             }
 
             /* insert this first to avoid a potential reallocation */
