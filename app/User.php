@@ -570,7 +570,7 @@ class User extends BaseObject {
                 $enabled = $this->enabledDonorRewards();
                 $reward = $this->donorRewards();
                 if ($enabled['HasCustomDonorIcon'] && $reward['CustomIcon']) {
-                    $iconImage = \ImageTools::process($reward['CustomIcon'], false, 'donoricon', $this->id);
+                    $iconImage = (new Util\ImageProxy)->process($reward['CustomIcon'], 'donoricon', $this->id);
                 } else {
                     $rank = $this->donorRank();
                     if ($rank == 0) {

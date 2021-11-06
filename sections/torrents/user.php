@@ -322,6 +322,7 @@ $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
 $torMan = new Gazelle\Manager\Torrent;
 $torMan->setViewer($Viewer);
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
 ?>
@@ -529,7 +530,7 @@ foreach (CATEGORY as $catKey => $catName) {
             <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
                 <div class="group_image float_left clear">
-                    <?php ImageTools::cover_thumb($results[$groupID]['WikiImage'], $groupCategoryID) ?>
+                    <?= $imgProxy->thumbnail($results[$groupID]['WikiImage'], $groupCategoryID) ?>
                 </div>
 <?php    } ?>
                 <div class="group_info clear">

@@ -286,7 +286,8 @@ class Users {
             return "Unknown [$UserID]";
         }
 
-        global $Viewer;
+        global $Viewer; // FIXME this is wrong
+        $imgProxy =  (new \Gazelle\Util\ImageProxy)->setViewer($Viewer);
         $Classes = $userMan->classList();
         if ($user->primaryClass() < $Classes[MOD]['Level']) {
             $OverrideParanoia = $Viewer->permitted('users_override_paranoia', $user->primaryClass());
@@ -320,7 +321,7 @@ class Users {
                 $IconLink = ($EnabledRewards['HasDonorIconLink'] && !empty($DonorRewards['CustomIconLink']))
                     ? display_str($DonorRewards['CustomIconLink']) : 'donate.php';
                 if ($EnabledRewards['HasCustomDonorIcon'] && !empty($DonorRewards['CustomIcon'])) {
-                    $IconImage = ImageTools::process($DonorRewards['CustomIcon'], false, 'donoricon', $UserID);
+                    $IconImage = $imgProxy->process($DonorRewards['CustomIcon'], 'donoricon', $UserID);
                 } else {
                     if ($user->specialDonorRank() === MAX_SPECIAL_RANK) {
                         $DonorHeart = 6;
@@ -375,8 +376,8 @@ class Users {
             $userTitle = $user->title();
             if ($Viewer->permitted('site_proxy_images') && !empty($userTitle)) {
                 $userTitle = preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-                    function($Matches) {
-                        return 'src=' . $Matches[1] . ImageTools::process($Matches[2]) . $Matches[3];
+                    function($Matches) use ($imgProxy) {
+                        return 'src=' . $Matches[1] . $imgProxy->process($Matches[2]) . $Matches[3];
                     }, $userTitle
                 );
             }

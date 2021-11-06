@@ -74,11 +74,15 @@ if ($bookmark->isArtistBookmarked($Viewer->id(), $ArtistID)) { ?>
     </div>
 
     <div class="sidebar">
-<?php if ($Artist->image()) { ?>
+<?php
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+if ($Artist->image()) {
+    $image = $imgProxy->process($Artist->image());
+?>
         <div class="box box_image">
             <div class="head"><strong><?= $name ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
-                <img style="max-width: 220px;" src="<?= ImageTools::process($Artist->image(), true) ?>" alt="<?= $name?>" onclick="lightbox.init('<?= ImageTools::process($Artist->image()) ?>', 220);" />
+                <img style="max-width: 220px;" src="<?= $image ?>" alt="<?= $name ?>" onclick="lightbox.init('<?= $image ?>', 220);" />
             </div>
         </div>
 <?php } ?>
@@ -344,7 +348,7 @@ if ($sections = $Artist->sections()) {
                     <td colspan="5" class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
                         <div class="group_image float_left clear">
-                            <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
+                            <?= $imgProxy->thumbnail($Group['WikiImage'], $Group['CategoryID']) ?>
                         </div>
 <?php   } ?>
                         <div class="group_info clear">

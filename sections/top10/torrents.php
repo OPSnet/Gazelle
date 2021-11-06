@@ -219,6 +219,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     $artists = Artists::get_artists($groupIds);
 
     $bookmark = new \Gazelle\Bookmark;
+    $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
     foreach ($details as $index => $detail) {
         [$torrentID, $groupID, $data] = $detail;
         $torrent = $torMan->findById($torrentID);
@@ -257,7 +258,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?php ImageTools::cover_thumb($group['WikiImage'], $group['CategoryID']) ?>
+                <?= $imgProxy->thumbnail($group['WikiImage'], $group['CategoryID']) ?>
             </div>
 <?php   } ?>
             <div class="group_info clear">

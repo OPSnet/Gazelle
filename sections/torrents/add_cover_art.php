@@ -15,11 +15,16 @@ if (count($imageList) != count($summaryList)) {
     error('Missing an image or a summary');
 }
 
+$imgProxy = new Gazelle\Util\ImageProxy;
 $logger = new Gazelle\Log;
 for ($i = 0, $end = count($imageList); $i < $end; $i++) {
     $image = trim($imageList[$i]);
-    if (ImageTools::blacklisted($image, true) || !preg_match(IMAGE_REGEXP, $image)) {
-        continue;
+    if (!preg_match(IMAGE_REGEXP, $image)) {
+        error(display_str($image) . " does not look like a valid image url");
+    }
+    $banned = $imgProxy->badHost($image);
+    if ($banned) {
+        error("Please rehost images from $banned elsewhere.");
     }
     $tgroup->addCoverArt($image, trim($summaryList[$i]), $Viewer->id(), $logger);
 }

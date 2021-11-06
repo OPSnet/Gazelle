@@ -757,6 +757,8 @@ class Text {
             return self::smileys(self::userMention($Array[0]));
         }
 
+        $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer(self::$viewer);
+
         foreach ($Array as $Key=>$Block) {
             if ($Key === 'Id') {
                 continue;
@@ -970,7 +972,8 @@ class Text {
                         if ($LocalURL) {
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'.$Block['Val'].'" src="'.$LocalURL.'" />';
                         } else {
-                            $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'.$Block['Val'].'" src="'.ImageTools::process($Block['Val']).'" />';
+                            $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'
+                                . $Block['Val'].'" src="' . $imgProxy->process($Block['Val']) . '" />';
                         }
                     }
                     break;
