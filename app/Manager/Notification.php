@@ -346,7 +346,7 @@ class Notification extends \Gazelle\Base {
 
     public function clearNews() {
         if ((new \Gazelle\WitnessTable\UserReadNews)->witness($this->userId)) {
-            $this->cache->deleteMulti(['u_' . $this->userId, 'user_info_heavy_' . $this->userId]);
+            $this->cache->delete_value('u_' . $this->userId);
         }
         return (new \Gazelle\Manager\News)->latestId();
     }

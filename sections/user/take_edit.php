@@ -218,7 +218,7 @@ $NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? '1' : '0');
 $NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? '1' : '0');
 $NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : '0');
 
-$NavItems = Users::get_nav_items();
+$NavItems = $userMan->forumNavItemList();
 $UserNavItems = [];
 foreach ($NavItems as $n) {
     if ($n['mandatory'] || (!empty($_POST["n_{$n['id']}"]) && $_POST["n_{$n['id']}"] == 'on')) {

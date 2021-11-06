@@ -224,18 +224,9 @@ function error($Error, $NoHTML = false, $Log = false) {
     die();
 }
 
-
-/**
- * Convenience function for check_perms within Permissions class.
- *
- * @see Permissions::check_perms()
- *
- * @param string $PermissionName
- * @param int $MinClass
- * @return bool
- */
-function check_perms($PermissionName, $MinClass = 0) {
-    return Permissions::check_perms($PermissionName, $MinClass);
+function check_perms(string $name) {
+    global $Viewer;
+    return $Viewer->permitted($name);
 }
 
 /**

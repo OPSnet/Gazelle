@@ -8,7 +8,7 @@ class ExpireInvites extends \Gazelle\Schedule\Task
     {
         $this->db->begin_transaction();
         $this->db->prepared_query("SELECT InviterID FROM invites WHERE Expires < now()");
-        $users = $this->db->collect('InviterID', false);
+        $list = $this->db->collect('InviterID', false);
 
         $this->db->prepared_query("DELETE FROM invites WHERE Expires < now()");
         $this->db->prepared_query("
@@ -17,10 +17,10 @@ class ExpireInvites extends \Gazelle\Schedule\Task
             WHERE i.InviteKey IS NULL
         ");
 
-        foreach ($users as $user) {
-            $this->db->prepared_query("UPDATE users_main SET Invites = Invites + 1 WHERE ID = ?", $user);
-            $this->cache->deleteMulti(["u_$user", "user_info_heavy_$user"]);
-            $this->debug("Expired invite from user $user", $user);
+        foreach ($list as $userId) {
+            $this->db->prepared_query("UPDATE users_main SET Invites = Invites + 1 WHERE ID = ?", $userId);
+            $this->cache->delete_value("u_$userId");
+            $this->debug("Expired invite from user $userId", $userId);
             $this->processed++;
         }
         $this->db->commit();

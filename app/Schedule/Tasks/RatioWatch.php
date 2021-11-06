@@ -35,7 +35,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
             ", ...$offRatioWatch);
 
             foreach ($offRatioWatch as $userID) {
-                $this->cache->deleteMulti(["u_$userID", "user_info_heavy_$userID"]);
+                $this->cache->delete_value("u_$userID");
                 $userMan->sendPM($userID, 0,
                     'You have been taken off Ratio Watch',
                     "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=rules.php?p=ratio]here[/url].\n"
@@ -79,7 +79,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
             ", ...$onRatioWatch);
 
             foreach ($onRatioWatch as $userID) {
-                $this->cache->deleteMulti(["u_$userID", "user_info_heavy_$userID"]);
+                $this->cache->delete_value("u_$userID");
                 $userMan->sendPM($userID, 0,
                     'You have been put on Ratio Watch',
                     "This happens when your ratio falls below the requirements outlined in the rules located [url=rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above."

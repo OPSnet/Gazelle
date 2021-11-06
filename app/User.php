@@ -121,6 +121,7 @@ class User extends BaseObject {
                 ui.InfoTitle,
                 ui.Inviter,
                 ui.JoinDate,
+                ui.NavItems,
                 ui.NotifyOnQuote,
                 ui.PermittedForums,
                 ui.RatioWatchEnds,
@@ -170,6 +171,7 @@ class User extends BaseObject {
         $this->info['NotifyOnQuote']   = ($this->info['NotifyOnQuote'] == '1');
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+        $this->info['NavItems']    = array_map('trim', explode(',', $this->info['NavItems'] ?? ''));
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: [];
@@ -261,6 +263,13 @@ class User extends BaseObject {
     }
 
     /**
+     * Get the custom forum navigation configuration.
+     */
+    public function forumNavList(): array {
+        return $this->info()['NavItems'];
+    }
+
+    /**
      * Get the permissions (granted or revoked) for this user
      *
      * @return array permission list
@@ -303,7 +312,6 @@ class User extends BaseObject {
             ", count($delta) ? serialize($delta) : null, $this->id
         );
         $this->cache->delete_value("u_" . $this->id);
-        $this->cache->delete_value("user_info_heavy_" . $this->id);
         $this->info = [];
         return $this->db->affected_rows() === 1;
     }
@@ -994,8 +1002,6 @@ class User extends BaseObject {
         $this->info = [];
         $this->cache->deleteMulti([
             sprintf(self::CACHE_KEY, $this->id),
-            "user_info_" . $this->id,
-            "user_info_heavy_" . $this->id,
             "user_stats_" . $this->id,
         ]);
     }

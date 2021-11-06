@@ -100,7 +100,7 @@ class Donation extends \Gazelle\Base {
         // They have been undonored
         if ($xbtAmount == 0.0 && $Rank == 0 && $TotalRank == 0) {
             $this->removeDonorStatus($UserID);
-            $this->cache->deleteMulti(["u_$UserID", "user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID"]);
+            $this->cache->deleteMulti(["u_$UserID", "donor_info_$UserID"]);
             return;
         }
 
@@ -158,7 +158,7 @@ class Donation extends \Gazelle\Base {
         );
 
         // Clear their user cache keys because the users_info values has been modified
-        $this->cache->deleteMulti(["u_$UserID", "user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID",
+        $this->cache->deleteMulti(["u_$UserID", "donor_info_$UserID",
             'donations_month_3', 'donations_month_12']);
         $this->db->set_query_id($QueryID);
     }

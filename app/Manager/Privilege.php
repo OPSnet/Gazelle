@@ -49,7 +49,6 @@ class Privilege extends \Gazelle\Base {
     protected function info() {
         if (empty($this->info)) {
             $info = $this->cache->get_value(self::CACHE_KEY);
-            $info = false;
             if ($info !== false) {
                 $this->info = $info;
             } else {
@@ -65,15 +64,15 @@ class Privilege extends \Gazelle\Base {
                 }
 
                 $this->db->prepared_query("
-                    SELECT ID
+                    SELECT ID, `Values` AS Permissions
                     FROM permissions
                     ORDER BY Secondary DESC, Level, Name
                 ");
-                $classList = $this->db->to_array('ID', MYSQLI_ASSOC);
+                $permission = $this->db->to_pair('ID', 'Permissions', false);
 
                 // decorate the privileges with those user classes that have benn granted access
-                foreach ($classList as $c) {
-                    $perm = \Permissions::get_permissions($c['ID'])['Permissions'];
+                foreach ($permission as $id => $perm) {
+                    $perm = unserialize($perm);
                     foreach (array_keys($perm) as $p) {
                         if (!isset($privilege[$p])) {
                             // orphan permissions in the db that no longer do anything
@@ -84,7 +83,7 @@ class Privilege extends \Gazelle\Base {
                                 'orphan'      => 1
                             ];
                         }
-                        $privilege[$p]['can'][] = $c['ID'];
+                        $privilege[$p]['can'][] = $id;
                     }
                 }
                 $this->info = [

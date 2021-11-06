@@ -86,14 +86,13 @@ switch ($_REQUEST['action'] ?? '') {
         }
         $UserID = $_REQUEST['id'];
         $Cache->deleteMulti([
+            'u_'                      . $UserID,
             'collage_subs_user_new_'  . $UserID,
             'donor_info_'             . $UserID,
             'inbox_new_'              . $UserID,
             'user_notify_upload_'     . $UserID,
             'staff_pm_new_'           . $UserID,
             'subscriptions_user_new_' . $UserID,
-            'user_info_'              . $UserID,
-            'user_info_heavy_'        . $UserID,
         ]);
         require_once('user.php');
         break;

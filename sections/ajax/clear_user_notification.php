@@ -6,9 +6,7 @@ $Type = $_POST['type'];
 
 switch($Type) {
     case 'Blog':
-        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($Viewer->id())) {
-            $Cache->delete_value('user_info_heavy_' . $Viewer->id());
-        }
+        (new Gazelle\WitnessTable\UserReadBlog)->witness($Viewer->id());
         break;
     case 'Collages':
         $notifMan->catchupAllCollages();

@@ -184,7 +184,7 @@ class View {
 
         $PageID = [$Document, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
         $navLinks = [];
-        $navItems = Users::get_user_nav_items($Viewer->id());
+        $navItems = (new Gazelle\Manager\User)->forumNavItemUserList($Viewer);
         foreach ($navItems as $n) {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
             if (strpos($Tests, ':')) {

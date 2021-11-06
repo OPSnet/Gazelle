@@ -40,7 +40,7 @@ class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
 
         // clear the appropriate cache keys
         foreach ($userIDs as $userID) {
-            $this->cache->deleteMulti(["u_$userID", "user_info_$userID"]);
+            $this->cache->delete_value("u_$userID");
             $this->processed++;
             $this->debug("Disabled $userID", $userID);
         }

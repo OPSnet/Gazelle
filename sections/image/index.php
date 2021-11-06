@@ -85,7 +85,7 @@ if (isset($_GET['type']) && isset($_GET['userid'])) {
                 $DB->prepared_query("
                     UPDATE users_info SET Avatar = '' WHERE UserID = ?  ", $userId
                 );
-                $Cache->delete_value("user_info_$userId");
+                $Cache->delete_value("u_$userId");
                 break;
             case 'avatar2':
                 $imageType = 'second avatar';

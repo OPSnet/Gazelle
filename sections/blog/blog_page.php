@@ -52,9 +52,7 @@ if ($action === 'Create') { /* default for non-staff */
 <?php
     $headlines = (new Gazelle\Manager\Blog)->headlines();
     if ($headlines) {
-        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($Viewer->id())) {
-            $Cache->delete_value('user_info_heavy_' . $Viewer->id());
-        }
+        (new \Gazelle\WitnessTable\UserReadBlog)->witness($Viewer->id());
     }
 
     foreach ($headlines as $article) {

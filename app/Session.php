@@ -108,8 +108,6 @@ class Session extends Base {
             'session_' . $sessionId,
             'u_' . $this->userId,
             'users_sessions_' . $this->userId,
-            'user_info_' . $this->userId,
-            'user_info_heavy_' . $this->userId,
             'user_stats_' . $this->userId,
         ]);
         return $this->db->affected_rows();
@@ -147,8 +145,6 @@ class Session extends Base {
             [
                 'u_' . $this->userId,
                 'users_sessions_' . $this->userId,
-                'user_info_' . $this->userId,
-                'user_info_heavy_' . $this->userId,
                 'user_stats_' . $this->userId,
             ]
         ));

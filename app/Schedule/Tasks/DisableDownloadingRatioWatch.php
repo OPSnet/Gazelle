@@ -33,7 +33,7 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
 
         $userMan = new \Gazelle\Manager\User;
         foreach ($userIDs as $userID) {
-            $this->cache->deleteMulti(["u_$userID", "user_info_heavy_$userID"]);
+            $this->cache->delete_value("u_$userID");
             $userMan->sendPM($userID, 0,
                 'Your downloading privileges have been disabled',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."

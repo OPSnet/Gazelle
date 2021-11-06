@@ -9,10 +9,6 @@ class UserReadBlog extends AbstractWitnessTable {
     protected function valueColumn() { return 'blog_id'; }
 
     public function witness(int $userId): bool {
-        $result = $this->witnessValue($userId);
-        if ($result) {
-            $this->cache->deleteMulti(["u_$userId", "user_info_heavy_$userId"]);
-        }
-        return $result;
+        return $this->witnessValue($userId);
     }
 }
