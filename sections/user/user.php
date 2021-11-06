@@ -161,21 +161,22 @@ if ($lastfmInfo)  {
     ]);
 }
 
-$Uploads          = check_paranoia_here('uploads+') ? $User->stats()->uploadTotal() : 0;
-$ArtistsAdded     = check_paranoia_here('artistsadded') ? $User->stats()->artistAddedTotal() : 0;
+$stats            = $User->stats();
+$Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
+$ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $User->collageAdditions() : 0;
 $releaseVotes     = $User->releaseVotes();
 $bonusPointsSpent = $User->bonusPointsSpent();
-$torrentComments  = check_paranoia_here('torrentcomments++') ? $User->torrentCommentCount() : 0;
+$torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
     new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
     [
         'uploaded'   => $User->uploadedSize(),
         'downloaded' => $User->downloadedSize(),
         'uploads'    => $Uploads,
-        'requests'   => $User->stats()->requestBountyTotal(),
-        'posts'      => $User->stats()->forumPostTotal(),
-        'bounty'     => $User->stats()->requestVoteSize(),
+        'requests'   => $stats->requestBountyTotal(),
+        'posts'      => $stats->forumPostTotal(),
+        'bounty'     => $stats->requestVoteSize(),
         'artists'    => $ArtistsAdded,
         'collage'    => $collageAdditions,
         'votes'      => $releaseVotes,
@@ -206,14 +207,14 @@ if (($Override = check_paranoia_here('uploads+'))) {
 }
 if (($Override = check_paranoia_here('requestsfilled_count'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($User->stats()->requestBountyTotal())?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($stats->requestBountyTotal())?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->stats()->requestBountySize())?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats->requestBountySize())?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
 <?php } ?>
-                <li class="tooltip" title="<?=number_format($User->stats()->forumPostTotal())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
+                <li class="tooltip" title="<?=number_format($stats->forumPostTotal())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
 <?php
 if (($Override = check_paranoia_here('torrentcomments++'))) {
 ?>
@@ -358,7 +359,7 @@ if (check_paranoia_here('snatched')) {
 }
 
 echo $Twig->render('user/sidebar-stats.twig', [
-    'stats'        => $User->stats(),
+    'stats'        => $stats,
     'user_id'      => $UserID,
     'can_leech'    => $User->canLeech(),
     'viewer'       => $Viewer,
