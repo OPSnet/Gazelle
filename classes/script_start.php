@@ -150,8 +150,8 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     (in_array($Document, ['schedule', 'peerupdate', 'tools']) && PHP_SAPI === 'cli')
     || ($Document === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
 ) {
-    // We want to allow through CLI calls to the above $Document types, as well as calls to the ocelot aciton if
-    // using the TRACKER_SECRET. We don't have a viewer in these cases, so it'll be left to null.
+    // We want to allow through CLI calls to the above $Document types, as well as calls to the ocelot action if
+    // using the TRACKER_SECRET. We don't have a viewer in these cases, so it will remain null.
 } elseif (!in_array($Document, ['index', 'login', 'register'])) {
     header('Location: login.php');
     exit;
@@ -159,11 +159,6 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 
 if (!is_null($Viewer)) {
     $viewerId = $Viewer->id();
-    $LoggedUser = array_merge(Users::user_heavy_info($viewerId), Users::user_info($viewerId));
-    $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($viewerId, $LoggedUser['CustomPermissions']);
-    if ($Viewer->disableWiki()) {
-        unset($LoggedUser['Permissions']['site_edit_wiki']);
-    }
 
     // Change necessary triggers in external components
     if ($Viewer->permitted('admin_clear_cache')) {

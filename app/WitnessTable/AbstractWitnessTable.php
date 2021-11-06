@@ -21,7 +21,11 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE {$this->valueColumn()} = ?
             ", $userId, $latest, $latest
         );
-        return $this->db->affected_rows() !== 0;
+        $success = $this->db->affected_rows() !== 0;
+        if ($success) {
+            $this->cache->delete_value("u_$userId");
+        }
+        return $success;
     }
 
     protected function witnessDate(int $userId): bool {
@@ -31,7 +35,11 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE {$this->valueColumn()} = now()
             ", $userId
         );
-        return $this->db->affected_rows() !== 0;
+        $success = $this->db->affected_rows() !== 0;
+        if ($success) {
+            $this->cache->delete_value("u_$userId");
+        }
+        return $success;
     }
 
     /**

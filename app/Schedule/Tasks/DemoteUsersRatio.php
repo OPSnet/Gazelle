@@ -63,7 +63,7 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
         while ([$userID] = $this->db->next_record()) {
             $demotions++;
             $this->debug("Demoting $userID to $classString for insufficient ratio", $userID);
-            $this->cache->deleteMulti(["u_$userID", "user_info_$userID", "user_info_heavy_$userID"]);
+            $this->cache->delete_value("u_$userID");
             $userMan->sendPM($userID, 0,
                 "You have been demoted to $classString",
                 "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about "

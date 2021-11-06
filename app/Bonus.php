@@ -27,7 +27,6 @@ class Bonus extends Base {
     public function flush() {
         $this->cache->deleteMulti([
             'u_' . $this->user->id(),
-            'user_info_heavy_' . $this->user->id(),
             'user_stats_' . $this->user->id(),
             sprintf(self::CACHE_HISTORY, $this->userId, 0),
             sprintf(self::CACHE_POOL_HISTORY, $this->userId),
@@ -377,8 +376,6 @@ class Bonus extends Base {
         $this->cache->deleteMulti([
             'u_' . $this->userId,
             'u_' . $toID,
-            'user_info_heavy_' . $this->userId,
-            'user_info_heavy_' . $toID,
             'user_stats_' . $this->userId,
             'user_stats_' . $toID,
         ]);

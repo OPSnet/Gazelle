@@ -73,8 +73,6 @@ class DemoteUsers extends \Gazelle\Schedule\Task
 
                     $this->cache->deleteMulti([
                         "u_$userId",
-                        "user_info_$userId",
-                        "user_info_heavy_$userId",
                         "user_stats_$userId",
                         "user_rlim_$userId",
                     ]);

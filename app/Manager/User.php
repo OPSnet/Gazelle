@@ -756,7 +756,7 @@ class User extends \Gazelle\Base {
         );
         if (is_null($current)) {
             // User was not already warned
-            $this->cache->deleteMulti(["u_$userId", "user_info_$userId"]);
+            $this->cache->delete_value("u_$userId");
             $warnTime = time_plus($duration);
             $warning = "Warned until $warnTime";
         } else {
@@ -819,7 +819,7 @@ class User extends \Gazelle\Base {
         );
         foreach ($userIds as $userId) {
             $this->cache->deleteMulti([
-                "u_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "users_sessions_$userId"
+                "u_$userId", "user_stats_$userId", "users_sessions_$userId"
             ]);
 
         }
@@ -1096,5 +1096,31 @@ class User extends \Gazelle\Base {
 
         $this->cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
+    }
+
+    public  function forumNavItemUserList(\Gazelle\User $user): array {
+        $UserIds = $user->forumNavList();
+        $NavItems = $this->forumNavItemList();
+        $list = [];
+        foreach ($NavItems as $n) {
+            if (($n['mandatory'] || in_array($n['id'], $UserIds)) || (!count($UserIds) && $n['initial'])) {
+                $list[] = $n;
+            }
+        }
+        return $list;
+    }
+
+    public function forumNavItemList(): array {
+        $list = $this->cache->get_value("nav_items");
+        if (!$list) {
+            $QueryID = $this->db->get_query_id();
+            $this->db->prepared_query("
+                SELECT id, tag, title, target, tests, test_user, mandatory, initial
+                FROM nav_items");
+            $list = $this->db->to_array("id", MYSQLI_ASSOC, false);
+            $this->cache->cache_value("nav_items", $list, 0);
+            $this->db->set_query_id($QueryID);
+        }
+        return $list;
     }
 }

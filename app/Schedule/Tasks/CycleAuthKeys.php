@@ -26,7 +26,7 @@ class CycleAuthKeys extends \Gazelle\Schedule\Task
         ");
         $keys = $this->db->collect(0, false);
         foreach ($keys as $key) {
-            $this->cache->deleteMulti(["u_$key", "user_info_heavy_$key"]);
+            $this->cache->delete_value("u_$key");
         }
     }
 }

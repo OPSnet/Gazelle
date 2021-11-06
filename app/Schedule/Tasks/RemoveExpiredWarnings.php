@@ -20,7 +20,7 @@ class RemoveExpiredWarnings extends \Gazelle\Schedule\Task
 
         $this->db->set_query_id($queryId);
         while (list($userID) = $this->db->next_record()) {
-            $this->cache->deleteMulti(["u_$userID", "user_info_$userID"]);
+            $this->cache->delete_value("u_$userID");
             $this->debug("Expiring warning for $userID", $userID);
             $this->processed++;
         }
