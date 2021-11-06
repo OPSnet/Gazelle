@@ -29,16 +29,6 @@ switch ($_REQUEST['action']) {
         require_once('managers/quick_ban.php');
         break;
 
-    case 'calendar':
-        require_once('managers/calendar.php');
-        break;
-    case 'get_calendar_event':
-        require_once('managers/ajax_get_calendar_event.php');
-        break;
-    case 'take_calendar_event':
-        require_once('managers/ajax_take_calendar_event.php');
-        break;
-
     case 'categories':
         require_once('managers/categories_list.php');
         break;

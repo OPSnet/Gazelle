@@ -84,7 +84,6 @@ Category('Administration', [
 
 Category('Announcements', [
     Item('Album of the Month',  'tools.php?action=monthalbum',          All(['admin_freeleech'])),
-    Item('Calendar',            'tools.php?action=calendar',            Calendar::can_view()),
     Item('Change log',          'tools.php?action=change_log',          All(['users_mod'])),
     Item('Global notification', 'tools.php?action=global_notification', All(['admin_global_notification'])),
     Item('Mass PM',             'tools.php?action=mass_pm',             All(['admin_global_notification'])),

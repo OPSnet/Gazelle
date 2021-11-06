@@ -1575,11 +1575,6 @@ div[class~=tooltipster-content] > a {
   color: #CC0000;
 }
 
-/* workaround for calendar display issue */
-div.sidebar #event_div {
-  margin-left: -50px;
-}
-
 .sidebar img {
   max-width: 225px;
 }
