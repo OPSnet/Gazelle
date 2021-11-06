@@ -28,9 +28,6 @@ $(document).ready(function() {
             }
             break;
         case "tools":
-            if (query['action'] == "calendar") {
-                $("#event_form").validate();
-            }
             if (query['action'] == "mass_pm") {
                 $("#messageform").validate();
             }
