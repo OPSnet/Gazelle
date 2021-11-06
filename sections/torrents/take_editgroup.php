@@ -58,18 +58,19 @@ if (($_GET['action'] ?? '') == 'revert') {
         }
     }
 
-    $Image = $_POST['image'];
-    if (!preg_match(IMAGE_REGEXP, $Image)) {
+    if (empty($_POST['image'])) {
         $Image = '';
-    }
-    ImageTools::blacklisted($Image);
-    if ($Image) {
-        foreach (IMAGE_HOST_BANNED as $banned) {
-            if (stripos($banned, $Image) !== false) {
-                error("Please rehost images from $banned elsewhere.");
-            }
+    } else {
+        $Image = $_POST['image'];
+        if (!preg_match(IMAGE_REGEXP, $Image)) {
+            error(display_str($Image) . " does not look like a valid image url");
+        }
+        $banned = (new Gazelle\Util\ImageProxy)->badHost($Image);
+        if ($banned) {
+            error("Please rehost images from $banned elsewhere.");
         }
     }
+
     $Body = $_POST['body'];
     if ($_POST['summary']) {
         $logInfo[] = "summary: " . trim($_POST['summary']);

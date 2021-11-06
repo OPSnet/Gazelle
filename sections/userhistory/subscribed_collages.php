@@ -11,6 +11,7 @@ $artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), !$ShowAll);
 
 $torMan = new Gazelle\Manager\Torrent;
 $torMan->setViewer($Viewer);
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
@@ -73,7 +74,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                 <td colspan="5" class="big_info">
 <?php if ($Viewer->option('CoverArt')) { ?>
                     <div class="group_image float_left clear">
-                        <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                        <?= $imgProxy->thumbnail($WikiImage, $GroupCategoryID) ?>
                     </div>
 <?php } ?>
                     <div class="group_info clear">
@@ -147,7 +148,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td class="td_info big_info">
 <?php           if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                <?= $imgProxy->thumbnail($WikiImage, $GroupCategoryID) ?>
             </div>
 <?php           } ?>
             <div class="group_info clear">

@@ -86,9 +86,10 @@ class Collage extends \Gazelle\Base {
         }
         $tags = new \Tags($group['TagList']);
 
+        global $Viewer; // FIXME this should be moved elsewhere where a $Viewer is available
         return $this->twig->render('collage/row.twig', [
             'group_id'   => $groupId,
-            'image'      => \ImageTools::process($group['WikiImage'], true),
+            'image'      => (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($group['WikiImage']),
             'name'       => $name,
             'tags'       => $tags->format(),
             'tags_plain' => implode(', ', $tags->get_tags()),

@@ -110,6 +110,8 @@ if (!empty($GroupIDs)) {
         $Cache->delete_value('user_notify_upload_'.$Viewer->id());
     }
 }
+
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notifications', ['js' => 'notifications']);
 ?>
 <div class="thin widethin">
@@ -246,7 +248,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?php ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupCategoryID) ?>
+                <?= $imgProxy->thumbnail($GroupInfo['WikiImage'], $GroupCategoryID) ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">

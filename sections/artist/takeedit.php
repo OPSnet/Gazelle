@@ -33,14 +33,12 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
 }
 
 if (!empty($image)) {
-    ImageTools::blacklisted($image);
     if (!preg_match(IMAGE_REGEXP, $image)) {
-        error("That does not look like a valid image url");
+        error(display_str($image) . " does not look like a valid image url");
     }
-    foreach (IMAGE_HOST_BANNED as $banned) {
-        if (stripos($banned, $image) !== false) {
-            error("Please rehost images from $banned elsewhere.");
-        }
+    $banned = (new Gazelle\Util\ImageProxy)->badHost($image);
+    if ($banned) {
+        error("Please rehost images from $banned elsewhere.");
     }
 }
 

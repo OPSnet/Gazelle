@@ -623,9 +623,11 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                     <td colspan="3">
 <?php
                 $Images = explode(' ', $Images);
+                $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
                 foreach ($Images as $Image) {
 ?>
-                        <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?=ImageTools::process($Image)?>" alt="Relevant image" />
+                        <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?=
+                            $imgProxy->process($Image) ?>" alt="Relevant image" />
 <?php           } ?>
                     </td>
                 </tr>

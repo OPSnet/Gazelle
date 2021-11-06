@@ -74,17 +74,13 @@ if (empty($_POST['tags'])) {
 if (empty($_POST['image'])) {
     $Image = null;
 } else {
-    ImageTools::blacklisted($_POST['image']);
-    if (preg_match_all(IMAGE_REGEXP, $_POST['image'], $match) > 0) {
-        $Image = implode(' ', $match[1]);
-    } else {
-        $Err = display_str($_POST['image']).' does not appear to be a valid link to an image.';
+    $Image = $_POST['image'];
+    if (!preg_match(IMAGE_REGEXP, $Image)) {
+        $Err = display_str($Image) . " does not look like a valid image url";
     }
-    foreach (IMAGE_HOST_BANNED as $banned) {
-        if (stripos($banned, $Image) !== false) {
-            $Err = "Please rehost images from $banned elsewhere.";
-            break;
-        }
+    $banned = (new Gazelle\Util\ImageProxy)->badHost($Image);
+    if ($banned) {
+        $Err = "Please rehost images from $banned elsewhere.";
     }
 }
 

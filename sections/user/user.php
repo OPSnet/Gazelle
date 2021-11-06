@@ -53,9 +53,12 @@ if ($UserID == $Viewer->id()) {
 $FA_Key = null;
 
 // Image proxy CTs
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 $DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->title()))
     ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-        function ($m) { return 'src=' . $m[1] . ImageTools::process($m[2]) . $m[3];}, $User->title())
+        function ($m) use ($imgProxy) {
+            return 'src=' . $m[1] . $imgProxy->process($m[2]) . $m[3];
+        }, $User->title())
     : $User->title();
 
 $Paranoia = ($Preview == 1) ? explode(',', $_GET['paranoia']) : $User->paranoia();
@@ -491,7 +494,7 @@ foreach ($Collages as $CollageInfo) {
 ?>
             <td>
                 <a href="torrents.php?id=<?= $C['GroupID'] ?>">
-                    <img class="tooltip" title="<?= $Name ?>" src="<?=ImageTools::process($C['WikiImage'], true)?>" alt="<?= $Name ?>" width="107" />
+                    <img class="tooltip" title="<?= $Name ?>" src="<?= $imgProxy->process($C['WikiImage']) ?>" alt="<?= $Name ?>" width="107" />
                 </a>
             </td>
 <?php    } ?>

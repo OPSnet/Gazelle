@@ -10,9 +10,10 @@ class Curl {
     public function __construct() {
         $this->curl = curl_init();
         curl_setopt_array($this->curl, [
-            CURLOPT_HEADER         => 0,
-            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_HEADER         => false,
+            CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 5,
             CURLOPT_USERAGENT      => FAKE_USERAGENT,
         ]);
         if (defined('HTTP_PROXY')) {

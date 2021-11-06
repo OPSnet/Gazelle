@@ -107,8 +107,12 @@ $Index = 0;
             </div>
 <div id="covers">
 <div id="cover_div_<?=$Index?>" class="pad">
-<?php if ($WikiImage != '') { ?>
-            <p align="center"><img width="100%" src="<?=ImageTools::process($WikiImage, true)?>" alt="<?= $title ?>" onclick="lightbox.init('<?=ImageTools::process($WikiImage)?>', 220);" /></p>
+<?php
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+if ($WikiImage != '') {
+    $image = $imgProxy->process($WikiImage);
+?>
+            <p align="center"><img width="100%" src="<?= $image ?>" alt="<?= $title ?>" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
 <?php } else { ?>
             <p align="center"><img width="100%" src="<?=STATIC_SERVER?>/common/noartwork/<?=CATEGORY_ICON[$GroupCategoryID - 1]?>" alt="<?=CATEGORY[$GroupCategoryID - 1]?>" class="brackets tooltip" title="<?=CATEGORY[$GroupCategoryID - 1]?>" height="220" border="0" /></p>
 <?php
@@ -120,13 +124,14 @@ $Index++;
                     <div id="cover_div_<?=$Index?>" class="pad"<?= $Viewer->option('ShowExtraCovers') ? '' : ' style="display: none;"' ?>>
                 <p align="center">
 <?php
+    $image = $imgProxy->process($c['Image']);
     if ($Viewer->option('ShowExtraCovers')) {
-        $Src = 'src="' . ImageTools::process($c['Image'], true) . '"';
+        $Src = 'src="' . $image . '"';
     } else {
-        $Src = 'src="" data-gazelle-temp-src="' . ImageTools::process($c['Image'], true) . '"';
+        $Src = 'src="" data-gazelle-temp-src="' . $image . '"';
     }
 ?>
-                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?=ImageTools::process($c['Image'])?>', 220);" />
+                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" />
                 </p>
                 <ul class="stats nobullet">
                     <li><?= $c['Summary'] ?>
