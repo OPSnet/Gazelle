@@ -15,6 +15,7 @@ if ($torrentId && $torrentHash) {
 }
 if (is_null($torrent)) {
     $json->failure('bad parameters');
+    exit;
 }
 
 $json->setVersion(5)
