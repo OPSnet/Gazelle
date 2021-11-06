@@ -4,6 +4,7 @@ $user = (new Gazelle\Manager\User)->findById((int)$_GET['id']);
 if (is_null($user)) {
     json_die("failure", "bad id parameter");
 }
+$stats = $user->stats();
 
 if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfilled_bounty'])) {
     $RequestsFilled = null;
@@ -11,16 +12,16 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $RequestsVoted  = null;
     $TotalSpent     = null;
 } else {
-    $RequestsFilled = $user->stats()->requestBountyTotal();
-    $TotalBounty    = $user->stats()->requestBountySize();
-    $RequestsVoted  = $user->stats()->requestVoteTotal();
-    $TotalSpent     = $user->stats()->requestVoteSize();
+    $RequestsFilled = $stats->requestBountyTotal();
+    $TotalBounty    = $stats->requestBountySize();
+    $RequestsVoted  = $stats->requestVoteTotal();
+    $TotalSpent     = $stats->requestVoteSize();
 }
-$ForumPosts       = $user->stats()->forumPostTotal();
-$Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $user->stats()->uploadTotal() : null;
-$ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $user->stats()->artistAddedTotal() : null;
+$ForumPosts       = $stats->forumPostTotal();
+$Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $stats->uploadTotal() : null;
+$ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : null;
 $releaseVotes     = $user->releaseVotes();
-$torrentComments  = $user->propertyVisible($Viewer, 'torrentcomments++') ? $user->torrentCommentCount() : null;
+$torrentComments  = $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('torrents') : null;
 $collageContribs  = $user->propertyVisible($Viewer, 'collagecontribs+') ? $user->collagesContributed() : null;
 
 $rank = new Gazelle\UserRank(
@@ -91,9 +92,9 @@ json_print("success", [
     'community' => [
         'posts'           => $ForumPosts,
         'torrentComments' => $torrentComments,
-        'artistComments'  => $user->propertyVisible($Viewer, 'torrentcomments++') ? $user->artistCommentCount() : null,
-        'collageComments' => $user->propertyVisible($Viewer, 'torrentcomments++') ? $user->collageCommentCount() : null,
-        'requestComments' => $user->propertyVisible($Viewer, 'torrentcomments++') ? $user->requestCommentCount() : null,
+        'artistComments'  => $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('artists') : null,
+        'collageComments' => $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('collages') : null,
+        'requestComments' => $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('requests') : null,
         'collagesStarted' => $user->propertyVisible($Viewer, 'collages+') ? $user->collagesCreated() : null,
         'collagesContrib' => $collageContribs,
         'requestsFilled'  => $RequestsFilled,
@@ -101,13 +102,13 @@ json_print("success", [
         'requestsVoted'   => $RequestsVoted,
         'bountySpent'     => $TotalSpent,
         'releaseVotes'    => $releaseVotes,
-        'perfectFlacs'    => $user->propertyVisible($Viewer, 'perfectflacs+') ? $user->stats()->perfectFlacTotal() : null,
-        'groups'          => $user->propertyVisible($Viewer, 'uniquegroups+') ? $user->stats()->uniqueGroupTotal() : null,
+        'perfectFlacs'    => $user->propertyVisible($Viewer, 'perfectflacs+') ? $stats->perfectFlacTotal() : null,
+        'groups'          => $user->propertyVisible($Viewer, 'uniquegroups+') ? $stats->uniqueGroupTotal() : null,
         'uploaded'        => $Uploads,
-        'seeding'         => $user->propertyVisible($Viewer, 'seeding+') ? $user->stats()->seedingTotal() : null,
-        'leeching'        => $user->propertyVisible($Viewer, 'leeching+') ? $user->stats()->leechTotal() : null,
-        'snatched'        => $user->propertyVisible($Viewer, 'snatched+') ? $user->stats()->snatchTotal() : null,
-        'invited'         => $user->propertyVisible($Viewer, 'invitedcount') ? $user->stats()->invitedTotal() : null,
+        'seeding'         => $user->propertyVisible($Viewer, 'seeding+') ? $stats->seedingTotal() : null,
+        'leeching'        => $user->propertyVisible($Viewer, 'leeching+') ? $stats->leechTotal() : null,
+        'snatched'        => $user->propertyVisible($Viewer, 'snatched+') ? $stats->snatchTotal() : null,
+        'invited'         => $user->propertyVisible($Viewer, 'invitedcount') ? $stats->invitedTotal() : null,
         'artistsAdded'    => $ArtistsAdded,
     ]
 ]);
