@@ -435,13 +435,13 @@ $bookmark = new \Gazelle\Bookmark;
 
 // Start printing torrent list
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
-$tgroupMan = new Gazelle\Manager\TGroup;
+$tgMan = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 foreach ($Results as $GroupID) {
-    $tgroup = $tgroupMan->findById($GroupID);
+    $tgroup = $tgMan->findById($GroupID);
     if (is_null($tgroup)) {
         continue;
     }
-    $Torrents = $tgroup->setViewer($Viewer)->torrentList();
+    $Torrents = $tgroup->torrentList();
     if (empty($Torrents)) {
         continue;
     }

@@ -412,7 +412,7 @@ class TGroup extends BaseObject {
             implode(" \xE2\x80\x93 ",
                 array_filter([
                     $this->artistHtml(),
-                    '<span dir="ltr">' . $this->name() . '</span>',
+                    '<span dir="ltr">' . display_str($this->name()) . '</span>',
                 ], fn($x) => !empty($x))
             ),
             ...$this->displayNameSuffix()
@@ -657,7 +657,7 @@ class TGroup extends BaseObject {
     }
 
     public function torrentList(): array {
-        $viewerId = $this->viewer ? $this->viewer->id() : 0;
+        $viewerId = isset($this->viewer) ? $this->viewer->id() : null;
         $showSnatched = $viewerId ? $this->viewer->option('ShowSnatched') : false;
         $list = $this->rawTorrentList();
         foreach ($list as &$info) {

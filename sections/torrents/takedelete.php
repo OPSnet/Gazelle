@@ -1,17 +1,14 @@
 <?php
 authorize();
 
-$t = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
-if (is_null($t)) {
+$torrent = (new Gazelle\Manager\Torrent)->setViewer($Viewer)->findById((int)$_POST['torrentid']);
+if (is_null($torrent)) {
     error(404);
 }
-$t->setViewer($Viewer);
-$tgroup  = $t->group();
-$group   = $tgroup->info();
-$torrent = $t->info();
-$torrentId = $t->id();
+$torrentId  = $torrent->id();
+$uploaderId = $torrent->uploaderId();
 
-if ($Viewer->id() != $torrent['UserID'] && !$Viewer->permitted('torrents_delete')) {
+if ($Viewer->id() != $uploaderId && !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
 if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !$Viewer->permitted('torrents_delete_fast')) {
@@ -22,38 +19,27 @@ if ($Cache->get_value("torrent_{$torrentId}_lock")) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
-$labelMan = new Gazelle\Manager\TorrentLabel;
-$labelMan->showMedia(true)
-    ->showEdition(true)
-    ->load($torrent);
+$fullName = $torrent->fullName();
+$infohash = $torrent->infohash();
+$size     = $torrent->size();
+$reason   = implode(' ', [array_map('trim', [$_POST['reason'], $_POST['extra']])]);
 
-$name = $group['Name'] . " [" . $labelMan->release() . '] (' . $labelMan->edition() . ')';
-$artistName = $tgroup->artistName();
-if ($artistName) {
-    $name = "$artistName - $name";
-}
-
-$reason = trim($_POST['reason']) . ' ' . trim($_POST['extra']);
-[$success, $message] = $t->remove($Viewer->id(), $reason);
+[$success, $message] = $torrent->remove($Viewer->id(), $reason);
 if (!$success) {
     error($message);
 }
 
 (new Gazelle\Manager\User)->sendRemovalPM(
-    $torrentId,
-    $torrent['UserID'],
-    $name,
-    "Torrent $torrentId $name ("
-        . number_format($torrent['Size'] / (1024 * 1024), 2) . ' MiB '
-        . strtoupper($torrent['info_hash'])
-        . ") was deleted by " . $Viewer->username() . ": $reason",
+    $torrentId, $uploaderId, $fullName,
+    "Torrent $torrentId $fullName (" . number_format($size / (1024 * 1024), 2) . ' MiB '
+        . strtoupper($infohash) . ") was deleted by " . $Viewer->username() . ": $reason",
     0,
-    $Viewer->id() != $torrent['UserID']
+    $Viewer->id() != $uploaderId
 );
 View::show_header('Torrent deleted');
 ?>
 <div class="thin">
-    <h3>Torrent <?= $name ?> was successfully deleted.</h3>
+    <h3>Torrent <?= $fullName ?> was successfully deleted.</h3>
 </div>
 <?php
 View::show_footer();

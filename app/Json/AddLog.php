@@ -54,7 +54,7 @@ class AddLog extends \Gazelle\Json {
 
         $torrentId    = $this->torrent->id();
         $logSummaries = [];
-        for ($i = 0; $total = count($this->files['name']), $i < $total; $i++) {
+        for ($i = 0, $total = count($this->files['name']); $i < $total; $i++) {
             if (!$this->files['size'][$i]) {
                 continue;
             }

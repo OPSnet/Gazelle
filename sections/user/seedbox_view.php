@@ -59,10 +59,9 @@ View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
 if ($source && $target) {
     echo $Twig->render('seedbox/report.twig', [
         'list' => $seedbox->torrentList(
-            $paginator->limit(),
-            $paginator->offset(),
             new Gazelle\Manager\Torrent,
-            (new Gazelle\Manager\TorrentLabel)->showFlags(false)->showEdition(false)
+            $paginator->limit(),
+            $paginator->offset()
         ),
         'auth'      => $Viewer->auth(),
         'mode'      => $union ? 'union' : 'exclude',
