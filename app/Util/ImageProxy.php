@@ -39,7 +39,7 @@ class ImageProxy {
      * @return string
      */
     public function process($url, $check = false, $UserID = false) {
-        if (empty($url) || (isset($this->viewer) && !$this->viewer->permitted('site_proxy_images'))) {
+        if (empty($url) || !isset($this->viewer) || (isset($this->viewer) && !$this->viewer->permitted('site_proxy_images'))) {
             return $url;
         }
         $extra = '';
