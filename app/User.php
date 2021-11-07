@@ -26,8 +26,6 @@ class User extends BaseObject {
     protected string $donorHeart;
 
     protected Stats\User $stats;
-    protected Manager\Torrent $torMan;
-    protected Manager\TorrentLabel $labelMan;
 
     public function tableName(): string {
         return 'users_main';
@@ -75,16 +73,6 @@ class User extends BaseObject {
         $session = new Session($this->id);
         $session->dropAll();
         $this->logout();
-    }
-
-    public function setTorrentManager(Manager\Torrent $torMan) {
-        $this->torMan = $torMan;
-        return $this;
-    }
-
-    public function setTorrentLabelManager(Manager\TorrentLabel $labelMan) {
-        $this->labelMan = $labelMan;
-        return $this;
     }
 
     public function info(): ?array {
@@ -2231,11 +2219,11 @@ class User extends BaseObject {
      * @param int $offset From where (which page)
      * @return array [torrent_id, group_id, created, expired, downloaded, uses, group_name, format, encoding, size]
      */
-    public function tokenPage(int $limit, int $offset): array {
+    public function tokenList(Manager\Torrent $torMan, int $limit, int $offset): array {
         $this->db->prepared_query("
             SELECT t.GroupID AS group_id,
                 g.Name       AS group_name,
-                t.ID         AS torrent_id,
+                f.TorrentId  AS torrent_id,
                 t.Size       AS size,
                 f.Time       AS created,
                 f.Expired    AS expired,
@@ -2252,20 +2240,10 @@ class User extends BaseObject {
         $list = [];
         $torrents = $this->db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($torrents as $t) {
-            if (!$t['group_id']) {
-                $name = "(<i>Deleted torrent <a href=\"log.php?search=Torrent+{$t['torrent_id']}\">{$t['torrent_id']}</a></i>)";
-            } else {
-                $name = "<a href=\"torrents.php?id={$t['group_id']}&amp;torrentid={$t['torrent_id']}\">{$t['group_name']}</a>";
-                $torrent = $this->torMan->findById($t['torrent_id']);
-                $artist = $torrent->group()->artistHtml();
-                if ($artist) {
-                    $name = "$artist - $name";
-                }
-                $this->labelMan->load($torrent->info());
-                $name .= ' [' . $this->labelMan->label() . ']';
-            }
-            $t['expired'] = ($t['expired'] === 1);
-            $t['name'] = $name;
+            $torrent = $torMan->findById($t['torrent_id']);
+            $t['name'] = $torrent
+                ? $torrent->fullLink()
+                : "(<i>Deleted torrent <a href=\"log.php?search=Torrent+{$t['torrent_id']}\">{$t['torrent_id']}</a></i>)";
             $list[] = $t;
         }
         return $list;

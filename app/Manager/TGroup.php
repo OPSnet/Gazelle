@@ -12,6 +12,17 @@ class TGroup extends \Gazelle\Base {
     const FEATURED_AOTM     = 0;
     const FEATURED_SHOWCASE = 1;
 
+    protected \Gazelle\User $viewer;
+
+    /**
+     * Set the viewer context, for snatched indicators etc.
+     * If this is set, and Torrent object created will have it set
+     */
+    public function setViewer(\Gazelle\User $viewer) {
+        $this->viewer = $viewer;
+        return $this;
+    }
+
     public function findById(int $tgroupId): ?\Gazelle\TGroup {
         $key = sprintf(self::ID_KEY, $tgroupId);
         $id = $this->cache->get_value($key);
@@ -24,7 +35,14 @@ class TGroup extends \Gazelle\Base {
                 $this->cache->cache_value($key, $id, 0);
             }
         }
-        return $id ? new \Gazelle\TGroup($id) : null;
+        if (!$id) {
+            return null;
+        }
+        $tgroup = new \Gazelle\TGroup($id);
+        if (isset($this->viewer)) {
+            $tgroup->setViewer($this->viewer);
+        }
+        return $tgroup;
     }
 
     /**

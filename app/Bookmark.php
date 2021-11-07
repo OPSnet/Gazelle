@@ -68,7 +68,7 @@ class Bookmark extends Base {
     public function torrentBookmarks(int $userId) {
         [$groupIds, $bookmarkData] = $this->cache->get_value("bookmarks_group_ids_$userId");
         if (!$groupIds) {
-            $q = $this->db->get_query_id();
+            $qid = $this->db->get_query_id();
             $this->db->prepared_query("
                 SELECT GroupID, Sort, `Time`
                 FROM bookmarks_torrents
@@ -78,6 +78,7 @@ class Bookmark extends Base {
             );
             $groupIds = $this->db->collect('GroupID');
             $bookmarkData = $this->db->to_array('GroupID', MYSQLI_ASSOC);
+            $this->db->set_query_id($qid);
             $this->cache->cache_value("bookmarks_group_ids_$userId", [$groupIds, $bookmarkData], 3600);
         }
         return [$groupIds, $bookmarkData, \Torrents::get_groups($groupIds)];
@@ -164,24 +165,31 @@ class Bookmark extends Base {
                     )", $id, $userId, $userId
                 );
                 $this->cache->deleteMulti(["bookmarks_{$type}_{$userId}", "bookmarks_group_ids_{$userId}"]);
-                // RSS feed stuff
-                $Feed = new \Feed;
 
                 $tgroup = (new Manager\TGroup)->findById($id);
-                $group = $tgroup->info();
-                $list  = $tgroup->torrentList();
-                $labelMan = new Manager\TorrentLabel;
+
                 $userMan = new Manager\User;
-                foreach ($list as $torrent) {
-                    $user = $userMan->findById($torrent['UserID']);
+                $user = $userMan->findById($userId);
+
+                $torMan = new Manager\Torrent;
+                $torMan->setViewerId($userId);
+
+                // RSS feed stuff
+                $Feed = new \Feed;
+                $list  = $tgroup->torrentList();
+                foreach ($list as $t) {
+                    $torrent = $torMan->findById($t['ID']);
+                    if (is_null($torrent)) {
+                        continue;
+                    }
                     $Feed->populate('torrents_bookmarks_t_' . $user->announceKey(),
                         $Feed->item(
-                            $group['Name'] . ' ' . $labelMan->load($torrent)->label(),
-                            \Text::strip_bbcode($group['WikiBody']),
-                            "torrents.php?action=download&amp;id={$torrent['ID']}&amp;torrent_pass=[[PASSKEY]]",
+                            $torrent->name() . ' ' . '[' . $torrent->label() .']',
+                            \Text::strip_bbcode($tgroup()->description()),
+                            "torrents.php?action=download&amp;id={$t['ID']}&amp;torrent_pass=[[PASSKEY]]",
                             $user->username(),
-                            "torrents.php?id=$id",
-                            $group['tagIds']
+                            "torrents.php?id=" . $t['ID'],
+                            $tgroup->tagNameList(),
                         )
                     );
                 }
