@@ -3,30 +3,6 @@
 namespace Gazelle\Manager;
 
 class Torrent extends \Gazelle\Base {
-    /*
-     **** To display a torrent name, edition and flags, at the minimum the code looks like:
-
-        $labelMan = new Gazelle\Manager\TorrentLabel;
-
-        // set up the labeler once
-        $labelMan->showMedia(true)->showEdition(true);
-        $torrent = new Gazelle\Torrent(1666);
-
-        // the artist name (A, A & B, Various Artists, Various Composers under Various Conductors etc)
-        echo $torrent->group()->artistHtml();
-
-        // load the torrent details into the labeler
-        $labelMan->load($torrent->info());
-
-        // remaster info, year, etc
-        echo $labelMan->edition();
-
-        // flags (Reported, Freeleech, Lossy WEB Approved, etc
-        echo $labelMan->label();
-
-    **** This is a bit cumbersome and subject to change
-    */
-
     protected const ID_KEY = 'zz_t_%d';
 
     const FEATURED_AOTM     = 0;

@@ -10,7 +10,8 @@ class Torrent extends BaseObject {
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
 
-    protected $isDeleted = false;
+    protected TGroup $tgroup;
+    protected bool $isDeleted = false;
     protected $showSnatched;
     protected $snatchBucket;
     protected $tokenCache;
@@ -22,6 +23,7 @@ class Torrent extends BaseObject {
     }
 
     public function flush() {
+        $this->cache->delete_key(sprintf(self::CACHE_KEY, $this->id));
     }
 
     public function url(): string {
@@ -30,6 +32,35 @@ class Torrent extends BaseObject {
 
     public function link(): string {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->group()->name()));
+    }
+
+    public function fullLink(): string {
+        $link = $this->group()->link();
+        $edition = $this->edition();
+        if ($edition) {
+            $link .= " [$edition]";
+        }
+        $label = $this->label();
+        if ($label) {
+            $link .= " [$label]";
+        }
+        return $link;
+    }
+
+    public function name(): string {
+        $tgroup = $this->group();
+        return $tgroup->categoryId() === 1
+            ? $tgroup->artistName() . " \xE2\x80\x93 " . $tgroup->name()
+            : $tgroup->name();
+    }
+
+    public function fullName(): string {
+        $name = $this->name();
+        $edition = $this->edition();
+        if ($edition) {
+            $name .= " [$edition]";
+        }
+        return $name;
     }
 
     /**
@@ -160,13 +191,31 @@ class Torrent extends BaseObject {
         return $info;
     }
 
+    /**
+     * Generate the edition of the torrent
+     */
+    public function edition(): string {
+        $tgroup = $this->group();
+        return implode('/', array_filter(
+            [
+                $this->remasterYear() ?? $tgroup->year(),
+                $this->remasterTitle(),
+                $this->remasterRecordLabel() ?? $tgroup->recordLabel(),
+                $this->remasterCatalogueNumber() ?? $tgroup->catalogueNumber(),
+            ],
+            fn($element) => !is_null($element)
+        ));
+    }
+
     protected function labelElement($class, $text): string {
         return sprintf('<strong class="torrent_label tooltip %s" title="%s" style="white-space: nowrap;">%s</strong>',
             $class, $text, $text
         );
     }
 
-    public function label(): string {
+    public function shortLabelList(): array {
+        $info = $this->info();
+        $label = [];
         $info = $this->info();
         $label = [];
         if (!empty($info['Media'])) {
@@ -189,6 +238,16 @@ class Torrent extends BaseObject {
         if ($info['Scene']) {
             $label[] = 'Scene';
         }
+        return $label;
+    }
+
+    public function shortLabel(): string {
+        return implode(' / ', $this->shortLabelList());
+    }
+
+    public function label(): string {
+        $info = $this->info();
+        $label = $this->shortLabelList();
 
         if (isset($this->viewer) && $this->isSnatched($this->viewer->id())) {
             $label[] = $this->labelElement('tl_snatched', 'Snatched!');
@@ -283,7 +342,10 @@ class Torrent extends BaseObject {
      * Get the torrent group in which this torrent belongs.
      */
     public function group(): TGroup {
-        return new TGroup($this->info()['GroupID']);
+        if (!isset($this->tgroup)) {
+            $this->tgroup = new TGroup($this->info()['GroupID']);
+        }
+        return $this->tgroup;
     }
 
     public function hasBadFiles(): bool {
@@ -691,13 +753,14 @@ class Torrent extends BaseObject {
         $snatchKey = "users_snatched_" . $userId . "_time";
         if (!$this->snatchBucket) {
             $this->snatchBucket = array_fill(0, $buckets, false);
-            $this->updateTime = $this->cache->get_value($snatchKey);
-            if ($this->updateTime === false) {
-                $this->updateTime = [
+            $updateTime = $this->cache->get_value($snatchKey);
+            if ($updateTime === false) {
+                $updateTime = [
                     'last' => 0,
                     'next' => 0
                 ];
             }
+            $this->updateTime = $updateTime;
         } elseif (isset($this->snatchBucket[$bucketId][$this->id])) {
             return true;
         }
@@ -969,9 +1032,8 @@ class Torrent extends BaseObject {
         $username = $userId ? (new Manager\User)->findById($userId)->username() : 'system';
         (new Log)->general(
             "Torrent "
-                . $this->id
-                . " (" . $group->name() . ") [" . (new Manager\TorrentLabel)->load($this->info())->release()
-                . "] ($sizeMB $infohash) was deleted by $username for reason: $reason"
+                . $this->id . " (" . $this->name() . ") [" . $this->edition() .
+                "] ($sizeMB $infohash) was deleted by $username for reason: $reason"
             )
             ->torrent(
                 $groupId, $this->id, $userId,

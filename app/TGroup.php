@@ -657,7 +657,7 @@ class TGroup extends BaseObject {
     }
 
     public function torrentList(): array {
-        $viewerId = $this->viewer ? $this->viewer->id() : 0;
+        $viewerId = isset($this->viewer) ? $this->viewer->id() : null;
         $showSnatched = $viewerId ? $this->viewer->option('ShowSnatched') : false;
         $list = $this->rawTorrentList();
         foreach ($list as &$info) {

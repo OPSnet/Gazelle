@@ -4,7 +4,9 @@ namespace Gazelle\Contest;
 
 trait TorrentLeaderboard {
     public function leaderboard(int $limit, int $offset): array {
-        $key = sprintf(\Gazelle\Contest::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, (int)($offset/CONTEST_ENTRIES_PER_PAGE));
+        $key = sprintf(\Gazelle\Contest::CONTEST_LEADERBOARD_CACHE_KEY,
+            $this->id, (int)($offset/CONTEST_ENTRIES_PER_PAGE)
+        );
         if (($leaderboard = $this->cache->get_value($key)) === false) {
             $this->db->prepared_query("
                 SELECT
@@ -22,23 +24,13 @@ trait TorrentLeaderboard {
                 LIMIT ? OFFSET ?
                 ", $this->id, $limit, $offset
             );
-            $torMan = new \Gazelle\Manager\Torrent;
-            $labelMan = new \Gazelle\Manager\TorrentLabel;
-            $labelMan->showMedia(true)->showEdition(true)->showFlags(false);
+            $leaderboard = $this->db->to_array(false, MYSQLI_ASSOC, false);
 
-            $leaderboard = $this->db->to_array(false, MYSQLI_ASSOC);
-            $leaderboardCount = count($leaderboard);
-            for ($i = 0; $i < $leaderboardCount; $i++) {
+            $torMan = new \Gazelle\Manager\Torrent;
+            for ($i = 0, $leaderboardCount = count($leaderboard); $i < $leaderboardCount; $i++) {
                 $torrent = $torMan->findById($leaderboard[$i]['last_entry_id']);
-                $group = $torrent->group();
-                $leaderboard[$i]['last_entry_link'] = sprintf(
-                    '%s - <a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> - %s',
-                    $group->artistHtml(),
-                    $leaderboard[$i]['group_id'],
-                    $leaderboard[$i]['last_entry_id'],
-                    $group->name(),
-                    $labelMan->load($torrent->info())->label()
-                );
+                $leaderboard[$i]['last_entry_link']
+                    = $torrent->link() . ' [' . $torrent->label() . ']';
             }
             $this->cache->cache_value($key, $leaderboard, 3600);
         }

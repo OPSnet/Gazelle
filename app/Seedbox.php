@@ -137,7 +137,7 @@ class Seedbox extends Base {
      * @param Gazelle\Manager\TorrentLAbel to decorate the release details
      * @return array list of torrent IDs
      */
-    public function torrentList(int $limit, int $offset, Manager\Torrent $torMan, Manager\TorrentLabel $labelMan): array {
+    public function torrentList(Manager\Torrent $torMan, int $limit, int $offset): array {
         $from = $this->buildFrom();
         $orderBy = ['tg.Name', 't.FilePath'][$this->viewBy];
         $this->db->prepared_query("
@@ -154,19 +154,16 @@ class Seedbox extends Base {
 
         $list = [];
         foreach ($info as $tid => $details) {
-            $labelMan->load($details);
+            $torrent = $torMan->findById($tid);
+            if (is_null($torrent)) {
+                continue;
+            }
             $list[] = [
-                'id' => $tid,
-                'folder' => $details['FilePath'],
-                'sortname' => $details['Name'],
-                'artist' => $torMan->findById($tid)->group()->artistHtml(),
-                'name' => sprintf('<a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> (%s) [%s]',
-                    $details['GroupID'],
-                    $tid,
-                    $details['Name'],
-                    $labelMan->edition(),
-                    $labelMan->label()
-                ),
+                'id'       => $tid,
+                'folder'   => $torrent->path(),
+                'sortname' => $torrent->group()->name(),
+                'artist'   => $torrent->group()->artistHtml(),
+                'name'     => $torrent->fullLink(),
             ];
         }
         if ($this->viewBy === self::VIEW_BY_NAME) {

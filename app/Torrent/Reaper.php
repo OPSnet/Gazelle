@@ -30,43 +30,39 @@ class Reaper extends \Gazelle\Base {
 
         $logEntries = $deleteNotes = [];
         $torMan = new \Gazelle\Manager\Torrent;
-        $labelMan = new \Gazelle\Manager\TorrentLabel;
-        $labelMan->showMedia(true)->showEdition(true);
 
         $i = 0;
         foreach ($torrents as $id) {
-            $t = $torMan->findById($id);
-            $torrent = $t->info();
-            $group   = $t->group()->info();
-            $name = $group['Name'] . " " . $labelMan->load($torrent)->edition();
-
-            $artistName = $t->group()->artistName();
-            if ($artistName) {
-                $name = "$artistName - $name";
+            $torrent = $torMan->findById($id);
+            if (is_null($torrent)) {
+                continue;
             }
 
-            [$success, $message] = $t->remove(0, 'inactivity (unseeded)');
+            [$success, $message] = $torrent->remove(0, 'inactivity (unseeded)');
             if (!$success) {
                 continue;
             }
-            $log = "Torrent $id ($name) (" . strtoupper($torrent['InfoHash']) . ") was deleted for inactivity (unseeded)";
+
+            $infohash = strtoupper($torrent->infohash());
+            $name     = $torrent->name();
+            $userId   = $torrent->uploaderId();
+
+            $log = "Torrent $id ($name) ($infohash) was deleted for inactivity (unseeded)";
             $logEntries[] = $log;
 
-            $userID = $torrent['UserID'];
-            if (!array_key_exists($userID, $deleteNotes)) {
-                $deleteNotes[$userID] = ['Count' => 0, 'Msg' => ''];
+            if (!array_key_exists($userId, $deleteNotes)) {
+                $deleteNotes[$userId] = ['Count' => 0, 'Msg' => ''];
             }
-
-            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=torrents.php?id=%s]%s[/url]", $group['ID'], $name);
-            $deleteNotes[$userID]['Count']++;
+            $deleteNotes[$userId]['Msg'] .= sprintf("\n[url=torrents.php?id=%s]%s[/url]", $torrent->groupId(), $name);
+            $deleteNotes[$userId]['Count']++;
 
             ++$i;
         }
 
         $userMan = new \Gazelle\Manager\User;
-        foreach ($deleteNotes as $userID => $messageInfo) {
+        foreach ($deleteNotes as $userId => $messageInfo) {
             $singular = (($messageInfo['Count'] == 1) ? true : false);
-            $userMan->sendPM( $userID, 0,
+            $userMan->sendPM( $userId, 0,
                 $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity',
                 ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']
             );
