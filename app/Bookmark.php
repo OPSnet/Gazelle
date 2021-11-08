@@ -166,13 +166,9 @@ class Bookmark extends Base {
                 );
                 $this->cache->deleteMulti(["bookmarks_{$type}_{$userId}", "bookmarks_group_ids_{$userId}"]);
 
+                $user   = (new Manager\User)->findById($userId);
+                $torMan = (new Manager\Torrent)->setViewer($user);
                 $tgroup = (new Manager\TGroup)->findById($id);
-
-                $userMan = new Manager\User;
-                $user = $userMan->findById($userId);
-
-                $torMan = new Manager\Torrent;
-                $torMan->setViewerId($userId);
 
                 // RSS feed stuff
                 $Feed = new \Feed;
