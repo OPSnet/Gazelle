@@ -1,0 +1,79 @@
+{{ header(title) }}
+<div class="header">
+    <h2>{{ title }}</h2>
+</div>
+<div class="linkbox">
+    <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
+    <a href="bonus.php" class="brackets">Bonus Point Shop</a>
+    <a href="bonus.php?action=history{% if viewer.permitted('admin_bp_history') and viewer.id != user.id
+        %}&amp;userid={{ user.id }}{% endif %}" class="brackets">History</a>
+</div>
+<table>
+    <thead>
+        <tr class="colhead">
+            <td style="text-align: center;">Total Torrents</td>
+            <td style="text-align: center;">Size</td>
+            <td style="text-align: center;">Total BP</td>
+            <td style="text-align: center;">BP/hour</td>
+            <td style="text-align: center;">BP/day</td>
+            <td style="text-align: center;">BP/week</td>
+            <td style="text-align: center;">BP/month</td>
+            <td style="text-align: center;">BP/year</td>
+            <td style="text-align: center;" title="Bonus points per GB if seeded a year">BP/GB/year</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align: center;">{{ total.total_torrents|number_format }}</td>
+            <td style="text-align: center;">{{ total.total_size|octet_size }}</td>
+            <td style="text-align: center;">{{ user.bonusPointsTotal|number_format }}</td>
+            <td style="text-align: center;">{{ total.hourly_points|number_format(2) }}</td>
+            <td style="text-align: center;">{{ total.daily_points|number_format(2) }}</td>
+            <td style="text-align: center;">{{ total.weekly_points|number_format(2) }}</td>
+            <td style="text-align: center;">{{ total.monthly_points|number_format(2) }}</td>
+            <td style="text-align: center;">{{ total.yearly_points|number_format(2) }}</td>
+            <td style="text-align: center;">{{ total.points_per_gb|number_format(2) }}</td>
+        </tr>
+    </tbody>
+</table>
+<br />
+
+{{ paginator.linkbox|raw }}
+<table>
+    <thead>
+    <tr class="colhead">
+        <td>Torrent</td>
+        <td class="nobr number_column">{{ heading.emit('size')|raw }}</td>
+        <td class="nobr">{{ heading.emit('seeders')|raw }}</td>
+        <td class="nobr">{{ heading.emit('seedtime')|raw }}</td>
+        <td class="nobr">{{ heading.emit('hourlypoints')|raw }}</td>
+        <td class="nobr">{{ heading.emit('dailypoints')|raw }}</td>
+        <td class="nobr">{{ heading.emit('weeklypoints')|raw }}</td>
+        <td class="nobr">{{ heading.emit('monthlypoints')|raw }}</td>
+        <td class="nobr">{{ heading.emit('yearlypoints')|raw }}</td>
+        <td class="nobr">{{ heading.emit('pointspergb')|raw }}</td>
+    </tr>
+    </thead>
+    <tbody>
+{% for id, stats in list %}
+    <tr>
+        <td>{{ stats.torrent.fullLink|raw }}</td>
+        <td class="nobr number_column">{{ stats.torrent.size|octet_size }}</td>
+        <td class="number_column">{{ stats.seeders|number_format }}</td>
+        <td class="number_column">{{ stats.seed_time|time_interval }}</td>
+        <td class="number_column">{{ stats.hourly_points|number_format(3) }}</td>
+        <td class="number_column">{{ stats.daily_points|number_format(3) }}</td>
+        <td class="number_column">{{ stats.weekly_points|number_format(3) }}</td>
+        <td class="number_column">{{ stats.monthly_points|number_format(2) }}</td>
+        <td class="number_column">{{ stats.yearly_points|number_format(2) }}</td>
+        <td class="number_column">{{ stats.points_per_gb|number_format(2) }}</td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="9" style="text-align:center;">No torrents being seeded currently</td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+{{ paginator.linkbox|raw }}
+{{ footer() }}

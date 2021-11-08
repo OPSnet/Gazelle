@@ -235,7 +235,7 @@ class Time {
             return '0s';
         }
 
-        $sec = $seconds % 60;
+        $interval = [($seconds % 60) .  's'];
         $minutes = (int)floor($seconds / 60);
 
         if ($minutes >= 60) {
@@ -245,6 +245,9 @@ class Time {
             $minute = $minutes;
             $hours  = 0;
         }
+        if ($minute) {
+            $interval[] = "{$minute}m";
+        }
 
         if ($hours >= 24) {
             $hour = $hours % 24;
@@ -252,6 +255,9 @@ class Time {
         } else {
             $hour = $hours;
             $days  = 0;
+        }
+        if ($hour) {
+            $interval[] = "{$hour}h";
         }
 
         if ($days >= 7) {
@@ -261,12 +267,13 @@ class Time {
             $day = $days;
             $week  = 0;
         }
-
-        return ($week ? "{$week}w" : '')
-            . ($day ? "{$day}d" : '')
-            . ($hour ? "{$hour}h" : '')
-            . ($minute ? "{$minute}m" : '')
-            . ($sec ? "{$sec}s" : '');
+        if ($day) {
+            $interval[] = "{$day}d";
+        }
+        if ($week) {
+            $interval[] = "{$week}y";
+        }
+        return implode('', array_slice(array_reverse($interval), 0, 2));
     }
 
     /**
