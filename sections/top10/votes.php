@@ -138,7 +138,7 @@ foreach ($topVotes as $groupID => $group) {
         // TODO: Gazelle\TGroup knows how to do this, so remove this garbage
         $groupSnatched = false;
         foreach ($torrents as &$tinfo) {
-            $torrent = $torMan->findById($torrentID);
+            $torrent = $torMan->findById($tinfo['ID']);
             if (is_null($torrent)) {
                 continue;
             }
