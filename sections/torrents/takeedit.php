@@ -162,18 +162,20 @@ if (!$Err && $Properties['Remastered'] && !$Properties['RemasterYear']) {
     }
 }
 
-// Strip out Amazon's padding
 if (isset($Properties['Image'])) {
+    // Strip out Amazon's padding
     if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
         $Properties['Image'] = $match[1].'.jpg';
     }
-}
-if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
-    $Err = display_str($Properties['Image']) . " does not look like a valid image url";
-}
-$banned = (new Gazelle\Util\ImageProxy)->badHost($Properties['Image']);
-if ($banned) {
-    $Err = "Please rehost images from $banned elsewhere.";
+
+    if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
+        $Err = display_str($Properties['Image']) . " does not look like a valid image url";
+    }
+
+    $banned = (new Gazelle\Util\ImageProxy)->badHost($Properties['Image']);
+    if ($banned) {
+        $Err = "Please rehost images from $banned elsewhere.";
+    }
 }
 
 if ($Err) { // Show the upload form, with the data the user entered
