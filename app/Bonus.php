@@ -478,18 +478,17 @@ class Bonus extends Base {
         ) ?? 0.0;
     }
 
-    public function userTotals() {
-        [$total, $size, $hourly, $daily, $weekly, $monthly, $yearly, $ppGB] = $this->db->row("
-            SELECT
-                count(xfu.uid) as TotalTorrents,
-                sum(t.Size) as TotalSize,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)), 0)                           AS HourlyPoints,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders)), 0) * (24 * 1)                AS DailyPoints,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders)), 0) * (24 * 7)                AS WeeklyPoints,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders)), 0) * (24 * 365.256363004/12) AS MonthlyPoints,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)    AS YearlyPoints,
+    public function userTotals(): array {
+        return $this->db->rowAssoc("
+            SELECT count(xfu.uid) AS total_torrents,
+                sum(t.Size)       AS total_size,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)), 0)                           AS hourly_points,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders)), 0) * (24 * 1)                AS daily_points,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders)), 0) * (24 * 7)                AS weekly_points,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders)), 0) * (24 * 365.256363004/12) AS monthly_points,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)    AS yearly_points,
                 coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)
-                    / (coalesce(sum(t.Size), 1) / (1024*1024*1024)) AS PointsPerGB
+                    / (coalesce(sum(t.Size), 1) / (1024*1024*1024)) AS points_per_gb
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu
@@ -501,41 +500,28 @@ class Bonus extends Base {
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ", $this->userId, $this->userId
         );
-        return [(int)$total, (float)$size, (float)$hourly, (float)$daily, (float)$weekly, (float)$monthly, (float)$yearly, (float)$ppGB];
     }
 
-    public function userDetails($orderBy, $orderWay, $limit, $offset) {
+    public function seedList(string $orderBy, string $orderWay, int $limit, int $offset): array {
         $this->db->prepared_query("
             SELECT
                 t.ID,
-                t.GroupID,
-                t.Size,
-                t.Format,
-                t.Encoding,
-                t.HasLog,
-                t.HasLogDB,
-                t.HasCue,
-                t.LogScore,
-                t.LogChecksum,
-                t.Media,
-                t.Scene,
-                t.RemasterYear,
-                t.RemasterTitle,
-                GREATEST(tls.Seeders, 1) AS Seeders,
-                xfh.seedtime AS Seedtime,
-                bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)                           AS HourlyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders) * (24 * 1)                AS DailyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders) * (24 * 7)                AS WeeklyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders) * (24 * 365.256363004/12) AS MonthlyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders) * (24 * 365.256363004)    AS YearlyPoints,
+                t.Size                   AS size,
+                GREATEST(tls.Seeders, 1) AS seeders,
+                xfh.seedtime             AS seed_time,
+                bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)                           AS hourly_points,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders) * (24 * 1)                AS daily_points,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders) * (24 * 7)                AS weekly_points,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders) * (24 * 365.256363004/12) AS monthly_points,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders) * (24 * 365.256363004)    AS yearly_points,
                 bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders) * (24 * 365.256363004)
-                    / (t.Size / (1024*1024*1024)) AS PointsPerGB
+                    / (t.Size / (1024*1024*1024)) AS points_per_gb
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu
             INNER JOIN xbt_files_history AS xfh USING (uid, fid)
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
             WHERE
                 xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
@@ -543,7 +529,12 @@ class Bonus extends Base {
             LIMIT ?
             OFFSET ?
             ", $this->userId, $this->userId, $limit, $offset
-        );
-        return [$this->db->collect('GroupID'), $this->db->to_array('ID', MYSQLI_ASSOC)];
+        ); $list = [];
+        $result = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+        foreach ($result as $r) {
+            $r['torrent'] = new Torrent($r['ID']);
+            $list[] = $r;
+        }
+        return $list;
     }
 }
