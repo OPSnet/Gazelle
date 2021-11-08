@@ -181,7 +181,7 @@ class Bookmark extends Base {
                     $Feed->populate('torrents_bookmarks_t_' . $user->announceKey(),
                         $Feed->item(
                             $torrent->name() . ' ' . '[' . $torrent->label() .']',
-                            \Text::strip_bbcode($tgroup()->description()),
+                            \Text::strip_bbcode($tgroup->description()),
                             "torrents.php?action=download&amp;id={$t['ID']}&amp;torrent_pass=[[PASSKEY]]",
                             $user->username(),
                             "torrents.php?id=" . $t['ID'],
