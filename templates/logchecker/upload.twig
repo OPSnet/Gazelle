@@ -25,13 +25,14 @@
                     <td colspan='2'>No uploads found.</td>
                 </tr>
 {% else %}
-    {% for id, name in list %}
+    {% for id, torrent in list %}
                 <tr>
-                    <td style="width: 5%;"><input type="radio" name="torrentid" value="{{ id }}"></td><td>{{ name|raw }}}</td>
+                    <td style="width: 5%;"><input type="radio" name="torrentid" value="{{
+                        id }}"></td><td>{{ torrent.fullLink|raw }}</td>
                 </tr>
     {% endfor %}
                 <tr class="colhead">
-                    <td colspan="2">Upload Logs for This Torrent</td>
+                    <td colspan="2">Upload logs for the selected torrent</td>
                 </tr>
                 <tr>
                     <td colspan="2" id="logfields">

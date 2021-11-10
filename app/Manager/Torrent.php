@@ -103,59 +103,14 @@ class Torrent extends \Gazelle\Base {
 
     public function missingLogfiles(int $userId): array {
         $this->db->prepared_query("
-            SELECT ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, LogChecksum
-            FROM torrents
-            WHERE HasLog = '1' AND HasLogDB = '0' AND UserID = ?
+            SELECT ID FROM torrents WHERE HasLog = '1' AND HasLogDB = '0' AND UserID = ?
             ", $userId
         );
-        if (!$this->db->has_results()) {
-            return [];
-        }
-        $GroupIDs = $this->db->collect('GroupID');
-        $TorrentsInfo = $this->db->to_array('ID');
-        $Groups = \Torrents::get_groups($GroupIDs);
+        $torrentIds = $this->db->collect(0, false);
 
         $result = [];
-        foreach ($TorrentsInfo as $TorrentID => $Torrent) {
-            [$ID, $GroupID, $Format, $Encoding, $HasCue, $HasLog, $HasLogDB, $LogScore, $LogChecksum] = $Torrent;
-            $Group = $Groups[$GroupID];
-            $GroupName = $Group['Name'];
-            $GroupYear = $Group['Year'];
-            $ExtendedArtists = $Group['ExtendedArtists'];
-            $Artists = $Group['Artists'];
-            if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
-                unset($ExtendedArtists[2]);
-                unset($ExtendedArtists[3]);
-                $DisplayName = \Artists::display_artists($ExtendedArtists);
-            } elseif (!empty($Artists)) {
-                $DisplayName = \Artists::display_artists([1 => $Artists]);
-            } else {
-                $DisplayName = '';
-            }
-            $DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$ID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
-            if ($GroupYear > 0) {
-                $DisplayName .= " [{$GroupYear}]";
-            }
-            $Info = [];
-            if (strlen($Format)) {
-                $Info[] = $Format;
-            }
-            if (strlen($Encoding)) {
-                $Info[] = $Encoding;
-            }
-            if (!empty($Info)) {
-                $DisplayName .= ' [' . implode('/', $Info) . ']';
-            }
-            if ($HasLog == '1') {
-                $DisplayName .= ' / Log'.($HasLogDB == '1' ? " ({$LogScore}%)" : "");
-            }
-            if ($HasCue == '1') {
-                $DisplayName .= ' / Cue';
-            }
-            if ($LogChecksum == '0') {
-                $DisplayName .= ' / ' . \Format::torrent_label('Bad/Missing Checksum');
-            }
-            $result[$ID] = $DisplayName;
+        foreach ($torrentIds as $torrentId) {
+            $result[$torrentId] = $this->findById($torrentId);
         }
         return $result;
     }
