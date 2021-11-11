@@ -196,9 +196,9 @@ class Torrent extends BaseObject {
      */
     public function edition(): string {
         $tgroup = $this->group();
-        return implode('/', array_filter(
+        return implode(' / ', array_filter(
             [
-                $this->remasterYear() ?? $tgroup->year(),
+                $this->remasterYear() ?: $tgroup->year(),
                 $this->remasterTitle(),
                 $this->remasterRecordLabel() ?? $tgroup->recordLabel(),
                 $this->remasterCatalogueNumber() ?? $tgroup->catalogueNumber(),
@@ -241,11 +241,7 @@ class Torrent extends BaseObject {
         return $label;
     }
 
-    public function shortLabel(): string {
-        return implode(' / ', $this->shortLabelList());
-    }
-
-    public function label(): string {
+    public function labelList(): array {
         $info = $this->info();
         $label = $this->shortLabelList();
 
@@ -288,7 +284,15 @@ class Torrent extends BaseObject {
         if ($this->hasLossywebApproved()) {
             $label[] = $this->labelElement('tl_approved tl_lossy_web', 'Lossy WEB Approved');
         }
-        return implode(' / ', $label);
+        return $label;
+    }
+
+    public function shortLabel(): string {
+        return implode(' / ', $this->shortLabelList());
+    }
+
+    public function label(): string {
+        return implode(' / ', $this->labelList());
     }
 
     public function unseeded(): bool {
@@ -348,6 +352,15 @@ class Torrent extends BaseObject {
         return $this->tgroup;
     }
 
+    /**
+     * It is possible that a torrent can be orphaned from a group, in which case the
+     * TGroup property cannot be instantiated, even though the Torrent object can.
+     * This method can be used to verify that group() can be called. (See ReportsV2).
+     */
+    public function hasTGroup(): bool {
+        return (new Manager\TGroup)->findById($this->info()['GroupID']) instanceof TGroup;
+    }
+
     public function hasBadFiles(): bool {
         return $this->info()['BadFiles'];
     }
@@ -389,6 +402,10 @@ class Torrent extends BaseObject {
      */
     public function isRemastered(): bool {
         return $this->info()['Remastered'];
+    }
+
+    public function isRemasteredUnknown(): bool {
+        return $this->isRemastered() && !$this->remasterYear();
     }
 
     public function isScene(): bool {
@@ -486,12 +503,22 @@ class Torrent extends BaseObject {
         return $this->info()['RemasterTitle'];
     }
 
-    public function ripLogIdList(): array {
-        return $this->info()['ripLogIds'];
-    }
-
     public function remasterYear(): ?int {
         return $this->info()['RemasterYear'];
+    }
+
+    public function remasterTuple(): string {
+        return implode('!!', [
+            $this->media(),
+            $this->remasterTitle(),
+            $this->remasterYear(),
+            $this->remasterRecordLabel(),
+            $this->remasterCatalogueNumber(),
+        ]);
+    }
+
+    public function ripLogIdList(): array {
+        return $this->info()['ripLogIds'];
     }
 
     public function seederTotal(): int {
