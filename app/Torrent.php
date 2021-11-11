@@ -417,7 +417,7 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * Does it have logs?
+     * Does it have a .cue file?
      */
     public function hasCue(): bool {
         return $this->info()['HasCue'];

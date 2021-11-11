@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class TGroup extends BaseObject {
 
-    const CACHE_KEY          = 'tg2_%d';
+    const CACHE_KEY          = 'tg_%d';
     const CACHE_TLIST_KEY    = 'tlist_%d';
     const CACHE_COVERART_KEY = 'tg_cover_%d';
 
@@ -236,7 +236,13 @@ class TGroup extends BaseObject {
             'producer'  => [],
             'arranger'  => [],
         ];
+        $roleId = [];
         while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
+            $roleId[$role][] = [
+                'id'      => $artistId,
+                'aliasid' => $aliasId,
+                'name'    => $artistName,
+            ];
             $roleList[$map[$role]][] = [
                 'id'      => $artistId,
                 'aliasid' => $aliasId,
@@ -244,6 +250,7 @@ class TGroup extends BaseObject {
             ];
         }
         $info['artist'] = $roleList;
+        $info['role_id'] = $roleId;
 
         $this->db->prepared_query("
             SELECT t.ID
@@ -297,6 +304,15 @@ class TGroup extends BaseObject {
      */
     public function artistRole(): array {
         return $this->info()['artist'];
+    }
+
+    /**
+     * Get artist list by id
+     *
+     * return array artists grouped by role id
+     */
+    public function artistRoleId(): array {
+        return $this->info()['role_id'];
     }
 
     public function catalogueNumber(): ?string {

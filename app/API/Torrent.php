@@ -6,76 +6,59 @@ class Torrent extends AbstractAPI {
     public function run() {
         switch ($_GET['req']) {
             case 'group':
-                return $this->getGroup();
+                return $this->tgroup((int)($_GET['group_id'] ?? 0));
                 break;
             default:
             case 'torrent':
-                return $this->getTorrent();
+                return $this->torrent((int)($_GET['torrent_id'] ?? 0));
                 break;
         }
     }
 
-    private function getTorrent() {
-        if (!isset($_GET['torrent_id'])) {
-            json_error('Missing torrent id');
-        }
-
-        $this->db->prepared_query("
-            SELECT
-                tg.ID,
-                tg.Name,
-                tg.Year,
-                tg.ReleaseType AS ReleaseTypeID,
-                t.Media,
-                t.Format,
-                t.HasLog,
-                t.HasLogDB,
-                t.LogScore,
-                tls.Snatched,
-                tls.Seeders,
-                tls.Leechers
-            FROM
-                torrents AS t
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-            WHERE
-                t.ID = ?", $_GET['torrent_id']);
-        if (!$this->db->has_results()) {
+    protected function torrent(int $id): array {
+        $torrent = (new \Gazelle\Manager\Torrent)->findById($id);
+        if (is_null($torrent)) {
             json_error('Torrent not found');
         }
-        $torrent = $this->db->next_record(MYSQLI_ASSOC, false);
-        $torrent['ReleaseType'] = $this->config['ReleaseTypes'][$torrent['ReleaseTypeID']];
-        $artists = \Artists::get_artist($torrent['ID']);
-        $torrent['Artists'] = $artists;
-        $torrent['DisplayArtists'] = \Artists::display_artists($artists,
-            false, false, false);
-        return $torrent;
+        if (is_null($torrent)) {
+            json_error('Torrent not found');
+        }
+        if (!$torrent->hasTGroup()) {
+            json_error('Torrent has been orphaned');
+        }
+        $tgroup = $torrent->group();
+        return [
+            'ID'             => $torrent->id(),
+            'Name'           => $tgroup->name(),
+            'Year'           => $tgroup->year(),
+            'ReleaseTypeID'  => $tgroup->releaseType(),
+            'ReleaseType'    => $tgroup->releaseTypeName(),
+            'Artists'        => $tgroup->artistRoleId(),
+            'DisplayArtists' => $tgroup->artistName(),
+            'Media'          => $torrent->media(),
+            'Format'         => $torrent->format(),
+            'HasLog'         => $torrent->hasLog(),
+            'HasLogDB'       => $torrent->hasLogDb(),
+            'LogScore'       => $torrent->logScore(),
+            'Snatched'       => $torrent->snatchTotal(),
+            'Seeders'        => $torrent->seederTotal(),
+            'Leechers'       => $torrent->leecherTotal(),
+        ];
     }
 
-    private function getGroup() {
-        if (!isset($_GET['group_id'])) {
-            json_error('Missing group id');
-        }
-
-        $this->db->prepared_query("
-            SELECT
-                ID,
-                Name,
-                Year,
-                ReleaseType AS ReleaseTypeID
-            FROM
-                torrents_group
-            WHERE
-                ID = ?", $_GET['group_id']);
-        if (!$this->db->has_results()) {
+    protected function tgroup(int $id): array {
+        $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
+        if (is_null($tgroup)) {
             json_error('Group not found');
         }
-        $group = $this->db->next_record(MYSQLI_ASSOC, false);
-        $group['ReleaseType'] = $this->config['ReleaseTypes'][$group['ReleaseTypeID']];
-        $artists = \Artists::get_artist($group['ID']);
-        $group['Artists'] = $artists;
-        $group['DisplayArtists'] = \Artists::display_artists($artists,
-            false, false, false);
-        return $group;
+        return [
+            'ID'             => $tgroup->id(),
+            'Name'           => $tgroup->name(),
+            'Year'           => $tgroup->year(),
+            'ReleaseTypeID'  => $tgroup->releaseType(),
+            'ReleaseType'    => $tgroup->releaseTypeName(),
+            'Artists'        => $tgroup->artistRoleId(),
+            'DisplayArtists' => $tgroup->artistName(),
+        ];
     }
 }
