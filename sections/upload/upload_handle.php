@@ -797,7 +797,7 @@ if (!$Viewer->disableBonusPoints()) {
 //--------------- Recent Uploads (KISS) ----------------------------------------//
 
 if ($Properties['Image'] != '') {
-    $Cache->delete_value('user_recent_up_'.$Viewer->id());
+    $viewer->flushRecentUpload();
 }
 
 //******************************************************************************//

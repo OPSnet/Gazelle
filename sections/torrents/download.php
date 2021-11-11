@@ -108,7 +108,7 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
 $Viewer->registerDownload($torrentId);
 
 if ($torrent->group()->categoryId() == 1 && $torrent->group()->image() != '' && $torrent->uploaderId() != $userId) {
-    $Cache->delete_value("user_recent_snatch_$userId");
+    $Viewer->flushRecentSnatch();
 }
 
 $downloadAsText = ($Viewer->option('DownloadAlt') === '1');
