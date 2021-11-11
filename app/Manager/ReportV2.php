@@ -69,14 +69,14 @@ class ReportV2 extends \Gazelle\Base {
 
     public function newSummary(): array {
         $this->db->prepared_query("
-            SELECT Type,
-                count(*) AS Count
+            SELECT Type  AS type,
+                count(*) AS total
             FROM reportsv2
             WHERE Status = 'New'
             GROUP BY Type
             ORDER BY Type
         ");
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function resolvedSummary(): array {
