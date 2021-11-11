@@ -5,13 +5,8 @@ namespace Gazelle\Manager;
 class Torrent extends \Gazelle\Base {
     protected const ID_KEY = 'zz_t_%d';
 
-    const FEATURED_AOTM     = 0;
-    const FEATURED_SHOWCASE = 1;
-
-    const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
-    const CACHE_KEY_FEATURED       = 'featured_%d';
     const CACHE_FOLDERNAME         = 'foldername_%s';
     const CACHE_REPORTLIST         = 'reports_torrent_%d';
     const FOLDER_SALT              = "v1\x01";
@@ -113,38 +108,6 @@ class Torrent extends \Gazelle\Base {
             $result[$torrentId] = $this->findById($torrentId);
         }
         return $result;
-    }
-
-    protected function featuredAlbum(int $type): array {
-        $key = sprintf(self::CACHE_KEY_FEATURED, $type);
-        if (($featured = $this->cache->get_value($key)) === false) {
-            $featured = $this->db->rowAssoc("
-                SELECT fa.GroupID,
-                    tg.Name,
-                    tg.WikiImage,
-                    fa.ThreadID,
-                    fa.Title
-                FROM featured_albums AS fa
-                INNER JOIN torrents_group AS tg ON (tg.ID = fa.GroupID)
-                WHERE Ended IS NULL AND type = ?
-                ", $type
-            );
-            if (!is_null($featured)) {
-                global $Viewer; // FIXME this is wrong
-                $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
-                $featured['image']       = (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($featured['WikiImage']);
-            }
-            $this->cache->cache_value($key, $featured, 86400 * 7);
-        }
-        return $featured ?? [];
-    }
-
-    public function featuredAlbumAotm(): array {
-        return $this->featuredAlbum(self::FEATURED_AOTM);
-    }
-
-    public function featuredAlbumShowcase(): array {
-        return $this->featuredAlbum(self::FEATURED_SHOWCASE);
     }
 
     /**
