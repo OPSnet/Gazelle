@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 class ReportV2 extends \Gazelle\Base {
 
-    protected $categories = [
+    protected array $categories = [
         'master' => 'General',
         '1' => 'Music',
         '2' => 'Application',
@@ -15,12 +15,11 @@ class ReportV2 extends \Gazelle\Base {
         '7' => 'Comics',
     ];
 
-    protected $types;
+    protected array $types;
     protected $filter;
-    protected $userMan;
 
     public function types(): array {
-        if (!$this->types) {
+        if (!isset($this->types)) {
             $this->types = require('ReportV2Types.php');
         }
         return $this->types;
@@ -77,7 +76,7 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY Type
             ORDER BY Type
         ");
-        return $this->db->to_array();
+        return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function resolvedSummary(): array {
@@ -158,31 +157,25 @@ class ReportV2 extends \Gazelle\Base {
         return $this;
     }
 
-    public function setUserManager(User $userMan) {
-        $this->userMan = $userMan;
-        return $this;
-    }
-
     protected function searchConfigure(): array {
         $cond = [];
         $args = [];
         $delcond = [];
         $delargs = [];
-        if (array_key_exists('reporter', $this->filter) && $this->filter['reporter']) {
-            $user = $this->userMan->findByUsername($this->filter['reporter']);
-            if (is_null($user)) {
-                throw new \Gazelle\Exception\ResourceNotFoundException("reporter '{$this->filter['reporter']}'");
-            }
+        if (isset($this->filter['reporter'])) {
             $cond[] = 'r.ReporterID = ?';
-            $args[] = $user->id();
+            $args[] = $this->filter['reporter']->id();
         }
-        if (array_key_exists('handler', $this->filter) && $this->filter['handler']) {
-            $user = $this->userMan->findByUsername($this->filter['handler']);
-            if (is_null($user)) {
-                throw new \Gazelle\Exception\ResourceNotFoundException("handler '{$this->filter['handler']}'");
-            }
+        if (isset($this->filter['handler'])) {
             $cond[] = 'r.ResolverID = ?';
-            $args[] = $user->id();
+            $args[] = $this->filter['handler']->id();
+        }
+        if (isset($this->filter['uploader'])) {
+            $userId = $this->filter['uploader']->id();
+            $cond[] = 't.UserID = ?';
+            $args[] = $userId;
+            $delcond[] = '(dt.UserID IS NULL OR dt.UserID = ?)';
+            $delargs[] = $userId;
         }
         if (array_key_exists('report-type', $this->filter)) {
             $cond[] = 'r.Type in (' . placeholders($this->filter['report-type']) . ')';
@@ -199,17 +192,6 @@ class ReportV2 extends \Gazelle\Base {
         if (array_key_exists('torrent', $this->filter)) {
             $delcond[] = 'r.TorrentID = ?';
             $delargs[] = $this->filter['torrent'];
-        }
-        if (array_key_exists('uploader', $this->filter) && $this->filter['uploader']) {
-            $user = $this->userMan->findByUsername($this->filter['uploader']);
-            if (is_null($user)) {
-                throw new \Gazelle\Exception\ResourceNotFoundException("uploader '{$this->filter['uploader']}'");
-            }
-            $userId = $user->id();
-            $cond[] = 't.UserID = ?';
-            $args[] = $userId;
-            $delcond[] = '(dt.UserID IS NULL OR dt.UserID = ?)';
-            $delargs[] = $userId;
         }
         if (array_key_exists('group', $this->filter)) {
             $cond[] = 't.GroupID = ?';
@@ -248,32 +230,28 @@ class ReportV2 extends \Gazelle\Base {
         );
     }
 
-    public function searchPage(int $limit, int $offset): array {
-        [$cond, $args, $delcond, $delargs] = $this->searchConfigure();;
+    public function searchList(Torrent $torMan, User $userMan, int $limit, int $offset): array {
+        [$cond, $args, $delcond, $delargs] = $this->searchConfigure();
         $where = (count($cond) == 0 && count($delcond) == 0)
             ? ''
             : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
+
         $this->db->prepared_query("
             SELECT r.ID,
-                r.ReporterID,
-                reporter.Username AS reporter_username,
-                r.ResolverID,
-                resolver.Username AS resolver_username,
-                r.TorrentID,
-                coalesce(t.UserID, dt.UserID) AS UserID,
-                coalesce(uploader.Username, del_uploader.Username) AS uploader_username,
-                coalesce(t.GroupID, dt.GroupID)   AS GroupID,
-                coalesce(t.Media, dt.Media)       AS Media,
-                coalesce(t.Format, dt.Format)     AS Format,
-                coalesce(t.Encoding, dt.Encoding) AS Encoding,
-                coalesce(g.Name, gl.Info)         AS Name,
-                g.Year,
+                r.ReporterID AS reporter_id,
+                r.ResolverID AS resolver_id,
+                r.TorrentID  AS torrent_id,
                 r.Type,
-                r.ReportedTime
+                r.ReportedTime,
+                coalesce(t.UserID, dt.UserID)     AS uploader_id,
+                coalesce(t.GroupID, dt.GroupID)   AS group_id,
+                coalesce(t.Media, dt.Media)       AS media,
+                coalesce(t.Format, dt.Format)     AS format,
+                coalesce(t.Encoding, dt.Encoding) AS encoding
             FROM reportsv2 r
-            LEFT JOIN torrents t ON (t.ID = r.TorrentID)
+            LEFT JOIN torrents t          ON (t.ID = r.TorrentID)
             LEFT JOIN deleted_torrents dt ON (dt.ID = r.TorrentID)
-            LEFT JOIN torrents_group g on (g.ID = t.GroupID)
+            LEFT JOIN torrents_group g    ON (g.ID = t.GroupID)
             LEFT JOIN (
                 SELECT max(t.ID) AS ID, t.TorrentID
                 FROM group_log t
@@ -282,15 +260,27 @@ class ReportV2 extends \Gazelle\Base {
                 GROUP BY t.TorrentID
             ) LASTLOG USING (TorrentID)
             LEFT JOIN group_log gl ON (gl.ID = LASTLOG.ID)
-            LEFT JOIN users_main reporter ON (reporter.ID = r.ReporterID)
-            LEFT JOIN users_main resolver ON (resolver.ID = r.ResolverID)
-            LEFT JOIN users_main uploader ON (uploader.ID = t.UserID)
-            LEFT JOIN users_main del_uploader ON (del_uploader.ID = dt.UserID)
             $where
             ORDER BY r.ReportedTime DESC
             LIMIT ? OFFSET ?
             ", ...array_merge($args, $args, $delargs, [$limit, $offset])
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+
+        $list = [];
+        $cache = []; // Avoid looking up a user more than once
+        $result = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($result as $r) {
+            foreach (['reporter_id', 'resolver_id', 'uploader_id'] as $id) {
+                if ($r[$id] && !isset($cache[$r[$id]])) {
+                    $cache[$r[$id]] = $userMan->findById($r[$id]);
+                }
+            }
+            $r['reporter'] = $cache[$r['reporter_id']];
+            $r['resolver'] = $cache[$r['resolver_id']];
+            $r['uploader'] = $cache[$r['uploader_id']] ?? null; // sometimes there is no uploader information
+            $r['torrent']  = $torMan->findById($r['torrent_id']);
+            $list[] = $r;
+        }
+        return $list;
     }
 }
