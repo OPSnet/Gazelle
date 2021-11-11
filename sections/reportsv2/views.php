@@ -190,20 +190,19 @@ if (!empty($list)) {
             </tr>
 <?php
         foreach ($list as $summary) {
-            //Ugliness
-            foreach ($Types as $Category) {
-                if (!empty($Category[$summary['Type']])) {
-                    $title = $Category[$summary['Type']]['title'];
+            foreach ($Types as $type => $list) {
+                if (isset($list[$summary['type']])) {
+                    $title = $list[$summary['type']]['title'];
                     break;
                 }
             }
 ?>
             <tr<?=$title === 'Urgent' ? ' class="rowa" style="font-weight: bold;"' : ''?>>
                 <td>
-                    <a href="reportsv2.php?view=type&amp;id=<?=display_str($summary['Type'])?>"><?=display_str($title)?></a>
+                    <a href="reportsv2.php?view=type&amp;id=<?=display_str($summary['type'])?>"><?=display_str($title)?></a>
                 </td>
                 <td class="number_column">
-                    <?=number_format($summary['Count'])?>
+                    <?=number_format($summary['total'])?>
                 </td>
             </tr>
 <?php
