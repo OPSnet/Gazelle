@@ -36,13 +36,14 @@ class Privilege extends \Gazelle\Base {
         return $this;
     }
 
-    public function create(string $name, int $level, bool $secondary, string $forums, array $values, mixed $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
+    public function create(string $name, int $level, bool $secondary, string $forums, array $values, bool $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
         $this->db->prepared_query('
             INSERT INTO permissions
                    (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
             VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
-            ', $name, $level, $secondary, $forums, serialize($values), $staffGroup, $badge, $displayStaff ? '1' : '0'
+            ', $name, $level, $secondary, $forums, serialize($values), (int)$staffGroup, $badge, $displayStaff ? '1' : '0'
         );
+        $this->cache->deleteMulti(['user_class', 'staff_class']);
         return new \Gazelle\Privilege($this->db->inserted_id());
     }
 
