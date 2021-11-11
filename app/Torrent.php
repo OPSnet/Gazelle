@@ -7,6 +7,7 @@ class Torrent extends BaseObject {
     const CACHE_KEY                = 't2_%d';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
+    const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
 
@@ -1039,11 +1040,12 @@ class Torrent extends BaseObject {
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $this->id]]);
 
         if ($userId !== 0) {
-            $RecentUploads = $this->cache->get_value("user_recent_up_" . $userId);
+            $key = sprintf(self::USER_RECENT_UPLOAD, $userId);
+            $RecentUploads = $this->cache->get_value($key);
             if (is_array($RecentUploads)) {
                 foreach ($RecentUploads as $Key => $Recent) {
                     if ($Recent['ID'] == $groupId) {
-                        $deleteKeys[] = "user_recent_up_" . $userId;
+                        $deleteKeys[] = $key;
                         break;
                     }
                 }

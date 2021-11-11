@@ -7,9 +7,12 @@ use Gazelle\Util\Mail;
 
 class User extends BaseObject {
 
-    const CACHE_KEY         = 'u_%d';
-    const CACHE_SNATCH_TIME = 'users_snatched_%d_time';
-    const CACHE_NOTIFY      = 'u_notify_%d';
+    const CACHE_KEY          = 'u_%d';
+    const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
+    const CACHE_NOTIFY       = 'u_notify_%d';
+    const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
+    const USER_RECENT_UPLOAD = 'u_recent_up_%d';
+
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
@@ -1006,6 +1009,14 @@ class User extends BaseObject {
         ]);
     }
 
+    public function flushRecentSnatch() {
+        $this->cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->id));
+    }
+
+    public function flushRecentUpload() {
+        $this->cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
+    }
+
     public function recordEmailChange(string $newEmail, string $ipaddr): int {
         $this->db->prepared_query("
             INSERT INTO users_history_emails
@@ -1452,7 +1463,7 @@ class User extends BaseObject {
             WHERE uid = ?
             ", $this->id
         );
-        $this->cache->delete_value("user_recent_snatch_" . $this->id);
+        $this->flushRecentSnatch();
         return $this->db->affected_rows();
     }
 
@@ -2023,13 +2034,12 @@ class User extends BaseObject {
         return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
     }
 
-    public function recentSnatches(int $limit = 5) {
-        if (($recent = $this->cache->get_value('user_recent_snatch_' . $this->id)) === false) {
+    public function recentSnatchList(int $limit = 5): array {
+        $key = sprintf(self::USER_RECENT_SNATCH, $this->id);
+        $recent = $this->cache->get_value($key);
+        if ($recent === false) {
             $this->db->prepared_query("
-                SELECT
-                    g.ID,
-                    g.Name,
-                    g.WikiImage
+                SELECT g.ID
                 FROM xbt_snatched AS s
                 INNER JOIN torrents AS t ON (t.ID = s.fid)
                 INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
@@ -2042,13 +2052,8 @@ class User extends BaseObject {
                 LIMIT ?
                 ", $this->id, $limit
             );
-            $recent = $this->db->to_array() ?? [];
-            $artists = \Artists::get_artists($this->db->collect('ID'));
-            foreach ($recent as $id => $info) {
-                $recent[$id]['Name'] = \Artists::display_artists($artists[$info['ID']], false, true)
-                    . $recent[$id]['Name'];
-            }
-            $this->cache->cache_value('user_recent_snatch_' . $this->id, $recent, 86400 * 3);
+            $recent = $this->db->collect(0, false);
+            $this->cache->cache_value($key, $recent, 86400 * 3);
         }
         return $recent;
     }
@@ -2079,13 +2084,12 @@ class User extends BaseObject {
         return $list;
     }
 
-    public function recentUploads(int $limit = 5) {
-        if (($recent = $this->cache->get_value('user_recent_up_' . $this->id)) === false) {
+    public function recentUploadList(int $limit = 5) {
+        $key = sprintf(self::USER_RECENT_UPLOAD, $this->id);
+        $recent = $this->cache->get_value($key);
+        if ($recent === false) {
             $this->db->prepared_query("
-                SELECT
-                    g.ID,
-                    g.Name,
-                    g.WikiImage
+                SELECT g.ID
                 FROM torrents_group AS g
                 INNER JOIN torrents AS t ON (t.GroupID = g.ID)
                 WHERE g.WikiImage != ''
@@ -2096,13 +2100,8 @@ class User extends BaseObject {
                 LIMIT ?
                 ", $this->id, $limit
             );
-            $recent = $this->db->to_array() ?? [];
-            $artists = \Artists::get_artists($this->db->collect('ID'));
-            foreach ($recent as $id => $info) {
-                $recent[$id]['Name'] = \Artists::display_artists($artists[$info['ID']], false, true)
-                    . $recent[$id]['Name'];
-            }
-            $this->cache->cache_value('user_recent_up_' . $this->id, $recent, 86400 * 3);
+            $recent = $this->db->collect(0, false);
+            $this->cache->cache_value($key, $recent, 86400 * 3);
         }
         return $recent;
     }

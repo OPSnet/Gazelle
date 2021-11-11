@@ -7,6 +7,8 @@ class TGroup extends BaseObject {
     const CACHE_KEY          = 'tg_%d';
     const CACHE_TLIST_KEY    = 'tlist_%d';
     const CACHE_COVERART_KEY = 'tg_cover_%d';
+    const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
+    const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
@@ -70,7 +72,7 @@ class TGroup extends BaseObject {
             ", $this->id
         );
         if ($this->db->has_results()) {
-            $this->cache->deleteMulti(array_map(fn ($id) => "user_recent_up_$id", $this->db->collect(0, false)));
+            $this->cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), $this->db->collect(0, false)));
         }
 
         $this->db->prepared_query("
@@ -81,7 +83,7 @@ class TGroup extends BaseObject {
             ", $this->id
         );
         if ($this->db->has_results()) {
-            $this->cache->deleteMulti(array_map(fn ($id) => "user_recent_snatch_$id", $this->db->collect(0, false)));
+            $this->cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), $this->db->collect(0, false)));
         }
     }
 
