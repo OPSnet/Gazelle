@@ -6,11 +6,14 @@ if (is_null($User)) {
     header("Location: log.php?search=User+" . (int)$_GET['id']);
     exit;
 }
-$UserID = $User->id();
-$Username = $User->username();
-$userBonus = new Gazelle\Bonus($User);
+
+$UserID      = $User->id();
+$Username    = $User->username();
+
+$userBonus   = new Gazelle\Bonus($User);
 $viewerBonus = new Gazelle\Bonus($Viewer);
-$donorMan = new Gazelle\Manager\Donation;
+$donorMan    = new Gazelle\Manager\Donation;
+$tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 
 if (!empty($_POST)) {
     authorize();
@@ -444,7 +447,7 @@ for ($i = 1; $i <= 4; $i++) {
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
-        'recent' => $User->recentSnatches(),
+        'recent' => array_map(fn($id) => $tgMan->findById($id), $User->recentSnatchList()),
         'title'  => 'Snatches',
         'type'   => 'snatched',
     ]);
@@ -453,7 +456,7 @@ if (check_paranoia_here('snatched')) {
 if (check_paranoia_here('uploads')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
-        'recent' => $User->recentUploads(),
+        'recent' => array_map(fn($id) => $tgMan->findById($id), $User->recentUploadList()),
         'title'  => 'Uploads',
         'type'   => 'uploaded',
     ]);
