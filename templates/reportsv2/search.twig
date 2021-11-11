@@ -1,0 +1,101 @@
+{% from 'macro/form.twig' import selected %}
+{{ header('Reports V2', {'js': 'reportsv2'}) }}
+<div class="header">
+    <h2>Search Reports</h2>
+<?php require_once('header.php'); ?>
+</div>
+{% if list %}
+{{ paginator.linkbox|raw }}
+<div class="thin box pad">
+    <table>
+        <thead>
+            <tr>
+                <td>Report</td>
+                <td class="nowrap">Uploaded by</td>
+                <td class="nowrap">Reported by</td>
+                <td class="nowrap">Resolved by</td>
+                <td>Torrent</td>
+                <td class="nowrap">Report type</td>
+                <td class="nowrap" width="120px">Date reported</td>
+            </tr>
+        </thead>
+        <tbody>
+{% for r in list %}
+        <tr>
+            <td align="right"><a href="/reportsv2.php?view=report&id={{ r.ID }}">{{ r.ID }}</a></td>
+            <td>{{ r.uploader.username ?? '<i>unknown</i>'|raw }}</td>
+            <td>{{ r.reporter.username ?? '<i>unknown</i>'|raw }}</td>
+            <td>{{ r.resolver.username ?? '<i>unclaimed</i>'|raw }}</td>
+            <td>{% if r.torrent %}
+                    {% if r.torrent.hasTGroup %}
+                        {{ r.torrent.group.link|raw }}
+                    {% else %}
+                        <i>Deleted/Merged Group #{{ r.torrent.groupId }}</i>
+                    {% endif %}
+                    <br />[{{ r.torrent.shortLabel }}]
+                {% else %}
+                    <a href="log.php?search=Torrent+{{ r.torrent_id }}">Deleted Torrent #{{ r.torrent_id }}</a>
+                {% endif %}
+            </td>
+            <td class="nowrap">{{ name_cache[r.Type] }}</td>
+            <td>{{ r.ReportedTime|time_diff }}</td>
+        </tr>
+{% endfor %}
+        </tbody>
+    </table>
+</div>
+{{ paginator.linkbox|raw }}
+<br />
+{% endif %}
+
+<div class="thin box pad">
+    <form method="get" action="/reportsv2.php">
+        <table>
+            <tr>
+                <td width="150px">Uploaded by</td>
+                <td><input type="text" name="uploader" size="20" value="{{ uploader }}" /> User id or @username</td>
+            </tr>
+            <tr>
+                <td width="150px">Reported by</td>
+                <td><input type="text" name="reporter" size="20" value="{{ reporter }}" /> User id or @username</td>
+            </tr>
+            <tr>
+                <td width="150px">Handled by</td>
+                <td><input type="text" name="handler" size="20" value="{{ handler }}" /> User id or @username</td>
+            </tr>
+            <tr>
+                <td width="150px">Single Torrent ID</td>
+                <td><input type="text" name="torrent" size="80" value="{{ torrent_id }}" /></td>
+            </tr>
+            <tr>
+                <td width="150px">Torrent Group ID</td>
+                <td><input type="text" name="group" size="80" value="{{ group_id }}" /></td>
+            </tr>
+            <tr>
+                <td width="150px">Report Type</td>
+                <td>
+                    <select multiple="multiple" size="8" name="report-type[]">
+                        <option value="0">Don't Care</option>
+{% for key, label in name_cache %}
+                        <option value="{{ key }}"{{ selected(key in report_type) }}>{{ label }}</option>
+{% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="150px">Created</td>
+                <td>
+                    From <input type="text" name="dt-from" size="10" value="{{ dt_from }}" />
+                    and until <input type="text" name="dt-until" size="10" value="{{ dt_until }}" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="hidden" name="action" value="search" />
+                    <input type="submit" value="Search reports" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+{{ footer() }}
