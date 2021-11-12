@@ -95,10 +95,10 @@ class Sphinxql extends mysqli {
      * @param bool $Halt halt page processing. Default is to continue processing the page
      */
     public function error($Msg, $Halt = false) {
+        global $Debug, $Viewer;
         $ErrorMsg = 'SphinxQL ('.$this->Ident.'): '.strval($Msg);
-        global $Debug;
         $Debug->analysis('SphinxQL Error', $ErrorMsg, 3600*24);
-        if ($Halt === true && (DEBUG_MODE || check_perms('site_debug'))) {
+        if ($Halt === true && (DEBUG_MODE || $Viewer->permitted('site_debug'))) {
             echo '<pre>'.display_str($ErrorMsg).'</pre>';
             die();
         } elseif ($Halt === true) {
