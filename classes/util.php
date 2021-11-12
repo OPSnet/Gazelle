@@ -224,11 +224,6 @@ function error($Error, $NoHTML = false, $Log = false) {
     die();
 }
 
-function check_perms(string $name) {
-    global $Viewer;
-    return $Viewer->permitted($name);
-}
-
 /**
  * Print JSON status result with an optional message and die.
  */
