@@ -102,7 +102,7 @@ class UserNav extends AbstractMigration
             ],
             [
                 'Key' => 'logchecker',
-                'Title' => 'Log Checker',
+                'Title' => 'Logchecker',
                 'Target' => 'logchecker.php',
                 'Tests' => 'logchecker',
                 'TestUser' => false,
