@@ -159,15 +159,17 @@ class View {
             }
         }
 
-        if ($Viewer->permitted('admin_site_debug')) {
-            if (!apcu_exists('DB_KEY') || !apcu_fetch('DB_KEY')) {
-                $activity->setAlert('<a href="tools.php?action=dbkey"><span style="color: red">DB key not loaded</span></a>');
+        if (OPEN_EXTERNAL_REFERRALS) {
+            if ($Viewer->permitted('admin_site_debug')) {
+                if (!apcu_exists('DB_KEY') || !apcu_fetch('DB_KEY')) {
+                    $activity->setAlert('<a href="tools.php?action=dbkey"><span style="color: red">DB key not loaded</span></a>');
+                }
             }
-        }
 
-        if ($Viewer->permitted('admin_manage_referrals')) {
-            if (!(new Gazelle\Manager\Referral)->checkBouncer()) {
-                $activity->setAlert('<a href="tools.php?action=referral_sandbox"><span class="nobr" style="color: red">Referral bouncer not responding</span></a>');
+            if ($Viewer->permitted('admin_manage_referrals')) {
+                if (!(new Gazelle\Manager\Referral)->checkBouncer()) {
+                    $activity->setAlert('<a href="tools.php?action=referral_sandbox"><span class="nobr" style="color: red">Referral bouncer not responding</span></a>');
+                }
             }
         }
 
