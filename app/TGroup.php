@@ -190,11 +190,11 @@ class TGroup extends BaseObject {
         $info['ReleaseType'] = (int)$info['ReleaseType'];
 
         // Reorganize tag info to be useful
-        $tagNames       = explode(',', $info['tagNames']);
-        $tagIds         = array_map('intval', explode(',', $info['tagIds']));
-        $tagVoteUserIds = array_map('intval', explode(',', $info['tagVoteUserIds']));
-        $tagUpvotes     = array_map('intval', explode(',', $info['tagUpvotes']));
-        $tagDownvotes   = array_map('intval', explode(',', $info['tagDownvotes']));
+        $tagNames       = explode(',', $info['tagNames'] ?? '');
+        $tagIds         = array_map('intval', explode(',', $info['tagIds'] ?? ''));
+        $tagVoteUserIds = array_map('intval', explode(',', $info['tagVoteUserIds'] ?? ''));
+        $tagUpvotes     = array_map('intval', explode(',', $info['tagUpvotes'] ?? ''));
+        $tagDownvotes   = array_map('intval', explode(',', $info['tagDownvotes'] ?? ''));
         $info['tags']   = [];
         for ($n = 0; $n < count($tagIds); ++$n) {
             $info['tags'][$tagIds[$n]] = [
@@ -352,7 +352,7 @@ class TGroup extends BaseObject {
     }
 
     public function isSnatched(): bool {
-        return $info['Flags']['IsSnatched'] ?? false;
+        return $this->info()['Flags']['IsSnatched'];
     }
 
     public function label(): string {

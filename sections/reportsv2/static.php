@@ -19,13 +19,9 @@ $userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
 
 $View = $_GET['view'];
-if (isset($_GET['id'])) {
-    if ((int)$_GET['id'] > 0) {
-        $ID = (int)$_GET['id'];
-    } else {
-        $reportType = $_GET['id'];
-        $ID = 0;
-    }
+$ID = (int)($_GET['id'] ?? 0);
+if (!$ID && isset($_GET['id'])) {
+    $reportType = $_GET['id'];
 }
 
 $orderBy = 'ORDER BY r.ReportedTime ASC';
@@ -229,8 +225,9 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
             }
             $RemasterDisplayString = $Remastered ? remasterInfo($RemasterTitle, $RemasterYear) : '';
 
+            $Size = (int)$Size;
             if ($ArtistID == 0 && empty($ArtistName)) {
-                $RawName = $GroupName.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MiB)';
+                $RawName = $GroupName . ($Year ? " ($Year)" : '') . ($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '') . ($HasLogDB ? " (Log: {$LogScore}%)" : '') . ' ('.number_format($Size / (1024 * 1024), 2).' MiB)';
 
                 $LinkName = "<a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\">".($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . '</a> '.($HasCue ? ' (Cue)' : '').($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log: {$LogScore}%)</a>" : '').' ('.number_format($Size / (1024 * 1024), 2)." MiB)";
 
