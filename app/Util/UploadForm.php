@@ -16,7 +16,7 @@ namespace Gazelle\Util;
 
 use \OrpheusNET\Logchecker\Logchecker;
 
-class uploadForm extends \Gazelle\Base {
+class UploadForm extends \Gazelle\Base {
     var $user;
 
     protected int $categoryId = 0;
