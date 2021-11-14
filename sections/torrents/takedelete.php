@@ -22,7 +22,7 @@ if ($Cache->get_value("torrent_{$torrentId}_lock")) {
 $fullName = $torrent->fullName();
 $infohash = $torrent->infohash();
 $size     = $torrent->size();
-$reason   = implode(' ', [array_map('trim', [$_POST['reason'], $_POST['extra']])]);
+$reason   = implode(' ', array_map('trim', [$_POST['reason'], $_POST['extra']]));
 
 [$success, $message] = $torrent->remove($Viewer->id(), $reason);
 if (!$success) {

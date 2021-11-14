@@ -1,0 +1,54 @@
+#! /usr/bin/env php
+<?php
+
+/**
+ * Script to clean broken uploads
+ *
+ * Usage: remove-upload <admin-id> <torrent-id> [<torrent-id> ...]
+ */
+
+require_once(__DIR__.'/../classes/config.php');
+require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__.'/../classes/util.php');
+
+$Cache = new Gazelle\Cache;
+$Cache->disableLocalCache();
+
+$DB = new DB_MYSQL;
+Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
+
+$torMan = new Gazelle\Manager\Torrent;
+$userMan = new Gazelle\Manager\User;
+
+array_shift($argv);
+$janitorId = array_shift($argv);
+$janitor = $userMan->find($janitorId);
+if (is_null($janitor)) {
+    die("No janitor [$janitorId]\n");
+}
+
+foreach ($argv as $torrentId) {
+    $torrent = $torMan->findById($torrentId);
+    if (is_null($torrent)) {
+        echo "No such torrent $torrentId\n";
+        continue;
+    }
+    $name = $torrent->group()->displayNameText()
+        . ' [' . implode('/', [$torrent->media(), $torrent->format(), $torrent->encoding()]) . ']';
+    $uploader = $torrent->uploader();
+    $bonus = new Gazelle\Bonus($uploader);
+    $points = 2 * $bonus->torrentValue($torrent);
+
+    [$success, $message] = $torrent->remove($janitor->id(), "Broken upload - backend");
+    if (!$success) {
+        echo "Did not remove $torrentId: $message\n";
+        continue;
+    }
+
+    $bonus->addPoints($points);
+    $userMan->sendPM($uploader->id(), 0,
+        "Your upload $name has been removed",
+        "Due to a transient bug, your upload $name was not completed by the backend. Since it did not break any rules (we hope), please feel free to re-upload it. Since this is on us, you have been gifted $points points."
+    );
+    echo "removed $torrentId ($name) for $points points, uploaded by " . $uploader->username() . "\n";
+}

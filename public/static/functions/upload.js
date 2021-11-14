@@ -679,7 +679,7 @@ function fillForm(group, torrent, source) {
     // other columns
     fillEncodingField(torrent['encoding']);
     if (group['tags']) {
-        $('#tags').val(group['tags'].join(','));
+        $('#tags').val(Object.values(group['tags']).filter(f => f != "").join(', '));
     }
     if (torrent['description']) {
         // This does not get converted to HTML in the ajax endpoint
