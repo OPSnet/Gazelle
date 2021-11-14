@@ -13,6 +13,6 @@ echo $Twig->render('collage/edit.twig', [
         || ($collage->isPersonal() && $collage->isOwner($Viewer->id()) && $Viewer->permitted('site_collages_renamepersonal')),
     'collage'     => $collage,
     'description' => new Gazelle\Util\Textarea('description', $collage->description(), 60, 10),
-    'error'       => $Err,
+    'error'       => $Err ?? false,
     'viewer'      => $Viewer,
 ]);

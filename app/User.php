@@ -176,12 +176,13 @@ class User extends BaseObject {
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
         $this->info['NavItems']    = array_map('trim', explode(',', $this->info['NavItems'] ?? ''));
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
-        $this->info['Paranoia']    = unserialize($this->info['Paranoia']) ?: [];
+        $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: [];
         if (!isset($this->info['SiteOptions']['HttpsTracker'])) {
             $this->info['SiteOptions']['HttpsTracker'] = true;
         }
-        $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
+        $this->info['RatioWatchEndsEpoch'] = $this->info['RatioWatchEnds']
+            ? strtotime($this->info['RatioWatchEnds']) : 0;
 
         // load their permissions
         $this->db->prepared_query("
@@ -233,7 +234,7 @@ class User extends BaseObject {
         $this->info['defaultPermission'] = $this->info['Permission'];
 
         // a custom permission may revoke a primary or secondary grant
-        $custom = unserialize($this->info['CustomPermissions']) ?: [];
+        $custom = $this->info['CustomPermissions'] ? unserialize($this->info['CustomPermissions']) : [];
         foreach ($custom as $name => $value) {
             $this->info['Permission'][$name] = (bool)$value;
         }
@@ -452,7 +453,7 @@ class User extends BaseObject {
     }
 
     public function bonusPointsTotal(): int {
-        return $this->info()['BonusPoints'];
+        return (int)$this->info()['BonusPoints'];
     }
 
     public function bonusPointsPerHour(): float {

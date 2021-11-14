@@ -29,7 +29,7 @@ foreach ($toc as $category => $forumList) {
         } else {
             $lastReadPage = null;
             $lastReadPost = null;
-            $catchup = $Viewer->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
+            $catchup = $f['LastPostTime'] ? $Viewer->forumCatchupEpoch() >= strtotime($f['LastPostTime']) : false;
             $isRead = false;
         }
 
