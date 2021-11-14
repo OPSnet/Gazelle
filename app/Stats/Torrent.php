@@ -223,10 +223,17 @@ class Torrent extends \Gazelle\Base {
             GROUP BY Type
         ");
         $stats = $this->db->to_array(0, MYSQLI_NUM, false);
-        $this->peerStats = [
-            'leecher_count' => $stats['Leeching'] ? $stats['Leeching'][1] : 0,
-            'seeder_count'  => $stats['Seeding'] ? $stats['Seeding'][1] : 0,
-        ];
+        if (count($stats)) {
+            $this->peerStats = [
+                'leecher_count' => $stats['Leeching'][1],
+                'seeder_count'  => $stats['Seeding'][1],
+            ];
+        } else {
+            $this->peerStats = [
+                'leecher_count' => 0,
+                'seeder_count'  => 0,
+            ];
+        }
         $this->cache->cache_value(self::PEER_KEY, $this->peerStats, 86400 * 2);
         $this->cache->delete_value(self::CALC_STATS_LOCK);
         $this->busy = false;

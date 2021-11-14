@@ -324,7 +324,7 @@ class Time {
         if ($timestamp === false) {
             $timestamp = time();
         }
-        return date('Y-m-d H:i:s', $timestamp);
+        return date('Y-m-d H:i:s', (int)$timestamp);
     }
 
     public static function validDate($date_string) {
