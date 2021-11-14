@@ -128,10 +128,6 @@ if (isset($categoryId)) {
 }
 $uploadForm->head();
 switch ($uploadCategory) {
-    case 'Music':
-        $uploadForm->music_form($GenreTags);
-        break;
-
     case 'Audiobooks':
     case 'Comedy':
         $uploadForm->audiobook_form();
@@ -143,7 +139,10 @@ switch ($uploadCategory) {
     case 'E-Learning Videos':
         $uploadForm->simple_form($Properties['CategoryID']);
         break;
+
+    case 'Music':
     default:
         $uploadForm->music_form($GenreTags);
+        break;
 }
 $uploadForm->foot(true);
