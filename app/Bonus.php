@@ -60,19 +60,14 @@ class Bonus extends Base {
         return array_key_exists($label, $items) ? $items[$label] : null;
     }
 
-    public function getTorrentValue($format, $media, $encoding, $haslogdb = 0, $logscore = 0, $logchecksum = 0) {
-        if ($format == 'FLAC') {
-            if ($media == 'CD' && $haslogdb && $logscore === 100 && $logchecksum == 1) {
+    public function torrentValue(Torrent $torrent): int {
+        if ($torrent->format() == 'FLAC') {
+            if ($torrent->isPerfectFlac()) {
                 return BONUS_AWARD_FLAC_PERFECT;
-            }
-            elseif (in_array($media, ['Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'])) {
-                return BONUS_AWARD_FLAC_PERFECT;
-            }
-            else {
+            } else {
                 return BONUS_AWARD_FLAC;
             }
-        }
-        elseif ($format == 'MP3' && in_array($encoding, ['V0 (VBR)', '320'])) {
+        } elseif ($torrent->format() == 'MP3' && in_array($torrent->encoding(), ['V0 (VBR)', '320'])) {
             return BONUS_AWARD_MP3;
         }
         return BONUS_AWARD_OTHER;
@@ -434,10 +429,8 @@ class Bonus extends Base {
         return $this->db->affected_rows();
     }
 
-    public function removePointsForUpload(array $torrentDetails): int {
-        [$Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum] = $torrentDetails;
-        $value = $this->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum);
-        return $this->removePoints($value, true);
+    public function removePointsForUpload(Torrent $torrent): bool {
+        return $this->removePoints($this->torrentValue($torrent), true);
     }
 
     public function removePoints($points, $force = false): bool {

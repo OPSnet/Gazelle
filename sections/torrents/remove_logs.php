@@ -18,5 +18,10 @@ $DB->prepared_query("UPDATE torrents SET HasLog='1', HasLogDB='0', LogScore=0, L
 $GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
 (new Gazelle\Log)->torrent($GroupID, $TorrentID, $Viewer->id(), "All logs removed from torrent");
 
-$Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID", "tg2_$GroupID", "tlist_$GroupID"]);
+$Cache->deleteMulti([
+    "torrent_group_$GroupID",
+    "torrents_details_$GroupID",
+    sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),
+    sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $groupId),
+]);
 header('Location: ' . redirectUrl("torrents.php?torrentid={$TorrentID}"));

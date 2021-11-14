@@ -123,7 +123,9 @@ class TGroup extends \Gazelle\Base {
         $this->db->set_query_id($qid);
 
         $this->cache->deleteMulti([
-            "tg2_$groupId", "groups_artists_$groupId", "torrents_details_$groupId", "torrent_group_$groupId", "torrent_group_light_$groupId"
+            sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),
+            sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $groupId),
+            "groups_artists_$groupId", "torrents_details_$groupId", "torrent_group_$groupId", "torrent_group_light_$groupId"
         ]);
         $info = \Artists::get_artist($groupId);
         foreach ($info as $roles => $role) {

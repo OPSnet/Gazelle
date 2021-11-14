@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Gazelle\Manager\Bonus $bonus */
-
 use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 
@@ -355,6 +353,7 @@ $HasCue = '0';
 $TmpFileList = [];
 $TooLongPaths = [];
 $DirName = (isset($TorData['info']['files']) ? make_utf8($bencoder->getName()) : '');
+$folderCheck = [$DirName];
 $IgnoredLogFileNames = ['audiochecker.log', 'sox.log'];
 
 if (!$Err) {
@@ -556,11 +555,14 @@ $LogName .= $Properties['Title'];
 $IsNewGroup = !isset($GroupID);
 
 //----- Start inserts
-$artistMan = new Gazelle\Manager\Artist;
+
+$Debug->set_flag('upload: database begin transaction');
+$DB->begin_transaction();
+
 if (!$IsNewGroup) {
     $DB->prepared_query('
-        UPDATE torrents_group
-        SET Time = now()
+        UPDATE torrents_group SET
+            Time = now()
         WHERE ID = ?
         ', $GroupID
     );
@@ -576,9 +578,9 @@ if (!$IsNewGroup) {
     $GroupID = $DB->inserted_id();
     if ($isMusicUpload) {
         $tgroupMan->findById($GroupID)->addArtists($Viewer, $ArtistRoleList, $ArtistNameList);
-        $Cache->increment('stats_album_count', count($ArtistNameList));
+        $Cache->increment_value('stats_album_count', count($ArtistNameList));
     }
-    $Cache->increment('stats_group_count');
+    $Cache->increment_value('stats_group_count');
     $Viewer->stats()->increment('unique_group_total');
 }
 $tgroup = $tgroupMan->findById($GroupID);
@@ -637,36 +639,63 @@ $DB->prepared_query("
        $TotalSize, $Properties['TorrentDescription']
 );
 $TorrentID = $DB->inserted_id();
-$torrent = $torMan->findById($TorrentID);
-if ($torrent->isPerfectFlac()) {
-    $Viewer->stats()->increment('perfect_flac_total');
-} elseif ($torrent->isPerfecterFlac()) {
-    $Viewer->stats()->increment('perfecter_flac_total');
-}
-$torMan->flushFoldernameCache($DirName);
-$folderCheck = [$DirName => true];
-$Cache->increment('stats_torrent_count');
-
 $DB->prepared_query('
     INSERT INTO torrents_leech_stats (TorrentID)
     VALUES (?)
     ', $TorrentID
 );
+$torrent = $torMan->findById($TorrentID);
 
-$tracker = new \Gazelle\Tracker;
-$tracker->update_tracker('add_torrent', ['id' => $TorrentID, 'info_hash' => rawurlencode($InfoHash), 'freetorrent' => 0]);
-$Debug->set_flag('upload: ocelot updated');
+$bonus = new Gazelle\Bonus($Viewer);
+$bonusTotal = $bonus->torrentValue($torrent);
 
 // Prevent deletion of this torrent until the rest of the upload process is done
-// (expire the key after 5 minutes to prevent locking it for too long in case there's a fatal error below)
-$Cache->cache_value("torrent_{$TorrentID}_lock", true, 300);
+$Cache->cache_value("torrent_{$TorrentID}_lock", true, 120);
 
-if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    $tgroupMan->flushLatestUploads(5);
+//******************************************************************************//
+//--------------- Upload Extra torrents ----------------------------------------//
+
+$extraFile = [];
+$trackerUpdate = [];
+
+foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
+    $DB->prepared_query("
+        INSERT INTO torrents
+            (GroupID, UserID, Media, Format, Encoding,
+            Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
+            info_hash, FileCount, FileList, FilePath, Size, Description,
+            Time, LogScore, HasLog, HasCue, FreeTorrent, FreeLeechType)
+        VALUES
+            (?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            now(), 0, '0', '0', '0', '0')
+        ", $GroupID, $Viewer->id(), $Properties['Media'], $ExtraTorrent['Format'], $ExtraTorrent['Encoding'],
+        $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
+        $ExtraTorrent['InfoHash'], $ExtraTorrent['NumFiles'], $ExtraTorrent['FileString'],
+        $ExtraTorrent['FilePath'], $ExtraTorrent['TotalSize'], $ExtraTorrent['TorrentDescription']
+    );
+    $ExtraTorrentID = $DB->inserted_id();
+    $DB->prepared_query('
+        INSERT INTO torrents_leech_stats (TorrentID)
+        VALUES (?)
+        ', $ExtraTorrentID
+    );
+    $torrent = new Gazelle\Torrent($ExtraTorrentID);
+
+    $torMan->flushFoldernameCache($ExtraTorrent['FilePath']);
+    $folderCheck[] = $ExtraTorrent['FilePath'];
+    $trackerUpdate[$ExtraTorrentID] = rawurlencode($ExtraTorrent['InfoHash']);
+    $bonusTotal += $bonus->torrentValue($torrent);
+
+    $extraFile[$ExtraTorrentID] = [
+        'payload' => $ExtraTorrent['TorEnc'],
+        'size' => number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2)
+    ];
 }
 
 //******************************************************************************//
-//--------------- Write Log DB       -------------------------------------------//
+//--------------- Write Files To Disk ------------------------------------------//
 
 $ripFiler = new Gazelle\File\RipLog;
 $htmlFiler = new Gazelle\File\RipLogHTML;
@@ -684,22 +713,66 @@ foreach($logfileSummary->all() as $logfile) {
     $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 }
 
-//******************************************************************************//
-//--------------- Write torrent file -------------------------------------------//
-
 $torrentFiler->put($bencoder->getEncode(), $TorrentID);
 (new Gazelle\Log)->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
-// Running total for amount of BP to give
-$bonus = new Gazelle\Bonus($Viewer);
-$BonusPoints = $bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
-    $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
+foreach ($extraFile as $id => $info) {
+    $torrentFiler->put($info['payload'], $id);
+    (new Gazelle\Log)->torrent($GroupID, $id, $Viewer->id(), "uploaded ({$info['size']} MiB)")
+        ->general("Torrent $ExtraTorrentID ($LogName) (${$info['size']}  MiB) was uploaded by " . $Viewer->username());
+}
+
+$DB->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
+$Debug->set_flag('upload: database committed');
+
+//******************************************************************************//
+//--------------- Finalize -----------------------------------------------------//
+
+$tracker = new \Gazelle\Tracker;
+$trackerUpdate[$TorrentID] = rawurlencode($InfoHash);
+foreach ($trackerUpdate as $id => $hash) {
+    $tracker->update_tracker('add_torrent', ['id' => $id, 'info_hash' => $hash, 'freetorrent' => 0]);
+}
+$Debug->set_flag('upload: ocelot updated');
+
+if (!$Viewer->disableBonusPoints()) {
+    $bonus->addPoints($bonusTotal);
+}
+
+$tgroupMan->refresh($GroupID);
+$torMan->flushFoldernameCache($DirName);
+if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
+    $tgroupMan->flushLatestUploads(5);
+}
+
+$totalNew = 1 + count($ExtraTorrentsInsert);
+$Viewer->stats()->increment('upload_total', $totalNew);
+if ($torrent->isPerfectFlac()) {
+    $Viewer->stats()->increment('perfect_flac_total');
+} elseif ($torrent->isPerfecterFlac()) {
+    $Viewer->stats()->increment('perfecter_flac_total');
+}
+
+// Update the various cache keys affected by this
+$Cache->increment_value('stats_torrent_count', $totalNew);
+if ($Properties['Image'] != '') {
+    $Cache->delete_value('user_recent_up_' . $Viewer->id());
+}
+$Cache->deleteMulti(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
+if (!$IsNewGroup) {
+    $Cache->deleteMulti([
+        "torrent_group_$GroupID",
+        "detail_files_$GroupID",
+        sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),
+        sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $groupId),
+    ]);
+}
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//
-$Announce = '';
 
+$Announce = '';
 if ($isMusicUpload) {
     $Announce .= $tgroup->artistName() . ' - ';
 }
@@ -737,68 +810,7 @@ $AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
 Irc::sendRaw('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
 $Debug->set_flag('upload: announced on irc');
 
-//******************************************************************************//
-//--------------- Upload Extra torrents ----------------------------------------//
-
-foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-    $BonusPoints += $bonus->getTorrentValue($ExtraTorrent['Format'], $Properties['Media'], $ExtraTorrent['Encoding']);
-
-    $DB->prepared_query("
-        INSERT INTO torrents
-            (GroupID, UserID, Media, Format, Encoding,
-            Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-            info_hash, FileCount, FileList, FilePath, Size, Description,
-            Time, LogScore, HasLog, HasCue, FreeTorrent, FreeLeechType)
-        VALUES
-            (?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?,
-            now(), 0, '0', '0', '0', '0')
-        ", $GroupID, $Viewer->id(), $Properties['Media'], $ExtraTorrent['Format'], $ExtraTorrent['Encoding'],
-        $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
-        $ExtraTorrent['InfoHash'], $ExtraTorrent['NumFiles'], $ExtraTorrent['FileString'],
-        $ExtraTorrent['FilePath'], $ExtraTorrent['TotalSize'], $ExtraTorrent['TorrentDescription']
-    );
-    $ExtraTorrentID = $DB->inserted_id();
-    $DB->prepared_query('
-        INSERT INTO torrents_leech_stats (TorrentID)
-        VALUES (?)
-        ', $ExtraTorrentID
-    );
-
-    $torMan->flushFoldernameCache($ExtraTorrent['FilePath']);
-    $folderCheck[$ExtraTorrent['FilePath']] = true;
-    $Cache->increment('stats_torrent_count');
-    $tracker->update_tracker('add_torrent', [
-        'id' => $ExtraTorrentID,
-        'info_hash' => rawurlencode($ExtraTorrent['InfoHash']),
-        'freetorrent' => 0
-    ]);
-
-    //******************************************************************************//
-    //--------------- Write torrent file -------------------------------------------//
-
-    $torrentFiler->put($ExtraTorrent['TorEnc'], $ExtraTorrentID);
-    $sizeMiB = number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2);
-    (new Gazelle\Log)->torrent($GroupID, $ExtraTorrentID, $Viewer->id(), "uploaded ($sizeMiB MiB)")
-        ->general("Torrent $ExtraTorrentID ($LogName) ($sizeMiB  MiB) was uploaded by " . $Viewer->username());
-}
-
 $Viewer->stats()->increment('upload_total', 1 + count($ExtraTorrentsInsert));
-
-//******************************************************************************//
-//--------------- Give Bonus Points  -------------------------------------------//
-
-if (!$Viewer->disableBonusPoints()) {
-    (new Gazelle\Bonus($Viewer))->addPoints($BonusPoints);
-}
-
-//******************************************************************************//
-//--------------- Recent Uploads (KISS) ----------------------------------------//
-
-if ($Properties['Image'] != '') {
-    $viewer->flushRecentUpload();
-}
 
 //******************************************************************************//
 //--------------- Post-processing ----------------------------------------------//
@@ -807,7 +819,9 @@ if ($Properties['Image'] != '') {
  * to make it seem like the PHP process is working in the background.
  */
 
-$tgroupMan->refresh($GroupID);
+if ($Properties['Image'] != '') {
+    $Viewer->flushRecentUpload();
+}
 
 if (defined('AJAX')) {
     $Response = [
@@ -817,7 +831,7 @@ if (defined('AJAX')) {
         'source' => !$UnsourcedTorrent,
     ];
 
-    if ($RequestID) {
+    if (isset($RequestID)) {
         define('NO_AJAX_ERROR', true);
         $FillResponse = require_once(__DIR__ . '/../requests/take_fill.php');
         if (!isset($FillResponse['requestId'])) {
@@ -832,7 +846,7 @@ if (defined('AJAX')) {
 } else {
     $folderClash = 0;
     if ($isMusicUpload) {
-        foreach (array_keys($folderCheck) as $foldername) {
+        foreach ($folderCheck as $foldername) {
             // This also has the nice side effect of warming the cache immediately
             $list = $torMan->findAllByFoldername($foldername);
             if (count($list) > 1) {
@@ -850,7 +864,7 @@ if (defined('AJAX')) {
             'wiki_id'   => SOURCE_FLAG_WIKI_PAGE_ID,
         ]);
         View::show_footer();
-    } elseif ($RequestID) {
+    } elseif (isset($RequestID)) {
         header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=" . $Viewer->auth());
     } else {
         header("Location: torrents.php?id=$GroupID");
@@ -897,11 +911,7 @@ if (!$IsNewGroup) {
     }
 }
 
-$paranoia = unserialize($DB->scalar("
-    SELECT Paranoia FROM users_main WHERE ID = ?
-    ", $Viewer->id()
-)) ?: [];
-if (!in_array('notifications', $paranoia)) {
+if (!in_array('notifications', $Viewer->paranoia())) {
     // For RSS
     $Feed = new Feed;
     $Item = $Feed->item(
@@ -941,10 +951,4 @@ if (!in_array('notifications', $paranoia)) {
     }
 
     $Debug->set_flag('upload: notifications handled');
-}
-
-// Clear cache and allow deletion of this torrent now
-$Cache->deleteMulti(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
-if (!$IsNewGroup) {
-    $Cache->deleteMulti(["torrent_group_$GroupID", "detail_files_$GroupID", "tg2_$GroupID", "tlist_$GroupID"]);
 }

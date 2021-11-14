@@ -217,8 +217,6 @@ class Torrent extends BaseObject {
     public function shortLabelList(): array {
         $info = $this->info();
         $label = [];
-        $info = $this->info();
-        $label = [];
         if (!empty($info['Media'])) {
             $label[] = $info['Media'];
         }
@@ -932,8 +930,8 @@ class Torrent extends BaseObject {
         $this->cache->deleteMulti([
             "torrent_group_" . $groupId,
             "torrents_details_" . $groupId,
-            "tg2_" . $groupId,
-            "tlist_" . $groupId,
+            sprintf(self::CACHE_KEY, $groupId),
+            sprintf(TGroup::CACHE_TLIST_KEY, $groupId),
         ]);
         return $this->db->affected_rows();
     }
@@ -957,9 +955,7 @@ class Torrent extends BaseObject {
         $qid = $this->db->get_query_id();
         $info = $this->info();
         if ($this->id > MAX_PREV_TORRENT_ID) {
-            (new \Gazelle\Bonus(new User($info['UserID'])))->removePointsForUpload(
-                [$info['Format'], $info['Media'], $info['Encoding'], $info['HasLogDB'], $info['LogScore'], $info['LogChecksum']]
-            );
+            (new \Gazelle\Bonus($this->uploader()))->removePointsForUpload($this);
         }
 
         $manager = new \Gazelle\DB;
