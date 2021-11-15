@@ -2035,9 +2035,17 @@ class User extends BaseObject {
         return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
     }
 
-    public function recentSnatchList(int $limit = 5): array {
+    /**
+     * Default list 5 will be cached. When fetching a different amount,
+     * set $forceNoCache to true to avoid caching a list with an unexpected length.
+     * This technique should be revisited, possibly by adding the limit to the key.
+     */
+    public function recentSnatchList(int $limit = 5, bool $forceNoCache = false): array {
         $key = sprintf(self::USER_RECENT_SNATCH, $this->id);
         $recent = $this->cache->get_value($key);
+        if ($forceNoCache) {
+            $recent = false;
+        }
         if ($recent === false) {
             $this->db->prepared_query("
                 SELECT g.ID
@@ -2054,7 +2062,9 @@ class User extends BaseObject {
                 ", $this->id, $limit
             );
             $recent = $this->db->collect(0, false);
-            $this->cache->cache_value($key, $recent, 86400 * 3);
+            if (!$forceNoCache) {
+                $this->cache->cache_value($key, $recent, 86400 * 3);
+            }
         }
         return $recent;
     }
@@ -2085,9 +2095,16 @@ class User extends BaseObject {
         return $list;
     }
 
-    public function recentUploadList(int $limit = 5) {
+    /**
+     * Default list 5 will be cached. When fetching a different amount,
+     * set $forceNoCache to true to avoid caching a list with an unexpected length
+     */
+    public function recentUploadList(int $limit = 5, bool $forceNoCache = false) {
         $key = sprintf(self::USER_RECENT_UPLOAD, $this->id);
         $recent = $this->cache->get_value($key);
+        if ($forceNoCache) {
+            $recent = false;
+        }
         if ($recent === false) {
             $this->db->prepared_query("
                 SELECT g.ID
@@ -2102,7 +2119,9 @@ class User extends BaseObject {
                 ", $this->id, $limit
             );
             $recent = $this->db->collect(0, false);
-            $this->cache->cache_value($key, $recent, 86400 * 3);
+            if (!$forceNoCache) {
+                $this->cache->cache_value($key, $recent, 86400 * 3);
+            }
         }
         return $recent;
     }
