@@ -11,11 +11,11 @@ if (is_null($user)) {
 $ownProfile = ($user->id() === $Viewer->id());
 
 $forumSearch = (new Gazelle\Search\Forum($user))
+    ->setViewer($Viewer)
     ->setShowGrouped($ownProfile && (!isset($_GET['group']) || !!$_GET['group']))
     ->setShowUnread($ownProfile && (!isset($_GET['showunread']) || !!$_GET['showunread']));
-$paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 
-$json = new Gazelle\Json\PostHistory;
-$json->setForumSearch($forumSearch)
-    ->setPaginator($paginator)
+(new Gazelle\Json\PostHistory)
+    ->setForumSearch($forumSearch)
+    ->setPaginator(new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1)))
     ->emit();

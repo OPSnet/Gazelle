@@ -4,47 +4,46 @@ namespace Gazelle\Json;
 
 class PostHistory extends \Gazelle\Json {
 
-    public function __construct() {
-        parent::__construct();
-    }
+    protected \Gazelle\Util\Paginator $paginator;
+    protected \Gazelle\Search\Forum $search;
 
-    /** @var \Gazelle\Util\Paginator */
-    protected $paginator;
-
-    /** @var \Gazelle\Search\Forum */
-    protected $search;
-
-    /**
-     * Supply a forum search context
-     *
-     * @param \Gazelle\Search\Forum
-     */
     public function setForumSearch(\Gazelle\Search\Forum $search) {
         $this->search = $search;
         return $this;
     }
 
-    /**
-     * Supply a paginator
-     *
-     * @param \Gazelle\Util\Paginator
-     */
     public function setPaginator(\Gazelle\Util\Paginator $paginator) {
         $this->paginator = $paginator;
         return $this;
     }
 
     public function payload(): array {
+        $this->paginator->setTotal($this->search->postHistoryTotal());
+        $userMan = new \Gazelle\Manager\User;
         $posts = $this->search->postHistoryPage($this->paginator->limit(), $this->paginator->offset());
         $thread = [];
         foreach ($posts as $p) {
+            $editor = $userMan->findById($p['edited_user_id']);
+            $editorName = $editor ? $editor->username() : null;
             $thread[] = [
-                'postId' => $p['post_id'],
+                'postId'         => $p['post_id'],
+                'topicId'        => $p['thread_id'],
+                'threadTitle'    => $p['title'],
+                'lastPostId'     => $p['last_post_id'],
+                'lastRead'       => $p['last_read'] ?? null,
+                'locked'         => (bool)$p['is_locked'],
+                'sticky'         => (bool)$p['is_sticky'],
+                'addedTime'      => $p['added_time'],
+                'body'           => \Text::full_format($p['body']),
+                'bbbody'         => $p['body'],
+                'editedUserId'   => $p['edited_user_id'] == 0 ? null : $p['edited_user_id'],
+                'editedUsername' => $editorName,
+                'editedTime'     => $p['edited_time'],
             ];
         }
         return [
             'currentPage' => $this->paginator->page(),
-            'pages'       => (int)ceil($this->search->postHistoryTotal() / $this->paginator->limit()),
+            'pages'       => $this->paginator->pages(),
             'messages'    => $thread,
         ];
     }

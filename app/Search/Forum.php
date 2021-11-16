@@ -4,30 +4,29 @@ namespace Gazelle\Search;
 
 class Forum extends \Gazelle\Base {
 
-    protected $permittedForums = [];
-    protected $forbiddenForums = [];
-    protected $selectedForums = [];
-    protected $forumCond = [];
-    protected $forumArgs = [];
-    protected $threadCond = [];
-    protected $threadArgs = [];
-    protected $postCond = [];
-    protected $postArgs = [];
+    protected array $permittedForums = [];
+    protected array $forbiddenForums = [];
+    protected array $selectedForums = [];
+    protected array $forumCond = [];
+    protected array $forumArgs = [];
+    protected array $threadCond = [];
+    protected array $threadArgs = [];
+    protected array $postCond = [];
+    protected array $postArgs = [];
 
-    protected $threadTitleSearch = true;
-    protected $searchText = '';
-    protected $authorName = '';
-    protected $authorId = 0;
-    protected $posterId;
-    protected $page = 0;
-    protected $threadId;
-    protected $linkbox;
-    protected $viewer;
+    protected string $searchText = '';
+    protected string $authorName = '';
+    protected string $linkbox;
 
-    protected $splitWords = false;
+    protected int $authorId = 0;
+    protected int $page = 0;
+    protected int $threadId;
 
-    /** @var \Gazelle\User */
-    protected $user;
+    protected bool $threadTitleSearch = true;
+    protected bool $splitWords = false;
+
+    protected \Gazelle\User $user;
+    protected \Gazelle\User $viewer;
 
     /** @var bool */
     protected $showGrouped = false;
@@ -62,14 +61,6 @@ class Forum extends \Gazelle\Base {
 
     public function threadId(): int {
         return $this->threadId;
-    }
-
-    /**
-     * Set poster Id for posts search
-     */
-    public function setPosterId(int $posterId) {
-        $this->posterId = $posterId;
-        return $this;
     }
 
     /**
@@ -266,7 +257,7 @@ class Forum extends \Gazelle\Base {
     protected function configure(): array {
         $cond = array_merge($this->forumCond, $this->threadCond, $this->isBodySearch() ? $this->postCond : []);
         $args = array_merge($this->forumArgs, $this->threadArgs, $this->isBodySearch() ? $this->postArgs : []);
-        $userContext = $this->viewer ?: $this->user;
+        $userContext = isset($this->viewer) ? $this->viewer : $this->user;
         if (!($this->permittedForums || $this->selectedForums)) {
             // any forum they have access to due to their class
             $cond[] = 'f.MinClassRead <= ?';
@@ -305,11 +296,11 @@ class Forum extends \Gazelle\Base {
             LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
             LEFT JOIN forums AS f ON (f.ID = t.ForumID)";
         $cond[] = 'p.AuthorID = ?';
-        $args[] = $this->posterId;
+        $args[] = $this->user->id();
         if ($this->showUnread) {
             $from .= "LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)\n";
             $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
-            array_unshift($args, $this->posterId);
+            array_unshift($args, $this->user->id());
         }
         return [$from, $cond, $args];
     }
@@ -494,7 +485,7 @@ class Forum extends \Gazelle\Base {
      * @return string HTML page linkbox
      */
     public function pageLinkbox(): string {
-        if (is_null($this->linkbox)) {
+        if (!isset($this->linkbox)) {
             $this->linkbox = \Format::get_pages($this->page, $this->totalHits(), POSTS_PER_PAGE, 9) ?: '';
         }
         return $this->linkbox;

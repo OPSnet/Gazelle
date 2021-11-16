@@ -34,7 +34,8 @@ if (isset($_GET['id'])) {
     json_die("failure", "bad parameters");
 }
 
-(new Gazelle\Json\Artist($artist))->setViewer($Viewer)
+(new Gazelle\Json\Artist)->setViewer($Viewer)
+    ->setArtist($artist)
     ->setReleasesOnly(!empty($_GET['artistreleases']))
     ->setVersion(2)
     ->emit();

@@ -4,17 +4,17 @@ namespace Gazelle\Json;
 
 class Inbox extends \Gazelle\Json {
 
-    protected $dateColumn;
-    protected $page = 1;
-    protected $unreadFirst = false;
-    protected $userId;
+    protected string $dateColumn;
+    protected int $page = 1;
+    protected bool $unreadFirst = false;
+    protected \Gazelle\User $user;
 
     protected $cond = [];
     protected $args = [];
     protected $join = [];
 
-    public function setViewerId(int $userId) {
-        $this->userId = $userId;
+    public function setViewer(\Gazelle\User $user) {
+        $this->user = $user;
         return $this;
     }
 
@@ -78,7 +78,7 @@ class Inbox extends \Gazelle\Json {
             LEFT JOIN pm_conversations_users AS other ON (other.ConvID = c.ID AND other.UserID != ? AND other.ForwardedTo = 0)
             " . implode(' ', $this->join) . "
             WHERE " . implode(' AND ', $this->cond) ."
-            ", $this->userId, $this->userId, ...$this->args
+            ", $this->user->id(), $this->user->id(), ...$this->args
         );
         $paginator = new \Gazelle\Util\Paginator(MESSAGES_PER_PAGE, $this->page);
         $paginator->setTotal($total);
@@ -101,7 +101,7 @@ class Inbox extends \Gazelle\Json {
             GROUP BY c.ID
             ORDER BY cu.Sticky, {$orderBy}
             LIMIT ? OFFSET ?
-            ", $this->userId, $this->userId, ...$this->args
+            ", $this->user->id(), $this->user->id(), ...$this->args
         );
 
         $userMan = new \Gazelle\Manager\User;

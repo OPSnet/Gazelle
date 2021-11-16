@@ -10,5 +10,5 @@ $json->setVersion(1)
     ->setPage((int)($_GET['page'] ?? 1))
     ->setUnreadFirst(($_GET['sort'] ?? 'unread') === 'unread')
     ->setFolder($_GET['type'] ?? 'inbox')
-    ->setViewerId($Viewer->id())
+    ->setViewer($Viewer)
     ->emit();

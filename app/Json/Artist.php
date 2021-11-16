@@ -7,9 +7,9 @@ class Artist extends \Gazelle\Json {
     protected $user;
     protected $releasesOnly = false;
 
-    public function __construct(\Gazelle\Artist $artist) {
-        parent::__construct();
+    public function setArtist(\Gazelle\Artist $artist) {
         $this->artist = $artist;
+        return $this;
     }
 
     public function setViewer(\Gazelle\User $user) {
