@@ -3,40 +3,40 @@
 namespace Gazelle\Json;
 
 class RipLog extends \Gazelle\Json {
-    protected $logId;
-    protected $torrentId;
-    protected $ripLog;
+    protected int $logId;
+    protected int $torrentId;
 
-    public function __construct(int $torrentId, int $logId) {
-        parent::__construct();
+    public function setTorrentLog(int $torrentId, int $logId) {
         $this->logId     = $logId;
         $this->torrentId = $torrentId;
-        try {
-            $this->ripLog = new \Gazelle\RipLog($this->torrentId, $this->logId);
-        } catch (\Gazelle\Exception\ResourceNotFoundException $e) {
-            throw new $e;
-        }
+        return $this;
     }
 
     public function payload(): array {
-        $logFile = (new \Gazelle\File\RipLog)->get([$this->torrentId, $this->logId]);
+        try {
+            $logFile = (new \Gazelle\File\RipLog)->get([$this->torrentId, $this->logId]);
+            $ripLog = new \Gazelle\RipLog($this->torrentId, $this->logId);
+        } catch (\Gazelle\Exception\ResourceNotFoundException $e) {
+            return [];
+        }
+
         return [
             'id'                => $this->torrentId,
             'logid'             => $this->logId,
             'log'               => $logFile === false ? null : base64_encode($logFile),
             'log_sha256'        => $logFile === false ? null : hash('sha256', $logFile),
-            'score'             => $this->ripLog->score(),
-            'score_adjusted'    => $this->ripLog->scoreAdjusted(),
-            'checksum'          => $this->ripLog->checksum(),
-            'checksum_adjusted' => $this->ripLog->checksumAdjusted(),
-            'checksum_state'    => $this->ripLog->checksumState(),
-            'adjusted'          => $this->ripLog->adjusted(),
-            'adjusted_by'       => $this->ripLog->adjustedBy(),
-            'adjusted_reason'   => $this->ripLog->adjustmentReason(),
-            'ripper'            => $this->ripLog->ripper(),
-            'ripper_lang'       => $this->ripLog->ripperLang(),
-            'ripper_version'    => $this->ripLog->ripperVersion(),
-            'checker_version'   => $this->ripLog->checkerVersion(),
+            'score'             => $ripLog->score(),
+            'score_adjusted'    => $ripLog->scoreAdjusted(),
+            'checksum'          => $ripLog->checksum(),
+            'checksum_adjusted' => $ripLog->checksumAdjusted(),
+            'checksum_state'    => $ripLog->checksumState(),
+            'adjusted'          => $ripLog->adjusted(),
+            'adjusted_by'       => $ripLog->adjustedBy(),
+            'adjusted_reason'   => $ripLog->adjustmentReason(),
+            'ripper'            => $ripLog->ripper(),
+            'ripper_lang'       => $ripLog->ripperLang(),
+            'ripper_version'    => $ripLog->ripperVersion(),
+            'checker_version'   => $ripLog->checkerVersion(),
         ];
     }
 }
