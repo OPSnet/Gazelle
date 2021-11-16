@@ -23,7 +23,6 @@ if ($showGrouped) {
 }
 
 $forumSearch = (new Gazelle\Search\Forum($Viewer))
-    ->setPosterId($user->id())
     ->setShowGrouped($ownProfile && $showGrouped)
     ->setShowUnread($ownProfile && $showUnread);
 
