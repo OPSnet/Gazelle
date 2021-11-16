@@ -367,12 +367,15 @@ class TGroup extends BaseObject {
         return $this->info()['RecordLabel'];
     }
 
-    public function releaseType(): int {
-        return $this->info()['ReleaseType'];
+    /**
+     * @return int Release type (will be null for non-Music categories)
+     */
+    public function releaseType(): ?int {
+        return $this->info()['ReleaseType'] == 0 ? null : $this->info()['ReleaseType'];
     }
 
-    public function releaseTypeName(): string {
-        return $this->releaseTypes[$this->releaseType()];
+    public function releaseTypeName(): ?string {
+        return $this->info()['ReleaseType'] == 0 ? null : $this->releaseTypes[$this->releaseType()];
     }
 
     public function tagList(): array {
