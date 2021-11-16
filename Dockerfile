@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 WORKDIR /var/www
 
@@ -9,37 +9,30 @@ RUN apt-get update \
         apt-transport-https \
         build-essential \
         ca-certificates \
+        curl \
         gnupg2 \
-        wget \
-    && wget -qO - https://packages.sury.org/php/apt.gpg | apt-key add - \
-    && echo "deb https://packages.sury.org/php/ buster main" | tee /etc/apt/sources.list.d/php.list \
+    && curl -sL https://packages.sury.org/php/apt.gpg | apt-key add - \
+    && echo "deb https://packages.sury.org/php/ bullseye main" | tee /etc/apt/sources.list.d/php.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         cron \
-        curl \
-        git \
-        imagemagick \
-        libboost-dev \
-        libbz2-dev \
-        libssl-dev \
-        libsqlite3-dev \
-        libtcmalloc-minimal4 \
         make \
         mariadb-client \
-        netcat-openbsd \
         nginx \
-        php8.0 \
-        php8.0-cli \
-        php8.0-curl \
-        php8.0-fpm \
-        php8.0-gd \
-        php8.0-mbstring \
-        php8.0-mysql \
-        php8.0-xml \
-        php8.0-zip \
+        php8.1 \
+        php8.1-cli \
+        php8.1-curl \
+        php8.1-fpm \
+        php8.1-gd \
+        php8.1-mbstring \
+        php8.1-memcached \
+        php8.1-mysql \
+        php8.1-pgsql \
+        php8.1-xml \
+        php8.1-zip \
         php-apcu \
+        php-dev \
         php-bcmath \
-        php-memcached \
         php-xdebug \
         python3 \
         python3-pip \
@@ -47,7 +40,6 @@ RUN apt-get update \
         python3-wheel \
         software-properties-common \
         unzip \
-        wget \
         zlib1g-dev \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
@@ -99,7 +91,6 @@ RUN apt-get update \
         libxss1 \
         libxtst6 \
         fonts-liberation \
-        libappindicator1 \
         libnss3 \
         lsb-release \
         xdg-utils \
@@ -122,10 +113,10 @@ COPY . /var/www
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \
     && chown -R gazelle:gazelle /var/www \
-    && cp /var/www/.docker/web/php.ini /etc/php/8.0/cli/php.ini \
-    && cp /var/www/.docker/web/php.ini /etc/php/8.0/fpm/php.ini \
-    && cp /var/www/.docker/web/xdebug.ini /etc/php/8.0/mods-available/xdebug.ini \
-    && cp /var/www/.docker/web/www.conf /etc/php/8.0/fpm/pool.d/www.conf \
+    && cp /var/www/.docker/web/php.ini /etc/php/8.1/cli/php.ini \
+    && cp /var/www/.docker/web/php.ini /etc/php/8.1/fpm/php.ini \
+    && cp /var/www/.docker/web/xdebug.ini /etc/php/8.1/mods-available/xdebug.ini \
+    && cp /var/www/.docker/web/www.conf /etc/php/8.1/fpm/pool.d/www.conf \
     && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default
