@@ -14,12 +14,21 @@ return
         'gazelle' => [
             'adapter' => 'mysql',
             'host' => SQLHOST,
+            'port' => SQLPORT,
             'name' => SQLDB,
             'user' => SQL_PHINX_USER,
             'pass' => SQL_PHINX_PASS,
-            'port' => SQLPORT,
-            'charset' => 'utf8'
-        ]
+            'charset' => 'utf8mb4'
+        ],
+        'pg' => [
+            'default_migration_table' => 'phinx.log',
+            'adapter' => 'pgsql',
+            'host' => GZPG_HOST,
+            'port' => GZPG_PORT,
+            'name' => GZPG_DB,
+            'user' => GZPG_USER,
+            'pass' => GZPG_PASSWORD,
+        ],
     ],
     'version_order' => 'creation'
 ];

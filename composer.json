@@ -24,7 +24,7 @@
     "sort-packages": true
   },
   "require": {
-    "php": ">=7.3",
+    "php": ">=7.4",
     "ext-curl": "*",
     "ext-json": "*",
     "ext-mysqli": "*",
@@ -40,9 +40,9 @@
     "whichbrowser/parser": "^2.0"
   },
   "require-dev": {
-    "phpstan/phpstan": "^0.12.99",
+    "phpstan/phpstan": "^1.1",
     "phpunit/phpunit": "^9.4",
-    "squizlabs/php_codesniffer": "^3.5"
+    "squizlabs/php_codesniffer": "^3.6"
   },
   "scripts": {
     "test": "phpunit",

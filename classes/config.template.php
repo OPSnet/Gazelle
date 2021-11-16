@@ -79,6 +79,12 @@ define('SQLDB', 'gazelle'); //The MySQL database to use
 define('SQLPORT', 3306); //The MySQL port to connect on
 define('SQLSOCK', false); // Socket mysql is listening on, usually /var/run/mysqld/mysqld.sock
 
+define('GZPG_HOST', 'pg');
+define('GZPG_PORT', 54321);
+define('GZPG_DB', 'gzpg');
+define('GZPG_USER', 'gus');
+define('GZPG_PASSWORD', 'gazpg');
+
 // Sphinx details
 define('SPHINX_HOST', 'localhost');
 define('SPHINX_PORT', 9312);
