@@ -1,7 +1,8 @@
 {{ header('Service Stats') }}
 {% if can_see_db %}
 <div class="linkbox">
-    <a href="tools.php?action=database_specifics" class="brackets">Schema info</a>
+    <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
+    <a href="tools.php?action=database_specifics" class="brackets">DB schema info</a>
     <a href="tools.php?action=db_sandbox" class="brackets">DB sandbox</a>
 </div>
 {% endif %}
@@ -77,20 +78,9 @@
             <tr><td colspan="2"></td></tr>
             <tr><td colspan="2"><strong>Utilities</strong></td></tr>
             <tr>
-                <td>Cache:</td>
-                <td>
-                    <form class="delete_form" name="cache" action="" method="post">
-                        <input type="hidden" name="action" value="service_stats" />
-                        <input type="hidden" name="auth" value="{{ auth }}" />
-                        <input type="hidden" name="global_flush" value="1" />
-                        <input type="submit" value="Manual Flush" />
-                    </form>
-                </td>
-            </tr>
-            <tr>
                 <td{% if mem_stats.cmd_flush > mem_stats.uptime / 7 * 24 * 3600 -%}
                     class="tooltip invalid" title="Flushing the cache on a regular basis defeats the benefits of it, look into using cache transactions, or deletes instead of global flushing where possible."
-                    {%- endif %}>Total flushes:</td>
+                    {%- endif %}>Total memcached flushes:</td>
                 <td>{{ mem_stats.cmd_flush|number_format }}</td>
             </tr>
             <tr>
