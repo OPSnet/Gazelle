@@ -12,7 +12,7 @@ parameters:
         - app
         - classes
         - db
-    excludes_analyse:
+    excludePaths:
         - classes/pushserver.class.php
         - design
         - sections
