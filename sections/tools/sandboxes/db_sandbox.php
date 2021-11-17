@@ -32,7 +32,9 @@ View::show_header($Title);
 
 ?>
 <div class="linkbox">
-    <a href="tools.php?action=database_specifics" class="brackets">Schema info</a>
+    <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
+    <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
+    <a href="tools.php?action=database_specifics" class="brackets">DB schema info</a>
 </div>
 <div class="header">
     <h2><?=$Title?></h2>

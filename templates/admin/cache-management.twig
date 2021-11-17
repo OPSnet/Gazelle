@@ -1,6 +1,11 @@
 {{ header('Cache management') }}
 <div class="header">
-    <h2>View or flush cache keys</h2>
+    <h2>Cache Inspector</h2>
+</div>
+<div class="linkbox">
+    <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
+    <a href="tools.php?action=database_specifics" class="brackets">DB schema info</a>
+    <a href="tools.php?action=db_sandbox" class="brackets">DB sandbox</a>
 </div>
 <div class="thin pad">
 
@@ -51,13 +56,14 @@
         <span style="padding: 0 0"><input type="submit" name="view" value="View" /></span>
         <span style="padding: 0 20px"><input type="submit" name="json" value="View as JSON" /></span>
 {% if can_flush %}
-        <span style="padding: 0 15px"><input type="checkbox" name="check" /> <input type="submit" name="flush" value="Flush" /></span>
+        <label><input type="checkbox" name="check" /> Confirm</label>
+        <input type="submit" name="flush" value="Flush keys" />
 {% endif %}
     </form>
     </div>
 {% if can_flush %}
     <div class="box pad">
-    <h2>Bulk eraser</h2>
+    <h2>Bulk Eraser</h2>
         <p>Flush collections. Warning: may be so slow as to cause a gateway timeout, but the process will complete.</p>
         <form class="manage_form" name="cache" action="">
         <input type="hidden" name="action" value="clear_cache" />
@@ -92,6 +98,19 @@
                     <input type="submit" name="flush-{{ name }}" value="Flush checked" /></span>
                 </td>
 {% endfor %}
+            </tr>
+            <tr>
+                <td colspan="{{ namespace|length }}">
+                    <form class="delete_form" name="cache" action="" method="post">
+                        <input type="hidden" name="action" value="service_stats" />
+                        <input type="hidden" name="auth" value="{{ auth }}" />
+                        <input type="hidden" name="global_flush" value="1" />
+
+                        <p>Full restart (all keys will be flushed!)</p>
+                        <label><input type="checkbox" field }}" id="confirm-global" /> Confirm</label>
+                        <input type="submit" value="Flush memcached" />
+                    </form>
+                </td>
             </tr>
         </table>
     <form class="manage_form" name="eraser" action="">

@@ -1,9 +1,15 @@
 <?php
-if (!$Viewer->permittedAny('users_mod', 'admin_clear_cache')) {
+
+if (!$Viewer->permitted('admin_clear_cache')) {
     error(403);
 }
 
 $flusher = new Gazelle\Util\CacheMultiFlush;
+
+if (isset($_POST['confirm-flush']) && isset($_POST['global_flush'])) {
+    authorize();
+    $Cache->flush();
+}
 
 $flushed = false;
 $multi   = false;
