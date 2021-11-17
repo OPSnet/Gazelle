@@ -17,7 +17,7 @@ if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) 
     exit;
 }
 
-$header = new Gazelle\Util\SortableTableHeader('totalsize', [
+$header = new Gazelle\Util\SortableTableHeader('name', [
     'datafree'  => ['dbColumn' => 'data_free',      'defaultSort' => 'desc', 'text' => 'Free Size',  'alt' => 'free space'],
     'datasize'  => ['dbColumn' => 'data_length',    'defaultSort' => 'desc', 'text' => 'Data Size',  'alt' => 'table size'],
     'freeratio' => ['dbColumn' => 'CASE WHEN data_length = 0 THEN 0 ELSE data_free / data_length END', 'defaultSort' => 'desc', 'text' => 'Bloat %', 'alt' => 'table bloat'],
@@ -67,6 +67,8 @@ $data = [];
 foreach ($Tables as $name => $info) {
     if ($header->getSortKey() === 'freeratio') {
         $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
+    } elseif ($header->getSortKey() === 'name') {
+        $data[$name] = $info['total_length'];
     } else {
         $data[$name] = $info[$orderBy];
     }

@@ -1,12 +1,7 @@
 <?php
 
-if (!$Viewer->permittedAny('site_debug', 'admin_clear_cache')) {
+if (!$Viewer->permitted('site_debug')) {
     error(403);
-}
-
-if (isset($_POST['global_flush'])) {
-    authorize();
-    $Cache->flush();
 }
 
 $inspectDb = new Gazelle\DB;
