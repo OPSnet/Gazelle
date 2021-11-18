@@ -96,11 +96,6 @@ Category('Rewards', [
     Item('Manage freeleech tokens',     'tools.php?action=tokens',             All(['admin_freeleech'])),
     Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['admin_freeleech'])),
 ]);
-
-Category('Stylesheets', [
-    Item('Stylesheet usage',          'tools.php?action=stylesheets',      All(['admin_manage_stylesheets'])),
-]);
-
 ?>
     </div>
     <div class="toolbox_container">
@@ -128,6 +123,7 @@ Category('Community', [
     Item('Invite Sources',          'tools.php?action=invite_source',     All(['admin_manage_invite_source'])),
     Item('IRC manager',             'tools.php?action=irc',               All(['admin_manage_forums'])),
     Item('Navigation link manager', 'tools.php?action=navigation',        All(['admin_manage_navigation'])),
+    Item('Stylesheet usage',        'tools.php?action=stylesheets',       All(['admin_manage_stylesheets'])),
 ]);
 
 ?>
