@@ -383,7 +383,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
             }
             if (!$Viewer->disableTagging() && $Viewer->permitted('site_delete_tag')) {
 ?>
-                    <span class="remove remove_tag"><a href="torrents.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tid ?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
+                    <span class="remove remove_tag"><a href="ajax.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tid ?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
 <?php       } ?>
                     </div>
                     <br style="clear: both;" />
