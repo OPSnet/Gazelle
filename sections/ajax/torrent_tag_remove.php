@@ -19,7 +19,7 @@ if ($tgroup->removeTag($tag)) {
 
     // Log the removal and if it was the last occurrence.
     $logger = new Gazelle\Log;
-    $logger->group($tgroup->id(), $Viewer->id(), "Tag \"" . $tag->name() . "\" removed from group " . $tgroup->id());
+    $logger->group($tgroup->id(), $Viewer->id(), "Tag \"" . $tag->name() . "\" removed");
     if (!$tagMan->findById($tag->id())) {
         $logger->general("Unused tag \"" . $tag->name() . "\" removed by user " . $Viewer->label());
     }

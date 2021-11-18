@@ -99,9 +99,6 @@ if (!empty($_REQUEST['action'])) {
         case 'add_tag':
             require_once('add_tag.php');
             break;
-        case 'delete_tag':
-            require_once('delete_tag.php');
-            break;
         case 'notify':
             require_once('notify.php');
             break;
