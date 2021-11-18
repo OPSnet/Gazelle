@@ -96,9 +96,6 @@ if (!empty($_REQUEST['action'])) {
         case 'vote_tag':
             require_once('vote_tag.php');
             break;
-        case 'add_tag':
-            require_once('add_tag.php');
-            break;
         case 'notify':
             require_once('notify.php');
             break;

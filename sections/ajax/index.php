@@ -1,6 +1,6 @@
 <?php
 
-define('AJAX', true);
+define('AJAX', !isset($_POST['auth']));
 
 /* 'x' requests every 'y' seconds: [5,10] = 5 requests every 10 seconds */
 $LimitedPages = [
@@ -52,9 +52,9 @@ $Aliases = [
     'requestfill' => 'request_fill',
 ];
 
-$Action = $_GET['action'] ?? '';
+$Action = $_REQUEST['action'] ?? '';
 if (isset($Aliases[$Action])) {
-    $_GET['action'] = $Action = $Aliases[$Action];
+    $_GET['action'] = $Action = $Aliases[$action];
 }
 if (!$Action || !isset($Viewer)) {
     json_die("failure");
@@ -80,7 +80,7 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     }
 }
 
-if (!isset($FullToken) && in_array($Action, $RequireTokenPages)) {
+if (AJAX && !isset($FullToken) && in_array($Action, $RequireTokenPages)) {
     json_die("failure", "This page requires an api token");
 }
 
@@ -88,19 +88,22 @@ switch ($Action) {
     // things (that may be) used on the site
     case 'upload_section':
         // Gets one of the upload forms
-        require('upload.php');
+        require_once('upload.php');
         break;
     case 'preview':
-        require('preview.php');
+        require_once('preview.php');
         break;
     case 'torrent_info':
-        require('torrent_info.php');
+        require_once('torrent_info.php');
+        break;
+    case 'add_tag':
+        require_once('torrent_tag_add.php');
         break;
     case 'delete_tag':
         require_once('torrent_tag_remove.php');
         break;
     case 'stats':
-        require('stats.php');
+        require_once('stats.php');
         break;
     case 'checkprivate':
         include('checkprivate.php');
@@ -108,84 +111,84 @@ switch ($Action) {
 
     // things not yet used on the site
     case 'torrent':
-        require('torrent.php');
+        require_once('torrent.php');
         break;
     case 'torrentgroup':
-        require('torrentgroup.php');
+        require_once('torrentgroup.php');
         break;
     case 'torrentgroupalbumart':        // so the album art script can function without breaking the ratelimit
-        require('torrentgroupalbumart.php');
+        require_once('torrentgroupalbumart.php');
         break;
     case 'torrent_remove_cover_art':
-        require('torrent_remove_cover_art.php');
+        require_once('torrent_remove_cover_art.php');
         break;
     case 'tcomments':
-        require('tcomments.php');
+        require_once('tcomments.php');
         break;
     case 'user':
-        require('user.php');
+        require_once('user.php');
         break;
     case 'forum':
-        require('forum/index.php');
+        require_once('forum/index.php');
         break;
     case 'post_edit':
-        require('post_edit.php');
+        require_once('post_edit.php');
         break;
     case 'top10':
-        require('top10/index.php');
+        require_once('top10/index.php');
         break;
     case 'browse':
-        require('browse.php');
+        require_once('browse.php');
         break;
     case 'usersearch':
-        require('usersearch.php');
+        require_once('usersearch.php');
         break;
     case 'requests':
-        require('requests.php');
+        require_once('requests.php');
         break;
     case 'artist':
-        require('artist.php');
+        require_once('artist.php');
         break;
     case 'add_similar':
-        require(__DIR__ . '/../artist/add_similar.php');
+        require_once(__DIR__ . '/../artist/add_similar.php');
         break;
     case 'inbox':
-        require('inbox/index.php');
+        require_once('inbox/index.php');
         break;
     case 'subscriptions':
-        require('subscriptions.php');
+        require_once('subscriptions.php');
         break;
     case 'index':
-        require('info.php');
+        require_once('info.php');
         break;
     case 'bookmarks':
-        require('bookmarks/index.php');
+        require_once('bookmarks/index.php');
         break;
     case 'announcements':
-        require('announcements.php');
+        require_once('announcements.php');
         break;
     case 'notifications':
-        require('notifications.php');
+        require_once('notifications.php');
         break;
     case 'request':
-        require('request.php');
+        require_once('request.php');
         break;
     case 'loadavg':
-        require('loadavg.php');
+        require_once('loadavg.php');
         break;
     case 'better':
-        require('better/index.php');
+        require_once('better/index.php');
         break;
     case 'password_validate':
-        require('password_validate.php');
+        require_once('password_validate.php');
         break;
     case 'similar_artists':
-        require('similar_artists.php');
+        require_once('similar_artists.php');
         break;
     case 'userhistory':
         switch ($_GET['type'] ?? '') {
             case 'posts':
-                require('userhistory/post_history.php');
+                require_once('userhistory/post_history.php');
                 break;
             default:
                 json_die('bad type');
@@ -193,65 +196,62 @@ switch ($Action) {
         }
         break;
     case 'votefavorite':
-        require('takevote.php');
+        require_once('takevote.php');
         break;
     case 'wiki':
-        require('wiki.php');
+        require_once('wiki.php');
         break;
     case 'get_friends':
-        require('get_friends.php');
+        require_once('get_friends.php');
         break;
     case 'news_ajax':
-        require('news_ajax.php');
+        require_once('news_ajax.php');
         break;
     case 'user_recents':
-        require('user_recents.php');
+        require_once('user_recents.php');
         break;
     case 'collage':
-        require('collage.php');
+        require_once('collage.php');
         break;
     case 'raw_bbcode':
-        require('raw_bbcode.php');
+        require_once('raw_bbcode.php');
         break;
     case 'get_user_notifications':
-        require('get_user_notifications.php');
+        require_once('get_user_notifications.php');
         break;
     case 'clear_user_notification':
-        require('clear_user_notification.php');
+        require_once('clear_user_notification.php');
         break;
     case 'pushbullet_devices':
-        require('pushbullet_devices.php');
+        require_once('pushbullet_devices.php');
         break;
     case 'loggy':
-        require('loggy.php');
+        require_once('loggy.php');
         break;
     case 'user_stats':
-        require('stats/users.php');
+        require_once('stats/users.php');
         break;
     case 'torrent_stats':
-        require('stats/torrents.php');
+        require_once('stats/torrents.php');
         break;
     case 'logchecker':
-        require('logchecker.php');
+        require_once('logchecker.php');
         break;
     case 'riplog':
-        require('riplog.php');
+        require_once('riplog.php');
         break;
 
     case 'upload':
-        require(__DIR__ . '/../upload/upload_handle.php');
+        require_once(__DIR__ . '/../upload/upload_handle.php');
         break;
     case 'download':
-        require(__DIR__ . '/../torrents/download.php');
+        require_once(__DIR__ . '/../torrents/download.php');
         break;
     case 'request_fill':
-        json_print('success', require(__DIR__ . '/../requests/take_fill.php'));
-        break;
-    case 'add_tag':
-        require(__DIR__ . '/../torrents/add_tag.php');
+        json_print('success', require_once(__DIR__ . '/../requests/take_fill.php'));
         break;
     case 'add_log':
-        require(__DIR__ . '/add_log.php');
+        require_once(__DIR__ . '/add_log.php');
         break;
     default:
         // If they're screwing around with the query string

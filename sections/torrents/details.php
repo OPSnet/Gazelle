@@ -359,7 +359,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
             <div class="head">
                 <strong>Tags</strong>
 <?php if ($DeletedTag) { ?>
-                    <form style="display: none;" id="undo_tag_delete_form" name="tags" action="torrents.php" method="post">
+                    <form style="display: none;" id="undo_tag_delete_form" name="tags" action="ajax.php" method="post">
                         <input type="hidden" name="action" value="add_tag" />
                         <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
@@ -401,7 +401,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
         <div class="box box_addtag">
             <div class="head"><strong>Add tag</strong></div>
             <div class="body">
-                <form class="add_form" name="tags" action="torrents.php" method="post">
+                <form class="add_form" name="tags" action="ajax.php" method="post">
                     <input type="hidden" name="action" value="add_tag" />
                     <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
                     <input type="hidden" name="groupid" value="<?=$GroupID?>" />
