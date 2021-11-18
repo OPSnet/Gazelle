@@ -14,6 +14,7 @@ $LimitedPages = [
     'bookmarks'       => [5, 60],
     'browse'          => [5, 10],
     'collage'         => [5, 60],
+    'delete_tag'      => [5, 30],
     'forum'           => [5, 10],
     'inbox'           => [2, 60],
     'news_ajax'       => [2, 60],
@@ -95,6 +96,9 @@ switch ($Action) {
         break;
     case 'torrent_info':
         require('torrent_info.php');
+        break;
+    case 'delete_tag':
+        require_once('torrent_tag_remove.php');
         break;
     case 'stats':
         require('stats.php');
