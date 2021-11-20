@@ -120,9 +120,8 @@ class UploadForm extends \Gazelle\Base {
                         RemasterCatalogueNumber DESC
                     ", $Torrent['GroupID']
                 );
-                if ($this->db->has_results()) {
-                    $GroupRemasters = $this->db->to_array(false, MYSQLI_BOTH, false);
-                }
+                // need BOTH for release selector
+                $GroupRemasters = $this->db->to_array(false, MYSQLI_BOTH, false);
             }
 
             $HasLog = $Torrent['HasLog'];
@@ -316,20 +315,26 @@ class UploadForm extends \Gazelle\Base {
                                 <tr id="edition_title">
                                     <td class="label">Title:</td>
                                     <td>
-                                        <input type="text" id="remaster_title" name="remaster_title" size="50" value="<?=display_str(!$this->NewTorrent && $Torrent['RemasterTitle']) ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                        <input type="text" id="remaster_title" name="remaster_title" size="50" value="<?=
+                                            $this->NewTorrent ? '' : display_str($Torrent['RemasterTitle'] ?? '')
+                                            ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">Title of the edition (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
                                     </td>
                                 </tr>
                                 <tr id="edition_record_label">
                                     <td class="label">Record label:</td>
                                     <td>
-                                        <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="<?=display_str(!$this->NewTorrent && $Torrent['RemasterRecordLabel']) ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                        <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="<?=
+                                            $this->NewTorrent ? '' : display_str($Torrent['RemasterRecordLabel'] ?? '')
+                                            ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">This is for the record label of the <strong>edition</strong>. It may differ from the original.</p>
                                     </td>
                                 </tr>
                                 <tr id="edition_catalogue_number">
                                     <td class="label">Catalogue number:</td>
-                                    <td><input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="<?=display_str(!$this->NewTorrent && $Torrent['RemasterCatalogueNumber']) ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                    <td><input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="<?=
+                                        $this->NewTorrent ? '' : display_str($Torrent['RemasterCatalogueNumber'] ?? '')
+                                        ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">This is for the catalogue number of the <strong>edition</strong>.</p>
                                     </td>
                                 </tr>
