@@ -9,8 +9,8 @@ $collMan = new Gazelle\Manager\Collage;
 $groupSubs = $collMan->subscribedGroupCollageList($Viewer->id(), !$ShowAll);
 $artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), !$ShowAll);
 
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setViewer($Viewer);
+$tgMan = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 View::show_header('Subscribed collages', ['js' => 'browse,collage']);
@@ -36,18 +36,15 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     </div>
 <?php
 } else {
-    $tgMan = new Gazelle\Manager\TGroup;
     $ShowGroups = 0;
     $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
     foreach ($groupSubs as $s) {
         $GroupIDs = $s['groupIds'];
         $NewCount = count($GroupIDs);
         $TorrentList = Torrents::get_groups($GroupIDs);
-        $Artists = Artists::get_artists($GroupIDs);
         $TorrentTable = '';
         foreach ($GroupIDs as $GroupID) {
             $tgroup = $tgMan->findById($GroupID);
-            $tgroup->setViewer($Viewer);
             if (is_null($tgroup)) {
                 continue;
             }
@@ -92,10 +89,10 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     if (is_null($torrent)) {
                         continue;
                     }
-                    if ($t['Remastered'] && !$t['RemasterYear']) {
+                    if ($torrent->isRemasteredUnknown()) {
                         $FirstUnknown = !isset($FirstUnknown);
                     }
-                    $current = "{$t['RemasterTitle']}/{$t['RemasterYear']}/{$t['RemasterRecordLabel']}/{$t['RemasterCatalogueNumber']}/{$t['Media']}";
+                    $current = $torrent->remasterTuple();
                     if ($prev != $current || (isset($FirstUnknown) && $FirstUnknown)) {
                         $EditionID++;
 ?>
@@ -106,7 +103,9 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     }
                     $prev = $current;
 ?>
-    <tr class="group_torrent groupid_<?= $s['collageId'] . $GroupID?> edition_<?=$EditionID?> hidden<?= ($t['IsSnatched'] ? ' snatched_torrent' : '') . $SnatchedGroupClass?>">
+    <tr class="group_torrent groupid_<?= $s['collageId'] . $GroupID?> edition_<?=
+            $EditionID?> hidden<?= ($torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '')
+            . $SnatchedGroupClass?>">
         <td colspan="2">
             <?= $Twig->render('torrent/action.twig', [
                 'can_fl' => $Viewer->canSpendFLToken($torrent),
@@ -130,14 +129,6 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     continue;
                 }
                 $Torrent = current($Torrents);
-
-                $DisplayName = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">{$Group['Name']}</a>";
-                if ($Torrent['IsSnatched']) {
-                    $DisplayName .= ' ' . Format::torrent_label('Snatched!');
-                }
-                if (!empty($Torrent['FreeTorrent'])) {
-                    $DisplayName .= ' ' . Format::torrent_label('Freeleech!');
-                }
 ?>
     <tr class="torrent<?= $Torrent['IsSnatched'] ? ' snatched_torrent' : '' ?>" id="group_<?= $s['collageId'] . $GroupID?>">
         <td></td>
@@ -157,7 +148,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     'key'    => $Viewer->announceKey(),
                     't'      => $Torrent,
                 ]) ?>
-                <strong><?=$DisplayName?></strong>
+                <strong><?= $torrent->link() ?></strong>
                 <div class="tags"><?=$TorrentTags->format()?></div>
             </div>
         </td>
