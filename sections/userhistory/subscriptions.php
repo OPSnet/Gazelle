@@ -1,6 +1,7 @@
 <?php
 
 $userMan = new Gazelle\Manager\User;
+$tgMan = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 
 $showAvatars   = $Viewer->showAvatars();
 $showCollapsed = (bool)($_GET['collapse'] ?? true);
@@ -86,9 +87,13 @@ if ($paginator->total()) {
                 }
                 break;
             case 'torrents':
+                $tgroup = $tgMan->findById($Result['PageID']);
+                if (is_null($tgroup)) {
+                    continue;
+                }
                 if (isset($TorrentGroups[$Result['PageID']])) {
                     $GroupInfo = $TorrentGroups[$Result['PageID']];
-                    $Links = 'Torrent: ' . Artists::display_artists($GroupInfo['ExtendedArtists']) . '<a href="torrents.php?id=' . $GroupInfo['ID'] . '" dir="ltr">' . $GroupInfo['Name'] . '</a>';
+                    $Links = 'Torrent: ' . $tgroup->link();
                     if ($GroupInfo['Year'] > 0) {
                         $Links .= " [" . $GroupInfo['Year'] . "]";
                     }
