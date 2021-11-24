@@ -141,6 +141,7 @@ class TGroup extends BaseObject {
                     'IsSnatched' => $this->fetchIsSnatched(),
                 ];
                 $this->info = $cached;
+                $this->info['from_cache'] = true;
                 return $this->info;
             }
         }
@@ -206,53 +207,9 @@ class TGroup extends BaseObject {
             ];
         }
 
-        // artists
-        $this->db->prepared_query("
-            SELECT ta.Importance,
-                ta.ArtistID,
-                aa.Name,
-                ta.AliasID
-            FROM torrents_artists AS ta
-            INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
-            WHERE ta.GroupID = ?
-            ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
-            ", $this->id
-        );
-        $map = [
-            1 => 'main',
-            2 => 'guest',
-            3 => 'remixer',
-            4 => 'composer',
-            5 => 'conductor',
-            6 => 'dj',
-            7 => 'producer',
-            8 => 'arranger',
-        ];
-        $roleList = [
-            'main'      => [],
-            'guest'     => [],
-            'remixer'   => [],
-            'composer'  => [],
-            'conductor' => [],
-            'dj'        => [],
-            'producer'  => [],
-            'arranger'  => [],
-        ];
-        $roleId = [];
-        while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
-            $roleId[$role][] = [
-                'id'      => $artistId,
-                'aliasid' => $aliasId,
-                'name'    => $artistName,
-            ];
-            $roleList[$map[$role]][] = [
-                'id'      => $artistId,
-                'aliasid' => $aliasId,
-                'name'    => $artistName,
-            ];
-        }
-        $info['artist'] = $roleList;
-        $info['role_id'] = $roleId;
+        $artistRole = new ArtistRole\TGroup($this->id);
+        $info['artist'] = $artistRole->roleList();
+        $info['role_id'] = $artistRole->idList();
 
         $this->db->prepared_query("
             SELECT t.ID
@@ -275,6 +232,7 @@ class TGroup extends BaseObject {
         $info['Flags'] = [
             'IsSnatched' => $this->fetchIsSnatched(),
         ];
+        $info['from_cache'] = false;
         $this->info = $info;
         return $this->info;
     }
