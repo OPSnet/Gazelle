@@ -283,6 +283,10 @@ class TGroup extends BaseObject {
         return $this->info()['CategoryID'];
     }
 
+    public function categoryName(): string {
+        return CATEGORY[$this->info()['CategoryID'] - 1];
+    }
+
     public function description(): string {
         return $this->info()['Body'] ?? '';
     }
