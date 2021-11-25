@@ -1,0 +1,38 @@
+{{ header('OS and Browser Usage') }}
+
+<div class="thin">
+<div class="header">
+    <h2>OS Usage</h2>
+</div>
+<table width="100%">
+    <tr class="colhead">
+        <td>OS</td>
+        <td>Count</td>
+    </tr>
+{% for os in os_list %}
+    <tr>
+        <td>{{ os.name }} {{ os.version }}</td>
+        <td>{{ os.total|number_format }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+<div class="header">
+    <h2>Browser Usage</h2>
+</div>
+<table width="100%">
+    <tr class="colhead">
+        <td>Browser</td>
+        <td>Count</td>
+    </tr>
+{% for browser in browser_list %}
+    <tr>
+        <td>{{ browser.name }} {{ browser.version }}</td>
+        <td>{{ browser.total|number_format }}</td>
+    </tr>
+{% endfor %}
+</table>
+<br />
+</div>
+
+{{ footer() }}
