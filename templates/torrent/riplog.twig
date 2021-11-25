@@ -3,7 +3,12 @@
     {% if loop.first %}
 <table>
 <tr class="colhead_dark" style="font-weight: bold">
-    <td>This torrent has {{ total }} log{{ total|plural }} with a total score of {{ log_score }}/100</td>
+    <td>This torrent has {{ total }} log{{ total|plural }} with a total score of {{ log_score }}/100
+        {% if total > 1 and viewer.permitted('torrents_delete') %}
+        <span style="float: right; font-weight: normal"><a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
+            href="torrents.php?action=removelogs&amp;torrentid={{ id }}">Remove all logs</a></span><br />
+        {% endif %}
+    </td>
 </tr>
     {% endif %}
 <tr class="log_section">
@@ -13,10 +18,6 @@
         <a class="brackets" onclick="return confirm('Are you sure you want to deleted this log? There is NO undo!');"
             href="torrents.php?action=deletelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Delete Log</a>
 
-        {% if viewer.permitted('torrents_delete') %}
-        <a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
-            href="torrents.php?action=removelogs&amp;torrentid={{ id }}">Remove all logs</a>
-        {% endif %}
         </div>
     {% endif %}
     {% if log.has_riplog %}
