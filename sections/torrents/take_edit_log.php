@@ -27,7 +27,7 @@ $Deductions = [
     ['read_mode_secure', 'Non-Secure Mode used', 20],
     ['audio_cache', 'Defeat/disable audio cache should be yes', 10],
     ['c2_points', 'C2 Pointers enabled', 10],
-    ['drive_offset', 'Incorred drive offset', 5],
+    ['drive_offset', 'Incorrect drive offset', 5],
     ['fill_offsets', 'Does not fill up missing offset samples with silence', 5],
     ['deletes_ofsets', 'Deletes leading and trailing silent blocks', 5],
     ['gap_handling', 'Gap handling should be appended to previous track', 10],
