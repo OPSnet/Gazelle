@@ -7,7 +7,7 @@
 <tr><th>Last seen</th><td colspan="2">{{ user.lastAccess|time_diff }}</td></tr>
 <tr><th>Joined</th><td colspan="2">{{ user.joinDate }}</td></tr>
 
-{% include 'admin/user-info-email.twig' with {'info': user.emailHistory } only %}
+{% include 'admin/user-info-email.twig' with {'info': user.emailHistory, 'title': 'Email History' } only %}
 {% include 'admin/user-info-email.twig' with {'info': user.siteIPv4Summary, 'title': 'Site IPv4 Information' } only %}
 {% include 'admin/user-info-email.twig' with {'info': user.trackerIPv4Summary, 'title': 'Tracker IPv4 Information' } only %}
 
