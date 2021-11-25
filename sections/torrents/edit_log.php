@@ -123,7 +123,7 @@ View::show_header("Edit Log", ['js' => 'edit_log']);
             <tr>
                 <td style="display: none"></td>
                 <td><label><input type="checkbox" name="c2_points" <?=isset_array_checked($AdjustmentDetails, 'c2_points')?> data-score="10" /> C2 Pointers enabled (-10 points)</td>
-                <td><label><input type="checkbox" name="drive_offset" <?=isset_array_checked($AdjustmentDetails, 'drive_offset')?> data-score="5" /> Incorred drive offset (-5 points)</td>
+                <td><label><input type="checkbox" name="drive_offset" <?=isset_array_checked($AdjustmentDetails, 'drive_offset')?> data-score="5" /> Incorrect drive offset (-5 points)</td>
             </tr>
             <tr>
                 <td style="display: none"></td>
@@ -142,7 +142,7 @@ View::show_header("Edit Log", ['js' => 'edit_log']);
             </tr>
             <tr>
                 <td style="display:none"></td>
-                <td>Suspicious Positions (-20 each)></td>
+                <td>Suspicious Positions (-20 each)</td>
                 <td><input type="text" name="suspicious_positions" value="<?=$AdjustmentDetails['tracks']['suspicious_positions']?>" data-score="20"/></td>
             </tr>
             <tr>
