@@ -382,4 +382,30 @@ class Users extends \Gazelle\Base {
         ");
         return $this->db->affected_rows();
     }
+
+    public function browserList(): array {
+        $this->db->prepared_query("
+            SELECT Browser     AS name,
+                BrowserVersion AS `version`,
+                count(*)       AS total
+            FROM users_sessions
+            WHERE Browser IS NOT NULL
+            GROUP BY name, version
+            ORDER BY total DESC, name, version
+        ");
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function operatingSystemList(): array {
+        $this->db->prepared_query("
+            SELECT OperatingSystem     AS name,
+                OperatingSystemVersion AS version,
+                count(*)               AS total
+            FROM users_sessions
+            WHERE OperatingSystem IS NOT NULL
+            GROUP BY name, version
+            ORDER BY total DESC, name, version
+        ");
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }
