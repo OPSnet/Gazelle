@@ -658,7 +658,9 @@ foreach ($TorrentList as $Torrent) {
                         <a href="torrents.php?action=masspm&amp;id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>" class="brackets">Mass PM snatchers</a>
 <?php } ?>
 <?php if ($Media === 'CD' && $HasLog && $HasLogDB) { ?>
-                        <a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>
+                        <a href="#" class="brackets" onclick="show_logs('<?=
+                            $TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log<?= plural(count($torrent->riplogIdList()))
+                            ?></a>
 <?php
     }
     if ($Viewer->permitted('site_view_torrent_snatchlist')) { ?>

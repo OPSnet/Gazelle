@@ -142,7 +142,7 @@ View::show_header("Edit Log", ['js' => 'edit_log']);
             </tr>
             <tr>
                 <td style="display:none"></td>
-                <td>Suspicious Positions (-20 each)></td>
+                <td>Suspicious Positions (-20 each)</td>
                 <td><input type="text" name="suspicious_positions" value="<?=$AdjustmentDetails['tracks']['suspicious_positions']?>" data-score="20"/></td>
             </tr>
             <tr>
