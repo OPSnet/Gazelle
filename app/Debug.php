@@ -11,15 +11,15 @@ class Debug {
     protected const MAX_ERRORS = 0; //Maxmimum errors, warnings, notices we will allow in a page
     protected const MAX_MEMORY = 80 * 1024 * 1024; //Maximum memory used per pageload
 
-    protected static $cache;
-    protected static $db;
+    protected static Cache $cache;
+    protected static \DB_MYSQL $db;
 
-    protected static $Errors = [];
-    protected static $Flags = [];
-    protected static $Perf = [];
-    protected static $LoggedVars = [];
+    protected static array $Errors = [];
+    protected static array $Flags = [];
+    protected static array $Perf = [];
+    protected static array $LoggedVars = [];
 
-    protected static $startTime;
+    protected static float $startTime;
     protected static $cpuTime = false;
 
     public function __construct(\Gazelle\Cache $cache, \DB_MYSQL $db) {
@@ -42,7 +42,7 @@ class Debug {
         return $this;
     }
 
-    public function startTime() {
+    public function startTime(): float {
         return self::$startTime;
     }
 
@@ -90,6 +90,26 @@ class Debug {
     }
 
     public function saveCase(string $message): string {
+        $duration = microtime(true) - self::$startTime;
+        self::$db->prepared_query("
+            INSERT INTO error_log
+                   (uri, duration, memory, nr_query, nr_cache, digest, trace, request, error_list)
+            VALUES (?,   ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?)
+            ON DUPLICATE KEY UPDATE
+                updated = now(),
+                seen = seen + 1,
+                duration = ?
+            ", isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
+                $duration,
+                memory_get_usage(true),
+                count($this->get_queries()),
+                count($this->get_cache_keys()),
+                md5($message, true),
+                $message,
+                json_encode($_REQUEST),
+                json_encode(self::$Errors),
+                $duration
+        );
         $ident = randomString(5);
         self::$cache->cache_value(
             'analysis_'.$ident, [
