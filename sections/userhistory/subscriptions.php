@@ -89,7 +89,7 @@ if ($paginator->total()) {
             case 'torrents':
                 $tgroup = $tgMan->findById($Result['PageID']);
                 if (is_null($tgroup)) {
-                    continue;
+                    continue 2;
                 }
                 if (isset($TorrentGroups[$Result['PageID']])) {
                     $GroupInfo = $TorrentGroups[$Result['PageID']];

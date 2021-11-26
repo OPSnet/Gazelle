@@ -480,9 +480,9 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * The media of this torrent
+     * The media of this torrent. Will be null for non-music uploads.
      */
-    public function media(): string {
+    public function media(): ?string {
         return $this->info()['Media'];
     }
 
