@@ -349,7 +349,7 @@ class Forum extends \Gazelle\Base {
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
         if ($this->isBodySearch()) {
             $sql = "SELECT t.ID,"
-                . ($this->threadId ? "substring_index(p.Body, ' ', 40)" : 't.Title') . ",
+                . (isset($this->threadId) ? "substring_index(p.Body, ' ', 40)" : 't.Title') . ",
                 t.ForumID,
                 f.Name,
                 p.AddedTime,
