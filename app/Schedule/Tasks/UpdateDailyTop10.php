@@ -6,6 +6,6 @@ class UpdateDailyTop10 extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        (new \Gazelle\Manager\Torrent)->storeTop10('Daily', 'day', 1);
+        $this->processed = (new \Gazelle\Manager\Torrent)->storeTop10('Daily', 'day', 1);
     }
 }
