@@ -8,9 +8,11 @@ if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
     $limit = 10;
 } else {
-    $details = isset($_GET['details']) && in_array($_GET['details'], ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year']) ? $_GET['details'] : 'all';
+    $details = $_GET['details'] ?? 'all';
+    $details = in_array($_GET['details'] ?? '', ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year'])
+        ? $details : 'all';
 
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
+    $limit = $_GET['limit'] ?? 10;
     $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 }
 
@@ -19,7 +21,7 @@ View::show_header("Top $limit Torrents");
 <div class="thin">
     <div class="header">
         <h2>Top <?=$limit?> Torrents</h2>
-        <?php \Gazelle\Top10::renderLinkbox("torrents"); ?>
+        <?= $Twig->render('top10/linkbox.twig', ['selected' => 'torrents']) ?>
     </div>
 <?php
 
