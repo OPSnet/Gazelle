@@ -4,11 +4,11 @@ View::show_header('Top 10 Donors');
 <div class="thin">
     <div class="header">
         <h2>Top Donors</h2>
-        <?php \Gazelle\Top10::renderLinkbox("donors"); ?>
+        <?= $Twig->render('top10/linkbox.twig', ['selected' => 'donors']) ?>
     </div>
 <?php
 
-$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
+$limit = (int)($_GET['limit'] ?? 10);
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 $isMod = $Viewer->permitted("users_mod");

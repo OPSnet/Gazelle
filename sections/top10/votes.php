@@ -2,8 +2,7 @@
 
 $vote = new Gazelle\Vote($Viewer->id());
 $tagMan = new Gazelle\Manager\Tag;
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setViewer($Viewer);
+$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
@@ -34,7 +33,7 @@ View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
 <div class="thin">
     <div class="header">
         <h2>Top <?=$limit?> Voted Groups</h2>
-        <?php Gazelle\Top10::renderLinkbox("votes"); ?>
+        <?= $Twig->render('top10/linkbox.twig', ['selected' => 'votes']) ?>
     </div>
 <?php if ($Viewer->permitted('site_advanced_top10')) { ?>
     <form class="search_form" name="votes" action="" method="get">

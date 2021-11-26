@@ -32,28 +32,20 @@ $tables = [
     ],
 ];
 
-if (isset($_GET['details'])) {
-    if (array_key_exists($_GET['details'], $tables)) {
-        $details = $_GET['details'];
-    } else {
-        error(404);
-    }
-} else {
-    $details = 'all';
-}
+$details = $_GET['details'] ?? 'all';
+$details = in_array($details, $tables) ? $details : 'all';
+
+$limit = $_GET['limit'] ?? 10;
+$limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 View::show_header('Top 10 Users');
 ?>
 <div class="thin">
     <div class="header">
         <h2>Top 10 Users</h2>
-        <?php \Gazelle\Top10::renderLinkbox("users"); ?>
-
+        <?= $Twig->render('top10/linkbox.twig', ['selected' => 'users']) ?>
     </div>
 <?php
-
-$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-$limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 foreach ($tables as $tag => $table) {
     if ($details === 'all' || $details === $tag) {

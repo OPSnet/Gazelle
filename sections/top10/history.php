@@ -9,7 +9,7 @@ View::show_header('Top 10 Torrents history!');
 <div class="thin">
     <div class="header">
         <h2>Top 10 Torrents</h2>
-        <?php \Gazelle\Top10::renderLinkbox(); ?>
+        <?= $Twig->render('top10/linkbox.twig') ?>
     </div>
     <div class="pad box">
         <form class="search_form" name="top10" method="get" action="">
