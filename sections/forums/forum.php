@@ -17,13 +17,12 @@ if (!$Viewer->readAccess($forum)) {
     error(403);
 }
 
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$forumToc = $forum->tableOfContentsForum($page);
+$paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($forum->topicCount());
 
-$Pages        = Format::get_pages($page, $forum->topicCount(), TOPICS_PER_PAGE, 9);
-$isDonorForum = $forumId == DONOR_FORUM ? true : false;
 $perPage      = $Viewer->postsPerPage();
 $userLastRead = $forum->userLastRead($Viewer->id(), $perPage);
+$forumToc     = $forum->tableOfContentsForum($paginator->page());
 
 foreach ($forumToc as &$thread) {
     if (isset($userLastRead[$thread['ID']])) {
@@ -66,6 +65,8 @@ foreach ($forumToc as &$thread) {
     unset($thread); // because looping by reference
 }
 
+$isDonorForum = $forumId == DONOR_FORUM ? true : false;
+
 View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? ['js' => 'donor'] : []);
 ?>
 <div class="thin">
@@ -76,9 +77,7 @@ echo $Twig->render('forum/header.twig', [
     'forum'     => $forum,
 ]);
 ?>
-    <div class="linkbox pager">
-    <?= $Pages ?>
-    </div>
+    <?= $paginator->linkbox() ?>
     <table class="forum_index m_table" width="100%">
         <tr class="colhead">
             <td style="width: 2%;"></td>
@@ -114,9 +113,7 @@ echo $Twig->render('forum/header.twig', [
 }
 ?>
     </table>
-    <div class="linkbox pager">
-        <?= $Pages ?>
-    </div>
+    <?= $paginator->linkbox() ?>
     <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=<?= $forumId ?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a></div>
 </div>
 <?php
