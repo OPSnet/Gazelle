@@ -478,16 +478,4 @@ class Forum extends \Gazelle\Base {
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
-
-    /**
-     * Display the HTML linkbox of the result set
-     *
-     * @return string HTML page linkbox
-     */
-    public function pageLinkbox(): string {
-        if (!isset($this->linkbox)) {
-            $this->linkbox = \Format::get_pages($this->page, $this->totalHits(), POSTS_PER_PAGE, 9) ?: '';
-        }
-        return $this->linkbox;
-    }
 }
