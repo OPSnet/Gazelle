@@ -306,9 +306,9 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * Get the encoding of this upload
+     * Get the encoding of this upload. Null for non-music uploads.
      */
-    public function encoding(): string {
+    public function encoding(): ?string {
         return $this->info()['Encoding'];
     }
 
@@ -324,9 +324,9 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * Get the format of this upload
+     * Get the format of this upload. Null for non-music uploads.
      */
-    public function format(): string {
+    public function format(): ?string {
         return $this->info()['Format'];
     }
 
