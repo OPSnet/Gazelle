@@ -1,30 +1,23 @@
 <?php
-// error out on invalid requests (before caching)
-if (isset($_GET['details'])) {
-    if (in_array($_GET['details'], ['top_used', 'top_request', 'top_voted'])) {
-        $details = $_GET['details'];
-    } else {
-        error(404);
-    }
-} else {
-    $details = 'all';
-}
+
+$details = $_GET['details'] ?? 'all';
+$details = in_array($_GET['details'] ?? '', ['top_used', 'top_request', 'top_voted'])
+    ? $details : 'all';
+
+$limit = $_GET['limit'] ?? 10;
+$limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
+
+$tag = new Gazelle\Top10\Tag;
 
 View::show_header('Top 10 Tags');
 ?>
 <div class="thin">
     <div class="header">
         <h2>Top 10 Tags</h2>
-        <?php \Gazelle\Top10::renderLinkbox("tags"); ?>
+        <?= $Twig->render('top10/linkbox.twig', ['selected' => 'tags']) ?>
     </div>
 
 <?php
-
-// defaults to 10 (duh)
-$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
-
-$tag = new \Gazelle\Top10\Tag;
 
 if ($details == 'all' || $details == 'top_used') {
     $topUsedTags = $tag->getTopUsedTags($limit);
@@ -115,4 +108,3 @@ function generate_tag_table($caption, $tag, $details, $limit, $showVotes = true,
     }
     echo '</table><br />';
 }
-?>

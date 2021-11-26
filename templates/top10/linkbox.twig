@@ -1,0 +1,10 @@
+{% from 'macro/top10.twig' import active -%}
+
+<div class="linkbox">
+    <a href="top10.php?type=torrents" class="brackets">{{ active('Torrents', selected == 'torrents') }}</a>
+    <a href="top10.php?type=lastfm" class="brackets">{{ active('Last.fm', selected == 'lastfm') }}</a>
+    <a href="top10.php?type=users" class="brackets">{{ active('Users', selected == 'users') }}</a>
+    <a href="top10.php?type=tags" class="brackets">{{ active('Tags', selected == 'tags') }}</a>
+    <a href="top10.php?type=votes" class="brackets">{{ active('Favorites', selected == 'votes') }}</a>
+    <a href="top10.php?type=donors" class="brackets">{{ active('Donors', selected == 'donors') }}</a>
+</div>
