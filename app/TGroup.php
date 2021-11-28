@@ -395,7 +395,7 @@ class TGroup extends BaseObject {
             implode(" \xE2\x80\x93 ",
                 array_filter([
                     $this->artistHtml(),
-                    '<span dir="ltr">' . $this->name() . '</span>',
+                    '<span dir="ltr">' . display_str($this->name()) . '</span>',
                 ], fn($x) => !empty($x))
             ),
             ...$this->displayNameSuffix()
