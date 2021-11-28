@@ -2,16 +2,9 @@
 
 namespace Gazelle\Manager;
 
-class PM extends \Gazelle\Base {
+class PM extends \Gazelle\BaseUser {
 
     protected const ID_KEY = 'zz_pm_%d_%d';
-
-    protected \Gazelle\User $user;
-
-    public function __construct(\Gazelle\User $user) {
-        parent::__construct();
-        $this->user = $user;
-    }
 
     public function findById(int $pmId): ?\Gazelle\PM {
         $key = sprintf(self::ID_KEY, $pmId, $this->user->id());

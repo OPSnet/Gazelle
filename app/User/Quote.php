@@ -2,15 +2,9 @@
 
 namespace Gazelle\User;
 
-class Quote extends \Gazelle\Base {
+class Quote extends \Gazelle\BaseUser {
 
-    protected $user;
-    protected $showAll = false;
-
-    public function __construct(\Gazelle\User $user) {
-        parent::__construct();
-        $this->user = $user;
-    }
+    protected bool $showAll = false;
 
     /**
      * Toggle whether only unread quotes should be listed
