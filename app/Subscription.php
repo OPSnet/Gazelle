@@ -2,13 +2,7 @@
 
 namespace Gazelle;
 
-class Subscription extends Base {
-    protected User $user;
-
-    public function __construct(User $user) {
-        parent::__construct();
-        $this->user = $user;
-    }
+class Subscription extends BaseUser {
 
     /**
      * Parse a post/comment body for quotes and notify all quoted users that have quote notifications enabled.

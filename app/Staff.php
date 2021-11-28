@@ -2,17 +2,7 @@
 
 namespace Gazelle;
 
-use Users;
-
-class Staff extends Base {
-
-    /** @var \Gazelle\User */
-    protected $user;
-
-    public function __construct(\Gazelle\User $user) {
-        parent::__construct();
-        $this->user = $user;
-    }
+class Staff extends BaseUser {
 
     public function id() {
         return $this->user->id();
