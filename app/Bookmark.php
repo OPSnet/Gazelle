@@ -71,7 +71,7 @@ class Bookmark extends Base {
             $qid = $this->db->get_query_id();
             $this->db->prepared_query("
                 SELECT GroupID, Sort, `Time`
-                FROM bookmarks_torrents
+                FROM bookmarks_torrents b
                 WHERE UserID = ?
                 ORDER BY Sort, `Time` ASC
                 ", $userId
@@ -82,6 +82,90 @@ class Bookmark extends Base {
             $this->cache->cache_value("bookmarks_group_ids_$userId", [$groupIds, $bookmarkData], 3600);
         }
         return [$groupIds, $bookmarkData, \Torrents::get_groups($groupIds)];
+    }
+
+    public function torrentArtistLeaderboard(int $userId, Manager\Artist $artistMan): array {
+        $this->db->prepared_query("
+            SELECT ta.ArtistID AS id,
+                count(*) AS total
+            FROM bookmarks_torrents b
+            INNER JOIN torrents_artists ta USING (GroupID)
+            WHERE b.userid = ?
+            GROUP BY ta.ArtistID
+            ORDER BY total DESC, id
+            LIMIT 10
+            ", $userId
+        );
+        $result = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $list = [];
+        foreach ($result as $item) {
+            $artist = $artistMan->findById($item['id']);
+            if ($artist) {
+                $item['name'] = $artist->name();
+                $list[] = $item;
+            }
+        }
+        return $list;
+    }
+
+    public function torrentArtistTotal(int $userId): int {
+        return $this->db->scalar("
+            SELECT count(*) AS total
+            FROM bookmarks_torrents b
+            INNER JOIN torrents_artists ta USING (GroupID)
+            WHERE b.UserID = ?
+            ", $userId
+        );
+    }
+
+    public function torrentTagLeaderboard(int $userId): array {
+        $this->db->prepared_query("
+            SELECT t.Name AS name,
+                count(*)  AS total
+            FROM bookmarks_torrents b
+            INNER JOIN torrents_tags ta USING (GroupID)
+            INNER JOIN tags t ON (t.ID = ta.TagID)
+            WHERE b.UserID = ?
+            GROUP BY t.Name
+            ORDER By 2 desc, t.Name
+            LIMIT 10
+            ", $userId
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function torrentTotal(int $userId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM bookmarks_torrents b
+            INNER JOIN torrents t USING (GroupID)
+            WHERE b.UserID = ?
+            ", $userId
+        );
+    }
+
+    /**
+     * Returns an array of torrent bookmarks
+     * @return array containing [group_id, seq, added, torrent_id]
+     */
+    public function torrentList(int $userId, int $limit, int $offset): array {
+        $this->db->prepared_query("
+            SELECT b.GroupID       AS tgroup_id,
+                b.Sort             AS seq,
+                b.Time             AS added,
+                group_concat(t.ID ORDER BY
+                    t.GroupID, t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+                    t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
+                ) AS torrent_list
+            FROM bookmarks_torrents b
+            INNER JOIN torrents t USING (GroupID)
+            WHERE b.UserID = ?
+            GROUP BY b.GroupID, b.Sort, b.Time
+            ORDER BY seq, added
+            LIMIT ? OFFSET ?
+            ", $userId, $limit, $offset
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -164,7 +248,7 @@ class Bookmark extends Base {
                         (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
                     )", $id, $userId, $userId
                 );
-                $this->cache->deleteMulti(["bookmarks_{$type}_{$userId}", "bookmarks_group_ids_{$userId}"]);
+                $this->cache->deleteMulti(["u_book_t_{$userId}", "bookmarks_{$type}_{$userId}", "bookmarks_group_ids_{$userId}"]);
 
                 $user   = (new Manager\User)->findById($userId);
                 $torMan = (new Manager\Torrent)->setViewer($user);
@@ -224,7 +308,7 @@ class Bookmark extends Base {
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
             ", $userId, $id
         );
-        $this->cache->delete_value("bookmarks_{$type}_{$userId}");
+        $this->cache->delete_value(["u_book_t_{$userId}", "bookmarks_{$type}_{$userId}"]);
 
         if ($this->db->affected_rows()) {
             switch ($type) {
