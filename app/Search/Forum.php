@@ -2,7 +2,7 @@
 
 namespace Gazelle\Search;
 
-class Forum extends \Gazelle\Base {
+class Forum extends \Gazelle\BaseUser {
 
     protected array $permittedForums = [];
     protected array $forbiddenForums = [];
@@ -16,30 +16,21 @@ class Forum extends \Gazelle\Base {
 
     protected string $searchText = '';
     protected string $authorName = '';
-    protected string $linkbox;
 
     protected int $authorId = 0;
     protected int $page = 0;
     protected int $threadId;
+    protected int $total = 0;
 
     protected bool $threadTitleSearch = true;
     protected bool $splitWords = false;
+    protected bool $showGrouped = false;
+    protected bool $showUnread = true;
 
-    protected \Gazelle\User $user;
     protected \Gazelle\User $viewer;
 
-    /** @var bool */
-    protected $showGrouped = false;
-
-    /** @var bool */
-    protected $showUnread = true;
-
-    /** @var int total number of posts found */
-    protected $total = 0;
-
     public function __construct(\Gazelle\User $user) {
-        parent::__construct();
-        $this->user = $user;
+        parent::__construct($user);
         $this->permittedForums = $this->user->permittedForums();
         $this->forbiddenForums = $this->user->forbiddenForums();
     }

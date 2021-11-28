@@ -2,14 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class UserLink extends \Gazelle\Base {
-
-    protected $source;
-
-    public function __construct(\Gazelle\User $source) {
-        parent::__construct();
-        $this->source = $source;
-    }
+class UserLink extends \Gazelle\BaseUser {
 
     public function groupId(\Gazelle\User $user): ?int {
         return $this->db->scalar("
@@ -21,7 +14,7 @@ class UserLink extends \Gazelle\Base {
     }
 
     public function link(\Gazelle\User $target, string $adminUsername, bool $updateNote): bool {
-        $sourceId = $this->source->id();
+        $sourceId = $this->user->id();
         [$sourceGroupId, $comments] = $this->db->row("
             SELECT u.GroupID, d.Comments
             FROM users_dupes AS u
@@ -88,7 +81,7 @@ class UserLink extends \Gazelle\Base {
                 INNER JOIN users_dupes AS d USING (UserID) SET
                     i.AdminComment = concat(now(), ?, i.AdminComment)
                 WHERE d.GroupID = ?
-                ", " - Linked accounts updated: [user]" . $this->source->username() . "[/user] and [user]"
+                ", " - Linked accounts updated: [user]" . $this->user->username() . "[/user] and [user]"
                     . $target->username() . "[/user] linked by {$adminUsername}\n\n",
                 $linkGroupId
             );
@@ -97,7 +90,7 @@ class UserLink extends \Gazelle\Base {
     }
 
     function addGroupComments(string $comments, string $adminName, bool $updateNote) {
-        $groupId = $this->groupId($this->source);
+        $groupId = $this->groupId($this->user);
         $oldHash = $this->db->scalar("
             SELECT sha1(Comments) AS CommentHash
             FROM dupe_groups
@@ -120,13 +113,13 @@ class UserLink extends \Gazelle\Base {
                     i.AdminComment = concat(now(), ?, i.AdminComment)
                 WHERE i.UserID = ?
                 ",  "- Linked accounts updated: Comments updated by {$adminName}\n\n",
-                    $this->source->id()
+                    $this->user->id()
             );
         }
     }
 
     function info() {
-        $sourceId = $this->source->id();
+        $sourceId = $this->user->id();
         [$linkedGroupId, $comments] = $this->db->row("
             SELECT d.ID, d.Comments
             FROM dupe_groups AS d

@@ -2,16 +2,10 @@
 
 namespace Gazelle;
 
-abstract class CommentViewer extends Base {
+abstract class CommentViewer extends BaseUser {
 
-    protected User $viewer;
     protected string $page;
     protected string $baseLink;
-
-    public function __construct(User $viewer) {
-        parent::__construct();
-        $this->viewer = $viewer;
-    }
 
     /**
      * Render a thread of comments
@@ -40,22 +34,22 @@ abstract class CommentViewer extends Base {
      */
     public function render($userMan, $AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Unread = false, $Header = '') {
         $author = new User($AuthorID);
-        $ownProfile = $AuthorID == $this->viewer->id();
+        $ownProfile = $AuthorID == $this->user->id();
         echo $this->twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,
             'author'      => $author,
-            'avatar'      => $userMan->avatarMarkup($this->viewer, $author),
+            'avatar'      => $userMan->avatarMarkup($this->user, $author),
             'body'        => $Body,
             'editor'      => $userMan->findById($EditedUserID),
             'edit_time'   => $EditedTime,
             'id'          => $PostID,
-            'is_admin'    => $this->viewer->permitted('site_admin_forums'),
+            'is_admin'    => $this->user->permitted('site_admin_forums'),
             'heading'     => $Header,
             'page'        => $this->page,
-            'show_avatar' => $this->viewer->showAvatars(),
-            'show_delete' => $this->viewer->permitted('site_forum_post_delete'),
-            'show_edit'   => $this->viewer->permitted('site_moderate_forums') || $ownProfile,
-            'show_warn'   => $this->viewer->permitted('users_warn') && !$ownProfile && $this->viewer->classLevel() >= $author->classLevel(),
+            'show_avatar' => $this->user->showAvatars(),
+            'show_delete' => $this->user->permitted('site_forum_post_delete'),
+            'show_edit'   => $this->user->permitted('site_moderate_forums') || $ownProfile,
+            'show_warn'   => $this->user->permitted('users_warn') && !$ownProfile && $this->user->classLevel() >= $author->classLevel(),
             'unread'      => $Unread,
             'url'         => $this->baseLink . "&postid=$PostID#post$PostID",
         ]);

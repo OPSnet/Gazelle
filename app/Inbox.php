@@ -2,19 +2,13 @@
 
 namespace Gazelle;
 
-class Inbox extends Base {
+class Inbox extends BaseUser {
 
-    protected User $user;
     protected bool $unreadFirst;
     protected string $filter;
     protected string $folder = 'inbox';
     protected string $searchField = 'user';
     protected string $searchTerm;
-
-    public function __construct(User $user) {
-        parent::__construct();
-        $this->user = $user;
-    }
 
     public function setFilter(string $filter) {
         $this->filter = $filter;

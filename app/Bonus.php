@@ -4,21 +4,12 @@ namespace Gazelle;
 
 use \Gazelle\Exception\BonusException;
 
-class Bonus extends Base {
+class Bonus extends BaseUser {
     const CACHE_OPEN_POOL = 'bonus_pool'; // also defined in Manager\Bonus
     const CACHE_PURCHASE = 'bonus_purchase_%d';
     const CACHE_SUMMARY = 'bonus_summary_%d';
     const CACHE_HISTORY = 'bonus_history_%d_%d';
     const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
-
-    protected User $user;
-    protected int $userId;
-
-    public function __construct(User $user) {
-        parent::__construct();
-        $this->user = $user;
-        $this->userId = $user->id();
-    }
 
     public function tableName(): string {
         return 'bonus_history';
@@ -28,8 +19,8 @@ class Bonus extends Base {
         $this->cache->deleteMulti([
             'u_' . $this->user->id(),
             'user_stats_' . $this->user->id(),
-            sprintf(self::CACHE_HISTORY, $this->userId, 0),
-            sprintf(self::CACHE_POOL_HISTORY, $this->userId),
+            sprintf(self::CACHE_HISTORY, $this->user->id(), 0),
+            sprintf(self::CACHE_POOL_HISTORY, $this->user->id()),
         ]);
     }
 
@@ -98,7 +89,7 @@ class Bonus extends Base {
     }
 
     public function summary() {
-        $key = sprintf(self::CACHE_SUMMARY, $this->userId);
+        $key = sprintf(self::CACHE_SUMMARY, $this->user->id());
         $summary = $this->cache->get_value($key);
         if ($summary === false) {
             $summary = $this->db->rowAssoc('
@@ -106,7 +97,7 @@ class Bonus extends Base {
                     coalesce(sum(price), 0) AS total
                 FROM bonus_history
                 WHERE UserID = ?
-                ', $this->userId
+                ', $this->user->id()
             );
             $this->cache->cache_value($key, $summary, 86400 * 7);
         }
@@ -115,7 +106,7 @@ class Bonus extends Base {
 
     public function history(int $limit, int $offset): array {
         $page = $offset / $limit;
-        $key = sprintf(self::CACHE_HISTORY, $this->userId, $page);
+        $key = sprintf(self::CACHE_HISTORY, $this->user->id(), $page);
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
@@ -125,12 +116,12 @@ class Bonus extends Base {
                 WHERE h.UserID = ?
                 ORDER BY PurchaseDate DESC
                 LIMIT ? OFFSET ?
-                ', $this->userId, $limit, $offset
+                ', $this->user->id(), $limit, $offset
             );
             $history = $this->db->to_array();
             $this->cache->cache_value($key, $history, 86400 * 3);
             /* since we had to fetch this page, invalidate the next one */
-            $this->cache->delete_value(sprintf(self::CACHE_HISTORY, $this->userId, $page+1));
+            $this->cache->delete_value(sprintf(self::CACHE_HISTORY, $this->user->id(), $page+1));
         }
         return $history;
     }
@@ -154,14 +145,14 @@ class Bonus extends Base {
             return false;
         }
         $this->user->flush();
-        (new \Gazelle\BonusPool($poolId))->contribute($this->userId, $value, $taxedValue);
+        (new \Gazelle\BonusPool($poolId))->contribute($this->user->id(), $value, $taxedValue);
 
         $this->cache->delete(self::CACHE_OPEN_POOL);
         return true;
     }
 
     public function poolHistory(): array {
-        $key = sprintf(self::CACHE_POOL_HISTORY, $this->userId);
+        $key = sprintf(self::CACHE_POOL_HISTORY, $this->user->id());
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
@@ -171,7 +162,7 @@ class Bonus extends Base {
                 WHERE c.user_id = ?
                 GROUP BY p.until_date, p.name
                 ORDER BY p.until_date, p.name
-                ', $this->userId
+                ', $this->user->id()
             );
             $history = $this->db->to_array();
             $this->cache->cache_value($key, $history, 86400 * 3);
@@ -185,7 +176,7 @@ class Bonus extends Base {
      * @return array of [title, total]
      */
     public function purchaseHistoryByUser(): array {
-        $key = sprintf(self::CACHE_PURCHASE, $this->userId);
+        $key = sprintf(self::CACHE_PURCHASE, $this->user->id());
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query("
@@ -198,7 +189,7 @@ class Bonus extends Base {
                 WHERE bh.UserID = ?
                 GROUP BY bi.Title
                 ORDER BY bi.sequence
-                ", $this->userId
+                ", $this->user->id()
             );
             $history = $this->db->to_array('id', MYSQLI_ASSOC, false);
             $this->cache->cache_value($key, $history, 86400 * 3);
@@ -219,7 +210,7 @@ class Bonus extends Base {
                 um.Invites = um.Invites + 1
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $this->userId
+            ', $price, $price, $this->user->id()
         );
         if ($this->db->affected_rows() != 2) {
             throw new BonusException('invite:nofunds');
@@ -263,7 +254,7 @@ class Bonus extends Base {
                 ui.collages = ui.collages + 1
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $this->userId
+            ', $price, $price, $this->user->id()
         );
         $rows = $this->db->affected_rows();
         if (!(($price > 0 && $rows === 2) || ($price === 0 && $rows === 1))) {
@@ -283,7 +274,7 @@ class Bonus extends Base {
                 ub.points = ub.points - ?
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $this->userId
+            ', $price, $price, $this->user->id()
         );
         if ($this->db->affected_rows() != 1) {
             $this->db->rollback();
@@ -294,7 +285,7 @@ class Bonus extends Base {
                 INSERT INTO user_has_attr
                        (UserID, UserAttrID)
                 VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
-                ", $this->userId, 'feature-seedbox'
+                ", $this->user->id(), 'feature-seedbox'
             );
         } catch (\DB_MYSQL_DuplicateKeyException $e) {
             // no point in buying a second time
@@ -321,7 +312,7 @@ class Bonus extends Base {
                 uf.tokens = uf.tokens + ?
             WHERE ub.user_id = ?
                 AND ub.points >= ?
-            ', $price, $amount, $this->userId, $price
+            ', $price, $amount, $this->user->id(), $price
         );
         if ($this->db->affected_rows() != 2) {
             throw new BonusException('selfToken:funds');
@@ -332,7 +323,7 @@ class Bonus extends Base {
     }
 
     public function purchaseTokenOther($toID, $label) {
-        if ($this->userId === $toID) {
+        if ($this->user->id() === $toID) {
             throw new BonusException('otherToken:self');
         }
         $item = $this->items()[$label];
@@ -362,16 +353,16 @@ class Bonus extends Base {
                 AND other.ID = ?
                 AND self.ID = ?
                 AND ub.points >= ?
-            ", $price, $amount, $toID, $this->userId, $price
+            ", $price, $amount, $toID, $this->user->id(), $price
         );
         if ($this->db->affected_rows() != 2) {
             throw new BonusException('otherToken:no-gift-funds');
         }
         $this->addPurchaseHistory($item['ID'], $price, $toID);
         $this->cache->deleteMulti([
-            'u_' . $this->userId,
+            'u_' . $this->user->id(),
             'u_' . $toID,
-            'user_stats_' . $this->userId,
+            'user_stats_' . $this->user->id(),
             'user_stats_' . $toID,
         ]);
         $this->sendPmToOther($toID, $amount);
@@ -394,15 +385,15 @@ class Bonus extends Base {
 
     private function addPurchaseHistory($itemId, $price, $otherUserId = null): int {
         $this->cache->deleteMulti([
-            sprintf(self::CACHE_PURCHASE, $this->userId),
-            sprintf(self::CACHE_SUMMARY, $this->userId),
-            sprintf(self::CACHE_HISTORY, $this->userId, 0)
+            sprintf(self::CACHE_PURCHASE, $this->user->id()),
+            sprintf(self::CACHE_SUMMARY, $this->user->id()),
+            sprintf(self::CACHE_HISTORY, $this->user->id(), 0)
         ]);
         $this->db->prepared_query("
             INSERT INTO bonus_history
                    (ItemID, UserID, Price, OtherUserID)
             VALUES (?,      ?,      ?,     ?)
-            ", $itemId, $this->userId, $price, $otherUserId
+            ", $itemId, $this->user->id(), $price, $otherUserId
         );
         return $this->db->affected_rows();
     }
@@ -412,7 +403,7 @@ class Bonus extends Base {
             UPDATE user_bonus SET
                 points = ?
             WHERE user_id = ?
-            ", $points, $this->userId
+            ", $points, $this->user->id()
         );
         $this->flush();
         return $this->db->affected_rows();
@@ -423,7 +414,7 @@ class Bonus extends Base {
             UPDATE user_bonus SET
                 points = points + ?
             WHERE user_id = ?
-            ", $points, $this->userId
+            ", $points, $this->user->id()
         );
         $this->flush();
         return $this->db->affected_rows();
@@ -438,13 +429,13 @@ class Bonus extends Base {
             // allow points to go negative
             $this->db->prepared_query('
                 UPDATE user_bonus SET points = points - ? WHERE user_id = ?
-                ', $points, $this->userId
+                ', $points, $this->user->id()
             );
         } else {
             // Fail if points would go negative
             $this->db->prepared_query('
                 UPDATE user_bonus SET points = points - ? WHERE points >= ?  AND user_id = ?
-                ', $points, $points, $this->userId
+                ', $points, $points, $this->user->id()
             );
             if ($this->db->affected_rows() != 1) {
                 return false;
@@ -467,7 +458,7 @@ class Bonus extends Base {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-            ", $this->userId, $this->userId
+            ", $this->user->id(), $this->user->id()
         ) ?? 0.0;
     }
 
@@ -491,7 +482,7 @@ class Bonus extends Base {
             WHERE
                 xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-            ", $this->userId, $this->userId
+            ", $this->user->id(), $this->user->id()
         );
     }
 
@@ -521,7 +512,7 @@ class Bonus extends Base {
             ORDER BY $orderBy $orderWay
             LIMIT ?
             OFFSET ?
-            ", $this->userId, $this->userId, $limit, $offset
+            ", $this->user->id(), $this->user->id(), $limit, $offset
         ); $list = [];
         $result = $this->db->to_array('ID', MYSQLI_ASSOC, false);
         foreach ($result as $r) {
