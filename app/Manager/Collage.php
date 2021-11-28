@@ -67,6 +67,15 @@ class Collage extends \Gazelle\Base {
         return new \Gazelle\Collage($id);
     }
 
+    public function tgroupCover(\Gazelle\TGroup $tgroup, \Gazelle\Util\ImageProxy $proxy): string {
+        return $this->twig->render('collage/row.twig', [
+            'group_id'   => $tgroup->id(),
+            'image'      => $proxy->process($tgroup->image()),
+            'name'       => $tgroup->displayNameText(),
+            'tags'       => implode(', ', $tgroup->tagNameList()),
+        ]);
+    }
+
     public function coverRow(array $group): string {
         $groupId = $group['ID'];
         $ExtendedArtists = $group['ExtendedArtists'];
