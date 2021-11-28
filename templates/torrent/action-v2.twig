@@ -1,0 +1,22 @@
+{% set url = "torrents.php?action=download&id=" ~ t.id ~ "&torrent_pass=" ~ key %}
+{% set fl_tokens = t.size|token_count %}
+<span class="torrent_links_block"> [ <a href="{{ url }}" class="tooltip" title="Download">DL</a>
+{% if can_fl %}
+ | <a href="{{ url }}&amp;usetoken=1" title="Use a FL Token" class="tooltip" onclick="return confirm('
+ {%- if not t.Seeders -%}Warning: This torrent is NOT SEEDED at the moment! {% endif -%}
+ Are you sure you want to use {{ fl_tokens }} Freeleech token{{ fl_tokens|plural }} here?');">FL</a>
+{% endif %}
+ | <a href="reportsv2.php?action=report&amp;id={{ t.id }}" class="tooltip" title="Report">RP</a>
+{% if edit %}
+ | <a href="torrents.php?action=edit&amp;id={{ t.id }}" class="tooltip" title="Edit">ED</a>
+{% endif %}
+{% if remove %}
+ | <a href="torrents.php?action=delete&amp;torrentid={{ t.id }}" class="tooltip" title="Remove">RM</a>
+{% endif %}
+{% if pl %}
+ | <a href="torrents.php?torrentid={{ t.id }}" class="tooltip" title="Permalink">PL</a>
+{% endif %}
+{% for e in extra %}
+ | {{ e|raw }}
+{% endfor %}
+] </span>
