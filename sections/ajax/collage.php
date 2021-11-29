@@ -45,7 +45,6 @@ $DB->prepared_query("
 );
 $TorrentGroups = $DB->collect('GroupID');
 
-$bookmark = new \Gazelle\Bookmark;
 $JSON = [
     'id'                  => (int)$CollageID,
     'name'                => $Name,
@@ -57,7 +56,7 @@ $JSON = [
     'locked'              => (bool)$Locked,
     'maxGroups'           => (int)$MaxGroups,
     'maxGroupsPerUser'    => (int)$MaxGroupsPerUser,
-    'hasBookmarked'       => $bookmark->isCollageBookmarked($Viewer->id(), $CollageID),
+    'hasBookmarked'       => (new \Gazelle\Bookmark($Viewer))->isCollageBookmarked($CollageID),
     'subscriberCount'     => (int)$Subscribers,
     'torrentGroupIDList'  => $TorrentGroups
 ];

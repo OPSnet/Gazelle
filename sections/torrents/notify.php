@@ -149,7 +149,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         $FilterGroups[$Result['FilterID']][] = $Result;
     }
 
-    $bookmark = new \Gazelle\Bookmark;
+    $bookmark = new \Gazelle\Bookmark($Viewer);
     foreach ($FilterGroups as $FilterID => $FilterResults) {
 ?>
 <div class="header">
@@ -267,7 +267,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
                     <strong class="new">New!</strong>
 <?php
         }
-        if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) {
+        if ($bookmark->isTorrentBookmarked($GroupID)) {
 ?>
                     <span class="remove_bookmark float_right">
                         <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>

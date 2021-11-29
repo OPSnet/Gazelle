@@ -412,7 +412,7 @@ if ($x % 7 != 0) { // Padding
     exit;
 }
 
-$bookmark = new \Gazelle\Bookmark;
+$bookmark = new \Gazelle\Bookmark($Viewer);
 ?>
 
 <?= $paginator->linkbox() ?>
@@ -498,7 +498,7 @@ foreach ($Results as $GroupID) {
 <?php    } ?>
             <div class="group_info clear">
                 <?=$DisplayName?>
-<?php    if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) { ?>
+<?php    if ($bookmark->isTorrentBookmarked($GroupID)) { ?>
                 <span class="remove_bookmark float_right">
                     <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                 </span>
