@@ -11,7 +11,7 @@ if (isset($_REQUEST['expired'])) {
     if (!$error) {
         $user = (new Gazelle\Manager\User)->findByEmail(trim($_REQUEST['email']));
         if ($user) {
-            $user->resetPassword($Twig);
+            $user->resetPassword();
             $user->logoutEverywhere();
             $sent = true;
         }
