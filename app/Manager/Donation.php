@@ -4,12 +4,6 @@ namespace Gazelle\Manager;
 
 class Donation extends \Gazelle\Base {
 
-    protected $twig;
-
-    public function twig(\Twig\Environment $twig) {
-        $this->twig = $twig;
-    }
-
     public function moderatorAdjust(\Gazelle\User $user, int $Rank, int $TotalRank, string $Reason, int $who) {
         $this->donate($user, [
             "Source" => "Modify Values",

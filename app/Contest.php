@@ -243,7 +243,7 @@ class Contest extends Base {
         return $this->db->affected_rows();
     }
 
-    public function doPayout(\Twig\Environment $twig) {
+    public function doPayout() {
         $enabledUserBonus = $this->bonusPerUser();
         $contestBonus     = $this->bonusPerContest();
         $perEntryBonus    = $this->bonusPerEntry();
@@ -271,7 +271,7 @@ class Contest extends Base {
             }
             $userMan->sendPM($p['ID'], 0,
                 "You have received " . number_format($totalGain, 2) . " bonus points!",
-                $twig->render('contest/payout-uploader.twig', [
+                $this->twig->render('contest/payout-uploader.twig', [
                     'username'        => $p['Username'],
                     'date'            => ['begin' => $this->info['date_begin'], 'end' => $this->info['date_end']],
                     'enabled_bonus'   => $enabledUserBonus,

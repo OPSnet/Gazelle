@@ -2542,10 +2542,8 @@ class User extends BaseObject {
 
     /**
      * Initiate a password reset
-     *
-     * @param \Twig\Environment $twig
      */
-    public function resetPassword($twig) {
+    public function resetPassword() {
         $resetKey = randomString();
         $this->db->prepared_query("
             UPDATE users_info SET
@@ -2556,7 +2554,7 @@ class User extends BaseObject {
         );
         $this->flush();
         (new Mail)->send($this->email(), 'Password reset information for ' . SITE_NAME,
-            $twig->render('email/password_reset.twig', [
+            $this->twig->render('email/password_reset.twig', [
                 'username'  => $this->username(),
                 'reset_key' => $resetKey,
                 'ipaddr'    => $_SERVER['REMOTE_ADDR'],
