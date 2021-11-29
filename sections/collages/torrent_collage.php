@@ -3,15 +3,15 @@
 $TorrentList = $Collage->torrentList();
 $GroupIDs = $Collage->groupIds();
 
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setViewer($Viewer);
+$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$bookmark = new Gazelle\Bookmark($Viewer);
 
 View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
 ?>
 <div class="thin">
 <?= $Twig->render('collage/header.twig', [
     'auth'        => $Viewer->auth(),
-    'bookmarked'  => $bookmark->isCollageBookmarked($Viewer->id(), $CollageID),
+    'bookmarked'  => $bookmark->isCollageBookmarked($CollageID),
     'can_create'  => $Viewer->permitted('site_collages_create'),
     'can_delete'  => $Viewer->permitted('site_collages_delete') || $Collage->isOwner($Viewer->id()),
     'can_edit'    => $Viewer->permitted('site_collages_delete') || ($Viewer->permitted('site_edit_wiki') && !$Collage->isLocked()),
@@ -235,7 +235,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             </td>
             <td colspan="5">
                 <strong><?= $DisplayName ?></strong>
-<?php   if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) { ?>
+<?php   if ($bookmark->isTorrentBookmarked($GroupID)) { ?>
                     <span class="remove_bookmark float_right">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="remove_bookmark brackets"

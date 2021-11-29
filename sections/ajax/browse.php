@@ -34,7 +34,7 @@ if ($NumResults == 0) {
     ]);
 }
 
-$bookmark = new Gazelle\Bookmark;
+$bookmark = new Gazelle\Bookmark($Viewer);
 $releaseMan = new Gazelle\ReleaseType;
 
 $torMan = new Gazelle\Manager\Torrent;
@@ -191,7 +191,7 @@ foreach ($Results as $Key => $GroupID) {
             'artist' => $DisplayName,
             'cover' => $GroupInfo['WikiImage'],
             'tags' => $TagList,
-            'bookmarked' => $bookmark->isTorrentBookmarked($Viewer->id(), $GroupID),
+            'bookmarked' => $bookmark->isTorrentBookmarked($GroupID),
             'vanityHouse' => $GroupInfo['VanityHouse'] == '1',
             'groupYear' => (int)$GroupYear,
             'releaseType' => $releaseMan->findNameById($ReleaseType),

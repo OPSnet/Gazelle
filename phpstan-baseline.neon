@@ -26,31 +26,6 @@ parameters:
 			path: app/Artist.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(string \\(on of artist, collage, request, torrent\\)\\)\\: Unexpected token \"\\(\", expected variable at offset 113$#"
-			count: 1
-			path: app/Bookmark.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string \\(on of artist, collage, request, torrent\\)\\)\\: Unexpected token \"\\(\", expected variable at offset 125$#"
-			count: 1
-			path: app/Bookmark.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$UserID$#"
-			count: 1
-			path: app/Bookmark.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userID$#"
-			count: 3
-			path: app/Bookmark.php
-
-		-
-			message: "#^PHPDoc tag @return has invalid value \\(\\[table, column\\]\\)\\: Unexpected token \"\\[\", expected type at offset 199$#"
-			count: 1
-			path: app/Bookmark.php
-
-		-
 			message: "#^Access to an undefined property Gazelle\\\\User\\:\\:\\$name\\.$#"
 			count: 1
 			path: app/Collage.php

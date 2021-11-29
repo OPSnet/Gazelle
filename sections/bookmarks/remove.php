@@ -1,9 +1,9 @@
 <?php
 authorize();
 
-$bookmark = new \Gazelle\Bookmark;
+$bookmark = new \Gazelle\Bookmark($Viewer);
 try {
-    $bookmark->remove($Viewer->id(), $_GET['type'], (int)$_GET['id']);
+    $bookmark->remove($_GET['type'], (int)$_GET['id']);
 }
 catch (Exception $e) {
     error(0);

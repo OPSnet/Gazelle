@@ -18,19 +18,19 @@ if (empty($_GET['userid'])) {
     $ownProfile = ($user->id() === $Viewer->id());
 }
 
-$bookmark = new Gazelle\Bookmark;
+$bookmark = new Gazelle\Bookmark($user);
 $collMan  = new Gazelle\Manager\Collage;
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $imgproxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(200, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($bookmark->torrentTotal($user->id()));
+$paginator->setTotal($bookmark->torrentTotal());
 
-$bookmarkList      = $bookmark->torrentList($user->id(), $paginator->limit(), $paginator->offset());
+$bookmarkList      = $bookmark->torrentList($paginator->limit(), $paginator->offset());
 $NumGroups         = count($bookmarkList);
-$artistLeaderboard = $bookmark->torrentArtistLeaderboard($user->id(), new Gazelle\Manager\Artist);
-$tagLeaderboard    = $bookmark->torrentTagLeaderboard($user->id());
+$artistLeaderboard = $bookmark->torrentArtistLeaderboard(new Gazelle\Manager\Artist);
+$tagLeaderboard    = $bookmark->torrentTagLeaderboard();
 $CollageCovers     = $Viewer->option('CollageCovers') ?? 25;
 $title             = $user->username() . " &rsaquo; Bookmarked torrent groups";
 
@@ -72,7 +72,7 @@ if (count($bookmarkList) === 0) { ?>
             <div class="head"><strong>Stats</strong></div>
             <ul class="stats nobullet">
                 <li>Torrent groups: <?=$NumGroups?></li>
-                <li>Artists: <?= $bookmark->torrentArtistTotal($user->id()) ?></li>
+                <li>Artists: <?= $bookmark->torrentArtistTotal() ?></li>
             </ul>
         </div>
         <div class="box box_artists">
@@ -149,11 +149,11 @@ if ($CollageCovers !== 0) { ?>
 <?php
         $CollagePages = [];
         for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
-            $Groups = array_slice($tgroupList, $i * $CollageCovers, $CollageCovers);
+            $Groups = array_slice($bookmarkList, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($id) use ($collMan, $imgproxy, $tgMan) {
-                        $tgroup = $tgMan->findById($id);
+                    function($bookmark) use ($collMan, $imgproxy, $tgMan) {
+                        $tgroup = $tgMan->findById($bookmark['tgroup_id']);
                         return $tgroup ? $collMan->tgroupCover($tgroup, $imgproxy) : '';
                     },
                     $Groups
