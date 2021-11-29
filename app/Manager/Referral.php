@@ -609,7 +609,7 @@ class Referral extends \Gazelle\Base {
         }
     }
 
-    public function generateInvite($acc, $username, $email, $twig) {
+    public function generateInvite($acc, $username, $email) {
         $existing = $this->db->scalar("
             SELECT Username
             FROM referral_users
@@ -639,7 +639,7 @@ class Referral extends \Gazelle\Base {
 
         if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) {
             (new Mail)->send($email, 'You have been invited to ' . SITE_NAME,
-                $twig->render('email/referral.twig', [
+                $this->twig->render('email/referral.twig', [
                     'email' => $email,
                     'inviter_key' => $inviteKey,
                 ])
