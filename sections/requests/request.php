@@ -85,8 +85,7 @@ View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,
             <a href="requests.php?action=delete&amp;id=<?=$RequestID?>" class="brackets">Delete</a>
 <?php
     }
-    $bookmark = new Gazelle\Bookmark;
-    if ($bookmark->isRequestBookmarked($Viewer->id(), $RequestID)) { ?>
+    if ((new Gazelle\Bookmark($Viewer))->isRequestBookmarked($RequestID)) { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Unbookmark('request', <?=$RequestID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php    } else { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Bookmark('request', <?=$RequestID?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>

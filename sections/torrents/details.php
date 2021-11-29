@@ -52,7 +52,7 @@ View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,sub
             <a href="<?= $tgroup->url() ?>&amp;action=revert&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
 <?php
 }
-if ((new Gazelle\Bookmark)->isTorrentBookmarked($Viewer->id(), $GroupID)) {
+if ((new Gazelle\Bookmark($Viewer))->isTorrentBookmarked($GroupID)) {
 ?>
             <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="remove_bookmark brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
 <?php } else { ?>

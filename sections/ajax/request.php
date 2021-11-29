@@ -98,7 +98,7 @@ json_print('success', [
     'requestId'       => $requestId,
     'requestorId'     => $Request['UserID'],
     'requestorName'   => $Requestor->username(),
-    'isBookmarked'    => (new Gazelle\Bookmark)->isRequestBookmarked($Viewer->id(), $requestId),
+    'isBookmarked'    => (new Gazelle\Bookmark($Viewer))->isRequestBookmarked($requestId),
     'requestTax'      => $RequestTax,
     'timeAdded'       => $Request['TimeAdded'],
     'canEdit'         => $CanEdit,

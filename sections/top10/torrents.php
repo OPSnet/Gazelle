@@ -220,14 +220,14 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     $groups = Torrents::get_groups($groupIds, true, false);
     $artists = Artists::get_artists($groupIds);
 
-    $bookmark = new \Gazelle\Bookmark;
+    $bookmark = new \Gazelle\Bookmark($Viewer);
     $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
     foreach ($details as $index => $detail) {
         [$torrentID, $groupID, $data] = $detail;
         $torrent = $torMan->findById($torrentID);
         $group = $groups[$groupID];
 
-        $isBookmarked = $bookmark->isTorrentBookmarked($Viewer->id(), $groupID);
+        $isBookmarked = $bookmark->isTorrentBookmarked($groupID);
         $isSnatched = $torrent->isSnatched($Viewer->id());
 
         // generate torrent's title

@@ -9,7 +9,7 @@ if (is_null($Artist)) {
 }
 $Artist->loadArtistRole();
 
-$bookmark = new Gazelle\Bookmark;
+$bookmark = new Gazelle\Bookmark($Viewer);
 $collageMan = new Gazelle\Manager\Collage;
 $authKey = $Viewer->auth();
 $isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
@@ -50,7 +50,7 @@ if ($Viewer->permitted('site_torrents_notify')) {
     }
 }
 
-if ($bookmark->isArtistBookmarked($Viewer->id(), $ArtistID)) { ?>
+if ($bookmark->isArtistBookmarked($ArtistID)) { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php } else { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
@@ -353,7 +353,7 @@ if ($sections = $Artist->sections()) {
 <?php   } ?>
                         <div class="group_info clear">
                             <strong><?=$DisplayName?></strong>
-<?php if ($bookmark->isTorrentBookmarked($Viewer->id(), $GroupID)) { ?>
+<?php if ($bookmark->isTorrentBookmarked($GroupID)) { ?>
                             <span class="remove_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>

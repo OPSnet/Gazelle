@@ -40,7 +40,7 @@ class Artist extends \Gazelle\Json {
         $JsonTorrents = [];
         $Tags = [];
         $NumTorrents = $NumSeeders = $NumLeechers = $NumSnatches = 0;
-        $bookmark = new \Gazelle\Bookmark;
+        $bookmark = new \Gazelle\Bookmark($this->user);
 
         foreach ($GroupIDs as $GroupID) {
             if (!isset($groupList[$GroupID])) {
@@ -118,7 +118,7 @@ class Artist extends \Gazelle\Json {
                 'releaseType'          => (int)$Group['ReleaseType'],
                 'wikiImage'            => $Group['WikiImage'],
                 'groupVanityHouse'     => $Group['VanityHouse'] == 1,
-                'hasBookmarked'        => $bookmark->isTorrentBookmarked($this->user->id(), $GroupID),
+                'hasBookmarked'        => $bookmark->isTorrentBookmarked($GroupID),
                 'artists'              => $artists,
                 'extendedArtists'      => $ExtendedArtists,
                 'torrent'              => $InnerTorrents,
@@ -162,7 +162,7 @@ class Artist extends \Gazelle\Json {
             'name'           => $name,
             'notificationsEnabled' =>
                 is_null($name) ? false : $this->user->hasArtistNotification($name),
-            'hasBookmarked'  => $bookmark->isArtistBookmarked($this->user->id(), $artistId),
+            'hasBookmarked'  => $bookmark->isArtistBookmarked($artistId),
             'image'          => $this->artist->image(),
             'body'           => \Text::full_format($this->artist->body()),
             'bodyBbcode'     => $this->artist->body(),

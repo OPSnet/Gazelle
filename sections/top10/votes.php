@@ -91,7 +91,7 @@ View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
 
 $number = 0;
 $torrentTable = '';
-$bookmark = new Gazelle\Bookmark;
+$bookmark = new Gazelle\Bookmark($Viewer);
 $userVotes = $vote->userVotes();
 $topVotes = $vote->topVotes();
 foreach ($topVotes as $groupID => $group) {
@@ -109,7 +109,7 @@ foreach ($topVotes as $groupID => $group) {
     $score = $group['Score'];
     $downVotes = $totalVotes - $upVotes;
 
-    $isBookmarked = $bookmark->isTorrentBookmarked($Viewer->id(), $groupID);
+    $isBookmarked = $bookmark->isTorrentBookmarked($groupID);
     $userVote = $userVotes[$groupID] ?? '';
 
     $displayName = $group['Rank'] . " - ";

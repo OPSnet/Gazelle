@@ -11,14 +11,13 @@ $Collage = new Gazelle\Collage($CollageID);
 
 if ($Collage->isDeleted()) {
     header("Location: log.php?search=Collage+$CollageID");
+    exit;
 }
-else {
-    $Collage->setViewer($Viewer);
-    $NumGroups = $Collage->numEntries();
-    $CollageCovers = ($Viewer->option('CollageCovers') ?? 25) * !(int)($Viewer->option('HideCollage'));
-    $CollagePages = [];
-    $bookmark = new Gazelle\Bookmark;
-    require_once($Collage->isArtist() ? 'artist_collage.php' : 'torrent_collage.php');
-}
+
+$Collage->setViewer($Viewer);
+$NumGroups = $Collage->numEntries();
+$CollageCovers = ($Viewer->option('CollageCovers') ?? 25) * !(int)($Viewer->option('HideCollage'));
+$CollagePages = [];
+require_once($Collage->isArtist() ? 'artist_collage.php' : 'torrent_collage.php');
 
 View::show_footer();
