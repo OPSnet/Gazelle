@@ -5,10 +5,10 @@ namespace Gazelle\Util;
 class Irc
 {
     public static function sendRaw(string $raw) {
-        if (defined('DISABLE_IRC') && DISABLE_IRC === true) {
+        if (DISABLE_IRC) {
             return;
         }
-        $ircSocket = @fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
+        $ircSocket = @fsockopen(IRC_SOCKET_LISTEN_ADDRESS, IRC_SOCKET_LISTEN_PORT);
         if ($ircSocket) {
             fwrite($ircSocket, str_replace(["\n", "\r"], '', $raw));
             fclose($ircSocket);

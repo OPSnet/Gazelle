@@ -311,11 +311,7 @@ class UserCreator extends Base {
     }
 
     /**
-     * Create salted crypt hash for a given string with
-     * settings specified in CRYPT_HASH_PREFIX
-     *
-     * @param string  $plaintext string to hash
-     * @return string hashed password
+     * Create salted crypt hash for a given string
      */
     static public function hashPassword(string $plaintext): string {
         return password_hash(hash('sha256', $plaintext), PASSWORD_DEFAULT);

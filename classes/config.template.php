@@ -14,6 +14,7 @@ define('SERVER_ROOT_LIVE', '/path'); //Only needed on the beta site when accessi
 define('BETA', false); //Only needed on the beta site when different code paths are necessary
 define('ANNOUNCE_HTTP_URL', '');
 define('ANNOUNCE_HTTPS_URL', '');
+define('HTTP_PROXY', false);
 
 define('REFERRAL_BOUNCER', ''); // URL to the bouncer including trailing /.
 define('REFERRAL_KEY', hash('sha512', '')); //Random key. Used for encrypting traffic to/from the boucner.
@@ -92,7 +93,6 @@ define('SPHINXQL_HOST', '127.0.0.1');
 define('SPHINXQL_PORT', 9306);
 define('SPHINXQL_SOCK', false);
 define('SPHINX_MAX_MATCHES', 1000); // Must be <= the server's max_matches variable (default 1000)
-define('SPHINX_INDEX', 'torrents');
 
 // Ocelot details
 define('DISABLE_TRACKER', false);
@@ -101,8 +101,10 @@ define('TRACKER_PORT', 2710);
 define('TRACKER_SECRET', ''); // Must be 32 characters and match site_password in Ocelot's config.cpp
 define('TRACKER_REPORTKEY', ''); // Must be 32 characters and match report_password in Ocelot's config.cpp
 
+// Last.fm settings
+define('LASTFM_API_KEY', null);
+
 // Site settings
-define('CRYPT_HASH_PREFIX', '$2y$07$');
 define('DEBUG_EMAIL', false); //Set to true to write messages to TMPDIR instead of delivering
 define('DEBUG_MODE', false); //Set to false if you dont want everyone to see debug information, can be overriden with 'site_debug'
 define('DEBUG_WARNINGS', true); //Set to true if you want to see PHP warnings in the footer
@@ -129,8 +131,6 @@ define('SYSTEM_USER_ID', 17); // ID for user to create "system" threads under (e
 define('STAFF_FORUM_ID', 5); // ID of principal Staff forum (for polls)
 define('TRASH_FORUM_ID', 4); // ID of forum to send threads to when trash button is pressed
 define('EDITING_FORUM_ID', 34); // ID of forum to send editing requests to
-define('HELP_FORUM_ID', 3); // ID of help forum
-define('BUGS_FORUM_ID', 6); // ID of bug reports forum
 define('AOTM_FORUM_ID', 51); // ID of the Album of The Month forum
 define('VANITY_HOUSE_FORUM_ID', 18); // Vanity House forum
 define('CLIENT_WHITELIST_FORUM_ID', 680); // Client whitelist suggestion forum
@@ -165,9 +165,7 @@ define('USER_TORRENT_DELETE_HOURS', 24);
 define('DELETE_USER_STATS_DAILY_DAY',    15); // retain how many days worth of hourly granularity
 define('DELETE_USER_STATS_MONTHLY_DAY', 120); // retain how many days worth of daily granularity
 
-if (!defined('FEATURE_EMAIL_REENABLE')) {
-    define('FEATURE_EMAIL_REENABLE', true);
-}
+define('FEATURE_EMAIL_REENABLE', true);
 
 // Name of class        Class ID (NOT level)
 define('USER',            2);
@@ -219,6 +217,8 @@ define('THREAD_CATALOGUE', 500); // Limit to THREAD_CATALOGUE posts per cache ke
 
 // IRC settings
 define('DISABLE_IRC', false);
+define('IRC_SOCKET_LISTEN_PORT', 51010);
+define('IRC_SOCKET_LISTEN_ADDRESS', 'localhost');
 define('BOT_NICK', '');
 define('BOT_SERVER', ''); // IRC server address. Used for onsite chat tool.
 define('BOT_PORT', 6667);
@@ -229,8 +229,10 @@ define('STATUS_CHAN', '#status');
 define('MOD_CHAN', '#staff');
 define('BOT_DISABLED_CHAN', '#disabled'); // Channel to refer disabled users to.
 define('BOT_REPORT_CHAN', '#reports');
-define('SOCKET_LISTEN_PORT', 51010);
-define('SOCKET_LISTEN_ADDRESS', 'localhost');
+
+// Push server settings
+define('PUSH_SOCKET_LISTEN_ADDRESS', '127.0.0.1');
+define('PUSH_SOCKET_LISTEN_PORT', 6789);
 
 // Miscellaneous values
 define('RANK_ONE_COST', 5);
@@ -254,7 +256,7 @@ define('BONUS_POOL_TAX_ELITE', 0.8);
 define('BONUS_POOL_TAX_TM', 0.7);
 define('BONUS_POOL_TAX_STAFF', 0.5);
 
-define('TEST_CONTEST_PAYOUT', true); // set to true to test
+define('DEBUG_CONTEST_PAYOUT', true); // set to true to test
 
 define('INDEX_WIKI_PAGE_ID', 1);
 define('RULES_WIKI_PAGE_ID', 127);

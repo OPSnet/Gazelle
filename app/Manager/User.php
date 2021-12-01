@@ -124,9 +124,8 @@ class User extends \Gazelle\Base {
      *
      * @param Gazelle\User viewer Who is doing the viewing, to determine how to fallback if no avatar is available
      * @param Gazelle\User viewed Which avatar is being viewed
-     * @return HTML markup of the viewed avatar
      */
-    public function avatarMarkup(\Gazelle\User $viewer, \Gazelle\User $viewed) {
+    public function avatarMarkup(\Gazelle\User $viewer, \Gazelle\User $viewed): string {
         static $cache = [];
         $viewedId = $viewed->id();
         if (!isset($cache[$viewedId])) {
@@ -1024,7 +1023,7 @@ class User extends \Gazelle\Base {
                 ]
             ]
         ];
-        if (defined('RECOVERY_DB') && !empty(RECOVERY_DB)) {
+        if (RECOVERY_DB) {
             $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
                'Query' => "
                     SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(rb.final, 0)

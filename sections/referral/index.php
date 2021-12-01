@@ -17,7 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $ReferralManager = new Gazelle\Manager\Referral;
 $Accounts = $ReferralManager->getActiveAccounts();
 
-if (!defined('OPEN_EXTERNAL_REFERRALS') || !OPEN_EXTERNAL_REFERRALS || !count($Accounts) || $ReferralManager->readOnly) {
+if (!OPEN_EXTERNAL_REFERRALS || !count($Accounts) || $ReferralManager->readOnly) {
     View::show_header("Referrals are closed");
 ?>
 <div class="thin" style="text-align: center;">
@@ -136,7 +136,7 @@ View::show_header('External Tracker Referrals');
     <br />
     <p><?=$Error?></p>
 <?php     } else {
-        if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) { ?>
+        if (REFERRAL_SEND_EMAIL) { ?>
             <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. We have sent you an email to the address you specified. Make sure to check your spam folder! Welcome to <?=SITE_NAME?>!</h3>
 <?php        } else { ?>
             <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. <a href=register.php?invite=<?=$Invite?>">Click here</a> to register. Welcome to <?=SITE_NAME?></h3>
