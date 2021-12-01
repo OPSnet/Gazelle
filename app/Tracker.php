@@ -115,7 +115,7 @@ class Tracker {
      * @return array with stats in named keys or empty if the request failed
      */
     private function get_stats($Type, $Params = false): array {
-        if (!defined('TRACKER_REPORTKEY')) {
+        if (!TRACKER_REPORTKEY) {
             return [];
         }
         $Get = TRACKER_REPORTKEY . '/report?';
@@ -147,7 +147,7 @@ class Tracker {
      * @return false|string tracker response message or false if the request failed
      */
     private function send_request($Get, $MaxAttempts = 1, &$Err = false) {
-        if (defined('DISABLE_TRACKER') && DISABLE_TRACKER === true) {
+        if (DISABLE_TRACKER) {
             return false;
         }
         $Header = "GET /$Get HTTP/1.1\r\nConnection: Close\r\n\r\n";

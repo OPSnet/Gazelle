@@ -1141,11 +1141,6 @@ parameters:
 			path: app/Manager/User.php
 
 		-
-			message: "#^Return typehint of method Gazelle\\\\Manager\\\\User\\:\\:avatarMarkup\\(\\) has invalid type Gazelle\\\\Manager\\\\HTML\\.$#"
-			count: 1
-			path: app/Manager/User.php
-
-		-
 			message: "#^Method Gazelle\\\\Manager\\\\Wiki\\:\\:create\\(\\) should return int but returns Gazelle\\\\Wiki\\.$#"
 			count: 1
 			path: app/Manager/Wiki.php

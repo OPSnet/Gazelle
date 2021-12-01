@@ -16,7 +16,7 @@ class Curl {
             CURLOPT_TIMEOUT        => 5,
             CURLOPT_USERAGENT      => FAKE_USERAGENT,
         ]);
-        if (defined('HTTP_PROXY')) {
+        if (HTTP_PROXY) {
             curl_setopt_array($this->curl, [
                 CURLOPT_HTTPPROXYTUNNEL => true,
                 CURLOPT_PROXY => HTTP_PROXY,

@@ -76,6 +76,10 @@ switch ($Document) {
         break;
 }
 
+defined('ERROR_EXCEPTION')  or define('ERROR_EXCEPTION', false);
+defined('MEMORY_EXCEPTION') or define('MEMORY_EXCEPTION', false);
+defined('TIME_EXCEPTION')   or define('TIME_EXCEPTION', false);
+
 if (!$Valid) {
     $_SERVER['SCRIPT_NAME'] = 'error.php';
     $_SERVER['SCRIPT_FILENAME'] = 'error.php';

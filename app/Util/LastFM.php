@@ -141,7 +141,7 @@ class LastFM extends \Gazelle\Base {
     }
 
     protected function fetch(string $Method, array $Args) {
-        if (!defined('LASTFM_API_KEY')) {
+        if (!LASTFM_API_KEY) {
             return false;
         }
         $RecentFailsKey = 'lastfm_api_fails';

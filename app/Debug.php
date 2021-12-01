@@ -54,16 +54,16 @@ class Debug {
         }
 
         $Micro = (microtime(true) - self::$startTime) * 1000;
-        if ($Micro > self::MAX_TIME && !defined('TIME_EXCEPTION')) {
+        if ($Micro > self::MAX_TIME && !TIME_EXCEPTION) {
             $Reason[] = number_format($Micro, 3).' ms';
         }
 
         $Errors = count($this->get_errors());
-        if ($Errors > self::MAX_ERRORS && !defined('ERROR_EXCEPTION')) {
+        if ($Errors > self::MAX_ERRORS && !ERROR_EXCEPTION) {
             $Reason[] = $Errors.' PHP errors';
         }
         $Ram = memory_get_usage(true);
-        if ($Ram > self::MAX_MEMORY && !defined('MEMORY_EXCEPTION')) {
+        if ($Ram > self::MAX_MEMORY && !MEMORY_EXCEPTION) {
             $Reason[] = \Format::get_size($Ram).' RAM used';
         }
 

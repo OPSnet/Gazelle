@@ -2,7 +2,7 @@
 
 switch ($_GET['action'] ?? '') {
     case 'save':
-        require_once(defined('RECOVERY') && RECOVERY ? 'save.php' : 'recover.php');
+        require_once(RECOVERY ? 'save.php' : 'recover.php');
         break;
     case 'admin':
         require_once('admin.php');

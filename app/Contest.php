@@ -266,7 +266,7 @@ class Contest extends Base {
             }
             fwrite($report, "$log DISTRIBUTED\n");
             fflush($report);
-            if (TEST_CONTEST_PAYOUT) {
+            if (DEBUG_CONTEST_PAYOUT) {
                 continue;
             }
             $userMan->sendPM($p['ID'], 0,

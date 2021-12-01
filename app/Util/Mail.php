@@ -30,7 +30,7 @@ class Mail {
             "X-Priority: 3",
             '' // for final "\r\n"
         ]);
-        if (defined('DEBUG_EMAIL') && DEBUG_EMAIL) {
+        if (DEBUG_EMAIL) {
             $out = fopen(TMPDIR . "/$msgId.mail", "w");
             fwrite($out, $headers . "\n" . $body . "\n");
             fclose($out);

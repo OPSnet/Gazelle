@@ -21,7 +21,7 @@ h5{padding-top:30px}
 
 <div class="container">
 <?php
-if (defined('RECOVERY') && RECOVERY) {
+if (RECOVERY) {
     require_once('form.php');
 }
 else {

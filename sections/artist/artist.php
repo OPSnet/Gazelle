@@ -62,7 +62,7 @@ if ($bookmark->isArtistBookmarked($ArtistID)) { ?>
             <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#info" class="brackets">Info</a>
-<?php if (defined('LASTFM_API_KEY')) { ?>
+<?php if (LASTFM_API_KEY) { ?>
             <a href="artist.php?id=<?=$ArtistID?>#concerts" class="brackets">Concerts</a>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#artistcomments" class="brackets">Comments</a>
@@ -662,7 +662,7 @@ function require(file, callback) {
             <div id="body" class="body"><?=Text::full_format($Artist->body())?></div>
         </div>
 <?php
-if (defined('LASTFM_API_KEY')) {
+if (LASTFM_API_KEY) {
     require_once('concerts.php');
 }
 ?>

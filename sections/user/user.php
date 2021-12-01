@@ -76,7 +76,7 @@ function check_paranoia_here($Setting) {
 
 [$ClassRatio, $Buffer] = $User->buffer();
 
-if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || $Viewer->permitted('users_mod'))) {
+if (RECOVERY_DB && ($OwnProfile || $Viewer->permitted('users_mod'))) {
     $recovered = $DB->scalar("
         SELECT final FROM recovery_buffer WHERE user_id = ?
         ", $UserID
