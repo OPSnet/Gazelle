@@ -1,6 +1,4 @@
 <?php
-define("PUSH_SOCKET_LISTEN_ADDRESS", "127.0.0.1");
-define("PUSH_SOCKET_LISTEN_PORT", 6789);
 
 require 'config.php';
 class PushServer {

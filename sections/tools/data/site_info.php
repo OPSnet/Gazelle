@@ -1,6 +1,6 @@
 <?php
 
-if ((!defined('DEBUG_MODE') || DEBUG_MODE !== true) && !$Viewer->permitted('admin_site_debug')) {
+if (!DEBUG_MODE && !$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
 
