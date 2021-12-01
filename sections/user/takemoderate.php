@@ -135,7 +135,6 @@ if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['
 }
 
 $donorMan = new Gazelle\Manager\Donation;
-$donorMan->twig($Twig);
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
     $donorMan->moderatorDonate($user, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $Viewer->id());
 } elseif (!empty($_POST['donor_values_submit'])) {
