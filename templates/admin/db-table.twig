@@ -16,12 +16,22 @@
     <h3>Rows read</h3>
     <table>
         <tr>
+            <th>Rows</th>
+            <th>Average length</th>
+            <th>Data</th>
+            <th>Index</th>
+            <th>Free</th>
             <th>Rows read</th>
             <th>Rows changed</th>
             <th>Rows changed per index</th>
         </tr>
 {% for r in table_read %}
         <tr>
+            <td>{{ stats.table_rows|number_format }}</td>
+            <td>{{ stats.avg_row_length|number_format }}</td>
+            <td>{{ stats.data_length|octet_size }}</td>
+            <td>{{ stats.index_length|octet_size }}</td>
+            <td>{{ stats.data_free|octet_size }}</td>
             <td>{{ r.ROWS_READ|number_format }}</td>
             <td>{{ r.ROWS_CHANGED|number_format }}</td>
             <td>{{ r.ROWS_CHANGED_X_INDEXES|number_format }}</td>

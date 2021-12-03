@@ -8,11 +8,15 @@ if (!$Viewer->permitted('site_database_specifics')) {
 if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) {
     $tableName = $match[1];
     $siteInfo = new Gazelle\SiteInfo;
+    if (!$siteInfo->tableExists($tableName)) {
+        error("No such table");
+    }
     echo $Twig->render('admin/db-table.twig', [
         'definition' => $DB->row('SHOW CREATE TABLE ' . $tableName)[1],
         'table_name' => $tableName,
         'table_read' => $siteInfo->tableRowsRead($tableName),
         'index_read' => $siteInfo->indexRowsRead($tableName),
+        'stats'      => $siteInfo->tableStats($tableName),
     ]);
     exit;
 }

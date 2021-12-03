@@ -105,6 +105,16 @@ class SiteInfo extends Base {
         return $packages;
     }
 
+    public function tableExists(string $tableName): bool {
+        return (bool)$this->db->scalar("
+            SELECT 1
+            FROM information_schema.tables t
+            WHERE t.table_schema = ?
+                AND t.table_name = ?
+            ", SQLDB, $tableName
+        );
+    }
+
     public function tablesWithoutPK(): array {
         $this->db->prepared_query("
             SELECT table_name
@@ -146,5 +156,19 @@ class SiteInfo extends Base {
             ", SQLDB, $tableName
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function tableStats(string $tableName): array {
+        return $this->db->rowAssoc("
+            SELECT t.table_rows,
+                t.avg_row_length,
+                t.data_length,
+                t.index_length,
+                t.data_free
+            FROM information_schema.tables t
+            WHERE t.table_schema = ?
+                AND t.table_name = ?
+            ", SQLDB, $tableName
+        );
     }
 }
