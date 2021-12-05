@@ -7,7 +7,7 @@ class Tag extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
-        $this->info = $this->db->rowAssoc("
+        $this->info = self::$db->rowAssoc("
             SELECT t.Name AS name,
                 t.TagType AS type,
                 t.Uses AS uses,

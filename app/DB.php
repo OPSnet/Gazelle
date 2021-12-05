@@ -10,25 +10,25 @@ class DB extends Base {
      */
     public function relaxConstraints(bool $relax) {
         if ($relax) {
-            $this->db->prepared_query("SET foreign_key_checks = 0");
+            self::$db->prepared_query("SET foreign_key_checks = 0");
         } else {
-            $this->db->prepared_query("SET foreign_key_checks = 1");
+            self::$db->prepared_query("SET foreign_key_checks = 1");
         }
         return $this;
     }
 
     public function globalStatus(): array {
-        $this->db->prepared_query('SHOW GLOBAL STATUS');
-        return $this->db->to_array('Variable_name', MYSQLI_ASSOC, false);
+        self::$db->prepared_query('SHOW GLOBAL STATUS');
+        return self::$db->to_array('Variable_name', MYSQLI_ASSOC, false);
     }
 
     public function globalVariables(): array {
-        $this->db->prepared_query('SHOW GLOBAL VARIABLES');
-        return $this->db->to_array('Variable_name', MYSQLI_ASSOC, false);
+        self::$db->prepared_query('SHOW GLOBAL VARIABLES');
+        return self::$db->to_array('Variable_name', MYSQLI_ASSOC, false);
     }
 
     public function selectQuery(string $tableName): string {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT concat(column_name, ' /* ', data_type, ' */') AS c
             FROM information_schema.columns
             WHERE table_schema = ?
@@ -36,7 +36,7 @@ class DB extends Base {
             ORDER BY ordinal_position
             ", SQLDB, $tableName
         );
-        return "SELECT " . implode(",\n    ", $this->db->collect(0)) . "\nFROM $tableName\nWHERE --";
+        return "SELECT " . implode(",\n    ", self::$db->collect(0)) . "\nFROM $tableName\nWHERE --";
     }
 
     /**
@@ -50,13 +50,13 @@ class DB extends Base {
      */
     public function softDelete($schema, $table, array $condition, $delete = true) {
         $sql = 'SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER BY 1';
-        $this->db->prepared_query($sql, $schema, $table);
-        $t1 = $this->db->to_array();
+        self::$db->prepared_query($sql, $schema, $table);
+        $t1 = self::$db->to_array();
         $n1 = count($t1);
 
         $softDeleteTable = 'deleted_' . $table;
-        $this->db->prepared_query($sql, $schema, $softDeleteTable);
-        $t2 = $this->db->to_array();
+        self::$db->prepared_query($sql, $schema, $softDeleteTable);
+        $t2 = self::$db->to_array();
         $n2 = count($t2);
 
         if (!$n1) {
@@ -87,18 +87,18 @@ class DB extends Base {
             SELECT $columnList
             FROM $table
             WHERE $conditionList";
-        $this->db->prepared_query($sql, ...$argList);
-        if ($this->db->affected_rows() == 0) {
+        self::$db->prepared_query($sql, ...$argList);
+        if (self::$db->affected_rows() == 0) {
             return [false, "condition selected 0 rows"];
         }
 
         if (!$delete) {
-            return [true, "rows affected: " . $this->db->affected_rows()];
+            return [true, "rows affected: " . self::$db->affected_rows()];
         }
 
         $sql = "DELETE FROM $table WHERE $conditionList";
-        $this->db->prepared_query($sql, ...$argList);
-        return [true, "rows deleted: " . $this->db->affected_rows()];
+        self::$db->prepared_query($sql, ...$argList);
+        return [true, "rows deleted: " . self::$db->affected_rows()];
     }
 
     /**

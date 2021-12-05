@@ -12,7 +12,7 @@ class ClientWhitelist extends \Gazelle\Base {
      * @return string The peer identifier
      */
     public function peerId(int $clientId) {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT peer_id
             FROM xbt_client_whitelist
             WHERE id = ?
@@ -21,14 +21,14 @@ class ClientWhitelist extends \Gazelle\Base {
     }
 
     public function list() {
-        if (($list = $this->cache->get_value(self::CACHE_KEY)) === false) {
-            $this->db->prepared_query("
+        if (($list = self::$cache->get_value(self::CACHE_KEY)) === false) {
+            self::$db->prepared_query("
                 SELECT id as client_id, vstring, peer_id
                 FROM xbt_client_whitelist
                 ORDER BY peer_id ASC
             ");
-            $list = $this->db->to_array('client_id', MYSQLI_ASSOC);
-            $this->cache->cache_value(self::CACHE_KEY, $list, 0);
+            $list = self::$db->to_array('client_id', MYSQLI_ASSOC);
+            self::$cache->cache_value(self::CACHE_KEY, $list, 0);
         }
         return $list;
     }
@@ -41,13 +41,13 @@ class ClientWhitelist extends \Gazelle\Base {
       * @return string The new peer identifier (unchanged)
       */
      public function create(string $peer, string $vstring) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO xbt_client_whitelist
                    (peer_id, vstring)
             VALUES (?,       ?)
             ", $peer, $vstring
         );
-        $this->cache->delete_value(self::CACHE_KEY);
+        self::$cache->delete_value(self::CACHE_KEY);
         return $peer;
     }
 
@@ -61,15 +61,15 @@ class ClientWhitelist extends \Gazelle\Base {
       */
      public function modify(int $clientId, string $peer, string $vstring) {
         $prevPeer = $this->peerId($clientId);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE xbt_client_whitelist SET
                 peer_id = ?,
                 vstring = ?
             WHERE id = ?
             ", $peer, $vstring, $clientId
         );
-        $this->cache->delete_value(self::CACHE_KEY);
-        return $prevPeer . $this->db->affected_rows();
+        self::$cache->delete_value(self::CACHE_KEY);
+        return $prevPeer . self::$db->affected_rows();
     }
 
     /**
@@ -79,12 +79,12 @@ class ClientWhitelist extends \Gazelle\Base {
      * @return int 0/1 Whether a client was found
      */
     public function remove(int $clientId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM xbt_client_whitelist
             WHERE id = ?
             ", $clientId
         );
-        $this->cache->delete_value(self::CACHE_KEY);
-        return $this->db->affected_rows();
+        self::$cache->delete_value(self::CACHE_KEY);
+        return self::$db->affected_rows();
     }
 }

@@ -6,7 +6,7 @@ class CycleAuthKeys extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
                 UPDATE users_info
                 SET AuthKey =
                     MD5(
@@ -21,12 +21,12 @@ class CycleAuthKeys extends \Gazelle\Schedule\Task
                     );
         ", randomString(), randomString());
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID FROM users_main
         ");
-        $keys = $this->db->collect(0, false);
+        $keys = self::$db->collect(0, false);
         foreach ($keys as $key) {
-            $this->cache->delete_value("u_$key");
+            self::$cache->delete_value("u_$key");
         }
     }
 }

@@ -65,7 +65,6 @@ class Notification extends \Gazelle\Base {
 
     public function __construct(int $userId = null, array $skip = [], bool $load = true, bool $autoSkip = true) {
         // TODO: fix this $skip/$autoSkip insanity
-        parent::__construct();
         if ($userId) {
             $this->load($userId, $skip, $load, $autoSkip);
         }
@@ -195,74 +194,74 @@ class Notification extends \Gazelle\Base {
         $type = db_string($type);
         if (!empty($userIds)) {
             $userIds = implode(",", $userIds);
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $QueryID = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT UserID
                 FROM users_notifications_settings
                 WHERE $type != 0
                     AND UserID IN ($userIds)");
             $userIds = array();
-            while ([$id] = $this->db->next_record()) {
+            while ([$id] = self::$db->next_record()) {
                 $userIds[] = $id;
             }
-            $this->db->set_query_id($QueryID);
+            self::$db->set_query_id($QueryID);
             foreach ($userIds as $userId) {
-                $oneReads = $this->cache->get_value("notifications_one_reads_$userId");
+                $oneReads = self::$cache->get_value("notifications_one_reads_$userId");
                 if (!$oneReads) {
                     $oneReads = array();
                 }
                 array_unshift($oneReads, $this->create($oneReads, null, $message, $url, $importance, "oneread_" . uniqid()));
                 $oneReads = array_filter($oneReads);
-                $this->cache->cache_value("notifications_one_reads_$userId", $oneReads, 0);
+                self::$cache->cache_value("notifications_one_reads_$userId", $oneReads, 0);
             }
         }
         **/
     }
 
     public function clearOneRead($id) {
-        $oneReads = $this->cache->get_value('notifications_one_reads_' . $this->userId);
+        $oneReads = self::$cache->get_value('notifications_one_reads_' . $this->userId);
         if ($oneReads) {
             unset($oneReads[$id]);
             if (count($oneReads) > 0) {
-                $this->cache->cache_value('notifications_one_reads_' . $this->userId, $oneReads, 0);
+                self::$cache->cache_value('notifications_one_reads_' . $this->userId, $oneReads, 0);
             } else {
-                $this->cache->delete_value('notifications_one_reads_' . $this->userId);
+                self::$cache->delete_value('notifications_one_reads_' . $this->userId);
             }
         }
     }
 
     protected function loadGlobal() {
-        $notification = $this->cache->get_value('global_notification');
+        $notification = self::$cache->get_value('global_notification');
         if ($notification) {
-            if (!$this->cache->get_value('user_read_global_' . $this->userId)) {
+            if (!self::$cache->get_value('user_read_global_' . $this->userId)) {
                 $this->create(self::GLOBALNOTICE,  $notification['Message'], $notification['URL'], $notification['Importance']);
             }
         }
     }
 
     public function global() {
-        return $this->cache->get_value('global_notification');
+        return self::$cache->get_value('global_notification');
     }
 
     public function setGlobal($message, $url, $importance, $expiration) {
         if (empty($message) || empty($expiration)) {
             error('Error setting notification');
         }
-        $this->cache->cache_value('global_notification', ["Message" => $message, "URL" => $url, "Importance" => $importance, "Expiration" => $expiration], $expiration);
+        self::$cache->cache_value('global_notification', ["Message" => $message, "URL" => $url, "Importance" => $importance, "Expiration" => $expiration], $expiration);
     }
 
     public function deleteGlobal() {
-        $this->cache->delete_value('global_notification');
+        self::$cache->delete_value('global_notification');
     }
 
     public function clearGlobal() {
-        $global = $this->cache->get_value('global_notification');
+        $global = self::$cache->get_value('global_notification');
         if ($global) {
             // This is some trickery
             // since we can't know which users have the read cache key set
             // we set the expiration time of their cache key to that of the length of the notification
             // this guarantees that their cache key will expire after the notification expires
-            $this->cache->cache_value('user_read_global_' . $this->userId, true, $global['Expiration']);
+            self::$cache->cache_value('user_read_global_' . $this->userId, true, $global['Expiration']);
         }
     }
 
@@ -291,23 +290,23 @@ class Notification extends \Gazelle\Base {
     }
 
     public function catchupCollage(int $collageId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_collage_subs SET
                 LastVisit = now()
             WHERE UserID = ? AND CollageID = ?
             ", $this->userId, $collageId
         );
-        $this->cache->delete_value(sprintf(\Gazelle\Collage::SUBS_NEW_KEY, $this->userId));
+        self::$cache->delete_value(sprintf(\Gazelle\Collage::SUBS_NEW_KEY, $this->userId));
     }
 
     public function catchupAllCollages() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_collage_subs SET
                 LastVisit = now()
             WHERE UserID = ?
             ", $this->userId
         );
-        $this->cache->delete_value(sprintf(\Gazelle\Collage::SUBS_NEW_KEY, $this->userId));
+        self::$cache->delete_value(sprintf(\Gazelle\Collage::SUBS_NEW_KEY, $this->userId));
     }
 
     public function loadInbox() {
@@ -346,7 +345,7 @@ class Notification extends \Gazelle\Base {
 
     public function clearNews() {
         if ((new \Gazelle\WitnessTable\UserReadNews)->witness($this->userId)) {
-            $this->cache->delete_value('u_' . $this->userId);
+            self::$cache->delete_value('u_' . $this->userId);
         }
         return (new \Gazelle\Manager\News)->latestId();
     }
@@ -364,8 +363,8 @@ class Notification extends \Gazelle\Base {
         if (!$this->user->permitted('users_mod')) {
             return;
         }
-        if (($readTime = $this->cache->get_value('staff_blog_read_' . $this->userId)) === false) {
-            $readTime = $this->db->scalar("
+        if (($readTime = self::$cache->get_value('staff_blog_read_' . $this->userId)) === false) {
+            $readTime = self::$db->scalar("
                 SELECT unix_timestamp(Time)
                 FROM staff_blog_visits
                 WHERE UserID = ?
@@ -374,16 +373,16 @@ class Notification extends \Gazelle\Base {
             if (!$readTime) {
                 $readTime = 0;
             }
-            $this->cache->cache_value('staff_blog_read_' . $this->userId, $readTime, 0);
+            self::$cache->cache_value('staff_blog_read_' . $this->userId, $readTime, 0);
         }
-        if (($latestTime = $this->cache->get_value('staff_blog_latest_time')) === false) {
-            $latestTime = $this->db->scalar("
+        if (($latestTime = self::$cache->get_value('staff_blog_latest_time')) === false) {
+            $latestTime = self::$db->scalar("
                 SELECT unix_timestamp(max(Time)) FROM staff_blog
             ");
             if (!$latestTime) {
                 $latestTime = 0;
             }
-            $this->cache->cache_value('staff_blog_latest_time', $latestTime, 0);
+            self::$cache->cache_value('staff_blog_latest_time', $latestTime, 0);
         }
         if ($readTime < $latestTime) {
             $this->create(self::STAFFBLOG, 'New Staff Blog Post!', 'staffblog.php', self::IMPORTANT);
@@ -391,15 +390,15 @@ class Notification extends \Gazelle\Base {
     }
 
     public function loadStaffPMs() {
-        if (($new = $this->cache->get_value('staff_pm_new_' . $this->userId)) === false) {
-            $new = $this->db->scalar("
+        if (($new = self::$cache->get_value('staff_pm_new_' . $this->userId)) === false) {
+            $new = self::$db->scalar("
                 SELECT count(*)
                 FROM staff_pm_conversations
                 WHERE Unread = '1'
                     AND UserID = ?
                 ", $this->userId
             );
-            $this->cache->cache_value('staff_pm_new_' . $this->userId, $new, 0);
+            self::$cache->cache_value('staff_pm_new_' . $this->userId, $new, 0);
         }
         if ($new > 0) {
             $this->create(self::STAFFPM, 'You have ' . article($new) . ' new Staff PM' . plural($new), 'staffpm.php', self::INFO);
@@ -428,16 +427,16 @@ class Notification extends \Gazelle\Base {
     }
 
     public function settings() {
-        if (($settings = $this->cache->get_value("users_notifications_settings_" . $this->userId)) === false) {
-            $this->db->prepared_query("
+        if (($settings = self::$cache->get_value("users_notifications_settings_" . $this->userId)) === false) {
+            self::$db->prepared_query("
                 SELECT *
                 FROM users_notifications_settings AS n
                 LEFT JOIN users_push_notifications AS p USING (UserID)
                 WHERE n.UserID = ?
                 ", $this->userId
             );
-            $settings = $this->db->next_record(MYSQLI_ASSOC, false);
-            $this->cache->cache_value("users_notifications_settings_" . $this->userId, $settings, 86400);
+            $settings = self::$db->next_record(MYSQLI_ASSOC, false);
+            self::$cache->cache_value("users_notifications_settings_" . $this->userId, $settings, 86400);
         }
         return $settings;
     }
@@ -470,8 +469,8 @@ class Notification extends \Gazelle\Base {
         $set = implode(",", $set);
         $args[] = $this->userId;
 
-        $QueryID = $this->db->get_query_id();
-        $this->db->prepared_query("
+        $QueryID = self::$db->get_query_id();
+        self::$db->prepared_query("
             UPDATE users_notifications_settings SET
                 $set
             WHERE UserID = ?
@@ -479,7 +478,7 @@ class Notification extends \Gazelle\Base {
         );
 
         if (!$service) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_push_notifications SET PushService = 0 WHERE UserID = ?
                 ", $this->userId
             );
@@ -488,7 +487,7 @@ class Notification extends \Gazelle\Base {
                 $options['PushDevice'] = $device;
             }
             $options = serialize($options);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO users_push_notifications
                        (UserID, PushService, PushOptions)
                 VALUES (?,      ?,           ?)
@@ -499,8 +498,8 @@ class Notification extends \Gazelle\Base {
                     $service, $options
             );
         }
-        $this->db->set_query_id($QueryID);
-        $this->cache->delete_value("users_notifications_settings_{$this->userId}");
+        self::$db->set_query_id($QueryID);
+        self::$cache->delete_value("users_notifications_settings_{$this->userId}");
     }
 
     /**
@@ -518,7 +517,7 @@ class Notification extends \Gazelle\Base {
         }
         foreach($UserIDs as $UserID) {
             $UserID = (int) $UserID;
-            $QueryID = $this->db->get_query_id();
+            $QueryID = self::$db->get_query_id();
             $SQL = "
                 SELECT
                     p.PushService, p.PushOptions
@@ -529,10 +528,10 @@ class Notification extends \Gazelle\Base {
             if ($Type != self::GLOBALNOTICE) {
                 $SQL .= " AND n.$Type IN (" . self::OPT_PUSH . "," . self::OPT_POPUP_PUSH . "," . self::OPT_TRADITIONAL_PUSH . ")";
             }
-            $this->db->prepared_query($SQL);
+            self::$db->prepared_query($SQL);
 
-            if ($this->db->has_results()) {
-                [$PushService, $PushOptions] = $this->db->next_record(MYSQLI_NUM, false);
+            if (self::$db->has_results()) {
+                [$PushService, $PushOptions] = self::$db->next_record(MYSQLI_NUM, false);
                 $PushOptions = unserialize($PushOptions);
                 switch ($PushService) {
                     // Case 1 is missing because NMA is dead.
@@ -563,7 +562,7 @@ class Notification extends \Gazelle\Base {
                         $Options["user"]["device"] = $PushOptions['PushDevice'];
                     }
 
-                    $this->db->prepared_query("
+                    self::$db->prepared_query("
                         INSERT INTO push_notifications_usage
                                (PushService, TimesUsed)
                         VALUES (?,           1)
@@ -576,7 +575,7 @@ class Notification extends \Gazelle\Base {
                     fclose($PushServerSocket);
                 }
             }
-            $this->db->set_query_id($QueryID);
+            self::$db->set_query_id($QueryID);
         }
     }
 
@@ -584,13 +583,13 @@ class Notification extends \Gazelle\Base {
      * Gets users who have push notifications enabled
      */
     public function pushableUsers() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID
             FROM users_push_notifications
             WHERE PushService != 0
                 AND UserID != ?
             ", $this->userId
         );
-        return $this->db->collect("UserID");
+        return self::$db->collect("UserID");
     }
 }

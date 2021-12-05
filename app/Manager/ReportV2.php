@@ -56,7 +56,7 @@ class ReportV2 extends \Gazelle\Base {
     }
 
     public function inProgressSummary(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS nr
             FROM reportsv2 AS r
@@ -64,11 +64,11 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER By nr DESC
         ");
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function newSummary(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT Type  AS type,
                 count(*) AS total
             FROM reportsv2
@@ -76,11 +76,11 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY Type
             ORDER BY Type
         ");
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function resolvedSummary(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT r.ResolverID,
                 um.Username,
                 count(*) AS Reports
@@ -89,11 +89,11 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY Reports DESC
         ");
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     protected function resolvedLastInterval(string $interval): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT r.ResolverID,
                 um.Username,
                 count(*) AS Reports
@@ -103,7 +103,7 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY Reports DESC
         ");
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function resolvedLastDay(): array {
@@ -125,7 +125,7 @@ class ReportV2 extends \Gazelle\Base {
      * @return number of reports
      */
     public function totalReportsGroup(int $groupId): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -142,7 +142,7 @@ class ReportV2 extends \Gazelle\Base {
      * @return number of reports
      */
     public function totalReportsUploader(int $userId): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -211,7 +211,7 @@ class ReportV2 extends \Gazelle\Base {
          * which means that t.GroupID in a condition refers to the same thing in
          * the `torrents` table as well. I am not certain this is entirely sane.
          */
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 r
             LEFT JOIN torrents t ON (t.ID = r.TorrentID)
@@ -236,7 +236,7 @@ class ReportV2 extends \Gazelle\Base {
             ? ''
             : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT r.ID,
                 r.ReporterID AS reporter_id,
                 r.ResolverID AS resolver_id,
@@ -268,7 +268,7 @@ class ReportV2 extends \Gazelle\Base {
 
         $list = [];
         $cache = []; // Avoid looking up a user more than once
-        $result = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $result = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($result as $r) {
             foreach (['reporter_id', 'resolver_id', 'uploader_id'] as $id) {
                 if ($r[$id] && !isset($cache[$r[$id]])) {

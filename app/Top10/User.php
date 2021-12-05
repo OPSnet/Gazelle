@@ -29,9 +29,9 @@ class User extends \Gazelle\Base {
             return [];
         }
 
-        if (!$results = $this->cache->get_value(sprintf(self::CACHE_KEY, $type, $limit))) {
+        if (!$results = self::$cache->get_value(sprintf(self::CACHE_KEY, $type, $limit))) {
             $orderBy = $this->sortMap[$type];
-            $this->db->prepared_query(sprintf("
+            self::$db->prepared_query(sprintf("
                 SELECT
                     um.ID AS id,
                     ui.JoinDate AS join_date,
@@ -68,8 +68,8 @@ class User extends \Gazelle\Base {
                 ), STARTING_UPLOAD, 5 * 1024 * 1024 * 1024, 5 * 1024 * 1024 * 1024, $limit
             );
 
-            $results = $this->db->to_array();
-            $this->cache->cache_value(sprintf(self::CACHE_KEY, $type, $limit), $results, 3600 * 12);
+            $results = self::$db->to_array();
+            self::$cache->cache_value(sprintf(self::CACHE_KEY, $type, $limit), $results, 3600 * 12);
         }
 
         return $results;

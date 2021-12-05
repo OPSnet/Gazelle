@@ -71,7 +71,7 @@ class Inbox extends \Gazelle\Json {
     }
 
     public function payload(): ?array {
-        $total = $this->db->scalar("
+        $total = self::$db->scalar("
             SELECT count(DISTINCT c.ID)
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
@@ -85,7 +85,7 @@ class Inbox extends \Gazelle\Json {
         array_push($this->args, $paginator->limit(), $paginator->offset());
 
         $orderBy = $this->unreadFirst ? "cu.Unread = '1' DESC, action_date ASC" : 'action_date ASC';
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT c.ID,
                 c.Subject,
                 cu.Unread,
@@ -107,8 +107,8 @@ class Inbox extends \Gazelle\Json {
         $userMan = new \Gazelle\Manager\User;
         $user = [];
         $messages = [];
-        $qid = $this->db->get_query_id();
-        while ([$convId, $subject, $unread, $sticky, $forwardedId, $senderId, $actionDate] = $this->db->next_record()) {
+        $qid = self::$db->get_query_id();
+        while ([$convId, $subject, $unread, $sticky, $forwardedId, $senderId, $actionDate] = self::$db->next_record()) {
             $senderId = (int)$senderId;
             if ($senderId && !isset($user[$senderId])) {
                 $user[$senderId] = $userMan->findById($senderId);
@@ -132,7 +132,7 @@ class Inbox extends \Gazelle\Json {
                 'enabled'       => $senderId ? $user[$senderId]->isEnabled() : false,
                 'date'          => $actionDate,
             ];
-            $this->db->set_query_id($qid);
+            self::$db->set_query_id($qid);
         }
         unset($user);
 

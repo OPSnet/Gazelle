@@ -9,9 +9,8 @@ class Blog extends Base {
     protected $topicId;
 
     public function __construct(int $id) {
-        parent::__construct();
         $this->id = $id;
-        [$this->title, $this->body, $this->topicId] = $this->db->row("
+        [$this->title, $this->body, $this->topicId] = self::$db->row("
             SELECT Title, Body, ThreadID
             FROM blog
             WHERE ID = ?

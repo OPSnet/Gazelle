@@ -66,14 +66,14 @@ class Filter extends \Gazelle\Base {
 
     public function setUsers(string $data) {
         $usernames = $this->multiLineSplit($data);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, Paranoia
             FROM users_main
             WHERE Username IN (" . placeholders($usernames) . ")
             ", ...$usernames
         );
         $this->field['user'] = [];
-        while ([$userId, $paranoia] = $this->db->next_record()) {
+        while ([$userId, $paranoia] = self::$db->next_record()) {
             if (!in_array('notifications', unserialize($paranoia))) {
                 $this->field['user'][] = $userId;
             }
@@ -114,13 +114,13 @@ class Filter extends \Gazelle\Base {
                 $args[] = $this->arg($field);
             }
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_notify_filters
                    (" . implode(', ', $set) . ")
             VALUES (" . placeholders($set) . ")
             ", ...$args
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function modify(int $userId, int $filterId): int {
@@ -137,12 +137,12 @@ class Filter extends \Gazelle\Base {
         }
         $args[] = $userId;
         $args[] = $filterId;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_notify_filters SET
             " . implode(', ', $set) . "
             WHERE UserID = ? AND ID = ?
             ", ...$args
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 }

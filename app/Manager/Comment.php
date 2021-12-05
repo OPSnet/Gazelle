@@ -20,7 +20,7 @@ class Comment extends \Gazelle\Base {
     }
 
     public function findById(int $postId) {
-        [$page, $pageId] = $this->db->row("
+        [$page, $pageId] = self::$db->row("
             SELECT Page, PageID FROM comments WHERE ID = ?
             ", $postId
         );
@@ -39,25 +39,25 @@ class Comment extends \Gazelle\Base {
      * @return int ID of the new comment
      */
     public function create(int $userId, string $page, int $pageId, string $body) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO comments
                    (Page, PageID, AuthorID, Body)
             VALUES (?,    ?,      ?,        ?)
             ", $page, $pageId, $userId, $body
         );
-        $postId = $this->db->inserted_id();
-        $catalogueId = $this->db->scalar("
+        $postId = self::$db->inserted_id();
+        $catalogueId = self::$db->scalar("
             SELECT floor((ceil(count(*) / ?) - 1) * ? / ?)
             FROM comments
             WHERE Page = ? AND PageID = ?
             ", TORRENT_COMMENTS_PER_PAGE, TORRENT_COMMENTS_PER_PAGE, THREAD_CATALOGUE, $page, $pageId
         );
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "{$page}_comments_{$pageId}_catalogue_{$catalogueId}",
             "{$page}_comments_{$pageId}"
         ]);
         if ($page == 'collages') {
-            $this->cache->delete_value("{$page}_comments_recent_{$pageId}");
+            self::$cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
         (new \Gazelle\Subscription(new \Gazelle\User($userId)))->quoteNotify($body, $postId, $page, $pageId);
         (new Subscription)->flush($page, $pageId);
@@ -67,15 +67,15 @@ class Comment extends \Gazelle\Base {
     }
 
     public function merge(string $page, int $pageId, int $targetPageId) {
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE comments SET
                 PageID = ?
             WHERE Page = ? AND PageID = ?
             ", $targetPageId, $page, $pageId
         );
-        $pageCount = $this->db->scalar("
+        $pageCount = self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
             WHERE Page = ? AND PageID = ?
@@ -85,22 +85,22 @@ class Comment extends \Gazelle\Base {
         $last = floor((TORRENT_COMMENTS_PER_PAGE * $pageCount - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
 
         // quote notifications
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_notify_quoted SET
                 PageID = ?
             WHERE Page = ? AND PageID = ?
             ", $targetPageId, $page, $pageId
         );
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
 
         // comment subscriptions
         $subscription = new \Gazelle\Manager\Subscription;
         $subscription->move($page, $pageId, $targetPageId);
 
         for ($i = 0; $i <= $last; ++$i) {
-            $this->cache->delete_value($page . "_comments_$targetPageId" . "_catalogue_$i");
+            self::$cache->delete_value($page . "_comments_$targetPageId" . "_catalogue_$i");
         }
-        $this->cache->delete_value($page."_comments_$targetPageId");
+        self::$cache->delete_value($page."_comments_$targetPageId");
     }
 
     /**
@@ -110,9 +110,9 @@ class Comment extends \Gazelle\Base {
      * @return boolean removal successful (or there was nothing to remove)
      */
     public function remove(string $page, int $pageId) {
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
 
-        $pageCount = $this->db->scalar("
+        $pageCount = self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
             WHERE Page = ? AND PageID = ?
@@ -124,7 +124,7 @@ class Comment extends \Gazelle\Base {
         }
         $last = floor((TORRENT_COMMENTS_PER_PAGE * $pageCount - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM comments WHERE Page = ? AND PageID = ?
             ", $page, $pageId
         );
@@ -132,26 +132,26 @@ class Comment extends \Gazelle\Base {
         // literally, move the comment thread to nowhere i.e. delete
         (new \Gazelle\Manager\Subscription)->move($page, $pageId, null);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?
             ", $page, $pageId
         );
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
 
         // Clear cache
         for ($i = 0; $i <= $last; ++$i) {
-            $this->cache->delete_value($page . '_comments_' . $pageId . '_catalogue_' . $i);
+            self::$cache->delete_value($page . '_comments_' . $pageId . '_catalogue_' . $i);
         }
-        $this->cache->delete_value($page . '_comments_' . $pageId);
+        self::$cache->delete_value($page . '_comments_' . $pageId);
 
         return true;
     }
 
     public function loadEdits(string $page, int $postId): array {
         $key = "edit_{$page}_{$postId}";
-        $edits = $this->cache->get_value($key);
+        $edits = self::$cache->get_value($key);
         if ($edits === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT EditUser, EditTime, Body
                 FROM comments_edits
                 WHERE Page = ?
@@ -159,8 +159,8 @@ class Comment extends \Gazelle\Base {
                 ORDER BY EditTime DESC
                 ", $page, $postId
             );
-            $edits = $this->db->to_array(false, MYSQLI_NUM, false);
-            $this->cache->cache_value($key, $edits, 0);
+            $edits = self::$db->to_array(false, MYSQLI_NUM, false);
+            self::$cache->cache_value($key, $edits, 0);
         }
         return $edits;
     }
@@ -178,10 +178,10 @@ class Comment extends \Gazelle\Base {
      */
     public function collageSummary($collageId, $count = 5): array {
         $key = "collages_comments_recent_$collageId";
-        $list = $this->cache->get_value($key);
+        $list = self::$cache->get_value($key);
         if ($list === false) {
-            $qid = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $qid = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT c.ID AS id,
                     c.Body as body,
                     c.AuthorID as author_id,
@@ -193,10 +193,10 @@ class Comment extends \Gazelle\Base {
                 LIMIT ?
                 ", 'collages', $collageId, $count
             );
-            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
-            $this->db->set_query_id($qid);
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$db->set_query_id($qid);
             if (count($list)) {
-                $this->cache->cache_value($key, $list, 7200);
+                self::$cache->cache_value($key, $list, 7200);
             }
         }
         return $list;

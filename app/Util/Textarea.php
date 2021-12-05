@@ -44,7 +44,6 @@ class Textarea extends \Gazelle\Base {
      * @param int $rows  rows attribute
      */
     public function __construct(string $name, string $value, int $cols = 72, int $rows = 10) {
-        parent::__construct();
         $this->id     = count(self::$list);
         $this->name   = $name;
         $this->value  = $value;

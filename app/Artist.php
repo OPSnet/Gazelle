@@ -46,12 +46,11 @@ class Artist extends Base {
      * @param  int|null  $revisionId
      */
     public function __construct(int $id, $revisionId = null) {
-        parent::__construct();
         $this->id = $id;
         $this->revisionId = $revisionId ?? 0;
 
         $cacheKey = $this->cacheKey();
-        if (($info = $this->cache->get_value($cacheKey)) !== false) {
+        if (($info = self::$cache->get_value($cacheKey)) !== false) {
             [$this->name, $this->image, $this->body, $this->vanity, $this->similar,
                 $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
             ] = $info;
@@ -67,7 +66,7 @@ class Artist extends Base {
             }
             [$this->name, $this->image, $this->body, $this->vanity, $this->discogsId, $this->discogsName,
                 $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred
-            ] = $this->db->row("
+            ] = self::$db->row("
                 SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse, dg.artist_discogs_id, dg.name,
                     dg.stem, dg.sequence, dg.is_preferred
                 FROM artists_group AS ag
@@ -78,7 +77,7 @@ class Artist extends Base {
             );
             $this->similar = $this->loadSimilar();
             $this->homonyms = $this->homonymCount();
-            $this->cache->cache_value($cacheKey, [
+            self::$cache->cache_value($cacheKey, [
                     $this->name, $this->image, $this->body, $this->vanity, $this->similar,
                     $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
                 ], 3600
@@ -87,7 +86,7 @@ class Artist extends Base {
     }
 
     public function loadArtistRole() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ta.GroupID AS group_id,
                 ta.Importance as artist_role,
                 rt.ID as release_type_id
@@ -109,7 +108,7 @@ class Artist extends Base {
             ARTIST_ARRANGER => 0,
         ];
 
-        while ([$groupId, $role, $releaseTypeId] = $this->db->next_record(MYSQLI_NUM, false)) {
+        while ([$groupId, $role, $releaseTypeId] = self::$db->next_record(MYSQLI_NUM, false)) {
             switch($role) {
                 case ARTIST_ARRANGER:
                     $sectionId = ARTIST_SECTION_ARRANGER;
@@ -216,29 +215,29 @@ class Artist extends Base {
     }
 
     public function rename(int $userId, int $aliasId, string $name): void {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, UserID, Redirect)
             VALUES (?,        ?,    ?,      0)
             ", $this->id, $name, $userId
         );
-        $targetId = $this->db->inserted_id();
-        $this->db->prepared_query("
+        $targetId = self::$db->inserted_id();
+        self::$db->prepared_query("
             UPDATE artists_alias SET Redirect = ? WHERE AliasID = ?
             ", $targetId, $aliasId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE artists_group SET Name = ? WHERE ArtistID = ?
             ", $name, $this->id
         );
 
         // process artists in torrents
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT GroupID FROM torrents_artists WHERE AliasID = ?
             ", $aliasId
         );
-        $groups = $this->db->collect('GroupID');
-        $this->db->prepared_query("
+        $groups = self::$db->collect('GroupID');
+        self::$db->prepared_query("
             UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
             ", $targetId, $aliasId
         );
@@ -248,17 +247,17 @@ class Artist extends Base {
         }
 
         // process artists in requests
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT RequestID FROM requests_artists WHERE AliasID = ?
             ", $aliasId
         );
-        $requests = $this->db->collect('RequestID');
-        $this->db->prepared_query("
+        $requests = self::$db->collect('RequestID');
+        self::$db->prepared_query("
             UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
             ", $targetId, $aliasId
         );
         foreach ($requests as $requestId) {
-            $this->cache->delete_value("request_artists_$requestId"); // Delete request artist cache
+            self::$cache->delete_value("request_artists_$requestId"); // Delete request artist cache
             \Requests::update_sphinx_requests($requestId);
         }
     }
@@ -270,15 +269,15 @@ class Artist extends Base {
     }
 
     public function flushCache(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
             FROM torrents_artists
             WHERE ArtistID = ?
             ", $this->id
         );
-        $cacheKeys = $this->db->collect(0, false);
-        $this->cache->deleteMulti($cacheKeys);
-        $this->cache->delete_value($this->cacheKey());
+        $cacheKeys = self::$db->collect(0, false);
+        self::$cache->deleteMulti($cacheKeys);
+        self::$cache->delete_value($this->cacheKey());
         return count($cacheKeys);
     }
 
@@ -289,7 +288,7 @@ class Artist extends Base {
      * @throws UnexpectedValueException
      */
     public function resolveRedirect(int $redirectId): int {
-        [$foundId, $foundRedirectId] = $this->db->row("
+        [$foundId, $foundRedirectId] = self::$db->row("
             SELECT ArtistID, Redirect
             FROM artists_alias
             WHERE AliasID = ?
@@ -311,17 +310,17 @@ class Artist extends Base {
      * @return int|void
      */
     public function addAlias(int $userId, string $name, int $redirect) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, Redirect, UserID)
             VALUES (?,        ?,    ?,        ?)
             ", $this->id, $name, $redirect, $userId
         );
-        return $this->db->inserted_id();
+        return self::$db->inserted_id();
     }
 
     public function removeAlias(int $aliasId): void {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE artists_alias SET
                 ArtistID = ?,
                 Redirect = 0
@@ -331,7 +330,7 @@ class Artist extends Base {
     }
 
     public function getAlias($name): int {
-        $alias = $this->db->scalar('
+        $alias = self::$db->scalar('
             SELECT AliasID
             FROM artists_alias
             WHERE ArtistID = ?
@@ -343,17 +342,17 @@ class Artist extends Base {
     }
 
     public function aliasList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT Name
             FROM artists_alias
             WHERE Redirect = 0 AND ArtistID = ?
             ", $this->id
         );
-        return $this->db->collect('Name');
+        return self::$db->collect('Name');
     }
 
     public function editableInformation(): array {
-        return $this->db->row("
+        return self::$db->row("
             SELECT
                 ag.Name,
                 wa.Image,
@@ -369,19 +368,19 @@ class Artist extends Base {
     }
 
     public function redirects(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT AliasID as aliasId, Name as aliasName, UserID as userId,  Redirect as redirectId
             FROM artists_alias
             WHERE ArtistID = ?
             ", $this->id
         );
-        return $this->db->to_array('aliasId', MYSQLI_ASSOC);
+        return self::$db->to_array('aliasId', MYSQLI_ASSOC);
     }
 
     public function requests(): array {
-        $requests = $this->cache->get_value("artists_requests_" . $this->id);
+        $requests = self::$cache->get_value("artists_requests_" . $this->id);
         if (empty($requests)) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 SELECT
                     r.ID,
                     r.CategoryID,
@@ -399,8 +398,8 @@ class Artist extends Base {
                 ORDER BY Votes DESC
                 ', $this->id
             );
-            $requests = $this->db->has_results() ? $this->db->to_array('ID', MYSQLI_ASSOC, false) : [];
-            $this->cache->cache_value("artists_requests_" . $this->id, $requests, 3600);
+            $requests = self::$db->has_results() ? self::$db->to_array('ID', MYSQLI_ASSOC, false) : [];
+            self::$cache->cache_value("artists_requests_" . $this->id, $requests, 3600);
         }
         return $requests;
     }
@@ -453,7 +452,7 @@ class Artist extends Base {
 
         // We only run this query when artist_discogs_id has changed, so the collision
         // should only happen on the UNIQUE(artist_id) index
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO artist_discogs
                    (artist_discogs_id, artist_id, is_preferred, sequence, stem, name, user_id)
             VALUES (?,                 ?,         ?,            ?,        ?,    ?,    ?)
@@ -468,23 +467,23 @@ class Artist extends Base {
             $this->discogsSequence, $this->discogsStem, $this->discogsName, $userId
         );
         $this->flushCache();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function homonymCount(): int {
-        return $this->db->scalar('
+        return self::$db->scalar('
             SELECT count(*) FROM artist_discogs WHERE stem = ?
             ', $this->discogsStem
         );
     }
 
     public function removeDiscogsRelation(): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM artist_discogs WHERE artist_id = ?
             ', $this->id
         );
         $this->flushCache();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function discogsId(): ?int {
@@ -520,7 +519,7 @@ class Artist extends Base {
     }
 
     public function revisionList(): array {
-         $this->db->prepared_query("
+         self::$db->prepared_query("
             SELECT RevisionID AS revision,
                 Summary       AS summary,
                 Time          AS time,
@@ -530,14 +529,14 @@ class Artist extends Base {
             ORDER BY RevisionID DESC
             ", $this->id
         );
-        return $this->db->to_array('revision', MYSQLI_ASSOC, false);
+        return self::$db->to_array('revision', MYSQLI_ASSOC, false);
     }
 
     public function addSimilar(Artist $similar, int $userId) {
         $artistId = $this->id;
         $similarArtistId = $similar->id();
         // Let's see if there's already a similar artists field for these two
-        $similarId = $this->db->scalar("
+        $similarId = self::$db->scalar("
             SELECT s1.SimilarID
             FROM artists_similar AS s1
             INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID)
@@ -545,20 +544,20 @@ class Artist extends Base {
                 AND s2.ArtistID = ?
             ", $this->id, $similar->id()
         );
-        $this->db->begin_transaction();
+        self::$db->begin_transaction();
         if ($similarId) { // The similar artists field already exists, just update the score
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE artists_similar_scores SET
                     Score = Score + 200
                 WHERE SimilarID = ?
                 ", $similarId
             );
         } else { // No, it doesn't exist - create it
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO artists_similar_scores (Score) VALUES (200)
             ");
-            $similarId = $this->db->inserted_id();
-            $this->db->prepared_query("
+            $similarId = self::$db->inserted_id();
+            self::$db->prepared_query("
                 INSERT INTO artists_similar
                        (ArtistID, SimilarID)
                 VALUES (?, ?), (?, ?)
@@ -566,53 +565,53 @@ class Artist extends Base {
             );
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO artists_similar_votes
                    (SimilarID, UserID, way)
             VALUES (?,         ?,      'up')
             ", $similarId, $userId
         );
-        $this->db->commit();
+        self::$db->commit();
 
         $this->flushCache();
         $similar->flushCache();
-        $this->cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+        self::$cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
     }
 
     public function removeSimilar(int $similarId): bool {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             SELECT ArtistID FROM artists_similar WHERE SimilarID = ?
             ", $similarId
         );
-        $artistIds = $this->db->collect(0);
+        $artistIds = self::$db->collect(0);
         if (!in_array($this->id, $artistIds)) {
-            $this->db->rollback();
+            self::$db->rollback();
             return false;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM artists_similar_votes WHERE SimilarID = ?
             ", $similarId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM artists_similar_scores WHERE SimilarID = ?
             ", $similarId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM artists_similar WHERE SimilarID = ?
             ", $similarId
         );
         $manager = new Manager\Artist;
         foreach ($artistIds as $id) {
             $manager->findById($id, 0)->flushCache();
-            $this->cache->delete_value("similar_positions_$id");
+            self::$cache->delete_value("similar_positions_$id");
         }
-        $this->db->commit();
+        self::$db->commit();
         return true;
     }
 
     public function loadSimilar(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 s2.ArtistID,
                 a.Name,
@@ -627,12 +626,12 @@ class Artist extends Base {
             LIMIT 30
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function similarGraph(int $width, int $height): array {
         // find the similar artists of this one
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT s2.ArtistID       AS artist_id,
                 a.Name               AS artist_name,
                 ass.Score            AS score,
@@ -649,15 +648,15 @@ class Artist extends Base {
             LIMIT 30
             ", $this->id
         );
-        $artistIds = $this->db->collect('artist_id') ?: [0];
-        $similar   = $this->db->to_array('artist_id', MYSQLI_ASSOC, false);
+        $artistIds = self::$db->collect('artist_id') ?: [0];
+        $similar   = self::$db->to_array('artist_id', MYSQLI_ASSOC, false);
         if (!$similar) {
             return [];
         }
         $nrSimilar = count($similar);
 
         // of these similar artists, see if any are similar to each other
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT s1.artistid AS source,
                 group_concat(s2.artistid) AS target
             FROM artists_similar s1
@@ -667,7 +666,7 @@ class Artist extends Base {
             GROUP BY s1.artistid
             ", ...array_merge($artistIds, $artistIds)
         );
-        $relation = $this->db->to_array('source', MYSQLI_ASSOC, false);
+        $relation = self::$db->to_array('source', MYSQLI_ASSOC, false);
 
         // calculate some minimax stuff to figure out line lengths
         $max = 0;
@@ -832,7 +831,7 @@ class Artist extends Base {
     }
 
     public function voteSimilar(int $userId, int $similarId, bool $upvote): bool {
-        if ($this->db->scalar("
+        if (self::$db->scalar("
             SELECT 1
             FROM artists_similar_votes
             WHERE SimilarID = ?
@@ -842,21 +841,21 @@ class Artist extends Base {
         )) {
             return false;
         }
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             UPDATE artists_similar_scores SET
                 Score = Score + ?
             WHERE SimilarID = ?
             ", $upvote ? 100 : -100, $similarId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO artists_similar_votes
                    (SimilarID, UserID, Way)
             VALUES (?,         ?,      ?)
             ", $similarId, $userId, $upvote ? 'up' : 'down'
         );
-        $this->db->commit();
-        $similarArtistId = $this->db->scalar("
+        self::$db->commit();
+        $similarArtistId = self::$db->scalar("
             SELECT ArtistID
             FROM artists_similar
             WHERE SimilarID = ?
@@ -866,7 +865,7 @@ class Artist extends Base {
         $similarArtist = new Artist($similarArtistId, 0);
         $this->flushCache();
         $similarArtist->flushCache();
-        $this->cache->deleteMulti(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
+        self::$cache->deleteMulti(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
         return true;
     }
 }

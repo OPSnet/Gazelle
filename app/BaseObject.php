@@ -4,15 +4,14 @@ namespace Gazelle;
 
 abstract class BaseObject extends Base {
 
-    protected $id;
+    protected int $id;
 
     /* used for handling updates */
-    protected $updateField = [];
-    protected $updateFieldPassThru = [];
-    protected $updateFieldRaw = [];
+    protected array $updateField = [];
+    protected array $updateFieldPassThru = [];
+    protected array $updateFieldRaw = [];
 
     public function __construct(int $id) {
-        parent::__construct();
         $this->id = $id;
     }
 
@@ -64,12 +63,12 @@ abstract class BaseObject extends Base {
             array_values($this->updateFieldPassThru)
         );
         $args[] = $this->id;
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             "UPDATE " . $this->tableName() . " SET
                 $set WHERE ID = ?
             ", ...$args
         );
-        $success = ($this->db->affected_rows() === 1);
+        $success = (self::$db->affected_rows() === 1);
         if ($success) {
             $this->flush();
         }

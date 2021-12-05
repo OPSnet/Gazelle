@@ -12,15 +12,15 @@ class Applicant extends \Gazelle\Base {
     const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
 
     public function createApplicant(int $userId, int $roleId, string $body) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO applicant
                    (RoleID, UserID, Body, ThreadID)
             VALUES (?,      ?,      ?,    ?)
             ", $roleId, $userId, $body,
                 (new Thread())->createThread('staff-role')->id()
         );
-        $this->cache->delete_value(self::CACHE_KEY_NEW_COUNT);
-        return new \Gazelle\Applicant($this->db->inserted_id());
+        self::$cache->delete_value(self::CACHE_KEY_NEW_COUNT);
+        return new \Gazelle\Applicant(self::$db->inserted_id());
     }
 
     /**
@@ -47,10 +47,10 @@ class Applicant extends \Gazelle\Base {
         if ($userId) {
             $key .= ".$userId";
         }
-        $list = $this->cache->get_value($key);
+        $list = self::$cache->get_value($key);
         if ($list === false) {
             $userCond = $userId ? 'a.UserID = ?' : '0 = ? /* manager */';
-            $this->db->prepared_query($sql = <<<END_SQL
+            self::$db->prepared_query($sql = <<<END_SQL
 SELECT APP.ID, r.Title as Role, APP.UserID, u.Username, APP.Created, APP.Modified, APP.nr_notes,
     last.UserID as last_UserID, ulast.Username as last_Username, last.Created as last_Created
 FROM
@@ -73,27 +73,27 @@ ORDER by r.Modified DESC,
 LIMIT ? OFFSET ?
 END_SQL
             , $resolved ? 1 : 0, $userId, self::ENTRIES_PER_PAGE, ($page-1) * self::ENTRIES_PER_PAGE);
-            $list = $this->db->has_results() ? $this->db->to_array() : [];
-            $this->cache->cache_value($key, $list, 86400);
+            $list = self::$db->has_results() ? self::$db->to_array() : [];
+            self::$cache->cache_value($key, $list, 86400);
         }
         return $list;
     }
 
     public function userIsApplicant(int $userId): bool {
         $key = 'user_applicant_' . $userId;
-        $hasApplication = $this->cache->get_value($key);
+        $hasApplication = self::$cache->get_value($key);
         if ($hasApplication === false) {
-            $hasApplication = $this->db->scalar('SELECT 1 FROM applicant WHERE UserID = ? LIMIT 1', $userId) ? true : false;
-            $this->cache->cache_value($key, $hasApplication, 86400);
+            $hasApplication = self::$db->scalar('SELECT 1 FROM applicant WHERE UserID = ? LIMIT 1', $userId) ? true : false;
+            self::$cache->cache_value($key, $hasApplication, 86400);
         }
         return $hasApplication;
     }
 
     public function newApplicantCount(): int {
         $key = self::CACHE_KEY_NEW_COUNT;
-        $count = $this->cache->get_value($key);
+        $count = self::$cache->get_value($key);
         if ($count === false) {
-            $count = $this->db->scalar("
+            $count = self::$db->scalar("
                 SELECT count(a.ID) as nr
                 FROM applicant a
                 INNER JOIN thread t ON (a.ThreadID = t.ID
@@ -104,16 +104,16 @@ END_SQL
                     AND n.id IS NULL
                 ", 'staff-role'
             ) ?? 0;
-            $this->cache->cache_value($key, $count, 3600);
+            self::$cache->cache_value($key, $count, 3600);
         }
         return $count;
     }
 
     public function newReplyCount(): int {
         $key = self::CACHE_KEY_NEW_REPLY;
-        $count = $this->cache->get_value($key);
+        $count = self::$cache->get_value($key);
         if ($count === false) {
-            $count = $this->db->scalar("
+            $count = self::$db->scalar("
                 SELECT count(*) AS nr
                 FROM applicant a
                 INNER JOIN thread_note n USING (ThreadID)
@@ -131,7 +131,7 @@ END_SQL
                 WHERE a.UserID = n.UserID /* if they are the applicant: not a staff response Q.E.D. */
                 ", 'staff-role'
             ) ?? 0;
-            $this->cache->cache_value($key, $count, 3600);
+            self::$cache->cache_value($key, $count, 3600);
         }
         return $count;
     }

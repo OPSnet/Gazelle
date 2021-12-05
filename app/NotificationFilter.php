@@ -12,7 +12,7 @@ class NotificationFilter extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID AS user_id,
                 Label        AS label,
                 Artists      AS artist,
@@ -32,7 +32,7 @@ class NotificationFilter extends BaseObject {
             WHERE ID = ?
             ", $this->id
         );
-        $this->info = $this->db->next_row(MYSQLI_ASSOC);
+        $this->info = self::$db->next_row(MYSQLI_ASSOC);
         foreach (self::DIMENSION as $dimension) {
             $this->info[$dimension] = $this->expand($this->info[$dimension]);
         }

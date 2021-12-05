@@ -35,7 +35,7 @@ class UploadFlac extends AbstractContest {
     }
 
     public function participationStats(): array {
-        return $this->db->row("
+        return self::$db->row("
             SELECT count(*) AS total_entries, count(DISTINCT um.ID) AS total_users
             FROM contest c,
                 users_main um
@@ -59,7 +59,7 @@ class UploadFlac extends AbstractContest {
     }
 
     public function userPayout(float $enabledUserBonus, float $contestBonus, float $perEntryBonus): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.ID, um.Username,
                 count(t.ID) AS total_entries,
                 ? AS enabled_bonus,
@@ -90,6 +90,6 @@ class UploadFlac extends AbstractContest {
             ", $enabledUserBonus, $contestBonus, $perEntryBonus,
                 $this->id
         );
-        return $this->db->to_array('ID', MYSQLI_ASSOC) ?? [];
+        return self::$db->to_array('ID', MYSQLI_ASSOC) ?? [];
     }
 }

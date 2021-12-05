@@ -35,7 +35,7 @@ abstract class CommentViewer extends BaseUser {
     public function render($userMan, $AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Unread = false, $Header = '') {
         $author = new User($AuthorID);
         $ownProfile = $AuthorID == $this->user->id();
-        echo $this->twig->render('comment/comment.twig', [
+        echo self::$twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,
             'author'      => $author,
             'avatar'      => $userMan->avatarMarkup($this->user, $author),

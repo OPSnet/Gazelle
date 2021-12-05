@@ -11,18 +11,18 @@ class Payment extends \Gazelle\Base {
     const DUE_KEY  = 'payment_due';
 
     public function create(array $val): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO payment_reminders
                    (Text, Expiry, AnnualRent, cc, Active)
             VALUES (?,    ?,      ?,          ?,  ?)
             ', $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active']
         );
         $this->flush();
-        return $this->db->inserted_id();
+        return self::$db->inserted_id();
     }
 
     public function modify($id, array $val): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE payment_reminders SET
                 Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
             WHERE ID = ?
@@ -30,26 +30,26 @@ class Payment extends \Gazelle\Base {
             $id
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function remove($id): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM payment_reminders WHERE ID = ?
             ', $id
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function flush() {
-        $x = $this->cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
+        $x = self::$cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
         return $this;
     }
 
     public function list(): array {
-        if (($list = $this->cache->get_value(self::LIST_KEY)) === false) {
-            $this->db->prepared_query("
+        if (($list = self::$cache->get_value(self::LIST_KEY)) === false) {
+            self::$db->prepared_query("
                 SELECT ID,
                     Text,
                     Expiry,
@@ -59,8 +59,8 @@ class Payment extends \Gazelle\Base {
                 FROM payment_reminders
                 ORDER BY Expiry
             ");
-            $list = $this->db->to_array('ID', MYSQLI_ASSOC, false);
-            $this->cache->cache_value(self::LIST_KEY, $list, 86400 * 30);
+            $list = self::$db->to_array('ID', MYSQLI_ASSOC, false);
+            self::$cache->cache_value(self::LIST_KEY, $list, 86400 * 30);
         }
 
         // update with latest forex rates
@@ -74,7 +74,7 @@ class Payment extends \Gazelle\Base {
                 $l['fiatRate'] = $XBT->fetchRate($l['cc']);
                 if (!$l['fiatRate']) {
                     // fallback to last known rate if there is one
-                    $l['fiatRate'] = $this->db->scalar("
+                    $l['fiatRate'] = self::$db->scalar("
                         SELECT rate
                         FROM xbt_forex
                         WHERE cc = ?
@@ -94,7 +94,7 @@ class Payment extends \Gazelle\Base {
     }
 
     public function monthlyRental(): float {
-        if (($rental = $this->cache->get_value(self::RENT_KEY)) === false) {
+        if (($rental = self::$cache->get_value(self::RENT_KEY)) === false) {
             $list = $this->list();
             $rental = 0.0;
             foreach ($list as $l) {
@@ -102,7 +102,7 @@ class Payment extends \Gazelle\Base {
                     $rental += $l['btcRent'];
                 }
             }
-            $this->cache->cache_value(self::RENT_KEY, $rental / 12, 86400);
+            self::$cache->cache_value(self::RENT_KEY, $rental / 12, 86400);
         }
         return $rental;
     }
@@ -115,16 +115,16 @@ class Payment extends \Gazelle\Base {
     }
 
     public function due(): array {
-        $due = $this->cache->get_value(self::DUE_KEY);
+        $due = self::$cache->get_value(self::DUE_KEY);
         if ($due === false) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 SELECT Text, Expiry
                 FROM payment_reminders
                 WHERE Active = 1 AND Expiry < now() + INTERVAL 1 WEEK
                 ORDER BY Expiry
             ');
-            $due = $this->db->to_array(false, MYSQLI_ASSOC, false);
-            $this->cache->cache_value(self::DUE_KEY, $due, 3600);
+            $due = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value(self::DUE_KEY, $due, 3600);
         }
         return $due;
     }

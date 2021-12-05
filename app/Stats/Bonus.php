@@ -10,7 +10,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of [title, total]
      */
     public function itemPurchase(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT bi.ID as id,
                 bi.Title AS title,
                 count(bh.ID) AS total
@@ -19,7 +19,7 @@ class Bonus extends \Gazelle\Base {
             GROUP BY bi.Title
             ORDER BY bi.sequence
         ");
-        return $this->db->to_array('id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -36,7 +36,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [title, total] aggregated over interval range
      */
     public function expenditureRange(string $interval, int $offset, int $length): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT bi.ID AS id,
                 bi.Title AS title,
                 count(bh.ItemID) AS total
@@ -51,7 +51,7 @@ class Bonus extends \Gazelle\Base {
             ORDER BY bi.sequence
             ", ($offset + $length), $offset
         );
-        return $this->db->to_array('id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -81,7 +81,7 @@ class Bonus extends \Gazelle\Base {
                 $table = 'users_stats_yearly';
                 break;
         }
-        return $this->db->rowAssoc("
+        return self::$db->rowAssoc("
             SELECT us.Time AS `date`,
                 sum(us.BonusPoints) AS total
             FROM $table us
@@ -104,7 +104,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [user_id, total]
      */
     public function topHoarders(int $n): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT user_id,
                 points AS total
             FROM user_bonus
@@ -112,7 +112,7 @@ class Bonus extends \Gazelle\Base {
             LIMIT ?
             ", $n
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -122,7 +122,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [user_id, total]
      */
     public function topSpenders(int $n): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID AS user_id,
                 sum(Price) AS total
             FROM bonus_history
@@ -131,7 +131,7 @@ class Bonus extends \Gazelle\Base {
             LIMIT ?
             ", $n
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -141,7 +141,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [user_id, total]
      */
     public function topPoolContributors(int $n): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT user_id,
                 sum(amount_sent) AS total
             FROM bonus_pool_contrib
@@ -150,7 +150,7 @@ class Bonus extends \Gazelle\Base {
             LIMIT ?
             ", $n
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -160,7 +160,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [user_id, total]
      */
     public function topAggregateSpenders(int $n): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             select user_id,
                 sum(total) as total
             FROM (
@@ -179,6 +179,6 @@ class Bonus extends \Gazelle\Base {
             LIMIT ?
             ", $n
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

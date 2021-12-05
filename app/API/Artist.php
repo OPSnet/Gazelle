@@ -8,7 +8,7 @@ class Artist extends AbstractAPI {
             json_error('Missing artist id');
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 ArtistID,
                 Name
@@ -16,10 +16,10 @@ class Artist extends AbstractAPI {
                 artists_group
             WHERE
                 ArtistID = ?", $_GET['artist_id']);
-        if (!$this->db->has_results()) {
+        if (!self::$db->has_results()) {
             json_error('Artist not found');
         }
-        $artist = $this->db->next_record(MYSQLI_ASSOC, false);
+        $artist = self::$db->next_record(MYSQLI_ASSOC, false);
         return $artist;
     }
 }

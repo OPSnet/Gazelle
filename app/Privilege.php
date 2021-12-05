@@ -23,7 +23,7 @@ class Privilege extends BaseObject {
 
     public function info(): array {
         if (empty($this->info)) {
-            $this->info = $this->db->rowAssoc("
+            $this->info = self::$db->rowAssoc("
                 SELECT p.Name,
                     p.Level,
                     p.Secondary,
@@ -82,7 +82,7 @@ class Privilege extends BaseObject {
     }
 
     protected function userFlush(array $ids): int {
-        $this->cache->deleteMulti(array_merge(
+        self::$cache->deleteMulti(array_merge(
             ["perm_" . $this->id],
             array_map(fn($id) => "u_$id", $ids),
         ));
@@ -92,35 +92,35 @@ class Privilege extends BaseObject {
     public function modify(): bool {
         $modified = parent::modify();
         if ($modified) {
-            $this->db->prepared_query(
+            self::$db->prepared_query(
                 $this->isSecondary()
                 ? "SELECT DISTINCT UserID FROM users_levels WHERE PermissionID = ?"
                 : "SELECT ID FROM users_main WHERE PermissionID = ?"
                 , $this->id
             );
-            $this->userFlush($this->db->collect(0, false));
+            $this->userFlush(self::$db->collect(0, false));
         }
         return $modified;
     }
 
     public function remove(): int {
         if ($this->isSecondary()) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT DISTINCT UserID FROM users_levels WHERE PermissionID = ?
                 ", $this->id
             );
-            $this->userFlush($this->db->collect(0, false));
-            $this->db->prepared_query("
+            $this->userFlush(self::$db->collect(0, false));
+            self::$db->prepared_query("
                 DELETE FROM users_levels WHERE PermissionId = ?
                 ", $this->id
             );
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM permissions WHERE ID = ?
             ", $this->id
         );
-        $this->cache->delete_value('classes');
-        return $this->db->affected_rows();
+        self::$cache->delete_value('classes');
+        return self::$db->affected_rows();
     }
 }

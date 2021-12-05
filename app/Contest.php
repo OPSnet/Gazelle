@@ -19,11 +19,10 @@ class Contest extends Base {
     protected $bonusPerEntry;
 
     public function __construct(int $id) {
-        parent::__construct();
         $this->id = $id;
         $key = sprintf(self::CACHE_CONTEST, $this->id);
-        if (($this->info = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
+        if (($this->info = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query("
                 SELECT t.name AS contest_type, c.name, c.banner, c.description, c.display, c.date_begin, c.date_end,
                     coalesce(cbp.bonus_pool_id, 0) AS bonus_pool,
                     cbp.status AS bonus_status,
@@ -38,8 +37,8 @@ class Contest extends Base {
                 WHERE c.contest_id = ?
                 ", 'open', $this->id
             );
-            $this->info = $this->db->next_record(MYSQLI_ASSOC);
-            $this->cache->cache_value($key, $this->info, 86400 * 3);
+            $this->info = self::$db->next_record(MYSQLI_ASSOC);
+            self::$cache->cache_value($key, $this->info, 86400 * 3);
         }
         if (is_null($this->info)) {
             throw new Exception\ResourceNotFoundException($id);
@@ -64,7 +63,7 @@ class Contest extends Base {
     }
 
     public function save(array $params): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE contest SET
                 name = ?, display = ?, date_begin = ?, date_end = ?,
                 contest_type_id = ?, banner = ?, description = ?
@@ -73,11 +72,11 @@ class Contest extends Base {
                 $params['type'], trim($params['banner']), trim($params['description']),
                 $this->id
         );
-        $success = $this->db->affected_rows();
+        $success = self::$db->affected_rows();
         if (isset($params['payment'])) {
             $this->setPaymentReady();
         }
-        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
+        self::$cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
         return $success;
     }
 
@@ -118,9 +117,9 @@ class Contest extends Base {
     }
 
     protected function participationStats(): array {
-        if (($this->stats = $this->cache->get_value('contest_stats_' . $this->id)) === false) {
+        if (($this->stats = self::$cache->get_value('contest_stats_' . $this->id)) === false) {
             $this->stats = $this->type->participationStats() ?? [0, 0];
-            $this->cache->cache_value('contest_stats_' . $this->id, $this->stats, 900);
+            self::$cache->cache_value('contest_stats_' . $this->id, $this->stats, 900);
         }
         return $this->stats;
     }
@@ -186,9 +185,9 @@ class Contest extends Base {
     public function calculateLeaderboard(): int {
         /* only called from scheduler, don't need to worry how long this takes */
         [$subquery, $args] = $this->type->ranker();
-        $this->db->begin_transaction();
-        $this->db->prepared_query('DELETE FROM contest_leaderboard WHERE contest_id = ?', $this->id);
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query('DELETE FROM contest_leaderboard WHERE contest_id = ?', $this->id);
+        self::$db->prepared_query("
             INSERT INTO contest_leaderboard
                 (contest_id, user_id, entry_count, last_entry_id)
             SELECT ?, LADDER.userid, LADDER.nr, T.ID
@@ -206,12 +205,12 @@ class Contest extends Base {
                 T.Time
             ", $this->id, ...$args
         );
-        $n = $this->db->affected_rows();
-        $this->db->commit();
+        $n = self::$db->affected_rows();
+        self::$db->commit();
         /* recache the pages */
         $pages = range(0, (int)(ceil($n)/CONTEST_ENTRIES_PER_PAGE) - 1);
         foreach ($pages as $p) {
-            $this->cache->delete_value(sprintf(self::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, $p));
+            self::$cache->delete_value(sprintf(self::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, $p));
             $this->type->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p);
         }
         return $n;
@@ -222,25 +221,25 @@ class Contest extends Base {
     }
 
     public function setPaymentReady() {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE contest_has_bonus_pool SET
                 status = ?
             WHERE contest_id = ?
             ', 'ready', $this->id
         );
-        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
-        return $this->db->affected_rows();
+        self::$cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
+        return self::$db->affected_rows();
     }
 
     public function setPaymentClosed() {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE contest_has_bonus_pool SET
                 status = ?
             WHERE contest_id = ?
             ', 'paid', $this->id
         );
-        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
-        return $this->db->affected_rows();
+        self::$cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
+        return self::$db->affected_rows();
     }
 
     public function doPayout() {
@@ -271,7 +270,7 @@ class Contest extends Base {
             }
             $userMan->sendPM($p['ID'], 0,
                 "You have received " . number_format($totalGain, 2) . " bonus points!",
-                $this->twig->render('contest/payout-uploader.twig', [
+                self::$twig->render('contest/payout-uploader.twig', [
                     'username'        => $p['Username'],
                     'date'            => ['begin' => $this->info['date_begin'], 'end' => $this->info['date_end']],
                     'enabled_bonus'   => $enabledUserBonus,
@@ -283,7 +282,7 @@ class Contest extends Base {
                 ])
             );
             (new Bonus(new User($p['ID'])))->addPoints($totalGain);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info SET
                     AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
                 WHERE UserID = ?

@@ -34,7 +34,6 @@ class Seedbox extends Base {
     public const VIEW_BY_PATH = 1;
 
     public function __construct(int $userId) {
-        parent::__construct();
         $this->userId = $userId;
         $this->hashid = new \Hashids\Hashids(SEEDBOX_SALT);
         $this->build();
@@ -74,7 +73,7 @@ class Seedbox extends Base {
     public function freeList() { return $this->free; }
 
     public function name(string $id): ?string {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT name
             FROM user_seedbox
             WHERE user_id = ?
@@ -123,7 +122,7 @@ class Seedbox extends Base {
     }
 
     public function total(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) " . $this->buildFrom(),
             $this->userId, $this->source, $this->userId, $this->target
         );
@@ -140,7 +139,7 @@ class Seedbox extends Base {
     public function torrentList(Manager\Torrent $torMan, int $limit, int $offset): array {
         $from = $this->buildFrom();
         $orderBy = ['tg.Name', 't.FilePath'][$this->viewBy];
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT xfu.fid, tg.Name, tg.Year, tg.RecordLabel,
                 t.GroupID, tg.Name, t.FilePath, t.RemasterTitle, t.RemasterRecordLabel,
                 t.Format, t.Encoding, t.Media, t.HasLog, t.HasLogDB, t.LogScore, t.HasCue, t.Scene
@@ -150,7 +149,7 @@ class Seedbox extends Base {
             ", $this->userId, $this->source, $this->userId, $this->target,
                 $limit, $offset
         );
-        $info = $this->db->to_array('fid', MYSQLI_ASSOC, false);
+        $info = self::$db->to_array('fid', MYSQLI_ASSOC, false);
 
         $list = [];
         foreach ($info as $tid => $details) {
@@ -190,13 +189,13 @@ class Seedbox extends Base {
      */
     public function idList() {
         $from = $this->buildFrom();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT xfu.fid
             $from
             ORDER BY xfu.fid
             ", $this->userId, $this->source, $this->userId, $this->target
         );
-        return $this->db->collect(0, false);
+        return self::$db->collect(0, false);
     }
 
     /**
@@ -211,16 +210,16 @@ class Seedbox extends Base {
         foreach ($update as $seedbox) {
             $name = $seedbox['name'];
             if ($name == '') {
-                $this->db->scalar("
+                self::$db->scalar("
                     DELETE FROM user_seedbox
                     WHERE user_id = ?
                         AND user_seedbox_id = ?
                     ", $this->userId, $this->hashid->decode($seedbox['id'])[0]
                 );
-                $n += $this->db->affected_rows();
+                $n += self::$db->affected_rows();
             } else {
                 try {
-                    $this->db->prepared_query($sql = "
+                    self::$db->prepared_query($sql = "
                         UPDATE user_seedbox SET
                             name = ?
                         WHERE user_id = ?
@@ -230,7 +229,7 @@ class Seedbox extends Base {
                 } catch (\DB_MYSQL_DuplicateKeyException $e) {
                     // do nothing
                 } finally {
-                    $n += $this->db->affected_rows();
+                    $n += self::$db->affected_rows();
                 }
             }
         }
@@ -251,27 +250,27 @@ class Seedbox extends Base {
             return 0;
         }
         $h = $this->hashid;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM user_seedbox
             WHERE user_id = ?
                 AND user_seedbox_id in (" . placeholders($remove) . ")
             ", $this->userId, ...array_map(function ($id) use ($h) {return $h->decode($id)[0];}, $remove)
         );
-        $n = $this->db->affected_rows();
+        $n = self::$db->affected_rows();
         $this->flushCache()->build();
         return $n;
     }
 
     protected function flushCache() {
-        $this->cache->delete_value(self::SUMMARY_KEY . $this->userId);
+        self::$cache->delete_value(self::SUMMARY_KEY . $this->userId);
         return $this;
     }
 
     protected function build() {
         $key = self::SUMMARY_KEY . $this->userId;
         // get the seeding locations and their totals
-        if (($client = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
+        if (($client = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query("
                 SELECT concat(IP, '/', useragent) as client,
                     useragent,
                     IP as ipv4addr,
@@ -281,11 +280,11 @@ class Seedbox extends Base {
                 GROUP BY IP, useragent
                 ", $this->userId
             );
-            $client = $this->db->to_array('client', MYSQLI_ASSOC);
-            $this->cache->cache_value($key, $client, 3600);
+            $client = self::$db->to_array('client', MYSQLI_ASSOC);
+            self::$cache->cache_value($key, $client, 3600);
         }
         // get the names the user has saved (no need to cache)
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT user_seedbox_id as id,
                 concat(inet_ntoa(ipaddr), '/', useragent) AS client,
                 inet_ntoa(ipaddr) AS ipv4addr,
@@ -298,7 +297,7 @@ class Seedbox extends Base {
         $h = $this->hashid;
         $nameList = array_map(function ($a) use ($h) {
                 $b = $a; $b['id'] = $h->encode($b['id']); return $b;
-            }, $this->db->to_array('client', MYSQLI_ASSOC));
+            }, self::$db->to_array('client', MYSQLI_ASSOC));
 
         // go through all the peers and use a name if we have one,
         // otherwise fallback to ip/useragent as a name.
@@ -307,13 +306,13 @@ class Seedbox extends Base {
             $seedbox['sig'] = $this->signature($seedbox['ipv4addr'], $seedbox['useragent']);
             if (!isset($nameList[$clientId])) {
                 $seedbox['name'] = $seedbox['ipv4addr'] . '::' . $seedbox['useragent'];
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     INSERT INTO user_seedbox
                            (user_id, name, useragent, ipaddr)
                     VALUES (?,       ?,    ?,         inet_aton(?))
                     ", $this->userId, $seedbox['name'], $seedbox['useragent'], $seedbox['ipv4addr']
                 );
-                $seedbox['id'] = $this->hashid->encode($this->db->inserted_id());
+                $seedbox['id'] = $this->hashid->encode(self::$db->inserted_id());
             } else {
                 $seedbox['name'] = $nameList[$clientId]['name'];
                 $seedbox['id'] = $nameList[$clientId]['id'];

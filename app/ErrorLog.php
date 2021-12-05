@@ -15,7 +15,7 @@ class ErrorLog extends BaseObject {
         if (isset($this->info)) {
             return $this->info;
         }
-        $info = $this->db->rowAssoc("
+        $info = self::$db->rowAssoc("
             SELECT error_log_id,
                 duration,
                 memory,

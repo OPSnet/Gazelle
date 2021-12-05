@@ -20,7 +20,6 @@ class Login extends Base {
     protected $watch;
 
     public function __construct() {
-        parent::__construct();
         $this->ipaddr = $_SERVER['REMOTE_ADDR'];
     }
 
@@ -84,7 +83,7 @@ class Login extends Base {
             if ($this->watch->nrAttempts() > 10) {
                 $this->watch->ban($this->username);
                 (new Manager\User)->sendPM($this->userId, 0, "Too many login attempts on your account",
-                    $this->twig->render('login/too-many-failures.twig', [
+                    self::$twig->render('login/too-many-failures.twig', [
                     'ipaddr' => $this->ipaddr,
                     'username' => $this->username,
                 ]));

@@ -6,7 +6,7 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $userQuery = $this->db->prepared_query("
+        $userQuery = self::$db->prepared_query("
             SELECT ID, torrent_pass
             FROM users_info AS i
             INNER JOIN users_main AS m ON (m.ID = i.UserID)
@@ -14,10 +14,10 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
                 AND m.Enabled = '1'
                 AND m.can_leech != '0'");
 
-        $userIDs = $this->db->collect('ID');
+        $userIDs = self::$db->collect('ID');
         if (count($userIDs) > 0) {
             $placeholders = placeholders($userIDs);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info AS i
                 INNER JOIN users_main AS m ON (m.ID = i.UserID)
                 SET m.can_leech = '0',
@@ -25,7 +25,7 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
                 WHERE m.ID IN($placeholders)
             ", ...$userIDs);
 
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM users_torrent_history
                 WHERE UserID IN ($placeholders)
             ", $userIDs);
@@ -33,7 +33,7 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
 
         $userMan = new \Gazelle\Manager\User;
         foreach ($userIDs as $userID) {
-            $this->cache->delete_value("u_$userID");
+            self::$cache->delete_value("u_$userID");
             $userMan->sendPM($userID, 0,
                 'Your downloading privileges have been disabled',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
@@ -42,8 +42,8 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
             $this->processed++;
         }
 
-        $this->db->set_query_id($userQuery);
-        $passkeys = $this->db->collect('torrent_pass');
+        self::$db->set_query_id($userQuery);
+        $passkeys = self::$db->collect('torrent_pass');
         $tracker = new \Gazelle\Tracker;
         foreach ($passkeys as $passkey) {
             $tracker->update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '0']);

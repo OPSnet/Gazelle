@@ -13,7 +13,6 @@ class SiteLog extends \Gazelle\Base {
     protected $userMan;
 
     public function __construct (\Gazelle\Debug $debug) {
-        parent::__construct();
         $this->debug = $debug;
         $this->usernames = [];
         $this->userMan = new \Gazelle\Manager\User;
@@ -24,8 +23,8 @@ class SiteLog extends \Gazelle\Base {
     public function errorMessage() { return $this->queryError; }
 
     public function next() {
-        $this->db->set_query_id($this->qid);
-        while ($result = $this->db->next_record(MYSQLI_NUM, false)) {
+        self::$db->set_query_id($this->qid);
+        while ($result = self::$db->next_record(MYSQLI_NUM, false)) {
             [$color, $message] = $this->colorize($result[1]);
             yield [
                 'id'      => $result[0],
@@ -33,20 +32,20 @@ class SiteLog extends \Gazelle\Base {
                 'color'   => $color,
                 'message' => $message,
             ];
-            $this->db->set_query_id($this->qid);
+            self::$db->set_query_id($this->qid);
         }
     }
 
     public function load(int $page, int $offset, string $searchTerm) {
         if ($searchTerm === '') {
-            $this->logQuery = $this->db->prepared_query("
+            $this->logQuery = self::$db->prepared_query("
                 SELECT ID, Message, Time
                 FROM log
                 ORDER BY ID DESC
                 LIMIT ?, ?
                 ", $offset, LOG_ENTRIES_PER_PAGE
             );
-            $this->totalMatches = $this->db->record_count();
+            $this->totalMatches = self::$db->record_count();
             if ($this->totalMatches == LOG_ENTRIES_PER_PAGE) {
                 $sq = new \SphinxqlQuery();
                 $result = $sq->select('id')->from('log, log_delta')->limit(0, 1, 1)->sphinxquery();
@@ -71,11 +70,11 @@ class SiteLog extends \Gazelle\Base {
             $this->debug->set_flag('Finished SphQL query');
             if ($this->queryStatus = $result->Errno) {
                 $this->queryError = $result->Error;
-                $this->logQuery = $this->db->prepared_query('SET @nothing = 0');
+                $this->logQuery = self::$db->prepared_query('SET @nothing = 0');
             } else  {
                 $this->totalMatches = min(SPHINX_MAX_MATCHES, $result->get_meta('total_found'));
                 $logIds = $result->collect('id') ?: [0];
-                $this->logQuery = $this->db->prepared_query("
+                $this->logQuery = self::$db->prepared_query("
                     SELECT ID, Message, Time
                     FROM log
                     WHERE ID IN (" . placeholders($logIds) . ")
@@ -84,7 +83,7 @@ class SiteLog extends \Gazelle\Base {
                 );
             }
         }
-        $this->qid = $this->db->get_query_id();
+        $this->qid = self::$db->get_query_id();
     }
 
     public function colorize(string $logMessage) {

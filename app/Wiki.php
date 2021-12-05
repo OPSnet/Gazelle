@@ -10,9 +10,9 @@ class Wiki extends BaseObject {
     public function __construct(int $id) {
         parent::__construct($id);
         $key = sprintf(self::CACHE_KEY, $this->id);
-        $this->info = $this->cache->get_value($key);
+        $this->info = self::$cache->get_value($key);
         if ($this->info === false) {
-            $this->info = $this->db->rowAssoc("
+            $this->info = self::$db->rowAssoc("
                 SELECT w.Title      AS title,
                     w.Body          AS body,
                     w.Date          AS date,
@@ -35,7 +35,7 @@ class Wiki extends BaseObject {
             \Text::$TOC = true;
             \Text::full_format($this->info['body'], false);
             $this->info['toc'] = \Text::parse_toc(0);
-            $this->cache->cache_value($key, $this->info, 0);
+            self::$cache->cache_value($key, $this->info, 0);
         }
     }
 
@@ -52,13 +52,13 @@ class Wiki extends BaseObject {
     }
 
     public function flush() {
-        $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
     }
 
     public function revisionBody(int $revision): ?string {
         return $revision === $this->info['revision']
             ? $this->info['body']
-            : $this->db->scalar("
+            : self::$db->scalar("
                 SELECT Body FROM wiki_revisions WHERE ID = ? AND Revision = ?
                 ", $this->id, $revision
             );
@@ -128,7 +128,7 @@ class Wiki extends BaseObject {
         if (!$this->dirty()) {
             return false;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO wiki_revisions
                   (ID, Revision, Title, Body, Author, Date)
             SELECT ID, Revision, Title, Body, Author, Date
@@ -149,17 +149,17 @@ class Wiki extends BaseObject {
      * param int the article to remove
      */
     public function remove() {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("DELETE FROM wiki_articles WHERE ID = ?", $this->id);
-        $this->db->prepared_query("DELETE FROM wiki_aliases WHERE ArticleID = ?", $this->id);
-        $this->db->prepared_query("DELETE FROM wiki_revisions WHERE ID = ?", $this->id);
-        $this->db->commit();
-        $this->cache->delete_value('wiki_aliases');
+        self::$db->begin_transaction();
+        self::$db->prepared_query("DELETE FROM wiki_articles WHERE ID = ?", $this->id);
+        self::$db->prepared_query("DELETE FROM wiki_aliases WHERE ArticleID = ?", $this->id);
+        self::$db->prepared_query("DELETE FROM wiki_revisions WHERE ID = ?", $this->id);
+        self::$db->commit();
+        self::$cache->delete_value('wiki_aliases');
         $this->flush();
     }
 
     public function revisionList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT Revision AS revision,
                 Title       AS title,
                 Author      AS author_id,
@@ -169,7 +169,7 @@ class Wiki extends BaseObject {
             ORDER BY Revision DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -180,14 +180,14 @@ class Wiki extends BaseObject {
      * @throws \DB_MYSQL_DuplicateKeyException if alias already exists on another article
      */
     public function addAlias(string $alias, int $userId): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO wiki_aliases
                    (ArticleID, Alias, UserID)
             VALUES (?,         ?,     ?)
             ", $this->id, self::normalizeAlias($alias), $userId
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -199,11 +199,11 @@ class Wiki extends BaseObject {
         if (!isset($this->info['alias'][$alias])) {
             return 0;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM wiki_aliases WHERE Alias = ?
             ", $alias
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 }

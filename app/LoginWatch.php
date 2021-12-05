@@ -8,20 +8,19 @@ class LoginWatch extends Base {
     protected $userId = 0;
 
     public function __construct(string $ipaddr) {
-        parent::__construct();
         $this->ipaddr = $ipaddr;
-        $this->id = $this->db->scalar("
+        $this->id = self::$db->scalar("
             SELECT ID FROM login_attempts WHERE IP = ?
             ", $this->ipaddr
         );
         if (is_null($this->id) && $ipaddr != '0.0.0.0') {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO login_attempts
                        (IP, UserID)
                 VALUES (?,  0)
                 ", $ipaddr
             );
-            $this->id = $this->db->inserted_id();
+            $this->id = self::$db->inserted_id();
         }
     }
 
@@ -35,7 +34,7 @@ class LoginWatch extends Base {
      */
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
-        $seen = (bool)$this->db->scalar("
+        $seen = (bool)self::$db->scalar("
             SELECT 1
             FROM users_history_ips
             WHERE (EndTime IS NULL OR EndTime > now() - INTERVAL 1 WEEK)
@@ -43,7 +42,7 @@ class LoginWatch extends Base {
                 AND IP = ?
             ", $this->userId, $this->ipaddr
         );
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE login_attempts SET
                 Attempts = Attempts + 1,
                 LastAttempt = now(),
@@ -54,7 +53,7 @@ class LoginWatch extends Base {
             ', $seen ? 60 : LOGIN_ATTEMPT_BACKOFF[min($this->nrAttempts(), count(LOGIN_ATTEMPT_BACKOFF)-1)],
                 $this->userId, $username, $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -62,7 +61,7 @@ class LoginWatch extends Base {
      * @return int 1 if the watch was banned
      */
     public function ban(string $username): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE login_attempts SET
                 Bans = Bans + 1,
                 LastAttempt = now(),
@@ -72,7 +71,7 @@ class LoginWatch extends Base {
             WHERE ID = ?
             ', $username, $this->userId, $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -80,7 +79,7 @@ class LoginWatch extends Base {
      * @return string datestamp of expiry
      */
     public function bannedUntil(): ?string {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT BannedUntil FROM login_attempts WHERE ID = ?
             ", $this->id
         );
@@ -99,14 +98,14 @@ class LoginWatch extends Base {
      * @return int 1 if a prior ban was cleared
      */
     public function clearPriorBan(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE login_attempts SET
                 BannedUntil = NULL,
                 Attempts = 0
             WHERE BannedUntil < now() AND ID = ?
             ", $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -114,13 +113,13 @@ class LoginWatch extends Base {
      * @return int 1 if an update was made
      */
     public function clearAttempts(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE login_attempts SET
                 Attempts = 0
             WHERE ID = ?
             ", $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -128,7 +127,7 @@ class LoginWatch extends Base {
      * @return int Number of attempts
      */
     public function nrAttempts(): int {
-        return (int)$this->db->scalar("
+        return (int)self::$db->scalar("
             SELECT Attempts FROM login_attempts WHERE ID = ?
             ", $this->id
         );
@@ -139,7 +138,7 @@ class LoginWatch extends Base {
      * @return int Number of attempts
      */
     public function nrBans(): int {
-        return (int)$this->db->scalar("
+        return (int)self::$db->scalar("
             SELECT Bans FROM login_attempts WHERE IP = ?
             ", $this->ipaddr
         );
@@ -150,7 +149,7 @@ class LoginWatch extends Base {
      * @return int count
      */
     public function activeTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM login_attempts w
             WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
@@ -162,7 +161,7 @@ class LoginWatch extends Base {
      * @return array list [ID, ipaddr, userid, LastAttempt (datetime), Attempts, BannedUntil (datetime), Bans]
      */
     public function activeList(string $orderBy, string $orderWay, int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT w.ID       AS id,
                 w.IP          AS ipaddr,
                 w.UserID      AS user_id,
@@ -181,7 +180,7 @@ class LoginWatch extends Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        return $this->db->to_array('id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -198,17 +197,17 @@ class LoginWatch extends Base {
         $reason = trim($reason);
         $n = 0;
         foreach ($list as $id) {
-            $ipv4 = $this->db->scalar("
+            $ipv4 = self::$db->scalar("
                 SELECT inet_aton(IP) FROM login_attempts WHERE ID = ?
                 ", $this->id
             );
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT IGNORE INTO ip_bans
                        (user_id, Reason, FromIP, ToIP)
                 VALUES (?,       ?,      ?,      ?)
                 ", $userId, $reason, $ipv4, $ipv4
             );
-            $n += $this->db->affected_rows();
+            $n += self::$db->affected_rows();
         }
         return $n;
     }
@@ -222,11 +221,11 @@ class LoginWatch extends Base {
         if (!$list) {
             return 0;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM login_attempts
             WHERE ID in (" . placeholders($list) . ")
             ", ... $list
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 }

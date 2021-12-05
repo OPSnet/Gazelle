@@ -16,9 +16,8 @@ class InviteTree extends Base {
     protected $maxPosition;
 
     public function __construct(int $userId) {
-        parent::__construct();
         $this->userId = $userId;
-        [$this->treeId, $this->treeLevel, $this->treePosition, $this->maxPosition] = $this->db->row("
+        [$this->treeId, $this->treeLevel, $this->treePosition, $this->maxPosition] = self::$db->row("
             SELECT
                 t1.TreeID,
                 t1.TreeLevel,
@@ -43,7 +42,7 @@ class InviteTree extends Base {
     }
 
     public function hasInvitees(): bool {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT 1
             FROM invite_tree
             WHERE InviterId = ?
@@ -53,7 +52,7 @@ class InviteTree extends Base {
     }
 
     public function inviteeList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID
             FROM invite_tree
             WHERE TreeID = ?
@@ -63,13 +62,13 @@ class InviteTree extends Base {
             ORDER BY TreePosition
             ", $this->treeId, $this->treeLevel, $this->treePosition, $this->maxPosition
         );
-        return $this->db->collect('UserID');
+        return self::$db->collect('UserID');
     }
 
     public function add(int $userId) {
         // TODO: use the new instance variables instead of doing a lookup here
         while (true) {
-            [$treeId, $inviterPosition, $level] = $this->db->row("
+            [$treeId, $inviterPosition, $level] = self::$db->row("
                 SELECT TreeID, TreePosition, TreeLevel
                 FROM invite_tree
                 WHERE UserID = ?
@@ -79,14 +78,14 @@ class InviteTree extends Base {
                 break;
             }
             // Not everyone is created by the genesis user. Invite trees may be disconnected.
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO invite_tree
                        (UserID, TreeID)
                 VALUES (?, (SELECT coalesce(max(it.TreeID), 0) + 1 FROM invite_tree AS it))
                 ", $this->userId
             );
         }
-        $nextPosition = $this->db->scalar("
+        $nextPosition = self::$db->scalar("
             SELECT TreePosition
             FROM invite_tree
             WHERE TreeID = ?
@@ -97,7 +96,7 @@ class InviteTree extends Base {
         );
         if (!$nextPosition) {
             // Tack them on the end of the list.
-            $nextPosition = $this->db->scalar("
+            $nextPosition = self::$db->scalar("
                 SELECT max(TreePosition) + 1
                 FROM invite_tree
                 WHERE TreeID = ?
@@ -107,7 +106,7 @@ class InviteTree extends Base {
             // Someone invited Alice and then Bob. Later on, Alice invites Carol,
             // so Bob and others have to "pushed down" a row so that Carol can
             // be lodged under Alice.
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE invite_tree SET
                     TreePosition = TreePosition + 1
                 WHERE TreeID = ?
@@ -115,7 +114,7 @@ class InviteTree extends Base {
                 ", $treeId, $nextPosition
             );
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO invite_tree
                    (UserID, InviterID, TreeID, TreePosition, TreeLevel)
             VALUES (?,      ?,         ?,      ?,            ?)
@@ -124,8 +123,8 @@ class InviteTree extends Base {
     }
 
     function details(): array {
-        $qid = $this->db->get_query_id();
-        [$treeId, $position, $level] = $this->db->row("
+        $qid = self::$db->get_query_id();
+        [$treeId, $position, $level] = self::$db->row("
             SELECT TreeID, TreePosition, TreeLevel
             FROM invite_tree
             WHERE UserID = ?
@@ -151,7 +150,7 @@ class InviteTree extends Base {
         ];
 
         $args = [$treeId, $position, $level];
-        $maxPosition = $this->db->scalar("
+        $maxPosition = self::$db->scalar("
             SELECT TreePosition
             FROM invite_tree
             WHERE TreeID = ?
@@ -167,7 +166,7 @@ class InviteTree extends Base {
             $maxCond = 'AND TreePosition < ?';
             $args[] = $maxPosition;
         }
-        $treeQ = $this->db->prepared_query("
+        $treeQ = self::$db->prepared_query("
             SELECT
                 it.UserID,
                 um.Enabled,
@@ -199,7 +198,7 @@ class InviteTree extends Base {
         $classSummary = [];
         $markup = '';
         while ([$inviteeId, $enabled, $permissionId, $donor, $uploaded, $downloaded, $joindate, $paranoia, $position, $level]
-            = $this->db->next_record(MYSQLI_NUM, false)
+            = self::$db->next_record(MYSQLI_NUM, false)
         ) {
             $info['total']++;
             if ($enabled == 2) {
@@ -248,7 +247,7 @@ class InviteTree extends Base {
             }
             $prevLevel = $level;
 
-            $this->db->set_query_id($treeQ);
+            self::$db->set_query_id($treeQ);
         }
 
         if (!$info['total']) {
@@ -270,7 +269,7 @@ class InviteTree extends Base {
                 'markup'      => $markup,
             ];
         }
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
         return $details;
     }
 }

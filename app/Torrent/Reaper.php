@@ -19,14 +19,14 @@ class Reaper extends \Gazelle\Base {
 
         $criteria = implode(' OR ', $criteria);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT t.ID
             FROM torrents AS t
             INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
             WHERE $criteria
             LIMIT 8000
         ");
-        $torrents = $this->db->collect('ID');
+        $torrents = self::$db->collect('ID');
 
         $logEntries = $deleteNotes = [];
         $torMan = new \Gazelle\Manager\Torrent;
@@ -72,7 +72,7 @@ class Reaper extends \Gazelle\Base {
         if (count($logEntries) > 0) {
             $chunks = array_chunk($logEntries, 100);
             foreach ($chunks as $messages) {
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     INSERT INTO log (Message, Time)
                     VALUES " . placeholders($messages, '(?, now())')
                     , ...$messages
@@ -80,23 +80,23 @@ class Reaper extends \Gazelle\Base {
             }
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT SimilarID
             FROM artists_similar_scores
             WHERE Score <= 0");
-        $similarIDs = $this->db->collect('SimilarID');
+        $similarIDs = self::$db->collect('SimilarID');
 
         if ($similarIDs) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM artists_similar
                 WHERE SimilarID IN (" . placeholders($similarIDs, '(?)') . ")
             ", ...$similarIDs);
             $placeholders = placeholders($similarIDs);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM artists_similar_scores
                 WHERE SimilarID IN ($placeholders)
             ", ...$similarIDs);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM artists_similar_votes
                 WHERE SimilarID IN ($placeholders)
             ", ...$similarIDs);

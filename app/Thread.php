@@ -23,9 +23,9 @@ class Thread extends BaseObject {
     public function __construct(int $id) {
         parent::__construct($id);
         $key = sprintf(self::CACHE_KEY, $this->id);
-        [$this->type, $this->created] = $this->cache->get_value($key);
+        [$this->type, $this->created] = self::$cache->get_value($key);
         if (is_null($this->type)) {
-            [$this->type, $this->created] = $this->db->row("
+            [$this->type, $this->created] = self::$db->row("
                 SELECT tt.Name as ThreadType,
                     t.Created
                 FROM thread t
@@ -36,7 +36,7 @@ class Thread extends BaseObject {
             if (is_null($this->type)) {
                 throw new Exception\ResourceNotFoundException($this->id);
             }
-            $this->cache->cache_value($key, [$this->type, $this->created], 86400);
+            self::$cache->cache_value($key, [$this->type, $this->created], 86400);
         }
         return $this->refresh(); /* load the story */
     }
@@ -62,7 +62,7 @@ class Thread extends BaseObject {
      * @param int $visibility 'public' or 'staff'
      */
     public function saveNote(int $userId, string $body, string $visibility) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO thread_note
                    (ThreadID, UserID, Body, Visibility)
             VALUES (?,        ?,      ?,    ?)
@@ -78,7 +78,7 @@ class Thread extends BaseObject {
      * @param int $visibility 'public' or 'staff'
      */
     public function modifyNote(int $id, string $body, string $visibility) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE thread_note SET
                 Body = ?,
                 Visibility = ?
@@ -93,7 +93,7 @@ class Thread extends BaseObject {
      * @param int $note_id The id to identify a note
      */
     public function removeNote(int $noteId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM thread_note
             WHERE ThreadID = ?
                 AND ID = ?
@@ -106,7 +106,7 @@ class Thread extends BaseObject {
      * Refresh the story cache when a note is added, changed, deleted.
      */
     protected function refresh() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT tn.ID      AS id,
                 tn.UserID     AS user_id,
                 um.Username   AS username,
@@ -119,8 +119,8 @@ class Thread extends BaseObject {
             ORDER BY tn.Created;
             ", $this->id
         );
-        $this->story = $this->db->to_array('id', MYSQLI_ASSOC, false);
-        $this->cache->cache_value(sprintf(self::STORY_KEY, $this->id), $this->story, 86400);
+        $this->story = self::$db->to_array('id', MYSQLI_ASSOC, false);
+        self::$cache->cache_value(sprintf(self::STORY_KEY, $this->id), $this->story, 86400);
         return $this;
     }
 }

@@ -7,7 +7,6 @@ class Log extends \Gazelle\Base {
     protected $id; // id of the torrent
 
     public function __construct ($id) {
-        parent::__construct();
         $this->id = $id;
     }
 
@@ -23,7 +22,7 @@ class Log extends \Gazelle\Base {
      *    The 'status' key points to an unserialized array of AdjustmentDetails
      */
     public function logDetails() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT LogID,
                 Adjusted,
                 AdjustedBy,
@@ -38,7 +37,7 @@ class Log extends \Gazelle\Base {
             WHERE TorrentID = ?
             ", $this->id
         );
-        $logs = $this->db->to_array('LogID', MYSQLI_ASSOC, false);
+        $logs = self::$db->to_array('LogID', MYSQLI_ASSOC, false);
         $details = [];
         $htmlFiler = new \Gazelle\File\RipLogHTML;
         foreach ($logs as $log) {

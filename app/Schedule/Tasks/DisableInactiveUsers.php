@@ -7,7 +7,7 @@ use Gazelle\Util\Mail;
 class DisableInactiveUsers extends \Gazelle\Schedule\Task
 {
     protected function userQuery($minDays, $maxDays) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.Username, um.Email, um.ID
             FROM users_main AS um
             INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
@@ -34,7 +34,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         $this->userQuery(110, 111);
         $mail = new Mail;
         global $Twig;
-        while ([$username, $email] = $this->db->next_record()) {
+        while ([$username, $email] = self::$db->next_record()) {
             $mail->send($email, 'Your ' . SITE_NAME . ' account is about to be disabled',
                 $Twig->render('email/disable-warning.twig', [
                     'username' => $username,
@@ -43,8 +43,8 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         }
 
         $this->userQuery(120, 180);
-        if ($this->db->has_results()) {
-            $userIDs = $this->db->collect('ID');
+        if (self::$db->has_results()) {
+            $userIDs = self::$db->collect('ID');
             $userMan = new \Gazelle\Manager\User;
             $userMan->disableUserList($userIDs, 'Disabled for inactivity.', \Gazelle\Manager\User::DISABLE_INACTIVITY);
             foreach ($userIDs as $userID) {

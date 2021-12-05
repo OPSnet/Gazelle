@@ -3,27 +3,13 @@
 namespace Gazelle;
 
 abstract class Base {
-    /** @var \DB_MYSQL */
-    protected static $_db;
-    protected $db;
-
-    /** @var \Gazelle\Cache */
-    protected static $_cache;
-    protected $cache;
-
-    /** @var \Twig\Environment */
-    protected static $_twig;
-    protected $twig;
-
-    public function __construct() {
-        $this->cache =& self::$_cache;
-        $this->db    =& self::$_db;
-        $this->twig  =& self::$_twig;
-    }
+    protected static \DB_MYSQL $db;
+    protected static \Gazelle\Cache $cache;
+    protected static \Twig\Environment $twig;
 
     public static function initialize(\Gazelle\Cache $cache, \DB_MYSQL $db, \Twig\Environment $twig) {
-        self::$_db    =& $db;
-        self::$_cache =& $cache;
-        self::$_twig  =& $twig;
+        self::$db    = $db;
+        self::$cache = $cache;
+        self::$twig  = $twig;
     }
 }

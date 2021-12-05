@@ -7,8 +7,8 @@ trait TorrentLeaderboard {
         $key = sprintf(\Gazelle\Contest::CONTEST_LEADERBOARD_CACHE_KEY,
             $this->id, (int)($offset/CONTEST_ENTRIES_PER_PAGE)
         );
-        if (($leaderboard = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
+        if (($leaderboard = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query("
                 SELECT
                     l.user_id,
                     um.Username as username,
@@ -24,7 +24,7 @@ trait TorrentLeaderboard {
                 LIMIT ? OFFSET ?
                 ", $this->id, $limit, $offset
             );
-            $leaderboard = $this->db->to_array(false, MYSQLI_ASSOC, false);
+            $leaderboard = self::$db->to_array(false, MYSQLI_ASSOC, false);
 
             $torMan = new \Gazelle\Manager\Torrent;
             for ($i = 0, $leaderboardCount = count($leaderboard); $i < $leaderboardCount; $i++) {
@@ -32,7 +32,7 @@ trait TorrentLeaderboard {
                 $leaderboard[$i]['last_entry_link']
                     = $torrent->link() . ' [' . $torrent->label() . ']';
             }
-            $this->cache->cache_value($key, $leaderboard, 3600);
+            self::$cache->cache_value($key, $leaderboard, 3600);
         }
         return $leaderboard;
     }
@@ -44,7 +44,6 @@ abstract class AbstractContest extends \Gazelle\Base {
     protected $end;
 
     public function __construct(int $id, string $begin, string $end) {
-        parent::__construct();
         $this->id    = $id;
         $this->begin = $begin;
         $this->end   = $end;

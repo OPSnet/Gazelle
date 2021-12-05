@@ -64,7 +64,6 @@ class UserRank extends Base {
     }
 
     public function __construct(\Gazelle\UserRank\Configuration $config, array $dimension) {
-        parent::__construct();
         $this->config = $config;
         $definition = $this->config->definition();
 

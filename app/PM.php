@@ -10,7 +10,6 @@ class PM extends Base {
     protected array $info = [];
 
     public function __construct(int $id, User $user) {
-        parent::__construct();
         $this->id = $id;
         $this->user = $user;
     }
@@ -20,16 +19,16 @@ class PM extends Base {
     }
 
     public function flush() {
-        $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id, $this->user->id()));
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id, $this->user->id()));
         $this->info = [];
     }
 
     public function info(): array {
         if (empty($this->info)) {
             $key = sprintf(self::CACHE_KEY, $this->id, $this->user->id());
-            $info = $this->cache->get_value($key);
+            $info = self::$cache->get_value($key);
             if ($info === false) {
-                $info = $this->db->rowAssoc("
+                $info = self::$db->rowAssoc("
                     SELECT c.Subject   AS subject,
                         cu.Sticky      AS pinned,
                         cu.UnRead      AS unread,
@@ -48,16 +47,16 @@ class PM extends Base {
                 }
 
                 // get the senders who have sent a message in this thread
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     SELECT DISTINCT pm.SenderID
                     FROM pm_messages pm
                     WHERE pm.ConvID = ?
                     ", $this->id
                 );
-                $info['sender_list'] = $this->db->collect(0, false);
+                $info['sender_list'] = self::$db->collect(0, false);
 
                 // get the recipients of messages in this thread.
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     SELECT DISTINCT cu.UserID
                     FROM pm_conversations_users cu
                     WHERE cu.ForwardedTo IN (0, cu.UserID)
@@ -65,8 +64,8 @@ class PM extends Base {
                         AND cu.UserID != ?
                     ", $this->id, $this->user->id()
                 );
-                $info['recipient_list'] = $this->db->collect(0, false);
-                $this->cache->cache_value($key, $info, 86400);
+                $info['recipient_list'] = self::$db->collect(0, false);
+                self::$cache->cache_value($key, $info, 86400);
                 $info['from_cache'] = false;
             }
             $this->info = $info;
@@ -132,7 +131,7 @@ class PM extends Base {
     public function markRead(): int {
         $affected = 0;
         if ($this->isUnread()) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE pm_conversations_users SET
                     UnRead = '0'
                 WHERE UnRead = '1'
@@ -140,9 +139,9 @@ class PM extends Base {
                     AND UserID = ?
                 ", $this->id, $this->user->id()
             );
-            $affected = $this->db->affected_rows();
+            $affected = self::$db->affected_rows();
             if ($affected) {
-                $this->cache->decrement("inbox_new_" . $this->user->id());
+                self::$cache->decrement("inbox_new_" . $this->user->id());
                 $this->flush();
             }
         }
@@ -150,8 +149,8 @@ class PM extends Base {
     }
 
     public function setForwardedTo(int $userId): int {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             INSERT IGNORE INTO pm_conversations_users
                    (UserID, ConvID, InInbox, InSentbox, ReceivedDate)
             VALUES (?,      ?,      '1',     '0',       now())
@@ -160,29 +159,29 @@ class PM extends Base {
                 UnRead = 1
             ", $userId, $this->id
         );
-        $affected = $this->db->affected_rows();
-        $this->db->prepared_query("
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 ForwardedTo = ?
             WHERE ConvID = ?
                 AND UserID = ?
             ", $userId, $this->user->id(), $this->id
         );
-        $affected += $this->db->affected_rows();
-        $this->db->commit();
-        $this->cache->delete_value("inbox_new_$userId");
+        $affected += self::$db->affected_rows();
+        self::$db->commit();
+        self::$cache->delete_value("inbox_new_$userId");
         return $affected;
     }
 
     public function postTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) from pm_messages where ConvID = ?
             ", $this->id
         );
     }
 
     public function postList(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID AS id,
                 SentDate AS sent_date,
                 SenderID AS sender_id,
@@ -193,6 +192,6 @@ class PM extends Base {
             LIMIT ? OFFSET ?
             ", $this->id, $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

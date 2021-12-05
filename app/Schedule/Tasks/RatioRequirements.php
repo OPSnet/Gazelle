@@ -7,13 +7,13 @@ class RatioRequirements extends \Gazelle\Schedule\Task
     public function run()
     {
         // Clear old seed time history
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM users_torrent_history
             WHERE Date < DATE(now() - INTERVAL 7 DAY)
         ');
 
         // Store total seeded time for each user in a temp table
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             CREATE TEMPORARY TABLE tmp_history_time (
                 UserID int(10) unsigned NOT NULL PRIMARY KEY,
                 SumTime bigint(20) unsigned NOT NULL DEFAULT 0
@@ -25,7 +25,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
 
         // Insert new row with <NumTorrents> = 0 with <Time> being number of seconds short of 72 hours.
         // This is where we penalize torrents seeded for less than 72 hours
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO users_torrent_history
                 (UserID, NumTorrents, Date, Time)
             SELECT UserID, 0, UTC_DATE() + 0, 259200 - SumTime
@@ -34,7 +34,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         ');
 
         // Set <Weight> to the time seeding <NumTorrents> torrents
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_torrent_history
             SET Weight = NumTorrents * Time
             WHERE Weight != NumTorrents * Time
@@ -42,7 +42,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
 
         // Calculate average time spent seeding each of the currently active torrents.
         // This rounds the results to the nearest integer because SeedingAvg is an int column.
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             CREATE TEMPORARY TABLE tmp_history_weight_time (
                 UserID int(10) unsigned NOT NULL PRIMARY KEY,
                 SeedingAvg int(6) unsigned NOT NULL DEFAULT 0
@@ -53,13 +53,13 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         ');
 
         // Remove dummy entry for torrents seeded less than 72 hours
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM users_torrent_history
             WHERE NumTorrents = 0
         ');
 
         // Get each user's amount of snatches of existing torrents
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             CREATE TEMPORARY TABLE tmp_snatch (
                 UserID int unsigned PRIMARY KEY,
                 NumSnatches int(10) unsigned NOT NULL DEFAULT 0
@@ -72,7 +72,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
 
         // Get the fraction of snatched torrents seeded for at least 72 hours this week
         // Essentially take the total number of hours seeded this week and divide that by 72 hours * <NumSnatches>
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             CREATE TEMPORARY TABLE tmp_snatch_weight (
                 UserID int unsigned PRIMARY KEY,
                 fraction float(10) NOT NULL
@@ -94,7 +94,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         ];
 
         $downloadBarrier = 100 * 1024 * 1024 * 1024;
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_main AS um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             SET um.RequiredRatio = 0.60
@@ -105,7 +105,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         foreach ($ratioRequirements as $requirement) {
             list($download, $ratio, $minRatio) = $requirement;
 
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 UPDATE users_main AS um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
                 INNER JOIN tmp_snatch_weight AS tsw ON (uls.UserID = um.ID)
@@ -115,7 +115,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
                 ', $ratio, $download, $downloadBarrier
             );
 
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 UPDATE users_main AS um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
                 SET um.RequiredRatio = ?
@@ -128,7 +128,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
             $downloadBarrier = $download;
         }
 
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_main AS um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             SET um.RequiredRatio = 0.00

@@ -14,14 +14,14 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function getTasks() {
-        if (!$tasks = $this->cache->get_value(self::CACHE_TASKS)) {
-            $this->db->prepared_query('
+        if (!$tasks = self::$cache->get_value(self::CACHE_TASKS)) {
+            self::$db->prepared_query('
                 SELECT periodic_task_id, name, classname, description, period, is_enabled, is_sane, is_debug, run_now
                 FROM periodic_task
             ');
 
-            $tasks = $this->db->has_results() ? $this->db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
-            $this->cache->cache_value(self::CACHE_TASKS, $tasks, 3600);
+            $tasks = self::$db->has_results() ? self::$db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
+            self::$cache->cache_value(self::CACHE_TASKS, $tasks, 3600);
         }
 
         return $tasks;
@@ -41,7 +41,7 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function clearCache() {
-        $this->cache->delete_value(self::CACHE_TASKS);
+        self::$cache->delete_value(self::CACHE_TASKS);
     }
 
     public function createTask(string $name, string $class, string $description, int $period, bool $isEnabled, bool $isSane, bool $isDebug) {
@@ -49,7 +49,7 @@ class Scheduler extends \Gazelle\Base {
             return;
         }
 
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO periodic_task
                    (name, classname, description, period, is_enabled, is_sane, is_debug)
             VALUES
@@ -63,7 +63,7 @@ class Scheduler extends \Gazelle\Base {
             return;
         }
 
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE periodic_task
             SET name = ?,
                 classname = ?,
@@ -78,7 +78,7 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function runNow(int $id) {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE periodic_task
             SET run_now = 1 - run_now
             WHERE periodic_task_id = ?
@@ -88,7 +88,7 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function deleteTask(int $id) {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM periodic_task
             WHERE periodic_task_id = ?
         ', $id);
@@ -96,7 +96,7 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function getTaskDetails(int $days = 7): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT pt.periodic_task_id, name, description, period, is_enabled, is_sane, run_now,
                    coalesce(stats.runs, 0) runs, coalesce(stats.processed, 0) processed,
                    coalesce(stats.errors, 0) errors, coalesce(events.events, 0) events,
@@ -125,11 +125,11 @@ class Scheduler extends \Gazelle\Base {
             ORDER BY pt.run_now DESC, pt.is_enabled DESC, pt.period, pt.periodic_task_id
         ", $days, $days);
 
-        return $this->db->to_array('periodic_task_id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('periodic_task_id', MYSQLI_ASSOC, false);
     }
 
     public function getTotal(int $id): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM periodic_task_history WHERE periodic_task_id = ?
             ", $id
         );
@@ -150,24 +150,24 @@ class Scheduler extends \Gazelle\Base {
         }
         $sort = $sortMap[$sort];
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT periodic_task_history_id, launch_time, status, num_errors, num_items, duration_ms
             FROM periodic_task_history
             WHERE periodic_task_id = ?
             ORDER BY $sort $direction
             LIMIT ? OFFSET ?
         ", $id, $limit, $offset);
-        $items = $this->db->to_array('periodic_task_history_id', MYSQLI_ASSOC);
+        $items = self::$db->to_array('periodic_task_history_id', MYSQLI_ASSOC);
 
         $historyEvents = [];
         if (count($items)) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT periodic_task_history_id, event_time, severity, event, reference
                 FROM periodic_task_history_event
                 WHERE periodic_task_history_id IN (" . placeholders($items) . ")
                 ORDER BY event_time, periodic_task_history_event_id
             ", ...array_keys($items));
-            $events = $this->db->to_array(false, MYSQLI_ASSOC);
+            $events = self::$db->to_array(false, MYSQLI_ASSOC);
 
             foreach ($events as $event) {
                 list($historyId, $eventTime, $severity, $message, $reference) = array_values($event);
@@ -211,7 +211,7 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function getRuntimeStats(int $days = 28) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT date_format(pth.launch_time, '%Y-%m-%d %H:00:00') AS date,
                    sum(pth.duration_ms) AS duration,
                    sum(pth.num_items) AS processed
@@ -222,9 +222,9 @@ class Scheduler extends \Gazelle\Base {
             GROUP BY 1
             ORDER BY 1
         ");
-        $hourly = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC, false), 'date', ['duration', 'processed'], true);
+        $hourly = $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC, false), 'date', ['duration', 'processed'], true);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT date(pth.launch_time) AS date,
                    sum(pth.duration_ms) AS duration,
                    sum(pth.num_items) AS processed
@@ -236,9 +236,9 @@ class Scheduler extends \Gazelle\Base {
             ORDER BY 1
             ", $days
         );
-        $daily = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC, false), 'date', ['duration', 'processed'], true);
+        $daily = $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC, false), 'date', ['duration', 'processed'], true);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT pt.name,
                    cast(avg(pth.duration_ms) AS INTEGER) AS duration_avg,
                    cast(avg(pth.num_items) AS INTEGER) AS processed_avg
@@ -250,9 +250,9 @@ class Scheduler extends \Gazelle\Base {
             ORDER BY 1
             ", $days
         );
-        $tasks = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC, false), 'name', ['duration_avg', 'processed_avg'], false);
+        $tasks = $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC, false), 'name', ['duration_avg', 'processed_avg'], false);
 
-        $totals = $this->db->rowAssoc("
+        $totals = self::$db->rowAssoc("
             SELECT count(pth.periodic_task_history_id) AS runs,
                    sum(pth.duration_ms) AS duration,
                    sum(pth.num_items) AS processed,
@@ -275,7 +275,7 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function getTaskRuntimeStats(int $taskId, int $days = 28) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT date(pth.launch_time) AS date,
                    sum(pth.duration_ms) AS duration,
                    sum(pth.num_items) AS processed
@@ -288,11 +288,11 @@ class Scheduler extends \Gazelle\Base {
             ", $taskId, $days
         );
 
-        return $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
+        return $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
     }
 
     public function getTaskSnapshot(float $start, float $end) {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT pt.periodic_task_id, pt.name, pth.launch_time, pth.status, pth.num_errors, pth.num_items, pth.duration_ms
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
@@ -300,7 +300,7 @@ class Scheduler extends \Gazelle\Base {
             ', $end, $start
         );
 
-        return $this->db->to_array('periodic_task_id', MYSQLI_ASSOC);
+        return self::$db->to_array('periodic_task_id', MYSQLI_ASSOC);
     }
 
     public function run() {
@@ -316,7 +316,7 @@ class Scheduler extends \Gazelle\Base {
             return;
         }
 
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT pt.periodic_task_id
             FROM periodic_task pt
             WHERE pt.is_enabled IS TRUE
@@ -328,7 +328,7 @@ class Scheduler extends \Gazelle\Base {
                 ) OR pt.run_now IS TRUE
         ');
 
-        $toRun = $this->db->collect('periodic_task_id');
+        $toRun = self::$db->collect('periodic_task_id');
 
         foreach ($toRun as $id) {
             $this->runTask($id);
@@ -358,7 +358,7 @@ class Scheduler extends \Gazelle\Base {
         }
 
         if ($task['run_now']) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 UPDATE periodic_task
                 SET run_now = FALSE
                 WHERE periodic_task_id = ?

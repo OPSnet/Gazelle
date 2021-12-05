@@ -7,7 +7,7 @@ class NotifyNonseedingUploaders extends \Gazelle\Schedule\Task
     public function run()
     {
         // Send warnings to uploaders of torrents that will be deleted this week
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 t.ID,
                 t.GroupID,
@@ -25,7 +25,7 @@ class NotifyNonseedingUploaders extends \Gazelle\Schedule\Task
             ORDER BY tls.last_action ASC"
         );
 
-        $torrentIDs = $this->db->to_array();
+        $torrentIDs = self::$db->to_array();
         $torrentAlerts = [];
         $inactivityExceptionsMade = [];
 

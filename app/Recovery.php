@@ -77,7 +77,7 @@ class Recovery extends Base {
     }
 
     public function checkPassword(string $user, string $pw): bool {
-        $prevhash = $this->db->prepared_query("
+        $prevhash = self::$db->prepared_query("
             SELECT PassHash FROM ' . RECOVERY_DB . '.users_main WHERE Username = ?
             ", $user
         );
@@ -85,7 +85,7 @@ class Recovery extends Base {
     }
 
     public function persist(array $info): int {
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             "INSERT INTO recovery (token, ipaddr, username, password_ok, email, email_clean, announce, screenshot, invite, info, state    )
                            VALUES (?,     ?,      ?,        ?,           ?,     ?,           ?,        ?,          ?,      ?,    'PENDING')",
             $info['token'],
@@ -99,19 +99,19 @@ class Recovery extends Base {
             $info['invite'],
             $info['info']
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function getTotal(string $state, int $admin_id): int {
         switch (strtoupper($state)) {
             case 'CLAIMED':
-                return $this->db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id);
+                return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id);
                 break;
             case 'PENDING':
-                return $this->db->scalar("SELECT count(*) FROM recovery WHERE state = ? and (admin_user_id is null or admin_user_id != ?)", $state, $admin_id);
+                return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and (admin_user_id is null or admin_user_id != ?)", $state, $admin_id);
                 break;
             default:
-                return $this->db->scalar("SELECT count(*) FROM recovery WHERE state = ?", strtoupper($state));
+                return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ?", strtoupper($state));
                 break;
         }
         return 0;
@@ -122,14 +122,14 @@ class Recovery extends Base {
         $sql_footer = 'ORDER BY updated_dt DESC LIMIT ? OFFSET ?';
         switch (strtoupper($state)) {
             case 'CLAIMED':
-                $this->db->prepared_query("$sql_header
+                self::$db->prepared_query("$sql_header
                     WHERE admin_user_id = ?
                     $sql_footer
                     ", $admin_id, $limit, $offset
                 );
                 break;
             case 'PENDING':
-                $this->db->prepared_query("$sql_header
+                self::$db->prepared_query("$sql_header
                     WHERE admin_user_id IS NULL
                         AND state = ?
                     $sql_footer
@@ -137,42 +137,42 @@ class Recovery extends Base {
                 );
                 break;
             default:
-                $this->db->prepared_query("$sql_header
+                self::$db->prepared_query("$sql_header
                     WHERE state = ?
                     $sql_footer
                     ", $state, $limit, $offset
                 );
                 break;
         }
-        return $this->db->to_array();
+        return self::$db->to_array();
     }
 
     public function validatePending() {
-        $this->db->prepared_query("SELECT recovery_id
+        self::$db->prepared_query("SELECT recovery_id
             FROM recovery r
             INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.torrent_pass = r.announce)
             WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL AND char_length(r.announce) = 32
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
-        $recover = $this->db->to_array();
+        $recover = self::$db->to_array();
         foreach ($recover as $r) {
             $this->accept($r['recovery_id'], RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME);
         }
 
-        $this->db->prepared_query("SELECT recovery_id
+        self::$db->prepared_query("SELECT recovery_id
             FROM recovery r
             INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.Email = r.email)
             WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL AND locate('@', r.email) > 1
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
-        $recover = $this->db->to_array();
+        $recover = self::$db->to_array();
         foreach ($recover as $r) {
             $this->accept($r['recovery_id'], RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME);
         }
     }
 
     public function claim(int $id, int $admin_id, string $admin_username): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE recovery SET
                 updated_dt = now(),
                 admin_user_id = ?,
@@ -183,11 +183,11 @@ class Recovery extends Base {
                 ("\r\n" . Date('Y-m-d H:i') . " claimed by $admin_username"),
                 $id, $admin_id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function unclaim(int $id, string $admin_username): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE recovery SET
                 admin_user_id = NULL,
                 state = 'PENDING',
@@ -197,11 +197,11 @@ class Recovery extends Base {
             ", ("\r\n" . Date('Y-m-d H:i') . " unclaimed by $admin_username"),
                 $id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function deny(int $id, int $admin_id, string $admin_username): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE recovery SET
                 state = 'DENIED',
                 updated_dt = now(),
@@ -210,11 +210,11 @@ class Recovery extends Base {
             ", ("\r\n" . Date('Y-m-d H:i') . " recovery denied by $admin_username"),
                 $id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function acceptFail(int $id, string $reason): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE recovery
             SET state = 'PENDING',
                 updated_dt = now(),
@@ -223,11 +223,11 @@ class Recovery extends Base {
             ", ("\r\n" . Date('Y-m-d H:i') . " recovery failed: $reason"),
                 $id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function accept(int $id, int $admin_id, string $admin_username): bool {
-        [$username, $email] = $this->db->row("
+        [$username, $email] = self::$db->row("
             SELECT username, email_clean
             FROM recovery WHERE state != 'DENIED' AND recovery_id = ?
             ", $id
@@ -236,13 +236,13 @@ class Recovery extends Base {
             return false;
         }
 
-        $this->db->prepared_query('select 1 from users_main where email = ?', $email);
-        if ($this->db->record_count() > 0) {
+        self::$db->prepared_query('select 1 from users_main where email = ?', $email);
+        if (self::$db->record_count() > 0) {
             $this->acceptFail($id, "an existing user $username already registered with $email");
             return false;
         }
 
-        $key = $this->db->scalar("
+        $key = self::$db->scalar("
             SELECT InviteKey FROM invites WHERE email = ?
             ", $email
         );
@@ -251,18 +251,18 @@ class Recovery extends Base {
             return false;
         }
         $key = randomString();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
              INSERT INTO invites (InviterID, InviteKey, Email,  Reason, Expires)
              VALUES              (?,         ?,         ?,      ?,      now() + interval 1 week)
              ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
         (new Mail)->send($email, 'Account recovery confirmation at ' . SITE_NAME,
-            $this->twig->render('email/recovery.twig', [
+            self::$twig->render('email/recovery.twig', [
                 'invite_key' => $key,
             ])
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE recovery SET
                 updated_dt = now(),
                 state = ?,
@@ -276,7 +276,7 @@ class Recovery extends Base {
     }
 
     public function getDetails(int $id): ?array {
-        return $this->db->row("
+        return self::$db->row("
             SELECT
                 recovery_id, state, admin_user_id, created_dt, updated_dt,
                 token, username, ipaddr, password_ok, email, email_clean,
@@ -298,7 +298,7 @@ class Recovery extends Base {
         }
 
         $condition = implode(' AND ', $cond);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 recovery_id, state, admin_user_id, created_dt, updated_dt,
                 token, username, ipaddr, password_ok, email, email_clean,
@@ -307,7 +307,7 @@ class Recovery extends Base {
             WHERE $condition
             ", ...$args
         );
-        return $this->db->next_record();
+        return self::$db->next_record();
     }
 
     protected function candidateSql(): string {
@@ -321,42 +321,42 @@ class Recovery extends Base {
     }
 
     public function findCandidate(string $username): ?array {
-        return $this->db->row($this->candidateSql() . "
+        return self::$db->row($this->candidateSql() . "
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
     }
 
     public function findByUsername(string $username): array {
-        $this->db->prepared_query($this->candidateSql() . "
+        self::$db->prepared_query($this->candidateSql() . "
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
-        return $this->db->to_array();
+        return self::$db->to_array();
     }
 
     public function findByAnnounce(string $announce): array {
-        $this->db->prepared_query($this->candidateSql() . "
+        self::$db->prepared_query($this->candidateSql() . "
             WHERE m.torrent_pass LIKE ? GROUP BY m.torrent_pass
             ", $announce
         );
-        return $this->db->to_array();
+        return self::$db->to_array();
     }
 
     public function findByEmail(string $email): array {
-        $this->db->prepared_query($this->candidateSql() . "
+        self::$db->prepared_query($this->candidateSql() . "
             WHERE m.Email LIKE ? GROUP BY m.Email
             ", $email
         );
-        return $this->db->to_array();
+        return self::$db->to_array();
     }
 
     public function findById(int $id): array {
-        $this->db->prepared_query($this->candidateSql() . "
+        self::$db->prepared_query($this->candidateSql() . "
             WHERE m.ID = ? GROUP BY m.ID
             ", $id
         );
-        return $this->db->to_array();
+        return self::$db->to_array();
     }
 
     protected function userDetailsSql($schema = null): string {
@@ -381,34 +381,34 @@ class Recovery extends Base {
     }
 
     public function pairConfirmation(int $prev_id, int $curr_id): array {
-        $this->db->prepared_query($this->userDetailsSql(RECOVERY_DB), $prev_id);
-        $prev = $this->db->next_record();
-        $this->db->prepared_query($this->userDetailsSql(), $curr_id);
-        $curr = $this->db->next_record();
+        self::$db->prepared_query($this->userDetailsSql(RECOVERY_DB), $prev_id);
+        $prev = self::$db->next_record();
+        self::$db->prepared_query($this->userDetailsSql(), $curr_id);
+        $curr = self::$db->next_record();
         return [$prev, $curr];
     }
 
     public function isMapped(int $ID): array {
-        $this->db->prepared_query(sprintf("SELECT mapped_id AS ID FROM %s.%s WHERE UserID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
-        return $this->db->to_array();
+        self::$db->prepared_query(sprintf("SELECT mapped_id AS ID FROM %s.%s WHERE UserID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
+        return self::$db->to_array();
     }
 
     public function isMappedLocal(int $ID): array {
-        $this->db->prepared_query(sprintf("SELECT user_id AS ID FROM %s.%s WHERE mapped_id = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
-        return $this->db->to_array();
+        self::$db->prepared_query(sprintf("SELECT user_id AS ID FROM %s.%s WHERE mapped_id = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
+        return self::$db->to_array();
     }
 
     public function mapToPrevious(int $siteUserId, int $prevUserId, string $admin_username): bool {
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             sprintf("INSERT INTO %s.%s (user_id, mapped_id) VALUES (?, ?)", RECOVERY_DB, RECOVERY_MAPPING_TABLE),
             $prevUserId, $siteUserId
         );
-        if ($this->db->affected_rows() != 1) {
+        if (self::$db->affected_rows() != 1) {
             return false;
         }
 
         /* staff note */
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info
             SET AdminComment = CONCAT(?, AdminComment)
             WHERE UserID = ?
@@ -463,7 +463,7 @@ class Recovery extends Base {
             RECOVERY_DB, RECOVERY_MAPPING_TABLE,
             RECOVERY_DB, RECOVERY_IRC_TABLE
         );
-        $this->db->prepared_query($sql, RECOVERY_BUFFER_REASSIGN_LIMIT);
+        self::$db->prepared_query($sql, RECOVERY_BUFFER_REASSIGN_LIMIT);
 
         $rescale = [
             'member'        =>  10.0 * pow(1024, 3),
@@ -474,10 +474,10 @@ class Recovery extends Base {
             'elitetm'       => 500.0 * pow(1024, 3)
         ];
 
-        $results = $this->db->to_array();
+        $results = self::$db->to_array();
         foreach ($results as list($username, $siteUserId, $prevUserId, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass, $final)) {
             /* close the gate */
-            $this->db->prepared_query(sprintf("
+            self::$db->prepared_query(sprintf("
                 UPDATE %s.user_recovery_mapping
                 SET buffer = true
                 WHERE mapped_id = ?
@@ -563,7 +563,7 @@ END_MSG;
             }
 
             /* insert this first to avoid a potential reallocation */
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO recovery_buffer
                        (user_id, prev_id, uploaded, downloaded, bounty, nr_torrents, userclass, final)
                 VALUES (?,       ?,       ?,        ?,          ?,      ?,           ?,         ?)
@@ -572,7 +572,7 @@ END_MSG;
             );
 
             /* staff note */
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info
                 SET AdminComment = CONCAT(?, AdminComment)
                 WHERE UserID = ?
@@ -581,19 +581,19 @@ END_MSG;
 
             /* buffer */
             if (RECOVERY_BUFFER) {
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     UPDATE users_leech_stats
                     SET Uploaded = Uploaded + ?
                     WHERE UserID = ?
                     ", $final, $siteUserId
                 );
             }
-            $this->cache->delete_value('user_stats_' . $siteUserId);
+            self::$cache->delete_value('user_stats_' . $siteUserId);
         }
     }
 
     public function reclaimPreviousUpload(int $userId): int {
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             sprintf('
                 UPDATE torrents curr
                 INNER JOIN %s.torrents prev USING (ID)
@@ -608,11 +608,11 @@ END_MSG;
                 ', RECOVERY_DB, RECOVERY_DB, RECOVERY_MAPPING_TABLE
             ),  $userId, $userId
         );
-        $reclaimed = $this->db->affected_rows();
+        $reclaimed = self::$db->affected_rows();
         if ($reclaimed == 0) {
             $reclaimed = -1;
         }
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             sprintf('
                 UPDATE %s.%s SET mapped = ? WHERE mapped_id = ?
                 ', RECOVERY_DB, RECOVERY_MAPPING_TABLE

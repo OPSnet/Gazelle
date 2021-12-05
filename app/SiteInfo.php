@@ -106,7 +106,7 @@ class SiteInfo extends Base {
     }
 
     public function tableExists(string $tableName): bool {
-        return (bool)$this->db->scalar("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM information_schema.tables t
             WHERE t.table_schema = ?
@@ -116,7 +116,7 @@ class SiteInfo extends Base {
     }
 
     public function tablesWithoutPK(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT table_name
             FROM information_schema.tables
             WHERE table_name NOT IN (
@@ -127,22 +127,22 @@ class SiteInfo extends Base {
             ORDER BY TABLE_NAME
             ", SQLDB, SQLDB
         );
-        return $this->db->collect(0);
+        return self::$db->collect(0);
     }
 
     public function tableRowsRead(string $tableName): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ROWS_READ, ROWS_CHANGED, ROWS_CHANGED_X_INDEXES
             FROM information_schema.table_statistics
             WHERE TABLE_SCHEMA = ?
                 AND TABLE_NAME = ?
             ", SQLDB, $tableName
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function indexRowsRead(string $tableName): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT s.INDEX_NAME,
                 coalesce(si.ROWS_READ, 0) as ROWS_READ
             FROM information_schema.statistics s
@@ -155,11 +155,11 @@ class SiteInfo extends Base {
                 s.INDEX_NAME
             ", SQLDB, $tableName
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function tableStats(string $tableName): array {
-        return $this->db->rowAssoc("
+        return self::$db->rowAssoc("
             SELECT t.table_rows,
                 t.avg_row_length,
                 t.data_length,

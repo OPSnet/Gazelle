@@ -6,7 +6,7 @@ class UpdateSeedTimes extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO xbt_files_history (uid, fid, seedtime)
                 SELECT DISTINCT uid, fid, 1
                 FROM xbt_files_users

@@ -15,14 +15,14 @@ class News extends \Gazelle\Base {
      * @return ID of new article
      */
     public function create(int $userId, string $title, string $body): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO news
                    (UserID, Title, Body)
             VALUES (?,      ?,     ?)
             ", $userId, trim($title), trim($body)
         );
-        $this->cache->deleteMulti(['feed_news', self::CACHE_KEY]);
-        return $this->db->inserted_id();
+        self::$cache->deleteMulti(['feed_news', self::CACHE_KEY]);
+        return self::$db->inserted_id();
     }
 
     /**
@@ -34,15 +34,15 @@ class News extends \Gazelle\Base {
      * @return 1 if successful
      */
     public function modify(int $id, string $title, string $body): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE news SET
                 Title = ?,
                 Body = ?
             WHERE ID = ?
             ", trim($title), trim($body), $id
         );
-        $this->cache->deleteMulti(['feed_news', self::CACHE_KEY]);
-        return $this->db->affected_rows();
+        self::$cache->deleteMulti(['feed_news', self::CACHE_KEY]);
+        return self::$db->affected_rows();
     }
 
     /**
@@ -52,12 +52,12 @@ class News extends \Gazelle\Base {
      * @return 1 if successful
      */
     public function remove(int $id): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM news WHERE ID = ?
             ", $id
         );
-        $this->cache->deleteMulti(['feed_news', self::CACHE_KEY]);
-        return $this->db->affected_rows();
+        self::$cache->deleteMulti(['feed_news', self::CACHE_KEY]);
+        return self::$db->affected_rows();
     }
 
     /**
@@ -71,15 +71,15 @@ class News extends \Gazelle\Base {
      *      - article creation date
      */
     public function headlines(): array {
-        if (($headlines = $this->cache->get_value(self::CACHE_KEY)) === false) {
-            $this->db->prepared_query("
+        if (($headlines = self::$cache->get_value(self::CACHE_KEY)) === false) {
+            self::$db->prepared_query("
                 SELECT ID, Title, Body, Time
                 FROM news
                 ORDER BY Time DESC
                 LIMIT 20
             ");
-            $headlines = $this->db->to_array(false, MYSQLI_NUM, false);
-            $this->cache->cache_value(self::CACHE_KEY, $headlines, 0);
+            $headlines = self::$db->to_array(false, MYSQLI_NUM, false);
+            self::$cache->cache_value(self::CACHE_KEY, $headlines, 0);
         }
         return $headlines;
     }
@@ -92,7 +92,7 @@ class News extends \Gazelle\Base {
      *
      */
     public function fetch(int $id): array {
-        return $this->db->row("
+        return self::$db->row("
             SELECT Title, Body
             FROM news
             WHERE ID = ?

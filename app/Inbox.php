@@ -130,7 +130,7 @@ class Inbox extends BaseUser {
     public function messageTotal(): int {
         [$cond, $args] = $this->configure();
         $where = $cond ? ("WHERE " . implode(' AND ', $cond)) : '/* all */';
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(DISTINCT cu.ConvID)
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
@@ -146,7 +146,7 @@ class Inbox extends BaseUser {
         [$cond, $args] = $this->configure();
         $unreadFirst = $this->showUnreadFirst() ? "cu.Unread," : '';
         array_push($args, $limit, $offset);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT cu.ConvID
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
@@ -159,7 +159,7 @@ class Inbox extends BaseUser {
             LIMIT ? OFFSET ?
             ", $this->user->id(), $this->user->id(), ...$args
         );
-        $list = $this->db->collect(0, false);
+        $list = self::$db->collect(0, false);
         $pmMan = new Manager\PM($this->user);
         $result = [];
         foreach ($list as $id) {
@@ -169,7 +169,7 @@ class Inbox extends BaseUser {
     }
 
     public function massRemove(array $ids): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 InInbox   = '0',
                 InSentbox = '0',
@@ -179,20 +179,20 @@ class Inbox extends BaseUser {
                 AND ConvID IN (" . placeholders($ids) . ")
             ", $this->user->id(), ...$ids
         );
-        $this->cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
-        return $this->db->affected_rows();
+        self::$cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
+        return self::$db->affected_rows();
     }
 
     protected function massToggleRead(array $ids, string $value): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 Unread = ?
             WHERE UserID = ?
                 AND ConvID IN (" . placeholders($ids) . ")
             ", $value, $this->user->id(), ...$ids
         );
-        $this->cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
-        return $this->db->affected_rows();
+        self::$cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
+        return self::$db->affected_rows();
     }
 
     public function massRead(array $ids): int {
@@ -204,14 +204,14 @@ class Inbox extends BaseUser {
     }
 
     public function massTogglePinned(array $ids): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 Sticky = CASE WHEN Sticky = '0' THEN '1' ELSE '0' END
             WHERE UserID = ?
                 AND ConvID IN (" . placeholders($ids) . ")
             ", $this->user->id(), ...$ids
         );
-        $this->cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
-        return $this->db->affected_rows();
+        self::$cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
+        return self::$db->affected_rows();
     }
 }

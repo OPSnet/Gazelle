@@ -20,24 +20,23 @@ class Referral extends \Gazelle\Base {
     const ID_TYPES = [3, 4, 5];
 
     public function __construct() {
-        parent::__construct();
-        $this->accounts = $this->cache->get_value(self::CACHE_ACCOUNTS);
+        $this->accounts = self::$cache->get_value(self::CACHE_ACCOUNTS);
         $this->proxy = new Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
 
         if ($this->accounts === false) {
-            $this->db->prepared_query("SELECT ID, Site, Active, Type FROM referral_accounts");
-            $this->accounts = $this->db->has_results() ? $this->db->to_array('ID') : [];
+            self::$db->prepared_query("SELECT ID, Site, Active, Type FROM referral_accounts");
+            $this->accounts = self::$db->has_results() ? self::$db->to_array('ID') : [];
             foreach ($this->accounts as &$acc) {
                 $acc["UserIsId"] = in_array($acc["Type"], self::ID_TYPES);
                 unset($acc);
             }
-            $this->cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
+            self::$cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
         }
 
         $this->readOnly = !apcu_exists('DB_KEY');
 
         if (!$this->readOnly) {
-            $url = $this->db->scalar("SELECT URL FROM referral_accounts LIMIT 1");
+            $url = self::$db->scalar("SELECT URL FROM referral_accounts LIMIT 1");
             if ($url) {
                 $this->readOnly = Crypto::dbDecrypt($url) == null;
             }
@@ -54,11 +53,11 @@ class Referral extends \Gazelle\Base {
             return true;
         }
 
-        $status = $this->cache->get_value(self::CACHE_BOUNCER);
+        $status = self::$cache->get_value(self::CACHE_BOUNCER);
         if ($status === false) {
             $req = $this->proxy->fetch(SITE_URL, [], [], false);
             $status = $req == null ? 'dead' : 'alive';
-            $this->cache->cache_value(self::CACHE_BOUNCER, $status, 60 * 15);
+            self::$cache->cache_value(self::CACHE_BOUNCER, $status, 60 * 15);
         }
 
         return $status == 'alive';
@@ -86,7 +85,7 @@ class Referral extends \Gazelle\Base {
     }
 
     public function getFullAccount($id) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
             FROM referral_accounts
             WHERE ID = ?
@@ -94,8 +93,8 @@ class Referral extends \Gazelle\Base {
         );
 
         $account = null;
-        if ($this->db->has_results()) {
-            $account = $this->db->next_record();
+        if (self::$db->has_results()) {
+            $account = self::$db->next_record();
             foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                 if (array_key_exists($key, $account)) {
                     $account[$key] = Crypto::dbDecrypt($account[$key]);
@@ -109,12 +108,12 @@ class Referral extends \Gazelle\Base {
     }
 
     public function getFullAccounts() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
             FROM referral_accounts");
 
-        if ($this->db->has_results()) {
-            $accounts = $this->db->to_array('ID', MYSQLI_ASSOC);
+        if (self::$db->has_results()) {
+            $accounts = self::$db->to_array('ID', MYSQLI_ASSOC);
             foreach ($accounts as &$account) {
                 foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                     if (array_key_exists($key, $account)) {
@@ -144,7 +143,7 @@ class Referral extends \Gazelle\Base {
             $cookie = '[]';
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO referral_accounts
                 (Site, URL, User, Password, Active, Type, Cookie)
             VALUES
@@ -153,7 +152,7 @@ class Referral extends \Gazelle\Base {
             Crypto::dbEncrypt($password), $active, $type, Crypto::dbEncrypt($cookie)
         );
 
-        $this->cache->delete_value(self::CACHE_ACCOUNTS);
+        self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
     private function updateCookie($id, $cookie) {
@@ -161,7 +160,7 @@ class Referral extends \Gazelle\Base {
             return;
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE referral_accounts
             SET Cookie = ?
             WHERE ID = ?
@@ -188,7 +187,7 @@ class Referral extends \Gazelle\Base {
         if (strlen($password) == 0) {
             $password = $account["Password"];
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE referral_accounts SET
                 Site = ?,
                 URL = ?,
@@ -202,13 +201,13 @@ class Referral extends \Gazelle\Base {
             Crypto::dbEncrypt($password), $active, $type, Crypto::dbEncrypt($cookie), $id
         );
 
-        $this->cache->delete_value(self::CACHE_ACCOUNTS);
+        self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
     public function deleteAccount($id) {
-        $this->db->prepared_query("DELETE FROM referral_accounts WHERE ID = ?", $id);
+        self::$db->prepared_query("DELETE FROM referral_accounts WHERE ID = ?", $id);
 
-        $this->cache->delete_value(self::CACHE_ACCOUNTS);
+        self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
     public function getReferredUsers($startDate, $endDate, $site, $username, $invite, \Gazelle\Util\Paginator $paginator, $view) {
@@ -242,7 +241,7 @@ class Referral extends \Gazelle\Base {
 
         $filter = implode(' AND ', $filter);
 
-        $results = $this->db->scalar("
+        $results = self::$db->scalar("
             SELECT count(*)
             FROM referral_users ru
             LEFT JOIN users_main um ON (um.ID = ru.UserID)
@@ -252,7 +251,7 @@ class Referral extends \Gazelle\Base {
         $paginator->setTotal($results);
 
         array_push($params, $paginator->limit(), $paginator->offset());
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ru.ID     AS id,
                 ru.UserID    AS user_id,
                 ru.Site      AS site,
@@ -269,11 +268,11 @@ class Referral extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", ...$params
         );
-        return $this->db->to_array('id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     public function deleteUserReferral($id) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM referral_users WHERE ID = ?
             ", $id
         );
@@ -610,7 +609,7 @@ class Referral extends \Gazelle\Base {
     }
 
     public function generateInvite($acc, $username, $email) {
-        $existing = $this->db->scalar("
+        $existing = self::$db->scalar("
             SELECT Username
             FROM referral_users
             WHERE Username = ? AND Site = ?
@@ -622,7 +621,7 @@ class Referral extends \Gazelle\Base {
         }
 
         $inviteKey = randomString();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO invites
                    (InviteKey, Email, Reason, Expires)
             VALUES (?,         ?,     ?,      now() + INTERVAL 3 DAY)
@@ -630,7 +629,7 @@ class Referral extends \Gazelle\Base {
                 'This user was referred from their account on ' . $acc["Site"] . '.'
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO referral_users
                    (Username, Site, IP, InviteKey)
             VALUES (?,        ?,    ?,  ?)
@@ -639,7 +638,7 @@ class Referral extends \Gazelle\Base {
 
         if (REFERRAL_SEND_EMAIL) {
             (new Mail)->send($email, 'You have been invited to ' . SITE_NAME,
-                $this->twig->render('email/referral.twig', [
+                self::$twig->render('email/referral.twig', [
                     'email' => $email,
                     'inviter_key' => $inviteKey,
                 ])

@@ -59,9 +59,9 @@ class Collage extends BaseObject {
         $this->contributors = [];
 
         $key = sprintf(self::CACHE_KEY, $id);
-        $info = $this->cache->get_value($key);
+        $info = self::$cache->get_value($key);
         if ($info === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT c.Deleted, c.TagList,
                     c.UserID, c.CategoryID, c.Updated, c.Subscribers, c.NumTorrents,
                     c.MaxGroups, c.MaxGroupsPerUser, c.Locked, c.Name, c.Description, c.Featured,
@@ -72,14 +72,14 @@ class Collage extends BaseObject {
                 WHERE c.ID = ?
                 ", 'sort-newest', $id
             );
-            if ($this->db->has_results()) {
-                $info = $this->db->next_record(MYSQLI_NUM, false);
+            if (self::$db->has_results()) {
+                $info = self::$db->next_record(MYSQLI_NUM, false);
             }
             else {
                 /* Need some sensible defaults for some fields if the collage doesn't exist in the DB. */
                 $info = [true, ''];
             }
-            $this->cache->cache_value($key, $info, 7200);
+            self::$cache->cache_value($key, $info, 7200);
         }
         [
             $this->deleted, $taglist,
@@ -100,7 +100,7 @@ class Collage extends BaseObject {
     }
 
     protected function loadArtists() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 ca.ArtistID,
                 ag.Name,
@@ -114,19 +114,19 @@ class Collage extends BaseObject {
             ORDER BY ca.Sort
             ", $this->id
         );
-        $artists = $this->db->to_array('ArtistID', MYSQLI_ASSOC, false);
+        $artists = self::$db->to_array('ArtistID', MYSQLI_ASSOC, false);
 
         // synch collage total with reality
         $count = count($artists);
         if ($this->numEntries != $count) {
             $this->numEntries = $count;
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE collages SET
                     NumTorrents = ?
                 WHERE ID = ?
                 ", $count, $this->id
             );
-            $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+            self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         }
 
         foreach ($artists as $artist) {
@@ -153,7 +153,7 @@ class Collage extends BaseObject {
 
     protected function loadTorrents() {
         $order = $this->sortNewest ? 'DESC' : 'ASC';
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 ct.GroupID,
                 ct.UserID
@@ -163,7 +163,7 @@ class Collage extends BaseObject {
             ORDER BY ct.Sort $order
             ", $this->id
         );
-        $groupContribIds = $this->db->to_array('GroupID', MYSQLI_ASSOC);
+        $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC);
         $groupIds = array_keys($groupContribIds);
 
         if (count($groupIds) > 0) {
@@ -176,17 +176,17 @@ class Collage extends BaseObject {
         $count = count($this->torrents);
         if ($this->numEntries != $count) {
             $this->numEntries = $count;
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE collages SET
                     NumTorrents = ?
                 WHERE ID = ?
                 ", $count, $this->id
             );
-            $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+            self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         }
 
         // in case of a tie in tag usage counts, order by first past the post
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT count(*) as \"count\",
                 tag.name AS tag
             FROM collages_torrents   AS ct
@@ -197,7 +197,7 @@ class Collage extends BaseObject {
             ORDER BY 1 DESC, ct.AddedOn
             ", $this->id
         );
-        $this->torrentTags = $this->db->to_array('tag', MYSQLI_ASSOC, false);
+        $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC, false);
 
         $this->groupIds = [];
         foreach ($groupIds as $groupId) {
@@ -284,7 +284,7 @@ class Collage extends BaseObject {
      * @return int number of entries
      */
     public function increment(int $delta = 1): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE collages SET
                 updated = now(),
                 NumTorrents = greatest(0, NumTorrents + ?)
@@ -307,30 +307,30 @@ class Collage extends BaseObject {
      * Flush the cache keys associated with this collage.
      */
     public function flush(array $keys = []) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT concat('collage_subs_user_new_', UserID) as ck
             FROM users_collage_subs
             WHERE CollageID = ?
             ", $this->id
         );
-        if ($this->db->has_results()) {
-            $keys = array_merge($keys, $this->db->collect('ck'));
+        if (self::$db->has_results()) {
+            $keys = array_merge($keys, self::$db->collect('ck'));
         }
         $keys[] = sprintf(self::CACHE_KEY, $this->id);
-        $this->cache->deleteMulti($keys);
+        self::$cache->deleteMulti($keys);
         return $this;
     }
 
     public function toggleSubscription(int $userId) {
-        $qid = $this->db->get_query_id();
-        if ($this->db->scalar("
+        $qid = self::$db->get_query_id();
+        if (self::$db->scalar("
             SELECT 1
             FROM users_collage_subs
             WHERE UserID = ?
                 AND CollageID = ?
             ", $userId, $this->id
         )) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM users_collage_subs
                 WHERE UserID = ?
                     AND CollageID = ?
@@ -338,7 +338,7 @@ class Collage extends BaseObject {
             );
             $delta = -1;
         } else {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT IGNORE INTO users_collage_subs
                        (UserID, CollageID)
                 VALUES (?,      ?)
@@ -346,18 +346,18 @@ class Collage extends BaseObject {
             );
             $delta = 1;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE collages SET
                 Subscribers = greatest(0, Subscribers + ?)
             WHERE ID = ?
             ", $delta, $this->id
         );
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::SUBS_KEY, $userId),
             sprintf(self::SUBS_NEW_KEY, $userId),
             sprintf(self::CACHE_KEY, $this->id)
         ]);
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
         return $this;
     }
 
@@ -369,27 +369,27 @@ class Collage extends BaseObject {
      */
     public function isSubscribed(int $userId): bool {
         $key = sprintf(self::SUBS_KEY, $userId);
-        if (false === ($this->userSubscriptions = $this->cache->get_value($key))) {
-            $this->db->prepared_query("
+        if (false === ($this->userSubscriptions = self::$cache->get_value($key))) {
+            self::$db->prepared_query("
                 SELECT CollageID
                 FROM users_collage_subs
                 WHERE UserID = ?
                 ", $userId
             );
-            $this->userSubscriptions = $this->db->collect(0);
-            $this->cache->cache_value($key, $this->userSubscriptions, 3600 * 12);
+            $this->userSubscriptions = self::$db->collect(0);
+            self::$cache->cache_value($key, $this->userSubscriptions, 3600 * 12);
         }
         if (!in_array($this->id, $this->userSubscriptions)) {
             return false;
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_collage_subs SET
                 LastVisit = now()
             WHERE CollageID = ? AND UserID = ?
             ", $this->id, $userId
         );
-        $this->cache->delete_value(sprintf(self::SUBS_NEW_KEY, $userId));
+        self::$cache->delete_value(sprintf(self::SUBS_NEW_KEY, $userId));
         return true;
     }
 
@@ -407,13 +407,13 @@ class Collage extends BaseObject {
      * @return boolean true if artist is already present
      */
     public function hasArtist(int $artistId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT 1
             FROM collages_artists
             WHERE CollageID = ?  AND ArtistID = ?
             ", $this->id, $artistId
         );
-        return $this->db->has_results();
+        return self::$db->has_results();
     }
 
     /**
@@ -423,7 +423,7 @@ class Collage extends BaseObject {
         if ($this->hasArtist($artistId)) {
             return;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO collages_artists
                    (CollageID, ArtistID, UserID, Sort)
             VALUES (?,         ?,        ?,
@@ -431,7 +431,7 @@ class Collage extends BaseObject {
             )
             ",  $this->id, $artistId, $adderId, $this->id
         );
-        $this->increment($this->db->affected_rows());
+        $this->increment(self::$db->affected_rows());
         $this->flush([
             "artists_collages_$artistId",
             "artists_collages_personal_$artistId"
@@ -443,13 +443,13 @@ class Collage extends BaseObject {
      * Remove an artist from an artist collage
      */
    public function removeArtist(int $artistId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM collages_artists
             WHERE CollageID = ?
                 AND ArtistID = ?
             ", $this->id, $artistId
         );
-        $this->increment(-$this->db->affected_rows());
+        $this->increment(-self::$db->affected_rows());
         $this->flush([
             "artists_collages_$artistId",
             "artists_collages_personal_$artistId"
@@ -480,13 +480,13 @@ class Collage extends BaseObject {
      * @return boolean true if torrent is already present
      */
     public function hasTorrent(int $groupId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT 1
             FROM collages_torrents
             WHERE CollageID = ?  AND GroupID = ?
             ", $this->id, $groupId
         );
-        return $this->db->has_results();
+        return self::$db->has_results();
     }
 
     /**
@@ -497,7 +497,7 @@ class Collage extends BaseObject {
         if ($this->hasTorrent($groupId)) {
             return;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO collages_torrents
                    (CollageID, GroupID, UserID, Sort)
             VALUES (?,         ?,       ?,
@@ -548,14 +548,14 @@ class Collage extends BaseObject {
     public function updateSequenceEntry(int $entryId, int $sequence): bool {
         $table = $this->isArtist() ? 'collages_artists' : 'collages_torrents';
         $column = $this->isArtist() ? 'ArtistID' : 'GroupID';
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE $table SET
                 Sort = ?
             WHERE CollageID = ?
                 AND $column = ?
             ", $sequence, $this->id, $entryId
         );
-        return $this->db->affected_rows() == 1;
+        return self::$db->affected_rows() == 1;
     }
 
     public function updateSequence(string $series): int {
@@ -567,60 +567,60 @@ class Collage extends BaseObject {
         $args = array_merge(...array_map(function ($sort, $entryId) use ($id) {
             return [(int)$entryId, ($sort + 1) * 10, $id];
         }, array_keys($series), $series));
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO " . $this->entryTable . " (" . $this->entryColumn . ", Sort, CollageID)
             VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?)')) . "
             ON DUPLICATE KEY UPDATE Sort = VALUES(Sort)
             ", ...$args
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function removeEntry(int $entryId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM " . $this->entryTable . "
             WHERE CollageID = ?
                 AND GroupID = ?
             ", $this->id, $entryId
         );
-        $rows = $this->db->affected_rows();
+        $rows = self::$db->affected_rows();
         $this->numEntries -= $rows;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE collages SET
                 NumTorrents = greatest(0, NumTorrents - ?)
             WHERE ID = ?
             ", $rows, $this->id
         );
         if ($this->isArtist()) {
-            $this->cache->deleteMulti(["artist_$entryId", "artist_groups_$entryId"]);
+            self::$cache->deleteMulti(["artist_$entryId", "artist_groups_$entryId"]);
         } else {
-            $this->cache->deleteMulti(["torrents_details_$entryId", "torrent_collages_$entryId", "torrent_collages_personal_$entryId"]);
+            self::$cache->deleteMulti(["torrents_details_$entryId", "torrent_collages_$entryId", "torrent_collages_personal_$entryId"]);
         }
         return $this;
     }
 
     public function remove(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT GroupID FROM collages_torrents WHERE CollageID = ?
             ", $this->id
         );
-        while ([$GroupID] = $this->db->next_record()) {
-            $this->cache->deleteMulti(["torrents_details_$GroupID", "torrent_collages_$GroupID", "torrent_collages_personal_$GroupID"]);
+        while ([$GroupID] = self::$db->next_record()) {
+            self::$cache->deleteMulti(["torrents_details_$GroupID", "torrent_collages_$GroupID", "torrent_collages_personal_$GroupID"]);
         }
 
         if ($this->isPersonal()) {
             (new \Gazelle\Manager\Comment)->remove('collages', $this->id);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM collages_torrents WHERE CollageID = ?
                 ", $this->id
             );
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM collages WHERE ID = ?
                 ", $this->id
             );
-            $rows = $this->db->affected_rows();
+            $rows = self::$db->affected_rows();
         } else {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE collages SET
                     Deleted = '1'
                 WHERE
@@ -628,7 +628,7 @@ class Collage extends BaseObject {
                     AND ID = ?
                 ", $this->id
             );
-            $rows = $this->db->affected_rows();
+            $rows = self::$db->affected_rows();
         }
         $this->flush();
         return $rows;
@@ -640,7 +640,7 @@ class Collage extends BaseObject {
         }
         if (in_array('Featured', $this->updateField)) {
             // unfeature the previously featured collage
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE collages SET
                     Featured = 0
                 WHERE CategoryID = 0

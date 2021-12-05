@@ -31,14 +31,14 @@ class Quote extends \Gazelle\BaseUser {
      * @return int Number of quotes cleared
      */
     public function clear(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_notify_quoted SET
                 UnRead = '0'
             WHERE UserID = ?
             ", $this->user->id()
         );
-        $this->cache->delete_value('user_quote_unread_' . $this->user->id());
-        return $this->db->affected_rows();
+        self::$cache->delete_value('user_quote_unread_' . $this->user->id());
+        return self::$db->affected_rows();
     }
 
     /**
@@ -49,7 +49,7 @@ class Quote extends \Gazelle\BaseUser {
      * @param int $lastPost The most recent post in the thread
      */
     public function clearThread(int $threadId, int $firstPost, int $lastPost): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_notify_quoted SET
                 UnRead = false
             WHERE Page = 'forums'
@@ -58,8 +58,8 @@ class Quote extends \Gazelle\BaseUser {
                 AND PostID BETWEEN ? AND ?
             ", $this->user->id(), $threadId, $firstPost, $lastPost
         );
-        $this->cache->delete_value('user_quote_unread_' . $this->user->id());
-        return $this->db->affected_rows() === 1;
+        self::$cache->delete_value('user_quote_unread_' . $this->user->id());
+        return self::$db->affected_rows() === 1;
     }
 
     /**
@@ -115,7 +115,7 @@ class Quote extends \Gazelle\BaseUser {
      */
     public function total() {
         [$cond, $args] = $this->configure();
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_notify_quoted AS q
             LEFT JOIN forums_topics  AS t ON (t.ID = q.PageID)
@@ -143,7 +143,7 @@ class Quote extends \Gazelle\BaseUser {
     public function page(int $limit, int $offset) {
         [$cond, $args] = $this->configure();
         $args = array_merge($args, [$limit, $offset]);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT q.Page,
                 q.PageID,
                 q.PostID,
@@ -165,7 +165,7 @@ class Quote extends \Gazelle\BaseUser {
             LIMIT ? OFFSET ?
             ", ...$args
         );
-        $quoteList = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $quoteList = self::$db->to_array(false, MYSQLI_ASSOC, false);
         $requestList = \Requests::get_requests(
             array_column(array_filter($quoteList, function ($x) { return $x['Page'] === 'requests'; }), 'PageID'),
             true

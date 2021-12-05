@@ -20,20 +20,19 @@ class Applicant extends Base {
     const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
 
     public function __construct(int $id) {
-        parent::__construct();
         $key = sprintf(self::CACHE_KEY, $id);
-        $data = $this->cache->get_value($key);
+        $data = self::$cache->get_value($key);
         if ($data === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT a.RoleID, a.UserID, a.ThreadID, a.Body, a.Resolved, a.Created, a.Modified
                 FROM applicant a
                 WHERE a.ID = ?
             ", $id);
-            if (!$this->db->has_results()) {
+            if (!self::$db->has_results()) {
                 throw new Exception\ResourceNotFoundException($id);
             }
-            $data = $this->db->next_record();
-            $this->cache->cache_value($key, $data, 86400);
+            $data = self::$db->next_record();
+            self::$cache->cache_value($key, $data, 86400);
         }
         $this->id       = $id;
         $this->roleId   = $data['RoleID'];
@@ -48,7 +47,7 @@ class Applicant extends Base {
     }
 
     protected function flushApplicantList() {
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             'user_applicant_' . $this->userId,
             self::CACHE_KEY_NEW_COUNT,
             self::CACHE_KEY_NEW_REPLY,
@@ -62,9 +61,9 @@ class Applicant extends Base {
                 sprintf(self::CACHE_KEY_RESOLVED . ".$this->userId", $page)
             ];
             foreach ($cache_key as $key) {
-                if ($this->cache->get_value($key) !== false) {
+                if (self::$cache->get_value($key) !== false) {
                     ++$hit;
-                    $this->cache->delete_value($key);
+                    self::$cache->delete_value($key);
                 }
             }
             if (!$hit) {
@@ -105,18 +104,18 @@ class Applicant extends Base {
 
     public function resolve($resolved = true) {
         $this->resolved = $resolved;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE applicant
             SET Resolved = ?
             WHERE ID = ?
         ", $this->resolved, $this->id);
         $key = sprintf(self::CACHE_KEY, $this->id);
-        $data = $this->cache->get_value($key);
+        $data = self::$cache->get_value($key);
         if ($data !== false) {
             $data['Resolved'] = $this->resolved;
-            $this->cache->replace_value($key, $data, 86400);
+            self::$cache->replace_value($key, $data, 86400);
         }
-        $this->cache->delete_value('user_applicant_' . $this->userId);
+        self::$cache->delete_value('user_applicant_' . $this->userId);
         return $this->flushApplicantList();
     }
 
@@ -131,9 +130,9 @@ class Applicant extends Base {
      */
     public function saveNote(User $poster, $body, $visibility) {
         $this->thread->saveNote($poster->id(), $body, $visibility);
-        $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        $this->cache->delete_value(self::CACHE_KEY_NEW_REPLY);
-        $this->cache->delete_value(self::CACHE_KEY_NEW_COUNT);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value(self::CACHE_KEY_NEW_REPLY);
+        self::$cache->delete_value(self::CACHE_KEY_NEW_COUNT);
         if ($visibility == 'public' && $poster->permitted('admin_manage_applicants')) {
             (new Manager\User)->sendPM(
                 $this->userId(),
@@ -159,7 +158,7 @@ END_MSG
     }
 
     public function removeNote($note_id) {
-        $this->cache->delete_value(self::CACHE_KEY_NEW_REPLY);
+        self::$cache->delete_value(self::CACHE_KEY_NEW_REPLY);
         $this->thread()->removeNote($note_id);
         return $this->flushApplicantList();
     }

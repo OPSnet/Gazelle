@@ -22,7 +22,7 @@ class TGroup extends \Gazelle\ArtistRole {
     }
 
     protected function init() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ta.Importance,
                 ta.ArtistID,
                 aa.Name,
@@ -54,7 +54,7 @@ class TGroup extends \Gazelle\ArtistRole {
             'arranger'  => [],
         ];
         $this->idList = [];
-        while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
+        while ([$role, $artistId, $artistName, $aliasId] = self::$db->next_record(MYSQLI_NUM, false)) {
             $this->idList[$role][] = [
                 'id'      => $artistId,
                 'name'    => $artistName,

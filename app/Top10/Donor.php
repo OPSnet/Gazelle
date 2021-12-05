@@ -5,7 +5,7 @@ namespace Gazelle\Top10;
 class Donor extends \Gazelle\Base {
     // TODO: move this method to Manager\Donation and kill this class
     public function getTopDonors($limit) {
-        return $this->db->prepared_query('
+        return self::$db->prepared_query('
             SELECT UserID, TotalRank, Rank, SpecialRank, DonationTime, Hidden
             FROM users_donor_ranks
             WHERE TotalRank > 0

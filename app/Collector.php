@@ -70,9 +70,7 @@ abstract class Collector extends Base  {
      * @param string $title name of the collection that will be created
      */
     public function __construct(\Gazelle\User $user, $title, $orderBy) {
-        parent::__construct();
-
-        $this->cache->disableLocalCache(); // The internal cache is almost completely useless for this
+        self::$cache->disableLocalCache(); // The internal cache is almost completely useless for this
         $this->title = $title;
         $this->user = $user;
         $this->orderBy = $orderBy;
@@ -164,19 +162,19 @@ abstract class Collector extends Base  {
      * @return array with results and torrent group IDs
      */
     public function process(string $Key): array {
-        $saveQid = $this->db->get_query_id();
-        $this->db->set_query_id($this->qid);
+        $saveQid = self::$db->get_query_id();
+        self::$db->set_query_id($this->qid);
         if (!isset($this->idBoundary)) {
             if ($Key == 'TorrentID') {
                 $this->idBoundary = false;
             } else {
-                $this->idBoundary = $this->db->to_pair($Key, 'TorrentID', false);
+                $this->idBoundary = self::$db->to_pair($Key, 'TorrentID', false);
             }
         }
         $found = 0;
         $GroupIDs = [];
         $Downloads = [];
-        while ($row = $this->db->next_record(MYSQLI_ASSOC, false)) {
+        while ($row = self::$db->next_record(MYSQLI_ASSOC, false)) {
             if (!$this->idBoundary || $row['TorrentID'] == $this->idBoundary[$row[$Key]]) {
                 $found++;
                 $Downloads[$row[$Key]] = $row;
@@ -187,7 +185,7 @@ abstract class Collector extends Base  {
             }
         }
         $this->totalFound += $found;
-        $this->db->set_query_id($saveQid);
+        self::$db->set_query_id($saveQid);
         return empty($Downloads) ? [null, null] : [$Downloads, $GroupIDs];
     }
 
@@ -272,7 +270,7 @@ abstract class Collector extends Base  {
      * @return string summary text
      */
     public function summary(): string {
-        return $this->twig->render('collector.twig', [
+        return self::$twig->render('collector.twig', [
             'added'   => $this->totalAdded,
             'total'   => $this->totalFound,
             'size'    => $this->totalSize,

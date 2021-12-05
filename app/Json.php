@@ -8,7 +8,6 @@ abstract class Json extends Base {
     protected $mode;
 
     public function __construct() {
-        parent::__construct();
         $this->source = SITE_NAME;
         $this->mode = JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR;
         $this->version = 1;
