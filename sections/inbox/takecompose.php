@@ -29,7 +29,7 @@ if ($pm) {
 }
 
 (new Gazelle\Manager\Notification)->push($recipient->id(),
-    "Message from " . $Viewer->username() . ", Subject: $subject",
+    "Message from " . $Viewer->username() . ", Subject: " . $pm->subject(),
     $body,
     SITE_URL . '/inbox.php',
     Gazelle\Manager\Notification::INBOX
