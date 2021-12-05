@@ -150,6 +150,11 @@ class Users extends \Gazelle\Base {
             CREATE TEMPORARY TABLE user_summary_new LIKE user_summary
         ");
 
+        /* Need to perform dirty reads to avoid wedging users, especially inserts to users_downloads */
+        $this->db->prepared_query("
+            SET SESSION tx_isolation = 'READ-UNCOMMITTED'
+        ");
+
         $this->db->prepared_query("
             INSERT INTO user_summary_new (user_id, artist_added_total)
                 SELECT ta.UserID, count(*)
