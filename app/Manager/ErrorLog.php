@@ -50,4 +50,12 @@ class ErrorLog extends \Gazelle\Base {
         }
         return $list;
     }
+
+    public function remove(array $list): int {
+        self::$db->prepared_query("
+            DELETE FROM error_log WHERE error_log_id IN (
+            " . placeholders($list) . ")", ...$list
+        );
+        return self::$db->affected_rows();
+    }
 }
