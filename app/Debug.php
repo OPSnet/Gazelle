@@ -91,6 +91,15 @@ class Debug {
 
     public function saveCase(string $message): string {
         $duration = microtime(true) - self::$startTime;
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            $uri = 'cli';
+        } else {
+            $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            $uri = preg_replace('/(?<=[?&]auth=)\w+/', 'AUTH', $uri);
+            $uri = preg_replace('/(?<=[?&]torrent_pass=)\w+/', 'HASH', $uri);
+            $uri = preg_replace('/([?&]\w*id=)\d+/', '\1IDnnn', $uri);
+        }
+
         self::$db->prepared_query("
             INSERT INTO error_log
                    (uri, duration, memory, nr_query, nr_cache, digest, trace, request, error_list)
@@ -99,7 +108,7 @@ class Debug {
                 updated = now(),
                 seen = seen + 1,
                 duration = ?
-            ", isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
+            ",  $uri,
                 $duration,
                 memory_get_usage(true),
                 count($this->get_queries()),
