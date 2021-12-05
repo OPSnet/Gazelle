@@ -23,8 +23,8 @@ class TList extends \Gazelle\Collector {
             INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID AND tg.CategoryID = '1')
             WHERE t.ID IN (" . placeholders($this->ids) . ")
             ORDER BY t.GroupID ASC, Rank DESC, " .  self::ORDER_BY[$this->orderBy];
-        $this->qid = $this->db->prepared_query($this->sql, ...$this->ids);
-        return $this->db->has_results();
+        $this->qid = self::$db->prepared_query($this->sql, ...$this->ids);
+        return self::$db->has_results();
     }
 
     public function fill() {
@@ -33,11 +33,11 @@ class TList extends \Gazelle\Collector {
                 break;
             }
             $Artists = \Artists::get_artists($GroupIDs);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT ID FROM torrents WHERE GroupID IN (" . placeholders($GroupIDs) .  ")
                 ", ...$GroupIDs
             );
-            $torrentIds = $this->db->collect('ID');
+            $torrentIds = self::$db->collect('ID');
             foreach ($torrentIds as $TorrentID) {
                 if (!isset($GroupIDs[$TorrentID])) {
                     continue;

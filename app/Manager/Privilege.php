@@ -10,21 +10,21 @@ class Privilege extends \Gazelle\Base {
 
     public function findById(int $privilegeId): ?\Gazelle\Privilege {
         $key = sprintf(self::ID_KEY, $privilegeId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM permissions WHERE ID = ?
                 ", $privilegeId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Privilege($id) : null;
     }
 
     public function findByLevel(int $level): ?\Gazelle\Privilege {
-        $id = $this->db->scalar("
+        $id = self::$db->scalar("
             SELECT ID FROM permissions WHERE Level = ?
             ", $level
         );
@@ -37,19 +37,19 @@ class Privilege extends \Gazelle\Base {
     }
 
     public function create(string $name, int $level, bool $secondary, string $forums, array $values, bool $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO permissions
                    (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
             VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
             ', $name, $level, $secondary, $forums, serialize($values), (int)$staffGroup, $badge, $displayStaff ? '1' : '0'
         );
-        $this->cache->deleteMulti(['user_class', 'staff_class']);
-        return new \Gazelle\Privilege($this->db->inserted_id());
+        self::$cache->deleteMulti(['user_class', 'staff_class']);
+        return new \Gazelle\Privilege(self::$db->inserted_id());
     }
 
     protected function info() {
         if (empty($this->info)) {
-            $info = $this->cache->get_value(self::CACHE_KEY);
+            $info = self::$cache->get_value(self::CACHE_KEY);
             if ($info !== false) {
                 $this->info = $info;
             } else {
@@ -64,12 +64,12 @@ class Privilege extends \Gazelle\Base {
                     ];
                 }
 
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     SELECT ID, `Values` AS Permissions
                     FROM permissions
                     ORDER BY Secondary DESC, Level, Name
                 ");
-                $permission = $this->db->to_pair('ID', 'Permissions', false);
+                $permission = self::$db->to_pair('ID', 'Permissions', false);
 
                 // decorate the privileges with those user classes that have benn granted access
                 foreach ($permission as $id => $perm) {
@@ -90,7 +90,7 @@ class Privilege extends \Gazelle\Base {
                 $this->info = [
                     'privilege' => $privilege,
                 ];
-                $this->cache->cache_value(self::CACHE_KEY, $this->info, 0);
+                self::$cache->cache_value(self::CACHE_KEY, $this->info, 0);
             }
         }
         return $this->info;

@@ -8,7 +8,7 @@ class Wiki extends AbstractAPI {
             json_error('Missing wiki article id');
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 wa.Title,
                 wa.MinClassRead,
@@ -19,10 +19,10 @@ class Wiki extends AbstractAPI {
                 INNER JOIN users_main AS um ON um.ID = wa.Author
             WHERE
                 wa.ID = ?", $_GET['wiki_id']);
-        if (!$this->db->has_results()) {
+        if (!self::$db->has_results()) {
             json_error('Wiki article not found');
         }
-        $article = $this->db->next_record(MYSQLI_ASSOC, false);
+        $article = self::$db->next_record(MYSQLI_ASSOC, false);
         return $article;
     }
 }

@@ -12,12 +12,11 @@ class Thread extends \Gazelle\Base {
     /**
      */
     public function createThread($type) {
-        parent::__construct();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO thread (ThreadTypeID) VALUES (
                 (SELECT ID FROM thread_type WHERE Name = ?)
             )
         ", $type);
-        return new \Gazelle\Thread($this->db->inserted_id());
+        return new \Gazelle\Thread(self::$db->inserted_id());
     }
 }

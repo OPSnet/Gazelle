@@ -83,12 +83,12 @@ class User extends BaseObject {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
-        $info = $this->cache->get_value($key);
+        $info = self::$cache->get_value($key);
         if ($info !== false) {
             return $this->info = $info;
         }
-        $qid = $this->db->get_query_id();
-        $this->db->prepared_query("
+        $qid = self::$db->get_query_id();
+        self::$db->prepared_query("
             SELECT um.Username,
                 um.can_leech,
                 um.CustomPermissions,
@@ -155,8 +155,8 @@ class User extends BaseObject {
             WHERE um.ID = ?
             ", FORUM_MOD, $this->id
         );
-        $this->info = $this->db->next_record(MYSQLI_ASSOC, false) ?? [];
-        $this->db->set_query_id($qid);
+        $this->info = self::$db->next_record(MYSQLI_ASSOC, false) ?? [];
+        self::$db->set_query_id($qid);
         if (empty($this->info)) {
             return $this->info;
         }
@@ -185,7 +185,7 @@ class User extends BaseObject {
             ? strtotime($this->info['RatioWatchEnds']) : 0;
 
         // load their permissions
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT p.ID,
                 p.Level,
                 p.Name,
@@ -199,7 +199,7 @@ class User extends BaseObject {
             ORDER BY p.Secondary, p.Level DESC
             ", $this->id
         );
-        $permissions = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+        $permissions = self::$db->to_array('ID', MYSQLI_ASSOC, false);
         $this->info['secondary_badge'] = [];
         $this->info['secondary_class'] = [];
         $forumAccess = [];
@@ -254,15 +254,15 @@ class User extends BaseObject {
         }
         $this->info['forum_access'] = $forumAccess;
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ua.Name, ua.ID
             FROM user_attr ua
             INNER JOIN user_has_attr uha ON (uha.UserAttrID = ua.ID)
             WHERE uha.UserID = ?
             ", $this->id
         );
-        $this->info['attr'] = $this->db->to_pair('Name', 'ID', false);
-        $this->cache->cache_value($key, $this->info, 3600);
+        $this->info['attr'] = self::$db->to_pair('Name', 'ID', false);
+        self::$cache->cache_value($key, $this->info, 3600);
         return $this->info;
     }
 
@@ -309,15 +309,15 @@ class User extends BaseObject {
                 $delta[$p] = $new;
             }
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_main SET
                 CustomPermissions = ?
             WHERE ID = ?
             ", count($delta) ? serialize($delta) : null, $this->id
         );
-        $this->cache->delete_value("u_" . $this->id);
+        self::$cache->delete_value("u_" . $this->id);
         $this->info = [];
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     /**
@@ -351,7 +351,7 @@ class User extends BaseObject {
      * @return array secondary classes list
      */
     public function secondaryClassesList(): array {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT
                 p.ID                   AS permId,
                 p.Name                 AS permName,
@@ -362,7 +362,7 @@ class User extends BaseObject {
             ORDER BY p.Name
             ', $this->id
         );
-        return $this->db->to_array('permName', MYSQLI_ASSOC, false);
+        return self::$db->to_array('permName', MYSQLI_ASSOC, false);
     }
 
     public function secondaryClasses(): array {
@@ -383,19 +383,19 @@ class User extends BaseObject {
         $found = !is_null($attrId);
         $toggled = false;
         if (!$flag && $found) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
                 ', $this->id, $attrId
             );
-            $toggled = $this->db->affected_rows() === 1;
+            $toggled = self::$db->affected_rows() === 1;
         }
         elseif ($flag && !$found) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT INTO user_has_attr (UserID, UserAttrID)
                     SELECT ?, ID FROM user_attr WHERE Name = ?
                 ', $this->id, $attr
             );
-            $toggled = $this->db->affected_rows() === 1;
+            $toggled = self::$db->affected_rows() === 1;
         }
         if ($toggled) {
             $this->flush();
@@ -554,7 +554,7 @@ class User extends BaseObject {
 
     public function donorVisible(): bool {
         if (!isset($this->donorVisible)) {
-            $this->donorVisible = (bool)$this->db->scalar("
+            $this->donorVisible = (bool)self::$db->scalar("
                 SELECT 1 FROM users_donor_ranks WHERE Hidden = '0' AND UserID = ?
                 ", $this->id
             );
@@ -634,7 +634,7 @@ class User extends BaseObject {
         for ($i = 0; $i < 10; $i++) {
             $recovery[] = randomString(20);
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_main SET
                 2FA_Key = ?,
                 Recovery = ?
@@ -642,11 +642,11 @@ class User extends BaseObject {
             ", $key, serialize($recovery), $this->id
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function list2FA(): array {
-        return unserialize($this->db->scalar("
+        return unserialize(self::$db->scalar("
             SELECT Recovery FROM users_main WHERE ID = ?
             ", $this->id
         )) ?: [];
@@ -666,13 +666,13 @@ class User extends BaseObject {
             return false;
         }
         unset($list[$index]);
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_main SET
                 Recovery = ?
             WHERE ID = ?
             ', count($list) === 0 ? null : serialize($list), $this->id
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function remove2FA() {
@@ -974,11 +974,11 @@ class User extends BaseObject {
      */
     public function lastReadInThread(int $threadId): int {
         if (!isset($this->lastRead)) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT TopicID, PostID FROM forums_last_read_topics WHERE UserID = ?
                 ", $this->id
             );
-            $this->lastRead = $this->db->to_pair('TopicID', 'PostID', false);
+            $this->lastRead = self::$db->to_pair('TopicID', 'PostID', false);
         }
         return $this->lastRead[$threadId] ?? 0;
     }
@@ -990,7 +990,7 @@ class User extends BaseObject {
      */
     public function forumCatchupEpoch() {
         if (!isset($this->lastReadForum)) {
-            $this->lastReadForum = (int)$this->db->scalar("
+            $this->lastReadForum = (int)self::$db->scalar("
                 SELECT unix_timestamp(last_read) FROM user_read_forum WHERE user_id = ?
                 ", $this->id
             );
@@ -1004,22 +1004,22 @@ class User extends BaseObject {
 
     public function flush() {
         $this->info = [];
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_KEY, $this->id),
             "user_stats_" . $this->id,
         ]);
     }
 
     public function flushRecentSnatch() {
-        $this->cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->id));
+        self::$cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->id));
     }
 
     public function flushRecentUpload() {
-        $this->cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
+        self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
     }
 
     public function recordEmailChange(string $newEmail, string $ipaddr): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_history_emails
                    (UserID, Email, IP, useragent)
             VALUES (?,      ?,     ?,  ?)
@@ -1028,7 +1028,7 @@ class User extends BaseObject {
         Irc::sendRaw("PRIVMSG " . $this->username()
             . " :Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
         (new Mail)->send($this->email(), 'Email address changed information for ' . SITE_NAME,
-            $this->twig->render('email/email-address-change.twig', [
+            self::$twig->render('email/email-address-change.twig', [
                 'ipaddr'     => $ipaddr,
                 'new_email'  => $newEmail,
                 'now'        => Date('Y-m-d H:i:s'),
@@ -1036,12 +1036,12 @@ class User extends BaseObject {
                 'username'   => $this->username(),
             ])
         );
-        $this->cache->delete_value('user_email_count_' . $this->id);
-        return $this->db->affected_rows();
+        self::$cache->delete_value('user_email_count_' . $this->id);
+        return self::$db->affected_rows();
     }
 
     public function recordPasswordChange(string $ipaddr): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_history_passwords
                    (UserID, ChangerIP, useragent)
             VALUES (?,      ?,         ?)
@@ -1050,19 +1050,19 @@ class User extends BaseObject {
         Irc::sendRaw("PRIVMSG " . $this->username()
             . " :Security alert: Your password was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
         (new Mail)->send($this->email(), 'Password changed information for ' . SITE_NAME,
-            $this->twig->render('email/password-change.twig', [
+            self::$twig->render('email/password-change.twig', [
                 'ipaddr'     => $ipaddr,
                 'now'        => Date('Y-m-d H:i:s'),
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'],
                 'username'   => $this->username(),
             ])
         );
-        $this->cache->delete_value('user_pw_count_' . $this->id);
-        return $this->db->affected_rows();
+        self::$cache->delete_value('user_pw_count_' . $this->id);
+        return self::$db->affected_rows();
     }
 
     public function remove() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
@@ -1117,7 +1117,7 @@ class User extends BaseObject {
         } else {
             $options[$name] = $value;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 SiteOptions = ?
             WHERE UserID = ?
@@ -1131,7 +1131,7 @@ class User extends BaseObject {
         $changed = false;
         if (!empty($this->forumWarning)) {
             $warning = implode(', ', $this->forumWarning);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO users_warnings_forums
                        (UserID, Comment)
                 VALUES (?,      concat(now(), ' - ', ?))
@@ -1139,17 +1139,17 @@ class User extends BaseObject {
                     Comment = concat(Comment, '\n', now(), ' - ', ?)
                 ", $this->id, $warning, $warning
             );
-            $changed = $changed || $this->db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
+            $changed = $changed || self::$db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
             $this->forumWarning = [];
         }
         if (!empty($this->staffNote)) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info SET
                 AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
                 WHERE UserID = ?
                 ", implode(', ', $this->staffNote) . "\n\n", $this->id
             );
-            $changed = $changed || $this->db->affected_rows() === 1;
+            $changed = $changed || self::$db->affected_rows() === 1;
             $this->staffNote = [];
         }
         if (parent::modify() || $changed) {
@@ -1160,7 +1160,7 @@ class User extends BaseObject {
     }
 
     public function mergeLeechStats(string $username, string $staffname) {
-        [$mergeId, $up, $down] = $this->db->row("
+        [$mergeId, $up, $down] = self::$db->row("
             SELECT um.ID, uls.Uploaded, uls.Downloaded
             FROM users_main um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
@@ -1170,7 +1170,7 @@ class User extends BaseObject {
         if (!$mergeId) {
             return null;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_leech_stats uls
             INNER JOIN users_info ui USING (UserID)
             SET
@@ -1189,7 +1189,7 @@ class User extends BaseObject {
     }
 
     public function lock(int $lockType): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO locked_accounts
                    (UserID, Type)
             VALUES (?,      ?)
@@ -1197,44 +1197,44 @@ class User extends BaseObject {
             ", $this->id, $lockType, $lockType
         );
         $this->flush();
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function unlock(): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM locked_accounts WHERE UserID = ?
             ", $this->id
         );
         $this->flush();
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function updateTokens(int $n): bool {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE user_flt SET
                 tokens = ?
             WHERE user_id = ?
             ', $n, $this->id
         );
         $this->flush();
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function updateIP($oldIP, $newIP) {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_history_ips SET
                 EndTime = now()
             WHERE EndTime IS NULL
                 AND UserID = ?  AND IP = ?
                 ', $this->id, $oldIP
         );
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT IGNORE INTO users_history_ips
                    (UserID, IP)
             VALUES (?,      ?)
             ', $this->id, $newIP
         );
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_main SET
                 IP = ?, ipcc = ?
             WHERE ID = ?
@@ -1244,24 +1244,24 @@ class User extends BaseObject {
     }
 
     public function registerDownload(int $torrentId): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_downloads
                    (UserID, TorrentID)
             VALUES (?,      ?)
             ", $this->id, $torrentId
         );
-        $affected = $this->db->affected_rows();
+        $affected = self::$db->affected_rows();
         if (!$affected) {
             return 0;
         }
         $this->stats()->increment('download_total');
-        $this->cache->delete_value('user_rlim_' . $this->id);
+        self::$cache->delete_value('user_rlim_' . $this->id);
         $key = sprintf(self::CACHE_SNATCH_TIME, $this->id);
-        $nextUpdate = $this->cache->get_value($key);
+        $nextUpdate = self::$cache->get_value($key);
         if ($nextUpdate !== false) {
             $soon = time() + self::SNATCHED_UPDATE_AFTERDL;
             if ($soon < $nextUpdate['next']) { // only if the change is closer than the next update
-                $this->cache->cache_value($key, ['next' => $soon], 0);
+                self::$cache->cache_value($key, ['next' => $soon], 0);
             }
         }
         return $affected;
@@ -1277,7 +1277,7 @@ class User extends BaseObject {
         $hash = $this->info()['PassHash'];
         $success = password_verify(hash('sha256', $plaintext), $hash);
         if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_main SET
                     PassHash = ?
                 WHERE ID = ?
@@ -1288,34 +1288,34 @@ class User extends BaseObject {
     }
 
     public function updatePassword(string $pw, string $ipaddr): bool {
-        $this->db->begin_transaction();
-        $this->db->prepared_query('
+        self::$db->begin_transaction();
+        self::$db->prepared_query('
             UPDATE users_main SET
                 PassHash = ?
             WHERE ID = ?
             ', UserCreator::hashPassword($pw), $this->id
         );
-        if ($this->db->affected_rows() !== 1) {
-            $this->db->rollback();
+        if (self::$db->affected_rows() !== 1) {
+            self::$db->rollback();
             return false;
         }
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO users_history_passwords
                    (UserID, ChangerIP, useragent)
             VALUES (?,      ?,         ?)
             ', $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
-        if ($this->db->affected_rows() !== 1) {
-            $this->db->rollback();
+        if (self::$db->affected_rows() !== 1) {
+            self::$db->rollback();
             return false;
         }
-        $this->db->commit();
+        self::$db->commit();
         $this->flush();
         return true;
     }
 
     public function passwordHistory(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ChangeTime AS date,
                 ChangerIP     AS ipaddr,
                 useragent
@@ -1324,7 +1324,7 @@ class User extends BaseObject {
             ORDER BY ChangeTime DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function onRatioWatch(): bool {
@@ -1334,7 +1334,7 @@ class User extends BaseObject {
     }
 
     public function resetRatioWatch(): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 RatioWatchEnds = NULL,
                 RatioWatchDownload = 0,
@@ -1343,37 +1343,37 @@ class User extends BaseObject {
             ", $this->id
         );
         $this->flush();
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function unreadTorrentNotifications(): int {
-        if (($new = $this->cache->get_value('user_notify_upload_' . $this->id)) === false) {
-            $new = $this->db->scalar("
+        if (($new = self::$cache->get_value('user_notify_upload_' . $this->id)) === false) {
+            $new = self::$db->scalar("
                 SELECT count(*)
                 FROM users_notify_torrents
                 WHERE UnRead = 1
                     AND UserID = ?
                 ", $this->id
             );
-            $this->cache->cache_value('user_notify_upload_' . $this->id, $new, 0);
+            self::$cache->cache_value('user_notify_upload_' . $this->id, $new, 0);
         }
         return $new;
     }
 
     public function clearTorrentNotifications(): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_notify_torrents
             SET Unread = '0'
             WHERE UnRead = '1'
                 AND UserID = ?
             ", $this->id
         );
-        $this->cache->delete_value('user_notify_upload_' . $this->id);
-        return $this->db->affected_rows() === 1;
+        self::$cache->delete_value('user_notify_upload_' . $this->id);
+        return self::$db->affected_rows() === 1;
     }
 
     public function siteIPv4Summary(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT IP,
                 min(StartTime) AS min_start,
                 max(coalesce(EndTime, now())) AS max_end
@@ -1383,11 +1383,11 @@ class User extends BaseObject {
             ORDER BY inet_aton(IP), StartTime DESC, EndTime DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function trackerIPv4Summary(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT IP,
                 from_unixtime(min(tstamp)) as first_seen,
                 from_unixtime(max(tstamp)) as last_seen
@@ -1397,98 +1397,98 @@ class User extends BaseObject {
             ORDER BY tstamp DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function resetIpHistory(): int {
         $n = 0;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM users_history_ips WHERE UserID = ?
             ", $this->id
         );
-        $n += $this->db->affected_rows();
-        $this->db->prepared_query("
+        $n += self::$db->affected_rows();
+        self::$db->prepared_query("
             UPDATE users_main SET IP = '127.0.0.1' WHERE ID = ?
             ", $this->id
         );
-        $n += $this->db->affected_rows();
-        $this->db->prepared_query("
+        $n += self::$db->affected_rows();
+        self::$db->prepared_query("
             UPDATE xbt_snatched SET IP = '' WHERE uid = ?
             ", $this->id
         );
-        $n += $this->db->affected_rows();
-        $this->db->prepared_query("
+        $n += self::$db->affected_rows();
+        self::$db->prepared_query("
             UPDATE users_history_passwords SET ChangerIP = '', useragent = 'reset-ip-history' WHERE UserID = ?
             ", $this->id
         );
-        $n += $this->db->affected_rows();
-        $this->db->prepared_query("
+        $n += self::$db->affected_rows();
+        self::$db->prepared_query("
             UPDATE users_history_passkeys SET ChangerIP = '' WHERE UserID = ?
             ", $this->id
         );
-        $n += $this->db->affected_rows();
-        $this->db->prepared_query("
+        $n += self::$db->affected_rows();
+        self::$db->prepared_query("
             UPDATE users_sessions SET IP = '127.0.0.1' WHERE UserID = ?
             ", $this->id
         );
-        $n += $this->db->affected_rows();
+        $n += self::$db->affected_rows();
         $this->flush();
         return $n;
     }
 
     public function resetEmailHistory(string $email, string $ipaddr): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM users_history_emails
             WHERE UserID = ?
             ", $this->id
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_history_emails
                    (UserID, Email, IP, useragent)
             VALUES (?,      ?,     ?, 'email-reset')
             ", $this->id, $email, $ipaddr
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_main
             SET Email = ?
             WHERE ID = ?
             ", $email, $this->id
         );
         $this->flush();
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function resetSnatched(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM xbt_snatched
             WHERE uid = ?
             ", $this->id
         );
         $this->flushRecentSnatch();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function resetDownloadList(): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM users_downloads
             WHERE UserID = ?
             ', $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function modifyAnnounceKeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_history_passkeys
                    (UserID, OldPassKey, NewPassKey, ChangerIP)
             VALUES (?,      ?,          ?,          ?)
             ", $this->id, $oldPasskey, $newPasskey, $ipaddr
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function announceKeyHistory(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT OldPassKey AS old,
                 NewPassKey    AS new,
                 ChangeTime    AS date,
@@ -1498,12 +1498,12 @@ class User extends BaseObject {
             ORDER BY ChangeTime DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function inboxUnreadCount(): int {
-        if (($unread = $this->cache->get_value('inbox_new_' . $this->id)) === false) {
-            $unread = $this->db->scalar("
+        if (($unread = self::$cache->get_value('inbox_new_' . $this->id)) === false) {
+            $unread = self::$db->scalar("
                 SELECT count(*)
                 FROM pm_conversations_users
                 WHERE UnRead    = '1'
@@ -1511,37 +1511,37 @@ class User extends BaseObject {
                     AND UserID  = ?
                 ", $this->id
             );
-            $this->cache->cache_value('inbox_new_' . $this->id, $unread, 0);
+            self::$cache->cache_value('inbox_new_' . $this->id, $unread, 0);
         }
         return $unread;
     }
 
     public function markAllReadInbox(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 Unread = '0'
             WHERE Unread = '1'
                 AND UserID = ?
             ", $this->id
         );
-        $this->cache->delete_value('inbox_new_' . $this->id);
-        return $this->db->affected_rows();
+        self::$cache->delete_value('inbox_new_' . $this->id);
+        return self::$db->affected_rows();
     }
 
     public function markAllReadStaffPM(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE staff_pm_conversations SET
                 Unread = false
             WHERE Unread = true
                 AND UserID = ?
             ", $this->id
         );
-        $this->cache->delete_value('staff_pm_new_' . $this->id);
-        return $this->db->affected_rows();
+        self::$cache->delete_value('staff_pm_new_' . $this->id);
+        return self::$db->affected_rows();
     }
 
     public function supportCount(int $newClassId, int $levelClassId): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(DISTINCT DisplayStaff)
             FROM permissions
             WHERE ID IN (?, ?)
@@ -1554,58 +1554,58 @@ class User extends BaseObject {
     }
 
     public function addClasses(array $classes): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO users_levels (UserID, PermissionID)
             VALUES " . implode(', ', array_fill(0, count($classes), '(' . $this->id . ', ?)')),
             ...$classes
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function removeClasses(array $classes): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM users_levels
             WHERE UserID = ?
                 AND PermissionID IN (" . placeholders($classes) . ")",
             $this->id, ...$classes
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function notifyFilters(): array {
         $key = sprintf(self::CACHE_NOTIFY, $this->id);
-        if ($this->forceCacheFlush || ($filters = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query('
+        if ($this->forceCacheFlush || ($filters = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query('
                 SELECT ID, Label
                 FROM users_notify_filters
                 WHERE UserID = ?
                 ', $this->id
             );
-            $filters = $this->db->to_pair('ID', 'Label', false);
-            $this->cache->cache_value($key, $filters, 2592000);
+            $filters = self::$db->to_pair('ID', 'Label', false);
+            self::$cache->cache_value($key, $filters, 2592000);
         }
         return $filters;
     }
 
     public function removeNotificationFilter(int $notifId): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM users_notify_filters
             WHERE UserID = ? AND ID = ?
             ', $this->id, $notifId
         );
-        $removed = $this->db->affected_rows();
+        $removed = self::$db->affected_rows();
         if ($removed) {
-            $this->cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $removed;
     }
 
     public function loadArtistNotifications(): array {
-        $info = $this->cache->get_value('notify_artists_' . $this->id);
+        $info = self::$cache->get_value('notify_artists_' . $this->id);
         if (empty($info)) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT ID, Artists
                 FROM users_notify_filters
                 WHERE Label = ?
@@ -1614,11 +1614,11 @@ class User extends BaseObject {
                 LIMIT 1
                 ", 'Artist notifications', $this->id
             );
-            $info = $this->db->next_record(MYSQLI_ASSOC, false);
+            $info = self::$db->next_record(MYSQLI_ASSOC, false);
             if (!$info) {
                 $info = ['ID' => 0, 'Artists' => ''];
             }
-            $this->cache->cache_value('notify_artists_' . $this->id, $info, 0);
+            self::$cache->cache_value('notify_artists_' . $this->id, $info, 0);
         }
         return $info;
     }
@@ -1637,24 +1637,24 @@ class User extends BaseObject {
 
         $change = 0;
         if (!$info['ID']) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO users_notify_filters
                        (UserID, Label, Artists)
                 VALUES (?,      ?,     ?)
                 ", $this->id, 'Artist notifications', "|$alias|"
             );
-            $change = $this->db->affected_rows();
+            $change = self::$db->affected_rows();
         } elseif (stripos($info['Artists'], "|$alias|") === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_notify_filters SET
                     Artists = ?
                 WHERE ID = ? AND Artists NOT LIKE concat('%', ?, '%')
                 ", $info['Artists'] . "$alias|", $info['ID'], "|$alias|"
             );
-            $change = $this->db->affected_rows();
+            $change = self::$db->affected_rows();
         }
         if ($change) {
-            $this->cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
     }
@@ -1669,23 +1669,23 @@ class User extends BaseObject {
         }
         $change = 0;
         if ($info['Artists'] === '||') {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM users_notify_filters
                 WHERE ID = ?
                 ", $info['ID']
             );
-            $change = $this->db->affected_rows();
+            $change = self::$db->affected_rows();
         } else {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_notify_filters SET
                     Artists = ?
                 WHERE ID = ?
                 ", $info['Artists'], $info['ID']
             );
-            $change = $this->db->affected_rows();
+            $change = self::$db->affected_rows();
         }
         if ($change) {
-            $this->cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
     }
@@ -1709,7 +1709,7 @@ class User extends BaseObject {
     }
 
     public function endWarningDate(int $weeks) {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT coalesce(Warned, now()) + INTERVAL ? WEEK
             FROM users_info
             WHERE UserID = ?
@@ -1741,7 +1741,7 @@ class User extends BaseObject {
      * @return int number of active collages
      */
     public function activePersonalCollages(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM collages
             WHERE CategoryID = 0
@@ -1761,7 +1761,7 @@ class User extends BaseObject {
     }
 
     public function personalCollages(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, Name
             FROM collages
             WHERE UserID = ?
@@ -1770,12 +1770,12 @@ class User extends BaseObject {
             ORDER BY Featured DESC, Name ASC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function collageUnreadCount(): int {
-        if (($new = $this->cache->get_value(sprintf(Collage::SUBS_NEW_KEY, $this->id))) === false) {
-            $new = $this->db->scalar("
+        if (($new = self::$cache->get_value(sprintf(Collage::SUBS_NEW_KEY, $this->id))) === false) {
+            $new = self::$db->scalar("
                  SELECT count(*) FROM (
                     SELECT s.LastVisit
                     FROM users_collage_subs s
@@ -1789,7 +1789,7 @@ class User extends BaseObject {
                 ) unread
                 ", $this->id
             );
-            $this->cache->cache_value(sprintf(Collage::SUBS_NEW_KEY, $this->id), $new, 0);
+            self::$cache->cache_value(sprintf(Collage::SUBS_NEW_KEY, $this->id), $new, 0);
         }
         return $new;
     }
@@ -1800,7 +1800,7 @@ class User extends BaseObject {
      * @return array [email address, ip, date, useragent]
      */
     public function emailHistory(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT h.Email,
                 h.Time,
                 h.IP,
@@ -1810,7 +1810,7 @@ class User extends BaseObject {
             ORDER BY h.Time DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     /**
@@ -1820,7 +1820,7 @@ class User extends BaseObject {
      */
     public function emailDuplicateHistory(): array {
         // Get history of matches
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT users_history_emails_id AS id,
                 Email  AS email,
                 UserID AS user_id,
@@ -1833,7 +1833,7 @@ class User extends BaseObject {
             ORDER BY uhe.Email, uhe.Time DESC
             ", $this->id, $this->id
         );
-        $dupe = $this->db->to_array('id', MYSQLI_ASSOC, false);
+        $dupe = self::$db->to_array('id', MYSQLI_ASSOC, false);
         foreach ($dupe as &$d) {
             $d['user'] = new User($d['user_id']);
         }
@@ -1842,30 +1842,30 @@ class User extends BaseObject {
     }
 
     public function clients(): array {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT DISTINCT useragent FROM xbt_files_users WHERE uid = ?
             ', $this->id
         );
-        return $this->db->collect(0) ?: ['None'];
+        return self::$db->collect(0) ?: ['None'];
     }
 
     protected function getSingleValue($cacheKey, $query) {
         $cacheKey .= '_' . $this->id;
-        if ($this->forceCacheFlush || ($value = $this->cache->get_value($cacheKey)) === false) {
-            $value = $this->db->scalar($query, $this->id);
-            $this->cache->cache_value($cacheKey, $value, 3600);
+        if ($this->forceCacheFlush || ($value = self::$cache->get_value($cacheKey)) === false) {
+            $value = self::$db->scalar($query, $this->id);
+            self::$cache->cache_value($cacheKey, $value, 3600);
         }
         return $value;
     }
 
     public function duplicateIPv4Count(): int {
         $cacheKey = "ipv4_dup_" . str_replace('-', '_', $this->info()['IP']);
-        if (($value = $this->cache->get_value($cacheKey)) === false) {
-            $value = $this->db->scalar("
+        if (($value = self::$cache->get_value($cacheKey)) === false) {
+            $value = self::$db->scalar("
                 SELECT count(*) FROM users_history_ips WHERE IP = ?
                 ", $this->info()['IP']
             );
-            $this->cache->cache_value($cacheKey, $value, 3600);
+            self::$cache->cache_value($cacheKey, $value, 3600);
         }
         return max(0, $value - 1);
     }
@@ -1923,7 +1923,7 @@ class User extends BaseObject {
     }
 
     public function pendingInviteList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT InviteKey AS invite_key,
                 Email        AS email,
                 Expires      AS expires
@@ -1932,11 +1932,11 @@ class User extends BaseObject {
             ORDER BY Expires
             ", $this->id
         );
-        return $this->db->to_array('invite_key', MYSQLI_ASSOC, false);
+        return self::$db->to_array('invite_key', MYSQLI_ASSOC, false);
     }
 
     public function inviteList(string $orderBy, string $direction): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 um.ID          AS user_id,
                 um.Email       AS email,
@@ -1952,7 +1952,7 @@ class User extends BaseObject {
             ORDER BY $orderBy $direction
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function passwordAge() {
@@ -2042,12 +2042,12 @@ class User extends BaseObject {
      */
     public function recentSnatchList(int $limit = 5, bool $forceNoCache = false): array {
         $key = sprintf(self::USER_RECENT_SNATCH, $this->id);
-        $recent = $this->cache->get_value($key);
+        $recent = self::$cache->get_value($key);
         if ($forceNoCache) {
             $recent = false;
         }
         if ($recent === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT g.ID
                 FROM xbt_snatched AS s
                 INNER JOIN torrents AS t ON (t.ID = s.fid)
@@ -2061,17 +2061,17 @@ class User extends BaseObject {
                 LIMIT ?
                 ", $this->id, $limit
             );
-            $recent = $this->db->collect(0, false);
+            $recent = self::$db->collect(0, false);
             if (!$forceNoCache) {
-                $this->cache->cache_value($key, $recent, 86400 * 3);
+                self::$cache->cache_value($key, $recent, 86400 * 3);
             }
         }
         return $recent;
     }
 
     public function tagSnatchCounts(int $limit = 8) {
-        if (($list = $this->cache->get_value('user_tag_snatch_' . $this->id)) === false) {
-            $this->db->prepared_query("
+        if (($list = self::$cache->get_value('user_tag_snatch_' . $this->id)) === false) {
+            self::$db->prepared_query("
                 SELECT tg.Name AS name,
                     tg.ID AS id,
                     count(*) AS n
@@ -2089,8 +2089,8 @@ class User extends BaseObject {
                 LIMIT ?
                 ", $this->id, $limit
             );
-            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
-            $this->cache->cache_value('user_tag_snatch_' . $this->id, $list, 86400 * 90);
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value('user_tag_snatch_' . $this->id, $list, 86400 * 90);
         }
         return $list;
     }
@@ -2101,12 +2101,12 @@ class User extends BaseObject {
      */
     public function recentUploadList(int $limit = 5, bool $forceNoCache = false) {
         $key = sprintf(self::USER_RECENT_UPLOAD, $this->id);
-        $recent = $this->cache->get_value($key);
+        $recent = self::$cache->get_value($key);
         if ($forceNoCache) {
             $recent = false;
         }
         if ($recent === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT g.ID
                 FROM torrents_group AS g
                 INNER JOIN torrents AS t ON (t.GroupID = g.ID)
@@ -2118,16 +2118,16 @@ class User extends BaseObject {
                 LIMIT ?
                 ", $this->id, $limit
             );
-            $recent = $this->db->collect(0, false);
+            $recent = self::$db->collect(0, false);
             if (!$forceNoCache) {
-                $this->cache->cache_value($key, $recent, 86400 * 3);
+                self::$cache->cache_value($key, $recent, 86400 * 3);
             }
         }
         return $recent;
     }
 
     public function torrentDownloadCount($torrentId) {
-        return (int)$this->db->scalar('
+        return (int)self::$db->scalar('
             SELECT count(*)
             FROM users_downloads ud
             INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
@@ -2138,7 +2138,7 @@ class User extends BaseObject {
     }
 
     public function torrentRecentDownloadCount() {
-        return (int)$this->db->scalar('
+        return (int)self::$db->scalar('
             SELECT count(*)
             FROM users_downloads ud
             INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
@@ -2149,7 +2149,7 @@ class User extends BaseObject {
     }
 
     public function torrentRecentRemoveCount(int $hours): int {
-        return (int)$this->db->scalar('
+        return (int)self::$db->scalar('
             SELECT count(*)
             FROM user_torrent_remove utr
             WHERE utr.user_id = ?
@@ -2163,9 +2163,9 @@ class User extends BaseObject {
             // they are whitelisted, let them through
             return 0.0;
         }
-        $stats = $this->cache->get_value('user_rlim_' . $this->id);
+        $stats = self::$cache->get_value('user_rlim_' . $this->id);
         if ($stats === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT 'download', count(DISTINCT ud.TorrentID) as nr
                 FROM users_downloads ud
                 INNER JOIN torrents t ON (t.ID = ud.TorrentID)
@@ -2178,10 +2178,10 @@ class User extends BaseObject {
                 ", $this->id, $this->id, $this->id
             );
             $stats = ['download' => 0, 'snatch' => 0];
-            while ([$key, $count] = $this->db->next_record(MYSQLI_ASSOC, false)) {
+            while ([$key, $count] = self::$db->next_record(MYSQLI_ASSOC, false)) {
                 $stats[$key] = $count;
             }
-            $stats = $this->cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
+            $stats = self::$cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
         }
         return (1 + $stats['download']) / (1 + $stats['snatch']);
     }
@@ -2245,7 +2245,7 @@ class User extends BaseObject {
      * @return array [torrent_id, group_id, created, expired, downloaded, uses, group_name, format, encoding, size]
      */
     public function tokenList(Manager\Torrent $torMan, int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT t.GroupID AS group_id,
                 g.Name       AS group_name,
                 f.TorrentId  AS torrent_id,
@@ -2263,7 +2263,7 @@ class User extends BaseObject {
             ", $this->id, $limit, $offset
         );
         $list = [];
-        $torrents = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $torrents = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($torrents as $t) {
             $torrent = $torMan->findById($t['torrent_id']);
             $t['name'] = $torrent
@@ -2296,7 +2296,7 @@ class User extends BaseObject {
     public function addBounty(int $bounty): int {
         if ($bounty > 0) {
             // adding
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_leech_stats SET
                     Uploaded = Uploaded + ?
                 WHERE UserID = ?
@@ -2307,7 +2307,7 @@ class User extends BaseObject {
             $uploaded = $this->uploadedSize();
             if ($bounty > $uploaded) {
                 // If we can't take it all out of upload, zero that out and add whatever is left as download.
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     UPDATE users_leech_stats SET
                         Uploaded = 0,
                         Downloaded = Downloaded + ?
@@ -2315,7 +2315,7 @@ class User extends BaseObject {
                     ", $bounty - $uploaded, $this->id
                 );
             } else {
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     UPDATE users_leech_stats SET
                         Uploaded = Uploaded - ?
                     WHERE UserID = ?
@@ -2323,7 +2323,7 @@ class User extends BaseObject {
                 );
             }
         }
-        $nr = $this->db->affected_rows();
+        $nr = self::$db->affected_rows();
         $this->stats()->increment('request_bounty_total', $bounty > 0 ? 1 : -1);
         $this->stats()->increment('request_bounty_size', $bounty);
         $this->stats()->increment('upload_total', $bounty);
@@ -2374,7 +2374,7 @@ class User extends BaseObject {
             foreach ($criteria['Extra'] as $req => $info) {
                 $query = str_replace('users_main.ID', '?', $info['Query']);
                 $params = array_fill(0, substr_count($query, '?'), $this->id);
-                $count = $this->db->scalar($query, ...$params);
+                $count = self::$db->scalar($query, ...$params);
 
                 $progress['Requirements'][$req] = [$count, $info['Count'], $info['Type']];
             }
@@ -2409,7 +2409,7 @@ class User extends BaseObject {
             }
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO api_tokens
                    (user_id, name, token)
             VALUES (?,       ?,    ?)
@@ -2419,7 +2419,7 @@ class User extends BaseObject {
     }
 
     public function apiTokenList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT id, name, token, created
             FROM api_tokens
             WHERE user_id = ?
@@ -2427,11 +2427,11 @@ class User extends BaseObject {
             ORDER BY created DESC
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function hasTokenByName(string $name) {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT 1
             FROM api_tokens
             WHERE revoked = 0
@@ -2442,7 +2442,7 @@ class User extends BaseObject {
     }
 
     public function hasApiToken(string $token): bool {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT 1
             FROM api_tokens
             WHERE revoked = 0
@@ -2453,24 +2453,24 @@ class User extends BaseObject {
     }
 
     public function revokeApiTokenById(int $tokenId): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE api_tokens SET
                 revoked = 1
             WHERE user_id = ? AND id = ?
             ", $this->id, $tokenId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function revokeUpload(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 DisableUpload = '1'
             WHERE UserID = ?
             ", $this->id
         );
         $this->flush();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -2515,27 +2515,27 @@ class User extends BaseObject {
      * @return bool success
      */
     public function removeInvite(string $key) {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM invites WHERE InviteKey = ?
             ", $key
         );
-        if ($this->db->affected_rows() == 0) {
-            $this->db->rollback();
+        if (self::$db->affected_rows() == 0) {
+            self::$db->rollback();
             return false;
         }
         if ($this->permitted('site_send_unlimited_invites')) {
-            $this->db->commit();
+            self::$db->commit();
             return true;
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_main SET
                 Invites = Invites + 1
             WHERE ID = ?
             ", $this->id
         );
-        $this->db->commit();
+        self::$db->commit();
         $this->flush();
         return true;
     }
@@ -2545,7 +2545,7 @@ class User extends BaseObject {
      */
     public function resetPassword() {
         $resetKey = randomString();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 ResetExpires = now() + INTERVAL 1 HOUR,
                 ResetKey = ?
@@ -2554,7 +2554,7 @@ class User extends BaseObject {
         );
         $this->flush();
         (new Mail)->send($this->email(), 'Password reset information for ' . SITE_NAME,
-            $this->twig->render('email/password_reset.twig', [
+            self::$twig->render('email/password_reset.twig', [
                 'username'  => $this->username(),
                 'reset_key' => $resetKey,
                 'ipaddr'    => $_SERVER['REMOTE_ADDR'],
@@ -2568,7 +2568,7 @@ class User extends BaseObject {
      * @return true if it has expired (or none exists)
      */
     public function resetPasswordExpired(): bool {
-        return (bool)$this->db->scalar("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM users_info
             WHERE coalesce(ResetExpires, now()) <= now()
@@ -2583,14 +2583,14 @@ class User extends BaseObject {
      * @return int 1 if the user was cleared
      */
     public function clearPasswordReset(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 ResetKey = '',
                 ResetExpires = NULL
             WHERE UserID = ?
             ", $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -2599,11 +2599,11 @@ class User extends BaseObject {
      */
     public function bookmarkList(): array {
         $key = "bookmarks_group_ids_" . $this->id;
-        if (($info = $this->cache->get_value($key)) !== false) {
+        if (($info = self::$cache->get_value($key)) !== false) {
             [$groupIds, $bookmarks] = $info;
         } else {
-            $qid = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $qid = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT GroupID,
                     Sort,
                     `Time`
@@ -2612,16 +2612,16 @@ class User extends BaseObject {
                 ORDER BY Sort, `Time`
                 ", $this->id
             );
-            $groupIds = $this->db->collect('GroupID');
-            $bookmarks = $this->db->to_array('GroupID', MYSQLI_ASSOC, false);
-            $this->db->set_query_id($qid);
-            $this->cache->cache_value($key, [$groupIds, $bookmarks], 3600);
+            $groupIds = self::$db->collect('GroupID');
+            $bookmarks = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
+            self::$db->set_query_id($qid);
+            self::$cache->cache_value($key, [$groupIds, $bookmarks], 3600);
         }
         return [$groupIds, $bookmarks, \Torrents::get_groups($groupIds)];
     }
 
     public function isFriend(int $userId): bool {
-        return (bool)$this->db->scalar("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM friends
             WHERE UserID = ?
@@ -2631,48 +2631,48 @@ class User extends BaseObject {
     }
 
     public function addFriend(int $userId): bool {
-        if (!$this->db->scalar("SELECT 1 FROM users_main WHERE ID = ?", $userId)) {
+        if (!self::$db->scalar("SELECT 1 FROM users_main WHERE ID = ?", $userId)) {
             return false;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO friends
                    (UserID, FriendID)
             VALUES (?,      ?)
             ", $this->id, $userId
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function addFriendComment(int $userId, string $comment): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE friends SET
                 Comment = ?
             WHERE UserID = ?
                 AND FriendID = ?
             ", $comment, $this->id, $userId
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function removeFriend(int $userId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM friends
             WHERE UserID = ?
                 AND FriendID = ?
             ", $this->id, $userId
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function totalFriends(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM friends WHERE UserID = ?
             ", $this->id
         );
     }
 
     public function friendList(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT f.FriendID AS id,
                 f.Comment as comment
             FROM friends AS f
@@ -2682,7 +2682,7 @@ class User extends BaseObject {
             LIMIT ? OFFSET ?
             ", $this->id, $limit, $offset
         );
-        $list = $this->db->to_array('id', MYSQLI_ASSOC, false);
+        $list = self::$db->to_array('id', MYSQLI_ASSOC, false);
         $userMan = new Manager\User;
         foreach (array_keys($list) as $id) {
             $list[$id]['user'] = new User($id);
@@ -2697,16 +2697,16 @@ class User extends BaseObject {
      * @return array of array of [amount, date, currency, reason, source, addedby, rank, totalrank]
      */
     public function donorHistory(): array {
-        $QueryID = $this->db->get_query_id();
-        $this->db->prepared_query("
+        $QueryID = self::$db->get_query_id();
+        self::$db->prepared_query("
             SELECT Amount, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
             FROM donations
             WHERE UserID = ?
             ORDER BY Time DESC
             ", $this->id
         );
-        $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
-        $this->db->set_query_id($QueryID);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        self::$db->set_query_id($QueryID);
         return $list;
     }
 
@@ -2716,10 +2716,10 @@ class User extends BaseObject {
     protected function donorInfo() {
         // Our cache class should prevent identical memcached requests
         $UserID = $this->id;
-        $DonorInfo = $this->cache->get_value("donor_info_$UserID");
+        $DonorInfo = self::$cache->get_value("donor_info_$UserID");
         if ($DonorInfo === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query('
+            $QueryID = self::$db->get_query_id();
+            self::$db->prepared_query('
                 SELECT Rank,
                     SpecialRank,
                     TotalRank,
@@ -2730,9 +2730,9 @@ class User extends BaseObject {
                 ', $UserID
             );
             // 2 hours less than 32 days to account for schedule run times
-            if ($this->db->has_results()) {
+            if (self::$db->has_results()) {
                 [$Rank, $SpecialRank, $TotalRank, $DonationTime, $ExpireTime]
-                    = $this->db->next_record(MYSQLI_NUM, false);
+                    = self::$db->next_record(MYSQLI_NUM, false);
                 if ($DonationTime === null) {
                     $DonationTime = 0;
                 }
@@ -2746,7 +2746,7 @@ class User extends BaseObject {
                 $Rank = MAX_EXTRA_RANK;
                 $SpecialRank = MAX_SPECIAL_RANK;
             }
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 SELECT IconMouseOverText,
                     AvatarMouseOverText,
                     CustomIcon,
@@ -2756,8 +2756,8 @@ class User extends BaseObject {
                 WHERE UserID = ?
                 ', $UserID
             );
-            if ($this->db->has_results()) {
-                $Rewards = $this->db->next_record(MYSQLI_ASSOC, false);
+            if (self::$db->has_results()) {
+                $Rewards = self::$db->next_record(MYSQLI_ASSOC, false);
             } else {
                 $Rewards = [
                     'IconMouseOverText'   => null,
@@ -2767,7 +2767,7 @@ class User extends BaseObject {
                     'SecondAvatar'        => null,
                 ];
             }
-            $this->db->set_query_id($QueryID);
+            self::$db->set_query_id($QueryID);
 
             $DonorInfo = [
                 'Rank'       => (int)$Rank,
@@ -2777,7 +2777,7 @@ class User extends BaseObject {
                 'ExpireTime' => $ExpireTime,
                 'Rewards'    => $Rewards
             ];
-            $this->cache->cache_value("donor_info_$UserID", $DonorInfo, 86400);
+            self::$cache->cache_value("donor_info_$UserID", $DonorInfo, 86400);
         }
         return $DonorInfo;
     }
@@ -2789,14 +2789,14 @@ class User extends BaseObject {
      */
     public function donorTitles() {
         $key = "donor_title_" . $this->id;
-        if (($Results = $this->cache->get_value($key)) === false) {
-            $Results = $this->db->row("
+        if (($Results = self::$cache->get_value($key)) === false) {
+            $Results = self::$db->row("
                 SELECT Prefix, Suffix, UseComma
                 FROM donor_forum_usernames
                 WHERE UserID = ?
                 ", $this->id
             );
-            $this->cache->cache_value($key, $Results, 0);
+            self::$cache->cache_value($key, $Results, 0);
         }
         return $Results;
     }
@@ -2913,10 +2913,10 @@ class User extends BaseObject {
      */
     public function profileDonorRewards() {
         $key = "donor_profile_rewards_" . $this->id;
-        $Results = $this->cache->get_value($key);
+        $Results = self::$cache->get_value($key);
         if ($Results === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query('
+            $QueryID = self::$db->get_query_id();
+            self::$db->prepared_query('
                 SELECT ProfileInfo1,
                     ProfileInfo2,
                     ProfileInfo3,
@@ -2929,8 +2929,8 @@ class User extends BaseObject {
                 WHERE UserID = ?
                 ', $this->id
             );
-            if ($this->db->has_results()) {
-                $Results = $this->db->next_record(MYSQLI_ASSOC, false);
+            if (self::$db->has_results()) {
+                $Results = self::$db->next_record(MYSQLI_ASSOC, false);
             } else {
                 $Results = [
                     'ProfileInfo1' => null,
@@ -2943,8 +2943,8 @@ class User extends BaseObject {
                     'ProfileInfoTitle4' => null,
                 ];
             }
-            $this->db->set_query_id($QueryID);
-            $this->cache->cache_value($key, $Results, 0);
+            self::$db->set_query_id($QueryID);
+            self::$cache->cache_value($key, $Results, 0);
         }
         return $Results;
     }
@@ -3010,7 +3010,7 @@ class User extends BaseObject {
         $insert = [];
         $args = [];
 
-        $QueryID = $this->db->get_query_id();
+        $QueryID = self::$db->get_query_id();
         $UserID = $this->id;
 
         if ($Rank >= 2 || $HasAll) {
@@ -3043,7 +3043,7 @@ class User extends BaseObject {
                 }
             }
             $comma = empty($field['donor_title_comma']) ? 0 : 1;
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT INTO donor_forum_usernames
                        (UserID, Prefix, Suffix, UseComma)
                 VALUES (?,      ?,      ?,      ?)
@@ -3052,7 +3052,7 @@ class User extends BaseObject {
                 ', $UserID, $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
                     $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
             );
-            $this->cache->delete_value("donor_title_$UserID");
+            self::$cache->delete_value("donor_title_$UserID");
         }
 
         for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
@@ -3073,7 +3073,7 @@ class User extends BaseObject {
             }
         }
         if (count($insert) > 0) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO donor_rewards
                        (UserID, " . implode(', ', $insert) . ")
                 VALUES (?, " . placeholders($insert) . ")
@@ -3082,7 +3082,7 @@ class User extends BaseObject {
                 $UserID, ...array_merge($args, $args)
             );
         }
-        $this->db->set_query_id($QueryID);
-        $this->cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
+        self::$db->set_query_id($QueryID);
+        self::$cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
     }
 }

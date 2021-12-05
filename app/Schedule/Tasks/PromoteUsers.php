@@ -53,14 +53,14 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         )', implode(' AND ', $subQueries));
             }
 
-            $this->db->prepared_query($query, ...$params);
-            $userIds = $this->db->collect('ID');
+            self::$db->prepared_query($query, ...$params);
+            $userIds = self::$db->collect('ID');
 
             if (count($userIds) > 0) {
                 $this->info(sprintf('Promoting %d users from %s to %s', count($userIds), $fromClass, $toClass));
                 $this->processed += count($userIds);
 
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     UPDATE users_main SET
                         PermissionID = ?
                     WHERE ID IN (" . placeholders($userIds) . ")
@@ -69,9 +69,9 @@ class PromoteUsers extends \Gazelle\Schedule\Task
 
                 foreach ($userIds as $userId) {
                     $this->debug(sprintf('Promoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
-                    $this->cache->deleteMulti(["u_$userId", "user_stats_$userId", "user_rlim_$userId"]);
+                    self::$cache->deleteMulti(["u_$userId", "user_stats_$userId", "user_rlim_$userId"]);
                     $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), $toClass);
-                    $this->db->prepared_query("
+                    self::$db->prepared_query("
                         UPDATE users_info SET
                             AdminComment = CONCAT(?, AdminComment)
                         WHERE UserID = ?

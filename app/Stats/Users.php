@@ -8,14 +8,14 @@ class Users extends \Gazelle\Base {
      * @return array keyed by month [month, joined, disabled]
      */
     public function flow(): array {
-        if (!$flow = $this->cache->get_value('stat-user-timeline')) {
+        if (!$flow = self::$cache->get_value('stat-user-timeline')) {
             /* Mysql does not implement a full outer join, so if there is a month with
              * no joiners, any banned users in that same month will not appear.
              * Mysql does not implement sequence generators as in Postgres, so if there
              * is a month without any joiners or banned, it will not appear at all.
              * Deal with it. - Spine
              */
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT J.Mon, J.n as Joined, coalesce(D.n, 0) as Disabled
                 FROM (
                     SELECT DATE_FORMAT(JoinDate,'%Y%m') as M, DATE_FORMAT(JoinDate, '%b %Y') AS Mon, count(*) AS n
@@ -32,8 +32,8 @@ class Users extends \Gazelle\Base {
                 ) D USING (M)
                 ORDER BY J.M;
             ");
-            $flow = $this->db->to_array('Mon');
-            $this->cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
+            $flow = self::$db->to_array('Mon');
+            self::$cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
         }
         return $flow ?: [];
     }
@@ -43,8 +43,8 @@ class Users extends \Gazelle\Base {
      * @return array [class name, user count]
      */
     public function classDistribution(): array {
-        if (!$dist = $this->cache->get_value('stat-user-class')) {
-            $this->db->prepared_query("
+        if (!$dist = self::$cache->get_value('stat-user-class')) {
+            self::$db->prepared_query("
                 SELECT p.Name, count(*) AS Users
                 FROM users_main AS m
                 INNER JOIN permissions AS p ON (m.PermissionID = p.ID)
@@ -52,8 +52,8 @@ class Users extends \Gazelle\Base {
                 GROUP BY p.Name
                 ORDER BY Users DESC
             ");
-            $dist = $this->db->to_array('Name');
-            $this->cache->cache_value('stat-user-class', $dist, 86400);
+            $dist = self::$db->to_array('Name');
+            self::$cache->cache_value('stat-user-class', $dist, 86400);
         }
         return $dist ?: [];
     }
@@ -63,15 +63,15 @@ class Users extends \Gazelle\Base {
      * @return array [platform, user count]
      */
     public function platformDistribution(): array {
-        if (!$dist = $this->cache->get_value('stat-user-platform')) {
-            $this->db->prepared_query("
+        if (!$dist = self::$cache->get_value('stat-user-platform')) {
+            self::$db->prepared_query("
                 SELECT OperatingSystem, count(*) AS Users
                 FROM users_sessions
                 GROUP BY OperatingSystem
                 ORDER BY Users DESC
             ");
-            $dist = $this->db->to_array();
-            $this->cache->cache_value('stat-user-platform', $dist, 86400);
+            $dist = self::$db->to_array();
+            self::$cache->cache_value('stat-user-platform', $dist, 86400);
         }
         return $dist ?: [];
     }
@@ -81,15 +81,15 @@ class Users extends \Gazelle\Base {
      * @return array [browser, user count]
      */
     public function browserDistribution(): array {
-        if (!$dist = $this->cache->get_value('stat-user-browser')) {
-            $this->db->prepared_query("
+        if (!$dist = self::$cache->get_value('stat-user-browser')) {
+            self::$db->prepared_query("
                 SELECT Browser, count(*) AS Users
                 FROM users_sessions
                 GROUP BY Browser
                 ORDER BY Users DESC
             ");
-            $dist = $this->db->to_array();
-            $this->cache->cache_value('stat-user-browser', $dist, 86400);
+            $dist = self::$db->to_array();
+            self::$cache->cache_value('stat-user-browser', $dist, 86400);
         }
         return $dist ?: [];
     }
@@ -106,12 +106,12 @@ class Users extends \Gazelle\Base {
      * @return int Log increments
      */
     public function geodistribution(): array {
-        if (![$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements] = $this->cache->get_value('geodistribution')) {
-            $this->db->prepared_query("
+        if (![$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements] = self::$cache->get_value('geodistribution')) {
+            self::$db->prepared_query("
                 SELECT Code, Users FROM users_geodistribution
             ");
-            $Data = $this->db->to_array();
-            $Count = $this->db->record_count() - 1;
+            $Data = self::$db->to_array();
+            $Count = self::$db->record_count() - 1;
 
             if ($Count < 30) {
                 $CountryMinThreshold = $Count;
@@ -140,22 +140,22 @@ class Users extends \Gazelle\Base {
             for ($i = $CountryMin; $i <= $CountryMax; $i++) {
                 $LogIncrements[] = \Format::human_format(pow(2, $i));
             }
-            $this->cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 86400 * 3);
+            self::$cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 86400 * 3);
         }
         return [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements];
     }
 
     public function refresh(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             CREATE TEMPORARY TABLE user_summary_new LIKE user_summary
         ");
 
         /* Need to perform dirty reads to avoid wedging users, especially inserts to users_downloads */
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SET SESSION tx_isolation = 'READ-UNCOMMITTED'
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, artist_added_total)
                 SELECT ta.UserID, count(*)
                 FROM torrents_artists ta
@@ -164,7 +164,7 @@ class Users extends \Gazelle\Base {
                 artist_added_total = VALUES(artist_added_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, collage_total, collage_contrib)
                 SELECT ui.UserID,
                     coalesce(CT.collage_total, 0),
@@ -189,7 +189,7 @@ class Users extends \Gazelle\Base {
                 collage_contrib = VALUES(collage_contrib)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, download_total, download_unique)
                 SELECT ud.UserID,
                    count(*) AS total,
@@ -202,7 +202,7 @@ class Users extends \Gazelle\Base {
                 download_unique = VALUES(download_unique)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, fl_token_total)
                 SELECT uf.UserID, count(*) AS fl_token_total
                 FROM users_freeleeches uf
@@ -211,7 +211,7 @@ class Users extends \Gazelle\Base {
                 fl_token_total = VALUES(fl_token_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, forum_post_total)
                 SELECT fp.AuthorID, count(*) AS forum_post_total
                 FROM forums_posts fp
@@ -220,7 +220,7 @@ class Users extends \Gazelle\Base {
                 forum_post_total = VALUES(forum_post_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, forum_thread_total)
                 SELECT ft.AuthorID, count(*) AS forum_thread_total
                 FROM forums_topics ft
@@ -229,7 +229,7 @@ class Users extends \Gazelle\Base {
                 forum_thread_total = VALUES(forum_thread_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, invited_total)
                 SELECT ui.Inviter, count(*) as invited_total
                 FROM users_info ui
@@ -239,7 +239,7 @@ class Users extends \Gazelle\Base {
                 invited_total = VALUES(invited_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, perfect_flac_total, perfecter_flac_total, unique_group_total, upload_total)
                 SELECT t.UserID,
                     sum(if(
@@ -268,7 +268,7 @@ class Users extends \Gazelle\Base {
                 upload_total = VALUES(upload_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, request_bounty_size, request_bounty_total)
                 SELECT r.FillerID,
                     coalesce(sum(rv.Bounty), 0) AS size,
@@ -282,7 +282,7 @@ class Users extends \Gazelle\Base {
                 request_bounty_total = VALUES(request_bounty_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, request_created_size, request_created_total)
                 SELECT r.UserID,
                     coalesce(sum(rv.Bounty), 0) AS size,
@@ -295,7 +295,7 @@ class Users extends \Gazelle\Base {
                 request_created_total = VALUES(request_created_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, request_vote_size, request_vote_total)
                 SELECT rv.UserID,
                     coalesce(sum(rv.Bounty), 0) AS size,
@@ -307,7 +307,7 @@ class Users extends \Gazelle\Base {
                 request_vote_total = VALUES(request_vote_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, leech_total)
                 SELECT xfu.uid,
                     count(DISTINCT xfu.fid)
@@ -319,7 +319,7 @@ class Users extends \Gazelle\Base {
                 leech_total = VALUES(leech_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, seeding_total)
                 SELECT xfu.uid,
                     count(DISTINCT xfu.fid)
@@ -331,7 +331,7 @@ class Users extends \Gazelle\Base {
                 seeding_total = VALUES(seeding_total)
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, snatch_total, snatch_unique)
                 SELECT xs.uid,
                    count(*) AS total,
@@ -344,27 +344,27 @@ class Users extends \Gazelle\Base {
                 snatch_unique = VALUES(snatch_unique)
         ");
 
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM user_summary
         ");
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_summary
             SELECT * FROM user_summary_new
         ");
-        $processed = $this->db->affected_rows();
-        $this->db->commit();
+        $processed = self::$db->affected_rows();
+        self::$db->commit();
         return $processed;
     }
 
     public function registerActivity(string $tableName, int $days): int {
         if ($days > 0) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                  DELETE FROM $tableName WHERE Time < now() - INTERVAL ? DAY
                  ", $days
             );
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO $tableName (UserID, Uploaded, Downloaded, BonusPoints, Torrents, PerfectFLACs)
             SELECT um.ID, uls.Uploaded, uls.Downloaded, coalesce(ub.points, 0), COUNT(t.ID) AS Torrents, COALESCE(p.Perfects, 0) AS PerfectFLACs
             FROM users_main um
@@ -385,11 +385,11 @@ class Users extends \Gazelle\Base {
             ) p ON (p.UserID = um.ID)
             GROUP BY um.ID
         ");
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function browserList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT Browser     AS name,
                 BrowserVersion AS `version`,
                 count(*)       AS total
@@ -398,11 +398,11 @@ class Users extends \Gazelle\Base {
             GROUP BY name, version
             ORDER BY total DESC, name, version
         ");
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function operatingSystemList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT OperatingSystem     AS name,
                 OperatingSystemVersion AS version,
                 count(*)               AS total
@@ -411,6 +411,6 @@ class Users extends \Gazelle\Base {
             GROUP BY name, version
             ORDER BY total DESC, name, version
         ");
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

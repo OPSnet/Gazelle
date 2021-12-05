@@ -17,7 +17,6 @@ class Forum extends Base {
      * @param int id The forum ID.
      */
     public function __construct(int $id) {
-        parent::__construct();
         $this->forumId = $id;
     }
 
@@ -32,7 +31,7 @@ class Forum extends Base {
      * @return int The thread ID.
      */
     public function findThreadIdByPostId(int $postId): int {
-        $threadId = $this->db->scalar("
+        $threadId = self::$db->scalar("
             SELECT TopicID FROM forums_posts WHERE ID = ?
             ", $postId
         );
@@ -48,7 +47,7 @@ class Forum extends Base {
      */
     public function modify(array $args) {
         $autolock = isset($_POST['autolock']) ? '1' : '0';
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums SET
                 Sort           = ?,
                 CategoryID     = ?,
@@ -72,7 +71,7 @@ class Forum extends Base {
      * Remove a forum (There is no undo!)
      */
     public function remove() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM forums
             WHERE ID = ?
             ", $this->forumId
@@ -88,8 +87,8 @@ class Forum extends Base {
      */
     public function info(): array {
         $key = sprintf(self::CACHE_FORUM, $this->forumId);
-        if (($info = $this->cache->get_value($key)) === false) {
-            $info = $this->db->rowAssoc("
+        if (($info = self::$cache->get_value($key)) === false) {
+            $info = self::$db->rowAssoc("
                 SELECT f.ID            AS forum_id,
                     f.Name             AS name,
                     f.Description      AS description,
@@ -114,7 +113,7 @@ class Forum extends Base {
                 WHERE f.ID = ?
                 ", $this->forumId
             );
-            $this->cache->cache_value($key, $info, 86400);
+            self::$cache->cache_value($key, $info, 86400);
         }
         return $info;
     }
@@ -190,7 +189,7 @@ class Forum extends Base {
     /* for the transition from sections/ to app/ - delete when done */
     public function flushCache() {
         (new \Gazelle\Manager\Forum)->flushToc();
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
@@ -206,28 +205,28 @@ class Forum extends Base {
      */
     public function addThread(int $userId, string $title, string $body) {
         // LastPostID is updated in updateTopic()
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
         $db = new DB;
         $db->relaxConstraints(true);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_topics
                    (ForumID, Title, AuthorID, LastPostAuthorID)
             Values (?,       ?,        ?,                ?)
             ", $this->forumId, $title, $userId, $userId
         );
-        $threadId = $this->db->inserted_id();
+        $threadId = self::$db->inserted_id();
         $body = trim($body);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_posts
                    (TopicID, AuthorID, Body)
             VALUES (?,       ?,        ?)
             ", $threadId, $userId, $body
         );
-        $postId = $this->db->inserted_id();
+        $postId = self::$db->inserted_id();
         $this->updateTopic($userId, $threadId, $postId);
         $db->relaxConstraints(false);
         (new Stats\User($userId))->increment('forum_thread_total');
-        $this->cache->cache_value(sprintf(self::CACHE_CATALOG, $threadId, 0), [
+        self::$cache->cache_value(sprintf(self::CACHE_CATALOG, $threadId, 0), [
             $postId => [
                 'ID'           => $postId,
                 'AuthorID'     => $userId,
@@ -237,7 +236,7 @@ class Forum extends Base {
                 'EditedTime'   => null,
             ]
         ]);
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
         return $threadId;
     }
 
@@ -247,21 +246,21 @@ class Forum extends Base {
      * @param int threadId The thread to lock
      */
     public function lockThread(int $threadId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_polls SET
                 Closed = '0'
             WHERE TopicID = ?
             ", $threadId
         );
-        $max = $this->db->scalar("
+        $max = self::$db->scalar("
             SELECT floor(NumPosts / ?) FROM forums_topics WHERE ID = ?
             ", THREAD_CATALOGUE, $threadId
         );
         for ($i = 0; $i <= $max; $i++) {
-            $this->cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
+            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
         }
-        $this->cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
-        $this->cache->delete_value("polls_$threadId");
+        self::$cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
+        self::$cache->delete_value("polls_$threadId");
     }
 
     /**
@@ -276,14 +275,14 @@ class Forum extends Base {
      */
     public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
         (new \Gazelle\Manager\Forum)->flushToc();
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $forumId),
             sprintf(self::CACHE_FORUM, $this->forumId),
             "zz_ft_{$threadId}", "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $forumId),
         ]);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_topics SET
                 ForumID  = ?,
                 IsSticky = ?,
@@ -310,7 +309,7 @@ class Forum extends Base {
      * @param int threadId The thread to remove
      */
     public function removeThread(int $threadId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE ft, fp, unq
             FROM forums_topics AS ft
             LEFT JOIN forums_posts AS fp ON (fp.TopicID = ft.ID)
@@ -323,7 +322,7 @@ class Forum extends Base {
         (new Manager\Subscription)->move('forums', $threadId, null);
 
         (new Manager\Forum)->flushToc();
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "thread_{$threadId}",
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_THREAD_INFO, $threadId),
@@ -347,7 +346,7 @@ class Forum extends Base {
          * pays the cost. At least this way the number correct
          * themselves if ever they drift out of synch -- Spine
          */
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums f
             LEFT JOIN (
                 /* these are the values to update the row in the forums table */
@@ -378,7 +377,7 @@ class Forum extends Base {
             WHERE f.ID = ?
             ", $forumId, $forumId, $forumId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -390,20 +389,20 @@ class Forum extends Base {
      * @return int postId The ID of the post
      */
     public function addPost(int $userId, int $threadId, string $body) {
-        $qid = $this->db->get_query_id();
-        $this->db->prepared_query("
+        $qid = self::$db->get_query_id();
+        self::$db->prepared_query("
             INSERT INTO forums_posts
                    (TopicID, AuthorID, Body)
             VALUES (?,       ?,        ?)
             ", $threadId, $userId, trim($body)
         );
-        $postId = $this->db->inserted_id();
+        $postId = self::$db->inserted_id();
         $this->updateTopic($userId, $threadId, $postId);
         (new Stats\User($userId))->increment('forum_post_total');
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
         $info = $this->threadInfo($threadId);
         $catId = (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
-        $this->cache->deleteMulti(["thread_{$threadId}_catalogue_{$catId}", "thread_{$threadId}_info"]);
+        self::$cache->deleteMulti(["thread_{$threadId}_catalogue_{$catId}", "thread_{$threadId}_info"]);
         return $postId;
     }
 
@@ -417,7 +416,7 @@ class Forum extends Base {
      */
     public function stickyPost(int $userId, int $threadId, int $postId, bool $set) {
         // need to reset the post catalogues
-        [$bottom, $top] = $this->db->row("
+        [$bottom, $top] = self::$db->row("
             SELECT
                 floor((ceil(count(*)               / ?) * ? - ?) / ?) AS bottom,
                 floor((ceil(sum(if(ID <= ?, 1, 0)) / ?) * ? - ?) / ?) AS top
@@ -432,15 +431,15 @@ class Forum extends Base {
             return;
         }
         $this->addThreadNote($threadId, $userId, "Post $postId " . ($set ? "stickied" : "unstickied"));
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_topics SET
                 StickyPostID = ?
             WHERE ID = ?
             ", $set ? $postId : 0, $threadId
         );
-        $this->cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
+        self::$cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
         for ($i = $bottom; $i <= $top; ++$i) {
-            $this->cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
+            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
         }
     }
 
@@ -448,7 +447,7 @@ class Forum extends Base {
      * calculating on which page a post falls.
      */
     public function priorPostTotal(int $postId): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM forums_posts
             WHERE TopicID = (SELECT TopicID FROM forums_posts WHERE ID = ?)
@@ -465,7 +464,7 @@ class Forum extends Base {
      * @param int postId The post in the thread
      */
     protected function updateTopic(int $userId, int $threadId, int $postId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_topics SET
                 NumPosts         = NumPosts + 1,
                 LastPostTime     = now(),
@@ -485,7 +484,7 @@ class Forum extends Base {
      * @param string notes  The multi-line text
      */
     public function addThreadNote(int $threadId, int $userId, string $notes) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_topic_notes
                    (TopicID, AuthorID, Body)
             VALUES (?,       ?,        ?)
@@ -500,14 +499,14 @@ class Forum extends Base {
      * @return array The notes [ID, AuthorID, AddedTime, Body]
      */
     public function threadNotes(int $threadId): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, AuthorID, AddedTime, Body
             FROM forums_topic_notes
             WHERE TopicID = ?
             ORDER BY ID ASC
             ", $threadId
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -519,7 +518,7 @@ class Forum extends Base {
      * @param int postId The post in the thread
      */
     protected function updateRoot(int $userId, int $threadId, int $postId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums f
             INNER JOIN (
                 SELECT ft.ForumID,
@@ -539,7 +538,7 @@ class Forum extends Base {
             ", $this->forumId, $postId,  $userId, $threadId, $this->forumId
         );
         (new \Gazelle\Manager\Forum)->flushToc();
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
@@ -556,13 +555,13 @@ class Forum extends Base {
      * @param array vots An array of votes (1 per answer)
      */
     public function addPoll(int $threadId, string $question, array $answers, array $votes) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_polls
                    (TopicID, Question, Answers)
             VALUES (?,       ?,        ?)
             ", $threadId, $question, serialize($answers)
         );
-        $this->cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, '0'], 0);
+        self::$cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, '0'], 0);
     }
 
     /**
@@ -573,7 +572,7 @@ class Forum extends Base {
      */
     protected function fetchPollAnswers(int $threadId) {
         return unserialize(
-            $this->db->scalar("
+            self::$db->scalar("
                 SELECT Answers FROM forums_polls WHERE TopicID = ?
                 ", $threadId
             )
@@ -587,13 +586,13 @@ class Forum extends Base {
      * @param array answers The answers
      */
     protected function savePollAnswers(int $threadId, array $answers) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_polls SET
                 Answers = ?
             WHERE TopicID = ?
             ", serialize($answers), $threadId
         );
-        $this->cache->delete_value("polls_$threadId");
+        self::$cache->delete_value("polls_$threadId");
     }
 
     /**
@@ -619,13 +618,13 @@ class Forum extends Base {
         if ($answers) {
             unset($answers[$item]);
             $this->savePollAnswers($threadId, $answers);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM forums_polls_votes
                 WHERE Vote = ?
                     AND TopicID = ?
                 ", $item, $threadId
             );
-            $this->cache->delete_value("polls_$threadId");
+            self::$cache->delete_value("polls_$threadId");
         }
     }
 
@@ -638,30 +637,30 @@ class Forum extends Base {
      * @return int 1 if this is the first time they have voted, otherwise 0
      */
     public function addPollVote(int $userId, int $threadId, int $vote) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO forums_polls_votes
                    (TopicID, UserID, Vote)
             VALUES (?,       ?,      ?)
             ", $threadId, $userId, $vote
         );
-        $change = $this->db->affected_rows();
+        $change = self::$db->affected_rows();
         if ($change) {
-            $this->cache->delete_value("polls_$threadId");
+            self::$cache->delete_value("polls_$threadId");
         }
         return $change;
     }
 
     public function modifyPollVote(int $userId, int $threadId, int $vote): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_polls_votes SET
                 Vote = ?
             WHERE TopicID = ?
                 AND UserID = ?
             ", $vote, $threadId, $userId
         );
-        $change = $this->db->affected_rows();
+        $change = self::$db->affected_rows();
         if ($change) {
-            $this->cache->delete_value("polls_$threadId");
+            self::$cache->delete_value("polls_$threadId");
         }
         return $change;
     }
@@ -674,7 +673,7 @@ class Forum extends Base {
      * @return int vote (null if they have not voted)
      */
     public function pollVote(int $userId, int $threadId): ?int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT Vote FROM forums_polls_votes WHERE UserID = ?  AND TopicID = ?
             ", $userId, $threadId
         );
@@ -692,8 +691,8 @@ class Forum extends Base {
      * - closed: Not more voting possible
      */
     public function pollData(int $threadId) {
-        if (![$Question, $Answers, $Votes, $Featured, $Closed] = $this->cache->get_value('polls_'.$threadId)) {
-            [$Question, $Answers, $Featured, $Closed] = $this->db->row("
+        if (![$Question, $Answers, $Votes, $Featured, $Closed] = self::$cache->get_value('polls_'.$threadId)) {
+            [$Question, $Answers, $Featured, $Closed] = self::$db->row("
                 SELECT Question, Answers, Featured, Closed
                 FROM forums_polls
                 WHERE TopicID = ?
@@ -703,7 +702,7 @@ class Forum extends Base {
                 $Featured = null;
             }
             $Answers = unserialize($Answers);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT Vote, count(*)
                 FROM forums_polls_votes
                 WHERE Vote != '0'
@@ -711,7 +710,7 @@ class Forum extends Base {
                 GROUP BY Vote
                 ", $threadId
             );
-            $VoteArray = $this->db->to_array(false, MYSQLI_NUM);
+            $VoteArray = self::$db->to_array(false, MYSQLI_NUM);
             $Votes = [];
             foreach ($VoteArray as $VoteSet) {
                 [$Key,$Value] = $VoteSet;
@@ -722,14 +721,14 @@ class Forum extends Base {
                     $Votes[$i] = 0;
                 }
             }
-            $this->cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $Closed], 0);
+            self::$cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $Closed], 0);
         }
         return [$Question, $Answers, $Votes, $Featured, $Closed];
     }
 
     public function pollDataExtended(int $threadId, int $userId): array {
         [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
-        $userVote = $this->db->scalar("
+        $userVote = self::$db->scalar("
             SELECT Vote
             FROM forums_polls_votes
             WHERE Vote > 0
@@ -770,29 +769,29 @@ class Forum extends Base {
     public function moderatePoll(int $threadId, int $toFeature, int $toClose) {
         [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
         if ($toFeature && !$Featured) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE forums_polls SET
                     Featured = now()
                 WHERE TopicID = ?
                 ", $Featured, $threadId
             );
-            $Featured = $this->db->scalar("
+            $Featured = self::$db->scalar("
                 SELECT Featured FROM forums_polls WHERE TopicID = ?
                 ", $threadId
             );
-            $this->cache->cache_value('polls_featured', $threadId ,0);
+            self::$cache->cache_value('polls_featured', $threadId ,0);
         }
 
         if ($toClose) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE forums_polls SET
                     Closed = ?
                 WHERE TopicID = ?
                 ", $Closed ? '1' : '0', $threadId
             );
         }
-        $this->cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
-        $this->cache->delete_value('polls_'.$threadId);
+        self::$cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
+        self::$cache->delete_value('polls_'.$threadId);
     }
 
     /**
@@ -802,7 +801,7 @@ class Forum extends Base {
      * @return array of [concatenated user, vote]
      */
     public function staffVote(int $threadId): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT group_concat(um.Username SEPARATOR ', '),
                 fpv.Vote
             FROM users_main AS um
@@ -811,7 +810,7 @@ class Forum extends Base {
             GROUP BY fpv.Vote
             ", $threadId
         );
-        return $this->db->to_array(false, MYSQLI_NUM);
+        return self::$db->to_array(false, MYSQLI_NUM);
     }
 
     /**
@@ -822,7 +821,7 @@ class Forum extends Base {
      * @param string body The new contents
      */
     public function mergePost(int $userId, int $threadId, string $body) {
-        [$postId, $oldBody] = $this->db->row("
+        [$postId, $oldBody] = self::$db->row("
             SELECT ID, Body
             FROM forums_posts
             WHERE TopicID = ?
@@ -832,8 +831,8 @@ class Forum extends Base {
         );
 
         // Edit the post
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             UPDATE forums_posts SET
                 EditedUserID = ?,
                 Body = CONCAT(Body, '\n\n', ?),
@@ -843,17 +842,17 @@ class Forum extends Base {
         );
 
         // Store edit history
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO comments_edits
                    (EditUser, PostID, Body, Page)
             VALUES (?,        ?,      ?,   'forums')
             ", $userId, $postId, $oldBody
         );
-        $this->db->commit();
+        self::$db->commit();
 
         // Update the cache
         $info = $this->threadInfo($threadId);
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "edit_forum_" . $this->forumId,
             "thread_{$threadId}_info",
             "thread_{$threadId}_catalogue_"
@@ -870,14 +869,14 @@ class Forum extends Base {
      * @param string body The new contents
      */
     public function editPost(int $userId, int $postId, string $body): int {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             INSERT INTO comments_edits
                    (EditUser, PostID, Body, Page)
             VALUES (?,        ?,      (SELECT Body from forums_posts WHERE ID = ?), 'forums')
             ", $userId, $postId, $postId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_posts SET
                 EditedUserID = ?,
                 Body = ?,
@@ -885,15 +884,15 @@ class Forum extends Base {
             WHERE ID = ?
             ", $userId, trim($body), $postId
         );
-        $this->db->commit();
+        self::$db->commit();
 
         $post = $this->postInfo($postId);
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "edit_forum_$postId",
             "thread_{$post['thread-id']}_info",
             "thread_{$post['thread-id']}_catalogue_" . (int)floor((POSTS_PER_PAGE * $post['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
         ]);
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -904,7 +903,7 @@ class Forum extends Base {
      * @return string The post body or null if no such post
      */
     public function postBody(int $postId): ?string {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT p.Body
             FROM forums_posts AS p
             INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
@@ -931,7 +930,7 @@ class Forum extends Base {
      * NB: kebab-case chosen for grepability
      */
     public function postInfo(int $postId): array {
-        return $this->db->rowAssoc("
+        return self::$db->rowAssoc("
             SELECT
                 f.MinClassWrite         AS 'min-class-write',
                 t.ForumID               AS 'forum-id',
@@ -962,20 +961,20 @@ class Forum extends Base {
         if (!$forumPost) {
             return false;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE fp, unq
             FROM forums_posts fp
             LEFT JOIN users_notify_quoted unq ON (unq.PostID = fp.ID and unq.Page = 'forums')
             WHERE fp.ID = ?
             ", $postId
         );
-        if ($this->db->affected_rows() === 0) {
+        if (self::$db->affected_rows() === 0) {
             return false;
         }
         $forumId  = $forumPost['forum-id'];
         $threadId = $forumPost['thread-id'];
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_topics t
             INNER JOIN
             (
@@ -1011,9 +1010,9 @@ class Forum extends Base {
         $begin = (int)floor((POSTS_PER_PAGE * (int)$forumPost['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE);
         $end = (int)floor((POSTS_PER_PAGE * (int)$forumPost['thread-pages'] - POSTS_PER_PAGE) / THREAD_CATALOGUE);
         for ($i = $begin; $i <= $end; $i++) {
-            $this->cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
+            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
         }
-        $this->cache->deleteMulti([sprintf(self::CACHE_THREAD_INFO, $threadId)]);
+        self::$cache->deleteMulti([sprintf(self::CACHE_THREAD_INFO, $threadId)]);
         $this->flushCache();
         return true;
     }
@@ -1026,8 +1025,8 @@ class Forum extends Base {
      * @return array [Title ForumId AuthorID LastPostAuthorID StickyPostID Ranking NumPosts isLocked isSticky NoPoll Posts LastPostTime StickyPost]
      */
     public function threadInfo(int $threadId): array {
-        if (($info = $this->cache->get_value(sprintf(self::CACHE_THREAD_INFO, $threadId))) === false) {
-            $this->db->prepared_query("
+        if (($info = self::$cache->get_value(sprintf(self::CACHE_THREAD_INFO, $threadId))) === false) {
+            self::$db->prepared_query("
                 SELECT t.Title,
                     t.ForumID,
                     t.AuthorID,
@@ -1047,13 +1046,13 @@ class Forum extends Base {
                 GROUP BY t.ID
                 ", $threadId
             );
-            if (!$this->db->has_results()) {
+            if (!self::$db->has_results()) {
                 return [];
             }
-            $info = $this->db->next_record(MYSQLI_ASSOC, false);
+            $info = self::$db->next_record(MYSQLI_ASSOC, false);
             if ($info['StickyPostID']) {
                 $info['Posts']--;
-                $info['StickyPost'] = $this->db->rowAssoc("
+                $info['StickyPost'] = self::$db->rowAssoc("
                     SELECT p.ID,
                         p.AuthorID,
                         p.AddedTime,
@@ -1065,7 +1064,7 @@ class Forum extends Base {
                     ", $threadId, $info['StickyPostID']
                 );
             }
-            $this->cache->cache_value(sprintf(self::CACHE_THREAD_INFO, $threadId), $info, 86400);
+            self::$cache->cache_value(sprintf(self::CACHE_THREAD_INFO, $threadId), $info, 86400);
         }
         return $info;
     }
@@ -1096,8 +1095,8 @@ class Forum extends Base {
      *    - int 'IsLocked' Last post is sticky (0/1)
      */
     public function tableOfContentsMain() {
-        if (!$toc = $this->cache->get_value(self::CACHE_TOC_MAIN)) {
-            $this->db->prepared_query("
+        if (!$toc = self::$cache->get_value(self::CACHE_TOC_MAIN)) {
+            self::$db->prepared_query("
                 SELECT cat.Name AS categoryName, cat.ID AS categoryId,
                     f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,
                     f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
@@ -1109,7 +1108,7 @@ class Forum extends Base {
                 ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
             $toc = [];
-            while ($row = $this->db->next_row(MYSQLI_ASSOC)) {
+            while ($row = self::$db->next_row(MYSQLI_ASSOC)) {
                 $category = $row['categoryName'];
                 unset($row['categoryName']);
                 $row['AutoLock'] = ($row['AutoLock'] == '1');
@@ -1118,7 +1117,7 @@ class Forum extends Base {
                 }
                 $toc[$category][] = $row;
             }
-            $this->cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);
+            self::$cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);
         }
         return $toc;
     }
@@ -1153,8 +1152,8 @@ class Forum extends Base {
     public function tableOfContentsForum(int $page = 1) {
         $key = sprintf(self::CACHE_TOC_FORUM, $this->forumId);
         $forumToc = null;
-        if ($page > 1 || ($page == 1 && !$forumToc = $this->cache->get_value($key))) {
-            $this->db->prepared_query("
+        if ($page > 1 || ($page == 1 && !$forumToc = self::$cache->get_value($key))) {
+            self::$db->prepared_query("
                 SELECT ID, Title, AuthorID, IsLocked, IsSticky,
                     NumPosts, LastPostID, LastPostTime, LastPostAuthorID,
                     (SELECT count(*) from forums_topics WHERE IsSticky = '1' AND ForumID = ?) AS stickyCount,
@@ -1165,9 +1164,9 @@ class Forum extends Base {
                 LIMIT ?, ?
                 ", $this->forumId, $this->forumId, $this->forumId, ($page - 1) * TOPICS_PER_PAGE, TOPICS_PER_PAGE
             );
-            $forumToc = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+            $forumToc = self::$db->to_array('ID', MYSQLI_ASSOC, false);
             if ($page == 1) {
-                $this->cache->cache_value($key, $forumToc, 86400 * 10);
+                self::$cache->cache_value($key, $forumToc, 86400 * 10);
             }
         }
         return $forumToc;
@@ -1189,7 +1188,7 @@ class Forum extends Base {
             $cond[] = 'f.ID NOT IN (' . placeholders($forbiddenForums) . ')';
             $args = array_merge($args, $forbiddenForums);
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT f.ID  AS forum_id,
                 f.Name   AS name,
                 sum(if(ft.LastPostId > coalesce(flrt.PostID, 0) AND C.last_read <= ft.LastPostTime, 1, 0)) AS unread,
@@ -1205,7 +1204,7 @@ class Forum extends Base {
             ORDER BY f.Sort
             ", $user->id(), $user->id(), $this->forumId, ...$args
         );
-        $departmentList = $this->db->to_array('forum_id', MYSQLI_ASSOC, false);
+        $departmentList = self::$db->to_array('forum_id', MYSQLI_ASSOC, false);
         return $departmentList;
     }
 
@@ -1220,9 +1219,9 @@ class Forum extends Base {
     public function threadCatalog(int $threadId, int $perPage, int $page): array {
         $chunk = (int)floor(($page - 1) * $perPage / THREAD_CATALOGUE);
         $key = sprintf(self::CACHE_CATALOG, $threadId, $chunk);
-        if (!$catalogue = $this->cache->get_value($key)) {
+        if (!$catalogue = self::$cache->get_value($key)) {
             $thread = $this->threadInfo($threadId);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT p.ID,
                     p.AuthorID,
                     p.AddedTime,
@@ -1235,9 +1234,9 @@ class Forum extends Base {
                 LIMIT ? OFFSET ?
                 ", $threadId, $thread['StickyPostID'], THREAD_CATALOGUE, $chunk * THREAD_CATALOGUE
             );
-            $catalogue = $this->db->to_array(false, MYSQLI_ASSOC);
+            $catalogue = self::$db->to_array(false, MYSQLI_ASSOC);
             if (!$thread['isLocked'] || $thread['isSticky']) {
-                $this->cache->cache_value($key, $catalogue, 0);
+                self::$cache->cache_value($key, $catalogue, 0);
             }
         }
         return $catalogue;
@@ -1255,7 +1254,7 @@ class Forum extends Base {
      * @param int userId The ID of the user catching up
      */
     public function userCatchup(int $userId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
                    (UserID, TopicID, PostID)
             SELECT ?,       ID,      LastPostID
@@ -1274,7 +1273,7 @@ class Forum extends Base {
      * @param int postId The ID of the last post the user has read
      */
     public function userCatchupThread(int $userId, int $threadId, int $postId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
                    (UserID, TopicID, PostID)
             VALUES (?,      ?,       ?)
@@ -1295,7 +1294,7 @@ class Forum extends Base {
      *  - int 'Page'    The page number
      */
     public function userLastRead(int $userId, int $perPage) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 l.TopicID,
                 l.PostID,
@@ -1312,7 +1311,7 @@ class Forum extends Base {
                 AND l.UserID = ?
             ", $perPage, $this->forumId, $userId
         );
-        return $this->db->to_array('TopicID');
+        return self::$db->to_array('TopicID');
     }
 
     /**
@@ -1321,7 +1320,7 @@ class Forum extends Base {
      * @param int id The thread ID.
      */
     public function clearUserLastRead(int $threadId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM forums_last_read_topics
             WHERE TopicID = ?
             ", $threadId
@@ -1336,7 +1335,7 @@ class Forum extends Base {
      * @param int The last read post id (or 0 if thread has never been read before)
      */
     public function userLastReadPost(int $userId, int $threadId): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT PostID FROM forums_last_read_topics WHERE UserID = ? AND TopicID = ?
             ", $userId, $threadId
         ) ?? 0;
@@ -1351,7 +1350,7 @@ class Forum extends Base {
      * @return int the number of posts
      */
     public function threadNumPosts(int $threadId, int $postId, bool $hasSticky) {
-        $count = $this->db->scalar("
+        $count = self::$db->scalar("
             SELECT count(*)
             FROM forums_posts
             WHERE TopicID = ?

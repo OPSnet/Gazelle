@@ -4,31 +4,31 @@ namespace Gazelle\Manager;
 
 class Changelog extends \Gazelle\Base {
     public function create(string $message, string $author): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO changelog
                    (Message, Author)
             VALUES (?,       ?)
             ", trim($message), trim($author)
         );
-        return $this->db->inserted_id();
+        return self::$db->inserted_id();
     }
 
     public function remove(int $id): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM changelog WHERE ID = ?
             ", $id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function total(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM changelog
         ");
     }
 
     public function page(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID    AS id,
                 Message  AS message,
                 Author   AS author,
@@ -38,6 +38,6 @@ class Changelog extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC);
+        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 }

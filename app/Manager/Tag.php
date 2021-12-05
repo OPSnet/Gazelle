@@ -8,21 +8,21 @@ class Tag extends \Gazelle\Base {
 
     public function findById(int $tagId): ?\Gazelle\Tag {
         $key = sprintf(self::ID_KEY, $tagId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM tags WHERE ID = ?
                 ", $tagId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Tag($id) : null;
     }
 
     public function findByName(string $name) {
-        return $this->findById((int)$this->db->scalar("
+        return $this->findById((int)self::$db->scalar("
             SELECT ID FROM tags WHERE Name = ?
             ", $name
         ));
@@ -73,7 +73,7 @@ class Tag extends \Gazelle\Base {
      * @return int ID of tag, or null if no such tag
      */
     public function lookup(string $tag): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT ID FROM tags WHERE Name = ?
             ", $tag
         );
@@ -86,7 +86,7 @@ class Tag extends \Gazelle\Base {
      * @return string $name Name of the tag
      */
     public function name(int $id): ?string {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT Name FROM tags WHERE ID = ?
             ", $id
         );
@@ -100,7 +100,7 @@ class Tag extends \Gazelle\Base {
      * @return int ID of tag
      */
     public function create(string $name, int $userId): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO tags
                    (Name, UserID)
             VALUES (?,    ?)
@@ -108,7 +108,7 @@ class Tag extends \Gazelle\Base {
                 Uses = Uses + 1
             ", $this->resolve($this->sanitize($name)), $userId
         );
-        return $this->db->inserted_id();
+        return self::$db->inserted_id();
     }
 
     /**
@@ -119,7 +119,7 @@ class Tag extends \Gazelle\Base {
      * @return int ID of tag, or null if no such tag
      */
     public function lookupBad(string $tag): ?int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT ID FROM tag_aliases WHERE BadTag = ?
             ", $tag
         );
@@ -137,7 +137,7 @@ class Tag extends \Gazelle\Base {
         $id = $this->lookup($tag);
         if ($id) {
             // Tag already exists
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE tags SET
                     TagType = 'genre'
                 WHERE ID = ?
@@ -145,13 +145,13 @@ class Tag extends \Gazelle\Base {
             );
         } else {
             // Tag doesn't exist yet: create it
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO tags
                        (Name, UserID, TagType, Uses)
                 VALUES (?,    ?,      'genre', 0)
                 ", $tag, $userId
             );
-            $id = $this->db->inserted_id();
+            $id = self::$db->inserted_id();
         }
         return $id;
     }
@@ -163,13 +163,13 @@ class Tag extends \Gazelle\Base {
      * @return int Number of tags that were actually unofficialized
      */
     public function unofficialize(array $id): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE tags SET
                 TagType = 'other'
             WHERE ID IN (" . placeholders($id) . ")
             ", ...$id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -180,14 +180,14 @@ class Tag extends \Gazelle\Base {
      */
     public function listOfficial($columns, $order = 'name'): array {
         $orderBy = $order == 'name' ? '2, 3 DESC' : '3 DESC, 2';
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID AS id, Name AS name, Uses AS uses
             FROM tags
             WHERE TagType = ?
             ORDER BY $orderBy
             ", 'genre'
         );
-        $list = $this->db->to_array('id', MYSQLI_ASSOC);
+        $list = self::$db->to_array('id', MYSQLI_ASSOC);
         $n = count($list);
         $result = [];
         if ($n < $columns) {
@@ -210,16 +210,16 @@ class Tag extends \Gazelle\Base {
      * @return array List of names
      */
     public function genreList(): array {
-        $list = $this->cache->get_value('genre_tags');
+        $list = self::$cache->get_value('genre_tags');
         if (!$list) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT Name
                 FROM tags
                 WHERE TagType = 'genre'
                 ORDER BY Name
             ");
-            $list = $this->db->collect('Name');
-            $this->cache->cache_value('genre_tags', $list, 3600 * 24);
+            $list = self::$db->collect('Name');
+            self::$cache->cache_value('genre_tags', $list, 3600 * 24);
         }
         return $list;
     }
@@ -233,14 +233,14 @@ class Tag extends \Gazelle\Base {
      * @return int number of affected rows (should be 0 or 1)
      */
     public function rename(int $tagId, string $name, int $userId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE tags SET
                 Name = ?,
                 UserID = ?
             WHERE ID = ?
             ", $name, $userId, $tagId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -271,7 +271,7 @@ class Tag extends \Gazelle\Base {
 
             // If the torrent has the old tag, but not the replacement, add it,
             $changed = 0;
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO torrents_tags (TagID, UserID, GroupID, PositiveVotes, NegativeVotes)
                     SELECT ?, ?, curr.GroupID, curr.PositiveVotes, curr.NegativeVotes
                     FROM torrents_tags curr
@@ -279,10 +279,10 @@ class Tag extends \Gazelle\Base {
                     WHERE curr.TagID = ? AND merge.TagID IS NULL
                 ", $replacementId, $userId, $replacementId, $currentId
             );
-            $changed += $this->db->affected_rows();
+            $changed += self::$db->affected_rows();
 
             // same for artists,
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT INTO artists_tags (TagID, UserID, ArtistID, PositiveVotes, NegativeVotes)
                     SELECT ?, ?, curr.ArtistID, curr.PositiveVotes, curr.NegativeVotes
                     FROM artists_tags curr
@@ -290,10 +290,10 @@ class Tag extends \Gazelle\Base {
                     WHERE curr.TagID = ? AND merge.TagID IS NULL
                 ', $replacementId, $userId, $replacementId, $currentId
             );
-            $changed += $this->db->affected_rows();
+            $changed += self::$db->affected_rows();
 
             // and requests.
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO requests_tags (TagID, RequestID)
                     SELECT ?, curr.RequestID
                     FROM requests_tags curr
@@ -301,10 +301,10 @@ class Tag extends \Gazelle\Base {
                     WHERE curr.TagID = ? AND merge.TagID IS NULL
                 ", $replacementId, $replacementId, $currentId
             );
-            $changed += $this->db->affected_rows();
+            $changed += self::$db->affected_rows();
 
             // update usage count for replacement tag
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE tags SET
                     Uses = Uses + ?
                 WHERE ID = ?
@@ -314,7 +314,7 @@ class Tag extends \Gazelle\Base {
         }
 
         // Kill the old tag everywhere
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE t, at, rt, tt
             FROM tags t
             LEFT JOIN artists_tags  at ON (at.TagID = t.ID)
@@ -334,13 +334,13 @@ class Tag extends \Gazelle\Base {
      * @return int Number of rows added (0 or 1)
      */
     public function createAlias(string $bad, string $good): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO tag_aliases
                    (BadTag, AliasTag)
             VALUES (?,     ?)
             ", $this->sanitize($bad), $this->sanitize($good)
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -352,14 +352,14 @@ class Tag extends \Gazelle\Base {
      * @return int Number of rows changed (0 or 1)
      */
     public function modifyAlias(int $aliasId, string $bad, string $good): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE tag_aliases SET
                 BadTag = ?,
                 AliasTag = ?
             WHERE ID = ?
             ", $this->sanitize($bad), $this->sanitize($good), $aliasId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -369,11 +369,11 @@ class Tag extends \Gazelle\Base {
      * @return int Number of rows deleted (0 or 1)
      */
     public function removeAlias(int $aliasId): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM tag_aliases WHERE ID = ?
             ", $aliasId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -384,14 +384,14 @@ class Tag extends \Gazelle\Base {
      * @return string The resolved tag name, its alias or itself
      */
     public function resolve($name): string {
-        $QueryID = $this->db->get_query_id();
-        $resolved = $this->db->scalar("
+        $QueryID = self::$db->get_query_id();
+        $resolved = self::$db->scalar("
             SELECT AliasTag
             FROM tag_aliases
             WHERE BadTag = ?
             ", $name
         );
-        $this->db->set_query_id($QueryID);
+        self::$db->set_query_id($QueryID);
         return $resolved ?: $name;
     }
 
@@ -403,12 +403,12 @@ class Tag extends \Gazelle\Base {
      */
     public function listAlias(bool $orderByBad): array {
         $column = $orderByBad ? 2 : 3;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID AS id, BadTag AS bad, AliasTag AS alias
             FROM tag_aliases
             ORDER BY $column
         ");
-        return $this->db->to_array('id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -419,7 +419,7 @@ class Tag extends \Gazelle\Base {
      * (artist elements may be null)
      */
     public function torrentLookup(int $tagId): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 ag.ArtistID AS artistId,
                 ag.Name     AS artistName,
@@ -432,7 +432,7 @@ class Tag extends \Gazelle\Base {
             WHERE t.TagID = ?
             ", $tagId
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -443,7 +443,7 @@ class Tag extends \Gazelle\Base {
      * (artist elements may be null)
      */
     public function requestLookup(int $tagId): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 ag.ArtistID  AS artistId,
                 ag.Name      AS artistName,
@@ -456,7 +456,7 @@ class Tag extends \Gazelle\Base {
             WHERE t.TagID = ?
             ", $tagId
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -467,13 +467,13 @@ class Tag extends \Gazelle\Base {
      * @return int Number of rows affected
      */
     public function createRequestTag(int $tagId, int $requestId): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO requests_tags
                    (TagID, RequestID)
             VALUES (?,     ?)
             ", $tagId, $requestId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -486,7 +486,7 @@ class Tag extends \Gazelle\Base {
      * @return int Number of rows affected
      */
     public function createTorrentTag(int $tagId, int $groupId, int $userId, int $weight): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO torrents_tags
                    (TagID, GroupID, UserID, PositiveVotes)
             VALUES (?,     ?,       ?,      ?)
@@ -494,7 +494,7 @@ class Tag extends \Gazelle\Base {
                 PositiveVotes = PositiveVotes + 2
             ", $tagId, $groupId, $userId, $weight
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -508,13 +508,13 @@ class Tag extends \Gazelle\Base {
      * @return int Number of rows affected
      */
     public function createTorrentTagVote(int $tagId, int $groupId, int $userId, string $vote): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO torrents_tags_votes
                    (TagID, GroupID, UserID, Way)
             VALUES (?,     ?,       ?,      ?)
             ", $tagId, $groupId, $userId, $vote
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -526,7 +526,7 @@ class Tag extends \Gazelle\Base {
      * @return bool True if the user as already voted on this tag
      */
     public function torrentTagHasVote(int $tagId, int $groupId, int $userId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT 1
             FROM torrents_tags_votes
             WHERE TagID = ?
@@ -534,7 +534,7 @@ class Tag extends \Gazelle\Base {
                 AND UserID = ?
             ", $tagId, $groupId, $userId
         );
-        return $this->db->has_results();
+        return self::$db->has_results();
     }
 
     /**
@@ -550,8 +550,8 @@ class Tag extends \Gazelle\Base {
         $letters = strtolower(substr($word, 0, $keySize));
         $key = "autocomplete_tags_{$keySize}_$letters";
 
-        if (($suggestions = $this->cache->get($key)) == false) {
-            $this->db->prepared_query("
+        if (($suggestions = self::$cache->get($key)) == false) {
+            self::$db->prepared_query("
                 SELECT Name
                 FROM tags
                 WHERE (Uses > 700 OR TagType = 'genre')
@@ -560,8 +560,8 @@ class Tag extends \Gazelle\Base {
                 LIMIT ?
                 ", $word, 10
             );
-            $suggestions = $this->db->to_array(false, MYSQLI_NUM, false);
-            $this->cache->cache_value($key, $suggestions, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
+            $suggestions = self::$db->to_array(false, MYSQLI_NUM, false);
+            self::$cache->cache_value($key, $suggestions, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
         }
         return array_map(fn($v) => ['value' => $v[0]], $suggestions);
     }

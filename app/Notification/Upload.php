@@ -8,10 +8,6 @@ class Upload extends \Gazelle\Base {
     protected $debug = false;
     protected $seenUserFilter = false;
 
-    public function __construct() {
-        parent::__construct();
-    }
-
     /**
      * Trace notification results on/off
      *
@@ -186,8 +182,8 @@ class Upload extends \Gazelle\Base {
      * @return array of arrays [filterid, userid]
      */
     public function lookup(): array {
-        $this->db->prepared_query($this->sql(), ...$this->args);
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        self::$db->prepared_query($this->sql(), ...$this->args);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -214,16 +210,16 @@ class Upload extends \Gazelle\Base {
         $n = 0;
         foreach ($results as $notify) {
             fprintf($out, "hit f={$notify['filter_id']} u={$notify['user_id']}\n");
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT IGNORE INTO users_notify_torrents
                        (GroupID, TorrentID, UserID, FilterID)
                 VALUES (?,       ?,         ?,      ?)
                 ", $groupId, $torrentId, $notify['user_id'], $notify['filter_id']
             );
-            $n += $this->db->affected_rows();
+            $n += self::$db->affected_rows();
             $feed->populate("torrents_notify_{$notify['passkey']}", $item);
             $feed->populate("torrents_notify_{$notify['filter_id']}_{$notify['passkey']}", $item);
-            $this->cache->delete_value("user_notify_upload_{$notify['user_id']}");
+            self::$cache->delete_value("user_notify_upload_{$notify['user_id']}");
         }
         fprintf($out, "inserted=%d\n", $n);
         fclose($out);

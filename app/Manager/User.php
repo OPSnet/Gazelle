@@ -32,14 +32,14 @@ class User extends \Gazelle\Base {
      */
     public function findById(int $userId): ?\Gazelle\User {
         $key = sprintf(self::ID_KEY, $userId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM users_main WHERE ID = ?
                 ", $userId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\User($id) : null;
@@ -52,14 +52,14 @@ class User extends \Gazelle\Base {
     public function findByUsername(string $username): ?\Gazelle\User {
         $username = trim($username);
         $key = sprintf(self::USERNAME_KEY, $username);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM users_main WHERE Username = ?
                 ", $username
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\User($id) : null;
@@ -73,7 +73,7 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findByEmail(string $email): ?\Gazelle\User {
-        return $this->findById((int)$this->db->scalar("
+        return $this->findById((int)self::$db->scalar("
             SELECT ID FROM users_main WHERE Email = ?  ", trim($email)
         ));
     }
@@ -85,7 +85,7 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findByAnnounceKey(string $announceKey): ?\Gazelle\User {
-        return $this->findById((int)$this->db->scalar("
+        return $this->findById((int)self::$db->scalar("
             SELECT ID FROM users_main WHERE torrent_pass = ?  ", $announceKey
         ));
     }
@@ -97,24 +97,24 @@ class User extends \Gazelle\Base {
      * @return \Gazelle\User object or null if not found
      */
     public function findByResetKey(string $key): ?\Gazelle\User {
-        return $this->findById((int)$this->db->scalar("
+        return $this->findById((int)self::$db->scalar("
             SELECT ui.UserID FROM users_info ui WHERE ui.ResetKey = ?
             ", $key
         ));
     }
 
     public function staffPMList(): array {
-        $list = $this->cache->get_value(self::CACHE_STAFF);
+        $list = self::$cache->get_value(self::CACHE_STAFF);
         if ($list === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT um.ID, um.Username
                 FROM users_main AS um
                 INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
                 WHERE p.DisplayStaff = '1'
                 ORDER BY um.Username
             ");
-            $list = $this->db->to_pair('ID', 'Username', false);
-            $this->cache->cache_value(self::CACHE_STAFF, $list, 86400);
+            $list = self::$db->to_pair('ID', 'Username', false);
+            self::$cache->cache_value(self::CACHE_STAFF, $list, 86400);
         }
         return $list;
     }
@@ -168,16 +168,16 @@ class User extends \Gazelle\Base {
      * @return array $classes
      */
     public function classList(): array {
-        if (($classList = $this->cache->get_value('user_class')) === false) {
-            $qid = $this->db->get_query_id();
-            $this->db->prepared_query("
+        if (($classList = self::$cache->get_value('user_class')) === false) {
+            $qid = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT ID, Name, Level, Secondary, badge
                 FROM permissions
                 ORDER BY Level
             ");
-            $classList = $this->db->to_array('ID');
-            $this->db->set_query_id($qid);
-            $this->cache->cache_value('user_class', $classList, 0);
+            $classList = self::$db->to_array('ID');
+            self::$db->set_query_id($qid);
+            self::$cache->cache_value('user_class', $classList, 0);
         }
         return $classList;
     }
@@ -210,8 +210,8 @@ class User extends \Gazelle\Base {
      * @return array id => \Gazelle\User
      */
     public function flsList() {
-        if (($list = $this->cache->get_value('idfls')) === false) {
-            $this->db->prepared_query("
+        if (($list = self::$cache->get_value('idfls')) === false) {
+            self::$db->prepared_query("
                 SELECT um.ID
                 FROM users_main AS um
                 INNER JOIN users_levels AS ul ON (ul.UserID = um.ID)
@@ -219,8 +219,8 @@ class User extends \Gazelle\Base {
                 ORDER BY um.Username
                 ", FLS_TEAM
             );
-            $list = $this->db->collect(0);
-            $this->cache->cache_value('idfls', $list, 3600);
+            $list = self::$db->collect(0);
+            self::$cache->cache_value('idfls', $list, 3600);
         }
         $fls = [];
         foreach ($list as $id) {
@@ -234,7 +234,7 @@ class User extends \Gazelle\Base {
      * @return array id => username
      */
     public function staffList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.ID    AS id
             FROM users_main AS um
             INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
@@ -242,7 +242,7 @@ class User extends \Gazelle\Base {
             ORDER BY p.Level DESC, um.Username ASC
             ", FORUM_MOD
         );
-        $list = $this->db->collect(0);
+        $list = self::$db->collect(0);
         $staff = [];
         foreach ($list as $id) {
             $staff[$id] = $this->findById($id);
@@ -255,8 +255,8 @@ class User extends \Gazelle\Base {
      * @return array $classes
      */
     public function staffClassList(): array {
-        if (($staffClassList = $this->cache->get_value('staff_class')) === false) {
-            $this->db->prepared_query("
+        if (($staffClassList = self::$cache->get_value('staff_class')) === false) {
+            self::$db->prepared_query("
                 SELECT ID, Name, Level
                 FROM permissions
                 WHERE Secondary = 0
@@ -264,15 +264,15 @@ class User extends \Gazelle\Base {
                 ORDER BY Level
                 ", FORUM_MOD
             );
-            $staffClassList = $this->db->to_array('ID', MYSQLI_ASSOC);
-            $this->cache->cache_value('staff_class', $staffClassList, 0);
+            $staffClassList = self::$db->to_array('ID', MYSQLI_ASSOC);
+            self::$cache->cache_value('staff_class', $staffClassList, 0);
         }
         return $staffClassList;
     }
 
     public function staffListGrouped() {
-        if (($staff = $this->cache->get_value('idstaff')) === false) {
-            $this->db->prepared_query("
+        if (($staff = self::$cache->get_value('idstaff')) === false) {
+            self::$db->prepared_query("
                 SELECT sg.Name as staffGroup,
                     um.ID
                 FROM users_main AS um
@@ -282,7 +282,7 @@ class User extends \Gazelle\Base {
                     AND p.Secondary = 0
                 ORDER BY sg.Sort, p.Level, um.Username
             ");
-            $list = $this->db->to_array(false, MYSQLI_ASSOC);
+            $list = self::$db->to_array(false, MYSQLI_ASSOC);
             $staff = [];
             foreach ($list as $user) {
                 if (!isset($staff[$user['staffGroup']])) {
@@ -290,7 +290,7 @@ class User extends \Gazelle\Base {
                 }
                 $staff[$user['staffGroup']][] = $user['ID'];
             }
-            $this->cache->cache_value('idstaff', $staff, 3600);
+            self::$cache->cache_value('idstaff', $staff, 3600);
         }
         $userMan = new \Gazelle\Manager\User;
         foreach ($staff as &$group) {
@@ -300,13 +300,13 @@ class User extends \Gazelle\Base {
     }
 
     public function findAllByCustomPermission(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, CustomPermissions
             FROM users_main
             WHERE CustomPermissions NOT IN ('', 'a:0:{}')
         ");
         return array_map(fn($perm) => unserialize($perm),
-            $this->db->to_pair('ID', 'CustomPermissions', false)
+            self::$db->to_pair('ID', 'CustomPermissions', false)
         );
     }
 
@@ -316,8 +316,8 @@ class User extends \Gazelle\Base {
      * @return array [Day, Week, Month]
      */
     public function globalActivityStats(): array {
-        if (($stats = $this->cache->get_value('stats_users')) === false) {
-            $this->db->prepared_query("
+        if (($stats = self::$cache->get_value('stats_users')) === false) {
+            self::$db->prepared_query("
                 SELECT
                     sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
                     sum(ula.last_access > now() - INTERVAL 1 WEEK) AS Week,
@@ -327,8 +327,8 @@ class User extends \Gazelle\Base {
                 WHERE um.Enabled = '1'
                     AND ula.last_access > now() - INTERVAL 1 MONTH
             ");
-            $stats = $this->db->next_record(MYSQLI_ASSOC);
-            $this->cache->cache_value('stats_users', $stats, 7200);
+            $stats = self::$db->next_record(MYSQLI_ASSOC);
+            self::$cache->cache_value('stats_users', $stats, 7200);
         }
         return $stats;
     }
@@ -339,8 +339,8 @@ class User extends \Gazelle\Base {
      * @return array [week, joined, disabled]
      */
     public function userflow(): array {
-        if (($userflow = $this->cache->get_value('userflow')) === false) {
-            $this->db->query("
+        if (($userflow = self::$cache->get_value('userflow')) === false) {
+            self::$db->query("
                 SELECT J.Week, J.n as Joined, coalesce(D.n, 0) as Disabled
                 FROM (
                     SELECT DATE_FORMAT(JoinDate, '%X-%V') AS Week, count(*) AS n
@@ -356,8 +356,8 @@ class User extends \Gazelle\Base {
                     LIMIT 52) D USING (Week)
                 ORDER BY 1
             ");
-            $userflow = $this->db->to_array('Week', MYSQLI_ASSOC, false);
-            $this->cache->cache_value('userflow', $userflow, 86400);
+            $userflow = self::$db->to_array('Week', MYSQLI_ASSOC, false);
+            self::$cache->cache_value('userflow', $userflow, 86400);
         }
         return $userflow;
     }
@@ -368,7 +368,7 @@ class User extends \Gazelle\Base {
      * @return int number of results
      */
     public function userflowTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM (
                 SELECT 1
                 FROM users_info
@@ -385,7 +385,7 @@ class User extends \Gazelle\Base {
      * @return array of array [day, month, joined, manual, ratio, inactivity]
      */
     public function userflowDetails(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT j.Date                    AS date,
                 DATE_FORMAT(j.Date, '%Y-%m') AS month,
                 coalesce(j.Flow, 0)          AS joined,
@@ -430,7 +430,7 @@ class User extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -439,9 +439,9 @@ class User extends \Gazelle\Base {
      * @return integer Number of enabled users (this is cached).
      */
     public function getEnabledUsersCount(): int {
-        if (($count = $this->cache->get_value('stats_user_count')) == false) {
-            $count = $this->db->scalar("SELECT count(*) FROM users_main WHERE Enabled = '1'");
-            $this->cache->cache_value('stats_user_count', $count, 0);
+        if (($count = self::$cache->get_value('stats_user_count')) == false) {
+            $count = self::$db->scalar("SELECT count(*) FROM users_main WHERE Enabled = '1'");
+            self::$cache->cache_value('stats_user_count', $count, 0);
         }
         return $count;
     }
@@ -458,7 +458,7 @@ class User extends \Gazelle\Base {
      * Flush the cached count of enabled users.
      */
     public function flushEnabledUsersCount() {
-        $this->cache->delete_value('stats_user_count');
+        self::$cache->delete_value('stats_user_count');
         return $this;
     }
 
@@ -469,14 +469,14 @@ class User extends \Gazelle\Base {
      * @return bool success (if invite status was changed)
      */
     public function disableInvites(int $userId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 DisableInvites = '1'
             WHERE DisableInvites = '0'
                 AND UserID = ?
             ", $userId
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     /**
@@ -498,7 +498,7 @@ class User extends \Gazelle\Base {
      * return int number of users
      */
     public function totalRatioWatchUsers(): int {
-        return $this->db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
+        return self::$db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
     }
 
     /**
@@ -507,7 +507,7 @@ class User extends \Gazelle\Base {
      * @return array user details
      */
     public function ratioWatchUsers(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.ID              AS user_id,
                 uls.Uploaded          AS uploaded,
                 uls.Downloaded        AS downloaded,
@@ -520,7 +520,7 @@ class User extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -529,7 +529,7 @@ class User extends \Gazelle\Base {
      * @return int number of users
      */
     public function totalBannedForRatio(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM users_info WHERE BanDate IS NOT NULL AND BanReason = '2'
         ");
     }
@@ -540,7 +540,7 @@ class User extends \Gazelle\Base {
      * @return int number of unresolved reports
      */
     public function unresolvedReportsTotal(int $userId): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -566,13 +566,13 @@ class User extends \Gazelle\Base {
             return 0;
         }
 
-        $qid = $this->db->get_query_id();
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        $qid = self::$db->get_query_id();
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             INSERT INTO pm_conversations (Subject) VALUES (?)
             ", $subject
         );
-        $convId = $this->db->inserted_id();
+        $convId = self::$db->inserted_id();
 
         $placeholders = ["(?, ?, '1', '0', '1')"];
         $args = [$toId, $convId];
@@ -581,15 +581,15 @@ class User extends \Gazelle\Base {
             $args = array_merge($args, [$fromId, $convId]);
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO pm_conversations_users
                    (UserID, ConvID, InInbox, InSentbox, UnRead)
             VALUES
             " . implode(', ', $placeholders), ...$args
         );
         $this->deliverPM($toId, $fromId, $subject, $body, $convId);
-        $this->db->commit();
-        $this->db->set_query_id($qid);
+        self::$db->commit();
+        self::$db->set_query_id($qid);
 
         return $convId;
     }
@@ -610,17 +610,17 @@ class User extends \Gazelle\Base {
             return 0;
         }
 
-        $qid = $this->db->get_query_id();
-        $this->db->begin_transaction();
+        $qid = self::$db->get_query_id();
+        self::$db->begin_transaction();
         $this->deliverPM($toId, $fromId, $subject, $body, $convId);
-        $this->db->commit();
-        $this->db->set_query_id($qid);
+        self::$db->commit();
+        self::$db->set_query_id($qid);
 
         return $convId;
     }
 
     protected function deliverPM(int $toId, int $fromId, string $subject, string $body, int $convId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 InInbox = '1',
                 UnRead = '1',
@@ -629,7 +629,7 @@ class User extends \Gazelle\Base {
                 AND ConvID = ?
             ", $toId, $convId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 InSentbox = '1',
                 SentDate = now()
@@ -638,7 +638,7 @@ class User extends \Gazelle\Base {
             ", $fromId, $convId
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO pm_messages
                    (SenderID, ConvID, Body)
             VALUES (?,        ?,      ?)
@@ -646,14 +646,14 @@ class User extends \Gazelle\Base {
         );
 
         // Update the cached new message count.
-        $this->cache->cache_value("inbox_new_$toId",
-            $this->db->scalar("
+        self::$cache->cache_value("inbox_new_$toId",
+            self::$db->scalar("
                 SELECT count(*) FROM pm_conversations_users WHERE UnRead = '1' AND InInbox = '1' AND UserID = ?
                 ", $toId
             )
         );
-        $this->cache->deleteMulti(["pm_{$convId}_{$fromId}", "pm_{$convId}_{$toId}"]);
-        $senderName = $this->db->scalar("
+        self::$cache->deleteMulti(["pm_{$convId}_{$fromId}", "pm_{$convId}_{$toId}"]);
+        $senderName = self::$db->scalar("
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId
         );
@@ -663,12 +663,12 @@ class User extends \Gazelle\Base {
     }
 
     public function sendSnatchPM(\Gazelle\User $viewer, \Gazelle\Torrent  $torrent, string $subject, string $body): int {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT uid FROM xbt_snatched WHERE fid = ?
             ', $torrent->id()
         );
 
-        $snatchers = $this->db->collect(0, false);
+        $snatchers = self::$db->collect(0, false);
         foreach ($snatchers as $userId) {
             $this->sendPM($userId, 0, $subject, $body);
         }
@@ -693,7 +693,7 @@ class User extends \Gazelle\Base {
         }
         $seen = [$uploaderId];
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT xfu.uid
             FROM xbt_files_users AS xfu
             INNER JOIN users_info AS ui ON (xfu.uid = ui.UserID)
@@ -702,13 +702,13 @@ class User extends \Gazelle\Base {
                 AND xfu.uid NOT IN (" . placeholders($seen) . ")
             ", $torrentId, ...$seen
         );
-        $ids = $this->db->collect('uid');
+        $ids = self::$db->collect('uid');
         foreach ($ids as $userId) {
             $this->sendPM($userId, 0, $subject, sprintf($message, 'you are seeding'));
         }
         $seen = array_merge($seen, $ids);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT xs.uid
             FROM xbt_snatched AS xs
             INNER JOIN users_info AS ui ON (xs.uid = ui.UserID)
@@ -717,13 +717,13 @@ class User extends \Gazelle\Base {
                 AND xs.uid NOT IN (" . placeholders($seen) . ")
             ", $torrentId, ...$seen
         );
-        $ids = $this->db->collect('uid');
+        $ids = self::$db->collect('uid');
         foreach ($ids as $userId) {
             $this->sendPM($userId, 0, $subject, sprintf($message, 'you have snatched'));
         }
         $seen = array_merge($seen, $ids);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT ud.UserID
             FROM users_downloads AS ud
             INNER JOIN users_info AS ui ON (ud.UserID = ui.UserID)
@@ -732,7 +732,7 @@ class User extends \Gazelle\Base {
                 AND ud.UserID NOT IN (" . placeholders($seen) . ")
             ", $torrentId, ...$seen
         );
-        $ids = $this->db->collect('UserID');
+        $ids = self::$db->collect('UserID');
         foreach ($ids as $userId) {
             $this->sendPM($userId, 0, $subject, sprintf($message, 'you have downloaded'));
         }
@@ -749,13 +749,13 @@ class User extends \Gazelle\Base {
      * @return int 1 if user was warned
      */
     public function warn(int $userId, int $duration, string $reason, string $staffName): int {
-        $current = $this->db->scalar("
+        $current = self::$db->scalar("
             SELECT Warned FROM users_info WHERE UserID = ?
             ", $userId
         );
         if (is_null($current)) {
             // User was not already warned
-            $this->cache->delete_value("u_$userId");
+            self::$cache->delete_value("u_$userId");
             $warnTime = time_plus($duration);
             $warning = "Warned until $warnTime";
         } else {
@@ -770,7 +770,7 @@ class User extends \Gazelle\Base {
                     . "Due to this collision, your warning status will now expire at $warnTime."
             );
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info SET
                 WarnedTimes = WarnedTimes + 1,
                 Warned = ?,
@@ -778,7 +778,7 @@ class User extends \Gazelle\Base {
             WHERE UserID = ?
             ", $warnTime, "$warning by $staffName\nReason: $reason\n\n", $userId
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -790,8 +790,8 @@ class User extends \Gazelle\Base {
      * @return int number of users disabled
      */
     public function disableUserList(array $userIds, string $comment, int $reason): int {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             UPDATE users_info AS ui
             INNER JOIN users_main AS um ON (um.ID = ui.UserID) SET
                 um.Enabled = '2',
@@ -802,22 +802,22 @@ class User extends \Gazelle\Base {
             WHERE um.ID IN (" . placeholders($userIds) . ")
             ", "$comment\n\n", $reason, ...$userIds
         );
-        $n = $this->db->affected_rows();
+        $n = self::$db->affected_rows();
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT concat('session_', SessionID) as cacheKey
             FROM users_sessions
             WHERE Active = 1
                 AND UserID IN (" . placeholders($userIds) . ")
             ", ...$userIds
         );
-        $this->cache->deleteMulti($this->db->collect('cacheKey'));
-        $this->db->prepared_query("
+        self::$cache->deleteMulti(self::$db->collect('cacheKey'));
+        self::$db->prepared_query("
             DELETE FROM users_sessions WHERE UserID IN (" . placeholders($userIds) . ")
             ", ...$userIds
         );
         foreach ($userIds as $userId) {
-            $this->cache->deleteMulti([
+            self::$cache->deleteMulti([
                 "u_$userId", "user_stats_$userId", "users_sessions_$userId"
             ]);
 
@@ -825,12 +825,12 @@ class User extends \Gazelle\Base {
         $this->flushEnabledUsersCount();
 
         // Remove the users from the tracker.
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT torrent_pass FROM users_main WHERE ID IN (" . placeholders($userIds) . ")
             ", ...$userIds
         );
-        $PassKeys = $this->db->collect('torrent_pass');
-        $this->db->commit();
+        $PassKeys = self::$db->collect('torrent_pass');
+        self::$db->commit();
         $Concat = '';
         $tracker = new \Gazelle\Tracker;
         foreach ($PassKeys as $PassKey) {
@@ -850,7 +850,7 @@ class User extends \Gazelle\Base {
      */
     protected function setDonorVisibility(\Gazelle\User $user, bool $visible): int {
         $hidden = $visible ? '0' : '1';
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_donor_ranks
                    (UserID, Hidden)
             VALUES (?,      ?)
@@ -858,7 +858,7 @@ class User extends \Gazelle\Base {
                 Hidden = ?
             ", $user->id(), $hidden, $hidden
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function hideDonor(\Gazelle\User $user): int {
@@ -870,7 +870,7 @@ class User extends \Gazelle\Base {
     }
 
     public function donorRewardTotal() {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_main AS um
             INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
@@ -886,7 +886,7 @@ class User extends \Gazelle\Base {
             $where = "WHERE um.username REGEXP ?";
             array_unshift($args, $search);
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.Username,
                 d.UserID AS user_id,
                 d.Rank AS rank,
@@ -904,7 +904,7 @@ class User extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function demotionCriteria(): array {
@@ -1046,21 +1046,21 @@ class User extends \Gazelle\Base {
     public function addMassTokens(int $amount, bool $allowLeechDisabled): int {
         $where = !$allowLeechDisabled ? "um.Enabled = '1' AND um.can_leech = 1" : "um.Enabled = '1'";
 
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             SELECT ID FROM users_main um WHERE $where
         ");
-        $ids = $this->db->collect('ID');
-        $this->db->prepared_query("
+        $ids = self::$db->collect('ID');
+        self::$db->prepared_query("
             UPDATE users_main um
             INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
                 uf.tokens = uf.tokens + ?
             WHERE $where
             ", $amount
         );
-        $this->db->commit();
+        self::$db->commit();
 
-        $this->cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
+        self::$cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
     }
 
@@ -1078,22 +1078,22 @@ class User extends \Gazelle\Base {
         array_push($cond, "uf.tokens > ?");
         $where = implode(' OR ', $cond);
 
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             SELECT ID FROM users_main um INNER JOIN user_flt uf ON (uf.user_id = um.ID) WHERE $where
             ", $amount
         );
-        $ids = $this->db->collect('ID');
-        $this->db->prepared_query("
+        $ids = self::$db->collect('ID');
+        self::$db->prepared_query("
             UPDATE users_main um
             INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
                 uf.tokens = ?
             WHERE $where
             ", $amount
         );
-        $this->db->commit();
+        self::$db->commit();
 
-        $this->cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
+        self::$cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
     }
 
@@ -1110,15 +1110,15 @@ class User extends \Gazelle\Base {
     }
 
     public function forumNavItemList(): array {
-        $list = $this->cache->get_value("nav_items");
+        $list = self::$cache->get_value("nav_items");
         if (!$list) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $QueryID = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT id, tag, title, target, tests, test_user, mandatory, initial
                 FROM nav_items");
-            $list = $this->db->to_array("id", MYSQLI_ASSOC, false);
-            $this->cache->cache_value("nav_items", $list, 0);
-            $this->db->set_query_id($QueryID);
+            $list = self::$db->to_array("id", MYSQLI_ASSOC, false);
+            self::$cache->cache_value("nav_items", $list, 0);
+            self::$db->set_query_id($QueryID);
         }
         return $list;
     }

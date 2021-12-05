@@ -24,12 +24,10 @@ class Vote extends Base {
     protected $topArgs   = [];
 
     public function __construct(int $userId) {
-        parent::__construct();
-
         $this->userId = $userId;
         $userKey = sprintf(self::VOTE_USER_KEY, $userId);
-        if (($this->userVote = $this->cache->get_value($userKey)) === false) {
-            $this->db->prepared_query("
+        if (($this->userVote = self::$cache->get_value($userKey)) === false) {
+            self::$db->prepared_query("
                 SELECT GroupID,
                     CASE WHEN Type = 'Up' THEN 1
                         WHEN Type = 'Down' THEN -1
@@ -39,8 +37,8 @@ class Vote extends Base {
                 WHERE UserID = ?
                 ", $userId
             );
-            $this->userVote = $this->db->to_pair('GroupID', 'Vote', false);
-            $this->cache->cache_value($userKey, $this->userVote);
+            $this->userVote = self::$db->to_pair('GroupID', 'Vote', false);
+            self::$cache->cache_value($userKey, $this->userVote);
         }
     }
 
@@ -103,16 +101,16 @@ class Vote extends Base {
      */
     public function rankOverall() {
         $key = "voting_ranks_overall";
-        if (($ranks = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
+        if (($ranks = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query("
                 SELECT GroupID,
                     Score
                 FROM torrents_votes
                 ORDER BY Score DESC
                 LIMIT 100
             ");
-            $ranks = $this->voteRanks($this->db->to_pair(0, 1, false));
-            $this->cache->cache_value($key, $ranks, 259200); // 3 days
+            $ranks = $this->voteRanks(self::$db->to_pair(0, 1, false));
+            self::$cache->cache_value($key, $ranks, 259200); // 3 days
         }
         return $ranks[$this->groupId] ?? false;
     }
@@ -124,8 +122,8 @@ class Vote extends Base {
      */
     public function rankYear(int $year) {
         $key = "voting_ranks_year_$year";
-        if (($ranks = $this->cache->get_value($year)) === false) {
-            $this->db->prepared_query("
+        if (($ranks = self::$cache->get_value($year)) === false) {
+            self::$db->prepared_query("
                 SELECT v.GroupID,
                     v.Score
                 FROM torrents_votes AS v
@@ -135,8 +133,8 @@ class Vote extends Base {
                 LIMIT 100
                 ", $year
             );
-            $ranks = $this->voteRanks($this->db->to_pair(0, 1, false));
-            $this->cache->cache_value($key, $ranks, 259200);
+            $ranks = $this->voteRanks(self::$db->to_pair(0, 1, false));
+            self::$cache->cache_value($key, $ranks, 259200);
         }
         return $ranks[$this->groupId] ?? false;
     }
@@ -149,8 +147,8 @@ class Vote extends Base {
     public function rankDecade(int $year) {
         $year -= $year % 10; // First year of the decade
         $key = "voting_ranks_decade_$year";
-        if (($ranks = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
+        if (($ranks = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query("
                 SELECT GroupID,
                     Score
                 FROM torrents_votes  AS v
@@ -161,8 +159,8 @@ class Vote extends Base {
                 LIMIT 100
                 ", $year, $year
             );
-            $ranks = $this->voteRanks($this->db->to_pair(0, 1, false));
-            $this->cache->cache_value($key, $ranks, 259200); // 3 days
+            $ranks = $this->voteRanks(self::$db->to_pair(0, 1, false));
+            self::$cache->cache_value($key, $ranks, 259200); // 3 days
         }
 
         return $ranks[$this->groupId] ?? false;
@@ -173,7 +171,7 @@ class Vote extends Base {
             . ($this->topWhere
                 ? md5(implode('|', array_merge($this->topWhere, $this->topArgs, [(int)$this->topConfig['tagAll']])))
             : '');
-        if (($topVotes = $this->cache->get_value($key)) === false) {
+        if (($topVotes = self::$cache->get_value($key)) === false) {
             if (isset($this->topConfig['tagList'])) {
                 if ($this->topConfig['tagAll']) {
                     foreach ($this->topConfig['tagList'] as $tag) {
@@ -200,7 +198,7 @@ class Vote extends Base {
             $this->topWhere[] = 'Score > 0';
             $this->topArgs[] = $this->topConfig['limit'] ?? 25;
 
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT v.GroupID, v.Ups, v.Total, v.Score
                 FROM torrents_votes AS v
                 " . implode("\n", array_values($this->topJoin)) . "
@@ -210,8 +208,8 @@ class Vote extends Base {
                 LIMIT ?
                 ", ...$this->topArgs
             );
-            $results = $this->db->to_array('GroupID', MYSQLI_ASSOC, false);
-            $ranks = $this->voteRanks($this->db->to_pair('GroupID', 'Score', false));
+            $results = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
+            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score', false));
             $groups = \Torrents::get_groups(array_keys($results));
 
             $topVotes = [];
@@ -225,16 +223,16 @@ class Vote extends Base {
                     ]
                 );
             }
-            $this->cache->cache_value($key, $topVotes, 3600);
+            self::$cache->cache_value($key, $topVotes, 3600);
         }
         return $topVotes;
     }
 
     public function similarVote(): array {
         $key = sprintf(self::VOTE_SIMILAR, $this->groupId);
-        $similar = $this->cache->get_value($key);
+        $similar = self::$cache->get_value($key);
         if ($similar === false || isset($similar[$this->groupId])) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT v.GroupID
                 FROM (
                     SELECT UserID
@@ -251,14 +249,14 @@ class Vote extends Base {
                 LIMIT 10
                 ", $this->groupId, $this->groupId
             );
-            $similar = $this->db->collect(0);
-            $this->cache->cache_value($key, $similar, 3600);
+            $similar = self::$db->collect(0);
+            self::$cache->cache_value($key, $similar, 3600);
         }
         return $similar;
     }
 
     public function links(string $auth): string {
-        return $this->twig->render('vote/links.twig', [
+        return self::$twig->render('vote/links.twig', [
             'auth'     => $auth,
             'group_id' => $this->groupId,
             'score'    => $this->score($this->total(), $this->totalUp()),
@@ -290,15 +288,15 @@ class Vote extends Base {
     public function loadGroup(): array {
         if (!$this->groupVote) {
             $key = sprintf(self::VOTED_GROUP, $this->groupId);
-            if (($this->groupVote = $this->cache->get_value($key)) === false) {
-                $this->groupVote = $this->db->rowAssoc("
+            if (($this->groupVote = self::$cache->get_value($key)) === false) {
+                $this->groupVote = self::$db->rowAssoc("
                     SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
                     ", $this->groupId
                 );
                 if (is_null($this->groupVote)) {
                     $this->groupVote = ['Ups' => 0, 'Total' => 0, 'Score' => 0];
                 }
-                $this->cache->cache_value($key, $this->groupVote, 259200); // 3 days
+                self::$cache->cache_value($key, $this->groupVote, 259200); // 3 days
             }
         }
         return $this->groupVote;
@@ -310,16 +308,16 @@ class Vote extends Base {
      */
     public function userVotes() {
         $key = sprintf(self::VOTED_USER, $this->userId);
-        if (($votes = $this->cache->get_value($key)) === false) {
-            $this->db->prepared_query("
+        if (($votes = self::$cache->get_value($key)) === false) {
+            self::$db->prepared_query("
                 SELECT GroupID,
                     CASE WHEN Type = 'Up' THEN 1 ELSE 0 END AS vote
                 FROM users_votes
                 WHERE UserID = ?
                 ", $this->userId
             );
-            $votes = $this->db->to_pair('GroupID', 'vote', false);
-            $this->cache->cache_value($key, $votes);
+            $votes = self::$db->to_pair('GroupID', 'vote', false);
+            self::$cache->cache_value($key, $votes);
         }
         return $votes;
     }
@@ -361,7 +359,7 @@ class Vote extends Base {
     }
 
     protected function summary(): array {
-        [$total, $ups] = $this->db->row("
+        [$total, $ups] = self::$db->row("
             SELECT count(*) AS Total,
                 coalesce(sum(if(v.Type = 'Up', 1, 0)), 0) AS Ups
             FROM users_votes AS v
@@ -383,15 +381,15 @@ class Vote extends Base {
         $up = $direction === 1 ? 1 : 0;
 
         // update db
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             INSERT IGNORE INTO users_votes
                    (UserID, GroupID, Type)
             VALUES (?,      ?,       ?)
             ", $this->userId, $this->groupId, $up ? 'Up' : 'Down'
         );
         [$total, $ups, $score] = $this->summary();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO torrents_votes
                    (GroupID, Ups, Score, Total)
             VALUES (?,       ?,   ?,     1)
@@ -401,15 +399,15 @@ class Vote extends Base {
                 Score = ?
             ", $this->groupId, $ups, $score, $total, $ups, $score
         );
-        $this->db->commit();
+        self::$db->commit();
 
         // update cache
         $this->userVote[$this->groupId] = $direction;
         $this->groupVote['Total'] = $total;
         $this->groupVote['Ups']   = $ups;
-        $this->cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->userId), $this->userVote, 259200); // 3 days
-        $this->cache->cache_value(sprintf(self::VOTED_GROUP, $this->groupId), $this->groupVote, 259200);
-        $this->cache->delete_value(sprintf(self::VOTE_PAIR_KEY, $this->groupId));
+        self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->userId), $this->userVote, 259200); // 3 days
+        self::$cache->cache_value(sprintf(self::VOTED_GROUP, $this->groupId), $this->groupVote, 259200);
+        self::$cache->delete_value(sprintf(self::VOTE_PAIR_KEY, $this->groupId));
 
         return [true, 'voted'];
     }
@@ -423,14 +421,14 @@ class Vote extends Base {
         }
         $up = $this->userVote[$this->groupId] === 1 ? 1 : 0;
 
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM users_votes
             WHERE UserID = ? AND GroupID = ?
             ", $this->userId, $this->groupId
         );
         [$total, $ups, $score] = $this->summary();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE torrents_votes SET
                 Total = ?,
                 Ups   = ?,
@@ -438,15 +436,15 @@ class Vote extends Base {
             WHERE GroupID = ?
             ", $total, $ups, $score, $this->groupId
         );
-        $this->db->commit();
+        self::$db->commit();
 
         // Update cache
         unset($this->userVote[$this->groupId]);
         $this->groupVote['Total'] = $total;
         $this->groupVote['Ups']   = $ups;
-        $this->cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->userId), $this->userVote, 259200);
-        $this->cache->cache_value(sprintf(self::VOTED_GROUP, $this->groupId), $this->groupVote, 259200);
-        $this->cache->delete_value(sprintf(self::VOTE_PAIR_KEY, $this->groupId));
+        self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->userId), $this->userVote, 259200);
+        self::$cache->cache_value(sprintf(self::VOTED_GROUP, $this->groupId), $this->groupVote, 259200);
+        self::$cache->delete_value(sprintf(self::VOTE_PAIR_KEY, $this->groupId));
 
         return [true, 'cleared'];
     }

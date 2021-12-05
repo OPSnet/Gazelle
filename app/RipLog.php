@@ -27,7 +27,7 @@ class RipLog extends BaseObject {
     public function __construct(int $torrentId, int $logId) {
         parent::__construct($logId);
         $this->torrentId = $torrentId;
-        $this->info = $this->db->rowAssoc("
+        $this->info = self::$db->rowAssoc("
             SELECT 
                 tl.LogID             AS log_id,
                 tl.TorrentID         AS torrent_id,

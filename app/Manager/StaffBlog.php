@@ -24,14 +24,14 @@ class StaffBlog extends \Gazelle\Base {
      * @param int ID of the vistort
      */
     public function visit(int $userId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO staff_blog_visits
                    (UserID)
             VALUES (?)
             ON DUPLICATE KEY UPDATE Time = now()
             ", $userId
         );
-        $this->cache->delete_value(sprintf(self::CACHE_READ_KEY, $userId));
+        self::$cache->delete_value(sprintf(self::CACHE_READ_KEY, $userId));
     }
 
     public function blogId(): ?int {
@@ -52,7 +52,7 @@ class StaffBlog extends \Gazelle\Base {
 
     public function load(int $blogId) {
         $this->blogId = $blogId;
-        [$this->body, $this->title] = $this->db->row("
+        [$this->body, $this->title] = self::$db->row("
             SELECT Body, Title
             FROM staff_blog
             WHERE ID = ?
@@ -67,8 +67,8 @@ class StaffBlog extends \Gazelle\Base {
      * @return array list of entries
      */
     public function blogList(): array {
-        if (($list = $this->cache->get_value(self::CACHE_KEY)) === false) {
-            $this->db->prepared_query("
+        if (($list = self::$cache->get_value(self::CACHE_KEY)) === false) {
+            self::$db->prepared_query("
                 SELECT
                     b.ID        AS id,
                     um.Username AS author,
@@ -80,8 +80,8 @@ class StaffBlog extends \Gazelle\Base {
                 INNER JOIN users_main AS um ON (b.UserID = um.ID)
                 ORDER BY Time DESC
             ");
-            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
-            $this->cache->cache_value(self::CACHE_KEY, $list, 1209600);
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value(self::CACHE_KEY, $list, 1209600);
         }
         return $list;
     }
@@ -94,13 +94,13 @@ class StaffBlog extends \Gazelle\Base {
      */
     public function readBy(\Gazelle\User $user) {
         $key = sprintf(self::CACHE_READ_KEY, $user->id());
-        if (($time = $this->cache->get_value($key)) === false) {
-            $time = $this->db->scalar("
+        if (($time = self::$cache->get_value($key)) === false) {
+            $time = self::$db->scalar("
                 SELECT Time FROM staff_blog_visits WHERE UserID = ?
                 ", $user->id()
             );
             $time = $time ? strtotime($time) : 0;
-            $this->cache->cache_value($key, $time, 86400);
+            self::$cache->cache_value($key, $time, 86400);
         }
         return $time;
     }
@@ -153,7 +153,7 @@ class StaffBlog extends \Gazelle\Base {
      */
     public function modify() {
         if ($this->blogId) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE staff_blog SET
                     Title = ?,
                     Body = ?
@@ -161,16 +161,16 @@ class StaffBlog extends \Gazelle\Base {
                 ", $this->title, $this->body, $this->blogId
             );
         } else {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO staff_blog
                        (UserID, Title, Body)
                 VALUES (?,      ?,     ?)
                 ", $this->authorId, $this->title, $this->body
             );
-            $this->blogId = $this->db->inserted_id();
+            $this->blogId = self::$db->inserted_id();
         }
-        $this->cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
-        return $this->db->affected_rows() === 1;
+        self::$cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
+        return self::$db->affected_rows() === 1;
     }
 
     /**
@@ -179,14 +179,14 @@ class StaffBlog extends \Gazelle\Base {
      * @return bool success
      */
     public function remove(int $blogId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM staff_blog WHERE ID = ?
             ", $blogId
         );
         $this->blogId = null;
         $this->body = null;
         $this->title = null;
-        $this->cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
-        return $this->db->affected_rows() === 1;
+        self::$cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
+        return self::$db->affected_rows() === 1;
     }
 }

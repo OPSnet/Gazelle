@@ -47,19 +47,19 @@ class Bookmark extends BaseUser {
             return $this->all;
         }
         $key = "bookmarks_{$type}_" . $this->user->id();
-        $all = $this->cache->get_value($key);
+        $all = self::$cache->get_value($key);
         if ($all === false) {
             [$table, $column] = $this->schema($type);
-            $q = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $q = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT $column
                 FROM $table
                 WHERE UserID = ?
                 ", $this->user->id()
             );
-            $all = $this->db->collect($column);
-            $this->db->set_query_id($q);
-            $this->cache->cache_value($key, $all, 0);
+            $all = self::$db->collect($column);
+            self::$db->set_query_id($q);
+            self::$cache->cache_value($key, $all, 0);
         }
         $this->all = $all;
         return $this->all;
@@ -98,26 +98,26 @@ class Bookmark extends BaseUser {
      * @return array Group IDs, Bookmark Data, Torrent List
      */
     public function torrentBookmarks(): array {
-        [$groupIds, $bookmarkData] = $this->cache->get_value("bookmarks_group_ids_" . $this->user->id());
+        [$groupIds, $bookmarkData] = self::$cache->get_value("bookmarks_group_ids_" . $this->user->id());
         if (!$groupIds) {
-            $qid = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $qid = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT GroupID, Sort, `Time`
                 FROM bookmarks_torrents b
                 WHERE UserID = ?
                 ORDER BY Sort, `Time` ASC
                 ", $this->user->id()
             );
-            $groupIds = $this->db->collect('GroupID');
-            $bookmarkData = $this->db->to_array('GroupID', MYSQLI_ASSOC);
-            $this->db->set_query_id($qid);
-            $this->cache->cache_value("bookmarks_group_ids_" . $this->user->id(), [$groupIds, $bookmarkData], 3600);
+            $groupIds = self::$db->collect('GroupID');
+            $bookmarkData = self::$db->to_array('GroupID', MYSQLI_ASSOC);
+            self::$db->set_query_id($qid);
+            self::$cache->cache_value("bookmarks_group_ids_" . $this->user->id(), [$groupIds, $bookmarkData], 3600);
         }
         return [$groupIds, $bookmarkData, \Torrents::get_groups($groupIds)];
     }
 
     public function torrentArtistLeaderboard(Manager\Artist $artistMan): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ta.ArtistID AS id,
                 count(*) AS total
             FROM bookmarks_torrents b
@@ -128,7 +128,7 @@ class Bookmark extends BaseUser {
             LIMIT 10
             ", $this->user->id()
         );
-        $result = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $result = self::$db->to_array(false, MYSQLI_ASSOC, false);
         $list = [];
         foreach ($result as $item) {
             $artist = $artistMan->findById($item['id']);
@@ -141,7 +141,7 @@ class Bookmark extends BaseUser {
     }
 
     public function torrentArtistTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) AS total
             FROM bookmarks_torrents b
             INNER JOIN torrents_artists ta USING (GroupID)
@@ -151,7 +151,7 @@ class Bookmark extends BaseUser {
     }
 
     public function torrentTagLeaderboard(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT t.Name AS name,
                 count(*)  AS total
             FROM bookmarks_torrents b
@@ -163,11 +163,11 @@ class Bookmark extends BaseUser {
             LIMIT 10
             ", $this->user->id()
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function torrentTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM bookmarks_torrents b
             INNER JOIN torrents t USING (GroupID)
@@ -181,7 +181,7 @@ class Bookmark extends BaseUser {
      * @return array containing [group_id, seq, added, torrent_id]
      */
     public function torrentList(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT b.GroupID       AS tgroup_id,
                 b.Sort             AS seq,
                 b.Time             AS added,
@@ -197,7 +197,7 @@ class Bookmark extends BaseUser {
             LIMIT ? OFFSET ?
             ", $this->user->id(), $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -211,7 +211,7 @@ class Bookmark extends BaseUser {
         if (!$id) {
             throw new Exception\BookmarkIdentifierException($id);
         }
-        if ($this->db->scalar("
+        if (self::$db->scalar("
             SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
             ", $this->user->id(), $id
         )) {
@@ -220,14 +220,14 @@ class Bookmark extends BaseUser {
         }
         switch($type) {
             case 'torrent':
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     INSERT IGNORE INTO bookmarks_torrents
                            (GroupID,  UserID, Sort)
                     VALUES (?,        ?,
                         (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
                     )", $id, $this->user->id(), $this->user->id()
                 );
-                $this->cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
+                self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
 
                 $torMan = (new Manager\Torrent)->setViewer($this->user);
                 $tgroup = (new Manager\TGroup)->findById($id);
@@ -253,19 +253,19 @@ class Bookmark extends BaseUser {
                 }
                 break;
             case 'request':
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     INSERT IGNORE INTO bookmarks_requests (RequestID, UserID) VALUES (?, ?)
                     ", $id, $this->user->id()
                 );
-                $this->cache->delete_value("bookmarks_{$type}_" . $this->user->id());
+                self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
                 $this->updateRequests($id);
                 break;
             default:
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     INSERT IGNORE INTO $table ($column, UserID) VALUES (?, ?)
                     ", $id, $this->user->id()
                 );
-                $this->cache->delete_value("bookmarks_{$type}_" . $this->user->id());
+                self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
                 break;
         }
     }
@@ -281,16 +281,16 @@ class Bookmark extends BaseUser {
         if (!$id) {
             throw new Exception\BookmarkIdentifierException($id);
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
             ", $this->user->id(), $id
         );
-        $this->cache->delete_value(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
+        self::$cache->delete_value(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
 
-        if ($this->db->affected_rows()) {
+        if (self::$db->affected_rows()) {
             switch ($type) {
             case 'torrent':
-                $this->cache->delete_value("bookmarks_group_ids_" . $this->user->id());
+                self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
                 break;
             case 'request':
                 $this->updateRequests($id);
@@ -301,11 +301,11 @@ class Bookmark extends BaseUser {
     }
 
     protected function updateRequests(int $requestId) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID FROM bookmarks_requests WHERE RequestID = ?
             ", $requestId
         );
-        if ($this->db->record_count() > 100) {
+        if (self::$db->record_count() > 100) {
             // Sphinx doesn't like huge MVA updates. Update sphinx_requests_delta
             // and live with the <= 1 minute delay if we have more than 100 bookmarkers
             \Requests::update_sphinx_requests($requestId);
@@ -313,7 +313,7 @@ class Bookmark extends BaseUser {
             $SphQL = new \SphinxqlQuery();
             $SphQL->raw_query(
                 "UPDATE requests, requests_delta SET bookmarker = ("
-                . implode(',', $this->db->collect('UserID'))
+                . implode(',', self::$db->collect('UserID'))
                 . ") WHERE id = $requestId"
             );
         }

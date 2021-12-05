@@ -9,13 +9,13 @@ class Collage extends \Gazelle\Base {
     protected const ID_KEY = 'zz_c_%d';
 
     public function create(\Gazelle\User $user, int $categoryId, string $name, string $description, string $tagList, \Gazelle\Log $logger) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO collages
                    (UserID, CategoryID, Name, Description, TagList)
             VALUES (?,      ?,          ?,    ?,           ?)
             ", $user->id(), $categoryId, trim($name), trim($description), trim($tagList)
         );
-        $id = $this->db->inserted_id();
+        $id = self::$db->inserted_id();
         (new \Gazelle\Stats\User($user->id()))->increment('collage_total');
         $logger->general("Collage $id ($name) was created by " . $user->username());
         return new \Gazelle\Collage($id);
@@ -23,42 +23,42 @@ class Collage extends \Gazelle\Base {
 
     public function findById(int $collageId): ?\Gazelle\Collage {
         $key = sprintf(self::ID_KEY, $collageId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM collages WHERE ID = ?
                 ", $collageId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Collage($id) : null;
     }
 
     public function findByName(string $name): ?\Gazelle\Collage {
-        return $this->findById((int)$this->db->scalar("
+        return $this->findById((int)self::$db->scalar("
             SELECT ID FROM collages WHERE Name = ?
             ", $name
         ));
     }
 
     public function recoverById(int $id) {
-        $collageId = $this->db->scalar("SELECT ID FROM collages WHERE ID = ?", $id);
+        $collageId = self::$db->scalar("SELECT ID FROM collages WHERE ID = ?", $id);
         if ($collageId !== null) {
             return $this->recover($collageId);
         }
     }
 
     public function recoverByName(string $name) {
-        $collageId = $this->db->scalar("SELECT ID FROM collages WHERE Name = ?", $name);
+        $collageId = self::$db->scalar("SELECT ID FROM collages WHERE Name = ?", $name);
         if ($collageId !== null) {
             return $this->recover($collageId);
         }
     }
 
     protected function recover(int $id) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE collages SET
                 Deleted = '0'
             WHERE ID = ?
@@ -68,7 +68,7 @@ class Collage extends \Gazelle\Base {
     }
 
     public function tgroupCover(\Gazelle\TGroup $tgroup, \Gazelle\Util\ImageProxy $proxy): string {
-        return $this->twig->render('collage/row.twig', [
+        return self::$twig->render('collage/row.twig', [
             'group_id'   => $tgroup->id(),
             'image'      => $proxy->process($tgroup->image()),
             'name'       => $tgroup->displayNameText(),
@@ -96,7 +96,7 @@ class Collage extends \Gazelle\Base {
         $tags = new \Tags($group['TagList']);
 
         global $Viewer; // FIXME this should be moved elsewhere where a $Viewer is available
-        return $this->twig->render('collage/row.twig', [
+        return self::$twig->render('collage/row.twig', [
             'group_id'   => $groupId,
             'image'      => (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($group['WikiImage']),
             'name'       => $name,
@@ -114,15 +114,15 @@ class Collage extends \Gazelle\Base {
      */
     public function personalCollageName(string $name): string {
         $new = $name . "'s personal collage";
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT ID FROM collages WHERE Name = ?
             ', $new
         );
         $i = 1;
         $basename = $new;
-        while ($this->db->has_results()) {
+        while (self::$db->has_results()) {
             $new = "$basename no. " . ++$i;
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 SELECT ID FROM collages WHERE Name = ?
                 ', $new
             );
@@ -134,7 +134,7 @@ class Collage extends \Gazelle\Base {
         if (empty($idList)) {
             return [];
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT c.ID AS id,
                 c.Name AS name
             FROM collages c
@@ -142,15 +142,15 @@ class Collage extends \Gazelle\Base {
             ORDER BY c.Updated DESC
             ", ...$idList
         );
-        return $this->db->to_pair('id', 'name', false);
+        return self::$db->to_pair('id', 'name', false);
     }
 
     public function addToArtistCollageDefault(int $userId, int $artistId): array {
         $key = sprintf(self::CACHE_DEFAULT_ARTIST, $userId);
-        $default = $this->cache->get_value($key);
+        $default = self::$cache->get_value($key);
         if ($default === false) {
             // Ensure that some of the creator's collages are in the result
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT c.ID
                 FROM collages c
                 WHERE c.Locked = '0'
@@ -164,14 +164,14 @@ class Collage extends \Gazelle\Base {
                 LIMIT 5
                 ", $userId, COLLAGE_ARTISTS_ID, $artistId
             );
-            $list = $this->db->collect(0, false);
+            $list = self::$db->collect(0, false);
             if (empty($list)) {
                 // Prevent empty IN operator: WHERE ID IN ()
                 $list = [0];
             }
 
             // Ensure that some of the other collages the user has worked on are present
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT c.ID
                 FROM collages c
                 INNER JOIN collages_artists ca ON (ca.CollageID = c.ID AND ca.UserID = ?)
@@ -187,18 +187,18 @@ class Collage extends \Gazelle\Base {
                 LIMIT 5
                 ", $userId, $userId, COLLAGE_ARTISTS_ID, $artistId
             );
-            $default = $this->idsToNames(array_merge($list, $this->db->collect(0)));
-            $this->cache->cache_value($key, $default, 86400);
+            $default = $this->idsToNames(array_merge($list, self::$db->collect(0)));
+            self::$cache->cache_value($key, $default, 86400);
         }
         return $default;
     }
 
     public function addToCollageDefault(int $userId, int $groupId): array {
         $key = sprintf(self::CACHE_DEFAULT_GROUP, $userId);
-        $default = $this->cache->get_value($key);
+        $default = self::$cache->get_value($key);
         if ($default === false) {
             // All of their personal collages are in the result
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT c.ID
                 FROM collages c
                 WHERE c.Locked = '0'
@@ -211,10 +211,10 @@ class Collage extends \Gazelle\Base {
                 ORDER BY c.Updated DESC
                 ", $userId, COLLAGE_PERSONAL_ID, $groupId
             );
-            $list = $this->db->collect(0, false) ?: [0];
+            $list = self::$db->collect(0, false) ?: [0];
 
             // Ensure that some (theirs and by others) of the other collages the user has worked on are present
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT c.ID
                 FROM collages c
                 INNER JOIN collages_torrents ca ON (ca.CollageID = c.ID AND ca.UserID = ?)
@@ -230,18 +230,18 @@ class Collage extends \Gazelle\Base {
                 ", $userId, COLLAGE_PERSONAL_ID, $groupId
             );
             unset($list[0]);
-            $default = $this->idsToNames(array_merge($list, $this->db->collect(0)));
-            $this->cache->cache_value($key, $default, 86400);
+            $default = $this->idsToNames(array_merge($list, self::$db->collect(0)));
+            self::$cache->cache_value($key, $default, 86400);
         }
         return $default;
     }
 
     public function flushDefaultArtist(int $userId) {
-        $this->cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $userId));
+        self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $userId));
     }
 
     public function flushDefaultGroup(int $userId) {
-        $this->cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $userId));
+        self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $userId));
     }
 
     public function autocomplete(string $text): array {
@@ -252,8 +252,8 @@ class Collage extends \Gazelle\Base {
         }
         $stem = mb_strtolower(mb_substr($text, 0, $length));
         $key = 'autocomplete_collage_' . $length . '_' . $stem;
-        if (($autocomplete = $this->cache->get($key)) === false) {
-            $this->db->prepared_query("
+        if (($autocomplete = self::$cache->get($key)) === false) {
+            self::$db->prepared_query("
                 SELECT ID,
                     Name
                 FROM collages
@@ -265,12 +265,12 @@ class Collage extends \Gazelle\Base {
                 LIMIT 10
                 ", COLLAGE_ARTISTS_ID, COLLAGE_PERSONAL_ID, $stem
             );
-            $pairs = $this->db->to_pair('ID', 'Name', false);
+            $pairs = self::$db->to_pair('ID', 'Name', false);
             $autocomplete = [];
             foreach($pairs as $key => $value) {
                 $autocomplete[] = ['data' => $key, 'value' => $value];
             }
-            $this->cache->cache_value($key, $autocomplete, 1800 + 7200 * ($maxLength - $length));
+            self::$cache->cache_value($key, $autocomplete, 1800 + 7200 * ($maxLength - $length));
         }
         return $autocomplete;
     }
@@ -284,7 +284,7 @@ class Collage extends \Gazelle\Base {
         } else {
             $groupIds = 'group_concat(if(ct.AddedOn > s.LastVisit, ct.GroupID, NULL) ORDER BY ct.AddedOn)';
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT c.ID       AS collageId,
                 c.Name        AS name,
                 c.NumTorrents AS nrEntries,
@@ -298,7 +298,7 @@ class Collage extends \Gazelle\Base {
             GROUP BY c.ID
             ", ...$args
         );
-        $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$entry) {
             $entry['groupIds'] = is_null($entry['groupIds']) ? [] : explode(',', $entry['groupIds']);
         }
@@ -314,7 +314,7 @@ class Collage extends \Gazelle\Base {
         } else {
             $artistIds = 'group_concat(if(ca.AddedOn > s.LastVisit, ca.ArtistID, NULL) ORDER BY ca.AddedOn)';
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT c.ID       AS collageId,
                 c.Name        AS name,
                 c.NumTorrents AS nrEntries,
@@ -328,7 +328,7 @@ class Collage extends \Gazelle\Base {
             GROUP BY c.ID
             ", ...$args
         );
-        $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$entry) {
             $entry['artistIds'] = is_null($entry['artistIds']) ? [] : explode(',', $entry['artistIds']);
         }

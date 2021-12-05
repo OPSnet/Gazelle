@@ -14,7 +14,6 @@ class Better extends \Gazelle\Base
     ];
 
     public function __construct(\Gazelle\ReleaseType $releaseMan) {
-        parent::__construct();
         $this->releaseTypes = $releaseMan->list();
     }
 
@@ -24,13 +23,13 @@ class Better extends \Gazelle\Base
             return;
         }
 
-        $this->db->prepared_query(sprintf('
+        self::$db->prepared_query(sprintf('
             DELETE FROM %s
             WHERE TorrentID = ?
             ', $table), $id
         );
 
-        $this->cache->delete_value('torrents_details_' . (new \Gazelle\Manager\Torrent())->findById($id)->groupId());
+        self::$cache->delete_value('torrents_details_' . (new \Gazelle\Manager\Torrent())->findById($id)->groupId());
     }
 
     public function missing(string $type, string $filter, string $search, int $limit, int $offset, int $userId) {
@@ -237,7 +236,7 @@ class Better extends \Gazelle\Base
             %s
             %s', $baseQuery, $joins, $where
         );
-        $resultCount = $this->db->scalar($query, ...$params);
+        $resultCount = self::$db->scalar($query, ...$params);
 
         $query = sprintf('
             SELECT %s
@@ -248,13 +247,13 @@ class Better extends \Gazelle\Base
             LIMIT %s OFFSET %s', $columns, $baseQuery, $joins, $where, $order, $limit, $offset
         );
 
-        $this->db->prepared_query($query, ...$params);
+        self::$db->prepared_query($query, ...$params);
 
         $results = null;
         switch ($mode) {
             case 'torrents':
                 if ($resultCount > 0) {
-                    $torrents = $this->db->to_array('TorrentID', MYSQLI_ASSOC);
+                    $torrents = self::$db->to_array('TorrentID', MYSQLI_ASSOC);
                 } else {
                     $torrents  = [];
                 }
@@ -265,7 +264,7 @@ class Better extends \Gazelle\Base
                 break;
             case 'groups':
                 if ($resultCount > 0) {
-                    $results = $this->db->to_array('ID', MYSQLI_ASSOC);
+                    $results = self::$db->to_array('ID', MYSQLI_ASSOC);
                     foreach (\Artists::get_artists(array_keys($results)) as $groupId => $data) {
                         $results[$groupId] = [
                             'Artists' => [],
@@ -284,7 +283,7 @@ class Better extends \Gazelle\Base
                 break;
             case 'artists':
                 if ($resultCount > 0) {
-                    $results = $this->db->to_array('ArtistID', MYSQLI_ASSOC);
+                    $results = self::$db->to_array('ArtistID', MYSQLI_ASSOC);
                 } else {
                     $results = [];
                 }
@@ -297,7 +296,7 @@ class Better extends \Gazelle\Base
     public function singleSeeded(\Gazelle\User $viewer): array {
         $torMan = new Torrent;
         $torMan->setViewer($viewer);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT t.ID
             FROM torrents t
             INNER JOIN torrents_leech_stats tls ON (t.ID = tls.TorrentID)
@@ -306,7 +305,7 @@ class Better extends \Gazelle\Base
             ORDER BY t.LogScore DESC, rand()
             LIMIT 50
         ");
-        return array_map(function ($id) use ($torMan) { return $torMan->findById($id); }, $this->db->collect(0));
+        return array_map(function ($id) use ($torMan) { return $torMan->findById($id); }, self::$db->collect(0));
     }
 
     public function twigGroups(array $results) {

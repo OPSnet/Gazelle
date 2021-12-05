@@ -60,7 +60,7 @@ class AddLog extends \Gazelle\Json {
             $logfiles[] = $logfile;
             $logfileSummary->add($logfile);
 
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT INTO torrents_logs
                        (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
                 VALUES (?,         ?,      ?,         ?,        ?,      ?,              ?,         ?,             ?,                 ?)
@@ -68,7 +68,7 @@ class AddLog extends \Gazelle\Json {
                     $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
                     Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
             );
-            $logId = $this->db->inserted_id();
+            $logId = self::$db->inserted_id();
             $ripFiler->put($logfile->filepath(), [$torrentId, $logId]);
             $htmlFiler->put($logfile->text(), [$torrentId, $logId]);
 
@@ -82,7 +82,7 @@ class AddLog extends \Gazelle\Json {
             ];
         }
 
-        [$score, $checksum] = $this->db->row("
+        [$score, $checksum] = self::$db->row("
             SELECT min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
                 min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
             FROM torrents_logs
@@ -91,13 +91,13 @@ class AddLog extends \Gazelle\Json {
             ", $torrentId
         );
 
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             'UPDATE torrents SET LogScore = ?, LogChecksum = ?, HasLogDB = ? WHERE ID = ?',
             $score, $checksum, '1', $torrentId
         );
 
         $groupId = $this->torrent->groupId();
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "torrent_group_{$groupId}",
             "torrents_details_{$groupId}",
             sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),

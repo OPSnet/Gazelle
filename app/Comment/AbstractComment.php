@@ -56,7 +56,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
     public function userId(): int {
         if (is_null($this->userId)) {
-            $this->userId = $this->db->scalar("
+            $this->userId = self::$db->scalar("
                 SELECT AuthorID FROM comments WHERE ID = ?
                 ", $this->id
             );
@@ -94,7 +94,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function body(): string {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT Body FROM comments WHERE Page = ?  AND ID = ?
             ", $this->page(), $this->id
         );
@@ -109,13 +109,13 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
         // Get the total number of comments
         $key = sprintf(self::PAGE_TOTAL, $page, $pageId);
-        $this->total = $this->cache->get_value($key);
+        $this->total = self::$cache->get_value($key);
         if ($this->total === false) {
-            $this->total = $this->db->scalar("
+            $this->total = self::$db->scalar("
                 SELECT count(*) FROM comments WHERE Page = ? AND PageID = ?
                 ", $page, $pageId
             );
-            $this->cache->cache_value($key, $this->total, 0);
+            self::$cache->cache_value($key, $this->total, 0);
         }
 
         if (is_null($this->pageNum)) {
@@ -123,7 +123,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             if (!$this->id) {
                 $this->pageNum = (int)ceil($this->total / TORRENT_COMMENTS_PER_PAGE);
             } else {
-                $prior = $this->db->scalar("
+                $prior = self::$db->scalar("
                     SELECT count(*)
                     FROM comments
                     WHERE Page = ?
@@ -138,8 +138,8 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         // Cache catalogue from which the page is selected
         $CatalogueID = (int)floor(TORRENT_COMMENTS_PER_PAGE * ($this->pageNum - 1) / THREAD_CATALOGUE);
         $catKey = sprintf(self::CATALOG, $page, $pageId, $CatalogueID);
-        if (($Catalogue = $this->cache->get_value($catKey)) === false) {
-            $this->db->prepared_query("
+        if (($Catalogue = self::$cache->get_value($catKey)) === false) {
+            self::$db->prepared_query("
                 SELECT c.ID,
                     c.AuthorID,
                     c.AddedTime,
@@ -154,8 +154,8 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                 LIMIT ? OFFSET ?
                 ", $page, $pageId, THREAD_CATALOGUE, THREAD_CATALOGUE * $CatalogueID
             );
-            $Catalogue = $this->db->to_array(false, MYSQLI_ASSOC);
-            $this->cache->cache_value($catKey, $Catalogue, 0);
+            $Catalogue = self::$db->to_array(false, MYSQLI_ASSOC);
+            self::$cache->cache_value($catKey, $Catalogue, 0);
         }
 
         //This is a hybrid to reduce the catalogue down to the page elements: We use the page limit % catalogue
@@ -175,8 +175,8 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         $userId = $user->id();
 
         // quote notifications
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             UPDATE users_notify_quoted SET
                 UnRead = false
             WHERE Page = ?
@@ -185,12 +185,12 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                 AND UserID = ?
             ", $page, $pageId, current($this->thread)['ID'], $lastPost, $userId
         );
-        if ($this->db->affected_rows()) {
-            $this->cache->delete_value("user_quote_unread_$userId");
+        if (self::$db->affected_rows()) {
+            self::$cache->delete_value("user_quote_unread_$userId");
         }
 
         // last read
-        $this->lastRead = $this->db->scalar("
+        $this->lastRead = self::$db->scalar("
             SELECT PostID
             FROM users_comments_last_read
             WHERE Page = ?
@@ -199,7 +199,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             ", $page, $pageId, $userId
         ) ?? 0;
         if ($this->lastRead < $lastPost) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO users_comments_last_read
                        (UserID, Page, PageID, PostID)
                 VALUES (?,      ?,    ?,      ?)
@@ -207,16 +207,16 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                     PostID = ?
                 ", $userId, $page, $pageId, $lastPost, $lastPost
             );
-            $this->cache->delete_value("subscriptions_user_new_$userId");
+            self::$cache->delete_value("subscriptions_user_new_$userId");
         }
-        $this->db->commit();
+        self::$db->commit();
     }
 
     /**
      * Modify a comment (saving the previous revision)
      */
     public function modify(): bool {
-        $body = $this->db->scalar("
+        $body = self::$db->scalar("
             SELECT Body FROM comments WHERE ID = ?
             ", $this->id
         );
@@ -224,24 +224,24 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             return false;
         }
 
-        $this->db->begin_transaction();
+        self::$db->begin_transaction();
 
         $success = parent::modify();
         if (!$success) {
-            $this->db->rollback();
+            self::$db->rollback();
             return false;
         }
 
         $page = $this->page();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO comments_edits
                    (Page, PostID, Body, EditUser)
             VALUES (?,    ?,      ?,    ?)
             ", $page, $this->id, $body, $this->field('EditedUserID')
         );
-        $this->db->commit();
+        self::$db->commit();
 
-        $commentPage = $this->db->scalar("
+        $commentPage = self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Page
             FROM comments
             WHERE Page = ?
@@ -251,7 +251,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
 
         // Update the cache
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "edit_{$page}_" . $this->id,
             "{$page}_comments_" . $this->pageId,
             "{$page}_comments_{$this->pageId}_catalogue_"
@@ -260,7 +260,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
         if ($page == 'collages') {
             // On collages, we also need to clear the collage key (collage_$CollageID), because it has the comments in it... (why??)
-            $this->cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $this->pageId));
+            self::$cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $this->pageId));
         }
 
         return true;
@@ -268,7 +268,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
     public function remove(): bool {
         $page = $this->page();
-        [$commentPages, $commentPage] = $this->db->row("
+        [$commentPages, $commentPage] = self::$db->row("
             SELECT
                 ceil(count(*) / ?) AS Pages,
                 ceil(sum(if(ID <= ?, 1, 0)) / ?) AS Page
@@ -281,24 +281,24 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             return false;
         }
 
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM comments WHERE ID = ?
             ", $this->id
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM comments_edits WHERE Page = ? AND PostID = ?
             ", $page, $this->id
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM users_notify_quoted WHERE Page = ? AND PostID = ?
             ", $page, $this->id
         );
-        $this->db->commit();
+        self::$db->commit();
 
         (new \Gazelle\Manager\Subscription)->flush($page, $this->pageId);
 
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             "edit_{$page}_" . $this->id,
             "{$page}_comments_" . $this->pageId,
         ]);
@@ -308,12 +308,12 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         $last = floor((TORRENT_COMMENTS_PER_PAGE * $commentPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         $keyStem = "{$page}_comments_{$this->pageId}_catalogue_";
         for ($i = $current; $i <= $last; ++$i) {
-            $this->cache->delete_value($keyStem . $i);
+            self::$cache->delete_value($keyStem . $i);
         }
 
         if ($page === 'collages') {
             // On collages, we also need to clear the collage key (collage_$CollageID), because it has the comments in it... (why??)
-            $this->cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $this->id));
+            self::$cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $this->id));
         }
         return true;
     }

@@ -7,7 +7,7 @@ class Blog extends \Gazelle\Base {
     const CACHE_KEY = 'blogv2';
 
     public function flushCache() {
-        $this->cache->deleteMulti(['feed_blog', self::CACHE_KEY]);
+        self::$cache->deleteMulti(['feed_blog', self::CACHE_KEY]);
     }
 
     /**
@@ -21,14 +21,14 @@ class Blog extends \Gazelle\Base {
      * @return ID of new article
      */
     public function create(array $info): \Gazelle\Blog {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO blog
                    (UserID, Title, Body, ThreadID, Important)
             VALUES (?,      ?,     ?,    ?,        ?)
             ", $info['userId'], trim($info['title']), trim($info['body']), $info['threadId'], $info['important']
         );
         $this->flushCache();
-        return new \Gazelle\Blog($this->db->inserted_id());
+        return new \Gazelle\Blog(self::$db->inserted_id());
     }
 
     /**
@@ -43,7 +43,7 @@ class Blog extends \Gazelle\Base {
      * @return 1 if successful
      */
     public function modify(array $info): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE blog SET
                 Title = ?,
                 Body = ?,
@@ -53,7 +53,7 @@ class Blog extends \Gazelle\Base {
             ", trim($info['title']), trim($info['body']), $info['threadId'], $info['important'], $info['id']
         );
         $this->flushCache();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -62,11 +62,11 @@ class Blog extends \Gazelle\Base {
      * @return bool true if the supplied ID corresponded to a blog article
      */
     public function remove(int $blogId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM blog WHERE ID = ?
             ", $blogId
         );
-        $removed = $this->db->affected_rows() == 1;
+        $removed = self::$db->affected_rows() == 1;
         if ($removed) {
             $this->flushCache();
         }
@@ -79,13 +79,13 @@ class Blog extends \Gazelle\Base {
      * @return bool true if there was a thread to remove
      */
     public function removeThread(int $blogId): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE blog SET
                 ThreadID = NULL
             WHERE ID = ?
             ", $blogId
         );
-        $removed = $this->db->affected_rows() == 1;
+        $removed = self::$db->affected_rows() == 1;
         if ($removed) {
             $this->flushCache();
         }
@@ -106,16 +106,16 @@ class Blog extends \Gazelle\Base {
      *      - threadId of associated thread
      */
     public function headlines(): array {
-        if (($headlines = $this->cache->get_value(self::CACHE_KEY)) === false) {
-            $this->db->prepared_query("
+        if (($headlines = self::$cache->get_value(self::CACHE_KEY)) === false) {
+            self::$db->prepared_query("
                 SELECT b.ID, b.Title, um.Username, b.UserID, b.Body, b.Time, b.ThreadID
                 FROM blog b
                 INNER JOIN users_main um ON (um.ID = b.UserID)
                 ORDER BY b.Time DESC
                 LIMIT 20
             ");
-            $headlines = $this->db->to_array(false, MYSQLI_NUM, false);
-            $this->cache->cache_value(self::CACHE_KEY, $headlines, 86400);
+            $headlines = self::$db->to_array(false, MYSQLI_NUM, false);
+            self::$cache->cache_value(self::CACHE_KEY, $headlines, 86400);
         }
         return $headlines;
     }

@@ -26,23 +26,23 @@ abstract class AbstractUserRank extends \Gazelle\Base {
      * slow.
      */
     public function build(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DROP TEMPORARY TABLE IF EXISTS temp_stats
         ");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             CREATE TEMPORARY TABLE temp_stats (
                 id int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT
             ) " . $this->selector()
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT min(n) as bucket
             FROM temp_stats
             GROUP BY ceil(id / (SELECT count(*)/100 FROM temp_stats))
             ORDER BY 1
         ");
-        $raw = $this->db->collect('bucket');
+        $raw = self::$db->collect('bucket');
         if (empty($raw)) {
             // This occurs only a fresh installation
             $raw = [0];
@@ -93,7 +93,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         $table = array_reverse($table, true);
 
         // add some fuzz to the expiry time, so all the tables don't expire at once
-        $this->cache->cache_value($this->cacheKey(), $table, 86400 + rand(0, 3600));
+        self::$cache->cache_value(self::$cacheKey(), $table, 86400 + rand(0, 3600));
         return $table;
     }
 
@@ -110,14 +110,14 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         if ($metric == 0) {
             return 0;
         }
-        if (($table = $this->cache->get_value($this->cacheKey())) === false) {
-            $cacheLock = $this->cacheKey() . '_lock';
-            if ($this->cache->get_value($cacheLock) !== false) {
+        if (($table = self::$cache->get_value(self::$cacheKey())) === false) {
+            $cacheLock = self::$cacheKey() . '_lock';
+            if (self::$cache->get_value($cacheLock) !== false) {
                 return 0;
             }
-            $this->cache->cache_value($cacheLock, true, 300);
+            self::$cache->cache_value($cacheLock, true, 300);
             $table = $this->build();
-            $this->cache->delete_value($cacheLock);
+            self::$cache->delete_value($cacheLock);
         }
         foreach ($table as $value => $percentile) {
             if ($metric >= $value) {

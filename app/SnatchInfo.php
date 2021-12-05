@@ -19,14 +19,14 @@ class SnatchInfo extends Base {
     }
 
     public function total(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM xbt_snatched xs WHERE {$this->searchField} = ?
             ", $this->searchValue
         );
     }
 
     public function summary(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT xs.IP,
                 count(*) AS total,
                 from_unixtime(min(xs.tstamp)) AS first,
@@ -37,11 +37,11 @@ class SnatchInfo extends Base {
             ORDER BY max(xs.tstamp) DESC
             ", $this->searchValue
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function page(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT xs.IP AS ip,
                 xs.uid,
                 coalesce(um.Username, 'System') AS username,
@@ -57,6 +57,6 @@ class SnatchInfo extends Base {
             LIMIT ? OFFSET ?
             ", $this->searchValue, $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

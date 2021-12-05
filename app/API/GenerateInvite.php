@@ -23,16 +23,16 @@ class GenerateInvite extends AbstractAPI {
         if (empty($email)) {
             json_error("Missing email address");
         } else {
-            if ($this->db->scalar("SELECT 1 FROM users_main WHERE Email = ?", $email)) {
+            if (self::$db->scalar("SELECT 1 FROM users_main WHERE Email = ?", $email)) {
                 json_error("Email address already in use");
             }
-            if ($this->db->scalar("SELECT 1 FROM invites WHERE Email = ?", $email)) {
+            if (self::$db->scalar("SELECT 1 FROM invites WHERE Email = ?", $email)) {
                 json_error("Invite code already generated for this email address");
             }
         }
 
         $key = randomString();
-        $this->db->prepared_query(
+        self::$db->prepared_query(
             "INSERT INTO invites
                     (InviterID, InviteKey, Email, Reason, Expires)
             VALUES  (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)",
@@ -40,7 +40,7 @@ class GenerateInvite extends AbstractAPI {
         );
         if (!empty($_GET['email'])) {
             (new Mail)->send($email, 'New account confirmation at ' . SITE_NAME,
-                $this->twig->render('email/invite-interviewer.twig', [
+                self::$twig->render('email/invite-interviewer.twig', [
                     'inviter_name' => $interviewer->username(),
                     'inviter_key' => $key,
                     'email' => $email,

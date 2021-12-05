@@ -19,14 +19,12 @@ class Economic extends \Gazelle\Base {
     }
 
     public function __construct() {
-        parent::__construct();
-
-        if (($this->stats = $this->cache->get_value(self::CACHE_KEY)) === false) {
+        if (($this->stats = self::$cache->get_value(self::CACHE_KEY)) === false) {
             list(
                 $this->stats['totalUpload'],
                 $this->stats['totalDownload'],
                 $this->stats['totalEnabled'],
-            ) = $this->db->row('
+            ) = self::$db->row('
                 SELECT sum(uls.Uploaded), sum(uls.Downloaded), count(*)
                 FROM users_main um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
@@ -34,12 +32,12 @@ class Economic extends \Gazelle\Base {
                 ', '1'
             );
 
-            $this->stats['totalBounty'] = $this->db->scalar('
+            $this->stats['totalBounty'] = self::$db->scalar('
                 SELECT SUM(Bounty)
                 FROM requests_votes
             ');
 
-            $this->stats['availableBounty'] = $this->db->scalar('
+            $this->stats['availableBounty'] = self::$db->scalar('
                 SELECT SUM(rv.Bounty)
                 FROM requests_votes AS rv
                 INNER JOIN requests AS r ON (r.ID = rv.RequestID)
@@ -48,12 +46,12 @@ class Economic extends \Gazelle\Base {
             list(
                 $this->stats['totalLiveSnatches'],
                 $this->stats['totalTorrents'],
-            ) = $this->db->row('
+            ) = self::$db->row('
                 SELECT sum(tls.Snatched), count(*)
                 FROM torrents_leech_stats tls
             ');
 
-            $this->stats['totalOverallSnatches'] = $this->db->scalar('
+            $this->stats['totalOverallSnatches'] = self::$db->scalar('
                 SELECT count(*)
                 FROM xbt_snatched
             ');
@@ -62,7 +60,7 @@ class Economic extends \Gazelle\Base {
                 $this->stats['totalSeeders'],
                 $this->stats['totalLeechers'],
                 $this->stats['totalPeers'],
-            ) = $this->db->row('
+            ) = self::$db->row('
                 SELECT
                     coalesce(sum(remaining = 0), 0) as seeders,
                     coalesce(sum(remaining > 0), 0) as leechers,
@@ -70,14 +68,14 @@ class Economic extends \Gazelle\Base {
                 FROM xbt_files_users
             ');
 
-            $this->stats['totalPeerUsers'] = $this->db->scalar('
+            $this->stats['totalPeerUsers'] = self::$db->scalar('
                 SELECT count(distinct uid)
                 FROM xbt_files_users xfu
                 WHERE remaining = 0
                     AND active = 1
             ');
 
-            $this->cache->cache_value(self::CACHE_KEY, $this->stats, 3600);
+            self::$cache->cache_value(self::CACHE_KEY, $this->stats, 3600);
         }
     }
 }

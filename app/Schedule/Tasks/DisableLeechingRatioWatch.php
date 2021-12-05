@@ -6,7 +6,7 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, torrent_pass
             FROM users_info AS i
             INNER JOIN users_main AS m ON (m.ID = i.UserID)
@@ -16,7 +16,7 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
                 AND m.Enabled = '1'
                 AND m.can_leech = '1'"
         );
-        $users = $this->db->to_pair('torrent_pass', 'ID');
+        $users = self::$db->to_pair('torrent_pass', 'ID');
 
         if (count($users) > 0) {
             $userMan = new \Gazelle\Manager\User;
@@ -30,7 +30,7 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
                 $this->debug("Disabling leech for $userID", $userID);
             }
 
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info AS i
                 INNER JOIN users_main AS m ON (m.ID = i.UserID)
                 SET

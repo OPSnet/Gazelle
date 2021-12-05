@@ -47,7 +47,7 @@ class IPv4 extends \Gazelle\Base {
 
     public function total(): int {
         [$from, $args] = $this->queryBase();
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) $from
             ", ...$args
         );
@@ -55,7 +55,7 @@ class IPv4 extends \Gazelle\Base {
 
     public function page(string $orderBy, string $orderDir, int $limit, int $offset): array {
         [$from, $args] = $this->queryBase();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT i.ID             AS id,
                 inet_ntoa(i.FromIP) AS from_ip,
                 inet_ntoa(i.ToIP)   AS to_ip,
@@ -68,7 +68,7 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", ...array_merge($args, [$limit, $offset])
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function userTotal(int $userId): int {
@@ -79,14 +79,14 @@ class IPv4 extends \Gazelle\Base {
             $args[] = $this->filterIpaddrRegexp;
         }
         $where  = join(' AND ', $cond);
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(DISTINCT IP) FROM users_history_ips WHERE $where
             ", ...$args
         );
     }
 
     public function userPage(int $userId, int $limit, int $offset): array {
-        $this->db->prepared_query("SET SESSION group_concat_max_len = 50000");
+        self::$db->prepared_query("SET SESSION group_concat_max_len = 50000");
         $cond = ['i.UserID = ?'];
         $args = [$userId];
         if (!is_null($this->filterIpaddrRegexp)) {
@@ -96,7 +96,7 @@ class IPv4 extends \Gazelle\Base {
         $where  = join(' AND ', $cond);
         $args[] = $limit;
         $args[] = $offset;
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT uhi.IP as ip_addr,
                 count(DISTINCT UserID) as nr_users,
                 group_concat(
@@ -117,7 +117,7 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $userId, ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -132,16 +132,16 @@ class IPv4 extends \Gazelle\Base {
     public function isBanned(string $IP) {
         $A = substr($IP, 0, strcspn($IP, '.'));
         $key = self::CACHE_KEY . $A;
-        $IPBans = $this->cache->get_value($key);
+        $IPBans = self::$cache->get_value($key);
         if (!is_array($IPBans)) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT FromIP, ToIP, ID
                 FROM ip_bans
                 WHERE FromIP BETWEEN ? << 24 AND (? << 24) - 1
                 ", $A, $A + 1
             );
-            $IPBans = $this->db->to_array(0, MYSQLI_NUM, false);
-            $this->cache->cache_value($key, $IPBans, 0);
+            $IPBans = self::$db->to_array(0, MYSQLI_NUM, false);
+            self::$cache->cache_value($key, $IPBans, 0);
         }
         $IPNum = sprintf('%u', ip2long($IP));
         foreach ($IPBans as $IPBan) {
@@ -164,7 +164,7 @@ class IPv4 extends \Gazelle\Base {
      * @return record id
      */
     public function createBan(int $userId, string $from, string $to, string $reason): int {
-        $id = $this->db->scalar("
+        $id = self::$db->scalar("
             SELECT ID
             FROM ip_bans
             WHERE FromIP = inet_aton(?)
@@ -172,7 +172,7 @@ class IPv4 extends \Gazelle\Base {
             ", $from, $to
         );
         if ($id) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE ip_bans SET
                     Reason  = concat(Reason, ' AND ', ?),
                     created = now()
@@ -181,16 +181,16 @@ class IPv4 extends \Gazelle\Base {
             );
             return $id;
         } else {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO ip_bans
                        (Reason, FromIP,       ToIP,         user_id)
                 VALUES (?,      inet_aton(?), inet_aton(?), ?)
                 ", $reason, $from, $to, $userId
             );
-            $this->cache->delete_value(
+            self::$cache->delete_value(
                 self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
             );
-            return $this->db->inserted_id();
+            return self::$db->inserted_id();
         }
     }
 
@@ -205,7 +205,7 @@ class IPv4 extends \Gazelle\Base {
      * @return bool succeeded
      */
     public function modifyBan(int $id, int $userId, string $from, string $to, string $reason): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE ip_bans SET
                 Reason  = ?,
                 FromIP  = inet_aton(?),
@@ -215,10 +215,10 @@ class IPv4 extends \Gazelle\Base {
             WHERE ID = ?
             ", $reason, $from, $to, $userId, $id
         );
-        $this->cache->delete_value(
+        self::$cache->delete_value(
             self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     /**
@@ -227,20 +227,20 @@ class IPv4 extends \Gazelle\Base {
      * param int $id Row to remove
      */
     public function removeBan(int $id): bool {
-        $fromClassA = $this->db->scalar("
+        $fromClassA = self::$db->scalar("
             SELECT FromIP >> 24 FROM ip_bans WHERE ID = ?
             ", $id
         );
         if (is_null($fromClassA)) {
             return false;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM ip_bans WHERE ID = ?
             ", $id
         );
-        if ($this->db->affected_rows()) {
-            $this->cache->delete_value(self::CACHE_KEY . $fromClassA);
+        if (self::$db->affected_rows()) {
+            self::$cache->delete_value(self::CACHE_KEY . $fromClassA);
         }
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 }

@@ -38,7 +38,7 @@ class Donation extends \Gazelle\Base {
     }
 
     public function donate(\Gazelle\User $user, array $Args) {
-        $QueryID = $this->db->get_query_id();
+        $QueryID = self::$db->get_query_id();
         if (!isset($Args['Amount'])) {
             $xbtAmount = 0.0;
             $fiatAmount = 0.0;
@@ -69,7 +69,7 @@ class Donation extends \Gazelle\Base {
         $totalDelta = $Args['TotalRank'] ?? $rankDelta;
         $UserID = $user->id();
 
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO users_donor_ranks
                    (UserID, Rank, TotalRank)
             VALUES (?,      ?,    ?)
@@ -84,7 +84,7 @@ class Donation extends \Gazelle\Base {
         );
 
         // Fetch their current donor rank after update
-        [$Rank, $TotalRank, $SpecialRank, $previousInvites] = $this->db->row('
+        [$Rank, $TotalRank, $SpecialRank, $previousInvites] = self::$db->row('
             SELECT Rank, TotalRank, SpecialRank, InvitesReceivedRank
             FROM users_donor_ranks
             WHERE UserID = ?
@@ -94,7 +94,7 @@ class Donation extends \Gazelle\Base {
         // They have been undonored
         if ($xbtAmount == 0.0 && $Rank == 0 && $TotalRank == 0) {
             $this->removeDonorStatus($UserID);
-            $this->cache->deleteMulti(["u_$UserID", "donor_info_$UserID"]);
+            self::$cache->deleteMulti(["u_$UserID", "donor_info_$UserID"]);
             return;
         }
 
@@ -121,11 +121,11 @@ class Donation extends \Gazelle\Base {
                 . implode(', ', $column)
                 . ' WHERE UserID = ?';
             $args[] = $UserID;
-            $this->db->prepared_query($sql, ...$args);
+            self::$db->prepared_query($sql, ...$args);
         }
 
         if ($inviteForNewDonor || $newInvites) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 UPDATE users_main
                 SET Invites = Invites + ?
                 WHERE ID = ?
@@ -143,7 +143,7 @@ class Donation extends \Gazelle\Base {
 
         // Add this donation to our history, with the reason for giving invites
         $reason = trim($Args['Reason'] . " invites new=$inviteForNewDonor prev=$previousInvites given=$newInvites");
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO donations
                    (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, xbt)
             VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?)
@@ -152,9 +152,9 @@ class Donation extends \Gazelle\Base {
         );
 
         // Clear their user cache keys because the users_info values has been modified
-        $this->cache->deleteMulti(["u_$UserID", "donor_info_$UserID",
+        self::$cache->deleteMulti(["u_$UserID", "donor_info_$UserID",
             'donations_month_3', 'donations_month_12']);
-        $this->db->set_query_id($QueryID);
+        self::$db->set_query_id($QueryID);
     }
 
     protected function calculateSpecialRank(\Gazelle\User $user, int $TotalRank) {
@@ -167,7 +167,7 @@ class Donation extends \Gazelle\Base {
         if ($SpecialRank < 1 && $TotalRank >= 10) {
             (new \Gazelle\Manager\User)->sendPM($UserID, 0,
                 "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
-                $this->twig->render('donation/special-rank-1.twig', [
+                self::$twig->render('donation/special-rank-1.twig', [
                    'forum_url'   => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                    'staffpm_url' => 'staffpm.php',
                 ])
@@ -178,7 +178,7 @@ class Donation extends \Gazelle\Base {
         if ($SpecialRank < 2 && $TotalRank >= 20) {
             (new \Gazelle\Manager\User)->sendPM($UserID, 0,
                 "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
-                $this->twig->render('donation/special-rank-2.twig', [
+                self::$twig->render('donation/special-rank-2.twig', [
                    'forum_url' => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                 ])
             );
@@ -188,7 +188,7 @@ class Donation extends \Gazelle\Base {
         if ($SpecialRank < 3 && $TotalRank >= 50) {
             (new \Gazelle\Manager\User)->sendPM($UserID, 0,
                 "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
-                $this->twig->render('donation/special-rank-3.twig', [
+                self::$twig->render('donation/special-rank-3.twig', [
                    'forum_url'      => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                    'forum_gold_url' => 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
                 ])
@@ -199,35 +199,35 @@ class Donation extends \Gazelle\Base {
     }
 
     protected function addDonorStatus(int $UserID): int {
-        if (($class = $this->db->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor')) !== null) {
-            $this->db->prepared_query('
+        if (($class = self::$db->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor')) !== null) {
+            self::$db->prepared_query('
                 INSERT IGNORE INTO users_levels
                        (UserID, PermissionID)
                 VALUES (?,      ?)
                 ', $UserID, $class
             );
-            return $this->db->affected_rows();
+            return self::$db->affected_rows();
         }
         return 0;
     }
 
     protected function removeDonorStatus(int $UserID): int {
-        $class = $this->db->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor');
+        $class = self::$db->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor');
         if ($class) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 DELETE FROM users_levels
                 WHERE UserID = ?
                     AND PermissionID = ?
                 ', $UserID, $class
             );
         }
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE users_donor_ranks SET
                 SpecialRank = 0
             WHERE UserID = ?
             ', $UserID
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function hasForumAccess(\Gazelle\User $user) {
@@ -235,8 +235,8 @@ class Donation extends \Gazelle\Base {
     }
 
     public function leaderboardRank(\Gazelle\User $user): int {
-        $this->db->prepared_query("SET @RowNum := 0");
-        $Position = $this->db->scalar("
+        self::$db->prepared_query("SET @RowNum := 0");
+        $Position = self::$db->scalar("
             SELECT Position
             FROM (
                 SELECT d.UserID, @RowNum := @RowNum + 1 AS Position
@@ -258,7 +258,7 @@ class Donation extends \Gazelle\Base {
         } elseif ($CurrentRank == 5) {
             $CurrentRank = 4;
         }
-        return $this->twig->render('donation/donation-pm.twig', [
+        return self::$twig->render('donation/donation-pm.twig', [
             'amount' => $amount,
             'cc'     => $Currency,
             'points' => $ReceivedRank,
@@ -269,20 +269,20 @@ class Donation extends \Gazelle\Base {
     }
 
     public function totalMonth(int $month) {
-        if (($donations = $this->cache->get_value("donations_month_$month")) === false) {
-            $donations = $this->db->scalar("
+        if (($donations = self::$cache->get_value("donations_month_$month")) === false) {
+            $donations = self::$db->scalar("
                 SELECT sum(xbt)
                 FROM donations
                 WHERE time >= CAST(DATE_FORMAT(NOW() ,'%Y-%m-01') as DATE) - INTERVAL ? MONTH
                 ", $month - 1
             );
-            $this->cache->cache_value("donations_month_$month", $donations, 3600 * 36);
+            self::$cache->cache_value("donations_month_$month", $donations, 3600 * 36);
         }
         return $donations;
     }
 
     public function expireRanks(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID
             FROM users_donor_ranks
             WHERE Rank > 1
@@ -290,12 +290,12 @@ class Donation extends \Gazelle\Base {
                 AND RankExpirationTime < NOW() - INTERVAL 766 HOUR
         "); // 2 hours less than 32 days to account for schedule run times
         $userIds = [];
-        while ([$id] = $this->db->next_record()) {
-            $this->cache->deleteMulti(["donor_info_$id", "donor_title_$id", "donor_profile_rewards_$id"]);
+        while ([$id] = self::$db->next_record()) {
+            self::$cache->deleteMulti(["donor_info_$id", "donor_title_$id", "donor_profile_rewards_$id"]);
             $userIds[] = $id;
         }
         if ($userIds) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_donor_ranks SET
                     Rank = Rank - 1,
                     RankExpirationTime = now()

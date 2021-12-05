@@ -22,7 +22,7 @@ class Invite extends \Gazelle\Base {
      * @return int number of invites
      */
     public function totalPending(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM invites WHERE Expires > now()
         ");
     }
@@ -43,7 +43,7 @@ class Invite extends \Gazelle\Base {
             $args = [$this->search];
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT i.InviterID AS user_id,
                 um.IP AS ipaddr,
                 i.InviteKey AS `key`,
@@ -56,7 +56,7 @@ class Invite extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", ...array_merge($args, [$limit, $offset])
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -66,11 +66,11 @@ class Invite extends \Gazelle\Base {
      * @return bool true if something was actually removed
      */
     public function removeInviteKey(string $key): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM invites
             WHERE InviteKey = ?
             ", trim($key)
         );
-        return $this->db->affected_rows() !== 0;
+        return self::$db->affected_rows() !== 0;
     }
 }

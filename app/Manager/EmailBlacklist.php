@@ -7,17 +7,17 @@ class EmailBlacklist extends \Gazelle\Base {
     protected $filterEmail;
 
     public function create(array $info): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO email_blacklist
                    (Email, Comment, UserID)
             VALUES (?,     ?,       ?)
             ", $info['email'], $info['comment'], $info['user_id']
         );
-        return $this->db->inserted_id();
+        return self::$db->inserted_id();
     }
 
     public function modify(int $id, array $info): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE email_blacklist SET
                 Email   = ?,
                 Comment = ?,
@@ -26,15 +26,15 @@ class EmailBlacklist extends \Gazelle\Base {
             WHERE ID = ?
             ", $info['email'], $info['comment'], $info['user_id'], $id
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function remove(int $id): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM email_blacklist WHERE ID = ?
             ", $id
         );
-        return $this->db->affected_rows() === 1;
+        return self::$db->affected_rows() === 1;
     }
 
     public function filterComment(string $filterComment) {
@@ -66,13 +66,13 @@ class EmailBlacklist extends \Gazelle\Base {
 
     public function total(): int {
         [$from, $args] = $this->queryBase();
-        return $this->db->scalar("SELECT count(*) $from", ...$args);
+        return self::$db->scalar("SELECT count(*) $from", ...$args);
     }
 
     public function page(int $limit, int $offset): array {
         [$from, $args] = $this->queryBase();
         $args = array_merge($args, [$limit, $offset]);
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID   AS id,
                 UserID  AS user_id,
                 Time    AS time,
@@ -83,6 +83,6 @@ class EmailBlacklist extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }
