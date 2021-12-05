@@ -23,7 +23,7 @@ $validator->setFields([
 $success = false;
 if (!empty($_REQUEST['password'])) {
     if (!$validator->validate($_REQUEST)) {
-        $error = $Validate->errorMessage();
+        $error = $validator->errorMessage();
     } else {
         // Form validates without error, set new secret and password.
         $user->clearPasswordReset();
