@@ -93,7 +93,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         $table = array_reverse($table, true);
 
         // add some fuzz to the expiry time, so all the tables don't expire at once
-        self::$cache->cache_value(self::$cacheKey(), $table, 86400 + rand(0, 3600));
+        self::$cache->cache_value($this->cacheKey(), $table, 86400 + rand(0, 3600));
         return $table;
     }
 
@@ -110,8 +110,8 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         if ($metric == 0) {
             return 0;
         }
-        if (($table = self::$cache->get_value(self::$cacheKey())) === false) {
-            $cacheLock = self::$cacheKey() . '_lock';
+        if (($table = self::$cache->get_value($this->cacheKey())) === false) {
+            $cacheLock = $this->cacheKey() . '_lock';
             if (self::$cache->get_value($cacheLock) !== false) {
                 return 0;
             }
