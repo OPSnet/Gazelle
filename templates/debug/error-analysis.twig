@@ -3,6 +3,10 @@
     <h2>Error Analysis</h2>
 </div>
 <div class="thin">
+{{ paginator.linkbox|raw }}
+<form class="manage_form" name="bans" action="" method="post">
+<input type="hidden" name="auth" value="{{ auth }}" />
+<input type="hidden" name="action" value="analysis_list" />
 <table width="100%">
     <tr class="colhead">
         <td>Case</td>
@@ -15,6 +19,7 @@
         <td>First</td>
         <td>Latest</td>
         <td>URI</td>
+        <td>Clear</td>
     </tr>
 {% for item in list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -27,10 +32,18 @@
         <td style="text-align: right">{{ item.seen|number_format }}</td>
         <td>{{ item.created }}</td>
         <td>{% if item.seen == 1 %}&mdash;{% else %}{{ item.updated }}{% endif %}</td>
-        <td>{{ item.uri }}</td>
+        <td style="word-break: break-all">{{ item.uri }}</td>
+        <td style="text-align: center"><input type="checkbox" name="clear-{{ item.error_log_id }}" /></td>
     </tr>
 {% endfor %}
+    <tr>
+        <td style="text-align: right" colspan="11">
+            <input type="submit" name="submit" value="Clear" />
+        </td>
+    </tr>
 </table>
+</form>
+{{ paginator.linkbox|raw }}
 </div>
 <br />
 {{ footer() }}
