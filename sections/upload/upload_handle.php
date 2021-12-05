@@ -842,6 +842,54 @@ if (defined('AJAX')) {
         }
         $Response['fillRequest'] = $FillResponse;
     }
+
+    // TODO: this is copy-pasted
+    $Feed = new Feed;
+    $Item = $Feed->item(
+        $Title,
+        Text::strip_bbcode($Properties['GroupDescription']),
+        "torrents.php?action=download&amp;id={$TorrentID}&amp;torrent_pass=[[PASSKEY]]",
+        $Viewer->username(),
+        'torrents.php?id=' . $GroupID,
+        implode(',', $tagList)
+    );
+
+    $notification = (new Gazelle\Notification\Upload)
+        ->addFormat($Properties['Format'])
+        ->addEncodings($Properties['Encoding'])
+        ->addMedia($Properties['Media'])
+        ->addYear($Properties['Year'], $Properties['RemasterYear'])
+        ->addArtists($tgroupMan->findById($GroupID)->artistRole())
+        ->addTags($tagList)
+        ->addCategory($Type)
+        ->addUser($Viewer)
+        ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
+
+    if ($isMusicUpload) {
+        $notification->addReleaseType($releaseTypes[$Properties['ReleaseType']]);
+    }
+
+    $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
+
+    // RSS for bookmarks
+    $DB->prepared_query('
+        SELECT u.torrent_pass
+        FROM users_main AS u
+        INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
+        WHERE b.GroupID = ?
+        ', $GroupID
+    );
+    while ([$Passkey] = $DB->next_record()) {
+        $feedType[] = "torrents_bookmarks_t_$Passkey";
+    }
+    foreach ($feedType as $subFeed) {
+        $Feed->populate($subFeed, $Item);
+    }
+
+    $Debug->set_flag('upload: notifications handled');
+
+    $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
+
     json_print('success', $Response);
 } else {
     $folderClash = 0;
@@ -923,17 +971,22 @@ if (!in_array('notifications', $Viewer->paranoia())) {
         implode(',', $tagList)
     );
 
-    (new Gazelle\Notification\Upload)->addFormat($Properties['Format'])
+    $notification = (new Gazelle\Notification\Upload)
+        ->addFormat($Properties['Format'])
         ->addEncodings($Properties['Encoding'])
         ->addMedia($Properties['Media'])
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
         ->addArtists($tgroupMan->findById($GroupID)->artistRole())
         ->addTags($tagList)
         ->addCategory($Type)
-        ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
         ->addUser($Viewer)
-        ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
-        ->trigger($GroupID, $TorrentID, $Feed, $Item);
+        ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
+
+    if ($isMusicUpload) {
+        $notification->addReleaseType($releaseTypes[$Properties['ReleaseType']]);
+    }
+
+    $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
 
     // RSS for bookmarks
     $DB->prepared_query('
