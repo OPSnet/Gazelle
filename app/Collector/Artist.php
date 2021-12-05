@@ -13,13 +13,13 @@ class Artist extends \Gazelle\Collector {
     }
 
     public function prepare(array $list): bool {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT GroupID, Importance
             FROM torrents_artists
             WHERE ArtistID = ?
             ", $this->artist->id()
         );
-        while ([$groupId, $role] = $this->db->next_record(MYSQLI_NUM, false)) {
+        while ([$groupId, $role] = self::$db->next_record(MYSQLI_NUM, false)) {
             // Get the highest importances to place the .torrents in the most relevant folders
             if (!isset($this->roleList[$groupId]) || $role < $this->roleList[$groupId]) {
                 $this->roleList[$groupId] = (int)$role;
@@ -32,8 +32,8 @@ class Artist extends \Gazelle\Collector {
             INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID AND tg.CategoryID = '1' AND tg.ID IN (" . placeholders($this->args) . ")
             ORDER BY t.GroupID ASC, Rank DESC, " .  self::ORDER_BY[$this->orderBy];
 
-        $this->qid = $this->db->prepared_query($this->sql, ...$this->args);
-        return $this->db->has_results();
+        $this->qid = self::$db->prepared_query($this->sql, ...$this->args);
+        return self::$db->has_results();
     }
 
     public function fill() {
@@ -44,11 +44,11 @@ class Artist extends \Gazelle\Collector {
                 break;
             }
             $Artists = \Artists::get_artists($GroupIDs);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT ID FROM torrents WHERE ID IN (" . placeholders($GroupIDs) . ")
                 ", ...array_keys($GroupIDs)
             );
-            $torrentIds = $this->db->collect('ID');
+            $torrentIds = self::$db->collect('ID');
             foreach ($torrentIds as $TorrentID) {
                 if (!isset($GroupIDs[$TorrentID])) {
                     continue;

@@ -8,7 +8,7 @@ class ErrorLog extends \Gazelle\Base {
      * Get an eror log based on its ID
      */
     public function findById(int $errorId): ?\Gazelle\ErrorLog {
-        $id = $this->db->scalar("
+        $id = self::$db->scalar("
             SELECT error_log_id FROM error_log WHERE error_log_id = ?
             ", $errorId
         );
@@ -16,13 +16,13 @@ class ErrorLog extends \Gazelle\Base {
     }
 
     public function total(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM error_log
         ");
     }
 
     public function list(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT error_log_id,
                 duration,
                 memory,
@@ -40,7 +40,7 @@ class ErrorLog extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        $result = $this->db->to_array('error_log_id', MYSQLI_ASSOC, false);
+        $result = self::$db->to_array('error_log_id', MYSQLI_ASSOC, false);
         $list = [];
         foreach ($result as $item) {
             $item['trace'] = explode("\n", $item['trace']);

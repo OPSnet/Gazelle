@@ -25,14 +25,14 @@ class TGroup extends \Gazelle\Base {
 
     public function findById(int $tgroupId): ?\Gazelle\TGroup {
         $key = sprintf(self::ID_KEY, $tgroupId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM torrents_group WHERE ID = ?
                 ", $tgroupId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         if (!$id) {
@@ -51,7 +51,7 @@ class TGroup extends \Gazelle\Base {
      * @return int The group id if found, otherwise null
      */
     public function findByTorrentInfohash(string $hash) {
-        $id = $this->db->scalar("
+        $id = self::$db->scalar("
             SELECT GroupID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );
@@ -64,14 +64,14 @@ class TGroup extends \Gazelle\Base {
      * @param int groupId
      */
     public function refresh(int $groupId) {
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
 
-        $voteScore = (int)$this->db->scalar("
+        $voteScore = (int)self::$db->scalar("
             SELECT Score FROM torrents_votes WHERE GroupID = ?
             ", $groupId
         );
 
-        $artistName = (string)$this->db->scalar("
+        $artistName = (string)self::$db->scalar("
             SELECT group_concat(aa.Name separator ' ')
             FROM torrents_artists AS ta
             INNER JOIN artists_alias AS aa USING (AliasID)
@@ -81,9 +81,9 @@ class TGroup extends \Gazelle\Base {
             ", $groupId
         );
 
-        $this->db->begin_transaction();
+        self::$db->begin_transaction();
         // todo: remove this legacy code once TagList replacement is confirmed working
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE torrents_group SET
                 TagList = (
                     SELECT REPLACE(GROUP_CONCAT(tags.Name SEPARATOR ' '), '.', '_')
@@ -96,7 +96,7 @@ class TGroup extends \Gazelle\Base {
             ", $groupId, $groupId
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             REPLACE INTO sphinx_delta
                 (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType, RecordLabel,
                 CatalogueNumber, VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
@@ -119,10 +119,10 @@ class TGroup extends \Gazelle\Base {
             GROUP BY t.ID
             ", $voteScore, $artistName, $groupId
         );
-        $this->db->commit();
-        $this->db->set_query_id($qid);
+        self::$db->commit();
+        self::$db->set_query_id($qid);
 
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),
             sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $groupId),
             "groups_artists_$groupId", "torrents_details_$groupId", "torrent_group_$groupId", "torrent_group_light_$groupId"
@@ -130,7 +130,7 @@ class TGroup extends \Gazelle\Base {
         $info = \Artists::get_artist($groupId);
         foreach ($info as $roles => $role) {
             foreach ($role as $artist) {
-                $this->cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
+                self::$cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
             }
         }
     }
@@ -146,8 +146,8 @@ class TGroup extends \Gazelle\Base {
      * @return array of [imageUrl, groupId, torrentId, uploadDate, username, paranoia]
      */
     public function latestUploads(int $limit) {
-        if (!($latest = $this->cache->get_value(self::CACHE_KEY_LATEST_UPLOADS . $limit))) {
-            $this->db->prepared_query("
+        if (!($latest = self::$cache->get_value(self::CACHE_KEY_LATEST_UPLOADS . $limit))) {
+            self::$db->prepared_query("
                 SELECT tg.WikiImage AS imageUrl,
                     R.GroupID       AS groupId,
                     R.torrentId,
@@ -183,7 +183,7 @@ class TGroup extends \Gazelle\Base {
             );
             $latest = [];
             while (count($latest) < $limit) {
-                $row = $this->db->next_record(MYSQLI_ASSOC, false);
+                $row = self::$db->next_record(MYSQLI_ASSOC, false);
                 if (!$row) {
                     break;
                 }
@@ -198,7 +198,7 @@ class TGroup extends \Gazelle\Base {
                 $row['name'] = \Torrents::display_string($row['groupId'], \Torrents::DISPLAYSTRING_SHORT);
                 $latest[$row['groupId']] = $row;
             }
-            $this->cache->cache_value(self::CACHE_KEY_LATEST_UPLOADS . $limit, $latest, 86400);
+            self::$cache->cache_value(self::CACHE_KEY_LATEST_UPLOADS . $limit, $latest, 86400);
         }
         return $latest;
     }
@@ -216,13 +216,13 @@ class TGroup extends \Gazelle\Base {
      * @param int $limit
      */
     public function flushLatestUploads(int $limit) {
-        $this->cache->delete_value(self::CACHE_KEY_LATEST_UPLOADS . $limit);
+        self::$cache->delete_value(self::CACHE_KEY_LATEST_UPLOADS . $limit);
     }
 
     protected function featuredAlbum(int $type): array {
         $key = sprintf(self::CACHE_KEY_FEATURED, $type);
-        if (($featured = $this->cache->get_value($key)) === false) {
-            $featured = $this->db->rowAssoc("
+        if (($featured = self::$cache->get_value($key)) === false) {
+            $featured = self::$db->rowAssoc("
                 SELECT fa.GroupID,
                     tg.Name,
                     tg.WikiImage,
@@ -238,7 +238,7 @@ class TGroup extends \Gazelle\Base {
                 $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
                 $featured['image']       = (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($featured['WikiImage']);
             }
-            $this->cache->cache_value($key, $featured, 86400 * 7);
+            self::$cache->cache_value($key, $featured, 86400 * 7);
         }
         return $featured ?? [];
     }

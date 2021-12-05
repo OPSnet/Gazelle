@@ -9,7 +9,7 @@ class StaffPM extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
-        $this->info = $this->db->rowAssoc("
+        $this->info = self::$db->rowAssoc("
             SELECT Subject     AS subject,
                 UserID         AS user_id,
                 Level          AS class_level,
@@ -85,18 +85,18 @@ class StaffPM extends BaseObject {
     }
 
     public function markAsRead(User $viewer): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE staff_pm_conversations SET
                 Unread = false
             WHERE ID = ?
             ", $this->id
         );
-        $this->cache->delete_value("staff_pm_new_" . $viewer->id());
-        return $this->db->affected_rows();
+        self::$cache->delete_value("staff_pm_new_" . $viewer->id());
+        return self::$db->affected_rows();
     }
 
     public function thread(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID     AS id,
                 UserID    AS user_id,
                 SentDate  AS sent_date,
@@ -106,6 +106,6 @@ class StaffPM extends BaseObject {
             ORDER BY SentDate
             ", $this->id
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

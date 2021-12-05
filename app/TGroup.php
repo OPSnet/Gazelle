@@ -44,7 +44,7 @@ class TGroup extends BaseObject {
 
     public function flush() {
         $this->info = [];
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),
             sprintf(self::CACHE_COVERART_KEY, $this->id),
@@ -56,34 +56,34 @@ class TGroup extends BaseObject {
      * When the image of a release group is changed, we need to flush other things
      */
     public function imageFlush() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT CollageID FROM collages_torrents WHERE GroupID = ?
             ", $this->id
         );
-        if ($this->db->has_results()) {
-            $this->cache->deleteMulti(array_map(fn ($id) => "collagev2_$id", $this->db->collect(0, false)));
+        if (self::$db->has_results()) {
+            self::$cache->deleteMulti(array_map(fn ($id) => "collagev2_$id", self::$db->collect(0, false)));
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT UserID
             FROM torrents AS t
             LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
             WHERE tg.ID = ?
             ", $this->id
         );
-        if ($this->db->has_results()) {
-            $this->cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), $this->db->collect(0, false)));
+        if (self::$db->has_results()) {
+            self::$cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), self::$db->collect(0, false)));
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT DISTINCT xs.uid
             FROM xbt_snatched xs
             INNER JOIN torrents t ON (t.ID = xs.fid)
             WHERE t.GroupID = ?
             ", $this->id
         );
-        if ($this->db->has_results()) {
-            $this->cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), $this->db->collect(0, false)));
+        if (self::$db->has_results()) {
+            self::$cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), self::$db->collect(0, false)));
         }
     }
 
@@ -105,7 +105,7 @@ class TGroup extends BaseObject {
     }
 
     public function revisionList(): array {
-         $this->db->prepared_query("
+         self::$db->prepared_query("
             SELECT RevisionID AS revision,
                 Summary       AS summary,
                 Time          AS time,
@@ -115,7 +115,7 @@ class TGroup extends BaseObject {
             ORDER BY RevisionID DESC
             ", $this->id
         );
-        return $this->db->to_array('revision', MYSQLI_ASSOC, false);
+        return self::$db->to_array('revision', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -130,7 +130,7 @@ class TGroup extends BaseObject {
         $key = sprintf(self::CACHE_KEY, $this->id);
         $this->revisionId = $revisionId;
         if (!$revisionId) {
-            $cached = $this->cache->get_value($key);
+            $cached = self::$cache->get_value($key);
             if (is_array($cached)) {
                 if (!isset($cached['Image'])) {
                     $cached['Image'] = $this->showFallbackImage
@@ -180,7 +180,7 @@ class TGroup extends BaseObject {
         $sql .= " WHERE tg.ID = ? GROUP BY tg.ID";
         $args[] = $this->id;
 
-        $info = $this->db->rowAssoc($sql, ...$args);
+        $info = self::$db->rowAssoc($sql, ...$args);
 
         // make the values sane (null, boolean as appropriate)
         // TODO: once all get_*_info calls have been ported over, do this prior to caching
@@ -211,7 +211,7 @@ class TGroup extends BaseObject {
         $info['artist'] = $artistRole->roleList();
         $info['role_id'] = $artistRole->idList();
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT t.ID
             FROM torrents t
             WHERE t.GroupID = ?
@@ -219,10 +219,10 @@ class TGroup extends BaseObject {
                 t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
             ", $this->id
         );
-        $info['torrent_list'] = $this->db->collect(0, false);
+        $info['torrent_list'] = self::$db->collect(0, false);
 
         if (!$this->revisionId) {
-            $this->cache->cache_value($key, $info, 0);
+            self::$cache->cache_value($key, $info, 0);
         }
         if (!$info['Image']) {
             $info['Image'] = $this->showFallbackImage
@@ -238,7 +238,7 @@ class TGroup extends BaseObject {
     }
 
     protected function fetchIsSnatched(): bool {
-        return $this->viewer && $this->viewer->option('ShowSnatched') && (bool)$this->db->scalar("
+        return $this->viewer && $this->viewer->option('ShowSnatched') && (bool)self::$db->scalar("
             SELECT 1
             FROM torrents_group tg
             WHERE exists(
@@ -300,7 +300,7 @@ class TGroup extends BaseObject {
     }
 
     public function isOwner(int $userId): bool {
-        return (bool)$this->db->scalar("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM torrents t
             WHERE t.GroupID = ?
@@ -410,73 +410,73 @@ class TGroup extends BaseObject {
     }
 
     public function addCoverArt(string $image, string $summary, int $userId, \Gazelle\Log $logger): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO cover_art
                    (GroupID, Image, Summary, UserID)
             VALUES (?,       ?,     ?,       ?)
             ", $this->id, $image, $summary, $userId
         );
-        $n = $this->db->affected_rows();
+        $n = self::$db->affected_rows();
         if ($n) {
             $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" added to group");
-            $this->cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
+            self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
         }
         return $n;
     }
 
     public function removeCoverArt(int $coverId, int $userId, \Gazelle\Log $logger): int {
-        [$image, $summary] = $this->db->row("
+        [$image, $summary] = self::$db->row("
             SELECT Image, Summary
             FROM cover_art
             WHERE ID = ?
             ", $coverId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM cover_art WHERE ID = ?
             ", $coverId
         );
-        $n = $this->db->affected_rows();
+        $n = self::$db->affected_rows();
         if ($n) {
             $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" removed from group");
-            $this->cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
+            self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
         }
         return $n;
     }
 
     public function coverArt(): array {
         $key = sprintf(self::CACHE_COVERART_KEY, $this->id);
-        $list = $this->cache->get_value($key);
+        $list = self::$cache->get_value($key);
         if ($list === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT ID, Image, Summary, UserID, Time
                 FROM cover_art
                 WHERE GroupID = ?
                 ORDER BY Time ASC
                 ", $this->id
             );
-            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
-            $this->cache->cache_value($key, $list, 0);
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $list, 0);
         }
         return $list;
     }
 
     public function toggleNoCoverArt(bool $noCoverArt): int {
         if ($noCoverArt) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 INSERT INTO torrent_group_has_attr
                    (TorrentGroupID, TorrentGroupAttrID)
                 VALUES (?, (SELECT ID FROM torrent_group_attr WHERE Name = 'no-cover-art'))
                 ", $this->id
             );
         } else {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM torrent_group_has_attr
                 WHERE TorrentGroupAttrID = (SELECT ID FROM torrent_group_attr WHERE Name = 'no-cover-art')
                     AND TorrentGroupID = ?
                 ", $this->id
             );
         }
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -594,7 +594,7 @@ class TGroup extends BaseObject {
         if (empty($add)) {
             return 0;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO torrents_artists
                    (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
             VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)')
@@ -611,17 +611,17 @@ class TGroup extends BaseObject {
     }
 
     public function removeArtist(int $artistId, int $role): bool {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             DELETE FROM torrents_artists
             WHERE GroupID = ?
                 AND ArtistID = ?
                 AND Importance = ?
             ', $this->id, $artistId, $role
         );
-        if (!$this->db->affected_rows()) {
+        if (!self::$db->affected_rows()) {
             return false;
         }
-        $unused = (bool)$this->db->scalar("
+        $unused = (bool)self::$db->scalar("
             SELECT 1
             FROM artists_group ag
             LEFT JOIN torrents_artists ta USING (ArtistID)
@@ -674,7 +674,7 @@ class TGroup extends BaseObject {
     public function rawTorrentList(): array {
         $key = sprintf(self::CACHE_TLIST_KEY, $this->id);
         if (!$this->revisionId) {
-            $list = $this->cache->get_value($key);
+            $list = self::$cache->get_value($key);
             if ($list !== false) {
                 return $list;
             }
@@ -720,7 +720,7 @@ class TGroup extends BaseObject {
                 group_concat(tl.LogID) as ripLogIds
         ";
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT $columns, 0 as is_deleted
             FROM torrents AS t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
@@ -760,12 +760,12 @@ class TGroup extends BaseObject {
                 ID
             ", $this->id, $this->id
         );
-        $list = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+        $list = self::$db->to_array('ID', MYSQLI_ASSOC, false);
         if (empty($list)) {
             return [];
         }
         if (!$this->revisionId) {
-            $this->cache->cache_value($key, $list, in_array(0, $this->db->collect('Seeders')) ? 600 : 3600);
+            self::$cache->cache_value($key, $list, in_array(0, self::$db->collect('Seeders')) ? 600 : 3600);
         }
         return $list;
     }
@@ -776,7 +776,7 @@ class TGroup extends BaseObject {
      * @return int number of unresolved reports
      */
     public function unresolvedReportsTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -787,28 +787,28 @@ class TGroup extends BaseObject {
     }
 
     public function expireToken(int $userId, int $torrentId): bool {
-        $hash = $this->db->scalar("
+        $hash = self::$db->scalar("
             SELECT info_hash FROM torrents WHERE ID = ?
             ", $torrentId
         );
         if (!$hash) {
             return false;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_freeleeches SET
                 Expired = true
             WHERE UserID = ?
                 AND TorrentID = ?
             ", $userId, $torrentId
         );
-        $this->cache->delete_value("users_tokens_{$userId}");
+        self::$cache->delete_value("users_tokens_{$userId}");
         (new \Gazelle\Tracker)->update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
         return true;
     }
 
     public function addTagVote(int $userId, int $tagId, string $way): int {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             SELECT TagID
             FROM torrents_tags_votes
             WHERE GroupID = ?
@@ -817,8 +817,8 @@ class TGroup extends BaseObject {
                 AND Way = ?
             ", $this->id, $tagId, $userId, $way
         );
-        if ($this->db->has_results()) {
-            $this->db->rollback();
+        if (self::$db->has_results()) {
+            self::$db->rollback();
             return 0;
         }
         if ($way == 'down') {
@@ -826,42 +826,42 @@ class TGroup extends BaseObject {
         } else {
             $change = 'PositiveVotes = PositiveVotes + 2';
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE torrents_tags SET
                 $change
             WHERE GroupID = ?
                 AND TagID = ?
             ", $this->id, $tagId
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO torrents_tags_votes
                    (GroupID, TagID, UserID, Way)
             VALUES (?,       ?,     ?,      ?)
             ", $this->id, $tagId, $userId, $way
         );
-        $n = $this->db->affected_rows();
-        $this->db->commit();
+        $n = self::$db->affected_rows();
+        self::$db->commit();
         $this->flush();
         return $n;
     }
 
     public function removeTag(\Gazelle\Tag $tag): bool {
         $tagId = $tag->id();
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM torrents_tags_votes WHERE GroupID = ? AND TagID = ?
             ", $this->id, $tag->id()
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM torrents_tags WHERE GroupID = ? AND TagID = ?
             ", $this->id, $tagId
         );
 
         // Was this the last occurrence?
-        $inUse = $this->db->scalar("
+        $inUse = self::$db->scalar("
             SELECT count(*) FROM torrents_tags WHERE TagID = ?
             ", $tagId
-        ) + $this->db->scalar("
+        ) + self::$db->scalar("
             SELECT count(*)
             FROM requests_tags rt
             INNER JOIN requests r ON (r.ID = rt.RequestID)
@@ -870,30 +870,30 @@ class TGroup extends BaseObject {
             ", $tagId
         );
         if (!$inUse) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM tags WHERE ID = ?
                 ", $tagId
             );
         }
 
-        $this->db->commit();
+        self::$db->commit();
         return true;
     }
 
     public function createRevision(int $userId, string $image, string $body, string $summary): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO wiki_torrents
                    (PageID, Body, Image, UserID, Summary)
             VALUES (?,      ?,    ?,     ?,      ?)
             ", $this->id, $body, $image, $userId, trim($summary)
         );
-        $revisionId = $this->db->inserted_id();
+        $revisionId = self::$db->inserted_id();
         (new \Gazelle\Manager\TGroup)->refresh($this->id);
         return $revisionId;
     }
 
     public function revertRevision(int $userId, int $revisionId): ?array {
-        $revert = $this->db->row("
+        $revert = self::$db->row("
             SELECT Body, Image
             FROM wiki_torrents
             WHERE PageID = ? AND RevisionID = ?
@@ -902,7 +902,7 @@ class TGroup extends BaseObject {
         if (is_null($revert)) {
             return null;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO wiki_torrents
                    (PageID, Body, Image, UserID, Summary)
             SELECT  ?,      Body, Image, ?,      ?

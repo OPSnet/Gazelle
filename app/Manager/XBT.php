@@ -32,13 +32,13 @@ class XBT extends \Gazelle\Base {
      * @return boolean Success
      */
     public function saveRate(string $CC, float $rate) {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO xbt_forex
                    (cc, rate)
             VALUES (?,  ?)
             ', $CC, $rate
         );
-        return $this->db->affected_rows() == 1;
+        return self::$db->affected_rows() == 1;
     }
 
     /* Get the latest Forex rate for this currency
@@ -48,8 +48,8 @@ class XBT extends \Gazelle\Base {
      */
     public function latestRate(string $CC) {
         $key = sprintf(self::CACHE_KEY, $CC);
-        if (($rate = $this->cache->get_value($key)) === false) {
-            $rate = $this->db->scalar('
+        if (($rate = self::$cache->get_value($key)) === false) {
+            $rate = self::$db->scalar('
                 SELECT rate
                 FROM xbt_forex
                 WHERE forex_date > now() - INTERVAL 6 HOUR
@@ -65,7 +65,7 @@ class XBT extends \Gazelle\Base {
                 }
                 $this->saveRate($CC, $rate);
             }
-            $this->cache->cache_value($key, $rate, 3600 * 6);
+            self::$cache->cache_value($key, $rate, 3600 * 6);
         }
         return $rate;
     }

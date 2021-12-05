@@ -8,17 +8,17 @@ class Stylesheet extends Base {
 
     public function list(): array {
         if (!isset($this->stylesheets)) {
-            $stylesheets = $this->cache->get_value('stylesheets');
+            $stylesheets = self::$cache->get_value('stylesheets');
             if ($stylesheets === false) {
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     SELECT ID,
                         lower(replace(Name, ' ', '_')) AS Name,
                         Name AS ProperName
                     FROM stylesheets
                     ORDER BY ID ASC
                 ");
-                $stylesheets = $this->db->to_array('ID', MYSQLI_ASSOC, false);
-                $this->cache->cache_value('stylesheets', $stylesheets, 0);
+                $stylesheets = self::$db->to_array('ID', MYSQLI_ASSOC, false);
+                self::$cache->cache_value('stylesheets', $stylesheets, 0);
             }
             $this->stylesheets = $stylesheets;
         }
@@ -30,7 +30,7 @@ class Stylesheet extends Base {
     }
 
     public function usageList(string $orderBy, string $direction): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT s.ID             AS id,
                 s.Name              AS name,
                 s.Description       AS description,
@@ -55,6 +55,6 @@ class Stylesheet extends Base {
             ) AS ud ON (s.ID = ud.StyleID)
             ORDER BY $orderBy $direction
         ");
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

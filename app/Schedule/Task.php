@@ -15,7 +15,6 @@ abstract class Task extends \Gazelle\Base {
     protected $processed;
 
     public function __construct(int $taskId, string $name, bool $isDebug) {
-        parent::__construct();
         $this->taskId = $taskId;
         $this->name = $name;
         $this->isDebug = $isDebug;
@@ -25,19 +24,19 @@ abstract class Task extends \Gazelle\Base {
 
     public function begin() {
         $this->startTime = microtime(true);
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO periodic_task_history
                    (periodic_task_id)
             VALUES (?)
         ', $this->taskId);
 
-        $this->historyId = $this->db->inserted_id();
+        $this->historyId = self::$db->inserted_id();
     }
 
     public function end(bool $sane) {
         $elapsed = (microtime(true) - $this->startTime) * 1000;
         $errorCount = count(array_filter($this->events, function ($event) { return $event->severity === 'error'; }));
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             UPDATE periodic_task_history
             SET status = ?,
                 num_errors = ?,
@@ -51,7 +50,7 @@ abstract class Task extends \Gazelle\Base {
 
         foreach ($this->events as $event) {
             echo(sprintf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event));
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT INTO periodic_task_history_event
                        (periodic_task_history_id, severity, event_time, event,             reference)
                 VALUES (?,                        ?,        ?,          substr(?, 1, 255), ?)
@@ -59,22 +58,22 @@ abstract class Task extends \Gazelle\Base {
         }
 
         if ($errorCount > 0 && $sane) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 UPDATE periodic_task
                 SET is_sane = FALSE
                 WHERE periodic_task_id = ?
             ', $this->taskId);
-            $this->cache->delete_value(Scheduler::CACHE_TASKS);
+            self::$cache->delete_value(Scheduler::CACHE_TASKS);
 
             Irc::sendChannel('Task '.$this->name.' is no longer sane '.SITE_URL.'/tools.php?action=periodic&mode=detail&id='.$this->taskId, LAB_CHAN);
             // todo: send notifications to appropriate users
         } else if ($errorCount == 0 && !$sane) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 UPDATE periodic_task
                 SET is_sane = TRUE
                 WHERE periodic_task_id = ?
             ', $this->taskId);
-            $this->cache->delete_value(Scheduler::CACHE_TASKS);
+            self::$cache->delete_value(Scheduler::CACHE_TASKS);
 
             Irc::sendChannel('Task '.$this->name.' is now sane', LAB_CHAN);
         }

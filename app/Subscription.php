@@ -12,7 +12,7 @@ class Subscription extends BaseUser {
      * @param int $PageID
      */
     public function quoteNotify(string $Body, int $PostID, string $Page, int $PageID) {
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
         /*
          * Explanation of the parameters PageID and Page: Page contains where
          * this quote comes from and can be forums, artist, collages, requests
@@ -30,7 +30,7 @@ class Subscription extends BaseUser {
             return;
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT m.ID
             FROM users_main AS m
             INNER JOIN users_info AS i ON (i.UserID = m.ID)
@@ -40,25 +40,25 @@ class Subscription extends BaseUser {
             ", $this->user->id(), ...$Usernames
         );
 
-        $Results = $this->db->collect(0, false);
+        $Results = self::$db->collect(0, false);
         $notification = new Manager\Notification;
         $quotername = $this->user->username();
         foreach ($Results as $userId) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT IGNORE INTO users_notify_quoted
                     (UserID, QuoterID, Page, PageID, PostID)
                 VALUES
                     (?,      ?,        ?,    ?,      ?)
                 ', $userId, $this->user->id(), $Page, $PageID, $PostID
             );
-            $this->cache->delete_value("user_quote_unread_" . $userId);
+            self::$cache->delete_value("user_quote_unread_" . $userId);
             $URL = SITE_URL .  ($Page == 'forums')
                 ? "/forums.php?action=viewthread&postid=$PostID"
                 : "/comments.php?action=jump&postid=$PostID";
             $notification->push($userId, 'New Quote!',
                 "Quoted by $quotername $URL", $URL, Manager\Notification::QUOTES);
         }
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
     }
 
     /**
@@ -66,23 +66,23 @@ class Subscription extends BaseUser {
      * @param int $TopicID
      */
     public function subscribe(int $TopicID) {
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
         if ($this->isSubscribed($TopicID) !== false) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 DELETE FROM users_subscriptions
                 WHERE UserID = ?
                     AND TopicID = ?
                 ', $this->user->id(), $TopicID
             );
         } else {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT IGNORE INTO users_subscriptions (UserID, TopicID)
                 VALUES (?, ?)
                 ', $this->user->id(), $TopicID
             );
         }
-        $this->cache->deleteMulti(["subscriptions_user_" . $this->user->id(), "subscriptions_user_new_" . $this->user->id()]);
-        $this->db->set_query_id($qid);
+        self::$cache->deleteMulti(["subscriptions_user_" . $this->user->id(), "subscriptions_user_new_" . $this->user->id()]);
+        self::$db->set_query_id($qid);
     }
 
     /**
@@ -91,11 +91,11 @@ class Subscription extends BaseUser {
      * @param int $PageID ArtistID, CollageID, RequestID or GroupID
      */
     public function subscribeComments(string $Page, int $PageID) {
-        $qid = $this->db->get_query_id();
+        $qid = self::$db->get_query_id();
         $UserCommentSubscriptions = $this->commentSubscriptions();
         $Key = $this->isSubscribedComments($Page, $PageID);
         if ($Key !== false) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 DELETE FROM users_subscriptions_comments
                 WHERE UserID = ?
                     AND Page = ?
@@ -104,7 +104,7 @@ class Subscription extends BaseUser {
             );
             unset($UserCommentSubscriptions[$Key]);
         } else {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT IGNORE INTO users_subscriptions_comments
                     (UserID, Page, PageID)
                 VALUES
@@ -113,9 +113,9 @@ class Subscription extends BaseUser {
             );
             array_push($UserCommentSubscriptions, [$Page, $PageID]);
         }
-        $this->cache->replace_value("subscriptions_comments_user_" . $this->user->id(), $UserCommentSubscriptions, 0);
-        $this->cache->delete_value("subscriptions_comments_user_new_" . $this->user->id());
-        $this->db->set_query_id($qid);
+        self::$cache->replace_value("subscriptions_comments_user_" . $this->user->id(), $UserCommentSubscriptions, 0);
+        self::$cache->delete_value("subscriptions_comments_user_new_" . $this->user->id());
+        self::$db->set_query_id($qid);
     }
 
     /**
@@ -123,17 +123,17 @@ class Subscription extends BaseUser {
      * @return array Array of TopicIDs
      */
     public function subscriptionList(): array {
-        $qid = $this->db->get_query_id();
-        $UserSubscriptions = $this->cache->get_value("subscriptions_user_" . $this->user->id());
+        $qid = self::$db->get_query_id();
+        $UserSubscriptions = self::$cache->get_value("subscriptions_user_" . $this->user->id());
         if ($UserSubscriptions === false) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 SELECT TopicID FROM users_subscriptions WHERE UserID = ?
                 ', $this->user->id()
             );
-            $UserSubscriptions = $this->db->collect(0);
-            $this->cache->cache_value("subscriptions_user_" . $this->user->id(), $UserSubscriptions, 0);
+            $UserSubscriptions = self::$db->collect(0);
+            self::$cache->cache_value("subscriptions_user_" . $this->user->id(), $UserSubscriptions, 0);
         }
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
         return $UserSubscriptions;
     }
 
@@ -142,19 +142,19 @@ class Subscription extends BaseUser {
      * @return array Array of ($Page, $PageID)
      */
     public function commentSubscriptions(): array {
-        $qid = $this->db->get_query_id();
-        $list = $this->cache->get_value("subscriptions_comments_user_" . $this->user->id());
+        $qid = self::$db->get_query_id();
+        $list = self::$cache->get_value("subscriptions_comments_user_" . $this->user->id());
         if ($list === false) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 SELECT Page, PageID
                 FROM users_subscriptions_comments
                 WHERE UserID = ?
                 ', $this->user->id()
             );
-            $list = $this->db->to_array(false, MYSQLI_NUM);
-            $this->cache->cache_value("subscriptions_comments_user_" . $this->user->id(), $list, 0);
+            $list = self::$db->to_array(false, MYSQLI_NUM);
+            self::$cache->cache_value("subscriptions_comments_user_" . $this->user->id(), $list, 0);
         }
-        $this->db->set_query_id($qid);
+        self::$db->set_query_id($qid);
         return $list;
     }
 
@@ -163,10 +163,10 @@ class Subscription extends BaseUser {
      * @return int Number of unread subscribed threads/comments
      */
     public function unread(): int {
-        $unread = $this->cache->get_value('subscriptions_user_new_' . $this->user->id());
+        $unread = self::$cache->get_value('subscriptions_user_new_' . $this->user->id());
         if ($unread === false) {
             $unread = (new Manager\Forum)->unreadSubscribedForumTotal($this->user) + $this->unreadCommentTotal();
-            $this->cache->cache_value('subscriptions_user_new_' . $this->user->id(), $unread, 0);
+            self::$cache->cache_value('subscriptions_user_new_' . $this->user->id(), $unread, 0);
         }
         return $unread;
     }
@@ -176,7 +176,7 @@ class Subscription extends BaseUser {
      * have new comments on them?
      */
     public function unreadCommentTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions_comments AS s
             LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
@@ -193,7 +193,7 @@ class Subscription extends BaseUser {
      * How many total subscribed entities (artists, collages, requests, torrents)
      */
     public function commentTotal(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions_comments AS s
             LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
@@ -211,12 +211,12 @@ class Subscription extends BaseUser {
      */
     public function unreadQuotes(): int {
         $key = 'user_quote_unread_' . $this->user->id();
-        $total = $this->cache->get_value($key);
+        $total = self::$cache->get_value($key);
         if ($total === false) {
             $forMan = new \Gazelle\Manager\Forum;
             [$cond, $args] = $forMan->configureForUser(new \Gazelle\User($this->user->id()));
             $args[] = $this->user->id(); // for q.UserID
-            $total = (int)$this->db->scalar("
+            $total = (int)self::$db->scalar("
                 SELECT count(*)
                 FROM users_notify_quoted AS q
                 LEFT JOIN forums_topics AS t ON (t.ID = q.PageID)
@@ -228,7 +228,7 @@ class Subscription extends BaseUser {
                     AND q.UserID = ?
                 ", ...$args
             );
-            $this->cache->cache_value($key, $total, 0);
+            self::$cache->cache_value($key, $total, 0);
         }
         return $total;
     }
@@ -251,8 +251,8 @@ class Subscription extends BaseUser {
      * Clear the forum subscription notifications of a user.
      */
     public function clear() {
-        $qid = $this->db->get_query_id();
-        $this->db->prepared_query("
+        $qid = self::$db->get_query_id();
+        self::$db->prepared_query("
             INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
                 SELECT us.UserID, ft.ID, ft.LastPostID
                 FROM forums_topics ft
@@ -261,8 +261,8 @@ class Subscription extends BaseUser {
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $this->user->id()
         );
-        $this->db->set_query_id($qid);
-        $this->cache->delete_value('subscriptions_user_new_' . $this->user->id());
+        self::$db->set_query_id($qid);
+        self::$cache->delete_value('subscriptions_user_new_' . $this->user->id());
     }
 
     /**
@@ -271,8 +271,8 @@ class Subscription extends BaseUser {
      * @return int number of forums+comments that were caught up
      */
     public function catchupSubscriptions(): int {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
                 SELECT us.UserID, ft.ID, ft.LastPostID
                 FROM users_subscriptions us
@@ -281,8 +281,8 @@ class Subscription extends BaseUser {
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $this->user->id()
         );
-        $n = $this->db->affected_rows();
-        $this->db->prepared_query("
+        $n = self::$db->affected_rows();
+        self::$db->prepared_query("
             INSERT INTO users_comments_last_read (UserID, Page, PageID, PostID)
                 SELECT s.UserID, s.Page, s.PageID, IFNULL(c.ID, 0)
                 FROM users_subscriptions_comments AS s
@@ -292,9 +292,9 @@ class Subscription extends BaseUser {
             ON DUPLICATE KEY UPDATE PostID = IFNULL(c.ID, 0)
             ", $this->user->id()
         );
-        $n += $this->db->affected_rows();
-        $this->db->commit();
-        $this->cache->delete_value('subscriptions_user_new_' . $this->user->id());
+        $n += self::$db->affected_rows();
+        self::$db->commit();
+        self::$cache->delete_value('subscriptions_user_new_' . $this->user->id());
         return $n;
     }
 
@@ -308,7 +308,7 @@ class Subscription extends BaseUser {
         $cond[] = "s.UserID = ?";
         array_push($args, $userId, $limit, $offset);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT s.Page,
                 s.PageID,
                 lr.PostID,
@@ -367,6 +367,6 @@ class Subscription extends BaseUser {
         LIMIT ? OFFSET ?
             ", $userId, $userId, $userId, ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

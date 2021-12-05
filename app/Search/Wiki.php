@@ -11,7 +11,6 @@ class Wiki extends \Gazelle\Base {
     protected $viewer;
 
     public function __construct(\Gazelle\User $viewer, string $type, string $terms) {
-        parent::__construct();
         // Break search string down into individual words
         preg_match_all('/(\S+)/', $terms, $match);
         $this->args = $match[1];
@@ -32,13 +31,13 @@ class Wiki extends \Gazelle\Base {
     }
 
     public function total(): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*) FROM wiki_articles " . $this->where, ...$this->args
         );
     }
 
     public function page(int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID,
                 Title,
                 Date,
@@ -48,6 +47,6 @@ class Wiki extends \Gazelle\Base {
             . " LIMIT ? OFFSET ?",
             ...array_merge($this->args, [$limit, $offset])
         );
-        return $this->db->to_array('ID', MYSQLI_ASSOC, false);
+        return self::$db->to_array('ID', MYSQLI_ASSOC, false);
     }
 }

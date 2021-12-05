@@ -19,14 +19,12 @@ class UserCreator extends Base {
     protected $username;
 
     public function __construct() {
-        parent::__construct();
-
         $this->adminComment = [];
         $this->email = [];
     }
 
     public function create() {
-        $this->newInstall = !$this->db->scalar("SELECT ID FROM users_main LIMIT 1");
+        $this->newInstall = !self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
         if ($this->newInstall) {
             $this->enabled = true;
             $this->permissionId = SYSOP;
@@ -43,7 +41,7 @@ class UserCreator extends Base {
         if (!$this->username) {
             throw new UserCreatorException('username');
         }
-        if ($this->db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->username)) {
+        if (self::$db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->username)) {
             throw new UserCreatorException('duplicate');
         }
         if (!preg_match(USERNAME_REGEXP, $this->username, $match)) {
@@ -57,7 +55,7 @@ class UserCreator extends Base {
         if (!$this->inviteKey) {
             $inviterId = null;
         } else {
-            [$inviterId, $inviterReason, $email] = $this->db->row("
+            [$inviterId, $inviterReason, $email] = self::$db->row("
                 SELECT InviterID, Reason, Email
                 FROM invites
                 WHERE InviteKey = ?
@@ -98,16 +96,16 @@ class UserCreator extends Base {
             $mainArgs[] = $this->id;
         }
 
-        $this->db->begin_transaction();
+        self::$db->begin_transaction();
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_main
                    (" . implode(',', $mainFields) . ")
             VALUES (" . placeholders($mainFields) . ")
             ", ...$mainArgs
         );
         if (!$this->id) {
-            $this->id = $this->db->inserted_id();
+            $this->id = self::$db->inserted_id();
         }
 
         // create users_info row
@@ -117,7 +115,7 @@ class UserCreator extends Base {
             $infoFields[] = 'AdminComment';
             $infoArgs[] = sqltime() . " - " . implode("\n", $this->adminComment);
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_info
                    (" . implode(',', $infoFields) . ", StyleID)
             VALUES (" . placeholders($infoFields) . ", (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
@@ -128,13 +126,13 @@ class UserCreator extends Base {
             (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $this->id);
             (new InviteTree($inviterId))->add($this->id);
             (new Stats\User($inviterId))->increment('invited_total');
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
                 ", $this->inviteKey
             );
         }
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE referral_users SET
                 UserID = ?,
                 Active = 1,
@@ -148,7 +146,7 @@ class UserCreator extends Base {
         // Each additional previous email address is staggered one second back in the past.
         $past = count($this->email);
         foreach ($this->email as $e) {
-            $this->db->prepared_query('
+            self::$db->prepared_query('
                 INSERT INTO users_history_emails
                        (UserID, Email, IP, useragent, Time)
                 VALUES (?,      ?,     ?,  ?,         now() - INTERVAL ? SECOND)
@@ -157,34 +155,34 @@ class UserCreator extends Base {
         }
 
         // Create the remaining rows in auxilliary tables
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_bonus (user_id) VALUES (?)
             ", $this->id
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO user_flt (user_id) VALUES (?)
             ", $this->id
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_history_ips (UserID, IP) VALUES (?, ?)
             ", $this->id, $this->ipaddr
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
             ", $this->id, STARTING_UPLOAD
         );
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO users_notifications_settings (UserID) VALUES (?)
             ", $this->id
         );
 
-        $this->db->commit();
+        self::$db->commit();
 
-        $this->cache->increment('stats_user_count');
+        self::$cache->increment('stats_user_count');
         (new \Gazelle\Tracker)->update_tracker('add_user', [
             'id'      => $this->id,
             'passkey' => $this->announceKey

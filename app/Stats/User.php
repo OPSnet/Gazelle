@@ -33,7 +33,7 @@ class User extends \Gazelle\BaseObject {
     }
 
     public function flush() {
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
             sprintf(self::CACHE_GENERAL, $this->id),
         ]);
@@ -48,17 +48,17 @@ class User extends \Gazelle\BaseObject {
     public function commentTotal(string $page): int {
         if (!isset($this->commentTotal)) {
             $key = sprintf(self::CACHE_COMMENT_TOTAL, $this->id);
-            $commentTotal = $this->cache->get_value($key);
+            $commentTotal = self::$cache->get_value($key);
             if ($commentTotal === false) {
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     SELECT Page, count(*) as n
                     FROM comments
                     WHERE AuthorID = ?
                     GROUP BY Page
                     ", $this->id
                 );
-                $commentTotal = $this->db->to_pair('Page', 'n', false);
-                $this->cache->cache_value($key, $commentTotal, 3600);
+                $commentTotal = self::$db->to_pair('Page', 'n', false);
+                self::$cache->cache_value($key, $commentTotal, 3600);
             }
             $this->commentTotal = $commentTotal;
         }
@@ -71,9 +71,9 @@ class User extends \Gazelle\BaseObject {
     public function general(): array {
         if (empty($this->general)) {
             $key = sprintf(self::CACHE_GENERAL, $this->id);
-            $general = $this->cache->get_value($key);
+            $general = self::$cache->get_value($key);
             if ($general === false) {
-                $general = $this->db->rowAssoc("
+                $general = self::$db->rowAssoc("
                     SELECT artist_added_total,
                         collage_total,
                         collage_contrib,
@@ -125,7 +125,7 @@ class User extends \Gazelle\BaseObject {
                     'unique_group_total'    => 0,
                     'upload_total'          => 0,
                 ];
-                $this->cache->cache_value($key, $general, 300);
+                self::$cache->cache_value($key, $general, 300);
             }
             $this->general = $general;
         }
@@ -139,15 +139,15 @@ class User extends \Gazelle\BaseObject {
      * If we can update immediately, though, we can do it here.
      */
     public function increment(string $name, int $incr = 1): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE user_summary SET
                 $name = $name + ?
             WHERE user_id = ?
             ", $incr, $this->id
         );
         $this->general = [];
-        $this->cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
-        return $this->db->affected_rows();
+        self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
+        return self::$db->affected_rows();
     }
 
     public function artistAddedTotal(): int {

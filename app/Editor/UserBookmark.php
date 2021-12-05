@@ -13,7 +13,6 @@ class UserBookmark extends \Gazelle\Base {
     protected $userId;
 
     public function __construct(int $userId) {
-        parent::__construct();
         $this->userId = $userId;
     }
 
@@ -24,14 +23,14 @@ class UserBookmark extends \Gazelle\Base {
      * @return int number of items removed
      */
     public function remove(array $groupIds): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM bookmarks_torrents
             WHERE UserID = ?
                 AND GroupID IN (" . placeholders($groupIds) . ")
             ", $this->userId, ...$groupIds
         );
-        $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->userId));
-        return $this->db->affected_rows();
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->userId));
+        return self::$db->affected_rows();
     }
 
     /**
@@ -52,7 +51,7 @@ class UserBookmark extends \Gazelle\Base {
         if (empty($placeholders)) {
             return 0;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO bookmarks_torrents
                 (GroupID, Sort, UserID)
             VALUES " . implode(', ', $placeholders) . "
@@ -60,7 +59,7 @@ class UserBookmark extends \Gazelle\Base {
                 Sort = VALUES (Sort)
             ", ...$args
         );
-        $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->userId));
-        return $this->db->affected_rows();
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->userId));
+        return self::$db->affected_rows();
     }
 }

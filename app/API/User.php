@@ -38,7 +38,7 @@ class User extends AbstractAPI {
 
     private function getUser() {
         $where = ($this->id !== null) ? "um.ID = ?" : "um.Username = ?";
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 um.ID,
                 um.Username,
@@ -62,7 +62,7 @@ class User extends AbstractAPI {
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 
-        $user = $this->db->next_record(MYSQLI_ASSOC, ['IRCKey', 'Paranoia']);
+        $user = self::$db->next_record(MYSQLI_ASSOC, ['IRCKey', 'Paranoia']);
         if (empty($user['Username'])) {
             json_error("User not found");
         }
@@ -104,7 +104,7 @@ class User extends AbstractAPI {
 
     private function enableUser() {
         $where = ($this->id !== null) ? "um.ID = ?" : "um.Username = ?";
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT
                 um.ID,
                 um.Username,
@@ -126,7 +126,7 @@ class User extends AbstractAPI {
 
         // TODO: merge this and the version in takemoderate.php
         $UpdateSet = [];
-        $Cur = $this->db->next_record(MYSQLI_ASSOC, false);
+        $Cur = self::$db->next_record(MYSQLI_ASSOC, false);
         $Comment = 'Enabled via API';
 
         if ($this->clear_tokens) {
@@ -135,7 +135,7 @@ class User extends AbstractAPI {
             $Comment = 'Tokens and invites reset, enabled via API';
         }
 
-        $this->cache->increment('stats_user_count');
+        self::$cache->increment('stats_user_count');
         $VisibleTrIp = $Cur['Visible'] && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
         $tracker = new \Gazelle\Tracker;
         $tracker->update_tracker('add_user', ['id' => $this->id,
@@ -160,7 +160,7 @@ class User extends AbstractAPI {
 
         $set = implode(', ', $UpdateSet);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_main AS um
             INNER users_info AS ui ON (ui.UserID = um.ID)
             INNER user_flt   AS uf ON (uf.user_id = um.ID)

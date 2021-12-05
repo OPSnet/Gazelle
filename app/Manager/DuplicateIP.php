@@ -5,7 +5,7 @@ namespace Gazelle\Manager;
 class DuplicateIP extends \Gazelle\Base {
 
     public function total(int $threshold): int {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_main AS um
             WHERE um.Enabled = '1'
@@ -20,7 +20,7 @@ class DuplicateIP extends \Gazelle\Base {
     }
 
     public function page(int $threshold, int $limit, int $offset): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.ID    AS user_id,
                 um.IP       AS ipaddr,
                 ui.JoinDate AS joined,
@@ -42,6 +42,6 @@ class DuplicateIP extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $threshold, $limit, $offset
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

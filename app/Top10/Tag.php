@@ -5,8 +5,8 @@ namespace Gazelle\Top10;
 class Tag extends \Gazelle\Base {
 
     public function getTopUsedTags($limit) {
-        if (!$topUsedTags = $this->cache->get_value('topusedtag_' . $limit)) {
-            $topUsedTags = $this->db->prepared_query("
+        if (!$topUsedTags = self::$cache->get_value('topusedtag_' . $limit)) {
+            $topUsedTags = self::$db->prepared_query("
                 SELECT
                     t.ID,
                     t.Name,
@@ -19,16 +19,16 @@ class Tag extends \Gazelle\Base {
                 ORDER BY Uses DESC, t.name
                 LIMIT ?", $limit);
 
-            $topUsedTags = $this->db->to_array();
-            $this->cache->cache_value('topusedtag_' . $limit, $topUsedTags, 3600 * 12);
+            $topUsedTags = self::$db->to_array();
+            self::$cache->cache_value('topusedtag_' . $limit, $topUsedTags, 3600 * 12);
         }
 
         return $topUsedTags;
     }
 
     public function getTopRequestTags($limit) {
-        if (!$topRequestTags = $this->cache->get_value('toprequesttag_' . $limit)) {
-            $this->db->prepared_query("
+        if (!$topRequestTags = self::$cache->get_value('toprequesttag_' . $limit)) {
+            self::$db->prepared_query("
                 SELECT
                     t.ID,
                     t.Name,
@@ -40,16 +40,16 @@ class Tag extends \Gazelle\Base {
                 ORDER BY Uses DESC, t.name
                 LIMIT ?", $limit);
 
-            $topRequestTags = $this->db->to_array();
-            $this->cache->cache_value('toprequesttag_' . $limit, $topRequestTags, 3600 * 12);
+            $topRequestTags = self::$db->to_array();
+            self::$cache->cache_value('toprequesttag_' . $limit, $topRequestTags, 3600 * 12);
         }
 
         return $topRequestTags;
     }
 
     public function getTopVotedTags($limit) {
-        if (!$topVotedTags = $this->cache->get_value('topvotedtag_' . $limit)) {
-            $topVotedTags = $this->db->prepared_query("
+        if (!$topVotedTags = self::$cache->get_value('topvotedtag_' . $limit)) {
+            $topVotedTags = self::$db->prepared_query("
                 SELECT
                     t.ID,
                     t.Name,
@@ -62,8 +62,8 @@ class Tag extends \Gazelle\Base {
                 ORDER BY PositiveVotes DESC, t.name
                 LIMIT ?", $limit);
 
-            $topVotedTags = $this->db->to_array();
-            $this->cache->cache_value('topvotedtag_' . $limit, $topVotedTags, 3600 * 12);
+            $topVotedTags = self::$db->to_array();
+            self::$cache->cache_value('topvotedtag_' . $limit, $topVotedTags, 3600 * 12);
         }
 
         return $topVotedTags;

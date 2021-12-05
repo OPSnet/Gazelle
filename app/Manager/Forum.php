@@ -16,7 +16,7 @@ class Forum extends \Gazelle\Base {
      * @param array hash of values (keyed on lowercase column names)
      */
     public function create(array $args) {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums
                    (Sort, CategoryID, Name, Description, MinClassRead, MinClassWrite, MinClassCreate, AutoLock, AutoLockWeeks)
             VALUES (?,    ?,          ?,    ?,           ?,            ?,             ?,              ?,        ?)
@@ -25,7 +25,7 @@ class Forum extends \Gazelle\Base {
                isset($args['autolock']) ? '1' : '0', (int)$args['autolockweeks']
         );
         $this->flushToc();
-        return new \Gazelle\Forum($this->db->inserted_id());
+        return new \Gazelle\Forum(self::$db->inserted_id());
     }
 
     /**
@@ -33,14 +33,14 @@ class Forum extends \Gazelle\Base {
      */
     public function findById(int $forumId): ?\Gazelle\Forum {
         $key = sprintf(self::ID_KEY, $forumId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ID FROM forums WHERE ID = ?
                 ", $forumId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Forum($id) : null;
@@ -54,14 +54,14 @@ class Forum extends \Gazelle\Base {
      */
     public function findByThreadId(int $threadId) {
         $key = sprintf(self::ID_THREAD_KEY, $threadId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ForumID FROM forums_topics WHERE ID = ?
                 ", $threadId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Forum($id) : null;
@@ -75,9 +75,9 @@ class Forum extends \Gazelle\Base {
      */
     public function findByPostId(int $postId) {
         $key = sprintf(self::ID_POST_KEY, $postId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT t.ForumID
                 FROM forums_topics t
                 INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)
@@ -85,7 +85,7 @@ class Forum extends \Gazelle\Base {
                 ", $postId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Forum($id) : null;
@@ -97,15 +97,15 @@ class Forum extends \Gazelle\Base {
      * @return thread id or null
      */
     public function findThreadIdByFeaturedPoll(): ?int {
-        if (($threadId = $this->cache->get_value('polls_featured')) === false) {
-            $threadId = $this->db->scalar("
+        if (($threadId = self::$cache->get_value('polls_featured')) === false) {
+            $threadId = self::$db->scalar("
                 SELECT TopicID
                 FROM forums_polls
                 WHERE Featured IS NOT NULL
                 ORDER BY Featured DESC
                 LIMIT 1
             ");
-            $this->cache->cache_value('polls_featured', $threadId, 86400 * 7);
+            self::$cache->cache_value('polls_featured', $threadId, 86400 * 7);
         }
         return $threadId;
     }
@@ -114,27 +114,27 @@ class Forum extends \Gazelle\Base {
      * Get list of forum names
      */
     public function nameList() {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID, Name FROM forums ORDER BY Sort
         ");
-        return $this->db->to_array();
+        return self::$db->to_array();
     }
 
     /**
      * Get list of forums categories
      */
     public function categoryList() {
-        $categories = $this->cache->get_value('forums_categories');
+        $categories = self::$cache->get_value('forums_categories');
         if ($categories === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT fc.ID,
                     fc.Name
                 FROM forums_categories fc
                 ORDER BY fc.Sort,
                     fc.Name
             ");
-            $categories = $this->db->to_pair('ID', 'Name');
-            $this->cache->cache_value('forums_categories', $categories, 0);
+            $categories = self::$db->to_pair('ID', 'Name');
+            self::$cache->cache_value('forums_categories', $categories, 0);
         }
         return $categories;
     }
@@ -143,7 +143,7 @@ class Forum extends \Gazelle\Base {
      * Get list of forums categories by usage
      */
     public function categoryUsageList(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT fc.ID AS id,
                 fc.Name  AS name,
                 fc.Sort  AS sequence,
@@ -154,19 +154,19 @@ class Forum extends \Gazelle\Base {
             ) AS f ON (f.CategoryID = fc.ID)
             ORDER BY fc.Sort
         ");
-        return $this->db->to_array('id', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     public function forumList(): array {
-        if (($list = $this->cache->get_value(self::CACHE_LIST)) === false) {
-            $this->db->prepared_query("
+        if (($list = self::$cache->get_value(self::CACHE_LIST)) === false) {
+            self::$db->prepared_query("
                 SELECT f.ID
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
                 ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
-            $list = $this->db->collect('ID');
-            $this->cache->cache_value(self::CACHE_LIST, $list, 86400);
+            $list = self::$db->collect('ID');
+            self::$cache->cache_value(self::CACHE_LIST, $list, 86400);
         }
         return $list;
     }
@@ -197,8 +197,8 @@ class Forum extends \Gazelle\Base {
      *    - int 'IsLocked' Last post is sticky (0/1)
      */
     public function tableOfContentsMain() {
-        if (!$toc = $this->cache->get_value(self::CACHE_TOC)) {
-            $this->db->prepared_query("
+        if (!$toc = self::$cache->get_value(self::CACHE_TOC)) {
+            self::$db->prepared_query("
                 SELECT cat.Name AS categoryName, cat.ID AS categoryId,
                     f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,
                     f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
@@ -210,7 +210,7 @@ class Forum extends \Gazelle\Base {
                 ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
             $toc = [];
-            while ($row = $this->db->next_row(MYSQLI_ASSOC)) {
+            while ($row = self::$db->next_row(MYSQLI_ASSOC)) {
                 $category = $row['categoryName'];
                 $row['AutoLock'] = ($row['AutoLock'] == '1');
                 if (!isset($toc[$category])) {
@@ -218,17 +218,17 @@ class Forum extends \Gazelle\Base {
                 }
                 $toc[$category][] = $row;
             }
-            $this->cache->cache_value(self::CACHE_TOC, $toc, 86400 * 10);
+            self::$cache->cache_value(self::CACHE_TOC, $toc, 86400 * 10);
         }
         return $toc;
     }
 
     protected function flushTransition(): void {
-        $this->cache->delete_value(self::CACHE_TRANSITION);
+        self::$cache->delete_value(self::CACHE_TRANSITION);
     }
 
     public function createTransition(array $args): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT INTO forums_transitions
                    (source, destination, label, permission_levels, permission_class, permissions, user_ids)
             VALUES (?,      ?,           ?,     ?,                 ?,                ?,           ?)
@@ -236,11 +236,11 @@ class Forum extends \Gazelle\Base {
             $args['permission_class'], $args['permissions'], $args['user_ids']
         );
         $this->flushTransition();
-        return $this->db->inserted_id();
+        return self::$db->inserted_id();
     }
 
     public function modifyTransition(array $args): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE forums_transitions SET
                 source = ?,
                 destination = ?,
@@ -255,29 +255,29 @@ class Forum extends \Gazelle\Base {
                $args['id']
         );
         $this->flushTransition();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function removeTransition(int $id): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             DELETE FROM forums_transitions WHERE forums_transitions_id = ?
             ", $id
         );
         $this->flushTransition();
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 
     public function forumTransitionList(\Gazelle\User $user) {
-        $items = $this->cache->get_value(self::CACHE_TRANSITION);
+        $items = self::$cache->get_value(self::CACHE_TRANSITION);
         if (!$items) {
-            $queryId = $this->db->get_query_id();
-            $this->db->prepared_query("
+            $queryId = self::$db->get_query_id();
+            self::$db->prepared_query("
                 SELECT forums_transitions_id AS id, source, destination, label, permission_levels,
                        permission_class, permissions, user_ids
                 FROM forums_transitions
             ");
-            $items = $this->db->to_array('id', MYSQLI_ASSOC);
-            $this->db->set_query_id($queryId);
+            $items = self::$db->to_array('id', MYSQLI_ASSOC);
+            self::$db->set_query_id($queryId);
             foreach ($items as &$i) {
                 // permission_class == primary class
                 // permission_levels == secondary classes
@@ -287,7 +287,7 @@ class Forum extends \Gazelle\Base {
                 unset($i['user_ids'][''], $i['permissions'][''], $i['permission_levels']['']);
             }
             unset($i);
-            $this->cache->cache_value(self::CACHE_TRANSITION, $items, 0);
+            self::$cache->cache_value(self::CACHE_TRANSITION, $items, 0);
         }
 
         $userId = $user->id();
@@ -337,7 +337,7 @@ class Forum extends \Gazelle\Base {
     }
 
     public function flushToc() {
-        $this->cache->delete_value(self::CACHE_TOC);
+        self::$cache->delete_value(self::CACHE_TOC);
         return $this;
     }
 
@@ -372,7 +372,7 @@ class Forum extends \Gazelle\Base {
 
     public function subscribedForumTotal(\Gazelle\User $user): int {
         [$cond, $args] = $this->configureForUser($user);
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions AS s
             LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
@@ -386,7 +386,7 @@ class Forum extends \Gazelle\Base {
 
     public function unreadSubscribedForumTotal(\Gazelle\User $user): int {
         [$cond, $args] = $this->configureForUser($user);
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions AS s
             LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
@@ -409,7 +409,7 @@ class Forum extends \Gazelle\Base {
         );
         array_push($args, $user->id(), $limit, $offset);
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT f.ID            AS forumId,
                 f.Name             AS forumName,
                 t.ID               AS threadId,
@@ -428,11 +428,11 @@ class Forum extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $user->id(), ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function lockOldThreads(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT t.ID, t.ForumID
             FROM forums_topics AS t
             INNER JOIN forums AS f ON (t.ForumID = f.ID)
@@ -441,35 +441,35 @@ class Forum extends \Gazelle\Base {
                 AND f.AutoLock = '1'
                 AND t.LastPostTime + INTERVAL f.AutoLockWeeks WEEK < now()
         ");
-        $ids = $this->db->collect('ID');
-        $forumIDs = $this->db->collect('ForumID');
+        $ids = self::$db->collect('ID');
+        $forumIDs = self::$db->collect('ForumID');
 
         $forumMan = new \Gazelle\Manager\Forum;
         if (count($ids) > 0) {
             $placeholders = placeholders($ids);
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE forums_topics SET
                     IsLocked = '1'
                 WHERE ID IN ($placeholders)
             ", ...$ids);
 
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 DELETE FROM forums_last_read_topics
                 WHERE TopicID IN ($placeholders)
             ", ...$ids);
 
             foreach ($ids as $id) {
-                $this->cache->begin_transaction("thread_$id".'_info');
-                $this->cache->update_row(false, ['IsLocked' => '1']);
-                $this->cache->commit_transaction(3600 * 24 * 30);
-                $this->cache->delete_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
-                $this->cache->delete_value("thread_$id".'_info', 3600 * 24 * 30);
+                self::$cache->begin_transaction("thread_$id".'_info');
+                self::$cache->update_row(false, ['IsLocked' => '1']);
+                self::$cache->commit_transaction(3600 * 24 * 30);
+                self::$cache->delete_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
+                self::$cache->delete_value("thread_$id".'_info', 3600 * 24 * 30);
                 $forumMan->findByThreadId($id)->addThreadNote($id, 0, 'Locked automatically by schedule');
             }
 
             $forumIDs = array_flip(array_flip($forumIDs));
             foreach ($forumIDs as $forumID) {
-                $this->cache->delete_value("forums_$forumID");
+                self::$cache->delete_value("forums_$forumID");
             }
         }
         return count($ids);

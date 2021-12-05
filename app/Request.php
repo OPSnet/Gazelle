@@ -23,9 +23,9 @@ class Request extends BaseObject {
 
     public function flush() {
         if ($this->info()['GroupID']) {
-            $this->cache->delete_value("requests_group_" . $this->info()['GroupID']);
+            self::$cache->delete_value("requests_group_" . $this->info()['GroupID']);
         }
-        $this->cache->deleteMulti([
+        self::$cache->deleteMulti([
             sprintf(self::CACHE_REQUEST, $this->id),
             sprintf(self::CACHE_ARTIST, $this->id),
             sprintf(self::CACHE_VOTE, $this->id),
@@ -35,38 +35,38 @@ class Request extends BaseObject {
 
     public function artistFlush() {
         $this->flush();
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ArtistID FROM requests_artists WHERE RequestID = ?
             ", $this->id
         );
-        $this->cache->deleteMulti([
-            ...array_map(fn ($id) => "artists_requests_$id", $this->db->collect(0, false)),
+        self::$cache->deleteMulti([
+            ...array_map(fn ($id) => "artists_requests_$id", self::$db->collect(0, false)),
         ]);
     }
 
     public function remove(): bool {
-        $this->db->begin_transaction();
-        $this->db->prepared_query("DELETE FROM requests_votes WHERE RequestID = ?", $this->id);
-        $this->db->prepared_query("DELETE FROM requests_tags WHERE RequestID = ?", $this->id);
-        $this->db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
-        $affected = $this->db->affected_rows();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("DELETE FROM requests_votes WHERE RequestID = ?", $this->id);
+        self::$db->prepared_query("DELETE FROM requests_tags WHERE RequestID = ?", $this->id);
+        self::$db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
             SELECT ArtistID FROM requests_artists WHERE RequestID = ?
             ", $this->id
         );
-        $artisIds = $this->db->collect(0);
-        $this->db->prepared_query('
+        $artisIds = self::$db->collect(0);
+        self::$db->prepared_query('
             DELETE FROM requests_artists WHERE RequestID = ?', $this->id
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             REPLACE INTO sphinx_requests_delta (ID) VALUES (?)
             ", $this->id
         );
         (new \Gazelle\Manager\Comment)->remove('requests', $this->id);
-        $this->db->commit();
+        self::$db->commit();
 
         foreach ($artisIds as $artistId) {
-            $this->cache->delete_value("artists_requests_$artistId");
+            self::$cache->delete_value("artists_requests_$artistId");
         }
         $this->flush();
 
@@ -75,7 +75,7 @@ class Request extends BaseObject {
 
     protected function info(): array {
         if (!isset($this->info)) {
-            $this->info = $this->db->rowAssoc("
+            $this->info = self::$db->rowAssoc("
                 SELECT r.UserID,
                     r.FillerID,
                     r.CategoryID,
@@ -108,7 +108,7 @@ class Request extends BaseObject {
     }
 
     public function bountyTotal(): int {
-        return (int)$this->db->scalar("
+        return (int)self::$db->scalar("
             SELECT sum(Bounty) FROM requests_votes WHERE RequestID = ?
             ", $this->id
         );
@@ -202,11 +202,11 @@ class Request extends BaseObject {
 
     public function artistList(): array {
         $key = sprintf(self::CACHE_ARTIST, $this->id);
-        $list = $this->cache->get_value($key);
+        $list = self::$cache->get_value($key);
         if ($list !== false) {
             return $list;
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ra.ArtistID,
                 aa.Name,
                 ra.Importance
@@ -216,12 +216,12 @@ class Request extends BaseObject {
             ORDER BY ra.Importance, aa.Name
             ", $this->id
         );
-        $raw = $this->db->to_array();
+        $raw = self::$db->to_array();
         $list = [];
         foreach ($raw as list($artistId, $artistName, $role)) {
             $list[$role][] = ['id' => $artistId, 'name' => $artistName];
         }
-        $this->cache->cache_value($key, $list, 0);
+        self::$cache->cache_value($key, $list, 0);
         return $list;
     }
 
@@ -270,7 +270,7 @@ class Request extends BaseObject {
     }
 
     public function fill(User $user, Torrent $torrent): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE requests SET
                 TimeFilled = now(),
                 FillerID = ?,
@@ -278,7 +278,7 @@ class Request extends BaseObject {
             WHERE ID = ?
             ", $user->id(), $torrent->id(), $this->id
         );
-        $updated = $this->db->affected_rows();
+        $updated = self::$db->affected_rows();
         $this->refreshSphinxDelta();
         (new \SphinxqlQuery())->raw_query("
             UPDATE requests, requests_delta SET
@@ -294,11 +294,11 @@ class Request extends BaseObject {
         $message = "One of your requests&nbsp;&mdash;&nbsp;[url=requests.php?action=view&amp;id="
             . $this->id . "]$name" . "[/url]&nbsp;&mdash;&nbsp;has been filled. You can view it here: [pl]"
             . $torrent->id() . "[/pl]";
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID FROM requests_votes WHERE RequestID = ?
             ", $this->id
         );
-        $ids = $this->db->collect(0, false);
+        $ids = self::$db->collect(0, false);
         $userMan = new Manager\User;
         foreach ($ids as $userId) {
             $userMan->sendPM($userId, 0, "The request \"$name\" has been filled", $message);
@@ -319,8 +319,8 @@ class Request extends BaseObject {
         $torrent = new Torrent($this->torrentId());
         $name = $torrent->group()->displayNameText();
 
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             UPDATE requests SET
                 TorrentID = 0,
                 FillerID = 0,
@@ -329,10 +329,10 @@ class Request extends BaseObject {
             WHERE ID = ?
             ", $this->id
         );
-        $updated = $this->db->affected_rows();
+        $updated = self::$db->affected_rows();
         $this->refreshSphinxDelta();
         $filler->addBounty(-$bounty);
-        $this->db->commit();
+        self::$db->commit();
 
         (new \SphinxqlQuery())->raw_query("
             UPDATE requests, requests_delta SET
@@ -343,7 +343,7 @@ class Request extends BaseObject {
 
         if ($filler->id() !== $admin->id()) {
             (new Manager\User)->sendPM($filler->id(), 0, 'A request you filled has been unfilled',
-                $this->twig->render('request/unfill-pm.twig', [
+                self::$twig->render('request/unfill-pm.twig', [
                     'name'    => $name,
                     'reason'  => $reason,
                     'request' => $this,
@@ -367,14 +367,14 @@ class Request extends BaseObject {
      * @return array keyed by user ID
      */
     public function bounty(): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT UserID, Bounty
             FROM requests_votes
             WHERE RequestID = ?
             ORDER BY Bounty DESC, UserID DESC
             ", $this->id
         );
-        return $this->db->to_array('UserID', MYSQLI_ASSOC, false);
+        return self::$db->to_array('UserID', MYSQLI_ASSOC, false);
     }
 
     /**
@@ -383,7 +383,7 @@ class Request extends BaseObject {
      * @return int keyed by user ID
      */
     public function userBounty(int $userId) {
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT Bounty
             FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
@@ -398,18 +398,18 @@ class Request extends BaseObject {
      */
     public function refundBounty(int $userId, string $staffName) {
         $bounty = $this->userBounty($userId);
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
             ", $this->id, $userId
         );
-        if ($this->db->affected_rows() == 1) {
+        if (self::$db->affected_rows() == 1) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("%s Refund of %s bounty (%s b) on %s by %s\n\n",
                 sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
             );
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info ui
                 INNER JOIN users_leech_stats uls USING (UserID)
                 SET
@@ -419,8 +419,8 @@ class Request extends BaseObject {
                 ", $bounty, $message, $userId
             );
         }
-        $this->db->commit();
-        $this->cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
+        self::$db->commit();
+        self::$cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
     }
 
     /**
@@ -430,26 +430,26 @@ class Request extends BaseObject {
      */
     public function removeBounty(int $userId, string $staffName) {
         $bounty = $this->userBounty($userId);
-        $this->db->begin_transaction();
-        $this->db->prepared_query("
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
             DELETE FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
             ", $this->id, $userId
         );
-        if ($this->db->affected_rows() == 1) {
+        if (self::$db->affected_rows() == 1) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("%s Removal of %s bounty (%s b) on %s by %s\n\n",
                 sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
             );
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 UPDATE users_info ui SET
                     ui.AdminComment = concat(?, ui.AdminComment)
                 WHERE ui.UserId = ?
                 ", $message, $userId
             );
         }
-        $this->db->commit();
-        $this->cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
+        self::$db->commit();
+        self::$cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
     }
 
     /**
@@ -459,7 +459,7 @@ class Request extends BaseObject {
      * @param int $staffName name of staff performing the operation
      */
     public function informRequestFillerReduction(int $bounty, string $staffName) {
-        [$fillerId, $fillDate] = $this->db->row("
+        [$fillerId, $fillDate] = self::$db->row("
             SELECT FillerID, date(TimeFilled)
             FROM requests
             WHERE TimeFilled IS NOT NULL AND ID = ?
@@ -471,7 +471,7 @@ class Request extends BaseObject {
         $message = sprintf("%s Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
             sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
         );
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE users_info ui
             INNER JOIN users_leech_stats uls USING (UserID)
             SET
@@ -480,9 +480,9 @@ class Request extends BaseObject {
             WHERE ui.UserId = ?
             ", $bounty, $message, $fillerId
         );
-        $this->cache->delete_value("user_stats_$fillerId");
+        self::$cache->delete_value("user_stats_$fillerId");
         (new Manager\User)->sendPM($fillerId, 0, "Bounty was reduced on a request you filled",
-            $this->twig->render('request/bounty-reduction.twig', [
+            self::$twig->render('request/bounty-reduction.twig', [
                 'bounty'      => $bounty,
                 'fill_date'   => $fillDate,
                 'request_url' => $this->url(),
@@ -492,7 +492,7 @@ class Request extends BaseObject {
     }
 
     public function refreshSphinxDelta(): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             REPLACE INTO sphinx_requests_delta (
                 ID, UserID, TimeAdded, LastVote, CategoryID, Title,
                 Year, ReleaseType, CatalogueNumber, RecordLabel, BitrateList,
@@ -520,6 +520,6 @@ class Request extends BaseObject {
             GROUP BY r.ID
             ", $this->id, $this->id
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 }

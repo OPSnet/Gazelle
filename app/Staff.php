@@ -9,22 +9,22 @@ class Staff extends BaseUser {
     }
 
     public function blogAlert() {
-        if (($readTime = $this->cache->get_value('staff_blog_read_'. $this->user->id())) === false) {
-            $readTime = $this->db->scalar('
+        if (($readTime = self::$cache->get_value('staff_blog_read_'. $this->user->id())) === false) {
+            $readTime = self::$db->scalar('
                 SELECT unix_timestamp(Time)
                 FROM staff_blog_visits
                 WHERE UserID = ?
                 ', $this->user->id()
             ) ?? 0;
-            $this->cache->cache_value('staff_blog_read_' . $this->user->id(), $readTime, 1209600);
+            self::$cache->cache_value('staff_blog_read_' . $this->user->id(), $readTime, 1209600);
         }
-        if (($blogTime = $this->cache->get_value('staff_blog_latest_time')) === false) {
-            $blogTime = $this->db->scalar('
+        if (($blogTime = self::$cache->get_value('staff_blog_latest_time')) === false) {
+            $blogTime = self::$db->scalar('
                 SELECT unix_timestamp(max(Time))
                 FROM staff_blog
                 '
             ) ?? 0;
-            $this->cache->cache_value('staff_blog_latest_time', $blogTime, 1209600);
+            self::$cache->cache_value('staff_blog_latest_time', $blogTime, 1209600);
         }
         return $readTime < $blogTime;
     }
@@ -45,14 +45,14 @@ class Staff extends BaseUser {
             $args[] = $classes[FORUM_MOD]['Level'];
         }
 
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM staff_pm_conversations
             WHERE " . implode(' AND ', $cond), ...$args);
     }
 
     public function userStaffPmList(int $viewerId): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT spc.ID   AS pm_id,
                 spc.Subject AS subject,
                 spc.Status  AS status,
@@ -73,6 +73,6 @@ class Staff extends BaseUser {
             ORDER BY spc.Date DESC
             ", $this->user->id(), $this->user->effectiveClass(), $viewerId
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

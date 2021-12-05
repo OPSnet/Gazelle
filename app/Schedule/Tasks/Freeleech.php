@@ -8,14 +8,14 @@ class Freeleech extends \Gazelle\Schedule\Task
     {
         //We use this to control 6 hour freeleeches.
         // They're actually 7 hours, but don't tell anyone.
-        $qId = $this->db->prepared_query("
+        $qId = self::$db->prepared_query("
             SELECT DISTINCT GroupID
             FROM torrents
             WHERE FreeTorrent = '1'
                 AND FreeLeechType = '3'
                 AND Time < now() - INTERVAL 7 HOUR");
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE torrents
             SET FreeTorrent = '0',
                 FreeLeechType = '0'
@@ -23,10 +23,10 @@ class Freeleech extends \Gazelle\Schedule\Task
                 AND FreeLeechType = '3'
                 AND Time < now() - INTERVAL 7 HOUR");
 
-        $this->db->set_query_id($qId);
-        while (list($groupID) = $this->db->next_record()) {
-            $this->cache->delete_value("torrents_details_$groupID");
-            $this->cache->delete_value("torrent_group_$groupID");
+        self::$db->set_query_id($qId);
+        while (list($groupID) = self::$db->next_record()) {
+            self::$cache->delete_value("torrents_details_$groupID");
+            self::$cache->delete_value("torrent_group_$groupID");
         }
     }
 }

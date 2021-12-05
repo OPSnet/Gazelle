@@ -16,20 +16,19 @@ class ApplicantRole extends Base {
     const CACHE_KEY_PUBLISHED = 'approle_list_published';
 
     public function __construct(int $id) {
-        parent::__construct();
         $key = sprintf(self::CACHE_KEY, $id);
-        $data = $this->cache->get_value($key);
+        $data = self::$cache->get_value($key);
         if ($data === false) {
-            $this->db->prepared_query("
+            self::$db->prepared_query("
                 SELECT Title, Published, Description, UserID, Created, Modified
                 FROM applicant_role
                 WHERE ID = ?
             ", $id);
-            if (!$this->db->has_results()) {
+            if (!self::$db->has_results()) {
                 throw new Exception\ResourceNotFoundException($id);
             }
-            $data = $this->db->next_record(MYSQLI_ASSOC);
-            $this->cache->cache_value($key, $data, 86400);
+            $data = self::$db->next_record(MYSQLI_ASSOC);
+            self::$cache->cache_value($key, $data, 86400);
         }
         $this->id          = $id;
         $this->title       = $data['Title'];
@@ -74,7 +73,7 @@ class ApplicantRole extends Base {
         $this->published   = $published ? 1 : 0;
         $this->modified    = strftime('%Y-%m-%d %H:%M:%S', time());
 
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             UPDATE applicant_role SET
                 Title = ?,
                 Published = ?,
@@ -83,9 +82,9 @@ class ApplicantRole extends Base {
             WHERE ID = ?
         ", $this->title, $this->published, $this->description, $this->modified,
             $this->id);
-        $this->cache->delete_value(self::CACHE_KEY_ALL);
-        $this->cache->delete_value(self::CACHE_KEY_PUBLISHED);
-        $this->cache->replace_value(sprintf(self::CACHE_KEY, $this->id),
+        self::$cache->delete_value(self::CACHE_KEY_ALL);
+        self::$cache->delete_value(self::CACHE_KEY_PUBLISHED);
+        self::$cache->replace_value(sprintf(self::CACHE_KEY, $this->id),
             [
                 'Title'       => $this->title,
                 'Published'   => $this->published,

@@ -12,35 +12,34 @@ class Artist extends \Gazelle\Base {
     protected $userId; // who is manipulating the torrents_artists or requests_artists tables
 
     public function __construct() {
-        parent::__construct();
-        if (($this->role = $this->cache->get_value(self::ROLE_KEY)) === false) {
-            $this->db->prepared_query("
+        if (($this->role = self::$cache->get_value(self::ROLE_KEY)) === false) {
+            self::$db->prepared_query("
                 SELECT slug, artist_role_id, sequence, name, title, collection
                 FROM artist_role
                 ORDER BY artist_role_id
             ");
-            $this->role = $this->db->to_array('slug', MYSQLI_ASSOC, false);
-            $this->cache->cache_value(self::ROLE_KEY, $this->role, 86400 * 30);
+            $this->role = self::$db->to_array('slug', MYSQLI_ASSOC, false);
+            self::$cache->cache_value(self::ROLE_KEY, $this->role, 86400 * 30);
         }
     }
 
     public function findById(int $artistId): ?\Gazelle\Artist {
         $key = sprintf(self::ID_KEY, $artistId);
-        $id = $this->cache->get_value($key);
+        $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = $this->db->scalar("
+            $id = self::$db->scalar("
                 SELECT ArtistID FROM artists_group WHERE ArtistID = ?
                 ", $artistId
             );
             if (!is_null($id)) {
-                $this->cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 0);
             }
         }
         return $id ? new \Gazelle\Artist($id) : null;
     }
 
     public function findByIdAndRevision(int $artistId, int $revisionId): ?\Gazelle\Artist {
-        $id = $this->db->scalar("
+        $id = self::$db->scalar("
             SELECT ArtistID
             FROM artists_group
             WHERE ArtistID = ?
@@ -51,14 +50,14 @@ class Artist extends \Gazelle\Base {
     }
 
     public function findByName(string $name): ?\Gazelle\Artist {
-        return $this->findById((int)$this->db->scalar("
+        return $this->findById((int)self::$db->scalar("
             SELECT ArtistID FROM artists_group WHERE Name = ?
             ", trim($name)
         ));
     }
 
     public function findByNameAndRevision(string $name, int $revisionId): ?\Gazelle\Artist {
-        $id = $this->db->scalar("
+        $id = self::$db->scalar("
             SELECT ArtistID
             FROM artists_group
             WHERE Name = ?
@@ -69,13 +68,13 @@ class Artist extends \Gazelle\Base {
     }
 
     public function fetchArtistIdAndAliasId(string $name): ?array {
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             SELECT AliasID, ArtistID, Redirect, Name
             FROM artists_alias
             WHERE Name = ?
             ', $name
         );
-        while ([$aliasId, $artistId, $redirect, $foundAliasName] = $this->db->next_record(MYSQLI_NUM, false)) {
+        while ([$aliasId, $artistId, $redirect, $foundAliasName] = self::$db->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($name, $foundAliasName)) {
                 if ($redirect) {
                     $aliasId = $redirect;
@@ -87,23 +86,23 @@ class Artist extends \Gazelle\Base {
     }
 
     public function create($name) {
-        $this->db->begin_transaction();
-        $this->db->prepared_query('
+        self::$db->begin_transaction();
+        self::$db->prepared_query('
             INSERT INTO artists_group (Name)
             VALUES (?)
             ', $name
         );
-        $artistId = $this->db->inserted_id();
+        $artistId = self::$db->inserted_id();
 
-        $this->db->prepared_query('
+        self::$db->prepared_query('
             INSERT INTO artists_alias (ArtistID, Name)
             VALUES (?, ?)
             ', $artistId, $name
         );
-        $aliasId = $this->db->inserted_id();
-        $this->db->commit();
+        $aliasId = self::$db->inserted_id();
+        self::$db->commit();
 
-        $this->cache->increment('stats_artist_count');
+        self::$cache->increment('stats_artist_count');
 
         return [$artistId, $aliasId];
     }
@@ -131,12 +130,12 @@ class Artist extends \Gazelle\Base {
     }
 
     public function addToRequest(int $artistId, int $aliasId, int $role): int {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             INSERT IGNORE INTO requests_artists
                    (RequestID, ArtistID, AliasID, artist_role_id, Importance)
             VALUES (?,         ?,        ?,       ?,              ?)
             ", $this->groupId, $artistId, $aliasId, $role, (string)$role
         );
-        return $this->db->affected_rows();
+        return self::$db->affected_rows();
     }
 }

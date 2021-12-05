@@ -31,8 +31,6 @@ class UploadForm extends \Gazelle\Base {
     const JSON_INPUT_ACCEPT = ['application/json', '.json'];
 
     function __construct(\Gazelle\User $user, $Torrent = false, $Error = false, $NewTorrent = true) {
-        parent::__construct();
-
         $this->user = $user;
         $this->NewTorrent = $NewTorrent;
         $this->Torrent = $Torrent;
@@ -66,7 +64,7 @@ class UploadForm extends \Gazelle\Base {
     }
 
     function head() {
-        echo $this->twig->render('upload/header.twig', [
+        echo self::$twig->render('upload/header.twig', [
             'announce'    => $this->user->announceUrl(),
             'auth'        => $this->user->auth(),
             'category_id' => $this->categoryId,
@@ -78,7 +76,7 @@ class UploadForm extends \Gazelle\Base {
     }
 
     function foot(bool $showFooter) {
-        echo $this->twig->render('upload/footer.twig', [
+        echo self::$twig->render('upload/footer.twig', [
             'is_new'      => (int)$this->NewTorrent,
             'info'        => $this->Torrent,
             'show_footer' => $showFooter,
@@ -87,7 +85,7 @@ class UploadForm extends \Gazelle\Base {
     }
 
     function music_form($GenreTags) {
-        $QueryID = $this->db->get_query_id();
+        $QueryID = self::$db->get_query_id();
         $Torrent = $this->Torrent;
         $IsRemaster = !empty($Torrent['Remastered']);
         $UnknownRelease = !$this->NewTorrent && $IsRemaster && !$Torrent['RemasterYear'];
@@ -104,7 +102,7 @@ class UploadForm extends \Gazelle\Base {
             $LossywebApproved = false;
         } else {
             if ($Torrent['GroupID']) {
-                $this->db->prepared_query("
+                self::$db->prepared_query("
                     SELECT ID,
                         RemasterYear,
                         RemasterTitle,
@@ -121,7 +119,7 @@ class UploadForm extends \Gazelle\Base {
                     ", $Torrent['GroupID']
                 );
                 // need BOTH for release selector
-                $GroupRemasters = $this->db->to_array(false, MYSQLI_BOTH, false);
+                $GroupRemasters = self::$db->to_array(false, MYSQLI_BOTH, false);
             }
 
             $HasLog = $Torrent['HasLog'];
@@ -500,7 +498,7 @@ class UploadForm extends \Gazelle\Base {
 <?php       } ?>
                     <input type="text" id="tags" name="tags" size="40" value="<?= display_str($Torrent['TagList'] ?? '') ?>"<?=
                         $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
-                    <br /><?= $this->twig->render('rules/tag.twig', ['on_upload' => true]) ?>
+                    <br /><?= self::$twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>
@@ -526,7 +524,7 @@ class UploadForm extends \Gazelle\Base {
             </tr>
         </table>
 <?php
-        $this->db->set_query_id($QueryID);
+        self::$db->set_query_id($QueryID);
     }
 
     function audiobook_form() {
@@ -594,7 +592,7 @@ class UploadForm extends \Gazelle\Base {
                 <td>
                     <input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
                         $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
-                    <br /><?= $this->twig->render('rules/tag.twig', ['on_upload' => true]) ?>
+                    <br /><?= self::$twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>

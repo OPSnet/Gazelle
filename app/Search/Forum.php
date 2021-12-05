@@ -92,7 +92,7 @@ class Forum extends \Gazelle\BaseUser {
     public function setAuthor(string $username) {
         $this->authorName = trim($username);
         if (!empty($this->authorName)) {
-            $this->authorId = $this->db->scalar("
+            $this->authorId = self::$db->scalar("
                 SELECT ID FROM users_main WHERE Username = ?
                 ", $this->authorName
             );
@@ -305,7 +305,7 @@ class Forum extends \Gazelle\BaseUser {
         $cond[] = 't.ID = ?';
         $args[] = $threadId;
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT Title
             FROM forums_topics AS t
             INNER JOIN forums AS f ON (f.ID = t.ForumID) $forumPostJoin
@@ -322,7 +322,7 @@ class Forum extends \Gazelle\BaseUser {
     public function totalHits(): int {
         [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM forums AS f
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID) $forumPostJoin
@@ -369,8 +369,8 @@ class Forum extends \Gazelle\BaseUser {
         }
         $this->page = $paginator->page();
         array_push($args, $paginator->limit(), $paginator->offset());
-        $this->db->prepared_query($sql, ...$args);
-        return $this->db->to_array(false, MYSQLI_NUM, false);
+        self::$db->prepared_query($sql, ...$args);
+        return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
     /**
@@ -380,7 +380,7 @@ class Forum extends \Gazelle\BaseUser {
      */
     public function threadsByUserTotal(): int {
         [$cond, $args] = $this->configure();
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM forums AS f
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID)
@@ -401,7 +401,7 @@ class Forum extends \Gazelle\BaseUser {
         [$cond, $args] = $this->configure();
         $args[] = $limit;
         $args[] = $offset;
-        $this->db->prepared_query($sql = "
+        self::$db->prepared_query($sql = "
             SELECT t.ID        AS thread_id,
                 t.Title        AS thread_title,
                 t.CreatedTime  AS created_time,
@@ -416,12 +416,12 @@ class Forum extends \Gazelle\BaseUser {
             LIMIT ? OFFSET ?
             ", $this->user->id(), ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function postHistoryTotal(): int {
         [$from, $cond, $args] = $this->configurePostHistory();
-        return $this->db->scalar("
+        return self::$db->scalar("
             SELECT count(*)
             FROM (
                 SELECT count(1)
@@ -445,7 +445,7 @@ class Forum extends \Gazelle\BaseUser {
             $unreadFirst = '';
             $unreadCond  = '';
         }
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT p.ID         AS post_id,
                 p.AddedTime     AS added_time,
                 p.Body          AS body,
@@ -467,6 +467,6 @@ class Forum extends \Gazelle\BaseUser {
             LIMIT ? OFFSET ?
             ", ...$args
         );
-        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }
