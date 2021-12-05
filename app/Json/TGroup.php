@@ -55,7 +55,7 @@ class TGroup extends \Gazelle\Json {
             'time'            => $tgroup->time(),
             'vanityHouse'     => $tgroup->isShowcase(),
             'isBookmarked'    => (new \Gazelle\Bookmark($this->user))->isTorrentBookmarked($tgroup->id()),
-            'tags'            => $tgroup->tagNameList(),
+            'tags'            => array_values($tgroup->tagNameList()),
             'musicInfo'       => $musicInfo,
         ];
     }
