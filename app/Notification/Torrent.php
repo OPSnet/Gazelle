@@ -78,7 +78,7 @@ class Torrent extends \Gazelle\Base {
         $this->db->prepared_query("
             UPDATE users_notify_torrents SET
                 UnRead = 0
-            WHERE UnRead = 1 UserID = ? AND FilterID = ?
+            WHERE UnRead = 1 AND UserID = ? AND FilterID = ?
             ", $this->userId, $filterId
         );
         if ($this->db->affected_rows()) {
