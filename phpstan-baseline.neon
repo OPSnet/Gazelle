@@ -1465,36 +1465,6 @@ parameters:
 			path: app/Search/Forum.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\Manager\\\\Torrent to display to release details\\)\\: Unexpected token \"to\", expected variable at offset 180$#"
-			count: 1
-			path: app/Seedbox.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\Manager\\\\TorrentLAbel to decorate the release details\\)\\: Unexpected token \"to\", expected variable at offset 253$#"
-			count: 1
-			path: app/Seedbox.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\Util\\\\Paginator to help figure out where we are\\)\\: Unexpected token \"to\", expected variable at offset 110$#"
-			count: 1
-			path: app/Seedbox.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int Number of rows changed\\.\\)\\: Unexpected token \"Number\", expected variable at offset 150$#"
-			count: 1
-			path: app/Seedbox.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string ipv4addr\\)\\: Unexpected token \"ipv4addr\", expected variable at offset 305$#"
-			count: 1
-			path: app/Seedbox.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string useragent\\)\\: Unexpected token \"useragent\", expected variable at offset 335$#"
-			count: 1
-			path: app/Seedbox.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\User viewer\\)\\: Unexpected token \"viewer\", expected variable at offset 268$#"
 			count: 1
 			path: app/StaffPM.php

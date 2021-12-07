@@ -18,7 +18,7 @@ if ($Viewer->id() != $userId && !$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 
-$seedbox = new Gazelle\Seedbox($userId);
+$seedbox = new Gazelle\Seedbox($user);
 
 if (isset($_POST['mode'])) {
     switch ($_POST['mode']) {
