@@ -67,8 +67,6 @@ class Comment extends \Gazelle\Base {
     }
 
     public function merge(string $page, int $pageId, int $targetPageId) {
-        $qid = self::$db->get_query_id();
-
         self::$db->prepared_query("
             UPDATE comments SET
                 PageID = ?
@@ -91,7 +89,6 @@ class Comment extends \Gazelle\Base {
             WHERE Page = ? AND PageID = ?
             ", $targetPageId, $page, $pageId
         );
-        self::$db->set_query_id($qid);
 
         // comment subscriptions
         $subscription = new \Gazelle\Manager\Subscription;

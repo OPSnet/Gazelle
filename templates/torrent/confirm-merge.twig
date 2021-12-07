@@ -1,0 +1,25 @@
+{{ header('Merge ' ~ old.displaNameText) }}
+<div class="center thin">
+<div class="header">
+    <h2>Merge Confirm!</h2>
+</div>
+<div class="box pad">
+    <form class="confirm_form" name="torrent_group" action="torrents.php" method="post">
+        <input type="hidden" name="action" value="merge" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="confirm" value="true" />
+        <input type="hidden" name="groupid" value="{{ old.id }}" />
+        <input type="hidden" name="targetgroupid" value="{{ new.id }}" />
+        <h3>You are attempting to merge the group:</h3>
+        <ul>
+            <li>{{ old.link|raw }}</li>
+        </ul>
+        <h3>Into the group:</h3>
+        <ul>
+            <li>{{ new.link|raw }}</li>
+        </ul>
+        <input type="submit" value="Confirm" />
+    </form>
+</div>
+</div>
+{{ footer() }}

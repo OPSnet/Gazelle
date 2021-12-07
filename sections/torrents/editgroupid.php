@@ -1,124 +1,78 @@
 <?php
-/***************************************************************
-* This page handles the backend of the "edit group ID" function
-* (found on edit.php). It simply changes the group ID of a
-* torrent.
-****************************************************************/
+
+/* Move a torrent from one group to another */
 
 if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$OldGroupID = (int)$_POST['oldgroupid'];
-$GroupID = (int)$_POST['groupid'];
-$TorrentID = (int)$_POST['torrentid'];
-
-if (!$OldGroupID || !$GroupID || !$TorrentID) {
-    error(404);
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+if (is_null($torrent)) {
+    error('Torrent does not exist!');
 }
 
-if ($OldGroupID == $GroupID) {
-    header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?action=edit&id={$OldGroupID}");
+$tgMan = new Gazelle\Manager\TGroup;
+$old = $tgMan->findById((int)($_POST['oldgroupid'] ?? 0));
+if (is_null($old)) {
+    error('The source torrent group does not exist!');
+}
+$new = $tgMan->findById((int)($_POST['groupid'] ?? 0));
+if (is_null($new)) {
+    error('The destination torrent group does not exist!');
+}
+if ($new->categoryName() !== 'Music') {
+    error('Destination torrent group must be in the "Music" category.');
+}
+
+if ($old->id() === $new->id()) {
+    header("Location: " . redirectUrl("torrents.php?action=edit&id=" . $old->id()));
     exit;
 }
 
-//Everything is legit, let's just confim they're not retarded
 if (empty($_POST['confirm'])) {
-    $Name = $DB->scalar("
-        SELECT Name
-        FROM torrents_group
-        WHERE ID = ?
-        ", $GroupID
-    );
-    if (is_null($Name)) {
-        //Trying to move to an empty group? I think not!
-        error('The destination torrent group does not exist!');
-    }
-    [$CategoryID, $NewName] = $DB->row("
-        SELECT CategoryID, Name
-        FROM torrents_group
-        WHERE ID = ?
-        ", $GroupID
-    );
-    if (CATEGORY[$CategoryID - 1] != 'Music') {
-        error('Destination torrent group must be in the "Music" category.');
-    }
-
-    $Artists = Artists::get_artists([$OldGroupID, $GroupID]);
-
-    View::show_header('Edit group ' . display_str($Name));
-?>
-    <div class="thin">
-        <div class="header">
-            <h2>Torrent Group ID Change Confirmation</h2>
-        </div>
-        <div class="box pad">
-            <form class="confirm_form" name="torrent_group" action="torrents.php" method="post">
-                <input type="hidden" name="action" value="editgroupid" />
-                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-                <input type="hidden" name="confirm" value="true" />
-                <input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
-                <input type="hidden" name="oldgroupid" value="<?=$OldGroupID?>" />
-                <input type="hidden" name="groupid" value="<?=$GroupID?>" />
-                <h3>You are attempting to move the torrent with ID <?=$TorrentID?> from the group:</h3>
-                <ul>
-                    <li><?= Artists::display_artists($Artists[$OldGroupID], true, false)?> - <a href="torrents.php?id=<?=$OldGroupID?>"><?=$Name?></a></li>
-                </ul>
-                <h3>Into the group:</h3>
-                <ul>
-                    <li><?= Artists::display_artists($Artists[$GroupID], true, false)?> - <a href="torrents.php?id=<?=$GroupID?>"><?=$NewName?></a></li>
-                </ul>
-                <input type="submit" value="Confirm" />
-            </form>
-        </div>
-    </div>
-<?php
-    View::show_footer();
-} else {
-    authorize();
-
-    $DB->prepared_query("
-        UPDATE torrents SET
-            GroupID = ?
-        WHERE ID = ?
-        ", $GroupID, $TorrentID
-    );
-
-    // Delete old torrent group if it's empty now
-    $Count = $DB->scalar("
-        SELECT count(*)
-        FROM torrents
-        WHERE GroupID = ?
-        ", $OldGroupID
-    );
-    $tgroupMan = new \Gazelle\Manager\TGroup;
-    $tgroupMan->refresh($GroupID);
-    if ($Count) {
-        $tgroupMan->refresh($OldGroupID);
-    } else {
-        // TODO: votes etc!
-        $DB->prepared_query("
-            UPDATE comments SET
-                PageID = ?
-            WHERE Page = 'torrents'
-                AND PageID = ?
-            ", $GroupID, $OldGroupID
-        );
-        $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
-        $Cache->delete_value("torrent_comments_$GroupID");
-        Torrents::delete_group($OldGroupID, $Viewer);
-    }
-
-    (new Gazelle\Log)->group($GroupID, $Viewer->id(), "merged group $OldGroupID")
-        ->general("Torrent $TorrentID was edited by " . $Viewer->username());
-    $DB->prepared_query("
-        UPDATE group_log
-        SET GroupID = ?
-        WHERE GroupID = ?
-        ", $GroupID, $OldGroupID
-    );
-    $Cache->delete_value("torrents_details_$GroupID");
-    $Cache->delete_value("torrent_download_$TorrentID");
-
-    header("Location: torrents.php?id=$GroupID");
+    echo $Twig->render('torrent/confirm-move.twig', [
+        'auth'    => $Viewer->auth(),
+        'new'     => $new,
+        'old'     => $old,
+        'torrent' => $torrent
+    ]);
+    exit;
 }
+
+authorize();
+
+$DB->prepared_query("
+    UPDATE torrents SET
+        GroupID = ?
+    WHERE ID = ?
+    ", $new->id(), $torrent->id()
+);
+
+$log = new Gazelle\Log;
+$oldId = $old->id();
+
+if ($DB->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) {
+    $old->flush();
+    $tgMan->refresh($oldId);
+} else {
+    // TODO: votes etc!
+
+    (new Gazelle\Manager\Bookmark)->merge($oldId, $new->id());
+    (new Gazelle\Manager\Comment)->merge('torrents', $oldId, $new->id());
+    $log->merge($oldId, $new->id());
+
+    $old->remove($Viewer, $log);
+}
+
+$new->flush();
+$tgMan->refresh($new->id());
+$torrent->flush();
+$Cache->deleteMulti([
+    "torrents_details_" . $oldId,
+    "torrent_download_" . $torrent->id(),
+]);
+
+$log->group($new->id(), $Viewer->id(), "merged group $oldId")
+    ->general("Torrent " . $torrent->id() , " was edited by " . $Viewer->label());
+
+header('Location: ' . $new->url());

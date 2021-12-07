@@ -56,4 +56,14 @@ class Log extends Base {
         self::$db->set_query_id($qid);
         return $this;
     }
+
+    public function merge(int $oldId, int $newId): int {
+        self::$db->prepared_query("
+            UPDATE group_log SET
+                GroupID = ?
+            WHERE GroupID = ?
+            ", $newId, $oldId
+        );
+        return self::$db->affected_rows();
+    }
 }
