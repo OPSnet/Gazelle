@@ -8,8 +8,7 @@ class Contest extends Base {
 
     protected $id;
     protected $info;
-    /** @var \Gazelle\Contest\AbstractContest */
-    protected $type;
+    protected Contest\AbstractContest $type;
     protected $stats; /* entries, users */
     protected $bonusPool;
     protected $totalEntries;

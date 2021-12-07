@@ -10,7 +10,7 @@ class RipLogHTML extends \Gazelle\File {
      *
      * @param array $id The unique identifier [torrentId, logId] of the object
      *                  If logId is null, all logs are taken into consideration
-     * @param boolean True (TODO: record individual unlink successes in the case of a wildcard
+     * @return bool True (TODO: record individual unlink successes in the case of a wildcard
      */
     public function remove(/* array */ $id) {
         $torrentId = $id[0];
@@ -35,10 +35,9 @@ class RipLogHTML extends \Gazelle\File {
     /**
      * Path of a HTML-ized rip log.
      *
-     * @param array id rip log identifier [torrentId, logId]
-     * @return Fully qualified filename
+     * @param array $id rip log identifier [torrentId, logId]
      */
-    public function path(/* array */ $id) {
+    public function path(/* array */ $id): string {
         $torrentId = $id[0];
         $logId = $id[1];
         $key = strrev(sprintf('%04d', $torrentId));

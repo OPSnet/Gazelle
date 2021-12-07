@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Forum extends Base {
-    protected $forumId;
+    protected int $forumId;
 
     const CACHE_TOC_MAIN    = 'forum_toc_main';
     const CACHE_TOC_FORUM   = 'forum_toc_%d';
@@ -11,11 +11,6 @@ class Forum extends Base {
     const CACHE_THREAD_INFO = 'thread_%d_info';
     const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
 
-    /**
-     * Construct a Forum object
-     *
-     * @param int id The forum ID.
-     */
     public function __construct(int $id) {
         $this->forumId = $id;
     }
@@ -26,9 +21,6 @@ class Forum extends Base {
 
     /**
      * Get the thread ID from a post ID.
-     *
-     * @param int id The post ID.
-     * @return int The thread ID.
      */
     public function findThreadIdByPostId(int $postId): int {
         $threadId = self::$db->scalar("
@@ -43,7 +35,8 @@ class Forum extends Base {
 
     /**
      * Modify a forum
-     * @param array hash of values (keyed on lowercase column names)
+     *
+     * @param array $args hash of values (keyed on lowercase column names)
      */
     public function modify(array $args) {
         $autolock = isset($_POST['autolock']) ? '1' : '0';
@@ -198,12 +191,9 @@ class Forum extends Base {
     /**
      * Add a thread to the forum
      *
-     * @param int userID The author
-     * @param string title The title of the thread
-     * @param string body The body of the first post in thread
-     * @return array $threadId The ID of the thread
+     * @return int ID of thread
      */
-    public function addThread(int $userId, string $title, string $body) {
+    public function addThread(int $userId, string $title, string $body): int {
         // LastPostID is updated in updateTopic()
         $qid = self::$db->get_query_id();
         $db = new DB;
@@ -242,16 +232,15 @@ class Forum extends Base {
 
     /**
      * Lock a thread. Closes its poll as a side-effect.
-     *
-     * @param int threadId The thread to lock
      */
-    public function lockThread(int $threadId) {
+    public function lockThread(int $threadId): int {
         self::$db->prepared_query("
             UPDATE forums_polls SET
                 Closed = '0'
             WHERE TopicID = ?
             ", $threadId
         );
+        $affected = self::$db->affected_rows();
         $max = self::$db->scalar("
             SELECT floor(NumPosts / ?) FROM forums_topics WHERE ID = ?
             ", THREAD_CATALOGUE, $threadId
@@ -261,19 +250,13 @@ class Forum extends Base {
         }
         self::$cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
         self::$cache->delete_value("polls_$threadId");
+        return $affected;
     }
 
     /**
      * Edit the metadata of a thread
-     *
-     * @param int threadId The thread to edit
-     * @param int forumId Where is it being moved to?
-     * @param int sticky Is the thread stuck at the top of the first page?
-     * @param int rank Where in the list of sticky threads does it appear? (Larger numbers are higher)
-     * @param int locked Is the thread locked?
-     * @param string title The new title of the thread
      */
-    public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
+    public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title): int {
         (new \Gazelle\Manager\Forum)->flushToc();
         self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $forumId),
@@ -293,6 +276,7 @@ class Forum extends Base {
             ", $forumId, $sticky ? '1' : '0', $rank, $locked ? '1' : '0', trim($title),
             $threadId
         );
+        $affected = self::$db->affected_rows();
         if ($forumId != $this->forumId) {
             $this->adjustForumStats($this->forumId);
             $this->adjustForumStats($forumId);
@@ -300,15 +284,14 @@ class Forum extends Base {
         if ($locked) {
             $this->lockThread($threadId);
         }
+        return $affected;
     }
 
     /**
      * Remove a thread from the forum
      * Forum counters are updated, subscriptions tidied, user last-read markers are removed.
-     *
-     * @param int threadId The thread to remove
      */
-    public function removeThread(int $threadId) {
+    public function removeThread(int $threadId): int {
         self::$db->prepared_query("
             DELETE ft, fp, unq
             FROM forums_topics AS ft
@@ -317,6 +300,7 @@ class Forum extends Base {
             WHERE TopicID = ?
             ", $threadId
         );
+        $affected = self::$db->affected_rows();
         $this->adjustForumStats($this->forumId);
 
         (new Manager\Subscription)->move('forums', $threadId, null);
@@ -328,6 +312,7 @@ class Forum extends Base {
             sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
+        return $affected;
     }
 
     /**
@@ -337,10 +322,8 @@ class Forum extends Base {
      * NB: This uses a forumID passed in explicitly, because
      * moving threads requires two calls and it just makes things
      * a bit clearer.
-     *
-     * @param int forumId The ID of the forum
      */
-    protected function adjustForumStats(int $forumId) {
+    protected function adjustForumStats(int $forumId): int {
         /* Recalculate the correct values from first principles.
          * This does not happen very often, and only a moderator
          * pays the cost. At least this way the number correct
@@ -382,13 +365,8 @@ class Forum extends Base {
 
     /**
      * Add a post to a thread in the forum
-     *
-     * @param int userID The author
-     * @param int threadId The thread
-     * @param string body The body of the post
-     * @return int postId The ID of the post
      */
-    public function addPost(int $userId, int $threadId, string $body) {
+    public function addPost(int $userId, int $threadId, string $body): int {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO forums_posts
@@ -408,13 +386,8 @@ class Forum extends Base {
 
     /**
      * Sticky (or unsticky) a post in a thread
-     *
-     * @param int userID The stickier
-     * @param int threadId The ID of the thread
-     * @param int postId The ID of the post
-     * @param bool set Sticky if true, otherwise unsticky
      */
-    public function stickyPost(int $userId, int $threadId, int $postId, bool $set) {
+    public function stickyPost(int $userId, int $threadId, int $postId, bool $set): int {
         // need to reset the post catalogues
         [$bottom, $top] = self::$db->row("
             SELECT
@@ -428,7 +401,7 @@ class Forum extends Base {
             $threadId
         );
         if ($bottom === '') { // Gazelle null-to-string coercion sucks
-            return;
+            return 0;
         }
         $this->addThreadNote($threadId, $userId, "Post $postId " . ($set ? "stickied" : "unstickied"));
         self::$db->prepared_query("
@@ -437,10 +410,12 @@ class Forum extends Base {
             WHERE ID = ?
             ", $set ? $postId : 0, $threadId
         );
+        $affected = self::$db->affected_rows();
         self::$cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
         for ($i = $bottom; $i <= $top; ++$i) {
             self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
         }
+        return $affected;
     }
 
     /* How many posts precede this post in the thread? Used as a basis for
@@ -458,12 +433,8 @@ class Forum extends Base {
 
     /* Update the topic following the creation of a thread.
      * (Most recent thread and sets last poster).
-     *
-     * @param int userId The author
-     * @param int threadId The thread
-     * @param int postId The post in the thread
      */
-    protected function updateTopic(int $userId, int $threadId, int $postId) {
+    protected function updateTopic(int $userId, int $threadId, int $postId): int {
         self::$db->prepared_query("
             UPDATE forums_topics SET
                 NumPosts         = NumPosts + 1,
@@ -473,29 +444,27 @@ class Forum extends Base {
             WHERE ID = ?
             ", $postId, $userId, $threadId
         );
+        $affected = self::$db->affected_rows();
         $this->updateRoot($userId, $threadId, $postId);
+        return $affected;
     }
 
     /**
      * Add a note to a thread
-     *
-     * @param int threadId The thread
-     * @param int userId   The moderator
-     * @param string notes  The multi-line text
      */
-    public function addThreadNote(int $threadId, int $userId, string $notes) {
+    public function addThreadNote(int $threadId, int $userId, string $notes): int {
         self::$db->prepared_query("
             INSERT INTO forums_topic_notes
                    (TopicID, AuthorID, Body)
             VALUES (?,       ?,        ?)
             ", $threadId, $userId, $notes
         );
+        return self::$db->inserted_id();
     }
 
     /**
      * Get the notes of a thread
      *
-     * @param int threadId the thread
      * @return array The notes [ID, AuthorID, AddedTime, Body]
      */
     public function threadNotes(int $threadId): array {
@@ -512,12 +481,8 @@ class Forum extends Base {
     /**
      * Update the forum catalog following a change to a thread.
      * (Most recent thread and poster).
-     *
-     * @param int userId The author
-     * @param int threadId The thread
-     * @param int postId The post in the thread
      */
-    protected function updateRoot(int $userId, int $threadId, int $postId) {
+    protected function updateRoot(int $userId, int $threadId, int $postId): int {
         self::$db->prepared_query("
             UPDATE forums f
             INNER JOIN (
@@ -537,24 +502,26 @@ class Forum extends Base {
             WHERE f.ID = ?
             ", $this->forumId, $postId,  $userId, $threadId, $this->forumId
         );
+        $affected = self::$db->affected_rows();
         (new \Gazelle\Manager\Forum)->flushToc();
         self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
         ]);
+        return $affected;
     }
 
     /**
      * Add a poll to a thread.
      * TODO: add a closing date
      *
-     * @param int threadId The thread
-     * @param string question The poll question
-     * @param array answer An array of answers (between 2 and 25)
-     * @param array vots An array of votes (1 per answer)
+     * @param int $threadId The thread
+     * @param string $question The poll question
+     * @param array $answers An array of answers (between 2 and 25)
+     * @param array $votes An array of votes (1 per answer)
      */
-    public function addPoll(int $threadId, string $question, array $answers, array $votes) {
+    public function addPoll(int $threadId, string $question, array $answers, array $votes): int {
         self::$db->prepared_query("
             INSERT INTO forums_polls
                    (TopicID, Question, Answers)
@@ -562,15 +529,13 @@ class Forum extends Base {
             ", $threadId, $question, serialize($answers)
         );
         self::$cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, '0'], 0);
+        return self::$db->inserted_id();
     }
 
     /**
      * The answers for a poll
-     *
-     * @param int threadId The thread
-     * @return array The answers
      */
-    protected function fetchPollAnswers(int $threadId) {
+    protected function fetchPollAnswers(int $threadId): array {
         return unserialize(
             self::$db->scalar("
                 SELECT Answers FROM forums_polls WHERE TopicID = ?
@@ -581,11 +546,8 @@ class Forum extends Base {
 
     /**
      * Save the answers for a poll
-     *
-     * @param int threadId The thread
-     * @param array answers The answers
      */
-    protected function savePollAnswers(int $threadId, array $answers) {
+    protected function savePollAnswers(int $threadId, array $answers): int {
         self::$db->prepared_query("
             UPDATE forums_polls SET
                 Answers = ?
@@ -593,61 +555,53 @@ class Forum extends Base {
             ", serialize($answers), $threadId
         );
         self::$cache->delete_value("polls_$threadId");
+        return self::$db->affected_rows();
     }
 
     /**
      * Add a new answer to a poll.
-     *
-     * @param int threadId The thread
-     * @param string answer The new answer
      */
-    public function addPollAnswer(int $threadId, string $answer) {
+    public function addPollAnswer(int $threadId, string $answer): int {
         $answers = $this->fetchPollAnswers($threadId);
         $answers[] = $answer;
-        $this->savePollAnswers($threadId, $answers);
+        return $this->savePollAnswers($threadId, $answers);
     }
 
     /**
      * Remove an answer from a poll.
-     *
-     * @param int threadId The thread
-     * @param int item The answer to remove (1-based)
      */
-    public function removedPollAnswer(int $threadId, int $item) {
+    public function removedPollAnswer(int $threadId, int $item): int {
         $answers = $this->fetchPollAnswers($threadId);
-        if ($answers) {
-            unset($answers[$item]);
-            $this->savePollAnswers($threadId, $answers);
-            self::$db->prepared_query("
-                DELETE FROM forums_polls_votes
-                WHERE Vote = ?
-                    AND TopicID = ?
-                ", $item, $threadId
-            );
-            self::$cache->delete_value("polls_$threadId");
+        if (!$answers) {
+            return 0;
         }
+        unset($answers[$item]);
+        $this->savePollAnswers($threadId, $answers);
+        self::$db->prepared_query("
+            DELETE FROM forums_polls_votes
+            WHERE Vote = ?
+                AND TopicID = ?
+            ", $item, $threadId
+        );
+        self::$cache->delete_value("polls_$threadId");
+        return self::$db->affected_rows();
     }
 
     /**
      * Vote on a poll
-     *
-     * @param int userId Who is voting?
-     * @param int threadId Where are they voting?
-     * @param int vote What are they voting for?
-     * @return int 1 if this is the first time they have voted, otherwise 0
      */
-    public function addPollVote(int $userId, int $threadId, int $vote) {
+    public function addPollVote(int $userId, int $threadId, int $vote): int {
         self::$db->prepared_query("
             INSERT IGNORE INTO forums_polls_votes
                    (TopicID, UserID, Vote)
             VALUES (?,       ?,      ?)
             ", $threadId, $userId, $vote
         );
-        $change = self::$db->affected_rows();
-        if ($change) {
+        $affected = self::$db->affected_rows();
+        if ($affected) {
             self::$cache->delete_value("polls_$threadId");
         }
-        return $change;
+        return $affected;
     }
 
     public function modifyPollVote(int $userId, int $threadId, int $vote): int {
@@ -658,19 +612,15 @@ class Forum extends Base {
                 AND UserID = ?
             ", $vote, $threadId, $userId
         );
-        $change = self::$db->affected_rows();
-        if ($change) {
+        $affected = self::$db->affected_rows();
+        if ($affected) {
             self::$cache->delete_value("polls_$threadId");
         }
-        return $change;
+        return $affected;
     }
 
     /**
      * How did a person vote in a poll?
-     *
-     * @param int the user id
-     * @param int the thread where the poll is defined
-     * @return int vote (null if they have not voted)
      */
     public function pollVote(int $userId, int $threadId): ?int {
         return self::$db->scalar("
@@ -682,7 +632,6 @@ class Forum extends Base {
     /**
      * Get the data for a poll (TODO: spin off into a Poll object)
      *
-     * @param int threadId The thread
      * @return array
      * - string: question
      * - array: answers
@@ -690,7 +639,7 @@ class Forum extends Base {
      * - featured: Featured on front page?
      * - closed: Not more voting possible
      */
-    public function pollData(int $threadId) {
+    public function pollData(int $threadId): array {
         if (![$Question, $Answers, $Votes, $Featured, $Closed] = self::$cache->get_value('polls_'.$threadId)) {
             [$Question, $Answers, $Featured, $Closed] = self::$db->row("
                 SELECT Question, Answers, Featured, Closed
@@ -761,13 +710,10 @@ class Forum extends Base {
     /**
      * Edit a poll
      * TODO: feature and unfeature a poll.
-     *
-     * @param int $threadId In which thread?
-     * @param int $toFeature non-zero to feature on front page
-     * @param int $toClose toggle open/closed for voting
      */
-    public function moderatePoll(int $threadId, int $toFeature, int $toClose) {
+    public function moderatePoll(int $threadId, int $toFeature, int $toClose): int {
         [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
+        $affected = 0;
         if ($toFeature && !$Featured) {
             self::$db->prepared_query("
                 UPDATE forums_polls SET
@@ -775,6 +721,7 @@ class Forum extends Base {
                 WHERE TopicID = ?
                 ", $Featured, $threadId
             );
+            $affected += self::$db->affected_rows();
             $Featured = self::$db->scalar("
                 SELECT Featured FROM forums_polls WHERE TopicID = ?
                 ", $threadId
@@ -789,16 +736,15 @@ class Forum extends Base {
                 WHERE TopicID = ?
                 ", $Closed ? '1' : '0', $threadId
             );
+            $affected += self::$db->affected_rows();
         }
         self::$cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
         self::$cache->delete_value('polls_'.$threadId);
+        return $affected;
     }
 
     /**
      * Get the names of the staff who voted per item in a poll
-     *
-     * @param int thread id
-     * @return array of [concatenated user, vote]
      */
     public function staffVote(int $threadId): array {
         self::$db->prepared_query("
@@ -815,12 +761,8 @@ class Forum extends Base {
 
     /**
      * Merge an addition to the last post in a thread
-     *
-     * @param int userID The editor making the change
-     * @param int threadId The thread
-     * @param string body The new contents
      */
-    public function mergePost(int $userId, int $threadId, string $body) {
+    public function mergePost(int $userId, int $threadId, string $body): int {
         [$postId, $oldBody] = self::$db->row("
             SELECT ID, Body
             FROM forums_posts
@@ -863,10 +805,6 @@ class Forum extends Base {
 
     /**
      * Edit a post
-     *
-     * @param int userID The editor making the change
-     * @param int postId The post
-     * @param string body The new contents
      */
     public function editPost(int $userId, int $postId, string $body): int {
         self::$db->begin_transaction();
@@ -884,6 +822,7 @@ class Forum extends Base {
             WHERE ID = ?
             ", $userId, trim($body), $postId
         );
+        $affected = self::$db->affected_rows();
         self::$db->commit();
 
         $post = $this->postInfo($postId);
@@ -892,14 +831,13 @@ class Forum extends Base {
             "thread_{$post['thread-id']}_info",
             "thread_{$post['thread-id']}_catalogue_" . (int)floor((POSTS_PER_PAGE * $post['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
         ]);
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     /**
      * Get a post body. It is up to the calling code to ensure the viewer
      * has the permission to view it.
      *
-     * @param int postId The post
      * @return string The post body or null if no such post
      */
     public function postBody(int $postId): ?string {
@@ -915,7 +853,6 @@ class Forum extends Base {
     /**
      * Fetch information about a post. Note: The ForumID can be recovered from a PostID.
      *
-     * @param int postId The post
      * @return array
      *   'min-class-write'  int Minimum permission required to write in forum where the post appears.
      *   'forum-id'         int forum ID
@@ -952,11 +889,8 @@ class Forum extends Base {
 
     /**
      * Remove a post from a thread
-     *
-     * @param int postID the ID of the post to remove
-     * @return bool Success
      */
-    public function removePost(int $postId) {
+    public function removePost(int $postId): bool {
         $forumPost = $this->postInfo($postId);
         if (!$forumPost) {
             return false;
@@ -1021,7 +955,6 @@ class Forum extends Base {
      * Get information about a thread
      * TODO: check if ever NumPosts != Posts
      *
-     * @param int threadId The thread
      * @return array [Title ForumId AuthorID LastPostAuthorID StickyPostID Ranking NumPosts isLocked isSticky NoPoll Posts LastPostTime StickyPost]
      */
     public function threadInfo(int $threadId): array {
@@ -1211,9 +1144,6 @@ class Forum extends Base {
     /**
      * Get a catalogue of thread posts
      *
-     * @param int thread id
-     * @param int how many posts per page
-     * @param int which page are we on
      * @return array [post_id, author_id, added_time, body, editor_user_id, edited_time]
      */
     public function threadCatalog(int $threadId, int $perPage, int $page): array {
@@ -1250,8 +1180,6 @@ class Forum extends Base {
 
     /**
      * Mark the user as having read everything in the forum.
-     *
-     * @param int userId The ID of the user catching up
      */
     public function userCatchup(int $userId) {
         self::$db->prepared_query("
@@ -1263,16 +1191,13 @@ class Forum extends Base {
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $userId, $this->forumId
         );
+        return self::$db->affected_rows();
     }
 
     /**
      * Mark the user as having read everything in the thread.
-     *
-     * @param int userId The ID of the user catching up
-     * @param int threadId The ID of the thread
-     * @param int postId The ID of the last post the user has read
      */
-    public function userCatchupThread(int $userId, int $threadId, int $postId) {
+    public function userCatchupThread(int $userId, int $threadId, int $postId): int {
         self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
                    (UserID, TopicID, PostID)
@@ -1281,19 +1206,18 @@ class Forum extends Base {
                 PostID = ?
             ", $userId, $threadId, $postId, $postId
         );
+        return self::$db->affected_rows();
     }
 
     /**
      * Return a list of which page the user has read up to
      *
-     * @param int userId The user id reading the forum
-     * @param int perPage The number of topics per page
      * @return array
      *  - int 'TopicID' The thread id
      *  - int 'PostID'  The post id
      *  - int 'Page'    The page number
      */
-    public function userLastRead(int $userId, int $perPage) {
+    public function userLastRead(int $userId, int $perPage): array {
         self::$db->prepared_query("
             SELECT
                 l.TopicID,
@@ -1316,40 +1240,32 @@ class Forum extends Base {
 
     /**
      * Clear the "last read" markers of users in a thread.
-     *
-     * @param int id The thread ID.
      */
-    public function clearUserLastRead(int $threadId) {
+    public function clearUserLastRead(int $threadId): int {
         self::$db->prepared_query("
             DELETE FROM forums_last_read_topics
             WHERE TopicID = ?
             ", $threadId
         );
+        return self::$db->affected_rows();
     }
 
     /**
      * Return the last (highest previously read) post ID for a user in this thread.
      *
-     * @param int userId The user ID.
-     * @param int threadId The thread ID.
-     * @param int The last read post id (or 0 if thread has never been read before)
+     * @return int The last read post id (or 0 if thread has never been read before)
      */
     public function userLastReadPost(int $userId, int $threadId): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT PostID FROM forums_last_read_topics WHERE UserID = ? AND TopicID = ?
             ", $userId, $threadId
-        ) ?? 0;
+        );
     }
 
     /**
-     * the number of posts up to the given post in the thread
-     *
-     * @param int threadId The thread ID
-     * @param int postId The post ID
-     * @param int stickyPostId If a sticky post, the count will be less one
-     * @return int the number of posts
+     * The number of posts up to the given post in the thread
      */
-    public function threadNumPosts(int $threadId, int $postId, bool $hasSticky) {
+    public function threadNumPosts(int $threadId, int $postId, bool $hasSticky): int {
         $count = self::$db->scalar("
             SELECT count(*)
             FROM forums_posts

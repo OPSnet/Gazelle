@@ -166,9 +166,6 @@ END_MSG
     /**
      * Get the applicant thread story (see Thread class)
      * Notes will be filtered out if viewer is not staff
-     *
-     * @param bool Is the viewer staff?
-     * @return array of story notes
      */
     public function story(bool $isStaff): array {
         $story = $this->thread->story();

@@ -66,8 +66,6 @@ abstract class Collector extends Base  {
 
     /**
      * Create a Zip object and store the query results
-     *
-     * @param string $title name of the collection that will be created
      */
     public function __construct(\Gazelle\User $user, $title, $orderBy) {
         self::$cache->disableLocalCache(); // The internal cache is almost completely useless for this
@@ -157,9 +155,6 @@ abstract class Collector extends Base  {
      * This method is called repeatedly after the query is prepared, and returns
      * the resultset in chunks, to avoid blowing out the memory requirements on
      * artists with many, many, many releases.
-     *
-     * @param string $Key the key to use in the result hash map
-     * @return array with results and torrent group IDs
      */
     public function process(string $Key): array {
         $saveQid = self::$db->get_query_id();
@@ -224,29 +219,24 @@ abstract class Collector extends Base  {
 
     /**
      * Add a file to the list of files that did not match the user's format or quality requirements
-     *
-     * @param array $info containing keys Artist, Name and Year
      */
-    public function skip($info) {
+    public function skip(array $info) {
         $this->skipped[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
         return $this;
     }
 
     /**
      * Add a file to the list of files for which the torrent data is corrupt.
-     *
-     * @param array $info containing keys Artist, Name and Year
      */
-    public function fail($info) {
+    public function fail(array $info) {
         $this->error[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
+        return $this;
     }
 
     /**
      * Compile a list of files that could not be added to the archive
-     *
-     * @return string Summary of error files
      */
-    public function errors() {
+    public function errors(): string {
         return "The following torrents are in an broken or missing. This is bad!"
             . "\r\n"
             . implode("\r\n", $this->error) . "\r\n";
