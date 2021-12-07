@@ -6,7 +6,7 @@ class DB extends Base {
 
     /**
      * Skip foreign key checks
-     * @param $relax true if foreign key checks should be skipped
+     * @param bool $relax true if foreign key checks should be skipped
      */
     public function relaxConstraints(bool $relax) {
         if ($relax) {
