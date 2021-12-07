@@ -6,11 +6,7 @@ class UserBookmark extends \Gazelle\Base {
 
     protected const CACHE_KEY = 'bookmarks_group_ids_%d';
 
-    /**
-     * The user ID
-     * @var int $userId
-     */
-    protected $userId;
+    protected int $userId;
 
     public function __construct(int $userId) {
         $this->userId = $userId;
@@ -18,9 +14,6 @@ class UserBookmark extends \Gazelle\Base {
 
     /**
      * Uses (checkboxes) $_POST['remove'] to delete entries.
-     *
-     * @param array List of group IDs
-     * @return int number of items removed
      */
     public function remove(array $groupIds): int {
         self::$db->prepared_query("
@@ -35,11 +28,8 @@ class UserBookmark extends \Gazelle\Base {
 
     /**
      * Uses $_POST['sort'] values to update entries.
-     *
-     * @param array List of group IDs
-     * @return int number of items modified
      */
-    public function modify(array $list) {
+    public function modify(array $list): int {
         $placeholders = [];
         $args = [];
         foreach ($list as $groupId => $sequence) {

@@ -14,9 +14,8 @@ class RipLog extends \Gazelle\File {
      * @param string $source Path to the file, usually the result
      *      of a POST operation.
      * @param array $id The unique identifier [torrentId, logId] of the object
-     * @return boolean Success of the operation
      */
-    public function put(string $source, /* array */ $id) {
+    public function put(string $source, /* array */ $id): bool {
         return false !== move_uploaded_file($source, $this->path($id));
     }
 
@@ -25,9 +24,9 @@ class RipLog extends \Gazelle\File {
      *
      * @param array $id The unique identifier [torrentId, logId] of the object
      *                  If logId is null, all logs are taken into consideration
-     * @param boolean True (TODO: record individual unlink successes in the case of a wildcard
+     * @return bool true (TODO: record individual unlink successes in the case of a wildcard
      */
-    public function remove(/* array */ $id) {
+    public function remove(/* array */ $id): bool {
         $torrent_id = $id[0];
         $log_id = $id[1];
         if (is_null($log_id)) {
@@ -50,10 +49,9 @@ class RipLog extends \Gazelle\File {
     /**
      * Path of a rip log.
      *
-     * @param array id rip log identifier [torrentId, logId]
-     * @return string Fully qualified filename
+     * @param array $id rip log identifier [torrentId, logId]
      */
-    public function path(/* array */ $id) {
+    public function path(/* array */ $id): string {
         $torrent_id = $id[0];
         $log_id = $id[1];
         $key = strrev(sprintf('%04d', $torrent_id));

@@ -9,8 +9,8 @@ abstract class CommentViewer extends BaseUser {
 
     /**
      * Render a thread of comments
-     * @param array [total comments, page, comment list, last read]
-     * @param int PostID of the last read post
+     * @param array $Thread [total comments, page, comment list, last read]
+     * @param int $lastRead PostID of the last read post
      */
     public function renderThread(array $Thread, int $lastRead) {
         $userMan = new Manager\User;
@@ -23,16 +23,8 @@ abstract class CommentViewer extends BaseUser {
 
     /**
      * Render a comment
-     * @param int $AuthorID
-     * @param int $PostID
-     * @param string $Body
-     * @param string $AddedTime
-     * @param int $EditedUserID
-     * @param string $EditedTime
-     * @param string $Header The header used in the post
-     * @param bool $Tools Whether or not to show [Edit], [Report] etc.
      */
-    public function render($userMan, $AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Unread = false, $Header = '') {
+    public function render(Manager\User $userMan, int $AuthorID, int $PostID, string $Body, string $AddedTime, $EditedUserID, $EditedTime, bool $Unread = false, string $Header = '') {
         $author = new User($AuthorID);
         $ownProfile = $AuthorID == $this->user->id();
         echo self::$twig->render('comment/comment.twig', [

@@ -31,8 +31,8 @@ class Collage extends BaseObject {
     protected $userSubscriptions;
 
     /* these are only loaded on a torrent collage display */
-    protected $torrents;
-    protected $groupIds;
+    protected array $torrents = [];
+    protected $groupIds       = [];
 
     /* these are only loaded on any collage display */
     protected $lockedForUser;
@@ -168,8 +168,6 @@ class Collage extends BaseObject {
 
         if (count($groupIds) > 0) {
             $this->torrents = \Torrents::get_groups($groupIds);
-        } else {
-            $this->torrents = [];
         }
 
         // synch collage total with reality
@@ -199,7 +197,6 @@ class Collage extends BaseObject {
         );
         $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC, false);
 
-        $this->groupIds = [];
         foreach ($groupIds as $groupId) {
             if (!isset($this->torrents[$groupId])) {
                 continue;
@@ -281,7 +278,6 @@ class Collage extends BaseObject {
      * Increment count of number of entries in collage.
      *
      * @param int $delta change in value (defaults to 1)
-     * @return int number of entries
      */
     public function increment(int $delta = 1): int {
         self::$db->prepared_query("
@@ -296,8 +292,6 @@ class Collage extends BaseObject {
 
     /**
      * How many entries in this collage are owned by a given user
-     * @param int $userId id of user
-     * @return int number of entries
      */
     public function countByUser(int $userId): int {
         return $this->contributors[$userId] ?? 0;
@@ -364,8 +358,6 @@ class Collage extends BaseObject {
     /**
      * Load the subscriptions of the user, and clear the new additions flag if
      * they have subscribed to this collage.
-     * @param int User id
-     * @return int True if user is subscribed to this collage.
      */
     public function isSubscribed(int $userId): bool {
         $key = sprintf(self::SUBS_KEY, $userId);
@@ -404,16 +396,14 @@ class Collage extends BaseObject {
 
     /**
      * Does the artist already exist in this artist collage
-     * @return boolean true if artist is already present
      */
     public function hasArtist(int $artistId): bool {
-        self::$db->prepared_query("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM collages_artists
             WHERE CollageID = ?  AND ArtistID = ?
             ", $this->id, $artistId
         );
-        return self::$db->has_results();
     }
 
     /**
@@ -421,7 +411,7 @@ class Collage extends BaseObject {
      */
     public function addArtist(int $artistId, int $adderId) {
         if ($this->hasArtist($artistId)) {
-            return;
+            return $this;
         }
         self::$db->prepared_query("
             INSERT IGNORE INTO collages_artists
@@ -464,9 +454,6 @@ class Collage extends BaseObject {
      * In order to display the collage correctly, the code needs to know who is viewing the
      * collage. The method setUserContext() must be called prior to calling this method,
      * otherwise it will throw an exception.
-     *
-     * @param ascending int True to sort ASC, False to sort DESC
-     * @return an of torrent groups, and an array of user ids (who added the torrents)
      */
     public function torrentList(): array {
         if (is_null($this->viewer)) {
@@ -477,7 +464,6 @@ class Collage extends BaseObject {
 
     /**
      * Does the torrent already exist in this torrent collage
-     * @return boolean true if torrent is already present
      */
     public function hasTorrent(int $groupId): bool {
         self::$db->prepared_query("
@@ -491,7 +477,6 @@ class Collage extends BaseObject {
 
     /**
      * Add an torrent group to an torrent collage.
-     * @param int $groupId id of torrent group
      */
     public function addTorrent(int $groupId, int $adderId) {
         if ($this->hasTorrent($groupId)) {
@@ -516,8 +501,7 @@ class Collage extends BaseObject {
     }
 
     /** Get top artists of the collage
-     * @param int limit Number of entries to return (default 5, -1 for all)
-     * @return array associative array of artist ids, pointing to number of entries by artist
+     * @param int $limit Number of entries to return (default 5, -1 for all)
      */
     public function topArtists(int $limit = 5): array {
         return $limit == -1
@@ -526,8 +510,7 @@ class Collage extends BaseObject {
     }
 
     /** Get top tags of the collage
-     * @param int limit Number of entries to return (default 5, -1 for all)
-     * @return array associative array of tags, pointing to number of occurrences (descending) by tag
+     * @param int $limit Number of entries to return (default 5, -1 for all)
      */
     public function topTags(int $limit = 5): array {
         return $limit == -1
