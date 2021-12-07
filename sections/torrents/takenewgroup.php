@@ -10,12 +10,21 @@ if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$OldGroupID = (int)$_POST['oldgroupid'];
-$TorrentID  = (int)$_POST['torrentid'];
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+if (is_null($torrent)) {
+    error('Torrent does not exist!');
+}
+
+$tgMan = new Gazelle\Manager\TGroup;
+$old = $tgMan->findById((int)($_POST['oldgroupid'] ?? 0));
+if (is_null($old)) {
+    error('The source torrent group does not exist!');
+}
+
 $ArtistName = trim($_POST['artist']);
 $Title      = trim($_POST['title']);
 $Year       = (int)$_POST['year'];
-if (!$OldGroupID || !$TorrentID || !$Year || empty($Title) || empty($ArtistName)) {
+if (!$Year || empty($Title) || empty($ArtistName)) {
     error(0);
 }
 
@@ -25,8 +34,8 @@ if (empty($_POST['confirm'])) {
     echo $Twig->render('torrent/confirm-split.twig', [
         'artist'     => $_POST['artist'],
         'auth'       => $Viewer->auth(),
-        'group_id'   => $OldGroupID,
-        'torrent_id' => $TorrentID,
+        'group_id'   => $old->id(),
+        'torrent_id' => $torrent->id(),
         'title'      => $_POST['title'],
         'year'       => $_POST['year'],
     ]);
@@ -40,29 +49,43 @@ $DB->prepared_query("
     VALUES (?,    ?,    1,          '',       '')
     ", $Title, $Year
 );
-$GroupID = $DB->inserted_id();
+$new = $tgMan->findById($DB->inserted_id());
 
-$tgroupMan = new \Gazelle\Manager\TGroup;
-$tgroup = $tgroupMan->findById($GroupID);
-$tgroup->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
+$new->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
 
 $DB->prepared_query('
     UPDATE torrents SET
         GroupID = ?
     WHERE ID = ?
-    ', $GroupID, $TorrentID
+    ', $new->id(), $torrent->id()
 );
 
+$log = new Gazelle\Log;
+$oldId = $old->id();
+
 // Update or remove previous group, depending on whether there is anything left
-$tgroupMan->refresh($GroupID);
-if ($DB->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $OldGroupID)) {
-    $tgroupMan->refresh($OldGroupID);
+if ($DB->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $oldId)) {
+    $old->flush();
+    $tgMan->refresh($oldId);
 } else {
-    Torrents::delete_group($OldGroupID, $Viewer);
+    // TODO: votes etc!
+
+    (new Gazelle\Manager\Bookmark)->merge($oldId, $new->id());
+    (new Gazelle\Manager\Comment)->merge('torrents', $oldId, $new->id());
+    $log->merge($oldId, $new->id());
+
+    $old->remove($Viewer, $log);
 }
 
-$Cache->delete_value("torrent_download_$TorrentID");
+$new->flush();
+$tgMan->refresh($new->id());
+$torrent->flush();
+$Cache->deleteMulti([
+    "torrents_details_" . $oldId,
+    "torrent_download_" . $torrent->id(),
+]);
 
-(new Gazelle\Log)->general("Torrent $TorrentID was split out from group $OldGroupID to $GroupId by " . $Viewer->label());
+$log->group($new->id(), $Viewer->id(), "split from group $oldId")
+    ->general("Torrent " . $torrent->id() . " was split out from group $oldId to " . $new->id() . " by " . $Viewer->label());
 
-header("Location: torrents.php?id=$GroupID");
+header('Location: ' . $new->url());
