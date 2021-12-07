@@ -22,7 +22,7 @@ $union = trim($_REQUEST['view'] ?? 'union') === 'union';
 $source = ($_REQUEST['source'] ?? null);
 $target = ($_REQUEST['target'] ?? null);
 
-$seedbox = new Gazelle\Seedbox($userId);
+$seedbox = new Gazelle\Seedbox($user);
 if (isset($_POST['action']) || isset($_REQUEST['viewby'])) {
     if (is_null($source) || is_null($target) || $source === $target) {
         error("Invalid comparison between two seedbox instances");
