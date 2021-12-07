@@ -6,18 +6,29 @@
 if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
+
 authorize();
 
-$OldGroupID = (int)$_POST['oldgroupid'];
-$TorrentID = (int)$_POST['torrentid'];
-$Title = trim($_POST['title']);
-$OldCategoryID = (int)$_POST['oldcategoryid'];
-$NewCategoryID = (int)$_POST['newcategoryid'];
-if (!$OldGroupID || !$NewCategoryID || !$TorrentID || empty($Title)) {
-    error(0);
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+if (is_null($torrent)) {
+    error('Torrent does not exist!');
 }
 
-$tgroupMan = new \Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup;
+$old = $tgMan->findById((int)($_POST['oldgroupid'] ?? 0));
+if (is_null($old)) {
+    error('The source torrent group does not exist!');
+}
+
+$Title = trim($_POST['title'] ?? '');
+if ($Title === '') {
+    error('Title cannot be blank');
+}
+
+$NewCategoryID = (int)($_POST['newcategoryid'] ?? 0);
+if (!$NewCategoryID) {
+    error('Bad category');
+}
 
 switch (CATEGORY[$NewCategoryID - 1]) {
     case 'Music':
@@ -31,14 +42,13 @@ switch (CATEGORY[$NewCategoryID - 1]) {
         $DB->prepared_query("
             INSERT INTO torrents_group
                    (Name, Year, ReleaseType, CategoryID, WikiBody, WikiImage)
-            VALUES (?,    ?,    ?,           1,         '',       '')
+            VALUES (?,    ?,    ?,           1,          '',       '')
             ", $Title, $Year, $ReleaseType
         );
-        $GroupID = $DB->inserted_id();
-
-        $tgroup = $tgroupMan->findById($GroupID);
-        $tgroup->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
+        $new = $tgMan->findById($DB->inserted_id());
+        $new->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
         break;
+
     case 'Audiobooks':
     case 'Comedy':
         $Year = (int)$_POST['year'];
@@ -51,8 +61,9 @@ switch (CATEGORY[$NewCategoryID - 1]) {
             VALUES (?,    ?,    ?,          '',       '')
             ", $Title, $Year, $NewCategoryID
         );
-        $GroupID = $DB->inserted_id();
+        $new = $tgMan->findById($DB->inserted_id());
         break;
+
     case 'Applications':
     case 'Comics':
     case 'E-Books':
@@ -63,7 +74,7 @@ switch (CATEGORY[$NewCategoryID - 1]) {
             VALUES (?,    ?,          '',       '')
             ", $Title, $NewCategoryID
         );
-        $GroupID = $DB->inserted_id();
+        $new = $tgMan->findById($DB->inserted_id());
         break;
 }
 
@@ -71,36 +82,35 @@ $DB->prepared_query('
     UPDATE torrents SET
         GroupID = ?
     WHERE ID = ?
-    ', $GroupID, $TorrentID
+    ', $new->id(), $torrent->id()
 );
+
+$log = new Gazelle\Log;
+$oldId = $old->id();
+$oldCategoryId = $old->categoryId();
 
 // Delete old group if needed
-if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $OldGroupID)) {
-    $tgroupMan->refresh($OldGroupID);
+if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
+    $old->flush();
+    $tgMan->refresh($oldId);
 } else {
     // TODO: votes etc.
-    $DB->prepared_query("
-        UPDATE comments SET
-            PageID = ?
-        WHERE Page = 'torrents' AND PageID = ?
-        ", $GroupID, $OldGroupID
-    );
-    Torrents::delete_group($OldGroupID, $Viewer);
-    $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
+
+    (new Gazelle\Manager\Bookmark)->merge($oldId, $new->id());
+    (new \Gazelle\Manager\Comment)->merge('torrents', $oldId, $new->id());
+    $log->merge($oldId, $new->id());
+
+    $old->remove($Viewer, $log);
 }
 
-$DB->prepared_query('
-    UPDATE group_log SET
-        GroupID = ?
-    WHERE GroupID = ?
-    ', $GroupID, $OldGroupID
-);
+$new->flush();
+$tgMan->refresh($new->id());
+$Cache->deleteMulti([
+    "torrents_details_" . $oldId,
+    "torrent_download_" . $torrent->id(),
+]);
 
-$tgroupMan->refresh($GroupID);
+$log->group($new->id(), $Viewer->id(), "category changed from $oldCategoryId to " . $new->categoryId() . ", merged from group $oldId")
+    ->general("Torrent " . $torrent->id() . " was changed to category " . $new->categoryId() . " by " . $Viewer->label());
 
-$Cache->delete_value("torrent_download_$TorrentID");
-
-(new Gazelle\Log)->group($GroupID, $Viewer->id(), "category changed from $OldCategoryID to $NewCategoryID, merged from group $OldGroupID")
-    ->general("Torrent $TorrentID was changed to category $NewCategoryID by " . $Viewer->label());
-
-header("Location: torrents.php?id=$GroupID");
+header('Location: ' . $new->url());

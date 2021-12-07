@@ -135,6 +135,149 @@ class TGroup extends \Gazelle\Base {
         }
     }
 
+    public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user): bool {
+        // Votes ninjutsu. This is so annoyingly complicated.
+        // 1. Get a list of everybody who voted on the old group and clear their cache keys
+        self::$db->prepared_query("
+            SELECT concat('voted_albums_', UserID)
+            FROM users_votes
+            WHERE GroupID = ?
+            ", $old->id()
+        );
+        self::$cache->deleteMulti(self::$db->collect(0, false));
+
+        self::$db->begin_transaction();
+
+        // 2. Update the existing votes where possible, clear out the duplicates left by key
+        // conflicts, and update the torrents_votes table
+        self::$db->prepared_query("
+            UPDATE IGNORE users_votes SET
+                GroupID = ?
+            WHERE GroupID = ?
+            ", $new->id(), $old->id()
+        );
+        self::$db->prepared_query("
+            DELETE FROM users_votes WHERE GroupID = ?
+            ", $old->id()
+        );
+        self::$db->prepared_query("
+            INSERT INTO torrents_votes (GroupId, Ups, Total, Score)
+            SELECT                      ?,       Ups, Total, 0
+            FROM (
+                SELECT
+                    ifnull(sum(if(Type = 'Up', 1, 0)), 0) As Ups,
+                    count(*) AS Total
+                FROM users_votes
+                WHERE GroupID = ?
+                GROUP BY GroupID
+            ) AS a
+            ON DUPLICATE KEY UPDATE
+                Ups = a.Ups,
+                Total = a.Total
+            ", $new->id(), $old->id()
+        );
+        if (self::$db->affected_rows()) {
+            // recompute score
+            self::$db->prepared_query("
+                UPDATE torrents_votes SET
+                    Score = IFNULL(binomial_ci(Ups, Total), 0)
+                WHERE GroupID = ?
+                ", $new->id()
+            );
+        }
+
+        // 3. Clear the votes_pairs keys
+        self::$db->prepared_query("
+            SELECT concat('vote_pairs_', v2.GroupId)
+            FROM users_votes AS v1
+            INNER JOIN users_votes AS v2 USING (UserID)
+            WHERE (v1.Type = 'Up' OR v2.Type = 'Up')
+                AND (v1.GroupId     IN (?, ?))
+                AND (v2.GroupId NOT IN (?, ?))
+            ", $old->id(), $new->id(), $old->id(), $new->id()
+        );
+        self::$cache->deleteMulti(self::$db->collect(0, false));
+
+        // GroupIDs
+        self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id());
+        $cacheKeys = [];
+        while ([$TorrentID] = self::$db->next_row()) {
+            $cacheKeys[] = 'torrent_download_' . $TorrentID;
+            $cacheKeys[] = 'tid_to_group_' . $TorrentID;
+        }
+        self::$cache->deleteMulti($cacheKeys);
+        unset($cacheKeys);
+
+        self::$db->prepared_query("
+            UPDATE torrents SET
+                GroupID = ?
+            WHERE GroupID = ?
+            ", $new->id(), $old->id()
+        );
+        self::$db->prepared_query("
+            UPDATE wiki_torrents SET
+                PageID = ?
+            WHERE PageID = ?
+            ", $new->id(), $old->id()
+        );
+
+        (new \Gazelle\Manager\Bookmark)->merge($old->id(), $new->id());
+        (new \Gazelle\Manager\Comment)->merge('torrents', $old->id(), $new->id());
+
+        // Collages
+        self::$db->prepared_query("
+            SELECT CollageID FROM collages_torrents WHERE GroupID = ?
+            ", $old->id()
+        );
+        $collageList = self::$db->collect(0, false);
+        self::$db->prepared_query("
+            UPDATE IGNORE collages_torrents SET
+                GroupID = ?
+            WHERE GroupID = ?
+            ", $new->id(), $old->id()
+        );
+        self::$db->prepared_query("
+            DELETE FROM collages_torrents WHERE GroupID = ?
+                ", $old->id()
+        );
+        self::$cache->deleteMulti(array_map(
+            fn ($id) => sprintf(\Gazelle\Collage::CACHE_KEY, $id), $collageList
+        ));
+
+        // Requests
+        self::$db->prepared_query("
+            SELECT concat('request_', ID) FROM requests WHERE GroupID = ?
+            ", $old->id()
+        );
+        self::$cache->deleteMulti(self::$db->collect(0, false));
+        self::$db->prepared_query("
+            UPDATE requests SET
+                GroupID = ?
+            WHERE GroupID = ?
+            ", $new->id(), $old->id()
+        );
+
+        self::$db->prepared_query("
+            UPDATE group_log SET
+                GroupID = ?
+            WHERE GroupID = ?
+            ", $new->id(), $old->id()
+        );
+
+        $old->remove($user, $log);
+        self::$db->commit();
+
+        $this->refresh($new->id());
+
+        self::$cache->deleteMulti([
+            "requests_group_" . $new->id(),
+            "torrent_collages_" . $new->id(),
+            "torrent_collages_personal_" . $new->id(),
+            "votes_" . $new->id(),
+        ]);
+        return true;
+    }
+
     /**
      * Return the N most recent lossless uploads
      * Note that if both a Lossless and 24bit Lossless are uploaded at the same time,

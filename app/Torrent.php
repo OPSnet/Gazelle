@@ -24,7 +24,7 @@ class Torrent extends BaseObject {
     }
 
     public function flush() {
-        self::$cache->delete_key(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
     }
 
     public function url(): string {

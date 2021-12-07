@@ -50,7 +50,6 @@ class Subscription extends \Gazelle\Base {
      * @param int $NewPageID target (if null, page is deleted)
      */
     public function move(string $Page, int $OldPageID, ?int $NewPageID) {
-        $qid = self::$db->get_query_id();
         if ($Page == 'forums') {
             if ($NewPageID !== null) {
                 self::$db->prepared_query('
@@ -147,7 +146,6 @@ class Subscription extends \Gazelle\Base {
                 ', $Page, $OldPageID
             );
         }
-        self::$db->set_query_id($qid);
         $this->flush($Page, $OldPageID);
     }
 }

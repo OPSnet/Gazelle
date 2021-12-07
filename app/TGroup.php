@@ -913,4 +913,126 @@ class TGroup extends BaseObject {
         );
         return $revert;
     }
+
+    public function remove(User $user): bool {
+        if ($this->categoryName() === 'Music') {
+            self::$cache->decrement('stats_album_count');
+        }
+        self::$cache->decrement('stats_group_count');
+
+        // Artists
+        // Collect the artist IDs and then wipe the torrents_artist entry
+        self::$db->prepared_query("
+            SELECT ArtistID FROM torrents_artists WHERE GroupID = ?
+            ", $this->id
+        );
+        $Artists = self::$db->collect(0, false);
+        self::$db->prepared_query("
+            DELETE FROM torrents_artists WHERE GroupID = ?
+            ", $this->id
+        );
+        foreach ($Artists as $ArtistID) {
+            // Get a count of how many groups or requests use the artist ID
+            $ReqCount = self::$db->scalar("
+                SELECT count(ag.ArtistID)
+                FROM artists_group AS ag
+                INNER JOIN requests_artists AS ra USING (ArtistID)
+                WHERE ag.ArtistID = ?
+                ", $ArtistID
+            );
+            $GroupCount = self::$db->scalar("
+                SELECT count(ag.ArtistID)
+                FROM artists_group AS ag
+                INNER JOIN torrents_artists AS ta USING (ArtistID)
+                WHERE ag.ArtistID = ?
+                ", $ArtistID
+            );
+            if ($ReqCount + $GroupCount === 0) {
+                //The only group to use this artist
+                \Artists::delete_artist($ArtistID, $user);
+            } else {
+                //Not the only group, still need to clear cache
+                self::$cache->delete_value("artist_groups_$ArtistID");
+            }
+        }
+
+        // Bookmarks
+        self::$db->prepared_query("
+            DELETE FROM bookmarks_torrents WHERE GroupID = ?
+            ", $this->id
+        );
+
+        // Collages
+        self::$db->prepared_query("
+            SELECT CollageID FROM collages_torrents WHERE GroupID = ?
+            ", $this->id
+        );
+        $CollageIDs = self::$db->collect(0, false);
+        if ($CollageIDs) {
+            self::$db->prepared_query("
+                UPDATE collages SET
+                    NumTorrents = NumTorrents - 1
+                WHERE ID IN (" . placeholders($CollageIDs) . ")
+                ", ...$CollageIDs
+            );
+            self::$db->prepared_query("
+                DELETE FROM collages_torrents WHERE GroupID = ?
+                ", $this->id
+            );
+            foreach ($CollageIDs as $CollageID) {
+                self::$cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $CollageID));
+            }
+            self::$cache->delete_value("torrent_collages_" . $this->id);
+        }
+
+        (new \Gazelle\Manager\Comment)->remove('torrents', $this->id);
+
+        // Requests
+        self::$db->prepared_query("
+            SELECT ID FROM requests WHERE GroupID = ?
+            ", $this->id
+        );
+        $Requests = self::$db->collect(0, false);
+        self::$db->prepared_query("
+            UPDATE requests SET
+                GroupID = NULL
+            WHERE GroupID = ?
+            ", $this->id
+        );
+        foreach ($Requests as $RequestID) {
+            self::$cache->delete_value("request_$RequestID");
+        }
+
+        self::$db->prepared_query("
+            DELETE FROM torrent_group_has_attr WHERE TorrentGroupID = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
+            DELETE FROM torrents_tags WHERE GroupID = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
+            DELETE FROM torrents_tags_votes WHERE GroupID = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
+            DELETE FROM wiki_torrents WHERE PageID = ?
+            ", $this->id
+        );
+
+        $manager = new \Gazelle\DB;
+        [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_group', [['ID', $this->id]]);
+        if (!$ok) {
+            return false;
+        }
+
+        self::$cache->deleteMulti([
+            "torrents_details_" . $this->id,
+            "torrent_group_" . $this->id,
+            sprintf(\Gazelle\TGroup::CACHE_KEY, " . $this->id),
+            sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, " . $this->id),
+            "groups_artists_" . $this->id,
+        ]);
+        return true;
+    }
 }
