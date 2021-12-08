@@ -149,11 +149,11 @@ if ($CollageCovers !== 0) { ?>
 <?php
         $CollagePages = [];
         for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
-            $Groups = array_slice($tgroupList, $i * $CollageCovers, $CollageCovers);
+            $Groups = array_slice($bookmarkList, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($id) use ($collMan, $imgproxy, $tgMan) {
-                        $tgroup = $tgMan->findById($id);
+                    function($bookmark) use ($collMan, $imgproxy, $tgMan) {
+                        $tgroup = $tgMan->findById($bookmark['tgroup_id']);
                         return $tgroup ? $collMan->tgroupCover($tgroup, $imgproxy) : '';
                     },
                     $Groups
