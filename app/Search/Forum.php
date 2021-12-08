@@ -285,11 +285,11 @@ class Forum extends \Gazelle\BaseUser {
         [$cond, $args] = $this->configure();
         $from = "FROM forums_posts AS p
             LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
-            LEFT JOIN forums AS f ON (f.ID = t.ForumID)";
+            LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+            LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)";
         $cond[] = 'p.AuthorID = ?';
         $args[] = $this->user->id();
         if ($this->showUnread) {
-            $from .= "LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)\n";
             $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
             array_unshift($args, $this->user->id());
         }
