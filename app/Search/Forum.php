@@ -438,13 +438,7 @@ class Forum extends \Gazelle\BaseUser {
         [$from, $cond, $args] = $this->configurePostHistory();
         $args[] = $limit;
         $args[] = $offset;
-        if ($this->showUnread) {
-            $unreadFirst = 'flrt.PostID AS last_read,';
-            $unreadCond  = 'AND (coalesce(flrt.PostID, 0) < t.LastPostID)';
-        } else {
-            $unreadFirst = '';
-            $unreadCond  = '';
-        }
+        $unreadFirst = $this->showUnread ? 'flrt.PostID AS last_read,' : '';
         self::$db->prepared_query("
             SELECT p.ID         AS post_id,
                 p.AddedTime     AS added_time,
@@ -455,9 +449,9 @@ class Forum extends \Gazelle\BaseUser {
                 t.Title         AS title,
                 t.IsLocked      AS is_locked,
                 t.IsSticky      AS is_sticky,
-                t.LastPostID    AS last_post_id, $unreadFirst
-                (NOT t.IsLocked OR t.IsSticky) $unreadCond
-                                AS new
+                t.LastPostID    AS last_post_id,
+                $unreadFirst
+                (NOT t.IsLocked OR t.IsSticky) AND (coalesce(flrt.PostID, 0) < t.LastPostID) as new
             $from
             WHERE
             " . implode(' AND ', $cond)
