@@ -17,7 +17,7 @@ class Bonus extends \Gazelle\Base {
         return (int)(new \Gazelle\Manager\SiteOption)->findValueByName('bonus-discount') ?? 0;
     }
 
-    public function itemList() {
+    public function itemList(): array {
         if (!isset($this->items)) {
             $items = self::$cache->get_value(self::CACHE_ITEM);
             if ($items === false) {
@@ -45,7 +45,7 @@ class Bonus extends \Gazelle\Base {
         self::$cache->delete_value(self::CACHE_ITEM);
     }
 
-    public function getOpenPool() {
+    public function getOpenPool(): array {
         $key = self::CACHE_OPEN_POOL;
         $pool = self::$cache->get_value($key);
         if ($pool === false) {
@@ -138,89 +138,66 @@ class Bonus extends \Gazelle\Base {
 
     public function givePoints(\Gazelle\Schedule\Task $task = null) {
         //------------------------ Update Bonus Points -------------------------//
-        // calcuation:
+        // calculation:
         // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))
         // Size (convert from bytes to GB) is in torrents
-        // Seedtime (convert from hours to days) is in xbt_snatched
-        // Seeders is in torrents
+        // Seedtime (convert from hours to days) is in xbt_files_history
+        // Seeders is in torrents_leech_stats
 
-        // precalculate the users we update this run
-        if ($task) {
-            $task->debug('begin');
-        } else {
-            echo "begin\n";
-        }
         self::$db->prepared_query("
-            CREATE TEMPORARY TABLE xbt_unique (
-                uid int(11) NOT NULL,
-                fid int(11) NOT NULL,
-                PRIMARY KEY (uid, fid)
+            CREATE TEMPORARY TABLE bonus_update (
+                user_id int(11) unsigned NOT NULL PRIMARY KEY,
+                delta float(20, 5) NOT NULL
             )
-            SELECT DISTINCT uid, fid
-            FROM xbt_files_users xfu
-            INNER JOIN users_main AS um ON (um.ID = xfu.uid)
-            INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
-            INNER JOIN torrents   AS t  ON (t.ID = xfu.fid)
-            WHERE xfu.active = 1
-                AND xfu.remaining = 0
-                AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
-                AND um.Enabled = '1'
+        ");
+        self::$db->prepared_query("
+            SET SESSION tx_isolation = 'READ-UNCOMMITTED'
+        ");
+        self::$db->pepared_query("
+            INSERT INTO bonus_update (user_id, delta)
+            SELECT xfu.uid,
+                sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders))
+            FROM xbt_files_users            AS xfu
+            INNER JOIN xbt_files_history    AS xfh USING (uid, fid)
+            INNER JOIN users_main           AS um ON (um.ID = xfu.uid)
+            INNER JOIN users_info           AS ui ON (ui.UserID = xfu.uid)
+            INNER JOIN torrents             AS t  ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+            WHERE xfu.active         = 1
+                AND xfu.remaining    = 0
+                AND xfu.mtime        > unix_timestamp(now() - INTERVAL 1 HOUR)
+                AND um.Enabled       = '1'
                 AND ui.DisablePoints = '0'
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
+            GROUP BY xfu.uid
+        ");
+        self::$db->prepared_query("
+            SET SESSION tx_isolation = 'REPEATABLE-READ'
         ");
         if ($task) {
-            $task->debug('xbt_unique constructed');
-        } else {
-            echo "xbt_unique constructed\n";
+            $task->info('bonus_update table constructed');
         }
 
-        $userId = 1;
-        $chunk = 150;
-        $processed = 0;
-        $more = true;
-        while ($more) {
-            /* update a block of users at a time, to minimize locking contention */
-            self::$db->prepared_query("
-                INSERT INTO user_bonus
-                SELECT
-                    xfu.uid AS ID,
-                    sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)) as new
-                FROM xbt_unique xfu
-                INNER JOIN xbt_files_history AS xfh USING (uid, fid)
-                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                WHERE xfu.uid BETWEEN ? AND ?
-                    AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
-                GROUP BY
-                    xfu.uid
-                ON DUPLICATE KEY UPDATE points = points + VALUES(points)
-                ", $userId, $userId + $chunk - 1
-            );
-            $processed += self::$db->affected_rows();
-
-            /* flush their stats */
-            self::$db->prepared_query("
-                SELECT concat('user_stats_', xfu.uid) as ck
-                FROM xbt_unique xfu
-                WHERE xfu.uid BETWEEN ? AND ?
-                ", $userId, $userId + $chunk - 1
-            );
-            if (self::$db->has_results()) {
-                self::$cache->deleteMulti(self::$db->collect('ck', false));
-            }
-            if ($task) {
-                $task->debug('chunk done', $userId);
-            } else {
-                echo "chunk done $userId\n";
-            }
-
-            /* see if there are some more users to process */
-            $userId += $chunk;
-            $more = self::$db->scalar("
-                SELECT 1 FROM xbt_unique WHERE uid >= ?
-                ", $userId
-            );
+        self::$db->prepared_query("
+            INSERT INTO user_bonus
+                     (user_id, points)
+            SELECT bu.user_id, bu.delta
+            FROM bonus_update bu
+            ON DUPLICATE KEY UPDATE points = points + bu.delta
+        ");
+        $processed = self::$db->affected_rows();
+        if ($task) {
+            $task->info('user_bonus updated');
         }
+
+        /* flush their stats */
+        self::$db->prepared_query("
+            SELECT concat('u_', bu.user_id) FROM bonus_update bu
+        ");
+        if (self::$db->has_results()) {
+            self::$cache->deleteMulti(self::$db->collect(0, false));
+        }
+
         return $processed;
     }
 }
