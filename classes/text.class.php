@@ -208,6 +208,8 @@ class Text {
     public static function full_format($Str, $OutputTOC = true, $Min = 3, $Rules = false) {
         $Str = display_str($Str);
 
+        self::$Headlines = [];
+
         //Inline links
         $URLPrefix = '(\[url\]|\[url\=|\[img\=|\[img\])';
         $Str = preg_replace('/'.$URLPrefix.'\s+/i', '$1', $Str);

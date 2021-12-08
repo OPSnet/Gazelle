@@ -26,8 +26,8 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
-            function ($text) {
-                return new \Twig\Markup(\Text::full_format($text), 'UTF-8');
+            function ($text, $outputToc = true) {
+                return new \Twig\Markup(\Text::full_format($text, $outputToc), 'UTF-8');
             }
         ));
 
