@@ -285,13 +285,13 @@ class Forum extends \Gazelle\BaseUser {
         [$cond, $args] = $this->configure();
         $from = "FROM forums_posts AS p
             LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
-            LEFT JOIN forums AS f ON (f.ID = t.ForumID)";
+            LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+            LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)";
         $cond[] = 'p.AuthorID = ?';
         $args[] = $this->user->id();
+        array_unshift($args, $this->user->id());
         if ($this->showUnread) {
-            $from .= "LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)\n";
             $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
-            array_unshift($args, $this->user->id());
         }
         return [$from, $cond, $args];
     }
@@ -438,13 +438,7 @@ class Forum extends \Gazelle\BaseUser {
         [$from, $cond, $args] = $this->configurePostHistory();
         $args[] = $limit;
         $args[] = $offset;
-        if ($this->showUnread) {
-            $unreadFirst = 'flrt.PostID AS last_read,';
-            $unreadCond  = 'AND (coalesce(flrt.PostID, 0) < t.LastPostID)';
-        } else {
-            $unreadFirst = '';
-            $unreadCond  = '';
-        }
+        $unreadFirst = $this->showUnread ? 'flrt.PostID AS last_read,' : '';
         self::$db->prepared_query("
             SELECT p.ID         AS post_id,
                 p.AddedTime     AS added_time,
@@ -455,9 +449,9 @@ class Forum extends \Gazelle\BaseUser {
                 t.Title         AS title,
                 t.IsLocked      AS is_locked,
                 t.IsSticky      AS is_sticky,
-                t.LastPostID    AS last_post_id, $unreadFirst
-                (NOT t.IsLocked OR t.IsSticky) $unreadCond
-                                AS new
+                t.LastPostID    AS last_post_id,
+                $unreadFirst
+                (NOT t.IsLocked OR t.IsSticky) AND (coalesce(flrt.PostID, 0) < t.LastPostID) as new
             $from
             WHERE
             " . implode(' AND ', $cond)
