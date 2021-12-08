@@ -5,7 +5,7 @@ if (empty($_GET['order_by']) || !isset(Gazelle\Search\Torrent::$SortOrders[$_GET
 } else {
     $OrderBy = $_GET['order_by'];
 }
-$OrderWay = ($_GET['order_way'] ?? 'asc');
+$OrderWay = ($_GET['order_way'] ?? 'desc');
 
 $GroupResults = !isset($_GET['group_results']) || $_GET['group_results'] != '0';
 $Page = (int)($_GET['page'] ?? 1);
