@@ -22,9 +22,10 @@ if ($showGrouped) {
     $title = "Post history";
 }
 
-$forumSearch = (new Gazelle\Search\Forum($Viewer))
-    ->setShowGrouped($ownProfile && $showGrouped)
-    ->setShowUnread($ownProfile && $showUnread);
+$forumSearch = (new Gazelle\Search\Forum($user))
+    ->setViewer($Viewer)
+    ->setShowGrouped($showGrouped)
+    ->setShowUnread($showUnread);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal($forumSearch->postHistoryTotal());
