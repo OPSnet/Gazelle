@@ -20,6 +20,9 @@ $Search = new Gazelle\Search\Torrent(
 $Results = $Search->query($_GET);
 $Groups = $Search->get_groups();
 $NumResults = $Search->record_count();
+if (!$Viewer->permitted('site_search_many')) {
+    $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
+}
 
 if ($Results === false) {
     json_die('failure', 'Search returned an error. Make sure all parameters are valid and of the expected types.');
