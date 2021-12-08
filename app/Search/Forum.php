@@ -289,9 +289,9 @@ class Forum extends \Gazelle\BaseUser {
             LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)";
         $cond[] = 'p.AuthorID = ?';
         $args[] = $this->user->id();
+        array_unshift($args, $this->user->id());
         if ($this->showUnread) {
             $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
-            array_unshift($args, $this->user->id());
         }
         return [$from, $cond, $args];
     }
