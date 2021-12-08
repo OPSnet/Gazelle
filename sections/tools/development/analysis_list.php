@@ -22,5 +22,3 @@ echo $Twig->render('debug/error-analysis.twig', [
     'list'      => $errMan->list($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
 ]);
-
-var_dump($clear);
