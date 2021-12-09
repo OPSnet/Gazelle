@@ -271,7 +271,7 @@ class Time {
             $interval[] = "{$day}d";
         }
         if ($week) {
-            $interval[] = "{$week}y";
+            $interval[] = "{$week}w";
         }
         return implode('', array_slice(array_reverse($interval), 0, 2));
     }
