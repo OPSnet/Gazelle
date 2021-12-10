@@ -223,7 +223,7 @@ if (!file_exists($file)) {
         require_once($file);
     }
     catch (\DB_MYSQL_Exception $e) {
-        if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
+        if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
 ?>
 <h3>Database error</h3>
 <code><?= $e->getMessage() ?></code>
