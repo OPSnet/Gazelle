@@ -153,7 +153,7 @@ class Bonus extends \Gazelle\Base {
         self::$db->prepared_query("
             SET SESSION tx_isolation = 'READ-UNCOMMITTED'
         ");
-        self::$db->pepared_query("
+        self::$db->prepared_query("
             INSERT INTO bonus_update (user_id, delta)
             SELECT xfu.uid,
                 sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders))
