@@ -152,8 +152,8 @@ if (!empty($_GET)) {
     $ClassIDs = [];
     $SecClassIDs = [];
     $Classes = (new Gazelle\Manager\User)->classList();
-    foreach ($Classes as $ClassID => $Value) {
-        if ($Value['Secondary']) {
+    foreach ($Classes as $ClassID => $validatorue) {
+        if ($validatorue['Secondary']) {
             $SecClassIDs[] = $ClassID;
         } else {
             $ClassIDs[] = $ClassID;
@@ -161,8 +161,8 @@ if (!empty($_GET)) {
     }
     $Stylesheets = (new \Gazelle\Stylesheet)->list();
 
-    $Val = new Gazelle\Util\Validator;
-    $Val->setFields([
+    $validator = new Gazelle\Util\Validator;
+    $validator->setFields([
         ['avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]],
         ['bounty', '0', 'inarray', "Invalid bounty field", $OffNumberChoices],
         ['cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]],
@@ -191,8 +191,8 @@ if (!empty($_GET)) {
         ['warned', '0', 'inarray', 'Invalid warned field', $Nullable],
         ['way', '0', 'inarray', 'Invalid way', $WayVals],
     ]);
-    if (!$Val->validate($_GET)) {
-        error($Val->errorMessage());
+    if (!$validator->validate($_GET)) {
+        error($validator->errorMessage());
     }
 
     $m = new SQLMatcher($matchMode);

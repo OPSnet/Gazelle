@@ -1372,11 +1372,12 @@ class User extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function siteIPv4Summary(): array {
+    public function siteIPv4History(): array {
         self::$db->prepared_query("
             SELECT IP,
                 min(StartTime) AS min_start,
-                max(coalesce(EndTime, now())) AS max_end
+                max(coalesce(EndTime, now())) AS max_end,
+                IP
             FROM users_history_ips
             WHERE UserID = ?
             GROUP BY IP
@@ -1386,11 +1387,12 @@ class User extends BaseObject {
         return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
-    public function trackerIPv4Summary(): array {
+    public function trackerIPv4History(): array {
         self::$db->prepared_query("
             SELECT IP,
                 from_unixtime(min(tstamp)) as first_seen,
-                from_unixtime(max(tstamp)) as last_seen
+                from_unixtime(max(tstamp)) as last_seen,
+                IP
             FROM xbt_snatched
             WHERE uid = ?
             GROUP BY inet_aton(IP)
@@ -1803,6 +1805,7 @@ class User extends BaseObject {
         self::$db->prepared_query("
             SELECT h.Email,
                 h.Time,
+                h.IP,
                 h.IP,
                 h.useragent
             FROM users_history_emails AS h
