@@ -6,7 +6,7 @@ if (!$Viewer->permitted('site_collages_renamepersonal')) {
     $ChangeJS = " onchange=\"if ( this.options[this.selectedIndex].value == '0') { $('#namebox').ghide(); $('#personal').gshow(); } else { $('#namebox').gshow(); $('#personal').ghide(); }\"";
 }
 
-$NoName = !$Viewer->permitted('site_collages_renamepersonal') && $Category === '0';
+$NoName = !$Viewer->permitted('site_collages_renamepersonal') && ($Category ?? 0) === 0;
 
 $personalAllowed = $Viewer->canCreatePersonalCollage();
 ?>
