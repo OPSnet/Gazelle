@@ -282,7 +282,7 @@ class Request extends BaseObject {
         $this->refreshSphinxDelta();
         (new \SphinxqlQuery())->raw_query("
             UPDATE requests, requests_delta SET
-                torrentid = " . $torrent->id() , ",
+                torrentid = " . $torrent->id() . ",
                 fillerid = " . $user->id() . ",
             WHERE id = " . $this->id, false
         );
