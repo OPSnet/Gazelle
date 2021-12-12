@@ -1151,7 +1151,7 @@ class Forum extends BaseObject {
                 AND l.UserID = ?
             ", $perPage, $this->id, $userId
         );
-        return self::$db->to_array('TopicID', MYSQLI_NUM, false);
+        return self::$db->to_array('TopicID', MYSQLI_ASSOC, false);
     }
 
     public function clearUserLastRead(int $threadId): int {
