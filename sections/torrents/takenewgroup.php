@@ -30,7 +30,6 @@ if (!$Year || empty($Title) || empty($ArtistName)) {
 
 // double check
 if (empty($_POST['confirm'])) {
-    View::show_header('Split new group');
     echo $Twig->render('torrent/confirm-split.twig', [
         'artist'     => $_POST['artist'],
         'auth'       => $Viewer->auth(),
@@ -39,7 +38,6 @@ if (empty($_POST['confirm'])) {
         'title'      => $_POST['title'],
         'year'       => $_POST['year'],
     ]);
-    View::show_footer();
     exit;
 }
 

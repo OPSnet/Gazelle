@@ -21,13 +21,11 @@ if (($_GET['action'] ?? '') == 'revert') {
         error(0);
     }
     if (empty($_GET['confirm'])) {
-        View::show_header('Group Edit');
         echo $Twig->render('tgroup/revert-confirm.twig', [
             'auth'        => $Viewer->auth(),
             'group_id'    => $GroupID,
             'revision_id' => $RevisionID,
         ]);
-        View::show_footer();
         exit;
     }
     $revert = $tgroup->revertRevision($Viewer->id(), $RevisionID);
