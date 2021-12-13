@@ -37,6 +37,6 @@ if (!$success) {
     $Viewer->id() != $uploaderId
 );
 
-echo $Twig->render('template/torrent/deleted.twig', [
+echo $Twig->render('torrent/deleted.twig', [
     'name' => $fullName,
 ]);
