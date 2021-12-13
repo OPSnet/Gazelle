@@ -6,7 +6,7 @@ use Gazelle\Util\Mail;
 
 class Recovery extends Base {
 
-    public function checkEmail(string $raw): array {
+    public function checkEmail(string $raw): ?array {
         $raw = strtolower(trim($raw));
         $parts = explode('@', $raw);
         if (count($parts) != 2) {

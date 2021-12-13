@@ -10,25 +10,25 @@ class Login extends Base {
     public const ERR_CREDENTIALS = 3;
     public const ERR_UNCONFIRMED = 4;
 
-    protected $error = self::NO_ERROR;
-    protected $ipaddr;
-    protected $password;
-    protected $persistent = 0;
-    protected $twofa;
-    protected $userId = 0;
-    protected $username;
-    protected $watch;
+    protected int $error = self::NO_ERROR;
+    protected int $persistent = 0;
+    protected int $userId = 0;
+    protected string $ipaddr;
+    protected string $password;
+    protected $twofa; // no idea?
+    protected string $username;
+    protected LoginWatch $watch;
 
     public function __construct() {
         $this->ipaddr = $_SERVER['REMOTE_ADDR'];
     }
 
-    public function setPassword($password) {
+    public function setPassword(string $password) {
         $this->password = $password;
         return $this;
     }
 
-    public function setPersistent($persistent) {
+    public function setPersistent(int $persistent) {
         $this->persistent = $persistent ? 1 : 0;
         return $this;
     }
@@ -43,12 +43,12 @@ class Login extends Base {
         return $this;
     }
 
-    public function setUsername($username) {
+    public function setUsername(string $username) {
         $this->username = trim($username);
         return $this;
     }
 
-    public function error() {
+    public function error(): int {
         return $this->error;
     }
 
@@ -56,7 +56,7 @@ class Login extends Base {
         return $this->ipaddr;
     }
 
-    public function persistent(): ?string {
+    public function persistent(): ?int {
         return $this->persistent;
     }
 
@@ -70,7 +70,7 @@ class Login extends Base {
      * If successful, clear any login rate-limiting on the associated IP address.
      * If unsuccessul, record a failure and if there are too many failures, ban.
      *
-     * @return true on success, false on failure and reason will be available from error()
+     * @return \Gazelle\User|null on failure, reason will be available from error()
      */
     public function login(): ?User {
         $begin = microtime(true);
@@ -101,7 +101,7 @@ class Login extends Base {
      * Attempt to log into the system.
      * Need a viable user/password and eventual 2FA code or recovery key.
      *
-     * @return a User object if the credentials are successfully authenticated
+     * @return \Gazelle\User|null a User object if the credentials are successfully authenticated
      */
     protected function attemptLogin(): ?User {
         if (is_null($this->username)) {
@@ -144,7 +144,7 @@ class Login extends Base {
             return null;
         }
         if ($TFAKey) {
-            $tfa = new \RobThree\Auth\TwoFactorAuth();
+            $tfa = new \RobThree\Auth\TwoFactorAuth;
             if (!$tfa->verifyCode($TFAKey, $this->twofa, 2)) {
                 // They have 2FA but the device key did not match
                 // Fallback to considering it as a recovery key.

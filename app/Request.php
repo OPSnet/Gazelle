@@ -280,11 +280,11 @@ class Request extends BaseObject {
         );
         $updated = self::$db->affected_rows();
         $this->refreshSphinxDelta();
-        (new \SphinxqlQuery())->raw_query("
-            UPDATE requests, requests_delta SET
-                torrentid = " . $torrent->id() . ",
-                fillerid = " . $user->id() . ",
-            WHERE id = " . $this->id, false
+        (new \SphinxqlQuery())->raw_query(
+            sprintf("
+                UPDATE requests, requests_delta SET torrentid = %d, fillerid = %d WHERE id = %d
+                ", $torrent->id(), $user->id(), $this->id
+            ), false
         );
 
         $bounty = $this->bountyTotal();
@@ -393,8 +393,6 @@ class Request extends BaseObject {
 
     /**
      * Refund the bounty of a user on a request
-     * @param int $userId ID of user
-     * @param int $staffName name of staff performing the operation
      */
     public function refundBounty(int $userId, string $staffName) {
         $bounty = $this->userBounty($userId);
