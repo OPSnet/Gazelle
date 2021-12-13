@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked, selected %}
+{{ header('Edit torrent group "' ~ tgroup.name ~ '"') }}
 <div class="thin">
     <div class="header">
         <h2>Edit <a href="torrents.php?id={{ tgroup.id }}">{{ tgroup.name }}</a></h2>
@@ -129,3 +130,4 @@
     </div>
 {% endif %}
 </div>
+{{ footer() }}

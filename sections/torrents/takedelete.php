@@ -36,10 +36,7 @@ if (!$success) {
     0,
     $Viewer->id() != $uploaderId
 );
-View::show_header('Torrent deleted');
-?>
-<div class="thin">
-    <h3>Torrent <?= $fullName ?> was successfully deleted.</h3>
-</div>
-<?php
-View::show_footer();
+
+echo $Twig->render('template/torrent/deleted.twig', [
+    'name' => $fullName,
+]);
