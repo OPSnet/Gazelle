@@ -94,7 +94,7 @@ class Artist extends Base {
             INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
             INNER JOIN release_type AS rt ON (rt.ID = tg.ReleaseType)
             WHERE ta.ArtistID = ?
-            ORDER BY rt.ID, tg.Year DESC, tg.Name DESC
+            ORDER BY tg.Year DESC, tg.Name, rt.ID
             ", $this->id
         );
         $this->artistRole = [
@@ -131,26 +131,13 @@ class Artist extends Base {
             if (!isset($this->section[$sectionId])) {
                 $this->section[$sectionId] = [];
             }
-            $this->section[$sectionId][$groupId] = true;;
+            $this->section[$sectionId][$groupId] = true;
             if (!isset($this->groupRole[$groupId])) {
                 $this->groupRole[$groupId] = [];
             }
             $this->groupRole[$groupId][] = $role;
             ++$this->artistRole[$role];
         }
-
-        $groupIds = array_keys($this->groupRole);
-        $torrentGroupList = \Torrents::get_groups($groupIds, true, true);
-        foreach ($groupIds as $groupId) {
-            $this->group[$groupId] = $torrentGroupList[$groupId];
-            foreach ($this->group[$groupId]['Torrents'] as $t) {
-                $this->nrLeechers += $t['Leechers'];
-                $this->nrSnatches += $t['Snatched'];
-                $this->nrSeeders  += $t['Seeders'];
-                ++$this->nrTorrents;
-            }
-        }
-        $this->nrGroups = count($groupIds);
         return $this;
     }
 
@@ -163,7 +150,7 @@ class Artist extends Base {
     }
 
     public function group(int $groupId): array {
-        return $this->group[$groupId];
+        return $this->group[$groupId] ?? []; // FIXME
     }
 
     public function nrGroups(): int {
@@ -212,6 +199,24 @@ class Artist extends Base {
 
     public function url(): string {
         return sprintf('<a href="artist.php?id=%d">%s</a>', $this->id, $this->name);
+    }
+
+    public function tagLeaderboard(): array {
+        self::$db->prepared_query("
+            SELECT t.Name AS name,
+                count(*)  AS total
+            FROM torrents_artists tga
+            INNER JOIN torrents_group tg ON (tg.ID = tga.GroupID)
+            INNER JOIN torrents_tags ta USING (GroupID)
+            INNER JOIN tags t ON (t.ID = ta.TagID)
+            WHERE tg.CategoryID NOT IN (3, 7)
+                AND tga.ArtistID = ?
+            GROUP BY t.Name
+            ORDER By 2 desc, t.Name
+            LIMIT 10
+            ", $this->id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function rename(int $userId, int $aliasId, string $name): void {

@@ -1,0 +1,69 @@
+<?php
+
+namespace Gazelle\Stats;
+
+class Artist extends \Gazelle\BaseObject {
+    protected const CACHE_KEY = 'a_stats_%d';
+
+    protected array $info;
+
+    public function tableName(): string { return '/* artist stats */'; }
+
+    public function url(): string {
+        return 'artist.php?id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">artist %d</a>', $this->url(), $this->id());
+    }
+
+    public function flush() {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+    }
+
+    public function info(): array {
+        if (isset($this->info)) {
+            return $this->info;
+        }
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        $info =self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT count(*)           AS torrent_total,
+                    count(DISTINCT tg.ID) AS tgroup_total,
+                    sum(tls.Leechers)     AS leecher_total,
+                    sum(tls.Seeders)      AS seeder_total,
+                    sum(tls.Snatched)     AS snatch_total
+                FROM torrents_artists           ta
+                INNER JOIN torrents_group       tg  ON (tg.ID = ta.GroupID)
+                INNER JOIN torrents             t   ON (t.GroupID = tg.ID)
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                WHERE ta.ArtistID = ?
+                ", $this->id()
+            );
+            self::$cache->cache_value($key, $info, 3600);
+        }
+        $this->info = $info;
+        return $this->info;
+    }
+
+    public function leecherTotal(): int {
+        return $this->info()['leecher_total'];
+    }
+
+    public function seederTotal(): int {
+        return $this->info()['seeder_total'];
+    }
+
+    public function snatchTotal(): int {
+        return $this->info()['snatch_total'];
+    }
+
+    public function tgroupTotal(): int {
+        return $this->info()['tgroup_total'];
+    }
+
+    public function torrentTotal(): int {
+        return $this->info()['torrent_total'];
+    }
+}

@@ -181,8 +181,8 @@ class Cache extends \Memcached {
         }
 
         $Return = $this->get($Key);
-        if ($Return !== false) {
-            $this->CacheHits[$Key] = $NoCache ? null : $Return;
+        if ($Return !== false && !$NoCache) {
+            $this->CacheHits[$Key] = $Return;
         }
         $this->Time += (microtime(true) - $StartTime) * 1000;
         return $Return;

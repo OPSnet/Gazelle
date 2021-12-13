@@ -146,6 +146,7 @@ class DB_MYSQL {
     protected $Row;
     protected $Errno = 0;
     protected $Error = '';
+    protected bool $queryLog = true;
 
     protected $PreparedQuery = null;
     protected $Statement = null;
@@ -167,6 +168,14 @@ class DB_MYSQL {
         $this->Pass = $Pass;
         $this->Port = $Port;
         $this->Socket = $Socket;
+    }
+
+    public function disableQueryLog() {
+        $this->queryLog = false;
+    }
+
+    public function enableQueryLog() {
+        $this->queryLog = true;
     }
 
     private function halt($Msg) {
@@ -346,7 +355,9 @@ class DB_MYSQL {
         if (($Len = strlen($Query))>16384) {
             $Query = substr($Query, 0, 16384).'... '.($Len-16384).' bytes trimmed';
         }
-        $this->Queries[] = [$Query, ($QueryEndTime - $QueryStartTime) * 1000, null];
+        if ($this->queryLog) {
+            $this->Queries[] = [$Query, ($QueryEndTime - $QueryStartTime) * 1000, null];
+        }
         $this->Time += ($QueryEndTime - $QueryStartTime) * 1000;
 
         // Update/Insert/etc statements for prepared queries don't return a QueryID,
