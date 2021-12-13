@@ -8,8 +8,6 @@ class Quote extends \Gazelle\BaseUser {
 
     /**
      * Toggle whether only unread quotes should be listed
-     *
-     * @param bool $showAll false if only unread should be shown, true to show everything
      */
     public function setShowAll(bool $showAll) {
         $this->showAll = $showAll;
@@ -18,8 +16,6 @@ class Quote extends \Gazelle\BaseUser {
 
     /**
      * Are only unread quotes displayed?
-     *
-     * @return bool true if all quotes are displayed
      */
     public function showAll(): bool {
         return $this->showAll;
@@ -27,8 +23,6 @@ class Quote extends \Gazelle\BaseUser {
 
     /**
      * Mark all unread quotes as having been seen by a user
-     *
-     * @return int Number of quotes cleared
      */
     public function clear(): int {
         self::$db->prepared_query("
@@ -43,10 +37,6 @@ class Quote extends \Gazelle\BaseUser {
 
     /**
      * Mark the user as having seen their quoted posts in a thread
-     *
-     * @param int $threadId The ID of the thread
-     * @param int $firstPost The first post in the thread
-     * @param int $lastPost The most recent post in the thread
      */
     public function clearThread(int $threadId, int $firstPost, int $lastPost): bool {
         self::$db->prepared_query("
@@ -72,7 +62,7 @@ class Quote extends \Gazelle\BaseUser {
      * The conditions should be AND'ed together in a WHERE clause and the
      * arguments passed to a db query.
      */
-    protected function configure() {
+    protected function configure(): array {
         $permittedForums = $this->user->permittedForums();
         $forbiddenForums = $this->user->forbiddenForums();
         $forumCond = [];
@@ -110,10 +100,8 @@ class Quote extends \Gazelle\BaseUser {
 
     /**
      * How many quotes does the person have
-     *
-     * @return int total quotes
      */
-    public function total() {
+    public function total(): int {
         [$cond, $args] = $this->configure();
         return self::$db->scalar("
             SELECT count(*)
@@ -140,7 +128,7 @@ class Quote extends \Gazelle\BaseUser {
      *  quoter_id: user id
      *  unread: has the viewer seen the quote
      */
-    public function page(int $limit, int $offset) {
+    public function page(int $limit, int $offset): array {
         [$cond, $args] = $this->configure();
         $args = array_merge($args, [$limit, $offset]);
         self::$db->prepared_query("
@@ -150,11 +138,12 @@ class Quote extends \Gazelle\BaseUser {
                 q.QuoterID,
                 q.Date,
                 q.UnRead,
-                f.ID as ForumID,
-                f.Name as ForumName,
-                t.Title as ForumTitle,
-                a.Name as ArtistName,
-                c.Name as CollageName
+                f.ID    AS ForumID,
+                f.Name  AS ForumName,
+                t.ID    AS threadId,
+                t.Title AS ForumTitle,
+                a.Name  AS ArtistName,
+                c.Name  AS CollageName
             FROM users_notify_quoted AS q
             LEFT JOIN forums_topics  AS t ON (t.ID = q.PageID)
             LEFT JOIN forums         AS f ON (f.ID = t.ForumID)
@@ -197,9 +186,11 @@ class Quote extends \Gazelle\BaseUser {
                 break;
             case 'forums':
                 $forum = $forumMan->findbyId($q['ForumID']);
+                $thread = $forum->threadInfo($q['threadId']);
+                $threadUrl = 
                 $context = [
                     'jump' => $forum->threadPostUrl($q['PageID'], $q['PostID']),
-                    'link' => $forum->link(),
+                    'link' => $forum->link() . ' &rsaquo; ' . $forum->threadLink($q['PageID'], $q['ForumTitle']),
                     'title' => 'Forums',
                 ];
                 break;
