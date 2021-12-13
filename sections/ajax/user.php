@@ -18,8 +18,8 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $TotalSpent     = $stats->requestVoteSize();
 }
 
-$Vote = new Gazelle\Vote($User);
-$releaseVotes     = $Vote->userTotal(Gazelle\Vote::UPVOTE|Gazelle\Vote::DOWNVOTE);
+$vote = new Gazelle\Vote($user);
+$releaseVotes     = $vote->userTotal(Gazelle\Vote::UPVOTE|Gazelle\Vote::DOWNVOTE);
 $ForumPosts       = $stats->forumPostTotal();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $stats->uploadTotal() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : null;
