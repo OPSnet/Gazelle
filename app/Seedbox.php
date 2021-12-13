@@ -12,7 +12,7 @@ class Seedbox extends BaseUser {
     protected \Hashids\Hashids $hashid;
     protected array $host = [];
     protected array $free = [];
-    protected bool $isUnion;
+    protected bool $isUnion = false;
     protected int $source;
     protected int $target;
     protected int $viewBy = self::VIEW_BY_NAME;
