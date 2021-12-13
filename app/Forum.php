@@ -32,6 +32,14 @@ class Forum extends BaseObject {
         ]);
     }
 
+    public function threadUrl(int $threadId): string {
+        return "forums.php?action=viewthread&amp;threadid={$threadId}";
+    }
+
+    public function threadLink(int $threadId, string $title): string {
+        return sprintf('<a href="%s">%s</a>', $this->threadUrl($threadId), display_str($title));
+    }
+
     public function threadPostUrl(int $threadId, int $postId): string {
         return "forums.php?action=viewthread&amp;threadid={$threadId}&amp;postid={$postId}#post{$postId}";
     }
