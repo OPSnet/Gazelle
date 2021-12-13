@@ -6,11 +6,6 @@ class TGroup extends \Gazelle\Json {
     protected \Gazelle\TGroup $tgroup;
     protected \Gazelle\User $user;
 
-    public function __construct() {
-        parent::__construct();
-        $this->setMode(JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
-    }
-
     public function setTGroup(\Gazelle\TGroup $tgroup) {
         $this->tgroup = $tgroup;
         return $this;

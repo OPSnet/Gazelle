@@ -39,12 +39,6 @@ class ReportV2 extends Base {
         return self::$db->affected_rows();
     }
 
-    /**
-     * Claim a report.
-     *
-     * @param int User ID
-     * @return bool claim success
-     */
     public function claim(int $userId): bool {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
@@ -60,7 +54,7 @@ class ReportV2 extends Base {
     /**
      * Unclaim a report (make it new and clear the resolver)
      *
-     * @return 1 if unresolved, 0 if nothing changed and -1 if the ID does not match a report
+     * @return int 1 if unresolved, 0 if nothing changed and -1 if the ID does not match a report
      */
     public function unclaim(): int {
         if (self::$db->scalar("SELECT 1 FROM reportsv2 WHERE ID = ?", $this->id)) {
@@ -77,12 +71,6 @@ class ReportV2 extends Base {
         return -1;
     }
 
-    /**
-     * Resolve a report
-     *
-     * @param string The resolve message
-     * @return bool resolve success
-     */
     public function resolve(string $message): bool {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
@@ -96,13 +84,6 @@ class ReportV2 extends Base {
         return self::$db->affected_rows() === 1;
     }
 
-    /**
-     * Moderator-resolve a report
-     *
-     * @param int User ID of moderator
-     * @param string The resolve message
-     * @return bool true if successfully resolved, false if nothing changed
-     */
     public function moderatorResolve(int $userId, string $message): bool {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
@@ -119,10 +100,6 @@ class ReportV2 extends Base {
 
     /**
      * Finalize a report: log the final details post-resolve
-     *
-     * @param int User ID of moderator
-     * @param string The resolve message
-     * @return bool true if successfully resolved, false if nothing changed
      */
     public function finalize(string $resolveType, string $log, string $message): bool {
         self::$db->prepared_query("
@@ -137,12 +114,6 @@ class ReportV2 extends Base {
         return self::$db->affected_rows() === 1;
     }
 
-    /**
-     * Change the type of a report
-     *
-     * @param string report type
-     * @return 1 if successfully changed, 0 if nothing changed
-     */
     public function changeType(string $type): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
@@ -156,9 +127,6 @@ class ReportV2 extends Base {
 
     /**
      * Update the comment of a report
-     *
-     * @param string comment
-     * @return 1 if successfully commented, 0 if nothing changed
      */
     public function comment(string $comment): int {
         self::$db->prepared_query("

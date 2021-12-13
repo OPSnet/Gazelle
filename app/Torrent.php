@@ -66,9 +66,6 @@ class Torrent extends BaseObject {
 
     /**
      * Set the viewer context, for snatched indicators etc.
-     *
-     * @param int $userID The ID of the User
-     * @return $this to allow method chaining
      */
     public function setViewer(User $viewer) {
         $this->viewer = $viewer;
@@ -78,9 +75,6 @@ class Torrent extends BaseObject {
     /**
      * In the context of a user, determine whether snatched indicators should be
      * added to torrent and group info.
-     *
-     * @param int $userID The ID of the User
-     * @return $this to allow method chaining
      */
     public function setShowSnatched(int $showSnatched) {
         $this->showSnatched = $showSnatched;
@@ -96,9 +90,6 @@ class Torrent extends BaseObject {
 
     /**
      * Check if the viewer has an active freeleech token on a torrent
-     *
-     * @param int userId
-     * @return true if an active token exists for the viewer
      */
     public function hasToken(int $userId): bool {
         if (!$this->tokenCache) {
@@ -591,13 +582,8 @@ class Torrent extends BaseObject {
 
     /**
      * Combine torrent media into a standardized file name
-     *
-     * @param array Torrent metadata
-     * @param bool whether to use .txt or .torrent as file extension
-     * @param int $MaxLength maximum file name length
-     * @return string file name with at most $MaxLength characters
      */
-    public function torrentFilename(bool $asText, int $MaxLength) {
+    public function torrentFilename(bool $asText, int $MaxLength): string {
         $MaxLength -= strlen($this->id) + 1 + ($asText ? 4 : 8);
         $info = $this->info();
         $group = $this->group();
@@ -630,11 +616,6 @@ class Torrent extends BaseObject {
 
     /**
      * Convert a stored torrent into a binary file that can be loaded in a torrent client
-     *
-     * @param mixed $TorrentData bencoded torrent without announce URL
-     * @param string $AnnounceURL
-     * @param int $TorrentID
-     * @return string bencoded string
      */
     public function torrentBody(string $announceUrl): string {
         $filer = new \Gazelle\File\Torrent;
@@ -765,11 +746,7 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * Has the viewing user snatched this torrent? (And do they want
-     * to know about it?)
-     *
-     * @param int user id
-     * @return bool viewer has snatched.
+     * Has the viewing user snatched this torrent? (And do they want to know about it?)
      */
     public function isSnatched(int $userId): bool {
         $buckets = 64;
@@ -946,10 +923,6 @@ class Torrent extends BaseObject {
 
     /**
      * Remove a torrent.
-     *
-     * @param int userid Who is removing the torrent
-     * @param string reason Why is this being deleted? (For the log)
-     * @param string trackerReason The deletion reason for ocelot to report to users.
      */
     public function remove(int $userId, string $reason, int $trackerReason = -1): array {
         $qid = self::$db->get_query_id();
@@ -1091,9 +1064,6 @@ class Torrent extends BaseObject {
 
     /**
      * Get the requests filled by this torrent.
-     * (Should only be one, but hey, who knows what the original developer was looking to catch?)
-     * @param int torrent ID
-     * @return DB object to loop over [request id, filler user id, date filled]
      */
     public function requestFills(): array {
         self::$db->prepared_query("

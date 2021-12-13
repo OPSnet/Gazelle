@@ -3,15 +3,8 @@
 namespace Gazelle;
 
 abstract class Json extends Base {
-    protected $version;
-    protected $source;
-    protected $mode;
-
-    public function __construct() {
-        $this->source = SITE_NAME;
-        $this->mode = JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR;
-        $this->version = 1;
-    }
+    protected int $mode    = JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR;
+    protected int $version = 1;
 
     /**
      * The payload of a valid JSON response, implemented in the child class.
@@ -22,8 +15,6 @@ abstract class Json extends Base {
 
     /**
      * Configure JSON printing (any of the json_encode  JSON_* constants)
-     *
-     * @param int $mode the bit-or'ed values to confgure encoding results
      */
     public function setMode(int $mode) {
         $this->mode = $mode;
@@ -31,11 +22,9 @@ abstract class Json extends Base {
     }
 
     /**
-     * set the version of the Json payload. Increment the
+     * Set the version of the Json payload. Increment the
      * value when there is significant change in the payload.
      * If not called, the version defaults to 1.
-     *
-     * @param int version
      */
     public function setVersion(int $version) {
         $this->version = $version;
@@ -44,8 +33,6 @@ abstract class Json extends Base {
 
     /**
      * General failure routine for when bad things happen.
-     *
-     * @param string $message The error set in the JSON response
      */
     public function failure(string $message) {
         print json_encode(
@@ -82,7 +69,7 @@ abstract class Json extends Base {
         }
     }
 
-    protected function debug() {
+    protected function debug(): array {
         global $Debug, $Viewer;
         if (!$Viewer->permitted('site_debug')) {
             return [];
@@ -94,10 +81,10 @@ abstract class Json extends Base {
         return $info;
     }
 
-    protected function info() {
+    protected function info(): array {
         return [
             'info' => [
-                'source' => $this->source,
+                'source'  => SITE_NAME,
                 'version' => $this->version,
             ]
         ];

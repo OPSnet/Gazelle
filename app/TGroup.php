@@ -95,9 +95,6 @@ class TGroup extends BaseObject {
     /**
      * Toggle whether an internal URL is returnd for missing cover artwork
      * is returned, or null. Used by API endpoints.
-     *
-     * @param bool false means the property will be null instead of placeholder URL
-     * @return $this to allow method chaining
      */
     public function showFallbackImage(bool $showFallbackImage) {
         $this->showFallbackImage = $showFallbackImage;
@@ -575,11 +572,6 @@ class TGroup extends BaseObject {
     /**
      * Add artists to a group. The role and name arrays must be the same length, and
      * are walked down in step, to match the artist with their role in the group
-     *
-     * param \Gazelle\User who is adding
-     * @param array list of artist roles
-     * @param array list of artist names (unknown artists will be created)
-     * @return int number of artists added
      */
     public function addArtists(\Gazelle\User $user, array $roles, array $names): int {
         $userId = $user->id();
@@ -782,8 +774,6 @@ class TGroup extends BaseObject {
 
     /**
      * How many unresolved torrent reports are there in this group?
-     * @param int Group ID
-     * @return int number of unresolved reports
      */
     public function unresolvedReportsTotal(): int {
         return self::$db->scalar("

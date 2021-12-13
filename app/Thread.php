@@ -51,15 +51,12 @@ class Thread extends BaseObject {
      *  body       - the note text itself
      * @return array The list of notes in a thread ordered by most recent first.
      */
-    public function story() {
+    public function story(): array {
         return $this->story;
     }
 
     /**
      * Persist a note to the db.
-     * @param int $userId The note author
-     * @param string $body The note text
-     * @param int $visibility 'public' or 'staff'
      */
     public function saveNote(int $userId, string $body, string $visibility) {
         self::$db->prepared_query("
@@ -73,9 +70,6 @@ class Thread extends BaseObject {
 
     /**
      * Persist a change to the note
-     * @param int $id The id to identify a note
-     * @param string $body The note text
-     * @param int $visibility 'public' or 'staff'
      */
     public function modifyNote(int $id, string $body, string $visibility) {
         self::$db->prepared_query("
@@ -90,7 +84,6 @@ class Thread extends BaseObject {
 
     /**
      * Delete a note.
-     * @param int $note_id The id to identify a note
      */
     public function removeNote(int $noteId) {
         self::$db->prepared_query("

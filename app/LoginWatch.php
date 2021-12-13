@@ -28,9 +28,6 @@ class LoginWatch extends Base {
      * Record another failure attempt on this watch. If the user has not
      * logged in recently from this IP address then subsequent logins
      * will be blocked for increasingly longer times, otherwise 1 minute.
-     *
-     * @param int $userId The ID of the user
-     * @return int 1 if the watch was updated
      */
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
@@ -58,7 +55,6 @@ class LoginWatch extends Base {
 
     /**
      * Ban subsequent attempts to login from this watched IP address for a while
-     * @return int 1 if the watch was banned
      */
     public function ban(string $username): int {
         self::$db->prepared_query('
@@ -76,7 +72,6 @@ class LoginWatch extends Base {
 
     /**
      * When does the login ban expire?
-     * @return string datestamp of expiry
      */
     public function bannedUntil(): ?string {
         return self::$db->scalar("
@@ -87,7 +82,6 @@ class LoginWatch extends Base {
 
     /**
      * When does the login ban expire?
-     * @return int epoch
      */
     public function bannedEpoch(): int {
         return strtotime($this->bannedUntil()) ?? 0;
@@ -95,7 +89,6 @@ class LoginWatch extends Base {
 
     /**
      * If the login ban was in the past then they get 6 more shots
-     * @return int 1 if a prior ban was cleared
      */
     public function clearPriorBan(): int {
         self::$db->prepared_query("
@@ -110,7 +103,6 @@ class LoginWatch extends Base {
 
     /**
      * If the login was successful, clear prior attempts
-     * @return int 1 if an update was made
      */
     public function clearAttempts(): int {
         self::$db->prepared_query("
@@ -124,7 +116,6 @@ class LoginWatch extends Base {
 
     /**
      * How many attempts have been made on this watch?
-     * @return int Number of attempts
      */
     public function nrAttempts(): int {
         return (int)self::$db->scalar("
@@ -135,7 +126,6 @@ class LoginWatch extends Base {
 
     /**
      * How many bans have been made on this watch?
-     * @return int Number of attempts
      */
     public function nrBans(): int {
         return (int)self::$db->scalar("
@@ -146,7 +136,6 @@ class LoginWatch extends Base {
 
     /**
      * Get total login failures
-     * @return int count
      */
     public function activeTotal(): int {
         return self::$db->scalar("
@@ -158,6 +147,7 @@ class LoginWatch extends Base {
 
     /**
      * Get the list of login failures
+     *
      * @return array list [ID, ipaddr, userid, LastAttempt (datetime), Attempts, BannedUntil (datetime), Bans]
      */
     public function activeList(string $orderBy, string $orderWay, int $limit, int $offset): array {
@@ -185,17 +175,13 @@ class LoginWatch extends Base {
 
     /**
      * Ban the IP addresses pointed to by the IDs that are on login watch.
-     * @param int User doing the banning
-     * @param string why
-     * @param array list of IDs to ban.
-     * @return number of addresses banned
      */
     public function setBan(int $userId, string $reason, array $list): int {
         if (!$list) {
             return 0;
         }
         $reason = trim($reason);
-        $n = 0;
+        $affected = 0;
         foreach ($list as $id) {
             $ipv4 = self::$db->scalar("
                 SELECT inet_aton(IP) FROM login_attempts WHERE ID = ?
@@ -207,15 +193,13 @@ class LoginWatch extends Base {
                 VALUES (?,       ?,      ?,      ?)
                 ", $userId, $reason, $ipv4, $ipv4
             );
-            $n += self::$db->affected_rows();
+            $affected += self::$db->affected_rows();
         }
-        return $n;
+        return $affected;
     }
 
     /**
      * Clear the list of IDs that are on login watch.
-     * @param array list of IDs to clear.
-     * @return number of rows removed
      */
     public function setClear(array $list): int {
         if (!$list) {
@@ -224,7 +208,7 @@ class LoginWatch extends Base {
         self::$db->prepared_query("
             DELETE FROM login_attempts
             WHERE ID in (" . placeholders($list) . ")
-            ", ... $list
+            ", ...$list
         );
         return self::$db->affected_rows();
     }

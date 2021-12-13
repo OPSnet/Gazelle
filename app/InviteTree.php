@@ -131,7 +131,7 @@ class InviteTree extends Base {
             ", $this->userId
         );
         if (!$treeId) {
-            return '';
+            return [];
         }
 
         $maxLevel   = $level; // The deepest level (this changes)
