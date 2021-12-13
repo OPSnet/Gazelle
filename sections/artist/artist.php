@@ -323,7 +323,7 @@ if ($sections = $Artist->sections()) {
                         </div>
 <?php   } ?>
                         <div class="group_info clear">
-                            <strong><?= $tgroup->displayNameHtml() ?></strong>
+                            <strong><?= $tgroup->link() ?></strong>
 <?php if ($bookmark->isTorrentBookmarked($groupId)) { ?>
                             <span class="remove_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$groupId?>" class="brackets" onclick="Unbookmark('torrent', <?=$groupId?>, 'Bookmark'); return false;">Remove bookmark</a>
