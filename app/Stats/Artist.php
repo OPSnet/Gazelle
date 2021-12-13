@@ -29,11 +29,11 @@ class Artist extends \Gazelle\BaseObject {
         $info =self::$cache->get_value($key);
         if ($info === false) {
             $info = self::$db->rowAssoc("
-                SELECT count(*)           AS torrent_total,
-                    count(DISTINCT tg.ID) AS tgroup_total,
-                    sum(tls.Leechers)     AS leecher_total,
-                    sum(tls.Seeders)      AS seeder_total,
-                    sum(tls.Snatched)     AS snatch_total
+                SELECT count(*)                    AS torrent_total,
+                    count(DISTINCT tg.ID)          AS tgroup_total,
+                    coalesce(sum(tls.Leechers), 0) AS leecher_total,
+                    coalesce(sum(tls.Seeders), 0)  AS seeder_total,
+                    coalesce(sum(tls.Snatched), 0) AS snatch_total
                 FROM torrents_artists           ta
                 INNER JOIN torrents_group       tg  ON (tg.ID = ta.GroupID)
                 INNER JOIN torrents             t   ON (t.GroupID = tg.ID)
