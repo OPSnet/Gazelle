@@ -118,7 +118,7 @@ class UserLink extends \Gazelle\BaseUser {
         }
     }
 
-    function info() {
+    function info(): array {
         $sourceId = $this->user->id();
         [$linkedGroupId, $comments] = self::$db->row("
             SELECT d.ID, d.Comments
@@ -137,7 +137,7 @@ class UserLink extends \Gazelle\BaseUser {
             ORDER BY um.ID
             ", $linkedGroupId, $sourceId
         );
-        return [$linkedGroupId, $comments, self::$db->to_array(false, MYSQLI_ASSOC, false)];
+        return [$linkedGroupId, $comments ?? '', self::$db->to_array(false, MYSQLI_ASSOC, false)];
     }
 
     function remove(\Gazelle\User $target, string $adminName) {
