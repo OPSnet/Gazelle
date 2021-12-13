@@ -39,7 +39,7 @@
         </tr>
         <tr>
             <td class="label">Additional forums</td>
-            <td><input type="text" size="30" name="forums" value="{{ privilege.forums }}" /></td>
+            <td><input type="text" size="30" name="forums" value="{{ privilege.permittedForums|join(', ') }}" /></td>
         </tr>
 {% if privilege.isSecondary %}
         <tr>

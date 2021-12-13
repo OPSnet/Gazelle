@@ -49,14 +49,14 @@ namespace Gazelle;
 
 class UserRank extends Base {
 
-    var $config;
-    var $rank;
-    var $score;
+    protected \Gazelle\UserRank\Configuration $config;
+    protected array $rank;
+    protected float $score = 0.0;
 
     const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 
-    public function score(): int {
-        return $this->score;
+    public function score(): ?int {
+        return is_nan($this->score) ? null : (int)round($this->score, 0);
     }
 
     public function rank(string $dimension): int {
@@ -68,7 +68,6 @@ class UserRank extends Base {
         $definition = $this->config->definition();
 
         $dimension['uploaded'] -= STARTING_UPLOAD;
-        $this->rank = [];
         $ok = true;
         foreach ($definition as $d) {
             $this->rank[$d] = $this->config->instance($d)->rank($dimension[$d]);
@@ -77,12 +76,11 @@ class UserRank extends Base {
             }
         }
         if (!$ok) {
-            $this->score = false;
+            $this->score = NAN;
             return;
         }
 
-        $this->score = 0;
-        $totalWeight = 0;
+        $totalWeight = 0.0;
         foreach ($definition as $d) {
             $weight = $this->config->weight($d);
             $this->score += $weight * $this->rank[$d];
