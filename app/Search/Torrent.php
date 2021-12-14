@@ -292,17 +292,20 @@ class Torrent {
                 $Words['include'] = $Words['exclude'];
                 unset($Words['exclude']);
             }
+            $totalWords = 0;
             if (!empty($Words['include'])) {
                 foreach ($Words['include'] as $Word) {
                     $QueryParts['include'][] = \Sphinxql::sph_escape_string($Word);
+                    ++$totalWords;
                 }
             }
             if (!empty($Words['exclude'])) {
                 foreach ($Words['exclude'] as $Word) {
                     $QueryParts['exclude'][] = '!' . \Sphinxql::sph_escape_string(substr($Word, 1));
+                    ++$totalWords;
                 }
             }
-            if (!empty($QueryParts)) {
+            if ($totalWords) {
                 if (isset($Words['operator'])) {
                     // Is the operator already specified?
                     $Operator = $Words['operator'];
@@ -638,7 +641,7 @@ class Torrent {
         if (count($this->SphResults) == 0) {
             return;
         }
-        $this->Groups = \Torrents::get_groups($this->SphResults);
+        $this->Groups = \Torrents::get_groups($this->SphResults) ?? [];
         if ($this->need_torrent_ft()) {
             // Query Sphinx for torrent IDs if torrent-specific fulltext filters were used
             $this->filter_torrents_sph();

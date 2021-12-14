@@ -76,7 +76,6 @@ $thread = $forum->threadPage($threadId, $PerPage, $Page);
 $paginator = new Gazelle\Util\Paginator($PerPage, $Page);
 $paginator->setTotal($threadInfo['Posts']);
 
-$firstOnPage = current($thread)['ID'];
 $lastOnPage = end($thread)['ID'];
 if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPage * $Page) {
     $lastOnPage = $threadInfo['StickyPostID'];
@@ -84,7 +83,7 @@ if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPa
 
 $quoteCount = $Cache->get_value('user_quote_unread_' . $Viewer->id());
 if ($quoteCount === false || $quoteCount > 0) {
-    (new Gazelle\User\Quote($Viewer))->clearThread($threadId, $firstOnPage, $lastOnPage);
+    (new Gazelle\User\Quote($Viewer))->clearThread($threadId, current($thread)['ID'] ?? 0, $lastOnPage);
 }
 
 $lastRead = $forum->userLastReadPost($Viewer->id(), $threadId);
