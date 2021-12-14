@@ -865,7 +865,7 @@ if (defined('AJAX')) {
         ->addUser($Viewer)
         ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
 
-    if ($isMusicUpload) {
+    if (isset($releaseTypes[$Properties['ReleaseType']])) {
         $notification->addReleaseType($releaseTypes[$Properties['ReleaseType']]);
     }
 
