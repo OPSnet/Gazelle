@@ -387,31 +387,6 @@ parameters:
 			path: app/Manager/TGroup.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(string space\\-separated list of tags\\)\\: Unexpected token \"space\\-separated\", expected variable at offset 102$#"
-			count: 1
-			path: app/Manager/Tag.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string tidy list of space\\-separated tags\\)\\: Unexpected token \"tidy\", expected variable at offset 152$#"
-			count: 1
-			path: app/Manager/Tag.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$gather$#"
-			count: 1
-			path: app/Manager/Tag.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$tag$#"
-			count: 3
-			path: app/Manager/Tag.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$userID$#"
-			count: 1
-			path: app/Manager/Tag.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(int torrent id\\)\\: Unexpected token \"torrent\", expected variable at offset 127$#"
 			count: 1
 			path: app/Manager/Torrent.php

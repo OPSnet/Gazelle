@@ -8,17 +8,17 @@ class Tag extends \Gazelle\Base {
 
     public function findById(int $tagId): ?\Gazelle\Tag {
         $key = sprintf(self::ID_KEY, $tagId);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
+        $tagId = self::$cache->get_value($key);
+        if ($tagId === false) {
+            $tagId = self::$db->scalar("
                 SELECT ID FROM tags WHERE ID = ?
                 ", $tagId
             );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+            if ($tagId) {
+                self::$cache->cache_value($key, $tagId, 0);
             }
         }
-        return $id ? new \Gazelle\Tag($id) : null;
+        return $tagId ? new \Gazelle\Tag($tagId) : null;
     }
 
     public function findByName(string $name) {
@@ -33,17 +33,14 @@ class Tag extends \Gazelle\Base {
      * Trim whitespace, force to lower case, internal spaces and dashes become dots,
      * remove all that is not alphanumeric + dot,
      * remove leading and trailing dots and remove doubled-up dots.
-     *
-     * @param string $tag
-     * @return string cleaned-up version of $tag
      */
-    public function sanitize($tag) {
+    public function sanitize(string $name): string {
         return preg_replace('/\.+/', '.',         // remove doubled-up dots
             trim(                                 // trim leading, trailing dots
                 preg_replace('/[^a-z0-9.]+/', '', // remove non alphanum, dot
                     str_replace([' ', '-'], '.',  // dash and internal space to dot
                         strtolower(               // lowercase
-                            trim($tag)            // whitespace
+                            trim($name)            // whitespace
                         )
                     )
                 ), '.' // trim-a-dot
@@ -54,8 +51,7 @@ class Tag extends \Gazelle\Base {
     /**
      * Normalize a list of tags (sanitize them and remove duplicates)
      *
-     * @param string space-separated list of tags
-     * @param string tidy list of space-separated tags
+     * @param string $tagList space-separated list of tags
      */
     public function normalize(string $tagList): string {
         $tags = preg_split('/[\s]+/', $tagList);
@@ -69,35 +65,32 @@ class Tag extends \Gazelle\Base {
     /**
      * Get the ID of a tag
      *
-     * @param string $tag
      * @return int ID of tag, or null if no such tag
      */
-    public function lookup(string $tag): int {
+    public function lookup(string $name): ?int {
         return self::$db->scalar("
             SELECT ID FROM tags WHERE Name = ?
-            ", $tag
+            ", $name
         );
     }
 
     /**
      * Get the name of an ID
      *
-     * @param int $id ID of the tag
-     * @return string $name Name of the tag
+     * @param int $tagId ID of the tag
      */
-    public function name(int $id): ?string {
+    public function name(int $tagId): ?string {
         return self::$db->scalar("
             SELECT Name FROM tags WHERE ID = ?
-            ", $id
+            ", $tagId
         );
     }
 
     /**
      * Create a tag. If the tag already exists its usage is incremented.
      *
-     * @param string $tag
+     * @param string $name
      * @param int $userId The id of the user creating the tag.
-     * @return int ID of tag
      */
     public function create(string $name, int $userId): int {
         self::$db->prepared_query("
@@ -115,33 +108,32 @@ class Tag extends \Gazelle\Base {
      * See if a tag is marked as bad (would be replaced by an alias)
      *
      * @see resolve()
-     * @param string $tag
      * @return int ID of tag, or null if no such tag
      */
-    public function lookupBad(string $tag): ?int {
+    public function lookupBad(string $name): ?int {
         return self::$db->scalar("
             SELECT ID FROM tag_aliases WHERE BadTag = ?
-            ", $tag
+            ", $name
         );
     }
 
     /**
      * Make a tag official
      *
-     * @param string $tag
+     * @param string $name
      * @param int $userId Who is doing the officializing/
      * @return int $tagId id of the officialized tag.
      */
-    public function officialize(string $tag, int $userId): int {
-        $tag = $this->sanitize($tag);
-        $id = $this->lookup($tag);
-        if ($id) {
+    public function officialize(string $name, int $userId): int {
+        $name = $this->sanitize($name);
+        $tagId = $this->lookup($name);
+        if ($tagId) {
             // Tag already exists
             self::$db->prepared_query("
                 UPDATE tags SET
                     TagType = 'genre'
                 WHERE ID = ?
-                ", $id
+                ", $tagId
             );
         } else {
             // Tag doesn't exist yet: create it
@@ -149,36 +141,37 @@ class Tag extends \Gazelle\Base {
                 INSERT INTO tags
                        (Name, UserID, TagType, Uses)
                 VALUES (?,    ?,      'genre', 0)
-                ", $tag, $userId
+                ", $name, $userId
             );
-            $id = self::$db->inserted_id();
+            $tagId = self::$db->inserted_id();
         }
-        return $id;
+        self::$cache->delete_value('genre_tags');
+        return $tagId;
     }
 
     /**
      * Make a list of tags unofficial
      *
-     * @param array $id list of ids to unofficialize
+     * @param array $tagId list of ids to unofficialize
      * @return int Number of tags that were actually unofficialized
      */
-    public function unofficialize(array $id): int {
+    public function unofficialize(array $tagId): int {
         self::$db->prepared_query("
             UPDATE tags SET
                 TagType = 'other'
-            WHERE ID IN (" . placeholders($id) . ")
-            ", ...$id
+            WHERE ID IN (" . placeholders($tagId) . ")
+            ", ...$tagId
         );
+        self::$cache->delete_value('genre_tags');
         return self::$db->affected_rows();
     }
 
     /**
-     * Return an iterator to loop over all the official tags.
+     * Return the list of all official tags
      *
-     * @param int $gather number of rows to gather per iteration
      * @return array [id, name, uses]
      */
-    public function listOfficial($columns, $order = 'name'): array {
+    public function officialList($order = 'name'): array {
         $orderBy = $order == 'name' ? '2, 3 DESC' : '3 DESC, 2';
         self::$db->prepared_query("
             SELECT ID AS id, Name AS name, Uses AS uses
@@ -187,21 +180,7 @@ class Tag extends \Gazelle\Base {
             ORDER BY $orderBy
             ", 'genre'
         );
-        $list = self::$db->to_array('id', MYSQLI_ASSOC);
-        $n = count($list);
-        $result = [];
-        if ($n < $columns) {
-            foreach ($list as $l) {
-                $result[] = [$l];
-            }
-        } else {
-            for ($i = 0; $i < $columns - 1; ++$i) {
-                $column = (int)ceil(count($list) / ($columns - $i));
-                $result[] = array_splice($list, 0, $column);
-            }
-            $result = array_merge($result, [$list]);
-        }
-        return $result;
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -224,14 +203,6 @@ class Tag extends \Gazelle\Base {
         return $list;
     }
 
-    /**
-     * Rename a tag
-     *
-     * @param int $tagId
-     * @param string $tag new tag name
-     * @param int $userId who is doing the rename
-     * @return int number of affected rows (should be 0 or 1)
-     */
     public function rename(int $tagId, string $name, int $userId) {
         self::$db->prepared_query("
             UPDATE tags SET
@@ -243,15 +214,7 @@ class Tag extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    /**
-     * Merge (or split) a tag
-     *
-     * @param int $currentId The tag that will be removed in the merge
-     * @param array $replacement The replacement tags for $currentId
-     * @param int $userID The ID of the moderator performing the merge
-     * @return int number of items changed by the merge
-     */
-    public function merge(int $currentId, array $replacement, int $userId) {
+    public function merge(int $currentId, array $replacement, int $userId): int {
         $totalChanged = 0;
         $totalRenamed = 0;
         foreach ($replacement as $r) {
@@ -328,10 +291,6 @@ class Tag extends \Gazelle\Base {
 
     /**
      * Add a mapping of a bad tag alias to a acceptable alias
-     *
-     * @param string $bad The bad tag name (to be replaced upon usage by)
-     * @param string $good The good name.
-     * @return int Number of rows added (0 or 1)
      */
     public function createAlias(string $bad, string $good): int {
         self::$db->prepared_query("
@@ -345,11 +304,6 @@ class Tag extends \Gazelle\Base {
 
     /**
      * Modify the mapping of a bad tag alias to a acceptable alias
-     *
-     * @param int $aliasId The id of the alias to change
-     * @param string $bad The bad tag name (to be replaced upon usage by)
-     * @param string $good The good name.
-     * @return int Number of rows changed (0 or 1)
      */
     public function modifyAlias(int $aliasId, string $bad, string $good): int {
         self::$db->prepared_query("
@@ -364,9 +318,6 @@ class Tag extends \Gazelle\Base {
 
     /**
      * Remove the mapping of a bad tag alias.
-     *
-     * @param int $aliasId The id of the alias to remove
-     * @return int Number of rows deleted (0 or 1)
      */
     public function removeAlias(int $aliasId): int {
         self::$db->prepared_query("
@@ -380,15 +331,11 @@ class Tag extends \Gazelle\Base {
      * Resolve the alias of a tag.
      *
      * @see lookupBad()
-     * @param string $tag the name we want to change if has an alias
-     * @return string The resolved tag name, its alias or itself
      */
     public function resolve($name): string {
         $QueryID = self::$db->get_query_id();
         $resolved = self::$db->scalar("
-            SELECT AliasTag
-            FROM tag_aliases
-            WHERE BadTag = ?
+            SELECT AliasTag FROM tag_aliases WHERE BadTag = ?
             ", $name
         );
         self::$db->set_query_id($QueryID);
@@ -414,7 +361,6 @@ class Tag extends \Gazelle\Base {
     /**
      * Get the list of torrents matched by a tag
      *
-     * @param int $tagId
      * @return array [artistId, artistName, torrentGroupId, torrentGroupName]
      * (artist elements may be null)
      */
@@ -438,7 +384,6 @@ class Tag extends \Gazelle\Base {
     /**
      * Get the list of torrents matched by a tag
      *
-     * @param int $tagId
      * @return array [artistId, artistName, requestId, requestName]
      * (artist elements may be null)
      */
@@ -459,13 +404,6 @@ class Tag extends \Gazelle\Base {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    /**
-     * Create a tag on a request
-     *
-     * @param int $tagId The id of the tag
-     * @param int $requestId The id of the request
-     * @return int Number of rows affected
-     */
     public function createRequestTag(int $tagId, int $requestId): int {
         self::$db->prepared_query("
             INSERT IGNORE INTO requests_tags
@@ -476,15 +414,6 @@ class Tag extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    /**
-     * Create a tag on a torrent group
-     *
-     * @param int $tagId The id of the tag
-     * @param int $groupId The id of the torrent group
-     * @param int $userId The id of the user
-     * @param int $weight The the weight of this addition
-     * @return int Number of rows affected
-     */
     public function createTorrentTag(int $tagId, int $groupId, int $userId, int $weight): int {
         self::$db->prepared_query("
             INSERT INTO torrents_tags
@@ -497,16 +426,6 @@ class Tag extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    /**
-     * Create a tag vote on a torrent group
-     *
-     * @param int $tagId The id of the tag
-     * @param int $groupId The id of the torrent group
-     * @param int $userId The id of the user
-     * @param string $vote 'up' or 'down'
-     *
-     * @return int Number of rows affected
-     */
     public function createTorrentTagVote(int $tagId, int $groupId, int $userId, string $vote): int {
         self::$db->prepared_query("
             INSERT INTO torrents_tags_votes
@@ -517,14 +436,6 @@ class Tag extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    /**
-     * Check if a user has voted on a torrent tag
-     *
-     * @param int $tagId The id of the tag
-     * @param int $groupId The id of the torrent group
-     * @param int $userId The id of the user
-     * @return bool True if the user as already voted on this tag
-     */
     public function torrentTagHasVote(int $tagId, int $groupId, int $userId): bool {
         self::$db->prepared_query("
             SELECT 1

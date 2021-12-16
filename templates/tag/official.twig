@@ -1,0 +1,76 @@
+{{ header('Official Tags Manager') }}
+<div class="header">
+    <div class="linkbox">
+        <a href="tools.php?action=tags" class="brackets">Batch Tag Editor</a>
+        <a href="tools.php?action=tags_aliases" class="brackets">Tag Aliases</a>
+        <a href="tools.php?action=tags_official" class="brackets">Official Tags</a>
+        <a href="tools.php" class="brackets">Back to toolbox</a>
+    </div>
+    <h2>Official Tags Manager</h2>
+    <div class="linkbox">
+        <a href="tools.php?action=tags_official&amp;order=name" class="brackets">Sort by name</a>
+        <a href="tools.php?action=tags_official&amp;order=uses" class="brackets">Sort by uses</a>
+    </div>
+</div>
+{% if new %}
+    <div class="box pad center">
+        <strong>Success:</strong> {{ new.name }} officialized.
+    </div>
+{% endif %}
+{% if unofficial %}
+    <div class="box pad center">
+        <strong>Success:</strong> {{ unofficial|join(', ') }} unofficialized.
+    </div>
+{% endif %}
+<div style="text-align: center;">
+    <div class="thin box">
+        <form class="manage_form" name="tags" method="post">
+            <input type="hidden" name="action" value="tags_official" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <table class="tags_table layout">
+                <tr class="colhead_dark">
+{% for col in range(1, constant('TAG_OFFICIAL_COLUMNS')) %}
+                    <td class="colhead" style="text-align: center">Remove</td>
+                    <td class="colhead">Tag</td>
+                    <td class="colhead" style="text-align: center">Uses</td>
+{% endfor %}
+                </tr>
+
+{% set end_col = constant('TAG_OFFICIAL_COLUMNS') - 1 %}
+{% for row in range(0, list|length // constant('TAG_OFFICIAL_COLUMNS')) %}
+                <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    {% for col in range(0, end_col) %}
+        {% set idx = row * constant('TAG_OFFICIAL_COLUMNS') + col %}
+        {% if idx >= list|length %}
+                    <td colspan="3">&nbsp;</td>
+        {% else %}
+            {% set item = list[idx] %}
+                    <td style="text-align: center;">
+                        <input type="checkbox" name="oldtags[]" value="{{ item.id }}" />
+                    </td>
+                    <td><a href="torrents.php?taglist={{ item.name }}">{{ item.name }}</a></td>
+                    <td style="text-align: right; padding-right: 20px;
+                        {%- if col < end_col %} border-right: solid 2px;{% endif -%}
+                        ">{{ item.uses|number_format }}</td>
+        {% endif %}
+    {% endfor %}
+                </tr>
+{% endfor %}
+{% set colspan = constant('TAG_OFFICIAL_COLUMNS') * 4 - 1 %}
+                <tr class="row{{ cycle(['a', 'b'], list|length // constant('TAG_OFFICIAL_COLUMNS')) }}">
+                <tr class="rowa">
+                    <td colspan="{{ colspan }}">
+                        <label for="newtag">New official tag: </label><input type="text" name="newtag" />
+                    </td>
+                </tr>
+                <tr style="border-top: thin solid;">
+                    <td colspan="{{ colspan }}" style="text-align: center;">
+                        <input type="submit" value="Update" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+{{ footer() }}
+
