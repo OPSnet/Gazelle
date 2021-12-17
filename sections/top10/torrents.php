@@ -260,7 +260,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->thumbnail($group['WikiImage'], $group['CategoryID']) ?>
+                <?= $imgProxy->thumbnail($group['WikiImage'] ?? '', $group['CategoryID']) ?>
             </div>
 <?php   } ?>
             <div class="group_info clear">
