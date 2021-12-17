@@ -476,4 +476,23 @@ class Tag extends \Gazelle\Base {
         }
         return array_map(fn($v) => ['value' => $v[0]], $suggestions);
     }
+
+    public function userTopTagList(int $userId): array {
+        self::$db->prepared_query("
+            SELECT tags.Name
+            FROM xbt_snatched AS s
+            INNER JOIN torrents AS t ON (t.ID = s.fid)
+            INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
+            INNER JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
+            INNER JOIN tags ON (tags.ID = tt.TagID)
+            WHERE g.CategoryID = 1
+                AND tags.Uses > 10
+                AND s.uid = ?
+            GROUP BY tt.TagID
+            ORDER BY ((count(tags.Name) - 2) * (sum(tt.PositiveVotes) - sum(tt.NegativeVotes))) / (tags.Uses * 0.8) DESC
+            LIMIT 8
+            ", $userId
+        );
+        return self::$db->collect(0, false);
+    }
 }
