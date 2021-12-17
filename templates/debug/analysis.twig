@@ -5,6 +5,18 @@
 <div class="linkbox">
     <a href="tools.php?action=analysis_list" class="brackets">Error list</a>
 </div>
+<div style="text-align: center">
+<form method="post">
+    <input type="hidden" name="action" value="analysis" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="id" value="{{ case.id }}" />
+    <input type="submit" name="prev" value="Prev" />
+    <input type="submit" name="remove-prev" value="Remove and Prev" />
+    <input type="submit" name="remove" value="Remove" />
+    <input type="submit" name="remove-next" value="Remove and Next" />
+    <input type="submit" name="next" value="Next" />
+</form>
+</div>
 <div class="thin">
 <table>
     <tr><td class="colhead">Case</td><td>{{ case.id }}</td></tr>
@@ -33,6 +45,20 @@
     </td></tr>
 </td></tr>
 </table>
+</div>
+
+<br />
+<div style="text-align: center">
+<form method="post">
+    <input type="hidden" name="action" value="analysis" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="id" value="{{ case.id }}" />
+    <input type="submit" name="prev" value="Prev" />
+    <input type="submit" name="remove-prev" value="Remove and Prev" />
+    <input type="submit" name="remove" value="Remove" />
+    <input type="submit" name="remove-next" value="Remove and Next" />
+    <input type="submit" name="next" value="Next" />
+</form>
 </div>
 <br />
 {{ footer() }}

@@ -39,6 +39,15 @@ class ErrorLog extends BaseObject {
         return $this->info;
     }
 
+    public function remove(): bool {
+        self::$db->prepared_query("
+            DELETE FROM error_log WHERE error_log_id = ?
+            ", $this->id
+        );
+        $this->info = [];
+        return self::$db->affected_rows();
+    }
+
     public function duration(): float {
         return $this->info()['duration'];
     }
