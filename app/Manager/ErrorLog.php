@@ -15,6 +15,30 @@ class ErrorLog extends \Gazelle\Base {
         return $id ? new \Gazelle\ErrorLog($id) : null;
     }
 
+    public function findByPrev(int $errorId): ?\Gazelle\ErrorLog {
+        $id = self::$db->scalar("
+            SELECT error_log_id
+            FROM error_log
+            WHERE updated > (SELECT updated FROM error_log WHERE error_log_id = ?)
+            ORDER BY updated ASC
+            LIMIT 1
+            ", $errorId
+        );
+        return $id ? new \Gazelle\ErrorLog($id) : null;
+    }
+
+    public function findByNext(int $errorId): ?\Gazelle\ErrorLog {
+        $id = self::$db->scalar("
+            SELECT error_log_id
+            FROM error_log
+            WHERE updated < (SELECT updated FROM error_log WHERE error_log_id = ?)
+            ORDER BY updated DESC
+            LIMIT 1
+            ", $errorId
+        );
+        return $id ? new \Gazelle\ErrorLog($id) : null;
+    }
+
     public function total(): int {
         return self::$db->scalar("
             SELECT count(*) FROM error_log
@@ -55,6 +79,14 @@ class ErrorLog extends \Gazelle\Base {
         self::$db->prepared_query("
             DELETE FROM error_log WHERE error_log_id IN (
             " . placeholders($list) . ")", ...$list
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function removeSlow(float $duration): int {
+        self::$db->prepared_query("
+            DELETE FROM error_log WHERE duration >= ?
+            ", $duration
         );
         return self::$db->affected_rows();
     }

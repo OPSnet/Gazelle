@@ -4,6 +4,11 @@
 </div>
 <div class="thin">
 {{ paginator.linkbox|raw }}
+{% if removed >= 0 %}
+<div class="box pad">
+{{ removed }} case{{ removed|plural }} removed.
+</div>
+{% endif %}
 <form class="manage_form" name="bans" action="" method="post">
 <input type="hidden" name="auth" value="{{ auth }}" />
 <input type="hidden" name="action" value="analysis_list" />
@@ -37,8 +42,12 @@
     </tr>
 {% endfor %}
     <tr>
-        <td style="text-align: right" colspan="11">
-            <input type="submit" name="submit" value="Clear" />
+        <td colspan="11">
+            Remove cases with a duration that meets or exceeds
+            <input type="text" name="slow" size="2" value="5" />
+            seconds.
+            <input type="submit" name="slow-clear" value="Slow clear" />
+            <span style="float: right"><input type="submit" name="clear" value="Clear" /></span>
         </td>
     </tr>
 </table>

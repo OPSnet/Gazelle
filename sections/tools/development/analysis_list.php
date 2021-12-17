@@ -10,15 +10,19 @@ $remove = array_map(
 );
 
 $errMan = new Gazelle\Manager\ErrorLog;
+$removed = -1;
 if ($remove) {
-    $errMan->remove($remove);
+    $removed = $errMan->remove($remove);
+} elseif (isset($_POST['slow-clear'])) {
+    $removed = $errMan->removeSlow((float)($_POST['slow'] ?? 60.0));
 }
 
 $paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($errMan->total());
 
-echo $Twig->render('debug/error-analysis.twig', [
+echo $Twig->render('debug/analysis-list.twig', [
     'auth'      => $Viewer->auth(),
     'list'      => $errMan->list($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
+    'removed'   => $removed,
 ]);
