@@ -1,0 +1,17 @@
+    <div class="box pad thin" align="center">
+        <h2>Your search did not match anything.</h2>
+        <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
+    {% for name in list %}
+        {% if loop.first %}
+        <p>You might like:
+        {% else %}
+        &mdash;
+        {% endif -%}
+        <a href="torrents.php?taglist={{ name }}">{{ name }}</a>
+        {% if loop.last -%}
+        </p>
+        {%- endif -%}
+    {% endfor %}
+    </div>
+</div>
+{{ footer() }}
