@@ -323,20 +323,28 @@ if ($sections = $Artist->sections()) {
                         </div>
 <?php   } ?>
                         <div class="group_info clear">
-                            <strong><?= $tgroup->link() ?></strong>
-<?php if ($bookmark->isTorrentBookmarked($groupId)) { ?>
+                            <strong><?= $tgroup->link() ?>
+<?php   if ($tgroup->year()) { ?>
+                            [<?= $tgroup->year() ?>]
+<?php   } ?>
+                            </strong>
+<?php   if ($bookmark->isTorrentBookmarked($groupId)) { ?>
                             <span class="remove_bookmark float_right">
-                                <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$groupId?>" class="brackets" onclick="Unbookmark('torrent', <?=$groupId?>, 'Bookmark'); return false;">Remove bookmark</a>
+                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
+                                    $groupId ?>" class="brackets" onclick="Unbookmark('torrent', <?=
+                                    $groupId ?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>
 <?php   } else { ?>
                             <span class="add_bookmark float_right">
-                                <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$groupId?>" class="brackets" onclick="Bookmark('torrent', <?=$groupId?>, 'Remove bookmark'); return false;">Bookmark</a>
+                                <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
+                                    $groupId ?>" class="brackets" onclick="Bookmark('torrent', <?=
+                                    $groupId ?>, 'Remove bookmark'); return false;">Bookmark</a>
                             </span>
 <?php
         }
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                            <?= (new Gazelle\Vote($Viewer))->setGroupId($groupId)->links($authKey) ?>
+                            &nbsp;<?= (new Gazelle\Vote($Viewer))->setGroupId($groupId)->links($authKey) ?>
 <?php   } ?>
                             <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>
                         </div>
