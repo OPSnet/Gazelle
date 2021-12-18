@@ -187,11 +187,14 @@ $vote = new Gazelle\Vote($Viewer);
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
+    $Torrents = $Group['Torrents'];
+    if (count($Torrents) === 0) {
+        continue;
+    }
     $GroupName = $Group['Name'];
     $GroupYear = $Group['Year'];
     $GroupCategoryID = $Group['CategoryID'];
-    $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
-    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $GroupFlags = $Group['Flags'] ?? ['IsSnatched' => false];
     $TorrentTags = new Tags($Group['TagList']);
     $Artists = $Group['Artists'];
     $ExtendedArtists = $Group['ExtendedArtists'];
