@@ -7,26 +7,30 @@
 <div class="box box_info box_userinfo_community">
     <div class="head colhead_dark">Community</div>
     <ul class="stats nobullet">
-        <li id="comm_posts">Forum threads: {{ stats.forumTopicTotal|number_format }} <a href="userhistory.php?action=topics&amp;userid={{ user_id }}" class="brackets">View</a></li>
-        <li id="comm_posts">Forum posts: {{ stats.forumPostTotal|number_format }} <a href="userhistory.php?action=posts&amp;userid={{ user_id }}" class="brackets">View</a></li>
+        <li id="comm_posts">Forum threads: {{ stats.forumThreadTotal|number_format }}
+            {%- if stats.forumThreadTotal %} <a href="userhistory.php?action=topics&amp;userid={{ user_id }}" class="brackets">View</a>{% endif -%}
+        </li>
+        <li id="comm_posts">Forum posts: {{ stats.forumPostTotal|number_format }}
+            {%- if stats.forumPostTotal %} <a href="userhistory.php?action=posts&amp;userid={{ user_id }}" class="brackets">View</a>{% endif -%}
+        </li>
 {% if visible['torrentcomments+'] %}
         <li id="comm_torrcomm"{{ _self.class_override(visible['torrentcomments+']) }}>Torrent comments: {{ stats.commentTotal('torrents')|number_format }}
-    {% if visible['torrentcomments'] %}
+    {% if stats.commentTotal('torrents') and visible['torrentcomments'] %}
             <a href="comments.php?id={{ user_id }}" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
     {% endif %}
         </li>
-        <li id="comm_artcomm"{{ _self.class_override(visible['torrentcomments']) }}>Artist comments: {{ stats.commentTotal('artists')|number_format }}
-    {% if visible['torrentcomments'] %}
+        <li id="comm_artcomm"{{ _self.class_override(visible['torrentcomments']) }}>Artist comments: {{ stats.commentTotal('artist')|number_format }}
+    {% if stats.commentTotal('artist') and visible['torrentcomments'] %}
             <a href="comments.php?id={{ user_id }}&amp;action=artist" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
     {% endif %}
         </li>
         <li id="comm_collcomm"{{ _self.class_override(visible['torrentcomments']) }}>Collage comments: {{ stats.commentTotal('collages')|number_format }}
-    {% if visible['torrentcomments'] %}
+    {% if stats.commentTotal('collages') and visible['torrentcomments'] %}
             <a href="comments.php?id={{ user_id }}&amp;action=collages" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
     {% endif %}
         </li>
         <li id="comm_reqcomm"{{ _self.class_override(visible['torrentcomments']) }}>Request comments: {{ stats.commentTotal('requests')|number_format }}
-    {% if visible['torrentcomments'] %}
+    {% if stats.commentTotal('requests') and visible['torrentcomments'] %}
             <a href="comments.php?id={{ user_id }}&amp;action=requests" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
     {% endif %}
         </li>
@@ -34,7 +38,7 @@
 
 {% if visible['collages+'] %}
         <li id="comm_collstart"{{ _self.class_override(visible['collages+']) }}>Collages started: {{ stats.collageTotal|number_format }}
-    {% if visible['collages'] %}
+    {% if stats.collageTotal and visible['collages'] %}
             <a href="collages.php?userid={{ user_id }}" class="brackets{{ _self.override(visible['collages']) }}">View</a>
     {% endif %}
         </li>
@@ -42,7 +46,7 @@
 
 {% if visible['collagecontribs+'] %}
         <li id="comm_collcontrib"{{ _self.class_override(visible['collagecontribs+']) }}>Collages contributed to: {{ stats.collageContrib|number_format }}
-    {% if visible['collagecontribs'] %}
+    {% if stats.collageContrib and visible['collagecontribs'] %}
             <a href="collages.php?userid={{ user_id }}&amp;contrib=1" class="brackets{{ _self.override(visible['collagecontribs']) }}">View</a>
     {% endif %}
         </li>
@@ -57,7 +61,7 @@
             <span{{ _self.class_override(visible['requestsvoted_bounty']) }}>Requests created: {{ stats.requestCreatedSize|octet_size }}
     {% endif %}
             </span>
-    {% if visible['requestsvoted_list'] %}
+    {% if stats.requestCreatedTotal and visible['requestsvoted_list'] %}
             <a href="requests.php?type=created&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['requestsvoted_list']) }}">View</a>
     {% endif %}
         </li>
@@ -69,7 +73,7 @@
             <span{{ _self.class_override(visible['requestsvoted_bounty']) }}>Requests voted: {{ stats.requestVoteSize|octet_size }}
     {% endif %}
             </span>
-    {% if visible['requestsvoted_list'] %}
+    {% if stats.requestVoteTotal and visible['requestsvoted_list'] %}
             <a href="requests.php?type=voted&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['requestsvoted_list']) }}">View</a>
     {% endif %}
         </li>
@@ -84,7 +88,7 @@
             <span{{ _self.class_override(visible['requestsfilled_bounty']) }}>Requests filled: {{ stats.requestBountySize|octet_size }}
     {% endif %}
             </span>
-    {% if visible['requestsfilled_list'] %}
+    {% if stats.requestBountyTotal and visible['requestsfilled_list'] %}
             <a href="requests.php?type=filled&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['requestsfilled_list']) }}">View</a>
     {% endif %}
         </li>
@@ -92,7 +96,7 @@
 
 {% if visible['uploads+'] %}
         <li id="comm_upload"{{ _self.class_override(visible['uploads+']) }}>Uploaded: {{ upload_total|number_format }}
-    {% if visible['uploads'] %}
+    {% if upload_total and visible['uploads'] %}
             <a href="torrents.php?type=uploaded&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['uploads']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
             <a href="torrents.php?action=redownload&amp;type=uploads&amp;userid={{
@@ -105,7 +109,7 @@
 
 {% if visible['uniquegroups+'] %}
         <li id="comm_uniquegroup"{{ _self.class_override(visible['uniquegroups+']) }}>Unique groups: {{ stats.uniqueGroupTotal|number_format }}
-    {% if visible['uniquegroups'] %}
+    {% if stats.uniqueGroupTotal and visible['uniquegroups'] %}
             <a href="torrents.php?type=uploaded&amp;userid={{ user_id }}&amp;filter=uniquegroup" class="brackets{{ _self.override(visible['uniquegroups']) }}">View</a>
     {% endif %}
         </li>
@@ -113,7 +117,7 @@
 
 {% if visible['perfectflacs+'] %}
         <li id="comm_perfectflac"{{ _self.class_override(visible['perfectflacs+']) }}>"Perfect" FLACs: {{ stats.perfectFlacTotal|number_format }}
-    {% if visible['perfectflacs'] %}
+    {% if stats.perfectFlacTotal and visible['perfectflacs'] %}
             <a href="torrents.php?type=uploaded&amp;userid={{ user_id }}&amp;filter=perfectflac" class="brackets{{ _self.override(visible['perfectflacs']) }}">View</a>
     {% endif %}
         </li>
@@ -121,13 +125,14 @@
 
 {% if visible['downloaded'] %}
         <li id="comm_downloaded"{{ _self.class_override(visible['downloaded']) }}>Downloaded: {{ stats.downloadTotal|number_format }}
-            <a href="torrents.php?type=downloaded&amp;userid={{ user_id }}" class="brackets">View</a>
+    {% if stats.downloadTotal != stats.downloadUnique %} ({{ stats.downloadUnique|number_format }} unique){% endif %}
+    {%- if stats.downloadTotal %} <a href="torrents.php?type=downloaded&amp;userid={{ user_id }}" class="brackets">View</a>{% endif -%}
         </li>
 {% endif %}
 
 {% if visible['leeching+'] %}
         <li id="comm_leeching"{{ _self.class_override(visible['leeching+']) }}>Leeching: {{ stats.leechTotal|number_format }}
-    {% if visible['leeching'] %}
+    {% if stats.leechTotal and visible['leeching'] %}
             <a href="torrents.php?type=leeching&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['leeching']) }}">View</a>
     {% endif %}
     {% if not can_leech and viewer.permitted('users_view_ips') %}
@@ -137,8 +142,9 @@
 {% endif %}
 
 {% if visible['snatched+'] or viewer.permitted('site_view_torrent_snatchlist') %}
-        <li id="comm_snatched"{{ _self.class_override(visible['snatched+']) }}>Snatched: {{ stats.snatchTotal|number_format }} ({{ stats.snatchUnique|number_format }} unique)
-    {% if visible['snatched'] %}
+        <li id="comm_snatched"{{ _self.class_override(visible['snatched+']) }}>Snatched: {{ stats.snatchTotal|number_format }}
+    {% if stats.snatchTotal != stats.snatchUnique %} ({{ stats.snatchUnique|number_format }} unique){% endif %}
+    {% if stats.snatchUnique and visible['snatched'] %}
             <a href="torrents.php?type=snatched&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['snatched']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
             <a href="torrents.php?action=redownload&amp;type=snatches&amp;userid={{
@@ -150,7 +156,7 @@
 
 {% if visible['seeding+'] %}
         <li id="comm_seeding"{{ _self.class_override(visible['seeding+']) }}>Seeding: {{ stats.seedingTotal|number_format }}
-    {% if visible['seeding'] %}
+    {% if stats.seedingTotal and visible['seeding'] %}
             <a href="torrents.php?type=seeding&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['seeding']) }}">View</a>
         {% if viewer.permitteed('zip_downloader') %}
             <a href="torrents.php?action=redownload&amp;type=seeding&amp;userid={{ user_id }}" onclick="return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the size of all torrents before redownloading.');" class="brackets">Download</a>
