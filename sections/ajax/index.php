@@ -56,10 +56,9 @@ $Action = $_GET['action'] ?? '';
 if (isset($Aliases[$Action])) {
     $_GET['action'] = $Action = $Aliases[$Action];
 }
-if (!$Action) {
+if (!$Action || !isset($Viewer)) {
     json_die("failure");
 }
-
 $UserID = $Viewer->id();
 
 if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) === 'application/json') {
