@@ -4,40 +4,40 @@ namespace Gazelle;
 
 class Collage extends BaseObject {
 
-    const CACHE_KEY    = 'collage_%d';
+    const CACHE_KEY    = 'collagev2_%d';
     const DISPLAY_KEY  = 'collage_display_%d';
     const SUBS_KEY     = 'collage_subs_user_%d';
     const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
     protected User $viewer;
-
-    protected $ownerId;
-    protected $categoryId;
-    protected $entryTable;
-    protected $entryColumn;
-    protected $deleted;
-    protected $description;
-    protected $featured;
-    protected $locked;
-    protected $name;
-    protected $numEntries;
-    protected $maxGroups;
-    protected $maxGroupsPerUser;
-    protected $sortNewest;
-    protected $numSubscribers;
-    protected $tags; // these are added at creation
-    protected $torrentTags; // these are derived from the torrents added to the collage
-    protected $updated;
-    protected $userSubscriptions;
+    protected int $numEntries = 0;
+    protected string $entryTable;
+    protected string $entryColumn;
+    protected array $info;
+    protected array $torrentTags; // these are derived from the torrents added to the collage
+    protected array $userSubscriptions;
 
     /* these are only loaded on a torrent collage display */
     protected array $torrents = [];
-    protected $groupIds       = [];
+    protected array $groupIds = [];
 
     /* these are only loaded on any collage display */
-    protected $lockedForUser;
-    protected $artists;
-    protected $contributors;
+    protected bool $lockedForUser = false;
+    protected array $artists      = [];
+    protected array $contributors = [];
+
+    public function __construct(int $id) {
+        parent::__construct($id);
+        if ($this->isArtist()) {
+            $this->entryTable = 'collages_artists';
+            $this->entryColumn = 'ArtistID';
+            $this->loadArtists();
+        } else {
+            $this->entryTable = 'collages_torrents';
+            $this->entryColumn = 'GroupID';
+            $this->loadTorrents();
+        }
+    }
 
     public function tableName(): string { return 'collages'; }
 
@@ -49,54 +49,63 @@ class Collage extends BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
     }
 
-    /**
-     * Collage constructor.
-     * @param int $id collage id
-     */
-    public function __construct(int $id) {
-        parent::__construct($id);
-        $this->artists = [];
-        $this->contributors = [];
+    public function categoryId() { return $this->info()['category_id']; }
+    public function description() { return $this->info()['description']; }
+    public function maxGroups() { return $this->info()['group_max']; }
+    public function maxGroupsPerUser() { return $this->info()['group_max_per_user']; }
+    public function name() { return $this->info()['name']; }
+    public function numSubscribers() { return $this->info()['subscriber_total']; }
+    public function ownerId() { return $this->info()['user_id']; }
+    public function sortNewest() { return $this->info()['sort_newest']; }
+    public function tags() { return $this->info()['tag_list']; }
+    public function updated() { return $this->info()['updated']; }
 
-        $key = sprintf(self::CACHE_KEY, $id);
+    public function numArtists() { return count($this->artists); }
+    public function contributors() { return $this->contributors; }
+    public function numContributors() { return count(array_keys($this->contributors)); }
+    public function numEntries() { return $this->numEntries; }
+    public function groupIds() { return $this->groupIds; }
+
+    public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
+    public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
+    public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
+    public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
+    public function isOwner(int $userId): bool { return $this->info()['user_id'] === $userId; }
+    public function isPersonal(): bool { return $this->info()['category_id'] === 0; }
+
+    public function info(): array {
+        if (!empty($this->info)) {
+            return $this->info;
+        }
+        $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
-            self::$db->prepared_query("
-                SELECT c.Deleted, c.TagList,
-                    c.UserID, c.CategoryID, c.Updated, c.Subscribers, c.NumTorrents,
-                    c.MaxGroups, c.MaxGroupsPerUser, c.Locked, c.Name, c.Description, c.Featured,
-                    CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END as SortNewest
+            $info = self::$db->rowAssoc("
+                SELECT c.Deleted        AS is_deleted,
+                    c.TagList           AS tag_string,
+                    c.UserID            AS user_id,
+                    c.CategoryID        AS category_id,
+                    c.Updated           AS updated,
+                    c.Subscribers       AS subscriber_total,
+                    c.NumTorrents       AS torrent_total,
+                    c.MaxGroups         AS group_max,
+                    c.MaxGroupsPerUser  AS group_max_per_user,
+                    c.Locked            AS is_locked,
+                    c.Name              AS name,
+                    c.Description       AS description,
+                    c.Featured          AS is_featured,
+                    CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
                 FROM collages c
                 LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
                 LEFT JOIN collage_attr ca ON (ca.ID = cha.CollageAttrID and ca.Name = ?)
                 WHERE c.ID = ?
-                ", 'sort-newest', $id
+                ", 'sort-newest', $this->id
             );
-            if (self::$db->has_results()) {
-                $info = self::$db->next_record(MYSQLI_NUM, false);
-            }
-            else {
-                /* Need some sensible defaults for some fields if the collage doesn't exist in the DB. */
-                $info = [true, ''];
-            }
+            $info['tag_list'] = explode(' ', $info['tag_string']);
             self::$cache->cache_value($key, $info, 7200);
         }
-        [
-            $this->deleted, $taglist,
-            $this->ownerId, $this->categoryId, $this->updated, $this->numSubscribers, $this->numEntries,
-            $this->maxGroups, $this->maxGroupsPerUser, $this->locked, $this->name, $this->description, $this->featured,
-            $this->sortNewest
-        ] = $info;
-        $this->tags = explode(' ', $taglist);
-        if ($this->isArtist()) {
-            $this->entryTable = 'collages_artists';
-            $this->entryColumn = 'ArtistID';
-            $this->loadArtists();
-        } else {
-            $this->entryTable = 'collages_torrents';
-            $this->entryColumn = 'GroupID';
-            $this->loadTorrents();
-        }
+        $this->info = $info;
+        return $this->info;
     }
 
     protected function loadArtists() {
@@ -152,7 +161,7 @@ class Collage extends BaseObject {
     }
 
     protected function loadTorrents() {
-        $order = $this->sortNewest ? 'DESC' : 'ASC';
+        $order = $this->sortNewest() ? 'DESC' : 'ASC';
         self::$db->prepared_query("
             SELECT
                 ct.GroupID,
@@ -163,7 +172,7 @@ class Collage extends BaseObject {
             ORDER BY ct.Sort $order
             ", $this->id
         );
-        $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC);
+        $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
         $groupIds = array_keys($groupContribIds);
 
         if (count($groupIds) > 0) {
@@ -235,44 +244,21 @@ class Collage extends BaseObject {
         $this->viewer = $viewer;
         $this->lockedForUser = false;
         if (!$this->viewer->permitted('site_collages_delete')) {
-            if ($this->categoryId === '0') {
+            if ($this->categoryId() === '0') {
                 if (!$this->viewer->permitted('site_collages_personal') || !$this->isOwner($this->viewer->id())) {
                     $this->lockedForUser = true;
                 }
             }
             $groupsByUser = $this->contributors[$this->viewer->id()] ?? 0;
-            if ($this->locked
-                || ($this->maxGroups > 0 && count($this->groupIds) >= $this->maxGroups)
-                || ($this->maxGroupsPerUser > 0 && $groupsByUser >= $this->maxGroupsPerUser)
+            if ($this->isLocked()
+                || ($this->maxGroups() > 0 && count($this->groupIds) >= $this->maxGroups())
+                || ($this->maxGroupsPerUser() > 0 && $groupsByUser >= $this->maxGroupsPerUser())
             ) {
                 $this->lockedForUser = true;
             }
         }
         return $this;
     }
-
-    public function categoryId() { return $this->categoryId; }
-    public function description() { return $this->description; }
-    public function groupIds() { return $this->groupIds; }
-    public function maxGroups() { return $this->maxGroups; }
-    public function maxGroupsPerUser() { return $this->maxGroupsPerUser; }
-    public function name() { return $this->name; }
-    public function numArtists() { return count($this->artists); }
-    public function numContributors() { return count(array_keys($this->contributors)); }
-    public function numEntries() { return $this->numEntries; }
-    public function numSubscribers() { return $this->numSubscribers; }
-    public function ownerId() { return $this->ownerId; }
-    public function sortNewest() { return $this->sortNewest; }
-    public function tags() { return $this->tags; }
-    public function updated() { return $this->updated; }
-    public function contributors() { return $this->contributors; }
-
-    public function isArtist(): bool { return $this->categoryId === COLLAGE_ARTISTS_ID; }
-    public function isDeleted(): bool { return $this->deleted == '1'; }
-    public function isFeatured () { return $this->featured; }
-    public function isLocked(): bool { return $this->locked == '1' || (isset($this->lockedForUser) && $this->lockedForUser); }
-    public function isOwner(int $userId): bool { return $this->ownerId === $userId; }
-    public function isPersonal(): bool { return $this->categoryId === 0; }
 
     /**
      * Increment count of number of entries in collage.
@@ -360,16 +346,20 @@ class Collage extends BaseObject {
      * they have subscribed to this collage.
      */
     public function isSubscribed(int $userId): bool {
-        $key = sprintf(self::SUBS_KEY, $userId);
-        if (false === ($this->userSubscriptions = self::$cache->get_value($key))) {
-            self::$db->prepared_query("
-                SELECT CollageID
-                FROM users_collage_subs
-                WHERE UserID = ?
-                ", $userId
-            );
-            $this->userSubscriptions = self::$db->collect(0);
-            self::$cache->cache_value($key, $this->userSubscriptions, 3600 * 12);
+        if (empty($this->userSubscriptions)) {
+            $key = sprintf(self::SUBS_KEY, $userId);
+            $subs = self::$cache->get_value($key);
+            if ($subs ===false) {
+                self::$db->prepared_query("
+                    SELECT CollageID
+                    FROM users_collage_subs
+                    WHERE UserID = ?
+                    ", $userId
+                );
+                $subs = self::$db->collect(0);
+                self::$cache->cache_value($key, $subs, 3600 * 12);
+            }
+            $this->userSubscriptions = $subs;
         }
         if (!in_array($this->id, $this->userSubscriptions)) {
             return false;
@@ -521,7 +511,7 @@ class Collage extends BaseObject {
     /*** UPDATE METHODS ***/
 
     public function setToggleLocked() {
-        return $this->setUpdate('Locked', $this->locked === '1' ? '0' : '1');
+        return $this->setUpdate('Locked', $this->isLocked() === '1' ? '0' : '1');
     }
 
     public function setFeatured() {
@@ -629,7 +619,7 @@ class Collage extends BaseObject {
                 WHERE CategoryID = 0
                     AND Featured = 1
                     AND UserID = ?
-                ", $this->ownerId
+                ", $this->ownerId()
             );
         }
         return parent::modify();

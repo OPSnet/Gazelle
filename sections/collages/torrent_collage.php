@@ -277,7 +277,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             if ($Torrent['Remastered'] && !$Torrent['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-            $SnatchedTorrentClass = $Torrent['IsSnatched'] ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '';
 
             if ($Torrent['RemasterTitle'] != $LastRemasterTitle
                 || $Torrent['RemasterYear'] != $LastRemasterYear
