@@ -231,6 +231,7 @@ class Bookmark extends BaseUser {
 
                 $torMan = (new Manager\Torrent)->setViewer($this->user);
                 $tgroup = (new Manager\TGroup)->findById($id);
+                $tgroup->stats()->increment('bookmark_total');
 
                 // RSS feed stuff
                 $Feed = new \Feed;
@@ -291,6 +292,7 @@ class Bookmark extends BaseUser {
             switch ($type) {
             case 'torrent':
                 self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
+                (new TGroup($id))->stats()->increment('bookmark_total', -1);
                 break;
             case 'request':
                 $this->updateRequests($id);

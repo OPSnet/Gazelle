@@ -6,6 +6,7 @@ class CommunityStats extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $this->processed = (new \Gazelle\Stats\Users)->refresh();
+        $this->processed = (new \Gazelle\Stats\Users)->refresh()
+            + (new \Gazelle\Stats\TGroups)->refresh();
     }
 }
