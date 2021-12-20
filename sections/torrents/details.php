@@ -338,6 +338,10 @@ if ($GroupCategoryID === 1) {
     }
 }
 
+echo $Twig->render('tgroup/stats.twig', [
+    'stats' => $tgroup->stats(),
+]);
+
 echo $Twig->render('vote/box.twig', [
     'group_id' => $GroupID,
     'percent'  => $vote->total() ? $vote->totalUp() / $vote->total() * 100 : '&mdash;',

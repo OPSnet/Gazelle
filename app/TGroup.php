@@ -20,6 +20,8 @@ class TGroup extends BaseObject {
     protected array $info;
     protected array $releaseTypes;
 
+    protected Stats\TGroup $stats;
+
     public function tableName(): string {
         return 'torrents_group';
     }
@@ -50,6 +52,16 @@ class TGroup extends BaseObject {
             sprintf(self::CACHE_COVERART_KEY, $this->id),
             'torrents_details_' . $this->id,
         ]);
+    }
+
+    /**
+     * Delegate stats methods to the Stats\TGroup class
+     */
+    public function stats(): \Gazelle\Stats\TGroup {
+        if (!isset($this->stats)) {
+            $this->stats = new Stats\TGroup($this->id);
+        }
+        return $this->stats;
     }
 
     /**
