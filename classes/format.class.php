@@ -198,23 +198,6 @@ class Format {
         }
     }
 
-    /**
-     * Echo data sent in a GET form field, useful for text areas.
-     *
-     * @param string $Index the name of the form field
-     * @param boolean $Return if set to true, value is returned instead of echoed.
-     * @return void|string Sanitized value of field index if $Return == true
-     */
-    public static function form($Index, $Return = false) {
-        if (!empty($_GET[$Index])) {
-            if ($Return) {
-                return display_str($_GET[$Index]);
-            } else {
-                echo display_str($_GET[$Index]);
-            }
-        }
-    }
-
 
     /**
      * Convenience function to echo out selected="selected" and checked="checked" so you don't have to.

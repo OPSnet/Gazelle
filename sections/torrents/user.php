@@ -347,7 +347,7 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                     <td>
                         <input type="hidden" name="type" value="<?=$_GET['type']?>" />
                         <input type="hidden" name="userid" value="<?=$userId?>" />
-                        <input type="search" name="search" size="60" value="<?php Format::form('search'); ?>" />
+                        <input type="search" name="search" size="60" value="<?= display_str($_GET['search'] ?? '') ?>" />
                     </td>
                 </tr>
                 <tr>
@@ -413,7 +413,7 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                 <tr>
                     <td class="label"><strong>Tags:</strong></td>
                     <td>
-                        <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?php Format::form('tags'); ?>" />&nbsp;
+                        <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?= display_str($_GET['tags'] ?? '') ?>" />&nbsp;
                         <input type="radio" name="tags_type" id="tags_type0" value="0"<?= ($_GET['tags_type'] ?? '') == '1' ? ' selected="selected"' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                         <input type="radio" name="tags_type" id="tags_type1" value="1"<?= ($_GET['tags_type'] ?? '') == '0' ? ' selected="selected"' : '' ?> /><label for="tags_type1"> All</label>
                     </td>
