@@ -33,9 +33,9 @@
         <td class="label nobr">Tracker IP:<br />
           <div style="padding-left: 20px; text-align: left;">
             <input type="radio" name="tracker-src" id="tracker-src-live" value="live"{{ checked(tracker_live_source) }} />
-            <label class="tooltip" for="tracker-src" title="Search for client ip addresses currently connecting to the tracker" for="tracker-src-live">Live</label><br />
+            <label class="tooltip" for="tracker-src-live" title="Search for client ip addresses currently connecting to the tracker">Live</label><br />
             <input type="radio" name="tracker-src" id="tracker-src-hist" value="hist"{{ checked(not tracker_live_source) }} />
-            <label class="tooltip" for="tracker-src" title="Search for ip addresses that have been seen by the tracker (but may be not connected at this time)" for="tracker-src-hist">Historical</label>
+            <label class="tooltip" for="tracker-src-hist" title="Search for ip addresses that have been seen by the tracker (but may be not connected at this time)">Historical</label>
           </div>
         </td>
         <td>
