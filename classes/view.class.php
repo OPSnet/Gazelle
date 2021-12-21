@@ -212,20 +212,22 @@ class View {
                 if ($hasNewSubscriptions) {
                     $extraClass[] = 'new-subscriptions';
                 }
-                $extraClass[] = Format::add_class($PageID, ['userhistory', 'subscriptions'], 'active', false);
+                if (self::add_active($PageID, ['userhistory', 'subscriptions'])) {
+                    $extraClass[] = 'active';
+                }
             } elseif ($Key === 'staffinbox') {
                 if ($needStaffInbox) {
                     $extraClass[] = 'new-subscriptions';
                 }
-                $extraClass[] = Format::add_class($PageID, $Tests, 'active', false);
+                if (self::add_active($PageID, $Tests)) {
+                    $extraClass[] = 'active';
+                }
+            } elseif ($TestUser && $Viewer->id() != ($_REQUEST['userid'] ?? 0) && self::add_active($PageID, $Tests)) {
+                $extraClass[] = 'active';
             }
-
-            $li = "<li id=\"nav_{$Key}\"" . (
-                $extraClass
-                    ? (' class="' . implode(' ', $extraClass) . '"')
-                    : Format::add_class($PageID, $Tests, 'active', true, $TestUser ? 'userid' : false)
-                ) . '>';
-            $navLinks[] = $li . '<a href="' . $Target . '">' . $Title . "</a></li>\n";
+            $navLinks[] = "<li id=\"nav_{$Key}\""
+                . ($extraClass ? ' class="' . implode(' ', $extraClass) . '"' : '')
+                . "><a href=\"{$Target}\">{$Title}</a></li>\n";
         }
 
         echo $Twig->render('index/private-header.twig', [
@@ -246,6 +248,40 @@ class View {
             'user'              => $Viewer,
             'user_class'        => (new Gazelle\Manager\User)->userclassName($Viewer->primaryClass()),
         ]);
+    }
+
+    /**
+     * Determine if a link should be marked as 'active'
+     *
+     * @param mixed $Target The variable to compare all values against
+     * @param mixed $Tests The condition values. Type and dimension determines test type
+     *     Scalar: $Tests must be equal to $Target for a match
+     *     Array: All elements in $Tests must correspond to equal values in $Target 2-dimensional array
+     *            At least one array must be identical to $Target
+     */
+    protected static function add_active($Target, $Tests, $UserIDKey = false): bool {
+        if (!is_array($Tests)) {
+            // Scalars are nice and easy
+            return $Tests === $Target;
+        } elseif (!is_array($Tests[0])) {
+            // Test all values in vectors
+            foreach ($Tests as $Type => $Part) {
+                if (!isset($Target[$Type]) || $Target[$Type] !== $Part) {
+                    return false;
+                }
+            }
+        } else {
+            // Loop to the end of the array or until we find a matching test
+            foreach ($Tests as $Test) {
+                // If $Pass remains true after this test, it's a match
+                foreach ($Test as $Type => $Part) {
+                    if (!isset($Target[$Type]) || $Target[$Type] !== $Part) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
