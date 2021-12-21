@@ -212,11 +212,11 @@ class User extends BaseObject {
                 $this->info['secondary_class'][$p['ID']] = $p['Name'];
                 $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
                 $secondaryClassLevel[$p['ID']] = $p['Level'];
-                $allowed = array_map('intval', explode(',', $p['PermittedForums']) ?: []);
-                foreach ($allowed as $forumId) {
-                    if ($forumId) {
-                        $forumAccess[$forumId] = true;
-                    }
+            }
+            $allowed = array_map('intval', explode(',', $p['PermittedForums']) ?: []);
+            foreach ($allowed as $forumId) {
+                if ($forumId) {
+                    $forumAccess[$forumId] = true;
                 }
             }
         }

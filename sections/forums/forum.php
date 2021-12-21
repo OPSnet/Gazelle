@@ -18,7 +18,7 @@ if (!$Viewer->readAccess($forum)) {
 }
 
 $paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($forum->topicCount());
+$paginator->setTotal($forum->threadCount());
 
 $perPage      = $Viewer->postsPerPage();
 $userLastRead = $forum->userLastRead($Viewer->id(), $perPage);
