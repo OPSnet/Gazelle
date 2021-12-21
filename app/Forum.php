@@ -990,9 +990,9 @@ class Forum extends BaseObject {
         return $toc;
     }
 
-    public function topicCount(): int {
+    public function threadCount(): int {
         $toc = $this->tableOfContentsForum();
-        return current($toc)['threadCount'];
+        return $toc ? current($toc)['threadCount'] : 0;
     }
 
     /**
