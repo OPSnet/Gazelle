@@ -1,30 +1,25 @@
 <?php
 
-use Gazelle\Util\Irc;
-
 authorize();
 
 $userMan = new Gazelle\Manager\User;
-$user = empty($_REQUEST['userid']) ? $Viewer : $userMan->findById((int)$_REQUEST['userid']);
-if (is_null($user)) {
-    error(404);
-}
-$userId = $user->id();
-if ($userId == $Viewer->id()) {
+if (!isset($_REQUEST['userid'])) {
     $ownProfile = true;
+    $user = $Viewer;
 } else {
-    if (!$Viewer->permitted('admin_bp_history')) {
+    if (!$Viewer->permitted('users_edit_profiles')) {
+        Gazelle\Util\Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->label()
+            . ' tried to edit ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']
+        );
         error(403);
     }
-    $ownProfile = false;
+    $user = $userMan->findById((int)$_REQUEST['userid']);
+    if (is_null($user)) {
+        error(404);
+    }
+    $ownProfile = ($user->id() == $Viewer->id());
 }
-
-if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
-    Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->username()
-        . ' (' . SITE_URL . '/' . $Viewer->url()
-        . ') just tried to edit the profile of ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']);
-    error(403);
-}
+$userId = $user->id();
 
 $validator = new Gazelle\Util\Validator;
 $validator->setFields([
