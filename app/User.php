@@ -56,7 +56,7 @@ class User extends BaseObject {
     /**
      * Log out the current session
      */
-    function logout($sessionId = false) {
+    public function logout($sessionId = false) {
         setcookie('session', '', [
             'expires'  => time() - 60 * 60 * 24 * 90,
             'path'     => '/',
@@ -73,7 +73,7 @@ class User extends BaseObject {
     /**
      * Logout all sessions
      */
-    function logoutEverywhere() {
+    public function logoutEverywhere() {
         $session = new Session($this->id);
         $session->dropAll();
         $this->logout();
@@ -767,7 +767,7 @@ class User extends BaseObject {
      * @param array $property What properties are they looking for?
      * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
-    function propertyVisibleMulti(User $viewer, array $property): int {
+    public function propertyVisibleMulti(User $viewer, array $property): int {
         $final = false;
         foreach ($property as $p) {
             $result = $this->propertyVisible($viewer, $p);
@@ -789,7 +789,7 @@ class User extends BaseObject {
      * @param string $property What property are they looking for?
      * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
-    function propertyVisible(User $viewer, string $property): int {
+    public function propertyVisible(User $viewer, string $property): int {
         if ($this->id === $viewer->id()) {
             return PARANOIA_ALLOWED;
         }
@@ -1082,7 +1082,7 @@ class User extends BaseObject {
      *
      * @param string $reason reason for the warning.
      */
-     public function addForumWarning(string $reason) {
+    public function addForumWarning(string $reason) {
         $this->forumWarning[] = $reason;
         return $this;
     }
