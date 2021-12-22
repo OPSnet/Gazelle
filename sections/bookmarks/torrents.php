@@ -167,7 +167,7 @@ if ($CollageCovers !== 0) { ?>
         unset($CollagePages);
     }
 }
-$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
+$urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
 ?>
         <?= $paginator->linkbox() ?>
         <table class="torrent_table grouping cats m_table" id="torrent_table">

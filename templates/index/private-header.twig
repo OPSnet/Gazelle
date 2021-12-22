@@ -32,21 +32,17 @@
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_vinyl{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Vinyl Sourced Torrents" />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Lossless Torrents" />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless24{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - 24bit Lossless Torrents" />
-
-{%- if viewer.permitted('site_torrents_notify') -%}
-    {%- for id, name in viewer.notifyFilters %}
+{% if viewer.permitted('site_torrents_notify') %}
+{%     for id, name in viewer.notifyFilters %}
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ id }}_{{ viewer.announce_key }}{{ auth_args|raw }}&amp;name={{ name }}" title="{{ constant('SITE_NAME') }} - {{ name }}" />
-    {%- endfor %}
-{% endif -%}
+{%     endfor %}
+{% endif %}
 
-{%- for sheet in style %}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ style.url }}" title="{{ style.name }}" />
+{% for sheet in style_extra %}
 {{ css(sheet) }}
 {% endfor %}
-{% if viewer.stylesheetUrl %}
-<link rel="stylesheet" type="text/css" media="screen" href="{{ viewer.stylesheetUrl }}" title="External CSS" />
-{% else -%}
-{{ css(viewer.stylesheetName ~ '/style.css') }}
-{% endif %}
+
 {% for js in script %}
 {{ script(js) }}
 {% endfor %}

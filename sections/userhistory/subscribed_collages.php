@@ -37,7 +37,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 <?php
 } else {
     $ShowGroups = 0;
-    $urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
+    $urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
     foreach ($groupSubs as $s) {
         $GroupIDs = $s['groupIds'];
         $NewCount = count($GroupIDs);

@@ -311,7 +311,7 @@ foreach ($topVotes as $groupID => $group) {
     } //if (count($torrents) > 1 || $groupCategoryID == 1)
     $torrentTable .= ob_get_clean();
 }
-$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
+$urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
 ?>
 <table class="torrent_table grouping cats m_table" id="discog_table">
     <tr class="colhead_dark">

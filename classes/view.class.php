@@ -29,12 +29,7 @@ class View {
         if (!empty($option['css'])) {
             $Style = array_merge(
                 $Style,
-                array_map(
-                    function ($style) {
-                        return $style . "/style.css";
-                    },
-                    explode(',', $option['css'])
-                )
+                array_map(fn($s) => "$s/style.css", explode(',', $option['css']))
             );
         }
 
@@ -234,7 +229,8 @@ class View {
             'auth_args'    => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
             'page_title'   => html_entity_decode($pageTitle),
             'script'       => array_map(fn($s) => "$s.js", $Scripts),
-            'style'        => $Style,
+            'style'        => new Gazelle\Stylesheet($Viewer),
+            'style_extra'  => $Style,
             'viewer'       => $Viewer,
         ]);
         echo $Twig->render('index/page-header.twig', [
