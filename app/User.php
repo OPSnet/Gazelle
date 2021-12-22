@@ -141,6 +141,7 @@ class User extends BaseObject {
                 p.Level AS Class,
                 p.Name  AS className,
                 p.Values AS primaryPermissions,
+                p.PermittedForums AS primaryForum,
                 if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
@@ -246,7 +247,13 @@ class User extends BaseObject {
                 $forumAccess[$forumId] = true;
             }
         }
-        $forbidden = array_map('intval', explode(',', $this->info['RestrictedForums'])) ?: [];
+        $allowed = array_map('intval', explode(',', $this->info['primaryForum']) ?: []);
+        foreach ($allowed as $forumId) {
+            if ($forumId) {
+                $forumAccess[$forumId] = true;
+            }
+        }
+        $forbidden = array_map('intval', explode(',', $this->info['RestrictedForums']) ?: []);
         foreach ($forbidden as $forumId) {
             // forbidden may override permitted
             if ($forumId) {

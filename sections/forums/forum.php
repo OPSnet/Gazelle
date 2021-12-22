@@ -72,7 +72,7 @@ View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? ['js' => 
 <div class="thin">
 <?php
 echo $Twig->render('forum/header.twig', [
-    'create'    => $Viewer->writeAccess($forum) && $Viewer->createAccess($forum),
+    'create'    => $Viewer->writeAccess($forum) && $Viewer->createAccess($forum) && !$Viewer->disablePosting(),
     'dept_list' => $forum->departmentList($Viewer),
     'forum'     => $forum,
 ]);
