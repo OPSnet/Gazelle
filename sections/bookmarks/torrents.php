@@ -19,10 +19,9 @@ if (empty($_GET['userid'])) {
 }
 
 $bookmark = new Gazelle\Bookmark($user);
-$collMan  = new Gazelle\Manager\Collage;
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$imgproxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$collMan  = (new Gazelle\Manager\Collage)->setImageProxy((new Gazelle\Util\ImageProxy)->setViewer($Viewer));
 
 $paginator = new Gazelle\Util\Paginator(200, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($bookmark->torrentTotal());
@@ -126,7 +125,7 @@ if ($CollageCovers !== 0) { ?>
     while ($idx < min($CollageCovers, $NumGroups)) {
         $tgroup = $tgMan->findById($bookmarkList[$idx]['tgroup_id']);
         if ($tgroup) {
-            echo $collMan->tgroupCover($tgroup, $imgproxy);
+            echo $collMan->tgroupCover($tgroup);
             ++$idx;
         }
     }
@@ -152,9 +151,9 @@ if ($CollageCovers !== 0) { ?>
             $Groups = array_slice($bookmarkList, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($bookmark) use ($collMan, $imgproxy, $tgMan) {
+                    function($bookmark) use ($collMan, $tgMan) {
                         $tgroup = $tgMan->findById($bookmark['tgroup_id']);
-                        return $tgroup ? $collMan->tgroupCover($tgroup, $imgproxy) : '';
+                        return $tgroup ? $collMan->tgroupCover($tgroup) : '';
                     },
                     $Groups
                 )

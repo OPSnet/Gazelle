@@ -87,11 +87,6 @@ parameters:
 			path: app/Manager/ClientWhitelist.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(string name of the user\\)\\: Unexpected token \"name\", expected variable at offset 186$#"
-			count: 1
-			path: app/Manager/Collage.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\User the viewer\\)\\: Unexpected token \"the\", expected variable at offset 121$#"
 			count: 1
 			path: app/Manager/Comment.php

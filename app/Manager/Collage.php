@@ -8,6 +8,8 @@ class Collage extends \Gazelle\Base {
     protected const CACHE_DEFAULT_GROUP = 'collage_default_group_%d';
     protected const ID_KEY = 'zz_c_%d';
 
+    protected \Gazelle\Util\ImageProxy $imageProxy;
+
     public function create(\Gazelle\User $user, int $categoryId, string $name, string $description, string $tagList, \Gazelle\Log $logger) {
         self::$db->prepared_query("
             INSERT INTO collages
@@ -67,41 +69,24 @@ class Collage extends \Gazelle\Base {
         return new \Gazelle\Collage($id);
     }
 
-    public function tgroupCover(\Gazelle\TGroup $tgroup, \Gazelle\Util\ImageProxy $proxy): string {
+    public function setImageProxy(\Gazelle\Util\ImageProxy $imageProxy) {
+        $this->imageProxy = $imageProxy;
+        return $this;
+    }
+
+    public function tgroupCover(\Gazelle\TGroup $tgroup): string {
         return self::$twig->render('collage/row.twig', [
             'group_id'   => $tgroup->id(),
-            'image'      => $proxy->process($tgroup->image()),
+            'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
             'name'       => $tgroup->displayNameText(),
             'tags'       => implode(', ', $tgroup->tagNameList()),
         ]);
     }
 
-    public function coverRow(array $group): string {
-        $groupId = $group['ID'];
-        $ExtendedArtists = $group['ExtendedArtists'];
-        $Artists = $group['Artists'];
-        $name = '';
-        if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])|| !empty($ExtendedArtists[6])) {
-            unset($ExtendedArtists[2]);
-            unset($ExtendedArtists[3]);
-            $name = \Artists::display_artists($ExtendedArtists, false);
-        } elseif (count($Artists) > 0) {
-            $name = \Artists::display_artists(['1' => $Artists], false);
-        }
-        $name .= $group['Name'];
-        $groupYear = $group['Year'];
-        if ($groupYear > 0) {
-            $name = "$name [$groupYear]";
-        }
-        $tags = new \Tags($group['TagList']);
-
-        global $Viewer; // FIXME this should be moved elsewhere where a $Viewer is available
+    public function coverRow(\Gazelle\TGroup $tgroup): string {
         return self::$twig->render('collage/row.twig', [
-            'group_id'   => $groupId,
-            'image'      => (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($group['WikiImage']),
-            'name'       => $name,
-            'tags'       => $tags->format(),
-            'tags_plain' => implode(', ', $tags->get_tags()),
+            'tgroup'     => $tgroup->id(),
+            'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
         ]);
     }
 
@@ -109,7 +94,6 @@ class Collage extends \Gazelle\Base {
      * Create a generic collage name for a personal collage.
      * Used for people who lack the privileges create personal collages with arbitrary names
      *
-     * @param string name of the user
      * @return string name of the collage
      */
     public function personalCollageName(string $name): string {

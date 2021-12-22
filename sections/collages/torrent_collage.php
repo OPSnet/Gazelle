@@ -3,8 +3,10 @@
 $TorrentList = $Collage->torrentList();
 $GroupIDs = $Collage->groupIds();
 
-$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $bookmark = new Gazelle\Bookmark($Viewer);
+$collMan  = (new Gazelle\Manager\Collage)->setImageProxy((new \Gazelle\Util\ImageProxy)->setViewer($Viewer));
 
 View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
 ?>
@@ -126,9 +128,14 @@ if ($Viewer->permitted('zip_downloader')) {
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
 <?php
-    $collMan = new Gazelle\Manager\Collage;
-    for ($Idx = 0; $Idx < min($NumGroups, $CollageCovers); $Idx++) {
-        echo $collMan->coverRow($TorrentList[$GroupIDs[$Idx]]);
+    $Idx = 0;
+    $limit = min($NumGroups, $CollageCovers);
+    while ($Idx < $limit) {
+        $tgroup = $tgMan->findById($GroupIDs[$Idx]);
+        if ($tgroup) {
+            echo $collMan->coverRow($tgroup);
+            ++$Idx;
+        }
     }
 ?>
             </ul>
@@ -146,15 +153,17 @@ if ($Viewer->permitted('zip_downloader')) {
         </div>
 <?php
         for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
-            $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
-            $CollagePages[] = implode('',
-                array_map(
-                    function($id) use ($collMan, $TorrentList) {
-                        return $collMan->coverRow($TorrentList[$id]);
-                    },
-                    $Groups
-                )
-            );
+            $chunk = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
+            if (!empty($chunk)) {
+                $CollagePages[] = implode('',
+                    array_map(
+                        function($id) use ($collMan, $tgMan, $TorrentList) {
+                            $tgroup = $tgMan->findById($TorrentList[$id]['ID']);
+                            return $tgroup ? $collMan->coverRow($tgroup) : '';
+                        }, $chunk
+                    )
+                );
+            }
         }
         if ($NumGroups > $CollageCovers) {
             for ($i = $NumGroups + 1; $i <= ceil($NumGroups / $CollageCovers) * $CollageCovers; $i++) {
@@ -238,14 +247,15 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             </td>
             <td colspan="5">
                 <strong><?= $DisplayName ?></strong>
+                    <span class="float_right">
 <?php   if ($bookmark->isTorrentBookmarked($GroupID)) { ?>
-                    <span class="remove_bookmark float_right">
+                    <span class="remove_bookmark">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="remove_bookmark brackets"
                            onclick="Unbookmark('torrent', <?= $GroupID ?>, 'Bookmark'); return false;">Remove bookmark</a>
                     </span>
 <?php   } else { ?>
-                    <span class="add_bookmark float_right">
+                    <span class="add_bookmark">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="add_bookmark brackets"
                            onclick="Bookmark('torrent', <?= $GroupID ?>, 'Remove bookmark'); return false;">Bookmark</a>
@@ -254,8 +264,9 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         }
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                    <?= $vote->setGroupId($GroupID)->links($Viewer->auth()) ?>
+                    <br /><?= $vote->setGroupId($GroupID)->links($Viewer->auth()) ?>
 <?php   } ?>
+                    </span>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
         </tr>
