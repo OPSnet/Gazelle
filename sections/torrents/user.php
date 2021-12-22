@@ -15,8 +15,8 @@ if (is_null($user)) {
 }
 $userId = $user->id();
 
-$urlStem = STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName()  . '/images/';
-$imgTag = '<img src="' . $urlStem . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+$imgTag = '<img src="' . (new Gazelle\Stylesheet($Viewer))->imagePath()
+    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'name'     => ['dbColumn' => 'tg.Name', 'defaultSort' => 'asc',  'text' => 'Torrent'],
     'time'     => ['dbColumn' => 'Time',    'defaultSort' => 'desc', 'text' => 'Time'],

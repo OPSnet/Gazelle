@@ -6,8 +6,8 @@ if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);
 }
 
-$urlStem = STATIC_SERVER . '/styles/' .  $Viewer->stylesheetName()  . '/images/';
-$imgTag = '<img src="' . $urlStem . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+$imgTag = '<img src="' . (new Gazelle\Stylesheet($Viewer))->imagePath()
+    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],
     'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Time'],

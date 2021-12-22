@@ -14,6 +14,6 @@ echo $Twig->render('torrent/downloadlist.twig', [
     'page'       => $torrent->downloadPage($paginator->limit(), $paginator->offset()),
     'paginator'  => $paginator,
     'torrent_id' => $torrent->id(),
-    'url_stem'   => STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/',
+    'url_stem'   => (new Gazelle\Stylesheet($Viewer))->imagePath(),
     'viewer_id'  => $Viewer->id(),
 ]);

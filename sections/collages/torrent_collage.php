@@ -169,7 +169,7 @@ if ($Viewer->permitted('zip_downloader')) {
         unset($CollagePages);
     }
 }
-$urlStem = STATIC_SERVER . '/styles/' . $Viewer->stylesheetName() . '/images/';
+$urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
 ?>
         <table class="torrent_table grouping cats m_table" id="discog_table">
             <tr class="colhead_dark">

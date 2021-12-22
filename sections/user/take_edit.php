@@ -264,11 +264,8 @@ if ($DownloadAlt != $user->option('DownloadAlt') || $Options['HttpsTracker'] != 
     $Cache->delete_value('user_' . $user->announceKey());
 }
 
-$SQL = "
-UPDATE users_main AS m
+$SQL = "UPDATE users_main AS m
 INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
-    i.StyleID = ?,
-    i.StyleURL = ?,
     i.Avatar = ?,
     i.SiteOptions = ?,
     i.NotifyOnQuote = ?,
@@ -285,8 +282,6 @@ INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
 ";
 
 $Params = [
-    $_POST['stylesheet'],
-    $_POST['styleurl'],
     $_POST['avatar'],
     serialize($Options),
     strval($Options['NotifyOnQuote']),
@@ -338,8 +333,10 @@ $DB->prepared_query($SQL, ...$Params);
 
 $user->flush();
 
+(new Gazelle\Stylesheet($user))->modifyInfo((int)$_POST['stylesheet'], $_POST['styleurl']);
+
 if ($ResetPassword) {
     $user->logoutEverywhere();
 }
 
-header("Location: user.php?action=edit&userid=$userId");
+header('Location: ' . $user->url() . '&action=edit');

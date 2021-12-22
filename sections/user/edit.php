@@ -19,15 +19,13 @@ if ($UserID != $Viewer->id() && !$Viewer->permitted('users_edit_profiles')) {
 }
 $User = new Gazelle\User($UserID);
 
-[$Paranoia, $Info, $InfoTitle, $Avatar, $StyleID, $StyleURL, $SiteOptions, $DownloadAlt, $UnseededAlerts,
+[$Paranoia, $Info, $InfoTitle, $Avatar, $SiteOptions, $DownloadAlt, $UnseededAlerts,
     $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems] = $DB->row("
     SELECT
         m.Paranoia,
         i.Info,
         i.InfoTitle,
         i.Avatar,
-        i.StyleID,
-        i.StyleURL,
         i.SiteOptions,
         i.DownloadAlt,
         i.UnseededAlerts,
@@ -41,6 +39,8 @@ $User = new Gazelle\User($UserID);
     WHERE m.ID = ?
     ", $UserID
 );
+
+$stylesheet = new Gazelle\Stylesheet($User);
 
 $options = unserialize($SiteOptions) ?: [];
 if (!isset($options['HttpsTracker'])) {
@@ -92,9 +92,9 @@ echo $Twig->render('user/setting.twig', [
     'option'           => $options,
     'profile'          => $profile,
     'release_order'    => $User->releaseOrder($options, (new Gazelle\ReleaseType)->extendedList()),
-    'style_id'         => $StyleID,
-    'style_url'        => $StyleURL,
-    'stylesheets'      => (new Gazelle\Stylesheet)->list(),
+    'style_id'         => $stylesheet->styleId(),
+    'style_url'        => $stylesheet->styleUrl(),
+    'stylesheets'      => (new Gazelle\Manager\Stylesheet)->list(),
     'user'             => $User,
     'can' => [
         'advanced_search' => $Viewer->permitted('site_advanced_search'),
