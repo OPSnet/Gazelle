@@ -1990,50 +1990,6 @@ class User extends BaseObject {
         ");
     }
 
-    public function artistCollageContributed(): int {
-        return $this->getSingleValue('user_collage_a_contrib', "
-            SELECT count(DISTINCT ct.CollageID)
-            FROM collages_artists AS ct
-            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
-            WHERE c.Deleted = '0' AND ct.UserID = ?
-        ");
-    }
-
-    public function torrentCollageContributed(): int {
-        return $this->getSingleValue('user_collage_t_contrib', "
-            SELECT count(DISTINCT ct.CollageID)
-            FROM collages_torrents AS ct
-            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
-            WHERE c.Deleted = '0' AND ct.UserID = ?
-        ");
-    }
-
-    public function collagesContributed(): int {
-        return $this->artistCollageContributed() + $this->torrentCollageContributed();
-    }
-
-    public function artistCollageAdditions(): int {
-        return $this->getSingleValue('user_collage_a_add', "
-            SELECT count(*)
-            FROM collages_artists AS ct
-            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
-            WHERE c.Deleted = '0' AND ct.UserID = ?
-        ");
-    }
-
-    public function torrentCollageAdditions(): int {
-        return $this->getSingleValue('user_collage_t_add', "
-            SELECT count(*)
-            FROM collages_torrents AS ct
-            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
-            WHERE c.Deleted = '0' AND ct.UserID = ?
-        ");
-    }
-
-    public function collageAdditions(): int {
-        return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
-    }
-
     /**
      * Default list 5 will be cached. When fetching a different amount,
      * set $forceNoCache to true to avoid caching a list with an unexpected length.

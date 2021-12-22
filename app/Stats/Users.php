@@ -166,27 +166,26 @@ class Users extends \Gazelle\Base {
 
         self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, collage_total, collage_contrib)
-                SELECT ui.UserID,
-                    coalesce(CT.collage_total, 0),
-                    coalesce(CC.collage_contrib, 0)
-                FROM users_info ui
-                LEFT JOIN (
-                    SELECT c.UserID, count(*) as collage_total
-                    FROM collages c
-                    WHERE c.Deleted = '0'
-                    GROUP BY c.UserID
-                    ) CT USING (UserID)
-                LEFT JOIN (
-                    SELECT ct.UserID, count(DISTINCT ct.CollageID) as collage_contrib
-                    FROM collages_torrents AS ct
-                    INNER JOIN collages c ON (c.ID = ct.CollageID)
-                    WHERE c.Deleted = '0'
-                    GROUP BY ct.UserID
-                    ) CC USING (UserID)
-                WHERE coalesce(CT.collage_total, CC.collage_contrib) IS NOT NULL
+                SELECT ct.UserID, count(*), count(distinct ct.CollageID)
+                FROM collages c
+                INNER JOIN collages_torrents ct ON (ct.CollageID = c.ID)
+                WHERE c.Deleted = '0'
+                GROUP BY ct.UserID
             ON DUPLICATE KEY UPDATE
                 collage_total = VALUES(collage_total),
                 collage_contrib = VALUES(collage_contrib)
+        ");
+
+        self::$db->prepared_query("
+            INSERT INTO user_summary_new (user_id, collage_total, collage_contrib)
+                SELECT ca.UserID, count(*), count(distinct ca.CollageID)
+                FROM collages c
+                INNER JOIN collages_artists ca ON (ca.CollageID = c.ID)
+                WHERE c.Deleted = '0'
+                GROUP BY ca.UserID
+            ON DUPLICATE KEY UPDATE
+                collage_total = collage_total + VALUES(collage_total),
+                collage_contrib = collage_contrib + VALUES(collage_contrib)
         ");
 
         self::$db->prepared_query("
