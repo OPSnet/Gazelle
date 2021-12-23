@@ -13,5 +13,5 @@ $heading = new Gazelle\Util\SortableTableHeader('id', [
 
 echo $Twig->render('admin/stylesheet.twig', [
     'heading' => $heading,
-    'list'    => (new Gazelle\Stylesheet)->usageList($heading->getOrderBy(), $heading->getOrderDir()),
+    'list'    => (new Gazelle\Manager\Stylesheet)->usageList($heading->getOrderBy(), $heading->getOrderDir()),
 ]);

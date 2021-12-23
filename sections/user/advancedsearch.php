@@ -159,7 +159,7 @@ if (!empty($_GET)) {
             $ClassIDs[] = $ClassID;
         }
     }
-    $Stylesheets = (new \Gazelle\Stylesheet)->list();
+    $Stylesheets = (new \Gazelle\Manager\Stylesheet)->list();
 
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
