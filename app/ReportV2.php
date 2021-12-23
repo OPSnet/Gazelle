@@ -2,15 +2,21 @@
 
 namespace Gazelle;
 
-class ReportV2 extends Base {
+class ReportV2 extends BaseObject {
 
-    protected $id;
-    protected $moderatorId;
-    protected $groupId;
-    protected $torrentId;
+    protected int $moderatorId;
+    protected int $groupId;
+    protected int $torrentId;
 
-    public function __construct(int $id) {
-        $this->id = $id;
+    public function tableName(): string { return 'reportsv2'; }
+    public function flush() {}
+
+    public function url(): string {
+        return "reportsv2.php?view=report&amp;id=" . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id());
     }
 
     public function setModeratorId(int $moderatorId) {
