@@ -87,9 +87,13 @@ class DB extends Base {
             SELECT $columnList
             FROM $table
             WHERE $conditionList";
-        self::$db->prepared_query($sql, ...$argList);
-        if (self::$db->affected_rows() == 0) {
-            return [false, "condition selected 0 rows"];
+        try {
+            self::$db->prepared_query($sql, ...$argList);
+            if (self::$db->affected_rows() == 0) {
+                return [false, "condition selected 0 rows"];
+            }
+        } catch (\DB_MYSQL_DuplicateKeyException $e) {
+            // do nothing, for some reason it was already deleted
         }
 
         if (!$delete) {

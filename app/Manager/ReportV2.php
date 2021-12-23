@@ -4,6 +4,8 @@ namespace Gazelle\Manager;
 
 class ReportV2 extends \Gazelle\Base {
 
+    protected const ID_KEY = 'zz_r2_%d';
+
     protected array $categories = [
         'master' => 'General',
         '1' => 'Music',
@@ -17,6 +19,21 @@ class ReportV2 extends \Gazelle\Base {
 
     protected array $types;
     protected $filter;
+
+    public function findById(int $reportId): ?\Gazelle\ReportV2 {
+        $key = sprintf(self::ID_KEY, $reportId);
+        $id = self::$cache->get_value($key);
+        if ($id === false) {
+            $id = self::$db->scalar("
+                SELECT ID FROM reportsv2 WHERE ID = ?
+                ", $reportId
+            );
+            if (!is_null($id)) {
+                self::$cache->cache_value($key, $id, 0);
+            }
+        }
+        return $id ? new \Gazelle\ReportV2($id) : null;
+    }
 
     public function types(): array {
         if (!isset($this->types)) {
