@@ -14,7 +14,7 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     }
 }
 
-$imgTag = (new Gazelle\Stylesheet($Viewer))->imagePath() . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+$imgTag = '<img src="' . (new Gazelle\Stylesheet($Viewer))->imagePath() . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['defaultSort' => 'desc', 'text' => 'Year'],
     'time'     => ['defaultSort' => 'desc', 'text' => 'Time'],
