@@ -7,17 +7,17 @@ if (!isset($_REQUEST['userid'])) {
     $ownProfile = true;
     $user = $Viewer;
 } else {
-    if (!$Viewer->permitted('users_edit_profiles')) {
-        Gazelle\Util\Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->label()
-            . ' tried to edit ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']
-        );
-        error(403);
-    }
     $user = $userMan->findById((int)$_REQUEST['userid']);
     if (is_null($user)) {
         error(404);
     }
     $ownProfile = ($user->id() == $Viewer->id());
+    if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
+        Gazelle\Util\Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->label()
+            . ' tried to edit ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']
+        );
+        error(403);
+    }
 }
 $userId = $user->id();
 
