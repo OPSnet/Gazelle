@@ -1396,39 +1396,24 @@ class Text {
             [$thread, $post] = explode(':', $thread);
         }
 
-        $cacheKey = 'bbcode_thread_' . $thread;
-        global $Cache, $DB;
-        [$id, $name, $isLocked, $forumId] = $Cache->get_value($cacheKey);
-        if (is_null($forumId)) {
-            if ($thread) {
-                [$id, $name, $isLocked, $forumId] = $DB->row('
-                    SELECT ft.ID, ft.Title, ft.IsLocked, ft.ForumID FROM forums_topics ft WHERE ft.ID = ?
-                    ', $thread
-                );
+        $forum = (new \Gazelle\Manager\Forum)->findByThreadId($thread);
+        if (is_null($forum)) {
+            if ($post) {
+                return '[thread]' .  $thread . ':' . $post . '[/thread]';
             } else {
-                [$id, $name, $isLocked, $forumId] = $DB->row('
-                    SELECT ft.ID, ft.Title, ft.IsLocked, ft.ForumID
-                    FROM forums_topics ft
-                    INNER JOIN forums_posts fp ON (fp.TopicID = ft.ID)
-                    WHERE fp.ID = ?
-                    ', $post
-                );
+                return '[thread]' .  $thread . '[/thread]';
             }
-            $Cache->cache_value($cacheKey, [$id, $name, $isLocked, $forumId], 86400 + rand(1, 3600));
         }
-        if (!self::$viewer->readAccess(new Gazelle\Forum($forumId))) {
-            return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $id, 'restricted');
+        if (!self::$viewer->readAccess($forum)) {
+            return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $forum->id(), 'restricted');
         }
 
+        $threadInfo = $forum->threadInfo($thread);
         if ($post) {
-            return $id
-                ? sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
-                    $id, $post, $post, ($isLocked ? ICON_PADLOCK . ' ' : ''), $name, $post)
-                : '[thread]' .  $thread . ':' . $post . '[/thread]';
+            return sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
+                $thread, $post, $post, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title'], $post);
         }
-        return $id
-            ? sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
-                $id, ($isLocked ? ICON_PADLOCK . ' ' : ''), $name)
-            : '[thread]' . $thread . '[/thread]';
+        return sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
+            $thread, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title']);
     }
 }

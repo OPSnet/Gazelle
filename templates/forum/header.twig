@@ -1,7 +1,7 @@
     <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php#{{ forum.categoryId }}">{{ forum.categoryName }}</a> &rsaquo; {{ forum.name }}</h2>
     <div class="linkbox">
 {% for d in dept_list %}
-        <a class="brackets" href="forums.php?action=viewforum&amp;forumid={{ d.forum_id }}">
+        <a class="brackets" href="{{ forum.url }}">
     {%- if d.active %}<b>{% endif %}{{ d.name }}{% if d.active %}</b>{% endif -%}
     {%- if d.unread %} <span title="unread">({{ d.unread|number_format }})</span>{% endif -%}
         </a>

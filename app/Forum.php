@@ -44,6 +44,10 @@ class Forum extends BaseObject {
         return "forums.php?action=viewthread&amp;threadid={$threadId}&amp;postid={$postId}#post{$postId}";
     }
 
+    public function threadPostLink(int $threadId, int $postId): string {
+        return sprintf('<a href="%s">%s</a>', $this->threadPostUrl($threadId, $postId), "Post #$postId");
+    }
+
     // TODO: rewrite to use BaseObject::modify()
     public function modifyForum(array $args): bool {
         $autolock = isset($_POST['autolock']) ? '1' : '0';
