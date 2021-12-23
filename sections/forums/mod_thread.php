@@ -94,9 +94,9 @@ $forum->editThread($threadId, $forumId, $newSticky, $newRank, $locked, $newTitle
 
 // topic notes and notifications
 $notes = [];
-$oldUrl = "[url=forums.php?action=viewforum&forumid=" . $forum->id() . "]" . $forum->name() . "[/url]";
+$oldUrl = "[url=" . $forum->url() . "]" . $forum->name() . "[/url]";
 if ($newForum) {
-    $newUrl = "[url=forums.php?action=viewforum&forumid=" . $newForum->id() . "]" . $newForum->name() . "[/url]";
+    $newUrl = "[url=" . $newForum->url() . "]" . $newForum->name() . "[/url]";
 }
 switch ($action ?? null) {
     case 'transitioning':

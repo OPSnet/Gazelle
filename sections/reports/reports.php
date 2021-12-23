@@ -61,6 +61,8 @@ $DB->prepared_query("
     ", ...$args
 );
 $Reports = $DB->get_query_id();
+$forumMan = new Gazelle\Manager\Forum;
+$userMan = new Gazelle\Manager\User;
 
 View::show_header('Reports', ['js' => 'bbcode,reports']);
 ?>
@@ -126,69 +128,38 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                                     }
                                     break;
                                 case 'thread':
-                                    [$forumId, $forumName, $thread, $userId, $username] = $DB->row("
-                                        SELECT
-                                            f.id,
-                                            f.Name,
-                                            ft.Title,
-                                            um.ID,
-                                            um.Username
-                                        FROM forums f
-                                        INNER JOIN forums_topics ft ON (ft.ForumID = f.ID)
-                                        INNER JOIN users_main um on (um.ID = ft.AuthorID)
-                                        WHERE ft.ID = ?
-                                        ", $ThingID
-                                    );
-                                    if (!$thread) {
+                                    $forum = $forumMan->findByThreadId($ThingID);
+                                    if (is_null($forum)) {
                                         echo 'No forum thread with the reported ID found';
-                                    } else { ?>
-<a href="forums.php?action=viewforum&amp;forumid=<?= $forumId ?>"><?= $forumName
-    ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?= $ThingID ?>"><?=
-    display_str($thread) ?></a> created by <a href="user.php?id=<?= $userId ?>"><?= $username ?></a>
+                                    } else {
+                                        $threadInfo = $forum->threadInfo($ThingID);
+                                        $user = $userMan->findById($threadInfo['AuthorID']);
+?>
+<?= $forum->link() ?> &rsaquo; <?= $forum->threadLink($ThingID, $threadInfo['Title']) ?> created by <?= $user ? $user->link() : 'System' ?></a>
 <?php
                                     }
                                     break;
                                 case 'post':
                                     $PerPage = $Viewer->postsPerPage();
-                                    [$forumId, $forumName, $threadId, $threadName, $userId, $username, $PostID, $Body, $PostNum] = $DB->row("
-                                        SELECT
-                                            f.ID,
-                                            f.Name,
-                                            ft.ID,
-                                            ft.Title,
-                                            um.ID,
-                                            um.Username,
-                                            p.ID,
-                                            p.Body,
-                                            (
-                                                SELECT count(*)
-                                                FROM forums_posts AS p2
-                                                WHERE p2.TopicID = p.TopicID AND p2.ID <= p.ID
-                                            ) AS PostNum
-                                        FROM forums_posts AS p
-                                        INNER JOIN forums_topics ft ON (ft.ID = p.TopicID)
-                                        INNER JOIN forums f on (f.ID = ft.ForumID)
-                                        INNER JOIN users_main um on (um.ID = p.AuthorID)
-                                        WHERE p.ID = ?
-                                        ", $ThingID
-                                    );
-                                    if (!$PostID) {
+                                    $forum = $forumMan->findByPostId($ThingID);
+                                    if (is_null($forum)) {
                                         echo 'No forum post with the reported ID found';
-                                    } else { ?>
-<a href="forums.php?action=viewforum&amp;forumid=<?= $forumId ?>"><?= $forumName
-    ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?= $threadId ?>"><?=
-    display_str($threadName) ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?=
-    $threadId ?>&amp;post=<?= $PostNum ?>#post<?= $PostID ?>">Post #<?= $PostID ?></a> by
-    <a href="user.php?id=<?= $userId ?>"><?= $username ?></a>
+                                    } else {
+                                        $postInfo = $forum->postInfo($ThingID);
+                                        $threadInfo = $forum->threadInfo($postInfo['thread-id']);
+                                        $user = $userMan->findById($postInfo['user-id']);
+?>
+<?= $forum->link() ?> &rsaquo; <?= $forum->threadLink($postInfo['thread-id'], $threadInfo['Title']) ?> &rsaquo;
+    <?= $forum->threadPostLink($postInfo['thread-id'], $ThingID) ?> by <?= $user ? $user->link() : 'System' ?>
 <?php
                                     }
                                     break;
                                 case 'comment':
-                                    $DB->prepared_query("
+                                    $found = (bool)$DB->prepared_query("
                                         SELECT 1 FROM comments WHERE ID = ?
                                         ", $ThingID
                                     );
-                                    if (!$DB->has_results()) {
+                                    if (!$found) {
                                         echo 'No comment with the reported ID found';
                                     } else {
                                         echo "<a href=\"comments.php?action=jump&amp;postid=$ThingID\">COMMENT</a>";
