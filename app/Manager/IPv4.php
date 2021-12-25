@@ -6,9 +6,9 @@ class IPv4 extends \Gazelle\Base {
 
     const CACHE_KEY = 'ipv4_bans_';
 
-    protected $filterNotes;
-    protected $filterIpaddr;
-    protected $filterIpaddrRegexp;
+    protected string $filterNotes;
+    protected string $filterIpaddr;
+    protected string $filterIpaddrRegexp;
 
     public function setFilterNotes(string $filterNotes) {
         $this->filterNotes = $filterNotes;
@@ -30,11 +30,11 @@ class IPv4 extends \Gazelle\Base {
     public function queryBase(): array {
         $cond = [];
         $args = [];
-        if (!is_null($this->filterNotes)) {
+        if (isset($this->filterNotes)) {
             $cond[] = "i.Reason REGEXP ?";
             $args[] = $this->filterNotes;
         }
-        if (!is_null($this->filterIpaddr)) {
+        if (isset($this->filterIpaddr)) {
             $cond[] = "inet_aton(?) BETWEEN i.FromIP AND i.ToIP";
             $args[] = $this->filterIpaddr;
         }
@@ -74,7 +74,7 @@ class IPv4 extends \Gazelle\Base {
     public function userTotal(int $userId): int {
         $cond = ['UserID = ?'];
         $args = [$userId];
-        if (!is_null($this->filterIpaddrRegexp)) {
+        if (isset($this->filterIpaddrRegexp)) {
             $cond[] = "IP REGEXP ?";
             $args[] = $this->filterIpaddrRegexp;
         }
@@ -89,7 +89,7 @@ class IPv4 extends \Gazelle\Base {
         self::$db->prepared_query("SET SESSION group_concat_max_len = 50000");
         $cond = ['i.UserID = ?'];
         $args = [$userId];
-        if (!is_null($this->filterIpaddrRegexp)) {
+        if (isset($this->filterIpaddrRegexp)) {
             $cond[] = "i.IP REGEXP ?";
             $args[] = $this->filterIpaddrRegexp;
         }
@@ -121,15 +121,12 @@ class IPv4 extends \Gazelle\Base {
     }
 
     /**
-     * Returns true if given IP is banned.
+     * Is an IP address banned?
      * TODO: This looks really braindead. Why not compare the 32bit address
      *       directly BETWEEN FromIP AND ToIP? Apart from dubious merits of
      *       caching?
-     *
-     * @param string $IP
-     * @return bool True if banned
      */
-    public function isBanned(string $IP) {
+    public function isBanned(string $IP): bool {
         $A = substr($IP, 0, strcspn($IP, '.'));
         $key = self::CACHE_KEY . $A;
         $IPBans = self::$cache->get_value($key);
@@ -137,8 +134,8 @@ class IPv4 extends \Gazelle\Base {
             self::$db->prepared_query("
                 SELECT FromIP, ToIP, ID
                 FROM ip_bans
-                WHERE FromIP BETWEEN ? << 24 AND (? << 24) - 1
-                ", $A, $A + 1
+                WHERE FromIP BETWEEN ? << 24 AND (? << 24) + 1
+                ", $A, $A
             );
             $IPBans = self::$db->to_array(0, MYSQLI_NUM, false);
             self::$cache->cache_value($key, $IPBans, 0);
@@ -155,13 +152,7 @@ class IPv4 extends \Gazelle\Base {
 
     /**
      * Create an ip address ban over a range of addresses. Will append
-     * the given reason to an existing ban.
-     *
-     * @param int $userId The person doing the band (0 for system)
-     * @param string $from The first address (dotted quad a.b.c.d)
-     * @param string $to The last adddress in the range (may equal $from)
-     * @param string $reason Why ban?
-     * @return record id
+     * the given reason to an existing ban. $to and $from are dotted quads
      */
     public function createBan(int $userId, string $from, string $to, string $reason): int {
         $id = self::$db->scalar("
@@ -180,29 +171,22 @@ class IPv4 extends \Gazelle\Base {
                 ", trim($reason), $id
             );
             return $id;
-        } else {
-            self::$db->prepared_query("
-                INSERT INTO ip_bans
-                       (Reason, FromIP,       ToIP,         user_id)
-                VALUES (?,      inet_aton(?), inet_aton(?), ?)
-                ", $reason, $from, $to, $userId
-            );
-            self::$cache->delete_value(
-                self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
-            );
-            return self::$db->inserted_id();
         }
+        self::$db->prepared_query("
+            INSERT INTO ip_bans
+                   (Reason, FromIP,       ToIP,         user_id)
+            VALUES (?,      inet_aton(?), inet_aton(?), ?)
+            ", $reason, $from, $to, $userId
+        );
+        self::$cache->delete_value(
+            self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
+        );
+        return self::$db->inserted_id();
     }
 
     /**
      * Modify an ip address ban over a range of addresses. Will append
-     * the given reason to an existing ban.
-     *
-     * @param int userId The person doing the band (0 for system)
-     * @param string from The first address (dotted quad a.b.c.d)
-     * @param string to The last adddress in the range (may equal $from)
-     * @param string reason Why ban?
-     * @return bool succeeded
+     * the given reason to an existing ban. $to and $from are dotted quads.
      */
     public function modifyBan(int $id, int $userId, string $from, string $to, string $reason): bool {
         self::$db->prepared_query("
@@ -222,9 +206,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     /**
-     * Remove an ip ban
-     *
-     * param int $id Row to remove
+     * Remove the record of an ip ban
      */
     public function removeBan(int $id): bool {
         $fromClassA = self::$db->scalar("

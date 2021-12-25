@@ -25,6 +25,9 @@ switch ($_REQUEST['action']) {
     case 'ip_ban':
         require_once('managers/bans.php');
         break;
+    case 'ip_search':
+        require_once('managers/ip_search.php');
+        break;
     case 'quick_ban':
         require_once('managers/quick_ban.php');
         break;

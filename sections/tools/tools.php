@@ -149,6 +149,7 @@ Category('Tags', [
 Category('External data', [
     Item('Email blacklist',        'tools.php?action=email_blacklist', All(['users_view_email'])),
     Item('IP address bans',        'tools.php?action=ip_ban',          All(['admin_manage_ipbans'])),
+    Item('IP bulk search',         'tools.php?action=ip_search',       All(['users_view_ips'])),
     Item('Duplicate IP addresses', 'tools.php?action=dupe_ips',        All(['users_view_ips'])),
 ]);
 
