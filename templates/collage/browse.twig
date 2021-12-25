@@ -1,0 +1,170 @@
+{% from 'macro/form.twig' import checked, selected %}
+{% set is_bookmark =  search.isBookmarkView %}
+{% if is_bookmark %}
+{{ header('Bookmarked collages', {'js': 'collage'}) }}
+{% else %}
+{{ header('Browse collages', {'js': 'collage'}) }}
+{% endif %}
+  
+<div class="thin">
+    <div class="header">
+{% if is_bookmark %}
+        <h2>{{ search.userLink|raw }} &rsaquo; Bookmarked collages</h2>
+{% else %}
+    {% if search.userLink %}
+        <h2>{{ search.userLink|raw }} &rsaquo; {% if search.isContributor %}Collage contributions{% else %}Collages{% endif %}</h2>
+    {% else %}
+        <h2>{% if page %}Collage contributions{% else %}Collages{% endif %}</h2>
+    {% endif %}
+{% endif %}
+    </div>
+{% if is_bookmark %}
+    <div class="linkbox">
+        <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
+        <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
+        <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
+        <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
+    </div>
+{% else %}
+    <div>
+        <form class="search_form" name="collages" action="" method="get">
+            <div><input type="hidden" name="action" value="search" /></div>
+            <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
+                <tr id="search_terms">
+                    <td class="label">Search for:</td>
+                    <td>
+                        <input type="search" name="search" size="70" value="{{ input.search }}" />
+                    </td>
+                </tr>
+                <tr id="search_name_description">
+                    <td class="label">Search in:</td>
+                    <td>
+                        <label><input type="radio" name="type" value="name"{{ checked(search.lookup == 'name') }} /> Names</label>&nbsp;&nbsp;
+                        <label><input type="radio" name="type" value="description"{{ checked(search.lookup == 'description') }} /> Descriptions</label>
+                    </td>
+                </tr>
+                <tr id="tagfilter">
+                    <td class="label">Tags (comma-separated):</td>
+                    <td>
+                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{% if viewer.hasAutocomplete('other') %} data-gazelle-autocomplete="true"{% endif %} /><br />
+                        <label><input type="radio" name="tags_type" value="0"{{ checked(not search.isTagAll) }} /> Any</label>&nbsp;&nbsp;
+                        <label><input type="radio" name="tags_type" value="1"{{ checked(search.isTagAll) }} /> All</label>
+                    </td>
+                </tr>
+                <tr id="categories">
+                    <td class="label">Categories:</td>
+                    <td>
+    {% for id, name in constant('COLLAGE') %}
+                        <span style=" white-space: nowrap;">
+                        <label><input type="checkbox" class="collagecat" value="1" name="cats[{{ id }}]"{{ checked(search.isSelectedCategory(id)) }} /> {{ name }}</label>
+                        </span>
+        {% if loop.index % 5 %}&nbsp;&nbsp;&nbsp;{% else %}<br />{% endif %}
+    {% endfor %}
+                        <br />
+                        <a href="#" title="Select all collage categories" onclick="javascript:checkCollageCats(true); return false;">{{ constant('ICON_ALL') }}</a>
+                        <a href="#" title="Clear all collage categories (but at least one will have to be checked)" onclick="javascript:checkCollageCats(false); return false;">{{ constant('ICON_NONE') }}</a>
+                        <a href="#" title="Toggle the select categories" onclick="javascript:invertCollageCats(); return false;">{{ constant('ICON_TOGGLE') }}</a>
+                    </td>
+                </tr>
+                <tr id="order_by">
+                    <td class="label">Order by:</td>
+                    <td>
+                        <select name="order" class="ft_order_by">
+                            <option value="time"{{ selected(input.order == 'time') }}>Time</option>
+                            <option value="name"{{ selected(input.order == 'name') }}>Name</option>
+                            <option value="subscribers"{{ selected(input.order == 'subscribers') }}>Subscribers</option>
+                            <option value="torrents"{{ selected(input.order == 'torrents') }}>Entries</option>
+                            <option value="updated"{{ selected(input.order == 'updated') }}>Updated</option>
+                        </select>
+                        <select name="sort" class="ft_order_way">
+                            <option value="desc"{{ selected(input.sort == 'desc') }}>Descending</option>
+                            <option value="asc"{{ selected(input.sort == 'asc') }}>Ascending</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="center">
+                        <input type="submit" value="Search" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{% endif %}
+
+    <div class="linkbox">
+{% if not is_bookmark %}
+    {% if viewer.permitted('site_collages_create') %}
+        <a href="collages.php?action=new" class="brackets">New collage</a>
+    {% endif %}
+    {% set active = viewer.activePersonalCollages %}
+    {% if active == 1 %}
+        <a href="collages.php?id={{ viewer.personalCollages.0.0 }}" class="brackets">Personal collage</a>
+    {% elseif active > 1 %}
+        <a href="collages.php?action=mine" class="brackets">Personal collages</a>
+    {% endif %}
+    {% if viewer.permitted('site_collages_subscribe') %}
+        <a href="userhistory.php?action=subscribed_collages" class="brackets">Subscribed collages</a>
+    {% endif %}
+        <a href="bookmarks.php?type=collages" class="brackets">Bookmarked collages</a>
+        <a href="random.php?action=collage" class="brackets">Random collage</a>
+    {% if viewer.permitted('site_collages_recover') %}
+        <a href="collages.php?action=recover" class="brackets">Recover collage</a>
+    {% endif %}
+        <br />
+{% endif %}
+{% if viewer.permittedAny('site_collages_create', 'site_collages_personal') %}
+        <a href="collages.php?userid=<?=viewer.id()?>" class="brackets">Collages you started</a>
+        <a href="collages.php?userid=<?=viewer.id()?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
+{% endif %}
+    </div>
+
+{% if not page %}
+<div class="box pad" align="center">
+    {% if is_bookmark %}
+    <h2>You have not bookmarked any collages.</h2>
+    {%  else %}
+    <h2>Your search did not match anything.</h2>
+    <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
+    {% endif %}
+</div>
+{% else %}
+{{ paginator.linkbox|raw }}
+<table width="100%" class="collage_table m_table">
+    <tr class="colhead">
+        <td class="m_th_left">Category</td>
+        <td class="nobr">{{ search.header.emit('name')|raw }} / {{ search.header.emit('time')|raw }}</td>
+        <td class="m_th_right nobr">{{ search.header.emit('torrents')|raw }}</td>
+        <td class="m_th_right nobr">{{ search.header.emit('subscribers')|raw }}</td>
+        <td class="nobr">{{ search.header.emit('updated')|raw }}</td>
+        <td>Author</td>
+    </tr>
+    {% for c in page %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}{% if is_bookmark %} bookmark_{{ c.id }}{% endif %}">
+        <td class="td_collage_category">
+            <a href="collages.php?action=search&amp;cats[{{ c.category_id }}]=1">{{ constant('COLLAGE')[c.category_id] }}</a>
+        </td>
+        <td class="td_info">
+            <a href="collages.php?id={{ c.id }}">{{ c.name }}</a>
+        {% if is_bookmark %}
+            <span style="float: right;">
+                <a href="#" onclick="Unbookmark('collage', {{ c.id }}, ''); return false;" class="brackets">Remove bookmark</a>
+            </span>
+        {% endif %}
+            <div class="tags">
+        {% for name in c.tag %}
+            <a href="collages.php?action=search&amp;tags={{ name }}">{{ name }}</a>
+        {% endfor %}
+            </div>
+        </td>
+        <td class="td_torrent_count m_td_right number_column">{{ c.total|number_format }}</td>
+        <td class="td_subscribers m_td_right number_column">{{ c.subscriber_total|number_format  }}</td>
+        <td class="td_updated nobr">{{ c.updated|time_diff }}</td>
+        <td class="td_author">{{ c.user_id|user_url }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{{ paginator.linkbox|raw }}
+{% endif %}
+</div>
+{{ footer() }}

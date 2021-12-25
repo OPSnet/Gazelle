@@ -116,7 +116,7 @@ class Collage extends \Gazelle\Base {
 
     public function configure() {
         $this->header = new \Gazelle\Util\SortableTableHeader('time', [
-            'time'        => ['dbColumn' => 'ID',            'defaultSort' => 'desc', 'text' => 'Created'],
+            'time'        => ['dbColumn' => 'c.ID',          'defaultSort' => 'desc', 'text' => 'Created'],
             'name'        => ['dbColumn' => 'c.Name',        'defaultSort' => 'asc',  'text' => 'Collage'],
             'subscribers' => ['dbColumn' => 'c.Subscribers', 'defaultSort' => 'desc', 'text' => 'Subscribers'],
             'torrents'    => ['dbColumn' => 'c.NumTorrents', 'defaultSort' => 'desc', 'text' => 'Entries'],
@@ -159,20 +159,24 @@ class Collage extends \Gazelle\Base {
         $orderBy = $this->header->getOrderBy();
         $orderDir = $this->header->getOrderDir();
         self::$db->prepared_query("
-            SELECT c.ID,
-                c.Name,
-                c.NumTorrents,
-                c.TagList,
-                c.CategoryID,
-                c.UserID,
-                c.Subscribers,
-                c.Updated
+            SELECT c.ID        AS id,
+                c.Name         AS name,
+                c.NumTorrents  AS total,
+                c.TagList      AS tag_list,
+                c.CategoryID   AS category_id,
+                c.UserID       AS user_id,
+                c.Subscribers  AS subscriber_total,
+                c.Updated      AS updated
             FROM collages AS c {$this->_join}
             WHERE {$this->_where}
             ORDER BY $orderBy $orderDir
             LIMIT ? OFFSET ?
             ", ...[...$this->args, $limit, $offset]
         );
-        return self::$db->to_array(false, MYSQLI_NUM, false);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$c) {
+            $c['tag'] = explode(' ', $c['tag_list']);
+        }
+        return $list;
     }
 }
