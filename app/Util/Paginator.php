@@ -3,13 +3,13 @@
 namespace Gazelle\Util;
 
 class Paginator {
-    protected $anchor = '';
-    protected $perPage = 25;
-    protected $page = 1;
-    protected $remove = []; // parameters to strip out of URIs (e.g. postid for comments)
-    protected $total = 0;
-    protected $linkbox = null;
-    protected $linkCount = 10;
+    protected array $remove = []; // parameters to strip out of URIs (e.g. postid for comments)
+    protected string $anchor = '';
+    protected string $linkbox;
+    protected int $perPage;
+    protected int $page;
+    protected int $total = 0;
+    protected int $linkCount = 10;
 
     /**
      * Calculat offset and limit for SQL pagination,
@@ -58,7 +58,7 @@ class Paginator {
     }
 
     public function linkbox(): string {
-        if (!is_null($this->linkbox)) {
+        if (isset($this->linkbox)) {
             return $this->linkbox;
         }
         $pageCount = 0;

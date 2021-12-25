@@ -1,0 +1,118 @@
+{% from 'macro/form.twig' import selected %}
+{% from 'macro/ipv4.twig' import ajax_ipv4 %}
+{{ header('IP Bulk Search') }}
+<div class="thin">
+    <div class="header">
+        <h2>IP Bulk Search</h2>
+    </div>
+
+{% if found %}
+<div class="box pad">
+<ul class="nobullet">
+    <li>IP addresses identified: {{ found|number_format }}</li>
+    <li>Matched on site: {{ paginator.total|number_format }}</li>
+</ul>
+
+{{ paginator.linkbox|raw }}
+
+<h3>Site history</h3>
+<table>
+<thead>
+    <tr>
+    <th>First seen</th>
+    <th>Last seen</th>
+    <th>IPv4</th>
+    <th>User</th>
+    </tr>
+</thead>
+<tbody>
+{% for r in page_site %}
+    <tr>
+    <td>{{ r.start }}</td>
+    <td>{{ r.end }}</td>
+    <td>{{ r.ipv4 }} ({{ ajax_ipv4(r.ipv4) }}) <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a></td>
+    <td>{% if r.user %}{{ r.user.id|user_full }}{% else %}User #{{ r.user_id }}{% endif %}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<br />
+<h3>Snatch history</h3>
+<table>
+<thead>
+    <tr>
+    <th>First seen</th>
+    <th>Last seen</th>
+    <th>IPv4
+    <th>Count</th>
+    <th>User</th>
+    </tr>
+</thead>
+<tbody>
+{% for r in page_snatch %}
+    <tr>
+    <td>{{ r.start }}</td>
+    <td>{{ r.end }}</td>
+    <td>{{ r.ipv4 }} ({{ ajax_ipv4(r.ipv4) }}) <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a></td>
+    <td><a href="torrents.php?type=snatched&userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
+    <td>{% if r.user %}{{ r.user.id|user_full }}{% else %}User #{{ r.user_id }}{% endif %}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<br />
+<h3>Tracker history</h3>
+<table>
+<thead>
+    <tr>
+    <th>First seen</th>
+    <th>Last seen</th>
+    <th>IPv4
+    <th>Count</th>
+    <th>User</th>
+    </tr>
+</thead>
+<tbody>
+{% for r in page_tracker %}
+    <tr>
+    <td>{{ r.start }}</td>
+    <td>{{ r.end }}</td>
+    <td>{{ r.ipv4 }} ({{ ajax_ipv4(r.ipv4) }}) <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a></td>
+    <td><a href="torrents.php?type=snatched&userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
+    <td>{% if r.user %}{{ r.user.id|user_full }}{% else %}User #{{ r.user_id }}{% endif %}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+</div>
+{{ paginator.linkbox|raw }}
+{% endif %}
+
+<div class="box pad">
+    <div class="thin">Paste a block of text here containing IP addresses (anything that look
+    like a dotted quad address a.b.c.d). The code will take of sorting and
+    deduplicating.</div>
+    <form action="tools.php?action=ip_search&amp;column={{ column }}&amp;direction={{ direction }}{% if ip_list %}&amp;iplist={{ ip_list }}{% endif %}" method="post">
+    {{ text.emit|raw }}
+    <ul class="nobullet">
+        <li>Sort by
+            <select name="column">
+                <option value="{{ constant('\\Gazelle\\Search\\IPV4::START') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPV4::START')) }}>First seen</option>
+                <option value="{{ constant('\\Gazelle\\Search\\IPV4::END') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPV4::END')) }}>Last seen</option>
+                <option value="{{ constant('\\Gazelle\\Search\\IPV4::IP') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPV4::IP')) }}>IP address</option>
+            </select>
+        </li>
+        <li>Sort direction
+            <select name="direction">
+                <option value="{{ constant('\\Gazelle\\Search\\IPV4::ASC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\IPV4::ASC')) }}>Ascending</option>
+                <option value="{{ constant('\\Gazelle\\Search\\IPV4::DESC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\IPV4::DESC')) }}>Descending</option>
+            </select>
+        </li>
+    </ul>
+    <input type="submit" value="Search" />
+    </form>
+</div>
+{{ footer() }}

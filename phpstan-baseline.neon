@@ -157,41 +157,6 @@ parameters:
 			path: app/Manager/Forum.php
 
 		-
-			message: "#^Binary operation \"\\+\" between string and 1 results in an error\\.$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int userId The person doing the band \\(0 for system\\)\\)\\: Unexpected token \"userId\", expected variable at offset 144$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string from The first address \\(dotted quad a\\.b\\.c\\.d\\)\\)\\: Unexpected token \"from\", expected variable at offset 213$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string reason Why ban\\?\\)\\: Unexpected token \"reason\", expected variable at offset 352$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string to The last adddress in the range \\(may equal \\$from\\)\\)\\: Unexpected token \"to\", expected variable at offset 279$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
-			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\record is incompatible with native type int\\.$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
-			message: "#^Return typehint of method Gazelle\\\\Manager\\\\IPv4\\:\\:createBan\\(\\) has invalid type Gazelle\\\\Manager\\\\record\\.$#"
-			count: 1
-			path: app/Manager/IPv4.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(int limit\\)\\: Unexpected token \"limit\", expected variable at offset 66$#"
 			count: 1
 			path: app/Manager/Invite.php
