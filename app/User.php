@@ -2086,32 +2086,12 @@ class User extends BaseObject {
         );
     }
 
-    public function downloadSnatchFactor() {
+    public function downloadSnatchFactor(): float {
         if ($this->hasAttr('unlimited-download')) {
             // they are whitelisted, let them through
             return 0.0;
         }
-        $stats = self::$cache->get_value('user_rlim_' . $this->id);
-        if ($stats === false) {
-            self::$db->prepared_query("
-                SELECT 'download', count(DISTINCT ud.TorrentID) as nr
-                FROM users_downloads ud
-                INNER JOIN torrents t ON (t.ID = ud.TorrentID)
-                WHERE ud.UserID = ? AND t.UserID != ?
-                UNION ALL
-                SELECT 'snatch', count(DISTINCT x.fid)
-                FROM xbt_snatched AS x
-                INNER JOIN torrents AS t ON (t.ID = x.fid)
-                WHERE x.uid = ?
-                ", $this->id, $this->id, $this->id
-            );
-            $stats = ['download' => 0, 'snatch' => 0];
-            while ([$key, $count] = self::$db->next_record(MYSQLI_ASSOC, false)) {
-                $stats[$key] = $count;
-            }
-            $stats = self::$cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
-        }
-        return (1 + $stats['download']) / (1 + $stats['snatch']);
+        return (float)((1 + $this->stats()->downloadUnique()) / (1 + $this->stats()->snatchUnique()));
     }
 
     /**
