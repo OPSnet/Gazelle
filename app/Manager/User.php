@@ -986,14 +986,14 @@ class User extends \Gazelle\Base {
                 'Extra' => [
                     '"Perfect" FLACs' => [
                         'Query' => "
-                            SELECT count(ID)
-                            FROM torrents
-                            WHERE Format = 'FLAC'
+                            SELECT count(DISTINCT t.GroupID))
+                            FROM torrents t
+                            WHERE t.Format = 'FLAC'
                                 AND (
-                                    (Media = 'CD' AND LogScore = 100)
-                                    OR Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT')
+                                    (t.Media = 'CD' AND t.LogScore = 100)
+                                    OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
                                 )
-                                AND UserID = users_main.ID",
+                                AND t.UserID = users_main.ID",
                         'Count' => 500,
                         'Type' => 'int'
                     ]
@@ -1008,11 +1008,11 @@ class User extends \Gazelle\Base {
                 'Extra' => [
                     '"Perfecter" FLACs' => [
                         'Query' => "
-                            SELECT count(DISTINCT t.GroupID, t.RemasterYear, t.RemasterCatalogueNumber, t.RemasterRecordLabel, t.RemasterTitle, t.Media)
+                            SELECT count(DISTINCT t.GroupID)
                             FROM torrents t
                             WHERE t.Format = 'FLAC'
                                 AND (
-                                    (t.LogScore = 100 AND t.Media = 'CD')
+                                       (t.Media = 'CD' AND t.LogScore = 100)
                                     OR t.Media IN ('Cassette', 'DAT')
                                     OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless')
                                 )

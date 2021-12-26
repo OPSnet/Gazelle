@@ -230,7 +230,7 @@ class Users extends \Gazelle\Base {
 
         self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, invited_total)
-                SELECT ui.Inviter, count(*) as invited_total
+                SELECT ui.Inviter, count(*) AS invited_total
                 FROM users_info ui
                 WHERE ui.Inviter IS NOT NULL
                 GROUP BY ui.Inviter
@@ -239,32 +239,43 @@ class Users extends \Gazelle\Base {
         ");
 
         self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, perfect_flac_total, perfecter_flac_total, unique_group_total, upload_total)
+            INSERT INTO user_summary_new (user_id, unique_group_total, upload_total)
                 SELECT t.UserID,
-                    sum(if(
-                        t.Format = 'FLAC'
-                        AND (
-                            (t.Media = 'CD' AND t.LogScore = 100)
-                            OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT'))
-                        ),
-                        1, 0)) AS perfect_flac_total,
-                    sum(if(
-                        t.Format = 'FLAC'
-                        AND (
-                            (t.Media = 'CD' AND t.LogScore = 100)
-                            OR t.Media IN ('Cassette', 'DAT')
-                            OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless')
-                        ),
-                        1, 0)) AS perfecter_flac_total,
                     count(DISTINCT GroupID) AS unique_group_total,
                     count(*) AS upload_total
                 FROM torrents t
                 GROUP BY t.UserID
             ON DUPLICATE KEY UPDATE
-                perfect_flac_total = VALUES(perfect_flac_total),
-                perfecter_flac_total = VALUES(perfecter_flac_total),
                 unique_group_total = VALUES(unique_group_total),
                 upload_total = VALUES(upload_total)
+        ");
+
+        self::$db->prepared_query("
+            INSERT INTO user_summary_new (user_id, perfect_flac_total)
+                SELECT t.UserID, count(DISTINCT t.GroupID) AS perfect_flac_total
+                FROM torrents t
+                WHERE t.Format = 'FLAC'
+                    AND (
+                        (t.Media = 'CD' AND t.LogScore = 100)
+                        OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
+                    )
+                GROUP BY t.UserID
+            ON DUPLICATE KEY UPDATE
+                perfect_flac_total = VALUES(perfect_flac_total)
+        ");
+
+        self::$db->prepared_query("
+            INSERT INTO user_summary_new (user_id, perfecter_flac_total)
+                SELECT t.UserID, count(DISTINCT t.GroupID) AS perfecter_flac_total
+                FROM torrents t
+                WHERE t.Format = 'FLAC'
+                    AND (
+                        (t.Media = 'CD' AND t.LogScore = 100)
+                        OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
+                    )
+                GROUP BY t.UserID
+            ON DUPLICATE KEY UPDATE
+                perfecter_flac_total = VALUES(perfecter_flac_total)
         ");
 
         self::$db->prepared_query("
