@@ -10,14 +10,14 @@
         <tr>
         <td class="label nobr">Username:</td>
         <td>
-            <input type="text" name="username" size="20" value="{{ username }}" />
+            <input type="text" name="username" size="20" value="{{ input.username }}" />
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Email address:</td>
         <td>
-            <input type="text" name="email" size="20" value="{{ email }}" />
+            <input type="text" name="email" size="20" value="{{ input.email }}" />
         </td>
         </tr>
 
@@ -25,7 +25,7 @@
         <td class="label tooltip nobr" title="To fuzzy search (default) for a block of addresses
             (e.g. 55.66.77.*), enter &quot;55.66.77.&quot; without the quotes">Site IP:</td>
         <td>
-            <input type="text" name="ip" size="20" value="{{ site_ip }}" />
+            <input type="text" name="ip" size="20" value="{{ input.ip }}" />
         </td>
         </tr>
 
@@ -39,21 +39,21 @@
           </div>
         </td>
         <td>
-            <input type="text" name="tracker_ip" size="20" value="{{ tracker_ip }}" />
+            <input type="text" name="tracker_ip" size="20" value="{{ input.tracker_ip }}" />
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Staff notes:</td>
         <td>
-            <input type="text" name="comment" size="20" value="{{ comment }}" />
+            <input type="text" name="comment" size="20" value="{{ input.comment }}" />
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Passkey:</td>
         <td>
-            <input type="text" name="passkey" size="20" value="{{ passkey }}" />
+            <input type="text" name="passkey" size="20" value="{{ input.passkey }}" />
         </td>
         </tr>
 
@@ -61,14 +61,14 @@
         <td class="label tooltip nobr" title="Supports partial URL matching, e.g. entering
             &quot;&#124;https://ptpimg.me&quot; will search for avatars hosted on https://phpimg.me">Avatar URL:</td>
         <td>
-            <input type="text" name="avatar" size="20" value="{{ avatar }}" />
+            <input type="text" name="avatar" size="20" value="{{ input.avatar }}" />
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Last.fm username:</td>
         <td>
-            <input type="text" name="lastfm" size="20" value="{{ lastfm }}" />
+            <input type="text" name="lastfm" size="20" value="{{ input.lastfm }}" />
         </td>
         </tr>
 
@@ -99,13 +99,13 @@
         <td class="label nobr">Joined:</td>
         <td style="white-space: nowrap;">
             <select name="joined">
-                <option value="on"{{ selected(joined_op == 'on') }}>On</option>
-                <option value="before"{{ selected(joined_op == 'before') }}>Before</option>
-                <option value="after"{{ selected(joined_op == 'after') }}>After</option>
-                <option value="between"{{ selected(joined_op == 'between') }}>Between</option>
+                <option value="on"{{ selected(input.joined == 'on') }}>On</option>
+                <option value="before"{{ selected(input.joined == 'before') }}>Before</option>
+                <option value="after"{{ selected(input.joined == 'after') }}>After</option>
+                <option value="between"{{ selected(input.joined == 'between') }}>Between</option>
             </select>
-            <input type="text" name="join1" size="10" value="{{ joined_min }}" placeholder="YYYY-MM-DD" />
-            <input type="text" name="join2" size="10" value="{{ joined_max }}" placeholder="YYYY-MM-DD" />
+            <input type="text" name="join1" size="10" value="{{ input.join1 }}" placeholder="YYYY-MM-DD" />
+            <input type="text" name="join2" size="10" value="{{ input.join2 }}" placeholder="YYYY-MM-DD" />
         </td>
         </tr>
 
@@ -113,13 +113,13 @@
         <td class="label nobr">Last active:</td>
         <td style="white-space: nowrap;">
             <select name="lastactive">
-                <option value="on"{{ selected(last_active_op == 'on') }}>On</option>
-                <option value="before"{{ selected(last_active_op == 'before') }}>Before</option>
-                <option value="after"{{ selected(last_active_op == 'after') }}>After</option>
-                <option value="between"{{ selected(last_active_op == 'between') }}>Between</option>
+                <option value="on"{{ selected(input.lastactive == 'on') }}>On</option>
+                <option value="before"{{ selected(input.lastactive == 'before') }}>Before</option>
+                <option value="after"{{ selected(input.lastactive == 'after') }}>After</option>
+                <option value="between"{{ selected(input.lastactive == 'between') }}>Between</option>
             </select>
-            <input type="text" name="lastactive1" size="10" value="{{ last_active_min }}" placeholder="YYYY-MM-DD" />
-            <input type="text" name="lastactive2" size="10" value="{{ last_active_max }}" placeholder="YYYY-MM-DD" />
+            <input type="text" name="lastactive1" size="10" value="{{ input.lastactive1 }}" placeholder="YYYY-MM-DD" />
+            <input type="text" name="lastactive2" size="10" value="{{ input.lastactive2 }}" placeholder="YYYY-MM-DD" />
         </td>
         </tr>
 
@@ -127,14 +127,14 @@
         <td class="label nobr" title="The number of releases downloaded (may be greater than snatched">Downloads:</td>
         <td width="30%">
             <select name="downloads">
-                <option value="off"{{ selected(downloads_op == 'off') }}>Off</option>
-                <option value="equal"{{ selected(downloads_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(downloads_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(downloads_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(downloads_op == 'between') }}>Between</option>
+                <option value="off"{{ selected(input.downloads == 'off') }}>Off</option>
+                <option value="equal"{{ selected(input.downloads == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.downloads == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.downloads == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.downloads == 'between') }}>Between</option>
             </select>
-            <input type="text" name="downloads1" size="6" value="{{ downloads_min }}" />
-            <input type="text" name="downloads2" size="6" value="{{ downloads_max }}" />
+            <input type="text" name="downloads1" size="6" value="{{ input.downloads1 }}" />
+            <input type="text" name="downloads2" size="6" value="{{ input.downloads2 }}" />
         </td>
         </tr>
 
@@ -142,14 +142,14 @@
         <td class="label nobr">Snatched:</td>
         <td width="30%">
             <select name="snatched">
-                <option value="off"{{ selected(snatched_op == 'off') }}>Off</option>
-                <option value="equal"{{ selected(snatched_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(snatched_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(snatched_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(snatched_op == 'between') }}>Between</option>
+                <option value="off"{{ selected(input.snatched == 'off') }}>Off</option>
+                <option value="equal"{{ selected(input.snatched == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.snatched == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.snatched == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.snatched == 'between') }}>Between</option>
             </select>
-            <input type="text" name="snatched1" size="6" value="{{ snatched_min }}" />
-            <input type="text" name="snatched2" size="6" value="{{ snatched_max }}" />
+            <input type="text" name="snatched1" size="6" value="{{ input.snatched1 }}" />
+            <input type="text" name="snatched2" size="6" value="{{ input.snatched2 }}" />
         </td>
         </tr>
 
@@ -157,14 +157,14 @@
         <td class="label nobr">Seeding:</td>
         <td width="30%">
             <select name="seeding">
-                <option value="off"{{ selected(seeding_op == 'off') }}>Off</option>
-                <option value="equal"{{ selected(seeding_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(seeding_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(seeding_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(seeding_op == 'between') }}>Between</option>
+                <option value="off"{{ selected(input.seeding == 'off') }}>Off</option>
+                <option value="equal"{{ selected(input.seeding == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.seeding == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.seeding == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.seeding == 'between') }}>Between</option>
             </select>
-            <input type="text" name="seeding1" size="6" value="{{ seeding_min }}" />
-            <input type="text" name="seeding2" size="6" value="{{ seeding_max }}" />
+            <input type="text" name="seeding1" size="6" value="{{ input.seeding1 }}" />
+            <input type="text" name="seeding2" size="6" value="{{ input.seeding2 }}" />
         </td>
         </tr>
 
@@ -172,14 +172,14 @@
         <td class="label tooltip nobr" title="Units are GiB">Data Uploaded:</td>
         <td width="30%">
             <select name="uploaded">
-                <option value="equal"{{ selected(downloaded_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(downloaded_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(downloaded_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(downloaded_op == 'between') }}>Between</option>
-                <option value="buffer"{{ selected(downloaded_op == 'buffer') }}>buffer</option>
+                <option value="equal"{{ selected(input.uploaded == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.uploaded == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.uploaded == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.uploaded == 'between') }}>Between</option>
+                <option value="buffer"{{ selected(input.uploaded == 'buffer') }}>buffer</option>
             </select>
-            <input type="text" name="uploaded1" size="6" value="{{ uploaded_min }}" />
-            <input type="text" name="uploaded2" size="6" value="{{ uploaded_max }}" />
+            <input type="text" name="uploaded1" size="6" value="{{ input.uploaded1 }}" />
+            <input type="text" name="uploaded2" size="6" value="{{ input.uploaded2 }}" />
         </td>
         </tr>
 
@@ -187,13 +187,13 @@
         <td class="label tooltip nobr" title="Units are GiB">Data Downloaded:</td>
         <td width="30%">
             <select name="downloaded">
-                <option value="equal"{{ selected(downloaded_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(downloaded_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(downloaded_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(downloaded_op == 'between') }}>Between</option>
+                <option value="equal"{{ selected(input.downloaded == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.downloaded == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.downloaded == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.downloaded == 'between') }}>Between</option>
             </select>
-            <input type="text" name="downloaded1" size="6" value="{{ downloaded_min }}" />
-            <input type="text" name="downloaded2" size="6" value="{{ downloaded_max }}" />
+            <input type="text" name="downloaded1" size="6" value="{{ input.downloaded1 }}" />
+            <input type="text" name="downloaded2" size="6" value="{{ input.downloaded2 }}" />
         </td>
         </tr>
 
@@ -201,13 +201,13 @@
         <td class="label tooltip nobr" title="Units are GiB">Request Bounty:</td>
         <td width="30%">
             <select name="bounty">
-                <option value="equal"{{ selected(bounty_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(bounty_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(bounty_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(bounty_op == 'between') }}>Between</option>
+                <option value="equal"{{ selected(input.bounty == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.bounty == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.bounty == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.bounty == 'between') }}>Between</option>
             </select>
-            <input type="text" name="bounty1" size="6" value="{{ bounty_min }}" />
-            <input type="text" name="bounty2" size="6" value="{{ bounty_max }}" />
+            <input type="text" name="bounty1" size="6" value="{{ input.bounty1 }}" />
+            <input type="text" name="bounty2" size="6" value="{{ input.bounty2 }}" />
         </td>
         </tr>
 
@@ -215,13 +215,13 @@
         <td class="label nobr">Ratio:</td>
         <td width="30%">
             <select name="ratio">
-                <option value="equal"{{ selected(ratio_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(ratio_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(ratio_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(ratio_op == 'between') }}>Between</option>
+                <option value="equal"{{ selected(input.ratio == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.ratio == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.ratio == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.ratio == 'between') }}>Between</option>
             </select>
-            <input type="text" name="ratio1" size="6" value="{{ ratio_min }}" />
-            <input type="text" name="ratio2" size="6" value="{{ ratio_max }}" />
+            <input type="text" name="ratio1" size="6" value="{{ input.ratio1 }}" />
+            <input type="text" name="ratio2" size="6" value="{{ input.ratio2 }}" />
         </td>
         </tr>
 
@@ -229,13 +229,13 @@
         <td class="label nobr"># of invites:</td>
         <td>
             <select name="invites">
-                <option value="equal"{{ selected(invites_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(invites_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(invites_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(invites_op == 'between') }}>Between</option>
+                <option value="equal"{{ selected(input.invites == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.invites == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.invites == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.invites == 'between') }}>Between</option>
             </select>
-            <input type="text" name="invites1" size="6" value="{{ invites_min }}" />
-            <input type="text" name="invites2" size="6" value="{{ invites_max }}" />
+            <input type="text" name="invites1" size="6" value="{{ input.invites1 }}" />
+            <input type="text" name="invites2" size="6" value="{{ input.invites2 }}" />
         </td>
         </tr>
 
@@ -243,14 +243,14 @@
         <td width="30%" class="label nobr"># invited:</td>
         <td>
             <select name="invited">
-                <option value="off"{{ selected(invited_op == 'off') }}>Off</option>
-                <option value="equal"{{ selected(invited_op == 'equal') }}>Equal</option>
-                <option value="above"{{ selected(invited_op == 'above') }}>Above</option>
-                <option value="below"{{ selected(invited_op == 'below') }}>Below</option>
-                <option value="between"{{ selected(invited_op == 'between') }}>Between</option>
+                <option value="off"{{ selected(input.invited == 'off') }}>Off</option>
+                <option value="equal"{{ selected(input.invited == 'equal') }}>Equal</option>
+                <option value="above"{{ selected(input.invited == 'above') }}>Above</option>
+                <option value="below"{{ selected(input.invited == 'below') }}>Below</option>
+                <option value="between"{{ selected(input.invited == 'between') }}>Between</option>
             </select>
-            <input type="text" name="invited1" size="6" value="{{ invited_min }}" />
-            <input type="text" name="invited2" size="6" value="{{ invited_max }}" />
+            <input type="text" name="invited1" size="6" value="{{ input.invited1 }}" />
+            <input type="text" name="invited2" size="6" value="{{ input.invited2 }}" />
         </td>
         </tr>
 
@@ -258,11 +258,11 @@
         <td class="label nobr"># of emails:</td>
         <td>
             <select name="emails_opt">
-                <option value="equal"{{ selected(email_op == 'any') }}>Equal</option>
-                <option value="above"{{ selected(email_op == 'locked') }}>Above</option>
-                <option value="below"{{ selected(email_op == 'unlocked') }}>Below</option>
+                <option value="equal"{{ selected(input.emails_opt == 'any') }}>Equal</option>
+                <option value="above"{{ selected(input.emails_opt == 'locked') }}>Above</option>
+                <option value="below"{{ selected(input.emails_opt == 'unlocked') }}>Below</option>
             </select>
-            <input type="text" name="email_cnt" size="6" value="{{ email_value }}" />
+            <input type="text" name="email_cnt" size="6" value="{{ input.email_cnt }}" />
         </td>
         </tr>
     </table></td>
@@ -275,7 +275,7 @@
         <td>
             <select name="class[]" size="3" multiple="multiple">
 {% for c in primary_class %}
-                <option value="{{ c.ID }}"{{ selected(c.ID in primary_current) }}>{{ c.Name|shorten(12) }} ({{ c.Level }})</option>
+                <option value="{{ c.ID }}"{{ selected(c.ID in input.class) }}>{{ c.Name|shorten(12) }} ({{ c.Level }})</option>
 {% endfor %}
             </select>
         </td>
@@ -285,9 +285,9 @@
         <td class="label nobr">Secondary class:</td>
         <td>
             <select name="secclass">
-                <option value=""{{ selected(sec_current == '') }}>Don't Care</option>
+                <option value=""{{ selected(input.secclass == '') }}>Don't Care</option>
 {% for c in secondary_class %}
-                <option value="{{ c.ID }}"{{ selected(sec_current == c.ID) }}>{{ c.Name|shorten(20) }}</option>
+                <option value="{{ c.ID }}"{{ selected(input.secclass == c.ID) }}>{{ c.Name|shorten(20) }}</option>
 {% endfor %}
             </select>
         </td>
@@ -297,10 +297,10 @@
         <td class="label nobr">Enabled:</td>
         <td>
             <select name="enabled">
-                <option value=""{{ selected(enabled == '') }}>Don't Care</option>
-                <option value="0"{{ selected(enabled == '0') }}>Unconfirmed</option>
-                <option value="1"{{ selected(enabled == '1') }}>Enabled</option>
-                <option value="2"{{ selected(enabled == '2') }}>Disabled</option>
+                <option value=""{{ selected(input.enabled is empty) }}>Don't Care</option>
+                <option value="0"{{ selected(input.enabled == '0') }}>Unconfirmed</option>
+                <option value="1"{{ selected(input.enabled == '1') }}>Enabled</option>
+                <option value="2"{{ selected(input.enabled == '2') }}>Disabled</option>
             </select>
         </td>
         </tr>
@@ -309,9 +309,9 @@
         <td class="label nobr">Donor:</td>
         <td>
             <select name="donor">
-                <option value=""{{ selected(donor == '') }}>Don't Care</option>
-                <option value="yes"{{ selected(donor == 'yes') }}>Yes</option>
-                <option value="no"{{ selected(donor == 'no') }}>No</option>
+                <option value=""{{ selected(input.donor is empty) }}>Don't Care</option>
+                <option value="yes"{{ selected(input.donor == 'yes') }}>Yes</option>
+                <option value="no"{{ selected(input.donor == 'no') }}>No</option>
             </select>
         </td>
         </tr>
@@ -320,9 +320,9 @@
         <td class="label nobr">Warned:</td>
         <td>
             <select name="warned">
-                <option value=""{{ selected(warned == '') }}>Don't Care</option>
-                <option value="isnotnull"{{ selected(warned == 'isnotnull') }}>Yes</option>
-                <option value="isnull"{{ selected(warned == 'isnull') }}>No</option>
+                <option value=""{{ selected(input.warned is empty) }}>Don't Care</option>
+                <option value="isnotnull"{{ selected(input.warned == 'isnotnull') }}>Yes</option>
+                <option value="isnull"{{ selected(input.warned == 'isnull') }}>No</option>
             </select>
         </td>
         </tr>
@@ -331,9 +331,9 @@
         <td class="label nobr">Locked Account:</td>
         <td>
             <select name="lockedaccount">
-                <option value="any"{{ selected(locked_account == 'any') }}>Don't Care</option>
-                <option value="locked"{{ selected(locked_account == 'locked') }}>Locked</option>
-                <option value="unlocked"{{ selected(locked_account == 'unlocked') }}>Unlocked</option>
+                <option value="any"{{ selected(input.lockedaccount == 'any') }}>Don't Care</option>
+                <option value="locked"{{ selected(input.lockedaccount == 'locked') }}>Locked</option>
+                <option value="unlocked"{{ selected(input.lockedaccount == 'unlocked') }}>Unlocked</option>
             </select>
         </td>
         </tr>
@@ -342,9 +342,9 @@
         <td class="label nobr">Disabled invites:</td>
         <td>
             <select name="disabled_invites">
-                <option value=""{{ selected(disabled_invites == '') }}>Don't Care</option>
-                <option value="yes"{{ selected(disabled_invites == 'yes') }}>Yes</option>
-                <option value="no"{{ selected(disabled_invites == 'no') }}>No</option>
+                <option value=""{{ selected(input.disabled_invites is empty) }}>Don't Care</option>
+                <option value="yes"{{ selected(input.disabled_invites == 'yes') }}>Yes</option>
+                <option value="no"{{ selected(input.disabled_invites == 'no') }}>No</option>
             </select>
         </td>
         </tr>
@@ -353,9 +353,9 @@
         <td class="label nobr">Disabled uploads:</td>
         <td>
             <select name="disabled_uploads">
-                <option value=""{{ selected(disabled_uploads == '') }}>Don't Care</option>
-                <option value="yes"{{ selected(disabled_uploads == 'yes') }}>Yes</option>
-                <option value="no"{{ selected(disabled_uploads == 'no') }}>No</option>
+                <option value=""{{ selected(input.disabled_uploads is empty) }}>Don't Care</option>
+                <option value="yes"{{ selected(input.disabled_uploads == 'yes') }}>Yes</option>
+                <option value="no"{{ selected(input.disabled_uploads == 'no') }}>No</option>
             </select>
         </td>
         </tr>
@@ -366,7 +366,7 @@
             <select name="stylesheet" id="stylesheet">
                 <option value="">Don't Care</option>
 {% for s in stylesheet %}
-                <option value="{{ s.ID }} "{{ selected(style_current == s.ID) }}>{{ s.ProperName }}</option>
+                <option value="{{ s.ID }} "{{ selected(input.stylesheet == s.ID) }}>{{ s.ProperName }}</option>
 {% endfor %}
             </select>
         </td>
@@ -376,10 +376,10 @@
         <td class="label tooltip nobr" title="Two-letter codes as defined in ISO 3166-1 alpha-2">Country code:</td>
         <td width="30%">
             <select name="cc_op">
-                <option value="equal"{{ selected(ccode_op == 'equal') }}>Equals</option>
-                <option value="not_equal"{{ selected(ccode_op == 'not_equal') }}>Not equal</option>
+                <option value="equal"{{ selected(input.cc_op == 'equal') }}>Equals</option>
+                <option value="not_equal"{{ selected(input.cc_op == 'not_equal') }}>Not equal</option>
             </select>
-            <input type="text" name="cc" size="2" value="{{ ccode }}" />
+            <input type="text" name="cc" size="2" value="{{ input.cc }}" />
         </td>
         </tr>
 
@@ -413,13 +413,13 @@
 
 Results ordered <select name="order">
 {% for field in field_by %}
-    <option value="{{ field }}"{{ selected(field == field_current)}}>{{ field }}</option>
+    <option value="{{ field }}"{{ selected(field == input.order|default('Joined')) }}>{{ field }}</option>
 {% endfor %}
 </select>
 
 <select name="way">
 {% for dir in order_by %}
-    <option value="{{ dir }}"{{ selected(dir == order_current) }}>{{ dir }}</option>
+    <option value="{{ dir }}"{{ selected(dir == input.way|default('Descending')) }}>{{ dir }}</option>
 {% endfor %}
 </select>
 <input type="submit" value=" Search " />
@@ -433,16 +433,16 @@ Results ordered <select name="order">
     <table width="100%">
         <tr class="colhead">
             <td>Username</td>
+            <td>Class</td>
             <td>Email</td>
-            <td>Joined</td>
-            <td>Last seen</td>
+            <td>Joined / Last seen</td>
             <td>Upload</td>
             <td>Download</td>
             <td>Ratio</td>
             <td>Bounty</td>
-            <td>Downloads</td>
-            <td>Snatched</td>
-            <td>Seeding</td>
+            <td title="Downloads">DLs</td>
+            <td><img src="{{ url_stem }}snatched.png" class="tooltip" title="Snatched" /></td>
+            <td><img src="{{ url_stem }}seeders.png" class="tooltip" title="Seeding" /></td>
             <td>Invites</td>
 {% if show_invited %}
             <td>Invited</td>
@@ -450,20 +450,39 @@ Results ordered <select name="order">
         </tr>
 {% for u in page %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>{{ u.user_id|user_full }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.join_date|time_diff }}</td>
-            <td>{{ u.last_access|time_diff }}</td>
-            <td>{{ u.uploaded|octet_size }}</td>
-            <td>{{ u.downloaded|octet_size }}</td>
-            <td>{{ ratio(u.uploaded, u.downloaded) }}</td>
-            <td>{{ u.bounty|octet_size }}</td>
-            <td>{{ u.downloads|number_format }}</td>
-            <td>{% if u.snatches is numeric %}{{ u.snatches|number_format }}{% else %}{{ u.snatches }}{% endif %}</td>
-            <td>{% if u.seeding is numeric %}{{ u.seeding|number_format }}{% else %}{{ u.seeding }}{% endif %}</td>
-            <td>{{ u.invites|number_format }}{% if u.disable_invites %}<span title="Invites are disabled">&nbsp;&nbsp;&#x1F6AB;</span>{% endif %}</td>
+            <td>{{ u.user.link|raw }} {{ u.user_id|user_status(viewer)|raw }}</td>
+            <td>{{ u.user.userclassName }}
+    {% for badge, title in u.user.secondaryBadges|filter((v, k) => k is not empty) %}
+        {% if loop.first %}
+            <br />
+        {% endif %}
+            <span class="tooltip secondary_class" title="{{ title }}">{{ badge }}</span>
+    {% endfor %}
+            </td>
+            <td>{{ u.user.email }}</td>
+            <td>{{ u.user.joinDate|time_diff(1) }}<br />{{ u.user.lastAccess|time_diff(1) }}</td>
+            <td>{{ u.user.uploadedSize|octet_size }}</td>
+            <td>{{ u.user.downloadedSize|octet_size }}</td>
+            <td>{{ ratio(u.user.uploadedSize, u.user.downloadedSize) }}</td>
+            <td>{{ u.user.stats.requestVoteSize|octet_size }}</td>
+            <td>{{ u.user.stats.downloadUnique|number_format }}</td>
+            <td>{{ u.user.stats.snatchUnique|number_format }}</td>
+            <td>{{ u.user.stats.seedingTotal|number_format }}</td>
+            <td>{{ u.invites|number_format }}
+    {%- if u.user.disableInvites -%}
+        <span title="Invites are disabled">&nbsp;&nbsp;&#x1F6AB;</span>
+    {%- endif -%}
+        </td>
     {% if show_invited %}
-            <td>{{ u.invited|number_format }}</td>
+            <td>
+        {%- if u.user.invitedTotal > 0 -%}
+            <a href="user.php?action=invitetree&userid={{ u.user_id }}">
+        {%- endif -%}
+            {{ u.user.invitedTotal }}
+        {%- if u.user.invitedTotal > 0 -%}
+            </a>
+        {%- endif -%}
+            </td>
     {% endif %}
         </tr>
 {% endfor %}

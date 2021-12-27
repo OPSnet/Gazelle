@@ -3,6 +3,13 @@
 namespace Gazelle\Util;
 
 class Twig {
+
+    protected static \Gazelle\Manager\User $userMan;
+
+    public static function setUserMan(\Gazelle\Manager\User $userMan) {
+        self::$userMan = $userMan;
+    }
+
     public static function factory(): \Twig\Environment {
         $twig = new \Twig\Environment(
             new \Twig\Loader\FilesystemLoader(__DIR__ . '/../../templates'), [
@@ -69,7 +76,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'plural',
-            function ($number, $plural = '') {
+            function ($number, $plural = 's') {
                 return plural($number, $plural);
             }
         ));
@@ -90,8 +97,8 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'time_diff',
-            function ($time) {
-                return new \Twig\Markup(time_diff($time), 'UTF-8');
+            function ($time, $levels = 2) {
+                return new \Twig\Markup(time_diff($time, $levels), 'UTF-8');
             }
         ));
 
@@ -134,6 +141,28 @@ class Twig {
             'user_full',
             function ($userId) {
                 return new \Twig\Markup(\Users::format_username($userId, true, true, true, true), 'UTF-8');
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'user_status',
+            function ($userId, $viewer): string {
+                $user = self::$userMan->findById($userId);
+                if (is_null($user)) {
+                    return '';
+                }
+                $icon = [(new \Gazelle\Donor($user))->link($viewer)];
+                if ($user->isWarned()) {
+                    $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
+                        . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
+                        . ($viewer->id() == $user->id() ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
+                        . '" class="tooltip" /></a>';
+                }
+                if ($user->isDisabled()) {
+                    $icon[] = '<a href="rules.php"><img src="'
+                        . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>';
+                }
+                return new \Twig\Markup(implode(' ', $icon), 'UTF-8');
             }
         ));
 

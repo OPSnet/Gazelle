@@ -219,22 +219,13 @@ if (!empty($_GET)) {
 
     $columns = "
         um1.ID          AS user_id,
-        um1.Email       AS email,
-        uls1.Uploaded   AS uploaded,
-        uls1.Downloaded AS downloaded,
-        (SELECT count(DISTINCT TorrentID) FROM users_downloads ud WHERE ud.UserID = um1.ID) AS downloads,
-        coalesce((SELECT sum(Bounty) FROM requests_votes rv WHERE rv.UserID = um1.ID), 0) AS bounty,
         $seedingValue  AS seeding,
         $snatchesValue AS snatches,
-        $invitedValue  AS invited,
-        um1.Invites        AS invites,
-        ui1.DisableInvites AS disabled_invites,
-        ui1.JoinDate       AS join_date,
-        ula.last_access    AS last_access,
-        um1.Username
+        $invitedValue  AS invited
     ";
 
     $from = "FROM users_main AS um1
+    INNER JOIN permissions p ON (p.ID = um1.PermissionID)
     INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
     INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID)
     LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
@@ -508,89 +499,38 @@ if (!empty($_GET)) {
 
     $DB->prepared_query($SQL, ...array_merge($Args, $HavingArgs, [$paginator->limit(), $paginator->offset()]));
     $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
+    $userman = new Gazelle\Manager\User;
+    foreach ($Results as &$r) {
+        $r['user'] = $userMan->findById($r['user_id']);
+    }
+    unset($r);
 }
 
 // Neither level nor ID is particularly useful when searching secondary classes, so sort them alphabetically.
 $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
-$Secondaries = array_filter($ClassLevels, function ($class) { return $class['Secondary'] == '1'; });
+$Secondaries = array_filter($ClassLevels, fn ($c) => $class['Secondary'] == '1');
 usort($Secondaries, function($c1, $c2) { return strcmp($c1['Name'], $c2['Name']); });
 
 echo $Twig->render('admin/advanced-user-search.twig', [
+    'page'          => $Results,
     'paginator'     => $paginator,
     'show_invited'  => $showInvited,
-    'page'          => $Results,
+    'url_stem'      => (new Gazelle\Stylesheet($Viewer))->imagePath(),
+    'viewer'        => $Viewer,
+    'input'         => $_GET,
 
-    // first column
-    'username'            => $_GET['username'] ?? '',
-    'email'               => $_GET['email'] ?? '',
-    'site_ip'             => $_GET['ip'] ?? '',
-    'tracker_ip'          => $_GET['tracker_ip'] ?? '',
     'tracker_live_source' => $trackerLiveSource,
-    'comment'             => $_GET['comment'] ?? '',
-    'passkey'             => $_GET['passkey'] ?? '',
-    'avatar'              => $_GET['avatar'] ?? '',
-    'lastfm'              => $_GET['lastfm'] ?? '',
     'check_disabled_ip'   => $disabledIpChecked,
     'check_ip_history'    => $ipHistoryChecked,
     'check_email_history' => $emailHistoryChecked,
 
-    // second column
-    'joined_op'   => $_GET['joined'] ?? '',
-    'joined_min'  => $_GET['join1'] ?? '',
-    'joined_max'  => $_GET['join2'] ?? '',
-    'last_active_op'   => $_GET['lastactive'] ?? '',
-    'last_active_min'  => $_GET['lastactive1'] ?? '',
-    'last_active_max'  => $_GET['lastactive2'] ?? '',
-    'downloads_op'     => $_GET['downloads'] ?? '',
-    'downloads_min'    => $_GET['downloads1'] ?? '',
-    'downloads_max'    => $_GET['downloads2'] ?? '',
-    'snatched_op'      => $_GET['snatched'] ?? '',
-    'snatched_min'     => $_GET['snatched1'] ?? '',
-    'snatched_max'     => $_GET['snatched2'] ?? '',
-    'seeding_op'       => $_GET['seeding'] ?? '',
-    'seeding_min'      => $_GET['seeding1'] ?? '',
-    'seeding_max'      => $_GET['seeding2'] ?? '',
-    'uploaded_op'      => $_GET['uploaded'] ?? '',
-    'uploaded_min'     => $_GET['uploaded1'] ?? '',
-    'uploaded_max'     => $_GET['uploaded2'] ?? '',
-    'downloaded_op'    => $_GET['downloaded'] ?? '',
-    'downloaded_min'   => $_GET['downloaded1'] ?? '',
-    'downloaded_max'   => $_GET['downloaded2'] ?? '',
-    'bounty_op'        => $_GET['bounty'] ?? '',
-    'bounty_min'       => $_GET['bounty1'] ?? '',
-    'bounty_max'       => $_GET['bounty2'] ?? '',
-    'ratio_op'         => $_GET['ratio'] ?? '',
-    'ratio_min'        => $_GET['ratio1'] ?? '',
-    'ratio_max'        => $_GET['ratio2'] ?? '',
-    'invites_op'       => $_GET['invites'] ?? '',
-    'invites_min'      => $_GET['invites1'] ?? '',
-    'invites_max'      => $_GET['invites2'] ?? '',
-    'invited_op'       => $_GET['invited'] ?? 'off',
-    'invited_min'      => $_GET['invited1'] ?? '',
-    'invited_max'      => $_GET['invited2'] ?? '',
-    'email_op'         => $_GET['emails_opt'] ?? 'equal',
-    'email_value'      => $_GET['email_cnt'] ?? '',
-
     // third column
-    'primary_class'    => array_filter($ClassLevels, function ($class) { return $class['Secondary'] == '0'; }),
-    'primary_current'  => $_GET['class'] ?? [],
+    'primary_class'    => array_filter($ClassLevels, fn ($c) => $class['Secondary'] == '0'),
     'secondary_class'  => $Secondaries,
-    'sec_current'      => $_GET['secclass'] ?? '',
-    'enabled'          => $_GET['enabled'] ?? '',
-    'donor'            => $_GET['donor'] ?? '',
-    'warned'           => $_GET['warned'] ?? '',
-    'locked_account'   => $_GET['lockedaccount'] ?? 'any',
-    'disabled_invites' => $_GET['disabled_invites'] ?? '',
-    'disabled_uploads' => $_GET['disabled_uploads'] ?? '',
     'stylesheet'       => $Stylesheets,
-    'style_current'    => $_GET['stylesheet'] ?? 0,
-    'ccode_op'         => $_GET['cc_op'] ?? 'equal',
-    'ccode_value'      => $_GET['cc'] ?? '',
     'match_mode'       => $matchMode,
 
     // sorting widgets
     'field_by'      => array_shift($OrderVals),
-    'field_current' => ($_GET['order'] ?? 'Joined'),
     'order_by'      => array_shift($WayVals),
-    'order_current' => ($_GET['way'] ?? 'Descending'),
 ]);
