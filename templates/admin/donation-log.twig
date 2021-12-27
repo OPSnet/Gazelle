@@ -1,3 +1,40 @@
+{{ header('Donation log', {'js': 'highcharts,highcharts_custom'}) }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('donation-timeline', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'Donations Timeline',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    yAxis: {
+        title: {text: 'bitcoin'},
+        plotLines: [{
+            color: '#800000',
+            width: 2,
+            value: {{ rental }},
+            zIndex: 5,
+        }],
+    },
+    xAxis: {
+        categories: {{ month|json_encode|raw }},
+    },
+    series: [
+        { name: 'Donated',  data: {{ amount|json_encode|raw }} }
+    ]
+
+})});
+</script>
+
 <div class="thin">
 <div class="box pad">
     <figure class="highcharts-figure"><div id="donation-timeline"></div></figure>
@@ -17,8 +54,8 @@
             <tr>
                 <td class="label"><strong>Date Range:</strong></td>
                 <td>
-                    <input type="date" name="after_date" />
-                    <input type="date" name="before_date" />
+                    <input type="date" name="after_date" value="{{ after }}" />
+                    <input type="date" name="before_date" value="{{ before }}" />
                 </td>
             </tr>
             <tr>
@@ -43,7 +80,7 @@
         <td>Time</td>
     </tr>
 {% set total = 0 %}
-{% for d in donation %}
+{% for d in page %}
     {% set total = total + d.xbt %}
     <tr>
         <td>{{ d.UserID|user_full }} ({{ d.AddedBy|user_url }})</td>
@@ -64,3 +101,4 @@
 </tr>
 </table>
 {{ paginator.linkbox|raw }}
+{{ footer() }}

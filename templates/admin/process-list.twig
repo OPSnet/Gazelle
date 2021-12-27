@@ -1,0 +1,23 @@
+{{ header('PHP Processes') }}
+<div class="thin">
+    <table class="process_info">
+        <colgroup>
+            <col class="process_info_pid" />
+            <col class="process_info_data" />
+        </colgroup>
+        <tr class="colhead_dark">
+            <td colspan="2">
+                {{ proc|length }} process{{ proc|length|plural('es') }} as of {{ now }}
+            </td>
+        </tr>
+{% for pid, info in proc %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td style="vertical-align: top;">{{ pid }}</td>
+            <td>
+                <pre>{{ info|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            </td>
+        </tr>
+{% endfor %}
+    </table>
+</div>
+{{ footer() }}

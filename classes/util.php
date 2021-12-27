@@ -34,17 +34,18 @@ if (PHP_INT_SIZE === 4) {
  * Awful anglo-centric hack for handling plurals ;-)
  *
  * @param int $n the number
+ * @param string $plural override the default 's' with something else e.g. 'es'
  * @return string '' if 1, otherwise 's'
  */
-function plural(int $n) {
-    return $n == 1 ? '' : 's';
+function plural(int $n, string $plural = 's'): string {
+    return $n == 1 ? '' : $plural;
 }
 
 /**
  * Awful anglo-centric hack for handling articles
  *
  * @param int $n the number
- * @param string $article string to use if you don't want the default 'a'
+ * @param string $article string to use if you don't want the default 'a' e.g. 'an'
  * @return string 'a' (or $article) if $n == 1, otherwise $n
  */
 function article(int $n, $article = 'a') {

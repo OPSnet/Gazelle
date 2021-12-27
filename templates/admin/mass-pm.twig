@@ -1,0 +1,33 @@
+{{ header('Compose Mass PM', {'js': 'inbox,bbcode,jquery.validate,form_validate'}) }}
+<div class="thin">
+<div class="header">
+    <h2>Send a mass PM</h2>
+</div>
+<form class="send_form" name="message" action="tools.php" method="post" id="messageform">
+    <div class="box pad">
+        <input type="hidden" name="action" value="take_mass_pm" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <div id="quickpost">
+            <h3>Class</h3>
+            <select id="class_id" name="class_id">
+                <option>---</option>
+{% for id, info in class %}
+                <option value="{{ id }}">{{ info.Name }}</option>
+{% endfor %}
+            </select>
+            <h3>Subject</h3>
+            <input type="text" class="required" name="subject" size="95" /><br />
+            <h3>Body</h3>
+            {{ body.preview|raw }}
+            {{ body.field|raw }}
+        </div>
+        <div id="buttons" class="center">
+            <label><input type="checkbox" name="from_system" id="from_system" /> Send as System</label>
+            {{ body.button|raw }}
+            <input type="submit" value="Send message" />
+        </div>
+    </div>
+</form>
+</div>
+{{ footer() }}
+
