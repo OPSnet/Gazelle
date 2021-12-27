@@ -1,13 +1,13 @@
 <?php
 
-$ArtistID = (int)($_GET['id'] ?? 0);
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 $artistMan = new Gazelle\Manager\Artist;
-$Artist = $artistMan->findById($ArtistID, $RevisionID);
+$Artist = $artistMan->findById((int)($_GET['id'] ?? 0), $RevisionID);
 if (is_null($Artist)) {
     error(404);
 }
 $Artist->loadArtistRole();
+$ArtistID = $Artist->id();
 
 $bookmark   = new Gazelle\Bookmark($Viewer);
 $collageMan = new Gazelle\Manager\Collage;

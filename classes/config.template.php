@@ -333,6 +333,8 @@ define('ICON_NONE',    "\xf0\x9f\x9a\xab");
 define('ICON_TOGGLE',  "\xf0\x9f\x94\x81");
 define('ICON_PADLOCK', "\xF0\x9F\x94\x92");
 define('ICON_STAR',    "\xE2\x98\x85");
+define('ICON_BLACK_SQUARE', "\xE2\x96\xA0");
+define('ICON_WHITE_SQUARE', "\xE2\x96\xA1");
 
 define('COLLAGE', [
     0 => 'Personal',
