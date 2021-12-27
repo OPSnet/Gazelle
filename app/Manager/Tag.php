@@ -8,17 +8,17 @@ class Tag extends \Gazelle\Base {
 
     public function findById(int $tagId): ?\Gazelle\Tag {
         $key = sprintf(self::ID_KEY, $tagId);
-        $tagId = self::$cache->get_value($key);
-        if ($tagId === false) {
-            $tagId = self::$db->scalar("
+        $id = self::$cache->get_value($key);
+        if ($id === false) {
+            $id = self::$db->scalar("
                 SELECT ID FROM tags WHERE ID = ?
                 ", $tagId
             );
-            if ($tagId) {
-                self::$cache->cache_value($key, $tagId, 0);
+            if ($id) {
+                self::$cache->cache_value($key, $id, 0);
             }
         }
-        return $tagId ? new \Gazelle\Tag($tagId) : null;
+        return $id ? new \Gazelle\Tag($id) : null;
     }
 
     public function findByName(string $name) {
