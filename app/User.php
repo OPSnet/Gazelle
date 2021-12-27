@@ -1613,7 +1613,7 @@ class User extends BaseObject {
 
     public function addArtistNotification(\Gazelle\Artist $artist): int {
         $info = $this->loadArtistNotifications();
-        $alias = implode('|', $artist->aliasList());
+        $alias = implode('|', $artist->aliasNameList());
         if (!$alias) {
             return 0;
         }
@@ -1644,7 +1644,7 @@ class User extends BaseObject {
 
     public function removeArtistNotification(\Gazelle\Artist $artist): int {
         $info = $this->loadArtistNotifications();
-        $aliasList = $artist->aliasList();
+        $aliasList = $artist->aliasNameList();
         foreach ($aliasList as $alias) {
             while (stripos($info['Artists'], "|$alias|") !== false) {
                 $info['Artists'] = str_ireplace("|$alias|", '|', $info['Artists']);

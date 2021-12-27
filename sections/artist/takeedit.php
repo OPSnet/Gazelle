@@ -30,6 +30,8 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     $body      = trim($_POST['body']);
     $summary[] = trim($_POST['summary']);
     $image     = trim($_POST['image']);
+    $locked    = $_POST['locked'] ?? false;
+    $unlocked  = $_POST['unlocked'] ?? false;
 }
 
 if (!empty($image)) {
@@ -77,7 +79,7 @@ $column = ['RevisionID = ?'];
 $args   = [$revisionId];
 if ($Viewer->permitted('artist_edit_vanityhouse')) {
     $column[] = 'VanityHouse = ?';
-    $args[] = isset($_POST['vanity_house']) ? 1 : 0;
+    $args[] = isset($_POST['showcase']) ? 1 : 0;
 }
 
 $columns = implode(', ', $column);
@@ -88,6 +90,12 @@ $DB->prepared_query($sql = "
     WHERE ArtistID = ?
     ", ...$args
 );
+
+if ($locked) {
+    $artist->setLocked();
+} elseif ($unlocked && check_perms('users_mod')) {
+    $artist->setUnlocked();
+}
 
 // There we go, all done!
 $artist->flushCache();

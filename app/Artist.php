@@ -3,19 +3,22 @@
 namespace Gazelle;
 
 class Artist extends Base {
-    protected $id = 0;
-    protected $revisionId = 0;
+    protected int $id = 0;
+    protected int $revisionId = 0;
     protected $artistRole;
-    protected $nrGroups = 0;
+    protected int $nrGroups = 0;
 
     /** All the groups */
-    protected $group = [];
+    protected array $group = [];
 
     /** The roles an artist holds in a release */
-    protected $groupRole = [];
+    protected array $groupRole = [];
 
     /** Their groups, gathered into sections */
-    protected $section = [];
+    protected array $section = [];
+
+    /** attributes */
+    protected array $attr;
 
     protected $discogsId;
     protected $discogsName;
@@ -25,17 +28,17 @@ class Artist extends Base {
     protected $discogsIsPreferred;
     protected $homonyms;
 
-    protected $name = '';
+    protected string $name = '';
     protected $image;
     protected $body;
     /** @var bool|int */
     protected $vanity;
     protected $similar = [];
 
-    protected $nrLeechers = 0;
-    protected $nrSnatches = 0;
-    protected $nrSeeders = 0;
-    protected $nrTorrents = 0;
+    protected int $nrLeechers = 0;
+    protected int $nrSnatches = 0;
+    protected int $nrSeeders = 0;
+    protected int $nrTorrents = 0;
 
     protected const CACHE_PREFIX = 'artist_';
     protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
@@ -52,8 +55,9 @@ class Artist extends Base {
         $cacheKey = $this->cacheKey();
         if (($info = self::$cache->get_value($cacheKey)) !== false) {
             [$this->name, $this->image, $this->body, $this->vanity, $this->similar,
-                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
+                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms, $attr
             ] = $info;
+            $this->attr = is_array($attr) ? $attr : $this->loadAttr();
         } else {
             if ($this->revisionId) {
                 $join = "LEFT JOIN wiki_artists AS wa ON (wa.PageID = ag.ArtistID)";
@@ -77,12 +81,69 @@ class Artist extends Base {
             );
             $this->similar = $this->loadSimilar();
             $this->homonyms = $this->homonymCount();
+            $this->attr = $this->loadAttr();
+
             self::$cache->cache_value($cacheKey, [
                     $this->name, $this->image, $this->body, $this->vanity, $this->similar,
-                    $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
+                    $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms, $this->attr
                 ], 3600
             );
         }
+    }
+
+    protected function loadAttr(): array {
+        self::$db->prepared_query("
+            SELECT aa.name, aa.artist_attr_id
+            FROM artist_attr aa
+            INNER JOIN artist_has_attr aha USING (artist_attr_id)
+            WHERE aha.artist_id = ?
+            ", $this->id
+        );
+        return self::$db->to_pair('name', 'artist_attr_id');
+    }
+
+    public function hasAttr(string $name): ?int {
+        if (!isset($this->attr)) {
+            $this->attr = $this->loadAttr();
+        }
+        return $this->attr[$name] ?? null;
+    }
+
+    protected function toggleAttr(string $attr, bool $flag): bool {
+        $attrId = $this->hasAttr($attr);
+        $found = !is_null($attrId);
+        $toggled = false;
+        if (!$flag && $found) {
+            self::$db->prepared_query('
+                DELETE FROM artist_has_attr WHERE artist_id = ? AND artist_attr_id = ?
+                ', $this->id, $attrId
+            );
+            $toggled = self::$db->affected_rows() === 1;
+        }
+        elseif ($flag && !$found) {
+            self::$db->prepared_query('
+                INSERT INTO artist_has_attr (artist_id, artist_attr_id)
+                    SELECT ?, artist_attr_id FROM artist_attr WHERE name = ?
+                ', $this->id, $attr
+            );
+            $toggled = self::$db->affected_rows() === 1;
+        }
+        if ($toggled) {
+            $this->flushCache();
+        }
+        return $toggled;
+    }
+
+    public function isLocked(): bool {
+        return $this->hasAttr('locked') ?? false;
+    }
+
+    public function setLocked(): bool {
+        return $this->toggleAttr('locked', true);
+    }
+
+    public function setUnlocked(): bool {
+        return $this->toggleAttr('locked', false);
     }
 
     public function loadArtistRole() {
@@ -287,10 +348,8 @@ class Artist extends Base {
     }
 
     /**
-     * @param  int  $redirectId
-     * @return int
-     * @throws Gazelle\Exception\ResourceNotFoundException
-     * @throws UnexpectedValueException
+     * @throws \Gazelle\Exception\ResourceNotFoundException
+     * @throws \Gazelle\Exception\ArtistRedirectException
      */
     public function resolveRedirect(int $redirectId): int {
         [$foundId, $foundRedirectId] = self::$db->row("
@@ -305,7 +364,7 @@ class Artist extends Base {
         if ($this->id !== $foundId) {
             throw new Exception\ArtistRedirectException();
         }
-        return $foundRedirectId > 0 ? (int) $foundRedirectId : $redirectId;
+        return $foundRedirectId > 0 ? (int)$foundRedirectId : $redirectId;
     }
 
     /**
@@ -346,11 +405,12 @@ class Artist extends Base {
         return $alias ?: $this->id;
     }
 
-    public function aliasList(): array {
+    public function aliasNameList(): array {
         self::$db->prepared_query("
             SELECT Name
             FROM artists_alias
             WHERE Redirect = 0 AND ArtistID = ?
+            ORDER BY Name
             ", $this->id
         );
         return self::$db->collect('Name');
@@ -372,14 +432,96 @@ class Artist extends Base {
         ) ?? [];
     }
 
-    public function redirects(): array {
+    public function aliasInfo(): array {
+    /**
+     * Build the alias info. We want all the non-redirecting aliases at the top
+     * level, and gather their aliases together, and having everything sorted
+     * alphabetically. This is harder than it seems.
+     *  +---------+-----------+------------+
+     *  | aliasId | aliasName | redirectId |
+     *  +---------+-----------+------------+
+     *  |     136 | alpha     |          0 |
+     *  |      82 | bravo     |          0 |
+     *  |     120 | charlie   |          0 |
+     *  |     122 | delta     |          0 |
+     *  |     134 | echo      |         82 |
+     *  |     135 | foxtrot   |        122 |
+     *  |      36 | golf      |        133 |
+     *  |     133 | hotel     |        134 |
+     *  |     140 | india     |        136 |
+     *  +---------+-----------+------------+
+     * alpha..delta are non-redirecting aliases. echo is an alias of bravo.
+     * golf is an alias of hotel, which is an alias of echo, which is an alias of bravo.
+     * This chaining will happen over time as aliases are added and removed and artists
+     * are merged or renamed. The golf-hotel-echo-bravo chain is a worst case example of
+     * an alias that points to another name that didn't exist when it was created.
+     * This means that the chains cannot be resolved in a single pass. I think the
+     * algorithm below covers all the edge cases.
+     * In the end, the result is:
+     *    alpha
+     *      - india
+     *    bravo
+     *      - echo
+     *      - golf
+     *      - hotel
+     *    charlie
+     *    delta
+     *      - foxtrot
+     */
         self::$db->prepared_query("
             SELECT AliasID as aliasId, Name as aliasName, UserID as userId,  Redirect as redirectId
             FROM artists_alias
             WHERE ArtistID = ?
+            ORDER BY Redirect, Name
             ", $this->id
         );
-        return self::$db->to_array('aliasId', MYSQLI_ASSOC);
+        $result = self::$db->to_array('aliasId', MYSQLI_ASSOC, false);
+
+        // create the first level of redirections
+        $map = [];
+        foreach ($result as $aliasId => $info) {
+            $map[$aliasId] = $info['redirectId'];
+        }
+
+        // go through the list again, and resolve the redirect chains
+        foreach ($result as $aliasId => $info) {
+            $redirect = $info['redirectId'];
+            while (isset($map[$redirect]) && $map[$redirect] > 0) {
+                $redirect = $map[$redirect];
+            }
+            $map[$aliasId] = $redirect;
+        }
+
+        // go through the list and tie the alias to its non-redirecting ancestor
+        $userMan = new Manager\User;
+        $alias = [];
+        foreach ($result as $aliasId => $info) {
+            if ($info['redirectId']) {
+                $redirect = $map[$aliasId];
+                $alias[$redirect]['alias'][] = [
+                    'alias_id' => $aliasId,
+                    'name'     => $info['aliasName'],
+                    'user'     => $userMan->findById($info['userId']),
+               ];
+            } else {
+                $alias[$aliasId] = [
+                    'alias'    => [],
+                    'alias_id' => $aliasId,
+                    'name'     => $info['aliasName'],
+                    'user'     => $userMan->findById($info['userId']),
+                ];
+            }
+        }
+
+        // the aliases may need to be sorted
+        foreach ($alias as &$a) {
+            if ($a['alias']) {
+                uksort($a['alias'], function ($x, $y) use ($a) {
+                    return strcasecmp($a['alias'][$x]['name'], $a['alias'][$y]['name']);
+                });
+            }
+        }
+        return $alias;
     }
 
     public function requests(): array {
@@ -608,7 +750,7 @@ class Artist extends Base {
         );
         $manager = new Manager\Artist;
         foreach ($artistIds as $id) {
-            $manager->findById($id, 0)->flushCache();
+            $manager->findById($id)->flushCache();
             self::$cache->delete_value("similar_positions_$id");
         }
         self::$db->commit();

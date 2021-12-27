@@ -6,21 +6,6 @@ parameters:
 			path: app/API/Request.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\Artist\\:\\:findById\\(\\) invoked with 2 parameters, 1 required\\.$#"
-			count: 1
-			path: app/Artist.php
-
-		-
-			message: "#^PHPDoc tag @throws with type Gazelle\\\\Gazelle\\\\Exception\\\\ResourceNotFoundException is not subtype of Throwable$#"
-			count: 1
-			path: app/Artist.php
-
-		-
-			message: "#^PHPDoc tag @throws with type Gazelle\\\\Gazelle\\\\Exception\\\\ResourceNotFoundException\\|Gazelle\\\\UnexpectedValueException is not subtype of Throwable$#"
-			count: 1
-			path: app/Artist.php
-
-		-
 			message: "#^Call to an undefined method Gazelle\\\\Contest\\\\AbstractContest\\:\\:leaderboard\\(\\)\\.$#"
 			count: 2
 			path: app/Contest.php
