@@ -78,11 +78,13 @@ function authorize($Ajax = false): bool {
 
 // Set the document we are loading
 $Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
-$userMan = new Gazelle\Manager\User;
-$ipv4Man = new Gazelle\Manager\IPv4;
 $SessionID = false;
 $FullToken = null;
 $Viewer = null;
+
+$ipv4Man = new Gazelle\Manager\IPv4;
+$userMan = new Gazelle\Manager\User;
+Gazelle\Util\Twig::setUserMan($userMan);
 
 // Only allow using the Authorization header for ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {

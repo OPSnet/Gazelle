@@ -623,6 +623,10 @@ class User extends BaseObject {
         return $this->info()['IRCKey'];
     }
 
+    public function joinDate() {
+        return $this->info()['JoinDate'];
+    }
+
     public function TFAKey() {
         return $this->info()['2FA_Key'];
     }
@@ -682,10 +686,6 @@ class User extends BaseObject {
     public function remove2FA() {
         return $this->setUpdate('2FA_Key', null)
             ->setUpdate('Recovery', null);
-    }
-
-    public function joinDate() {
-        return $this->info()['JoinDate'];
     }
 
     public function paranoia(): array {
@@ -1937,6 +1937,14 @@ class User extends BaseObject {
             ", $this->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function invitedTotal(): int {
+        return $this->getSingleValue('user_invited', '
+            SELECT count(*)
+            FROM users_info
+            WHERE Inviter = ?
+        ');
     }
 
     public function passwordAge() {
