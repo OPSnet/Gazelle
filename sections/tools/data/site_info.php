@@ -1,6 +1,6 @@
 <?php
 
-if (!DEBUG_MODE && !$Viewer->permitted('admin_site_debug')) {
+if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
 
@@ -13,8 +13,6 @@ function gid ($id) {
 }
 
 $info = new Gazelle\SiteInfo;
-
-View::show_header('Site Information');
 
 if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
     $config = new Gazelle\UserRank\Configuration(RANKING_WEIGHT);
@@ -53,5 +51,3 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'no_pk'            => $info->tablesWithoutPK(),
     ]);
 }
-
-View::show_footer();

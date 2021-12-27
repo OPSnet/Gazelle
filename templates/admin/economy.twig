@@ -1,0 +1,98 @@
+{#
+Tools necessary for economic management
+1. Current overall stats (!economy)
+2. Statistical traffic trends in a graph
+    a. All time / 1 year (whichever is smaller)
+    b. 1 month
+    c. 1 week
+    d. 1 day
+3. Freeleech analysis
+    a. total download average during freeleech vs. normal conditions
+    b. total stats of a freeleech - uploaded torrents, upload amount, download amount, snatches, etc.
+4. Traffic trends over an account's life, on average
+    a. at one week, one month, whatever (selectable range in weeks) - averages (up/down/ratio)
+    b. given a selected timespan, average ratio (users who are 4-5 months old have X ratio)
+    c. average date at which >50% of accounts with ratios >1 reach 1.0 and never dip below, stockpiling buffer
+5. Raw numbers
+    a. total torrents, seeders, leechers
+    b. average seeds/leechs per torrent
+    c. average snatches/user
+    d. average seeding torrents/user
+    e. users on ratio watch
+6. Distribution graph of seedership vs. torrent percentage
+    a. graph showing that the top 1% of torrents has 50% of seeders or whatever the numbers might be
+7. Effects of economic changes
+    a. number of users changed by ratio being changed
+    b. project effects with intelligent mathematical analysis of a 24, 48 or 72 hour freeleech
+#}
+
+{% set download = info.get('totalDownload') %}
+{% set upload   = info.get('totalUpload') %}
+{% set enabled  = info.get('totalEnabled') %}
+{% set leechers = info.get('totalLeechers') %}
+{% set peers    = info.get('totalPeerUsers') %}
+{% set seeders  = info.get('totalSeeders') %}
+{% set torrents = info.get('totalTorrents') %}
+
+{% set snatches         = info.get('totalSnatches') %}
+{% set snatches_overall = info.get('totalOverallSnatches') %}
+
+{{ header('Economy') }}
+<div class="thin">
+    <div class="box">
+        <div class="head">Overall stats</div>
+        <div class="pad">
+            <ul class="stats nobullet">
+                <li><strong>Total upload: </strong>{{ upload|octet_size }}</li>
+                <li><strong>Total download: </strong>{{ download|octet_size }}</li>
+                <li><strong>Total buffer: </strong>{{ (upload - download)|octet_size }}</li>
+                <br />
+                <li><strong>Mean ratio: </strong>{{ ratio(upload, download) }}</li>
+                <li><strong>Mean upload: </strong>{{ (upload / enabled)|octet_size }}</li>
+                <li><strong>Mean download: </strong>{{ (download / enabled)|octet_size }}</li>
+                <li><strong>Mean buffer: </strong>{{ ((upload - download) / enabled)|octet_size }}</li>
+                <br />
+                <li><strong>Total request bounty: </strong>{{ info.get('totalBounty')|octet_size }}</li>
+                <li><strong>Available request bounty: </strong>{{ info.get('availableBounty')|octet_size }}</li>
+            </ul>
+        </div>
+    </div>
+    <br />
+
+    <div class="box">
+        <div class="head">Swarms and snatches</div>
+        <div class="pad">
+            <table>
+            <tr>
+            <td style="vertical-align:top;" width="50%">
+            <ul class="stats nobullet">
+                <li><strong>Total seeders: </strong>{{ seeders|number_format }}</li>
+                <li><strong>Total leechers: </strong>{{ leechers|number_format }}</li>
+                <li><strong>Total peers: </strong>{{ (seeders + leechers)|number_format }}</li>
+                <li><strong>Total snatches: </strong>{{ snatches_overall|number_format }}</li>
+                <li><strong>Seeder/leecher ratio: </strong>{{ ratio(seeders, leechers) }}</li>
+                <li><strong>Seeder/snatch ratio: </strong>{{ ratio(seeders, snatches_overall) }}</li>
+                <br />
+                <li><strong>Total users in at least 1 swarm: </strong>{{ peers|number_format }}</li>
+                <li><strong>Mean seeding per user in at least 1 swarm: </strong>{{ (peers ? seeders / peers : 0)|number_format(2) }}</li>
+                <li><strong>Mean leeching per user in at least 1 swarm: </strong>{{ (peers ? leechers / peers : 0)|number_format(2) }}</li>
+                <li><strong>Mean snatches per user in at least 1 swarm: </strong>{{ (peers ? snatches / peers : 0)|number_format(2) }}</li>
+            </ul>
+            </td>
+            <td style="vertical-align:top;" width="50%">
+            <ul class="stats nobullet">
+                <li><strong>Mean seeders per torrent: </strong>{{ (torrents ? seeders / torrents : 0)|number_format(2) }}</li>
+                <li><strong>Mean leechers per torrent: </strong>{{ (torrents ? leechers / torrents : 0)|number_format(2) }}</li>
+                <li><strong>Mean snatches per torrent: </strong>{{ (torrents ? snatches / torrents : 0)|number_format(2) }}</li>
+                <br />
+                <li><strong>Mean seeding per user: </strong>{{ (seeders / enabled)|number_format(2) }}</li>
+                <li><strong>Mean leeching per user: </strong>{{ (leechers / enabled)|number_format(2) }}</li>
+                <li><strong>Mean snatches per user: </strong>{{ (snatches_overall / enabled)|number_format(2) }}</li>
+            </ul>
+            </td>
+            </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{{ footer() }}

@@ -202,10 +202,7 @@ switch ($_REQUEST['action']) {
 
     // Finances
     case 'donation_log':
-        require_once('finances/btc_log.php');
-        break;
-    case 'bitcoin_balance':
-        require_once('finances/bitcoin_balance.php');
+        require_once('finances/donation_log.php');
         break;
     case 'donor_rewards':
         require_once('finances/donor_rewards.php');

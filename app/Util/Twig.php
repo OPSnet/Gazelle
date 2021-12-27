@@ -69,8 +69,8 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'plural',
-            function ($number) {
-                return plural($number);
+            function ($number, $plural = '') {
+                return plural($number, $plural);
             }
         ));
 

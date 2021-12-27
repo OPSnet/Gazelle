@@ -306,4 +306,26 @@ class Donation extends \Gazelle\Base {
         }
         return count($userIds);
     }
+
+    public function grandTotal(): float {
+        return (float)self::$db->scalar("
+            SELECT SUM(xbt) FROM donations
+        ");
+    }
+
+    public function timeline(): array {
+        self::$db->prepared_query("
+            SELECT date_format(Time,'%b %Y') AS Month,
+                sum(xbt) as Amount
+            FROM donations
+            GROUP BY Month
+            ORDER BY Time DESC
+            LIMIT 0, 17
+        ");
+        $timeline =  array_reverse(self::$db->to_array(false, MYSQLI_ASSOC, false));
+        foreach ($timeline as &$t) {
+            $t['Amount'] = (float)$t['Amount'];
+        }
+        return $timeline;
+    }
 }

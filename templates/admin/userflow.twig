@@ -1,3 +1,4 @@
+{{ header('User Flow', {'js': 'highcharts,highcharts_custom'}) }}
 <div class="thin">
 {% if show_flow %}
     <div class="box pad center">
@@ -30,4 +31,37 @@
     </table>
     {{ paginator.linkbox|raw }}
 </div>
+
+{% if show_flow %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-flow', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Flow',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    xAxis: {
+        categories: [{{ category|join(',')|raw }}],
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    plotOptions: {
+        column: { stacking: 'normal' }
+    },
+    series: [
+        { name: 'Enabled',  data: [{{ enabled|join(',') }}] },
+        { name: 'Disabled', data: [{{ disabled|join(',') }}] },
+    ]
+})});
+</script>
+{% endif %}
+
 {{ footer() }}
