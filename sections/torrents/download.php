@@ -27,33 +27,31 @@ if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERV
  */
 $userId = $Viewer->id();
 if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
-    $PRL = new \Gazelle\PermissionRateLimit;
-    if (!$PRL->safeFactor($Viewer)) {
-        if (!$PRL->safeOvershoot($Viewer)) {
-            $DB->prepared_query('
-                INSERT INTO ratelimit_torrent
-                       (user_id, torrent_id)
-                VALUES (?,       ?)
-                ON DUPLICATE KEY UPDATE logged = now()
-                ', $userId, $torrentId
+    $PRL = new \Gazelle\PermissionRateLimit($Viewer);
+    if (!$PRL->safeFactor() && !$PRL->safeOvershoot()) {
+        $DB->prepared_query('
+            INSERT INTO ratelimit_torrent
+                   (user_id, torrent_id)
+            VALUES (?,       ?)
+            ON DUPLICATE KEY UPDATE logged = now()
+            ', $userId, $torrentId
+        );
+        if ($Cache->get_value('user_flood_' . $userId)) {
+            $Cache->increment('user_flood_' . $userId);
+        } else {
+            Irc::sendChannel(
+                SITE_URL . "/" . $Viewer->url()
+                . " (" . $Viewer->username() . ")"
+                . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
+                . " accessing "
+                . SITE_URL . $_SERVER['REQUEST_URI']
+                . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')
+                . ' hit download rate limit',
+                STATUS_CHAN
             );
-            if ($Cache->get_value('user_flood_' . $userId)) {
-                $Cache->increment('user_flood_' . $userId);
-            } else {
-                Irc::sendChannel(
-                    SITE_URL . "/" . $Viewer->url()
-                    . " (" . $Viewer->username() . ")"
-                    . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
-                    . " accessing "
-                    . SITE_URL . $_SERVER['REQUEST_URI']
-                    . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')
-                    . ' hit download rate limit',
-                    STATUS_CHAN
-                );
-                $Cache->cache_value('user_429_flood_' . $userId, 1, 3600);
-            }
-            json_or_error('rate limiting hit on downloading', 429);
+            $Cache->cache_value('user_429_flood_' . $userId, 1, 3600);
         }
+        json_or_error('rate limiting hit on downloading', 429);
     }
 }
 
