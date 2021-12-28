@@ -986,7 +986,7 @@ class User extends \Gazelle\Base {
                 'Extra' => [
                     '"Perfect" FLACs' => [
                         'Query' => "
-                            SELECT count(DISTINCT t.GroupID))
+                            SELECT count(DISTINCT t.GroupID)
                             FROM torrents t
                             WHERE t.Format = 'FLAC'
                                 AND (
