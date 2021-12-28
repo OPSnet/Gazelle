@@ -34,6 +34,7 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
                 INSERT INTO ratelimit_torrent
                        (user_id, torrent_id)
                 VALUES (?,       ?)
+                ON DUPLICATE KEY UPDATE logged = now()
                 ', $userId, $torrentId
             );
             if ($Cache->get_value('user_flood_' . $userId)) {
