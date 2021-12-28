@@ -52,7 +52,7 @@ $Aliases = [
     'requestfill' => 'request_fill',
 ];
 
-$Action = $_REQUEST['action'] ?? '';
+$Action = $_GET['action'] ?? $_POST['action'] ?? '';
 if (isset($Aliases[$Action])) {
     $_GET['action'] = $Action = $Aliases[$action];
 }

@@ -49,7 +49,7 @@ $ownProfile = $userId === $Viewer->id();
 $class = (int)$_POST['Class'];
 $username = trim($_POST['Username']);
 $title = trim($_POST['Title']);
-$adminComment = trim($_POST['AdminComment']);
+$adminComment = trim($_POST['admincomment']);
 $secondaryClasses = array_filter(
     array_map('intval', $_POST['secondary_classes'] ?? [] ),
     fn($id) => $id > 0
@@ -602,7 +602,7 @@ if (!(count($set) || count($leechSet) || count($editSummary)) && $reason) {
     $editSummary[] = 'notes added';
 }
 
-// Because of the infinitely fucked up encoding/decoding of Gazelle, $adminComment !== $cur['AdminComment']
+// Because of the infinitely fucked up encoding/decoding of Gazelle, $adminComment !== $cur['admincomment']
 // almost always evaluates to true, even if the user did not purposely change the field. This then means
 // we do have a bug where if a mod changes something about a user AND changes the admin comment, we will lose
 // that change, but until we never decode stuff coming out of the DB, not much can be done.
@@ -611,7 +611,7 @@ if (count($editSummary)) {
     $summary = implode(', ', $editSummary) . ' by ' . $Viewer->username();
     $set[] = "AdminComment = ?";
     $args[] = sqltime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
-} elseif ($adminComment !== $cur['AdminComment']) {
+} elseif ($adminComment !== $cur['admincomment']) {
     $set[] = "AdminComment = ?";
     $args[] = $adminComment;
 }
