@@ -12,6 +12,7 @@ $Username    = $User->username();
 
 $userBonus   = new Gazelle\Bonus($User);
 $viewerBonus = new Gazelle\Bonus($Viewer);
+$PRL         = new Gazelle\PermissionRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 
@@ -363,12 +364,13 @@ if (check_paranoia_here('snatched')) {
 }
 
 echo $Twig->render('user/sidebar-stats.twig', [
-    'stats'        => $stats,
-    'user_id'      => $UserID,
-    'can_leech'    => $User->canLeech(),
-    'viewer'       => $Viewer,
-    'upload_total' => $Uploads,
-    'visible'  => [
+    'prl'            => $PRL,
+    'stats'          => $stats,
+    'user_id'        => $UserID,
+    'viewer'         => $Viewer,
+    'upload_total'   => $Uploads,
+    'user'           => $User,
+    'visible'        => [
         'collages+'             => check_paranoia_here('collages+'),
         'collages'              => check_paranoia_here('collages'),
         'collagescontrib+'      => check_paranoia_here('collagecontribs+'),
@@ -757,7 +759,8 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('admin_rate_limit_manage')) {
         echo $Twig->render('user/edit-rate-limit.twig', [
-            'unlimited' => $User->hasUnlimitedDownload(),
+            'prl'  => $PRL,
+            'user' => $User,
         ]);
     }
 

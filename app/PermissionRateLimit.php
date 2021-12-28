@@ -2,65 +2,46 @@
 
 namespace Gazelle;
 
-class PermissionRateLimit extends Base {
+class PermissionRateLimit extends BaseUser {
 
-    public function list() {
-         self::$db->prepared_query('
-            SELECT p.ID, p.Name, prl.factor, prl.overshoot
+    public function metrics(): ?array {
+         return self::$db->rowAssoc('
+            SELECT factor, overshoot
             FROM permission_rate_limit prl
             INNER JOIN permissions p ON (p.ID = prl.permission_id)
-            ORDER BY p.Level
-        ');
-        return self::$db->to_array('ID', MYSQLI_ASSOC, false);
-    }
-
-    public function save($id, $factor, $overshoot) {
-         self::$db->prepared_query('
-            INSERT INTO permission_rate_limit
-                   (permission_id, factor, overshoot)
-            VALUES (?,             ?,      ?)
-            ', $id, $factor, $overshoot
+            INNER JOIN users_main um ON (um.PermissionID = prl.permission_id)
+            WHERE um.ID = ?
+            ', $this->user->id()
         );
-        return self::$db->affected_rows();
     }
 
-    public function remove($id) {
-         self::$db->prepared_query('
-             DELETE FROM permission_rate_limit WHERE permission_id = ?
-            ', $id
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function safeFactor(\Gazelle\User $user) {
-         self::$db->prepared_query('
+    public function safeFactor(): bool {
+         $classFactor = self::$db->scalar('
             SELECT factor
             FROM permission_rate_limit prl
             INNER JOIN permissions p ON (p.ID = prl.permission_id)
             INNER JOIN users_main um ON (um.PermissionID = prl.permission_id)
             WHERE um.ID = ?
-            ', $user->id()
+            ', $this->user->id()
         );
-        if (!self::$db->has_results()) {
+        if (is_null($classFactor)) {
             return true;
         }
-        list($classFactor) = self::$db->next_record(MYSQLI_NUM, false);
-        return $user->downloadSnatchFactor() <= $classFactor;
+        return $this->user->downloadSnatchFactor() <= $classFactor;
     }
 
-    public function safeOvershoot(\Gazelle\User $user) {
-         self::$db->prepared_query('
+    public function safeOvershoot(): bool {
+         $classOvershoot = self::$db->scalar('
             SELECT overshoot
             FROM permission_rate_limit prl
             INNER JOIN permissions p ON (p.ID = prl.permission_id)
             INNER JOIN users_main um ON (um.PermissionID = prl.permission_id)
             WHERE um.ID = ?
-            ', $user->id()
+            ', $this->user->id()
         );
-        if (!self::$db->has_results()) {
+        if (is_null($classOvershoot)) {
             return true;
         }
-        list($classOvershoot) = self::$db->next_record(MYSQLI_NUM, false);
-        return $user->torrentRecentDownloadCount() <= $classOvershoot;
+        return $this->user->torrentRecentDownloadCount() <= $classOvershoot;
     }
 }
