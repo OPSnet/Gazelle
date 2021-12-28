@@ -1,8 +1,9 @@
 <?php
-/* AJAX Previews, simple stuff. */
+
 Text::$TOC = true;
-if (!empty($_POST['AdminComment'])) {
-    echo Text::full_format($_POST['AdminComment']);
+
+if (!empty($_POST['admincomment'])) {
+    echo Text::full_format($_POST['admincomment']);
 } elseif (!empty($_POST['WikiText'])) {
     echo Text::full_format($_REQUEST['WikiText']);
 } else {

@@ -685,7 +685,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
             <div id="staffnotes" class="pad">
                 <input type="hidden" name="comment_hash" value="<?= $User->info()['CommentHash'] ?>" />
                 <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($User->staffNotes())?></div>
-                <textarea id="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($User->staffNotes())?></textarea>
+                <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($User->staffNotes())?></textarea>
                 <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Toggle edit</a>
                 <script type="text/javascript">
                     resize('admincomment');
