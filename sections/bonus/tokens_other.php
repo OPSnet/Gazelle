@@ -31,30 +31,15 @@ if (isset($_POST['confirm'])) {
         }
     }
 }
-
+$auth = $Viewer->auth();
 View::show_header('Bonus Points - Gift Tokens', ['js' => 'bonus']);
-?>
-<div class="thin">
-    <table>
-        <thead>
-        <tr>
-            <td>Gift Tokens - <?=number_format($Price)?> Points</td>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>
-                <form action="bonus.php?action=purchase&label=<?= $Label ?>" method="post">
-                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-                    <input type="hidden" name="confirm" value="true" />
-                    <input type="text" style="width: 98%" id="user" name="user" placeholder="User"/> <br />
-                    <input type="text" style="width: 98%" id="message" name="message" placeholder="Message"/> <br />
-                    <input type="submit" onclick="ConfirmPurchase(event,'<?=$Item['Title']?>')" value="Submit" />
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
 
-<?php  View::show_footer();
+echo $Twig->render('bonus/token-other.twig', [
+    'auth'     => $auth,
+    'price'    => number_format($Price),
+    'label'    => $Label,
+    'item'     => $Item['Title']
+]);
+
+View::show_footer();
+

@@ -373,7 +373,7 @@ class Bonus extends BaseUser {
     public function sendPmToOther($toID, $amount, $message) {
         (new Manager\User)->sendPM($toID, 0,
             "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
-            self::$twig->render('bonus/token-other.twig', [
+            self::$twig->render('bonus/token-other-message.twig', [
                 'TO'       => (new User($toID))->username(),
                 'FROM'     => $this->user->username(),
                 'AMOUNT'   => $amount,

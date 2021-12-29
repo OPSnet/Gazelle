@@ -23,7 +23,7 @@ switch ($_GET['action'] ?? '') {
                         require_once('tokens.php');
                         break;
                     case 'other-1': case 'other-2': case 'other-3': case 'other-4':
-                        require_once('gift_tokens.php');
+                        require_once('tokens_other.php');
                         break;
                     case 'invite':
                         require_once('invite.php');
