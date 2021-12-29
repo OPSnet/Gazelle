@@ -1,7 +1,5 @@
 <?php
 
-require_once(__DIR__ . '/util.php');
-
 class Text {
     /**
      * Array of valid tags; tag => max number of attributes

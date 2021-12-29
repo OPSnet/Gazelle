@@ -7,15 +7,7 @@
  * longer exists.
  */
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/util.php');
-
-$DB    = new DB_MYSQL;
-$Cache = new Gazelle\Cache;
-Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
-$Debug = new Gazelle\Debug($Cache, $DB);
-$Debug->handle_errors();
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 ini_set('max_execution_time', -1);
 

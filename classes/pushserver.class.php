@@ -1,6 +1,5 @@
 <?php
 
-require 'config.php';
 class PushServer {
     private $ListenSocket = false;
     private $State = 1;

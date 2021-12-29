@@ -2,14 +2,7 @@
 
 /* If ever can_leech and RatioWatchEnds get out of synch, no task will catch it */
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/util.php');
-
-$Cache = new Gazelle\Cache;
-$DB    = new DB_MYSQL;
-$Debug = new Gazelle\Debug($Cache, $DB);
-$Debug->handle_errors();
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 ini_set('max_execution_time', -1);
 
@@ -22,7 +15,7 @@ $DB->prepared_query('
 ');
 $users = $DB->to_array('ID', MYSQLI_ASSOC, false);
 
-$tracker = new \Gazelle\Tracker;
+$tracker = new Gazelle\Tracker;
 foreach ($users as $u) {
     $tracker->update_tracker('update_user', ['passkey' => $u['torrent_pass'], 'can_leech' => '1']);
     $DB->prepared_query('

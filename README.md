@@ -1,16 +1,23 @@
 # Gazelle
+
 Gazelle is a web framework geared towards private BitTorrent trackers.
 Although naturally focusing on music, it can be modified for most
-needs. Gazelle is written in PHP, JavaScript, and MySQL.
+needs. Gazelle is written in PHP, Twig, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
 * [Nginx](http://wiki.nginx.org/Main) (recommended)
-* [PHP 7.2+](https://www.php.net/) (required)
+* [PHP 7.4.27+](https://www.php.net/) (required)
 * [NodeJS 12+](https://nodejs.org/en/) (required)
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
 * [procps-ng](http://sourceforge.net/projects/procps-ng/) (recommended)
+
+
+## Gazelle/Ocelot Compile-time Dependencies
+* [Git](http://git-scm.com/) (required)
 * [ocelot](https://github.com/OPSnet/Ocelot)
+* [GCC/G++](http://gcc.gnu.org/) (4.7+ required; 4.8.1+ recommended)
+* [Boost](http://www.boost.org/) (1.55.0+ required)
 
 _Note: This list may not be exhaustive._
 
@@ -23,34 +30,41 @@ depedencies through `pip`:
 
 ## Installation
 
-We provide installation notes [here](docs/INSTALL.txt). These notes are provided as a best effort, and are not guaranteed
-to be fully up-to-date or accurate.
+We provide installation notes [here](docs/INSTALL.txt). These notes are provided
+as a best effort, and are not guaranteed to be fully up-to-date or accurate.
 
-Due to the nature of torrenting, we HIGHLY recommend not trying to run this in production if you are not prepared or knowledgeable
-in setting up servers, proxies, and tuning TCP configs to get proper performance and privacy.
+Due to the nature of torrenting, we HIGHLY recommend not trying to run this in
+production if you are not prepared or knowledgeable in setting up servers,
+proxies, and tuning TCP configs to get proper performance and privacy.
 
-## Gazelle Development
+## Development
 Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
 
-Setup the [ocelot](https://github.com/OPSnet/Ocelot) container image, by doing the following:
+### Ocelot
+The [ocelot](https://github.com/OPSnet/Ocelot) repository is used to build
+build the Ocelot image. To keep things simple, check out the source in a
+sibling directory to Gazelle.
 
 ```bash
 git clone https://github.com/OPSnet/ocelot
 docker build . -t ocelot
 ```
 
-Within the gazelle folder, run the following command:
+### Gazelle
+In the root folder of the Gazelle repository, run the following command:
 
+`docker-compose up`
 
-```bash
-docker-compose up
-```
-
-This will build and pull the needed images to run Gazelle on Debian
-Buster. A volume is mounted from the base of the git repository at
+This will pull and build the needed images to run Gazelle on Debian
+Bullseye. A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
+
+## Going further
+The 'admin' account might not have all the permissions that have
+been added recently. Navigate to the /tools.php?action=permissions
+page and tick everything.
 
 ### Ports
 The following ports are forwarded:
@@ -58,9 +72,8 @@ The following ports are forwarded:
 * 3306 -> 36000 (mysql)
 * 34000 -> 34000 (ocelot)
 
-You can access the site by going to `http://localhost:8080`
+You can access the site by viewing `http://localhost:8080`
 
-## Going further
 You may want to install additional packages:
 * `apt update`
 * `apt install less procps vim`
@@ -89,7 +102,7 @@ the database container:
 ```
     [mysql]
     user = root
-    password = <sekret>
+    password = password
     database = gazelle
 ```
 
@@ -104,7 +117,7 @@ You can run Boris directly:
 
 `docker exec -it $WEBCONT /var/www/boris`
 
-#### Production Mode (not fully baked yet)
+#### Production Mode (not yet fully baked)
 In order to have Docker run the container using the production mode commands
 for both Composer and NPM, run this when powering it up:
 
@@ -116,5 +129,5 @@ questions concerning Gazelle (or any of the repos published by
 Orpheus).
 
 ## Open source
-Open issues at https://github.com/OPSnet.
+Create issues at https://github.com/OPSnet
 Patches welcome!

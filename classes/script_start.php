@@ -11,15 +11,11 @@
 /*------------------------------------------------------*/
 /********************************************************/
 
-$now = microtime(true); //To track how long a page takes to create
-
-require_once(__DIR__ . '/config.php'); //The config contains all site wide configuration information
-require_once(__DIR__ . '/util.php');
-require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 use Gazelle\Util\{Crypto, Irc, Text};
 
-//Deal with dumbasses
+// Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
     die('d14:failure reason40:Invalid .torrent, try downloading again.e');
 }
@@ -33,16 +29,6 @@ if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
 }
 
 ob_start(); //Start a buffer, mainly in case there is a mysql error
-
-$Cache = new Gazelle\Cache;
-$DB    = new DB_MYSQL;
-$Debug = new Gazelle\Debug($Cache, $DB);
-$Debug->setStartTime($now)
-    ->handle_errors()
-    ->set_flag('init');
-
-$Twig = Gazelle\Util\Twig::factory();
-Gazelle\Base::initialize($Cache, $DB, $Twig);
 
 // TODO: reconcile this with log_attempt in login/index.php
 function log_token_attempt(DB_MYSQL $db, int $userId): void {

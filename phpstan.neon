@@ -5,9 +5,9 @@ parameters:
     level: 3
     bootstrapFiles:
         - classes/config.template.php
+        - lib/bootstrap.php
     scanFiles:
-        - classes/util.php
-        - sections/artist/index.php
+        - lib/util.php
     paths:
         - app
         - classes

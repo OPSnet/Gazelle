@@ -1,14 +1,6 @@
 <?php
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/util.php');
-
-$Cache = new Gazelle\Cache;
-$DB    = new DB_MYSQL;
-Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
-$Debug = new Gazelle\Debug($Cache, $DB);
-$Debug->handle_errors();
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 ini_set('max_execution_time', -1);
 
@@ -18,7 +10,7 @@ $offset    = 0;
 $processed = 0;
 $new       = 0;
 
-$filer = new \Gazelle\File\Torrent;
+$filer = new Gazelle\File\Torrent;
 
 while (true) {
     $DB->prepared_query('
