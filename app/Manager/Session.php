@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 class Session extends \Gazelle\Base {
 
-    public function purgeDead(): int {
+    public function purge(): int {
         self::$db->prepared_query("
             SELECT concat('users_sessions_', UserID) as ck
             FROM users_sessions
