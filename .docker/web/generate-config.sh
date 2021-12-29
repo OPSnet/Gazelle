@@ -1,18 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+set -euo pipefail
 
-TARGET=${THIS_DIR}/../../classes/config.php
+LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../lib"
+SOURCE="${LIB_DIR}/config.devel.example.php"
+TARGET="${LIB_DIR}/config.override.php"
 
-if [ -f ${TARGET} ]; then
-    exit 0;
-fi
-
+[ -f ${TARGET} ] && exit 0
 echo "GENERATING GAZELLE CONFIG..."
-echo ""
-sed -Ef $THIS_DIR/generate-config.sed \
-    -e "s/('SQL(LOGIN|_PHINX_USER)', *')/\1${MYSQL_USER}/" \
-    -e "s/('SQL(_PHINX_)?PASS', *')/\1${MYSQL_PASSWORD}/" \
-    ${THIS_DIR}/../../classes/config.template.php > ${TARGET}
-
-echo ""
+(
+    perl -ple 's/""/q{"} . qx(head \/dev\/urandom|tr -dc 0-9A-Za-z|head -c 16) . q{"}/e' "${SOURCE}"
+    date +"define('SITE_LAUNCH_YEAR', %Y);"
+) > "${TARGET}"

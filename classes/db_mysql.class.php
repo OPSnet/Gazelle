@@ -193,7 +193,7 @@ class DB_MYSQL {
 
     public function connect() {
         if (!$this->LinkID) {
-            $this->LinkID = mysqli_connect($this->Server, $this->User, $this->Pass, $this->Database, $this->Port, $this->Socket); // defined in config.php
+            $this->LinkID = mysqli_connect($this->Server, $this->User, $this->Pass, $this->Database, $this->Port, $this->Socket);
             if (!$this->LinkID) {
                 $this->Errno = mysqli_connect_errno();
                 $this->Error = mysqli_connect_error();

@@ -1,31 +1,24 @@
 includes:
-	- phpstan-baseline.neon
+    - phpstan-baseline.neon
 
 parameters:
     level: 3
+    stubFiles:
+        - lib/stub/memcached.stub
     bootstrapFiles:
-        - classes/config.template.php
-        - lib/bootstrap.php
+        - lib/config.php
     scanFiles:
+        - lib/bootstrap.php
         - lib/util.php
     paths:
         - app
         - classes
         - db
+        - scripts
     excludePaths:
-        - classes/pushserver.class.php
-        - design
         - sections
     parallel:
         maximumNumberOfProcesses: 1
-
-    # The ignored error in theory should not occur on PHP 7.3 with php-gd, but
-    # we have had it happen nevertheless on some developer machines. Given its
-    # our only ignored error, we are fine having this error happen optionally
-    # for developers. If we add more ignored errors, we should readdress this
-    # setting, and if the error still occurs for people
-    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        -
-            message: '/(Constant IMG_BMP|Function imagebmp) not found\./'
-            path: app/Image.php
+        # lib/bootstrap.php declares these variables, and thus available everywhere.
+        - '/Variable \$(Cache|DB|Debug|Twig) might not be defined\./'

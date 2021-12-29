@@ -3,7 +3,7 @@
  * This array is the backbone of the reports system.
  * Important thing to note about the array:
  *   1. When coding for a non music site, you need to ensure that the top level of the
- * array lines up with the $Categories array in your config.php.
+ * array lines up with the CATEGORIES array in lib/config.php.
  *   2. The first sub array contains resolves that are present on every report type
  * regardless of category.
  *   3. The only part that shouldn't be self-explanatory is that for the tracks field in

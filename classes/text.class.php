@@ -275,7 +275,7 @@ class Text {
             return false;
         }
         $Host = $URLInfo['host'];
-        if (empty($URLInfo['port']) && ($Host === SITE_HOST || (defined('ALT_SITE_HOST') && $Host === ALT_SITE_HOST))) {
+        if (empty($URLInfo['port']) && in_array($Host, [SITE_HOST, ALT_SITE_HOST])) {
             $URL = '';
             if (!empty($URLInfo['path'])) {
                 $URL .= ltrim($URLInfo['path'], '/'); // Things break if the path starts with '//'
@@ -298,7 +298,7 @@ class Text {
         if (
             !$info
             || empty($info['host'])
-            || ($info['host'] !== SITE_HOST && (!defined('ALT_SITE_HOST') || $info['host'] !== ALT_SITE_HOST))
+            || !in_array($info['host'], [SITE_HOST, ALT_SITE_HOST])
         ) {
             return null;
         }

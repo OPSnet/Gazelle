@@ -4,10 +4,6 @@
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
-use Gazelle\Util\Crypto;
-
-set_include_path(SERVER_ROOT);
-
 $in = fopen($argv[1], 'r');
 
 $row = fgets($in);

@@ -99,7 +99,7 @@ class Donation extends \Gazelle\Base {
         }
 
         // Assign them to the Donor secondary class if it hasn't already been done
-        $inviteForNewDonor = $xbtAmount > 0 ? DONOR_FIRST_INVITE_COUNT * $this->addDonorStatus($UserID) : 0;
+        $inviteForNewDonor = $xbtAmount > 0 ? DONOR_INVITES * $this->addDonorStatus($UserID) : 0;
 
         // Now that their rank and total rank has been set, we can calculate their special rank and invites
         $column = [];

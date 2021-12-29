@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * On a development machine, the php-memcached package is not necesssarily
+ * installed, but it is present in the Docker container. Running phpstan will
+ * therefore complain about "Class 'Memcached' not found/".
+ *
+ * This file addresses that problem.
+ */
+
+class Memcached {
+}
