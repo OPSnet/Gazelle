@@ -33,15 +33,15 @@ if (isset($_POST['username'])) {
 
         if ($user->isEnabled()) {
             $browser = parse_user_agent();
-            $sessionMan = new Gazelle\Session($user->id());
-            $session = $sessionMan->create([
+            $session = new Gazelle\Session($user);
+            $current = $session->create([
                 'keep-logged' => $login->persistent() ? '1' : '0',
                 'browser'     => $browser['Browser'],
                 'os'          => $browser['OperatingSystem'],
                 'ipaddr'      => $user->permitted('site_disable_ip_history') ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
                 'useragent'   => $user->permitted('site_disable_ip_history') ? FAKE_USERAGENT : $_SERVER['HTTP_USER_AGENT'],
             ]);
-            setcookie('session', $sessionMan->cookie($session['SessionID']), [
+            setcookie('session', $session->cookie($current['SessionID']), [
                 'expires'  => $login->persistent() * (time() + 60 * 60 * 24 * 90),
                 'path'     => '/',
                 'secure'   => !DEBUG_MODE,

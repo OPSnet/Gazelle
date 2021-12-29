@@ -200,7 +200,7 @@ if ($_POST['ResetDownloadList'] ?? 0 && $Viewer->permitted('users_edit_reset_key
 }
 
 if ($logoutSession && $Viewer->permitted('users_logout')) {
-    $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\Session($userId))->dropAll() . ")";
+    $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\Session($user))->dropAll() . ")";
 }
 
 if ($flTokens != $cur['FLTokens'] && ($editRatio || $Viewer->permitted('admin_manage_user_fls'))) {
@@ -646,7 +646,7 @@ if ($addedClasses) {
 
 if ($changePassword && $Viewer->permitted('users_edit_password')) {
     $user->updatePassword($_POST['ChangePassword'], '127.0.0.1');
-    (new \Gazelle\Session($userId))->dropAll();
+    (new \Gazelle\Session($user))->dropAll();
 }
 
 if ($newBonusPoints !== false) {

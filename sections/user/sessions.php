@@ -12,19 +12,21 @@ if (!isset($_GET['userid'])) {
     }
 }
 
-$sessionMan = new Gazelle\Session($user->id());
+$session = new Gazelle\Session($user);
 if (isset($_POST['all'])) {
     authorize();
-    $sessionMan->dropAll();
+    $session->dropAll();
+    header('Location: /');
+    exit;
 }
 if (isset($_POST['session'])) {
     authorize();
-    $sessionMan->drop($_POST['session']);
+    $session->drop($_POST['session']);
 }
 
 echo $Twig->render('user/session.twig', [
     'auth'    => $Viewer->auth(),
     'current' => $SessionID,
-    'session' => $sessionMan->loadSessions(),
+    'session' => $session->info(),
     'user'    => $user,
 ]);
