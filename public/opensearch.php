@@ -1,16 +1,12 @@
 <?php
+
 header('Content-type: application/opensearchdescription+xml');
-require_once(__DIR__.'/../classes/config.php');
 
-$SSL = ($_SERVER['SERVER_PORT'] === '443');
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
-$Type = ((!empty($_GET['type']) && in_array($_GET['type'],['torrents','artists','requests','forums','users','wiki','log']))?$_GET['type']:'artists');
-
-/*
-$FH = fopen(SERVER_ROOT.'/favicon.ico','r');
-$Image = base64_encode(fread($FH,filesize(SERVER_ROOT.'/favicon.ico')));
-fclose($FH);
-*/
+$Type = in_array(($_GET['type'] ?? ''), ['torrents','artists','requests','forums','users','wiki','log'])
+    ? $_GET['type']
+    : 'artists';
 
 echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 
@@ -18,7 +14,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
     <ShortName><?=SITE_NAME.' '.ucfirst($Type)?> </ShortName>
     <Description>Search <?=SITE_NAME?> for <?=ucfirst($Type)?></Description>
     <Developer></Developer>
-    <Image width="16" height="16" type="image/x-icon">http<?=($SSL?'s':'')?>://<?=SITE_URL?>/favicon.ico</Image>
+    <Image width="16" height="16" type="image/x-icon<?= SITE_URL ?>/favicon.ico</Image>
 <?php
 switch ($Type) {
     case 'artists':

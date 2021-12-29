@@ -1,35 +1,19 @@
 <?php
 /*-- API Start Class -------------------------------*/
 /*--------------------------------------------------*/
-/* Simplified version of script_start, used for the    */
-/* site API calls                                    */
+/* Simplified version of script_start, used for the */
+/* site API calls                                   */
 /*--------------------------------------------------*/
 /****************************************************/
 
-use Twig\Loader\FilesystemLoader;
-use Twig\Environment;
-
-$now = microtime(true);
-
-//Lets prevent people from clearing feeds
+// Prevent people from clearing feeds
 if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/util.php');
-
-$Cache = new Gazelle\Cache;
-$DB    = new DB_MYSQL;
-$Twig  = Gazelle\Util\Twig::factory();
-Gazelle\Base::initialize($Cache, $DB, $Twig);
-
-$Debug = new Gazelle\Debug($Cache, $DB);
-$Debug->setStartTime($now);
-$Debug->handle_errors();
-
 header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
 header('Content-type: application/json');
-require_once(__DIR__.'/../sections/api/index.php');
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once(__DIR__ . '/../sections/api/index.php');

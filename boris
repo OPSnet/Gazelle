@@ -10,42 +10,20 @@
  *   pcntl_waitpid
  *
  * boris won't function unless these functions are enabled in the PHP interpreter.
- *
- * The following variables are defined:
- *
- *   $db         - database connection
- *   $cache      - memcache connection
- *   $bonus      - \Gazelle\Manager\Bonus instance
- *   $stylesheet - \Gazelle\Stylesheet instance
- *
- * More can be added when implemented.
  */
 
 define('BORIS', 1);
 $_SERVER['HTTP_USER_AGENT'] = 'boris';
 
-require_once(__DIR__ . '/classes/config.php');
-require_once(__DIR__ . '/vendor/autoload.php');
-require_once(__DIR__ . '/classes/util.php');
+require_once(__DIR__ . '/lib/bootstrap.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
-
-$Cache = new Gazelle\Cache;
-$DB = new DB_MYSQL;
-$Twig = new Twig\Environment(
-    new Twig\Loader\FilesystemLoader('templates'),
-    ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
-);
-\Gazelle\Base::initialize($Cache, $DB, $Twig);
-
-$Debug = new \Gazelle\Debug($Cache, $DB);
-$Debug->setStartTime(microtime(true))->handle_errors();
 
 $b = new \Boris\Boris(SITE_NAME . '> ');
 $preload = [
     'cache'       => $Cache,
     'db'          => $DB,
     'debug'       => $Debug,
-    'twig'        => $Twig,
+    'Twig'        => $Twig,
     'bonus'       => new \Gazelle\Manager\Bonus,
     'collMan'     => new \Gazelle\Manager\Collage,
     'forMan'      => new \Gazelle\Manager\Forum,

@@ -7,16 +7,9 @@
  * Usage: remove-upload <admin-id> <torrent-id> [<torrent-id> ...]
  */
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/util.php');
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $Cache = new Gazelle\Cache;
-$Cache->disableLocalCache();
-
-$DB = new DB_MYSQL;
-Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
-
 $torMan = new Gazelle\Manager\Torrent;
 $userMan = new Gazelle\Manager\User;
 

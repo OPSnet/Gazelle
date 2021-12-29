@@ -1,15 +1,6 @@
 <?php
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/util.php');
-
-$Cache = new Gazelle\Cache;
-$Cache->disableLocalCache();
-
-$DB = new DB_MYSQL;
-Gazelle\Base::initialize($Cache, $DB, Gazelle\Util\Twig::factory());
-$Debug = new Gazelle\Debug($Cache, $DB);
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $torMan = new Gazelle\Manager\Torrent;
 $max = $DB->scalar("SELECT max(ID) FROM torrents");
