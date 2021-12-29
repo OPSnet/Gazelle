@@ -31,15 +31,9 @@ if (isset($_POST['confirm'])) {
         }
     }
 }
-$auth = $Viewer->auth();
-View::show_header('Bonus Points - Gift Tokens', ['js' => 'bonus']);
-
 echo $Twig->render('bonus/token-other.twig', [
-    'auth'     => $auth,
+    'auth'     => $Viewer->auth(),
     'price'    => number_format($Price),
     'label'    => $Label,
     'item'     => $Item['Title']
 ]);
-
-View::show_footer();
-
