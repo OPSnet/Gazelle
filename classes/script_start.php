@@ -120,7 +120,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
             header('Location: login.php');
             exit;
         }
-        $session = new Gazelle\Session($Viewer->id());
+        $session = new Gazelle\Session($Viewer);
         if (!$session->valid($SessionID)) {
             $Viewer->logout($SessionID);
             header('Location: login.php');
