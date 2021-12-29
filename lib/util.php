@@ -221,8 +221,10 @@ function parse_user_agent(): array {
 function error($Error, $NoHTML = false, $Log = false) {
     global $Debug, $Viewer;
     require_once(__DIR__ . '/../sections/error/index.php');
-    $Debug->profile($Viewer);
-    die();
+    if (isset($Viewer)) {
+        $Debug->profile($Viewer);
+    }
+    exit;
 }
 
 /**
