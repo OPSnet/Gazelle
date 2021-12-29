@@ -4,21 +4,14 @@ namespace Gazelle\Stats;
 
 class Torrent extends \Gazelle\Base {
 
-    protected $stats;
-    protected $peerStats;
-    protected $busy = false;
+    protected array $stats;
+    protected array $peerStats;
 
-    const CACHE_KEY = 'stats_torrent';
-    const PEER_KEY  = 'stats_peers';
-    const CALC_STATS_LOCK = 'stats_peers_lock';
+    const CACHE_KEY = 'stats_global_torrent';
+    const PEER_KEY  = 'stats_global_peer';
 
     public function __construct() {
-        $stats = self::$cache->get_value(self::CACHE_KEY);
-        if ($this->stats === false) {
-            $this->stats = $this->init();
-        } else {
-            $this->stats = $stats;
-        }
+        $this->stats = self::$cache->get_value(self::CACHE_KEY) ?: $this->init();
     }
 
     public function torrentCount() { return $this->stats['torrent-count']; }
@@ -193,53 +186,37 @@ class Torrent extends \Gazelle\Base {
         return $count;
     }
 
-    public function leecherCount() {
-        return $this->busy ? 'Server busy' : $this->peerStats()['leecher_count'];
+    public function leecherCount(): int {
+        return $this->peerStats()['leech_total'];
     }
 
-    public function seederCount() {
-        return $this->busy ? 'Server busy' : $this->peerStats()['seeder_count'];
+    public function seederCount(): int {
+        return $this->peerStats()['seeding_total'];
     }
 
-    public function peerCount() {
-        return $this->busy ? 'Server busy' : $this->peerStats()['leecher_count'] + $this->peerStats()['seeder_count'];
+    public function peerCount(): int {
+        return $this->leecherCount() + $this->seederCount();
     }
 
-    protected function peerStats(): array {
-        if ($this->peerStats) {
+    public function peerStats(): array {
+        if (!empty($this->peerStats)) {
             return $this->peerStats;
         }
-        $this->peerStats = self::$cache->get_value(self::PEER_KEY);
-        if ($this->peerStats !== false && isset($this->peerStats['leecher_count'])) {
-            return $this->peerStats;
+        $stats = self::$cache->get_value(self::PEER_KEY);
+        if ($stats === false) {
+            $stats = self::$db->rowAssoc("
+                SELECT sum(leech_total) AS leech_total,
+                    sum(seeding_total) AS seeding_total
+                FROM user_summary
+            ");
+            if ($stats) {
+                $stats = array_map(fn($n) => (int)$n, $stats);
+            } else {
+                $stats = ['leech_total' => 0, 'seeding_total' => 0];
+            }
+            self::$cache->cache_value(self::PEER_KEY, $stats, 3600);
         }
-        $this->busy = (bool)self::$cache->get_value(self::CALC_STATS_LOCK);
-        if ($this->busy) {
-            return [];
-        }
-        self::$cache->cache_value(self::CALC_STATS_LOCK, 1, 30);
-        self::$db->prepared_query("
-            SELECT if(remaining = 0, 'Seeding', 'Leeching') AS Type,
-                count(uid)
-            FROM xbt_files_users
-            WHERE active = 1
-            GROUP BY Type
-        ");
-        $stats = self::$db->to_array(0, MYSQLI_NUM, false);
-        if (count($stats)) {
-            $this->peerStats = [
-                'leecher_count' => $stats['Leeching'][1],
-                'seeder_count'  => $stats['Seeding'][1],
-            ];
-        } else {
-            $this->peerStats = [
-                'leecher_count' => 0,
-                'seeder_count'  => 0,
-            ];
-        }
-        self::$cache->cache_value(self::PEER_KEY, $this->peerStats, 86400 * 2);
-        self::$cache->delete_value(self::CALC_STATS_LOCK);
-        $this->busy = false;
+        $this->peerStats = $stats;
         return $this->peerStats;
     }
 }
