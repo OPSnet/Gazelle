@@ -309,7 +309,7 @@ class UserCreator extends Base {
     }
 
     /**
-     * Create salted crypt hash for a given string
+     * Create a password hash of a plaintext password.
      */
     static public function hashPassword(string $plaintext): string {
         return password_hash(hash('sha256', $plaintext), PASSWORD_DEFAULT);

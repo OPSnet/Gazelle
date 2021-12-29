@@ -11,14 +11,16 @@
 /*------------------------------------------------------*/
 /********************************************************/
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
-
-use Gazelle\Util\{Crypto, Irc, Text};
+use Gazelle\Util\Crypto;
+use Gazelle\Util\Irc;
+use Gazelle\Util\Text;
 
 // Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
     die('d14:failure reason40:Invalid .torrent, try downloading again.e');
 }
+
+require_once('../lib/bootstrap.php');
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
@@ -146,8 +148,6 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 }
 
 if (!is_null($Viewer)) {
-    $viewerId = $Viewer->id();
-
     // Change necessary triggers in external components
     if ($Viewer->permitted('admin_clear_cache')) {
         $Cache->enableCacheClear();

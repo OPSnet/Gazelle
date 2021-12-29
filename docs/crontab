@@ -1,0 +1,7 @@
+# These are our cron jobs.
+# Replace SCHEDULE_KEY with the value referenced in lib/config.php / lib/config.override.php
+
+0,15,30,45  *   * * * /usr/bin/php /var/www/scripts/schedule.php SCHEDULE_KEY >> /root/schedule.log
+10,25,40,55 *   * * * /usr/bin/php /var/www/scripts/peerupdate.php SCHEDULE_KEY >> /root/peerupdate.log
+*           *   * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate delta requests_delta log_delta >/dev/null
+5           */2 * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate --all >>/root/sphinx-indexer.log

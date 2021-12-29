@@ -1,6 +1,7 @@
 <?php
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
+$Cache->disableLocalCache();
 
 $torMan = new Gazelle\Manager\Torrent;
 $max = $DB->scalar("SELECT max(ID) FROM torrents");

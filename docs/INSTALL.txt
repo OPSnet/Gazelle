@@ -1,72 +1,79 @@
 INSTALLATION NOTES
 
-Note: We make no guarantee of completeness or accuracy of these install notes. The most up-to-date notes on a basic
-install setup is found through our docker-compose.yml setup we use for development. Please reference it before asking
-questions.
+Note: We make no guarantee of completeness or accuracy of these install notes.
+The most up-to-date notes on a basic install setup is found through our
+docker-compose.yml setup we use for development. Please reference it before
+asking questions.
 
-Note: If overwhelmed by the these instructions, we urge you to NOT run a tracker in production. Doing such requires
-more additional steps not covered here (setting up proxies, tunneling, LUKS encryption, TCP tuning, etc.) that messing
+Note: If overwhelmed by the these instructions, we urge you to NOT run a tracker
+in production. Doing such requires more additional steps not covered here
+(setting up proxies, tunneling, LUKS encryption, TCP tuning, etc.) that messing
 up would put the privacy / security of both yourself and your users at risk.
 
-1. Install the PHP and JS dependencies to run / setup the site:
+The docker installation does all this for you, but in production you need
+to do this by hand.
+
+1. First, install the PHP and JS dependencies to setup and run the site.
 
 composer install
 yarn install
 
-2. First, you will need to setup the following services:
+2. Install and setup the following services:
     * MySQL
     * memcached
     * sphinxsearch
 
 Depending on your OS, these may be available in the package manager. You can see
-what versions of the above we support by looking at our [docker-compose.yml](../docker-compose.yml)
+what versions of the above we support by looking at our docker-compose.yml
 configuration.
 
-For setting up memcached, we recommend giving it multiple threads and several GB of RAM, for example:
+3. For up memcached, we recommend giving it multiple threads and several
+   gigs of RAM, for example:
 
     memcached -d -m 5120 -s /var/run/memcached.sock -a 0777 -t4 -C -u nobody
 
-This will give memcached 4 threads and 5GB of RAM. Tune this accordingly depending on how large your server
-is, and traffic you get, but a the more RAM you give memcached, the quicker Gazelle will run as it heavily
-relies on caching.
+This will give memcached 4 threads and 5GB of RAM. Tune this accordingly
+depending on how large your server and how many users you have. Look at
+your cache eviction. If you are seeing hundreds of items evicted per second,
+you need to scale up drastically. If you are seeing zero evictions, you
+have allocated too much RAM and should scale down. Ideally you should only
+see expired unfetched activity.
 
-For sphinxsearch, we recommend you use the included sphinx.conf which can be found under .docker/sphinxsearch/sphinx.conf.
-You can copy this to /etc/sphinx/sphinx.conf. You need to fill in the details of the SQL server though!
+4. Create the required Mysql roles according to 01-MysqlRoles.txt
+   Use www.random.org to generate passwords.
 
-You might also need to create the /var/lib/sphinx folder.
+5. Review lib/config.php. Edit lib/config.override.php as needed.
+   You should be able to launch boris from the command line.
 
-For documentation, read http://www.sphinxsearch.com/docs/current.html
-
-After you've installed sphinx, create the indices:
-
-    /usr/bin/indexer -c /etc/sphinx/sphinx.conf --all
-
-3. Configure config variables. First, you will want to copy over the template file ([classes/config.template.php](../classes/config.template.php))
-to `classes/config.php`, and then go through and configure to your needs. See the comments within that file on what you will need to change.
-
-
-4. After configuring the config.php file in the step above (or minimially the SQL* variables), you can use phinx to setup your DB by running:
+6. Run the phinx migrations and seeds to populate the database.
 
     vendor/bin/phinx migrate
 
-5. Generate stylesheets and their previews by running the following:
+7. Configure Sphinx - we recommend you use the included .docker/sphinxsearch/sphinx.conf
+   You can copy this to /etc/sphinx/sphinx.conf. You need to fill in the
+   details of the SQL server from lib/config.override.php and you may need to
+   create the `/var/lib/sphinx` folder.
+
+   More information is available at: https://sphinxsearch.com/docs/current.html
+
+   Run the indexer to finish the setup:
+
+   /usr/bin/indexer -c /etc/sphinx/sphinx.conf --all
+
+8. Generate stylesheets and their previews by running the following:
 
     yarn build
 
-Note, to generate the previews requires a chrome instance to be installed onto the computer.
+Note, generating the previews requires a Chrome instance on the host.
 
-6. Setup your web server. We recommend using nginx (https://www.nginx.com/). A sample configuration for nginx can be found in .docker/web/nginx.conf.
+9. Setup your web server. We recommend using nginx (https://www.nginx.com/).
+   A sample configuration for nginx can be found in .docker/web/nginx.conf.
 
-7. Sign up. The first user is made a SysOp!
+10. Set up cron jobs. You need a cron job for the scheduler, a cron job for
+   the peerupdate (all groups are cached, but the peer counts change often,
+   so peerupdate is a script to update them), and the two Sphinx indices.
 
-8. Set up cron jobs. You need a cron job for the schedule, a cron job for the peerupdate (all groups are cached, but the peer counts change often,
-so peerupdate is a script to update them), and the two Sphinx indices. These are our cron jobs. SCHEDULE_KEY is the same as in classes/config.php:
+   see docs/crontab
 
-0,15,30,45 *    *       *       *       /usr/bin/php /var/www/vhosts/what/schedule.php SCHEDULE_KEY >> /root/schedule.log
-10,25,40,55 *  *        *       *       /usr/bin/php /var/www/vhosts/what/peerupdate.php SCHEDULE_KEY >> /root/peerupdate.log
-*       *       *       *       *       /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate delta requests_delta log_delta >/dev/null
-5       0,12    *       *       *       /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate --all >>/root/sphinx-indexer.log
-
-An example cron script can be seen in .docker/web/crontab
-
-9. Start modifying stuff. Hopefully, everything will have gone smoothly so far and nothing will have exploded (ha ha ha)
+11. Start modifying stuff. Hopefully, everything will have gone smoothly so far
+   and nothing will have exploded (ha ha ha)

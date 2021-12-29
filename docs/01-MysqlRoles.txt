@@ -25,7 +25,7 @@ These mysql roles should be configured with different passwords and used in
 the following places:
 
     /etc/sphinxsearch/sphinx.conf
-    /var/www/gazelle/classes/config.php
+    /var/www/gazelle/lib/config.override.php
     /var/www/ocelot/ocelot.conf
 
 In practice, the roles will probably have specific IP addresses. localhost

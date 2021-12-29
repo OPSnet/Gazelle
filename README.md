@@ -19,6 +19,11 @@ needs. Gazelle is written in PHP, Twig, JavaScript, and MySQL.
 * [GCC/G++](http://gcc.gnu.org/) (4.7+ required; 4.8.1+ recommended)
 * [Boost](http://www.boost.org/) (1.55.0+ required)
 
+## Gazelle/Ocelot Compile-time Dependencies
+* [Git](http://git-scm.com/) (required)
+* [GCC/G++](http://gcc.gnu.org/) (4.7+ required; 4.8.1+ recommended)
+* [Boost](http://www.boost.org/) (1.55.0+ required)
+
 _Note: This list may not be exhaustive._
 
 ## Logchecker
@@ -61,7 +66,14 @@ Bullseye. A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
 
-## Going further
+You can access the site by viewing `http://localhost:8080`
+
+The first account is 'admin' and has the highest level of  access
+to the site installation. The second account is 'user' and has
+standard user access. The passwords for both accounts are literally
+'password' (without the quotes). If you want to change these before
+building, edit db/seeds/InitialUserSeeder.php first.
+
 The 'admin' account might not have all the permissions that have
 been added recently. Navigate to the /tools.php?action=permissions
 page and tick everything.
@@ -72,8 +84,7 @@ The following ports are forwarded:
 * 3306 -> 36000 (mysql)
 * 34000 -> 34000 (ocelot)
 
-You can access the site by viewing `http://localhost:8080`
-
+## Going further
 You may want to install additional packages:
 * `apt update`
 * `apt install less procps vim`

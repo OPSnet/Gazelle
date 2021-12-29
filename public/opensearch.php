@@ -2,7 +2,7 @@
 
 header('Content-type: application/opensearchdescription+xml');
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once(__DIR__ . '/../lib/config.php');
 
 $Type = in_array(($_GET['type'] ?? ''), ['torrents','artists','requests','forums','users','wiki','log'])
     ? $_GET['type']

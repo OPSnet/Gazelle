@@ -24,7 +24,7 @@ __MACOSX/
 /public/static/font/
 /public/static/local/
 /vendor
-/classes/config.php
+/lib/config.override.php
 /mix-manifest.json
 /mix.js.map
 /yarn-error.log

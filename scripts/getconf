@@ -14,7 +14,7 @@
  *    try it :)
  */
 
-require_once(__DIR__ . '/../classes/config.php');
+require_once(__DIR__ . '/../lib/config.php');
 
 array_shift($argv);
 $multi = count($argv) > 1;

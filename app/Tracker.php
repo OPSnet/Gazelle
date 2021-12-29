@@ -115,7 +115,7 @@ class Tracker {
      * @return array with stats in named keys or empty if the request failed
      */
     private function get_stats($Type, $Params = false): array {
-        if (!TRACKER_REPORTKEY) {
+        if (DISABLE_TRACKER) {
             return [];
         }
         $Get = TRACKER_REPORTKEY . '/report?';
