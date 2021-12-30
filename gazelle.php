@@ -21,7 +21,6 @@ $Valid = false;
 switch ($Document) {
     case 'peerupdate':
     /** @noinspection PhpMissingBreakStatementInspection */
-    case 'schedule':
         define('MEMORY_EXCEPTION', true);
         define('TIME_EXCEPTION', true);
     case 'artist':

@@ -161,12 +161,12 @@ class View {
             }
         }
 
-        if ($Viewer->permitted('admin_schedule')) {
+        if ($Viewer->permitted('admin_periodic_task_view')) {
             global $DB;
             $lastSchedulerRun = $DB->scalar("
                 SELECT now() - max(launch_time) FROM periodic_task_history
             ");
-            if ($lastSchedulerRun > 300) {
+            if ($lastSchedulerRun > SCHEDULER_DELAY) {
                 $activity->setAlert('<span style="color: red">Scheduler not running</span>');
             }
         }

@@ -392,6 +392,10 @@ defined('USER_TORRENT_DELETE_MAX') or define('USER_TORRENT_DELETE_MAX', 3);
 // How long a break must a user take if they delete too many torrents?
 defined('USER_TORRENT_DELETE_HOURS') or define('USER_TORRENT_DELETE_HOURS', 24);
 
+// How many seconds should elapse before alerting that the scheduler is not running?
+// Hint: check the crond service
+defined('SCHEDULER_DELAY') or define('SCHEDULER_DELAY', 300);
+
 // Which image hosts are acceptable and which aren't?
 defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', ['badhost.example.com']);
 defined('IMAGE_HOST_RECOMMENDED') or define('IMAGE_HOST_RECOMMENDED', ['goodhost.example.com']);
