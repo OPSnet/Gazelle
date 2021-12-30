@@ -15,7 +15,8 @@ define('STORAGE_PATH_TORRENT',    '/var/lib/gazelle/torrent');
 define('STORAGE_PATH_RIPLOG',     '/var/lib/gazelle/riplog');
 define('STORAGE_PATH_RIPLOGHTML', '/var/lib/gazelle/riploghtml');
 
-define('TRACKER_HOST', 'tracker.example.com');
+define('TRACKER_HOST', '10.0.0.2');
+define('TRACKER_NAME', 'tracker.example.com');
 define('TRACKER_PORT', 12345);
 
 define('SQLHOST', '10.0.0.1');
