@@ -764,8 +764,8 @@ if (!$IsNewGroup) {
     $Cache->deleteMulti([
         "torrent_group_$GroupID",
         "detail_files_$GroupID",
-        sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),
-        sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $groupId),
+        sprintf(\Gazelle\TGroup::CACHE_KEY, $GroupID),
+        sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $GroupID),
     ]);
 }
 
