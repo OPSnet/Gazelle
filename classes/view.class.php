@@ -154,6 +154,23 @@ class View {
             }
         }
 
+        if ($Viewer->permitted('admin_site_debug')) {
+            $longRunning = (new Gazelle\DB)->longRunning();
+            if ($longRunning > 0) {
+                $activity->setAlert('<span style="color: red">' . $longRunning . ' DB operation' . plural($longRunning) . ' running.</span>');
+            }
+        }
+
+        if ($Viewer->permitted('admin_schedule')) {
+            global $DB;
+            $lastSchedulerRun = $DB->scalar("
+                SELECT now() - max(launch_time) FROM periodic_task_history
+            ");
+            if ($lastSchedulerRun > 300) {
+                $activity->setAlert('<span style="color: red">Scheduler not running</span>');
+            }
+        }
+
         if (OPEN_EXTERNAL_REFERRALS) {
             if ($Viewer->permitted('admin_site_debug')) {
                 if (!apcu_exists('DB_KEY') || !apcu_fetch('DB_KEY')) {

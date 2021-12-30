@@ -117,4 +117,16 @@ class DB extends Base {
 
         return [$page, $pageSize, $pageSize * ($page - 1)];
     }
+
+    /**
+     * How many queries have been runnning for more than 20 minutes?
+     */
+    public function longRunning(): int {
+        return self::$db->scalar("
+            SELECT count(*)
+            FROM information_schema.processlist
+            WHERE COMMAND NOT IN ('Sleep')
+                AND TIME > 1200;
+        ");
+    }
 }
