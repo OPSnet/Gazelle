@@ -120,7 +120,7 @@ while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason,
                                     }
                                     break;
                                 case 'collage':
-                                    $collage = (Gazelle\Manager\Collage)->findById($ThingID);
+                                    $collage = (new Gazelle\Manager\Collage)->findById($ThingID);
                                     if (is_null($collage)) {
                                         echo 'No collage with the reported ID found';
                                     } else {
