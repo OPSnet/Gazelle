@@ -387,6 +387,10 @@ class Torrent extends BaseObject {
         return $this->info()['PersonalFL'];
     }
 
+    public function isNeutralleech(): bool {
+        return $this->info()['FreeTorrent'] == '2';
+    }
+
     /**
      * Is this a remastered release?
      */

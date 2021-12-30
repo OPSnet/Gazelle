@@ -6,9 +6,9 @@ if (empty($_GET['order_by']) || !isset(Gazelle\Search\Torrent::$SortOrders[$_GET
     $OrderBy = $_GET['order_by'];
 }
 $OrderWay = ($_GET['order_way'] ?? 'desc');
-
-$GroupResults = !isset($_GET['group_results']) || $_GET['group_results'] != '0';
+$GroupResults = ($_GET['group_results'] ?? '1') != '0';
 $Page = (int)($_GET['page'] ?? 1);
+
 $Search = new Gazelle\Search\Torrent(
     $GroupResults,
     $OrderBy,
@@ -17,8 +17,7 @@ $Search = new Gazelle\Search\Torrent(
     TORRENTS_PER_PAGE,
     $Viewer->permitted('site_search_many')
 );
-$Results = $Search->query($_GET);
-$Groups = $Search->get_groups();
+$Results    = $Search->query($_GET);
 $NumResults = $Search->record_count();
 if (!$Viewer->permitted('site_search_many')) {
     $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
@@ -34,200 +33,129 @@ if ($NumResults == 0) {
     ]);
 }
 
-$bookmark = new Gazelle\Bookmark($Viewer);
+$bookmark   = new Gazelle\Bookmark($Viewer);
 $releaseMan = new Gazelle\ReleaseType;
+$tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setViewer($Viewer);
 $JsonGroups = [];
 foreach ($Results as $Key => $GroupID) {
-    $GroupInfo = $Groups[$GroupID];
-    if (empty($GroupInfo['Torrents'])) {
+    $tgroup = $tgMan->findById($GroupID);
+    if (is_null($tgroup)) {
         continue;
     }
-    $CategoryID = $GroupInfo['CategoryID'];
-    $GroupYear = $GroupInfo['Year'];
-    $ExtendedArtists = $GroupInfo['ExtendedArtists'];
-    $GroupCatalogueNumber = $GroupInfo['CatalogueNumber'];
-    $GroupName = $GroupInfo['Name'];
-    $GroupRecordLabel = $GroupInfo['RecordLabel'];
-    $ReleaseType = $GroupInfo['ReleaseType'];
+    $Torrents = [];
     if ($GroupResults) {
-        $Torrents = $GroupInfo['Torrents'];
-        $GroupTime = $MaxSize = $TotalLeechers = $TotalSeeders = $TotalSnatched = 0;
-        foreach ($Torrents as $T) {
-            $GroupTime = max($GroupTime, strtotime($T['Time']));
-            $MaxSize = max($MaxSize, $T['Size']);
-            $TotalLeechers += $T['Leechers'];
-            $TotalSeeders += $T['Seeders'];
-            $TotalSnatched += $T['Snatched'];
+        $torrentIdList = $tgroup->torrentIdList();
+        $GroupTime = 0;
+        $MaxSize   = 0;
+        foreach ($torrentIdList as $torrentId) {
+            $torrent = $torMan->findById($torrentId);
+            if (is_null($torrent)) {
+                continue;
+            }
+            $GroupTime  = max($GroupTime, strtotime($torrent->uploadDate()));
+            $MaxSize    = max($MaxSize, $torrent->size());
+            $Torrents[] = $torrent;
         }
     } else {
-        $TorrentID = $Key;
-        $Torrents = [$TorrentID => $GroupInfo['Torrents'][$TorrentID]];
-    }
-
-    $TagList = explode(' ', $GroupInfo['TagList']);
-    $JsonArtists = [];
-    if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
-        unset($ExtendedArtists[2]);
-        unset($ExtendedArtists[3]);
-        $DisplayName = Artists::display_artists($ExtendedArtists, false, false, false);
-        foreach ($ExtendedArtists[1] as $Artist) {
-            $JsonArtists[] = [
-                'id' => (int)$Artist['id'],
-                'name' => $Artist['name'],
-                'aliasid' => (int)$Artist['aliasid']];
+        $torrent = $torMan->findById($Key);
+        if ($torrent) {
+            $Torrents[] = $torrent;
         }
-    } else {
-        $DisplayName = '';
     }
-    if ($GroupResults && (count($Torrents) > 1 || isset(CATEGORY_GROUPED[$CategoryID - 1]))) {
-        // These torrents are in a group
-        $LastRemasterYear = '-';
-        $LastRemasterTitle = '';
-        $LastRemasterRecordLabel = '';
-        $LastRemasterCatalogueNumber = '';
-        $LastMedia = '';
 
+    $TagList = array_values($tgroup->tagNameList());
+    $JsonArtists = (new Gazelle\ArtistRole\TGroup($tgroup->id()))->rolelist()['main'];
+
+    if ($GroupResults && (count($Torrents) > 1 || $tgroup->categoryGrouped())) {
+        $prev = false;
         $EditionID = 0;
         unset($FirstUnknown);
 
         $JsonTorrents = [];
-        foreach ($Torrents as $TorrentID => $Data) {
-            // All of the individual torrents in the group
-            $torrent = $torMan->findById($TorrentID);
-            if (is_null($torrent)) {
-                continue;
-            }
+        foreach ($Torrents as $torrent) {
+            $current = $torrent->remasterTuple();
 
-            if ($Data['Remastered'] && !$Data['RemasterYear']) {
+            if ($torrent->isRemasteredUnknown()) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-
-            if (isset(CATEGORY_GROUPED[$CategoryID - 1])
-                    && ($Data['RemasterTitle'] != $LastRemasterTitle
-                        || $Data['RemasterYear'] != $LastRemasterYear
-                        || $Data['RemasterRecordLabel'] != $LastRemasterRecordLabel
-                        || $Data['RemasterCatalogueNumber'] != $LastRemasterCatalogueNumber)
-                    || (isset($FirstUnknown) && $FirstUnknown)
-                    || $Data['Media'] != $LastMedia) {
+            if ($tgroup->categoryGrouped() && ($prev != $current || (isset($FirstUnknown) && $FirstUnknown))) {
                 $EditionID++;
-
-                if ($Data['Remastered'] && $Data['RemasterYear'] != 0) {
-
-                    $RemasterName = $Data['RemasterYear'];
-                    $AddExtra = ' - ';
-                    if ($Data['RemasterRecordLabel']) {
-                        $RemasterName .= $AddExtra.display_str($Data['RemasterRecordLabel']);
-                        $AddExtra = ' / ';
-                    }
-                    if ($Data['RemasterCatalogueNumber']) {
-                        $RemasterName .= $AddExtra.display_str($Data['RemasterCatalogueNumber']);
-                        $AddExtra = ' / ';
-                    }
-                    if ($Data['RemasterTitle']) {
-                        $RemasterName .= $AddExtra.display_str($Data['RemasterTitle']);
-                        $AddExtra = ' / ';
-                    }
-                    $RemasterName .= $AddExtra.display_str($Data['Media']);
-                } else {
-                    $AddExtra = ' / ';
-                    if (!$Data['Remastered']) {
-                        $MasterName = 'Original Release';
-                        if ($GroupRecordLabel) {
-                            $MasterName .= $AddExtra.$GroupRecordLabel;
-                            $AddExtra = ' / ';
-                        }
-                        if ($GroupCatalogueNumber) {
-                            $MasterName .= $AddExtra.$GroupCatalogueNumber;
-                            $AddExtra = ' / ';
-                        }
-                    } else {
-                        $MasterName = 'Unknown Release(s)';
-                    }
-                    $MasterName .= $AddExtra.display_str($Data['Media']);
-                }
             }
-            $LastRemasterTitle = $Data['RemasterTitle'];
-            $LastRemasterYear = $Data['RemasterYear'];
-            $LastRemasterRecordLabel = $Data['RemasterRecordLabel'];
-            $LastRemasterCatalogueNumber = $Data['RemasterCatalogueNumber'];
-            $LastMedia = $Data['Media'];
+            $prev = $current;
 
             $JsonTorrents[] = [
-                'torrentId' => (int)$TorrentID,
-                'editionId' => (int)$EditionID,
-                'artists' => $JsonArtists,
-                'remastered' => $Data['Remastered'] == '1',
-                'remasterYear' => (int)$Data['RemasterYear'],
-                'remasterCatalogueNumber' => $Data['RemasterCatalogueNumber'],
-                'remasterTitle' => $Data['RemasterTitle'],
-                'media' => $Data['Media'],
-                'encoding' => $Data['Encoding'],
-                'format' => $Data['Format'],
-                'hasLog' => $Data['HasLog'] == '1',
-                'logScore' => (int)$Data['LogScore'],
-                'hasCue' => $Data['HasCue'] == '1',
-                'scene' => $Data['Scene'] == '1',
-                'vanityHouse' => $GroupInfo['VanityHouse'] == '1',
-                'fileCount' => (int)$Data['FileCount'],
-                'time' => $Data['Time'],
-                'size' => (int)$Data['Size'],
-                'snatches' => (int)$Data['Snatched'],
-                'seeders' => (int)$Data['Seeders'],
-                'leechers' => (int)$Data['Leechers'],
-                'isFreeleech' => $Data['FreeTorrent'] == '1',
-                'isNeutralLeech' => $Data['FreeTorrent'] == '2',
-                'isPersonalFreeleech' => $Data['PersonalFL'],
-                'canUseToken' => $Viewer->canSpendFLToken($torrent),
-                'hasSnatched' => $torrent->isSnatched($Viewer->id()),
+                'torrentId'      => $torrent->id(),
+                'editionId'      => $EditionID,
+                'artists'        => $JsonArtists,
+                'remastered'     => $torrent->isRemastered(),
+                'remasterYear'   => $torrent->remasterYear(),
+                'remasterRecordLabel'
+                                 => $torrent->remasterRecordLabel() ?? '',
+                'remasterCatalogueNumber'
+                                 => $torrent->remasterCatalogueNumber() ?? '',
+                'remasterTitle'  => $torrent->remasterTitle() ?? '',
+                'media'          => $torrent->media(),
+                'format'         => $torrent->format(),
+                'encoding'       => $torrent->encoding(),
+                'hasLog'         => $torrent->hasLog(),
+                'logScore'       => $torrent->logScore(),
+                'hasCue'         => $torrent->hasCue(),
+                'scene'          => $torrent->isScene(),
+                'vanityHouse'    => $tgroup->isShowcase(),
+                'fileCount'      => $torrent->fileTotal(),
+                'time'           => $torrent->uploadDate(),
+                'size'           => $torrent->size(),
+                'snatches'       => $torrent->snatchTotal(),
+                'seeders'        => $torrent->seederTotal(),
+                'leechers'       => $torrent->leecherTotal(),
+                'isFreeleech'    => $torrent->isFreeleech(),
+                'isNeutralLeech' => $torrent->isNeutralLeech(),
+                'isPersonalFreeleech'
+                                 => $torrent->isFreeleechPersonal(),
+                'canUseToken'    => $Viewer->canSpendFLToken($torrent),
+                'hasSnatched'    => $torrent->isSnatched($Viewer->id()),
             ];
         }
 
         $JsonGroups[] = [
-            'groupId' => (int)$GroupID,
-            'groupName' => $GroupName,
-            'artist' => $DisplayName,
-            'cover' => $GroupInfo['WikiImage'],
-            'tags' => $TagList,
-            'bookmarked' => $bookmark->isTorrentBookmarked($GroupID),
-            'vanityHouse' => $GroupInfo['VanityHouse'] == '1',
-            'groupYear' => (int)$GroupYear,
-            'releaseType' => $releaseMan->findNameById($ReleaseType),
-            'groupTime' => (string)$GroupTime,
-            'maxSize' => (int)$MaxSize,
-            'totalSnatched' => (int)$TotalSnatched,
-            'totalSeeders' => (int)$TotalSeeders,
-            'totalLeechers' => (int)$TotalLeechers,
-            'torrents' => $JsonTorrents
+            'groupId'       => $tgroup->id(),
+            'groupName'     => $tgroup->name(),
+            'artist'        => $tgroup->artistName(),
+            'cover'         => $tgroup->image(),
+            'tags'          => $TagList,
+            'bookmarked'    => $bookmark->isTorrentBookmarked($tgroup->id()),
+            'vanityHouse'   => $tgroup->isShowcase(),
+            'groupYear'     => $tgroup->year(),
+            'releaseType'   => $tgroup->releaseTypeName() ?? '',
+            'groupTime'     => (string)$GroupTime,
+            'maxSize'       => $MaxSize,
+            'totalSnatched' => $tgroup->stats()->snatchTotal(),
+            'totalSeeders'  => $tgroup->stats()->seedingTotal(),
+            'totalLeechers' => $tgroup->stats()->leechTotal(),
+            'torrents'      => $JsonTorrents,
         ];
     } else {
         // Viewing a type that does not require grouping
-        $TorrentID = key($Torrents);
-        $Data = current($Torrents);
-        $torrent = $torMan->findById($TorrentID);
-        if (is_null($torrent)) {
-            continue;
-        }
-
         $JsonGroups[] = [
-            'groupId' => (int)$GroupID,
-            'groupName' => $GroupName,
-            'torrentId' => (int)$TorrentID,
-            'tags' => $TagList,
-            'category' => CATEGORY[$CategoryID - 1],
-            'fileCount' => (int)$Data['FileCount'],
-            'groupTime' => (string)strtotime($Data['Time']),
-            'size' => (int)$Data['Size'],
-            'snatches' => (int)$Data['Snatched'],
-            'seeders' => (int)$Data['Seeders'],
-            'leechers' => (int)$Data['Leechers'],
-            'isFreeleech' => $Data['FreeTorrent'] == '1',
-            'isNeutralLeech' => $Data['FreeTorrent'] == '2',
-            'isPersonalFreeleech' => $Data['PersonalFL'],
-            'canUseToken' => $Viewer->canSpendFLToken($torrent),
-            'hasSnatched' => $torrent->isSnatched($Viewer->id()),
+            'groupId'        => $tgroup->id(),
+            'groupName'      => $tgroup->name(),
+            'torrentId'      => (int)$TorrentID,
+            'tags'           => $TagList,
+            'category'       => $tgroup->categoryName(),
+            'fileCount'      => $torrent->fileTotal(),
+            'groupTime'      => $torrent->uploadDate(),
+            'size'           => $torrent->size(),
+            'snatches'       => $torrent->snatchTotal(),
+            'seeders'        => $torrent->seederTotal(),
+            'leechers'       => $torrent->leecherTotal(),
+            'isFreeleech'    => $torrent->isFreeleech(),
+            'isNeutralLeech' => $torrent->isNeutralLeech(),
+            'isPersonalFreeleech'
+                             => $torrent->isFreeleechPersonal(),
+            'canUseToken'    => $Viewer->canSpendFLToken($torrent),
+            'hasSnatched'    => $torrent->isSnatched($Viewer->id()),
         ];
     }
 }
