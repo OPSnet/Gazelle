@@ -141,10 +141,12 @@ class TGroup extends BaseObject {
         if (!$revisionId) {
             $cached = self::$cache->get_value($key);
             if (is_array($cached)) {
+                $refresh = false;
                 if (!isset($cached['Image'])) {
                     $cached['Image'] = $this->showFallbackImage
                         ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])
                         : null;
+                    $refresh = true;
                 }
                 $cached['Flags'] = [
                     'IsSnatched' => $this->fetchIsSnatched(),
@@ -153,6 +155,22 @@ class TGroup extends BaseObject {
                     $artistRole = new ArtistRole\TGroup($this->id);
                     $cached['artist'] = $artistRole->roleList();
                     $cached['role_id'] = $artistRole->idList();
+                    $refresh = true;
+                }
+                if (!isset($cached['torrent_list'])) {
+                    self::$db->prepared_query("
+                        SELECT t.ID
+                        FROM torrents t
+                        WHERE t.GroupID = ?
+                        ORDER BY t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+                            t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
+                        ", $this->id
+                    );
+                    $cached['torrent_list'] = self::$db->collect(0, false);
+                    $refresh = true;
+                }
+                if ($refresh) {
+                    self::$cache->cache_value($key, $cached, 0);
                 }
                 $this->info = $cached;
                 $this->info['from_cache'] = true;
@@ -297,8 +315,12 @@ class TGroup extends BaseObject {
         return $this->info()['CategoryID'];
     }
 
+    public function categoryGrouped(): bool {
+        return isset(CATEGORY_GROUPED[$this->categoryId() - 1]);
+    }
+
     public function categoryName(): string {
-        return CATEGORY[$this->info()['CategoryID'] - 1];
+        return CATEGORY[$this->categoryId() - 1];
     }
 
     public function cover(): string {
