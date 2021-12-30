@@ -27,15 +27,6 @@ if ($match[1] === 'token') {
     } elseif ($user->id() == $Viewer->id()) {
         error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
-    try {
-        $viewerBonus->purchaseTokenOther($user->id(), $Label);
-    } catch (BonusException $e) {
-        if ($e->getMessage() == 'otherToken:no-gift-funds') {
-            error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
-        } else {
-            error(0);
-        }
-    }
 }
 
 header('Location: bonus.php?complete=' . urlencode($Label));
