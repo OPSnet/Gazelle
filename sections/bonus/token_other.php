@@ -34,7 +34,7 @@ if (isset($_POST['confirm'])) {
 
 echo $Twig->render('bonus/token-other.twig', [
     'auth'     => $Viewer->auth(),
-    'price'    => number_format($Price),
+    'price'    => $Price,
     'label'    => $Label,
     'item'     => $Item['Title']
 ]);
