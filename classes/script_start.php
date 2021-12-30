@@ -20,7 +20,7 @@ if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
     die('d14:failure reason40:Invalid .torrent, try downloading again.e');
 }
 
-require_once(__DIR__ . '../lib/bootstrap.php');
+require_once(__DIR__ . '/../lib/bootstrap.php');
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
