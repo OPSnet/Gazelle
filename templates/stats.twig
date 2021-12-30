@@ -1,4 +1,4 @@
-<?php View::show_header('Site stats'); ?>
+{{ header('Site stats') }}
 
 <div class="thin">
     <h3 id="general">Pursuit of Perfection</h3>
@@ -8,5 +8,5 @@
             <li><a href='stats.php?action=torrents'>Torrent Stats</a>
     </div>
 </div>
-<?php
-View::show_footer();
+
+{{ footer() }}
