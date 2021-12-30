@@ -23,3 +23,6 @@ define('RSS_HASH',     "");
 
 define('SEEDBOX_SALT', "");
 define('AVATAR_SALT',  "");
+
+// Docker setup runs the scheduler only once every 15 minutes
+define('SCHEDULER_DELAY', 1200);

@@ -170,7 +170,6 @@ Category('Development', [
     Item('Error Analysis',        'tools.php?action=analysis_list',            $Viewer->permitted('site_analysis')),
     Item('PHP processes',         'tools.php?action=process_info',             $Viewer->permitted('admin_site_debug')),
     Item('Scheduler',             'tools.php?action=periodic&amp;mode=view',   $Viewer->permitted('admin_periodic_task_view')),
-    Item('Scheduler (legacy)',    'schedule.php?auth='. $Viewer->auth(),       $Viewer->permitted('admin_schedule')),
 ]);
 
 ?>

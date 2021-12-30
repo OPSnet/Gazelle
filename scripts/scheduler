@@ -1,0 +1,5 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+(new Gazelle\Schedule\Scheduler)->run();
