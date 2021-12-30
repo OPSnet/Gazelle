@@ -69,11 +69,11 @@
         <input type="hidden" name="action" value="clear_cache" />
         <table>
             <tr>
-{% for name in namespace|keys %}
-                <th width="{{ 100/(namespace|length) }}%">{{ name }}</th>
+{% for name in constant('CACHE_NAMESPACE')|keys %}
+                <th width="{{ 100/(constant('CACHE_NAMESPACE')|length) }}%">{{ name }}</th>
 {% endfor %}
             </tr>
-{% for list in namespace %}
+{% for list in constant('CACHE_NAMESPACE') %}
                 <td style="vertical-align: top">
     {% for field, shape in list %}
                     <label><input type="checkbox" name="{{ field }}" id="flush-{{ field }}" /> {{ shape|replace({'%d': '*'}) }}</label>
@@ -82,27 +82,27 @@
                 </td>
 {% endfor %}
             <tr>
-                <td colspan="{{ namespace|length }}">If you also want to flush a specfic collection (or more) that is not listed,
+                <td colspan="{{ constant('CACHE_NAMESPACE')|length }}">If you also want to flush a specfic collection (or more) that is not listed,
                 you may write it in below (e.g. <tt>artist_foo_*</tt>, space separated, in the appropriate column).</td>
             </tr>
             <tr>
-{% for name in namespace|keys %}
+{% for name in constant('CACHE_NAMESPACE')|keys %}
                 <td>write-in<br />
-                    <textarea cols="{{ 90/(namespace|length) }}" rows="3" name="{{ name }}-free" id="{{ name }}-free" class="inputtext"></textarea><br />
+                    <textarea cols="{{ 90/(constant('CACHE_NAMESPACE')|length) }}" rows="3" name="{{ name }}-free" id="{{ name }}-free" class="inputtext"></textarea><br />
                 </td>
 {% endfor %}
             </tr>
             <tr>
-{% for name in namespace|keys %}
+{% for name in constant('CACHE_NAMESPACE')|keys %}
                 <td align="center">
                     <input type="submit" name="flush-{{ name }}" value="Flush checked" /></span>
                 </td>
 {% endfor %}
             </tr>
             <tr>
-                <td colspan="{{ namespace|length }}">
+                <td colspan="{{ constant('CACHE_NAMESPACE')|length }}">
                     <form class="delete_form" name="cache" action="" method="post">
-                        <input type="hidden" name="action" value="service_stats" />
+                        <input type="hidden" name="action" value="clear_cache" />
                         <input type="hidden" name="auth" value="{{ auth }}" />
                         <input type="hidden" name="global_flush" value="1" />
 
