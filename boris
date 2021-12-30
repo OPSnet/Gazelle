@@ -1,16 +1,17 @@
 #! /usr/bin/env php
 <?php
 
-/* Ensure that the following functions are removed from the `disable_functions`
- * directive in cli/php.ini
- *
- *   pcntl_fork
- *   pcntl_signal
- *   pcntl_signal_dispatch
- *   pcntl_waitpid
- *
- * boris won't function unless these functions are enabled in the PHP interpreter.
- */
+$remove = [];
+foreach (['pcntl_fork', 'pcntl_signal', 'pcntl_signal_dispatch', 'pcntl_waitpid'] as $function) {
+    if (!function_exists($function)) {
+        $remove[] = $function;
+    }
+}
+if ($remove) {
+    echo "The following functions musst be removed from the `disable_functions` directive in cli/php.ini:\n";
+    echo "=>  ", implode(', ', $remove), "\n";
+    exit;
+}
 
 define('BORIS', 1);
 $_SERVER['HTTP_USER_AGENT'] = 'boris';
@@ -18,7 +19,9 @@ $_SERVER['HTTP_USER_AGENT'] = 'boris';
 require_once(__DIR__ . '/lib/bootstrap.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
-$b = new \Boris\Boris(SITE_NAME . '> ');
+$b = new Boris\Boris(SITE_NAME . '> ');
+$b->setInspector(new Boris\ExportInspector);
+
 $preload = [
     'cache'       => $Cache,
     'db'          => $DB,
