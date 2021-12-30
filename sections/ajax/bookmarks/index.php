@@ -1,33 +1,18 @@
 <?php
 
-
-// Number of users per page
-define('BOOKMARKS_PER_PAGE', '20');
-
-if (empty($_REQUEST['type'])) { $_REQUEST['type'] = 'torrents'; }
-switch ($_REQUEST['type']) {
-    case 'torrents':
-        require(SERVER_ROOT.'/sections/ajax/bookmarks/torrents.php');
-        break;
+switch ($_REQUEST['type'] ?? '') {
     case 'artists':
-        require(SERVER_ROOT.'/sections/ajax/bookmarks/artists.php');
+        require_once(__DIR__ . '/artists.php');
         break;
     case 'collages':
         $_GET['bookmarks'] = 1;
-        require(SERVER_ROOT.'/sections/ajax/collages/browse.php');
+        requir_oncee(__DIR__ . '/browse.php');
         break;
     case 'requests':
         $_GET['type'] = 'bookmarks';
-        require(SERVER_ROOT.'/sections/ajax/requests/requests.php');
+        requir_oncee(__DIR__ . '/requests.php');
         break;
     default:
-        print
-            json_encode(
-                [
-                    'status' => 'failure'
-                ]
-            );
-        die();
+        require_once(__DIR__ . '/torrents.php');
+        break;
 }
-
-?>
