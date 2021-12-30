@@ -204,7 +204,10 @@ defined('SPHINX_MAX_MATCHES') or define('SPHINX_MAX_MATCHES', 1000);
 // should be overridden and set to true.
 defined('DISABLE_TRACKER') or define('DISABLE_TRACKER', false);
 
-// Hostname of the Ocelot instance
+// Public-facing hostname of the Ocelot instance
+defined('TRACKER_NAME') or define('TRACKER_NAME', 'localhost');
+
+// IP address of the Ocelot instance (on your internal network)
 defined('TRACKER_HOST') or define('TRACKER_HOST', 'localhost');
 
 // TCP port of the Ocelot instance
@@ -221,8 +224,8 @@ defined('TRACKER_REPORTKEY') or define('TRACKER_REPORTKEY', 'abcdefghijklmnopqrs
 
 // Announce URLs for users. Some clients cannot do HTTPS, and some people
 // persist in using these clients, which is a great pity.
-define('ANNOUNCE_HTTP_URL', 'http://' . TRACKER_HOST);
-define('ANNOUNCE_HTTPS_URL', 'https://' . TRACKER_HOST);
+defined('ANNOUNCE_HTTP_URL') or define('ANNOUNCE_HTTP_URL', 'http://' . TRACKER_NAME);
+defined('ANNOUNCE_HTTPS_URL') or define('ANNOUNCE_HTTPS_URL', 'https://' . TRACKER_NAME);
 
 // ------------------------------------------------------------------------
 // Memcached settings
