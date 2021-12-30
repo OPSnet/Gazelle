@@ -322,7 +322,7 @@ class Bonus extends BaseUser {
         return $amount;
     }
 
-    public function purchaseTokenOther(int $toID, string $label, string $message=''): int {
+    public function purchaseTokenOther(int $toID, string $label, string $message): int {
         if ($this->user->id() === $toID) {
             throw new BonusException('otherToken:self');
         }

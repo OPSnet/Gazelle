@@ -14,7 +14,7 @@ if (isset($_POST['confirm'])) {
             error('You cannot gift yourself tokens, they are cheaper to buy directly.');
         }
         try {
-            $viewerBonus->purchaseTokenOther($user->id(), $Label, $_POST['message']);
+            $viewerBonus->purchaseTokenOther($user->id(), $Label, $_POST['message'] ?? '');
         } catch (BonusException $e) {
             if ($e->getMessage() == 'otherToken:no-gift-funds') {
                 error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
