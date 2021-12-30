@@ -71,6 +71,5 @@ echo $Twig->render('admin/cache-management.twig', [
     'flushed'       => $flushed,
     'key'           => $_REQUEST['key'] ?? '',
     'multi'         => $multi,
-    'namespace'     => CACHE_NAMESPACE,
     'result'        => $result,
 ]);
