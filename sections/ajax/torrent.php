@@ -2,16 +2,13 @@
 
 $json = new Gazelle\Json\Torrent;
 
-$torrentId = (int)$_GET['id'];
-$torrentHash = $_GET['hash'];
-
-if ($torrentId && $torrentHash) {
+if (isset($_GET['id']) && isset($_GET['hash'])) {
     $json->failure('bad parameters');
     exit;
-} elseif ($torrentHash) {
-    $torrent = (new Gazelle\Manager\Torrent)->findByInfohash($torrentHash);
+} elseif (isset($_GET['hash'])) {
+    $torrent = (new Gazelle\Manager\Torrent)->findByInfohash($_GET['hash']);
 } else {
-    $torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
+    $torrent = (new Gazelle\Manager\Torrent)->findById($_GET['id']);
 }
 if (is_null($torrent)) {
     $json->failure('bad parameters');
