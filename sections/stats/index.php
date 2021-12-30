@@ -2,12 +2,12 @@
 
 switch ($_REQUEST['action'] ?? null) {
     case 'users':
-        require('users.php');
+        require_once('users.php');
         break;
     case 'torrents':
-        require('torrents.php');
+        require_once('torrents.php');
         break;
     default:
-        require('list.php');
+        echo $Twig->render('stats.twig');
         break;
 }
