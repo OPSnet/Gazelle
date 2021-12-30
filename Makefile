@@ -61,7 +61,7 @@ ocelot-reload-conf:
 	pkill -HUP ocelot
 
 .PHONY: ocelot-reload-db
-ocelot-reload-reload:
+ocelot-reload-db:
 	pkill -USR1 ocelot
 
 .PHONY: test
