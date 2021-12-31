@@ -165,6 +165,24 @@ function redirectUrl(string $fallback): string {
     return empty($_SERVER['HTTP_REFERER']) ? $fallback : $_SERVER['HTTP_REFERER'];
 }
 
+/**
+ * Make sure $_GET['auth'] is the same as the user's authorization key
+ * Should be used for any user action that relies solely on GET.
+ *
+ * @param bool $Ajax Are we using ajax?
+ * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
+ */
+function authorize($Ajax = false): bool {
+    global $Viewer;
+    if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
+        return true;
+    }
+    Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $Viewer->username() . " just failed authorize on "
+        . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+    error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
+    return false;
+}
+
 function parse_user_agent(): array {
     if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
         $OS = explode(" ", $Matches[2]);

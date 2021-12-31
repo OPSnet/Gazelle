@@ -12,7 +12,6 @@
 /********************************************************/
 
 use Gazelle\Util\Crypto;
-use Gazelle\Util\Irc;
 use Gazelle\Util\Text;
 
 // Deal with dumbasses
@@ -31,38 +30,6 @@ if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
 }
 
 ob_start(); //Start a buffer, mainly in case there is a mysql error
-
-// TODO: reconcile this with log_attempt in login/index.php
-function log_token_attempt(DB_MYSQL $db, int $userId): void {
-    $ipaddr = $_SERVER['REMOTE_ADDR'];
-    $watch = new Gazelle\LoginWatch($ipaddr);
-    $watch->increment($userId, "[usertoken:$userId]");
-    if ($watch->nrAttempts() < 6) {
-        return;
-    }
-    $watch->ban("[id:$userId]");
-    if ($watch->nrBans() > 9) {
-        (new Gazelle\Manager\IPv4)->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
-    }
-}
-
-/**
- * Make sure $_GET['auth'] is the same as the user's authorization key
- * Should be used for any user action that relies solely on GET.
- *
- * @param bool $Ajax Are we using ajax?
- * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
- */
-function authorize($Ajax = false): bool {
-    global $Viewer;
-    if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
-        return true;
-    }
-    Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $Viewer->username() . " just failed authorize on "
-        . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
-    error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
-    return false;
-}
 
 // Set the document we are loading
 $Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
@@ -97,7 +64,16 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 
     $Viewer = $userMan->findById((int)substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32));
     if (is_null($Viewer) || !$Viewer->hasApiToken($FullToken) || $Viewer->isDisabled() || $Viewer->isLocked()) {
-        log_token_attempt($DB, $Viewer ? $Viewer->id() : 0);
+        $userId =  $Viewer ? $Viewer->id() : 0;
+        $ipaddr = $_SERVER['REMOTE_ADDR'];
+        $watch = new Gazelle\LoginWatch($ipaddr);
+        $watch->increment($userId, "[usertoken:$userId]");
+        if ($watch->nrAttempts() >= 5) {
+            $watch->ban("[id:$userId]");
+            if ($watch->nrBans() >= 10) {
+                (new Gazelle\Manager\IPv4)->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
+            }
+        }
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
@@ -193,14 +169,15 @@ $Cache->cache_value('php_' . getmypid(), [
     )
 ], 600);
 
-function shutdown() {
-    $error = error_get_last();
-    if ($error['type'] ?? 0 == E_ERROR) {
-        global $Debug;
-        $Debug->saveCase(str_replace(SERVER_ROOT .'/', '', $error['message']));
+register_shutdown_function(
+    function () {
+        $error = error_get_last();
+        if ($error['type'] ?? 0 == E_ERROR) {
+            global $Debug;
+            $Debug->saveCase(str_replace(SERVER_ROOT .'/', '', $error['message']));
+        }
     }
-}
-register_shutdown_function('shutdown');
+);
 
 $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
 $file = realpath(__DIR__ . '/../sections/' . $Document . '/index.php');
