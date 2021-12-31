@@ -202,7 +202,7 @@ switch ($Action) {
         require_once('wiki.php');
         break;
     case 'get_friends':
-        require_once('get_friends.php');
+        echo json_encode((new Gazelle\User\Friend($Viewer))->userList());
         break;
     case 'news_ajax':
         require_once('news_ajax.php');

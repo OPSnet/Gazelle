@@ -35,6 +35,9 @@
 {% if own_profile or viewer.permitted('users_edit_profiles') %}
         <a href="user.php?action=edit&amp;userid={{ user_id }}" class="brackets">Settings</a>
 {% endif %}
+{% if viewer.id == user_id %}
+        <a href="friends.php" class="brackets">Friends</a>
+{% endif %}
 {% if viewer.permitted('users_view_invites') or (user.canPurchaseInvite and own_profile) %}
         <a href="user.php?action=invite&amp;userid={{ user_id }}" class="brackets">Invites</a>
 {% endif %}
