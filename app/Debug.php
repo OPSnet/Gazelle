@@ -89,7 +89,7 @@ class Debug {
         return false;
     }
 
-    public function saveCase(string $message): string {
+    public function saveCase(string $message): int {
         $duration = microtime(true) - self::$startTime;
         if (!isset($_SERVER['REQUEST_URI'])) {
             $uri = 'cli';
@@ -100,6 +100,7 @@ class Debug {
             $uri = preg_replace('/([?&]\w*id=)\d+/', '\1IDnnn', $uri);
         }
 
+        $digest = md5($message, true);
         self::$db->prepared_query("
             INSERT INTO error_log
                    (uri, duration, memory, nr_query, nr_cache, digest, trace, request, error_list)
@@ -108,20 +109,24 @@ class Debug {
                 updated = now(),
                 seen = seen + 1,
                 duration = ?
-            ",  $uri,
-                $duration,
-                memory_get_usage(true),
-                count($this->get_queries()),
-                count($this->get_cache_keys()),
-                md5($message, true),
-                $message,
-                json_encode($_REQUEST),
-                json_encode(self::$Errors),
-                $duration
+            ",
+            $uri,
+            $duration,
+            memory_get_usage(true),
+            count($this->get_queries()),
+            count($this->get_cache_keys()),
+            $digest,
+            $message,
+            json_encode($_REQUEST),
+            json_encode(self::$Errors),
+            $duration
         );
-        $ident = randomString(5);
+        $id = self::$db->scalar("
+            SELECT error_log_id FROM error_log WHERE digest = ?
+            ", $digest
+        );
         self::$cache->cache_value(
-            'analysis_'.$ident, [
+            'analysis_'.$id, [
                 'URI'      => isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
                 'message'  => $message,
                 'time'     => time(),
@@ -140,7 +145,7 @@ class Debug {
             ],
             86400 * 2
         );
-        return $ident;
+        return $id;
     }
 
     public function analysis($Message, $Report = '', $Time = 43200) {
