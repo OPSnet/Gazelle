@@ -55,7 +55,7 @@ class Artist extends \Gazelle\Json {
                 $A['aliasid'] = (int)$A['aliasid'];
             }
 
-            $ExtendedArtists = $Group['ExtendedArtists'];
+            $ExtendedArtists = array_filter($Group['ExtendedArtists'], fn ($a) => !is_null($a));
             foreach ($ExtendedArtists as &$artistGroup) {
                 foreach ($artistGroup as &$A) {
                     $A['id'] = (int)$A['id'];
