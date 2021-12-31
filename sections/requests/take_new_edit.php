@@ -114,6 +114,10 @@ $RecordLabel = empty($_POST['recordlabel']) ? '' : trim($_POST['recordlabel']);
 //Apply OCLC to all types
 $OCLC = empty($_POST['oclc']) ? '' : trim($_POST['oclc']);
 
+$AllBitrates = false;
+$AllFormats  = false;
+$$AllMedia   = false;
+
 if (!$onlyMetadata) {
     if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
         $Err = 'Please pick a release type';
@@ -122,7 +126,7 @@ if (!$onlyMetadata) {
 
     if (empty($_POST['all_formats']) && count($_POST['formats']) !== count(FORMAT)) {
         $FormatArray = $_POST['formats'];
-        if (count($FormatArray) < 1) {
+        if (empty($FormatArray)) {
             $Err = 'You must require at least one format';
         }
     } else {
@@ -131,7 +135,7 @@ if (!$onlyMetadata) {
 
     if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count(ENCODING)) {
         $BitrateArray = $_POST['bitrates'];
-        if (count($BitrateArray) < 1) {
+        if (empty($BitrateArray)) {
             $Err = 'You must require at least one bitrate';
         }
     } else {
@@ -237,53 +241,50 @@ if (!empty($Err)) {
 }
 
 if (!$onlyMetadata) {
-    if (empty($AllBitrates)) {
+    if ($AllBitrates) {
+        $BitrateList = 'Any';
+    } else {
         foreach ($BitrateArray as $Index => $MasterIndex) {
             if (array_key_exists($Index, ENCODING)) {
                 $BitrateArray[$Index] = ENCODING[$MasterIndex];
             } else {
-                //Hax
                 error(0);
             }
         }
         $BitrateList = implode('|', $BitrateArray);
-    } else {
-        $BitrateList = 'Any';
     }
 
-    if (empty($AllFormats)) {
+    if ($AllFormats) {
+        $FormatList = 'Any';
+    } else {
         foreach ($FormatArray as $Index => $MasterIndex) {
             if (array_key_exists($Index, FORMAT)) {
                 $FormatArray[$Index] = FORMAT[$MasterIndex];
             } else {
-                //Hax
                 error(0);
             }
         }
         $FormatList = implode('|', $FormatArray);
-    } else {
-        $FormatList = 'Any';
     }
 
-    if (empty($AllMedia)) {
+    if ($AllMedia) {
+        $MediaList = 'Any';
+    } else {
         foreach ($MediaArray as $Index => $MasterIndex) {
             if (array_key_exists($Index, MEDIA)) {
                 $MediaArray[$Index] = MEDIA[$MasterIndex];
             } else {
-                //Hax
                 error(0);
             }
         }
         $MediaList = implode('|', $MediaArray);
-    } else {
-        $MediaList = 'Any';
     }
 }
 
 if (!$NeedLog) {
     $LogCue = '';
 } else {
-    $LogCue .= 'Log';
+    $LogCue = 'Log';
     if ($MinLogScore > 0) {
         if ($MinLogScore >= 100) {
             $LogCue .= ' (100%)';
