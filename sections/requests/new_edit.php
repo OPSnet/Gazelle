@@ -118,7 +118,7 @@ if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
         WHERE tg.ID = ?",
         $_GET['groupid']
     );
-    if (list($Title, $Year, $ReleaseType, $Image, $Tags, $CategoryID) = $DB->next_record()) {
+    if ([$Title, $Year, $ReleaseType, $Image, $Tags, $CategoryID] = $DB->next_record()) {
         $GroupID = trim($_REQUEST['groupid']);
     }
 }
@@ -347,7 +347,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="checkbox" id="needlog" name="needlog" onchange="ToggleLogScore()" <?=(!empty($NeedLog) ? 'checked="checked" ' : '')?>/><label for="needlog"> Require log</label>
                         <span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="<?=(!empty($MinLogScore) ? $MinLogScore : '')?>" /> Minimum log score</span>
                         <br />
-                        <input type="checkbox" id="needcksum" name="needcksum"<?=$Checksum ? ' checked="checked" ' : ''?>/><label for="needcksum"> Require checksum</label>
+                        <input type="checkbox" id="needcksum" name="needcksum"<?= ($Checksum ?? false) ? ' checked="checked" ' : ''?>/><label for="needcksum"> Require checksum</label>
                         <br />
                         <input type="checkbox" id="needcue" name="needcue" <?=(!empty($NeedCue) ? 'checked="checked" ' : '')?>/><label for="needcue"> Require cue file</label>
                     </td>
@@ -367,7 +367,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         If this request matches a torrent group <span style="font-weight: bold;">already existing</span> on the site, please indicate that here.
                     </td>
                 </tr>
-<?php    } elseif ($GroupID && ($CategoryID == 1)) { ?>
+<?php    } elseif (isset($GroupID) && ($CategoryID == 1)) { ?>
                 <tr>
                     <td class="label">Torrent group</td>
                     <td>
