@@ -3,7 +3,7 @@
 use \Gazelle\Util\Irc;
 
 $torrent = (new Gazelle\Manager\Torrent)->findById((int)($_REQUEST['id'] ?? 0));
-if (!$torrent) {
+if (is_null($torrent)) {
     json_or_error('could not find torrent', 404);
 }
 $torrent->setViewer($Viewer);
@@ -13,7 +13,7 @@ $torrentId = $torrent->id();
  * To prevent this retardation from blowing bandwidth etc., let's block it
  * if the .torrent file has been downloaded four times before.
  */
-if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERVER['HTTP_USER_AGENT'])
+if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERVER['HTTP_USER_AGENT'] ?? 'unknown')
     && $Viewer->torrentDownloadCount($torrentId) > 3
 ) {
     $Msg = 'You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.';
