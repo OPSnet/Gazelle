@@ -316,22 +316,22 @@ class Notification extends \Gazelle\Base {
         }
     }
 
-    public function inboxAlert() {
+    public function inboxAlert(): string {
         $this->loadInbox();
         $new = $this->notifications();
         $alert = isset($new[self::INBOX])
             ? sprintf('<a href="%s">%s</a>', $new[self::INBOX]['url'], $new[self::INBOX]['message'])
-            : null;
+            : '';
         $this->clear();
         return $alert;
     }
 
-    public function torrentAlert() {
+    public function torrentAlert(): string {
         $this->loadTorrents();
         $new = $this->notifications();
         $alert = isset($new[self::TORRENTS])
             ? sprintf('<a href="%s">%s</a>', $new[self::TORRENTS]['url'], $new[self::TORRENTS]['message'])
-            : null;
+            : '';
         $this->clear();
         return $alert;
     }
