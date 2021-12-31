@@ -592,7 +592,7 @@ class Torrent extends BaseObject {
         $info = $this->info();
         $group = $this->group();
         $artist = safeFilename($group->artistName());
-        if ($info['Year'] > 0) {
+        if ($info['Year'] ?? 0 > 0) {
             $artist .= ".{$info['Year']}";
         }
         $meta = [];
