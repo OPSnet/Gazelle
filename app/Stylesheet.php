@@ -75,7 +75,7 @@ class Stylesheet extends BaseUser {
         }
         $info = parse_url($url);
         if (substr($info['path'], -4) === '.css'
-                && $info['query'] . $info['fragment'] === ''
+                && (($info['query'] ?? '') . ($info['fragment'] ?? '')) === ''
                 && $info['host'] === SITE_HOST
                 && file_exists(SERVER_ROOT . $info['path'])) {
             $url .= '?v=' . filemtime(SERVER_ROOT . "/sass/{$info['path']}");
