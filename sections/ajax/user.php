@@ -58,7 +58,7 @@ if (is_null($uploaded) || is_null($downloaded)) {
 json_print("success", [
     'username'    => $user->username(),
     'avatar'      => $user->avatar(),
-    'isFriend'    => $user->isFriend($Viewer->id()),
+    'isFriend'    => (new Gazelle\User\Friend($user))->isFriend($Viewer->id()),
     'profileText' => Text::full_format($user->infoProfile()),
     'stats' => [
         'joinedDate'    => $user->joinDate(),
