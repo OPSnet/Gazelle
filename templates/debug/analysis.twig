@@ -28,6 +28,7 @@
     <tr><td class="colhead">First</td><td>{{ case.created }}</td></tr>
     <tr><td class="colhead">Last</td><td>{{ case.updated }}</td></tr>
     <tr><td class="colhead">URI</td><td>{{ case.uri }}</td></tr>
+    <tr><td class="colhead">Logged variables</td><td>{{ case.logged_var }}</td></tr>
     <tr><td class="colhead" style="vertical-align: top">Stacktrace</td><td>
     {% for line in case.trace %}
         <code>{{ line }}</code><br />
