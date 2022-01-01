@@ -148,25 +148,21 @@ View::show_footer();
 
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $groupBy, $torMan, $Viewer;
+    global $groupBy, $torMan, $Twig, $Viewer;
 ?>
         <h3>Top <?="$limit $caption"?>
-<?php
-    if (empty($_GET['advanced'])) { ?>
+<?php if (empty($_GET['advanced'])) { ?>
         <small class="top10_quantity_links">
-<?php
-        switch ($limit) {
-            case 100: ?>
+<?php   if ($limit == 100) { ?>
                 - <a href="top10.php?details=<?=$tag?>" class="brackets">Top 10</a>
                 - <span class="brackets">Top 100</span>
                 - <a href="top10.php?type=torrents&amp;limit=250&amp;details=<?=$tag?>" class="brackets">Top 250</a>
-<?php           break;
+<?php   } elseif ($limit == 250) { ?>
             case 250: ?>
                 - <a href="top10.php?details=<?=$tag?>" class="brackets">Top 10</a>
                 - <a href="top10.php?type=torrents&amp;limit=100&amp;details=<?=$tag?>" class="brackets">Top 100</a>
                 - <span class="brackets">Top 250</span>
-<?php           break;
-            default: ?>
+<?php   } else { ?>
                 - <span class="brackets">Top 10</span>
                 - <a href="top10.php?type=torrents&amp;limit=100&amp;details=<?=$tag?>" class="brackets">Top 100</a>
                 - <a href="top10.php?type=torrents&amp;limit=250&amp;details=<?=$tag?>" class="brackets">Top 250</a>
@@ -183,11 +179,10 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         <td class="cats_col"></td>
         <td class="m_th_left m_th_left_collapsable">Name</td>
         <td style="text-align: right;">Size</td>
-        <td style="text-align: right;">Data</td>
+        <td style="text-align: right;">Transferred</td>
         <td style="text-align: right;" class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
         <td style="text-align: right;" class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
         <td style="text-align: right;" class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
-        <td style="text-align: right;">Peers</td>
     </tr>
 <?php
     // Server is already processing a top10 query. Starting another one will make things slow
@@ -216,84 +211,56 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     }
 
     $groupIds = array_column($details, 1);
-    // exclude artists because it's retarded
-    $groups = Torrents::get_groups($groupIds, true, false);
-    $artists = Artists::get_artists($groupIds);
-
     $bookmark = new \Gazelle\Bookmark($Viewer);
     $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
     foreach ($details as $index => $detail) {
-        [$torrentID, $groupID, $data] = $detail;
-        $torrent = $torMan->findById($torrentID);
-        $group = $groups[$groupID];
-
-        $isBookmarked = $bookmark->isTorrentBookmarked($groupID);
-        $isSnatched = $torrent->isSnatched($Viewer->id());
-
-        // generate torrent's title
-        $displayName = '';
-
-        if (!empty($artists[$groupID])) {
-            $displayName = Artists::display_artists($artists[$groupID], true, true);
+        [$torrentId, $groupId, $data] = $detail;
+        $torrent = $torMan->findById($torrentId);
+        if (is_null($torrent)) {
+            continue;
         }
+        $tgroup       = $torrent->group();
+        $isBookmarked = $bookmark->isTorrentBookmarked($groupId);
+        $isSnatched   = $torrent->isSnatched($Viewer->id());
+        $reported     = $torMan->hasReport($Viewer, $torrentId);
 
-        $displayName .= "<a href=\"torrents.php?id=$groupID&amp;torrentid=$torrentID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">${group['Name']}</a>";
-
-        if ($group['CategoryID'] == 1 && $group['Year'] > 0) {
-            $displayName .= " [${group['Year']}]";
-        }
-
-        if ($group['CategoryID'] == 1 && $group['ReleaseType'] > 0) {
-            $displayName .= ' [' . (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']) . ']';
-        }
-
-        $torrentDetails     = $group['Torrents'][$torrentID];
-        $torrentInformation = Torrents::torrent_info($torrentDetails);
-        $torrentTags        = new Tags($group['TagList']);
-        $reported           = $torMan->hasReport($Viewer, $torrentID);
-
-        global $Twig;
 ?>
     <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '') . ($isSnatched ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
-        <td class="center cats_col m_hidden"><div title="<?=$torrentTags->title()?>" class="tooltip <?=Format::css_category($group['CategoryID'])?> <?=$torrentTags->css_name()?>"></div></td>
+        <td class="center cats_col m_hidden"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?=
+            Format::css_category($tgroup->categoryId()) ?> tags_<?= str_replace('.', '_', $tgroup->primaryTag()) ?>"></div></td>
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->thumbnail($group['WikiImage'] ?? '', $group['CategoryID']) ?>
+                <?= $imgProxy->thumbnail($tgroup->image() ?? '', $tgroup->categoryId()) ?>
             </div>
 <?php   } ?>
             <div class="group_info clear">
-                <?= $Twig->render('torrent/action.twig', [
+                <?= $Twig->render('torrent/action-v2.twig', [
                     'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
-                    't'      => $torrentDetails,
+                    't'      => $torrent,
                 ]) ?>
-                <strong><?=$displayName?></strong> <?=$torrentInformation?><?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>
-<?php
-        if ($isBookmarked) {
-?>
+                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>
+<?php   if ($isBookmarked) { ?>
                 <span class="remove_bookmark float_right">
-                    <a href="#" id="bookmarklink_torrent_<?=$groupID?>" class="bookmarklink_torrent_<?=$groupID?> brackets" onclick="Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;">Remove bookmark</a>
+                    <a href="#" id="bookmarklink_torrent_<?=$groupId?>" class="bookmarklink_torrent_<?=$groupId?> brackets" onclick="Unbookmark('torrent', <?=$groupId?>, 'Bookmark'); return false;">Remove bookmark</a>
                 </span>
 <?php   } else { ?>
                 <span class="add_bookmark float_right">
-                    <a href="#" id="bookmarklink_torrent_<?=$groupID?>" class="bookmarklink_torrent_<?=$groupID?> brackets" onclick="Bookmark('torrent', <?=$groupID?>, 'Remove bookmark'); return false;">Bookmark</a>
+                    <a href="#" id="bookmarklink_torrent_<?=$groupId?>" class="bookmarklink_torrent_<?=$groupId?> brackets" onclick="Bookmark('torrent', <?=$groupId?>, 'Remove bookmark'); return false;">Bookmark</a>
                 </span>
 <?php   } ?>
-                <div class="tags"><?=$torrentTags->format()?></div>
+                <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
             </div>
         </td>
-        <td class="td_size number_column nobr"><?=Format::get_size($torrentDetails['Size'])?></td>
+        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
         <td class="td_data number_column nobr"><?=Format::get_size($data)?></td>
-        <td class="td_snatched number_column m_td_right"><?=number_format((double)$torrentDetails['Snatched'])?></td>
-        <td class="td_seeders number_column m_td_right"><?=number_format((double)$torrentDetails['Seeders'])?></td>
-        <td class="td_leechers number_column m_td_right"><?=number_format((double)$torrentDetails['Leechers'])?></td>
-        <td class="td_seeders_leechers number_column m_hidden"><?=number_format($torrentDetails['Seeders'] + $torrentDetails['Leechers'])?></td>
+        <td class="td_snatched number_column m_td_right"><?= number_format($torrent->snatchTotal()) ?></td>
+        <td class="td_seeders number_column m_td_right"><?= number_format($torrent->seederTotal()) ?></td>
+        <td class="td_leechers number_column m_td_right"><?= number_format($torrent->leecherTotal()) ?></td>
     </tr>
-<?php
-    } //foreach ($details as $detail)
-?>
+<?php } ?>
     </table><br />
 <?php
 }
