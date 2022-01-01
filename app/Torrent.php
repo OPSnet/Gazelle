@@ -1029,9 +1029,10 @@ class Torrent extends BaseObject {
             }
         }
 
-        $deleteKeys[] = "torrent_download_" . $this->id;
-        $deleteKeys[] = "torrent_group_" . $groupId;
-        $deleteKeys[] = "torrents_details_" . $groupId;
+        
+        array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id),
+            "torrent_download_" . $this->id, "torrent_group_" . $groupId, "torrents_details_" . $groupId
+        );
         self::$cache->deleteMulti($deleteKeys);
 
         $sizeMB = number_format($this->info()['Size'] / (1024 * 1024), 2) . ' MiB';

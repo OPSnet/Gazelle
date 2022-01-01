@@ -37,9 +37,6 @@ class Artists {
         }
         if (count($DBs) > 0) {
             $IDs = implode(',', $DBs);
-            if (empty($IDs)) {
-                $IDs = "null";
-            }
             $QueryID = $DB->get_query_id();
             $DB->prepared_query("
                 SELECT ta.GroupID,
@@ -301,6 +298,7 @@ class Artists {
         (new \Gazelle\Log)->general("Artist $ArtistID ($Name) was deleted by " . $user->username());
         $DB->commit();
 
+        $Cache->delete_value('zz_a_' . $ArtistID);
         $Cache->delete_value('artist_' . $ArtistID);
         $Cache->delete_value('artist_groups_' . $ArtistID);
         $Cache->decrement('stats_artist_count');
