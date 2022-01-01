@@ -114,9 +114,9 @@ $RecordLabel = empty($_POST['recordlabel']) ? '' : trim($_POST['recordlabel']);
 //Apply OCLC to all types
 $OCLC = empty($_POST['oclc']) ? '' : trim($_POST['oclc']);
 
-$AllBitrates = false;
-$AllFormats  = false;
-$$AllMedia   = false;
+$AllEncodings = false;
+$AllFormats   = false;
+$AllMedia     = false;
 
 if (!$onlyMetadata) {
     if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
@@ -124,8 +124,8 @@ if (!$onlyMetadata) {
     }
     $ReleaseType = (int)$_POST['releasetype'];
 
-    if (empty($_POST['all_formats']) && count($_POST['formats']) !== count(FORMAT)) {
-        $FormatArray = $_POST['formats'];
+    $FormatArray = $_POST['formats'] ?? [];
+    if (empty($_POST['all_formats']) && count($FormatArray) !== count(FORMAT)) {
         if (empty($FormatArray)) {
             $Err = 'You must require at least one format';
         }
@@ -133,18 +133,18 @@ if (!$onlyMetadata) {
         $AllFormats = true;
     }
 
-    if (empty($_POST['all_bitrates']) && count($_POST['bitrates']) !== count(ENCODING)) {
-        $BitrateArray = $_POST['bitrates'];
-        if (empty($BitrateArray)) {
+    $EncodingArray = $_POST['bitrates'] ?? [];
+    if (empty($_POST['all_bitrates']) && count($EncodingArray) !== count(ENCODING)) {
+        if (empty($EncodingArray)) {
             $Err = 'You must require at least one bitrate';
         }
     } else {
-        $AllBitrates = true;
+        $AllEncodings = true;
     }
 
-    if (empty($_POST['all_media']) && count($_POST['media']) !== count(MEDIA)) {
-        $MediaArray = $_POST['media'];
-        if (count($MediaArray) < 1) {
+    $MediaArray = $_POST['media'] ?? [];
+    if (empty($_POST['all_media']) && count($MediaArray) !== count(MEDIA)) {
+        if (empty($MediaArray)) {
             $Err = 'You must require at least one medium.';
         }
     } else {
@@ -165,7 +165,7 @@ if (!$onlyMetadata) {
         }
         $NeedCue = empty($_POST['needcue']) ? false : true;
         //FLAC was picked, require either Lossless or 24 bit Lossless
-        if (!$AllBitrates && !in_array(array_search('Lossless', ENCODING), $BitrateArray) && !in_array(array_search('24bit Lossless', ENCODING), $BitrateArray)) {
+        if (!$AllEncodings && !in_array(array_search('Lossless', ENCODING), $EncodingArray) && !in_array(array_search('24bit Lossless', ENCODING), $EncodingArray)) {
             $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
         }
         $NeedChecksum = empty($_POST['needcksum']) ? false : true;
@@ -241,17 +241,17 @@ if (!empty($Err)) {
 }
 
 if (!$onlyMetadata) {
-    if ($AllBitrates) {
-        $BitrateList = 'Any';
+    if ($AllEncodings) {
+        $EncodingList = 'Any';
     } else {
-        foreach ($BitrateArray as $Index => $MasterIndex) {
+        foreach ($EncodingArray as $Index => $MasterIndex) {
             if (array_key_exists($Index, ENCODING)) {
-                $BitrateArray[$Index] = ENCODING[$MasterIndex];
+                $EncodingArray[$Index] = ENCODING[$MasterIndex];
             } else {
                 error(0);
             }
         }
-        $BitrateList = implode('|', $BitrateArray);
+        $EncodingList = implode('|', $EncodingArray);
     }
 
     if ($AllFormats) {
@@ -310,7 +310,7 @@ if ($NewRequest) {
             now(), now(), 1, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         $Viewer->id(), $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
-        $CatalogueNumber, $ReleaseType, $BitrateList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC);
+        $CatalogueNumber, $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC);
     $RequestID = $DB->inserted_id();
 
 } else {
@@ -329,7 +329,7 @@ if ($NewRequest) {
                 ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
             WHERE ID = ?',
             $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel,
-            $ReleaseType, $BitrateList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC,
+            $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC,
             $RequestID
         );
     }
