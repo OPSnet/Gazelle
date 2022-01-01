@@ -34,7 +34,7 @@ class TGroup extends BaseObject {
         return implode(" \xE2\x80\x93 ",
             array_filter([
                 $this->artistHtml(),
-                '<span dir="ltr">' . sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())) . '</span>',
+                sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())),
             ], fn($x) => !empty($x))
         );
     }
@@ -383,6 +383,11 @@ class TGroup extends BaseObject {
 
     public function tagList(): array {
         return $this->info()['tags'];
+    }
+
+    public function primaryTag(): string {
+        $tagList = $this->tagList();
+        return $tagList ? current($tagList)['name'] : '';
     }
 
     public function tagNameList(): array {
