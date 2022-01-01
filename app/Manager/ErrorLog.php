@@ -58,7 +58,8 @@ class ErrorLog extends \Gazelle\Base {
                 uri,
                 trace,
                 request,
-                error_list
+                error_list,
+                logged_var
             FROM error_log
             ORDER BY updated DESC
             LIMIT ? OFFSET ?
@@ -70,6 +71,7 @@ class ErrorLog extends \Gazelle\Base {
             $item['trace'] = explode("\n", $item['trace']);
             $item['request'] = json_decode($item['request'], true);
             $item['error_list'] = json_decode($item['error_list'], true);
+            $item['logged_var'] = json_decode($item['logged_var'], true);
             $list[] = $item;
         }
         return $list;

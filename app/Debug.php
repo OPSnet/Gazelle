@@ -103,8 +103,8 @@ class Debug {
         $digest = md5($message, true);
         self::$db->prepared_query("
             INSERT INTO error_log
-                   (uri, duration, memory, nr_query, nr_cache, digest, trace, request, error_list)
-            VALUES (?,   ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?)
+                   (uri, duration, memory, nr_query, nr_cache, digest, trace, request, error_list, logged_var)
+            VALUES (?,   ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?,          ?)
             ON DUPLICATE KEY UPDATE
                 updated = now(),
                 seen = seen + 1,
@@ -119,6 +119,7 @@ class Debug {
             $message,
             json_encode($_REQUEST),
             json_encode(self::$Errors),
+            json_encode(self::$LoggedVars),
             $duration
         );
         $id = self::$db->scalar("

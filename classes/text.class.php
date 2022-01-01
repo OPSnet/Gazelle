@@ -752,9 +752,15 @@ class Text {
         }
         $Str = '';
 
-        if (array_key_exists('Id', $Array) && is_string($Array[0]) && count($Array) == 2) {
-            self::$Levels--;
-            return self::smileys(self::userMention($Array[0]));
+        if (array_key_exists('Id', $Array)) {
+            if (!isset($Array[0])) {
+                global $Debug;
+                $Debug->log_var($Array, 'Text::to_html(' . randomString(4) . ')');
+            }
+            if (is_string($Array[0]) && count($Array) == 2) {
+                self::$Levels--;
+                return self::smileys(self::userMention($Array[0]));
+            }
         }
 
         $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer(self::$viewer);
