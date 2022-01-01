@@ -781,6 +781,10 @@ class Torrent extends BaseObject {
             if ($bucket === false || $now > $this->updateTime['next']) {
                 $bucketKeyStem = 'users_snatched_' . $userId . '_';
                 $updated = [];
+                if (!isset($this->updateTime['last'])) {
+                    global $Debug;
+                    $Debug->log_var([$userId, $this->updateTime], 'isSnatched(' . randomString(4) , ')');
+                }
                 $qid = self::$db->get_query_id();
                 if ($bucket === false || $this->updateTime['last'] == 0) {
                     for ($i = 0; $i < $buckets; $i++) {
