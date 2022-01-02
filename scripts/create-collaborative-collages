@@ -1,0 +1,37 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$logger     = new Gazelle\Log;
+$collageMan = new Gazelle\Manager\Collage;
+$creator    = (new Gazelle\Manager\User)->findById($argv[1]);
+$min        = (int)($argv[2] ?? 1000);
+$wikiId     = (int)($argv[3] ?? 706);
+
+$DB->prepared_query("
+    SELECT t.Name AS name FROM tags t
+    WHERE t.TagType = 'genre'
+        AND NOT t.Name REGEXP '[12][0-9][0-9][0-9]s'
+        AND t.Uses >= ?
+    ORDER BY t.Uses DESC
+    ", $min
+);
+$nameList = $DB->collect(0, false);
+
+foreach ($nameList as $name) {
+    try {
+        $collage = $collageMan->create(
+            $creator,
+            2, // Genre Introduction
+            SITE_NAME . " Collaborative #{$name} Collage (2)",
+            "A collaborative introduction to the {$name} genre. See [url=wiki.php?action=article&id={$wikiId}]The Orpheus Collaborative Collage Project[/url] for more information.",
+            "$name, orpheus",
+            $logger
+        );
+    } catch (\Exception $e) {
+        continue; // name already exists
+    }
+    $collage->setUpdate('MaxGroupsPerUser', 1)->modify();
+    echo "[collage]{$collage->id()}[/collage]\n";
+}
