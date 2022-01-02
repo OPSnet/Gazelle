@@ -328,24 +328,26 @@ if ($sections = $Artist->sections()) {
                             [<?= $tgroup->year() ?>]
 <?php   } ?>
                             </strong>
+                            <span class="float_right">
 <?php   if ($bookmark->isTorrentBookmarked($groupId)) { ?>
-                            <span class="remove_bookmark float_right">
+                            <span class="remove_bookmark">
                                  <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
                                     $groupId ?>" class="brackets" onclick="Unbookmark('torrent', <?=
                                     $groupId ?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>
 <?php   } else { ?>
-                            <span class="add_bookmark float_right">
+                            <span class="add_bookmark">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
                                     $groupId ?>" class="brackets" onclick="Bookmark('torrent', <?=
                                     $groupId ?>, 'Remove bookmark'); return false;">Bookmark</a>
                             </span>
 <?php
         }
-        if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
+        if (!$Viewer->option('NoVoteLinks')) {
 ?>
-                            &nbsp;<?= (new Gazelle\Vote($Viewer))->setGroupId($groupId)->links($authKey) ?>
+                            <br /><?= (new Gazelle\Vote($Viewer))->setGroupId($groupId)->links() ?>
 <?php   } ?>
+                            </span>
                             <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>
                         </div>
                     </td>

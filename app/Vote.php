@@ -18,8 +18,6 @@ class Vote extends BaseUser {
     protected const VOTED_USER    = 'user_voted_%d';
     protected const VOTED_GROUP   = 'group_voted_%d';
 
-    protected User $user;
-
     protected array $groupVote = [];
     protected array $topConfig = [];
     protected array $topJoin   = [];
@@ -274,12 +272,12 @@ class Vote extends BaseUser {
         return $similar;
     }
 
-    public function links(string $auth): string {
+    public function links(): string {
         return self::$twig->render('vote/links.twig', [
-            'auth'     => $auth,
             'group_id' => $this->groupId,
             'score'    => $this->score($this->total(), $this->totalUp()),
             'vote'     => $this->userVote[$this->groupId] ?? 0,
+            'viewer'   => $this->user,
         ]);
     }
 

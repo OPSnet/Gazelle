@@ -320,8 +320,7 @@ $results      = Torrents::get_groups($groupIDs);
 $action       = display_str($_GET['type']);
 $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
@@ -540,8 +539,9 @@ foreach (CATEGORY as $catKey => $catName) {
                         't'      => $tinfo,
                     ]) ?>
                     <?= $displayName ?>
-<?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-                <?= $vote->setGroupId($groupID)->links($Viewer->auth()) ?>
+<?php   if (!$Viewer->option('NoVoteLinks')) { ?>
+                    <br />
+                    <span class="float_right"><?= $vote->setGroupId($groupID)->links() ?></span>
 <?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userId.'&amp;tags=')?></div>
                 </div>
