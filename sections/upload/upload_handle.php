@@ -20,7 +20,7 @@ $Properties = [];
 $Type = CATEGORY[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
-$Properties['Title'] = trim($_POST['title']);
+$Properties['Title'] = isset($_POST['title']) ? trim($_POST['title']) : null;
 // Remastered is an Enum in the DB
 $Properties['Remastered'] = !empty($_POST['remaster']) ? '1' : '0';
 if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
@@ -38,7 +38,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
     $Properties['RemasterRecordLabel'] = '';
     $Properties['RemasterCatalogueNumber'] = '';
 }
-$Properties['Year'] = trim($_POST['year']);
+$Properties['Year'] = isset($_POST['year']) ? trim($_POST['year']) : null;
 $_POST['year'] = $Properties['Year'];
 $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
