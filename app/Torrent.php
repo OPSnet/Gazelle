@@ -761,6 +761,10 @@ class Torrent extends BaseObject {
         if (!$this->snatchBucket) {
             $this->snatchBucket = array_fill(0, $buckets, false);
             $updateTime = self::$cache->get_value($snatchKey);
+            if (!isset($this->updateTime['last'])) {
+                global $Debug;
+                $Debug->log_var([$userId, $this->updateTime], 'isSnatched(' . randomString(4) , ')');
+            }
             if ($updateTime === false) {
                 $updateTime = [
                     'last' => 0,
