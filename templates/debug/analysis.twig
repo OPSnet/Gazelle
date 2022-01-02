@@ -28,22 +28,28 @@
     <tr><td class="colhead">First</td><td>{{ case.created }}</td></tr>
     <tr><td class="colhead">Last</td><td>{{ case.updated }}</td></tr>
     <tr><td class="colhead">URI</td><td>{{ case.uri }}</td></tr>
+    {% if case.logged_var is not empty %}
     <tr><td class="colhead">Logged variables</td><td>{{ case.logged_var }}</td></tr>
+    {% endif %}
     <tr><td class="colhead" style="vertical-align: top">Stacktrace</td><td>
     {% for line in case.trace %}
         <code>{{ line }}</code><br />
     {% endfor %}
     </td></tr>
+    {% if case.request is not empty %}
     <tr><td class="colhead" style="vertical-align: top">Request</td><td>
-    {% for key, value in case.request %}
-        {{ key }}: <code>{{ value }}</code><br />
-    {% endfor %}
+        {% for key, value in case.request %}
+        {{ key }}: <code>{% if value is iterable %}{{ value|json_encode }}{% else %}{{ value }}{% endif %}</code><br />
+        {% endfor %}
     </td></tr>
+    {% endif %}
+    {% if case.errorList is not empty %}
     <tr><td class="colhead" style="vertical-align: top">Errors</td><td>
-    {% for line in case.errorList %}
+        {% for line in case.errorList %}
         <code>{{ line.1 }} - {{ line.2 }}({{ line.0 }}) </code><br />
-    {% endfor %}
+        {% endfor %}
     </td></tr>
+    {% endif %}
 </td></tr>
 </table>
 </div>
