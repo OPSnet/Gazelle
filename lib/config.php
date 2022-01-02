@@ -897,8 +897,9 @@ defined('URL_REGEXP_STEM') or define('URL_REGEXP_STEM', '((?:f|ht)tps?:\/\/)(?:'
 defined('URL_REGEXP')      or define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
 defined('CSS_REGEXP')      or define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)$/i');
 defined('IMAGE_REGEXP')    or define('IMAGE_REGEXP',    '/\b(' . URL_REGEXP_STEM . '\.(?:gif|png|webm|jpe?g|tiff?)(\?\S*)?)\b/i');
-defined('SITELINK_REGEXP') or define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') . (defined('ALT_SITE_URL') ? '|' . preg_quote(ALT_SITE_URL, '/') : '') . ')');
+defined('SITELINK_REGEXP') or define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') .  '|' . preg_quote(ALT_SITE_URL, '/') . ')');
 defined('ARTIST_REGEXP')   or define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
+defined('COLLAGE_REGEXP')  or define('COLLAGE_REGEXP',  '/^' . SITELINK_REGEXP . '\/collages\.php\?.*?\bid=(?P<id>\d+)\b/');
 defined('TGROUP_REGEXP')   or define('TGROUP_REGEXP',   '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\bid=(?P<id>\d+)\b/');
 defined('TORRENT_REGEXP')  or define('TORRENT_REGEXP',  '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\btorrentid=(?P<id>\d+)\b/');
 defined('EMAIL_REGEXP')    or define('EMAIL_REGEXP',    '/^[\w-]+(?:\.[\w-]+)*(?:\+[.\w-]+)?@[\w-]+(?:\.[\w-]+)+$/');
