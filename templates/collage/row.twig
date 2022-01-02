@@ -1,9 +1,9 @@
-<li class="image_group_{{ group_id }}">
+<li id="image_group_{{ group_id }}">
     <a href="torrents.php?id={{ group_id }}" class="bookmark_{{ group_id }}">
 {% if image %}
         <img class="tooltip_interactive" src="{{ image }}" title="{{ name }} <br /> {{ tags }}" data-title-plain="{{ name }} ({{ tags_plain }})" width="118" />
 {% else %}
-        <div style="width: 107px; padding: 5px;">{{ name }} ({{ tags_plain }})</div>
+        <div style="padding: 5px;">{{ name }} ({{ tags_plain }})</div>
 {% endif %}
     </a>
 </li>
