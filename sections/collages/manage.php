@@ -1,15 +1,11 @@
 <?php
-$CollageID = (int)$_GET['collageid'];
-if (!$CollageID) {
+
+$collage = new Gazelle\Collage((int)($_GET['collageid'] ?? $_GET['id'] ?? 0));
+if (is_null($collage) || $collage->isArtist()) {
     error(404);
 }
-$collage = new Gazelle\Collage($CollageID);
-
 if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !$Viewer->permitted('site_collages_delete')) {
     error(403);
-}
-if ($collage->isArtist()) {
-    error(404);
 }
 
 $DB->prepared_query("
@@ -24,7 +20,7 @@ $DB->prepared_query("
     LEFT JOIN users_main AS um ON (um.ID = ct.UserID)
     WHERE ct.CollageID = ?
     ORDER BY ct.Sort
-    ", $CollageID
+    ", $collage->id()
 );
 $GroupIDs = $DB->collect('GroupID');
 
@@ -114,7 +110,7 @@ View::show_header("Manage collage: " . $collage->name(), ['js' => 'jquery-ui,jqu
                     <td class="nobr">
                         <input type="hidden" name="action" value="manage_handle" />
                         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-                        <input type="hidden" name="collageid" value="<?=$CollageID?>" />
+                        <input type="hidden" name="collageid" value="<?=$collage->id() ?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                         <input type="submit" name="submit" value="Edit" />
                         <input type="submit" name="submit" value="Remove" />
@@ -132,7 +128,7 @@ View::show_header("Manage collage: " . $collage->name(), ['js' => 'jquery-ui,jqu
         <div>
             <input type="hidden" name="action" value="manage_handle" />
             <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-            <input type="hidden" name="collageid" value="<?=$CollageID?>" />
+            <input type="hidden" name="collageid" value="<?=$collage->id() ?>" />
             <input type="hidden" name="groupid" value="1" />
             <input type="hidden" name="drag_drop_collage_sort_order" id="drag_drop_collage_sort_order" readonly="readonly" value="" />
         </div>

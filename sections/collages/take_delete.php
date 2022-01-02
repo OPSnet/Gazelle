@@ -21,7 +21,7 @@ $collage->remove();
 
 (new Gazelle\Manager\Subscription)->flush('collages', $collageId);
 (new Gazelle\Log)->general(sprintf("Collage %d (%s) was deleted by %s: %s",
-    $collageId, $name, $Viewer->username, $reason
+    $collageId, $name, $Viewer->username(), $reason
 ));
 
 header('Location: collages.php');
