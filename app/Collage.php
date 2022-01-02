@@ -549,7 +549,7 @@ class Collage extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function removeEntry(int $entryId) {
+    public function removeEntry(int $entryId): int {
         self::$db->prepared_query("
             DELETE FROM " . $this->entryTable . "
             WHERE CollageID = ?
@@ -564,12 +564,13 @@ class Collage extends BaseObject {
             WHERE ID = ?
             ", $rows, $this->id
         );
+        $affected = self::$db->affected_rows();
         if ($this->isArtist()) {
             self::$cache->deleteMulti(["artist_$entryId", "artist_groups_$entryId"]);
         } else {
             self::$cache->deleteMulti(["torrents_details_$entryId", "torrent_collages_$entryId", "torrent_collages_personal_$entryId"]);
         }
-        return $this;
+        return $affected;
     }
 
     public function remove(): int {
