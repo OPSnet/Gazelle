@@ -79,14 +79,18 @@ class Collage extends \Gazelle\Base {
             'group_id'   => $tgroup->id(),
             'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
             'name'       => $tgroup->displayNameText(),
-            'tags'       => implode(', ', $tgroup->tagNameList()),
+            'tags'       => implode(', ', array_map(fn($n) => "${$n}", $tgroup->tagNameList())),
+            'tags_plain' => implode(', ', $tgroup->tagNameList()),
         ]);
     }
 
     public function coverRow(\Gazelle\TGroup $tgroup): string {
         return self::$twig->render('collage/row.twig', [
-            'tgroup'     => $tgroup->id(),
+            'group_id'   => $tgroup->id(),
             'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
+            'name'       => $tgroup->displayNameText(),
+            'tags'       => implode(', ', array_map(fn($n) => "#{$n}", $tgroup->tagNameList())),
+            'tags_plain' => implode(', ', $tgroup->tagNameList()),
         ]);
     }
 
