@@ -8,7 +8,10 @@ $errorLog = new Gazelle\Manager\ErrorLog;
 $case = null;
 
 if (isset($_POST['remove'])) {
-    $errorLog->findById((int)$_POST['id'])->remove();
+    $case = $errorLog->findById((int)$_POST['id']);
+    if ($case) {
+        $case->remove();
+    }
 } elseif (isset($_POST['prev'])) {
     $case = $errorLog->findByPrev((int)$_POST['id']);
 } elseif (isset($_POST['next'])) {
