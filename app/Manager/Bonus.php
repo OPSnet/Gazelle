@@ -62,6 +62,9 @@ class Bonus extends \Gazelle\Base {
     }
 
     public function addMultiPoints(int $points, array $ids = []): int {
+        if (empty($ids)) {
+            return 0;
+        }
         self::$db->prepared_query("
             UPDATE user_bonus SET
                 points = points + ?
@@ -69,6 +72,7 @@ class Bonus extends \Gazelle\Base {
             ", $points, ...$ids
         );
         self::$cache->deleteMulti(array_map(fn($k) => "user_stats_$k", $ids));
+        self::$cache->deleteMulti(array_map(fn($k) => "u_$k", $ids));
         return self::$db->affected_rows();
     }
 
@@ -77,11 +81,13 @@ class Bonus extends \Gazelle\Base {
             SELECT um.ID
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
             WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_has_attr uhafl
+                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+                    WHERE uhafl.UserID = um.ID
+                )
         ");
         return $this->addMultiPoints($points, self::$db->collect('ID', false));
     }
@@ -92,11 +98,13 @@ class Bonus extends \Gazelle\Base {
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN user_last_access ula ON (ula.user_id = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
             WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_has_attr uhafl
+                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+                    WHERE uhafl.UserID = um.ID
+                )
                 AND ula.last_access >= ?
             ", $since
         );
@@ -109,11 +117,13 @@ class Bonus extends \Gazelle\Base {
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN torrents t ON (t.UserID = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
             WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_has_attr uhafl
+                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+                    WHERE uhafl.UserID = um.ID
+                )
                 AND t.Time >= ?
             ", $since
         );
@@ -126,11 +136,13 @@ class Bonus extends \Gazelle\Base {
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN xbt_files_users xfu ON (xfu.uid = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
             WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_has_attr uhafl
+                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+                    WHERE uhafl.UserID = um.ID
+                )
                 AND xfu.active = 1 and xfu.remaining = 0 and xfu.connectable = 1 and timespent > 0
         ");
         return $this->addMultiPoints($points, self::$db->collect('ID', false));
