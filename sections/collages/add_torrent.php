@@ -11,6 +11,10 @@ if (isset($_POST['collage_combo']) && (int)$_POST['collage_combo']) {
     $collage = $collageMan->findById((int)$_POST['collage_combo']); // From release page
 } elseif (isset($_POST['collage_ref'])) {
     $collage = $collageMan->findByName(trim($_POST['collage_ref'])); // From release page (autocomplete)
+    // maybe it was an URL
+    if (is_null($collage) && preg_match(COLLAGE_REGEXP, $_POST['collage_ref'], $match)) {
+        $collage = $collageMan->findById((int)$match['id']);
+    }
 } else {
     $collage = $collageMan->findById((int)$_POST['collageid']); // From collage page
 }
@@ -64,14 +68,16 @@ foreach ($URL as $u) {
 if (!$Viewer->permitted('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
-        if ($collage->countByUser($Viewer->id()) + count($ID) > $maxGroupsPerUser) {
-            error("You may add no more than $maxGroupsPerUser entries to this collage.");
+        if ($collage->countByUser($Viewer->id()) + count($groupIds) > $maxGroupsPerUser) {
+            $entry = $maxGroupsPerUser === 1 ? 'entry' : 'entries';
+            error("You may add no more than $maxGroupsPerUser $entry to this collage.");
         }
     }
 
     $maxGroups = $collage->maxGroups();
-    if ($maxGroups > 0 && ($collage->numEntries() + count($ID) > $maxGroups)) {
-        error("This collage can hold only $maxGroups entries.");
+    if ($maxGroups > 0 && ($collage->numEntries() + count($groupIds) > $maxGroups)) {
+        $entry = $maxGroupsPerUser === 1 ? 'entry' : 'entries';
+        error("This collage can hold only $maxGroups $entry.");
     }
 }
 
