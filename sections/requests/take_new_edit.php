@@ -310,9 +310,9 @@ if ($NewRequest) {
             now(), now(), 1, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         $Viewer->id(), $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
-        $CatalogueNumber, $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC);
+        $CatalogueNumber, $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID ?? null, $OCLC
+    );
     $RequestID = $DB->inserted_id();
-
 } else {
     if ($onlyMetadata) {
         $DB->prepared_query("
@@ -350,7 +350,7 @@ if ($NewRequest) {
     $Cache->delete_value("request_artists_$RequestID");
 }
 
-if ($GroupID) {
+if (isset($GroupID)) {
     $Cache->delete_value("requests_group_$GroupID");
 }
 
