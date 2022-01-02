@@ -359,7 +359,7 @@ class TGroup extends BaseObject {
     }
 
     public function label(): string {
-        return $this->id . " (" . $this->info()['Name'] . ")";
+        return $this->id . " (" . $this->name() . ")";
     }
 
     public function name(): string {
