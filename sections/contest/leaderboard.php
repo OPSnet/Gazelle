@@ -1,11 +1,15 @@
 <?php
 
+$prior = $contestMan->priorContests();
 if (!empty($_POST['leaderboard'])) {
     $contest = new Gazelle\Contest((int)$_POST['leaderboard']);
 } elseif (!empty($_GET['id'])) {
     $contest = new Gazelle\Contest((int)$_GET['id']);
 } else {
     $contest = $contestMan->currentContest();
+    if (is_null($contest)) {
+        $contest = end($prior);
+    }
 }
 
 $paginator = new Gazelle\Util\Paginator(CONTEST_ENTRIES_PER_PAGE, (int)($_GET['page'] ?? 1));
@@ -17,7 +21,7 @@ echo $Twig->render('contest/leaderboard.twig', [
     'action_header' => $isRequestFill ? 'requests have been filled' : 'torrents have been uploaded',
     'score_header'  => $isRequestFill ? 'Requests Filled' : 'Perfect FLACs',
     'contest'       => $contest,
-    'prior'         => $contestMan->priorContests(),
+    'prior'         => $prior,
     'paginator'     => $paginator,
     'title'         => empty($contest) ? 'Leaderboard' : $contest->name() . ' Leaderboard',
     'viewer'        => $Viewer,
