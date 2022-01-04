@@ -17,6 +17,10 @@ if ($remove) {
     $removed = $errMan->removeSlow((float)($_POST['slow'] ?? 60.0));
 }
 
+if ($_REQUEST['filter']) {
+    $errMan->setFilter(trim($_REQUEST['search'] ?? ''));
+}
+
 $paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($errMan->total());
 
@@ -25,4 +29,5 @@ echo $Twig->render('debug/analysis-list.twig', [
     'list'      => $errMan->list($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
     'removed'   => $removed,
+    'search'    => $_REQUEST['search'] ?? '',
 ]);

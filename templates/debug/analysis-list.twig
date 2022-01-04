@@ -3,13 +3,18 @@
     <h2>Error Analysis</h2>
 </div>
 <div class="thin">
+<form class="manage_form" name="error-log" action="" method="post">
+<span style="float: right">
+    <input type="text" name="search" value="{{ search }}" />
+    <input type="submit" name="filter" value="Filter" />
+    <input type="submit" name="refresh" value="Refresh" />
+</span>
 {{ paginator.linkbox|raw }}
 {% if removed >= 0 %}
 <div class="box pad">
 {{ removed }} case{{ removed|plural }} removed.
 </div>
 {% endif %}
-<form class="manage_form" name="bans" action="" method="post">
 <input type="hidden" name="auth" value="{{ auth }}" />
 <input type="hidden" name="action" value="analysis_list" />
 <table width="100%">

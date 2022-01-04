@@ -4,6 +4,8 @@ namespace Gazelle\Manager;
 
 class ErrorLog extends \Gazelle\Base {
 
+    protected string $filter;
+
     /**
      * Get an eror log based on its ID
      */
@@ -39,13 +41,34 @@ class ErrorLog extends \Gazelle\Base {
         return $id ? new \Gazelle\ErrorLog($id) : null;
     }
 
+    public function setFilter(string $filter) {
+        $this->filter = $filter;
+        return $this;
+    }
+
     public function total(): int {
+        $args = [];
+        if (!isset($this->filter)) {
+            $where = '';
+        } else {
+            $where = "WHERE uri LIKE concat('%', ?, '%')";
+            $args[] = $this->filter;
+        }
         return self::$db->scalar("
-            SELECT count(*) FROM error_log
-        ");
+            SELECT count(*) FROM error_log $where
+            ", ...$args
+        );
     }
 
     public function list(int $limit, int $offset): array {
+        $args = [];
+        if (!isset($this->filter)) {
+            $where = '';
+        } else {
+            $where = "WHERE uri LIKE concat('%', ?, '%')";
+            $args[] = $this->filter;
+        }
+        array_push($args, $limit, $offset);
         self::$db->prepared_query("
             SELECT error_log_id,
                 duration,
@@ -60,10 +83,10 @@ class ErrorLog extends \Gazelle\Base {
                 request,
                 error_list,
                 logged_var
-            FROM error_log
+            FROM error_log $where
             ORDER BY updated DESC
             LIMIT ? OFFSET ?
-            ", $limit, $offset
+            ", ...$args
         );
         $result = self::$db->to_array('error_log_id', MYSQLI_ASSOC, false);
         $list = [];
