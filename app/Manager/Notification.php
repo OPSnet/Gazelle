@@ -57,11 +57,11 @@ class Notification extends \Gazelle\Base {
     protected $userId;
     protected \Gazelle\Subscription $subscription;
     protected $notifications;
-    protected $settings;
     protected $skipped;
-    protected $typeList = [];
+    protected array $settings = [];
+    protected array $typeList = [];
 
-    protected static $registry = [];
+    protected static array $registry = [];
 
     public function __construct(int $userId = null, array $skip = [], bool $load = true, bool $autoSkip = true) {
         // TODO: fix this $skip/$autoSkip insanity
@@ -123,7 +123,8 @@ class Notification extends \Gazelle\Base {
     }
 
     public function isTraditional(string $type): bool {
-        return in_array($this->settings[$type], [self::OPT_TRADITIONAL, self::OPT_TRADITIONAL_PUSH]);
+        return isset($this->settings[$type])
+            && in_array($this->settings[$type], [self::OPT_TRADITIONAL, self::OPT_TRADITIONAL_PUSH]);
     }
 
     public function isSkipped(string $type): bool {
@@ -423,7 +424,8 @@ class Notification extends \Gazelle\Base {
     }
 
     public function settings() {
-        if (($settings = self::$cache->get_value("users_notifications_settings_" . $this->userId)) === false) {
+        $settings = self::$cache->get_value("users_notifications_settings_" . $this->userId);
+        if ($settings == false) {
             self::$db->prepared_query("
                 SELECT *
                 FROM users_notifications_settings AS n
@@ -431,7 +433,7 @@ class Notification extends \Gazelle\Base {
                 WHERE n.UserID = ?
                 ", $this->userId
             );
-            $settings = self::$db->next_record(MYSQLI_ASSOC, false);
+            $settings = self::$db->next_record(MYSQLI_ASSOC, false) ?? [];
             self::$cache->cache_value("users_notifications_settings_" . $this->userId, $settings, 86400);
         }
         return $settings;
