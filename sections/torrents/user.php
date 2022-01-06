@@ -482,7 +482,7 @@ foreach (CATEGORY as $catKey => $catName) {
         </tr>
 <?php
     $pageSize = 0;
-    $vote = new Gazelle\Vote($Viewer);
+    $vote = new Gazelle\User\Vote($Viewer);
 
     foreach ($torrentsInfo as $torrentID => $info) {
         $torrent = $torMan->findById($torrentID);

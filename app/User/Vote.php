@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Vote extends BaseUser {
+class Vote extends \Gazelle\BaseUser {
     const Z_VAL    = 1.281728756502709;  // original
     const Z_VAL_90 = 1.6448536251336989; // p-value .90
     const Z_VAL_95 = 1.959963986120195;  //         .95
@@ -26,7 +26,7 @@ class Vote extends BaseUser {
     protected array $userVote;
     protected array $voteSummary;
 
-    public function __construct(User $user) {
+    public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
         $userKey = sprintf(self::VOTE_USER_KEY, $this->user->id());
         $userVote = self::$cache->get_value($userKey);
@@ -92,7 +92,7 @@ class Vote extends BaseUser {
          return $this;
     }
 
-    public function voteRanks(array $list) {
+    public function voteRanks(array $list): array {
         $ranks = [];
         $rank = 0;
         $prevRank = false;
@@ -182,7 +182,7 @@ class Vote extends BaseUser {
         return $ranks[$this->groupId] ?? false;
     }
 
-    public function topVotes() {
+    public function topVotes(): array {
         $key = 'top10_votes_' . $this->topConfig['limit']
             . ($this->topWhere
                 ? md5(implode('|', array_merge($this->topWhere, $this->topArgs, [(int)$this->topConfig['tagAll']])))
@@ -325,7 +325,7 @@ class Vote extends BaseUser {
      * Returns an array with User Vote data: GroupID and vote type
      * @return array [groupId => 0|1]
      */
-    public function userVotes() {
+    public function userVotes(): array {
         $key = sprintf(self::VOTED_USER, $this->user->id());
         $votes = self::$cache->get_value($key);
         if ($votes === false) {
@@ -365,7 +365,7 @@ class Vote extends BaseUser {
      *
      * @return array [bool success, string reason]
      */
-    public function upvote() {
+    public function upvote(): array {
         return $this->castVote(1);
     }
 
@@ -374,7 +374,7 @@ class Vote extends BaseUser {
      *
      * @return array [bool success, string reason]
      */
-    public function downvote() {
+    public function downvote(): array {
         return $this->castVote(-1);
     }
 
@@ -435,7 +435,7 @@ class Vote extends BaseUser {
     /**
      * Clear a vote on this release group
      */
-    public function clear() {
+    public function clear(): array {
         if (!isset($this->userVote[$this->groupId])) {
             return [false, 'not-voted'];
         }
@@ -469,7 +469,7 @@ class Vote extends BaseUser {
         return [true, 'cleared'];
     }
 
-    public function recent(Manager\TGroup $tgMan): array {
+    public function recent(\Gazelle\Manager\TGroup $tgMan): array {
         $key = sprintf(self::VOTE_RECENT, $this->user->id());
         $recent = self::$cache->get_value($key);
         if ($recent === false) {
@@ -516,7 +516,7 @@ class Vote extends BaseUser {
         }
     }
 
-    public function userPage(int $mask, int $limit, int $offset): array {
+    public function userPage(\Gazelle\Manager\TGroup $tgMan, int $mask, int $limit, int $offset): array {
         $cond = ['UserID = ?'];
         $args = [$this->user->id()];
         if ($mask === self::UPVOTE) {
@@ -538,7 +538,6 @@ class Vote extends BaseUser {
             ", ...$args
         );
         $page =  self::$db->to_array(false, MYSQLI_ASSOC, false);
-        $tgMan = new Manager\TGroup;
         foreach ($page as &$p) {
             $p['tgroup'] = $tgMan->findById($p['group_id']);
         }

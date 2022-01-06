@@ -1,3 +1,4 @@
+{{ header(user.username ~ ' &rsaquo; Voting History') }}
 <div id="user-vote-history" class="box pad thin">
 {% for v in page %}
 <div>
@@ -12,3 +13,4 @@
 </div>
 {% endfor %}
 </div>
+{{ footer() }}

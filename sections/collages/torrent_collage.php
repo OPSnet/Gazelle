@@ -192,7 +192,7 @@ $urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
             </tr>
 <?php
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
-$vote = new Gazelle\Vote($Viewer);
+$vote = new Gazelle\User\Vote($Viewer);
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
