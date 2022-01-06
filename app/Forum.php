@@ -833,6 +833,9 @@ class Forum extends BaseObject {
         if (!$forumPost) {
             return false;
         }
+        self::$db->begin_transaction();
+        $db = new DB;
+        $db->relaxConstraints(true);
         self::$db->prepared_query("
             DELETE fp, unq
             FROM forums_posts fp
@@ -841,6 +844,8 @@ class Forum extends BaseObject {
             ", $postId
         );
         if (self::$db->affected_rows() === 0) {
+            $db->relaxConstraints(false);
+            self::$db->rollback();
             return false;
         }
         $forumId  = $forumPost['forum-id'];
@@ -873,6 +878,8 @@ class Forum extends BaseObject {
             WHERE t.ID = ?
             ", $postId, $threadId, $threadId, $threadId
         );
+        $db->relaxConstraints(false);
+        self::$db->commit();
 
         $this->adjustForumStats($forumId);
 
