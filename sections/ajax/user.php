@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\User\Vote;
+
 $user = (new Gazelle\Manager\User)->findById((int)$_GET['id']);
 if (is_null($user)) {
     json_die("failure", "bad id parameter");
@@ -18,8 +20,8 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $TotalSpent     = $stats->requestVoteSize();
 }
 
-$vote = new Gazelle\Vote($user);
-$releaseVotes     = $vote->userTotal(Gazelle\Vote::UPVOTE|Gazelle\Vote::DOWNVOTE);
+$vote             = new Vote($user);
+$releaseVotes     = $vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
 $ForumPosts       = $stats->forumPostTotal();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $stats->uploadTotal() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : null;

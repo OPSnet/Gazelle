@@ -2,7 +2,7 @@ From: Spine
 To: Developers
 Date: 2020-11-28
 Subject: Orpheus Development Papers #3 - Voting Implementation
-Version: 1
+Version: 2
 
 When a person upvotes or downvotes a release group, that information is recorded
 in the `users_votes` table (user id, group id, direction and timestamp).
@@ -16,18 +16,8 @@ will be 5 rows (from the five voters) in the users_votes table, and the
 torrents_votes table will contain one row with Total = 5, Ups = 3.
 
 If the `torrents_votes` is ever corrupted, it may be recreated with
-
-    INSERT INTO torrents_votes (GroupID, Ups, Total)
-    SELECT v.GroupID, sum(if(v.Type = 'Up', 1, 0)), count(*)
-    FROM users_votes v
-    GROUP BY v.GroupID
-
-    UPDATE torrents_votes SET Score = ((Ups / Total) + 1.2817288 * 1.2817288 / (2 * Total) - 1.2817288
-        * sqrt(((Ups / Total) * (1 - (Ups / Total)) + 1.2817288 * 1.2817288 / (4 * Total)) / Total))
-            / (1 + 1.2817288 * 1.2817288 / Total);
-
-There is some discrepancy in the code between the above formula and the
-use of binomial_ci(Ups, Total).
+`scripts/rebuild-votes`. There is some discrepancy in the code between the
+above formula and the use of binomial_ci(Ups, Total).
 
 The user and group vote information are both cached. As the user object can
 become quite large, care must be taken to update the cache on writes. This is

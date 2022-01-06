@@ -1,6 +1,6 @@
 <?php
 
-$vote = new Gazelle\Vote($Viewer);
+$vote = new Gazelle\User\Vote($Viewer);
 $tagMan = new Gazelle\Manager\Tag;
 $torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 

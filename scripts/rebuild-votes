@@ -1,0 +1,57 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$DB->prepared_query("
+    CREATE TEMPORARY TABLE torrents_votes_new LIKE torrents_votes
+");
+
+echo Date('Y-m-d H-i-s') . " create new temp table\n";
+$DB->prepared_query("
+    INSERT INTO torrents_votes_new (GroupID, Ups, Total)
+    SELECT v.GroupID, sum(if(v.Type = 'Up', 1, 0)), count(*)
+    FROM users_votes v
+    GROUP BY v.GroupID
+");
+
+echo Date('Y-m-d H-i-s') . " update scores\n";
+$DB->prepared_query("
+    UPDATE torrents_votes_new SET Score = ((Ups / Total) + 1.2817288 * 1.2817288 / (2 * Total) - 1.2817288
+        * sqrt(((Ups / Total) * (1 - (Ups / Total)) + 1.2817288 * 1.2817288 / (4 * Total)) / Total))
+            / (1 + 1.2817288 * 1.2817288 / Total)
+");
+
+$DB->begin_transaction();
+echo Date('Y-m-d H-i-s') . " delete old scores\n";
+$DB->prepared_query("
+    DELETE FROM torrents_votes
+");
+echo Date('Y-m-d H-i-s') . " insert new scores\n";
+$DB->prepared_query("
+    INSERT INTO torrents_votes
+    SELECT * FROM torrents_votes_new
+");
+$DB->commit();
+
+$max = $DB->scalar("SELECT max(ID) FROM torrents_group");
+$id = 0;
+
+while ($id < $max) {
+    $id++;
+    echo Date('Y-m-d H-i-s') . " cache expiry $id/$max\n";
+    $list = $DB->scalar("
+        SELECT group_concat(ID ORDER BY ID)
+        FROM torrents_group
+        WHERE ID >= ?
+        ORDER BY ID
+        LIMIT ?
+        ", $id, 2000
+    );
+    if (!$list) {
+        break;
+    }
+    $ids = explode(',', $list);
+    $Cache->deleteMulti($ids);
+    $id = end($ids);
+}

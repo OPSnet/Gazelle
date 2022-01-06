@@ -14,6 +14,7 @@ $collageMan = new Gazelle\Manager\Collage;
 $tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $stats      = new Gazelle\Stats\Artist($ArtistID);
+$vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
 $isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
@@ -345,7 +346,7 @@ if ($sections = $Artist->sections()) {
         }
         if (!$Viewer->option('NoVoteLinks')) {
 ?>
-                            <br /><?= (new Gazelle\Vote($Viewer))->setGroupId($groupId)->links() ?>
+                            <br /><?= $vote->setGroupId($groupId)->links() ?>
 <?php   } ?>
                             </span>
                             <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>

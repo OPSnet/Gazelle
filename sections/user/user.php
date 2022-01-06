@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\User\Vote;
+
 $userMan = new Gazelle\Manager\User;
 $User = $userMan->findById((int)$_GET['id']);
 if (is_null($User)) {
@@ -165,12 +167,12 @@ if ($lastfmInfo)  {
     ]);
 }
 
-$Vote             = new Gazelle\Vote($User);
+$Vote             = new Vote($User);
 $stats            = $User->stats();
 $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
 $ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0;
-$releaseVotes     = $Vote->userTotal(Gazelle\Vote::UPVOTE|Gazelle\Vote::DOWNVOTE);
+$releaseVotes     = $Vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
 $bonusPointsSpent = $User->bonusPointsSpent();
 $torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
