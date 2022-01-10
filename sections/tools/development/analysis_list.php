@@ -17,8 +17,8 @@ if ($remove) {
     $removed = $errMan->removeSlow((float)($_POST['slow'] ?? 60.0));
 }
 
-if ($_REQUEST['filter']) {
-    $errMan->setFilter(trim($_REQUEST['search'] ?? ''));
+if (isset($_REQUEST['filter']) && isset($_REQUEST['search'])) {
+    $errMan->setFilter(trim($_REQUEST['search']));
 }
 
 $paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
