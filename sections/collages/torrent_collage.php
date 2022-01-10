@@ -193,6 +193,7 @@ $urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
 <?php
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 $vote = new Gazelle\User\Vote($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
@@ -288,7 +289,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             if ($Torrent['Remastered'] && !$Torrent['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-            $SnatchedTorrentClass = $torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '';
 
             if ($Torrent['RemasterTitle'] != $LastRemasterTitle
                 || $Torrent['RemasterYear'] != $LastRemasterYear

@@ -13,8 +13,6 @@ class Torrent extends BaseObject {
 
     protected TGroup $tgroup;
     protected bool $isDeleted = false;
-    protected $showSnatched;
-    protected $snatchBucket;
     protected $tokenCache;
     protected $updateTime;
     protected User $viewer;
@@ -69,15 +67,6 @@ class Torrent extends BaseObject {
      */
     public function setViewer(User $viewer) {
         $this->viewer = $viewer;
-        return $this;
-    }
-
-    /**
-     * In the context of a user, determine whether snatched indicators should be
-     * added to torrent and group info.
-     */
-    public function setShowSnatched(int $showSnatched) {
-        $this->showSnatched = $showSnatched;
         return $this;
     }
 
@@ -174,7 +163,7 @@ class Torrent extends BaseObject {
 
         if (isset($this->viewer)) {
             $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewer->id());
-            $info['IsSnatched'] = $this->showSnatched && $this->viewer->option('ShowSnatched') && $this->isSnatched($this->viewer->id());
+            $info['IsSnatched'] = (new User\Snatch($this->viewer))->showSnatch($this->id);
         } else {
             $info['PersonalFL'] = false;
             $info['IsSnatched'] = false;
@@ -235,7 +224,7 @@ class Torrent extends BaseObject {
         $info = $this->info();
         $label = $this->shortLabelList();
 
-        if (isset($this->viewer) && $this->isSnatched($this->viewer->id())) {
+        if (isset($this->viewer) && (new User\Snatch($this->viewer))->showSnatch($this->id)) {
             $label[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
         if (isset($info['FreeTorrent'])) {
@@ -747,95 +736,6 @@ class Torrent extends BaseObject {
             }
         }
         return $list;
-    }
-
-    /**
-     * Has the viewing user snatched this torrent? (And do they want to know about it?)
-     */
-    public function isSnatched(int $userId): bool {
-        $buckets = 64;
-        $bucketMask = $buckets - 1;
-        $bucketId = $this->id & $bucketMask;
-
-        $snatchKey = "users_snatched_" . $userId . "_time";
-        if (!$this->snatchBucket) {
-            $this->snatchBucket = array_fill(0, $buckets, false);
-            $updateTime = self::$cache->get_value($snatchKey);
-            if (!isset($this->updateTime['last'])) {
-                global $Debug;
-                $Debug->log_var([$userId, $this->updateTime], 'isSnatched(' . randomString(4) , ')');
-            }
-            if ($updateTime === false) {
-                $updateTime = [
-                    'last' => 0,
-                    'next' => 0
-                ];
-            }
-            $this->updateTime = $updateTime;
-        } elseif (isset($this->snatchBucket[$bucketId][$this->id])) {
-            return true;
-        }
-
-        // Torrent was not found in the previously inspected snatch lists
-        $bucket =& $this->snatchBucket[$bucketId];
-        if ($bucket === false) {
-            $now = time();
-            // This bucket hasn't been checked before
-            $bucket = self::$cache->get_value($snatchKey, true);
-            if ($bucket === false || $now > $this->updateTime['next']) {
-                $bucketKeyStem = 'users_snatched_' . $userId . '_';
-                $updated = [];
-                if (!isset($this->updateTime['last'])) {
-                    global $Debug;
-                    $Debug->log_var([$userId, $this->updateTime], 'isSnatched(' . randomString(4) , ')');
-                }
-                $qid = self::$db->get_query_id();
-                if ($bucket === false || $this->updateTime['last'] == 0) {
-                    for ($i = 0; $i < $buckets; $i++) {
-                        $this->snatchBucket[$i] = [];
-                    }
-                    // Not found in cache. Since we don't have a suitable index, it's faster to update everything
-                    self::$db->prepared_query("
-                        SELECT fid FROM xbt_snatched WHERE uid = ?
-                        ", $userId
-                    );
-                    while ([$id] = self::$db->next_record(MYSQLI_NUM, false)) {
-                        $this->snatchBucket[$id & $bucketMask][(int)$id] = true;
-                    }
-                    $updated = array_fill(0, $buckets, true);
-                } elseif (isset($bucket[$this->id])) {
-                    // Old cache, but torrent is snatched, so no need to update
-                    return true;
-                } else {
-                    // Old cache, check if torrent has been snatched recently
-                    self::$db->prepared_query("
-                        SELECT fid FROM xbt_snatched WHERE uid = ? AND tstamp >= ?
-                        ", $userId, $this->updateTime['last']
-                    );
-                    while ([$id] = self::$db->next_record(MYSQLI_NUM, false)) {
-                        $bucketId = $id & $bucketMask;
-                        if ($this->snatchBucket[$bucketId] === false) {
-                            $this->snatchBucket[$bucketId] = self::$cache->get_value("$bucketKeyStem$bucketId", true);
-                            if ($this->snatchBucket[$bucketId] === false) {
-                                $this->snatchBucket[$bucketId] = [];
-                            }
-                        }
-                        $this->snatchBucket[$bucketId][(int)$id] = true;
-                        $updated[$bucketId] = true;
-                    }
-                }
-                self::$db->set_query_id($qid);
-                for ($i = 0; $i < $buckets; $i++) {
-                    if (isset($updated[$i])) {
-                        self::$cache->cache_value("$bucketKeyStem$i", $this->snatchBucket[$i], 7200);
-                    }
-                }
-                $this->updateTime['last'] = $now;
-                $this->updateTime['next'] = $now + self::SNATCHED_UPDATE_INTERVAL;
-                self::$cache->cache_value($snatchKey, $this->updateTime, 7200);
-            }
-        }
-        return isset($bucket[$this->id]);
     }
 
     /**

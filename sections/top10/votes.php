@@ -3,6 +3,7 @@
 $vote = new Gazelle\User\Vote($Viewer);
 $tagMan = new Gazelle\Manager\Tag;
 $torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
@@ -141,7 +142,7 @@ foreach ($topVotes as $groupID => $group) {
             if (is_null($torrent)) {
                 continue;
             }
-            if (($tinfo['IsSnatched'] = $torrent->isSnatched($Viewer->id())) && !$groupSnatched) {
+            if (($tinfo['IsSnatched'] = $snatcher->showSnatch($torrent->id())) && !$groupSnatched) {
                 $groupSnatched = true;
             }
         }
@@ -260,7 +261,7 @@ foreach ($topVotes as $groupID => $group) {
             continue;
         }
         $tinfo = current($torrents);
-        $tinfo['IsSnatched'] = $torrent->isSnatched($Viewer->id());
+        $tinfo['IsSnatched'] = $snatcher->showSnatch($torrent->id());
 
         $displayName = $number .' - <a href="torrents.php?id='.$groupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$groupName.'</a>';
         if ($tinfo['IsSnatched']) {

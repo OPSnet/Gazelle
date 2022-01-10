@@ -2,7 +2,7 @@
 {% set v_tokens = viewer.tokenCount %}
 {% for t in results %}
     {% set t_tokens = t.tokenCount %}
-<tr class="torrent torrent_t{{ t.isSnatched(viewer.id) ? ' snatched_torrent' : '' }}">
+<tr class="torrent torrent_t{{ snatcher.showSnatch(t.id) ? ' snatched_torrent' : '' }}">
     <td>
         <span class="torrent_links_block">
             <a href="torrents.php?action=download&amp;id={{ t.id }}&amp;viewer.announceKey={{ viewer.announceKey }}" class="brackets tooltip" title="Download">DL</a>

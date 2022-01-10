@@ -67,7 +67,7 @@ foreach ($Results as $Key => $GroupID) {
 
     $TagList = array_values($tgroup->tagNameList());
     $JsonArtists = (new Gazelle\ArtistRole\TGroup($tgroup->id()))->rolelist()['main'];
-
+    $snatcher    = new Gazelle\User\Snatch($Viewer);
     if ($GroupResults && (count($Torrents) > 1 || $tgroup->categoryGrouped())) {
         $prev = false;
         $EditionID = 0;
@@ -115,7 +115,7 @@ foreach ($Results as $Key => $GroupID) {
                 'isPersonalFreeleech'
                                  => $torrent->isFreeleechPersonal(),
                 'canUseToken'    => $Viewer->canSpendFLToken($torrent),
-                'hasSnatched'    => $torrent->isSnatched($Viewer->id()),
+                'hasSnatched'    => $snatcher->showSnatch($torrent->id()),
             ];
         }
 
@@ -155,7 +155,7 @@ foreach ($Results as $Key => $GroupID) {
             'isPersonalFreeleech'
                              => $torrent->isFreeleechPersonal(),
             'canUseToken'    => $Viewer->canSpendFLToken($torrent),
-            'hasSnatched'    => $torrent->isSnatched($Viewer->id()),
+            'hasSnatched'    => $snatcher->showSnatch($torrent->id()),
         ];
     }
 }

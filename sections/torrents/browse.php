@@ -5,6 +5,7 @@ use Gazelle\Util\SortableTableHeader;
 $tagMan = new Gazelle\Manager\Tag;
 $tgMan  = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $torrent = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
@@ -235,7 +236,7 @@ foreach ($Results as $GroupID) {
             if ($Data['Remastered'] && !$Data['RemasterYear']) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-            $SnatchedTorrentClass = $torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '';
             $Reported = $torMan->hasReport($Viewer, $TorrentID);
 
             if (isset(CATEGORY_GROUPED[$CategoryID - 1])

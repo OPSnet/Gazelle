@@ -17,16 +17,11 @@ class Torrent extends \Gazelle\Json {
         return $this;
     }
 
-    public function setShowSnatched(bool $showSnatched) {
-        $this->showSnatched = $showSnatched;
-        return $this;
-    }
-
     public function torrentPayload(): array {
         $torMan  = new \Gazelle\Manager\Torrent;
-        $torrent = $this->torrent->setViewer($this->user)->setShowSnatched($this->showSnatched);
+        $torrent = $this->torrent->setViewer($this->user);
         return array_merge(
-            $torrent->isSnatched($this->user->id()) || $torrent->uploaderId() == $this->user->id()
+            (new \Gazelle\User\Snatch($this->user))->isSnatched($torrent->id()) || $torrent->uploaderId() == $this->user->id()
                 ? [ 'infoHash' => $torrent->infohash() ]
                 : [],
             [

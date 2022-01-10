@@ -3,6 +3,7 @@
 $torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan = new Gazelle\Manager\Torrent;
 $torMan->setViewer($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
@@ -221,7 +222,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         }
         $tgroup       = $torrent->group();
         $isBookmarked = $bookmark->isTorrentBookmarked($groupId);
-        $isSnatched   = $torrent->isSnatched($Viewer->id());
+        $isSnatched   = $snatcher->showSnatch($torrent->id());
         $reported     = $torMan->hasReport($Viewer, $torrentId);
 
 ?>
