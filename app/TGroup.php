@@ -681,8 +681,13 @@ class TGroup extends BaseObject {
     }
 
     public function torrentList(): array {
-        $viewerId = isset($this->viewer) ? $this->viewer->id() : null;
-        $showSnatched = $viewerId ? $this->viewer->option('ShowSnatched') : false;
+        if (isset($this->viewer)) {
+            $showSnatched = (bool)$this->viewer->option('ShowSnatched');
+            $snatcher = new User\Snatch($this->viewer);
+        } else {
+            $showSnatched = false;
+            $snatcher = false;
+        }
         $list = $this->rawTorrentList();
         foreach ($list as &$info) {
             foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear']
@@ -700,10 +705,10 @@ class TGroup extends BaseObject {
             ) {
                 $info[$emptytruth] = !($info[$emptytruth] == '');
             }
-            if ($viewerId) {
+            if ($showSnatched) {
                 $torrent = new Torrent($info['ID']);
-                $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $torrent->hasToken($viewerId);
-                $info['IsSnatched'] = $showSnatched && $torrent->isSnatched($viewerId);
+                $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $torrent->hasToken($this->viewer->id());
+                $info['IsSnatched'] = $snatcher->isSnatched($torrent->id());
             } else {
                 $info['PersonalFL'] = false;
                 $info['IsSnatched'] = false;

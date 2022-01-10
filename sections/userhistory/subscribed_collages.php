@@ -12,6 +12,7 @@ $artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), !$ShowAll);
 $tgMan = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
 
 View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
@@ -104,7 +105,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     $prev = $current;
 ?>
     <tr class="group_torrent groupid_<?= $s['collageId'] . $GroupID?> edition_<?=
-            $EditionID?> hidden<?= ($torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '')
+            $EditionID?> hidden<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
             . $SnatchedGroupClass?>">
         <td colspan="2">
             <?= $Twig->render('torrent/action.twig', [

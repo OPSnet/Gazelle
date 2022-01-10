@@ -38,6 +38,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 $collageMan = new Gazelle\Manager\Collage;
 $isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $GroupID);
 
+$snatcher = new Gazelle\User\Snatch($Viewer);
 View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
 ?>
 <div class="thin">
@@ -471,7 +472,7 @@ foreach ($TorrentList as $Torrent) {
     if (is_null($torrent)) {
         continue;
     }
-    $IsSnatched = $torrent->isSnatched($Viewer->id());
+    $IsSnatched = $snatcher->showSnatch($torrent->id());
     $Torrent['PersonalFL'] = $torrent->isFreeleechPersonal();
 
     if ($is_deleted && count($TorrentList) > 1) {

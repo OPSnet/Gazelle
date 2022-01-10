@@ -9,6 +9,7 @@ $torMan = new Gazelle\Manager\Torrent;
 $torMan->setViewer($Viewer);
 $userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
+$snatcher = new Gazelle\User\Snatch($Viewer);
 
 $torrent = $torMan->findById((int)$_GET['id']);
 if (is_null($torrent)) {
@@ -48,7 +49,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
         <h3><?=$DisplayName?></h3>
     </div>
     <div class="thin">
-        <table class="torrent_table details<?= $torrent->isSnatched($Viewer->id()) ? ' snatched' : '' ?>" id="torrent_details">
+        <table class="torrent_table details<?= $snatcher->showSnatch($torrent->id()) ? ' snatched' : '' ?>" id="torrent_details">
             <tr class="colhead_dark">
                 <td width="80%"><strong>Reported torrent</strong></td>
                 <td><strong>Size</strong></td>
@@ -136,7 +137,8 @@ if ($CategoryID == 1  && ($FirstUnknown || $remasterTuple != $torrent->remasterT
 }
 $remasterTuple = $torrent->remasterTuple();
 ?>
-                <tr class="torrent_row releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=($torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
+                <tr class="torrent_row releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=
+                    $snatcher->showSnatch($torrent->id() ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
                     <td>
                         <?= $Twig->render('torrent/action.twig', [
                             'can_fl' => $Viewer->canSpendFLToken($torrent),

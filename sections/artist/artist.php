@@ -354,6 +354,7 @@ if ($sections = $Artist->sections()) {
                     </td>
                 </tr>
 <?php
+        $snatcher = new Gazelle\User\Snatch($Viewer);
         $SnatchedGroupClass = $tgroup->isSnatched();
         $prev = '';
         $EditionID = 0;
@@ -379,7 +380,7 @@ if ($sections = $Artist->sections()) {
 <?php
             }
             $prev = $current;
-            $SnatchedTorrentClass = ($torrent->isSnatched($Viewer->id()) ? ' snatched_torrent' : '');
+            $SnatchedTorrentClass = ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '');
 ?>
         <tr class="releases_<?=$sectionId?> torrent_row groupid_<?=$groupId?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
             <td class="td_info" colspan="2">
