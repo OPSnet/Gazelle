@@ -324,7 +324,9 @@ class Text {
                     case 'viewforum':
                         return self::bbcodeForumUrl($args['forumid']) ?? null;
                     case 'viewthread':
-                        return self::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null) ?? null;
+                        return !isset($args['threadid']) && isset($args['postid'])
+                            ?  self::bbcodePostUrl((int)$args['postid'])
+                            :  self::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null);
                 }
                 return null;
 
@@ -1395,29 +1397,43 @@ class Text {
             : '[forum]' . $val . '[/forum]';
     }
 
-    protected static function bbcodeThreadUrl($thread, $post = null) {
+    protected static function bbcodePostUrl(int $postId) {
+        $forum = (new \Gazelle\Manager\Forum)->findByPostId($postId);
+        if (is_null($forum)) {
+            return null;
+        }
+        $postInfo = $forum->postInfo($postId);
+        return self::bbcodeThreadUrl($postInfo['thread-id'], $postId);
+    }
+
+    protected static function bbcodeThreadUrl($thread, $postId = null) {
         if (strpos($thread, ':') !== false) {
-            [$thread, $post] = explode(':', $thread);
+            [$threadId, $postId] = explode(':', $thread);
+        } else {
+            $threadId = $thread;
+        }
+        if (is_null($threadId)) {
+            return '[thread]' .  $thread . '[/thread]';
         }
 
-        $forum = (new \Gazelle\Manager\Forum)->findByThreadId($thread);
+        $forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
         if (is_null($forum)) {
-            if ($post) {
-                return '[thread]' .  $thread . ':' . $post . '[/thread]';
+            if ($postId) {
+                return '[thread]' .  $threadId . ':' . $postId . '[/thread]';
             } else {
-                return '[thread]' .  $thread . '[/thread]';
+                return '[thread]' .  $threadId . '[/thread]';
             }
         }
         if (!self::$viewer->readAccess($forum)) {
             return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $forum->id(), 'restricted');
         }
 
-        $threadInfo = $forum->threadInfo($thread);
-        if ($post) {
+        $threadInfo = $forum->threadInfo($threadId);
+        if ($postId) {
             return sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
-                $thread, $post, $post, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title'], $post);
+                $threadId, $postId, $postId, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title'], $postId);
         }
         return sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
-            $thread, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title']);
+            $threadId, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title']);
     }
 }
