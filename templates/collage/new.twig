@@ -1,0 +1,69 @@
+{% from 'macro/form.twig' import selected %}
+{{ header('Create a collage') }}
+<div class="thin">
+{% if error %}
+    <div class="save_message error">{{ error }}</div>
+    <br />
+{% endif %}
+    <form class="create_form" name="collage" action="collages.php" method="post">
+
+        <input type="hidden" name="action" value="new_handle" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <table class="layout">
+            <tr id="collagename">
+                <td class="label"><strong>Name</strong></td>
+                <td>
+                    <input type="text"{% if no_name %} class="hidden"{% endif %} name="name" size="60" id="namebox" value="{{ name }}" />
+                    <span id="personal"{% if not no_name %} class="hidden"{% endif %} style="font-style: oblique;"><strong>{{ viewer.username }}'s personal collage</strong></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label" style="vertical-align: top;"><strong>Category</strong></td>
+                <td>
+                    <select name="category"
+{%- if viewer.permitted('site_collages_renamepersonal') %}
+        onchange="if (this.options[this.selectedIndex].value == '0') { $('#namebox').ghide(); $('#personal').gshow(); } else { $('#namebox').gshow(); $('#personal').ghide();}"
+{% endif %}>
+{% for id, name in constant('COLLAGE') %}
+    {% if (id == constant('COLLAGE_PERSONAL_ID') and viewer.canCreatePersonalCollage)
+        or
+        (id != constant('COLLAGE_PERSONAL_ID') and viewer.permitted('site_collages_create'))
+    %}
+                        <option value="{{ id }}"{{ selected(id == category) }}>{{ name }}</option>
+    {% endif %}
+{% endfor %}
+                    </select>
+                    <br />
+{% if viewer.permitted('site_collages_create') %}can general<br />{% endif %}
+{% include 'collage/description.twig' with {
+        'general_allowed': viewer.permitted('site_collages_create'),
+        'personal_allowed': viewer.canCreatePersonalCollage,
+        'available': viewer.allowedPersonalCollages - viewer.activePersonalCollages,
+    } only %}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Description</td>
+                <td>(Must be at least 10 characters long).
+                    {{ description.emit|raw }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Tags (comma-separated)</strong></td>
+                <td>
+                    <input type="text" id="tags" name="tags" size="60" value="{{ tags }}" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <strong>Please ensure your collage is allowed under the <a href="rules.php?p=collages">Collage Rules</a>.</strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center"><input type="submit" value="Create collage" /></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<?php
+{{ footer() }}

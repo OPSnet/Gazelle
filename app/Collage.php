@@ -128,6 +128,10 @@ class Collage extends BaseObject {
         return $this;
     }
 
+    public function userHasContributed(User $user): bool {
+        return isset($this->contributors[$user->id()]);
+    }
+
     /**
      * Increment count of number of entries in collage.
      *
@@ -409,6 +413,15 @@ class Collage extends BaseObject {
             ", ...$args
         );
         return self::$db->affected_rows();
+    }
+
+    public function entryUserId(int $entryId): int {
+        return (int)self::$db->scalar("
+            SELECT UserID FROM " . $this->entryTable . "
+            WHERE CollageID = ?
+                AND GroupID = ?
+            ", $this->id, $entryId
+        );
     }
 
     public function removeEntry(int $entryId): int {

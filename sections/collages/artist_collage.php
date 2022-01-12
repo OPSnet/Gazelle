@@ -4,7 +4,6 @@ $Artists = $Collage->artistList();
 
 $NumGroups = $Collage->numArtists();
 $NumGroupsByUser = 0;
-$UserAdditions = [];
 $Render = [];
 $ArtistTable = '';
 
@@ -44,7 +43,7 @@ View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
     'can_create'  => $Viewer->permitted('site_collages_create'),
     'can_delete'  => $Viewer->permitted('site_collages_delete') || $Collage->isOwner($Viewer->id()),
     'can_edit'    => $Viewer->permitted('site_collages_delete') || ($Viewer->permitted('site_edit_wiki') && !$Collage->isLocked()),
-    'can_manage'  => $Viewer->permitted('site_collages_manage') && !$Collage->isLocked(),
+    'can_manage'  => ($Viewer->permitted('site_collages_manage') && !$Collage->isLocked()) || $Collage->userHasContributed($Viewer),
     'can_sub'     => $Viewer->permitted('site_collages_subscribe'),
     'id'          => $CollageID,
     'name'        => $Collage->name(),

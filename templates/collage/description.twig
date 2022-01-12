@@ -1,9 +1,13 @@
 <ul>
+{% if personal_allowed or general_allowed %}
 <li><strong>Personal</strong> – You can put whatever you want here.
 If you do not see the option then you must purchase a slot in the <a
 href="/bonus.php">Bonus Shop</a>. Note that Donors are given up to
-five free personal collages.</li>
+five free personal collages. You have <b>{{ available }}</b> collage
+slot{{ available|plural }} available.</li>
+{% endif %}
 
+{% if general_allowed %}
 <li><strong>Theme</strong> – A collage containing releases that all
 relate to a certain theme.<br />Examples: "Concept Albums", "Funky
 Groove", "Predominantly Polka Dot Covers"). <b>DO NOT</b> use this
@@ -43,4 +47,5 @@ or reissues.<br /> Examples: The Desert Sessions (across the following
 labels – Matador,Rekords, Man's Ruin, Southern Lord, Ipecac) and
 The Originals (Deutsche Gramophone and Decca; The Vivaldi Edition
 (Naive / Opus111 labels)</li>
+{% endif %}
 </ul>

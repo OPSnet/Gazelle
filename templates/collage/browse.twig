@@ -94,12 +94,12 @@
 
     <div class="linkbox">
 {% if not is_bookmark %}
-    {% if viewer.permitted('site_collages_create') %}
+    {% set active = viewer.activePersonalCollages %}
+    {% if viewer.canCreatePersonalCollage or viewer.permitted('site_collages_create') %}
         <a href="collages.php?action=new" class="brackets">New collage</a>
     {% endif %}
-    {% set active = viewer.activePersonalCollages %}
     {% if active == 1 %}
-        <a href="collages.php?id={{ viewer.personalCollages.0.0 }}" class="brackets">Personal collage</a>
+        <a href="collages.php?id={{ viewer.personalCollages.0.0.0 }}" class="brackets">Personal collage</a>
     {% elseif active > 1 %}
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
     {% endif %}
@@ -113,9 +113,9 @@
     {% endif %}
         <br />
 {% endif %}
-{% if viewer.permittedAny('site_collages_create', 'site_collages_personal') %}
-        <a href="collages.php?userid=<?=viewer.id()?>" class="brackets">Collages you started</a>
-        <a href="collages.php?userid=<?=viewer.id()?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
+{% if viewer.permittedAny('site_collages_create') %}
+        <a href="collages.php?userid={{ viewer.id }}" class="brackets">Collages you started</a>
+        <a href="collages.php?userid={{ viewer.id }}&amp;contrib=1" class="brackets">Collages you contributed to</a>
 {% endif %}
     </div>
 

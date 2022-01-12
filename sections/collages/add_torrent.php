@@ -5,6 +5,9 @@ authorize();
 if (!in_array($_REQUEST['action'], ['add_torrent', 'add_torrent_batch'])) {
     error(403);
 }
+if (!$Viewer->permitted('site_collages_manage') && !$Viewer->activePersonalCollages()) {
+    error(403);
+}
 
 $collageMan = new Gazelle\Manager\Collage;
 if (isset($_POST['collage_combo']) && (int)$_POST['collage_combo']) {

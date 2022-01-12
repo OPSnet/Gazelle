@@ -3,16 +3,10 @@
 switch ($_REQUEST['action'] ?? '') {
     case 'add_torrent':
     case 'add_torrent_batch':
-        if (!$Viewer->permitted('site_collages_manage')) {
-            error(403);
-        }
         require('add_torrent.php');
         break;
     case 'add_artist':
     case 'add_artist_batch':
-        if (!$Viewer->permitted('site_collages_manage')) {
-            error(403);
-        }
         require('add_artist.php');
         break;
     case 'autocomplete':
@@ -67,15 +61,9 @@ switch ($_REQUEST['action'] ?? '') {
         require('manage_artists_handle.php');
         break;
     case 'new':
-        if (!$Viewer->permitted('site_collages_create')) {
-            error(403);
-        }
         require('new.php');
         break;
     case 'new_handle':
-        if (!$Viewer->permitted('site_collages_create')) {
-            error(403);
-        }
         require('new_handle.php');
         break;
     case 'recover':
