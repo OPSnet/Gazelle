@@ -22,7 +22,7 @@
         <a href="user.php?id={{ user.id }}" class="username">{{ user.username }}</a>
     </li>
     <li id="nav_userclass">
-        <span class="hidden userclass">{{ user_class }}</span>
+        <span class="hidden userclass">{{ viewer.userclassName }}</span>
     </li>
     <li id="nav_useredit" class="brackets{{ _self.active_class(document == 'user' and action =='edit') }}">
         <a href="user.php?action=edit&amp;userid={{ user.id }}">Settings</a>
@@ -75,7 +75,7 @@
     </li>
 {% endif %}
 </ul>
-<ul id="userinfo_minor"{% if new_subs %} class="highlite"{% endif %}>
+<ul id="userinfo_minor">
 {% for link in nav_links -%}
     {{ link|raw }}
 {%- endfor %}

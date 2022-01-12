@@ -53,29 +53,22 @@ class View {
             $Style[] = 'opendyslexic/style.css';
         }
 
-        $notifMan = new Gazelle\Manager\Notification($Viewer->id());
-        if ($notifMan->useNoty()) {
-            array_push($Scripts, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
-        }
-        $NewSubscriptions = [];
-        $hasNewSubscriptions = false;
-        if ($Viewer->permitted('site_torrents_notify')) {
-            $Notifications = $notifMan->notifications();
-            $hasNewSubscriptions = isset($Notifications[Gazelle\Manager\Notification::SUBSCRIPTIONS]);
-            if ($notifMan->isSkipped(Gazelle\Manager\Notification::SUBSCRIPTIONS)) {
-                $NewSubscriptions = (new Gazelle\Subscription($Viewer))->unread();
-            }
-        }
-
-        $payMan   = new Gazelle\Manager\Payment;
-        $spmMan   = new Gazelle\Manager\StaffPM;
-        $spmTotal = $spmMan->countAtLevel($Viewer, ['Unanswered']);
-
         $activity = new Gazelle\User\Activity($Viewer);
         $activity->configure()
-            ->setNotification($notifMan)
-            ->setStaffPM($spmMan);
+            ->setStaffPM(new Gazelle\Manager\StaffPM);
 
+        $notifier = new Gazelle\User\Notification($Viewer);
+        $alertList = $notifier->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
+        foreach($alertList as $alert) {
+            if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_TRADITIONAL, Gazelle\User\Notification::DISPLAY_TRADITIONAL_PUSH])) {
+                $activity->setAlert(sprintf('<a href="%s">%s</a>', $alert->url(), $alert->title()));
+            }
+        }
+        if ($notifier->useNoty()) {
+            array_push($Scripts, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
+        }
+
+        $payMan = new Gazelle\Manager\Payment;
         if ($Viewer->permitted('users_mod')) {
             $activity->setStaff(new Gazelle\Staff($Viewer))
                 ->setReport(new Gazelle\Report)
@@ -119,7 +112,7 @@ class View {
             if ($Key === 'inbox') {
                 $Target = 'inbox.php';
             } elseif ($Key === 'subscriptions') {
-                if ($hasNewSubscriptions) {
+                if (isset($alertList['Subscription'])) {
                     $extraClass[] = 'new-subscriptions';
                 }
                 if (self::add_active($PageID, ['userhistory', 'subscriptions'])) {
@@ -155,9 +148,7 @@ class View {
             'document'          => $Document,
             'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
             'nav_links'         => $navLinks,
-            'subscriptions'     => $NewSubscriptions,
             'user'              => $Viewer,
-            'user_class'        => (new Gazelle\Manager\User)->userclassName($Viewer->primaryClass()),
         ]);
     }
 
@@ -217,15 +208,22 @@ class View {
             return $Twig->render('index/public-footer.twig');
         }
 
-        ob_start();
-
         $launch = date('Y');
         if ($launch != SITE_LAUNCH_YEAR) {
             $launch = SITE_LAUNCH_YEAR . "-$launch";
         }
 
+        global $Document;
+        $alertList = (new Gazelle\User\Notification($Viewer))->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
+        $notification = [];
+        foreach($alertList as $alert) {
+            if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_POPUP, Gazelle\User\Notification::DISPLAY_POPUP_PUSH])) {
+                $notification[] = $alert;
+            }
+        }
+
         global $Cache, $DB, $Debug, $SessionID;
-        echo $Twig->render('index/private-footer.twig', [
+        return $Twig->render('index/private-footer.twig', [
             'cache_time'   => $Cache->Time,
             'db_time'      => $DB->Time,
             'debug'        => $Debug,
@@ -233,7 +231,7 @@ class View {
             'last_active'  => (new Gazelle\Session($Viewer))->lastActive($SessionID),
             'launch'       => $launch,
             'load'         => sys_getloadavg(),
-            'notification' => (new Gazelle\Manager\Notification())->registeredNotifications($Viewer->id()),
+            'notification' => $notification,
             'memory'       => memory_get_usage(true),
             'date'         => date('Y-m-d'),
             'textarea_js'  => Gazelle\Util\Textarea::activate(),
@@ -244,6 +242,5 @@ class View {
                 ? ['list'  => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]
                 : [],
         ]);
-        return ob_get_clean();
     }
 }

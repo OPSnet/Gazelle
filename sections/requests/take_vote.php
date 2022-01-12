@@ -67,18 +67,6 @@ $DB->prepared_query('
 $Cache->delete_value('user_stats_'.$Viewer->id());
 
 Requests::update_sphinx_requests($RequestID);
-$DB->prepared_query('
-    SELECT UserID
-    FROM requests_votes
-    WHERE RequestID = ?
-        AND UserID != ?', $RequestID, $Viewer->id());
-$UserIDs = [];
-while (list($UserID) = $DB->next_record()) {
-    $UserIDs[] = $UserID;
-}
-$notification = new Notification;
-$notification->notifyUsers($UserIDs, Notification::REQUESTALERTS, Format::get_size($Amount)
-    . " of bounty has been added to a request you've voted on!", "requests.php?action=view&id=" . $RequestID);
 
 $Cache->delete_value("request_$RequestID");
 $Cache->delete_value("request_votes_$RequestID");

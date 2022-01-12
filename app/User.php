@@ -1327,32 +1327,6 @@ class User extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function unreadTorrentNotifications(): int {
-        if (($new = self::$cache->get_value('user_notify_upload_' . $this->id)) === false) {
-            $new = self::$db->scalar("
-                SELECT count(*)
-                FROM users_notify_torrents
-                WHERE UnRead = 1
-                    AND UserID = ?
-                ", $this->id
-            );
-            self::$cache->cache_value('user_notify_upload_' . $this->id, $new, 0);
-        }
-        return $new;
-    }
-
-    public function clearTorrentNotifications(): bool {
-        self::$db->prepared_query("
-            UPDATE users_notify_torrents
-            SET Unread = '0'
-            WHERE UnRead = '1'
-                AND UserID = ?
-            ", $this->id
-        );
-        self::$cache->delete_value('user_notify_upload_' . $this->id);
-        return self::$db->affected_rows() === 1;
-    }
-
     public function siteIPv4History(): array {
         self::$db->prepared_query("
             SELECT IP,
@@ -1499,30 +1473,6 @@ class User extends BaseObject {
         return $unread;
     }
 
-    public function markAllReadInbox(): int {
-        self::$db->prepared_query("
-            UPDATE pm_conversations_users SET
-                Unread = '0'
-            WHERE Unread = '1'
-                AND UserID = ?
-            ", $this->id
-        );
-        self::$cache->delete_value('inbox_new_' . $this->id);
-        return self::$db->affected_rows();
-    }
-
-    public function markAllReadStaffPM(): int {
-        self::$db->prepared_query("
-            UPDATE staff_pm_conversations SET
-                Unread = false
-            WHERE Unread = true
-                AND UserID = ?
-            ", $this->id
-        );
-        self::$cache->delete_value('staff_pm_new_' . $this->id);
-        return self::$db->affected_rows();
-    }
-
     public function supportCount(int $newClassId, int $levelClassId): int {
         return self::$db->scalar("
             SELECT count(DISTINCT DisplayStaff)
@@ -1570,6 +1520,10 @@ class User extends BaseObject {
             self::$cache->cache_value($key, $filters, 2592000);
         }
         return $filters;
+    }
+
+    public function notifyOnQuote(): bool {
+        return $this->info()['NotifyOnQuote'];
     }
 
     public function removeNotificationFilter(int $notifId): int {

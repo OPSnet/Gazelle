@@ -1,8 +1,17 @@
 <?php
 
-$notifMan = new Gazelle\Manager\Notification($Viewer->id());
-foreach ($_GET['type'] as $type) {
-    $notifMan->setType($type);
+$alertList = (new Gazelle\User\Notification($Viewer))->alertList();
+
+$payload = [];
+foreach ($alertList as $alert) {
+    if (!isset($_GET['type']) || isset($_GET['type'][$alert->type()])) {
+        $payload[$alert->type()] = [
+            'id'         => $alert->context(),
+            'importance' => $alert->className(),
+            'message'    => $alert->title(),
+            'url'        => $alert->url(),
+        ];
+    }
 }
 
-json_print('success', $notifMan->notifications());
+json_print('success', $payload);

@@ -248,13 +248,12 @@ if (is_null($OldFMUsername) && $LastFMUsername !== '') {
 }
 
 $user->toggleAcceptFL($Options['AcceptFL']);
-(new Gazelle\Manager\Notification($userId))
-    ->save(
-        array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST)))),
-        ["PushKey" => $_POST['pushkey']],
-        $_POST['pushservice'],
-        $_POST['pushdevice']
-    );
+(new Gazelle\User\Notification($user))->save(
+    array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST)))),
+    ["PushKey" => $_POST['pushkey']],
+    $_POST['pushservice'],
+    $_POST['pushdevice']
+);
 
 $user->toggleAttr('hide-vote-recent', empty($_POST['pattr_hide_vote_recent']));
 $user->toggleAttr('hide-vote-history', empty($_POST['pattr_hide_vote_history']));

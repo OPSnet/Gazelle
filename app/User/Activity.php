@@ -67,22 +67,6 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setNotification(\Gazelle\Manager\Notification $notifMan) {
-        if ($notifMan->isTraditional(\Gazelle\Manager\Notification::INBOX)) {
-            $alert = $notifMan->inboxAlert();
-            if ($alert) {
-                $this->setAlert($alert);
-            }
-        }
-        if ($notifMan->isTraditional(\Gazelle\Manager\Notification::TORRENTS)) {
-            $alert = $notifMan->torrentAlert();
-            if ($alert) {
-                $this->setAlert($alert);
-            }
-        }
-        return $this;
-    }
-
     public function setPayment(\Gazelle\Manager\Payment $payMan) {
         if ($this->user->permitted('admin_manage_payments')) {
             $due = $payMan->due();

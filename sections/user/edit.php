@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Manager\Notification;
-
 function display_paranoia($FieldName) {
     global $Paranoia;
     $Level = (in_array($FieldName . '+', $Paranoia)) ? 0 : (in_array($FieldName, $Paranoia) ? 1 : 2);
@@ -112,7 +110,7 @@ echo $Twig->render('user/setting.twig', [
         'snatched'   => $NotifyOnDeleteSnatched,
         'downloaded' => $NotifyOnDeleteDownloaded,
         'unseeded'   => $UnseededAlerts,
-        'settings'   => (new Notification($UserID))->settings(),
+        'settings'   => (new Gazelle\User\Notification($User))->config(),
     ],
     'paranoia' => [
         'donor_visible'    => $User->donorVisible($UserID),

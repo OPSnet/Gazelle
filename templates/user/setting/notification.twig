@@ -2,25 +2,25 @@
 {% macro check_popup(name, value) %}
     <label>
         <input type="checkbox" name="notifications_{{ name }}_popup" id="notifications_{{ name }}_popup"{{ checked(value in [
-            constant('\\Gazelle\\Manager\\Notification::OPT_POPUP'),
-            constant('\\Gazelle\\Manager\\Notification::OPT_POPUP_PUSH'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP_PUSH'),
         ]) }} /> Pop-up
     </label>
 {% endmacro %}
 {% macro check_push(name, value) %}
     <label>
         <input type="checkbox" name="notifications_{{ name }}_push" id="notifications_{{ name }}_push"{{ checked(value in [
-            constant('\\Gazelle\\Manager\\Notification::OPT_PUSH'),
-            constant('\\Gazelle\\Manager\\Notification::OPT_POPUP_PUSH'),
-            constant('\\Gazelle\\Manager\\Notification::OPT_TRADITIONAL_PUSH'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_PUSH'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP_PUSH'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL_PUSH'),
         ]) }} /> Push
     </label>
 {% endmacro %}
 {% macro check_trad(name, value) %}
     <label>
         <input type="checkbox" name="notifications_{{ name }}_traditional" id="notifications_{{ name }}_traditional"{{ checked(value in [
-            constant('\\Gazelle\\Manager\\Notification::OPT_TRADITIONAL'),
-            constant('\\Gazelle\\Manager\\Notification::OPT_TRADITIONAL_PUSH'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL'),
+            constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL_PUSH'),
         ]) }} /> Traditional
     </label>
 {% endmacro %}
@@ -144,7 +144,7 @@
             <strong>Thread subscriptions</strong>
         </td>
         <td>
-            {{ _self.check_popup("Subscriptions", settings.Subscriptions) }}
+            {{ _self.check_popup("Subscription", settings.Subscription) }}
         </td>
     </tr>
     <tr>
@@ -152,8 +152,8 @@
             <strong>Quote notifications</strong>
         </td>
         <td>
-            {{ _self.check_popup("Quotes", settings.Quotes) }}
-            {{ _self.check_push("Quotes", settings.Quotes) }}
+            {{ _self.check_popup("Quote", settings.Quote) }}
+            {{ _self.check_push("Quote", settings.Quote) }}
         </td>
     </tr>
 {% if torrent_notify %}
@@ -162,8 +162,8 @@
             <strong>Torrent notifications</strong>
         </td>
         <td>
-            {{ _self.check_popup("Torrents", settings.Torrents) }}
-            {{ _self.check_trad("Torrents", settings.Torrents) }}
+            {{ _self.check_popup("Torrent", settings.Torrent) }}
+            {{ _self.check_trad("Torrent", settings.Torrent) }}
         </td>
     </tr>
 {% endif %}
@@ -172,7 +172,7 @@
             <strong>Collage subscriptions</strong>
         </td>
         <td>
-            {{ _self.check_popup("Collages", settings.Collages) }}
+            {{ _self.check_popup("Collage", settings.Collage) }}
         </td>
     </tr>
 {% if request_notify %}
