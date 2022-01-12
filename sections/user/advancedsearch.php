@@ -515,7 +515,7 @@ echo $Twig->render('admin/advanced-user-search.twig', [
     'page'          => $Results,
     'paginator'     => $paginator,
     'show_invited'  => $showInvited,
-    'url_stem'      => (new Gazelle\Stylesheet($Viewer))->imagePath(),
+    'url_stem'      => (new Gazelle\User\Stylesheet($Viewer))->imagePath(),
     'viewer'        => $Viewer,
     'input'         => $_GET,
 

@@ -137,7 +137,7 @@ class View {
             'auth_args'    => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
             'page_title'   => html_entity_decode($pageTitle),
             'script'       => array_map(fn($s) => "$s.js", $Scripts),
-            'style'        => new Gazelle\Stylesheet($Viewer),
+            'style'        => new Gazelle\User\Stylesheet($Viewer),
             'style_extra'  => $Style,
             'viewer'       => $Viewer,
         ]);

@@ -38,7 +38,7 @@ $User = new Gazelle\User($UserID);
     ", $UserID
 );
 
-$stylesheet = new Gazelle\Stylesheet($User);
+$stylesheet = new Gazelle\User\Stylesheet($User);
 
 $options = unserialize($SiteOptions) ?: [];
 if (!isset($options['HttpsTracker'])) {

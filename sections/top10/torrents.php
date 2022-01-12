@@ -171,7 +171,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         </small>
 <?php
     }
-    $urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
+    $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 ?>
         </h3>
     <table class="torrent_table cats numbering border m_table">

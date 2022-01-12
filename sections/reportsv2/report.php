@@ -25,7 +25,7 @@ $TorrentID   = $torrent->id();
 $DisplayName = $tgroup->link() . " [{$tgroup->year()}] [{$tgroup->releaseTypeName()}]";
 $AltName     = $torrent->fullName();
 
-$urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
+$urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
 if (empty($Types[$CategoryID])) {
     $TypeList = $Types['master'];
