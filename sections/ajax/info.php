@@ -19,7 +19,7 @@ json_print("success", [
     'passkey'  => $Viewer->announceKey(),
     'notifications' => [
         'messages'         => $Viewer->inboxUnreadCount(),
-        'notifications'    => $Viewer->unreadTorrentNotifications(),
+        'notifications'    => (new Gazelle\User\Notification\Torrent($Viewer))->unread(),
         'newAnnouncement'  => (new Gazelle\Manager\News)->latest() < (new Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
         'newBlog'          => (new Gazelle\Manager\Blog)->latest() < (new Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
         'newSubscriptions' => (new Gazelle\Subscription($Viewer))->unread() > 0,
