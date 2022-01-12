@@ -3,7 +3,6 @@
 $torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan = new Gazelle\Manager\Torrent;
 $torMan->setViewer($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
@@ -150,6 +149,7 @@ View::show_footer();
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
     global $groupBy, $torMan, $Twig, $Viewer;
+    $snatcher = new Gazelle\User\Snatch($Viewer);
 ?>
         <h3>Top <?="$limit $caption"?>
 <?php if (empty($_GET['advanced'])) { ?>
