@@ -28,7 +28,7 @@ class GlobalNotification extends AbstractNotification {
 
     public function load(): bool {
         $notification = self::$cache->get_value('global_notification');
-        if ($notification !== falsse && self::$cache->get_value(sprintf(self::CLEARED, $this->user->id()) !== false)) {
+        if ($notification !== false && self::$cache->get_value(sprintf(self::CLEARED, $this->user->id()) !== false)) {
             $this->title     = $notification['Message'];
             $this->url       = $notification['URL'];
             $this->className = $notification['Importance'];

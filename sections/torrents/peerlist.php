@@ -13,6 +13,6 @@ echo $Twig->render('torrent/peerlist.twig', [
     'list'       => $torrent->peerlistPage($Viewer->id(), $paginator->limit(), $paginator->offset()),
     'paginator'  => $paginator,
     'torrent_id' => $torrent->id(),
-    'url_stem'   => (new Gazelle\Stylesheet($Viewer))->imagePath(),
+    'url_stem'   => (new Gazelle\User\Stylesheet($Viewer))->imagePath(),
     'user_id'    => $Viewer->id(),
 ]);

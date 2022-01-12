@@ -332,7 +332,7 @@ $DB->prepared_query($SQL, ...$Params);
 
 $user->flush();
 
-(new Gazelle\Stylesheet($user))->modifyInfo((int)$_POST['stylesheet'], $_POST['styleurl']);
+(new Gazelle\User\Stylesheet($user))->modifyInfo((int)$_POST['stylesheet'], $_POST['styleurl']);
 
 if ($ResetPassword) {
     $user->logoutEverywhere();

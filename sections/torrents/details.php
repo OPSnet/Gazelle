@@ -416,7 +416,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
         </div>
 <?php
 }
-$urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
+$urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 ?>
     </div>
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Stylesheet extends BaseUser {
+class Stylesheet extends \Gazelle\BaseUser {
 
     protected const CACHE_KEY = 'u_ss_%d';
     protected array $info;

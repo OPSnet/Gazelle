@@ -6,7 +6,7 @@ if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);
 }
 
-$imgTag = '<img src="' . (new Gazelle\Stylesheet($Viewer))->imagePath()
+$imgTag = '<img src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
     . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],

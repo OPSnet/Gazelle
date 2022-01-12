@@ -284,7 +284,7 @@ if ($sections = $Artist->sections()) {
     </div>
     <table class="torrent_table grouped release_table m_table">
 <?php
-    $urlStem = (new Gazelle\Stylesheet($Viewer))->imagePath();
+    $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
     $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 
     foreach ($sections as $sectionId => $groupList) {
