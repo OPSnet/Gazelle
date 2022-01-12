@@ -138,7 +138,7 @@ if ($CategoryID == 1  && ($FirstUnknown || $remasterTuple != $torrent->remasterT
 $remasterTuple = $torrent->remasterTuple();
 ?>
                 <tr class="torrent_row releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=
-                    $snatcher->showSnatch($torrent->id() ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
+                    $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '' ?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
                     <td>
                         <?= $Twig->render('torrent/action.twig', [
                             'can_fl' => $Viewer->canSpendFLToken($torrent),
