@@ -366,7 +366,7 @@
             <select name="stylesheet" id="stylesheet">
                 <option value="">Don't Care</option>
 {% for s in stylesheet %}
-                <option value="{{ s.ID }} "{{ selected(input.stylesheet == s.ID) }}>{{ s.ProperName }}</option>
+                <option value="{{ s.ID }}"{{ selected(input.stylesheet == s.ID) }}>{{ s.ProperName }}</option>
 {% endfor %}
             </select>
         </td>

@@ -136,6 +136,7 @@ $disabledIpChecked = false;
 $trackerLiveSource = true;
 
 $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$Stylesheets = (new \Gazelle\Manager\Stylesheet)->list();
 
 $matchMode = ($_GET['matchtype'] ?? 'fuzzy');
 $searchDisabledInvites = (isset($_GET['disabled_invites']) && $_GET['disabled_invites'] != '');
@@ -152,14 +153,13 @@ if (!empty($_GET)) {
     $ClassIDs = [];
     $SecClassIDs = [];
     $Classes = (new Gazelle\Manager\User)->classList();
-    foreach ($Classes as $ClassID => $validatorue) {
-        if ($validatorue['Secondary']) {
-            $SecClassIDs[] = $ClassID;
+    foreach ($Classes as $id => $value) {
+        if ($value['Secondary']) {
+            $SecClassIDs[] = $id;
         } else {
-            $ClassIDs[] = $ClassID;
+            $ClassIDs[] = $id;
         }
     }
-    $Stylesheets = (new \Gazelle\Manager\Stylesheet)->list();
 
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
@@ -186,7 +186,7 @@ if (!empty($_GET)) {
         ['secclass', '0', 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]],
         ['seeding', '0', 'inarray', "Invalid seeding field", $OffNumberChoices],
         ['snatched', '0', 'inarray', "Invalid snatched field", $OffNumberChoices],
-        ['stylesheet', '0', 'inarray', 'Invalid stylesheet', array_unique(array_keys($Stylesheets))],
+        ['stylesheet', '0', 'inarray', 'Invalid stylesheet', ['inarray' => array_keys($Stylesheets)]],
         ['uploaded', '0', 'inarray', 'Invalid uploaded field', $NumberChoices],
         ['warned', '0', 'inarray', 'Invalid warned field', $Nullable],
         ['way', '0', 'inarray', 'Invalid way', $WayVals],
@@ -508,7 +508,7 @@ if (!empty($_GET)) {
 
 // Neither level nor ID is particularly useful when searching secondary classes, so sort them alphabetically.
 $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
-$Secondaries = array_filter($ClassLevels, fn ($c) => $class['Secondary'] == '1');
+$Secondaries = array_filter($ClassLevels, fn ($c) => $c['Secondary'] == '1');
 usort($Secondaries, function($c1, $c2) { return strcmp($c1['Name'], $c2['Name']); });
 
 echo $Twig->render('admin/advanced-user-search.twig', [
@@ -525,7 +525,7 @@ echo $Twig->render('admin/advanced-user-search.twig', [
     'check_email_history' => $emailHistoryChecked,
 
     // third column
-    'primary_class'    => array_filter($ClassLevels, fn ($c) => $class['Secondary'] == '0'),
+    'primary_class'    => array_filter($ClassLevels, fn ($c) => $c['Secondary'] == '0'),
     'secondary_class'  => $Secondaries,
     'stylesheet'       => $Stylesheets,
     'match_mode'       => $matchMode,
