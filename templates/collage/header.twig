@@ -11,8 +11,6 @@
 {% endif %}
 {% if can_edit %}
         <a href="collages.php?action=edit&amp;collageid={{ id }}" class="brackets">Edit description</a>
-{% else %}
-        <span class="brackets">Locked</span>
 {% endif %}
 {% if bookmarked %}
         <a href="#" id="bookmarklink_collage_{{ id }}" class="brackets" onclick="Unbookmark('collage', {{ id }}, 'Bookmark'); return false;">Remove bookmark</a>
