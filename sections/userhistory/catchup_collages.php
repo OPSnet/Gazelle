@@ -3,7 +3,7 @@
 authorize();
 
 $notifier = new Gazelle\User\Notification\Collage($Viewer);
-if (!isset($_REQUEST['collageid']) {
+if (!isset($_REQUEST['collageid'])) {
     $notifier->clear();
 } else {
     if ((int)$_REQUEST['collageid']) {
