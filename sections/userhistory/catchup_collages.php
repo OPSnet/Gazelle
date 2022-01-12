@@ -2,11 +2,15 @@
 
 authorize();
 
-$notifMan = new \Gazelle\Manager\Notification($Viewer->id());
-if ($_REQUEST['collageid'] && (int)$_REQUEST['collageid']) {
-    $notifMan->catchupCollage($_REQUEST['collageid']);
+$notifier = new Gazelle\User\Notification\Collage($Viewer);
+if (!isset($_REQUEST['collageid']) {
+    $notifier->clear();
 } else {
-    $notifMan->catchupAllCollages();
+    if ((int)$_REQUEST['collageid']) {
+        $notifier->clearCollage($_REQUEST['collageid']);
+    } else {
+        error(404);
+    }
 }
 
 header('Location: userhistory.php?action=subscribed_collages');

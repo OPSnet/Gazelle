@@ -22,20 +22,6 @@ class Quote extends \Gazelle\BaseUser {
     }
 
     /**
-     * Mark all unread quotes as having been seen by a user
-     */
-    public function clear(): int {
-        self::$db->prepared_query("
-            UPDATE users_notify_quoted SET
-                UnRead = '0'
-            WHERE UserID = ?
-            ", $this->user->id()
-        );
-        self::$cache->delete_value('user_quote_unread_' . $this->user->id());
-        return self::$db->affected_rows();
-    }
-
-    /**
      * Mark the user as having seen their quoted posts in a thread
      */
     public function clearThread(int $threadId, int $firstPost, int $lastPost): bool {

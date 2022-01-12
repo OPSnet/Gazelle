@@ -12,13 +12,6 @@ class Blog extends \Gazelle\Base {
 
     /**
      * Create a blog article
-     * @param array
-     *      - userId     The UserID of the author
-     *      - title      The title of the article
-     *      - body       The body of the article
-     *      - threadId   The associated threadId
-     *      - important  The level of importance
-     * @return ID of new article
      */
     public function create(array $info): \Gazelle\Blog {
         self::$db->prepared_query("
@@ -33,14 +26,6 @@ class Blog extends \Gazelle\Base {
 
     /**
      * Modify an existing blog article
-     *
-     * @param array
-     *      - id         The id of the news article
-     *      - title      The title of the article
-     *      - body       The body of the article
-     *      - threadId   The associated threadId
-     *      - important  The level of importance
-     * @return 1 if successful
      */
     public function modify(array $info): int {
         self::$db->prepared_query("
@@ -58,8 +43,6 @@ class Blog extends \Gazelle\Base {
 
     /**
      * Remove an existing blog article
-     * @param int ID of the blog article
-     * @return bool true if the supplied ID corresponded to a blog article
      */
     public function remove(int $blogId): bool {
         self::$db->prepared_query("
@@ -75,8 +58,6 @@ class Blog extends \Gazelle\Base {
 
     /**
      * Remove an the link to the forum topic of the blog article
-     * @param int ID of the blog article
-     * @return bool true if there was a thread to remove
      */
     public function removeThread(int $blogId): bool {
         self::$db->prepared_query("
@@ -139,5 +120,13 @@ class Blog extends \Gazelle\Base {
      */
     public function latestId(): ?int {
         return $this->latest()[0];
+    }
+
+    /**
+     * Get the epoch of the most recent entry
+     */
+    public function latestEpoch(): int {
+        $latest = $this->latest();
+        return isset($latest[5]) ? strtotime($latest[5]) : 0;
     }
 }

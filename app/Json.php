@@ -70,11 +70,16 @@ abstract class Json extends Base {
     }
 
     protected function debug(): array {
-        global $Debug, $Viewer;
-        if (!$Viewer->permitted('site_debug')) {
+        global $Viewer;
+        if (!isset($Viewer) || !$Viewer->permitted('site_debug')) {
             return [];
         }
-        $info = ['debug' => ['queries'  => $Debug->get_queries()]];
+        global $Debug;
+        $info = [
+            'debug' => [
+                'queries' => isset($Debug) ? $Debug->get_queries() : [],
+            ],
+        ];
         if (class_exists('Sphinxql')) {
             $info['searches'] = \Sphinxql::$Queries;
         }

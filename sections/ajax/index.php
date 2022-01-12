@@ -167,9 +167,6 @@ switch ($Action) {
     case 'announcements':
         require_once('announcements.php');
         break;
-    case 'notifications':
-        require_once('notifications.php');
-        break;
     case 'request':
         require_once('request.php');
         break;
@@ -215,6 +212,9 @@ switch ($Action) {
         break;
     case 'raw_bbcode':
         require_once('raw_bbcode.php');
+        break;
+    case 'notifications':
+        require_once('notifications.php');
         break;
     case 'get_user_notifications':
         require_once('get_user_notifications.php');

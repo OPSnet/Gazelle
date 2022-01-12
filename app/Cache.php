@@ -44,7 +44,7 @@ class Cache extends \Memcached {
     protected bool $InternalCache = true;
 
     protected string $PersistentKeysRegexp =
-        '/^(?:global_notification$|(?:ajax_requests|notifications_one_reads_|query_lock|stats|top10(?:tor|votes)|users_snatched)_)/';
+        '/^(?:global_notification$|(?:ajax_requests|query_lock|stats|top10(?:tor|votes)|users_snatched)_)/';
 
     public $Time = 0;
 

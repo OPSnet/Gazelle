@@ -47,8 +47,9 @@ actions of it.</div>
 <div id="lightbox" class="lightbox hidden"></div>
 <div id="curtain" class="curtain hidden"></div>
 
-{% for type, n in notification %}
-<span class="noty-notification" style="display: none;" data-noty-type="{{ type }}" data-noty-id="{{ n.id }}" data-noty-importance="{{ n.importance }}" data-noty-url="{{ n.url }}">{{ n.message }}</span>
+{% for alert in notification -%}
+<span class="noty-notification" style="display: none;" data-noty-type="{{ alert.type }}" data-noty-id="noty-{{
+    loop.index }}" data-noty-importance="{{ alert.className }}" data-noty-url="{{ alert.url }}">{{ alert.title }}</span>
 {% endfor %}
 <!-- Extra divs, for stylesheet developers to add imagery -->
 <div id="extra1"><span></span></div>

@@ -4,15 +4,10 @@ namespace Gazelle\Manager;
 
 class News extends \Gazelle\Base {
 
-    const CACHE_KEY = 'newsv2';
+    const CACHE_KEY = 'news';
 
     /**
      * Create a news article
-     *
-     * @param $userId  The UserID of the author
-     * @param $title   The title of the article
-     * @param $body    The body of the article
-     * @return ID of new article
      */
     public function create(int $userId, string $title, string $body): int {
         self::$db->prepared_query("
@@ -27,11 +22,6 @@ class News extends \Gazelle\Base {
 
     /**
      * Modify an existing news article (the author remains unchanged)
-     *
-     * @param $id      The article ID
-     * @param $title   The title of the article
-     * @param $body    The body of the article
-     * @return 1 if successful
      */
     public function modify(int $id, string $title, string $body): int {
         self::$db->prepared_query("
@@ -47,9 +37,6 @@ class News extends \Gazelle\Base {
 
     /**
      * Remove an existing news article
-     *
-     * @param $id The id of the news article
-     * @return 1 if successful
      */
     public function remove(int $id): int {
         self::$db->prepared_query("
@@ -64,11 +51,7 @@ class News extends \Gazelle\Base {
      * Get a number of most recent articles.
      * (hard-coded to 20 max, otherwise cache invalidation becomes difficult)
      *
-     * @return array
-     *      - id of article
-     *      - title of article
-     *      - body of article
-     *      - article creation date
+     * @return array [id, title, body, creation date]
      */
     public function headlines(): array {
         if (($headlines = self::$cache->get_value(self::CACHE_KEY)) === false) {
@@ -87,9 +70,7 @@ class News extends \Gazelle\Base {
     /**
      * Get the title and body of an article
      *
-     * @param $id ID of article
-     * @return array [string $title, string $body] or null if no such article
-     *
+     * @return array [string title, string body] or null if no such article
      */
     public function fetch(int $id): array {
         return self::$db->row("
@@ -104,7 +85,7 @@ class News extends \Gazelle\Base {
      * Get the latest news article id and title
      * ID will be -1 if no news yet exists.
      *
-     * @return array [$id, $title]
+     * @return array [id, title]
      */
     public function latest(): array {
         $headlines = $this->headlines();
@@ -120,5 +101,13 @@ class News extends \Gazelle\Base {
     public function latestId(): int {
         [$newsId] = $this->latest();
         return $newsId;
+    }
+
+    /**
+     * Get the epoch of the most recent entry
+     */
+    public function latestEpoch(): int {
+        $latest = $this->headlines();
+        return isset($latest[4]) ? strtotime($latest[4]) : 0;
     }
 }

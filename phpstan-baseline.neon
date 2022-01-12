@@ -36,52 +36,6 @@ parameters:
 			path: app/Manager/Applicant.php
 
 		-
-			message:
-				"""
-					#^PHPDoc tag @param has invalid value \\(array
-					     \\- id         The id of the news article
-					     \\- title      The title of the article
-					     \\- body       The body of the article
-					     \\- threadId   The associated threadId
-					     \\- important  The level of importance\\)\\: Unexpected token "\\\\n     \\* ", expected variable at offset 69$#
-				"""
-			count: 1
-			path: app/Manager/Blog.php
-
-		-
-			message:
-				"""
-					#^PHPDoc tag @param has invalid value \\(array
-					     \\- userId     The UserID of the author
-					     \\- title      The title of the article
-					     \\- body       The body of the article
-					     \\- threadId   The associated threadId
-					     \\- important  The level of importance\\)\\: Unexpected token "\\\\n     \\* ", expected variable at offset 52$#
-				"""
-			count: 1
-			path: app/Manager/Blog.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int ID of the blog article\\)\\: Unexpected token \"ID\", expected variable at offset 61$#"
-			count: 1
-			path: app/Manager/Blog.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int ID of the blog article\\)\\: Unexpected token \"ID\", expected variable at offset 87$#"
-			count: 1
-			path: app/Manager/Blog.php
-
-		-
-			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\ID is not subtype of native type Gazelle\\\\Blog\\.$#"
-			count: 1
-			path: app/Manager/Blog.php
-
-		-
-			message: "#^Return typehint of method Gazelle\\\\Manager\\\\Blog\\:\\:create\\(\\) has invalid type Gazelle\\\\Manager\\\\ID\\.$#"
-			count: 1
-			path: app/Manager/Blog.php
-
-		-
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$clientID$#"
 			count: 1
 			path: app/Manager/ClientWhitelist.php
@@ -155,56 +109,6 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(string invite key\\)\\: Unexpected token \"invite\", expected variable at offset 56$#"
 			count: 1
 			path: app/Manager/Invite.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$body    The body of the article\\)\\: Unexpected token \"\\$body\", expected type at offset 150$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$body    The body of the article\\)\\: Unexpected token \"\\$body\", expected type at offset 181$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$id      The article ID\\)\\: Unexpected token \"\\$id\", expected type at offset 95$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$id ID of article\\)\\: Unexpected token \"\\$id\", expected type at offset 69$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$id The id of the news article\\)\\: Unexpected token \"\\$id\", expected type at offset 64$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$title   The title of the article\\)\\: Unexpected token \"\\$title\", expected type at offset 102$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$title   The title of the article\\)\\: Unexpected token \"\\$title\", expected type at offset 133$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$userId  The UserID of the author\\)\\: Unexpected token \"\\$userId\", expected type at offset 54$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\ID is incompatible with native type int\\.$#"
-			count: 1
-			path: app/Manager/News.php
-
-		-
-			message: "#^Return typehint of method Gazelle\\\\Manager\\\\News\\:\\:create\\(\\) has invalid type Gazelle\\\\Manager\\\\ID\\.$#"
-			count: 1
-			path: app/Manager/News.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(int Group ID\\)\\: Unexpected token \"Group\", expected variable at offset 79$#"

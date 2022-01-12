@@ -4,7 +4,10 @@ if (!$Viewer->permitted("admin_global_notification")) {
     error(403);
 }
 
-$GlobalNotification = (new Gazelle\Manager\Notification)->global();
+$notifMan = new Gazelle\Manager\Notification;
+$level = $notifMan->level();
+
+$GlobalNotification = $notifMan->global();
 if ($GlobalNotification !== false) {
     $Expiration = $GlobalNotification['Expiration'] / 60;
 } else {
@@ -41,8 +44,8 @@ View::show_header("Global Notification");
                 <td class="label">Importance</td>
                 <td>
                     <select name="importance" id="importance">
-<?php   foreach (Gazelle\Manager\Notification::$Importances as $Key => $Value) { ?>
-                        <option value="<?=$Value?>"<?=$Value == $GlobalNotification['Importance'] ? ' selected="selected"' : ''?>><?=ucfirst($Key)?></option>
+<?php   foreach ($level as $name) { ?>
+                        <option value="<?= $name ?>"<?=$name == $GlobalNotification['Importance'] ? ' selected="selected"' : ''?>><?= $name ?></option>
 <?php   } ?>
                     </select>
                 </td>
@@ -54,14 +57,14 @@ View::show_header("Global Notification");
                 </td>
             </tr>
             <tr>
+                <td>&nbsp;</td>
                 <td>
+<?php   if (!$GlobalNotification['Message']) { ?>
                     <input type="submit" name="set" value="Create Notification" />
-                </td>
-<?php   if ($GlobalNotification) { ?>
-                <td>
+<?php   } else {?>
                     <input type="submit" name="delete" value="Delete Notification" />
-                </td>
 <?php   } ?>
+                </td>
             </tr>
         </table>
     </form>
