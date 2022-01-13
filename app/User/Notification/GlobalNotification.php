@@ -14,24 +14,20 @@ class GlobalNotification extends AbstractNotification {
     }
 
     public function clear(): int {
-        $global = self::$cache->get_value('global_notification');
-        if ($global) {
-            // This is some trickery
-            // since we can't know which users have the read cache key set
-            // we set the expiration time of their cache key to that of the length of the notification
-            // this guarantees that their cache key will expire after the notification expires
-            self::$cache->cache_value(sprintf(self::CLEARED, $this->user->id()), true, $global['Expiration']);
-            return 1;
-        }
-        return 0;
+        self::$cache->cache_value(
+            sprintf(self::CLEARED, $this->user->id()),
+            true,
+            (new \Gazelle\Notification\GlobalNotification)->remaining()
+        );
+        return 1;
     }
 
     public function load(): bool {
-        $notification = self::$cache->get_value('global_notification');
-        if ($notification !== false && self::$cache->get_value(sprintf(self::CLEARED, $this->user->id()) !== false)) {
-            $this->title     = $notification['Message'];
-            $this->url       = $notification['URL'];
-            $this->className = $notification['Importance'];
+        $alert = (new \Gazelle\Notification\GlobalNotification)->alert();
+        if ($alert && self::$cache->get_value(sprintf(self::CLEARED, $this->user->id())) === false) {
+            $this->title     = $alert['title'];
+            $this->url       = $alert['url'];
+            $this->className = $alert['level'];
             return true;
         }
         return false;

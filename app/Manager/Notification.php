@@ -15,30 +15,6 @@ class Notification extends \Gazelle\Base {
     const QUOTES = 'Quotes';
     const GLOBALNOTICE = 'Global';
 
-    public function level(): array {
-        return [
-            'confirmation',
-            'information',
-            'warning',
-            'error',
-        ];
-    }
-
-    public function global() {
-        return self::$cache->get_value('global_notification');
-    }
-
-    public function setGlobal(string $message, string $url, string $importance, string $expiration) {
-        if (empty($message) || empty($expiration)) {
-            error('Error setting notification');
-        }
-        self::$cache->cache_value('global_notification', ["Message" => $message, "URL" => $url, "Importance" => $importance, "Expiration" => $expiration], $expiration);
-    }
-
-    public function deleteGlobal() {
-        self::$cache->delete_value('global_notification');
-    }
-
     /**
      * Send a push notification to a user
      *
@@ -119,13 +95,13 @@ class Notification extends \Gazelle\Base {
     /**
      * Gets users who have push notifications enabled
      */
-    public function pushableUsers() {
+    public function pushableUsers(int $userId) {
         self::$db->prepared_query("
             SELECT UserID
             FROM users_push_notifications
             WHERE PushService != 0
                 AND UserID != ?
-            ", $this->userId
+            ", $userId
         );
         return self::$db->collect("UserID", false);
     }

@@ -1,0 +1,50 @@
+{% from 'macro/form.twig' import selected %}
+{{ header("Global Notification") }}
+<h2>Set global notification</h2>
+<div class="thin box pad">
+<form method="post">
+    <input type="hidden" name="action" value="global_notification" />
+    <input type="hidden" name="type" value="set" />
+    <table align="center">
+        <tr>
+            <td class="label">Title</td>
+            <td>
+                <input type="text" name="title" size="50" value="{{ alert.title }}" />
+            </td>
+        </tr>
+        <tr>
+            <td class="label">URL (optional)</td>
+            <td>
+                <input type="text" name="url" size="50" value="{{ alert.url }}" />
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Importance</td>
+            <td>
+                <select name="level">
+{% for name in level %}
+                    <option value="{{ name }}"{{ selected(alert.level == name) }}>{{ name }}</option>
+{% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Length (in minutes)</td>
+            <td>
+                <input type="text" name="length" size="10" value="{{ alert.expiry|default(1440) }}" />
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>
+{% if alert.title %}
+                <input type="submit" name="delete" value="Delete Notification" /> ({{ remaining|time_interval }} remaining).
+{% else %}
+                <input type="submit" name="set" value="Create Notification" />
+{% endif %}
+            </td>
+        </tr>
+    </table>
+</form>
+</div>
+{{ footer() }}

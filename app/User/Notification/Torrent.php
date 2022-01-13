@@ -49,7 +49,7 @@ class Torrent extends AbstractNotification {
                     AND UserID = ?
                 ", $this->user->id()
             );
-            self::$cache->cache_value('user_notify_upload_' . $this->id, $total, 0);
+            self::$cache->cache_value('user_notify_upload_' . $this->user->id(), $total, 0);
         }
         return $total;
     }
