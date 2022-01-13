@@ -91,9 +91,6 @@ switch ($_REQUEST['action']) {
     case 'global_notification':
         require_once('managers/global_notification.php');
         break;
-    case 'take_global_notification':
-        require_once('managers/take_global_notification.php');
-        break;
 
     case 'invite_source':
         require_once('managers/invite_source.php');

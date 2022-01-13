@@ -41,7 +41,7 @@ if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
     (new Gazelle\Subscription($Viewer))->subscribe($ThreadID);
 }
 $notification = new Gazelle\Manager\Notification($Viewer->id());
-$notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);
+$notification->push($notification->pushableUsers($Viewer->id()), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);
 
 Irc::sendRaw("PRIVMSG " . BOT_CHAN . " :New blog article: " . $blog->title());
 
