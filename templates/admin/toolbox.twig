@@ -1,0 +1,139 @@
+{% macro item(title, url, allowed) %}
+    {%- if allowed %}
+<tr><td><a href="{{ url }}">{{ title }}</a></td></tr>
+    {%- endif %}
+{% endmacro %}
+
+{% macro category(title, list) %}
+    {%- for entry in list %}
+        {%- if loop.first %}
+<div class="permission_subcontainer">
+    <table class="layout">
+        <tr class="colhead"><td>{{ title }}</td></tr>
+        {%- endif -%}
+        {{ _self.item(entry.0, entry.1, entry.2) }}
+        {% if loop.last -%}
+    </table>
+</div>
+        {%- endif %}
+    {%- endfor %}
+{% endmacro %}
+
+{{ header('Staff Tools') }}
+
+<div class="permissions"><div class="toolbox_container">
+
+{{ _self.category('Administration', [
+    ['Applicant manager',        'apply.php?action=admin',            viewer.permitted('admin_manage_applicants')],
+    ['Auto-Enable requests',     'tools.php?action=enable_requests',  FEATURE_EMAIL_REENABLE],
+    ['Database encryption key',  'tools.php?action=dbkey',            viewer.permitted('admin_site_debug')],
+    ['Permissions manager',      'tools.php?action=permissions',      viewer.permitted('admin_manage_permissions')],
+    ['Privilege matrix',         'tools.php?action=privilege_matrix', viewer.permitted('admin_manage_permissions')],
+    ['Reports V1',               'reports.php',                       viewer.permittedAny('admin_reports', 'site_moderate_forums')],
+    ['Staff page group manager', 'tools.php?action=staff_groups',     viewer.permitted('admin_manage_permissions')],
+]) }}
+
+{{ _self.category('Announcements', [
+    ['Album of the Month',  'tools.php?action=monthalbum',          viewer.permitted('admin_freeleech')],
+    ['Change log',          'tools.php?action=change_log',          true],
+    ['Global notification', 'tools.php?action=global_notification', viewer.permitted('admin_global_notification')],
+    ['Mass PM',             'tools.php?action=mass_pm',             viewer.permitted('admin_global_notification')],
+    ['News post',           'tools.php?action=news',                viewer.permitted('admin_manage_news')],
+    ['Vanity House',        'tools.php?action=vanityhouse',         viewer.permitted('admin_freeleech')],
+]) }}
+
+{{ _self.category('Rewards', [
+    ['Manage bonus points',         'tools.php?action=bonus_points',       viewer.permitted('admin_bp_history')],
+    ['Manage freeleech tokens',     'tools.php?action=tokens',             viewer.permitted('admin_freeleech')],
+    ['Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', viewer.permitted('admin_freeleech')],
+
+]) }}
+
+</div><div class="toolbox_container">
+
+{{ _self.category('User management', [
+    ['Create user',         'tools.php?action=create_user',       viewer.permitted('admin_create_users')],
+    ['Login watch',         'tools.php?action=login_watch',       viewer.permitted('admin_login_watch')],
+    ['Invite pool',         'tools.php?action=invite_pool',       viewer.permitted('users_view_invites')],
+    ['Invite tree manager', 'tools.php?action=manipulate_tree',   true],
+    ['Special users',       'tools.php?action=special_users',     viewer.permitted('admin_manage_permissions')],
+    ['Recovery',            'recovery.php?action=admin',          viewer.permitted('admin_recovery')],
+    ['Referral accounts',   'tools.php?action=referral_accounts', viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
+    ['Referred users',      'tools.php?action=referral_users',    viewer.permitted('admin_view_referrals')],
+    ['Registration log',    'tools.php?action=registration_log',  viewer.permitted('users_view_email')],
+    ['User flow',           'tools.php?action=user_flow',         viewer.permitted('site_view_flow')],
+]) }}
+
+{{ _self.category('Community', [
+    ['Contest manager',         'contest.php?action=admin',           viewer.permitted('admin_manage_contest')],
+    ['Forum categories',        'tools.php?action=categories',        viewer.permitted('admin_manage_forums')],
+    ['Forum departments',       'tools.php?action=forum',             viewer.permitted('admin_manage_forums')],
+    ['Forum transitions',       'tools.php?action=forum_transitions', viewer.permitted('admin_manage_forums')],
+    ['Invite Sources',          'tools.php?action=invite_source',     viewer.permitted('admin_manage_invite_source')],
+    ['IRC manager',             'tools.php?action=irc',               viewer.permitted('admin_manage_forums')],
+    ['Navigation link manager', 'tools.php?action=navigation',        viewer.permitted('admin_manage_navigation')],
+    ['Stylesheet usage',        'tools.php?action=stylesheets',       viewer.permitted('admin_manage_stylesheets')],
+]) }}
+
+</div><div class="toolbox_container">
+
+{{ _self.category('Torrents', [
+    ['Client whitelist',     'tools.php?action=whitelist',     viewer.permitted('admin_whitelist')],
+    ['"Do Not Upload" list', 'tools.php?action=dnu',           viewer.permitted('admin_dnu')],
+    ['Collage recovery',     'collages.php?action=recover',    viewer.permitted('site_collages_recover')],
+    ['Label aliases',        'tools.php?action=label_aliases', true],
+    ['Rate limiting',        'tools.php?action=rate_limit',    viewer.permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage')],
+]) }}
+
+{{ _self.category('Tags', [
+    ['Batch tag editor',      'tools.php?action=tags',          true],
+    ['Tag aliases',           'tools.php?action=tags_aliases',  true],
+    ['Official tags manager', 'tools.php?action=tags_official', true],
+]) }}
+
+{{ _self.category('External data', [
+    ['Email blacklist',        'tools.php?action=email_blacklist', viewer.permitted('users_view_email')],
+    ['IP address bans',        'tools.php?action=ip_ban',          viewer.permitted('admin_manage_ipbans')],
+    ['IP bulk search',         'tools.php?action=ip_search',       viewer.permitted('users_view_ips')],
+    ['Duplicate IP addresses', 'tools.php?action=dupe_ips',        viewer.permitted('users_view_ips')],
+]) }}
+
+{{ _self.category('Finances', [
+    ['Donation log',          'tools.php?action=donation_log',    viewer.permitted('admin_donor_log')],
+    ['Donor rewards',         'tools.php?action=donor_rewards',   true],
+    ['Payment dates',         'tools.php?action=payment_list',    viewer.permitted('admin_view_payments')],
+]) }}
+
+</div><div class="toolbox_container">
+
+{{ _self.category('Site Information', [
+    ['Bonus points stats',   'tools.php?action=bonus_stats',    viewer.permitted('admin_bp_history')],
+    ['Economic stats',       'tools.php?action=economic_stats', viewer.permitted('site_view_flow')],
+    ['Torrent stats',        'tools.php?action=torrent_stats',  viewer.permitted('site_view_flow')],
+    ['Ratio watch',          'tools.php?action=ratio_watch',    viewer.permitted('site_view_flow')],
+    ['OS and browser usage', 'tools.php?action=platform_usage', viewer.permitted('site_debug')],
+    ['Site info',            'tools.php?action=site_info',      viewer.permitted('admin_site_debug')],
+    ['Site options',         'tools.php?action=site_options',   true],
+    ['Tracker info',         'tools.php?action=ocelot_info',    true],
+]) }}
+
+{{ _self.category('Developer Sandboxes', [
+    ['BBCode sandbox',       'tools.php?action=bbcode_sandbox',            true],
+    ['DB Sandbox',           'tools.php?action=db_sandbox',                viewer.permitted('admin_site_debug')],
+    ['Notification sandbox', 'tools.php?action=notification_sandbox',      viewer.permitted('admin_view_notifications')],
+    ['Referral sandbox',     'tools.php?action=referral_sandbox',          viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
+]) }}
+
+{{ _self.category('Development', [
+    ['Cache/DB stats',        'tools.php?action=service_stats',            viewer.permitted('site_debug')],
+    ['Cache Inspector',       'tools.php?action=clear_cache',              viewer.permitted('site_debug')],
+    ['Database schema info',  'tools.php?action=database_specifics',       viewer.permitted('site_database_specifics')],
+    ['Error Analysis',        'tools.php?action=analysis_list',            viewer.permitted('site_analysis')],
+    ['PHP processes',         'tools.php?action=process_info',             viewer.permitted('admin_site_debug')],
+    ['Scheduler',             'tools.php?action=periodic&amp;mode=view',   viewer.permitted('admin_periodic_task_view')],
+]) }}
+
+</div>
+</div>
+{{ footer() }}
+
