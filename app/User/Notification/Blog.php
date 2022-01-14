@@ -15,6 +15,9 @@ class Blog extends AbstractNotification {
     public function load(): bool {
         $blogMan = new \Gazelle\Manager\Blog;
         [$blogId, $title] = $blogMan->latest();
+        if (is_null($blogId)) {
+            return false;
+        }
         $lastRead = (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user->id());
 
         // You must be new around here.

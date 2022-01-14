@@ -248,12 +248,29 @@ if (is_null($OldFMUsername) && $LastFMUsername !== '') {
 }
 
 $user->toggleAcceptFL($Options['AcceptFL']);
-(new Gazelle\User\Notification($user))->save(
-    array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST)))),
-    ["PushKey" => $_POST['pushkey']],
-    $_POST['pushservice'],
-    $_POST['pushdevice']
+
+/* transform
+ *   'notifications_News_popup'
+ *   'notifications_Blog_popup'
+ *   'notifications_Inbox_traditional'
+ * into
+ *   [
+ *     'News'  => 'popup',
+ *     'Blog'  => 'popup',
+ *     'Inbox' => 'traditional',
+ *   ];
+ */
+$notification = array_values(
+    array_map(
+        fn($s) => explode('_', substr($s, strlen('notifications_'))),
+        preg_grep('/^notifications_/', array_keys($_POST))
+    )
 );
+$settings = [];
+foreach ($notification as $n) {
+    $settings[$n[0]] = $n[1];
+}
+(new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
 $user->toggleAttr('hide-vote-recent', empty($_POST['pattr_hide_vote_recent']));
 $user->toggleAttr('hide-vote-history', empty($_POST['pattr_hide_vote_history']));
