@@ -23,25 +23,16 @@ switch ($_REQUEST['action'] ?? '') {
         require('common_responses.php');
         break;
     case 'delete_response':
-        if (!$Viewer->isStaffPMReader()) {
-            error(403);
-        }
         require('ajax_delete_response.php');
         break;
     case 'edit_response':
-        if (!$Viewer->isStaffPMReader()) {
-            error(403);
-        }
         require('ajax_edit_response.php');
         break;
     case 'get_response':
-        if (!$Viewer->isStaffPMReader()) {
-            error(403);
-        }
         require('ajax_get_response.php');
         break;
     case 'preview':
-        require('ajax_preview_response.php');
+        echo Text::full_format($_POST['message'] ?? '');
         break;
     case 'get_post':
         require('get_post.php');

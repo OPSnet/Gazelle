@@ -1,13 +1,8 @@
 <?php
 
-$ID = (int)$_GET['id'];
-if (!$ID) {
-    echo '-1';
-    exit;
+if (!$Viewer->isStaffPMReader()) {
+    error(403);
 }
 
-$Message = $DB->scalar("
-    SELECT Message FROM staff_pm_responses WHERE ID = ?
-    ", $ID
-);
-echo (int)$_GET['plain'] === 1 ? $Message : Text::full_format($Message);
+$answer = (new Gazelle\Manager\StaffPM)->commonAnswer((int)($_GET['id'] ?? 0));
+echo (int)($_GET['plain'] ?? 0) === 1 ? $answer : Text::full_format($answer);
