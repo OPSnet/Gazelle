@@ -1,10 +1,10 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
 use \Gazelle\Util\Crypto;
 
-class Session extends BaseUser {
+class Session extends \Gazelle\BaseUser {
     protected const CACHE_KEY = 'u_sess_%d';
 
     protected array $info = [];

@@ -33,7 +33,7 @@ if (isset($_POST['username'])) {
 
         if ($user->isEnabled()) {
             $browser = parse_user_agent();
-            $session = new Gazelle\Session($user);
+            $session = new Gazelle\User\Session($user);
             $current = $session->create([
                 'keep-logged' => $login->persistent() ? '1' : '0',
                 'browser'     => $browser['Browser'],

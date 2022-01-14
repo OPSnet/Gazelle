@@ -228,7 +228,7 @@ class View {
             'db_time'      => $DB->Time,
             'debug'        => $Debug,
             'disclaimer'   => isset($Options['disclaimer']),
-            'last_active'  => (new Gazelle\Session($Viewer))->lastActive($SessionID),
+            'last_active'  => (new Gazelle\User\Session($Viewer))->lastActive($SessionID),
             'launch'       => $launch,
             'load'         => sys_getloadavg(),
             'notification' => $notification,

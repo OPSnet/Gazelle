@@ -80,7 +80,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 } elseif (isset($_COOKIE['session'])) {
     $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
     if ($LoginCookie !== false) {
-        [$SessionID, $userId] = Gazelle\Session::decode($LoginCookie);
+        [$SessionID, $userId] = Gazelle\User\Session::decode($LoginCookie);
         $Viewer = $userMan->findById((int)$userId);
         if (is_null($Viewer)) {
             setcookie('session', '', [
@@ -98,7 +98,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
             header('Location: login.php');
             exit;
         }
-        $session = new Gazelle\Session($Viewer);
+        $session = new Gazelle\User\Session($Viewer);
         if (!$session->valid($SessionID)) {
             $Viewer->logout($SessionID);
             header('Location: login.php');
