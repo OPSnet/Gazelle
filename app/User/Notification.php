@@ -125,27 +125,32 @@ class Notification extends \Gazelle\BaseUser {
     public function save(array $settings, array $options, int $service, $device): int {
         $set = [];
         $args = [];
-        foreach (self::$Types as $Type) {
-            $Popup = array_key_exists("notifications_{$Type}_popup", $settings);
-            $Traditional = array_key_exists("notifications_{$Type}_traditional", $settings);
-            $Push = array_key_exists("notifications_{$Type}_push", $settings);
-            if ($Push) {
-                if ($Popup) {
-                    $Result = self::DISPLAY_POPUP_PUSH;
-                } elseif ($Traditional) {
-                    $Result = self::DISPLAY_TRADITIONAL_PUSH;
+        $rename = [
+            'Collages'      => 'Collage',
+            'Quotes'        => 'Quote',
+            'Subscriptions' => 'Subscription',
+            'Torrents'      => 'Torrent',
+        ];
+        foreach (self::$Types as $column) {
+            $set[] = "$column = ?";
+            $name  = $rename[$column] ?? $column;
+            $popup = ($settings[$name] ?? '') === 'popup';
+            $trad  = ($settings[$name] ?? '') === 'traditional';
+            if (($settings[$name] ?? '') === 'push') {
+                if ($popup) {
+                    $args[] = self::DISPLAY_POPUP_PUSH;
+                } elseif ($trad) {
+                    $args[] = self::DISPLAY_TRADITIONAL_PUSH;
                 } else {
-                    $Result = self::DISPLAY_PUSH;
+                    $args[] = self::DISPLAY_PUSH;
                 }
-            } elseif ($Traditional) {
-                $Result = self::DISPLAY_TRADITIONAL;
-            } elseif ($Popup) {
-                $Result = self::DISPLAY_POPUP;
+            } elseif ($trad) {
+                $args[] = self::DISPLAY_TRADITIONAL;
+            } elseif ($popup) {
+                $args[] = self::DISPLAY_POPUP;
             } else {
-                $Result = self::DISPLAY_DISABLED;
+                $args[] = self::DISPLAY_DISABLED;
             }
-            $set[] = "$Type = ?";
-            $args[] = $Result;
         }
         $set = implode(",", $set);
         $args[] = $this->user->id();
