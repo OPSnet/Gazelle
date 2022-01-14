@@ -65,7 +65,7 @@ class User extends BaseObject {
             'samesite' => 'Lax',
         ]);
         if ($sessionId) {
-            (new Session($this))->drop($sessionId);
+            (new User\Session($this))->drop($sessionId);
         }
         $this->flush();
     }
@@ -74,7 +74,7 @@ class User extends BaseObject {
      * Logout all sessions
      */
     public function logoutEverywhere() {
-        $session = new Session($this);
+        $session = new User\Session($this);
         $session->dropAll();
         $this->logout();
     }

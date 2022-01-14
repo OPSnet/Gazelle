@@ -12,7 +12,7 @@ if (!isset($_GET['userid'])) {
     }
 }
 
-$session = new Gazelle\Session($user);
+$session = new Gazelle\User\Session($user);
 if (isset($_POST['all'])) {
     authorize();
     $session->dropAll();
