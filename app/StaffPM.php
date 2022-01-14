@@ -3,21 +3,25 @@
 namespace Gazelle;
 
 class StaffPM extends BaseObject {
-    protected $info;
+    protected array $info;
     protected $author;
     protected $assigned;
 
     public function __construct(int $id) {
         parent::__construct($id);
         $this->info = self::$db->rowAssoc("
-            SELECT Subject     AS subject,
-                UserID         AS user_id,
-                Level          AS class_level,
-                AssignedToUser AS assigned_user_id,
-                Unread         AS unread,
-                Status         AS status
-            FROM staff_pm_conversations
-            WHERE ID = ?
+            SELECT spm.Subject     AS subject,
+                spm.UserID         AS user_id,
+                spm.Level          AS class_level,
+                coalesce(p.Name, concat('Level ', spm.Level))
+                                   AS userclass_name,
+                spm.AssignedToUser AS assigned_user_id,
+                spm.Unread         AS unread,
+                spm.Status         AS status,
+                spm.Date           AS date
+            FROM staff_pm_conversations spm
+            LEFT JOIN permissions p USING (Level)
+            WHERE spm.ID = ?
             ", $this->id
         );
         $userMan = new Manager\User;
@@ -41,6 +45,10 @@ class StaffPM extends BaseObject {
         // no-op
     }
 
+    public function assignedUserId(): int {
+        return (int)$this->info['assigned_user_id'];
+    }
+
     public function assigned(): ?User {
         return $this->assigned;
     }
@@ -51,6 +59,24 @@ class StaffPM extends BaseObject {
 
     public function classLevel(): int {
         return $this->info['class_level'];
+    }
+
+    public function date(): string {
+        return $this->info['date'];
+    }
+
+    public function inProgress(): bool {
+        return $this->info['status'] !== 'Resolved';
+    }
+
+    public function isReadable(User $user): bool {
+        return (!$user->isStaffPMReader() && !in_array($user->id(), [$this->userId(), $this->assignedUserId()]))
+            || ($user->isFLS() && !in_array($this->assignedUserId(), [0, $user->id()]))
+            || ($user->isStaff() && $this->classLevel() > $user->effectiveClass());
+    }
+
+    public function isResolved(): bool {
+        return $this->info['status'] === 'Resolved';
     }
 
     public function isUnread(): bool {
@@ -65,8 +91,12 @@ class StaffPM extends BaseObject {
         return is_null($this->assigned);
     }
 
-    public function inProgress(): bool {
-        return $this->info['status'] != 'Resolved';
+    public function userId(): int {
+        return (int)$this->info['user_id'];
+    }
+
+    public function userclassName(): string {
+        return $this->info['userclass_name'];
     }
 
     /**
@@ -92,6 +122,17 @@ class StaffPM extends BaseObject {
             ", $this->id
         );
         self::$cache->delete_value("staff_pm_new_" . $viewer->id());
+        return self::$db->affected_rows();
+    }
+
+    public function unresolve(): int {
+        self::$db->prepared_query("
+            UPDATE staff_pm_conversations SET
+                Date = now(),
+                Status = 'Unanswered'
+            WHERE ID = ?
+            ", $this->id
+        );
         return self::$db->affected_rows();
     }
 

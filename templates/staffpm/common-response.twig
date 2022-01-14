@@ -1,0 +1,80 @@
+{{ header('Staff PMs', {'js': 'staffpm'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Staff PMs - Manage common responses</h2>
+        <div class="linkbox">
+{% if viewer.isStaff %}
+            <a href="staffpm.php" class="brackets">View your unanswered</a>
+{% endif %}
+            <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
+            <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
+            <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
+{% if conv_id %}
+            <a href="staffpm.php?action=viewconv&amp;id={{ conv_id }}" class="brackets">Back to conversation</a>
+{% endif %}
+        </div>
+    </div>
+    <br />
+    <div class="box pad">You can add a new answer here (or edit existing
+    answers). Updates will be made in place without a page reload. When you are
+    satified with the result, you may click on the "Back to conversation" link
+    above to resume your reply.</div>
+    <br />
+    <div id="commonresponses">
+        <br />
+        <div id="ajax_message_0" class="hidden alertbar"></div>
+        <br />
+        <div class="pad">
+            <h3>Create new response:</h3>
+        </div>
+        <div id="response_new" class="box">
+            <form class="send_form" name="response" id="response_form_0" action="">
+                <div class="head">
+                    <strong>Name:</strong>
+                    <input onfocus="if (this.value == 'New name') { this.value = ''; }"
+                        onblur="if (this.value == '') { this.value = 'New name'; }"
+                        type="text" id="response_name_0" size="87" value="New name"
+                    />
+                </div>
+                <div class="pad">
+                    <textarea onfocus="if (this.value == 'New message') { this.value = ''; }"
+                        onblur="if (this.value == '') { this.value = 'New message'; }"
+                        rows="10" cols="87"
+                        id="response_message_0">New message</textarea>
+                    <br />
+                    <input type="button" value="Save" id="save_0" onclick="SaveMessage(0);" />
+                </div>
+            </form>
+        </div>
+        <br />
+        <br />
+        <div class="pad">
+            <h3>Edit old responses:</h3>
+        </div>
+{% for answer in list %}
+        <br />
+        <div id="ajax_message_{{ answer.id }}" class="hidden alertbar"></div>
+        <br />
+        <div id="response_{{ answer.id }}" class="box">
+            <form class="send_form" name="response" id="response_form_{{ answer.id }}" action="">
+                <div class="head">
+                    <strong>Name:</strong>
+                    <input type="hidden" name="id" value="{{ answer.id }}" />
+                    <input type="text" name="name" id="response_name_{{ answer.id }}" size="87" value="{{ answer.name }}" />
+                </div>
+                <div class="pad">
+                    <div class="box pad hidden" style="text-align: left;" id="response_div_{{ answer.id }}">
+                        {{ answer.message|bb_format }}
+                    </div>
+                    <textarea rows="10" cols="87" id="response_message_{{ answer.id }}" name="message">{{ answer.message }}</textarea>
+                    <br />
+                    <input type="button" value="Toggle preview" onclick="PreviewResponse({{ answer.id }});" />
+                    <input type="button" value="Delete" onclick="DeleteMessage({{ answer.id }});" />
+                    <input type="button" value="Save" id="save_{{ answer.id }}" onclick="SaveMessage({{ answer.id }});" />
+                </div>
+            </form>
+        </div>
+{% endfor %}
+    </div>
+</div>
+{{ footer() }}

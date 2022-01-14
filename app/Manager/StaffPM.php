@@ -21,14 +21,70 @@ class StaffPM extends \Gazelle\Base {
         return $id ? new \Gazelle\StaffPM($id) : null;
     }
 
+    public function findAllByUserId(int $userId): array {
+        self::$db->prepared_query("
+            SELECT ID
+            FROM staff_pm_conversations
+            WHERE UserID = ?
+            ORDER BY Status, Date DESC
+            ", $userId
+        );
+        $result = [];
+        $list   = self::$db->collect(0, false);
+        foreach ($list as $id) {
+            $spm = $this->findById($id);
+            if ($spm) {
+                $result[] = $spm;
+            }
+        }
+        return $result;
+    }
+
+    public function createCommonAnswer(string $name, string $message): int {
+        self::$db->prepared_query("
+            INSERT INTO staff_pm_responses
+                   (Name, Message)
+            VALUES (?,    ?)
+            ", $name, $message
+        );
+        return self::$db->inserted_id();
+    }
+
+    public function modifyCommonAnswer(int $id, string $name, string $message): int {
+        self::$db->prepared_query("
+            UPDATE staff_pm_responses SET
+                Name = ?,
+                Message = ?
+            WHERE ID = ?
+            ", $name, $message, $id
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function removeCommonAnswer(int $id): int {
+        self::$db->prepared_query("
+            DELETE FROM staff_pm_responses WHERE ID = ?
+            ", $id
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function commonAnswer(int $id): string {
+        return (string)self::$db->scalar("
+            SELECT Message FROM staff_pm_responses WHERE ID = ?
+            ", $id
+        );
+    }
+
     public function commonAnswerList(): array {
         self::$db->prepared_query("
-            SELECT ID,
-                Name
+            SELECT ID   AS id,
+                Name    AS name,
+                Message AS message
             FROM staff_pm_responses
             ORDER BY Name
         ");
-        return self::$db->to_array('ID', MYSQLI_ASSOC, false);
+        return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     public function countByStatus(\Gazelle\User $viewer, array $status): int {

@@ -1,36 +1,23 @@
 <?php
 
-$Message = trim($_POST['message']);
-$Name = trim($_POST['name']);
-if (!$Message || !$Name) {
-    // No message/name
-    echo '-1';
+if (!$Viewer->isStaffPMReader()) {
+    error(403);
+}
+
+$name    = trim($_POST['name']);
+$message = trim($_POST['message']);
+if (!$name || !$message) {
+    echo -1;
     exit;
 }
 
-if (!is_numeric($_POST['id'])) {
-    // No ID
-    echo '-2';
-    exit;
-}
-
-if ($DB->scalar("SELECT 1 FROM staff_pm_responses WHERE ID = ?", (int)$_POST['id'])) {
-    // Edit response
-    $DB->prepared_query("
-        UPDATE staff_pm_responses SET
-            Message = ?,
-            Name = ?
-        WHERE ID = ?
-        ", $Message, $Name, $ID
-    );
-    echo '2';
+$id     = (int)($_POST['id'] ?? 0);
+$spmMan = new Gazelle\Manager\StaffPM;
+$answer = $spmMan->commonAnswer($id);
+if (is_null($answer)) {
+    $spmMan->createCommonAnswer($name, $message);
+    echo 2;
 } else {
-    // Create new response
-    $DB->prepared_query("
-        INSERT INTO staff_pm_responses
-               (Message, Name)
-        VALUES (?,       ?)
-        ", $Message, $Name
-    );
-    echo '1';
+    $spmMan->modifyCommonAnswer($id, $name, $message);
+    echo 1;
 }
