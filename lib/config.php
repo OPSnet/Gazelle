@@ -895,7 +895,7 @@ defined('CACHE_NAMESPACE') or define('CACHE_NAMESPACE', [
 defined('IP_REGEXP')       or define('IP_REGEXP',       '/\b(?:\d{1,3}\.){3}\d{1,3}\b/');
 defined('URL_REGEXP_STEM') or define('URL_REGEXP_STEM', '((?:f|ht)tps?:\/\/)(?:' . str_replace('/', '', IP_REGEXP) . '|[\w-]+(?:\.[\w-]+)+)(?::\d{1,5})?(?:\/\S*)');
 defined('URL_REGEXP')      or define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
-defined('CSS_REGEXP')      or define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)$/i');
+defined('CSS_REGEXP')      or define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)?$/i');
 defined('IMAGE_REGEXP')    or define('IMAGE_REGEXP',    '/\b(' . URL_REGEXP_STEM . '\.(?:gif|png|webm|jpe?g|tiff?)(\?\S*)?)\b/i');
 defined('SITELINK_REGEXP') or define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') .  '|' . preg_quote(ALT_SITE_URL, '/') . ')');
 defined('ARTIST_REGEXP')   or define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
