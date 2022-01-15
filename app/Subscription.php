@@ -250,8 +250,7 @@ class Subscription extends BaseUser {
     /**
      * Clear the forum subscription notifications of a user.
      */
-    public function clear() {
-        $qid = self::$db->get_query_id();
+    public function clear(): int {
         self::$db->prepared_query("
             INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
                 SELECT us.UserID, ft.ID, ft.LastPostID
@@ -261,8 +260,8 @@ class Subscription extends BaseUser {
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $this->user->id()
         );
-        self::$db->set_query_id($qid);
         self::$cache->delete_value('subscriptions_user_new_' . $this->user->id());
+        return self::$db->affected_rows();
     }
 
     /**
