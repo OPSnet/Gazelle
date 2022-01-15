@@ -477,8 +477,6 @@ if (!$torrentList) {
 
         $reportTotal = $torrent->reportTotal();
         $reportList  = $torMan->reportList($Viewer, $TorrentID);
-        $CanEdit     = $Viewer->permitted('torrents_edit') || (($torrent->uploaderId() == $Viewer->id() && !$Viewer->disableWiki()) && !$torrent->isRemasteredUnknown());
-        $RegenLink   = $Viewer->permitted('users_mod') ? ' <a href="torrents.php?action=regen_filelist&amp;torrentid='.$TorrentID.'" class="brackets">Regenerate</a>' : '';
     ?>
             <tr class="torrent_row releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$GroupID?> edition_<?= $EditionID
                 ?> group_torrent<?= $snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : ''
@@ -489,7 +487,8 @@ if (!$torrentList) {
             'can_fl' => $Viewer->canSpendFLToken($torrent),
             'key'    => $Viewer->announceKey(),
             't'      => $torrent,
-            'edit'   => $CanEdit,
+            'edit'   => $Viewer->permitted('torrents_edit')
+                || (($torrent->uploaderId() == $Viewer->id() && !$Viewer->disableWiki()) && !$torrent->isRemasteredUnknown()),
             'remove' => $Viewer->permitted('torrents_delete') || $torrent->uploaderId() == $Viewer->id(),
             'pl'     => true,
             'extra'  => [
@@ -570,9 +569,9 @@ if (!$torrentList) {
     }
     if ($torrent->media() === 'CD' && $torrent->hasLog() && $torrent->hasLogDb()) {
 ?>
-                        <a href="#" class="brackets" onclick="show_logs('<?=
-                            $TorrentID?>', <?=$torrent->hasLogDb()?>, '<?= $torrent->logScore() ?>'); return false;">View log<?= plural(count($torrent->riplogIdList()))
-                            ?></a>
+                        <a href="#" class="brackets" onclick="show_logs('<?= $TorrentID?>', <?=$torrent->hasLogDb()?>, '<?=
+                            $torrent->logScore() ?>'); return false;">View log<?=
+                            plural(count($torrent->riplogIdList())) ?></a>
 <?php
     }
     if ($Viewer->permitted('site_view_torrent_snatchlist')) {
@@ -594,20 +593,26 @@ if (!$torrentList) {
                         <table class="filelist_table">
                             <tr class="colhead_dark">
                                 <td>
-                                    <div class="filelist_title" style="float: left;">File Names' . $RegenLink . '</div>
-                                    <div class="filelist_path" style="float: right;">' . ($torrent->path() ? ("/" . $torrent->path() . "/" : '') . '</div>
+                                    <div class="filelist_title" style="float: left;">File Names
+<?php   if ($Viewer->permitted('users_mod')) { ?>
+            <a href="torrents.php?action=regen_filelist&amp;torrentid=<?= $TorrentID ?>" class="brackets">Regenerate</a>
+<?php   } ?>
+                                    </div>
+                                    <div class="filelist_path" style="float: right;"><?=
+                                        $torrent->path() ? ("/" . $torrent->path() . "/") : '' ?></div>
                                 </td>
                                 <td class="nobr" style="text-align: right">
                                     <strong>Size</strong>
                                 </td>
                             </tr>
 <?php
-                        $file = $torrent->fileList();
-                        foreach ($file as $fileData) {
-                            $info = $torMan->splitMetaFilename($fileData);
+        $file = $torrent->fileList();
+        foreach ($file as $fileData) {
+            $info = $torMan->splitMetaFilename($fileData);
 ?>
-                            <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?= Format::get_size($info['size']) ?></td></tr>
-<?php                   } ?>
+                            <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?=
+                                Format::get_size($info['size']) ?></td></tr>
+<?php   } ?>
                         </table>
                     </div>
 <?php if ($reportTotal) { ?>
@@ -645,9 +650,9 @@ if (!$torrentList) {
 <?php
     }
     if (!empty($Description)) {
-            echo "\n<blockquote>".Text::full_format($Description).'</blockquote>';
-    }
 ?>
+        <blockquote><?= Text::full_format($Description) ?></blockquote>
+<?php } ?>
                 </td>
             </tr>
 <?php } // $torrentList ?>
