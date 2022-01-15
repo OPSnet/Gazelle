@@ -91,6 +91,14 @@ class Artist extends Base {
         }
     }
 
+    public function url(): string {
+        return 'artist.php?id=' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name));
+    }
+
     protected function loadAttr(): array {
         self::$db->prepared_query("
             SELECT aa.name, aa.artist_attr_id
@@ -256,10 +264,6 @@ class Artist extends Base {
 
     public function similarArtists(): array {
         return $this->similar;
-    }
-
-    public function url(): string {
-        return sprintf('<a href="artist.php?id=%d">%s</a>', $this->id, $this->name);
     }
 
     public function tagLeaderboard(): array {

@@ -870,11 +870,11 @@ defined('CACHE_NAMESPACE') or define('CACHE_NAMESPACE', [
         'g5' => 'torrent_group_%d',
         'g6' => 'torrent_group_light_%d',
         'g7' => 'groups_artists_%d',
-        'g8' => 'tg_%d',
+        'g8' => 'tg2_%d',
         'g9' => 'tlist_%d',
     ],
     'torrent' => [
-        't1' => 't2_%d',
+        't1' => 't3_%d',
     ],
     'user' => [
         'u1' => 'bookmarks_group_ids_%d',

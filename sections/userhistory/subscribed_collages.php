@@ -228,7 +228,7 @@ if ($artistSubs) {
 <table class="artist_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $s['collageId'] ?>">
 <?php   foreach ($s['artistIds'] as $artistId) { ?>
     <tr class="colhead">
-        <td><?= (new Gazelle\Artist($artistId))->url() ?></td>
+        <td><?= (new Gazelle\Artist($artistId))->link() ?></td>
     </tr>
 <?php   } ?>
 </table>
