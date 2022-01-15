@@ -262,13 +262,13 @@ $user->toggleAcceptFL($Options['AcceptFL']);
  */
 $notification = array_values(
     array_map(
-        fn($s) => explode('_', substr($s, strlen('notifications_'))),
-        preg_grep('/^notifications_/', array_keys($_POST))
+        fn($s) => explode('_', $s),
+        preg_grep('/^notifications_[^_]+_/', array_keys($_POST))
     )
 );
 $settings = [];
 foreach ($notification as $n) {
-    $settings[$n[0]] = $n[1];
+    $settings[$n[1]] = $n[2];
 }
 (new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
