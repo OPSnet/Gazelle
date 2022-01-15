@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class TGroup extends BaseObject {
 
-    const CACHE_KEY          = 'tg_%d';
+    const CACHE_KEY          = 'tg2_%d';
     const CACHE_TLIST_KEY    = 'tlist_%d';
     const CACHE_COVERART_KEY = 'tg_cover_%d';
     const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
@@ -232,6 +232,7 @@ class TGroup extends BaseObject {
         for ($n = 0; $n < count($tagIds); ++$n) {
             $info['tags'][$tagIds[$n]] = [
                 'name'      => $tagNames[$n],
+                'id'        => $tagIds[$n],
                 'userId'    => $tagVoteUserIds[$n],
                 'upvotes'   => $tagUpvotes[$n],
                 'downvotes' => $tagDownvotes[$n],
@@ -317,6 +318,10 @@ class TGroup extends BaseObject {
 
     public function categoryGrouped(): bool {
         return isset(CATEGORY_GROUPED[$this->categoryId() - 1]);
+    }
+
+    public function categoryIcon(): bool {
+        return isset(CATEGORY_ICON[$this->categoryId() - 1]);
     }
 
     public function categoryName(): string {
@@ -489,7 +494,7 @@ class TGroup extends BaseObject {
         return $n;
     }
 
-    public function coverArt(): array {
+    public function coverArt(Manager\User $userMan): array {
         $key = sprintf(self::CACHE_COVERART_KEY, $this->id);
         $list = self::$cache->get_value($key);
         if ($list === false) {
@@ -502,6 +507,10 @@ class TGroup extends BaseObject {
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 0);
+        }
+        foreach ($list as &$cover) {
+            $user = $userMan->findById($cover['UserID']);
+            $cover['userlink'] = $user ? $user->link() : 'System';
         }
         return $list;
     }
@@ -1078,5 +1087,29 @@ class TGroup extends BaseObject {
             "groups_artists_" . $this->id,
         ]);
         return true;
+    }
+
+    /**
+     * Return info about the deleted masterings of a torrent group.
+     *
+     * @param return array of strings imploded by '!!'
+     *  [torrent_id, remastered, title, year, record_label, catalogue_number]
+     */
+    public function deletedMasteringList(): array {
+        self::$db->prepared_query("
+            SELECT d.Media                                                            AS media,
+                d.Remastered = '1'                                                    AS remastered,
+                d.RemasterTitle                                                       AS title,
+                if(d.Remastered = '1', d.RemasterYear, tg.Year)                       AS year,
+                if(d.Remastered = '1', d.RemasterRecordLabel, tg.RecordLabel)         AS record_label,
+                if(d.Remastered = '1', d.RemasterCatalogueNumber, tg.CatalogueNumber) AS catalogue_number
+            FROM deleted_torrents d
+            LEFT JOIN torrents_group tg ON (tg.ID = d.GroupID)
+            WHERE d.GroupID = ?
+            GROUP BY remastered, year, title, record_label, catalogue_number, media
+            ORDER BY remastered, year, title, record_label, catalogue_number, media
+            ", $this->id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

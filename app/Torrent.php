@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class Torrent extends BaseObject {
 
-    const CACHE_KEY                = 't2_%d';
+    const CACHE_KEY                = 't3_%d';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
@@ -157,6 +157,13 @@ class Torrent extends BaseObject {
             $info['ripLogIds'] = empty($info['ripLogIds']) ? [] : array_map('intval', explode(',', $info['ripLogIds']));
             $info['LogCount'] = count($info['ripLogIds']);
             $info['FileList'] = explode("\n", $info['FileList']);
+            $info['Reported'] = self::$db->scalar("
+                SELECT count(*)
+                FROM reportsv2 r
+                WHERE r.Status != 'Resolved'
+                    AND r.TorrentID = ?
+                ", $this->id
+            );
 
             self::$cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
         }
@@ -177,15 +184,27 @@ class Torrent extends BaseObject {
      */
     public function edition(): string {
         $tgroup = $this->group();
-        return implode(' / ', array_filter(
-            [
-                $this->remasterYear() ?: $tgroup->year(),
-                $this->remasterTitle(),
+        if ($this->isRemastered()) {
+            $edition = [
                 $this->remasterRecordLabel() ?? $tgroup->recordLabel(),
                 $this->remasterCatalogueNumber() ?? $tgroup->catalogueNumber(),
-            ],
-            fn($element) => !is_null($element)
-        ));
+                $this->remasterTitle(),
+                $this->media(),
+            ];
+        } elseif ($tgroup->recordLabel() || $tgroup->catalogueNumber()) {
+            $edition = [
+                $tgroup->recordLabel(),
+                $tgroup->catalogueNumber(),
+                $this->media(),
+            ];
+        } else {
+            $edition = [
+                'Original Release',
+                $this->media(),
+            ];
+        }
+        return ($this->isRemastered() ? ($this->remasterYear() ?? $tgroup->year()) : $tgroup->year())
+            . " \xE2\x80\x93 " . implode(' / ', array_filter($edition, fn($e) => !is_null($e)));
     }
 
     protected function labelElement($class, $text): string {
@@ -197,9 +216,6 @@ class Torrent extends BaseObject {
     public function shortLabelList(): array {
         $info = $this->info();
         $label = [];
-        if (!empty($info['Media'])) {
-            $label[] = $info['Media'];
-        }
         if (!empty($info['Format'])) {
             $label[] = $info['Format'];
         }
@@ -208,7 +224,7 @@ class Torrent extends BaseObject {
         }
         if ($info['Media'] === 'CD') {
             if ($info['HasLog']) {
-                $label[] = ($info['HasLogDB'] ? "{$info['LogScore']}% " : '') . 'Log';
+                $label[] = 'Log' . ($info['HasLogDB'] ? " ({$info['LogScore']}%)" : '');
             }
             if ($info['HasCue']) {
                 $label[] = 'Cue';
@@ -236,9 +252,6 @@ class Torrent extends BaseObject {
         } elseif ($info['PersonalFL']) {
             $label[] = $this->labelElement('tl_free tl_personal', 'Personal Freeleech!');
         }
-        if (isset($info['Reported']) && $info['Reported']) {
-            $label[] = $this->labelElement('tl_reported', 'Reported');
-        }
         if ($info['Media'] === 'CD' && $info['HasLog'] && $info['HasLogDB'] && !$info['LogChecksum']) {
             $label[] = $this->labelElement('tl_notice', 'Bad/Missing Checksum');
         }
@@ -262,6 +275,9 @@ class Torrent extends BaseObject {
         }
         if ($this->hasLossywebApproved()) {
             $label[] = $this->labelElement('tl_approved tl_lossy_web', 'Lossy WEB Approved');
+        }
+        if (isset($info['Reported']) && $info['Reported']) {
+            $label[] = $this->labelElement('tl_reported', 'Reported');
         }
         return $label;
     }
@@ -384,7 +400,7 @@ class Torrent extends BaseObject {
      * Is this a remastered release?
      */
     public function isRemastered(): bool {
-        return $this->info()['Remastered'];
+        return $this->info()['Remastered'] ?? false;
     }
 
     public function isRemasteredUnknown(): bool {
@@ -440,6 +456,10 @@ class Torrent extends BaseObject {
 
     public function lastActiveDate(): ?string {
         return $this->info()['last_action'];
+    }
+
+    public function lastActiveEpoch(): int {
+        return strtotime($this->lastActiveDate() ?? 0);
     }
 
     /**
@@ -498,6 +518,10 @@ class Torrent extends BaseObject {
             $this->remasterRecordLabel(),
             $this->remasterCatalogueNumber(),
         ]);
+    }
+
+    public function reportTotal(): int {
+        return $this->info()['Reported'];
     }
 
     public function ripLogIdList(): array {

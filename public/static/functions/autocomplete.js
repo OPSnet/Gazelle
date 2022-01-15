@@ -1,9 +1,9 @@
-var ARTIST_AUTOCOMPLETE_URL = 'artist.php?action=autocomplete';
-var COLLAGE_AUTOCOMPLETE_URL = 'collages.php?action=autocomplete';
-var TAGS_AUTOCOMPLETE_URL = 'torrents.php?action=autocomplete_tags';
-var SELECTOR = '[data-gazelle-autocomplete="true"]';
 $(document).ready(function() {
     var url = new gazURL();
+    var ARTIST_AUTOCOMPLETE_URL  = 'artist.php?action=autocomplete';
+    var COLLAGE_AUTOCOMPLETE_URL = 'collages.php?action=autocomplete';
+    var TAGS_AUTOCOMPLETE_URL    = 'torrents.php?action=autocomplete_tags';
+    var SELECTOR = '[data-gazelle-autocomplete="true"]';
 
     $('#artistsearch' + SELECTOR).autocomplete({
         deferRequestBy: 300,
@@ -15,6 +15,10 @@ $(document).ready(function() {
 
     if (url.path == 'torrents' || url.path == 'upload' || url.path == 'artist' || (url.path == 'requests' && url.query['action'] == 'new') || url.path == 'collages') {
         $("#artist_0" + SELECTOR).autocomplete({
+            deferRequestBy: 300,
+            serviceUrl : ARTIST_AUTOCOMPLETE_URL
+        });
+        $("#artist" + SELECTOR).autocomplete({
             deferRequestBy: 300,
             serviceUrl : ARTIST_AUTOCOMPLETE_URL
         });
