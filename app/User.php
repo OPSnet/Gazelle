@@ -126,7 +126,6 @@ class User extends BaseObject {
                 ui.Inviter,
                 ui.JoinDate,
                 ui.NavItems,
-                ui.NotifyOnQuote,
                 ui.PermittedForums,
                 ui.RatioWatchEnds,
                 ui.RestrictedForums,
@@ -169,7 +168,6 @@ class User extends BaseObject {
         $this->info['DisableTagging']  = ($this->info['DisableTagging'] == '1');
         $this->info['DisableUpload']   = ($this->info['DisableUpload'] == '1');
         $this->info['DisableWiki']     = ($this->info['DisableWiki'] == '1');
-        $this->info['NotifyOnQuote']   = ($this->info['NotifyOnQuote'] == '1');
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
         $this->info['NavItems']    = array_map('trim', explode(',', $this->info['NavItems'] ?? ''));
@@ -1520,10 +1518,6 @@ class User extends BaseObject {
             self::$cache->cache_value($key, $filters, 2592000);
         }
         return $filters;
-    }
-
-    public function notifyOnQuote(): bool {
-        return $this->info()['NotifyOnQuote'];
     }
 
     public function removeNotificationFilter(int $notifId): int {

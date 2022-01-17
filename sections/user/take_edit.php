@@ -173,7 +173,6 @@ $Options['Tooltipster']         = (!empty($_POST['usetooltipster']) ? 1 : 0);
 $Options['DisableAvatars']      = (!empty($_POST['disableavatars']) ? (int)$_POST['disableavatars'] : 0);
 $Options['Identicons']          = (!empty($_POST['identicons']) ? (int)$_POST['identicons'] : 0);
 $Options['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);
-$Options['NotifyOnQuote']       = (!empty($_POST['notifications_Quotes_popup']) ? 1 : 0);
 $Options['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
 $Options['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
 $Options['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
@@ -284,7 +283,6 @@ $SQL = "UPDATE users_main AS m
 INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
     i.Avatar = ?,
     i.SiteOptions = ?,
-    i.NotifyOnQuote = ?,
     i.Info = ?,
     i.InfoTitle = ?,
     i.DownloadAlt = ?,
@@ -300,7 +298,6 @@ INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
 $Params = [
     $_POST['avatar'],
     serialize($Options),
-    strval($Options['NotifyOnQuote']),
     $_POST['info'],
     $_POST['profile_title'],
     $DownloadAlt,

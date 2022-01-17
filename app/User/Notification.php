@@ -65,6 +65,10 @@ class Notification extends \Gazelle\BaseUser {
         return $this->config;
     }
 
+    public function isActive(string $alertType): bool {
+        return $this->config()[$alertType] != self::DISPLAY_DISABLED;
+    }
+
     public function setDocument(string $document, string $action): Notification {
         $this->document = $document;
         $this->action   = $action;
@@ -187,5 +191,4 @@ class Notification extends \Gazelle\BaseUser {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));
         return $affected;
     }
-
 }

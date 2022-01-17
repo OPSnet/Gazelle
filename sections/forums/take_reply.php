@@ -17,21 +17,23 @@ if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $ThreadInfo[
 }
 
 // If you're not sending anything, go back
-$Body = trim($_POST['quickpost'] ?? '');
-if ($Body === '') {
+$body = trim($_POST['quickpost'] ?? '');
+if ($body === '') {
     header("Location: " .  $_SERVER['HTTP_REFERER'] ?? "forums.php?action=viewthread&threadid={$_POST['thread']}");
     exit;
 }
 
 if ($ThreadInfo['LastPostAuthorID'] == $Viewer->id() && isset($_POST['merge'])) {
-    $PostID = $forum->mergePost($Viewer->id(), $threadId, $Body);
+    $postId = $forum->mergePost($Viewer->id(), $threadId, $body);
 } else {
-    $PostID = $forum->addPost($Viewer->id(), $threadId, $Body);
+    $postId = $forum->addPost($Viewer->id(), $threadId, $body);
     ++$ThreadInfo['Posts'];
 }
 
+(new Gazelle\User\Notification\Quote($Viewer))->create(
+    new Gazelle\Manager\User, $body, $postId, 'forums', $threadId
+);
 $subscription = new Gazelle\Subscription($Viewer);
-$subscription->quoteNotify($Body, $PostID, 'forums', $threadId);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
     $subscription->subscribe($threadId);
 }

@@ -4,6 +4,8 @@ namespace Gazelle\User;
 
 class Quote extends \Gazelle\BaseUser {
 
+    const UNREAD_QUOTE_KEY = 'u_unread_%d';
+
     protected bool $showAll = false;
 
     /**
@@ -21,10 +23,38 @@ class Quote extends \Gazelle\BaseUser {
         return $this->showAll;
     }
 
+    public function flush(): Quote {
+        self::$cache->delete_value(sprintf(self::UNREAD_QUOTE_KEY, $this->user->id()));
+        return $this;
+    }
+
+    public function create(int $quoterId, string $page, int $pageId, int $postId): int {
+        self::$db->prepared_query('
+            INSERT IGNORE INTO users_notify_quoted
+                   (UserID, QuoterID, Page, PageID, PostID)
+            VALUES (?,      ?,        ?,    ?,      ?)
+            ', $this->user->id(), $quoterId, $page, $pageId, $postId
+        );
+        $this->flush();
+        return self::$db->affected_rows();
+    }
+
+    public function clearAll(): int {
+        self::$db->prepared_query("
+            UPDATE users_notify_quoted SET
+                UnRead = true
+            WHERE Unread = false
+                AND UserID = ?
+            ", $this->user->id()
+        );
+        $this->flush();
+        return self::$db->affected_rows();
+    }
+
     /**
      * Mark the user as having seen their quoted posts in a thread
      */
-    public function clearThread(int $threadId, int $firstPost, int $lastPost): bool {
+    public function clearThread(int $threadId, int $firstPost, int $lastPost): int {
         self::$db->prepared_query("
             UPDATE users_notify_quoted SET
                 UnRead = false
@@ -34,8 +64,8 @@ class Quote extends \Gazelle\BaseUser {
                 AND PostID BETWEEN ? AND ?
             ", $this->user->id(), $threadId, $firstPost, $lastPost
         );
-        self::$cache->delete_value('user_quote_unread_' . $this->user->id());
-        return self::$db->affected_rows() === 1;
+        $this->flush();
+        return self::$db->affected_rows();
     }
 
     /**
@@ -232,5 +262,33 @@ class Quote extends \Gazelle\BaseUser {
             );
         }
         return $page;
+    }
+
+    /**
+     * Returns whether or not the current user has new quote notifications.
+     * @return int Number of unread quote notifications
+     */
+    public function unreadTotal(): int {
+        $key = sprintf(self::UNREAD_QUOTE_KEY, $this->user->id());
+        $total = self::$cache->get_value($key);
+        if ($total === false) {
+            $forMan = new \Gazelle\Manager\Forum;
+            [$cond, $args] = $forMan->configureForUser(new \Gazelle\User($this->user->id()));
+            $args[] = $this->user->id(); // for q.UserID
+            $total = (int)self::$db->scalar("
+                SELECT count(*)
+                FROM users_notify_quoted AS q
+                LEFT JOIN forums_topics AS t ON (t.ID = q.PageID)
+                LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+                LEFT JOIN collages AS c ON (q.Page = 'collages' AND c.ID = q.PageID)
+                WHERE q.UnRead = true
+                    AND (q.Page != 'forums' OR " . implode(' AND ', $cond). ")
+                    AND (q.Page != 'collages' OR c.Deleted = '0')
+                    AND q.UserID = ?
+                ", ...$args
+            );
+            self::$cache->cache_value($key, $total, 0);
+        }
+        return $total;
     }
 }

@@ -33,9 +33,7 @@ class Comment extends \Gazelle\Base {
 
     /**
      * Post a comment on an artist, request or torrent page.
-     * @param string $page
-     * @param int $pageId
-     * @param string $Body
+     *
      * @return int ID of the new comment
      */
     public function create(int $userId, string $page, int $pageId, string $body) {
@@ -59,7 +57,10 @@ class Comment extends \Gazelle\Base {
         if ($page == 'collages') {
             self::$cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
-        (new \Gazelle\Subscription(new \Gazelle\User($userId)))->quoteNotify($body, $postId, $page, $pageId);
+        $user = (new Gazelle\Manager\User)->findById($userId);
+        if ($user) {
+            (new \Gazelle\User\Notification\Quote($user))->create(new User, $body, $postId, $page, $pageId);
+        }
         (new Subscription)->flush($page, $pageId);
 
         $className = $this->className($page);

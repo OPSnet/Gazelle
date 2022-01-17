@@ -76,14 +76,15 @@ $thread = $forum->threadPage($threadId, $PerPage, $Page);
 $paginator = new Gazelle\Util\Paginator($PerPage, $Page);
 $paginator->setTotal($threadInfo['Posts']);
 
+$firstOnPage = current($thread)['ID'] ?? 0;
 $lastOnPage = end($thread)['ID'];
 if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPage * $Page) {
     $lastOnPage = $threadInfo['StickyPostID'];
 }
 
-$quoteCount = $Cache->get_value('user_quote_unread_' . $Viewer->id());
-if ($quoteCount === false || $quoteCount > 0) {
-    (new Gazelle\User\Quote($Viewer))->clearThread($threadId, current($thread)['ID'] ?? 0, $lastOnPage);
+$quote = new Gazelle\User\Quote($Viewer);
+if ($quote->unreadTotal()) {
+    $quote->clearThread($threadId, $firstOnPage, $lastOnPage);
 }
 
 $lastRead = $forum->userLastReadPost($Viewer->id(), $threadId);
