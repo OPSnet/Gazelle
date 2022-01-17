@@ -322,7 +322,7 @@ class Bonus extends BaseUser {
         return $amount;
     }
 
-    public function purchaseTokenOther($toID, $label) {
+    public function purchaseTokenOther(int $toID, string $label, string $message): int {
         if ($this->user->id() === $toID) {
             throw new BonusException('otherToken:self');
         }
@@ -365,20 +365,21 @@ class Bonus extends BaseUser {
             'user_stats_' . $this->user->id(),
             'user_stats_' . $toID,
         ]);
-        $this->sendPmToOther($toID, $amount);
+        $this->sendPmToOther($toID, $amount, $message);
 
         return $amount;
     }
 
-    public function sendPmToOther($toID, $amount) {
+    public function sendPmToOther($toID, $amount, $message) {
         (new Manager\User)->sendPM($toID, 0,
             "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
-            self::$twig->render('bonus/token-other.twig', [
+            self::$twig->render('bonus/token-other-message.twig', [
                 'TO'       => (new User($toID))->username(),
                 'FROM'     => $this->user->username(),
                 'AMOUNT'   => $amount,
                 'PLURAL'   => plural($amount),
                 'WIKI_ID'  => 57,
+                'MESSAGE'  => $message
             ])
         );
     }

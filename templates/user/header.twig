@@ -95,12 +95,13 @@
     <div class="head colhead_dark">Give Freeleech Tokens</div>
     <form class="fl_form" name="user" id="fl_form" action="user.php?id={{ user_id }}" method="post">
         <ul class="stats nobullet">
-        {% for f in freeleech.item %}
-            <li><input type="radio" name="fltype" id="fl-{{ f.Label }}" value="fl-{{ f.Label }}" />
-            <label title="This costs {{ f.Price|number_format }} BP, which will leave you with {{ f.After|number_format
-                }} afterwards" for="fl-{{ f.Label }}"> {{ f.Name }}</label></li>
-        {% endfor %}
-    <li><input type="submit" name="flsubmit" value="Send" /></li>
+            {% for f in freeleech.item %}
+                <li><input type="radio" name="fltype" id="fl-{{ f.Label }}" value="fl-{{ f.Label }}" />
+                <label title="This costs {{ f.Price|number_format }} BP, which will leave you with {{ f.After|number_format
+                    }} afterwards" for="fl-{{ f.Label }}"> {{ f.Name }}</label></li>
+            {% endfor %}
+            <li><input type="text" id="message" name="message" placeholder="Message"/> <br /></li>
+            <li><input type="submit" name="flsubmit" value="Send" /></li>
         </ul>
         <input type="hidden" name="action" value="fltoken" />
         <input type="hidden" name="auth" value="{{ auth }}" />
