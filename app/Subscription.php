@@ -5,63 +5,6 @@ namespace Gazelle;
 class Subscription extends BaseUser {
 
     /**
-     * Parse a post/comment body for quotes and notify all quoted users that have quote notifications enabled.
-     * @param string $Body
-     * @param int $PostID
-     * @param string $Page
-     * @param int $PageID
-     */
-    public function quoteNotify(string $Body, int $PostID, string $Page, int $PageID) {
-        $qid = self::$db->get_query_id();
-        /*
-         * Explanation of the parameters PageID and Page: Page contains where
-         * this quote comes from and can be forums, artist, collages, requests
-         * or torrents. The PageID contains the additional value that is
-         * necessary for the users_notify_quoted table. The PageIDs for the
-         * different Page are: forums: TopicID artist: ArtistID collages:
-         * CollageID requests: RequestID torrents: GroupID
-         */
-
-        if (!preg_match_all('/(?:\[quote=|@)' . str_replace('/', '', USERNAME_REGEXP) . '/i', $Body, $match)) {
-            return;
-        };
-        $Usernames = array_unique($match['username']);
-        if (empty($Usernames)) {
-            return;
-        }
-
-        self::$db->prepared_query("
-            SELECT m.ID
-            FROM users_main AS m
-            INNER JOIN users_info AS i ON (i.UserID = m.ID)
-            WHERE i.NotifyOnQuote = '1'
-                AND i.UserID != ?
-                AND m.Username IN (" . placeholders($Usernames) . ")
-            ", $this->user->id(), ...$Usernames
-        );
-
-        $Results = self::$db->collect(0, false);
-        $notification = new Manager\Notification;
-        $quotername = $this->user->username();
-        foreach ($Results as $userId) {
-            self::$db->prepared_query('
-                INSERT IGNORE INTO users_notify_quoted
-                    (UserID, QuoterID, Page, PageID, PostID)
-                VALUES
-                    (?,      ?,        ?,    ?,      ?)
-                ', $userId, $this->user->id(), $Page, $PageID, $PostID
-            );
-            self::$cache->delete_value("user_quote_unread_" . $userId);
-            $URL = SITE_URL .  ($Page == 'forums')
-                ? "/forums.php?action=viewthread&postid=$PostID"
-                : "/comments.php?action=jump&postid=$PostID";
-            $notification->push($userId, 'New Quote!',
-                "Quoted by $quotername $URL", $URL, Manager\Notification::QUOTES);
-        }
-        self::$db->set_query_id($qid);
-    }
-
-    /**
      * (Un)subscribe from a forum thread.
      * @param int $TopicID
      */
@@ -203,34 +146,6 @@ class Subscription extends BaseUser {
                 AND s.UserID = ?
             ", $this->user->id()
         );
-    }
-
-    /**
-     * Returns whether or not the current user has new quote notifications.
-     * @return int Number of unread quote notifications
-     */
-    public function unreadQuotes(): int {
-        $key = 'user_quote_unread_' . $this->user->id();
-        $total = self::$cache->get_value($key);
-        if ($total === false) {
-            $forMan = new \Gazelle\Manager\Forum;
-            [$cond, $args] = $forMan->configureForUser(new \Gazelle\User($this->user->id()));
-            $args[] = $this->user->id(); // for q.UserID
-            $total = (int)self::$db->scalar("
-                SELECT count(*)
-                FROM users_notify_quoted AS q
-                LEFT JOIN forums_topics AS t ON (t.ID = q.PageID)
-                LEFT JOIN forums AS f ON (f.ID = t.ForumID)
-                LEFT JOIN collages AS c ON (q.Page = 'collages' AND c.ID = q.PageID)
-                WHERE q.UnRead
-                    AND (q.Page != 'forums' OR " . implode(' AND ', $cond). ")
-                    AND (q.Page != 'collages' OR c.Deleted = '0')
-                    AND q.UserID = ?
-                ", ...$args
-            );
-            self::$cache->cache_value($key, $total, 0);
-        }
-        return $total;
     }
 
     public function isSubscribed(int $TopicID): bool {

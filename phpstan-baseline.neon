@@ -41,26 +41,6 @@ parameters:
 			path: app/Manager/ClientWhitelist.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\User the viewer\\)\\: Unexpected token \"the\", expected variable at offset 121$#"
-			count: 1
-			path: app/Manager/Comment.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\\\Gazelle\\\\User the viewer\\)\\: Unexpected token \"the\", expected variable at offset 149$#"
-			count: 1
-			path: app/Manager/Comment.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Body$#"
-			count: 1
-			path: app/Manager/Comment.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$CollageID$#"
-			count: 1
-			path: app/Manager/Comment.php
-
-		-
 			message: "#^Class Gazelle\\\\Manager\\\\Thread referenced with incorrect case\\: Gazelle\\\\Manager\\\\thread\\.$#"
 			count: 1
 			path: app/Manager/Forum.php
@@ -209,21 +189,6 @@ parameters:
 			message: "#^Property Gazelle\\\\Manager\\\\StaffBlog\\:\\:\\$title \\(string\\) does not accept null\\.$#"
 			count: 1
 			path: app/Manager/StaffBlog.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$Page$#"
-			count: 1
-			path: app/Manager/Subscription.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$PageID$#"
-			count: 1
-			path: app/Manager/Subscription.php
-
-		-
-			message: "#^Parameter \\$PageID of method Gazelle\\\\Manager\\\\Subscription\\:\\:flush\\(\\) has invalid typehint type Gazelle\\\\Manager\\\\type\\.$#"
-			count: 1
-			path: app/Manager/Subscription.php
 
 		-
 			message: "#^Method Gazelle\\\\Manager\\\\TGroup\\:\\:findByTorrentInfohash\\(\\) should return int but returns Gazelle\\\\TGroup\\|null\\.$#"

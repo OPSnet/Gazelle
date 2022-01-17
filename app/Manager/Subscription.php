@@ -38,9 +38,12 @@ class Subscription extends \Gazelle\Base {
         $list = self::$db->collect('UserID', false);
         self::$db->set_query_id($qid);
 
-        return $affected + count(
-            self::$cache->deleteMulti(array_map(fn ($id) => "user_quote_unread_$id", $list))
-        );
+        $userMan = new User;
+        foreach ($list as $userId) {
+            (new \Gazelle\User\Quote(new \Gazelle\User($userId)))->flush();
+        }
+
+        return $affected;
     }
 
     /**
