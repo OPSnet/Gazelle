@@ -32,7 +32,7 @@ if (!empty($_POST)) {
         error(403);
     }
     try {
-        $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($UserID, $match[1]);
+        $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($UserID, $match[1], $_POST['message'] ?? '');
     } catch (Gazelle\Exception\BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');

@@ -26,7 +26,7 @@ class Bonus extends \Gazelle\Base {
                     SELECT ID,
                      Price * (greatest(0, least(100, 100 - ?)) / 100) as Price,
                         Amount, MinClass, FreeClass, Label, Title, sequence,
-                        IF (Label REGEXP '^other-', 'ConfirmOther', 'null') AS JS_next_function,
+                        IF (Label REGEXP '^other-', 'NoOp', 'ConfirmPurchase') AS JS_on_click,
                         IF (Label REGEXP '^title-bb-[yn]', 'NoOp', 'ConfirmPurchase') AS JS_on_click
                     FROM bonus_item
                     ORDER BY sequence

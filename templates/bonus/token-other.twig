@@ -1,8 +1,37 @@
-Hello {{ TO }},
-
-[user]{{ FROM }}[/user] has sent you {{ AMOUNT }} freeleech token{{ PLURAL }} to use!
-You can use tokens to download torrents without being charged any download.
-
-More details about FL tokens can be found on [url=wiki.php?action=article&amp;id={{ WIKI_ID }}]the wiki[/url].
-
-Enjoy!
+{{ header("Bonus Points - Gift Tokens ", {'js': 'bonus'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Gift Tokens - {{price | number_format}} Points</a></h2>
+    </div>
+    <form action="bonus.php?action=purchase&amp;label={{label}}" method="post">
+        <div class="pad">
+            <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
+                <tbody>
+                    <input type="hidden" name="auth" value="{{auth}}" />
+                    <input type="hidden" name="confirm" value="true" />
+                    <tr>
+                        <td class="label">Username:</td>
+                        <td>
+                            <input type="text" id="user" name="user" style="width:90%" /> <br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">Message:</td>
+                        <td>
+                            <div style="width:90%">
+                                {{ textarea.preview|raw }}
+                                {{ textarea.field|raw }}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="buttons" class="center">
+                {{ textarea.button|raw }}
+                <input type="submit" onclick="ConfirmPurchase(event,'{{item}}')" value="Submit" />
+            </div>
+        </div>
+ 
+    </form>
+</div>
+{{ footer() }}

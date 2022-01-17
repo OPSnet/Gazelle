@@ -20,8 +20,10 @@ switch ($_GET['action'] ?? '') {
                 }
                 switch($Label)  {
                     case 'token-1': case 'token-2': case 'token-3': case 'token-4':
-                    case 'other-1': case 'other-2': case 'other-3': case 'other-4':
                         require_once('tokens.php');
+                        break;
+                    case 'other-1': case 'other-2': case 'other-3': case 'other-4':
+                        require_once('token_other.php');
                         break;
                     case 'invite':
                         require_once('invite.php');
