@@ -9,33 +9,31 @@ class Collage extends BaseObject {
     const SUBS_KEY     = 'collage_subs_user_%d';
     const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
-    protected User $viewer;
-    protected int $numEntries = 0;
-    protected string $entryTable;
-    protected string $entryColumn;
+    protected bool  $lockedForUser = false;
+    protected int   $numEntries = 0;
     protected array $info;
-    protected array $torrentTags; // these are derived from the torrents added to the collage
     protected array $userSubscriptions;
+    protected User  $viewer;
 
-    /* these are only loaded on a torrent collage display */
-    protected array $torrents = [];
-    protected array $groupIds = [];
-
-    /* these are only loaded on any collage display */
-    protected bool $lockedForUser = false;
-    protected array $artists      = [];
-    protected array $contributors = [];
+    protected Collage\AbstractCollage $collage;
 
     public function __construct(int $id) {
         parent::__construct($id);
         if ($this->isArtist()) {
-            $this->entryTable = 'collages_artists';
-            $this->entryColumn = 'ArtistID';
-            $this->loadArtists();
+            $this->collage = new Collage\Artist($this);
         } else {
-            $this->entryTable = 'collages_torrents';
-            $this->entryColumn = 'GroupID';
-            $this->loadTorrents();
+            $this->collage = new Collage\TGroup($this);
+        }
+        $this->collage->load();
+        if ($this->numEntries != $this->collage->entryTotal()) {
+            $this->numEntries = $this->collage->entryTotal();
+            self::$db->prepared_query("
+                UPDATE collages SET
+                    NumTorrents = ?
+                WHERE ID = ?
+                ", $this->numEntries, $this->id
+            );
+            self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         }
     }
 
@@ -60,184 +58,54 @@ class Collage extends BaseObject {
     public function tags() { return $this->info()['tag_list']; }
     public function updated() { return $this->info()['updated']; }
 
-    public function numArtists() { return count($this->artists); }
-    public function contributors() { return $this->contributors; }
-    public function numContributors() { return count(array_keys($this->contributors)); }
     public function numEntries() { return $this->numEntries; }
-    public function groupIds() { return $this->groupIds; }
+    public function groupIds() { return $this->collage->groupIdList(); }
 
-    public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
     public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
     public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
     public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
     public function isOwner(int $userId): bool { return $this->info()['user_id'] === $userId; }
     public function isPersonal(): bool { return $this->info()['category_id'] === 0; }
 
+    public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
+    public function contributors() { return $this->collage->contributorList(); }
+
+    public function numContributors() { return count(array_keys($this->contributors())); }
+    public function numArtists() { return count($this->collage->artistList()); }
+
     public function info(): array {
-        if (!empty($this->info)) {
-            return $this->info;
+        if (!isset($this->info)) {
+            $key = sprintf(self::CACHE_KEY, $this->id);
+            $info = self::$cache->get_value($key);
+            if ($info === false) {
+                $info = self::$db->rowAssoc("
+                    SELECT c.Deleted        AS is_deleted,
+                        c.TagList           AS tag_string,
+                        c.UserID            AS user_id,
+                        c.CategoryID        AS category_id,
+                        c.Updated           AS updated,
+                        c.Subscribers       AS subscriber_total,
+                        c.NumTorrents       AS torrent_total,
+                        c.MaxGroups         AS group_max,
+                        c.MaxGroupsPerUser  AS group_max_per_user,
+                        c.Locked            AS is_locked,
+                        c.Name              AS name,
+                        c.Description       AS description,
+                        c.Featured          AS is_featured,
+                        CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
+                    FROM collages c
+                    LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
+                    LEFT JOIN collage_attr ca ON (ca.ID = cha.CollageAttrID and ca.Name = ?)
+                    WHERE c.ID = ?
+                    ", 'sort-newest', $this->id
+                );
+                $info['tag_list'] = explode(' ', $info['tag_string']);
+                self::$cache->cache_value($key, $info, 7200);
+            }
+            $this->info = $info;
+            $this->numEntries = $this->info['torrent_total'];
         }
-        $key = sprintf(self::CACHE_KEY, $this->id);
-        $info = self::$cache->get_value($key);
-        if ($info === false) {
-            $info = self::$db->rowAssoc("
-                SELECT c.Deleted        AS is_deleted,
-                    c.TagList           AS tag_string,
-                    c.UserID            AS user_id,
-                    c.CategoryID        AS category_id,
-                    c.Updated           AS updated,
-                    c.Subscribers       AS subscriber_total,
-                    c.NumTorrents       AS torrent_total,
-                    c.MaxGroups         AS group_max,
-                    c.MaxGroupsPerUser  AS group_max_per_user,
-                    c.Locked            AS is_locked,
-                    c.Name              AS name,
-                    c.Description       AS description,
-                    c.Featured          AS is_featured,
-                    CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
-                FROM collages c
-                LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
-                LEFT JOIN collage_attr ca ON (ca.ID = cha.CollageAttrID and ca.Name = ?)
-                WHERE c.ID = ?
-                ", 'sort-newest', $this->id
-            );
-            $info['tag_list'] = explode(' ', $info['tag_string']);
-            self::$cache->cache_value($key, $info, 7200);
-        }
-        $this->info = $info;
         return $this->info;
-    }
-
-    protected function loadArtists() {
-        self::$db->prepared_query("
-            SELECT
-                ca.ArtistID,
-                ag.Name,
-                IF(wa.Image is NULL, '', wa.Image) as Image,
-                ca.UserID,
-                ca.Sort
-            FROM collages_artists    AS ca
-            INNER JOIN artists_group AS ag USING (ArtistID)
-            LEFT JOIN wiki_artists   AS wa USING (RevisionID)
-            WHERE ca.CollageID = ?
-            ORDER BY ca.Sort
-            ", $this->id
-        );
-        $artists = self::$db->to_array('ArtistID', MYSQLI_ASSOC, false);
-
-        // synch collage total with reality
-        $count = count($artists);
-        if ($this->numEntries != $count) {
-            $this->numEntries = $count;
-            self::$db->prepared_query("
-                UPDATE collages SET
-                    NumTorrents = ?
-                WHERE ID = ?
-                ", $count, $this->id
-            );
-            self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        }
-
-        foreach ($artists as $artist) {
-            if (!isset($this->artists[$artist['ArtistID']])) {
-                $this->artists[$artist['ArtistID']] = [
-                    'count'    => 0,
-                    'id'       => $artist['ArtistID'],
-                    'image'    => $artist['Image'],
-                    'name'     => $artist['Name'],
-                    'sequence' => $artist['Sort'],
-                    'user_id'  => $artist['UserID'],
-                ];
-            }
-            $this->artists[$artist['ArtistID']]['count']++;
-
-            if (!isset($this->contributors[$artist['UserID']])) {
-                $this->contributors[$artist['UserID']] = 0;
-            }
-            $this->contributors[$artist['UserID']]++;
-        }
-        arsort($this->contributors);
-        return $this;
-    }
-
-    protected function loadTorrents() {
-        $order = $this->sortNewest() ? 'DESC' : 'ASC';
-        self::$db->prepared_query("
-            SELECT
-                ct.GroupID,
-                ct.UserID
-            FROM collages_torrents AS ct
-            INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
-            WHERE ct.CollageID = ?
-            ORDER BY ct.Sort $order
-            ", $this->id
-        );
-        $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
-        $groupIds = array_keys($groupContribIds);
-
-        if (count($groupIds) > 0) {
-            $this->torrents = \Torrents::get_groups($groupIds);
-        }
-
-        // synch collage total with reality
-        $count = count($this->torrents);
-        if ($this->numEntries != $count) {
-            $this->numEntries = $count;
-            self::$db->prepared_query("
-                UPDATE collages SET
-                    NumTorrents = ?
-                WHERE ID = ?
-                ", $count, $this->id
-            );
-            self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        }
-
-        // in case of a tie in tag usage counts, order by first past the post
-        self::$db->prepared_query("
-            SELECT count(*) as \"count\",
-                tag.name AS tag
-            FROM collages_torrents   AS ct
-            INNER JOIN torrents_tags AS tt USING (groupid)
-            INNER JOIN tags          AS tag ON (tag.id = tt.tagid)
-            WHERE ct.collageid = ?
-            GROUP BY tag.name
-            ORDER BY 1 DESC, ct.AddedOn
-            ", $this->id
-        );
-        $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC, false);
-
-        foreach ($groupIds as $groupId) {
-            if (!isset($this->torrents[$groupId])) {
-                continue;
-            }
-            $this->groupIds[] = $groupId;
-            $group = $this->torrents[$groupId];
-            $extendedArtists = $group['ExtendedArtists'];
-            $artists =
-                (empty($extendedArtists[1]) && empty($extendedArtists[4]) && empty($extendedArtists[5]) && empty($extendedArtists[6]))
-                ? $group['Artists']
-                : array_merge((array)$extendedArtists[1], (array)$extendedArtists[4], (array)$extendedArtists[5], (array)$extendedArtists[6]);
-
-            foreach ($artists as $artist) {
-                if (!isset($this->artists[$artist['id']])) {
-                    $this->artists[$artist['id']] = [
-                        'count' => 0,
-                        'id'    => (int)$artist['id'],
-                        'name'  => $artist['name'],
-                    ];
-                }
-                $this->artists[$artist['id']]['count']++;
-            }
-
-            $contribUserId = $groupContribIds[$groupId]['UserID'];
-            if (!isset($this->contributors[$contribUserId])) {
-                $this->contributors[$contribUserId] = 0;
-            }
-            $this->contributors[$contribUserId]++;
-        }
-        uasort($this->artists, function ($x, $y) { return $y['count'] <=> $x['count']; });
-        arsort($this->contributors);
-        return $this;
     }
 
     public function setViewer(User $viewer) {
@@ -251,7 +119,7 @@ class Collage extends BaseObject {
             }
             $groupsByUser = $this->contributors[$this->viewer->id()] ?? 0;
             if ($this->isLocked()
-                || ($this->maxGroups() > 0 && count($this->groupIds) >= $this->maxGroups())
+                || ($this->maxGroups() > 0 && count($this->groupIds()) >= $this->maxGroups())
                 || ($this->maxGroupsPerUser() > 0 && $groupsByUser >= $this->maxGroupsPerUser())
             ) {
                 $this->lockedForUser = true;
@@ -380,8 +248,8 @@ class Collage extends BaseObject {
     /**
      * Get artists of a collage for display.
      */
-    public function artistList() {
-        return $this->artists;
+    public function artistList(): array {
+        return $this->collage->artistList();
     }
 
     /**
@@ -441,15 +309,9 @@ class Collage extends BaseObject {
 
     /**
      * Get torrents of a collage to display
-     * In order to display the collage correctly, the code needs to know who is viewing the
-     * collage. The method setUserContext() must be called prior to calling this method,
-     * otherwise it will throw an exception.
      */
     public function torrentList(): array {
-        if (is_null($this->viewer)) {
-            throw new Exception\CollageUserNotSetException;
-        }
-        return $this->torrents;
+        return $this->collage->torrentList();
     }
 
     /**
@@ -495,8 +357,8 @@ class Collage extends BaseObject {
      */
     public function topArtists(int $limit = 5): array {
         return $limit == -1
-            ? $this->artists
-            : array_slice($this->artists, 0, $limit);
+            ? $this->collage->artistList()
+            : array_slice($this->collage->artistList(), 0, $limit);
     }
 
     /** Get top tags of the collage
@@ -504,8 +366,8 @@ class Collage extends BaseObject {
      */
     public function topTags(int $limit = 5): array {
         return $limit == -1
-            ? $this->torrentTags
-            : array_slice($this->torrentTags, 0, $limit, true);
+            ? $this->collage->torrentTagList()
+            : array_slice($this->collage->torrentTagList(), 0, $limit, true);
     }
 
     /*** UPDATE METHODS ***/
@@ -532,16 +394,16 @@ class Collage extends BaseObject {
     }
 
     public function updateSequence(string $series): int {
-        $series = parseUrlArgs($_POST['drag_drop_collage_sort_order'], 'li[]');
+        $series = parseUrlArgs($series, 'li[]');
         if (empty($series)) {
             return 0;
         }
-        $id = $this->id;
+        $id = $this->holder->id();
         $args = array_merge(...array_map(function ($sort, $entryId) use ($id) {
             return [(int)$entryId, ($sort + 1) * 10, $id];
         }, array_keys($series), $series));
         self::$db->prepared_query("
-            INSERT INTO " . $this->entryTable . " (" . $this->entryColumn . ", Sort, CollageID)
+            INSERT INTO " . $this->collage->entryTable() . " (" . $this->collage->entryColumn() . ", Sort, CollageID)
             VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?)')) . "
             ON DUPLICATE KEY UPDATE Sort = VALUES(Sort)
             ", ...$args
@@ -551,7 +413,7 @@ class Collage extends BaseObject {
 
     public function removeEntry(int $entryId): int {
         self::$db->prepared_query("
-            DELETE FROM " . $this->entryTable . "
+            DELETE FROM " . $this->collage->entryTable() . "
             WHERE CollageID = ?
                 AND GroupID = ?
             ", $this->id, $entryId
