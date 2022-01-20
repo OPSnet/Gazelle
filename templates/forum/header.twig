@@ -1,7 +1,7 @@
     <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php#{{ forum.categoryId }}">{{ forum.categoryName }}</a> &rsaquo; {{ forum.name }}</h2>
     <div class="linkbox">
 {% for d in dept_list %}
-        <a class="brackets" href="{{ forum.url }}">
+        <a class="brackets" href="forums.php?action=viewforum&amp;forumid={{ d.forum_id }}">
     {%- if d.active %}<b>{% endif %}{{ d.name }}{% if d.active %}</b>{% endif -%}
     {%- if d.unread %} <span title="unread">({{ d.unread|number_format }})</span>{% endif -%}
         </a>
@@ -12,6 +12,7 @@
         <a href="forums.php?action=new&amp;forumid={{ forum.id }}" class="brackets">New thread</a>
 {% endif %}
         <a href="#" onclick="$('#searchforum').gtoggle(); this.innerHTML = (this.innerHTML == 'Search this forum' ? 'Hide search' : 'Search this forum'); return false;" class="brackets">Search this forum</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;<a href="forums.php?action=catchup&amp;forumid={{ forum.id }}&amp;auth={{ auth }}" class="brackets">Catch up</a>
         <div id="searchforum" class="hidden center">
             <div style="display: inline-block;">
                 <h3>Search this forum:</h3>

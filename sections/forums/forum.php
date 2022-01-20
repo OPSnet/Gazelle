@@ -72,6 +72,7 @@ View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? ['js' => 
 <div class="thin">
 <?php
 echo $Twig->render('forum/header.twig', [
+    'auth'      => $Viewer->auth(),
     'create'    => $Viewer->writeAccess($forum) && $Viewer->createAccess($forum) && !$Viewer->disablePosting(),
     'dept_list' => $forum->departmentList($Viewer),
     'forum'     => $forum,
@@ -114,7 +115,6 @@ echo $Twig->render('forum/header.twig', [
 ?>
     </table>
     <?= $paginator->linkbox() ?>
-    <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=<?= $forumId ?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a></div>
 </div>
 <?php
 View::show_footer();
