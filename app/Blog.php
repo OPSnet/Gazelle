@@ -2,54 +2,123 @@
 
 namespace Gazelle;
 
-class Blog extends Base {
-    protected $id;
-    protected $title;
-    protected $body;
-    protected $topicId;
+class Blog extends BaseObject {
 
-    public function __construct(int $id) {
-        $this->id = $id;
-        [$this->title, $this->body, $this->topicId] = self::$db->row("
-            SELECT Title, Body, ThreadID
-            FROM blog
-            WHERE ID = ?
-            ", $this->id
-        );
-        if (!$this->title) {
-            throw new Exception\ResourceNotFoundException($id);
+    const CACHE_KEY = 'blog_%d';
+
+    protected array $info;
+
+    public function tableName(): string { return 'blog'; }
+
+    public function url(): string {
+        return 'blog.php?id=' . $this->id . '#blog' . $this->id;
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
+    }
+
+    public function flush() {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+    }
+
+    public function info(): array {
+        if (!isset($this->info)) {
+            $key = sprintf(self::CACHE_KEY, $this->id);
+            $info = self::$cache->get_value($key);
+            if ($info === false) {
+                $info = self::$db->rowAssoc("
+                    SELECT Title  AS title,
+                        Body      AS body,
+                        ThreadID  AS thread_id,
+                        Time      AS created,
+                        UserID    AS user_id,
+                        Important AS important
+                    FROM blog
+                    WHERE ID = ?
+                    ", $this->id
+                );
+                self::$cache->cache_value($key, $info, 0);
+            }
+            $this->info = $info;
         }
-    }
-
-    /**
-     * The ID of the blog
-     * @return int $id
-     */
-    public function id(): int {
-        return $this->id;
-    }
-
-    /**
-     * The title of the blog
-     * @return string $title
-     */
-    public function title(): string {
-        return $this->title;
+        return $this->info;
     }
 
     /**
      * The body of the blog
-     * @return string $body
      */
     public function body(): string {
-        return $this->body;
+        return $this->info()['body'];
     }
 
     /**
-     * The forum topic ID of the blog
-     * @return int $topicId
+     * The creation date of the blog
      */
-    public function topicId(): int {
-        return $this->topicId;
+    public function created(): string {
+        return $this->info()['created'];
+    }
+
+    /**
+     * The creation epoch of the blog
+     */
+    public function createdEpoch(): int {
+        return strtotime($this->info()['created']);
+    }
+
+    /**
+     * The importance of the blog
+     */
+    public function important(): int {
+        return $this->info()['important'];
+    }
+
+    /**
+     * The title of the blog
+     */
+    public function title(): string {
+        return $this->info()['title'];
+    }
+
+    /**
+     * The forum thread ID of the blog
+     *
+     * @return ID of thread or null if none was defined
+     */
+    public function threadId(): ?int {
+        return $this->info()['thread_id'];
+    }
+
+    /**
+     * The author of the blog
+     */
+    public function userId(): int {
+        return $this->info()['user_id'];
+    }
+
+    /**
+     * Remove an existing blog article
+     */
+    public function remove(): int {
+        self::$db->prepared_query("
+            DELETE FROM blog WHERE ID = ?
+            ", $this->id
+        );
+        $this->flush();
+        return self::$db->affected_rows();
+    }
+
+    /**
+     * Remove an the link to the forum topic of the blog article
+     */
+    public function removeThread(): int {
+        self::$db->prepared_query("
+            UPDATE blog SET
+                ThreadID = NULL
+            WHERE ID = ?
+            ", $this->id
+        );
+        $this->flush();
+        return self::$db->affected_rows();
     }
 }

@@ -5,42 +5,42 @@ if (!$Viewer->permitted('admin_manage_blog')) {
 }
 authorize();
 
-if (empty($_POST['blogid']) || empty($_POST['body']) || empty($_POST['title'])) {
-    error('You must provide a blog id, title, and body when editing a blog entry.');
+$blogMan = new Gazelle\Manager\Blog;
+$blog = $blogMan->findById((int)($_POST['blogid'] ?? 0));
+if (!$blog) {
+    error(404);
+}
+if (empty($_POST['body'])) {
+    error('The body of the blog article must not be empty');
+}
+if (empty($_POST['title'])) {
+    error('The title of the blog article must not be empty');
 }
 
-$ThreadID = !isset($_POST['thread']) || $_POST['thread'] === '' ? '' : max(0, intval($_POST['thread']));
-
-if ($ThreadID > 0) {
-    if (!$DB->scalar("
-        SELECT 1 FROM forums_topics WHERE ID = ?
-        ", $ThreadID
-    )) {
+$threadId = !isset($_POST['thread']) || $_POST['thread'] === '' ? '' : max(0, (int)$_POST['thread']);
+if ($threadId) {
+    $forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
+    if (!$forum) {
         error('No such thread exists!');
     }
-} elseif ($ThreadID === '') {
+} elseif ($threadId === '') {
     $forum = new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
-    $ThreadID = $forum->addThread($Viewer->id(), $_POST['title'], $_POST['body']);
-    if ($ThreadID < 1) {
+    $threadId = $forum->addThread($Viewer->id(), $_POST['title'], $_POST['body']);
+    if (!$threadId) {
         error(0);
     }
 } else {
-    $ThreadID = null;
+    $threadId = null;
 }
 
-$BlogID = (int)$_POST['blogid'];
-if ($BlogID) {
-    $blogMan = new Gazelle\Manager\Blog;
-    $blogMan->modify([
-        'id'        => $BlogID,
-        'title'     => $_POST['title'],
-        'body'      => $_POST['body'],
-        'important' => isset($_POST['important']) ? 1 : 0,
-        'threadId'  => $ThreadID,
-    ]);
-    if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-        (new Gazelle\Subscription($Viewer))->subscribe($ThreadID);
-    }
+$blog->setUpdate('Body', trim($_POST['body']))
+    ->setUpdate('Title', trim($_POST['title']))
+    ->setUpdate('ThreadID', $threadId)
+    ->setUpdate('Important', isset($_POST['important']) ? 1 : 0)
+    ->modify();
+
+if (isset($_POST['subscribe']) && (int)$threadId) {
+    (new Gazelle\Subscription($Viewer))->subscribe($threadId);
 }
 
 header('Location: blog.php');

@@ -15,7 +15,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'takenewblog':
         require_once('take_new_blog.php');
         break;
-    case 'editblog':
     default:
         require_once('blog_page.php');
         break;
