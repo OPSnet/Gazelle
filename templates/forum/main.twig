@@ -32,7 +32,7 @@
             <a href="forums.php?action=viewthread&amp;threadid={{ id }}&amp;page={{ last_read_page }}#post{{ last_read_post }}"></a>
         </span>
 {% endif %}
-        <span style="float: right;" class="last_poster">by {{ last_post_user|raw }} {{ last_post_diff|raw }}</span>
+        <span style="float: right;" class="last_poster">by {{ last_post_user|user_url|raw }} {{ last_post_time|time_diff(1) }}</span>
     </td>
 {% endif %}
     <td class="td_topic_count number_column m_td_right">{{ num_topics|number_format }}</td>
