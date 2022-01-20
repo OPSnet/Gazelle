@@ -16,20 +16,7 @@ if (isset($fileTmp)) {
     unlink($fileTmp);
 }
 
-View::show_header('Logchecker');
-?>
-
-<div class="linkbox">
-    <a href="logchecker.php" class="brackets">Test Another Log file</a>
-    <a href="logchecker.php?action=upload" class="brackets">Upload Missing Logs</a>
-</div>
-<div class="thin">
-    <h2 class="center">Logchecker Test Results</h2>
-<?= $Twig->render('logchecker/report.twig', [
-    'pasted'   => $isPaste,
-    'logfile'  => $logfile,
-]) ?>
-</div>
-
-<?php
-View::show_footer();
+echo $Twig->render('logchecker/test-report.twig', [
+    'pasted'  => $isPaste,
+    'logfile' => $logfile,
+]);
