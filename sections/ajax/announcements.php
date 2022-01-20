@@ -26,15 +26,14 @@ foreach ($headlines as $item) {
 $headlines = (new Gazelle\Manager\Blog)->headlines();
 $blog = [];
 foreach ($headlines as $item) {
-    [$id, $title, $author, , $body, $time, $threadId] = $item;
     $blog[] = [
-        'blogId'   => $id,
-        'author'   => $author,
-        'title'    => $title,
-        'bbBody'   => $body,
-        'body'     => Text::full_format($body),
-        'blogTime' => $time,
-        'threadId' => $threadId,
+        'blogId'   => $item->id(),
+        'author'   => $item->userId(),
+        'title'    => $item->title(),
+        'bbBody'   => $item->body(),
+        'body'     => Text::full_format($item->body()),
+        'blogTime' => $item->created(),
+        'threadId' => $item->threadId(),
     ];
 }
 

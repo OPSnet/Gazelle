@@ -5,11 +5,10 @@ if (!$Viewer->permitted('admin_manage_blog')) {
 }
 authorize();
 
-$blogId = (int)$_GET['id'];
-if (!$blogId) {
-    error('Please provide an ID for a blog post to remove the thread link from.');
+$blog = (new Gazelle\Manager\Blog)->findById((int)($_GET['id'] ?? 0));
+if (is_null($blog)) {
+    error('Please provide the ID of a blog post from which to remove the thread link.');
 }
-
-(new Gazelle\Manager\Blog)->removeThread($blogId);
+$blog->removeThread();
 
 header('Location: blog.php');

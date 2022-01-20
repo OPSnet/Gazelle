@@ -14,20 +14,19 @@ class Blog extends AbstractNotification {
 
     public function load(): bool {
         $blogMan = new \Gazelle\Manager\Blog;
-        [$blogId, $title] = $blogMan->latest();
-        if (is_null($blogId)) {
+        $latest = $blogMan->latest();
+        if (is_null($latest)) {
             return false;
         }
         $lastRead = (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user->id());
 
         // You must be new around here.
-        $newJoiner = is_null($lastRead)
-            && $blogMan->latest() > strtotime($this->user->joinDate());
+        $newJoiner = is_null($lastRead) && $latest->createdEpoch() > strtotime($this->user->joinDate());
 
-        if ($newJoiner || (!$newJoiner && $blogId > $lastRead)) {
-            $this->title   = "Blog: $title";
-            $this->url     = "blog.php#blog$blogId";
-            $this->context = $blogId;
+        if ($newJoiner || (!$newJoiner && $latest->id() > $lastRead)) {
+            $this->title   = "Blog: " . $latest->title();
+            $this->url     = $latest->url();
+            $this->context = $latest->id();
             return true;
         }
         return false;
