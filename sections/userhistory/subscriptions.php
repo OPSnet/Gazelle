@@ -40,19 +40,19 @@ View::show_header('Subscriptions', ['js' => 'subscriptions,comments,bbcode']);
         <div class="linkbox">
 <?php if (!$showUnread) { ?>
             <br /><br />
-            <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>&nbsp;
+            <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>
 <?php } else { ?>
             <br /><br />
-            <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>&nbsp;
+            <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>
 <?php
 }
 if ($paginator->total()) {
 ?>
-            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$showCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
+            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$showCollapsed ? 'Show' : 'Hide' ?> post bodies</a>
 <?php } ?>
-            <a href="userhistory.php?action=posts&amp;userid=<?=$Viewer->id()?>" class="brackets">Go to post history</a>&nbsp;
-            <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
-            <a href="userhistory.php?action=catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>
+            <a href="userhistory.php?action=posts&amp;userid=<?=$Viewer->id()?>" class="brackets">Go to post history</a>
+            <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>
+            &nbsp;&nbsp;<a href="userhistory.php?action=catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>
         </div>
     </div>
 <?php if (!$paginator->total()) { ?>
@@ -64,11 +64,11 @@ if ($paginator->total()) {
     foreach ($Results as $Result) {
         switch ($Result['Page']) {
             case 'artist':
-                $Links = 'Artist: <a href="artist.php?id=' . $Result['PageID'] . '">' . display_str($Result['Name']) . '</a>';
+                $Links = 'Artist &rsaquo; <a href="artist.php?id=' . $Result['PageID'] . '">' . display_str($Result['Name']) . '</a>';
                 $JumpLink = 'artist.php?id=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 break;
             case 'collages':
-                $Links = 'Collage: <a href="collages.php?id=' . $Result['PageID'] . '">' . display_str($Result['Name']) . '</a>';
+                $Links = 'Collage &rsaquo; <a href="collages.php?id=' . $Result['PageID'] . '">' . display_str($Result['Name']) . '</a>';
                 $JumpLink = 'collages.php?action=comments&collageid=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 break;
             case 'requests':
@@ -76,7 +76,7 @@ if ($paginator->total()) {
                     $Request = $Requests[$Result['PageID']];
                     $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
 
-                    $Links = 'Request: ';
+                    $Links = 'Request &rsaquo; ';
                     if ($CategoryName == 'Music' || $CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
                         $Links .= ($CategoryName == 'Music' ? Artists::display_artists(Requests::get_artists($Result['PageID'])) : '')
                             . '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '" dir="ltr">' . $Request['Title'] . " [" . $Request['Year'] . "]</a>";
@@ -93,7 +93,7 @@ if ($paginator->total()) {
                 }
                 if (isset($TorrentGroups[$Result['PageID']])) {
                     $GroupInfo = $TorrentGroups[$Result['PageID']];
-                    $Links = 'Torrent: ' . $tgroup->link();
+                    $Links = 'Torrent &rsaquo; ' . $tgroup->link();
                     if ($GroupInfo['Year'] > 0) {
                         $Links .= " [" . $GroupInfo['Year'] . "]";
                     }
@@ -104,7 +104,7 @@ if ($paginator->total()) {
                 }
                 break;
             case 'forums':
-                $Links = 'Forums: <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &rsaquo; ' .
+                $Links = 'Forums &rsaquo; <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &rsaquo; ' .
                     '<a href="forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] .
                         '" class="tooltip" title="' . display_str($Result['Name']) . '">' .
                         display_str(shortenString($Result['Name'], 75)) .
