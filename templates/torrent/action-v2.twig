@@ -3,7 +3,7 @@
 <span class="torrent_links_block"> [ <a href="{{ url }}" class="tooltip" title="Download">DL</a>
 {% if can_fl %}
  | <a href="{{ url }}&amp;usetoken=1" title="Use a FL Token" class="tooltip" onclick="return confirm('
- {%- if not t.Seeders -%}Warning: This torrent is NOT SEEDED at the moment! {% endif -%}
+ {%- if t.unseeded -%}Warning: This torrent is NOT SEEDED at the moment! {% endif -%}
  Are you sure you want to use {{ fl_tokens }} Freeleech token{{ fl_tokens|plural }} here?');">FL</a>
 {% endif %}
  | <a href="reportsv2.php?action=report&amp;id={{ t.id }}" class="tooltip" title="Report">RP</a>
