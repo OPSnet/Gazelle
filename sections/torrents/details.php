@@ -649,9 +649,9 @@ if (!$torrentList) {
 </div>
 <?php
     }
-    if (!empty($Description)) {
+    if (!empty($torrent->description())) {
 ?>
-        <blockquote><?= Text::full_format($Description) ?></blockquote>
+        <blockquote><?= Text::full_format($torrent->description()) ?></blockquote>
 <?php } ?>
                 </td>
             </tr>
