@@ -707,114 +707,19 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
         </div>
 <?php
 }
-$Collages = $Cache->get_value("torrent_collages_$GroupID");
-if (!is_array($Collages)) {
-    $DB->prepared_query("
-        SELECT c.Name, c.NumTorrents, c.ID
-        FROM collages AS c
-        INNER JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
-        WHERE Deleted = '0'
-            AND CategoryID != '0'
-            AND ct.GroupID = ?
-        ", $GroupID
-    );
-    $Collages = $DB->to_array();
-    $Cache->cache_value("torrent_collages_$GroupID", $Collages, 3600 * 6);
-}
-if (count($Collages) > 0) {
-    if (count($Collages) > COLLAGE_SAMPLE_THRESHOLD) {
-        // Pick some at random
-        $Range = range(0, count($Collages) - 1);
-        shuffle($Range);
-        $Indices = array_slice($Range, 0, COLLAGE_SAMPLE_THRESHOLD);
-        $SeeAll = ' <a href="#" onclick="$(\'.collage_rows\').gtoggle(); return false;">(See all)</a>';
-    } else {
-        $Indices = range(0, count($Collages) - 1);
-        $SeeAll = '';
-    }
-?>
-        <table class="collage_table" id="collages">
-            <tr class="colhead">
-                <td width="85%"><a href="#">&uarr;</a>&nbsp;This album is in <?=number_format(count($Collages))?> collage<?= plural(count($Collages)) ?><?=$SeeAll?></td>
-                <td># torrents</td>
-            </tr>
-<?php
-    foreach ($Indices as $i) {
-        [$CollageName, $CollageTorrents, $CollageID] = $Collages[$i];
-        unset($Collages[$i]);
-?>
-            <tr>
-                <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
-                <td class="number_column"><?=number_format($CollageTorrents)?></td>
-            </tr>
-<?php
-    }
-    foreach ($Collages as $Collage) {
-        [$CollageName, $CollageTorrents, $CollageID] = $Collage;
-?>
-            <tr class="collage_rows hidden">
-                <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
-                <td class="number_column"><?=number_format($CollageTorrents)?></td>
-            </tr>
-<?php } ?>
-        </table>
-<?php
-}
 
-$PersonalCollages = $Cache->get_value("torrent_collages_personal_$GroupID");
-if (!is_array($PersonalCollages)) {
-    $DB->prepared_query("
-        SELECT c.Name, c.NumTorrents, c.ID
-        FROM collages AS c
-            JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-        WHERE Deleted = '0'
-            AND CategoryID = '0'
-            AND ct.GroupID = ?
-        ", $GroupID
-    );
-    $PersonalCollages = $DB->to_array(false, MYSQLI_NUM);
-    $Cache->cache_value("torrent_collages_personal_$GroupID", $PersonalCollages, 3600 * 6);
-}
+echo $Twig->render('collage/summary.twig', [
+    'class'   => 'collage_rows',
+    'object'  => 'album',
+    'summary' => $collageMan->tgroupGeneralSummary($GroupID),
+]);
 
-if (count($PersonalCollages) > 0) {
-    if (count($PersonalCollages) > PERSONAL_COLLAGE_SAMPLE_THRESHOLD) {
-        // Pick some at random
-        $Range = range(0,count($PersonalCollages) - 1);
-        shuffle($Range);
-        $Indices = array_slice($Range, 0, PERSONAL_COLLAGE_SAMPLE_THRESHOLD);
-        $SeeAll = ' <a href="#" onclick="$(\'.personal_rows\').gtoggle(); return false;">(See all)</a>';
-    } else {
-        $Indices = range(0, count($PersonalCollages) - 1);
-        $SeeAll = '';
-    }
-?>
-        <table class="collage_table" id="personal_collages">
-            <tr class="colhead">
-                <td width="85%"><a href="#">&uarr;</a>&nbsp;This album is in <?=number_format(count($PersonalCollages))?> personal collage<?= plural(count($PersonalCollages)) ?><?=$SeeAll?></td>
-                <td># torrents</td>
-            </tr>
-<?php
-    foreach ($Indices as $i) {
-        [$CollageName, $CollageTorrents, $CollageID] = $PersonalCollages[$i];
-        unset($PersonalCollages[$i]);
-?>
-            <tr>
-                <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
-                <td class="number_column"><?=number_format($CollageTorrents)?></td>
-            </tr>
-<?php
-    }
-    foreach ($PersonalCollages as $Collage) {
-        [$CollageName, $CollageTorrents, $CollageID] = $Collage;
-?>
-            <tr class="personal_rows hidden">
-                <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
-                <td class="number_column"><?=number_format($CollageTorrents)?></td>
-            </tr>
-<?php } ?>
-        </table>
-<?php
-}
+echo $Twig->render('collage/summary.twig', [
+    'class'   => 'personal_rows',
+    'object'  => 'album',
+    'summary' => $collageMan->tgroupPersonalSummary($GroupID),
+]);
+
 // Matched Votes
 $similar = $vote->similarVote();
 if (!empty($similar)) {

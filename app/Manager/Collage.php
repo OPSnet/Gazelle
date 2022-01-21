@@ -5,7 +5,10 @@ namespace Gazelle\Manager;
 class Collage extends \Gazelle\Base {
 
     protected const CACHE_DEFAULT_ARTIST = 'collage_default_artist_%d';
-    protected const CACHE_DEFAULT_GROUP = 'collage_default_group_%d';
+    protected const CACHE_DEFAULT_GROUP  = 'collage_default_group_%d';
+    protected const TGROUP_GENERAL_KEY   = 'torrent_collages_%d';
+    protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
+    protected const ARTIST_KEY           = 'artists_collages_%d';
     protected const ID_KEY = 'zz_c_%d';
 
     protected \Gazelle\Util\ImageProxy $imageProxy;
@@ -321,5 +324,129 @@ class Collage extends \Gazelle\Base {
             $entry['artistIds'] = is_null($entry['artistIds']) ? [] : explode(',', $entry['artistIds']);
         }
         return $list;
+    }
+
+    /**
+     * In how many general (non-personal) collages does a given torrent group
+     * appear? The result is separated into two groups, those that will be
+     * displayed "above the fold" and those that are hidden "below the fold".
+     * The total (which has to be calculated here anyway), is also returned to
+     * the caller, so that the code does not have to check whether the arrays are
+     * empty (to skip the display entirely).
+     *
+     * The contents of an entry is ['id', 'name', 'total']
+     *
+     * @return array [total results, array above, array below]
+     */
+    public function tgroupGeneralSummary(int $tgroupId): array {
+        $key = sprintf(self::TGROUP_GENERAL_KEY, $tgroupId);
+        $list = self::$cache->get_value($key);
+        if ($list === false) {
+            self::$db->prepared_query("
+                SELECT c.ID       AS id,
+                    c.Name        AS name,
+                    c.NumTorrents AS total
+                FROM collages AS c
+                INNER JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
+                WHERE Deleted = '0'
+                    AND CategoryID != ?
+                    AND ct.GroupID = ?
+                ORDER BY c.updated DESC
+                ", COLLAGE_PERSONAL_ID, $tgroupId
+            );
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $list, 3600 * 6);
+        }
+        return $this->listShuffle(COLLAGE_SAMPLE_THRESHOLD, $list);
+    }
+
+    /**
+     * In how many general (non-personal) collages does a given
+     * torrent group appear?
+     *
+     * @see \Gazelle\Manager\Collage::tgroupGeneralSummary()
+     * @return array [total results, array above, array below]
+     */
+    public function tgroupPersonalSummary(int $tgroupId): array {
+        $key = sprintf(self::TGROUP_PERSONAL_KEY, $tgroupId);
+        $list = self::$cache->get_value($key);
+        if ($list === false) {
+            self::$db->prepared_query("
+                SELECT c.ID       AS id,
+                    c.Name        AS name,
+                    c.NumTorrents AS total
+                FROM collages AS c
+                INNER JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
+                WHERE Deleted = '0'
+                    AND CategoryID = ?
+                    AND ct.GroupID = ?
+                ORDER BY c.updated DESC
+                ", COLLAGE_PERSONAL_ID, $tgroupId
+            );
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $list, 3600 * 6);
+        }
+        return $this->listShuffle(PERSONAL_COLLAGE_SAMPLE_THRESHOLD, $list);
+    }
+
+    /**
+     * In how many collages does a given artist appear?
+     *
+     * @see \Gazelle\Manager\Collage::tgroupGeneralSummary()
+     * @return array [total results, array above, array below]
+     */
+    public function artistSummary(int $artistId): array {
+        $key = sprintf(self::ARTIST_KEY, $artistId);
+        $list = self::$cache->get_value($key);
+        if ($list === false) {
+            self::$db->prepared_query("
+                SELECT c.ID       AS id,
+                    c.Name        AS name,
+                    c.NumTorrents AS total
+                FROM collages AS c
+                INNER JOIN collages_artists AS ca ON (ca.CollageID = c.ID)
+                WHERE Deleted = '0'
+                    AND CategoryID = ?
+                    AND ca.ArtistID = ?
+                ORDER BY c.updated DESC
+                ", COLLAGE_ARTISTS_ID, $artistId
+            );
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $list, 3600 * 6);
+        }
+        return $this->listShuffle(COLLAGE_SAMPLE_THRESHOLD, $list);
+    }
+
+    /**
+     * Take an array and if there are more entries than a threshold,
+     * then split it into two arrays, the first containing the threshold
+     * number of random entries and the overflow contained in the second.
+     *
+     * If there are insufficient entries to trigger an overflow, all
+     * the entries will be in the first array and the second will be
+     * empty.
+     *
+     * @return array [total results, array above, array below]
+     */
+    public function listShuffle(int $threshold, array $list): array {
+        $total = count($list);
+        if ($total <= $threshold) {
+            return ['total' => $total, 'above' => $list, 'below' => []];
+        }
+
+        $choose = range(0, $total - 1);
+        shuffle($choose);
+        $choose = array_slice($choose, 0, $threshold);
+
+        $above = [];
+        $below = [];
+        foreach ($list as $idx => $row) {
+            if (in_array($idx, $choose)) {
+                $above[] = $row;
+            } else {
+                $below[] = $row;
+            }
+        }
+        return ['total' => $total, 'above' => $above, 'below' => $below];
     }
 }
