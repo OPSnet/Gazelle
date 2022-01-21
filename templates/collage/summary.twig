@@ -1,0 +1,24 @@
+{% if summary.total %}
+<table class="collage_table" id="collages">
+    <tr class="colhead">
+        <td width="85%"><a href="#">&uarr;</a>&nbsp;This {{ object }} is in {{ summary.total|number_format }} collage{{ summary.total|plural }}
+    {% if summary.below %}
+            <a href="#" onclick="$('.{{ class }}').gtoggle(); return false;">(See all)</a>
+    {% endif %}
+        </td>
+        <td># {% if object == 'artist' %}artists{% else %}torrents{% endif %}</td>
+    </tr>
+    {% for c in summary.above %}
+    <tr>
+        <td><a href="collages.php?id={{ c.id }}">{{ c.name }}</a></td>
+        <td class="number_column">{{ c.total|number_format }}</td>
+    </tr>
+    {% endfor %}
+    {% for c in summary.below %}
+    <tr class="{{ class }} hidden">
+        <td><a href="collages.php?id={{ c.id }}">{{ c.name }}</a></td>
+        <td class="number_column">{{ c.total|number_format }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}

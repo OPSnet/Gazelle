@@ -412,59 +412,11 @@ if ($sections = $Artist->sections()) {
 <?php
 } /* all sections */
 
-$Collages = $Cache->get_value("artists_collages_$ArtistID");
-if (!is_array($Collages)) {
-    $DB->prepared_query("
-        SELECT c.Name, c.NumTorrents, c.ID
-        FROM collages AS c
-        INNER JOIN collages_artists AS ca ON (ca.CollageID = c.ID)
-        WHERE CategoryID = '7'
-            AND Deleted = '0'
-            AND ca.ArtistID = ?
-        ", $ArtistID
-    );
-    $Collages = $DB->to_array();
-    $Cache->cache_value("artists_collages_$ArtistID", $Collages, 3600 * 6);
-}
-if (count($Collages) > 0) {
-    if (count($Collages) > COLLAGE_SAMPLE_THRESHOLD) {
-        // Pick some at random
-        $Range = range(0,count($Collages) - 1);
-        shuffle($Range);
-        $Indices = array_slice($Range, 0, COLLAGE_SAMPLE_THRESHOLD);
-        $SeeAll = ' <a href="#" onclick="$(\'.collage_rows\').gtoggle(); return false;">(See all)</a>';
-    } else {
-        $Indices = range(0, count($Collages)-1);
-        $SeeAll = '';
-    }
-?>
-    <table class="collage_table" id="collages">
-        <tr class="colhead">
-            <td width="85%"><a href="#">&uarr;</a>&nbsp;This artist is in <?=number_format(count($Collages))?> collage<?= plural(count($Collages)) ?><?=$SeeAll?></td>
-            <td># artists</td>
-        </tr>
-<?php
-            foreach ($Indices as $i) {
-                [$CollageName, $CollageArtists, $CollageID] = $Collages[$i];
-                unset($Collages[$i]);
-?>
-                    <tr>
-                        <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
-                        <td><?=number_format($CollageArtists)?></td>
-                    </tr>
-<?php
-            }
-            foreach ($Collages as $Collage) {
-                [$CollageName, $CollageArtists, $CollageID] = $Collage;
-?>
-                    <tr class="collage_rows hidden">
-                        <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
-                        <td><?=number_format($CollageArtists)?></td>
-                    </tr>
-<?php       } ?>
-    </table>
-<?php
-}
+echo $Twig->render('collage/summary.twig', [
+    'class'   => 'collage_rows',
+    'object'  => 'artist',
+    'summary' => $collageMan->artistSummary($ArtistID),
+]);
 
 if ($Requests) {
 ?>
