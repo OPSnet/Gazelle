@@ -417,7 +417,7 @@ class Collage extends BaseObject {
 
     public function entryUserId(int $entryId): int {
         return (int)self::$db->scalar("
-            SELECT UserID FROM " . $this->entryTable . "
+            SELECT UserID FROM " . $this->collage->entryTable() . "
             WHERE CollageID = ?
                 AND GroupID = ?
             ", $this->id, $entryId
