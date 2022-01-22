@@ -6,7 +6,7 @@ if ($Viewer->disableForums()) {
 $userQuote = new Gazelle\User\Quote($Viewer);
 
 if ($_GET['catchup'] ?? 0) {
-    $userQuote->clear();
+    $userQuote->clearAll();
     header('Location: userhistory.php?action=quote_notifications');
     exit;
 }
