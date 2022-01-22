@@ -164,11 +164,11 @@ if (!$onlyMetadata) {
             }
         }
         $NeedCue = empty($_POST['needcue']) ? false : true;
+        $NeedChecksum = empty($_POST['needcksum']) ? false : true;
         //FLAC was picked, require either Lossless or 24 bit Lossless
-        if (!$AllEncodings && !in_array(array_search('Lossless', ENCODING), $EncodingArray) && !in_array(array_search('24bit Lossless', ENCODING), $EncodingArray)) {
+        if (!$AllEncodings && empty(array_intersect($EncodingArray, [array_search('Lossless', ENCODING), array_search('24bit Lossless', ENCODING)]))) {
             $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
         }
-        $NeedChecksum = empty($_POST['needcksum']) ? false : true;
 
         if (($NeedCue || $NeedLog || $NeedChecksum)) {
             if (empty($_POST['all_media']) && !(in_array('0', $MediaArray))) {
@@ -182,7 +182,6 @@ if (!$onlyMetadata) {
         $MinLogScore = false;
     }
 }
-
 
 // GroupID
 if (!empty($_POST['groupid'])) {
@@ -319,7 +318,7 @@ if ($NewRequest) {
             UPDATE requests SET
                 CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?, GroupID = ?, OCLC = ?
             WHERE ID = ?
-            ", $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel, $GroupID, $OCLC,
+            ", $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel, $GroupID ?? null, $OCLC,
             $RequestID
         );
     } else {
@@ -329,7 +328,7 @@ if ($NewRequest) {
                 ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
             WHERE ID = ?',
             $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel,
-            $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID, $OCLC,
+            $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID ?? null, $OCLC,
             $RequestID
         );
     }
