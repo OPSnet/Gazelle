@@ -31,7 +31,8 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
     }
 
     public function type(): string {
-        return end(explode('\\', get_class($this)));
+        $path = explode('\\', get_class($this));
+        return end($path); // silence "Only variables should be passed by reference"
     }
 
     public function url(): string {
