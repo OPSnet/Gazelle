@@ -402,7 +402,7 @@ class Collage extends BaseObject {
         if (empty($series)) {
             return 0;
         }
-        $id = $this->holder->id();
+        $id = $this->id;
         $args = array_merge(...array_map(function ($sort, $entryId) use ($id) {
             return [(int)$entryId, ($sort + 1) * 10, $id];
         }, array_keys($series), $series));
