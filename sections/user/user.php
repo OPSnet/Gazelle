@@ -826,7 +826,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
                 'delete_user' => $Viewer->permitted('users_delete_users'),
             ],
             'disable' => [
-                'avatar'  => !$User->showAvatars(),
+                'avatar'  => $User->disableAvatar(),
                 'bonus'   => $User->disableBonusPoints(),
                 'forum'   => $User->disableForums(),
                 'invite'  => $User->disableInvites(),
