@@ -22,7 +22,7 @@ json_print("success", [
         'messages'         => $Viewer->inboxUnreadCount(),
         'notifications'    => (new Gazelle\User\Notification\Torrent($Viewer))->unread(),
         'newAnnouncement'  => (new Gazelle\Manager\News)->latest() < (new Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
-        'newBlog'          => $latest && $latest->createdEpoch() < (new Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
+        'newBlog'          => $latestBlog && $latestBlog->createdEpoch() < (new Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
         'newSubscriptions' => (new Gazelle\Subscription($Viewer))->unread() > 0,
     ],
     'userstats' => [
