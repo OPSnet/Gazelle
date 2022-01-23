@@ -386,4 +386,5 @@ $changeLog = implode(', ', $change);
 
 $Cache->deleteMulti(["torrents_details_{$current['GroupID']}", "torrent_download_$TorrentID"]);
 
+(new \Gazelle\Torrent($TorrentID))->flush();
 header("Location: torrents.php?id={$current['GroupID']}");
