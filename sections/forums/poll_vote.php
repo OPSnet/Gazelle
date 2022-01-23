@@ -36,20 +36,20 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 <?php
 } else {
     authorize();
-    $Vote = $_POST['vote'];
-    if (!isset($Answers[$Vote]) && $Vote != 0) {
+    $Vote = (int)$_POST['vote'];
+    if (!isset($Answers[$Vote]) && $Vote !== 0) {
         error(0, true);
     }
 
     //Add our vote
-    if ($forum->addPollVote($Viewer->id(), $threadId, $Vote)) {
+    if ($forum->addPollVote($Viewer->id(), $threadId, $Vote) && $Vote !== 0) {
         $Votes[$Vote]++;
         $TotalVotes++;
         $MaxVotes++;
     }
 
-    if ($Vote != 0) {
-        $Answers[$Vote] = '=> '.$Answers[$Vote];
+    if ($Vote !== 0) {
+        $Answers[$Vote] = '=> ' . $Answers[$Vote];
     }
 ?>
         <ul class="poll nobullet">
