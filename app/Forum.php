@@ -668,7 +668,7 @@ class Forum extends BaseObject {
                 UPDATE forums_polls SET
                     Featured = now()
                 WHERE TopicID = ?
-                ", $Featured, $threadId
+                ", $threadId
             );
             $affected += self::$db->affected_rows();
             $Featured = self::$db->scalar("
