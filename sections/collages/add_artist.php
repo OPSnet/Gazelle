@@ -82,7 +82,7 @@ if (!$Viewer->permitted('site_collages_delete')) {
 }
 
 foreach ($ID as $artistId) {
-    $collage->addArtist($artistId, $Viewer->id());
+    $collage->addEntry($artistId, $Viewer->id());
 }
 $collageMan->flushDefaultArtist($Viewer->id());
 header('Location: ' . $collage->url());

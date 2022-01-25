@@ -42,8 +42,6 @@ class TGroup extends AbstractCollage {
             $this->torrents = \Torrents::get_groups($groupIds);
         }
 
-        $this->entryTotal = count($this->torrents);
-
         // in case of a tie in tag usage counts, order by first past the post
         self::$db->prepared_query("
             SELECT count(*) as \"count\",
@@ -90,5 +88,40 @@ class TGroup extends AbstractCollage {
         uasort($this->artists, function ($x, $y) { return $y['count'] <=> $x['count']; });
         arsort($this->contributors);
         return count($this->groupIds);
+    }
+
+    protected function flushTarget(int $tgroupId): void {
+        $this->flushAll([
+            "torrent_collages_$tgroupId",
+            "torrent_collages_personal_$tgroupId",
+            "torrents_details_$tgroupId"
+        ]);
+    }
+
+    public function remove(): int {
+        self::$db->prepared_query("
+            SELECT GroupID FROM collages_torrents WHERE CollageID = ?
+            ", $this->id
+        );
+        self::$cache->deleteMulti(array_merge(...array_map(
+            fn ($id) => ["torrents_details_$id", "torrent_collages_$id", "torrent_collages_personal_$id"],
+            self::$db->collect(0, false)
+        )));
+        if (!$this->holder->isPersonal()) {
+            $rows = parent::remove();
+        } else {
+            (new \Gazelle\Manager\Comment)->remove('collages', $this->id);
+            self::$db->prepared_query("
+                DELETE FROM collages_torrents WHERE CollageID = ?
+                ", $this->id
+            );
+            self::$db->prepared_query("
+                DELETE FROM collages WHERE ID = ?
+                ", $this->id
+            );
+            $rows = self::$db->affected_rows();
+        }
+        $this->flushAll();
+        return $rows;
     }
 }

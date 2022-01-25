@@ -18,7 +18,7 @@ if (!$collage->isArtist()) {
 }
 
 if ($_POST['submit'] === 'Remove') {
-    $collage->removeArtist($artistId);
+    $collage->removeEntry($artistId);
 } elseif (isset($_POST['drag_drop_collage_sort_order'])) {
     $collage->updateSequence($_POST['drag_drop_collage_sort_order']);
 } else {

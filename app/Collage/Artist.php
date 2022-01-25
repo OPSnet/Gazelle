@@ -22,7 +22,7 @@ class Artist extends AbstractCollage {
             ", $this->holder->id()
         );
         $artists = self::$db->to_array('ArtistID', MYSQLI_ASSOC, false);
-        $this->entryTotal = count($artists);
+        $total = count($artists);
 
         foreach ($artists as $artist) {
             if (!isset($this->artists[$artist['ArtistID']])) {
@@ -43,6 +43,27 @@ class Artist extends AbstractCollage {
             $this->contributors[$artist['UserID']]++;
         }
         arsort($this->contributors);
-        return $this->entryTotal;
+        return $total;
+    }
+
+    protected function flushTarget(int $artistId): void {
+        $this->flushAll([
+            "artists_collages_$artistId",
+            "artists_collages_personal_$artistId",
+        ]);
+    }
+
+    public function remove(): int {
+        self::$db->prepared_query("
+            SELECT ArtistID FROM collages_artists WHERE CollageID = ?
+            ", $this->id
+        );
+        $keys = array_merge(...array_map(
+            fn ($id) => ["artists_collages_$id", "artists_collages_personal_$id"],
+            self::$db->collect(0, false)
+        ));
+        $rows = parent::remove();
+        $this->flushAll($keys);
+        return $rows;
     }
 }
