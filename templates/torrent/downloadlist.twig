@@ -7,7 +7,8 @@
     <tr class="colhead_dark" style="font-weight: bold;">
         {% for n in range(1, 2) %}
         <td>User</td>
-        <td>Time</td>
+        <td title="Earliest">Time</td>
+        <td>Copies</td>
         <td><img src="{{ url_stem }}snatched.png" class="tooltip" alt="Snatched?" title="Snatched?" /></td>
         <td><img src="{{ url_stem }}seeders.png" class="tooltip" alt="Seeding?" title="Seeding?" /></td>
         {% endfor %}
@@ -17,8 +18,9 @@
     </tr>
     <tr>
     {% endif %}
-        <td>{{ download.user_id|user_full }}</td>
+        <td>{{ download.user_id|user_url }}</td>
         <td>{{ download.timestamp|time_diff }}</td>
+        <td>{{ download.total|number_format }}</td>
         <td>{% if download.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #f57c00">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
         <td>{% if download.is_seeding %}<span class="tooltip" title="Seeding!" style="color: #388e3c">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
     {% if loop.last %}

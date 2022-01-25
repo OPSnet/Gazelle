@@ -1066,7 +1066,7 @@ class Torrent extends BaseObject {
 
     public function downloadTotal(): int {
         return self::$db->scalar("
-            SELECT count(*) FROM users_downloads WHERE TorrentID = ?
+            SELECT count(DISTINCT UserID) FROM users_downloads WHERE TorrentID = ?
             ", $this->id
         );
     }
@@ -1074,11 +1074,13 @@ class Torrent extends BaseObject {
     public function downloadPage(int $limit, int $offset): array {
         self::$db->prepared_query("
             SELECT ud.UserID AS user_id,
-                ud.Time      AS timestamp,
+                min(ud.Time) AS timestamp,
+                count(*)     AS total,
                 EXISTS(SELECT 1 FROM xbt_snatched xs WHERE xs.uid = ud.UserID AND xs.fid = ud.TorrentID) AS is_snatched,
                 EXISTS(SELECT 1 FROM xbt_files_users xfu WHERE xfu.uid = ud.UserID AND xfu.fid = ud.TorrentID) AS is_seeding
             FROM users_downloads ud
             WHERE ud.TorrentID = ?
+            GROUP BY user_id, is_snatched, is_seeding
             ORDER BY ud.Time DESC, ud.UserID
             LIMIT ? OFFSET ?
             ", $this->id, $limit, $offset
