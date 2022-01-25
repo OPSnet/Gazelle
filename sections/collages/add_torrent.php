@@ -85,7 +85,7 @@ if (!$Viewer->permitted('site_collages_delete')) {
 }
 
 foreach ($groupIds as $groupId) {
-    $collage->addTorrent($groupId, $Viewer->id());
+    $collage->addEntry($groupId, $Viewer->id());
 }
 $collageMan->flushDefaultGroup($Viewer->id());
 header('Location: ' . $collage->url());
