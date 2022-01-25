@@ -87,6 +87,7 @@ class ReportV2 extends BaseObject {
             ", $message, $this->id
         );
         self::$cache->decrement('num_torrent_reportsv2');
+        (new \Gazelle\Torrent($this->torrentId))->flush();
         return self::$db->affected_rows() === 1;
     }
 
@@ -101,6 +102,7 @@ class ReportV2 extends BaseObject {
                 AND ID = ?
             ", $userId, $message, $this->id
         );
+        (new \Gazelle\Torrent($this->torrentId))->flush();
         return self::$db->affected_rows() > 0;
     }
 
