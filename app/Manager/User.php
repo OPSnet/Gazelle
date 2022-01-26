@@ -679,14 +679,16 @@ class User extends \Gazelle\Base {
         return $total;
     }
 
-    public function sendRemovalPM(int $torrentId, int $uploaderId, string $name, string $Log, int $trumpId, bool $pmUploader): int {
+    public function sendRemovalPM(int $torrentId, int $uploaderId, string $name, string $log, int $trumpId, bool $pmUploader): int {
         $subject = 'Torrent deleted: ' . $name;
         $message = 'A torrent %s '
             . (!$trumpId
                  ? ' has been deleted.'
                  : " has been trumped. You can find the new torrent [url=torrents.php?torrentid={$trumpId}]here[/url]."
             )
-            . "\n\n[url=log.php?search=Torrent+{$torrentId}]Log message[/url]: {$Log}.";
+            . "\n\n[url=log.php?search=Torrent+{$torrentId}]Log message[/url]: "
+            . str_replace('%', '%%', $log) // to prevent sprintf() interpolation
+            . ".";
 
         if ($pmUploader) {
             $this->sendPM($uploaderId, 0, $subject, sprintf($message, 'you uploaded'));
