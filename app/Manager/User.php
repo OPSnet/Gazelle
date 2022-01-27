@@ -66,6 +66,48 @@ class User extends \Gazelle\Base {
     }
 
     /**
+     * Find a user based on an Authorization header.
+     *
+     * @return array [success, result]
+     * If success is false, the result is the error message to be returned in the response
+     * Otherwise the result is a Gazelle\User object.
+     */
+    public function findByAuthorization(IPv4 $ipv4Man, string $authorization, string $ipaddr): array {
+        $info = explode(" ", $authorization);
+        // this first case is for compatibility with RED
+        if (count($info) === 1) {
+            $token = $info[0];
+        } elseif (count($info) === 2) {
+            if ($info[0] !== 'token') {
+                return [false, 'invalid authorization type, must be "token"'];
+            }
+            $token = $info[1];
+        } else {
+            return [false, 'invalid authorization type, must be "token"'];
+        }
+        $userId = (int)substr(
+            \Gazelle\Util\Crypto::decrypt(
+                base64_decode(str_pad(strtr($token, '-_', '+/'), strlen($token) % 4, '=', STR_PAD_RIGHT)),
+                ENCKEY
+            ),
+            32
+        );
+        $user = $this->findById($userId);
+        if (is_null($user) || !$user->hasApiToken($token) || $user->isDisabled() || $user->isLocked()) {
+            $watch = new \Gazelle\LoginWatch($ipaddr);
+            $watch->increment($userId, "[usertoken:$userId]");
+            if ($watch->nrAttempts() >= 5) {
+                $watch->ban("[id:$userId]");
+                if ($watch->nrBans() >= 10) {
+                    $ipv4Man->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
+                }
+            }
+            return [false, 'invalid token'];
+        }
+        return [true, $user];
+    }
+
+    /**
      * Get a User object from their email address
      * (used for password reset)
      *

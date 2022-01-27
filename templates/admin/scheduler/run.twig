@@ -1,0 +1,19 @@
+{{ header('Periodic Task Run') }}
+<div class="header">
+<h2>Periodic Task Run - {{ task.name }}</h2>
+</div>
+{% include 'admin/scheduler/links.twig' with {'can_edit': viewer.permitted('admin_periodic_task_manage')} only %}
+
+<div class="thin">
+
+<div class="box pad">
+<pre>{{ output }}</pre>
+</div>
+
+<div class="box pad">
+Items processed: {{ processed|number_format }}
+</div>
+
+</div>
+
+{{ footer() }}

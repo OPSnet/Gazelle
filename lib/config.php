@@ -105,10 +105,6 @@ defined('ALT_SITE_URL') or define('ALT_SITE_URL', SITE_URL);
 // This may be what you need in the event of a compromise.
 defined('ENCKEY') or define('ENCKEY', 'thisisfine');
 
-// This value must be passed as an argument on the crontab entry of schedule.php.
-// It may be changed at any time as long as both places are kept in synch.
-defined('SCHEDULE_KEY') or define('SCHEDULE_KEY', 'thisisfine');
-
 // Extra salt added into RSS authentication
 defined('RSS_HASH') or define('RSS_HASH', 'thisisfine');
 
@@ -434,6 +430,12 @@ defined('LOGIN_ATTEMPT_BACKOFF') or define('LOGIN_ATTEMPT_BACKOFF', [
 // recent uploads widget.
 defined('HOMEPAGE_TAG_IGNORE') or define('HOMEPAGE_TAG_IGNORE', [0]);
 
+// Do not report these pages for excessive memory consumption
+defined('INGORE_PAGE_MAX_MEMORY') or define('INGORE_PAGE_MAX_MEMORY', ['artist', 'bookmark']);
+
+// Do not report these pages for being slow
+defined('INGORE_PAGE_MAX_TIME') or define('INGORE_PAGE_MAX_TIME', ['top10']);
+
 // ------------------------------------------------------------------------
 // Inactivity reaper settings
 //
@@ -645,6 +647,58 @@ defined('SOURCE_FLAG_WIKI_PAGE_ID') or define('SOURCE_FLAG_WIKI_PAGE_ID', 113);
 // numbers or they are used in more than place. Any changes here will most
 // likely require a corresonding change in the code or stylesheets.
 // ------------------------------------------------------------------------
+
+// Only these /<page>.php URLs will be rendered, antything else will
+// return a 404 error.
+
+defined('VALID_PAGE') or define('VALID_PAGE', [
+    'ajax',
+    'apply',
+    'artist',
+    'better',
+    'blog',
+    'bonus',
+    'bookmarks',
+    'captcha',
+    'chat',
+    'collages',
+    'comments',
+    'contest',
+    'donate',
+    'enable',
+    'error',
+    'forums',
+    'friends',
+    'image',
+    'inbox',
+    'index',
+    'irc',
+    'locked',
+    'log',
+    'logchecker',
+    'login',
+    'logout',
+    'random',
+    'recovery',
+    'referral',
+    'register',
+    'reports',
+    'reportsv2',
+    'requests',
+    'rules',
+    'signup',
+    'staff',
+    'staffblog',
+    'staffpm',
+    'stats',
+    'tools',
+    'top10',
+    'torrents',
+    'upload',
+    'user',
+    'userhistory',
+    'view',
+]);
 
 // Maximum length of a custom user title.
 defined('USER_TITLE_LENGTH') or define('USER_TITLE_LENGTH', 1024);

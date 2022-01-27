@@ -56,9 +56,9 @@
         <td class="number_column">{{ t.errors|number_format }}</td>
         <td class="number_column">{{ t.events|number_format }}</td>
         <td>
-{% if viewer.permitted('admin_schedule') %}
-            <a class="brackets" href="tools.php?action=periodic&amp;mode=run_now&amp;auth={{ viewer.auth }}&amp;id={{ t.periodic_task_id }}">Run Now</a>
-            <a class="brackets" href="schedule.php?auth={{ viewer.auth }}&amp;id={{ t.periodic_task_id }}">Debug</a>
+    {% if viewer.permitted('admin_schedule') %}
+            <a class="brackets" href="tools.php?action=periodic&amp;auth={{ viewer.auth }}&amp;id={{ t.periodic_task_id }}&amp;mode=enqueue">Enqueue</a>
+            <a class="brackets" href="tools.php?action=periodic&amp;auth={{ viewer.auth }}&amp;id={{ t.periodic_task_id }}&amp;mode=run">Run</a>
     {% endif %}
         </td>
     </tr>

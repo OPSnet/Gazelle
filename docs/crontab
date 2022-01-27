@@ -1,7 +1,8 @@
-# These are our cron jobs.
-# Replace SCHEDULE_KEY with the value referenced in lib/config.php / lib/config.override.php
+# These are the cron jobs.
+# Adjust PATH according to where the repository is checked out on the filesystem
 
-0,15,30,45  *   * * * /var/www/scripts/schedule >> /root/schedule.log
-10,25,40,55 *   * * * /usr/bin/php /var/www/scripts/peerupdate.php SCHEDULE_KEY >> /root/peerupdate.log
-*           *   * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate delta requests_delta log_delta >/dev/null
-5           */2 * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate --all >>/root/sphinx-indexer.log
+PATH=$PATH:/var/www/scripts
+
+0,15,30,45  *   * * * scheduler >> /tmp/schedule.log
+*           *   * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate delta requests_delta log_delta > /dev/null
+5           */2 * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate --all >> /tmp/sphinx-indexer.log

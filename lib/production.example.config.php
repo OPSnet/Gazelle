@@ -42,7 +42,6 @@ define('TRACKER_SECRET',    '0123456789abcdef0123456789abcdef01');
 define('TRACKER_REPORTKEY', '0123456789abcdef0123456789abcdef01');
 
 define('ENCKEY',       'thisisfine');
-define('SCHEDULE_KEY', 'thisisfine');
 define('RSS_HASH',     'thisisfine');
 define('SEEDBOX_SALT', 'thisisfine');
 define('AVATAR_SALT',  'thisisfine');

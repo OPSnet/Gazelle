@@ -282,7 +282,7 @@ switch ($_REQUEST['action']) {
     case 'periodic':
         $mode = $_REQUEST['mode'] ?? 'view';
         switch ($mode) {
-            case 'run_now':
+            case 'enqueue':
             case 'view':
                 require_once('development/periodic_view.php');
                 break;
@@ -297,6 +297,9 @@ switch ($_REQUEST['action']) {
                 break;
             case 'alter':
                 require_once('development/periodic_alter.php');
+                break;
+            case 'run':
+                require_once('development/periodic_run.php');
                 break;
         }
         break;

@@ -237,10 +237,10 @@ function parse_user_agent(): array {
  * @param boolean $Log If true, the user is given a link to search $Log in the site log.
  */
 function error($Error, $NoHTML = false, $Log = false) {
-    global $Debug, $Viewer, $Twig;
+    global $Debug, $Document, $Viewer, $Twig;
     require_once(__DIR__ . '/../sections/error/index.php');
     if (isset($Viewer)) {
-        $Debug->profile($Viewer);
+        $Debug->profile($Viewer, $Document);
     }
     exit;
 }

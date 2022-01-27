@@ -8,10 +8,10 @@ use Gazelle\Exception\RouterException;
 /**
  * Router class to be used by Gazelle to serve up the necessary file on
  * a specified route. Current usage would be that the Router is initialized
- * within script_start.php and then all sections/<*>/index.php files would
- * set their specific section routes on that global Router object. script_start.php
+ * within gazelle.php and then all sections/<*>/index.php files would
+ * set their specific section routes on that global Router object. gazelle.php
  * would then include that index.php for a given section to populate the router,
- * and then call the route from within script_start.php.
+ * and then call the route from within gazelle.php.
  *
  * By default, we assume that any POST requests will require authorization and any
  * GET request will not.

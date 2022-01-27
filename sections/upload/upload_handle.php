@@ -5,7 +5,6 @@ use OrpheusNET\Logchecker\Logchecker;
 
 ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
-define('QUERY_EXCEPTION', true); // Shut up debugging
 if (!defined('AJAX')) {
     authorize();
 }

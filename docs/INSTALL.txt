@@ -69,9 +69,7 @@ Note, generating the previews requires a Chrome instance on the host.
 9. Setup your web server. We recommend using nginx (https://www.nginx.com/).
    A sample configuration for nginx can be found in .docker/web/nginx.conf.
 
-10. Set up cron jobs. You need a cron job for the scheduler, a cron job for
-   the peerupdate (all groups are cached, but the peer counts change often,
-   so peerupdate is a script to update them), and the two Sphinx indices.
+10. Set up the cronjobs for the background task scheduler and Sphinx updates.
 
    see docs/crontab
 
