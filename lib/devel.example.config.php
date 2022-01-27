@@ -18,7 +18,6 @@ define('OPEN_REGISTRATION', true);
 define('MEMCACHE_HOST_LIST', [['host' => 'memcached', 'port' => 11211, 'buckets' => 1]]);
 
 define('ENCKEY',       "");
-define('SCHEDULE_KEY', "");
 define('RSS_HASH',     "");
 
 define('SEEDBOX_SALT', "");

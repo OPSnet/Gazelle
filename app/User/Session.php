@@ -9,10 +9,6 @@ class Session extends \Gazelle\BaseUser {
 
     protected array $info = [];
 
-    static public function decode(string $cookie): array {
-        return explode('|~|', Crypto::decrypt($cookie, ENCKEY)) ?? [];
-    }
-
     public function info(): array {
         if (!empty($this->info)) {
             return $this->info;

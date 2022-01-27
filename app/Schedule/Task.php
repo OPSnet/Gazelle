@@ -33,7 +33,7 @@ abstract class Task extends \Gazelle\Base {
         $this->historyId = self::$db->inserted_id();
     }
 
-    public function end(bool $sane) {
+    public function end(bool $sane): int {
         $elapsed = (microtime(true) - $this->startTime) * 1000;
         $errorCount = count(array_filter($this->events, function ($event) { return $event->severity === 'error'; }));
         self::$db->prepared_query('
@@ -49,7 +49,7 @@ abstract class Task extends \Gazelle\Base {
         echo("DONE! (".number_format(microtime(true) - $this->startTime, 3).")\n");
 
         foreach ($this->events as $event) {
-            echo(sprintf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event));
+            printf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event);
             self::$db->prepared_query('
                 INSERT INTO periodic_task_history_event
                        (periodic_task_history_id, severity, event_time, event,             reference)
@@ -77,6 +77,7 @@ abstract class Task extends \Gazelle\Base {
 
             Irc::sendChannel('Task '.$this->name.' is now sane', LAB_CHAN);
         }
+        return $this->processed;
     }
 
     public function log(string $message, string $severity = 'info', int $reference = 0) {

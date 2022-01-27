@@ -335,26 +335,27 @@ class Scheduler extends \Gazelle\Base {
         }
     }
 
-    public function runTask(int $id, bool $debug = false) {
+    public function runTask(int $id, bool $debug = false): int {
         $task = $this->getTask($id);
         if ($task === null) {
-            return;
+            return -1;
         }
-        echo('Running task '.$task['name']."...");
+        echo('Running task ' . $task['name'] . "...");
 
         $taskRunner = $this->createRunner($id, $task['name'], $task['classname'], $task['is_debug'] || $debug);
         if ($taskRunner === null) {
             Irc::sendChannel('Failed to construct task '.$task['name'], LAB_CHAN);
-            return;
+            return -1;
         }
 
+        $processed = -1;
         $taskRunner->begin();
         try {
             $taskRunner->run();
         } catch (\Throwable $e) {
             $taskRunner->log('Caught exception: ' . str_replace(SERVER_ROOT, '', $e->getMessage()), 'error');
         } finally {
-            $taskRunner->end($task['is_sane']);
+            $processed = $taskRunner->end($task['is_sane']);
         }
 
         if ($task['run_now']) {
@@ -366,10 +367,14 @@ class Scheduler extends \Gazelle\Base {
             );
             $this->flush();
         }
+        return $processed;
     }
 
-    private function createRunner(int $id, string $name, string $class, bool $isDebug): Task {
+    private function createRunner(int $id, string $name, string $class, bool $isDebug): ?Task {
         $class = 'Gazelle\\Schedule\\Tasks\\' . $class;
+        if (!class_exists($class)) {
+            return null;
+        }
         return new $class($id, $name, $isDebug);
     }
 }

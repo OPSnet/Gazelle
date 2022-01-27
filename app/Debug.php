@@ -46,7 +46,7 @@ class Debug {
         return self::$startTime;
     }
 
-    public function profile(User $user, $Automatic = '') {
+    public function profile(User $user, string $document, string $Automatic = '') {
         $Reason = [];
 
         if (!empty($Automatic)) {
@@ -54,16 +54,16 @@ class Debug {
         }
 
         $Micro = (microtime(true) - self::$startTime) * 1000;
-        if ($Micro > self::MAX_TIME && !TIME_EXCEPTION) {
+        if ($Micro > self::MAX_TIME && !in_array($document, INGORE_PAGE_MAX_TIME)) {
             $Reason[] = number_format($Micro, 3).' ms';
         }
 
         $Errors = count($this->get_errors());
-        if ($Errors > self::MAX_ERRORS && !ERROR_EXCEPTION) {
+        if ($Errors > self::MAX_ERRORS) {
             $Reason[] = $Errors.' PHP errors';
         }
         $Ram = memory_get_usage(true);
-        if ($Ram > self::MAX_MEMORY && !MEMORY_EXCEPTION) {
+        if ($Ram > self::MAX_MEMORY && !in_array($document, IGNORE_PAGE_MAX_MEMORY)) {
             $Reason[] = \Format::get_size($Ram).' RAM used';
         }
 

@@ -5,13 +5,14 @@ if (!$Viewer->permitted('admin_periodic_task_view')) {
 }
 
 $scheduler = new Gazelle\Schedule\Scheduler;
+$taskId = (int)($_REQUEST['id'] ?? 0);
 
-if ($_REQUEST['mode'] === 'run_now' && isset($_REQUEST['id'])) {
+if ($taskId && $_REQUEST['mode'] === 'run_now') {
     if (!$Viewer->permitted('admin_schedule')) {
         error(403);
     }
     authorize();
-    $scheduler->runNow(intval($_REQUEST['id']));
+    $scheduler->runNow($taskId);
 }
 
 echo $Twig->render('admin/scheduler/view.twig', [

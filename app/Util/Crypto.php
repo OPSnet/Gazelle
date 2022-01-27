@@ -10,11 +10,7 @@ class Crypto {
             OPENSSL_RAW_DATA, $iv));
     }
 
-    public static function dbEncrypt($plaintext) {
-        return apcu_exists('DB_KEY') ? Crypto::encrypt($plaintext, apcu_fetch('DB_KEY')) : false;
-    }
-
-    public static function decrypt($ciphertext, $key) {
+    public static function decrypt(string $ciphertext, string $key): string {
         if (empty($ciphertext)) {
             return '';
         }
@@ -24,6 +20,10 @@ class Crypto {
         $iv = substr($data, 0, $iv_size);
         return openssl_decrypt(substr($data, $iv_size), 'AES-128-CBC', $key,
             OPENSSL_RAW_DATA, $iv);
+    }
+
+    public static function dbEncrypt($plaintext) {
+        return apcu_exists('DB_KEY') ? Crypto::encrypt($plaintext, apcu_fetch('DB_KEY')) : false;
     }
 
     public static function dbDecrypt($ciphertext) {
