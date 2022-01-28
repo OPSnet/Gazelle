@@ -759,9 +759,15 @@ if (!empty($similar)) {
             </div>
         </div>
 <?php
-echo $paginator->linkbox();
-(new Gazelle\CommentViewer\Torrent($Viewer, $GroupID))->renderThread($commentPage->thread(), $commentPage->lastRead());
-echo $paginator->linkbox();
+
+echo $Twig->render('comment/thread.twig', [
+    'page'      => $_SERVER['REQUEST_URI'],
+    'thread'    => $commentPage->thread(),
+    'unread'    => $commentPage->lastRead(),
+    'paginator' => $paginator,
+    'userMan'   => $userMan,
+    'viewer'    => $Viewer,
+]);
 
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',

@@ -1,0 +1,61 @@
+{{ paginator.linkbox|raw }}
+{% for post in thread %}
+    <table class="forum_post box vertical_margin{{ viewer.showAvatars ? '' : ' noavatar' }}{{ (post.ID > unread) ? ' forum_unread' : ''}}" id="post{{ post.ID }}">
+        <colgroup>
+    {% if viewer.showAvatars %}
+            <col class="col_avatar" />
+    {% endif %}
+            <col class="col_post_body" />
+        </colgroup>
+        <tr class="colhead_dark">
+            <td colspan="{{ viewer.showAvatars ? 2 : 1 }}">
+                <div style="float: left;"><a class="post_id" href="{{ "#{page}&postid=#{post.ID}#post#{post.ID}" }}">#{{ post.ID }}</a>
+                    <strong>{{ post.AuthorID|user_full }}</strong> {{ post.AddedTime|time_diff }}
+                    <span id="postcontrol-{{ post.ID }}">
+                    - <a href="#quickpost" onclick="Quote('{{ post.ID }}','{{ post.AuthorID }}', true);" class="brackets">Quote</a>
+    {%    if (viewer.permitted('site_moderate_forums')) or (post.AuthorID == viewer.Id)%}
+                    - <a href="#post{{ post.ID }}" onclick="Edit_Form('{{ post.ID }}','{{ key }}');" class="brackets">Edit</a>
+    {%    endif %}
+                    </span>
+                </div>
+                <div id="bar{{ post.ID }}" style="float: right;">
+                    <a href="reports.php?action=report&amp;type=comment&amp;id={{ post.ID }}" class="brackets">Report</a>
+    {% if viewer.permitted('site_admin_forums') %}
+    {%    if viewer.permitted('site_forum_post_delete') %}
+                    - <a href="#post{{ post.ID }}" onclick="Delete('{{ post.ID }}');" class="brackets">Delete</a>
+    {%    endif %}
+    {%    if (viewer.permitted('users_warn')) or (post.AuthorID == viewer.Id) or (viewer.classLevel >= userMan.findById(post.AuthorID).classLevel)  %}
+                    <form class="manage_form hidden" name="user" id="warn{{ post.ID }}" action="comments.php" method="post">
+                        <input type="hidden" name="action" value="warn" />
+                        <input type="hidden" name="postid" value="{{ post.ID }}" />
+                    </form>
+                    - <a href="#" onclick="$('#warn{{ post.ID }}').raw().submit(); return false;" class="brackets">Warn</a>
+    {%     endif %}
+    {% endif %}
+                        &nbsp;
+                    <a href="#">&uarr;</a>
+                </div>
+            </td>
+        </tr>
+        <tr>
+    {% if viewer.showAvatars %}
+            <td class="avatar" valign="top">{{ userMan.avatarMarkup(viewer, userMan.findById(post.AuthorID))|raw }}</td>
+    {% endif %}
+            <td class="body" valign="top">
+                <div id="content{{ post.ID }}">
+                    {{ post.Body|bb_format }}
+    {% if post.EditedUserID %}
+                    <br />
+                    <br />
+                    <span class="last_edited">
+    {%    if viewer.permitted('site_admin_forums') %}
+                    <a href="#content{{ post.ID }}" onclick="LoadEdit('{{ page }}', {{ post.ID }}, 1); return false;">&laquo;</a>
+    {%    endif %}
+                    Last edited by {{ post.EditedUserID|user_url }} {{ post.EditedTime|time_diff }}</span>
+    {% endif %}
+                </div>
+            </td>
+        </tr>
+    </table>
+{% endfor %}
+{{ paginator.linkbox|raw }}

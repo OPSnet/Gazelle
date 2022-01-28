@@ -613,12 +613,18 @@ $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
-echo $paginator->linkbox();
-$comments = new Gazelle\CommentViewer\Artist($Viewer, $ArtistID);
-$comments->renderThread($commentPage->thread(), $commentPage->lastRead());
+
+echo $Twig->render('comment/thread.twig', [
+    'page'      => $_SERVER['REQUEST_URI'],
+    'thread'    => $commentPage->thread(),
+    'unread'    => $commentPage->lastRead(),
+    'paginator' => $paginator,
+    'userMan'   => $userMan,
+    'viewer'    => $Viewer,
+]);
+
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setPreviewManual(true);
-echo $paginator->linkbox();
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
     'auth'     => $authKey,
