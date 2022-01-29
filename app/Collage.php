@@ -139,7 +139,7 @@ class Collage extends BaseObject {
     }
 
     public function entryUserId(int $entryId): int {
-        return $this->collage->entryUserId($entryI);
+        return $this->collage->entryUserId($entryId);
     }
 
     public function toggleSubscription(int $userId) {
