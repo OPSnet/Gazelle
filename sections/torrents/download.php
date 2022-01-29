@@ -61,7 +61,7 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
  * table and update their cache key.
  */
 
-if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
+if (isset($_REQUEST['usetoken']) && $_REQUEST['usetoken'] && $torrent->freeleechStatus() == '0') {
     if (!$Viewer->canSpendFLToken($torrent)) {
         json_or_error('You cannot use tokens here (leeching disabled or already freeleech).');
     }
