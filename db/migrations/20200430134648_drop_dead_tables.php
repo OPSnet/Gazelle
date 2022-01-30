@@ -272,7 +272,6 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('Size', 'biginteger', [
                 'null' => true,
                 'default' => null,
-                'limit' => MysqlAdapter::INT_BIG,
             ])
             ->addColumn('Snatched', 'integer', [
                 'null' => true,
@@ -445,7 +444,6 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('balance', 'biginteger', [
                 'null' => false,
-                'limit' => MysqlAdapter::INT_BIG,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -583,7 +581,6 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('SumTime', 'biginteger', [
                 'null' => false,
                 'default' => '0',
-                'limit' => MysqlAdapter::INT_BIG,
                 'signed' => false,
             ])
             ->addColumn('SeedingAvg', 'integer', [
