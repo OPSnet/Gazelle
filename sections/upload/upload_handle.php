@@ -743,7 +743,7 @@ if (!$Viewer->disableBonusPoints()) {
 $tgroupMan->refresh($GroupID);
 $torMan->flushFoldernameCache($DirName);
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    $tgroupMan->flushLatestUploads(5);
+    $torMan->flushLatestUploads(5);
 }
 
 $totalNew = 1 + count($ExtraTorrentsInsert);
