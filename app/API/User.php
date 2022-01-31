@@ -49,7 +49,6 @@ class User extends AbstractAPI {
                 um.PermissionID AS Class,
                 um.Paranoia,
                 coalesce(ub.points, 0) as BonusPoints,
-                ui.DisableIRC,
                 p.Name as ClassName,
                 p.Level,
                 GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS SecondaryClasses

@@ -110,17 +110,6 @@ class User extends BaseObject {
                 ui.AuthKey,
                 ui.Avatar,
                 ui.collages,
-                ui.DisableAvatar,
-                ui.DisableForums,
-                ui.DisableIRC,
-                ui.DisableInvites,
-                ui.DisablePM,
-                ui.DisablePoints,
-                ui.DisablePosting,
-                ui.DisableRequests,
-                ui.DisableTagging,
-                ui.DisableUpload,
-                ui.DisableWiki,
                 ui.Info,
                 ui.InfoTitle,
                 ui.Inviter,
@@ -157,17 +146,6 @@ class User extends BaseObject {
         if (empty($this->info)) {
             return $this->info;
         }
-        $this->info['DisableAvatar']   = ($this->info['DisableAvatar'] == '1');
-        $this->info['DisableForums']   = ($this->info['DisableForums'] == '1');
-        $this->info['DisableInvites']  = ($this->info['DisableInvites'] == '1');
-        $this->info['DisableIrc']      = ($this->info['DisableIRC'] == '1');
-        $this->info['DisablePM']       = ($this->info['DisablePM'] == '1');
-        $this->info['DisablePoints']   = ($this->info['DisablePoints'] == '1');
-        $this->info['DisablePosting']  = ($this->info['DisablePosting'] == '1');
-        $this->info['DisableRequests'] = ($this->info['DisableRequests'] == '1');
-        $this->info['DisableTagging']  = ($this->info['DisableTagging'] == '1');
-        $this->info['DisableUpload']   = ($this->info['DisableUpload'] == '1');
-        $this->info['DisableWiki']     = ($this->info['DisableWiki'] == '1');
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
         $this->info['NavItems']    = array_map('trim', explode(',', $this->info['NavItems'] ?? ''));
@@ -375,23 +353,21 @@ class User extends BaseObject {
         return $this->info()['secondary_badge'];
     }
 
-    public function hasAttr(string $name): ?int {
-        $attr = $this->info()['attr'];
-        return isset($attr[$name]) ? $attr[$name] : null;
+    public function hasAttr(string $name): int {
+        return $this->info()['attr'][$name] ?? 0;
     }
 
     public function toggleAttr(string $attr, bool $flag): bool {
         $attrId = $this->hasAttr($attr);
-        $found = !is_null($attrId);
         $toggled = false;
-        if (!$flag && $found) {
+        if (!$flag && $attrId) {
             self::$db->prepared_query('
                 DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
                 ', $this->id, $attrId
             );
             $toggled = self::$db->affected_rows() === 1;
         }
-        elseif ($flag && !$found) {
+        elseif ($flag && !$attrId) {
             self::$db->prepared_query('
                 INSERT INTO user_has_attr (UserID, UserAttrID)
                     SELECT ?, ID FROM user_attr WHERE Name = ?
@@ -413,7 +389,7 @@ class User extends BaseObject {
     }
 
     public function hasUnlimitedDownload(): bool {
-        return !is_null($this->hasAttr('unlimited-download'));
+        return $this->hasAttr('unlimited-download');
     }
 
     /**
@@ -479,47 +455,47 @@ class User extends BaseObject {
     }
 
     public function disableAvatar(): bool {
-        return $this->info()['DisableAvatar'];
+        return $this->hasAttr('disable-avatar');
     }
 
     public function disableBonusPoints(): bool {
-        return $this->info()['DisablePoints'];
+        return $this->hasAttr('disable-bonus-points');
     }
 
     public function disableForums(): bool {
-        return $this->info()['DisableForums'];
+        return $this->hasAttr('disable-forums');
     }
 
     public function disableInvites(): bool {
-        return $this->info()['DisableInvites'];
+        return $this->hasAttr('disable-invites');
     }
 
-    public function disableIrc(): bool {
-        return $this->info()['DisableIrc'];
+    public function disableIRC(): bool {
+        return $this->hasAttr('disable-irc');
     }
 
     public function disablePm(): bool {
-        return $this->info()['DisablePM'];
+        return $this->hasAttr('disable-pm');
     }
 
     public function disablePosting(): bool {
-        return $this->info()['DisablePosting'];
+        return $this->hasAttr('disable-posting');
     }
 
     public function disableRequests(): bool {
-        return $this->info()['DisableRequests'];
+        return $this->hasAttr('disable-requests');
     }
 
     public function disableTagging(): bool {
-        return $this->info()['DisableTagging'];
+        return $this->hasAttr('disable-tagging');
     }
 
     public function disableUpload(): bool {
-        return $this->info()['DisableUpload'];
+        return $this->hasAttr('disable-upload');
     }
 
     public function disableWiki(): bool {
-        return $this->info()['DisableWiki'];
+        return $this->hasAttr('disable-wiki');
     }
 
     public function auth(): string {

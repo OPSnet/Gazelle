@@ -830,7 +830,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
                 'bonus'   => $User->disableBonusPoints(),
                 'forum'   => $User->disableForums(),
                 'invite'  => $User->disableInvites(),
-                'irc'     => $User->disableIrc(),
+                'irc'     => $User->disableIRC(),
                 'leech'   => !$User->canLeech(),
                 'pm'      => $User->disablePM(),
                 'posting' => $User->disablePosting(),
