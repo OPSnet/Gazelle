@@ -5,6 +5,7 @@ namespace Gazelle\Manager;
 class Torrent extends \Gazelle\Base {
     protected const ID_KEY = 'zz_t_%d';
 
+    const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_%d';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     const CACHE_FOLDERNAME         = 'foldername_%s';
@@ -541,5 +542,77 @@ class Torrent extends \Gazelle\Base {
         ");
         self::$db->commit();
         return [$UpdatedKeys, $UncachedGroups];
+    }
+
+    /**
+     * Flush the most recent uploads (e.g. a new lossless upload is made).
+     *
+     * Note: Since arbitrary N may have been cached, all uses of N latest
+     * uploads must be flushed when invalidating, following a new upload.
+     * grep is your friend. This also assumes that there is sufficient
+     * activity to not have to worry about a very recent upload being
+     * deleted for whatever reason. For a start, even if the list becomes
+     * briefly out of date, the next upload will regenerate the list.
+     */
+    public function flushLatestUploads(int $limit) {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY_LATEST_UPLOADS, $limit));
+    }
+
+    /**
+     * Return the N most recent lossless uploads
+     * Note that if both a Lossless and 24bit Lossless are uploaded at the same time,
+     * only one entry will be returned, to ensure that the result is comprised of N
+     * different groups. Uploads of paranoid and disabled users are excluded.
+     * Uploads without cover art are excluded.
+     *
+     * @return array of \Gazelle\TGroup objects
+     */
+    public function latestUploads(int $limit): array {
+        $key = sprintf(self::CACHE_KEY_LATEST_UPLOADS, $limit);
+        $latest = self::$cache->get_value($key);
+        if ($latest === false) {
+            self::$db->prepared_query("
+                SELECT t.GroupID                    AS groupId,
+                    t.ID                            AS torrentId,
+                    coalesce(um.Paranoia, 'a:0:{}') AS paranoia
+                FROM torrents t
+                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
+                INNER JOIN users_main     um ON (um.ID = t.UserID)
+                WHERE t.Time > now() - INTERVAL 3 DAY
+                    AND t.Encoding IN ('Lossless', '24bit Lossless')
+                    AND tg.WikiImage != ''
+                    AND um.Enabled = '1'
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM torrents_tags ttex
+                        WHERE t.GroupID = ttex.GroupID
+                            AND ttex.TagID IN (" . placeholders(HOMEPAGE_TAG_IGNORE) . ")
+                    )
+                ORDER BY t.Time DESC
+                ", ...HOMEPAGE_TAG_IGNORE
+            );
+            $latest = [];
+            $seen = [];
+            while (count($latest) < $limit) {
+                $row = self::$db->next_record(MYSQLI_ASSOC, false);
+                if (!$row) {
+                    break;
+                }
+                if (in_array($row['groupId'], $seen)) {
+                    continue;
+                }
+                if (in_array('uploads', unserialize($row['paranoia']))) {
+                    continue;
+                }
+                $torrent = $this->findById($row['torrentId']);
+                if (is_null($torrent) || !$torrent->group()->image()) {
+                    continue;
+                }
+                $seen[]   = $row['groupId'];
+                $latest[] = $row['torrentId'];
+            }
+            self::$cache->cache_value($key, $latest, 86400);
+        }
+        return array_map(fn($id) => $this->findById($id), $latest);
     }
 }

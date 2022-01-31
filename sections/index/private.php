@@ -5,7 +5,8 @@ $contestMan = new Gazelle\Manager\Contest;
 $forumMan   = new Gazelle\Manager\Forum;
 $newsMan    = new Gazelle\Manager\News;
 $newsReader = new Gazelle\WitnessTable\UserReadNews;
-$tgroupMan  = new Gazelle\Manager\TGroup;
+$tgMan      = new Gazelle\Manager\TGroup;
+$torMan     = new Gazelle\Manager\Torrent;
 $userMan    = new Gazelle\Manager\User;
 
 if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMan->latestId()) {
@@ -44,8 +45,8 @@ echo $Twig->render('index/private-sidebar.twig', [
     'blog'              => new Gazelle\Manager\Blog,
     'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
     'leaderboard'       => $leaderboard,
-    'featured_aotm'     => $tgroupMan->featuredAlbumAotm(),
-    'featured_showcase' => $tgroupMan->featuredAlbumShowcase(),
+    'featured_aotm'     => $tgMan->featuredAlbumAotm(),
+    'featured_showcase' => $tgMan->featuredAlbumShowcase(),
     'staff_blog'        => new Gazelle\Manager\StaffBlog,
     'poll'              => $poll,
     'poll_thread_id'    => $threadId,
@@ -60,6 +61,6 @@ echo $Twig->render('index/private-sidebar.twig', [
 echo $Twig->render('index/private-main.twig', [
     'admin'   => $Viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
-    'latest'  => $tgroupMan->latestUploads(5),
+    'latest'  => $torMan->latestUploads(5),
     'news'    => $newsMan->headlines(),
 ]);

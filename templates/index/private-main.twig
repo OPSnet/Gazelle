@@ -16,12 +16,12 @@
             </div>
             <div class="head">
             <ul class="collage_images" id="collage_page0">
-{% for upload in latest %}
-    {% set title = upload.name ~ '<br />(' ~ upload.tags ~ ')<br />uploaded by ' ~ upload.username ~ ' ' ~ upload.uploadDate|time_diff %}
+{% for t in latest %}
+    {% set title = t.name ~ '<br />(' ~ t.group.tagNameList|join(', ') ~ ')<br />uploaded by ' ~ t.uploader.username ~ ' ' ~ t.uploadDate|time_diff %}
     {% set alt = title|replace({'<br />': ' '}) %}
-                <li class="image_group_{{ upload.groupId }}">
-                <a href="torrents.php?id={{ upload.groupId }}&amp;torrentid={{ upload.torrentId }}#torrent{{ upload.torrentId }}">
-                <img class="tooltip_interactive" src="{{ upload.imageUrl|image }}" alt="{{ alt }}" title="{{ title }}" data-title-plain="{{ alt }}" width="118" /></a>
+                <li class="image_group_{{ t.groupId }}">
+                <a href="torrents.php?id={{ t.groupId }}&amp;torrentid={{ t.id }}#torrent{{ t.id }}">
+                <img class="tooltip_interactive" src="{{ t.group.image|image }}" alt="{{ alt }}" title="{{ title }}" data-title-plain="{{ alt }}" width="118" /></a>
                 </li>
 {% endfor %}
             </ul>
