@@ -1,32 +1,15 @@
 <?php
 
-/** @var \Gazelle\Bonus $viewerBonus */
-
-use Gazelle\Exception\BonusException;
+/** @var \Gazelle\User\Bonus $viewerBonus */
 
 authorize();
 
-if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
+if (!preg_match('/^token-[1-4]$/', $Label, $match)) {
     error(403);
 }
 
-if ($match[1] === 'token') {
-    try {
-        $viewerBonus->purchaseToken($Label);
-    } catch (BonusException $e) {
-        $message = $e->getMessage();
-        error("Purchase not concluded ($message).");
-    }
-} else {
-    if (empty($_GET['user'])) {
-        error('You have to enter a username to give tokens to.');
-    }
-    $user = (new Gazelle\Manager\User)->findByUsername(urldecode($_GET['user']));
-    if (is_null($user)) {
-        error('Nobody with that name found at ' . SITE_NAME . '. Are you certain the spelling is right?');
-    } elseif ($user->id() == $Viewer->id()) {
-        error('You cannot gift yourself tokens, they are cheaper to buy directly.');
-    }
+if (!$viewerBonus->purchaseToken($Label)) {
+    error("You aren't able to buy those tokens. Do you have enough bonus points?");
 }
 
 header('Location: bonus.php?complete=' . urlencode($Label));

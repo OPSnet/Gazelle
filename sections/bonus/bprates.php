@@ -32,7 +32,7 @@ if (empty($_GET['userid'])) {
     $ownProfile = false;
 }
 
-$bonus = new Gazelle\Bonus($user);
+$bonus = new Gazelle\User\Bonus($user);
 $total = $bonus->userTotals();
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($total['total_torrents']);

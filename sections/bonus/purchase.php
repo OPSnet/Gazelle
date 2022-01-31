@@ -1,38 +1,20 @@
 <?php
 
-use Gazelle\Exception\BonusException;
-
 authorize();
 
 $label = $_REQUEST['label'];
-$bonus = new Gazelle\Bonus($Viewer);
-switch($label) {
-    case 'collage-1':
-        try {
-            if ($bonus->purchaseCollage($label)) {
-                header("Location: bonus.php?complete=$label");
-                exit;
-            }
-        }
-        catch (BonusException $e) {
-            if ($e->getMessage() === 'collage:nofunds') {
-                error('Could not complete purchase of collage due to lack of funds.');
-            }
-        }
-        break;
-    case 'seedbox':
-        try {
-            if ($bonus->unlockSeedbox()) {
-                header("Location: bonus.php?complete=$label");
-                exit;
-            }
-        }
-        catch (BonusException $e) {
-            if ($e->getMessage() === 'seedbox:nofunds') {
-                error('Could not complete purchase of seedbox viewer due to lack of funds.');
-            } elseif ($e->getMessage() === 'seedbox:already-purchased') {
-                error('Could not buy seedbox viewer for a second time.');
-            }
-        }
+$bonus = new Gazelle\User\Bonus($Viewer);
+
+if ($label === 'collage-1') {
+    if (!$bonus->purchaseCollage($label)) {
+        error('Could not purchase a personal collage slot due to lack of funds.');
+    }
+    header("Location: bonus.php?complete=$label");
+} elseif ($label === 'seedbox') {
+    if (!$bonus->unlockSeedbox()) {
+        error('Could not unlock the seedbox viewer. Either you have already unlocked it, or you lack the required bonus points.');
+    }
+    header("Location: bonus.php?complete=$label");
+} else {
+    error(403);
 }
-error(403);

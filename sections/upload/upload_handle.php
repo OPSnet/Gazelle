@@ -646,7 +646,7 @@ $DB->prepared_query('
 );
 $torrent = $torMan->findById($TorrentID);
 
-$bonus = new Gazelle\Bonus($Viewer);
+$bonus = new Gazelle\User\Bonus($Viewer);
 $bonusTotal = $bonus->torrentValue($torrent);
 
 // Prevent deletion of this torrent until the rest of the upload process is done

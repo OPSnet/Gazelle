@@ -6,11 +6,6 @@ parameters:
 			path: app/API/Request.php
 
 		-
-			message: "#^Call to an undefined method Gazelle\\\\Contest\\\\AbstractContest\\:\\:leaderboard\\(\\)\\.$#"
-			count: 2
-			path: app/Contest.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$page int The page number to fetch \\(50 entries\\) defaults to 1\\)\\: Unexpected token \"\\$page\", expected type at offset 928$#"
 			count: 1
 			path: app/Manager/Applicant.php

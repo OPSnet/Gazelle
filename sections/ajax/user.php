@@ -40,7 +40,7 @@ $rank = new Gazelle\UserRank(
         'artists'    => $ArtistsAdded ?? 0,
         'collage'    => $collageContribs ?? 0,
         'votes'      => $releaseVotes,
-        'bonus'      => $user->bonusPointsSpent(),
+        'bonus'      => (new Gazelle\User\Bonus($user))->pointsSpent(),
         'comment-t'  => $torrentComments ?? 0,
     ]
 );

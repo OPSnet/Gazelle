@@ -10,7 +10,7 @@ switch ($_GET['action'] ?? '') {
     case 'purchase':
         /* handle validity and cost as early as possible */
         if (isset($_REQUEST['label']) && preg_match('/^[a-z]{1,15}(-\w{1,15}){0,4}/', $_REQUEST['label'])) {
-            $viewerBonus = new \Gazelle\Bonus($Viewer);
+            $viewerBonus = new \Gazelle\User\Bonus($Viewer);
             $Label = $_REQUEST['label'];
             $Item = $viewerBonus->getItem($Label);
             if ($Item) {

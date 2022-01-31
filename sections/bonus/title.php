@@ -1,8 +1,6 @@
 <?php
 
-/** @var \Gazelle\Bonus $viewerBonus */
-
-use Gazelle\Exception\BonusException;
+/** @var \Gazelle\User\Bonus $viewerBonus */
 
 if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST['BBCode'])) {
     echo $_REQUEST['BBCode'] === 'true'
@@ -31,19 +29,11 @@ if (isset($_POST['confirm'])) {
     if (!isset($_POST['title'])) {
         error(403);
     }
-    try {
-        $viewerBonus->purchaseTitle($Label, $_POST['title']);
-        header('Location: bonus.php?complete=' . urlencode($Label));
-    } catch (BonusException $e) {
-        switch ($e->getMessage()) {
-        case 'title:too-long':
-            error('This title is too long, you must reduce the length.');
-            break;
-        default:
-            error('You cannot afford this item.');
-            break;
-        }
+    if (!$viewerBonus->purchaseTitle($Label, $_POST['title'])) {
+        error('This title is too long, you must reduce the length (or you do not have enough bonus points).');
     }
+    header('Location: bonus.php?complete=' . urlencode($Label));
+    exit;
 }
 
 echo $Twig->render('bonus/title.twig', [

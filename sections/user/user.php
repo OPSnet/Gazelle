@@ -12,8 +12,8 @@ if (is_null($User)) {
 $UserID      = $User->id();
 $Username    = $User->username();
 
-$userBonus   = new Gazelle\Bonus($User);
-$viewerBonus = new Gazelle\Bonus($Viewer);
+$userBonus   = new Gazelle\User\Bonus($User);
+$viewerBonus = new Gazelle\User\Bonus($Viewer);
 $PRL         = new Gazelle\PermissionRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
@@ -31,14 +31,9 @@ if (!empty($_POST)) {
     if (!preg_match('/^fl-(other-[1-4])$/', $_POST['fltype'], $match)) {
         error(403);
     }
-    try {
-        $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($UserID, $match[1], $_POST['message'] ?? '');
-    } catch (Gazelle\Exception\BonusException $e) {
-        if ($e->getMessage() == 'otherToken:no-gift-funds') {
-            error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
-        } else {
-            error(0);
-        }
+    $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($UserID, $match[1], $_POST['message'] ?? '');
+    if (!$FL_OTHER_tokens) {
+        error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
     }
 }
 
@@ -173,7 +168,7 @@ $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
 $ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0;
 $releaseVotes     = $Vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
-$bonusPointsSpent = $User->bonusPointsSpent();
+$bonusPointsSpent = $userBonus->pointsSpent();
 $torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
     new Gazelle\UserRank\Configuration(RANKING_WEIGHT),

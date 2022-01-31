@@ -134,21 +134,22 @@ class View {
         }
 
         echo $Twig->render('index/private-header.twig', [
-            'auth_args'    => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
-            'page_title'   => html_entity_decode($pageTitle),
-            'script'       => array_map(fn($s) => "$s.js", $Scripts),
-            'style'        => new Gazelle\User\Stylesheet($Viewer),
-            'style_extra'  => $Style,
-            'viewer'       => $Viewer,
+            'auth_args'   => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
+            'page_title'  => html_entity_decode($pageTitle),
+            'script'      => array_map(fn($s) => "$s.js", $Scripts),
+            'style'       => new Gazelle\User\Stylesheet($Viewer),
+            'style_extra' => $Style,
+            'viewer'      => $Viewer,
         ]);
         echo $Twig->render('index/page-header.twig', [
-            'action'            => $_REQUEST['action'] ?? null,
-            'action_list'       => $activity->actionList(),
-            'alert_list'        => $activity->alertList(),
-            'document'          => $Document,
-            'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
-            'nav_links'         => $navLinks,
-            'user'              => $Viewer,
+            'action'      => $_REQUEST['action'] ?? null,
+            'action_list' => $activity->actionList(),
+            'alert_list'  => $activity->alertList(),
+            'bonus'       => new Gazelle\User\Bonus($Viewer),
+            'document'    => $Document,
+            'dono_target' => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
+            'nav_links'   => $navLinks,
+            'user'        => $Viewer,
         ]);
     }
 

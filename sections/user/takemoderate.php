@@ -640,7 +640,7 @@ if ($changePassword && $Viewer->permitted('users_edit_password')) {
 }
 
 if ($newBonusPoints !== false) {
-    (new Gazelle\Bonus($user))->setPoints($newBonusPoints);
+    (new Gazelle\User\Bonus($user))->setPoints($newBonusPoints);
 }
 
 if ($flTokens != $cur['FLTokens']) {

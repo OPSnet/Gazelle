@@ -1,6 +1,6 @@
 <?php
 
-$bonus = new Gazelle\Bonus($Viewer);
+$bonus = new Gazelle\User\Bonus($Viewer);
 
 View::show_header('Bonus Points Shop', ['js' => 'bonus']);
 ?>

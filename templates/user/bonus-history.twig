@@ -1,11 +1,12 @@
 {{ header('Bonus Points Purchase History', {'js': 'bonus'}) }}
+{% set self = (user.id == viewer.id) %}
 <div class="header">
-    <h2>{{ header|raw }}</h2>
+    <h2>Bonus Points Spending History{% if not self %} for {{ user.id|user_url }}{% endif %}</h2>
 </div>
 <div class="linkbox">
     <a href="wiki.php?action=article&amp;name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php" class="brackets">Bonus Point Shop</a>
-    <a href="bonus.php?action=bprates{% if is_admin and not self %}&amp;userid={{ user_id }}{% endif %}" class="brackets">Bonus Point Rates</a>
+    <a href="bonus.php?action=bprates{% if viewer.permitted('admin_bp_history') and not self %}&amp;userid={{ user.id }}{% endif %}" class="brackets">Bonus Point Rates</a>
 </div>
 
 <div class="thin">
@@ -13,18 +14,30 @@
     <div class="pad box">
     {% if pool_total %}
         {% for p in pool_summary %}
-        <p>{{ who_spent|raw }} {{ p.total|number_format }} bonus points to donate to the {{ p.name }}
-            {% if now > p.until_date|date('U') %}ended{% else %}ending in{% endif %}
-            {{ p.until_date|time_diff }}.</p>
+        <p>
+            {%- if self %}You{% else %}{{ user.username }}{% endif %} spent
+            {{ p.total|number_format }} bonus points to donate to the {{ p.name }}
+            {% if date(now) > date(p.until_date) %}ended {% else %}ending in {% endif -%}
+            {{- p.until_date|time_diff }}.
+        </p>
         {% endfor %}
+    {% endif -%}
+    {%- if summary.total -%}
+        <p>
+        {%- if self %}You{% else %}{{ user.id|user_url }}{% endif %} spent
+        {% if pool_total %} a further {% endif -%} {{ summary.total|number_format }}
+        bonus points to purchase {{ summary.nr|number_format }} item{{ summary.nr|plural }}.
+        </p>
     {% endif %}
-    {% if summary.total %}
-        <p>{{ who_spent|raw }}{% if pool_total %} a further{% endif %} {{ summary.total|number_format }} bonus points to purchase {{
-            summary.nr|number_format }} item{% if summary.nr > 1 %}s{% endif %}.</p>
-    {% endif %}
-    {% if pool_total and summary.total %}
-        <p>That makes a grand total of {{ (pool_total + summary.total)|number_format }} points, {{ adjective }}well done!</p>
-    {% endif %}
+    {%- if pool_total and summary.total %}
+        <p>That makes a grand total of {{ (pool_total + summary.total)|number_format }} points,
+        {%- set total = pool_total + summary.total -%}
+        {%- if total > 500000 %} very
+        {%- elseif total >  1000000 %} very, very
+        {%- elseif total >  5000000 %} extremely
+        {%- elseif total > 10000000 %} exceptionally
+        {%- endif %} well done!</p>
+    {%- endif %}
     </div>
 {% endif %}
 
