@@ -67,7 +67,7 @@ class UploadFlacNoSingle extends AbstractContest {
 
     public function userPayout(float $enabledUserBonus, float $contestBonus, float $perEntryBonus): array {
         self::$db->prepared_query("
-            SELECT um.ID, um.Username,
+            SELECT um.ID,
                 count(t.ID) AS total_entries,
                 ? AS enabled_bonus,
                 CASE WHEN count(t.ID) > 0 THEN ? ELSE 0 END AS contest_bonus,

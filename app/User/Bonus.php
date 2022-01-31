@@ -1,10 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-use \Gazelle\Exception\BonusException;
-
-class Bonus extends BaseUser {
+class Bonus extends \Gazelle\BaseUser {
     const CACHE_OPEN_POOL = 'bonus_pool'; // also defined in Manager\Bonus
     const CACHE_PURCHASE = 'bonus_purchase_%d';
     const CACHE_SUMMARY = 'bonus_summary_%d';
@@ -16,16 +14,22 @@ class Bonus extends BaseUser {
     }
 
     public function flush() {
+        $this->user->flush();
         self::$cache->deleteMulti([
-            'u_' . $this->user->id(),
-            'user_stats_' . $this->user->id(),
             sprintf(self::CACHE_HISTORY, $this->user->id(), 0),
             sprintf(self::CACHE_POOL_HISTORY, $this->user->id()),
         ]);
     }
 
+    public function pointsSpent(): int {
+        return (int)self::$db->scalar("
+            SELECT sum(Price) FROM bonus_history WHERE UserID = ?
+            ", $this->id
+        );
+    }
+
     protected function items(): array {
-        return (new Manager\Bonus)->itemList();
+        return (new \Gazelle\Manager\Bonus)->itemList();
     }
 
     public function getListForUser(): array {
@@ -46,9 +50,9 @@ class Bonus extends BaseUser {
         return $allowed;
     }
 
-    public function getItem($label): ?array {
+    public function getItem(string $label): ?array {
         $items = $this->items();
-        return array_key_exists($label, $items) ? $items[$label] : null;
+        return $items[$label] ?? null;
     }
 
     public function torrentValue(Torrent $torrent): int {
@@ -64,7 +68,7 @@ class Bonus extends BaseUser {
         return BONUS_AWARD_OTHER;
     }
 
-    public function getEffectivePrice($label): int {
+    public function getEffectivePrice(string $label): int {
         $item = $this->items()[$label];
         if (preg_match('/^collage-\d$/', $label)) {
             return $item['Price'] * pow(2, $this->user->paidPersonalCollages());
@@ -171,11 +175,11 @@ class Bonus extends BaseUser {
     }
 
     /**
-     * Get the total purchases of all items by a user
+     * Get the total purchases of all their items
      *
      * @return array of [title, total]
      */
-    public function purchaseHistoryByUser(): array {
+    public function purchaseHistory(): array {
         $key = sprintf(self::CACHE_PURCHASE, $this->user->id());
         $history = self::$cache->get_value($key);
         if ($history === false) {
@@ -197,9 +201,9 @@ class Bonus extends BaseUser {
         return $history;
     }
 
-    public function purchaseInvite() {
+    public function purchaseInvite(): bool {
         if (!$this->user->canPurchaseInvite()) {
-            throw new BonusException('invite:minclass');
+            return false;
         }
         $item = $this->items()['invite'];
         $price = $item['Price'];
@@ -213,28 +217,26 @@ class Bonus extends BaseUser {
             ', $price, $price, $this->user->id()
         );
         if (self::$db->affected_rows() != 2) {
-            throw new BonusException('invite:nofunds');
+            return false;
         }
         $this->addPurchaseHistory($item['ID'], $price);
         $this->flush();
         return true;
     }
 
-    public function purchaseTitle($label, $title) {
+    public function purchaseTitle(string $label, string $title): bool {
         $item  = $this->items()[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
 
-        try {
-            $this->user->setTitle($title);
-        } catch (Exception\UserException $e) {
-            throw new BonusException('title:too-long');
+        if (!$this->user->setTitle($title)) {
+            return false;
         }
 
         /* if the price is 0, nothing changes so avoid hitting the db */
         $price = $this->getEffectivePrice($label);
         if ($price > 0) {
             if (!$this->removePoints($price)) {
-                throw new BonusException('title:nofunds');
+                return false;
             }
         }
 
@@ -244,7 +246,7 @@ class Bonus extends BaseUser {
         return true;
     }
 
-    public function purchaseCollage($label) {
+    public function purchaseCollage(string $label): bool {
         $item  = $this->items()[$label];
         $price = $this->getEffectivePrice($label);
         self::$db->prepared_query('
@@ -257,15 +259,15 @@ class Bonus extends BaseUser {
             ', $price, $price, $this->user->id()
         );
         $rows = self::$db->affected_rows();
-        if (!(($price > 0 && $rows === 2) || ($price === 0 && $rows === 1))) {
-            throw new BonusException('collage:nofunds');
+        if (($price > 0 && $rows !== 2) || ($price === 0 && $rows !== 1)) {
+            return false;
         }
         $this->addPurchaseHistory($item['ID'], $price);
         $this->flush();
         return true;
     }
 
-    public function unlockSeedbox() {
+    public function unlockSeedbox(): bool {
         $item  = $this->items()['seedbox'];
         $price = $this->getEffectivePrice('seedbox');
         self::$db->begin_transaction();
@@ -278,7 +280,7 @@ class Bonus extends BaseUser {
         );
         if (self::$db->affected_rows() != 1) {
             self::$db->rollback();
-            throw new BonusException('seedbox:nofunds');
+            return false;
         }
         try {
             self::$db->prepared_query("
@@ -290,7 +292,7 @@ class Bonus extends BaseUser {
         } catch (\DB_MYSQL_DuplicateKeyException $e) {
             // no point in buying a second time
             self::$db->rollback();
-            throw new BonusException('seedbox:already-purchased');
+            return false;
         }
         self::$db->commit();
         $this->addPurchaseHistory($item['ID'], $price);
@@ -298,10 +300,10 @@ class Bonus extends BaseUser {
         return true;
     }
 
-    public function purchaseToken($label): int {
+    public function purchaseToken(string $label): bool {
         $item = $this->items()[$label];
         if (!$item) {
-            throw new BonusException('selfToken:badlabel');
+            return false;
         }
         $amount = (int)$item['Amount'];
         $price  = $item['Price'];
@@ -315,20 +317,24 @@ class Bonus extends BaseUser {
             ', $price, $amount, $this->user->id(), $price
         );
         if (self::$db->affected_rows() != 2) {
-            throw new BonusException('selfToken:funds');
+            return false;
         }
         $this->addPurchaseHistory($item['ID'], $price);
         $this->flush();
-        return $amount;
+        return true;
     }
 
+    /**
+     * This method does not return a boolean success, but rather the number of
+     * tokens purchased (for use in a response to the receiver).
+     */
     public function purchaseTokenOther(int $toID, string $label, string $message): int {
         if ($this->user->id() === $toID) {
-            throw new BonusException('otherToken:self');
+            return 0;
         }
         $item = $this->items()[$label];
         if (!$item) {
-            throw new BonusException('otherToken:badlabel');
+            return 0;
         }
         $amount = (int)$item['Amount'];
         $price  = $item['Price'];
@@ -356,35 +362,32 @@ class Bonus extends BaseUser {
             ", $price, $amount, $toID, $this->user->id(), $price
         );
         if (self::$db->affected_rows() != 2) {
-            throw new BonusException('otherToken:no-gift-funds');
+            return 0;
         }
         $this->addPurchaseHistory($item['ID'], $price, $toID);
-        self::$cache->deleteMulti([
-            'u_' . $this->user->id(),
-            'u_' . $toID,
-            'user_stats_' . $this->user->id(),
-            'user_stats_' . $toID,
-        ]);
-        $this->sendPmToOther($toID, $amount, $message);
+
+        $receiver = new \Gazelle\User($toID);
+        $this->sendPmToOther($receiver, $amount, $message);
+        $this->flush();
+        $receiver->flush();
 
         return $amount;
     }
 
-    public function sendPmToOther($toID, $amount, $message) {
-        (new Manager\User)->sendPM($toID, 0,
+    public function sendPmToOther(\Gazelle\User $receiver, int $amount, string $message) {
+        (new \Gazelle\Manager\User)->sendPM($receiver->id(), 0,
             "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
             self::$twig->render('bonus/token-other-message.twig', [
-                'TO'       => (new User($toID))->username(),
-                'FROM'     => $this->user->username(),
-                'AMOUNT'   => $amount,
-                'PLURAL'   => plural($amount),
-                'WIKI_ID'  => 57,
-                'MESSAGE'  => $message
+                'to'       => $receiver->username(),
+                'from'     => $this->user->username(),
+                'amount'   => $amount,
+                'wiki_id'  => 57,
+                'message'  => $message
             ])
         );
     }
 
-    private function addPurchaseHistory($itemId, $price, $otherUserId = null): int {
+    private function addPurchaseHistory(int $itemId, int $price, $otherUserId = null): int {
         self::$cache->deleteMulti([
             sprintf(self::CACHE_PURCHASE, $this->user->id()),
             sprintf(self::CACHE_SUMMARY, $this->user->id()),
@@ -425,7 +428,7 @@ class Bonus extends BaseUser {
         return $this->removePoints($this->torrentValue($torrent), true);
     }
 
-    public function removePoints($points, $force = false): bool {
+    public function removePoints(int $points, bool $force = false): bool {
         if ($force) {
             // allow points to go negative
             self::$db->prepared_query('
@@ -517,7 +520,7 @@ class Bonus extends BaseUser {
         ); $list = [];
         $result = self::$db->to_array('ID', MYSQLI_ASSOC, false);
         foreach ($result as $r) {
-            $r['torrent'] = new Torrent($r['ID']);
+            $r['torrent'] = new \Gazelle\Torrent($r['ID']);
             $list[] = $r;
         }
         return $list;

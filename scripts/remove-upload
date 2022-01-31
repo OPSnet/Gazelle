@@ -29,7 +29,7 @@ foreach ($argv as $torrentId) {
     $name = $torrent->group()->displayNameText()
         . ' [' . implode('/', [$torrent->media(), $torrent->format(), $torrent->encoding()]) . ']';
     $uploader = $torrent->uploader();
-    $bonus = new Gazelle\Bonus($uploader);
+    $bonus = new Gazelle\User\Bonus($uploader);
     $points = 2 * $bonus->torrentValue($torrent);
 
     [$success, $message] = $torrent->remove($janitor->id(), "Broken upload - backend");

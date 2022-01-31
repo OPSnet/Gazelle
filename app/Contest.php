@@ -257,8 +257,8 @@ class Contest extends Base {
             if ($p['total_entries']) {
                 $totalGain += $contestBonus + ($perEntryBonus * $p['total_entries']);
             }
-            $log = date('Y-m-d H:i:s') ." {$p['Username']} ({$p['ID']}) n={$p['total_entries']} t={$totalGain}";
-            if ($user->hasAttr('no-fl-gifts')) {
+            $log = date('Y-m-d H:i:s') ." {$user->username()} ({$user->id()}) n={$p['total_entries']} t={$totalGain}";
+            if ($user->hasAttr('no-fl-gifts') || $user->hasAttr('disable-bonus-points')) {
                 fwrite($report, "$log DECLINED\n");
                 continue;
             }
@@ -280,14 +280,9 @@ class Contest extends Base {
                     'entries'         => $p['total_entries'] == 1 ? 'entry' : 'entries',
                 ])
             );
-            (new Bonus(new User($p['ID'])))->addPoints($totalGain);
-            self::$db->prepared_query("
-                UPDATE users_info SET
-                    AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
-                WHERE UserID = ?
-                ", number_format($totalGain, 2) . " BP added for {$p['total_entries']} entries in {$this->info['name']}\n\n",
-                    $p['ID']
-            );
+            (new User\Bonus($user))->addPoints($totalGain);
+            $user->addStaffNote(number_format($totalGain, 2) . " BP added for {$p['total_entries']} entries in {$this->info['name']}")
+                ->modify();
         }
         fclose($report);
         return count($participants);

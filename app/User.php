@@ -435,18 +435,6 @@ class User extends BaseObject {
         return (int)$this->info()['BonusPoints'];
     }
 
-    public function bonusPointsPerHour(): float {
-        return (new Bonus($this))->hourlyRate();
-    }
-
-    public function bonusPointsSpent(): int {
-        return (int)$this->getSingleValue('user_bp_spent', '
-            SELECT sum(Price)
-            FROM bonus_history
-            WHERE UserID = ?
-        ');
-    }
-
     public function downloadedSize(): int {
         return $this->info()['Downloaded'];
     }
@@ -1058,7 +1046,7 @@ class User extends BaseObject {
         $title = trim($title);
         $length = mb_strlen($title);
         if ($length > USER_TITLE_LENGTH) {
-            throw new Exception\UserException("title-too-long:" . USER_TITLE_LENGTH . ":$length");
+            return false;
         }
         return $this->setUpdate('Title', $title);
     }

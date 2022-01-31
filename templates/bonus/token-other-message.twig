@@ -1,12 +1,12 @@
-Hello {{ TO }},
+Hello {{ to }},
 
-[user]{{ FROM }}[/user] has sent you {{ AMOUNT }} freeleech token{{ PLURAL }} to use!
+[user]{{ from }}[/user] has sent you {{ amount }} freeleech token{{ amount|plural }} to use!
 You can use tokens to download torrents without being charged any download.
-{% if MESSAGE is not empty %} 
+{% if message is not empty %} 
 
-They said: [quote]{{MESSAGE}}[/quote] 
+They said: [quote]{{ message }}[/quote] 
 {% endif %}
 
-More details about FL tokens can be found on [url=wiki.php?action=article&amp;id={{ WIKI_ID }}]the wiki[/url].
+More details about FL tokens can be found on [url=wiki.php?action=article&amp;id={{ wiki_id }}]the wiki[/url].
 
 Enjoy!

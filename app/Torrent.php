@@ -864,7 +864,7 @@ class Torrent extends BaseObject {
         $qid = self::$db->get_query_id();
         $info = $this->info();
         if ($this->id > MAX_PREV_TORRENT_ID) {
-            (new \Gazelle\Bonus($this->uploader()))->removePointsForUpload($this);
+            (new \Gazelle\User\Bonus($this->uploader()))->removePointsForUpload($this);
         }
 
         $manager = new \Gazelle\DB;
