@@ -420,7 +420,7 @@ if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
 <?php if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) { ?>
         <div class="box">
             <div class="head">Ratio watch</div>
-            <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($User->downloadedSize() * $User->requiredRatio()) - $User->uploadedSize())?> in the next <?=time_diff($User->ratioWatchExpiry()) ?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($User->downloadedSize() - $stats['RatioWatchDownload'])?></div>
+            <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($User->downloadedSize() * $User->requiredRatio()) - $User->uploadedSize())?> in the next <?=time_diff($User->ratioWatchExpiry()) ?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($User->downloadedSize() - $User->downloadedOnRatioWatch())?></div>
         </div>
 <?php } ?>
         <div class="box">
