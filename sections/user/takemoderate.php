@@ -429,58 +429,42 @@ if ($Viewer->permitted('users_disable_any')) {
             . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech).")";
         $user->toggleAttr('disable-leech', !$disableLeech);
     }
-    if ($disableInvites != $cur['DisableInvites']) {
-        $set[] = "DisableInvites = ?";
-        $args[] = $disableInvites ? '1' : '0';
+    if ($disableInvites != $user->disableInvites()) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
         $editSummary[] = 'invites privileges ' . revoked($disableInvites);
         $user->toggleAttr('disable-invites', $disableInvites);
     }
-    if ($disableAvatar != $cur['DisableAvatar']) {
-        $set[] = "DisableAvatar = ?";
-        $args[] = $disableAvatar ? '1' : '0';
+    if ($disableAvatar != $user->disableAvatar()) {
         $privChange[] = 'Your avatar privileges have been ' . revoked($disableAvatar);
         $editSummary[] = 'avatar privileges ' . revoked($disableAvatar);
         $user->toggleAttr('disable-avatar', $disableAvatar);
     }
-    if ($disablePoints != $cur['DisablePoints']) {
-        $set[] = "DisablePoints = ?";
-        $args[] = $disablePoints ? '1' : '0';
+    if ($disablePoints != $user->disableBonusPoints()) {
         $privChange[] = 'Your bonus points acquisition has been ' . revoked($disablePoints);
         $editSummary[] = 'points privileges ' . revoked($disablePoints);
         $user->toggleAttr('disable-bonus-points', $disablePoints);
     }
-    if ($disableTagging != $cur['DisableTagging']) {
-        $set[] = "DisableTagging = ?";
-        $args[] = $disableTagging ? '1' : '0';
+    if ($disableTagging != $user->disableTagging()) {
         $privChange[] = 'Your tagging privileges have been ' . revoked($disableTagging);
         $editSummary[] = 'tagging privileges ' . revoked($disableTagging);
         $user->toggleAttr('disable-tagging', $disableTagging);
     }
-    if ($disableUpload != $cur['DisableUpload']) {
-        $set[] = "DisableUpload = ?";
-        $args[] = $disableUpload ? '1' : '0';
+    if ($disableUpload != $user->disableUpload()) {
         $privChange[] = 'Your upload privileges have been ' . revoked($disableUpload);
         $editSummary[] = 'upload privileges ' . revoked($disableUpload);
         $user->toggleAttr('disable-upload', $disableUpload);
     }
-    if ($disableWiki != $cur['DisableWiki']) {
-        $set[] = "DisableWiki = ?";
-        $args[] = $disableWiki ? '1' : '0';
+    if ($disableWiki != $user->disableWiki()) {
         $privChange[] = 'Your site editing privileges have been ' . revoked($disableWiki);
         $editSummary[] = 'wiki privileges ' . revoked($disableWiki);
         $user->toggleAttr('disable-wiki', $disableWiki);
     }
-    if ($disablePM != $cur['DisablePM']) {
-        $set[] = "DisablePM = ?";
-        $args[] = $disablePM ? '1' : '0';
+    if ($disablePM != $user->disablePm()) {
         $privChange[] = 'Your private messate (PM) privileges have been ' . revoked($disablePM);
         $editSummary[] = 'PM privileges ' . revoked($disablePM);
         $user->toggleAttr('disable-pm', $disablePM);
     }
-    if ($disableRequests != $cur['DisableRequests']) {
-        $set[] = "DisableRequests = ?";
-        $args[] = $disableRequests ? '1' : '0';
+    if ($disableRequests != $user->disableRequests()) {
         $privChange[] = 'Your request privileges have been ' . revoked($disableRequests);
         $editSummary[] = 'request privileges ' . revoked($disableRequests);
         $user->toggleAttr('disable-requests', $disableRequests);
@@ -488,26 +472,20 @@ if ($Viewer->permitted('users_disable_any')) {
 }
 
 if ($Viewer->permitted('users_disable_posts')) {
-    if ($disablePosting != $cur['DisablePosting']) {
-        $set[] = "DisablePosting = ?";
-        $args[] = $disablePosting ? '1' : '0';
+    if ($disablePosting != $user->disablePosting()) {
         $privChange[] = 'Your forum posting privileges have been ' . revoked($disablePosting);
         $editSummary[] = 'posting privileges ' . revoked($disablePosting);
         $user->toggleAttr('disable-posting', $disablePosting);
     }
 
-    if ($disableForums != $cur['DisableForums']) {
-        $set[] = "DisableForums = ?";
-        $args[] = $disableForums ? '1' : '0';
+    if ($disableForums != $user->disableForums()) {
         $privChange[] = 'Your forum access has been ' . revoked($disableForums);
         $editSummary[] = 'forums privileges ' . revoked($disableForums);
         $user->toggleAttr('disable-forums', $disableForums);
     }
 }
 
-if ($disableIRC != $cur['DisableIRC']) {
-    $set[] = "DisableIRC = ?";
-    $args[] = $disableIRC ? '1' : '0';
+if ($disableIRC != $user->disableIRC()) {
     $privChange[] = 'Your IRC privileges have been ' . revoked($disableIRC);
     $editSummary[] = 'IRC privileges ' . revoked($disableIRC);
     $user->toggleAttr('disable-irc', $disableIRC);

@@ -80,13 +80,11 @@ class Bonus extends \Gazelle\Base {
         self::$db->prepared_query("
             SELECT um.ID
             FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
                 AND NOT EXISTS (
-                    SELECT 1 FROM user_has_attr uhafl
-                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-                    WHERE uhafl.UserID = um.ID
+                    SELECT 1 FROM user_has_attr uha
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
+                    WHERE uha.UserID = um.ID
                 )
         ");
         return $this->addMultiPoints($points, self::$db->collect('ID', false));
@@ -96,14 +94,12 @@ class Bonus extends \Gazelle\Base {
         self::$db->prepared_query("
             SELECT um.ID
             FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN user_last_access ula ON (ula.user_id = um.ID)
-            WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
                 AND NOT EXISTS (
-                    SELECT 1 FROM user_has_attr uhafl
-                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-                    WHERE uhafl.UserID = um.ID
+                    SELECT 1 FROM user_has_attr uha
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
+                    WHERE uha.UserID = um.ID
                 )
                 AND ula.last_access >= ?
             ", $since
@@ -115,14 +111,12 @@ class Bonus extends \Gazelle\Base {
         self::$db->prepared_query($sql = "
             SELECT DISTINCT um.ID
             FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN torrents t ON (t.UserID = um.ID)
-            WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
                 AND NOT EXISTS (
-                    SELECT 1 FROM user_has_attr uhafl
-                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-                    WHERE uhafl.UserID = um.ID
+                    SELECT 1 FROM user_has_attr uha
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
+                    WHERE uha.UserID = um.ID
                 )
                 AND t.Time >= ?
             ", $since
@@ -134,14 +128,12 @@ class Bonus extends \Gazelle\Base {
         self::$db->prepared_query("
             SELECT DISTINCT um.ID
             FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN xbt_files_users xfu ON (xfu.uid = um.ID)
-            WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
                 AND NOT EXISTS (
-                    SELECT 1 FROM user_has_attr uhafl
-                    INNER JOIN user_attr uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-                    WHERE uhafl.UserID = um.ID
+                    SELECT 1 FROM user_has_attr uha
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
+                    WHERE uha.UserID = um.ID
                 )
                 AND xfu.active = 1 and xfu.remaining = 0 and xfu.connectable = 1 and timespent > 0
         ");
@@ -172,15 +164,18 @@ class Bonus extends \Gazelle\Base {
             FROM xbt_files_users            AS xfu
             INNER JOIN xbt_files_history    AS xfh USING (uid, fid)
             INNER JOIN users_main           AS um ON (um.ID = xfu.uid)
-            INNER JOIN users_info           AS ui ON (ui.UserID = xfu.uid)
             INNER JOIN torrents             AS t  ON (t.ID = xfu.fid)
             INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
             WHERE xfu.active         = 1
                 AND xfu.remaining    = 0
                 AND xfu.mtime        > unix_timestamp(now() - INTERVAL 1 HOUR)
                 AND um.Enabled       = '1'
-                AND ui.DisablePoints = '0'
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_has_attr uhafl
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
+                    WHERE uhafl.UserID = um.ID
+                )
             GROUP BY xfu.uid
         ");
         self::$db->prepared_query("
