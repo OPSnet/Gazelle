@@ -117,6 +117,7 @@ class User extends BaseObject {
                 ui.NavItems,
                 ui.PermittedForums,
                 ui.RatioWatchEnds,
+                ui.RatioWatchDownload,
                 ui.RestrictedForums,
                 ui.SiteOptions,
                 ui.SupportFor,
@@ -448,6 +449,10 @@ class User extends BaseObject {
 
     public function downloadedSize(): int {
         return $this->info()['Downloaded'];
+    }
+
+    public function downloadedOnRatioWatch(): int {
+        return $this->info()['RatioWatchDownload'];
     }
 
     public function uploadedSize(): int {
