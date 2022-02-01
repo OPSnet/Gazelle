@@ -1,3 +1,9 @@
+{% if donor_forum %}
+{{ header('Forums &rsaquo; ' ~ forum.name, {'js': 'donor'}) }}
+{% else %}
+{{ header('Forums &rsaquo; ' ~ forum.name) }}
+{% endif %}
+<div class="thin">
     <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php#{{ forum.categoryId }}">{{ forum.categoryName }}</a> &rsaquo; {{ forum.name }}</h2>
     <div class="linkbox">
 {% for d in dept_list %}
@@ -8,11 +14,11 @@
 {% endfor %}
     </div>
     <div class="linkbox">
-{% if create %}
+{% if viewer.createAccess(forum) and not viewer.disablePosting %}
         <a href="forums.php?action=new&amp;forumid={{ forum.id }}" class="brackets">New thread</a>
 {% endif %}
         <a href="#" onclick="$('#searchforum').gtoggle(); this.innerHTML = (this.innerHTML == 'Search this forum' ? 'Hide search' : 'Search this forum'); return false;" class="brackets">Search this forum</a>
-        &nbsp;&nbsp;&nbsp;&nbsp;<a href="forums.php?action=catchup&amp;forumid={{ forum.id }}&amp;auth={{ auth }}" class="brackets">Catch up</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;<a href="forums.php?action=catchup&amp;forumid={{ forum.id }}&amp;auth={{ viewer.auth }}" class="brackets">Catch up</a>
         <div id="searchforum" class="hidden center">
             <div style="display: inline-block;">
                 <h3>Search this forum:</h3>
@@ -52,3 +58,45 @@
             </div>
         </div>
     </div>
+
+    {{ paginator.linkbox|raw }}
+    <table class="forum_index m_table" width="100%">
+{% for thread in toc %}
+    {% set tooltip = donor_forum ? 'tooltip_gold' : 'tooltip' %}
+    {% if loop.first %}
+        <tr class="colhead">
+            <td style="width: 2%;"></td>
+            <td class="m_th_left">Latest</td>
+            <td class="m_th_right" style="width: 7%;">Replies</td>
+            <td style="width: 14%;">Author</td>
+        </tr>
+    {% endif %}
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    <td class="td_read {{ thread.icon_class }} {{ tooltip }}" title="{ thread.icon_class|replace({'_': ' '})|ucfirstall }}"></td>
+    <td class="td_latest">
+        <span style="float: left;" class="last_topic">
+            <strong>
+                <a href="forums.php?action=viewthread&amp;threadid={{ thread.ID }}" class="tooltip" data-title-plain="{{ thread.Title }}"{%
+                    if thread.Title != thread.cut_title %} title="{{ thread.Title }}"{% endif %}>{{ thread.cut_title }}</a>
+            </strong>
+            {{ thread.page_links|raw }}
+        </span>
+{% if thread.is_read %}
+        <span style="float: left;" class="{{ tooltip }} last_read" title="Jump to last read">
+            <a href="forums.php?action=viewthread&amp;threadid={{ thread.ID }}&amp;page={{ thread.last_read_page }}#post{{ thread.last_read_post }}"></a>
+        </span>
+{% endif %}
+        <span style="float: right;" class="last_poster">by {{ thread.LastPostAuthorID|user_url }} {{ thread.LastPostTime|time_diff }}</span>
+    </td>
+    <td class="td_replies number_column m_td_right">{{ (thread.NumPosts - 1)|number_format }}</td>
+    <td class="td_author">{{ thread.AuthorID|user_url }}</td>
+</tr>
+{% else %}
+    <tr>
+        <td colspan="4">No threads to display in this forum!</td>
+    </tr>
+{% endfor %}
+    </table>
+    {{ paginator.linkbox|raw }}
+</div>
+{{ footer() }}
