@@ -31,7 +31,7 @@ json_print("success", [
         'ratio'              => (float)$Ratio,
         'requiredratio'      => $Viewer->requiredRatio(),
         'bonusPoints'        => $Viewer->bonusPointsTotal(),
-        'bonusPointsPerHour' => (float)number_format($Viewer->bonusPointsPerHour(), 2),
+        'bonusPointsPerHour' => (float)number_format((new Gazelle\User\Bonus($Viewer))->hourlyRate(), 2),
         'class'              => $Viewer->userclassName(),
     ]
 ]);
