@@ -25,7 +25,7 @@
         <span class="hidden userclass">{{ viewer.userclassName }}</span>
     </li>
     <li id="nav_useredit" class="brackets{{ _self.active_class(document == 'user' and action =='edit') }}">
-        <a href="user.php?action=edit&amp;userid={{ user.id }}">Settings</a>
+        <a href="user.php?action=edit&amp;id={{ user.id }}">Settings</a>
     </li>
     <li id="nav_logout" class="brackets">
         <a href="logout.php?auth={{ auth }}">Logout</a>

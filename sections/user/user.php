@@ -348,7 +348,7 @@ if ($OwnProfile || $Viewer->permitted('users_mod') || $Viewer->isFLS()) {
                 <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Password age: <?= $User->passwordAge() ?></li>
 <?php }
 if ($OwnProfile || $Viewer->permitted('users_override_paranoia')) { ?>
-    <li>IRC Key: <?=strlen($User->IRCKey()) ? 'Yes' : 'No' ?></li>
+    <li>IRC Key: <?=strlen($User->IRCKey() ?? '') ? 'Yes' : 'No' ?></li>
 <?php } ?>
             </ul>
         </div>
@@ -399,14 +399,10 @@ echo $Twig->render('user/sidebar-stats.twig', [
 
 if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
     echo $Twig->render('donation/stats.twig', [
-        'is_donor'    => $User->isDonor(),
         'is_self'     => $OwnProfile,
         'is_mod'      => $Viewer->permitted('users_mod'),
-        'total_rank'  => $User->totalDonorRank(),
-        'current'     => $User->donorRankLabel(true),
         'leaderboard' => $donorMan->leaderboardRank($User),
-        'last'        => $User->lastDonation(),
-        'expiry'      => $User->donorRankExpiry(),
+        'user'        => $User,
     ]);
 }
 ?>
@@ -806,33 +802,11 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
     if ($Viewer->permitted('users_disable_posts') || $Viewer->permitted('users_disable_any')) {
         $fm = new Gazelle\Manager\Forum;
         echo $Twig->render('user/edit-privileges.twig', [
-            'email'          => $User->emailHistory(),
-            'is_unconfirmed' => $User->isUnconfirmed(),
-            'is_enabled'     => $User->isEnabled(),
-            'is_disabled'    => $User->isDisabled(),
-            'forum' => [
-                'restricted'       => implode(', ', $User->forbiddenForums()),
-                'permitted'        => implode(', ', $User->permittedForums()),
+            'user'   => $User,
+            'viewer' => $Viewer,
+            'forum'  => [
                 'restricted_names' => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->forbiddenForums())),
                 'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->permittedForums())),
-            ],
-            'permission' => [
-                'disable_any' => $Viewer->permitted('users_disable_any'),
-                'delete_user' => $Viewer->permitted('users_delete_users'),
-            ],
-            'disable' => [
-                'avatar'  => $User->disableAvatar(),
-                'bonus'   => $User->disableBonusPoints(),
-                'forum'   => $User->disableForums(),
-                'invite'  => $User->disableInvites(),
-                'irc'     => $User->disableIRC(),
-                'leech'   => !$User->canLeech(),
-                'pm'      => $User->disablePM(),
-                'posting' => $User->disablePosting(),
-                'request' => $User->disableRequests(),
-                'tag'     => $User->disableTagging(),
-                'upload'  => $User->disableUpload(),
-                'wiki'    => $User->disableWiki(),
             ],
         ]);
     }

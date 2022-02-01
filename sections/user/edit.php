@@ -7,15 +7,16 @@ function display_paranoia($FieldName) {
         <label><input type="checkbox" name="p_l_%s"%s onchange="AlterParanoia()" /> Show list</label>',
         $FieldName, $Level >= 1 ? ' checked="checked"' : '', $FieldName, $Level >= 2 ? ' checked="checked"' : '') . "\n";
 }
+$userMan = new Gazelle\Manager\User;
 
-$UserID = (int)$_REQUEST['userid'];
-if (!$UserID) {
+$User = $userMan->findById((int)($_REQUEST['id'] ?? 0));
+if (is_null($User)) {
     error(404);
 }
+$UserID = $User->id();
 if ($UserID != $Viewer->id() && !$Viewer->permitted('users_edit_profiles')) {
     error(403);
 }
-$User = new Gazelle\User($UserID);
 
 [$Paranoia, $Info, $InfoTitle, $Avatar, $SiteOptions, $DownloadAlt, $UnseededAlerts,
     $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems] = $DB->row("
@@ -78,13 +79,11 @@ foreach (range(1, 4) as $level) {
 }
 
 echo $Twig->render('user/setting.twig', [
-    'auth'             => $Viewer->auth(),
     'avatar'           => $Avatar,
     'download_text'    => $DownloadAlt,
     'is_mod'           => $Viewer->permitted('users_mod'),
     'js'               => (new Gazelle\Util\Validator)->generateJS('userform'),
     'lastfm_username'  => (new Gazelle\Util\LastFM)->username($UserID),
-    'logged_user'      => $Viewer->id(),
     'nav_items'        => $NavItems,
     'nav_items_user'   => $UserNavItems,
     'option'           => $options,
@@ -94,11 +93,7 @@ echo $Twig->render('user/setting.twig', [
     'style_url'        => $stylesheet->styleUrl(),
     'stylesheets'      => (new Gazelle\Manager\Stylesheet)->list(),
     'user'             => $User,
-    'can' => [
-        'advanced_search' => $Viewer->permitted('site_advanced_search'),
-        'request_notify'  => $Viewer->permitted('site_vote'),
-        'torrent_notify'  => $Viewer->permitted('site_torrents_notify'),
-    ],
+    'viewer'           => $Viewer,
     'donor' => [
         'enabled' => $enabledReward,
         'reward'  => $User->donorRewards(),

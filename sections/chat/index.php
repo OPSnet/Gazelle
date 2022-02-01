@@ -10,7 +10,7 @@ if (empty($IRCKey)) {
     </div>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <p>
-            <strong>Please set your IRC Key on your <a href="user.php?action=edit&amp;userid=<?=
+            <strong>Please set your IRC Key on your <a href="user.php?action=edit&amp;id=<?=
                 $Viewer->id() ?>">profile</a> first! For more information on IRC, please read the <a href="wiki.php?action=article&amp;name=IRC+-+How+to+join">wiki article</a>.</strong>
         </p>
     </div>

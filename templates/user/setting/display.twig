@@ -16,7 +16,7 @@
                     <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(option.ShowTorFilter) }} />
                     <label for="showtfilter">Show search form at top page (otherwise it is just a click away)</label>
                 </li>
-{% if can.advanced_search %}
+{% if user.permitted('site_advanced_search') %}
                 <li>
                     <input type="checkbox" name="search_type_advanced" id="search_type"{{ checked(option.SearchType) }} />
                     <label for="search_type">Show advanced search form (more filtering options)</label>

@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked %}
 <table class="layout" id="warn_user_box">
     <tr class="colhead">
         <td colspan="2">
@@ -7,7 +8,7 @@
     <tr>
         <td class="label">Warned:</td>
         <td>
-            <input type="checkbox" name="Warned"{{ is_warned|checked }} />{{ is_warned ? ' until ' ~ until : '' }}
+            <input type="checkbox" name="Warned"{{ checked(is_warned) }} />{{ is_warned ? ' until ' ~ until : '' }}
         </td>
     </tr>
 {% if not is_warned %}

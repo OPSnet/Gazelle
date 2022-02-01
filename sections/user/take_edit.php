@@ -3,18 +3,18 @@
 authorize();
 
 $userMan = new Gazelle\Manager\User;
-if (!isset($_REQUEST['userid'])) {
+if (!isset($_REQUEST['id'])) {
     $ownProfile = true;
     $user = $Viewer;
 } else {
-    $user = $userMan->findById((int)$_REQUEST['userid']);
+    $user = $userMan->findById((int)$_REQUEST['id']);
     if (is_null($user)) {
         error(404);
     }
     $ownProfile = ($user->id() == $Viewer->id());
     if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
         Gazelle\Util\Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :User ' . $Viewer->label()
-            . ' tried to edit ' . SITE_URL . '/user . php?id=' . $_REQUEST['userid']
+            . ' tried to edit ' . SITE_URL . $user->url()
         );
         error(403);
     }

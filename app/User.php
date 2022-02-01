@@ -1812,7 +1812,7 @@ class User extends BaseObject {
     }
 
     public function inviteCount(): int {
-        return $this->info()['DisableInvites'] ? 0 : $this->info()['Invites'];
+        return $this->disableInvites() ? 0 : $this->info()['Invites'];
     }
 
     public function pendingInviteCount(): int {
@@ -2325,7 +2325,7 @@ class User extends BaseObject {
      * @return boolean false if they have been naughty, otherwise true
      */
     public function canInvite(): bool {
-        return !$this->info()['DisableInvites']
+        return !$this->disableInvites()
             && !$this->onRatioWatch()
             && $this->canLeech()
             && ($this->info()['Invites'] > 0 || $this->permitted('site_send_unlimited_invites'));

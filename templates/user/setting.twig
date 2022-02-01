@@ -8,7 +8,7 @@
     <form class="edit_form" name="user" id="userform" action="" method="post" autocomplete="off">
     <input type="hidden" name="action" value="take_edit" />
     <input type="hidden" name="userid" value="{{ user.id }}" />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <div class="sidebar settings_sidebar">
         <div class="box box2" id="settings_sections">
             <div class="head">
@@ -55,14 +55,11 @@
 {% include 'user/setting/community.twig' %}
 {% include 'user/setting/notification.twig'
     with {
-        'auth': auth,
-        'logged_user': logged_user,
         'notify': notify,
         'settings': notify.settings,
         'service': notify.settings.PushService,
-        'torrent_notify': can.torrent_notify,
-        'request_notify': can.request_notify,
         'option': notify.settings.PushOptions,
+        'viewer': viewer,
     } only
 %}
 {% include 'user/setting/personal.twig' %}
