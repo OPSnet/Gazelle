@@ -65,56 +65,11 @@ foreach ($forumToc as &$thread) {
     unset($thread); // because looping by reference
 }
 
-$isDonorForum = $forumId == DONOR_FORUM ? true : false;
-
-View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? ['js' => 'donor'] : []);
-?>
-<div class="thin">
-<?php
-echo $Twig->render('forum/header.twig', [
-    'auth'      => $Viewer->auth(),
-    'create'    => $Viewer->writeAccess($forum) && $Viewer->createAccess($forum) && !$Viewer->disablePosting(),
-    'dept_list' => $forum->departmentList($Viewer),
-    'forum'     => $forum,
+echo $Twig->render('forum/forum.twig', [
+    'dept_list'   => $forum->departmentList($Viewer),
+    'donor_forum' => $forumId == DONOR_FORUM,
+    'forum'       => $forum,
+    'toc'         => $forumToc,
+    'paginator'   => $paginator,
+    'viewer'      => $Viewer,
 ]);
-?>
-    <?= $paginator->linkbox() ?>
-    <table class="forum_index m_table" width="100%">
-        <tr class="colhead">
-            <td style="width: 2%;"></td>
-            <td class="m_th_left">Latest</td>
-            <td class="m_th_right" style="width: 7%;">Replies</td>
-            <td style="width: 14%;">Author</td>
-        </tr>
-<?php if (!$forumToc) { ?>
-        <tr>
-            <td colspan="4">
-                No threads to display in this forum!
-            </td>
-        </tr>
-<?php
-} else {
-    foreach ($forumToc as $thread) {
-        echo $Twig->render('forum/toc.twig', [
-            'author'         => Users::format_username($thread['AuthorID'], false, false, false, false, false, $isDonorForum),
-            'cut_title'      => $thread['cut_title'],
-            'icon_class'     => $thread['icon_class'],
-            'id'             => $thread['ID'],
-            'is_read'        => $thread['is_read'],
-            'last_post_diff' => time_diff($thread['LastPostTime'], 1),
-            'last_post_user' => Users::format_username($thread['LastPostAuthorID'], false, false, false, false, false, $isDonorForum),
-            'last_read_page' => $thread['last_read_page'],
-            'last_read_post' => $thread['last_read_post'],
-            'page_links'     => $thread['page_links'],
-            'replies'        => $thread['NumPosts'] - 1,
-            'title'          => $thread['Title'],
-            'tooltip'        => $forumId == DONOR_FORUM ? "tooltip_gold" : "tooltip",
-        ]);
-    }
-}
-?>
-    </table>
-    <?= $paginator->linkbox() ?>
-</div>
-<?php
-View::show_footer();
