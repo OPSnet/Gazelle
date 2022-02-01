@@ -13,11 +13,15 @@
 
 authorize();
 
-if ((int)$_POST['torrentid'] < 1 || (int)$_POST['categoryid'] < 1) {
+$CategoryID = (int)$_POST['categoryid'];
+if (!$CategoryID) {
+    error("report category not set");
+}
+
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+if (is_null($torrent)) {
     error(404);
 }
-$TorrentID = (int)$_POST['torrentid'];
-$CategoryID = (int)$_POST['categoryid'];
 
 $reportMan = new Gazelle\Manager\ReportV2;
 $Types = $reportMan->types();
@@ -50,7 +54,7 @@ if (empty($_POST['sitelink'])) {
         $Err = 'The permalink was incorrect. Please copy the torrent permalink URL, which is labelled as [PL] and is found next to the [DL] buttons.';
     } else {
         $all = $match['id'];
-        if (in_array($TorrentID, $all)) {
+        if (in_array($torrent->id(), $all)) {
             $Err = "The extra permalinks you gave included the link to the torrent you're reporting!";
         }
         $ExtraIDs = implode(' ', $all);
@@ -92,25 +96,7 @@ if (empty($userComment)) {
     $Err = 'As useful as blank reports are, could you be a tiny bit more helpful? (Leave a comment)';
 }
 
-list($GroupID, $UserID) = $DB->row("
-    SELECT GroupID, UserID
-    FROM torrents
-    WHERE ID = ?
-    ", $TorrentID
-);
-if (!$GroupID) {
-    $Err = "A torrent with that ID doesn't exist!";
-}
-
-if ($DB->scalar("
-    SELECT ID
-    FROM reportsv2
-    WHERE
-        ReportedTime > now() - INTERVAL 5 SECOND
-        AND TorrentID = ?
-        AND ReporterID = ?
-        ", $TorrentID, $Viewer->id()
-)) {
+if ($reportMan->findRecentByTorrentId($torrent->id(), $Viewer->id())) {
     $Err = "Slow down, you're moving too fast!";
 }
 
@@ -118,25 +104,20 @@ if (!empty($Err)) {
     error($Err);
 }
 
-$DB->prepared_query("
-    INSERT INTO reportsv2
-           (ReporterID, TorrentID, Type, UserComment, Track, Image, ExtraID, Link)
-    VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
-    ", $Viewer->id(), $TorrentID, $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links
-);
+$reportMan->createReport($Viewer->id(), $torrent->id(), $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links);
 
-$Cache->delete_value("reports_torrent_$TorrentID");
+$Cache->delete_value("reports_torrent_" . $torrent->id());
 $Cache->increment('num_torrent_reportsv2');
-
-if ($UserID != $Viewer->id()) {
-    (new Gazelle\Manager\User)->sendPM($UserID, 0,
+$torrent->flush();
+if ($torrent->uploaderId() != $Viewer->id()) {
+    (new Gazelle\Manager\User)->sendPM($torrent->uploaderId(), 0,
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.twig', [
-            'id'     => $TorrentID,
+            'id'     => $torrent->id(),
             'title'  => $ReportType['title'],
             'reason' => $userComment,
         ])
     );
 }
 
-header("Location: torrents.php?torrentid=$TorrentID");
+header('Location: ' . $torrent->url());

@@ -20,6 +20,15 @@ class ReportV2 extends \Gazelle\Base {
     protected array $types;
     protected $filter;
 
+    public function createReport(string $viewerId, int $torrentID, string $type, string $userComment, string$tracks, string $images, string $extraIDs, string $links): void {
+        self::$db->prepared_query("
+            INSERT INTO reportsv2
+                   (ReporterID, TorrentID, Type, UserComment, Track, Image, ExtraID, Link)
+            VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
+            ", $viewerId, $torrentID, $type, $userComment, $tracks, $images, $extraIDs, $links
+        );
+    }
+
     public function findById(int $reportId): ?\Gazelle\ReportV2 {
         $key = sprintf(self::ID_KEY, $reportId);
         $id = self::$cache->get_value($key);
@@ -33,6 +42,17 @@ class ReportV2 extends \Gazelle\Base {
             }
         }
         return $id ? new \Gazelle\ReportV2($id) : null;
+    }
+
+    public function findRecentByTorrentId(int $torrentId, int $ViewerId): ?array {
+        return self::$db->scalar("
+            SELECT ID
+            FROM reportsv2
+            WHERE
+                ReportedTime > now() - INTERVAL 5 SECOND
+                AND TorrentID = ?
+                AND ReporterID = ?
+            ", $torrentId, $ViewerId);
     }
 
     public function types(): array {
