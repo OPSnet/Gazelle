@@ -24,7 +24,7 @@ class Bonus extends \Gazelle\BaseUser {
     public function pointsSpent(): int {
         return (int)self::$db->scalar("
             SELECT sum(Price) FROM bonus_history WHERE UserID = ?
-            ", $this->id
+            ", $this->user->id()
         );
     }
 
@@ -55,7 +55,7 @@ class Bonus extends \Gazelle\BaseUser {
         return $items[$label] ?? null;
     }
 
-    public function torrentValue(Torrent $torrent): int {
+    public function torrentValue(\Gazelle\Torrent $torrent): int {
         if ($torrent->format() == 'FLAC') {
             if ($torrent->isPerfectFlac()) {
                 return BONUS_AWARD_FLAC_PERFECT;
@@ -424,7 +424,7 @@ class Bonus extends \Gazelle\BaseUser {
         return self::$db->affected_rows();
     }
 
-    public function removePointsForUpload(Torrent $torrent): bool {
+    public function removePointsForUpload(\Gazelle\Torrent $torrent): bool {
         return $this->removePoints($this->torrentValue($torrent), true);
     }
 
