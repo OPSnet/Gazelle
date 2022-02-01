@@ -82,13 +82,6 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'selected',
-            function ($isSelected) {
-                return $isSelected ? ' selected="selected"' : '';
-            }
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
             'shorten',
             function (string $text, int $length) {
                 return shortenString($text, $length);

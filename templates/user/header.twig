@@ -33,7 +33,7 @@
         <a href="reports.php?action=report&amp;type=user&amp;id={{ user_id }}" class="brackets">Report user</a>
 {% endif %}
 {% if own_profile or viewer.permitted('users_edit_profiles') %}
-        <a href="user.php?action=edit&amp;userid={{ user_id }}" class="brackets">Settings</a>
+        <a href="user.php?action=edit&amp;id={{ user_id }}" class="brackets">Settings</a>
 {% endif %}
 {% if viewer.id == user_id %}
         <a href="friends.php" class="brackets">Friends</a>

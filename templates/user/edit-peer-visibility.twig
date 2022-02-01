@@ -1,4 +1,5 @@
+{% from 'macro/form.twig' import checked %}
 <tr>
     <td class="label">Visible in peer lists:</td>
-    <td><input type="checkbox" name="Visible"{{ is_visible|checked }} /></td>
+    <td><input type="checkbox" name="Visible"{{ checked(is_visible) }} /></td>
 </tr>

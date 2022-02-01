@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked, selected %}
 <table class="layout" id="user_privs_box">
     <tr class="colhead">
         <td colspan="2">
@@ -7,34 +8,35 @@
     <tr>
         <td class="label">Disable:</td>
         <td>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePosting" id="DisablePosting"{{ disable.posting|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePosting" id="DisablePosting"{{ checked(user.disablePosting) }} />
             <label for="DisablePosting">Posting</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableForums" id="DisableForums"{{ disable.forum|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableForums" id="DisableForums"{{ checked(user.disableForums) }} />
             <label for="DisableForums">Forums</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableIRC" id="DisableIRC"{{ disable.irc|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableIRC" id="DisableIRC"{{ checked(user.disableIRC) }} />
             <label for="DisableIRC">IRC</label></span>
-{% if permission.disable_any %}
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableAvatar" id="DisableAvatar"{{ disable.avatar|checked }} />
+{% if viewer.permitted('users_disable_any') %}
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableAvatar" id="DisableAvatar"{{ checked(user.disableAvatar) }} />
             <label for="DisableAvatar">Avatar</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePoints" id="DisablePoints"{{ disable.bonus|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePoints" id="DisablePoints"{{ checked(user.disableBonusPoints) }} />
             <label for="DisablePoints">Bonus Points</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableInvites" id="DisableInvites"{{ disable.invite|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableInvites" id="DisableInvites"{{ checked(user.disableInvites) }} />
             <label for="DisableInvites">Invites</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableLeech" id="DisableLeech"{{ disable.leech|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableLeech" id="DisableLeech"{{ checked((not user.canLeech)) }} />
             <label for="DisableLeech">Leech</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePM" id="DisablePM"{{ disable.pm|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePM" id="DisablePM"{{ checked(user.disablePM) }} />
             <label for="DisablePM">PM</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableRequests" id="DisableRequests"{{ disable.request|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableRequests" id="DisableRequests"{{ checked(user.disableRequests) }} />
             <label for="DisableRequests">Requests</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableUpload" id="DisableUpload"{{ disable.upload|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableUpload" id="DisableUpload"{{ checked(user.disableUpload) }} />
             <label for="DisableUpload">Torrent upload</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableTagging" id="DisableTagging"{{ disable.tag|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableTagging" id="DisableTagging"{{ checked(user.disableTagging) }} />
             <label for="DisableTagging" class="tooltip" title="This only disables a user's ability to delete tags.">Tagging</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableWiki" id="DisableWiki"{{ disable.wiki|checked }} />
+            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableWiki" id="DisableWiki"{{ checked(user.disableWiki) }} />
             <label for="DisableWiki">Wiki</label></span>
 {% endif %}
         </td>
     </tr>
+
     <tr>
         <td class="label">Reason:</td>
         <td>
@@ -42,15 +44,15 @@
             If left blank, the changes will be registered but the user will not be alerted.
         </td>
     </tr>
-{% if permission.disable_any %}
+{% if viewer.permitted('users_disable_any') %}
     <tr>
         <td class="label">Hacked:</td>
         <td>
             <input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
             <select name="HackedEmail">
-{% for e in email %}
+    {% for e in user.emailHistory %}
                 <option value="{{ e.0 }}">{{ e.0 }} - {{ e.1 }}</option>
-{% endfor %}
+    {% endfor %}
             </select>
             <br />Use when disabling an account due to suspected misuse. (Checking this will disable the account).
         </td>
@@ -59,14 +61,14 @@
         <td class="label">Account:</td>
         <td>
             <select name="UserStatus">
-                <option value="0"{{ is_confirmed|selected }}>Unconfirmed</option>
-                <option value="1"{{ is_enabled|selected   }}>Enabled</option>
-                <option value="2"{{ is_disabled|selected  }}>Disabled</option>
-{% if permission.delete_user %}
+                <option value="0"{{ selected(user.isUnconfirmed) }}>Unconfirmed</option>
+                <option value="1"{{ selected(user.isEnabled)     }}>Enabled</option>
+                <option value="2"{{ selected(user.isDisabled)    }}>Disabled</option>
+    {% if viewer.permitted('users_delete_users') %}
                 <optgroup label="-- WARNING --">
                     <option value="delete">Delete account</option>
                 </optgroup>
-{% endif %}
+    {% endif %}
             </select>
         </td>
     </tr>
@@ -74,8 +76,8 @@
     <tr>
         <td class="label tooltip" title="Enter a comma-delimited list of forum IDs that the user is no longer allowed to access">Prohibited forums:</td>
         <td>
-            <input type="text" class="wide_input_text" name="RestrictedForums" value="{{ forum.restricted }}" />
-            {% if forum.restricted %}
+            <input type="text" class="wide_input_text" name="RestrictedForums" value="{{ user.forbiddenForums|join(', ') }}" />
+            {% if forum.restricted_names %}
             <br />{{ forum.restricted_names }}
             {% endif %}
         </td>
@@ -83,8 +85,8 @@
     <tr>
         <td class="label tooltip" title="Enter a comma-delimited list of forum IDs that the user is allowed to access">Extra forums:</td>
         <td>
-            <input type="text" class="wide_input_text" name="PermittedForums" value="{{ forum.permitted }}" />
-            {% if forum.permitted %}
+            <input type="text" class="wide_input_text" name="PermittedForums" value="{{ user.permittedForums|join(', ') }}" />
+            {% if forum.permitted_names %}
             <br />{{ forum.permitted_names }}
             {% endif %}
         </td>

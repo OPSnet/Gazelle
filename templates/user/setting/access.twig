@@ -102,11 +102,11 @@
                 <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
                     <td>{{ token.name }}</td>
                     <td>{{ token.created|time_diff }}</td>
-                    <td style='text-align: center'><a href='user.php?action=token&amp;do=revoke&amp;user_id={{ logged_user }}&amp;token_id={{ token.id }}'>Revoke</a>
+                    <td style='text-align: center'><a href='user.php?action=token&amp;do=revoke&amp;user_id={{ user.id }}&amp;token_id={{ token.id }}'>Revoke</a>
                 </tr>
 {% endfor %}
             </table>
-            <a href="user.php?action=token&amp;user_id={{ logged_user }}">Click here to create a new token</a>
+            <a href="user.php?action=token&amp;user_id={{ user.id }}">Click here to create a new token</a>
         </td>
     </tr>
 </table>

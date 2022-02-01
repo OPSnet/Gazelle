@@ -29,11 +29,7 @@ switch ($_REQUEST['action'] ?? '') {
         }
         break;
     case 'edit':
-        if (isset($_REQUEST['userid'])) {
-            require_once('edit.php');
-        } else {
-            header("Location: user.php?action=edit&userid=" . $Viewer->id());
-        }
+        require_once('edit.php');
         break;
     case '2fa':
         require_once('2fa/index.php');

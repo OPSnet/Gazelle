@@ -965,7 +965,7 @@ class Text {
                         }
                     }
                     else {
-                        $Str .= '<span class="mature_blocked" style="font-style: italic;"><a href="wiki.php?action=article&amp;id=1063">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href="user.php?action=edit&amp;userid=' . self::$viewer->id() . '">settings</a>.</span>';
+                        $Str .= '<span class="mature_blocked" style="font-style: italic;"><a href="wiki.php?action=article&amp;id=1063">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href="user.php?action=edit&amp;id=' . self::$viewer->id() . '">settings</a>.</span>';
                     }
                     break;
                 case 'img':

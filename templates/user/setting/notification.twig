@@ -97,7 +97,7 @@
                     <option value="{{ option.PushDevice }}" selected="selected">{{ option.PushDevice }}</option>
                 </select>
                 <br />
-                <a href="user.php?action=take_push&amp;push=1&amp;userid={{ logged_user }}&amp;auth={{ auth }}" class="brackets">Test push</a>
+                <a href="user.php?action=take_push&amp;push=1&amp;userid={{ viewer.id }}&amp;auth={{ viewer.auth }}" class="brackets">Test push</a>
                 <a href="wiki.php?action=article&amp;id=113" class="brackets">View wiki guide</a>
             </div>
         </td>
@@ -156,7 +156,7 @@
             {{ _self.check_push("Quote", settings.Quote) }}
         </td>
     </tr>
-{% if torrent_notify %}
+{% if viewer.permitted('site_torrents_notify') %}
     <tr>
         <td class="label tooltip" title="Enabling this will give you a notification when the torrent notification filters you have established are triggered.">
             <strong>Torrent notifications</strong>
@@ -175,7 +175,4 @@
             {{ _self.check_popup("Collage", settings.Collage) }}
         </td>
     </tr>
-{% if request_notify %}
-{# TODO #}
-{% endif %}
 </table>

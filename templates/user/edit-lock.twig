@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked %}
 <table class="layout">
     <tr class="colhead">
         <td colspan="2">
@@ -7,7 +8,7 @@
     <tr>
         <td class="label">Lock Account:</td>
         <td>
-            <input type="checkbox" name="LockAccount" id="LockAccount"{{ is_locked|checked }} /> You must give the reason below when locking.
+            <input type="checkbox" name="LockAccount" id="LockAccount"{{ checked(is_locked) }} /> You must give the reason below when locking.
         </td>
     </tr>
     <tr>
@@ -15,7 +16,7 @@
         <td>
             <select name="LockType">
                 <option value="---">---</option>
-                <option value="{{ staff_lock }}" {{ is_locked|checked }}>Staff Lock</option>
+                <option value="{{ staff_lock }}" {{ checked(is_locked) }}>Staff Lock</option>
             </select>
         </td>
     </tr>
