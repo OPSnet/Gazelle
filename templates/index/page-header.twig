@@ -7,11 +7,13 @@
 {% set auth = user.auth -%}
 </head>
 <body id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
+<form id="extra-hidden">
 <input id="extracb1" class="hidden" type="checkbox">
 <input id="extracb2" class="hidden" type="checkbox">
 <input id="extracb3" class="hidden" type="checkbox">
 <input id="extracb4" class="hidden" type="checkbox">
 <input id="extracb5" class="hidden" type="checkbox">
+</form>
 <div id="wrapper">
 <h1 class="hidden">{{ constant('SITE_NAME') }}</h1>
 <div id="header">
@@ -22,7 +24,7 @@
         <a href="user.php?id={{ user.id }}" class="username">{{ user.username }}</a>
     </li>
     <li id="nav_userclass">
-        <span class="hidden userclass">{{ viewer.userclassName }}</span>
+        <span class="hidden userclass">{{ user.userclassName }}</span>
     </li>
     <li id="nav_useredit" class="brackets{{ _self.active_class(document == 'user' and action =='edit') }}">
         <a href="user.php?action=edit&amp;id={{ user.id }}">Settings</a>
@@ -132,7 +134,7 @@
 </li>
 <li id="searchbar_collages">
     <span class="hidden">Collage: </span>
-    <form class="search_form" name="artists" action="collages.php" method="get">
+    <form class="search_form" name="collages" action="collages.php" method="get">
         <input id="collagesearch" value="Collages" placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c" />
     </form>
 </li>

@@ -1,7 +1,7 @@
 {% if summary.total %}
 <table class="collage_table" id="collages">
     <tr class="colhead">
-        <td width="85%"><a href="#">&uarr;</a>&nbsp;This {{ object }} is in {{ summary.total|number_format }} collage{{ summary.total|plural }}
+        <td style="width:85%"><a href="#">&uarr;</a>&nbsp;This {{ object }} is in {{ summary.total|number_format }} collage{{ summary.total|plural }}
     {% if summary.below %}
             <a href="#" onclick="$('.{{ class }}').gtoggle(); return false;">(See all)</a>
     {% endif %}

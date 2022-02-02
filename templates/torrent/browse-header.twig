@@ -8,21 +8,18 @@
 <form class="search_form" name="torrents" method="get" action="" onsubmit="$(this).disableUnset();">
 <div class="box filter_torrents">
     <div class="head">
-{% if not show_search %}
         <span style="float: right;">
+{% if not show_search %}
     {% if viewer.permitted('site_advanced_search') %}
             <a id="ft_type" href="#" class="brackets tooltip hidden" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch('{{ search_toggle }}');">Switch to {{ search_toggle }}</a>
     {% endif %}
             <a href="#" id="ft_toggle" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);">Show search form</a>
-        </span>
 {% else %}
-        <span style="float: right;">
     {% if viewer.permitted('site_advanced_search') %}
             <a id="ft_type" href="#" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch('{{ search_toggle }}');">Switch to {{ search_toggle }}</a>
     {% endif %}
-            <a href="#" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);" id="ft_toggle" class="brackets">Hide search form</a>
-        </span>
-{% endif %}&nbsp;
+            <a href="#" id="ft_toggle" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);">Hide search form</a>
+{% endif %}</span>&nbsp;
     </div>
 
     <div id="ft_container" class="pad{% if not show_search %} hidden{% endif %}">
@@ -204,7 +201,7 @@
     <table class="layout cat_list ft_cat_list">
         <tr>
 {% for key, name in constant('CATEGORY') %}
-            <td width="{{ 100 / constant('CATEGORY')|length }}%" style="padding-left: 1.6em; text-indent:-1.6em">
+            <td style="width:{{ (100 / constant('CATEGORY')|length)|round(1) }}%; padding-left: 1.6em; text-indent:-1.6em">
                 <input type="checkbox" name="filter_cat[{{ key + 1 }}]" id="cat_{{ key + 1 }}" value="1"{{ checked(input.filter_cat[key + 1]) }} />
                 <label for="{{ key + 1 }}">{{ name }}</label>
             </td>
@@ -232,7 +229,7 @@
         </tr>
         <tr>
         {% endif %}
-            <td width="{{ width }}%"><a href="#" onclick="add_tag('{{ tag }}'); return false;">{{ tag }}</a></td>
+            <td style="width:{{ width }}%"><a href="#" onclick="add_tag('{{ tag }}'); return false;">{{ tag }}</a></td>
     {% endfor %}
     {% if tag_default|length % n %}
             <td colspan="{{ n - (tag_default|length % n) }}">&nbsp;</td>

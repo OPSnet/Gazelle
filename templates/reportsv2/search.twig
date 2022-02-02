@@ -16,7 +16,7 @@
                 <td class="nowrap">Resolved by</td>
                 <td>Torrent</td>
                 <td class="nowrap">Report type</td>
-                <td class="nowrap" width="120px">Date reported</td>
+                <td class="nowrap" style="width:120px">Date reported</td>
             </tr>
         </thead>
         <tbody>
@@ -52,27 +52,27 @@
     <form method="get" action="/reportsv2.php">
         <table>
             <tr>
-                <td width="150px">Uploaded by</td>
+                <td style="width:150px">Uploaded by</td>
                 <td><input type="text" name="uploader" size="20" value="{{ uploader }}" /> User id or @username</td>
             </tr>
             <tr>
-                <td width="150px">Reported by</td>
+                <td style="width:150px">Reported by</td>
                 <td><input type="text" name="reporter" size="20" value="{{ reporter }}" /> User id or @username</td>
             </tr>
             <tr>
-                <td width="150px">Handled by</td>
+                <td style="width:150px">Handled by</td>
                 <td><input type="text" name="handler" size="20" value="{{ handler }}" /> User id or @username</td>
             </tr>
             <tr>
-                <td width="150px">Single Torrent ID</td>
+                <td style="width:150px">Single Torrent ID</td>
                 <td><input type="text" name="torrent" size="80" value="{{ torrent_id }}" /></td>
             </tr>
             <tr>
-                <td width="150px">Torrent Group ID</td>
+                <td style="width:150px">Torrent Group ID</td>
                 <td><input type="text" name="group" size="80" value="{{ group_id }}" /></td>
             </tr>
             <tr>
-                <td width="150px">Report Type</td>
+                <td style="width:150px">Report Type</td>
                 <td>
                     <select multiple="multiple" size="8" name="report-type[]">
                         <option value="0">Don't Care</option>
@@ -83,7 +83,7 @@
                 </td>
             </tr>
             <tr>
-                <td width="150px">Created</td>
+                <td style="width:150px">Created</td>
                 <td>
                     From <input type="text" name="dt-from" size="10" value="{{ dt_from }}" />
                     and until <input type="text" name="dt-until" size="10" value="{{ dt_until }}" />

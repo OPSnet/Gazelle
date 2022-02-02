@@ -64,7 +64,7 @@ Tools necessary for economic management
         <div class="pad">
             <table>
             <tr>
-            <td style="vertical-align:top;" width="50%">
+            <td style="vertical-align:top; width:50%">
             <ul class="stats nobullet">
                 <li><strong>Total seeders: </strong>{{ seeders|number_format }}</li>
                 <li><strong>Total leechers: </strong>{{ leechers|number_format }}</li>
@@ -79,7 +79,7 @@ Tools necessary for economic management
                 <li><strong>Mean snatches per user in at least 1 swarm: </strong>{{ (peers ? snatches / peers : 0)|number_format(2) }}</li>
             </ul>
             </td>
-            <td style="vertical-align:top;" width="50%">
+            <td style="vertical-align:top; width:50%">
             <ul class="stats nobullet">
                 <li><strong>Mean seeders per torrent: </strong>{{ (torrents ? seeders / torrents : 0)|number_format(2) }}</li>
                 <li><strong>Mean leechers per torrent: </strong>{{ (torrents ? leechers / torrents : 0)|number_format(2) }}</li>
