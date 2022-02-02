@@ -3,21 +3,21 @@
         {% set nr = list|length %}
 <table class="layout" width="100%">
     <tr>
-        <td align="left"><strong><a href="#" id="debug-view-ocelot" class="brackets">View</a>
+        <td><strong><a href="#" id="debug-view-ocelot" class="brackets">View</a>
         {{ nr|number_format }} Ocelot request{% if nr > 1 %}s{% endif %}s:</strong></td>
     </tr>
 </table>
 <table id="debug_ocelot" class="debug_table hidden">
     {% endif %}
     <tr>
-        <td align="left" class="debug_data debug_ocelot_data">
+        <td class="debug_data debug_ocelot_data">
             <a href="#" onclick="$('#debug_ocelot_{{ n }}').gtoggle(); return false">{{ request.path }}</a>
             <pre id="debug_ocelot_{{ n }}" class="hidden">{{ request.response }}</pre>
         </td>
-        <td align="left" class="debug_info" style="width: 100px;">
+        <td class="debug_info" style="width: 100px;">
             {{ request.status }}
         </td>
-        <td align="left" class="debug_info debug_timing" style="width: 100px;">
+        <td class="debug_info debug_timing" style="width: 100px;">
             {{ request.time|number_format(5) }} ms
         </td>
     </tr>

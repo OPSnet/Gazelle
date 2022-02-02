@@ -53,8 +53,8 @@
 
         <table class="message_table checkboxes">
             <tr class="colhead">
-                <td width="10"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
-                <td width="50%">Subject</td>
+                <td style="width:10px"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
+                <td style="width:50%">Subject</td>
                 <td>{% if inbox.folder == 'sentbox' %}Receiver{% else  %}Sender{% endif %}</td>
                 <td>Date</td>
     {% if viewer.permitted('users_mod') %}

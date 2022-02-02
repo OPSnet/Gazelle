@@ -3,18 +3,18 @@
         {% set nr = list|length %}
 <table class="layout" width="100%">
     <tr>
-        <td align="left"><strong><a href="#" id="debug-view-var" class="brackets">View</a>
+        <td><strong><a href="#" id="debug-view-var" class="brackets">View</a>
         {{ nr }} Logged Variable{% if nr > 1 %}s{% endif %}:</strong></td>
     </tr>
 </table>
 <table id="debug_var" class="debug_table hidden">
     {% endif %}
     <tr>
-        <td style="vertical-align: top" align="left" class="debug_info debug_loggedvars_name">
+        <td style="vertical-align: top" class="debug_info debug_loggedvars_name">
             <a href="#" onclick="$('#debug_loggedvars_{{ id }}').gtoggle(); return false;">{{ var.name }}</a>
             <div>{{ var.path }}:{{ var.line }}</div>
         </td>
-        <td class="debug_data debug_loggedvars_data" align="left">
+        <td class="debug_data debug_loggedvars_data">
             <pre id="debug_loggedvars_{{ id }}" class="hidden">{{ var.data }}</pre>
         </td>
     </tr>

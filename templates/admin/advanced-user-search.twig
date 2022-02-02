@@ -125,7 +125,7 @@
 
         <tr>
         <td class="label nobr" title="The number of releases downloaded (may be greater than snatched">Downloads:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="downloads">
                 <option value="off"{{ selected(input.downloads == 'off') }}>Off</option>
                 <option value="equal"{{ selected(input.downloads == 'equal') }}>Equal</option>
@@ -140,7 +140,7 @@
 
         <tr>
         <td class="label nobr">Snatched:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="snatched">
                 <option value="off"{{ selected(input.snatched == 'off') }}>Off</option>
                 <option value="equal"{{ selected(input.snatched == 'equal') }}>Equal</option>
@@ -155,7 +155,7 @@
 
         <tr>
         <td class="label nobr">Seeding:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="seeding">
                 <option value="off"{{ selected(input.seeding == 'off') }}>Off</option>
                 <option value="equal"{{ selected(input.seeding == 'equal') }}>Equal</option>
@@ -170,7 +170,7 @@
 
         <tr>
         <td class="label tooltip nobr" title="Units are GiB">Data Uploaded:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="uploaded">
                 <option value="equal"{{ selected(input.uploaded == 'equal') }}>Equal</option>
                 <option value="above"{{ selected(input.uploaded == 'above') }}>Above</option>
@@ -185,7 +185,7 @@
 
         <tr>
         <td class="label tooltip nobr" title="Units are GiB">Data Downloaded:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="downloaded">
                 <option value="equal"{{ selected(input.downloaded == 'equal') }}>Equal</option>
                 <option value="above"{{ selected(input.downloaded == 'above') }}>Above</option>
@@ -199,7 +199,7 @@
 
         <tr>
         <td class="label tooltip nobr" title="Units are GiB">Request Bounty:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="bounty">
                 <option value="equal"{{ selected(input.bounty == 'equal') }}>Equal</option>
                 <option value="above"{{ selected(input.bounty == 'above') }}>Above</option>
@@ -213,7 +213,7 @@
 
         <tr>
         <td class="label nobr">Ratio:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="ratio">
                 <option value="equal"{{ selected(input.ratio == 'equal') }}>Equal</option>
                 <option value="above"{{ selected(input.ratio == 'above') }}>Above</option>
@@ -240,7 +240,7 @@
         </tr>
 
         <tr>
-        <td width="30%" class="label nobr"># invited:</td>
+        <td style="width:30%" class="label nobr"># invited:</td>
         <td>
             <select name="invited">
                 <option value="off"{{ selected(input.invited == 'off') }}>Off</option>
@@ -374,7 +374,7 @@
 
         <tr>
         <td class="label tooltip nobr" title="Two-letter codes as defined in ISO 3166-1 alpha-2">Country code:</td>
-        <td width="30%">
+        <td style="width:30%">
             <select name="cc_op">
                 <option value="equal"{{ selected(input.cc_op == 'equal') }}>Equals</option>
                 <option value="not_equal"{{ selected(input.cc_op == 'not_equal') }}>Not equal</option>
