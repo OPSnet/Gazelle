@@ -562,7 +562,7 @@ if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
     (new Mail)->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
         $Twig->render('email/hacked.twig')
     );
-    Tools::disable_users($userId, '', 1);
+    $userMan->disableUserList([$userId], "Disabled via hacked email", Gazelle\Manager\User::DISABLE_MANUAL);
     $editSummary[] = "hacked account email sent to $hackedEmail";
 }
 

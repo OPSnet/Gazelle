@@ -843,3 +843,49 @@ function get_group_requests($GroupID) {
     }
     return Requests::get_requests($Requests);
 }
+
+/**
+ * Geolocate an IP address using the database
+ *
+ * @param string|int $IP the ip to fetch the country for
+ * @return string the country of origin
+ */
+function geoip($IP): string {
+    static $IPs = [];
+    if (isset($IPs[$IP])) {
+        return $IPs[$IP];
+    }
+    if (is_number($IP)) {
+        $Long = $IP;
+    } else {
+        $Long = sprintf('%u', ip2long($IP));
+    }
+    if (!$Long || $Long == 2130706433) { // No need to check cc for 127.0.0.1
+        return 'localhost';
+    }
+    return '?';
+}
+
+/**
+ * Gets an hostname using AJAX
+ *
+ * @param string $IP the IP to fetch
+ * @return string a span with JavaScript code
+ */
+function get_host_by_ajax(string $IP): string {
+    static $IPs = [];
+    $Class = strtr($IP, '.', '-');
+    $HTML = '<span class="host_'.$Class.'">Resolving host...';
+    if (!isset($IPs[$IP])) {
+        $HTML .= '<script type="text/javascript">' .
+                '$(document).ready(function() {' .
+                    '$.get(\'tools.php?action=get_host&ip='.$IP.'\', function(host) {' .
+                        '$(\'.host_'.$Class.'\').html(host);' .
+                    '});' .
+                '});' .
+            '</script>';
+    }
+    $HTML .= '</span>';
+    $IPs[$IP] = 1;
+    return $HTML;
+}

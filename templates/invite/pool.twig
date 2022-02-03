@@ -46,7 +46,7 @@
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ invite.user_id|user_full }}</td>
         <td>{{ invite.email }}</td>
-        <td>{{ invite.ipaddr|ipaddr }}</td>
+        <td>{{ ipaddr(invite.ipaddr) }}</td>
         <td><a href="register.php?invite={{ invite.key }}">{{ invite.key }}</a></td>
         <td>{{ invite.expires|time_diff }}</td>
     {% if can_edit %}
