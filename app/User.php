@@ -1186,7 +1186,7 @@ class User extends BaseObject {
             UPDATE users_main SET
                 IP = ?, ipcc = ?
             WHERE ID = ?
-            ', $newIP, \Tools::geoip($newIP), $this->id
+            ', $newIP, geoip($newIP), $this->id
         );
         $this->flush();
     }

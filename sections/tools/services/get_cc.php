@@ -16,4 +16,4 @@ if (empty($_GET['ip'])) {
     die('Invalid IP address.');
 }
 
-die(Tools::geoip($_GET['ip']));
+die(geoip($_GET['ip']));

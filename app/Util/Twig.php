@@ -60,13 +60,6 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'ipaddr',
-            function ($ipaddr) {
-                return new \Twig\Markup(\Tools::display_ip($ipaddr), 'UTF-8');
-            }
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
             'octet_size',
             function ($size, array $option = []) {
                 return \Format::get_size($size, empty($option) ? 2 : $option[0]);
@@ -177,6 +170,14 @@ class Twig {
             return new \Twig\Markup(
                 (new ImageProxy)->process($icon, 'donoricon', $userId),
                 'UTF-8'
+            );
+        }));
+
+        $twig->addFunction(new \Twig\TwigFunction('ipaddr', function (string $ipaddr) {
+            return new \Twig\Markup(
+                "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip="
+                    . $ipaddr . '" title="Search" class="brackets tooltip">S</a>'
+                , 'UTF-8'
             );
         }));
 

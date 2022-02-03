@@ -303,8 +303,8 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
 }
 if ($Viewer->permitted('users_view_ips')) {
 ?>
-                <li>IP: <?=Tools::display_ip($User->ipaddr())?></li>
-                <li>Host: <?=Tools::get_host_by_ajax($User->ipaddr())?></li>
+                <li>IP: <?= $Twig->createTemplate("{{ ipaddr(ip) }}")->render(['ip' => $User->ipaddr()]) ?></li>
+                <li>Host: <?= get_host_by_ajax($User->ipaddr()) ?></li>
 <?php
 }
 

@@ -42,7 +42,7 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
             Irc::sendChannel(
                 SITE_URL . "/" . $Viewer->url()
                 . " (" . $Viewer->username() . ")"
-                . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
+                . " (" . geoip($_SERVER['REMOTE_ADDR']) . ")"
                 . " accessing "
                 . SITE_URL . $_SERVER['REQUEST_URI']
                 . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')

@@ -88,7 +88,7 @@ class UserCreator extends Base {
         ];
         $mainArgs = [
             $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
-            $this->permissionId, $this->enabled ? '1' : '0', STARTING_INVITES, \Tools::geoip($this->ipaddr)
+            $this->permissionId, $this->enabled ? '1' : '0', STARTING_INVITES, geoip($this->ipaddr)
         ];
 
         if ($this->id) {
