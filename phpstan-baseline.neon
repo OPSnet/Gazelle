@@ -525,16 +525,6 @@ parameters:
 			path: app/Stats/Economic.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(string page name \\[artist, collages requests torrents\\]\\)\\: Unexpected token \"page\", expected variable at offset 90$#"
-			count: 1
-			path: app/Stats/User.php
-
-		-
-			message: "#^PHPDoc tag @return with type int is incompatible with native type array\\.$#"
-			count: 1
-			path: app/Stats/Users.php
-
-		-
 			message: "#^Part \\$attr \\(array\\<int, string\\>&nonEmpty\\) of encapsed string cannot be cast to string\\.$#"
 			count: 1
 			path: classes/torrents.class.php

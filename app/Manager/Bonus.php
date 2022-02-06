@@ -155,7 +155,7 @@ class Bonus extends \Gazelle\Base {
             )
         ");
         self::$db->prepared_query("
-            SET SESSION tx_isolation = 'READ-UNCOMMITTED'
+            SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
         ");
         self::$db->prepared_query("
             INSERT INTO bonus_update (user_id, delta)
@@ -179,7 +179,7 @@ class Bonus extends \Gazelle\Base {
             GROUP BY xfu.uid
         ");
         self::$db->prepared_query("
-            SET SESSION tx_isolation = 'REPEATABLE-READ'
+            SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ
         ");
         if ($task) {
             $task->info('bonus_update table constructed');
