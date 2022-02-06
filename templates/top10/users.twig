@@ -38,8 +38,8 @@
 </table><br />
 {% else %}
     {% for row in results %}
-    <tr class="row{{ row.rank % 2 ? 'a' : 'b' }}">
-        <td class="center">{{ row.rank }}</td>
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td class="center">{{ row.sequence }}</td>
         <td>{{ row.username|raw }}</td>
         <td class="number_column">{{ row.uploaded }}</td>
         <td class="number_column tooltip" title="Upload speed is reported in base 2 in bytes per second, not bits per second.">{{ row.up_speed }}/s</td>

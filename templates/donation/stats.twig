@@ -11,7 +11,7 @@
 {%      if is_mod or is_self %}
         <li>Total donor points: {{ user.totalDonorRank }}</li>
 {%      endif %}
-        <li>Current donor rank: {{ users.donorRankLabel(true)|raw }}</li>
+        <li>Current donor rank: {{ user.donorRankLabel(true)|raw }}</li>
         <li>Leaderboard position: {{ leaderboard }}</li>
         <li>Last donated: {{ user.lastDonation|time_diff }}
         <li>Rank expires: {{ user.donorRankExpiry|raw }}

@@ -360,8 +360,8 @@ class Torrent extends \Gazelle\Base {
             if ($torrent) {
                 self::$db->prepared_query('
                     INSERT INTO top10_history_torrents
-                           (HistoryID, Rank, TorrentID, TitleString, TagString)
-                    VALUES (?,         ?,    ?,         ?,           ?)
+                           (HistoryID, sequence, TorrentID, TitleString, TagString)
+                    VALUES (?,         ?,        ?,         ?,           ?)
                     ', $historyId, ++$rank, $torrentId, $torrent->fullLink(),
                         implode(' ', $torrent->group()->tagNameList())
                 );

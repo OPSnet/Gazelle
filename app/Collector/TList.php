@@ -22,7 +22,7 @@ class TList extends \Gazelle\Collector {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) /* FIXME: only needed if sorting by Seeders */
             INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID AND tg.CategoryID = '1')
             WHERE t.ID IN (" . placeholders($this->ids) . ")
-            ORDER BY t.GroupID ASC, Rank DESC, " .  self::ORDER_BY[$this->orderBy];
+            ORDER BY t.GroupID ASC, sequence DESC, " .  self::ORDER_BY[$this->orderBy];
         $this->qid = self::$db->prepared_query($this->sql, ...$this->ids);
         return self::$db->has_results();
     }

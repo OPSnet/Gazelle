@@ -59,7 +59,7 @@ if (!empty($_GET['date'])) {
     if ($Details === false) {
         $DB->query("
             SELECT
-                tht.Rank,
+                tht.sequence,
                 tht.TitleString,
                 tht.TagString,
                 tht.TorrentID,
@@ -86,7 +86,7 @@ if (!empty($_GET['date'])) {
             LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
             LEFT JOIN tags t ON (t.ID = tt.TagID)
             $Where
-            ORDER BY tht.Rank ASC");
+            ORDER BY tht.sequence ASC");
 
         $Details = $DB->to_array();
 
