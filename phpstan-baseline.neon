@@ -340,11 +340,6 @@ parameters:
 			path: app/RipLog.php
 
 		-
-			message: "#^Method Gazelle\\\\Schedule\\\\Scheduler\\:\\:createRunner\\(\\) should return Gazelle\\\\Schedule\\\\Task but returns null\\.$#"
-			count: 1
-			path: app/Schedule/Scheduler.php
-
-		-
 			message: "#^Method Gazelle\\\\Search\\\\Forum\\:\\:isBodySearch\\(\\) should return true but returns bool\\.$#"
 			count: 1
 			path: app/Search/Forum.php
