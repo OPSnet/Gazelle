@@ -10,7 +10,7 @@ class TGroups extends \Gazelle\Base {
 
         /* Need to perform dirty reads to avoid wedging users, especially inserts to users_downloads */
         self::$db->prepared_query("
-            SET SESSION tx_isolation = 'READ-UNCOMMITTED'
+            SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
         ");
 
         self::$db->prepared_query("
