@@ -40,7 +40,7 @@ class Scheduler extends \Gazelle\Base {
         return class_exists($class);
     }
 
-    public function clearCache() {
+    public function flush() {
         self::$cache->delete_value(self::CACHE_TASKS);
     }
 
@@ -55,7 +55,7 @@ class Scheduler extends \Gazelle\Base {
             VALUES
                    (?,    ?,         ?,           ?,      ?,          ?,       ?)
         ', $name, $class, $description, $period, $isEnabled, $isSane, $isDebug);
-        $this->clearCache();
+        $this->flush();
     }
 
     public function updateTask(int $id, string $name, string $class, string $description, int $period, bool $isEnabled, bool $isSane, bool $isDebug) {
@@ -73,8 +73,8 @@ class Scheduler extends \Gazelle\Base {
                 is_sane = ?,
                 is_debug = ?
             WHERE periodic_task_id = ?
-        ', $name, $class, $description, $period, $isEnabled, $isSane, $isDebug, $id);
-        $this->clearCache();
+        ', $name, $class, $description, $period, $isEnabled ? 1 : 0, $isSane ? 1 : 0, $isDebug ? 1 : 0, $id);
+        $this->flush();
     }
 
     public function runNow(int $id) {
@@ -84,7 +84,7 @@ class Scheduler extends \Gazelle\Base {
             WHERE periodic_task_id = ?
             ', $id
         );
-        $this->clearCache();
+        $this->flush();
     }
 
     public function deleteTask(int $id) {
@@ -92,7 +92,7 @@ class Scheduler extends \Gazelle\Base {
             DELETE FROM periodic_task
             WHERE periodic_task_id = ?
         ', $id);
-        $this->clearCache();
+        $this->flush();
     }
 
     public function getTaskDetails(int $days = 7): array {
@@ -364,15 +364,12 @@ class Scheduler extends \Gazelle\Base {
                 WHERE periodic_task_id = ?
                 ', $id
             );
-            $this->clearCache();
+            $this->flush();
         }
     }
 
     private function createRunner(int $id, string $name, string $class, bool $isDebug): Task {
-        $class = 'Gazelle\\Schedule\\Tasks\\'.$class;
-        if (!class_exists($class)) {
-            return null;
-        }
+        $class = 'Gazelle\\Schedule\\Tasks\\' . $class;
         return new $class($id, $name, $isDebug);
     }
 }
