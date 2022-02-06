@@ -875,7 +875,7 @@ class User extends \Gazelle\Base {
         return self::$db->scalar("
             SELECT count(*)
             FROM users_main AS um
-            INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
+            INNER JOIN users_eonor_ranks AS d ON (d.UserID = um.ID)
             INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
         ");
     }
@@ -891,7 +891,7 @@ class User extends \Gazelle\Base {
         self::$db->prepared_query("
             SELECT um.Username,
                 d.UserID AS user_id,
-                d.Rank AS rank,
+                d.donor_rank,
                 if(hidden=0, 'No', 'Yes') AS hidden,
                 d.DonationTime AS donation_time,
                 r.IconMouseOverText AS icon_mouse,
@@ -902,7 +902,7 @@ class User extends \Gazelle\Base {
             FROM users_main AS um
             INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
             INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
-            $where ORDER BY d.Rank DESC, d.DonationTime ASC
+            $where ORDER BY d.donor_rank DESC, d.DonationTime ASC
             LIMIT ? OFFSET ?
             ", ...$args
         );

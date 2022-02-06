@@ -65,16 +65,16 @@ class Donation extends \Gazelle\Base {
         // Multiple ranks can be acquired at once, but the current rank cannot exceed MAX_EXTRA_RANK
         // The entire number of multiple ranks purchased at donation time are credited to Total ranks.
         // Total ranks acquired (all time) unlock Special ranks.
-        $rankDelta = $Args['Rank'] ?? floor($fiatAmount / DONOR_RANK_PRICE);
+        $rankDelta = $Args['donor_rank'] ?? floor($fiatAmount / DONOR_RANK_PRICE);
         $totalDelta = $Args['TotalRank'] ?? $rankDelta;
         $UserID = $user->id();
 
         self::$db->prepared_query('
             INSERT INTO users_donor_ranks
-                   (UserID, Rank, TotalRank)
+                   (UserID, donor_rank, TotalRank)
             VALUES (?,      ?,    ?)
             ON DUPLICATE KEY UPDATE
-                Rank               = coalesce(Rank, 0) + ?,
+                donor_rank         = coalesce(donor_rank, 0) + ?,
                 TotalRank          = coalesce(TotalRank, 0) + ?,
                 DonationTime       = now(),
                 RankExpirationTime = now()
@@ -85,7 +85,7 @@ class Donation extends \Gazelle\Base {
 
         // Fetch their current donor rank after update
         [$Rank, $TotalRank, $SpecialRank, $previousInvites] = self::$db->row('
-            SELECT Rank, TotalRank, SpecialRank, InvitesReceivedRank
+            SELECT donor_rank, TotalRank, SpecialRank, InvitesReceivedRank
             FROM users_donor_ranks
             WHERE UserID = ?
             ', $UserID
@@ -145,8 +145,8 @@ class Donation extends \Gazelle\Base {
         $reason = trim($Args['Reason'] . " invites new=$inviteForNewDonor prev=$previousInvites given=$newInvites");
         self::$db->prepared_query('
             INSERT INTO donations
-                   (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, xbt)
-            VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?)
+                   (UserID, Amount, Source, Reason, Currency, AddedBy, donor_rank, TotalRank, xbt)
+            VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,          ?,         ?)
             ', $UserID, round($fiatAmount, 2), $Args['Source'], $reason, $Args['Currency'] ?? 'XZZ',
                 $Args['Who'], $rankDelta, $TotalRank, $xbtAmount
         );
@@ -285,7 +285,7 @@ class Donation extends \Gazelle\Base {
         self::$db->prepared_query("
             SELECT UserID
             FROM users_donor_ranks
-            WHERE Rank > 1
+            WHERE donor_rank > 1
                 AND SpecialRank != 3
                 AND RankExpirationTime < NOW() - INTERVAL 766 HOUR
         "); // 2 hours less than 32 days to account for schedule run times
@@ -297,9 +297,9 @@ class Donation extends \Gazelle\Base {
         if ($userIds) {
             self::$db->prepared_query("
                 UPDATE users_donor_ranks SET
-                    Rank = Rank - 1,
+                    donor_rank = donor_rank - 1,
                     RankExpirationTime = now()
-                WHERE Rank > 1
+                WHERE donor_rank > 1
                     AND UserID IN (" . placeholders($userIds) . ")
                 ", ...$userIds
             );

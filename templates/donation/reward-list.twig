@@ -26,7 +26,7 @@
     {% endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td style="vertical-align: top">{{ u.user_id|user_full }}</td>
-        <td style="vertical-align: top">{{ u.rank }}</td>
+        <td style="vertical-align: top">{{ u.donor_rank }}</td>
         <td style="vertical-align: top">{{ u.hidden }}</td>
         <td style="vertical-align: top" class="nobr">{{ u.donation_time|time_diff }}</td>
         <td style="vertical-align: top; word-wrap: anywhere">

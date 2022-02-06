@@ -2461,7 +2461,7 @@ class User extends BaseObject {
     public function donorHistory(): array {
         $QueryID = self::$db->get_query_id();
         self::$db->prepared_query("
-            SELECT Amount, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
+            SELECT Amount, Time, Currency, Reason, Source, AddedBy, donor_rank, TotalRank
             FROM donations
             WHERE UserID = ?
             ORDER BY Time DESC
@@ -2482,7 +2482,7 @@ class User extends BaseObject {
         if ($DonorInfo === false) {
             $QueryID = self::$db->get_query_id();
             self::$db->prepared_query('
-                SELECT Rank,
+                SELECT donor_rank,
                     SpecialRank,
                     TotalRank,
                     DonationTime,
@@ -2532,7 +2532,7 @@ class User extends BaseObject {
             self::$db->set_query_id($QueryID);
 
             $DonorInfo = [
-                'Rank'       => (int)$Rank,
+                'donor_rank' => (int)$Rank,
                 'SRank'      => (int)$SpecialRank,
                 'TotRank'    => (int)$TotalRank,
                 'Time'       => $DonationTime,
@@ -2569,7 +2569,7 @@ class User extends BaseObject {
      * @return int points
      */
     public function donorRank() {
-        return $this->donorInfo()['Rank'];
+        return $this->donorInfo()['donor_rank'];
     }
 
     /**
@@ -2600,7 +2600,7 @@ class User extends BaseObject {
         if ($info['SRank'] == MAX_SPECIAL_RANK) {
             return 5;
         }
-        return min($info['Rank'], 5); // One extra collage per donor rank up to 5
+        return min($info['donor_rank'], 5); // One extra collage per donor rank up to 5
     }
 
     /**

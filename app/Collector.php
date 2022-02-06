@@ -24,7 +24,7 @@ SELECT
     CASE
         WHEN t.Format = 'MP3' AND t.Encoding = 'V0 (VBR)' THEN 1
         WHEN t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)' THEN 2
-        ELSE 100 END AS Rank,
+        ELSE 100 END AS sequence,
     t.GroupID,
     t.Media,
     t.Format,
@@ -37,7 +37,7 @@ FROM torrents AS t
 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
 INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID AND tg.CategoryID = '1'
 INNER JOIN artists_group AS a ON a.ArtistID = tg.ArtistID AND a.ArtistID = 123
-ORDER BY t.GroupID ASC, Rank DESC, tls.Seeders ASC
+ORDER BY t.GroupID ASC, sequence DESC, tls.Seeders ASC
 */
 
 abstract class Collector extends Base  {
@@ -93,7 +93,7 @@ abstract class Collector extends Base  {
     public function queryPreamble(array $list) {
         $sql = 'SELECT ';
         if (count($list) == 0) {
-            $sql .= '0 AS Rank, ';
+            $sql .= '0 AS sequence, ';
         } else {
             $sql .= 'CASE ';
             foreach ($list as $Priority => $Selection) {
@@ -137,7 +137,7 @@ abstract class Collector extends Base  {
                 }
                 $sql .= "THEN $Priority ";
             }
-            $sql .= "ELSE 100 END AS Rank, ";
+            $sql .= "ELSE 100 END AS sequence, ";
         }
         return $sql
             . "t.GroupID,
@@ -194,7 +194,7 @@ abstract class Collector extends Base  {
      * @param string $folderName folder name
      */
     public function add(array $info, $folderName = null) {
-        if ($info['Rank'] == 100) {
+        if ($info['sequence'] == 100) {
             $this->skip($info);
             return;
         }

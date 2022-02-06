@@ -113,7 +113,7 @@ foreach ($topVotes as $groupID => $group) {
     $isBookmarked = $bookmark->isTorrentBookmarked($groupID);
     $userVote = $userVotes[$groupID] ?? '';
 
-    $displayName = $group['Rank'] . " - ";
+    $displayName = $group['sequence'] . " - ";
 
     if (!empty($extendedArtists[1]) || !empty($extendedArtists[4]) || !empty($extendedArtists[5])|| !empty($extendedArtists[6])) {
         unset($extendedArtists[2]);
