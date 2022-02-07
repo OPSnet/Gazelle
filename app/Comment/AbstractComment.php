@@ -121,17 +121,16 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         if (is_null($this->pageNum)) {
             // default to final page, or page where specified post is found
             if (!$this->id) {
-                $this->pageNum = (int)ceil($this->total / TORRENT_COMMENTS_PER_PAGE);
+                $this->pageNum = $this->total ? (int)ceil($this->total / TORRENT_COMMENTS_PER_PAGE) : 1;
             } else {
-                $prior = self::$db->scalar("
-                    SELECT count(*)
+                $this->pageNum = (int)self::$db->scalar("
+                    SELECT ceil(count(*) / ?)
                     FROM comments
                     WHERE Page = ?
                         AND PageID = ?
                         AND ID <= ?
-                    ", $page, $pageId, $this->id
+                    ", TORRENT_COMMENTS_PER_PAGE, $page, $pageId, $this->id
                 );
-                $this->pageNum = (int)ceil($prior / TORRENT_COMMENTS_PER_PAGE);
             }
         }
 
