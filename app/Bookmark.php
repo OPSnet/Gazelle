@@ -286,7 +286,7 @@ class Bookmark extends BaseUser {
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
             ", $this->user->id(), $id
         );
-        self::$cache->delete_value(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
+        self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
 
         if (self::$db->affected_rows()) {
             switch ($type) {
