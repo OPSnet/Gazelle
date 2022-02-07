@@ -92,18 +92,22 @@ class Vote extends \Gazelle\BaseUser {
          return $this;
     }
 
+    /**
+     * Calculate a leaderboard with ties, based on scores.
+     * E.g. [10, 13, 17, 17, 20, 34, 34, 34, 50] returns [1, 2, 3, 3, 5, 6, 6, 6, 9]
+     */
     public function voteRanks(array $list): array {
         $ranks = [];
         $rank = 0;
-        $prevRank = false;
+        $prevRank = 1;
         $prevScore = false;
         foreach ($list as $id => $score) {
             ++$rank;
             if ($prevScore && $prevScore !== $score) {
                 $prevRank  = $rank;
-                $prevScore = $score;
             }
             $ranks[$id] = $prevRank;
+            $prevScore = $score;
         }
         return $ranks;
     }
@@ -233,10 +237,10 @@ class Vote extends \Gazelle\BaseUser {
             foreach ($results as $groupID => $votes) {
                 $topVotes[$groupID] = array_merge(
                     $groups[$groupID], [
-                        'Ups'   => $votes['Ups'],
-                        'Total' => $votes['Total'],
-                        'Score' => $votes['Score'],
-                        'Rank'  => $ranks[$groupID],
+                        'Ups'      => $votes['Ups'],
+                        'Total'    => $votes['Total'],
+                        'Score'    => $votes['Score'],
+                        'sequence' => $ranks[$groupID],
                     ]
                 );
             }
