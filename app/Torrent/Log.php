@@ -6,7 +6,7 @@ class Log extends \Gazelle\Base {
 
     protected $id; // id of the torrent
 
-    public function __construct ($id) {
+    public function __construct($id) {
         $this->id = $id;
     }
 
@@ -21,13 +21,13 @@ class Log extends \Gazelle\Base {
      *      - reason (reason given by the adjuster for adjusting the log)
      *    The 'status' key points to an unserialized array of AdjustmentDetails
      */
-    public function logDetails() {
+    public function logDetails(): array {
         self::$db->prepared_query("
             SELECT LogID,
                 Adjusted,
                 AdjustedBy,
                 AdjustmentReason,
-                AdjustmentDetails,
+                coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
                 Score,
                 AdjustedScore,
                 `Checksum`,
@@ -51,7 +51,7 @@ class Log extends \Gazelle\Base {
                         'reason'   => empty($log['AdjustmentReason']) ? 'none supplied' : $log['AdjustmentReason'],
                     ],
                 'log'    => $htmlFiler->get([$this->id, $log['LogID']]),
-                'status' => array_merge(explode("\n", $log['Details']), unserialize($log['AdjustmentDetails']) ?: []),
+                'status' => array_merge(explode("\n", $log['Details']), unserialize($log['AdjustmentDetails'])),
             ];
             if (($log['Adjusted'] === '0' && $log['Checksum'] === '0') || ($log['Adjusted'] === '1' && $log['AdjustedChecksum'] === '0')) {
                 $details[$log['LogID']]['status'][] = 'Bad/No Checksum(s)';
