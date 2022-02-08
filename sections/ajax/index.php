@@ -80,7 +80,7 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     }
 }
 
-if (AJAX && !isset($FullToken) && in_array($Action, $RequireTokenPages)) {
+if (AJAX && !defined('AUTHED_BY_TOKEN') && in_array($Action, $RequireTokenPages)) {
     json_die("failure", "This page requires an api token");
 }
 

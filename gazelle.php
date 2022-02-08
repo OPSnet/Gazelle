@@ -58,6 +58,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     [$success, $result] = $userMan->findByAuthorization($ipv4Man, $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REMOTE_ADDR']);
     if ($success) {
         $Viewer = $result;
+        define('AUTHED_BY_TOKEN', true);
     } else {
         header('Content-type: application/json');
         json_die('failure', $result);
