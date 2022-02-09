@@ -343,6 +343,10 @@ if (isset($TorData['encrypted_files'])) {
     $Err = 'This torrent contains an encrypted file list which is not supported here.';
 }
 
+if (isset($TorData['info']['meta version'])) {
+    $Err = 'This torrent is not a V1 torrent. V2 and Hybrid torrents are not supported here.';
+}
+
 $checker = new Gazelle\Util\FileChecker;
 
 // File list and size
