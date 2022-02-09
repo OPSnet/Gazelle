@@ -267,11 +267,9 @@ class Twig {
             );
         }));
 
-        $twig->addTest(
-            new \Twig\TwigTest('numeric', function ($value) {
-                return is_numeric($value);
-            })
-        );
+        $twig->addTest(new \Twig\TwigTest('nan', function ($value) {
+            return is_nan($value);
+        }));
 
         return $twig;
     }

@@ -1990,17 +1990,6 @@ class User extends BaseObject {
         );
     }
 
-    public function torrentRecentDownloadCount() {
-        return (int)self::$db->scalar('
-            SELECT count(*)
-            FROM users_downloads ud
-            INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
-            WHERE ud.Time > now() - INTERVAL 1 DAY
-                AND ud.UserID = ?
-            ', $this->id
-        );
-    }
-
     public function torrentRecentRemoveCount(int $hours): int {
         return (int)self::$db->scalar('
             SELECT count(*)
@@ -2009,14 +1998,6 @@ class User extends BaseObject {
                 AND utr.removed >= now() - INTERVAL ? HOUR
             ', $this->id, $hours
         );
-    }
-
-    public function downloadSnatchFactor(): float {
-        if ($this->hasAttr('unlimited-download')) {
-            // they are whitelisted, let them through
-            return 0.0;
-        }
-        return (float)((1 + $this->stats()->downloadUnique()) / (1 + $this->stats()->snatchUnique()));
     }
 
     /**

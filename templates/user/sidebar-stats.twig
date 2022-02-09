@@ -166,21 +166,28 @@
 {% endif %}
 
 {% if user_id == viewer.id or viewer.isStaff %}
-    {% set snatches = user.stats.snatchUnique %}
-    {% set downloads = user.stats.downloadUnique %}
-        <li id="comm_dl_factor">Snatch factor:
-    {% if prl.safeFactor and prl.safeOvershoot -%}
-            <span style="color: #388e3c" title="good">
-    {%- elseif not prl.safeFactor and prl.safeOvershoot -%}
-            <span class="tooltip" style="color: #f57c00" title="You should snatch more of the torrents you downloaded to avoid being limited&#13;You have {{
-                snatches }} snatch{{ snatches|plural('es') }}, you should have {{
-                ((downloads + 1)/(prl.metrics.factor + 1))|number_format(0) }} snatches for {{ downloads|number_format }} downloads">
-    {%- else -%}
-            <span class="tooltip" style="color: red" title="You must snatch more of the torrents you downloaded&#13;You have {{
-                snatches }} snatch{{ snatches|plural('es') }}, you need {{
-                ((downloads + 1)/(prl.metrics.factor + 1))|number_format(0) }} snatches for {{ downloads|number_format }} downloads">
+        <li id="comm_dl_factor">Download factor:
+    {% if prl.activityFactor is nan %}
+            <span class="tooltip" style="color: red" title="No snatched or seeding downloads!">&infin;</span>
+    {% else %}
+        {% set snatches = user.stats.snatchUnique %}
+        {% set seeding = user.stats.seedingTotal %}
+        {% set activity = max(snatches, seeding)%}
+        {% set downloads = user.stats.downloadUnique %}
+        {% set limit = activity * prl.metrics.factor %}
+        {% if prl.safeFactor and prl.safeOvershoot -%}
+            <span class="tooltip" style="color: #388e3c" title="good (lower is better)">
+        {%- else %}
+            {% if not prl.safeFactor and prl.safeOvershoot -%}
+            <span class="tooltip" style="color: #f57c00" title="You should snatch or seed more of the torrents you downloaded to avoid being limited!&#13;
+            {%- else -%}
+            <span class="tooltip" style="color: red" title="You must snatch or seed more of the torrents you have already downloaded&#13;
+            {%- endif -%}
+            You have {{ snatches }} snatch{{ snatches|plural('es') }}/{{ seeding }} seed{{ seeding|plural }} seeds, you need {{
+                limit }} snatches or seeds for {{ downloads|number_format }} downloads">
+        {%- endif -%}
+        {{ prl.activityFactor|number_format(3) }}</span>
     {%- endif -%}
-            {{ user.downloadSnatchFactor|number_format(3) }}</span>
         </li>
 {% endif %}
 

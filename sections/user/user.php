@@ -14,7 +14,7 @@ $Username    = $User->username();
 
 $userBonus   = new Gazelle\User\Bonus($User);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
-$PRL         = new Gazelle\PermissionRateLimit($User);
+$PRL         = new Gazelle\User\PermissionRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 

@@ -27,7 +27,7 @@ if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERV
  */
 $userId = $Viewer->id();
 if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
-    $PRL = new \Gazelle\PermissionRateLimit($Viewer);
+    $PRL = new \Gazelle\User\PermissionRateLimit($Viewer);
     if (!$PRL->safeFactor() && !$PRL->safeOvershoot()) {
         $DB->prepared_query('
             INSERT INTO ratelimit_torrent
