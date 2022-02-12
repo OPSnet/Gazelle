@@ -62,7 +62,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         if (self::$db->has_results()) {
             array_push($keys, self::$db->collect(0, false));
         }
-        self::$cache->deleteMulti(...$keys);
+        self::$cache->deleteMulti($keys);
         $this->holder->flush();
         return $this;
     }
