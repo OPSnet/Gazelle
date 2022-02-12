@@ -117,6 +117,10 @@ $OCLC = empty($_POST['oclc']) ? '' : trim($_POST['oclc']);
 $AllEncodings = false;
 $AllFormats   = false;
 $AllMedia     = false;
+$NeedLog      = false;
+$NeedCue      = false;
+$NeedChecksum = false;
+$MinLogScore  = 0;
 
 if (!$onlyMetadata) {
     if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
@@ -175,11 +179,6 @@ if (!$onlyMetadata) {
                 $Err = 'Only CD is allowed as media for FLAC + log/cue requests.';
             }
         }
-    } else {
-        $NeedLog = false;
-        $NeedCue = false;
-        $NeedChecksum = false;
-        $MinLogScore = false;
     }
 }
 
@@ -309,7 +308,7 @@ if ($NewRequest) {
             now(), now(), 1, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         $Viewer->id(), $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
-        $CatalogueNumber, $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID ?? null, $OCLC
+        $CatalogueNumber, $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC
     );
     $RequestID = $DB->inserted_id();
 } else {
@@ -328,7 +327,7 @@ if ($NewRequest) {
                 ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
             WHERE ID = ?',
             $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel,
-            $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum, $GroupID ?? null, $OCLC,
+            $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC,
             $RequestID
         );
     }
