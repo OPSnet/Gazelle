@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import selected -%}
 {{ header('Missing Search') }}
 <div class="thin">
     <h2>Missing</h2>
@@ -9,21 +10,21 @@
                 <td class="label"><strong>Filter</strong></td>
                 <td>
                     <select name="type">
-                        <option value="checksum"{{ types.checksum | selected }}>Missing Checksums</option>
-                        <option value="tags"{{ types.tags | selected }}>Bad Tags</option>
-                        <option value="folders"{{ types.folders | selected }}>Bad Folders</option>
-                        <option value="files"{{ types.files | selected }}>Bad Files</option>
-                        <option value="lineage"{{ types.lineage | selected }}>Missing Lineage</option>
-                        <option value="artwork"{{ types.artwork | selected }}>Missing Artwork</option>
-                        <option value="artistimg"{{ types.artistimg | selected }}>Missing Artist Images</option>
-                        <option value="artistcollage"{{ types.artistcollage | selected }}>Missing Artists Images in Artist Collages</option>
-                        <option value="artistdesc"{{ types.artistdesc | selected }}>Missing Artist Descriptions</option>
-                        <option value="artistdiscogs"{{ types.artistdiscogs | selected }}>Missing Artist Discogs ID</option>
+                        <option value="checksum"{{ selected(types.checksum) }}>Missing Checksums</option>
+                        <option value="tags"{{ selected(types.tags) }}>Bad Tags</option>
+                        <option value="folders"{{ selected(types.folders) }}>Bad Folders</option>
+                        <option value="files"{{ selected(types.files) }}>Bad Files</option>
+                        <option value="lineage"{{ selected(types.lineage) }}>Missing Lineage</option>
+                        <option value="artwork"{{ selected(types.artwork) }}>Missing Artwork</option>
+                        <option value="artistimg"{{ selected(types.artistimg) }}>Missing Artist Images</option>
+                        <option value="artistcollage"{{ selected(types.artistcollage) }}>Missing Artists Images in Artist Collages</option>
+                        <option value="artistdesc"{{ selected(types.artistdesc) }}>Missing Artist Descriptions</option>
+                        <option value="artistdiscogs"{{ selected(types.artistdiscogs) }}>Missing Artist Discogs ID</option>
                     </select>
                     <select name="filter">
-                        <option value="all"{{ filters.all | selected }}>All</option>
-                        <option value="snatched"{{ filters.snatched | selected }}>Snatched</option>
-                        <option value="uploaded"{{ filters.uploaded | selected }}>Uploaded</option>
+                        <option value="all"{{ selected(filters.all) }}>All</option>
+                        <option value="snatched"{{ selected(filters.snatched) }}>Snatched</option>
+                        <option value="uploaded"{{ selected(filters.uploaded) }}>Uploaded</option>
                     </select>
                 </td>
             </tr>
