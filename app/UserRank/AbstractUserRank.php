@@ -32,14 +32,37 @@ abstract class AbstractUserRank extends \Gazelle\Base {
 
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE temp_stats (
-                id int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT
-            ) " . $this->selector()
+                id integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                n bigint NOT NULL DEFAULT 0
+            )
+        ");
+        self::$db->prepared_query("
+            INSERT INTO temp_stats (n)
+            " . $this->selector()
         );
+
+        /* Classic Mysql cannot do this (although it is fixed in MariaDB)
+         * See: https://stackoverflow.com/questions/343402/getting-around-mysql-cant-reopen-table-error
+         *
+         *  SELECT min(n) as bucket
+         *  FROM temp_stats
+         *  GROUP BY ceil(id / (SELECT count(*)/100 FROM temp_stats))
+         */
+        self::$db->prepared_query("
+            DROP TEMPORARY TABLE IF EXISTS temp_stats_dup
+        ");
+        self::$db->prepared_query("
+            CREATE TEMPORARY TABLE temp_stats_dup LIKE temp_stats
+        ");
+        self::$db->prepared_query("
+            INSERT INTO temp_stats_dup
+            SELECT * FROM temp_stats
+        ");
 
         self::$db->prepared_query("
             SELECT min(n) as bucket
             FROM temp_stats
-            GROUP BY ceil(id / (SELECT count(*)/100 FROM temp_stats))
+            GROUP BY ceil(id / (SELECT count(*)/100 FROM temp_stats_dup))
             ORDER BY 1
         ");
         $raw = self::$db->collect('bucket');
