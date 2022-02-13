@@ -310,8 +310,14 @@ class DB_MYSQL {
         }
 
         $Closure = function() use ($Statement) {
-            $Statement->execute();
-            return $Statement->get_result();
+            try {
+                $Statement->execute();
+                return $Statement->get_result();
+            } catch (\mysqli_sql_exception $e) {
+                if (mysqli_error($this->LinkID) == 1062) {
+                    throw new DB_MYSQL_DuplicateKeyException;
+                }
+            }
         };
 
         $Query = $this->PreparedQuery . ' -- ' . json_encode($Parameters);

@@ -1,7 +1,8 @@
 <?php
 authorize();
 
-$article = (new Gazelle\Manager\Wiki)->findByAlias($_GET['alias'] ?? '');
+$alias = $_GET['alias'] ?? '';
+$article = (new Gazelle\Manager\Wiki)->findByAlias($alias);
 if (is_null($article)) {
     error(404);
 }
