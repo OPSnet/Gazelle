@@ -4,7 +4,7 @@
 // This page relies on the TORRENT_FORM class. All it does is call      //
 // the necessary functions.                                             //
 //----------------------------------------------------------------------//
-// $Properties, $Err and $uploadCategory are set in upload_handle.php,  //
+// $Properties, $Err and $categoryId are set in upload_handle.php,      //
 // and are only used when the form doesn't validate and this page must  //
 // be called again.                                                     //
 //**********************************************************************//
@@ -13,13 +13,13 @@ ini_set('max_file_uploads', '100');
 
 if (!isset($Properties)) {
     $requestId = (int)($_GET['requestid'] ?? 0);
-    $uploadCategory = false;
+    $categoryId = false;
     if ((int)($_GET['groupid'] ?? 0)) {
         $addTgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
         if (is_null($addTgroup)) {
             unset($_GET['groupid']);
         } else {
-            $uploadCategory = $addTgroup->categoryId();
+            $categoryId = $addTgroup->categoryId();
             $Properties = [
                 'GroupID'          => $addTgroup->id(),
                 'ReleaseType'      => $addTgroup->releaseType(),
@@ -40,7 +40,7 @@ if (!isset($Properties)) {
     } elseif ($requestId) {
         $addRequest = (new Gazelle\Manager\Request)->findById($requestId);
         if ($addRequest) {
-            $uploadCategory = $addRequest->categoryId();
+            $categoryId = $addRequest->categoryId();
             $Properties = [
                 'RequestID'        => $requestId,
                 'ReleaseType'      => $addRequest->releaseType(),
@@ -55,8 +55,8 @@ if (!isset($Properties)) {
             ];
         }
     }
-    if ($uploadCategory) {
-        $Properties['CategoryName'] = CATEGORY[$uploadCategory - 1];
+    if ($categoryId) {
+        $Properties['CategoryName'] = CATEGORY[$categoryId];
     }
 }
 
@@ -127,7 +127,7 @@ if (isset($categoryId)) {
     $uploadForm->setCategoryId($categoryId);
 }
 $uploadForm->head();
-switch ($uploadCategory) {
+switch (CATEGORY[$categoryId ?? 0]) {
     case 'Audiobooks':
     case 'Comedy':
         $uploadForm->audiobook_form();
@@ -137,7 +137,7 @@ switch ($uploadCategory) {
     case 'Comics':
     case 'E-Books':
     case 'E-Learning Videos':
-        $uploadForm->simple_form($Properties['CategoryID']);
+        $uploadForm->simple_form($categoryId);
         break;
 
     case 'Music':
