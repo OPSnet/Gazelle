@@ -347,8 +347,8 @@ class Torrent extends \Gazelle\Base {
             INNER JOIN torrents_group AS tg     ON (tg.ID = t.GroupID)
             WHERE tls.Seeders > 0
                 AND t.Time > now() - INTERVAL ? DAY
-            GROUP BY tls.Seeders + tls.Leechers DESC
-            ORDER BY score DESC, t.ID
+            GROUP BY tls.Seeders + tls.Leechers
+            ORDER BY score DESC, t.ID DESC
             LIMIT ?
             ", $days, 10
         );
