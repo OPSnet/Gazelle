@@ -191,14 +191,13 @@ class Tags {
      * General purpose method to get all tag aliases from the DB
      * @return array
      */
-    public static function get_aliases() {
+    protected static function get_aliases() {
         global $Cache, $DB;
         $TagAliases = $Cache->get_value('tag_aliases_search');
         if ($TagAliases === false) {
-            $DB->query('
-            SELECT ID, BadTag, AliasTag
-            FROM tag_aliases
-            ORDER BY BadTag');
+            $DB->prepared_query("
+                SELECT ID, BadTag, AliasTag FROM tag_aliases ORDER BY BadTag
+            ");
             $TagAliases = $DB->to_array(false, MYSQLI_ASSOC, false);
             // Unify tag aliases to be in_this_format as tags not in.this.format
             array_walk_recursive($TagAliases, function(&$val, $key) {
