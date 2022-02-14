@@ -63,7 +63,8 @@ class Requests {
      */
     //
     //In places where the output from this is merged with sphinx filters, it will be in a different order.
-    public static function get_requests($RequestIDs, $Return = true) {
+    public static function get_requests($RequestIDs, $Return = true): array {
+        global $Cache, $DB;
         $Found = $NotFound = array_fill_keys($RequestIDs, false);
         // Try to fetch the requests from the cache first.
         foreach ($RequestIDs as $i => $RequestID) {
@@ -71,7 +72,6 @@ class Requests {
                 unset($RequestIDs[$i], $Found[$RequestID], $NotFound[$RequestID]);
                 continue;
             }
-            global $Cache;
             $Data = $Cache->get_value("request_$RequestID");
             if (!empty($Data)) {
                 unset($NotFound[$RequestID]);
@@ -82,17 +82,14 @@ class Requests {
         if (count($RequestIDs) === 0) {
             return [];
         }
-        $IDs = implode(',', array_keys($NotFound));
 
         /*
             Don't change without ensuring you change everything else that uses get_requests()
         */
 
         if (count($NotFound) > 0) {
-            global $Cache, $DB;
             $QueryID = $DB->get_query_id();
-
-            $DB->query("
+            $DB->prepared_query("
                 SELECT
                     ID,
                     UserID,
@@ -117,8 +114,10 @@ class Requests {
                     GroupID,
                     OCLC
                 FROM requests
-                WHERE ID IN ($IDs)
-                ORDER BY ID");
+                WHERE ID IN (" . placeholders($NotFound) . ")
+                ORDER BY ID
+                ", ...$NotFound
+            );
             $Requests = $DB->to_array(false, MYSQLI_ASSOC, true);
             $Tags = self::get_tags($DB->collect('ID', false));
             foreach ($Requests as $Request) {
@@ -219,30 +218,27 @@ class Requests {
         return $result;
     }
 
-    public static function get_tags($RequestIDs) {
+    public static function get_tags(array $RequestIDs): array {
         if (empty($RequestIDs)) {
             return [];
         }
-        if (is_array($RequestIDs)) {
-            $RequestIDs = implode(',', $RequestIDs);
-        }
         global $DB;
         $QueryID = $DB->get_query_id();
-        $DB->query("
-            SELECT
-                rt.RequestID,
+        $DB->prepared_query("
+            SELECT rt.RequestID,
                 rt.TagID,
                 t.Name
             FROM requests_tags AS rt
-                JOIN tags AS t ON rt.TagID = t.ID
-            WHERE rt.RequestID IN ($RequestIDs)
-            ORDER BY rt.TagID ASC");
-        $Tags = $DB->to_array(false, MYSQLI_NUM, false);
+            INNER JOIN tags AS t ON (t.ID = rt.TagID)
+            WHERE rt.RequestID IN (" . placeholders($RequestIDs) . ")
+            ORDER BY rt.TagID ASC
+            ", ...$RequestIDs
+        );
+        $Tags = $DB->to_array(false, MYSQLI_ASSOC, false);
         $DB->set_query_id($QueryID);
         $Results = [];
         foreach ($Tags as $TagsRow) {
-            list($RequestID, $TagID, $TagName) = $TagsRow;
-            $Results[$RequestID][$TagID] = $TagName;
+            $Results[$TagsRow['RequestID']][$TagsRow['TagID']] = $TagsRow['Name'];
         }
         return $Results;
     }
