@@ -652,7 +652,7 @@ class UploadForm extends \Gazelle\Base {
             <tr>
                 <td class="label">Description:</td>
                 <td>
-                    <?= (new Textarea('desc', display_str($Torrent['TorrentDescription']), 60, 5))->emit() ?>
+                    <?= (new Textarea('desc', display_str($Torrent['TorrentDescription'] ?? ''), 60, 5))->emit() ?>
                 </td>
             </tr>
 <?php   } ?>
