@@ -39,8 +39,6 @@ if (!in_array($Document, VALID_PAGE)) {
     $Error = 404;
 }
 
-ob_start();
-
 // 3. Do we have a viewer?
 
 $SessionID = false;
@@ -164,6 +162,9 @@ register_shutdown_function(
 
 // 5. Display the page
 
+header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
+header('Pragma: no-cache');
+
 $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
 $file = realpath(__DIR__ . "/sections/{$Document}/index.php");
 if (!file_exists($file)) {
@@ -210,18 +211,6 @@ if ($Router->hasRoutes()) {
 }
 
 // 6. Finish up
-
-/* Required in the absence of session_start() for providing that pages will change
- * upon hit rather than being browser cached for changing content.
- * Old versions of Internet Explorer choke when downloading binary files over HTTPS with disabled cache.
- * Define the following constant in files that handle file downloads.
- */
-if (!defined('SKIP_NO_CACHE_HEADERS')) {
-    header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
-    header('Pragma: no-cache');
-}
-
-ob_end_flush();
 
 $Debug->set_flag('and send to user');
 if (!is_null($Viewer)) {
