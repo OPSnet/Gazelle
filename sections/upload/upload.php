@@ -56,7 +56,7 @@ if (!isset($Properties)) {
         }
     }
     if ($categoryId) {
-        $Properties['CategoryName'] = CATEGORY[$categoryId];
+        $Properties['CategoryName'] = CATEGORY[$categoryId - 1];
     }
 }
 
@@ -127,7 +127,7 @@ if (isset($categoryId)) {
     $uploadForm->setCategoryId($categoryId);
 }
 $uploadForm->head();
-switch (CATEGORY[$categoryId ?? 0]) {
+switch (CATEGORY[($categoryId ?? 1) - 1]) {
     case 'Audiobooks':
     case 'Comedy':
         $uploadForm->audiobook_form();
