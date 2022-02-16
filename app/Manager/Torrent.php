@@ -593,7 +593,9 @@ class Torrent extends \Gazelle\Base {
             );
             $latest = [];
             $seen = [];
-            while (count($latest) < $limit) {
+            $max = self::$db->record_count();
+            $nr = 0;
+            while ($nr < min($limit, $max)) {
                 $row = self::$db->next_record(MYSQLI_ASSOC, false);
                 if (!$row) {
                     break;
@@ -610,6 +612,7 @@ class Torrent extends \Gazelle\Base {
                 }
                 $seen[]   = $row['groupId'];
                 $latest[] = $row['torrentId'];
+                ++$nr;
             }
             self::$cache->cache_value($key, $latest, 86400);
         }
