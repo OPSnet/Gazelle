@@ -25,7 +25,7 @@ while ! mysql -h mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "show databases;"
     fi;
 done
 
-[ -f /var/www/lib/config.override.php ] || bash /var/www/.docker/web/generate-config.sh
+[ -f /var/www/lib/override.config.php ] || bash /var/www/.docker/web/generate-config.sh
 
 echo "Run migrations..."
 if ! FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; then

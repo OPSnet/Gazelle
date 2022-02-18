@@ -4,7 +4,7 @@ set -euo pipefail
 
 LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../lib"
 SOURCE="${LIB_DIR}/devel.example.config.php"
-TARGET="${LIB_DIR}/config.override.php"
+TARGET="${LIB_DIR}/override.config.php"
 
 [ -f ${TARGET} ] && exit 0
 echo "GENERATING GAZELLE CONFIG..."

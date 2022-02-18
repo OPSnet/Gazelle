@@ -42,7 +42,7 @@ see expired unfetched activity.
 4. Create the required Mysql roles according to 01-MysqlRoles.txt
    Use www.random.org to generate passwords.
 
-5. Review lib/config.php. Edit lib/config.override.php as needed.
+5. Review lib/config.php. Edit lib/override.config.php as needed.
    You should be able to launch boris from the command line.
 
 6. Run the phinx migrations and seeds to populate the database.
@@ -51,7 +51,7 @@ see expired unfetched activity.
 
 7. Configure Sphinx - we recommend you use the included .docker/sphinxsearch/sphinx.conf
    You can copy this to /etc/sphinx/sphinx.conf. You need to fill in the
-   details of the SQL server from lib/config.override.php and you may need to
+   details of the SQL server from lib/override.config.php and you may need to
    create the `/var/lib/sphinx` folder.
 
    More information is available at: https://sphinxsearch.com/docs/current.html

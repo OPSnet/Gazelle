@@ -1,6 +1,6 @@
 <?php
 
-// Copy these variables to your config.override.php in a development environment.
+// Copy these variables to your override.config.php in a development environment.
 // Change as required.
 
 define('SITE_URL', 'http://localhost:8080');

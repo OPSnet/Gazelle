@@ -1,6 +1,6 @@
 <?php
 
-// Copy these variables to your config.override.php in a production environment.
+// Copy these variables to your override.config.php in a production environment.
 // Change as required.
 
 define('SITE_NAME', 'Gazelle');
