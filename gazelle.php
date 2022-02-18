@@ -38,6 +38,9 @@ if (!in_array($Document, VALID_PAGE)) {
     $_SERVER['SCRIPT_FILENAME'] = 'error.php';
     $Error = 404;
 }
+if (!isset($_SERVER['HTTP_USER_AGENT'])) {
+    $_SERVER['HTTP_USER_AGENT'] = '[no-useragent]';
+}
 
 // 3. Do we have a viewer?
 
