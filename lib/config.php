@@ -3,7 +3,7 @@
 /* This file defines all the configuration required to run a Gazelle
  * installation. Much can be left as-is in development. For production, a
  * number of keys will need to be changed. This is done in the
- * config.override.php file which must reside in the same directory as this
+ * override.config.php file which must reside in the same directory as this
  * file. (You can also also create an override.php file for development/staging
  * environments if required).
  *
@@ -20,7 +20,7 @@
  *
  * Pro-tip: the development.config.php and production.config.php provide
  * the list of constants that will most likely need to appear in a
- * config.override.php file. The docker installation takes care of this
+ * override.config.php file. The docker installation takes care of this
  * automatically.
  *
  * When adding a new value, consider whether the setting is appropriate for
@@ -31,8 +31,8 @@
  * You are expected to read this file in its entirety before setting out.
  */
 
-if (file_exists(__DIR__ . '/config.override.php')) {
-    require_once(__DIR__ . '/config.override.php');
+if (file_exists(__DIR__ . '/override.config.php')) {
+    require_once(__DIR__ . '/override.config.php');
 }
 
 // ------------------------------------------------------------------------

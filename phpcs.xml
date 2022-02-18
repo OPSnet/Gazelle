@@ -7,7 +7,7 @@
 
     <file>.</file>
     <exclude-pattern>cache/*</exclude-pattern>
-    <exclude-pattern>lib/config.override.php</exclude-pattern>
+    <exclude-pattern>lib/override.config.php</exclude-pattern>
     <exclude-pattern>*/.docker/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/static/*</exclude-pattern>
