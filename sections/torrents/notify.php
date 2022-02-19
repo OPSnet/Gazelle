@@ -112,6 +112,9 @@ if (!empty($GroupIDs)) {
 }
 
 $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
+
 View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notifications', ['js' => 'notifications']);
 ?>
 <div class="thin widethin">
@@ -184,113 +187,85 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
     </tr>
 <?php
         unset($FilterResults['FilterLabel']);
-        $torMan = new Gazelle\Manager\Torrent;
-        $torMan->setViewer($Viewer);
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
             $torrent = $torMan->findById($TorrentID);
             if (is_null($torrent)) {
                 continue;
             }
-            $GroupID = $Result['GroupID'];
-            $GroupInfo = $TorrentGroups[$Result['GroupID']];
-            if (!isset($GroupInfo['Torrents'][$TorrentID]) || !isset($GroupInfo['ID'])) {
-                // If $GroupInfo['ID'] is unset, the torrent group associated with the torrent doesn't exist
-                continue;
-            }
-            $TorrentInfo = $GroupInfo['Torrents'][$TorrentID];
-            // generate torrent's title
-            $DisplayName = '';
-            if (!empty($GroupInfo['ExtendedArtists'])) {
-                $MatchingArtists = [];
-                foreach ($GroupInfo['ExtendedArtists'] as $GroupArtists) {
-                    if (is_null($GroupArtists)) {
-                        continue;
-                    }
-                    foreach ($GroupArtists as $GroupArtist) {
-                        if (isset($Filters[$FilterID]['Artists'][mb_strtolower($GroupArtist['name'], 'UTF-8')])) {
-                            $MatchingArtists[] = $GroupArtist['name'];
-                        }
+
+            $tgroup = $torrent->group();
+            $tagList = $tgroup->tagList();
+            $primaryTag = current($tagList)['name'];
+            $roleIdList = (new Gazelle\ArtistRole\TGroup($tgroup->id()))->idList();
+            $match = [];
+            foreach ($roleIdList as $role) {
+                foreach ($role as $artist) {
+                    if (isset($Filters[$FilterID]['Artists'][mb_strtolower($artist['name'])])) {
+                        $match[] = $artist['name'];
                     }
                 }
-                $MatchingArtistsText = (!empty($MatchingArtists) ? 'Caught by filter for '.implode(', ', $MatchingArtists) : '');
-                $DisplayName = Artists::display_artists($GroupInfo['ExtendedArtists'], true, true);
             }
-            $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$TorrentID#torrent$TorrentID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">" . $GroupInfo['Name'] . '</a>';
-
-            $GroupCategoryID = $GroupInfo['CategoryID'];
-            if ($GroupCategoryID == 1) {
-                if ($GroupInfo['Year'] > 0) {
-                    $DisplayName .= " [" . $GroupInfo['Year'] . "]";
-                }
-                if ($GroupInfo['ReleaseType'] > 0) {
-                    $DisplayName .= ' [' . (new Gazelle\ReleaseType)->findNameById($GroupInfo['ReleaseType']) . ']';
-                }
-            }
-
-            // append extra info to torrent title
-            $ExtraInfo = Torrents::torrent_info($TorrentInfo, true, true);
-
-            $TorrentTags = new Tags($GroupInfo['TagList']);
-            if ($GroupInfo['TagList'] == '') {
-                $TorrentTags->set_primary(CATEGORY[$GroupCategoryID - 1]);
-            }
-
-        // print row
+            $MatchingArtistsText = ($match ? 'Caught by filter for '.implode(', ', $match) : '');
 ?>
-    <tr class="torrent torrent_row<?=($TorrentInfo['IsSnatched'] ? ' snatched_torrent' : '') . ($GroupInfo['Flags']['IsSnatched'] ? ' snatched_group' : '') . ($MatchingArtistsText ? ' tooltip" title="'.display_str($MatchingArtistsText) : '')?>" id="torrent<?=$TorrentID?>">
+    <tr id="torrent<?= $TorrentID ?>" class="torrent torrent_row<?=
+        ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
+        . ($tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '')
+        ?>">
         <td class="m_td_left td_checkbox" style="text-align: center;">
             <input type="checkbox" class="notify_box notify_box_<?=$FilterID?>" value="<?=$TorrentID?>" id="clear_<?=$TorrentID?>" tabindex="1" />
         </td>
         <td class="center cats_col">
-            <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
+            <div title="<?= ucfirst($primaryTag) ?>"
+                 class="tooltip cats_<?= strtolower($tgroup->categoryName()) ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
         </td>
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->thumbnail($GroupInfo['WikiImage'], $GroupCategoryID) ?>
+                <?= $imgProxy->thumbnail($tgroup->image(), $tgroup->categoryId()) ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">
-                <?= $Twig->render('torrent/action.twig', [
+                <?= $Twig->render('torrent/action-v2.twig', [
                     'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
-                    't'      => $TorrentInfo,
+                    't'      => $torrent,
                     'extra'  => [
                         $ownProfile ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
                     ],
                 ]) ?>
-                <strong><?=$DisplayName?></strong>
+                <strong><?= $torrent->fullLink() ?></strong>
                 <div class="torrent_info">
-                    <?=$ExtraInfo?>
-<?php   if ($Result['UnRead']) { ?>
+<?php       if ($Result['UnRead']) { ?>
                     <strong class="new">New!</strong>
 <?php
-        }
-        if ($bookmark->isTorrentBookmarked($GroupID)) {
+            }
+            if ($bookmark->isTorrentBookmarked($tgroup->id())) {
 ?>
                     <span class="remove_bookmark float_right">
-                        <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
+                        <a href="#" id="bookmarklink_torrent_<?=$tgroup->id()?>" class="brackets" onclick="Unbookmark('torrent', <?=$tgroup->id()?>, 'Bookmark'); return false;">Remove bookmark</a>
                     </span>
-<?php               } else { ?>
+<?php       } else { ?>
                     <span class="add_bookmark float_right">
-                        <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?php               } ?>
+                        <a href="#" id="bookmarklink_torrent_<?=$tgroup->id()?>" class="brackets" onclick="Bookmark('torrent', <?=$tgroup->id()?>, 'Remove bookmark'); return false;">Bookmark</a>
+<?php       } ?>
                     </span>
                 </div>
-                <div class="tags"><?=$TorrentTags->format()?></div>
+                <div class="tags"><?= implode(', ', array_map(
+                    fn($name) => "<a href=\"torrents.php?taglists={$name}\">$name</a>",
+                    $tgroup->tagNameList()))
+                    ?></div>
+                <?= display_str($MatchingArtistsText) ?>
             </div>
         </td>
-        <td class="td_file_count"><?=$TorrentInfo['FileCount']?></td>
-        <td class="td_time number_column nobr"><?=time_diff($TorrentInfo['Time'])?></td>
-        <td class="td_size number_column nobr"><?=Format::get_size($TorrentInfo['Size'])?></td>
-        <td class="td_snatched m_td_right number_column"><?=number_format($TorrentInfo['Snatched'])?></td>
-        <td class="td_seeders m_td_right number_column"><?=number_format($TorrentInfo['Seeders'])?></td>
-        <td class="td_leechers m_td_right number_column"><?=number_format($TorrentInfo['Leechers'])?></td>
+        <td class="td_file_count"><?= $torrent->fileTotal() ?></td>
+        <td class="td_time nobr"><?= time_diff($torrent->uploadDate(), 1) ?></td>
+        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
+        <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
+        <td class="td_seeders m_td_right number_column<?= $torrent->seederTotal() ? '' : ' r00' ?>"><?= number_format($torrent->seederTotal()) ?></td>
+        <td class="td_leechers m_td_right number_column"><?= number_format($torrent->leecherTotal()) ?></td>
     </tr>
-<?php
-        }
-?>
+<?php   } ?>
 </table>
 </form>
 <?php
