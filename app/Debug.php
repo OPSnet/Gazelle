@@ -54,7 +54,7 @@ class Debug {
         }
 
         $Micro = (microtime(true) - self::$startTime) * 1000;
-        if ($Micro > self::MAX_TIME && !in_array($document, INGORE_PAGE_MAX_TIME)) {
+        if ($Micro > self::MAX_TIME && !in_array($document, IGNORE_PAGE_MAX_TIME)) {
             $Reason[] = number_format($Micro, 3).' ms';
         }
 
