@@ -100,7 +100,7 @@ echo $Twig->render('user/setting.twig', [
         'title'   => $User->donorTitles(),
     ],
     'notify' => [
-        'autosub'    => $options['AutoSubscribe'] ?: false,
+        'autosub'    => $options['AutoSubscribe'] ?? false,
         'seeded'     => $NotifyOnDeleteSeeding,
         'snatched'   => $NotifyOnDeleteSnatched,
         'downloaded' => $NotifyOnDeleteDownloaded,
