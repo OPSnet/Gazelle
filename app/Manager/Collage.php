@@ -82,7 +82,7 @@ class Collage extends \Gazelle\Base {
             'group_id'   => $tgroup->id(),
             'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
             'name'       => $tgroup->displayNameText(),
-            'tags'       => implode(', ', array_map(fn($n) => "${$n}", $tgroup->tagNameList())),
+            'tags'       => implode(', ', array_map(fn($n) => "#{$n}", $tgroup->tagNameList())),
             'tags_plain' => implode(', ', $tgroup->tagNameList()),
         ]);
     }
