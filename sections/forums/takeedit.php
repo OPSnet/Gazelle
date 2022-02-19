@@ -18,8 +18,8 @@ $forumPost = $forum->postInfo($postId);
 if (empty($forumPost)) {
     error("No forum post #$postId found");
 }
-if ($forumPost['is-locked'] && !$Viewer->permitted('site_moderate_forums')) {
-    error('You cannot edit a locked post.', true);
+if ($forumPost['thread-locked'] && !$Viewer->permitted('site_moderate_forums')) {
+    error('You cannot edit a pos in a locked thread.', true);
 }
 if ($Viewer->id() != $forumPost['user-id']) {
     if (!$Viewer->permitted('site_moderate_forums')) {
