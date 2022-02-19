@@ -41,5 +41,5 @@ if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
 
 header("Location: forums.php?action=viewthread&threadid=$threadId&page="
     . (int)ceil($ThreadInfo['Posts'] / $Viewer->postsPerPage())
-    . "#post$PostID"
+    . "#post$postId"
 );
