@@ -65,22 +65,20 @@ class Requests {
     //In places where the output from this is merged with sphinx filters, it will be in a different order.
     public static function get_requests($RequestIDs, $Return = true): array {
         global $Cache, $DB;
-        $Found = $NotFound = array_fill_keys($RequestIDs, false);
+        $Found = [];
+        $NotFound = [];
         // Try to fetch the requests from the cache first.
         foreach ($RequestIDs as $i => $RequestID) {
-            if (!is_number($RequestID)) {
-                unset($RequestIDs[$i], $Found[$RequestID], $NotFound[$RequestID]);
+            $RequestID = (int)$RequestID;
+            if (!$RequestID) {
                 continue;
             }
             $Data = $Cache->get_value("request_$RequestID");
-            if (!empty($Data)) {
-                unset($NotFound[$RequestID]);
+            if ($Data) {
                 $Found[$RequestID] = $Data;
+            } else {
+                $NotFound[$RequestID] = true;
             }
-        }
-        // Make sure there's something in $RequestIDs, otherwise the SQL will break
-        if (count($RequestIDs) === 0) {
-            return [];
         }
 
         /*
@@ -89,9 +87,9 @@ class Requests {
 
         if (count($NotFound) > 0) {
             $QueryID = $DB->get_query_id();
+            $ids = array_keys($NotFound);
             $DB->prepared_query("
-                SELECT
-                    ID,
+                SELECT ID,
                     UserID,
                     TimeAdded,
                     LastVote,
@@ -114,9 +112,8 @@ class Requests {
                     GroupID,
                     OCLC
                 FROM requests
-                WHERE ID IN (" . placeholders($NotFound) . ")
-                ORDER BY ID
-                ", ...$NotFound
+                WHERE ID IN (" . placeholders($ids) . ")
+                ", ...$ids
             );
             $Requests = $DB->to_array(false, MYSQLI_ASSOC, true);
             $Tags = self::get_tags($DB->collect('ID', false));
@@ -128,7 +125,7 @@ class Requests {
             }
             $DB->set_query_id($QueryID);
 
-            // Orphan requests. There shouldn't ever be any
+            // Orphan requests. There should never be any
             if (count($NotFound) > 0) {
                 foreach (array_keys($NotFound) as $GroupID) {
                     unset($Found[$GroupID]);
