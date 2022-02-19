@@ -1,25 +1,25 @@
 <?php
-if (empty($_GET['query'])) {
-    error(0);
-}
-header('Content-Type: application/json; charset=utf-8');
 
-$fullName = rawurldecode($_GET['query']);
+header('Content-Type: application/json; charset=utf-8');
+if (empty($_GET['query'])) {
+    echo json_encode([]);
+    exit;
+}
+
+$fullName = trim(urldecode($_GET['query']));
 
 $maxKeySize = 4;
 if (strtolower(substr($fullName, 0, 4)) == 'the ') {
     $maxKeySize += 4;
 }
 $keySize = min($maxKeySize, max(1, strlen($fullName)));
-
 $letters = mb_strtolower(mb_substr($fullName, 0, $keySize));
-$autoSuggest = $Cache->get('autocomplete_artist_' . $keySize . '_' . $letters);
 
-if (!$autoSuggest) {
-    $limit = (($keySize === $maxKeySize) ? 250 : 10);
+$key = 'autocomplete_artist_' . $keySize . '_' . str_replace(' ', '%20', $letters);
+$autoSuggest = $Cache->get($key);
+if ($autoSuggest === false) {
     $DB->prepared_query("
-        SELECT
-            a.ArtistID,
+        SELECT a.ArtistID,
             a.Name
         FROM artists_group AS a
         INNER JOIN torrents_artists AS ta ON (ta.ArtistID = a.ArtistID)
@@ -29,9 +29,10 @@ if (!$autoSuggest) {
         GROUP BY ta.ArtistID
         ORDER BY tls.Snatched DESC
         LIMIT ?",
-        str_replace('\\','\\\\',$letters) . '%', $limit);
+        str_replace('\\','\\\\',$letters) . '%', $keySize === $maxKeySize ? 250 : 10
+    );
     $autoSuggest = $DB->to_array(false, MYSQLI_NUM, false);
-    $Cache->cache_value('autocomplete_artist_' . $keySize . '_' . $letters, $autoSuggest, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
+    $Cache->cache_value($key, $autoSuggest, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
 }
 
 $matched = 0;
@@ -40,7 +41,7 @@ $response = [
     'suggestions' => []
 ];
 foreach ($autoSuggest as $suggestion) {
-    list($id, $name) = $suggestion;
+    [$id, $name] = $suggestion;
     if (stripos($name, $fullName) === 0) {
         $response['suggestions'][] = ['value' => $name, 'data' => $id];
         if (++$matched > 9) {
