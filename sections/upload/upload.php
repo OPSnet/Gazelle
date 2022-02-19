@@ -55,8 +55,10 @@ if (!isset($Properties)) {
             ];
         }
     }
-    if ($categoryId) {
+    if ($categoryId !== false) {
         $Properties['CategoryName'] = CATEGORY[$categoryId - 1];
+    } else {
+        unset($categoryId);
     }
 }
 
