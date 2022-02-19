@@ -431,10 +431,10 @@ defined('LOGIN_ATTEMPT_BACKOFF') or define('LOGIN_ATTEMPT_BACKOFF', [
 defined('HOMEPAGE_TAG_IGNORE') or define('HOMEPAGE_TAG_IGNORE', [0]);
 
 // Do not report these pages for excessive memory consumption
-defined('INGORE_PAGE_MAX_MEMORY') or define('INGORE_PAGE_MAX_MEMORY', ['artist', 'bookmark']);
+defined('IGNORE_PAGE_MAX_MEMORY') or define('IGNORE_PAGE_MAX_MEMORY', ['artist', 'bookmark']);
 
 // Do not report these pages for being slow
-defined('INGORE_PAGE_MAX_TIME') or define('INGORE_PAGE_MAX_TIME', ['top10']);
+defined('IGNORE_PAGE_MAX_TIME') or define('IGNORE_PAGE_MAX_TIME', ['top10']);
 
 // ------------------------------------------------------------------------
 // Inactivity reaper settings
