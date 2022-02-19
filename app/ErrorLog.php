@@ -34,7 +34,7 @@ class ErrorLog extends BaseObject {
         );
         $info['trace'] = explode("\n", $info['trace']);
         $info['request'] = json_decode($info['request'], true);
-        $info['error_list'] = json_decode($info['error_list'], true);
+        $info['error_list'] = json_decode($info['error_list'], true) ?? [];
         $this->info = $info;
         return $this->info;
     }
