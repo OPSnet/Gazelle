@@ -95,23 +95,22 @@
     <div class="thin">Paste a block of text here containing IP addresses (anything that look
     like a dotted quad address a.b.c.d). The code will take of sorting and
     deduplicating.</div>
+    <br />
     <form action="tools.php?action=ip_search&amp;column={{ column }}&amp;direction={{ direction }}{% if ip_list %}&amp;iplist={{ ip_list }}{% endif %}" method="post">
-    {{ text.emit|raw }}
-    <ul class="nobullet">
-        <li>Sort by
-            <select name="column">
-                <option value="{{ constant('\\Gazelle\\Search\\IPV4::START') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPV4::START')) }}>First seen</option>
-                <option value="{{ constant('\\Gazelle\\Search\\IPV4::END') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPV4::END')) }}>Last seen</option>
-                <option value="{{ constant('\\Gazelle\\Search\\IPV4::IP') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPV4::IP')) }}>IP address</option>
-            </select>
-        </li>
-        <li>Sort direction
-            <select name="direction">
-                <option value="{{ constant('\\Gazelle\\Search\\IPV4::ASC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\IPV4::ASC')) }}>Ascending</option>
-                <option value="{{ constant('\\Gazelle\\Search\\IPV4::DESC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\IPV4::DESC')) }}>Descending</option>
-            </select>
-        </li>
-    </ul>
+    {{ text.preview|raw }}
+    {{ text.field|raw }}
+    <br /> Order by
+    <select name="column">
+        <option value="{{ constant('\\Gazelle\\Search\\IPv4::START') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPv4::START')) }}>First seen</option>
+        <option value="{{ constant('\\Gazelle\\Search\\IPv4::END') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPv4::END')) }}>Last seen</option>
+        <option value="{{ constant('\\Gazelle\\Search\\IPv4::IP') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPv4::IP')) }}>IP address</option>
+        <option value="{{ constant('\\Gazelle\\Search\\IPv4::TOTAL') }}"{{ selected(column == constant('\\Gazelle\\Search\\IPv4::TOTAL')) }}>Total</option>
+    </select>
+    <select name="direction">
+        <option value="{{ constant('\\Gazelle\\Search\\IPv4::ASC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\IPv4::ASC')) }}>Ascending</option>
+        <option value="{{ constant('\\Gazelle\\Search\\IPv4::DESC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\IPv4::DESC')) }}>Descending</option>
+    </select>
+    {{ text.button|raw }}
     <input type="submit" value="Search" />
     </form>
 </div>
