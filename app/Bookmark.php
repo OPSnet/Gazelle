@@ -248,7 +248,7 @@ class Bookmark extends BaseUser {
                             "torrents.php?action=download&amp;id={$t['ID']}&amp;torrent_pass=[[PASSKEY]]",
                             $this->user->username(),
                             "torrents.php?id=" . $t['ID'],
-                            $tgroup->tagNameList(),
+                            implode(',', $tgroup->tagNameList()),
                         )
                     );
                 }
