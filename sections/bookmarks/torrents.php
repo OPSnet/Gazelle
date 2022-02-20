@@ -19,6 +19,7 @@ if (empty($_GET['userid'])) {
 }
 
 $bookmark = new Gazelle\Bookmark($user);
+$snatcher = new Gazelle\User\Snatch($Viewer);
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $collMan  = (new Gazelle\Manager\Collage)->setImageProxy((new Gazelle\Util\ImageProxy)->setViewer($Viewer));
@@ -223,7 +224,6 @@ foreach ($bookmarkList as $bm) {
             </td>
         </tr>
 <?php
-        $snatcher = new Gazelle\User\Snatch($Viewer);
         $prev = '';
         $EditionID = 0;
         unset($FirstUnknown);
