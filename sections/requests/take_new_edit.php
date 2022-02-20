@@ -334,18 +334,17 @@ if ($NewRequest) {
 
     // We need to be able to delete artists / tags
     $DB->prepared_query("
-        SELECT ArtistID FROM requests_artists WHERE RequestID = ?
+        SELECT concat('artists_requests_', ArtistID) FROM requests_artists WHERE RequestID = ?
         ", $RequestID
     );
-    $RequestArtists = $DB->to_array();
-    foreach ($RequestArtists as $RequestArtist) {
-        $Cache->delete_value("artists_requests_$RequestArtist");
-    }
+    $Cache->deleteMulti([
+        "request_artists_$RequestID",
+        ...$DB->collect(0, false)
+    ]);
     $DB->prepared_query("
         DELETE FROM requests_artists WHERE RequestID = ?
         ", $RequestID
     );
-    $Cache->delete_value("request_artists_$RequestID");
 }
 
 if (isset($GroupID)) {
