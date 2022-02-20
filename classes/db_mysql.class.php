@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Util\Irc;
+
 //-----------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////////////
 /*//-- MySQL wrapper class ----------------------------------------------------------
@@ -20,32 +23,19 @@ $DB = new DB_MYSQL;
 
 * Making a query
 
-$DB->query("
+$DB->prepare_query("
     SELECT *
     FROM table...");
 
     Is functionally equivalent to using mysqli_query("SELECT * FROM table...")
     Stores the result set in $this->QueryID
     Returns the result set, so you can save it for later (see set_query_id())
------
 
 * Getting data from a query
 
 $array = $DB->next_record();
     Is functionally equivalent to using mysqli_fetch_array($ResultSet)
     You do not need to specify a result set - it uses $this-QueryID
------
-
-* Escaping a string
-
-db_string($str);
-    Is a wrapper for $DB->escape_str(), which is a wrapper for
-    mysqli_real_escape_string(). The db_string() function exists so that you
-    don't have to keep calling $DB->escape_str().
-
-    USE THIS FUNCTION EVERY TIME YOU USE AN UNVALIDATED USER-SUPPLIED VALUE IN
-    A DATABASE QUERY!
-
 
 //--------- Advanced usage ---------------------------------------------------------
 
@@ -95,14 +85,14 @@ set_query_id($ResultSet)
     This class can only hold one result set at a time. Using set_query_id allows
     you to set the result set that the class is using to the result set in
     $ResultSet. This result set should have been obtained earlier by using
-    $DB->query().
+    $DB->prepared_query().
 
     Example:
 
-    $FoodRS = $DB->query("
+    $FoodRS = $DB->prepared_query("
             SELECT *
             FROM food");
-    $DB->query("
+    $DB->prepared_query("
         SELECT *
         FROM drink");
     $Drinks = $DB->next_record();
@@ -115,28 +105,9 @@ set_query_id($ResultSet)
 -------------------------------------------------------------------------------------
 *///---------------------------------------------------------------------------------
 
-if (!extension_loaded('mysqli')) {
-    throw new Exception('Mysqli Extension not loaded.');
-}
-
-//Handles escaping
-function db_string($String, $DisableWildcards = false) {
-    global $DB;
-    //Escape
-    $String = $DB->escape_str($String);
-    //Remove user input wildcards
-    if ($DisableWildcards) {
-        $String = str_replace(['%','_'], ['\%','\_'], $String);
-    }
-    return $String;
-}
-
-use \Gazelle\Util\Irc;
-
 class DB_MYSQL_Exception extends Exception {}
 class DB_MYSQL_DuplicateKeyException extends DB_MYSQL_Exception {}
 
-//TODO: revisit access levels once Drone is replaced by ZeRobot
 class DB_MYSQL {
     /** @var mysqli|bool */
     public $LinkID = false;
@@ -144,24 +115,24 @@ class DB_MYSQL {
     protected $QueryID = false;
     protected $Record = [];
     protected $Row;
-    protected $Errno = 0;
-    protected $Error = '';
+    protected int $Errno = 0;
+    protected string $Error = '';
     protected bool $queryLog = true;
 
     protected $PreparedQuery = null;
     protected $Statement = null;
 
-    public $Queries = [];
-    public $Time = 0.0;
+    public array $Queries = [];
+    public float $Time = 0.0;
 
-    protected $Database = '';
-    protected $Server = '';
-    protected $User = '';
-    protected $Pass = '';
-    protected $Port = 0;
-    protected $Socket = '';
+    protected string $Database = '';
+    protected string $Server = '';
+    protected string $User = '';
+    protected string $Pass = '';
+    protected int $Port = 0;
+    protected string $Socket = '';
 
-    public function __construct($Database = SQLDB, $User = SQLLOGIN, $Pass = SQLPASS, $Server = SQLHOST, $Port = SQLPORT, $Socket = SQLSOCK) {
+    public function __construct(string $Database, string $User, string $Pass, string $Server, int $Port, string $Socket) {
         $this->Database = $Database;
         $this->Server = $Server;
         $this->User = $User;
@@ -218,35 +189,6 @@ class DB_MYSQL {
         }
 
         $this->connect();
-    }
-
-    /**
-     * Runs a raw query assuming pre-sanitized input. However, attempting to self sanitize (such
-     * as via db_string) is still not as safe for using prepared statements so for queries
-     * involving user input, you really should not use this function (instead opting for
-     * prepared_query) {@See DB_MYSQL::prepared_query}
-     *
-     * When running a batch of queries using the same statement
-     * with a variety of inputs, it's more performant to reuse the statement
-     * with {@see DB_MYSQL::prepare} and {@see DB_MYSQL::execute}
-     *
-     * @return mysqli_result|bool Returns a mysqli_result object
-     *                            for successful SELECT queries,
-     *                            or TRUE for other successful DML queries
-     *                            or FALSE on failure.
-     *
-     * @param string $Query
-     * @param int $AutoHandle
-     * @return mysqli_result|bool
-     */
-    public function query($Query, $AutoHandle=1) {
-        $this->setup_query();
-
-        $Closure = function() use ($Query) {
-            return mysqli_query($this->LinkID, $Query);
-        };
-
-        return $this->attempt_query($Query, $Closure, $AutoHandle);
     }
 
     /**
@@ -479,16 +421,6 @@ class DB_MYSQL {
         return mysqli_get_host_info($this->LinkID);
     }
 
-    // You should use db_string() instead.
-    public function escape_str($Str) {
-        $this->connect();
-        if (is_array($Str)) {
-            trigger_error('Attempted to escape array.');
-            return '';
-        }
-        return mysqli_real_escape_string($this->LinkID, $Str);
-    }
-
     // Creates an array from a result set
     // If $Key is set, use the $Key column in the result set as the array key
     // Otherwise, use an integer
@@ -594,11 +526,6 @@ class DB_MYSQL {
 
     public function get_query_id() {
         return $this->QueryID;
-    }
-
-    public function beginning() {
-        mysqli_data_seek($this->QueryID, 0);
-        $this->Row = 0;
     }
 
     /**

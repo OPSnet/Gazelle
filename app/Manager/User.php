@@ -381,8 +381,9 @@ class User extends \Gazelle\Base {
      * @return array [week, joined, disabled]
      */
     public function userflow(): array {
-        if (($userflow = self::$cache->get_value('userflow')) === false) {
-            self::$db->query("
+        $userflow = self::$cache->get_value('userflow');
+        if ($userflow === false) {
+            self::$db->prepared_query("
                 SELECT J.Week, J.n as Joined, coalesce(D.n, 0) as Disabled
                 FROM (
                     SELECT DATE_FORMAT(JoinDate, '%X-%V') AS Week, count(*) AS n

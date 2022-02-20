@@ -11,7 +11,7 @@ if (!defined('SITE_NAME')) {
 }
 
 $Cache = new Gazelle\Cache;
-$DB    = new DB_MYSQL;
+$DB    = new DB_MYSQL(SQLDB, SQLLOGIN, SQLPASS, SQLHOST, SQLPORT, SQLSOCK);
 $Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->setStartTime($now)
     ->handle_errors()
