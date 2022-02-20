@@ -2528,17 +2528,25 @@ class User extends BaseObject {
     /**
      * Donor honorifics for the donor forum
      *
-     * @return array [prefix, suffix, usecomma]
+     * @return array [prefix, suffix, use_comma]
      */
-    public function donorTitles() {
-        $key = "donor_title_" . $this->id;
-        if (($Results = self::$cache->get_value($key)) === false) {
-            $Results = self::$db->row("
-                SELECT Prefix, Suffix, UseComma
+    public function donorTitles(): array {
+        $key = "u_donor_" . $this->id;
+        $Results = self::$cache->get_value($key);
+        if ($Results === false) {
+            $Results = self::$db->rowAssoc("
+                SELECT Prefix AS prefix,
+                    Suffix AS suffix,
+                    UseComma AS use_comma
                 FROM donor_forum_usernames
                 WHERE UserID = ?
                 ", $this->id
             );
+            if (is_null($Results)) {
+                $Results = ['prefix' => null, 'suffix' => null, 'use_comma' => false];
+            } else {
+                $Results['use_comma'] = (bool)$Results['use_comma'];
+            }
             self::$cache->cache_value($key, $Results, 0);
         }
         return $Results;
@@ -2792,10 +2800,10 @@ class User extends BaseObject {
                 VALUES (?,      ?,      ?,      ?)
                 ON DUPLICATE KEY UPDATE
                     Prefix = ?, Suffix = ?, UseComma = ?
-                ', $UserID, $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
-                    $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
+                ', $UserID, $field['donor_title_prefix'] ?? '', $field['donor_title_suffix'] ?? '', $comma,
+                    $field['donor_title_prefix'] ?? '', $field['donor_title_suffix'] ?? '', $comma,
             );
-            self::$cache->delete_value("donor_title_$UserID");
+            self::$cache->delete_value("u_donor_$UserID");
         }
 
         for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
