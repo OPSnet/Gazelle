@@ -7,8 +7,10 @@ use Gazelle\Util\Crypto;
 if (PHP_VERSION_ID < 70427) {
     die("Gazelle (Orpheus fork) requires at least PHP version 7.4.27 or 8.1.2");
 }
-if (!extension_loaded('memcached')) {
-    die('memcached extension not loaded');
+foreach (['memcached', 'mysqli'] as $e) {
+    if (!extension_loaded($e)) {
+        die("$e extension not loaded");
+    }
 }
 date_default_timezone_set('UTC');
 

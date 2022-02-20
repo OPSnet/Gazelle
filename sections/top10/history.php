@@ -57,7 +57,7 @@ if (!empty($_GET['date'])) {
 
     $Details = $Cache->get_value("top10_history_$SQLTime");
     if ($Details === false) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 tht.sequence,
                 tht.TitleString,
@@ -86,8 +86,8 @@ if (!empty($_GET['date'])) {
             LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
             LEFT JOIN tags t ON (t.ID = tt.TagID)
             $Where
-            ORDER BY tht.sequence ASC");
-
+            ORDER BY tht.sequence ASC
+        ");
         $Details = $DB->to_array();
 
         $Cache->cache_value("top10_history_$SQLTime", $Details, 3600 * 24);
