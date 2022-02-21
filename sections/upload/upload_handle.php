@@ -16,9 +16,8 @@ if (!defined('AJAX')) {
 
 $Err = null;
 $Properties = [];
-$Type = CATEGORY[(int)$_POST['type']];
-$TypeID = $_POST['type'] + 1;
-$Properties['CategoryName'] = $Type;
+$categoryId = (int)$_POST['type'] + 1;
+$categoryName = CATEGORY[$categoryId - 1];
 $Properties['Title'] = isset($_POST['title']) ? trim($_POST['title']) : null;
 // Remastered is an Enum in the DB
 $Properties['Remastered'] = !empty($_POST['remaster']) ? '1' : '0';
@@ -79,7 +78,7 @@ if (!empty($_POST['requestid'])) {
 //******************************************************************************//
 //--------------- Validate data in upload form ---------------------------------//
 
-$isMusicUpload = ($Type === 'Music');
+$isMusicUpload = ($categoryName === 'Music');
 
 // common to all types
 $Validate = new Gazelle\Util\Validator;
@@ -104,7 +103,7 @@ if (isset($_POST['album_desc'])) {
 }
 
 // audio types
-if (in_array($Type, ['Music', 'Audiobooks', 'Comedy'])) {
+if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
     $Validate->setField('format', '1','inarray','Please select a valid format.', ['inarray'=>FORMAT]);
     if ($Properties['Encoding'] !== 'Other') {
         $Validate->setField('bitrate', '1','inarray','You must choose a bitrate.', ['inarray'=>ENCODING]);
@@ -122,7 +121,7 @@ if (in_array($Type, ['Music', 'Audiobooks', 'Comedy'])) {
 $feedType = ['torrents_all'];
 
 $releaseTypes = (new Gazelle\ReleaseType)->list();
-switch ($Type) {
+switch ($categoryName) {
     case 'Music':
         $Validate->setFields([
             ['groupid', '0', 'number', 'Group ID was not numeric'],
@@ -311,7 +310,6 @@ if ($Err) { // Show the upload form, with the data the user entered
     if (defined('AJAX')) {
         json_error($Err);
     } else {
-        $categoryId = $TypeID - 1;
         require(__DIR__ . '/upload.php');
         die();
     }
@@ -377,7 +375,7 @@ foreach ($FileList as $FileInfo) {
     }
     // Check file name and extension against blacklist/whitelist
     if (!$Err) {
-        $Err = $checker->checkFile($Type, $Name);
+        $Err = $checker->checkFile($categoryName, $Name);
     }
     // Make sure the filename is not too long
     if (mb_strlen($Name, 'UTF-8') + mb_strlen($DirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
@@ -441,7 +439,7 @@ if ($isMusicUpload) {
         foreach ($ExtraFileList as $ExtraFile) {
             ['path' => $ExtraName, 'size' => $ExtraSize] = $ExtraFile;
             if (!$Err) {
-                $Err = $checker->checkFile($Type, $ExtraName);
+                $Err = $checker->checkFile($categoryName, $ExtraName);
             }
             if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($ExtraDirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
                 $Err = "The torrent contained one or more files with too long of a name: <br />$ExtraDirName/$ExtraName";
@@ -477,7 +475,6 @@ if ($Err) {
     if (defined('AJAX')) {
         json_error($Err);
     } else {
-        $categoryId = $TypeID - 1;
         // TODO: Repopulate the form correctly
         require(__DIR__ . '/upload.php');
         die();
@@ -578,7 +575,7 @@ if (!$IsNewGroup) {
         INSERT INTO torrents_group
                (CategoryID, Name, Year, RecordLabel, CatalogueNumber, WikiBody, WikiImage, ReleaseType, VanityHouse)
         VALUES (?,          ?,    ?,    ?,           ?,               ?,        ?,         ?,           ?)
-        ', $TypeID, $Properties['Title'], $Properties['Year'], $Properties['RecordLabel'], $Properties['CatalogueNumber'],
+        ', $categoryId, $Properties['Title'], $Properties['Year'], $Properties['RecordLabel'], $Properties['CatalogueNumber'],
             $Properties['GroupDescription'], $Properties['Image'], $Properties['ReleaseType'], $Properties['VanityHouse']
     );
     $GroupID = $DB->inserted_id();
@@ -867,7 +864,7 @@ if (defined('AJAX')) {
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
         ->addArtists($tgroupMan->findById($GroupID)->artistRole()->roleList())
         ->addTags($tagList)
-        ->addCategory($Type)
+        ->addCategory($categoryName)
         ->addUser($Viewer)
         ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
 
@@ -984,7 +981,7 @@ if (!in_array('notifications', $Viewer->paranoia())) {
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
         ->addArtists($tgroupMan->findById($GroupID)->artistRole()->roleList())
         ->addTags($tagList)
-        ->addCategory($Type)
+        ->addCategory($categoryName)
         ->addUser($Viewer)
         ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
 
