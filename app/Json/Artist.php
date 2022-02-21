@@ -3,12 +3,24 @@
 namespace Gazelle\Json;
 
 class Artist extends \Gazelle\Json {
-    protected $artist;
-    protected $user;
-    protected $releasesOnly = false;
+    protected \Gazelle\Artist          $artist;
+    protected \Gazelle\User            $user;
+    protected \Gazelle\Manager\TGroup  $tgMan;
+    protected \Gazelle\Manager\Torrent $torMan;
+    protected bool $releasesOnly = false;
 
     public function setArtist(\Gazelle\Artist $artist) {
         $this->artist = $artist;
+        return $this;
+    }
+
+    public function setTGroupManager(\Gazelle\Manager\TGroup $tgMan) {
+        $this->tgMan = $tgMan;
+        return $this;
+    }
+
+    public function setTorrentManager(\Gazelle\Manager\Torrent $torMan) {
+        $this->torMan = $torMan;
         return $this;
     }
 
@@ -29,13 +41,7 @@ class Artist extends \Gazelle\Json {
         }
         $artistId = $this->artist->id();
         $this->artist->loadArtistRole();
-
         $GroupIDs = $this->artist->groupIds();
-        if (count($GroupIDs) > 0) {
-            $groupList = \Torrents::get_groups($GroupIDs, true, true);
-        } else {
-            $groupList = [];
-        }
 
         $JsonTorrents = [];
         $Tags = [];
@@ -43,87 +49,75 @@ class Artist extends \Gazelle\Json {
         $bookmark = new \Gazelle\Bookmark($this->user);
 
         foreach ($GroupIDs as $GroupID) {
-            if (!isset($groupList[$GroupID])) {
+            $tgroup = $this->tgMan->findById($GroupID);
+            if (is_null($tgroup)) {
                 continue;
             }
-            $Group = $groupList[$GroupID];
-            $Torrents = $Group['Torrents'] ?? [];
-            $artists = $Group['Artists'];
-
-            foreach ($artists as &$A) {
-                $A['id'] = (int)$A['id'];
-                $A['aliasid'] = (int)$A['aliasid'];
-            }
-
-            $ExtendedArtists = $Group['ExtendedArtists'];
-            foreach ($ExtendedArtists as &$artistGroup) {
-                if (is_null($artistGroup)) {
-                    continue;
-                }
-                foreach ($artistGroup as &$A) {
-                    $A['id'] = (int)$A['id'];
-                    $A['aliasid'] = (int)$A['aliasid'];
-                }
-            }
-
+            $artists = $tgroup->artistRole()->legacyList();
+            $artists = isset($artists[1]) ? $artists[1] : null;
             $Found = $this->search_array($artists, 'id', $artistId);
             if ($this->releasesOnly && empty($Found)) {
                 continue;
             }
 
-            $TagList = explode(' ', $Group['TagList']);
-            foreach ($TagList as $Tag) {
-                if (!isset($Tags[$Tag])) {
-                    $Tags[$Tag] = ['name' => $Tag, 'count' => 1];
-                } else {
-                    $Tags[$Tag]['count']++;
+            $tagList = $tgroup->tagNameList();
+            foreach ($tagList as $tag) {
+                if (!isset($Tags[$tag])) {
+                    $Tags[$tag] = ['name' => $tag, 'count' => 0];
                 }
+                $Tags[$tag]['count']++;
             }
+
+            $torrentIds = $tgroup->torrentIdList();
             $InnerTorrents = [];
-            foreach ($Torrents as $Torrent) {
+            foreach ($torrentIds as $torrentId) {
+                $torrent = $this->torMan->findById($torrentId);
+                if (is_null($torrent)) {
+                    continue;
+                }
                 $NumTorrents++;
-                $NumSeeders += $Torrent['Seeders'];
-                $NumLeechers += $Torrent['Leechers'];
-                $NumSnatches += $Torrent['Snatched'];
+                $NumSeeders += $torrent->seederTotal();
+                $NumLeechers += $torrent->leecherTotal();
+                $NumSnatches += $torrent->snatchTotal();
 
                 $InnerTorrents[] = [
-                    'id' => (int)$Torrent['ID'],
-                    'groupId' => (int)$Torrent['GroupID'],
-                    'media' => $Torrent['Media'],
-                    'format' => $Torrent['Format'],
-                    'encoding' => $Torrent['Encoding'],
-                    'remasterYear' => (int)$Torrent['RemasterYear'],
-                    'remastered' => $Torrent['Remastered'] == 1,
-                    'remasterTitle' => $Torrent['RemasterTitle'],
-                    'remasterRecordLabel' => $Torrent['RemasterRecordLabel'],
-                    'scene' => $Torrent['Scene'] == 1,
-                    'hasLog' => $Torrent['HasLog'] == 1,
-                    'hasCue' => $Torrent['HasCue'] == 1,
-                    'logScore' => (int)$Torrent['LogScore'],
-                    'fileCount' => (int)$Torrent['FileCount'],
-                    'freeTorrent' => $Torrent['FreeTorrent'] == 1,
-                    'size' => (int)$Torrent['Size'],
-                    'leechers' => (int)$Torrent['Leechers'],
-                    'seeders' => (int)$Torrent['Seeders'],
-                    'snatched' => (int)$Torrent['Snatched'],
-                    'time' => $Torrent['Time'],
-                    'hasFile' => (int)$Torrent['HasFile']
+                    'id'                   => $torrent->id(),
+                    'groupId'              => $GroupID,
+                    'media'                => $torrent->media(),
+                    'format'               => $torrent->format(),
+                    'encoding'             => $torrent->encoding(),
+                    'remasterYear'         => (int)$torrent->remasterYear(),
+                    'remastered'           => $torrent->isRemastered(),
+                    'remasterTitle'        => (string)$torrent->remasterTitle(),
+                    'remasterRecordLabel'  => (string)$torrent->remasterRecordLabel(),
+                    'scene'                => $torrent->isScene(),
+                    'hasLog'               => $torrent->hasLog(),
+                    'hasCue'               => $torrent->hasCue(),
+                    'logScore'             => $torrent->logScore(),
+                    'fileCount'            => $torrent->fileTotal(),
+                    'freeTorrent'          => $torrent->isFreeleech(),
+                    'size'                 => $torrent->size(),
+                    'leechers'             => $torrent->leecherTotal(),
+                    'seeders'              => $torrent->seederTotal(),
+                    'snatched'             => $torrent->snatchTotal(),
+                    'time'                 => $torrent->uploadDate(),
+                    'hasFile'              => $torrent->id(), /* legacy wtf */
                 ];
             }
             $JsonTorrents[] = [
                 'groupId'              => $GroupID,
-                'groupName'            => $Group['Name'],
-                'groupYear'            => $Group['Year'],
-                'groupRecordLabel'     => $Group['RecordLabel'],
-                'groupCatalogueNumber' => $Group['CatalogueNumber'],
-                'groupCategoryID'      => $Group['CategoryID'],
-                'tags'                 => $TagList,
-                'releaseType'          => (int)$Group['ReleaseType'],
-                'wikiImage'            => $Group['WikiImage'],
-                'groupVanityHouse'     => $Group['VanityHouse'] == 1,
+                'groupName'            => $tgroup->name(),
+                'groupYear'            => $tgroup->year(),
+                'groupRecordLabel'     => $tgroup->recordLabel(),
+                'groupCatalogueNumber' => $tgroup->catalogueNumber(),
+                'groupCategoryID'      => $tgroup->categoryId(),
+                'tags'                 => $tagList,
+                'releaseType'          => (int)$tgroup->releaseType(),
+                'wikiImage'            => $tgroup->image(),
+                'groupVanityHouse'     => $tgroup->isShowcase(),
                 'hasBookmarked'        => $bookmark->isTorrentBookmarked($GroupID),
                 'artists'              => $artists,
-                'extendedArtists'      => $ExtendedArtists,
+                'extendedArtists'      => $tgroup->artistRole()->legacyList(),
                 'torrent'              => $InnerTorrents,
             ];
         }
@@ -173,7 +167,7 @@ class Artist extends \Gazelle\Json {
             'tags'           => array_values($Tags),
             'similarArtists' => $JsonSimilar,
             'statistics' => [
-                'numGroups'   => count($groupList),
+                'numGroups'   => count($GroupIDs),
                 'numTorrents' => $NumTorrents,
                 'numSeeders'  => $NumSeeders,
                 'numLeechers' => $NumLeechers,
@@ -185,7 +179,7 @@ class Artist extends \Gazelle\Json {
         ];
     }
 
-    protected function search_array($Array, $Key, $Value) {
+    protected function search_array($Array, $Key, $Value): array {
         $Results = [];
         if (is_array($Array)) {
             if (isset($Array[$Key]) && $Array[$Key] == $Value) {

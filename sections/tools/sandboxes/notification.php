@@ -32,7 +32,7 @@ if (isset($_POST['torrentid'])) {
             ->addEncodings($torrent['Encoding'])
             ->addMedia($torrent['Media'])
             ->addYear($group['Year'], $torrent['RemasterYear'])
-            ->addArtists($tgroup->artistRole())
+            ->addArtists($tgroup->artistRole()->roleList())
             ->addTags($tags)
             ->addCategory($category)
             ->addUser(new Gazelle\User($torrent['UserID']))

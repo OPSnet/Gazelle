@@ -210,7 +210,7 @@ $Index++;
     </div>
 <?php
 if ($musicRelease) {
-    $role = $tgroup->artistRole();
+    $role = $tgroup->artistRole()->roleList();
 ?>
         <div class="box box_artists">
             <div class="head"><strong>Artists</strong>

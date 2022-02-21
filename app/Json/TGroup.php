@@ -21,7 +21,7 @@ class TGroup extends \Gazelle\Json {
         if ($tgroup->categoryId() != 1) {
             $musicInfo = null;
         } else {
-            $role = $tgroup->artistRoleId();
+            $role = $tgroup->artistRole()->idList();
             $musicInfo = [
                 'artists'   => $role[1] ?? [],
                 'with'      => $role[2] ?? [],
