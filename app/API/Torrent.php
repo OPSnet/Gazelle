@@ -33,7 +33,7 @@ class Torrent extends AbstractAPI {
             'Year'           => $tgroup->year(),
             'ReleaseTypeID'  => $tgroup->releaseType(),
             'ReleaseType'    => $tgroup->releaseTypeName(),
-            'Artists'        => $tgroup->artistRoleId(),
+            'Artists'        => $tgroup->artistRole()->idList(),
             'DisplayArtists' => $tgroup->artistName(),
             'Media'          => $torrent->media(),
             'Format'         => $torrent->format(),
@@ -57,7 +57,7 @@ class Torrent extends AbstractAPI {
             'Year'           => $tgroup->year(),
             'ReleaseTypeID'  => $tgroup->releaseType(),
             'ReleaseType'    => $tgroup->releaseTypeName(),
-            'Artists'        => $tgroup->artistRoleId(),
+            'Artists'        => $tgroup->artistRole()->idList(),
             'DisplayArtists' => $tgroup->artistName(),
         ];
     }

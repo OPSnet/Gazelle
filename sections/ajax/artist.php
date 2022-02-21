@@ -36,6 +36,8 @@ if (isset($_GET['id'])) {
 
 (new Gazelle\Json\Artist)->setViewer($Viewer)
     ->setArtist($artist)
+    ->setTGroupManager(new Gazelle\Manager\TGroup)
+    ->setTorrentManager(new Gazelle\Manager\Torrent)
     ->setReleasesOnly(!empty($_GET['artistreleases']))
     ->setVersion(2)
     ->emit();

@@ -13,10 +13,11 @@ class TGroup extends BaseObject {
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
 
-    protected $artistDisplay = self::ARTIST_DISPLAY_HTML;
-    protected $revisionId = 0;
-    protected $showFallbackImage = true;
-    protected $viewer;
+    protected int $artistDisplay = self::ARTIST_DISPLAY_HTML;
+    protected int $revisionId = 0;
+    protected bool $showFallbackImage = true;
+    protected ArtistRole\TGroup $artistRole;
+    protected User $viewer;
     protected array $info;
     protected array $releaseTypes;
 
@@ -151,12 +152,6 @@ class TGroup extends BaseObject {
                 $cached['Flags'] = [
                     'IsSnatched' => $this->fetchIsSnatched(),
                 ];
-                if (!isset($cached['artist'])) {
-                    $artistRole = new ArtistRole\TGroup($this->id);
-                    $cached['artist'] = $artistRole->roleList();
-                    $cached['role_id'] = $artistRole->idList();
-                    $refresh = true;
-                }
                 if (!isset($cached['torrent_list'])) {
                     self::$db->prepared_query("
                         SELECT t.ID
@@ -240,10 +235,6 @@ class TGroup extends BaseObject {
             ];
         }
 
-        $artistRole = new ArtistRole\TGroup($this->id);
-        $info['artist'] = $artistRole->roleList();
-        $info['role_id'] = $artistRole->idList();
-
         self::$db->prepared_query("
             SELECT t.ID
             FROM torrents t
@@ -271,7 +262,7 @@ class TGroup extends BaseObject {
     }
 
     protected function fetchIsSnatched(): bool {
-        return $this->viewer && $this->viewer->option('ShowSnatched') && (bool)self::$db->scalar("
+        return isset($this->viewer) && $this->viewer->option('ShowSnatched') && (bool)self::$db->scalar("
             SELECT 1
             FROM torrents_group tg
             WHERE exists(
@@ -290,22 +281,11 @@ class TGroup extends BaseObject {
         return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
     }
 
-    /**
-     * Get artist list
-     *
-     * return array artists grouped by role
-     */
-    public function artistRole(): array {
-        return $this->info()['artist'];
-    }
-
-    /**
-     * Get artist list by id
-     *
-     * return array artists grouped by role id
-     */
-    public function artistRoleId(): array {
-        return $this->info()['role_id'];
+    public function artistRole(): ArtistRole\TGroup {
+        if (!isset($this->artistRole)) {
+            $this->artistRole = new ArtistRole\TGroup($this->id);
+        }
+        return $this->artistRole;
     }
 
     public function catalogueNumber(): ?string {
@@ -553,7 +533,7 @@ class TGroup extends BaseObject {
             return $nameCache[$renderMode][$this->id];
         }
 
-        $roleList = $this->artistRole();
+        $roleList = $this->artistRole()->roleList();
         $composerCount = count($roleList['composer']);
         $conductorCount = count($roleList['conductor']);
         $arrangerCount = count($roleList['arranger']);
@@ -661,6 +641,10 @@ class TGroup extends BaseObject {
     }
 
     public function removeArtist(int $artistId, int $role): bool {
+        if (!isset($this->viewer)) {
+            // we don't know who you are
+            return false;
+        }
         self::$db->prepared_query('
             DELETE FROM torrents_artists
             WHERE GroupID = ?

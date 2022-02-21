@@ -38,7 +38,7 @@ class UserRecent extends \Gazelle\Json {
                     'ID'        => $tgroup->id(),
                     'Name'      => $tgroup->name(),
                     'WikiImage' => $tgroup->image(),
-                    'artists'   => $tgroup->artistRoleId(),
+                    'artists'   => $tgroup->artistRole()->idList(),
                 ];
             }
         }
