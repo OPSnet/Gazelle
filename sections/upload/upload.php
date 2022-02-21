@@ -13,7 +13,6 @@ ini_set('max_file_uploads', '100');
 
 if (!isset($Properties)) {
     $requestId = (int)($_GET['requestid'] ?? 0);
-    $categoryId = false;
     if ((int)($_GET['groupid'] ?? 0)) {
         $addTgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
         if (is_null($addTgroup)) {
@@ -54,11 +53,6 @@ if (!isset($Properties)) {
                 'TagList'          => implode(', ', $addRequest->tagNameList()),
             ];
         }
-    }
-    if ($categoryId !== false) {
-        $Properties['CategoryName'] = CATEGORY[$categoryId - 1];
-    } else {
-        unset($categoryId);
     }
 }
 
