@@ -1,6 +1,6 @@
 <?php
-$top10 = new \Gazelle\Top10\User;
 
+$top10 = new Gazelle\Top10\User;
 $tables = [
     'ul' => [
         'Title' => 'Uploaders',
@@ -33,39 +33,24 @@ $tables = [
 ];
 
 $details = $_GET['details'] ?? 'all';
-$details = in_array($details, $tables) ? $details : 'all';
+$details = isset($tables[$details]) ? $details : 'all';
 
 $limit = $_GET['limit'] ?? 10;
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
-View::show_header('Top 10 Users');
+View::show_header("Top $limit Users");
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Top 10 Users</h2>
+        <h2>Top <?= $limit ?> Users</h2>
         <?= $Twig->render('top10/linkbox.twig', ['selected' => 'users']) ?>
     </div>
 <?php
 
 foreach ($tables as $tag => $table) {
     if ($details === 'all' || $details === $tag) {
-        $results = $top10->fetch($table['Type'], $limit);
-        $rank = 0;
-        foreach ($results as &$result) {
-            $result['username'] = Users::format_username($result['id'], false, false, false);
-            $result['num_uploads'] = number_format($result['num_uploads']);
-            $result['request_fills'] = number_format($result['request_fills']);
-            $result['ratio'] = Format::get_ratio_html($result['uploaded'], $result['downloaded']);
-            $result['join_date'] = time_diff($result['join_date']);
-            $result['rank'] = ++$rank;
-            foreach (['uploaded', 'up_speed', 'downloaded', 'down_speed', 'request_votes'] as $key) {
-                $result[$key] = Format::get_size($result[$key]);
-            }
-        }
-        unset($result);
-
         echo($Twig->render('top10/users.twig', [
-            'results' => $results,
+            'results' => $top10->fetch($table['Type'], $limit),
             'limit'   => $limit,
             'tag'     => $tag,
             'title'   => $table['Title']

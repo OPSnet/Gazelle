@@ -1,11 +1,11 @@
-<h3>Top {{ limit }}  {{ title }}
+<h3>Top {{ limit }} {{ title }}
     <small class="top10_quantity_links">
         {% if limit == 100 %}
-            - <a href="top10.php?type=users&amp;details={{ tag }}" class="brackets">Top 10</a>
+            - <a href="top10.php?type=users" class="brackets">Top 10</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=users&amp;limit=250&amp;details={{ tag }}" class="brackets">Top 250</a>
         {% elseif limit == 250 %}
-            - <a href="top10.php?type=users&amp;details={{ tag }}" class="brackets">Top 10</a>
+            - <a href="top10.php?type=users" class="brackets">Top 10</a>
             - <a href="top10.php?type=users&amp;limit=100&amp;details={{ tag }}" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
         {% else %}
@@ -39,17 +39,17 @@
 {% else %}
     {% for row in results %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-        <td class="center">{{ row.sequence }}</td>
-        <td>{{ row.username|raw }}</td>
-        <td class="number_column">{{ row.uploaded }}</td>
-        <td class="number_column tooltip" title="Upload speed is reported in base 2 in bytes per second, not bits per second.">{{ row.up_speed }}/s</td>
-        <td class="number_column">{{ row.downloaded }}</td>
-        <td class="number_column tooltip" title="Download speed is reported in base 2 in bytes per second, not bits per second.">{{ row.down_speed }}/s</td>
-        <td class="number_column">{{ row.request_votes }}</td>
-        <td class="number_column">{{ row.request_fills }}</td>
-        <td class="number_column">{{ row.num_uploads }}</td>
-        <td class="number_column">{{ row.ratio|raw }}</td>
-        <td class="number_column">{{ row.join_date|raw }}</td>
+        <td class="center">{{ loop.index }}</td>
+        <td>{{ row.id|user_url }}</td>
+        <td class="number_column">{{ row.uploaded|octet_size(3) }}</td>
+        <td class="number_column tooltip" title="Upload speed is reported in base 2 in bytes per second, not bits per second.">{{ row.up_speed|octet_size(3) }}/s</td>
+        <td class="number_column">{{ row.downloaded|octet_size(3) }}</td>
+        <td class="number_column tooltip" title="Download speed is reported in base 2 in bytes per second, not bits per second.">{{ row.down_speed|octet_size(3) }}/s</td>
+        <td class="number_column">{{ row.request_votes|octet_size(3) }}</td>
+        <td class="number_column">{{ row.request_fills|number_format }}</td>
+        <td class="number_column">{{ row.num_uploads|number_format }}</td>
+        <td class="number_column">{{ ratio(row.uploaded, row.downloaded) }}</td>
+        <td class="number_column">{{ row.join_date|time_diff }}</td>
     </tr>
     {% endfor %}
 </table><br />
