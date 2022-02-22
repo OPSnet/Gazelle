@@ -308,4 +308,23 @@ class TGroup extends \Gazelle\Base {
     public function featuredAlbumShowcase(): array {
         return $this->featuredAlbum(self::FEATURED_SHOWCASE);
     }
+
+    public function groupLog(int $groupId): array {
+        self::$db->prepared_query("
+            SELECT gl.TorrentID        AS torrent_id,
+                gl.UserID              AS user_id,
+                gl.Info                AS info,
+                gl.Time                AS created,
+                t.Media                AS media,
+                t.Format               AS format,
+                t.Encoding             AS encoding,
+                if(t.ID IS NULL, 1, 0) AS deleted
+            FROM group_log gl
+            LEFT JOIN torrents t ON (t.ID = gl.TorrentID)
+            WHERE gl.GroupID = ?
+            ORDER BY gl.Time DESC
+            ", $groupId
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }

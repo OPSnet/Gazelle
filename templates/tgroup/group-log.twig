@@ -1,0 +1,33 @@
+{{ header("History for Group " ~ group_id) }}
+<div class="thin">
+    <div class="header">
+        <h2>History for {{ title|raw }}</h2>
+    </div>
+    <table>
+        <tr class="colhead">
+            <td>Date</td>
+            <td>Torrent</td>
+            <td>User</td>
+            <td>Info</td>
+        </tr>
+{% for entry in log %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td>{{ entry.created }}</td>
+    {%- if not entry.torrent_id %}
+            <td></td>
+    {%- else %}
+            <td><a href="torrents.php?torrentid={{ entry.torrent_id }}">{{ entry.torrent_id }}</a>
+        {%- if entry.deleted %} (Deleted)
+        {%- else %}
+            {%- if entry.media %} ({{ entry.media }}/{{ entry.format }}/{{ entry.encoding }})
+            {%- endif %}
+        {%- endif %}
+            </td>
+    {%- endif %}
+        <td>{{ entry.user_id|user_url }}</td>
+        <td>{{ entry.info }}</td>
+    </tr>
+{% endfor %}
+    </table>
+</div>
+{{ footer() }}
