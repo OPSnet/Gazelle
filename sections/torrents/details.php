@@ -110,7 +110,7 @@ if ($Viewer->permitted('site_submit_requests')) {
             <a href="requests.php?action=new&amp;groupid=<?=$GroupID?>" class="brackets">Request format</a>
 <?php } ?>
             <a href="<?= $tgroup->url() ?>&amp;action=history" class="brackets">View history</a>
-            <a href="<?= $tgroup->url() ?>&amp;action=grouplog&amp;" class="brackets">View log</a>
+            <a href="<?= $tgroup->url() ?>&amp;action=grouplog" class="brackets">View log</a>
         </div>
     </div>
     <div class="sidebar">
