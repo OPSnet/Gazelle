@@ -142,13 +142,21 @@ abstract class AbstractCollage extends \Gazelle\Base {
         if (empty($series)) {
             return 0;
         }
+        self::$db->prepared_query("
+            SELECT {$this->entryColumn()} AS cID,
+                UserID
+            FROM {$this->entryTable()}
+            WHERE CollageID = ?
+            ", $this->id
+        );
+        $userMap = self::$db->to_pair('cID', 'UserID');
         $id = $this->id;
-        $args = array_merge(...array_map(function ($sort, $entryId) use ($id) {
-            return [(int)$entryId, ($sort + 1) * 10, $id];
+        $args = array_merge(...array_map(function ($sort, $entryId) use ($id, $userMap) {
+            return [(int)$entryId, ($sort + 1) * 10, $id, $userMap[$entryId]];
         }, array_keys($series), $series));
         self::$db->prepared_query("
-            INSERT INTO {$this->entryTable()} ({$this->entryColumn()}, Sort, CollageID)
-            VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?)')) . "
+            INSERT INTO {$this->entryTable()} ({$this->entryColumn()}, Sort, CollageID, UserID)
+            VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?, ?)')) . "
             ON DUPLICATE KEY UPDATE Sort = VALUES(Sort)
             ", ...$args
         );
