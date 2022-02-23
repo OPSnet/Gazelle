@@ -128,6 +128,7 @@ class Wiki extends BaseObject {
         if (!$this->dirty()) {
             return false;
         }
+        self::$db->begin_transaction();
         self::$db->prepared_query("
             INSERT INTO wiki_revisions
                   (ID, Revision, Title, Body, Author, Date)
@@ -138,9 +139,15 @@ class Wiki extends BaseObject {
             LIMIT 1
             ", $this->id
         );
+        $revision = self::$db->scalar("
+            SELECT 1 + max(Revision) FROM wiki_articles WHERE ID = ?
+            ", $this->id
+        );
         $this->setUpdateRaw('Date = now()')
-            ->setUpdatePassThru('Revision = 1 + (SELECT max(Revision) FROM wiki_articles WHERE ID = ?)', $this->id);
-        return parent::modify();
+            ->setUpdate('Revision', $revision);
+        $success = parent::modify();
+        self::$db->commit();
+        return $success;
     }
 
     /**
