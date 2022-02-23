@@ -241,4 +241,42 @@ class User extends \Gazelle\BaseObject {
     public function uploadTotal(): int {
         return $this->general()['upload_total'];
     }
+
+    public function timeline(): array {
+        $key = "u_statgraphs_" . $this->id;
+        $charts = self::$cache->get_value($key);
+        if ($charts === false) {
+            $charts = [
+                ['name' => 'daily',   'interval' => 1,      'count' => 24],
+                ['name' => 'monthly', 'interval' => 24,     'count' => 30],
+                ['name' => 'yearly',  'interval' => 24 * 7, 'count' => 52],
+            ];
+            foreach ($charts as &$chart) {
+                self::$db->prepared_query("
+                    SELECT unix_timestamp(Time) * 1000 AS epoch,
+                        Uploaded              AS data_up,
+                        Downloaded            AS data_down,
+                        Uploaded - Downloaded AS buffer,
+                        BonusPoints           AS bp,
+                        Torrents              AS uploads,
+                        PerfectFLACs          AS perfect
+                    FROM users_stats_{$chart['name']}
+                    WHERE UserID = ?
+                    ORDER BY Time DESC
+                    LIMIT ?
+                    ", $this->id, $chart['count']
+                );
+                $stats = array_reverse(self::$db->to_array(false, MYSQLI_ASSOC, false));
+                $timeline = array_column($stats, 'epoch');
+                foreach(['data_up', 'data_down', 'buffer', 'bp', 'uploads', 'perfect'] as $dimension) {
+                    $series = array_column($stats, $dimension);
+                    $chart[$dimension] = array_map(fn($n) => [$timeline[$n], $series[$n]], range(0, count($series)-1));
+                }
+                $chart['start'] = $timeline[0] ?? null;
+                unset($chart);
+            }
+            self::$cache->cache_value($key, $charts, 3600);
+        }
+        return $charts;
+    }
 }
