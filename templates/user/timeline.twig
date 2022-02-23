@@ -1,0 +1,76 @@
+{{ header('User Stats', {'js': 'highcharts,highcharts_custom'}) }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+{% for c in charts %}
+    {% if c.count %}
+    initialiseChart('{{ c.name }}-stats', '{{ c.name|ucfirst }} Stats', [
+    {
+        name: 'Downloaded',
+        data: {{ c.data_down|json_encode }},
+    },{
+        name: 'Uploaded',
+        data: {{ c.data_up|json_encode }},
+    },{
+        name: 'Buffer',
+        data: {{ c.buffer|json_encode }},
+    }], {bytes: true});
+
+    initialiseChart('{{ c.name }}-bp', '{{ c.name|ucfirst }} Bonus Points', [
+    {
+        name: 'Bonus Points',
+        data: {{ c.bp|json_encode }},
+    }]);
+
+    initialiseChart('{{ c.name }}-upload', '{{ c.name|ucfirst }} Uploads', [
+    {
+        name: 'Torrents',
+        data: {{ c.uploads|json_encode }},
+    },{
+        name: 'Perfect FLACs',
+        data: {{ c.perfect|json_encode }},
+    }]);
+    {% endif %}
+{% endfor %}
+});
+</script>
+
+<div class="box">
+    <div class="header">
+        <h2>{{ user.id|user_full }}</h2>
+    </div>
+    <div class="linkbox">
+{% set own_profile = (user.id == viewer.id) %}
+{% if own_profile %}
+        <a href="inbox.php?action=compose&amp;toid={{ user.id }}" class="brackets">Send message</a>
+        <a href="reports.php?action=report&amp;type=user&amp;id={{ user.id }}" class="brackets">Report user</a>
+{% endif %}
+{% if viewer.permitted('admin_reports') %}
+        <a href="reportsv2.php?view=reporter&amp;id={{ user.id }}" class="brackets">Reports</a>
+{% endif %}
+{% if viewer.permitted('users_mod') %}
+        <a href="userhistory.php?action=token_history&amp;userid={{ user.id }}" class="brackets">FL tokens</a>
+{% endif %}
+{% if viewer.permitted('users_mod') or (own_profile and viewer.permitted('site_user_stats')) %}
+        <a href="user.php?action=stats&amp;userid={{ user.id }}" class="brackets">Stats</a>
+{% endif %}
+    </div>
+</div>
+
+{% for c in charts %}
+<div class="box">
+    <div class="pad">
+    {% if user.id %}
+        <div id="{{ c.name }}-stats" style="width: 100%; height: 400px"></div>
+        <br />
+        <div id="{{ c.name }}-bp" style="width: 100%; height: 400px"></div>
+        <br />
+        <div id="{{ c.name }}-upload" style="width: 100%; height: 400px"></div>
+    {% else %}
+        No stats available.
+    {% endif %}
+    </div>
+</div>
+{% endfor %}
+{{ footer() }}
+
