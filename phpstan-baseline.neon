@@ -518,9 +518,3 @@ parameters:
 			message: "#^Cannot access offset 'totalUpload' on false\\.$#"
 			count: 1
 			path: app/Stats/Economic.php
-
-		-
-			message: "#^Part \\$attr \\(array\\<int, string\\>&nonEmpty\\) of encapsed string cannot be cast to string\\.$#"
-			count: 1
-			path: classes/torrents.class.php
-

@@ -369,6 +369,7 @@ class Torrents {
     }
 
     public static function bbcodeUrl($val, $attr) {
+        $val = trim($val);
         $cacheKey = 'bbcode_torrent_' . $val;
         if ($attr) {
             $cacheKey .= '_' . $attr;
