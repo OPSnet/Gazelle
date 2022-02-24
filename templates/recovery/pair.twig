@@ -1,0 +1,101 @@
+{{ header('Recovery pair users') }}
+<div class="thin">
+
+<div class="linkbox">
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
+    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
+</div>
+
+{% if message %}
+<div class="box">
+    <div class="head">Result</div>
+    <div>{{ message }}</div>
+</div>
+{% elseif confirm %}
+<div class="box">
+    <div class="head">Confirm</div>
+
+    <form method="post" action="/recovery.php?action=pair">
+    <p>Please confirm the following pairing:<p>
+    <table>
+        <tr><th></th><th>Previous</th><th>{{ constant('SITE_NAME') }}</th>
+
+        <tr>
+            <th>ID</th>
+            <td>{{ prev.ID }}</td>
+            <td>{{ confirm.ID }}</td>
+        </tr>
+
+        <tr>
+            <th>Username</th>
+            <td>{{ prev.Username }}</td>
+            <td>{{ confirm.Username }}</td>
+        </tr>
+
+        <tr>
+            <th>Userclass</th>
+            <td>{{ prev.UserClass }}</td>
+            <td>{{ confirm.UserClass }}</td>
+        </tr>
+
+        <tr>
+            <th>Email</th>
+            <td>{{ prev.Email }}</td>
+            <td>{{ confirm.Email }}</td>
+        </tr>
+
+        <tr>
+            <th>Announce</th>
+            <td>{{ prev.torrent_pass }}</td>
+            <td>{{ confirm.torrent_pass }}</td>
+        </tr>
+
+        <tr>
+            <th>Torrents</th>
+            <td>{{ prev.nr_torrents }}</td>
+            <td>{{ confirm.nr_torrents }}</td>
+        </tr>
+
+        <tr>
+            <td colspan="3"><input type="submit" value="Confirm" /></td>
+        </tr>
+
+    </table>
+
+    <input type="hidden" name="curr" value="{{ curr_id }}" />
+    <input type="hidden" name="prev" value="{{ prev_id }}" />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    </form>
+</div>
+{% endif %}
+
+<div class="box">
+    <div class="head">Pair {{ constant('SITE_NAME') }} user</div>
+
+    <p>In the following section you will be asked to pair a user on {{ constant('SITE_NAME') }} with their original account on the previous site.
+    Once this assocation has been recorded, torrents, buffer, bookmarks etc, from the previous account will be assigned to
+    the {{ constant('SITE_NAME') }} account.</p>
+
+    <div class="pad">
+        <form method="post" action="/recovery.php?action=pair">
+        <table>
+            <tr>
+                <th>{{ constant('SITE_NAME') }} ID</th>
+                <td><input type="text" name="curr" width="10" value="{{ curr_id }}" /></td>
+            </tr>
+            <tr>
+                <th>Previous ID</th>
+                <td><input type="text" name="prev" width="10" value="{{ prev_id }}" /></td>
+            </tr>
+        </table>
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="submit" value="Pair" />
+        </form>
+    </div>
+</div>
+{{ footer() }}
