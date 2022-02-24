@@ -389,7 +389,7 @@ class Recovery extends Base {
     }
 
     public function isMapped(int $ID): array {
-        self::$db->prepared_query(sprintf("SELECT mapped_id AS ID FROM %s.%s WHERE UserID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
+        self::$db->prepared_query(sprintf("SELECT mapped_id AS ID FROM %s.%s WHERE user_id = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
         return self::$db->to_array();
     }
 
@@ -432,7 +432,7 @@ class Recovery extends Base {
                     0
                 ) as new_up
             FROM (
-                SELECT uam.MappedID, uam.UserID,
+                SELECT uam.mapped_id, uam.user_id,
                     u.Username,
                     u.Uploaded,
                     u.Downloaded,
@@ -447,7 +447,7 @@ class Recovery extends Base {
                     FROM %s.requests_votes
                     GROUP BY UserID
                 ) r ON (r.UserID = u.ID)
-                INNER JOIN %s.%s uam ON (uam.UserID = u.ID)
+                INNER JOIN %s.%s uam ON (uam.user_id = u.ID)
                 LEFT  JOIN %s.%s irc ON (irc.UserID = u.ID)
                 LEFT  JOIN recovery_buffer rb ON (rb.prev_id = u.ID)
                 WHERE NOT uam.buffer
