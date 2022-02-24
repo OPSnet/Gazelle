@@ -19,7 +19,7 @@ switch ($title) {
         if (is_null($user)) {
             error(404);
         }
-        $ids = (new Gazelle\Seedbox($user))
+        $ids = (new Gazelle\User\Seedbox($user))
             ->setSource($_GET['s'] ?? '')
             ->setTarget($_GET['t'] ?? '')
             ->setUnion($_GET['m'] === 'union')
