@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Seedbox extends BaseUser {
+class Seedbox extends \Gazelle\BaseUser {
 
     protected const SUMMARY_KEY = 'seedbox_summary_';
 
@@ -17,7 +17,7 @@ class Seedbox extends BaseUser {
     protected int $target;
     protected int $viewBy = self::VIEW_BY_NAME;
 
-    public function __construct(User $user) {
+    public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
         $this->hashid = new \Hashids\Hashids(SEEDBOX_SALT);
         $this->build();
@@ -105,16 +105,18 @@ class Seedbox extends BaseUser {
     }
 
     public function total(): int {
-        return self::$db->scalar("
-            SELECT count(*) " . $this->buildFrom(),
-            $this->user->id(), $this->source, $this->user->id(), $this->target
-        );
+        return !(isset($this->source) && isset($this->target))
+            ? 0
+            : self::$db->scalar("
+                SELECT count(*) " . $this->buildFrom(),
+                $this->user->id(), $this->source, $this->user->id(), $this->target
+            );
     }
 
     /**
      * Get a page of torrents. Source and target must be set.
      */
-    public function torrentList(Manager\Torrent $torMan, int $limit, int $offset): array {
+    public function torrentList(\Gazelle\Manager\Torrent $torMan, int $limit, int $offset): array {
         $from = $this->buildFrom();
         $orderBy = ['tg.Name', 't.FilePath'][$this->viewBy];
         self::$db->prepared_query("
@@ -265,7 +267,7 @@ class Seedbox extends BaseUser {
         $nameList = self::$db->to_array('client', MYSQLI_ASSOC, false);
         $h = $this->hashid;
         foreach ($nameList as &$n) {
-            $n['id'] = $h->encode($n['id']); 
+            $n['id'] = $h->encode($n['id']);
         }
 
         // go through all the peers and use a name if we have one,
