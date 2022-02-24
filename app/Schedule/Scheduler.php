@@ -49,12 +49,12 @@ class Scheduler extends \Gazelle\Base {
             return;
         }
 
-        self::$db->prepared_query('
+        self::$db->prepared_query("
             INSERT INTO periodic_task
                    (name, classname, description, period, is_enabled, is_sane, is_debug)
             VALUES
                    (?,    ?,         ?,           ?,      ?,          ?,       ?)
-        ', $name, $class, $description, $period, $isEnabled, $isSane, $isDebug);
+        ", $name, $class, $description, $period, $isEnabled, $isSane, $isDebug);
         $this->flush();
     }
 
@@ -63,9 +63,9 @@ class Scheduler extends \Gazelle\Base {
             return;
         }
 
-        self::$db->prepared_query('
-            UPDATE periodic_task
-            SET name = ?,
+        self::$db->prepared_query("
+            UPDATE periodic_task SET
+                name = ?,
                 classname = ?,
                 description = ?,
                 period = ?,
@@ -73,42 +73,41 @@ class Scheduler extends \Gazelle\Base {
                 is_sane = ?,
                 is_debug = ?
             WHERE periodic_task_id = ?
-        ', $name, $class, $description, $period, $isEnabled ? 1 : 0, $isSane ? 1 : 0, $isDebug ? 1 : 0, $id);
+        ", $name, $class, $description, $period, $isEnabled ? 1 : 0, $isSane ? 1 : 0, $isDebug ? 1 : 0, $id);
         $this->flush();
     }
 
     public function runNow(int $id) {
-        self::$db->prepared_query('
-            UPDATE periodic_task
-            SET run_now = 1 - run_now
+        self::$db->prepared_query("
+            UPDATE periodic_task SET
+                run_now = 1 - run_now
             WHERE periodic_task_id = ?
-            ', $id
+            ", $id
         );
         $this->flush();
     }
 
     public function deleteTask(int $id) {
-        self::$db->prepared_query('
-            DELETE FROM periodic_task
-            WHERE periodic_task_id = ?
-        ', $id);
+        self::$db->prepared_query("
+            DELETE FROM periodic_task WHERE periodic_task_id = ?
+        ", $id);
         $this->flush();
     }
 
     public function getTaskDetails(int $days = 7): array {
         self::$db->prepared_query("
             SELECT pt.periodic_task_id, name, description, period, is_enabled, is_sane, run_now,
-                   coalesce(stats.runs, 0) runs, coalesce(stats.processed, 0) processed,
-                   coalesce(stats.errors, 0) errors, coalesce(events.events, 0) events,
-                   coalesce(pth.launch_time, '') last_run,
-                   coalesce(pth.duration_ms, 0) duration,
-                   coalesce(pth.status, '') status,
-                   if(pth.launch_time is null, now(), pth.launch_time + INTERVAL period SECOND) AS next_run
+                coalesce(stats.runs, 0) runs, coalesce(stats.processed, 0) processed,
+                coalesce(stats.errors, 0) errors, coalesce(events.events, 0) events,
+                coalesce(pth.launch_time, '') last_run,
+                coalesce(pth.duration_ms, 0) duration,
+                coalesce(pth.status, '') status,
+                if(pth.launch_time is null, now(), pth.launch_time + INTERVAL period SECOND) AS next_run
             FROM periodic_task pt
             LEFT JOIN
             (
                 SELECT periodic_task_id, max(periodic_task_history_id) AS latest, count(*) AS runs,
-                       sum(num_errors) AS errors, sum(num_items) AS processed
+                    sum(num_errors) AS errors, sum(num_items) AS processed
                 FROM periodic_task_history
                 WHERE launch_time > (now() - INTERVAL ? DAY)
                 GROUP BY periodic_task_id
@@ -170,14 +169,14 @@ class Scheduler extends \Gazelle\Base {
             $events = self::$db->to_array(false, MYSQLI_ASSOC);
 
             foreach ($events as $event) {
-                list($historyId, $eventTime, $severity, $message, $reference) = array_values($event);
+                [$historyId, $eventTime, $severity, $message, $reference] = array_values($event);
                 $historyEvents[$historyId][] = new Event($severity, $message, $reference, $eventTime);
             }
         }
 
         $task = new TaskHistory($this->getTask($id)['name'], $this->getTotal($id));
         foreach ($items as $item) {
-            list($historyId, $launchTime, $status, $numErrors, $numItems, $duration) = array_values($item);
+            [$historyId, $launchTime, $status, $numErrors, $numItems, $duration] = array_values($item);
             $taskEvents = $historyEvents[$historyId] ?? [];
             $task->items[] = new HistoryItem($launchTime, $status, $numErrors, $numItems, $duration, $taskEvents);
         }
@@ -213,8 +212,8 @@ class Scheduler extends \Gazelle\Base {
     public function getRuntimeStats(int $days = 28) {
         self::$db->prepared_query("
             SELECT date_format(pth.launch_time, '%Y-%m-%d %H:00:00') AS date,
-                   sum(pth.duration_ms) AS duration,
-                   sum(pth.num_items) AS processed
+                sum(pth.duration_ms) AS duration,
+                sum(pth.num_items) AS processed
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.is_enabled IS TRUE
@@ -226,12 +225,12 @@ class Scheduler extends \Gazelle\Base {
 
         self::$db->prepared_query("
             SELECT date(pth.launch_time) AS date,
-                   sum(pth.duration_ms) AS duration,
-                   sum(pth.num_items) AS processed
-                   FROM periodic_task pt
+                sum(pth.duration_ms) AS duration,
+                sum(pth.num_items) AS processed
+            FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
+                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             GROUP BY 1
             ORDER BY 1
             ", $days
@@ -240,12 +239,12 @@ class Scheduler extends \Gazelle\Base {
 
         self::$db->prepared_query("
             SELECT pt.name,
-                   cast(avg(pth.duration_ms) AS INTEGER) AS duration_avg,
-                   cast(avg(pth.num_items) AS INTEGER) AS processed_avg
+                cast(avg(pth.duration_ms) AS INTEGER) AS duration_avg,
+                cast(avg(pth.num_items) AS INTEGER) AS processed_avg
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
+                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             GROUP BY 1
             ORDER BY 1
             ", $days
@@ -254,15 +253,15 @@ class Scheduler extends \Gazelle\Base {
 
         $totals = self::$db->rowAssoc("
             SELECT count(pth.periodic_task_history_id) AS runs,
-                   sum(pth.duration_ms) AS duration,
-                   sum(pth.num_items) AS processed,
-                   count(pthe.periodic_task_history_event_id) AS events,
-                   sum(pth.num_errors) AS errors
+                sum(pth.duration_ms) AS duration,
+                sum(pth.num_items) AS processed,
+                count(pthe.periodic_task_history_event_id) AS events,
+                sum(pth.num_errors) AS errors
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             LEFT JOIN periodic_task_history_event pthe USING (periodic_task_history_id)
             WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
+                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             ", $days
         );
 
@@ -277,12 +276,12 @@ class Scheduler extends \Gazelle\Base {
     public function getTaskRuntimeStats(int $taskId, int $days = 28) {
         self::$db->prepared_query("
             SELECT date(pth.launch_time) AS date,
-                   sum(pth.duration_ms) AS duration,
-                   sum(pth.num_items) AS processed
-                   FROM periodic_task pt
+                sum(pth.duration_ms) AS duration,
+                sum(pth.num_items) AS processed
+            FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.periodic_task_id = ?
-              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
+                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             GROUP BY 1
             ORDER BY 1
             ", $taskId, $days
@@ -335,6 +334,15 @@ class Scheduler extends \Gazelle\Base {
         }
     }
 
+    public function runClass(string $className, bool $debug = false): int {
+        return $this->runTask(
+            (int)self::$db->scalar("
+                SELECT pt.periodic_task_id FROM periodic_task pt WHERE pt.classname = ?
+                ", $className
+            ), $debug
+        );
+    }
+
     public function runTask(int $id, bool $debug = false): int {
         $task = $this->getTask($id);
         if ($task === null) {
@@ -360,8 +368,8 @@ class Scheduler extends \Gazelle\Base {
 
         if ($task['run_now']) {
             self::$db->prepared_query('
-                UPDATE periodic_task
-                SET run_now = FALSE
+                UPDATE periodic_task SET
+                    run_now = FALSE
                 WHERE periodic_task_id = ?
                 ', $id
             );
