@@ -5,6 +5,7 @@ namespace Gazelle\Util;
 class Paginator {
     protected array $remove = []; // parameters to strip out of URIs (e.g. postid for comments)
     protected string $anchor = '';
+    protected string $param = '';
     protected string $linkbox;
     protected int $perPage;
     protected int $page;
@@ -45,6 +46,11 @@ class Paginator {
 
     public function setAnchor(string $anchor) {
         $this->anchor = '#' . $anchor;
+        return $this;
+    }
+
+    public function setParam(string $param) {
+        $this->param = '&amp;' . $param;
         return $this;
     }
 
@@ -101,13 +107,13 @@ class Paginator {
             }
 
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}&amp;page=1{$this->anchor}\"><strong>&laquo; First</strong></a> "
-                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
+                $this->linkbox = "<a href=\"{$uri}&amp;page=1{$this->param}{$this->anchor}\"><strong>&laquo; First</strong></a> "
+                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . $this->param . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
-                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i{$this->anchor}\">";
+                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i{$this->param}{$this->anchor}\">";
                 }
                 $this->linkbox .= '<strong>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
@@ -132,7 +138,7 @@ class Paginator {
             }
 
             if ($this->page && $this->page < $pageCount) {
-                $this->linkbox .= " | <a href=\"${uri}&amp;page=" . ($this->page + 1) . $this->anchor
+                $this->linkbox .= " | <a href=\"${uri}&amp;page=" . ($this->page + 1) . $this->param . $this->anchor
                     . '" class="pager_next"><strong>Next &rsaquo;</strong></a>'
                     . " <a href=\"${uri}&amp;page=$pageCount\"><strong> Last &raquo;</strong></a>";
             }
