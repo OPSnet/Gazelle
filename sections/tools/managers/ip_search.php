@@ -21,7 +21,8 @@ if (isset($_POST['text']) || isset($_GET['iplist'])) {
     $found = $search->add($text);
 
     if ($found) {
-        $paginator->setTotal(max($search->siteTotal(), $search->snatchTotal(), $search->trackerTotal()));
+        $paginator->setTotal(max($search->siteTotal(), $search->snatchTotal(), $search->trackerTotal()))
+            ->setParam('iplist=' . $search->ipList());
         $limit  = $paginator->limit();
         $offset = $paginator->offset();
     }

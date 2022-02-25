@@ -10,6 +10,7 @@ class IPv4 extends \Gazelle\Base {
     public const START = 0;
     public const END   = 1;
     public const IP    = 2;
+    public const TOTAL = 3;
 
     /**
      * Take a freeform slab of text and search for dotted quads.
@@ -77,10 +78,10 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function sitePage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
-        $column = ['uhi.StartTime', 'uhi.EndTime', "s.addr_n"][$this->column];
+        $column = ['uhi.StartTime', 'uhi.EndTime', 's.addr_n', 's.addr_n'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             SELECT uhi.StartTime AS start,
                 uhi.EndTime      AS 'end',
                 uhi.IP           AS ipv4,
@@ -91,7 +92,7 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        $list =  self::$db->to_array(false, MYSQLI_ASSOC, false);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
             $row['user'] = $userMan->findById($row['user_id']);
         }
@@ -107,7 +108,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function snatchPage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
-        $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', "s.addr_n"][$this->column];
+        $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query($sql = "
@@ -139,7 +140,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function trackerPage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
-        $column = ['from_unixtime(min(xfu.mtime))', 'from_unixtime(max(xfu.mtime))', "s.addr_n"][$this->column];
+        $column = ['from_unixtime(min(xfu.mtime))', 'from_unixtime(max(xfu.mtime))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query($sql = "
@@ -155,7 +156,7 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
-        $list =  self::$db->to_array(false, MYSQLI_ASSOC, false);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
             $row['user'] = $userMan->findById($row['user_id']);
         }

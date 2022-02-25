@@ -1,9 +1,13 @@
 {{ header('Manage email blacklist') }}
+<div class="thin">
 <div class="header">
     <h2>Email Blacklist</h2>
 </div>
 
-<div class="thin">
+<div class="linkbox">
+    <a href="http://localhost:8080/tools.php?action=email_search" class="brackets">Bulk Email Search</a>
+</div>
+
 <h3>Search</h3>
 <form action="tools.php" method="post">
     <input type="hidden" name="action" value="email_blacklist" />
