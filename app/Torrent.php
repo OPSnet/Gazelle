@@ -463,7 +463,7 @@ class Torrent extends BaseObject {
     }
 
     /**
-     * The size (in bytes) of this upload
+     * The number of leechers of this torrent
      */
     public function leecherTotal(): int {
         return $this->info()['Leechers'];
