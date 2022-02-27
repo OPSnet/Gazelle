@@ -37,7 +37,7 @@ foreach ($userIds as $userId) {
         'donor'    => $user->isDonor(),
         'warned'   => $user->isWarned(),
         'enabled'  => $user->isEnabled(),
-        'class'    => $userMan->userclassName($permissionId),
+        'class'    => $user->userclassName(),
         'avatar'   => $user->avatar(),
     ];
 }
