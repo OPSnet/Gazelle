@@ -1,105 +1,126 @@
 <?php
-$torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
+
 $details = isset($_GET['details']) && in_array($_GET['details'], ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year']) ? $_GET['details'] : 'all';
 
-$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
+$limit = (int)($_GET['limit'] ?? 10);
+$limit = in_array($limit, [10, 100, 250]) && $details !== 'all' ? $limit : 10;
 
-$OuterResults = [];
+$top10  = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
+$torMan = new Gazelle\Manager\Torrent;
+$result = [];
 
 if ($details == 'all' || $details == 'day') {
-    $topTorrentsActiveLastDay = $torrent->getTopTorrents($_GET, 'day', $limit);
-    $OuterResults[] = generate_torrent_json('Most Active Torrents Uploaded in the Past Day', 'day', $topTorrentsActiveLastDay, $limit);
+    $result[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Day',
+        'tag'     => 'day',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'day', $limit)),
+    ];
 }
 
 if ($details == 'all' || $details == 'week') {
-    $topTorrentsActiveLastWeek = $torrent->getTopTorrents($_GET, 'week', $limit);
-    $OuterResults[] = generate_torrent_json('Most Active Torrents Uploaded in the Past Week', 'week', $topTorrentsActiveLastWeek, $limit);
+    $result[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Week',
+        'tag'     => 'week',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'week', $limit)),
+    ];
 }
 
 if ($details == 'all' || $details == 'month') {
-    $topTorrentsActiveLastMonth = $torrent->getTopTorrents($_GET, 'month', $limit);
-    $OuterResults[] = generate_torrent_json('Most Active Torrents Uploaded in the Past Week', 'week', $topTorrentsActiveLastMonth, $limit);
+    $result[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Month',
+        'tag'     => 'month',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'month', $limit)),
+    ];
 }
 
 if ($details == 'all' || $details == 'year') {
-    $topTorrentsActiveLastYear = $torrent->getTopTorrents($_GET, 'year', $limit);
-    $OuterResults[] = generate_torrent_json('Most Active Torrents Uploaded in the Past Week', 'week', $topTorrentsActiveLastYear, $limit);
+    $result[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Year',
+        'tag'     => 'year',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'year', $limit)),
+    ];
 }
 
 if ($details == 'all' || $details == 'overall') {
-    $topTorrentsActiveAllTime = $torrent->getTopTorrents($_GET, 'overall', $limit);
-    $OuterResults[] = generate_torrent_json('Most Active Torrents of All Time', 'overall', $topTorrentsActiveAllTime, $limit);
+    $result[] = [
+        'caption' => 'Most Active Torrents Uploaded of All Time',
+        'tag'     => 'overall',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'overall', $limit)),
+    ];
 }
 
-if (($details == 'all' || $details == 'snatched')) {
-    $topTorrentsSnatched = $torrent->getTopTorrents($_GET, 'snatched', $limit);
-    $OuterResults[] = generate_torrent_json('Most Snatched Torrents', 'snatched', $topTorrentsSnatched, $limit);
+if ($details == 'all' || $details == 'snatched') {
+    $result[] = [
+        'caption' => 'Most Snatched  Torrents',
+        'tag'     => 'snatched',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'snatched', $limit)),
+    ];
 }
 
-if (($details == 'all' || $details == 'data')) {
-    $topTorrentsTransferred = $torrent->getTopTorrents($_GET, 'data', $limit);
-    $OuterResults[] = generate_torrent_json('Most Data Transferred Torrents', 'data', $topTorrentsTransferred, $limit);
+if ($details == 'all' || $details == 'data') {
+    $result[] = [
+        'caption' => 'Most Data Transferred Torrents',
+        'tag'     => 'data',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'data', $limit)),
+    ];
 }
 
-if (($details == 'all' || $details == 'seeded')) {
-    $topTorrentsSeeded = $torrent->getTopTorrents($_GET, 'seeded', $limit);
-    $OuterResults[] = generate_torrent_json('Best Seeded Torrents', 'seeded', $topTorrentsSeeded, $limit);
+if ($details == 'all' || $details == 'seeded') {
+    $result[] = [
+        'caption' => 'Best Seeded Torrents',
+        'tag'     => 'seeded',
+        'limit'   => $limit,
+        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'seeded', $limit)),
+    ];
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => $OuterResults
-        ]
-    );
+print json_encode([
+    'status'   => 'success',
+    'response' => $result
+]);
 
-
-function generate_torrent_json($caption, $tag, $details, $limit) {
+function payload(Gazelle\Manager\Torrent $torMan, array $details): array {
     $results = [];
     foreach ($details as $detail) {
-        list($torrentID, $groupID, $groupName, $groupCategoryID, $wikiImage, $tagsList,
-            $format, $encoding, $media, $scene, $hasLog, $hasCue, $hasLogDB, $logScore, $logChecksum, $year, $groupYear,
-            $remasterTitle, $snatched, $seeders, $leechers, $data, $releaseType, $size) = $detail;
-
-        $artist = Artists::display_artists(Artists::get_artist($groupID), false, true);
-        $truncatedArtist = substr($artist, 0, strlen($artist) - 3);
-
-        // Append to the existing array.
+        $torrent = $torMan->findById($detail[0]);
+        if (is_null($torrent)) {
+            continue;
+        }
+        $tgroup = $torrent->group();
         $results[] = [
-            'torrentId' => (int)$torrentID,
-            'groupID' => (int)$groupID,
-            'artist' => $truncatedArtist,
-            'groupName' => $groupName,
-            'groupCategory' => (int)$groupCategoryID,
-            'groupYear' => (int)$groupYear,
-            'remasterTitle' => $remasterTitle,
-            'format' => $format,
-            'encoding' => $encoding,
-            'hasLog' => $hasLog == 1,
-            'hasCue' => $hasCue == 1,
-            'hasLogDB' => $hasLogDB == 1,
-            'logScore' => $logScore,
-            'logChecksum' => $logChecksum,
-            'media' => $media,
-            'scene' => $scene == 1,
-            'year' => (int)$year,
-            'tags' => explode(' ', $tagsList),
-            'snatched' => (int)$snatched,
-            'seeders' => (int)$seeders,
-            'leechers' => (int)$leechers,
-            'data' => (int)$data,
-            'size' => (int)$size,
-            'wikiImage' => $wikiImage,
-            'releaseType' => $releaseType,
+            'torrentId'     => $torrent->id(),
+            'groupID'       => $torrent->groupId(),
+            'artist'        => $tgroup->artistName(),
+            'groupName'     => $tgroup->name(),
+            'groupCategory' => $tgroup->categoryId(),
+            'groupYear'     => $tgroup->year(),
+            'remasterTitle' => $torrent->remasterTitle(),
+            'format'        => $torrent->format(),
+            'encoding'      => $torrent->encoding(),
+            'hasLog'        => $torrent->hasLog(),
+            'hasCue'        => $torrent->hasCue(),
+            'hasLogDB'      => $torrent->hasLogDb(),
+            'logScore'      => $torrent->logScore(),
+            'logChecksum'   => $torrent->logChecksum(),
+            'media'         => $torrent->media(),
+            'scene'         => $torrent->isScene(),
+            'year'          => $torrent->remasterYear(),
+            'tags'          => array_values($tgroup->tagNameList()),
+            'snatched'      => $torrent->snatchTotal(),
+            'seeders'       => $torrent->seederTotal(),
+            'leechers'      => $torrent->leecherTotal(),
+            'data'          => $torrent->size() * $torrent->snatchTotal() + $torrent->size() * $torrent->leecherTotal() * 0.5,
+            'size'          => $torrent->size(),
+            'wikiImage'     => $tgroup->image(),
+            'releaseType'   => $tgroup->releaseType(),
         ];
     }
-
-    return [
-        'caption' => $caption,
-        'tag' => $tag,
-        'limit' => (int)$limit,
-        'results' => $results
-    ];
+    return $results;
 }
