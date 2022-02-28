@@ -813,8 +813,6 @@ $AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
 Irc::sendRaw('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
 $Debug->set_flag('upload: announced on irc');
 
-$Viewer->stats()->increment('upload_total', 1 + count($ExtraTorrentsInsert));
-
 //******************************************************************************//
 //--------------- Post-processing ----------------------------------------------//
 /* Because tracker updates and notifications can be slow, we're

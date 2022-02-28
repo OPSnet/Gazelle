@@ -2140,7 +2140,6 @@ class User extends BaseObject {
         $nr = self::$db->affected_rows();
         $this->stats()->increment('request_bounty_total', $bounty > 0 ? 1 : -1);
         $this->stats()->increment('request_bounty_size', $bounty);
-        $this->stats()->increment('upload_total', $bounty);
         return $nr;
     }
 
