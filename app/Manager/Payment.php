@@ -94,15 +94,13 @@ class Payment extends \Gazelle\Base {
     }
 
     public function monthlyRental(): float {
-        if (($rental = self::$cache->get_value(self::RENT_KEY)) === false) {
-            $list = $this->list();
-            $rental = 0.0;
-            foreach ($list as $l) {
-                if ($l['Active']) {
-                    $rental += $l['btcRent'];
-                }
-            }
-            self::$cache->cache_value(self::RENT_KEY, $rental / 12, 86400);
+        $rental = self::$cache->get_value(self::RENT_KEY);
+        if ($rental === false) {
+            $rental = (float)array_reduce(
+                array_filter($this->list(), fn($p) => $p['Active']),
+                function ($sum = 0.0, array $s = []) { return $sum + $s['btcRent']; }
+            ) / 12;
+            self::$cache->cache_value(self::RENT_KEY, $rental, 86400);
         }
         return $rental;
     }
