@@ -173,7 +173,7 @@
         <li{{ class_override(visible) }}><a href="bonus.php?action=bprates&amp;userid={{ user_id }}">Points Per Hour</a>: {{ hourly_rate|number_format(2) }}
     {% elseif own_profile %}
         <li{{ class_override(visible) }}>Bonus Points: {{ user.bonusPointsTotal|number_format }}
-            <a href="bonus.php?action=history&amp" class="brackets">History</a></li>
+            <a href="bonus.php?action=history" class="brackets">History</a></li>
         <li{{ class_override(visible) }}><a href="bonus.php?action=bprates">Points Per Hour</a>: {{ hourly_rate|number_format(2) }}
     {% else %}
         <li{{ class_override(visible) }}>Bonus Points: {{ user.bonusPointsTotal|number_format }}</li>
