@@ -823,26 +823,6 @@ class TGroup extends BaseObject {
         );
     }
 
-    public function expireToken(int $userId, int $torrentId): bool {
-        $hash = self::$db->scalar("
-            SELECT info_hash FROM torrents WHERE ID = ?
-            ", $torrentId
-        );
-        if (!$hash) {
-            return false;
-        }
-        self::$db->prepared_query("
-            UPDATE users_freeleeches SET
-                Expired = true
-            WHERE UserID = ?
-                AND TorrentID = ?
-            ", $userId, $torrentId
-        );
-        self::$cache->delete_value("users_tokens_{$userId}");
-        (new \Gazelle\Tracker)->update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
-        return true;
-    }
-
     public function addTagVote(int $userId, int $tagId, string $way): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
