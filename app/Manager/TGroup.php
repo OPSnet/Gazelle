@@ -102,7 +102,7 @@ class TGroup extends \Gazelle\Base {
                 HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
                 RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
             SELECT
-                t.ID, g.ID, g.Name, g.Year, g.CategoryID, unix_timestamp(t.Time), g.ReleaseType,
+                t.ID, g.ID, g.Name, g.Year, g.CategoryID, t.Time, g.ReleaseType,
                 g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
                 tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
                 cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
