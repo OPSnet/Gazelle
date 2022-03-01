@@ -43,7 +43,7 @@ if ($Properties['Remastered']) {
     $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number']);
 } else {
     $Properties['UnknownRelease'] = 0;
-    $Properties['RemasterYear'] = '';
+    $Properties['RemasterYear'] = null;
     $Properties['RemasterTitle'] = '';
     $Properties['RemasterRecordLabel'] = '';
     $Properties['RemasterCatalogueNumber'] = '';
