@@ -191,7 +191,7 @@ class LoginWatch extends Base {
                 INSERT IGNORE INTO ip_bans
                        (user_id, Reason, FromIP, ToIP)
                 VALUES (?,       ?,      ?,      ?)
-                ", $userId, $reason, $ipv4, $ipv4
+                ", $userId, substr($reason, 0, 255), $ipv4, $ipv4
             );
             $affected += self::$db->affected_rows();
         }
