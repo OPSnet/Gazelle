@@ -1294,6 +1294,39 @@ class User extends \Gazelle\Base {
         return count($ids);
     }
 
+    public function expireFreeleechTokens(\Gazelle\Tracker $tracker): int {
+        $slop   = 1.04; // 4% overshoot on download before forced expiry
+
+        self::$db->prepared_query("
+            SELECT uf.UserID,
+                uf.TorrentID,
+                t.info_hash
+            FROM users_freeleeches AS uf
+            INNER JOIN torrents AS t ON (t.ID = uf.TorrentID)
+            WHERE uf.Expired = FALSE
+                AND (uf.Downloaded > t.Size * ? OR uf.Time < now() - INTERVAL ? DAY);
+            ", $slop, FREELEECH_TOKEN_EXPIRY_DAYS
+        );
+        $expire = self::$db->to_array(false, MYSQLI_ASSOC, false);
+
+        $clear = [];
+        $processed = 0;
+        foreach ($expire as $token) {
+            $clear["users_tokens_{$token['UserID']}"] = true;
+            $tracker->update_tracker('remove_token', ['info_hash' => rawurlencode($token['info_hash']), 'userid' => $token['UserID']]);
+            $processed++;
+            self::$db->prepared_query("
+                UPDATE users_freeleeches SET
+                    Expired = TRUE
+                WHERE TorrentID = ?
+                    AND UserID = ?
+                ", $token['TorrentID'], $token['UserID']
+            );
+        }
+        self::$cache->deleteMulti(array_keys($clear));
+        return $processed;
+    }
+
     public  function forumNavItemUserList(\Gazelle\User $user): array {
         $UserIds = $user->forumNavList();
         $NavItems = $this->forumNavItemList();
