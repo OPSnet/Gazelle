@@ -7,7 +7,7 @@ if (is_null($torrent)) {
 
 echo $Twig->render('torrent/riplog.twig', [
     'id'        => $torrent->id(),
-    'list'      => $torrent->logfileList(),
+    'list'      => $torrent->logfileList(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML),
     'log_score' => (int)($_GET['logscore'] ?? 0),
     'viewer'    => $Viewer,
 ]);

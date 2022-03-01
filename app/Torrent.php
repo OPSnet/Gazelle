@@ -728,8 +728,8 @@ class Torrent extends BaseObject {
         return 0;
     }
 
-    public function logfileList(): array {
-        self::$db->prepared_query('
+    public function logfileList(\Gazelle\File\RipLog $ripFiler, \Gazelle\File\RipLogHTML $htmlFiler): array {
+        self::$db->prepared_query("
             SELECT LogID AS id,
                 Score,
                 `Checksum`,
@@ -738,15 +738,13 @@ class Torrent extends BaseObject {
                 AdjustedScore,
                 AdjustedChecksum,
                 AdjustmentReason,
-                AdjustmentDetails,
+                coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
                 Details
             FROM torrents_logs
             WHERE TorrentID = ?
-            ', $this->id
+            ", $this->id
         );
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        $ripFiler = new \Gazelle\File\RipLog;
-        $htmlFiler = new \Gazelle\File\RipLogHTML;
         foreach ($list as &$log) {
             $log['has_riplog'] = $ripFiler->exists([$this->id, $log['id']]);
             $log['html_log'] = $htmlFiler->get([$this->id, $log['id']]);
