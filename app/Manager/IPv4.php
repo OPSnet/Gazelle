@@ -165,7 +165,7 @@ class IPv4 extends \Gazelle\Base {
         if ($id) {
             self::$db->prepared_query("
                 UPDATE ip_bans SET
-                    Reason  = concat(Reason, ' AND ', ?),
+                    Reason  = substring(concat(Reason, ' AND ', ?), 1, 255),
                     created = now()
                 WHERE ID = ?
                 ", trim($reason), $id
@@ -176,7 +176,7 @@ class IPv4 extends \Gazelle\Base {
             INSERT INTO ip_bans
                    (Reason, FromIP,       ToIP,         user_id)
             VALUES (?,      inet_aton(?), inet_aton(?), ?)
-            ", $reason, $from, $to, $userId
+            ", substr($reason, 1, 255), $from, $to, $userId
         );
         self::$cache->delete_value(
             self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
@@ -197,7 +197,7 @@ class IPv4 extends \Gazelle\Base {
                 user_id = ?,
                 created = now()
             WHERE ID = ?
-            ", $reason, $from, $to, $userId, $id
+            ", substr($reason, 1, 255), $from, $to, $userId, $id
         );
         self::$cache->delete_value(
             self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
