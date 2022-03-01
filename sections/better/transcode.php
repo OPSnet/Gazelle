@@ -71,7 +71,7 @@ function transcode_parse_groups($groups) {
                 ];
             }
             if (!isset($torrentGroups[$groupID]['Editions'][$remIdent])) {
-                if ($torrent['Remastered'] && $torrent['RemasterYear'] != 0) {
+                if ($torrent['Remastered'] && (int)$torrent['RemasterYear'] != 0) {
                     $editionName = $torrent['RemasterYear'];
                     $addExtra = ' - ';
                     if ($torrent['RemasterRecordLabel']) {
