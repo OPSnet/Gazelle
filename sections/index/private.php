@@ -8,6 +8,7 @@ $newsReader = new Gazelle\WitnessTable\UserReadNews;
 $tgMan      = new Gazelle\Manager\TGroup;
 $torMan     = new Gazelle\Manager\Torrent;
 $userMan    = new Gazelle\Manager\User;
+$userStats  = new Gazelle\Stats\Users;
 
 if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMan->latestId()) {
     $newsReader->witness($Viewer->id());
@@ -54,7 +55,7 @@ echo $Twig->render('index/private-sidebar.twig', [
     'snatch_stats'      => $Cache->get_value('stats_snatches'),
     'torrent_stats'     => new Gazelle\Stats\Torrent,
     'user_count'        => $userMan->getEnabledUsersCount(),
-    'user_stats'        => $userMan->globalActivityStats(),
+    'user_stats'        => $userStats->globalActivityStats(),
     'viewer'            => $Viewer,
 ]);
 

@@ -145,6 +145,44 @@ class Users extends \Gazelle\Base {
         return [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements];
     }
 
+    public function frontPage(): int {
+        self::$cache->cache_value('stats_snatches',
+            (int)self::$db->scalar("SELECT count(*) FROM xbt_snatched"),
+            0
+        );
+        self::$cache->cache_value('stats_peers', [
+                (int)self::$db->scalar("SELECT count(*) FROM xbt_files_users WHERE active = 1 AND remaining = 0"),
+                (int)self::$db->scalar("SELECT count(*) FROM xbt_files_users WHERE active = 1 AND remaining > 0"),
+            ], 0
+        );
+        return self::$cache->get_value('stats_peers')[1];
+    }
+
+    /**
+     * Get the number of enabled users last day/week/month
+     *
+     * @return array [Day, Week, Month]
+     */
+    public function globalActivityStats(): array {
+        $stats = self::$cache->get_value('stats_users');
+        if ($stats === false) {
+            $stats = array_map(fn($n) => (int)$n,
+                self::$db->rowAssoc("
+                    SELECT
+                        sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
+                        sum(ula.last_access > now() - INTERVAL 1 WEEK) AS Week,
+                        sum(ula.last_access > now() - INTERVAL 1 MONTH) AS Month
+                    FROM users_main um
+                    INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+                    WHERE um.Enabled = '1'
+                        AND ula.last_access > now() - INTERVAL 1 MONTH
+                ")
+            );
+            self::$cache->cache_value('stats_users', $stats, 7200);
+        }
+        return $stats;
+    }
+
     public function refresh(): int {
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE user_summary_new LIKE user_summary

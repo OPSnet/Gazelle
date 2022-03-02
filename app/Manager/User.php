@@ -353,29 +353,6 @@ class User extends \Gazelle\Base {
     }
 
     /**
-     * Get the number of enabled users last day/week/month
-     *
-     * @return array [Day, Week, Month]
-     */
-    public function globalActivityStats(): array {
-        if (($stats = self::$cache->get_value('stats_users')) === false) {
-            self::$db->prepared_query("
-                SELECT
-                    sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
-                    sum(ula.last_access > now() - INTERVAL 1 WEEK) AS Week,
-                    sum(ula.last_access > now() - INTERVAL 1 MONTH) AS Month
-                FROM users_main um
-                INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-                WHERE um.Enabled = '1'
-                    AND ula.last_access > now() - INTERVAL 1 MONTH
-            ");
-            $stats = self::$db->next_record(MYSQLI_ASSOC);
-            self::$cache->cache_value('stats_users', $stats, 7200);
-        }
-        return $stats;
-    }
-
-    /**
      * Get the last year of user flow (joins, disables)
      *
      * @return array [week, joined, disabled]
