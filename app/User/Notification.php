@@ -191,4 +191,63 @@ class Notification extends \Gazelle\BaseUser {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));
         return $affected;
     }
+
+    protected function valueToArray(string $value): array {
+        if (is_null($value) || in_array(trim($value), ['', '||'])) {
+            return [];
+        }
+        return explode('|', substr($value, 1, -1));
+    }
+
+    public function filterList(\Gazelle\Manager\User $userMan): array {
+        self::$db->prepared_query("
+            SELECT ID,
+                Label,
+                Artists,
+                ExcludeVA,
+                NewGroupsOnly,
+                Tags,
+                NotTags,
+                ReleaseTypes,
+                Categories,
+                Formats,
+                Encodings,
+                Media,
+                FromYear,
+                ToYear,
+                Users
+            FROM users_notify_filters
+            WHERE UserID = ?
+            ", $this->user->id()
+        );
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$f) {
+            $f['Artists']      = implode("\n", $this->valueToArray($f['Artists']));
+            $f['Tags']         = implode("\n", $this->valueToArray($f['Tags']));
+            $f['NotTags']      = implode("\n", $this->valueToArray($f['NotTags']));
+            $f['ReleaseTypes'] = $this->valueToArray($f['ReleaseTypes']);
+            $f['Categories']   = $this->valueToArray($f['Categories']);
+            $f['Formats']      = $this->valueToArray($f['Formats']);
+            $f['Encodings']    = $this->valueToArray($f['Encodings']);
+            $f['Media']        = $this->valueToArray($f['Media']);
+
+            if ($f['FromYear'] == 0) {
+                $f['FromYear'] = '';
+            }
+            if ($f['ToYear'] == 0) {
+                $f['ToYear'] = '';
+            }
+
+            $userIds = $this->valueToArray($f['Users']);
+            $usernames = [];
+            foreach ($userIds as $userId) {
+                $u = $userMan->findById((int)$userId);
+                if (!is_null($u)) {
+                    $usernames[] = $u->username();
+                }
+            }
+            $f['Users'] = implode("\n", $usernames);
+        }
+        return $list;
+    }
 }

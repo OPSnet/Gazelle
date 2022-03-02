@@ -64,18 +64,12 @@ class Filter extends \Gazelle\Base {
         return $this;
     }
 
-    public function setUsers(string $data) {
+    public function setUsers(\Gazelle\Manager\User $userMan, string $data) {
         $usernames = $this->multiLineSplit($data);
-        self::$db->prepared_query("
-            SELECT ID, Paranoia
-            FROM users_main
-            WHERE Username IN (" . placeholders($usernames) . ")
-            ", ...$usernames
-        );
-        $this->field['user'] = [];
-        while ([$userId, $paranoia] = self::$db->next_record()) {
-            if (!in_array('notifications', unserialize($paranoia))) {
-                $this->field['user'][] = $userId;
+        foreach ($usernames as $username) {
+            $user = $userMan->findByUsername($username);
+            if ($user && !$user->isParanoid('notifications')) {
+                $this->field['user'][] = $user->id();
             }
         }
         return $this;
