@@ -19,7 +19,7 @@ $artistId = $artist->id();
 $userId   = $Viewer->id();
 $summary  = [];
 
-if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
+if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous revision
     authorize();
     $revisionId = $_GET['revisionid'];
     if (!is_number($revisionId)) {
