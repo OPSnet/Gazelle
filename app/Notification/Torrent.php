@@ -105,6 +105,9 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function clearTorrentList(array $torrentIds): int {
+        if (!$torrentIds) {
+            return 0;
+        }
         self::$db->prepared_query("
             DELETE FROM users_notify_torrents WHERE UserID = ? AND TorrentID IN (" . placeholders($torrentIds) . ")
             ", $this->userId, ...$torrentIds

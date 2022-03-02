@@ -41,11 +41,12 @@ switch ($_GET['action']) {
         break;
 
     case 'notify_clear_items':
-        $torrentIds = explode(',', $_GET['torrentids']);
-        if (empty($torrentIds)) {
+        $cleared = $notifier->clearTorrentList(array_map(
+            fn($n) => (int)$n, explode(',', $_GET['torrentids'] ?? '')
+        ));
+        if (!$cleared) {
             error(0);
         }
-        $notifier->clearTorrentList($torrentIds);
         break;
 
     default:
