@@ -1,0 +1,146 @@
+{% from 'macro/form.twig' import checked -%}
+{{ header('Manage notifications', {'js': 'jquery.validate,form_validate'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Notify me of all new torrents with...</h2>
+        <div class="linkbox">
+            <a href="torrents.php?action=notify" class="brackets">View notifications</a>
+        </div>
+    </div>
+{% set viewer_args = '&amp;user=' ~ viewer.id ~ '&amp;auth=' ~ viewer.rssAuth ~ '&amp;passkey=' ~ viewer.announceKey ~ '&amp;authkey=' ~ viewer.auth %}
+{% set img = '<img src="' ~ constant('STATIC_SERVER') ~ '/common/symbols/rss.png" alt="RSS feed" />' %}
+{% for filter in list %}
+    {% set new = filter.ID is same as(false) %}
+    {% if new and list|length > 1 %}
+    <br /><br />
+    <h3>Create a new notification filter</h3>
+    {% elseif list|length > 1 %}
+    <h3>
+        <a href="feeds.php?feed=torrents_notify_{{ filter.ID }}_{{ viewer.announceKey }}{{ viewer_args }}&amp;name={{ filter.Label|url_encode }}">{{ img|raw }}</a>
+        {{ filter.Label }}
+        <a href="user.php?action=notify_delete&amp;id={{ filter.ID }}&amp;auth={{ viewer.auth() }}" onclick="return confirm('Are you sure you want to delete this notification filter?')" class="brackets">Delete</a>
+        <a href="#" onclick="$('#filter_{{ filter.ID }}').gtoggle(); return false;" class="brackets">Show</a>
+    </h3>
+    {% endif %}
+    <form class="{% if new %}create_form{% else %}edit_form{% endif %}" id="notification{{ loop.index }}" name="notification{{ loop.index }}" action="user.php" method="post">
+        <input type="hidden" name="formid" value="{{ loop.index }}" />
+        <input type="hidden" name="action" value="notify_handle" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    {% if not new %}
+        <input type="hidden" name="id{{ loop.index }}" value="{{ filter.ID }}" />
+    {% endif %}
+        <table {% if new %}class="layout"{% else %}id="filter_{{ filter.ID }}" class="layout hidden"{% endif %}>
+    {% if new %}
+            <tr>
+                <td class="label"><strong>Notification filter name</strong></td>
+                <td>
+                    <input type="text" class="required" name="label{{ loop.index }}" style="width: 100%;" />
+                    <p class="min_padding">A name for the notification filter set to tell different filters apart.</p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <strong>All fields below here are optional</strong>
+                </td>
+            </tr>
+    {% endif %}
+            <tr>
+                <td class="label"><strong>One of these artists</strong></td>
+                <td>
+                    <textarea name="artists{{ loop.index }}" style="width: 100%;" rows="5">{{ filter.Artists }}</textarea>
+                    <p class="min_padding">Newline-separated list of artists</p>
+                    <input type="checkbox" name="excludeva{{ loop.index }}" id="excludeva_{{ filter.ID }}"{{ checked(filter.ExcludeVA == '1') }} />
+                    <label for="excludeva_{{ filter.ID }}">Exclude Various Artists releases</label>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>One of these users</strong></td>
+                <td>
+                    <textarea name="users{{ loop.index }}" style="width: 100%;" rows="5">{{ filter.Users }}</textarea>
+                    <p class="min_padding">Newline-separated list of usernames. (People who are paranoid about upload notifications will not be saved).</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>At least one of these tags</strong></td>
+                <td>
+                    <textarea name="tags{{ loop.index }}" style="width: 100%;" rows="2">{{ filter.Tags }}</textarea>
+                    <p class="min_padding">Newline-separated list</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>None of these tags</strong></td>
+                <td>
+                    <textarea name="nottags{{ loop.index }}" style="width: 100%;" rows="2">{{ filter.NotTags }}</textarea>
+                    <p class="min_padding">Newline-separated list</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Only these categories</strong></td>
+                <td>
+    {% for key, name in constant('CATEGORY') %}
+                    <input type="checkbox" name="categories{{ loop.index }}[]" id="cat_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Categories) }} />
+                    <label for="cat_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
+    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Only these types</strong></td>
+                <td>
+    {% for key, name in release_type %}
+                    <input type="checkbox" name="releasetypes{{ loop.index }}[]" id="rt_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.ReleaseTypes) }} />
+                    <label for="rt_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
+    {% endfor %}
+               </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Only these formats</strong></td>
+                <td>
+    {% for key, name in constant('FORMAT') %}
+                    <input type="checkbox" name="formats{{ loop.index }}[]" id="for_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Formats) }} />
+                    <label for="for_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
+    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Only these bitrates</strong></td>
+                <td>
+    {% for key, name in constant('ENCODING') %}
+                    <input type="checkbox" name="bitrates{{ loop.index }}[]" id="enc_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Encodings) }} />
+                    <label for="enc_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
+    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Only these media</strong></td>
+                <td>
+    {% for key, name in constant('MEDIA') %}
+                    <input type="checkbox" name="media{{ loop.index }}[]" id="med_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Media) }} />
+                    <label for="med_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
+    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Between the years</strong></td>
+                <td>
+                    <input type="text" name="fromyear{{ loop.index }}" value="{{ filter.FromYear }}" size="4" />
+                    and
+                    <input type="text" name="toyear{{ loop.index }}" value="{{ filter.ToYear }}" size="4" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Only new releases</strong></td>
+                <td>
+                    <input type="checkbox" name="newgroupsonly{{ loop.index }}" id="newgroupsonly_{{ filter.ID }}"{{ checked(filter.NewGroupsOnly == '1') }} />
+                    <label for="newgroupsonly_{{ filter.ID }}">Only notify for new releases, not new formats</label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <input type="submit" value="{% if new %}Create{% else %}Update{% endif %} filter" />
+                </td>
+            </tr>
+        </table>
+    </form>
+{% endfor %}
+</div>
+{{ footer() }}

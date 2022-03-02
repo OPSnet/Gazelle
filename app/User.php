@@ -659,6 +659,10 @@ class User extends BaseObject {
         return $this->info()['Paranoia'];
     }
 
+    public function isParanoid(string $for): bool {
+        return in_array($for, $this->info()['Paranoia']);
+    }
+
     public function paranoiaLevel(): int {
         $paranoia = $this->paranoia();
         $level = count($paranoia);
