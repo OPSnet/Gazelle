@@ -12,7 +12,7 @@
         <td>
             <select name="stylesheet" id="stylesheet">
 {% for sheet in stylesheets %}
-                <option value="{{ sheet.ID }}"{{ selected(sheet.ID == style_id) }}>{{ sheet.ProperName }}</option>
+                <option value="{{ sheet.ID }}"{{ selected(sheet.ID == stylesheet.styleId) }}>{{ sheet.ProperName }}</option>
 {% endfor %}
             </select>&nbsp;&nbsp;
             <a href="#" id="toggle_css_gallery" class="brackets">Show gallery</a>
@@ -37,7 +37,7 @@
             <strong>External stylesheet URL</strong>
         </td>
         <td>
-            <input type="text" size="40" name="styleurl" id="styleurl" value="{{ style_url }}" />
+            <input type="text" size="40" name="styleurl" id="styleurl" value="{{ stylesheet.styleUrl }}" />
         </td>
     </tr>
     <tr id="site_opendyslexic_tr">
@@ -47,7 +47,7 @@
             <strong>OpenDyslexic</strong></td>
         <td>
             <div class="field_div">
-                <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ checked(option.UseOpenDyslexic) }} />
+                <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ checked(user.option('UseOpenDyslexic')) }} />
                 <label for="useopendyslexic">Enable the OpenDyslexic font</label>
             </div>
             <p class="min_padding">This is an experimental feature, and some stylesheets will have display issues.</p>
@@ -58,7 +58,7 @@
             <strong>Styled tooltips</strong>
         </td>
         <td>
-            <input type="checkbox" name="usetooltipster" id="usetooltipster"{{ checked(option.Tooltipster) }} />
+            <input type="checkbox" name="usetooltipster" id="usetooltipster"{{ checked(user.option('Tooltipster')) }} />
             <label for="usetooltipster">Enable styled tooltips</label>
         </td>
     </tr>

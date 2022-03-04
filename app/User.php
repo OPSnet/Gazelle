@@ -7,7 +7,7 @@ use Gazelle\Util\Mail;
 
 class User extends BaseObject {
 
-    const CACHE_KEY          = 'u_%d';
+    const CACHE_KEY          = 'u2_%d';
     const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
     const CACHE_NOTIFY       = 'u_notify_%d';
     const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
@@ -110,17 +110,22 @@ class User extends BaseObject {
                 ui.AuthKey,
                 ui.Avatar,
                 ui.collages,
+                ui.DownloadAlt,
                 ui.Info,
                 ui.InfoTitle,
                 ui.Inviter,
                 ui.JoinDate,
                 ui.NavItems,
+                ui.NotifyOnDeleteSeeding,
+                ui.NotifyOnDeleteSnatched,
+                ui.NotifyOnDeleteDownloaded,
                 ui.PermittedForums,
                 ui.RatioWatchEnds,
                 ui.RatioWatchDownload,
                 ui.RestrictedForums,
                 ui.SiteOptions,
                 ui.SupportFor,
+                ui.UnseededAlerts,
                 ui.Warned,
                 uls.Uploaded,
                 uls.Downloaded,
@@ -568,6 +573,10 @@ class User extends BaseObject {
             }
         }
         return $this->donorHeart;
+    }
+
+    public function downloadAlt(): bool {
+        return $this->info()['DownloadAlt'] == '1';
     }
 
     public function email(): string {
@@ -1563,6 +1572,22 @@ class User extends BaseObject {
         return $change;
     }
 
+    public function notifyUnseeded(): bool {
+        return $this->info()['UnseededAlerts'] == '1';
+    }
+
+    public function notifyDeleteSeeding(): bool {
+        return $this->info()['NotifyOnDeleteSeeding'] == '1';
+    }
+
+    public function notifyDeleteSnatch(): bool {
+        return $this->info()['NotifyOnDeleteSnatched'] == '1';
+    }
+
+    public function notifyDeleteDownload(): bool {
+        return $this->info()['NotifyOnDeleteDownloaded'] == '1';
+    }
+
     public function removeArtistNotification(\Gazelle\Artist $artist): int {
         $info = $this->loadArtistNotifications();
         $aliasList = $artist->aliasNameList();
@@ -2006,35 +2031,31 @@ class User extends BaseObject {
 
     /**
      * Generates a check list of release types, ordered by the user or default
-     * @param array $options
      * @param array $releaseType
      */
-    public function releaseOrder(array $options, array $releaseType) {
-        if (empty($options['SortHide'])) {
+    public function releaseOrder(array $releaseType) {
+        if (empty($this->option('SortHide'))) {
             $sort = $releaseType;
-            $defaults = !empty($options['HideTypes']);
+            $defaults = !empty($this->option('HideTypes'));
         } else {
-            $sort = $options['SortHide'];
+            $sort = $this->option('SortHide');
             $missingTypes = array_diff_key($releaseType, $sort);
             foreach (array_keys($missingTypes) as $missing) {
                 $sort[$missing] = 0;
             }
         }
 
-        $x = [];
+        $order = [];
         foreach ($sort as $key => $val) {
             if (isset($defaults)) {
-                $checked = $defaults && isset($options['HideTypes'][$key]);
-            } else {
-                if (!isset($releaseType[$key])) {
-                    continue;
-                }
+                $checked = $defaults && isset($this->option('HideTypes')[$key]);
+            } elseif (isset($releaseType[$key])) {
                 $checked = $val;
                 $val = $releaseType[$key];
             }
-            $x[] = ['id' => $key. '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
+            $order[] = ['id' => $key. '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
         }
-        return $x;
+        return $order;
     }
 
     public function tokenCount(): int {

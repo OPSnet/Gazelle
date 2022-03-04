@@ -275,7 +275,7 @@ $user->toggleAttr('hide-vote-recent', empty($_POST['pattr_hide_vote_recent']));
 $user->toggleAttr('hide-vote-history', empty($_POST['pattr_hide_vote_history']));
 
 // Information on how the user likes to download torrents is stored in cache
-if ($DownloadAlt != $user->option('DownloadAlt') || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {
+if ((bool)$DownloadAlt != $user->downloadAlt() || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {
     $Cache->delete_value('user_' . $user->announceKey());
 }
 

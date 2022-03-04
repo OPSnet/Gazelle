@@ -36,7 +36,7 @@
             <strong>Automatic thread subscriptions</strong>
         </td>
         <td>
-            <input type="checkbox" name="autosubscribe" id="autosubscribe"{{ checked(notify.autosub) }} />
+            <input type="checkbox" name="autosubscribe" id="autosubscribe"{{ checked(user.option('AutoSubscribe')) }} />
             <label for="autosubscribe">Enable automatic thread subscriptions</label>
         </td>
     </tr>
@@ -45,7 +45,7 @@
             <strong>Deleted seeding torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"{{ checked(notify.seeded) }} />
+            <input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"{{ checked(user.notifyDeleteSeeding) }} />
             <label for="notifyondeleteseeding">Enable PM notification for deleted seeding torrents</label>
         </td>
     </tr>
@@ -54,7 +54,7 @@
             <strong>Deleted snatched torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"{{ checked(notify.snatched) }} />
+            <input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"{{ checked(user.notifyDeleteSnatch) }} />
             <label for="notifyondeletesnatched">Enable PM notification for deleted snatched torrents</label>
         </td>
     </tr>
@@ -63,7 +63,7 @@
             <strong>Deleted downloaded torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ checked(notify.downloaded) }} />
+            <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ checked(user.notifyDeleteDownload) }} />
             <label for="notifyondeletedownloaded">Enable PM notification for deleted downloaded torrents</label>
         </td>
     </tr>
@@ -72,7 +72,7 @@
             <strong>Unseeded torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="unseededalerts" id="unseededalerts"{{ checked(notify.unseeded) }} />
+            <input type="checkbox" name="unseededalerts" id="unseededalerts"{{ checked(user.notifyUnseeded) }} />
             <label for="unseededalerts">Enable unseeded torrent alerts</label>
         </td>
     </tr>

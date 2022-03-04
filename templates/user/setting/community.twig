@@ -11,9 +11,10 @@
         </td>
         <td>
             <select name="postsperpage" id="postsperpage">
-                <option value="25"{{ selected(option.PostsPerPage == 25) }}>25 (default)</option>
-                <option value="50"{{ selected(option.PostsPerPage == 50) }}>50</option>
-                <option value="100"{{ selected(option.PostsPerPage == 100) }}>100</option>
+                {%- set ppp = user.option('PostsPerPage') -%}
+                <option value="25"{{ selected(ppp == 25) }}>25 (default)</option>
+                <option value="50"{{ selected(ppp == 50) }}>50</option>
+                <option value="100"{{ selected(ppp == 100) }}>100</option>
             </select>
             posts per page
         </td>
@@ -23,7 +24,7 @@
             <strong>Inbox sorting</strong>
         </td>
         <td>
-            <input type="checkbox" name="list_unread_pms_first" id="list_unread_pms_first"{{ checked(option.ListUnreadPMsFirst) }} />
+            <input type="checkbox" name="list_unread_pms_first" id="list_unread_pms_first"{{ checked(user.option('ListUnreadPMsFirst')) }} />
             <label for="list_unread_pms_first">List unread private messages first</label>
         </td>
     </tr>
@@ -32,7 +33,7 @@
             <strong>Emoticons</strong>
         </td>
         <td>
-            <input type="checkbox" name="disablesmileys" id="disablesmileys"{{ checked(option.DisableSmileys) }} />
+            <input type="checkbox" name="disablesmileys" id="disablesmileys"{{ checked(user.option('DisableSmileys')) }} />
             <label for="disablesmileys">Disable emoticons</label>
         </td>
     </tr>
@@ -43,7 +44,7 @@
             <strong>Mature content (forums, comments, profiles)</strong>
         </td>
         <td>
-            <input type="checkbox" name="enablematurecontent" id="enablematurecontent"{{ checked(option.EnableMatureContent) }} />
+            <input type="checkbox" name="enablematurecontent" id="enablematurecontent"{{ checked(user.option('EnableMatureContent')) }} />
             <label for="enablematurecontent">Display mature content</label>
         </td>
     </tr>
@@ -55,19 +56,21 @@
         </td>
         <td>
             <select name="disableavatars" id="disableavatars" onchange="ToggleIdenticons();">
-                <option value="1"{{ selected(option.DisableAvatars == 1) }}>Disable avatars</option>
-                <option value="0"{{ selected(option.DisableAvatars == 0) }}>Show avatars</option>
-                <option value="2"{{ selected(option.DisableAvatars == 2) }}>Show avatars or:</option>
-                <option value="3"{{ selected(option.DisableAvatars == 3) }}>Replace all avatars with:</option>
+                {%- set avatar_mode = user.option('DisableAvatars') -%}
+                <option value="1"{{ selected(avatar_mode == 1) }}>Disable avatars</option>
+                <option value="0"{{ selected(avatar_mode == 0) }}>Show avatars</option>
+                <option value="2"{{ selected(avatar_mode == 2) }}>Show avatars or:</option>
+                <option value="3"{{ selected(avatar_mode == 3) }}>Replace all avatars with:</option>
             </select>
             <select name="identicons" id="identicons">
-                <option value="0"{{ selected(option.Identicons == 0) }}>Identicon</option>
-                <option value="1"{{ selected(option.Identicons == 1) }}>MonsterID</option>
-                <option value="2"{{ selected(option.Identicons == 2) }}>Wavatar</option>
-                <option value="3"{{ selected(option.Identicons == 3) }}>Retro</option>
-                <option value="4"{{ selected(option.Identicons == 4) }}>Robots 1</option>
-                <option value="5"{{ selected(option.Identicons == 5) }}>Robots 2</option>
-                <option value="6"{{ selected(option.Identicons == 6) }}>Robots 3</option>
+                {%- set identicon = user.option('Identicons') -%}
+                <option value="0"{{ selected(identicon == 0) }}>Identicon</option>
+                <option value="1"{{ selected(identicon == 1) }}>MonsterID</option>
+                <option value="2"{{ selected(identicon == 2) }}>Wavatar</option>
+                <option value="3"{{ selected(identicon == 3) }}>Retro</option>
+                <option value="4"{{ selected(identicon == 4) }}>Robots 1</option>
+                <option value="5"{{ selected(identicon == 5) }}>Robots 2</option>
+                <option value="6"{{ selected(identicon == 6) }}>Robots 3</option>
             </select>
         </td>
     </tr>
@@ -77,7 +80,7 @@
             <strong>Auto-save reply text</strong>
         </td>
         <td>
-            <input type="checkbox" name="disableautosave" id="disableautosave"{{ checked(option.DisableAutoSave) }} />
+            <input type="checkbox" name="disableautosave" id="disableautosave"{{ checked(user.option('DisableAutoSave')) }} />
             <label for="disableautosave">Disable text auto-saving</label>
         </td>
     </tr>

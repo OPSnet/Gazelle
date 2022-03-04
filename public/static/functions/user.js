@@ -33,19 +33,11 @@ function AlterParanoia() {
     if (!$('input[name=p_ratio]').raw()) {
         return;
     }
-    var showDownload = $('input[name=p_downloaded]').raw().checked || ($('input[name=p_uploaded]').raw().checked && $('input[name=p_ratio]').raw().checked);
-    if (($('input[name=p_c_seeding]').raw().checked) && ($('input[name=p_c_snatched]').raw().checked) && showDownload) {
-        $('input[type=checkbox][name=p_requiredratio]').raw().checked = true;
-        $('input[type=checkbox][name=p_requiredratio]').raw().disabled = true;
-    } else {
-        $('input[type=checkbox][name=p_requiredratio]').raw().disabled = false;
-    }
 
     $.each([
         'requestsfilled', 'requestsvoted',
     ], function(i,val) {
         $('input[name=p_list_' + val + ']').raw().disabled = !($('input[name=p_count_' + val + ']').raw().checked && $('input[name=p_bounty_' + val + ']').raw().checked);
-        UncheckIfDisabled($('input[name=p_list_' + val + ']').raw());
     });
 
     $.each([
@@ -54,6 +46,15 @@ function AlterParanoia() {
         $('input[name=p_l_' + val + ']').raw().disabled = !$('input[name=p_c_' + val + ']').raw().checked;
         UncheckIfDisabled($('input[name=p_l_' + val + ']').raw());
     });
+
+    if ($('input[name=p_c_seeding]').raw().checked
+        && $('input[name=p_c_snatched]').raw().checked
+        && ($('input[name=p_downloaded]').raw().checked || ($('input[name=p_uploaded]').raw().checked && $('input[name=p_ratio]').raw().checked))
+    ) {
+        $('input[type=checkbox][name=p_requiredratio]').raw().checked = true;
+    } else {
+        $('input[type=checkbox][name=p_requiredratio]').raw().disabled = false;
+    }
 
     // unique groups, "Perfect" FLACs and artists added are deducible from the list of uploads
     if ($('input[name=p_l_uploads]').raw().checked) {
@@ -69,9 +70,7 @@ function AlterParanoia() {
         $('input[type=checkbox][name=p_artistsadded]').raw().disabled = true;
     } else {
         $('input[name=p_c_uniquegroups]').raw().disabled = false;
-        $('input[name=p_l_uniquegroups]').raw().disabled = true;
         $('input[name=p_c_perfectflacs]').raw().disabled = false;
-        $('input[name=p_l_perfectflacs]').raw().disabled = true;
         $('input[type=checkbox][name=p_artistsadded]').raw().disabled = false;
     }
 

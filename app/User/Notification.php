@@ -184,7 +184,7 @@ class Notification extends \Gazelle\BaseUser {
                 ON DUPLICATE KEY UPDATE
                     PushService = ?,
                     PushOptions = ?
-                ", $this->userId, $service, $options,
+                ", $this->user->id(), $service, $options,
                     $service, $options
             );
         }
