@@ -239,8 +239,8 @@ class Scheduler extends \Gazelle\Base {
 
         self::$db->prepared_query("
             SELECT pt.name,
-                cast(avg(pth.duration_ms) AS INTEGER) AS duration_avg,
-                cast(avg(pth.num_items) AS INTEGER) AS processed_avg
+                avg(pth.duration_ms) AS duration_avg,
+                avg(pth.num_items)   AS processed_avg
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.is_enabled IS TRUE
