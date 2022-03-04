@@ -11,7 +11,7 @@
             <strong>Avatar URL</strong>
         </td>
         <td>
-            <input type="text" size="50" name="avatar" id="avatar" value="{{ avatar }}" />
+            <input type="text" size="50" name="avatar" id="avatar" value="{{ user.avatar }}" />
         </td>
     </tr>
 {% include 'user/setting/donor.twig' with {'enabled': donor.enabled, 'reward': donor.reward, 'title': donor.title, 'user': user} only %}

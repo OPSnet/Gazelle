@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked %}
+{% from 'macro/user-edit.twig' import paranoia_list %}
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="paranoia_settings">
     <tr class="colhead_dark">
         <td colspan="2">
@@ -22,7 +23,23 @@
             <strong>Recent activity</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_lastseen"{{ checked(paranoia.lastseen) }} /> Last seen</label>
+            <label><input type="checkbox" name="p_lastseen"{{ checked(not user.isParanoid('lastseen')) }} /> Last seen</label>
+        </td>
+    </tr>
+    <tr id="para_vote_recent_tr">
+        <td class="label tooltip" title="This option controls the display of the votes you have made on releases. When checked, other users can see your recent votes on your profile page.">
+            <strong>Recent release votes</strong>
+        </td>
+        <td>
+            <label><input type="checkbox" name="pattr_hide_vote_recent"{{ checked(not user.hasAttr('hide-vote-recent')) }} /> Show recent release votes</label>
+        </td>
+    </tr>
+    <tr id="para_vote_hist_tr">
+        <td class="label tooltip" title="This option controls the display of the votes you have made on releases. When checked, other users can see the way you voted on releases.">
+            <strong>Release votes history</strong>
+        </td>
+        <td>
+            <label><input type="checkbox" name="pattr_hide_vote_history"{{ checked(not user.hasAttr('hide-vote-history')) }} /> Show release votes history</label>
         </td>
     </tr>
     <tr id="para_presets_tr">
@@ -36,9 +53,9 @@
     <tr id="para_donations_tr">
         <td class="label"><strong>Donations</strong></td>
         <td>
-            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ checked(paranoia.donor_visible) }} />
-            <label for="p_donor_stats">Show donor stats</label>
-            <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ checked(paranoia.hide_heart) }} />
+            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ checked(user.donorVisible) }} />
+            <label for="p_donor_stats">Show donor stats</label>&nbsp;&nbsp;
+            <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ checked(not user.isParanoid('hide_donor_heart')) }} />
             <label for="p_donor_heart">Show donor heart</label>
         </td>
     </tr>
@@ -47,108 +64,85 @@
             <strong>Statistics</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"{{ checked(paranoia.upload) }} /> Uploaded</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"{{ checked(paranoia.download) }} /> Downloaded</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"{{ checked(paranoia.ratio) }} /> Ratio</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bonuspoints"{{ checked(paranoia.bonus) }} /> Bonus Points</label>
+            <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"{{ checked(not user.isParanoid('uploaded')) }} /> Uploaded</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"{{ checked(not user.isParanoid('downloaded')) }} /> Downloaded</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bonuspoints"{{ checked(not user.isParanoid('bonuspoints')) }} /> Bonus Points</label>
+            <label><input type="checkbox" name="p_invitedcount"{{ checked(not user.isParanoid('invitedcount')) }} /> Invitees</label>
         </td>
     </tr>
     <tr id="para_reqratio_tr">
-        <td class="label"><strong>Required Ratio</strong></td>
+        <td class="label"><strong>Ratio</strong></td>
         <td>
-            <label><input type="checkbox" name="p_requiredratio"{{ checked(paranoia.ratio_req) }} /> Required Ratio</label>
+            <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"{{ checked(not user.isParanoid('ratio')) }} /> Current Ratio</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_requiredratio"{{ checked(not user.isParanoid('requiredratio')) }} /> Required Ratio</label>
         </td>
+    </tr>
+    <tr id="para_upltor_tr">
+        <td class="label"><strong>Uploads</strong></td>
+        <td>{{ paranoia_list(user, 'uploads') }}</td>
+    </tr>
+    <tr id="para_uplunique_tr">
+        <td class="label"><strong>Unique groups uploaded</strong></td>
+        <td>{{ paranoia_list(user, 'uniquegroups') }}</td>
+    </tr>
+    <tr id="para_uplpflac_tr">
+        <td class="label"><strong>"Perfect" FLACs uploaded</strong></td>
+        <td>{{ paranoia_list(user, 'perfectflacs') }}</td>
+    </tr>
+    <tr id="para_artistsadded_tr">
+        <td class="label tooltip" title="This option controls the display of the artists you have added to torrent groups on the site. This number includes artists added via the torrent upload form, as well as artists added via the &quot;Add artists&quot; box on torrent group pages.">
+            <strong>Artists added via uploads</strong>
+        </td>
+        <td>
+            <label><input type="checkbox" name="p_artistsadded"{{ checked(not user.isParanoid('artistsadded')) }} /> Show count</label>
+        </td>
+    </tr>
+    <tr id="para_torsubscr_tr">
+        <td class="label tooltip" title="This option allows other users to subscribe to your torrent uploads.">
+            <strong>Notifications</strong>
+        </td>
+        <td>
+            <label><input type="checkbox" name="p_notifications"{{ checked(not user.isParanoid('notifications')) }} /> Allow notifications on your uploads</label>
+        </td>
+    </tr>
+    <tr id="para_torleech_tr">
+        <td class="label"><strong>Leeching stats</strong></td>
+        <td>{{ paranoia_list(user, 'leeching') }}</td>
+    </tr>
+    <tr id="para_torsnatch_tr">
+        <td class="label"><strong>Snatched stats</strong></td>
+        <td>{{ paranoia_list(user, 'snatched') }}</td>
+    </tr>
+    <tr id="para_torseed_tr">
+        <td class="label"><strong>Seeding stats</strong></td>
+        <td>{{ paranoia_list(user, 'seeding') }}</td>
     </tr>
     <tr id="para_comments_tr">
         <td class="label"><strong>Comments (torrents)</strong></td>
-        <td>{{ paranoia.torrentcomments|raw }}</td>
+        <td>{{ paranoia_list(user, 'torrentcomments') }}</td>
     </tr>
     <tr id="para_collcontr_tr">
         <td class="label"><strong>Collages (contributed to)</strong></td>
-        <td>{{ paranoia.collages_contrib|raw }}</td>
+        <td>{{ paranoia_list(user, 'collagecontribs') }}</td>
     </tr>
     <tr id="para_collstart_tr">
         <td class="label"><strong>Collages (started)</strong></td>
-        <td>{{ paranoia.collages|raw }}</td>
+        <td>{{ paranoia_list(user, 'collages') }}</td>
     </tr>
     <tr id="para_reqfill_tr">
         <td class="label"><strong>Requests (filled)</strong></td>
         <td>
-            <label><input type="checkbox" name="p_count_requestsfilled" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.count) }} /> Show count</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bounty_requestsfilled" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_list_requestsfilled" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.list) }} /> Show list</label>
+            <label><input type="checkbox" name="p_count_requestsfilled" onchange="AlterParanoia();"{{ checked(not user.isParanoid('requestsfilled_count')) }} /> Show count</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_list_requestsfilled" onchange="AlterParanoia();"{{ checked(not user.isParanoid('requestsfilled_list')) }} /> Show list</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bounty_requestsfilled" onchange="AlterParanoia();"{{ checked(not user.isParanoid('requestsfilled_bounty')) }} /> Show bounty received</label>
         </td>
     </tr>
     <tr id="para_reqvote_tr">
         <td class="label"><strong>Requests (voted for)</strong></td>
         <td>
-            <label><input type="checkbox" name="p_count_requestsvoted" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.count) }} /> Show count</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bounty_requestsvoted" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_list_requestsvoted" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.list) }} /> Show list</label>
-        </td>
-    </tr>
-    <tr id="para_upltor_tr">
-        <td class="label"><strong>Uploaded torrents</strong></td>
-        <td>{{ paranoia.uploads|raw }}</td>
-    </tr>
-    <tr id="para_uplunique_tr">
-        <td class="label"><strong>Uploaded torrents (unique groups)</strong></td>
-        <td>{{ paranoia.unique|raw }}</td>
-    </tr>
-    <tr id="para_uplpflac_tr">
-        <td class="label"><strong>Uploaded torrents ("perfect" FLACs)</strong></td>
-        <td>{{ paranoia.perfectflacs|raw }}</td>
-    </tr>
-    <tr id="para_torseed_tr">
-        <td class="label"><strong>Torrents (seeding)</strong></td>
-        <td>{{ paranoia.seeding|raw }}</td>
-    </tr>
-    <tr id="para_torleech_tr">
-        <td class="label"><strong>Torrents (leeching)</strong></td>
-        <td>{{ paranoia.leeching|raw }}</td>
-    </tr>
-    <tr id="para_torsnatch_tr">
-        <td class="label"><strong>Torrents (snatched)</strong></td>
-        <td>{{ paranoia.snatched|raw }}</td>
-    </tr>
-    <tr id="para_torsubscr_tr">
-        <td class="label tooltip" title="This option allows other users to subscribe to your torrent uploads.">
-            <strong>Torrents (upload subscriptions)</strong>
-        </td>
-        <td>
-            <label><input type="checkbox" name="p_notifications"{{ checked(paranoia.notify) }} /> Allow torrent upload subscriptions</label>
-        </td>
-    </tr>
-    <tr id="para_invited_tr">
-        <td class="label tooltip" title="This option controls the visibility of your {{ constant('SITE_NAME') }} invitees.">
-            <strong>Invitees</strong>
-        </td>
-        <td>
-            <label><input type="checkbox" name="p_invitedcount"{{ checked(paranoia.invited) }} /> Show count</label>
-        </td>
-    </tr>
-    <tr id="para_artistsadded_tr">
-        <td class="label tooltip" title="This option controls the display of the artists you have added to torrent groups on the site. This number includes artists added via the torrent upload form, as well as artists added via the &quot;Add artists&quot; box on torrent group pages.">
-            <strong>Artists added</strong>
-        </td>
-        <td>
-            <label><input type="checkbox" name="p_artistsadded"{{ checked(paranoia.artists) }} /> Show count</label>
-        </td>
-    </tr>
-    <tr id="para_vote_recent_tr">
-        <td class="label tooltip" title="This option controls the display of the votes you have made on releases. When checked, other users can see your recent votes on your profile page.">
-            <strong>Recent release votes</strong>
-        </td>
-        <td>
-            <label><input type="checkbox" name="pattr_hide_vote_recent"{{ checked(not paranoia.hide_vote_recent) }} /> Show recent release votes</label>
-        </td>
-    </tr>
-    <tr id="para_vote_hist_tr">
-        <td class="label tooltip" title="This option controls the display of the votes you have made on releases. When checked, other users can see the way you voted on releases.">
-            <strong>Release votes history</strong>
-        </td>
-        <td>
-            <label><input type="checkbox" name="pattr_hide_vote_history"{{ checked(not paranoia.hide_vote_history) }} /> Show release votes history</label>
+            <label><input type="checkbox" name="p_count_requestsvoted" onchange="AlterParanoia();"{{ checked(not user.isParanoid('requestsvoted_count')) }} /> Show count</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_list_requestsvoted" onchange="AlterParanoia();"{{ checked(not user.isParanoid('requestsvoted_list')) }} /> Show list</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bounty_requestsvoted" onchange="AlterParanoia();"{{ checked(not user.isParanoid('requestsvoted_bounty')) }} /> Show bounty offered</label>
         </td>
     </tr>
     <tr id="para_preview_tr">

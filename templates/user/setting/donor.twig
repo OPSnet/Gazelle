@@ -1,5 +1,7 @@
 {% from 'macro/form.twig' import checked %}
-{% if user.enabledRewards.HasSecondAvatar %}
+{% set reward = user.donorRewards %}
+{% set title = user.donorTitles %}
+{% if enabled_reward.HasSecondAvatar %}
     <tr id="pers_avatar2_tr">
         <td class="label tooltip_interactive"
             title="Congratulations! You've unlocked this option by reaching Special Rank #2. Thanks for donating. Your normal avatar will &quot;flip&quot; to this one when someone runs their mouse over the image. Please link to an avatar which follows the &lt;a href=&quot;rules.php&quot;&gt;site rules&lt;/a&gt;. The avatar width should be 150 pixels and will be resized if necessary."
@@ -11,7 +13,7 @@
         </td>
     </tr>
 {% endif %}
-{% if user.enabledRewards.HasAvatarMouseOverText %}
+{% if enabled_reward.HasAvatarMouseOverText %}
     <tr id="pers_avatarhover_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. Text you enter in this field will appear when someone mouses over your avatar. All text should follow site rules. 200 character limit.">
             <strong>Avatar mouseover text</strong>
@@ -21,7 +23,7 @@
         </td>
     </tr>
 {% endif %}
-{% if user.enabledRewards.HasDonorIconMouseOverText %}
+{% if enabled_reward.HasDonorIconMouseOverText %}
     <tr id="pers_donorhover_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. Text you enter in this field will appear when someone mouses over your donor icon. All text should follow site rules. 200 character limit.">
             <strong>Donor icon mouseover text</strong>
@@ -31,7 +33,7 @@
         </td>
     </tr>
 {% endif %}
-{% if user.enabledRewards.HasDonorIconLink %}
+{% if enabled_reward.HasDonorIconLink %}
     <tr id="pers_donorlink_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. Links you enter in this field will be accessible when your donor icon is clicked. All links should follow site rules.">
             <strong>Donor icon link</strong>
@@ -41,7 +43,7 @@
         </td>
     </tr>
 {% endif %}
-{% if user.enabledRewards.HasCustomDonorIcon %}
+{% if enabled_reward.HasCustomDonorIcon %}
     <tr id="pers_donoricon_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. Please link to an icon which you'd like to replace your default donor icon with. Icons must be 15 pixels wide by 13 pixels tall. Icons of any other size will be automatically resized.">
             <strong>Custom donor icon URL</strong>

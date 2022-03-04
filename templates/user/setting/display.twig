@@ -13,17 +13,17 @@
         <td>
             <ul class="options_list nobullet">
                 <li>
-                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(option.ShowTorFilter) }} />
+                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(user.option('ShowTorFilter')) }} />
                     <label for="showtfilter">Show search form at top page (otherwise it is just a click away)</label>
                 </li>
 {% if user.permitted('site_advanced_search') %}
                 <li>
-                    <input type="checkbox" name="search_type_advanced" id="search_type"{{ checked(option.SearchType) }} />
+                    <input type="checkbox" name="search_type_advanced" id="search_type"{{ checked(user.option('SearchType')) }} />
                     <label for="search_type">Show advanced search form (more filtering options)</label>
                 </li>
 {% endif %}
                 <li>
-                    <input type="checkbox" name="showtags" id="showtags"{{ checked(option.ShowTags) }} />
+                    <input type="checkbox" name="showtags" id="showtags"{{ checked(user.option('ShowTags')) }} />
                     <label for="showtags">Show top official tags at bottom of form</label>
                 </li>
             </ul>
@@ -36,7 +36,7 @@
             <p class="min_padding">Enabling torrent grouping on the search page will place multiple
             formats of the same torrent group together beneath a common header.</p>
             <div class="option_group">
-                <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ checked(not option.DisableGrouping2) }} />
+                <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ checked(not user.option('DisableGrouping2')) }} />
                 <label for="disablegrouping">Enable torrent grouping</label>
             </div>
         </td>
@@ -49,11 +49,11 @@
                     <p class="min_padding">In torrent search results and on artist pages, &quot;open&quot;
                     will expand torrent groups by default, and &quot;closed&quot; will collapse torrent groups by default.</p>
                     <li>
-                        <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ checked(option.TorrentGrouping == 0) }} />
+                        <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ checked(user.option('TorrentGrouping') == 0) }} />
                         <label for="torrent_grouping_open">Open</label>
                     </li>
                     <li>
-                        <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ checked(option.TorrentGrouping == 1) }} />
+                        <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ checked(user.option('TorrentGrouping') == 1) }} />
                         <label for="torrent_grouping_closed">Closed</label>
                     </li>
                 </ul>
@@ -85,11 +85,11 @@
             <ul class="options_list nobullet">
                 <li>
                     <input type="hidden" name="coverart" value="" />
-                    <input type="checkbox" name="coverart" id="coverart"{{ checked(option.CoverArt) }} />
+                    <input type="checkbox" name="coverart" id="coverart"{{ checked(user.option('CoverArt')) }} />
                     <label for="coverart">Enable cover artwork</label>
                 </li>
                 <li>
-                    <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ checked(option.ShowExtraCovers) }} />
+                    <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ checked(user.option('ShowExtraCovers')) }} />
                     <label for="show_extra_covers">Enable additional cover artwork</label>
                 </li>
             </ul>
@@ -101,12 +101,13 @@
         </td>
         <td>
             <select name="collagecovers" id="collagecovers">
-                <option value="10"{{ selected(option.CollageCovers == 10) }}>10</option>
-                <option value="25"{{ selected(option.CollageCovers is null or option.CollageCovers == 25) }}>25 (default)</option>
-                <option value="50"{{ selected(option.CollageCovers == 50) }}>50</option>
-                <option value="100"{{ selected(option.CollageCovers == 100) }}>100</option>
-                <option value="1000000"{{ selected(option.CollageCovers == 1000000) }}>All</option>
-                <option value="0"{{ selected(option.CollageCovers == 0 or (option.CollageCovers is null and option.HideCollage)) }}>None</option>
+                {%- set n = user.option('CollageCovers') -%}
+                <option value="10"{{ selected(n == 10) }}>10</option>
+                <option value="25"{{ selected(n is null or n == 25) }}>25 (default)</option>
+                <option value="50"{{ selected(n == 50) }}>50</option>
+                <option value="100"{{ selected(n == 100) }}>100</option>
+                <option value="1000000"{{ selected(n == 1000000) }}>All</option>
+                <option value="0"{{ selected(n == 0 or (n is null and user.option('HideCollage'))) }}>None</option>
             </select>
             covers per page
         </td>
@@ -117,9 +118,10 @@
         </td>
         <td>
             <select name="autocomplete">
-                <option value="0"{{ selected(option.AutoComplete is null) }}>Everywhere</option>
-                <option value="2"{{ selected(option.AutoComplete == 2) }}>Searches only</option>
-                <option value="1"{{ selected(option.AutoComplete == 1) }}>Disable</option>
+                {%- set ac = user.option('AutoComplete') -%}
+                <option value="0"{{ selected(ac is null) }}>Everywhere</option>
+                <option value="2"{{ selected(ac == 2) }}>Searches only</option>
+                <option value="1"{{ selected(ac == 1) }}>Disable</option>
             </select>
         </td>
     </tr>
@@ -128,7 +130,7 @@
             <strong>Voting links</strong>
         </td>
         <td>
-            <input type="checkbox" name="novotelinks" id="novotelinks"{{ checked(option.NoVoteLinks) }} />
+            <input type="checkbox" name="novotelinks" id="novotelinks"{{ checked(user.option('NoVoteLinks')) }} />
             <label for="novotelinks">Disable voting links</label>
         </td>
     </tr>
@@ -138,7 +140,7 @@
             <strong>Snatched torrents indicator</strong>
         </td>
         <td>
-            <input type="checkbox" name="showsnatched" id="showsnatched"{{ checked(option.ShowSnatched) }} />
+            <input type="checkbox" name="showsnatched" id="showsnatched"{{ checked(user.option('ShowSnatched')) }} />
             <label for="showsnatched">Enable snatched torrents indicator</label>
         </td>
     </tr>
@@ -147,7 +149,7 @@
             <strong>Text file downloads</strong>
         </td>
         <td>
-            <input type="checkbox" name="downloadalt" id="downloadalt"{{ checked(download_text) }} />
+            <input type="checkbox" name="downloadalt" id="downloadalt"{{ checked(user.downloadAlt) }} />
             <label for="downloadalt">Enable downloading torrent files as text files</label>
         </td>
     </tr>
@@ -156,7 +158,7 @@
             <strong>Use HTTPS Tracker</strong>
         </td>
         <td>
-            <input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(option.HttpsTracker) }} />
+            <input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(user.option('HttpsTracker')) }} />
             <label for="httpstracker">Enable HTTPs tracker for announce URL</label>
         </td>
     </tr>
