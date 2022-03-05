@@ -1,0 +1,84 @@
+{%- from 'macro/form.twig' import selected -%}
+{%- macro yes_no(value) -%}
+    {%- if value -%}
+        <strong class="important_text_alt">YES</strong>
+    {%- else -%}
+        <strong class="important_text">NO</strong>
+    {%- endif -%}
+{%- endmacro -%}
+{{ header('Transcode Search') }}
+<div class="thin">
+    <h2>Transcodes</h2>
+    <div class="linkbox">
+        <a class="brackets" href="better.php?method=transcode">Transcodes</a>
+        <a class="brackets" href="better.php?method=missing">Missing</a>
+        <a class="brackets" href="better.php?method=single">Single Seeded</a>
+    </div>
+    <form class="search_form" name="transcodes" action="" method="get">
+        <input type="hidden" name="method" value="transcode" />
+        <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
+            <tr>
+                <td class="label"><strong>Filter</strong></td>
+                <td>
+                    <select name="filter">
+                        <option value="snatched"{{ selected(filter == 'snatched') }}>Snatched only</option>
+                        <option value="seeding"{{ selected(filter == 'seeding') }}>Seeding only</option>
+                        <option value="uploaded"{{ selected(filter == 'uploaded') }}>Uploaded only</option>
+                    </select>
+                    <select name="target">
+                        <option value="v0"{{ selected(target == 'v0') }}>V0 missing</option>
+                        <option value="320"{{ selected(target == '320') }}>320 missing</option>
+                        <option value="all"{{ selected(target == 'all') }}>All transcodes missing</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Search</strong></td>
+                <td>
+                    <input type="search" name="search" size="60" value="{{ search }}" />
+                </td>
+            </tr>
+            <tr><td>&nbsp;</td><td><input type="submit" value="Search" /></td></tr>
+        </table>
+    </form>
+    <h3>About</h3>
+    <div class="box pad" style="padding: 10px 10px 10px 20px;">
+        <p>
+            This page lists {{ constant('TORRENTS_PER_PAGE') }} random transcodable perfect FLACs matching the options you selected above, but there can be more or less matches on this page. The following numbers tell you something about the torrents currently listed below and can change if you reload.<br /><br />
+
+            Number of perfect FLACs you can transcode: {{ total.source|number_format }}<br />
+            Number of missing transcodes: {{ (total.mp3_v0 + total.mp3_320)|number_format }}<br />
+            Number of missing V0 / 320 transcodes: {{ total.mp3_v0|number_format }} / {{ total.mp3_320|number_format }}<br />
+{% if viewer.permitted('zip_downloader') and source|length > 0 %}
+            <br />
+            <br />
+            <a class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{ source|join(',') }}" onclick="return confirm('If you do not have the content, your ratio WILL be affected; be sure to check the size of all torrents before downloading.');">Download All</a>
+{% endif %}
+        </p>
+    </div>
+    <h3>List</h3>
+    <table width="100%" class="torrent_table">
+        <tr class="colhead">
+            <td>Torrent</td>
+            {% if target != '320' %}<td>V0</td>{% endif %}
+            {% if target != 'v0' %}<td>320</td>{% endif %}
+        </tr>
+{% for item in list %}
+    {% if item.torrent %}
+        <tr>
+            <td>
+                <span class="torrent_links_block">
+                    {{ item.torrent.group.artistHtml|raw }} – {{ item.torrent.link|raw }}
+                    [{{ item.torrent.edition|raw }}]
+                </span>
+            </td>
+            {% if target != '320' %}<td>{{ _self.yes_no(item.mp3_v0) }}</td>{% endif %}
+            {% if target != 'v0' %}<td>{{ _self.yes_no(item.mp3_320) }}</td>{% endif %}
+        </tr>
+    {% endif %}
+{% else %}
+        <tr><td colspan="4">No results found!</td></tr>
+{% endfor %}
+    </table>
+</div>
+{{ footer() }}
