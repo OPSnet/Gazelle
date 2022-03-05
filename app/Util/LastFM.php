@@ -62,6 +62,9 @@ class LastFM extends \Gazelle\Base {
     }
 
     public function lastTrack($Username) {
+        if (!LASTFM_API_KEY) {
+            return '';
+        }
         $Response = self::$cache->get_value("lastfm_last_played_track_$Username");
         if ($Response === false) {
             $Response = $this->fetch("user.getRecentTracks", ["user" => $Username, "limit" => 1]);
