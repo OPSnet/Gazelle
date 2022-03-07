@@ -267,7 +267,7 @@ defined('BOT_REPORT_CHAN')   or define('BOT_REPORT_CHAN', '#reports');
 // ------------------------------------------------------------------------
 // Push server settings
 
-defined('PUSH_SOCKET_LISTEN_ADDRESS') or define('PUSH_SOCKET_LISTEN_ADDRESS', 'localhost');
+defined('PUSH_SOCKET_LISTEN_ADDRESS') or define('PUSH_SOCKET_LISTEN_ADDRESS', false);
 defined('PUSH_SOCKET_LISTEN_PORT') or define('PUSH_SOCKET_LISTEN_PORT', 6789);
 
 // ------------------------------------------------------------------------

@@ -64,7 +64,7 @@ class Notification extends \Gazelle\Base {
                     default:
                         break;
                 }
-                if (!empty($Service) && !empty($PushOptions['PushKey'])) {
+                if (PUSH_SOCKET_LISTEN_ADDRESS && !empty($Service) && !empty($PushOptions['PushKey'])) {
                     $Options = [
                         "service" => strtolower($Service),
                         "user" => ["key" => $PushOptions['PushKey']],
@@ -83,7 +83,7 @@ class Notification extends \Gazelle\Base {
                             TimesUsed = TimesUsed + 1
                         ", $Service
                     );
-                    $PushServerSocket = fsockopen("127.0.0.1", 6789);
+                    $PushServerSocket = fsockopen(PUSH_SOCKET_LISTEN_ADDRESS, PUSH_SOCKET_LISTEN_PORT);
                     fwrite($PushServerSocket, json_encode($Options));
                     fclose($PushServerSocket);
                 }
