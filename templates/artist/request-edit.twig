@@ -1,0 +1,42 @@
+{{ header("Request an Edit: " ~ artist.name) }}
+<div class="thin">
+<div class="header">
+    <h2>Request an Edit: {{ artist.name }}</h2>
+</div>
+<div class="box pad">
+    <div style="margin-bottom: 10px">
+        <p><strong class="important_text">You are requesting an edit for <a href="{{ artist.url }}">{{ artist.name }}</a></strong></p>
+        
+    </div>
+    <div style="margin-bottom: 10px">
+        <p>
+        Please detail all information that needs to be edited for the artist. Include all relevant links (discogs, musicbrainz, etc.).<br /><br />
+        This will not generate a report, but will create a thread in the Editing forum.<br /><br />
+        What this form can be used for:
+        </p>
+        <ul>
+            <li>Renaming the artist</li>
+            <li>Non-redirecting or redirecting aliases</li>
+            <li>Adding/Deleting aliases</li>
+            <li>etc...</li>
+        </ul>
+        <p>Do NOT use this form for individual torrents or torrent groups. For individual
+            torrents, use the torrent report feature. For torrent groups, go to their respective
+            pages and use the edit request feature.</p>
+    </div>
+    <div>
+        <p><strong class="important_text">Edit Details</strong></p>
+
+        <div class="center">
+            <form action="artist.php" method="POST">
+                <input type="hidden" name="action" value="takeeditrequest" />
+                <input type="hidden" name="artistid" value="{{ artist.id }}" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                {{ details.emit|raw }}
+                <input type="submit" value="Send Request" />
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+{{ footer() }}
