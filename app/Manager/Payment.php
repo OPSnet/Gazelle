@@ -43,7 +43,7 @@ class Payment extends \Gazelle\Base {
     }
 
     public function flush() {
-        $x = self::$cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
+        self::$cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
         return $this;
     }
 
