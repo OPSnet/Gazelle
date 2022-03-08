@@ -217,7 +217,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         </td>
         <td class="center cats_col">
             <div title="<?= ucfirst($primaryTag) ?>"
-                 class="tooltip cats_<?= strtolower($tgroup->categoryName()) ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+                 class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
         </td>
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
