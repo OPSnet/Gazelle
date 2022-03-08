@@ -206,7 +206,7 @@ foreach ($bookmarkList as $bm) {
             </td>
             <td class="m_hidden center">
                 <div title="<?= ucfirst($primaryTag) ?>"
-                     class="tooltip cats_<?= strtolower($tgroup->categoryName()) ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+                     class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
             </td>
             <td class="td_info" colspan="5">
                 <strong><?= $tgroup->displayNameHtml() ?></strong>
@@ -283,7 +283,7 @@ foreach ($bookmarkList as $bm) {
             <td></td>
             <td class="center">
                 <div title="<?= '$TorrentTags->title()' ?>"
-                     class="tooltip <?= 'Format::css_category($GroupCategoryID)' ?> <?= '$TorrentTags->css_name()' ?>">
+                     class="tooltip <?= $tgroup->categoryCss() ?> <?= '$TorrentTags->css_name()' ?>">
                 </div>
             </td>
             <td>

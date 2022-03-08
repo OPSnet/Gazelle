@@ -308,6 +308,10 @@ class TGroup extends BaseObject {
         return CATEGORY[$this->categoryId() - 1];
     }
 
+    public function categoryCss(): string {
+        return 'cats_' . strtolower(str_replace(['-', ' '], '', $this->categoryName()));
+    }
+
     public function cover(): string {
         return $this->info()['Image']
             ?? (STATIC_SERVER . '/common/noartwork/' . strotolower($this->categoryName()) . ".png");

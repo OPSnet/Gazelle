@@ -183,7 +183,7 @@ foreach ($Results as $GroupID) {
             </div>
         </td>
         <td class="center cats_col">
-            <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($CategoryID)?> <?=$TorrentTags->css_name()?>">
+            <div title="<?=$TorrentTags->title()?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$TorrentTags->css_name()?>">
             </div>
         </td>
         <td colspan="2" class="td_info big_info">
@@ -312,7 +312,7 @@ foreach ($Results as $GroupID) {
         <td></td>
 <?php   } ?>
         <td class="center cats_col m_cats_col m_td_left">
-            <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($CategoryID)?> <?=$TorrentTags->css_name()?>"></div>
+            <div title="<?=$TorrentTags->title()?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$TorrentTags->css_name()?>"></div>
         </td>
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
