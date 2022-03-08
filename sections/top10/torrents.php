@@ -1,8 +1,11 @@
 <?php
 
-$torrent = new \Gazelle\Top10\Torrent(FORMAT, $Viewer);
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setViewer($Viewer);
+$bookmark = new Gazelle\Bookmark($Viewer);
+$snatcher = new Gazelle\User\Snatch($Viewer);
+$top10    = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
+$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
@@ -14,6 +17,76 @@ if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
 
     $limit = $_GET['limit'] ?? 10;
     $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
+}
+
+$disableFreeleechTorrentTop10 = $Viewer->option('DisableFreeTorrentTop10') ?? false;
+
+if (isset($_GET['freeleech'])) {
+    $newPreference = (($_GET['freeleech'] == 'hide') ? 1 : 0);
+    if ($newPreference != $disableFreeleechTorrentTop10) {
+        $disableFreeleechTorrentTop10 = $newPreference;
+        $Viewer->modifyOption('DisableFreeTorrentTop10', $disableFreeleechTorrentTop10);
+    }
+}
+
+$freeleechToggleName = isset($_GET['freeleech']) && $top10->showFreeleechTorrents($_GET['freeleech']) ? 'show' : 'hide';
+$freeleechToggleQuery = Format::get_url(['freeleech', 'groups']);
+
+if (!empty($freeleechToggleQuery)) {
+    $freeleechToggleQuery .= '&amp;';
+}
+$freeleechToggleQuery .= 'freeleech=' . $freeleechToggleName;
+
+$groupByToggleName = (!empty($_GET['groups']) && $_GET['groups'] == 'show' ? 'hide' : 'show');
+$groupByToggleQuery = Format::get_url(['freeleech', 'groups']);
+if (!empty($groupByToggleQuery)) {
+  $groupByToggleQuery .= '&amp;';
+}
+
+$groupByToggleQuery .= 'groups=' . $groupByToggleName;
+
+$context = [];
+if (in_array($details, ['all', 'day'])) {
+    $context[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Day',
+        'tag'     => 'day',
+        'list'    => $top10->getTopTorrents($_GET, 'day', $limit),
+    ];
+}
+if (in_array($details, ['all', 'week'])) {
+    $context[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Week',
+        'tag'     => 'week',
+        'list'    => $top10->getTopTorrents($_GET, 'week', $limit),
+    ];
+}
+if (in_array($details, ['all', 'month'])) {
+    $context[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Month',
+        'tag'     => 'month',
+        'list'    => $top10->getTopTorrents($_GET, 'month', $limit),
+    ];
+}
+if (in_array($details, ['all', 'year'])) {
+    $context[] = [
+        'caption' => 'Most Active Torrents Uploaded in the Past Year',
+        'tag'     => 'year',
+        'list'    => $top10->getTopTorrents($_GET, 'year', $limit),
+    ];
+}
+if (in_array($details, ['all', 'overall'])) {
+    $context[] = [
+        'caption' => 'Most Active Torrents of All Time',
+        'tag'     => 'overall',
+        'list'    => $top10->getTopTorrents($_GET, 'overall', $limit),
+    ];
+}
+if (in_array($details, ['all', 'snatched'])) {
+    $context[] = [
+        'caption' => 'Most Snatched Torrents',
+        'tag'     => 'snatched',
+        'list'    => $top10->getTopTorrents($_GET, 'snatched', $limit),
+    ];
 }
 
 View::show_header("Top $limit Torrents");
@@ -50,11 +123,10 @@ if ($Viewer->permitted('site_advanced_top10')) {
                 <td>
                     <select name="format" style="width: auto;" class="ft_format">
                         <option value="">Any</option>
-<?php
-    foreach (FORMAT as $formatName) { ?>
+<?php foreach (FORMAT as $formatName) { ?>
                         <option value="<?=display_str($formatName)?>"<?php if (isset($_GET['format']) && $formatName==$_GET['format']) { ?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
-<?php
-    } ?>                </select>
+<?php } ?>
+                    </select>
                 </td>
             </tr>
             <tr>
@@ -66,32 +138,6 @@ if ($Viewer->permitted('site_advanced_top10')) {
     </form>
 <?php
 }
-
-$disableFreeleechTorrentTop10 = $Viewer->option('DisableFreeTorrentTop10') ?? false;
-
-if (isset($_GET['freeleech'])) {
-    $newPreference = (($_GET['freeleech'] == 'hide') ? 1 : 0);
-    if ($newPreference != $disableFreeleechTorrentTop10) {
-        $disableFreeleechTorrentTop10 = $newPreference;
-        $Viewer->modifyOption('DisableFreeTorrentTop10', $disableFreeleechTorrentTop10);
-    }
-}
-
-$freeleechToggleName = isset($_GET['freeleech']) && $torrent->showFreeleechTorrents($_GET['freeleech']) ? 'show' : 'hide';
-$freeleechToggleQuery = Format::get_url(['freeleech', 'groups']);
-
-if (!empty($freeleechToggleQuery))
-    $freeleechToggleQuery .= '&amp;';
-
-$freeleechToggleQuery .= 'freeleech=' . $freeleechToggleName;
-
-$groupByToggleName = (!empty($_GET['groups']) && $_GET['groups'] == 'show' ? 'hide' : 'show');
-$groupByToggleQuery = Format::get_url(['freeleech', 'groups']);
-if (!empty($groupByToggleQuery)) {
-  $groupByToggleQuery .= '&amp;';
-}
-
-$groupByToggleQuery .= 'groups=' . $groupByToggleName;
 ?>
     <div style="text-align: right;" class="linkbox">
         <a href="top10.php?<?=$freeleechToggleQuery?>" class="brackets"><?=ucfirst($freeleechToggleName)?> freeleech in Top 10</a>
@@ -100,58 +146,11 @@ $groupByToggleQuery .= 'groups=' . $groupByToggleName;
 <?php } ?>
     </div>
 <?php
-
-if ($details == 'all' || $details == 'day') {
-    $topTorrentsActiveLastDay = $torrent->getTopTorrents($_GET, 'day', $limit);
-    generate_torrent_table('Most Active Torrents Uploaded in the Past Day', 'day', $topTorrentsActiveLastDay, $limit);
-}
-
-if ($details == 'all' || $details == 'week') {
-    $topTorrentsActiveLastWeek = $torrent->getTopTorrents($_GET, 'week', $limit);
-    generate_torrent_table('Most Active Torrents Uploaded in the Past Week', 'week', $topTorrentsActiveLastWeek, $limit);
-}
-
-if ($details == 'all' || $details == 'month') {
-    $topTorrentsActiveLastMonth = $torrent->getTopTorrents($_GET, 'month', $limit);
-    generate_torrent_table('Most Active Torrents Uploaded in the Past Month', 'month', $topTorrentsActiveLastMonth, $limit);
-}
-
-if ($details == 'all' || $details == 'year') {
-    $topTorrentsActiveLastYear = $torrent->getTopTorrents($_GET, 'year', $limit);
-    generate_torrent_table('Most Active Torrents Uploaded in the Past Year', 'year', $topTorrentsActiveLastYear, $limit);
-}
-
-if ($details == 'all' || $details == 'overall') {
-    $topTorrentsActiveAllTime = $torrent->getTopTorrents($_GET, 'overall', $limit);
-    generate_torrent_table('Most Active Torrents of All Time', 'overall', $topTorrentsActiveAllTime, $limit);
-}
-
-if (($details == 'all' || $details == 'snatched')) {
-    $topTorrentsSnatched = $torrent->getTopTorrents($_GET, 'snatched', $limit);
-    generate_torrent_table('Most Snatched Torrents', 'snatched', $topTorrentsSnatched, $limit);
-}
-
-if (($details == 'all' || $details == 'data')) {
-    $topTorrentsTransferred = $torrent->getTopTorrents($_GET, 'data', $limit);
-    generate_torrent_table('Most Data Transferred Torrents', 'data', $topTorrentsTransferred, $limit);
-}
-
-if (($details == 'all' || $details == 'seeded')) {
-    $topTorrentsSeeded = $torrent->getTopTorrents($_GET, 'seeded', $limit);
-    generate_torrent_table('Best Seeded Torrents', 'seeded', $topTorrentsSeeded, $limit);
-}
-
+foreach ($context as $c) {
+    $tag     = $c['tag'];
+    $details = $c['list'];
 ?>
-</div>
-<?php
-View::show_footer();
-
-// generate a table based on data from most recent query to $DB
-function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $groupBy, $torMan, $Twig, $Viewer;
-    $snatcher = new Gazelle\User\Snatch($Viewer);
-?>
-        <h3>Top <?="$limit $caption"?>
+        <h3>Top <?= $limit ?> <?= $c['caption'] ?>
 <?php if (empty($_GET['advanced'])) { ?>
         <small class="top10_quantity_links">
 <?php   if ($limit == 100) { ?>
@@ -171,7 +170,6 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         </small>
 <?php
     }
-    $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 ?>
         </h3>
     <table class="torrent_table cats numbering border m_table">
@@ -196,7 +194,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         </tr>
         </table><br />
 <?php
-        return;
+        continue;
     }
 
     if (empty($details)) {
@@ -208,12 +206,10 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         </tr>
         </table><br />
 <?php
-        return;
+        continue;
     }
 
     $groupIds = array_column($details, 1);
-    $bookmark = new \Gazelle\Bookmark($Viewer);
-    $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
     foreach ($details as $index => $detail) {
         [$torrentId, $groupId, $data] = $detail;
         $torrent = $torMan->findById($torrentId);
@@ -224,7 +220,6 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         $isBookmarked = $bookmark->isTorrentBookmarked($groupId);
         $isSnatched   = $snatcher->showSnatch($torrent->id());
         $reported     = $torMan->hasReport($Viewer, $torrentId);
-
 ?>
     <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '') . ($isSnatched ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
@@ -263,5 +258,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     </tr>
 <?php } ?>
     </table><br />
+<?php } ?>
+</div>
 <?php
-}
+View::show_footer();
