@@ -1,0 +1,98 @@
+{{ header("View conversation " ~ pm.subject, {'js': 'comments,inbox,bbcode,jquery.validate,form_validate'}) }}
+<div class="thin">
+    <h2>{{ pm.subject }}{% if pm.forwardedTo is not null %} (Forwarded to {{ pm.forwardedTo.username }}){% endif %}</h2>
+    <div class="linkbox">
+        <a href="{{ inbox.folderLink(inbox.folder, inbox.showUnreadFirst) }}" class="brackets">
+            Return to {{ inbox.folder }}
+        </a>
+    </div>
+
+{{ paginator.linkbox|raw }}
+{% set sender_list = pm.senderList %}
+{% for post in post_list %}
+    <div class="box vertical_space">
+        <div class="head" style="overflow: hidden;">
+            <div style="float: left;">
+                <strong>
+    {% if sender_list[post.sender_id] is null %}
+                System</strong> {{ post.sent_date|time_diff }}
+    {% else %}
+                {{ post.sender_id|user_url }}</strong> {{ post.sent_date|time_diff }}
+                    - <a href="#quickpost" onclick="Quote('{{ post.id }}','{{ sender_list[post.sender_id].username }}');" class="brackets">Quote</a>
+    {% endif %}
+            </div>
+            <div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
+        </div>
+        <div class="body" id="message{{ post.id }}">
+            {{ post.body|bb_format }}
+        </div>
+    </div>
+{% endfor %}
+{{ paginator.linkbox|raw }}
+
+{% if pm.recipientList %}
+    <h3>Reply</h3>
+    <form class="send_form" name="reply" action="inbox.php" method="post" id="messageform">
+        <div class="box pad">
+            <input type="hidden" name="action" value="takecompose" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="toid" value="{{ pm.recipientList|join(',') }}" />
+            <input type="hidden" name="convid" value="{{ pm.id }}" />
+            <textarea id="quickpost" class="required" name="body" cols="90" rows="10" onkeyup="resize('quickpost');"></textarea> <br />
+            <div id="preview" class="box vertical_space body hidden"></div>
+            <div id="buttons" class="center">
+                <input type="button" value="Preview" onclick="Quick_Preview();" />
+                <input type="submit" value="Send message" />
+            </div>
+        </div>
+    </form>
+{% endif %}
+    <h3>Manage conversation</h3>
+    <form class="manage_form" name="messages" action="inbox.php" method="post">
+        <div class="box pad">
+            <input type="hidden" name="action" value="takeedit" />
+            <input type="hidden" name="convid" value="{{ pm.id }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+
+            <table class="layout" width="100%">
+                <tr>
+                    <td class="label"><label for="pin">Pinned</label></td>
+                    <td>
+                        <input type="checkbox" id="pin" name="pin"{% if pm.isPinned %} checked="checked"{% endif %} />
+                    </td>
+                    <td class="label"><label for="mark_unread">Mark as unread</label></td>
+                    <td>
+                        <input type="checkbox" id="mark_unread" name="mark_unread" />
+                    </td>
+                    <td class="label"><label for="delete">Delete conversation</label></td>
+                    <td>
+                        <input type="checkbox" id="delete" name="delete" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center" colspan="6"><input type="submit" value="Manage conversation" /></td>
+                </tr>
+            </table>
+        </div>
+    </form>
+{% if viewer.isStaffPMReader and (not pm.forwardedTo or pm.forwardedTo.id == viewer.id) %}
+    <h3>Forward conversation</h3>
+    <form class="send_form" name="forward" action="inbox.php" method="post">
+        <div class="box pad">
+            <input type="hidden" name="action" value="forward" />
+            <input type="hidden" name="convid" value="{{ pm.id }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <label for="receiverid">Forward to</label>
+            <select id="receiverid" name="receiverid">
+    {% for staff_id, staff_name in staff_list %}
+        {% if staff_id != viewer.id and staff_id not in pm.recipientlist %}
+                <option value="{{ staff_id }}">{{ staff_name }}</option>
+        {% endif %}
+    {% endfor %}
+            </select>
+            <input type="submit" value="Forward" />
+        </div>
+    </form>
+{% endif %}
+</div>
+{{ footer() }}
