@@ -9,40 +9,41 @@ $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
-    $limit = 10;
+    $limit   = 10;
 } else {
-    $details = $_GET['details'] ?? 'all';
     $details = in_array($_GET['details'] ?? '', ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year'])
-        ? $details : 'all';
+        ? $_GET['details'] : 'all';
 
-    $limit = $_GET['limit'] ?? 10;
-    $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
+    $limit = (int)($_GET['limit'] ?? 10);
+    $limit = in_array($limit, [10, 100, 250]) && $details !== 'all' ? $limit : 10;
 }
 
-$disableFreeleechTorrentTop10 = $Viewer->option('DisableFreeTorrentTop10') ?? false;
+$anyAll = $_GET['anyall'] ?? 'all';
+$excludedArtists = $_GET['excluded_artists'] ?? '';
+$format          = $_GET['format'] ?? '';
+$tags            = $_GET['tags'] ?? '';
 
+$hideFreeleechTorrentTop10 = (int)$Viewer->option('DisableFreeTorrentTop10');
 if (isset($_GET['freeleech'])) {
-    $newPreference = (($_GET['freeleech'] == 'hide') ? 1 : 0);
-    if ($newPreference != $disableFreeleechTorrentTop10) {
-        $disableFreeleechTorrentTop10 = $newPreference;
-        $Viewer->modifyOption('DisableFreeTorrentTop10', $disableFreeleechTorrentTop10);
+    $newPreference = (int)($_GET['freeleech'] == 'hide');
+    if ($newPreference != $hideFreeleechTorrentTop10) {
+        $hideFreeleechTorrentTop10 = $newPreference;
+        $Viewer->modifyOption('DisableFreeTorrentTop10', $hideFreeleechTorrentTop10);
     }
 }
 
-$freeleechToggleName = isset($_GET['freeleech']) && $top10->showFreeleechTorrents($_GET['freeleech']) ? 'show' : 'hide';
 $freeleechToggleQuery = Format::get_url(['freeleech', 'groups']);
-
 if (!empty($freeleechToggleQuery)) {
     $freeleechToggleQuery .= '&amp;';
 }
+$freeleechToggleName = $top10->showFreeleechTorrents($hideFreeleechTorrentTop10) ? 'show' : 'hide';
 $freeleechToggleQuery .= 'freeleech=' . $freeleechToggleName;
 
-$groupByToggleName = (!empty($_GET['groups']) && $_GET['groups'] == 'show' ? 'hide' : 'show');
 $groupByToggleQuery = Format::get_url(['freeleech', 'groups']);
 if (!empty($groupByToggleQuery)) {
   $groupByToggleQuery .= '&amp;';
 }
-
+$groupByToggleName = ($_GET['groups'] ?? '') == 'show' ? 'hide' : 'show';
 $groupByToggleQuery .= 'groups=' . $groupByToggleName;
 
 $context = [];
@@ -106,16 +107,16 @@ if ($Viewer->permitted('site_advanced_top10')) {
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
-                    <input type="text" name="tags" id="tags" size="75" value="<?php if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>"<?=
+                    <input type="text" name="tags" id="tags" size="75" value="<?= display_str($tags) ?>"<?=
                         $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
-                    <input type="radio" id="rdoAll" name="anyall" value="all"<?=(empty($_GET['anyall']) || $_GET['anyall'] != 'any' ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
-                    <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!empty($_GET['anyall']) && $_GET['anyall'] == 'any' ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
+                    <input type="radio" id="rdoAll" name="anyall" value="all"<?= $anyAll == 'all' ? ' checked="checked"' : '' ?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
+                    <input type="radio" id="rdoAny" name="anyall" value="any"<?= $anyAll != 'all' ? ' checked="checked"' : '' ?> /><label for="rdoAny"> Any</label>
                 </td>
             </tr>
             <tr id="artistfilter">
                 <td class="label">Exclude Artists (one on each line):</td>
                 <td>
-                    <textarea name="excluded_artists" rows="3" cols="25" style="width: 95%"><?php if (!empty($_GET['excluded_artists'])) echo display_str($_GET['excluded_artists']) ?></textarea>&nbsp;
+                    <textarea name="excluded_artists" rows="3" cols="25" style="width: 95%"><?= display_str($excludedArtists) ?></textarea>&nbsp;
                 </td>
             </tr>
             <tr>
@@ -124,7 +125,7 @@ if ($Viewer->permitted('site_advanced_top10')) {
                     <select name="format" style="width: auto;" class="ft_format">
                         <option value="">Any</option>
 <?php foreach (FORMAT as $formatName) { ?>
-                        <option value="<?=display_str($formatName)?>"<?php if (isset($_GET['format']) && $formatName==$_GET['format']) { ?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
+                        <option value="<?=display_str($formatName)?>"<?php if ($format) { ?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
 <?php } ?>
                     </select>
                 </td>
@@ -195,9 +196,7 @@ foreach ($context as $c) {
         </table><br />
 <?php
         continue;
-    }
-
-    if (empty($details)) {
+    } elseif (empty($details)) {
 ?>
         <tr class="rowb">
             <td colspan="9" class="center">
@@ -218,10 +217,9 @@ foreach ($context as $c) {
         }
         $tgroup       = $torrent->group();
         $isBookmarked = $bookmark->isTorrentBookmarked($groupId);
-        $isSnatched   = $snatcher->showSnatch($torrent->id());
-        $reported     = $torMan->hasReport($Viewer, $torrentId);
 ?>
-    <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '') . ($isSnatched ? ' snatched_torrent' : '')?>">
+    <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '')
+        . ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
         <td class="center cats_col m_hidden"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?=
             $tgroup->categoryCss() ?> tags_<?= str_replace('.', '_', $tgroup->primaryTag()) ?>"></div></td>
@@ -237,7 +235,7 @@ foreach ($context as $c) {
                     'key'    => $Viewer->announceKey(),
                     't'      => $torrent,
                 ]) ?>
-                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>
+                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torMan->hasReport($Viewer, $torrentId)) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>
 <?php   if ($isBookmarked) { ?>
                 <span class="remove_bookmark float_right">
                     <a href="#" id="bookmarklink_torrent_<?=$groupId?>" class="bookmarklink_torrent_<?=$groupId?> brackets" onclick="Unbookmark('torrent', <?=$groupId?>, 'Bookmark'); return false;">Remove bookmark</a>
