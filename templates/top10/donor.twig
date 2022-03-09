@@ -1,0 +1,52 @@
+{{ header('Top Donors') }}
+<div class="thin">
+    <div class="header">
+        <h2>Top Donors</h2>
+        {% include 'top10/linkbox.twig' with {'selected': 'donors'} %}
+    </div>
+<h3>Top {{ limit }} Donors
+  <small class="top10_quantity_links">
+{% if limit == 100 %}
+      - <a href="top10.php?type=donors" class="brackets">Top 10</a>
+      - <span class="brackets">Top 100</span>
+      - <a href="top10.php?type=donors&amp;limit=250" class="brackets">Top 250</a>
+{% elseif limit == 250 %}
+      - <a href="top10.php?type=donors" class="brackets">Top 10</a>
+      - <a href="top10.php?type=donors&amp;limit=100" class="brackets">Top 100</a>
+      - <span class="brackets">Top 250</span>
+{% else %}
+      - <span class="brackets">Top 10</span>
+      - <a href="top10.php?type=donors&amp;limit=100" class="brackets">Top 100</a>
+      - <a href="top10.php?type=donors&amp;limit=250" class="brackets">Top 250</a>
+{% endif %}
+  </small></h3>
+  <table class="border">
+    <tr class="colhead">
+      <td class="center">Position</td>
+      <td>User</td>
+      <td style="text-align: left;">Total Donor Points</td>
+      <td style="text-align: left;">Current Donor Rank</td>
+      <td style="text-align: left;">Last Donated</td>
+    </tr>
+{% for item in list %}
+    {% if not item.user is null %}
+        {% set hide = item.hidden and not is_mod %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td class="center">{{ loop.index }}</td>
+        <td>{% if hide  %}Hidden{% else %}{{ item.user.link|raw }}{% endif %}</td>
+        <td style="text-align: left;">{% if loop.index <= 50 or is_mod %}{{ item.total_rank }}{% else %}Hidden{% endif %}</td>
+        <td style="text-align: left;">{% if hide %}Hidden{% else %}{{ item.user.donorRankLabel|raw }}{% endif %}</td>
+        <td style="text-align: left;">{% if hide %}Hidden{% else %}{{ item.user.lastDonation }}{% endif %}</td>
+    </tr>
+    {% endif %}
+{% else %}
+  <tr class="rowb">
+      <td colspan="9" class="center">
+          Found no users matching the criteria
+      </td>
+  </tr>
+{% endfor %}
+  </table>
+</div>
+<br />
+{{ footer() }}
