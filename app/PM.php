@@ -5,14 +5,12 @@ namespace Gazelle;
 class PM extends Base {
     protected const CACHE_KEY = 'pm_%d_%d';
 
-    protected int $id;
-    protected User $user;
     protected array $info = [];
 
-    public function __construct(int $id, User $user) {
-        $this->id = $id;
-        $this->user = $user;
-    }
+    public function __construct(
+        protected int $id,
+        protected User $user
+    ) { }
 
     public function id(): int {
         return $this->id;
@@ -64,7 +62,7 @@ class PM extends Base {
                         AND cu.UserID != ?
                     ", $this->id, $this->user->id()
                 );
-                $info['recipient_list'] = self::$db->collect(0, false);
+                $info['recipient_list'] = [$this->user->id(), ...self::$db->collect(0, false)];
                 self::$cache->cache_value($key, $info, 86400);
                 $info['from_cache'] = false;
             }
@@ -116,6 +114,11 @@ class PM extends Base {
         return $this->info()['body'];
     }
 
+    public function isReadable(): bool {
+        return in_array($this->user->id(), $this->info()['sender_list'])
+            || in_array($this->user->id(), $this->recipientList());
+    }
+
     public function recipientList(): array {
         return $this->info()['recipient'];
     }
@@ -146,6 +149,49 @@ class PM extends Base {
             }
         }
         return $affected;
+    }
+
+    public function markUnread(): int {
+        self::$db->prepared_query("
+            UPDATE pm_conversations_users SET
+                Unread = '1'
+            WHERE Unread = '0'
+                AND ConvID = ?
+                AND UserID = ?
+            ", $this->id, $this->user->id()
+        );
+        $affected = self::$db->affected_rows();
+        if ($affected > 0) {
+            self::$cache->increment('inbox_new_' . $this->user->id());
+            $this->flush();
+        }
+        return $affected;
+    }
+
+    public function pin(bool $pin): int {
+        self::$db->prepared_query("
+            UPDATE pm_conversations_users SET
+                Sticky = ?
+            WHERE ConvID = ?
+                AND UserID = ?
+            ", $pin ? '1' : '0', $this->id, $this->user->id()
+        );
+        $this->flush();
+        return self::$db->affected_rows();
+    }
+
+    public function remove(): int {
+        self::$edb->prepared_query("
+            UPDATE pm_conversations_users SET
+                InInbox   = '0',
+                InSentbox = '0',
+                Sticky    = '0'
+            WHERE ConvID = ?
+                AND UserID = ?
+            ", $this->id, $this->user->id()
+        );
+        $this->flush();
+        return self::$db->affected_rows();
     }
 
     public function setForwardedTo(int $userId): int {

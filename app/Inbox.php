@@ -168,6 +168,11 @@ class Inbox extends BaseUser {
         return $result;
     }
 
+    protected function massFlush(array $ids): void {
+        $userId = $this->user->id();
+        self::$cache->deleteMulti(["inbox_new_$userId", ...array_map(fn ($id) => "pm_{$id}_{$userId}", $ids)]);
+    }
+
     public function massRemove(array $ids): int {
         self::$db->prepared_query("
             UPDATE pm_conversations_users SET
@@ -179,7 +184,7 @@ class Inbox extends BaseUser {
                 AND ConvID IN (" . placeholders($ids) . ")
             ", $this->user->id(), ...$ids
         );
-        self::$cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
+        $this->massFlush($ids);
         return self::$db->affected_rows();
     }
 
@@ -191,7 +196,7 @@ class Inbox extends BaseUser {
                 AND ConvID IN (" . placeholders($ids) . ")
             ", $value, $this->user->id(), ...$ids
         );
-        self::$cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
+        $this->massFlush($ids);
         return self::$db->affected_rows();
     }
 
@@ -211,7 +216,7 @@ class Inbox extends BaseUser {
                 AND ConvID IN (" . placeholders($ids) . ")
             ", $this->user->id(), ...$ids
         );
-        self::$cache->deleteMulti(['inbox_new_' . $this->user->id(), ...array_map(fn ($id) => "pm_$id", $ids)]);
+        $this->massFlush($ids);
         return self::$db->affected_rows();
     }
 }
