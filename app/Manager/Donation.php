@@ -328,4 +328,25 @@ class Donation extends \Gazelle\Base {
         }
         return $timeline;
     }
+
+    public function topDonorList(int $limit, \Gazelle\Manager\User $userMan): array {
+        self::$db->prepared_query("
+            SELECT UserID     AS user_id,
+                TotalRank     AS total_rank,
+                donor_rank    AS donor_rank,
+                SpecialRank   AS special_rank,
+                DonationTime  AS donation_time,
+                Hidden        AS hidden
+                FROM users_donor_ranks
+            WHERE TotalRank > 0
+            ORDER BY TotalRank DESC, DonationTime ASC
+            LIMIT ?
+            ", $limit
+        );
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$donor) {
+            $donor['user'] = $userMan->findById($donor['user_id']);
+        }
+        return $list;
+    }
 }
