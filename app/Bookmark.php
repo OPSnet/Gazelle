@@ -176,6 +176,18 @@ class Bookmark extends BaseUser {
         );
     }
 
+    public function artistList(): array {
+        self::$db->prepared_query("
+            SELECT ag.ArtistID, ag.Name
+            FROM bookmarks_artists AS ba
+            INNER JOIN artists_group AS ag USING (ArtistID)
+            WHERE ba.UserID = ?
+            ORDER BY ag.Name
+            ", $this->user->id()
+        );
+        return self::$db->to_pair('ArtistID', 'Name', false);
+    }
+
     /**
      * Returns an array of torrent bookmarks
      * @return array containing [group_id, seq, added, torrent_id]
