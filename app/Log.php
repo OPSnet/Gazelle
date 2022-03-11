@@ -12,7 +12,7 @@ class Log extends Base {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO log (Message) VALUES (?)
-            ", trim($message)
+            ", substr(trim($message), 0, 800)
         );
         self::$db->set_query_id($qid);
         return $this;
