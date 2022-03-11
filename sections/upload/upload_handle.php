@@ -713,14 +713,15 @@ foreach($logfileSummary->all() as $logfile) {
     $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 }
 
+$log = new Gazelle\Log;
 $torrentFiler->put($bencoder->getEncode(), $TorrentID);
-(new Gazelle\Log)->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
+$log->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
 foreach ($extraFile as $id => $info) {
     $torrentFiler->put($info['payload'], $id);
-    (new Gazelle\Log)->torrent($GroupID, $id, $Viewer->id(), "uploaded ({$info['size']} MiB)")
-        ->general("Torrent $ExtraTorrentID ($LogName) (${$info['size']}  MiB) was uploaded by " . $Viewer->username());
+    $log->torrent($GroupID, $id, $Viewer->id(), "uploaded ({$info['size']} MiB)")
+        ->general("Torrent $ExtraTorrentID ($LogName) ({$info['size']}  MiB) was uploaded by " . $Viewer->username());
 }
 
 $DB->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
