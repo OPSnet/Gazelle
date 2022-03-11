@@ -906,7 +906,7 @@ class TGroup extends BaseObject {
             INSERT INTO wiki_torrents
                    (PageID, Body, Image, UserID, Summary)
             VALUES (?,      ?,    ?,     ?,      ?)
-            ", $this->id, $body, $image, $userId, trim($summary)
+            ", $this->id, $body, $image, $userId, mb_substr(trim($summary), 0, 100)
         );
         $revisionId = self::$db->inserted_id();
         (new \Gazelle\Manager\TGroup)->refresh($this->id);
