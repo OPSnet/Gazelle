@@ -46,6 +46,10 @@ class Artist extends AbstractCollage {
         return $total;
     }
 
+    public function entryList(): array {
+        return array_keys($this->artists);
+    }
+
     protected function flushTarget(int $artistId): void {
         $this->flushAll([
             "artists_collages_$artistId",

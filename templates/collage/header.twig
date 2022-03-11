@@ -1,28 +1,31 @@
+{{ header(collage.name, {'js': 'browse,collage,bbcode,voting'}) }}
+<div class="thin">
 <div class="header">
-    <h2>{{ name }}</h2>
+    <h2>{{ collage.name }}</h2>
     <div class="linkbox">
         <a href="collages.php" class="brackets">List of collages</a>
-{% if can_create %}
+{% if viewer.permitted('site_collages_create') %}
         <a href="collages.php?action=new" class="brackets">New collage</a>
 {% endif %}
         <br /><br />
-{% if can_sub %}
-        <a href="#" id="subscribelink{{ id }}" class="brackets" onclick="CollageSubscribe({{ id }}); return false;">{{ subbed ? 'Unsubscribe' : 'Subscribe' }}</a>
+{% if viewer.permitted('site_collages_subscribe') %}
+        <a href="#" id="subscribelink{{ collage.id }}" class="brackets" onclick="CollageSubscribe({{ collage.id }}); return false;">
+    {%- if collage.isSubscribed(viewer.id) %}Unsubscribe{% else %}Subscribe{% endif %}</a>
 {% endif %}
-{% if can_edit %}
-        <a href="collages.php?action=edit&amp;collageid={{ id }}" class="brackets">Edit description</a>
+{% if viewer.permitted('site_collages_delete') or (viewer.permitted('site_edit_wiki') and not collage.isLocked) %}
+        <a href="collages.php?action=edit&amp;collageid={{ collage.id }}" class="brackets">Edit description</a>
 {% endif %}
 {% if bookmarked %}
-        <a href="#" id="bookmarklink_collage_{{ id }}" class="brackets" onclick="Unbookmark('collage', {{ id }}, 'Bookmark'); return false;">Remove bookmark</a>
+        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets" onclick="Unbookmark('collage', {{ collage.id }}, 'Bookmark'); return false;">Remove bookmark</a>
 {% else %}
-        <a href="#" id="bookmarklink_collage_{{ id }}" class="brackets" onclick="Bookmark('collage', {{ id }}, 'Remove bookmark'); return false;">Bookmark</a>
+        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets" onclick="Bookmark('collage', {{ collage.id }}, 'Remove bookmark'); return false;">Bookmark</a>
 {% endif %}
-{% if can_manage %}
-        <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ id }}" class="brackets">Manage {{ object }}s</a>
+{% if collage.userCanContribute(viewer) %}
+        <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ collage.id }}" class="brackets">Manage {{ object }}s</a>
 {% endif %}
-        <a href="reports.php?action=report&amp;type=collage&amp;id={{ id }}" class="brackets">Report collage</a>
-{% if can_delete %}
-        <a href="collages.php?action=delete&amp;collageid={{ id }}" class="brackets">Delete</a>
+        <a href="reports.php?action=report&amp;type=collage&amp;id={{ collage.id }}" class="brackets">Report collage</a>
+{% if viewer.permitted('site_collages_delete') or collage.isOwner(viewer.id) %}
+        <a href="collages.php?action=delete&amp;collageid={{ collage.id }}" class="brackets">Delete</a>
 {% endif %}
     </div>
 </div>

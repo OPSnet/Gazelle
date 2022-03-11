@@ -12,6 +12,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
 
     abstract public function entryTable(): string;
     abstract public function entryColumn(): string;
+    abstract public function entryList(): array;
     abstract public function load(): int;
     abstract protected function flushTarget(int $targetId): void;
 

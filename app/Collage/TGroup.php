@@ -26,8 +26,7 @@ class TGroup extends AbstractCollage {
     public function load(): int {
         $order = $this->holder->sortNewest() ? 'DESC' : 'ASC';
         self::$db->prepared_query("
-            SELECT
-                ct.GroupID,
+            SELECT ct.GroupID,
                 ct.UserID
             FROM collages_torrents AS ct
             INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
@@ -88,6 +87,10 @@ class TGroup extends AbstractCollage {
         uasort($this->artists, function ($x, $y) { return $y['count'] <=> $x['count']; });
         arsort($this->contributors);
         return count($this->groupIds);
+    }
+
+    public function entryList(): array {
+        return $this->groupIds;
     }
 
     protected function flushTarget(int $tgroupId): void {
