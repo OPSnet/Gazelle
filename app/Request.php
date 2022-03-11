@@ -83,6 +83,7 @@ class Request extends BaseObject {
                     r.Description,
                     r.Year,
                     r.Image,
+                    r.CatalogueNumber,
                     r.ReleaseType,
                     r.RecordLabel,
                     r.GroupID,
@@ -114,7 +115,7 @@ class Request extends BaseObject {
         );
     }
 
-    public function catalogueNumber(): ?string {
+    public function catalogueNumber(): string {
         return $this->info()['CatalogueNumber'];
     }
 

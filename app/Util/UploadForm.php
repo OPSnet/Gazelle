@@ -36,7 +36,7 @@ class UploadForm extends \Gazelle\Base {
         $this->Torrent = $Torrent;
         $this->Error = $Error;
 
-        if ($this->Torrent && $this->Torrent['GroupID']) {
+        if ($this->Torrent && isset($this->Torrent['GroupID'])) {
             $this->Disabled = ' disabled="disabled"';
             $this->DisabledFlag = true;
         }
