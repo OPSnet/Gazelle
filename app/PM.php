@@ -181,7 +181,7 @@ class PM extends Base {
     }
 
     public function remove(): int {
-        self::$edb->prepared_query("
+        self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 InInbox   = '0',
                 InSentbox = '0',
