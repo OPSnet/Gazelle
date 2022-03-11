@@ -131,6 +131,15 @@ class Collage extends BaseObject {
         return isset($this->contributors[$user->id()]);
     }
 
+    public function userCanContribute(User $user): bool {
+        return !$this->isLocked()
+            && (
+                (!$this->isPersonal() && ($user->permitted('site_collages_manage') || $user->activePersonalCollages()))
+                ||
+                ($this->isPersonal() && $this->isOwner($user->id()))
+            );
+    }
+
     /**
      * How many entries in this collage are owned by a given user
      */
@@ -214,6 +223,10 @@ class Collage extends BaseObject {
         );
         self::$cache->delete_value(sprintf(self::SUBS_NEW_KEY, $userId));
         return true;
+    }
+
+    public function entryList(): array {
+        return $this->collage->entryList();
     }
 
     /*** ARTIST COLLAGES ***/

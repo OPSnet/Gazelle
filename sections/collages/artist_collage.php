@@ -34,42 +34,22 @@ for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
     $CollagePages[] = $CollagePage;
 }
 
-View::show_header($Collage->name(), ['js' => 'browse,collage,bbcode,voting']);
-?>
-<div class="thin">
-<?= $Twig->render('collage/header.twig', [
-    'auth'        => $Viewer->auth(),
-    'bookmarked'  => (new Gazelle\Bookmark($Viewer))->isCollageBookmarked($CollageID),
-    'can_create'  => $Viewer->permitted('site_collages_create'),
-    'can_delete'  => $Viewer->permitted('site_collages_delete') || $Collage->isOwner($Viewer->id()),
-    'can_edit'    => $Viewer->permitted('site_collages_delete') || ($Viewer->permitted('site_edit_wiki') && !$Collage->isLocked()),
-    'can_manage'  => ($Viewer->permitted('site_collages_manage') && !$Collage->isLocked()) || $Collage->userHasContributed($Viewer),
-    'can_sub'     => $Viewer->permitted('site_collages_subscribe'),
-    'id'          => $CollageID,
-    'name'        => $Collage->name(),
-    'object'      => 'artist',
-    'subbed'      => $Collage->isSubscribed($Viewer->id()),
-    'user_id'     => $Viewer->id(),
+echo $Twig->render('collage/header.twig', [
+    'bookmarked' => (new Gazelle\Bookmark($Viewer))->isCollageBookmarked($CollageID),
+    'collage'    => $Collage,
+    'object'     => 'artist',
+    'viewer'     => $Viewer,
 ]);
-?>
-    <div class="sidebar">
-<?= $Twig->render('collage/sidebar.twig', [
-    'artists'        => 0, // only makes sense for torrent collages
-    'auth'           => $Viewer->auth(),
-    'can_add'        => $Viewer->permitted('site_collages_manage') && !$Collage->isLocked(),
-    'can_post'       => !$Viewer->disablePosting(),
-    'category_id'    => $Collage->categoryId(),
-    'category_name'  => COLLAGE[$Collage->categoryId()],
-    'comments'       => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
-    'contributors'   => array_slice($Collage->contributors(), 0, 5, true),
-    'contributors_n' => $Collage->numContributors(),
-    'description'    => Text::full_format($Collage->description()),
-    'entries'        => $Collage->numArtists(),
-    'id'             => $CollageID,
-    'object'         => 'artist',
-    'object_name'    => 'artist',
-    'subscribers'    => $Collage->numSubscribers(),
-    'updated'        => $Collage->updated(),
+
+echo $Twig->render('collage/sidebar.twig', [
+    'artists'      => 0, // only makes sense for torrent collages
+    'collage'      => $Collage,
+    'comments'     => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
+    'contributors' => array_slice($Collage->contributors(), 0, 5, true),
+    'entries'      => $Collage->numArtists(),
+    'object'       => 'artist',
+    'object_name'  => 'artist',
+    'viewer'       => $Viewer,
 ]);
 ?>
     </div>

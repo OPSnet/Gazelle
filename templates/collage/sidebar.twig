@@ -1,15 +1,16 @@
+<div class="sidebar">
 <div class="box box_category">
     <div class="head"><strong>Category</strong></div>
     <div class="pad">
-    <a href="collages.php?action=search&amp;cats[{{ category_id }}]=1">{{ category_name }}</a>
-{% if is_personal %}
-collage by {{ user_id|user_url }}
+    <a href="collages.php?action=search&amp;cats[{{ collage.categoryId }}]=1">{{ constant('COLLAGE')[collage.categoryId] }}</a>
+{% if collage.isPersonal %}
+collage by {{ collage.ownerId|user_url }}
 {% endif %}
     </div>
 </div>
 <div class="box box_description">
     <div class="head"><strong>Description</strong></div>
-    <div class="pad">{{ description|raw }}</div>
+    <div class="pad">{{ collage.description|bb_format }}</div>
 </div>
 <div class="box box_info box_statistics_collage_{{ object }}s">
     <div class="head"><strong>Statistics</strong></div>
@@ -18,9 +19,9 @@ collage by {{ user_id|user_url }}
 {% if artists %}
         <li>Artists: {{ artists|number_format }}</li>
 {% endif %}
-        <li>Subscribers: {{ subscribers|number_format }}</li>
-        <li>Built by {{ contributors_n|number_format }} user{{ contributors_n|plural }}</li>
-        <li>Last updated: {{ updated|time_diff }}</li>
+        <li>Subscribers: {{ collage.numSubscribers|number_format }}</li>
+        <li>Built by {{ collage.numContributors|number_format }} member{{ collage.numContributors|plural }}</li>
+        <li>Last updated: {{ collage.updated|time_diff }}</li>
     </ul>
 </div>
 {% if top_tags is defined %}
@@ -51,7 +52,7 @@ collage by {{ user_id|user_url }}
     </div>
 </div>
 {% endif %}
-{% if not is_personal %}
+{% if not collage.isPersonal %}
 <div class="box box_contributors">
     <div class="head"><strong>Top Contributors</strong></div>
     <div class="pad">
@@ -63,14 +64,14 @@ collage by {{ user_id|user_url }}
     </div>
 </div>
 {% endif %}
-{% if can_add %}
+{% if collage.userCanContribute(viewer) %}
 <div class="box box_add{{ object }}">
     <div class="head"><strong>Add {{ object_name }}</strong><span class="float_right"><a href="#" onclick="$('.add_{{ object }}_container').toggle_class('hidden'); this.innerHTML = (this.innerHTML == 'Batch add' ? 'Individual add' : 'Batch add'); return false;" class="brackets">Batch add</a></span></div>
     <div class="pad add_{{ object }}_container">
         <form class="add_form" name="{{ object }}" action="collages.php" method="post">
             <input type="hidden" name="action" value="add_{{ object }}" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
-            <input type="hidden" name="collageid" value="{{ id }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="collageid" value="{{ collage.id }}" />
             <div class="field_div">
                 <input type="text" size="20" name="url" />
             </div>
@@ -83,8 +84,8 @@ collage by {{ user_id|user_url }}
     <div class="pad hidden add_{{ object }}_container">
         <form class="add_form" name="{{ object }}s" action="collages.php" method="post">
             <input type="hidden" name="action" value="add_{{ object }}_batch" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
-            <input type="hidden" name="collageid" value="{{ id }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="collageid" value="{{ collage.id }}" />
             <div class="field_div">
                 <textarea name="urls" rows="5" cols="25" style="white-space: pre; word-wrap: normal; overflow: auto;"></textarea>
             </div>
@@ -109,16 +110,16 @@ collage by {{ user_id|user_url }}
 </div>
 {% endfor %}
 <div class="box pad">
-    <a href="collages.php?action=comments&amp;collageid={{ id }}" class="brackets">View all comments</a>
+    <a href="collages.php?action=comments&amp;collageid={{ collage.id }}" class="brackets">View all comments</a>
 </div>
-{% if can_post %}
+{% if not viewer.disablePosting %}
 <div class="box box_addcomment">
     <div class="head"><strong>Add comment</strong></div>
     <form class="send_form" name="comment" id="quickpostform" onsubmit="quickpostform.submit_button.disabled = true;" action="comments.php" method="post">
         <input type="hidden" name="action" value="take_post" />
         <input type="hidden" name="page" value="collages" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
-        <input type="hidden" name="pageid" value="{{ id }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="pageid" value="{{ collage.id }}" />
         <div class="pad">
             <div class="field_div">
                 <textarea name="quickpost" cols="24" rows="5"></textarea>

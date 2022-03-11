@@ -355,7 +355,7 @@ if ($sections = $Artist->sections()) {
                 </tr>
 <?php
         $snatcher = new Gazelle\User\Snatch($Viewer);
-        $SnatchedGroupClass = $tgroup->isSnatched();
+        $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
         $prev = '';
         $EditionID = 0;
         $UnknownCounter = 0;
