@@ -14,8 +14,7 @@ if (is_null($tgroup) || is_null($tag)) {
 }
 
 if ($tgroup->removeTag($tag)) {
-    $tgroupMan->refresh($tgroup->id());
-    $Cache->cache_value('deleted_tags_' . $tgroup->id() . '_' . $Viewer->id(), $name, 300);
+    $Cache->cache_value('deleted_tags_' . $tgroup->id() . '_' . $Viewer->id(), $tag->name(), 300);
 
     // Log the removal and if it was the last occurrence.
     $logger = new Gazelle\Log;

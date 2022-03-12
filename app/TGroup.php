@@ -871,7 +871,7 @@ class TGroup extends BaseObject {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM torrents_tags_votes WHERE GroupID = ? AND TagID = ?
-            ", $this->id, $tag->id()
+            ", $this->id, $tagId
         );
         self::$db->prepared_query("
             DELETE FROM torrents_tags WHERE GroupID = ? AND TagID = ?
@@ -898,6 +898,7 @@ class TGroup extends BaseObject {
         }
 
         self::$db->commit();
+        $this->refresh($this->id());
         return true;
     }
 
