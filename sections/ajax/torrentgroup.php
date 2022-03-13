@@ -1,15 +1,14 @@
 <?php
 
 $json     = new Gazelle\Json\TGroup;
-$tgMan    = new Gazelle\Manager\TGroup;
-$groupId  = (int)$_GET['id'] ?? 0;
+$groupId  = (int)($_GET['id'] ?? 0);
 $infohash = $_GET['hash'] ?? null;
-
 if ($groupId && $infohash) {
     $json->failure('bad parameters');
     exit;
 }
 
+$tgMan = new Gazelle\Manager\TGroup;
 $tgroup = $infohash
     ? $tgMan->findByTorrentInfohash($infohash)
     : $tgMan->findById($groupId);
