@@ -36,6 +36,33 @@ class TGroup extends \Gazelle\ArtistRole {
     }
 
     /**
+     * A readable representation of the artists grouped by their roles in a
+     * release group. All artist roles are present as arrays (no need to see if
+     * the key exists). Like roleList() but some of the key names change.
+     *   'main'     becomes 'artists'
+     *   'guest'    becomes 'with'
+     *   'remixer'  becomes 'remixedBy'
+     *   'composer' becomes 'composers'
+     * A role is an array of two keys: ["id" => 801, "name" => "The Group"]
+     */
+    public function roleListByType(): array {
+        if (!isset($this->idList)) {
+            $this->init();
+        }
+        $list = $this->idList;
+        return [
+            'artists'   => $list[ARTIST_MAIN] ?? [],
+            'with'      => $list[ARTIST_GUEST] ?? [],
+            'remixedBy' => $list[ARTIST_REMIXER] ?? [],
+            'composers' => $list[ARTIST_COMPOSER] ?? [],
+            'conductor' => $list[ARTIST_CONDUCTOR] ?? [],
+            'dj'        => $list[ARTIST_DJ] ?? [],
+            'producer'  => $list[ARTIST_PRODUCER] ?? [],
+            'arranger'  => $list[ARTIST_ARRANGER] ?? [],
+        ];
+    }
+
+    /**
      * A cryptic representation of artists grouped by their roles, using magic
      * numbers that require consulting the source code to understand. Roles that
      * are not represent in the release group are not present in the result.
@@ -54,6 +81,8 @@ class TGroup extends \Gazelle\ArtistRole {
      * that is a mix of magic numbers from idList(), but has all the entries of
      * roleList() with the aliasid key, however if a role is not present, the
      * role points to null. Used only for the artist ajax endpoint.
+     *
+     * Yes, having all these variants is insane.
      *
      * @return array [1 => ["id" => 55, "aliasid" => 48, "name" => "Anne Other"],
      *  2 => null, 3 => null, 4 => null, 5 => null, 6 => null,

@@ -50,6 +50,16 @@ class Artist extends AbstractCollage {
         return array_keys($this->artists);
     }
 
+    public function nameList(): array {
+        return array_map(
+            fn($a) => [
+                'id'    => $a['id'], 
+                'name'  => $a['name'], 
+                'image' => $a['image'], 
+            ], $this->artists
+        );
+    }
+
     protected function flushTarget(int $artistId): void {
         $this->flushAll([
             "artists_collages_$artistId",
