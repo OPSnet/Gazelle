@@ -238,6 +238,13 @@ class Collage extends BaseObject {
         return $this->collage->artistList();
     }
 
+    /**
+     * Get artists names of a collage for the ajax representation.
+     */
+    public function nameList(): array {
+        return $this->collage->nameList();
+    }
+
     /*** TORRENT COLLAGES ***/
 
     /**

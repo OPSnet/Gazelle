@@ -18,7 +18,7 @@ if (isset($_POST['collage_combo']) && (int)$_POST['collage_combo']) {
 }
 $collageMan = new Gazelle\Manager\Collage;
 $collage = $collageMan->findById($collageId);
-if (!$collage) {
+if (is_null($collage)) {
     error(404);
 }
 
