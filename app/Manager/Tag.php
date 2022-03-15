@@ -15,7 +15,7 @@ class Tag extends \Gazelle\Base {
                 ", $tagId
             );
             if ($id) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Tag($id) : null;

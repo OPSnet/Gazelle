@@ -39,7 +39,7 @@ class Torrent extends \Gazelle\Base {
                 ", $torrentId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         if (!$id) {
@@ -81,7 +81,7 @@ class Torrent extends \Gazelle\Base {
                 ", $folder
             );
             $list = self::$db->collect(0);
-            self::$cache->cache_value($key, $list, 0);
+            self::$cache->cache_value($key, $list, 7200);
         }
         $all = [];
         foreach ($list as $id) {
@@ -258,7 +258,7 @@ class Torrent extends \Gazelle\Base {
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$db->set_query_id($qid);
-            self::$cache->cache_value($key, $list, 0);
+            self::$cache->cache_value($key, $list, 7200);
         }
         return $viewer->permitted('admin_reports')
             ? $list
@@ -526,7 +526,7 @@ class Torrent extends \Gazelle\Base {
                 [$TorrentID, $GroupID, $Seeders, $Leechers, $Snatches] = self::$db->next_record(MYSQLI_NUM, false);
             }
             if ($Changed) {
-                self::$cache->cache_value("torrent_group_$LastGroupID", $CachedData, 0);
+                self::$cache->cache_value("torrent_group_$LastGroupID", $CachedData, 7200);
                 unset($CachedStats);
                 $UpdatedKeys++;
                 $Changed = false;

@@ -18,7 +18,7 @@ class PM extends \Gazelle\BaseUser {
                 ", $pmId, $this->user->id()
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\PM($id, $this->user) : null;

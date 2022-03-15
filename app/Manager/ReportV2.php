@@ -38,7 +38,7 @@ class ReportV2 extends \Gazelle\Base {
                 ", $reportId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\ReportV2($id) : null;

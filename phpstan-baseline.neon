@@ -36,36 +36,6 @@ parameters:
 			path: app/Manager/ClientWhitelist.php
 
 		-
-			message: "#^Class Gazelle\\\\Manager\\\\Thread referenced with incorrect case\\: Gazelle\\\\Manager\\\\thread\\.$#"
-			count: 1
-			path: app/Manager/Forum.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(Gazelle\\\\User viewer\\)\\: Unexpected token \"viewer\", expected variable at offset 462$#"
-			count: 1
-			path: app/Manager/Forum.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(array hash of values \\(keyed on lowercase column names\\)\\)\\: Unexpected token \"hash\", expected variable at offset 46$#"
-			count: 1
-			path: app/Manager/Forum.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int id The post ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 72$#"
-			count: 1
-			path: app/Manager/Forum.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int id The thread ID\\.\\)\\: Unexpected token \"id\", expected variable at offset 74$#"
-			count: 1
-			path: app/Manager/Forum.php
-
-		-
-			message: "#^PHPDoc tag @return with type Gazelle\\\\Manager\\\\Thread is incompatible with native type int\\|null\\.$#"
-			count: 1
-			path: app/Manager/Forum.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(int limit\\)\\: Unexpected token \"limit\", expected variable at offset 66$#"
 			count: 1
 			path: app/Manager/Invite.php
@@ -84,21 +54,6 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(string invite key\\)\\: Unexpected token \"invite\", expected variable at offset 56$#"
 			count: 1
 			path: app/Manager/Invite.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int Group ID\\)\\: Unexpected token \"Group\", expected variable at offset 79$#"
-			count: 1
-			path: app/Manager/ReportV2.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int User ID of uploader\\)\\: Unexpected token \"User\", expected variable at offset 82$#"
-			count: 1
-			path: app/Manager/ReportV2.php
-
-		-
-			message: "#^PHPDoc tag @return with type float\\|int is not subtype of native type int\\.$#"
-			count: 2
-			path: app/Manager/ReportV2.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(int ID of option\\)\\: Unexpected token \"ID\", expected variable at offset 94$#"
@@ -184,56 +139,6 @@ parameters:
 			message: "#^Property Gazelle\\\\Manager\\\\StaffBlog\\:\\:\\$title \\(string\\) does not accept null\\.$#"
 			count: 1
 			path: app/Manager/StaffBlog.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Wiki\\:\\:create\\(\\) should return int but returns Gazelle\\\\Wiki\\.$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int author id\\)\\: Unexpected token \"author\", expected variable at offset 193$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int can the viewer administrate the wiki\\)\\: Unexpected token \"can\", expected variable at offset 115$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int minimum class to modify\\)\\: Unexpected token \"minimum\", expected variable at offset 151$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int minimum class to read\\)\\: Unexpected token \"minimum\", expected variable at offset 111$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int the proposed edit class\\)\\: Unexpected token \"the\", expected variable at offset 243$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int the proposed read class\\)\\: Unexpected token \"the\", expected variable at offset 201$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(int viewer class\\)\\: Unexpected token \"viewer\", expected variable at offset 170$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string body\\)\\: Unexpected token \"body\", expected variable at offset 88$#"
-			count: 1
-			path: app/Manager/Wiki.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string title\\)\\: Unexpected token \"title\", expected variable at offset 61$#"
-			count: 1
-			path: app/Manager/Wiki.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\?int original year\\)\\: Unexpected token \"original\", expected variable at offset 77$#"

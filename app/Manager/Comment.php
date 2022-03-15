@@ -158,7 +158,7 @@ class Comment extends \Gazelle\Base {
                 ", $page, $postId
             );
             $edits = self::$db->to_array(false, MYSQLI_NUM, false);
-            self::$cache->cache_value($key, $edits, 0);
+            self::$cache->cache_value($key, $edits, 7200);
         }
         return $edits;
     }

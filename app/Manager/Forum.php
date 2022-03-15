@@ -40,7 +40,7 @@ class Forum extends \Gazelle\Base {
                 ", $forumId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Forum($id) : null;
@@ -61,7 +61,7 @@ class Forum extends \Gazelle\Base {
                 ", $threadId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Forum($id) : null;
@@ -85,7 +85,7 @@ class Forum extends \Gazelle\Base {
                 ", $postId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Forum($id) : null;

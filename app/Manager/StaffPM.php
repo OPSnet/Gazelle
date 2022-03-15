@@ -15,7 +15,7 @@ class StaffPM extends \Gazelle\Base {
                 ", $pmId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\StaffPM($id) : null;

@@ -15,7 +15,7 @@ class Request extends \Gazelle\Base {
                 ", $requestId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Request($id) : null;
