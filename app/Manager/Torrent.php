@@ -112,6 +112,33 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
+     * Return a list of all CD+Log uploads of a user. As this list can be large.
+     * only id + name fields are returned to avoid excessive memory consumption.
+     * Should probably become paginated.
+     *
+     * @return array of ['id', 'link']
+     */
+    public function logFileList(int $userId): array {
+        $this->db->prepared_query("
+            SELECT ID FROM torrents WHERE HasLog = '1' AND HasLogDB = '1' AND UserID = ?
+            ", $userId
+        );
+        $torrentIds = $this->db->collect(0, false);
+
+        $result = [];
+        foreach ($torrentIds as $torrentId) {
+            $torrent = $this->findById($torrentId);
+            if ($torrent) {
+                $result[$torrentId] = [
+                    'id'   => $torrent->id(),
+                    'link' => $torrent->fullLink(),
+                ];
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Create a string that contains file info in a format that's easy to use for Sphinx
      *
      * @param  string  $Name file path
