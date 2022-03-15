@@ -1,0 +1,92 @@
+{{ header('Non-torrent report stats') }}
+<div class="header">
+    <h2>Non-torrent report stats</h2>
+    <div class="linkbox">
+        <a href="reports.php">New</a> |
+        <a href="reports.php?view=old">Old</a> |
+        <a href="reports.php?action=stats">Stats</a>
+    </div>
+</div>
+<div class="thin float_clear">
+    <div class="two_columns pad">
+<?php
+{% if viewer.permitted('admin_reports') %}
+
+    <h3><strong>Reports resolved in the last 24 hours</strong></h3>
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark">Username</td>
+            <td class="colhead_dark number_column">Reports</td>
+        </tr>
+    {% for result in stats.day(1) %}
+        <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
+            <td>{{ result.user_id|user_url }}</td>
+            <td class="number_column">{{ result.total|number_format }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <h3><strong>Reports resolved in the last week</strong></h3>
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark">Username</td>
+            <td class="colhead_dark number_column">Reports</td>
+        </tr>
+    {% for result in stats.day(7) %}
+        <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
+            <td>{{ result.user_id|user_url }}</td>
+            <td class="number_column">{{ result.total|number_format }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <h3><strong>Reports resolved in the last month</strong></h3>
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark">Username</td>
+            <td class="colhead_dark number_column">Reports</td>
+        </tr>
+    {% for result in stats.day(30) %}
+        <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
+            <td>{{ result.user_id|user_url }}</td>
+            <td class="number_column">{{ result.total|number_format }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <h3><strong>Reports resolved all time</strong></h3>
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark">Username</td>
+            <td class="colhead_dark number_column">Reports</td>
+        </tr>
+    {% for result in stats.allTime %}
+        <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
+            <td>{{ result.user_id|user_url }}</td>
+            <td class="number_column">{{ result.total|number_format }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+</div>
+
+<div class="two_columns pad">
+    <h3><strong>Forum threads trashed since the beginning of time</strong></h3>
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark number_column">Place</td>
+            <td class="colhead_dark">Username</td>
+            <td class="colhead_dark number_column">Trashed</td>
+        </tr>
+{% for result in stats.forumThreadTrashTotal %}
+        <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
+            <td class="number_column">{{ loop.index }}</td>
+            <td>{{ result.user_id|user_url }}</td>
+            <td class="number_column">{{ result.total|number_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div>
+<wdiv>
+{{ footer() }}
+
