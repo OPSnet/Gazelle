@@ -38,7 +38,7 @@ class Blog extends BaseObject {
                     WHERE ID = ?
                     ", $this->id
                 );
-                self::$cache->cache_value($key, $info, 0);
+                self::$cache->cache_value($key, $info, 7200);
             }
             $this->info = $info;
         }

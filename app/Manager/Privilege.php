@@ -17,7 +17,7 @@ class Privilege extends \Gazelle\Base {
                 ", $privilegeId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Privilege($id) : null;
@@ -90,7 +90,7 @@ class Privilege extends \Gazelle\Base {
                 $this->info = [
                     'privilege' => $privilege,
                 ];
-                self::$cache->cache_value(self::CACHE_KEY, $this->info, 0);
+                self::$cache->cache_value(self::CACHE_KEY, $this->info, 7200);
             }
         }
         return $this->info;

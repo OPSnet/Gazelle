@@ -39,7 +39,7 @@ class User extends \Gazelle\Base {
                 ", $userId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\User($id) : null;
@@ -59,7 +59,7 @@ class User extends \Gazelle\Base {
                 ", $username
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\User($id) : null;
@@ -219,7 +219,7 @@ class User extends \Gazelle\Base {
             ");
             $classList = self::$db->to_array('ID');
             self::$db->set_query_id($qid);
-            self::$cache->cache_value('user_class', $classList, 0);
+            self::$cache->cache_value('user_class', $classList, 7200);
         }
         return $classList;
     }
@@ -307,7 +307,7 @@ class User extends \Gazelle\Base {
                 ", FORUM_MOD
             );
             $staffClassList = self::$db->to_array('ID', MYSQLI_ASSOC);
-            self::$cache->cache_value('staff_class', $staffClassList, 0);
+            self::$cache->cache_value('staff_class', $staffClassList, 7200);
         }
         return $staffClassList;
     }
@@ -461,7 +461,7 @@ class User extends \Gazelle\Base {
     public function getEnabledUsersCount(): int {
         if (($count = self::$cache->get_value('stats_user_count')) == false) {
             $count = self::$db->scalar("SELECT count(*) FROM users_main WHERE Enabled = '1'");
-            self::$cache->cache_value('stats_user_count', $count, 0);
+            self::$cache->cache_value('stats_user_count', $count, 7200);
         }
         return $count;
     }

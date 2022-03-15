@@ -32,7 +32,7 @@ class Artist extends \Gazelle\Base {
                 ", $artistId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Artist($id) : null;

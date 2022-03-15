@@ -20,7 +20,7 @@ class Wiki extends \Gazelle\Base {
                 ", $wikiId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Wiki($id) : null;

@@ -20,7 +20,7 @@ class Blog extends \Gazelle\Base {
                 ", $blogId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+                self::$cache->cache_value($key, $id, 7200);
             }
         }
         return $id ? new \Gazelle\Blog($id) : null;
@@ -55,7 +55,7 @@ class Blog extends \Gazelle\Base {
                 LIMIT 20
             ");
             $idList = self::$db->collect(0, false) ?? [];
-            self::$cache->cache_value(self::CACHE_KEY, $idList, 0);
+            self::$cache->cache_value(self::CACHE_KEY, $idList, 7200);
         }
         return array_map(fn ($id) => new \Gazelle\Blog($id), $idList);
     }
