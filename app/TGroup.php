@@ -35,7 +35,7 @@ class TGroup extends BaseObject {
         return implode(" \xE2\x80\x93 ",
             array_filter([
                 $this->artistHtml(),
-                sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())),
+                sprintf('<a href="%s" class="tooltip" title="View torrent group" dir="ltr">%s</a>', $this->url(), display_str($this->name())),
             ], fn($x) => !empty($x))
         );
     }

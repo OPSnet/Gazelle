@@ -393,7 +393,7 @@ if ($sections = $Artist->sections()) {
                             . $torrent->fullName() . " $torrentId [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
                     ],
                 ]) ?>
-                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$groupId?>&amp;torrentid=<?=$torrentId?>"><?= $torrent->label() ?></a>
+                &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
             </td>
             <td class="td_size number_column nobr"><?=Format::get_size($torrent->size()) ?></td>
             <td class="td_snatched number_column m_td_right"><?=number_format($torrent->snatchTotal()) ?></td>
