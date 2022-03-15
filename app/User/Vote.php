@@ -231,18 +231,15 @@ class Vote extends \Gazelle\BaseUser {
             );
             $results = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
             $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score', false));
-            $groups = \Torrents::get_groups(array_keys($results));
 
             $topVotes = [];
             foreach ($results as $groupID => $votes) {
-                $topVotes[$groupID] = array_merge(
-                    $groups[$groupID], [
-                        'Ups'      => $votes['Ups'],
-                        'Total'    => $votes['Total'],
-                        'Score'    => $votes['Score'],
-                        'sequence' => $ranks[$groupID],
-                    ]
-                );
+                $topVotes[$groupID] = [
+                    'Ups'      => $votes['Ups'],
+                    'Total'    => $votes['Total'],
+                    'Score'    => $votes['Score'],
+                    'sequence' => $ranks[$groupID],
+                ];
             }
             self::$cache->cache_value($key, $topVotes, 3600);
         }

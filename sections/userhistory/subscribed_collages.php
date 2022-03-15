@@ -131,7 +131,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                 'key'    => $Viewer->announceKey(),
                 't'      => $torrent,
             ]) ?>
-            &nbsp;&raquo;&nbsp;<a href="<?= $torrent->url() ?>"><?= $torrent->label() ?></a>
+            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
         </td>
         <td class="number_column nobr"><?=Format::get_size($torrent->size())?></td>
         <td class="number_column"><?=number_format($torrent->snatchTotal())?></td>

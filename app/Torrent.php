@@ -46,6 +46,10 @@ class Torrent extends BaseObject {
         return $link;
     }
 
+    public function labelLink(): string {
+        return '<a href="' . $this->url() . '">' . $this->label() . '</a>';
+    }
+
     public function name(): string {
         $tgroup = $this->group();
         return $tgroup->categoryId() === 1

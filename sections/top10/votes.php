@@ -2,8 +2,6 @@
 
 $vote = new Gazelle\User\Vote($Viewer);
 $tagMan = new Gazelle\Manager\Tag;
-$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
@@ -27,7 +25,15 @@ if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
     }
 }
 $vote->setTopLimit($limit);
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+
+$bookmark     = new Gazelle\Bookmark($Viewer);
+$snatcher     = new Gazelle\User\Snatch($Viewer);
+$tgMan        = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$torMan       = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$imgProxy     = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$topVotes     = $vote->topVotes();
+$number       = 0;
 
 View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
 ?>
@@ -88,232 +94,6 @@ View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
         </small>
 <?php } ?>
     </h3>
-<?php
-
-$number = 0;
-$torrentTable = '';
-$bookmark = new Gazelle\Bookmark($Viewer);
-$userVotes = $vote->userVotes();
-$topVotes = $vote->topVotes();
-foreach ($topVotes as $groupID => $group) {
-    ++$number;
-    $groupName = $group['Name'];
-    $groupYear = $group['Year'];
-    $groupCategoryID = $group['CategoryID'];
-    $torrentTags = new Tags($group['TagList']);
-    $wikiImage = $group['WikiImage'];
-    $torrents = isset($group['Torrents']) ? $group['Torrents'] : [];
-    $artists = $group['Artists'];
-    $extendedArtists = $group['ExtendedArtists'];
-    $upVotes = $group['Ups'];
-    $totalVotes = $group['Total'];
-    $score = $group['Score'];
-    $downVotes = $totalVotes - $upVotes;
-
-    $isBookmarked = $bookmark->isTorrentBookmarked($groupID);
-    $userVote = $userVotes[$groupID] ?? '';
-
-    $displayName = $group['sequence'] . " - ";
-
-    if (!empty($extendedArtists[1]) || !empty($extendedArtists[4]) || !empty($extendedArtists[5])|| !empty($extendedArtists[6])) {
-        unset($extendedArtists[2]);
-        unset($extendedArtists[3]);
-        $displayName .= Artists::display_artists($extendedArtists);
-    } elseif (count($artists) > 0) {
-        $displayName .= Artists::display_artists(['1' => $artists]);
-    }
-
-    $displayName .= '<a href="torrents.php?id='.$groupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$groupName.'</a>';
-    if ($groupYear > 0) {
-        $displayName .= " [$groupYear]";
-    }
-    if ($group['VanityHouse']) {
-        $displayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
-    }
-    // Start an output buffer, so we can store this output in $torrentTable
-    ob_start();
-
-    if (count($torrents) > 1 || $groupCategoryID == 1) {
-        // Grouped torrents
-        // TODO: Gazelle\TGroup knows how to do this, so remove this garbage
-        $groupSnatched = false;
-        foreach ($torrents as &$tinfo) {
-            $torrent = $torMan->findById($tinfo['ID']);
-            if (is_null($torrent)) {
-                continue;
-            }
-            if (($tinfo['IsSnatched'] = $snatcher->showSnatch($torrent->id())) && !$groupSnatched) {
-                $groupSnatched = true;
-            }
-        }
-        unset($tinfo);
-        $snatchedGroupClass = $groupSnatched ? ' snatched_group' : '';
-?>
-                <tr class="group groupid_<?=$groupID?>_header discog<?=$snatchedGroupClass?>" id="group_<?=$groupID?>">
-                    <td class="center">
-                        <div id="showimg_<?=$groupID?>" class="show_torrents">
-                            <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$groupID?>, this, event);" title="Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups on this page."></a>
-                        </div>
-                    </td>
-                    <td class="center cats_col">
-                        <div title="<?=$torrentTags->title()?>" class="tooltip <?=Format::css_category($groupCategoryID)?> <?=$torrentTags->css_name()?>"></div>
-                    </td>
-                    <td class="big_info">
-<?php        if ($Viewer->option('CoverArt')) { ?>
-                        <div class="group_image float_left clear">
-                            <?= $imgProxy->thumbnail($wikiImage, $groupCategoryID) ?>
-                        </div>
-<?php        } ?>
-                        <div class="group_info clear">
-
-                            <strong><?=$displayName?></strong>
-<?php        if ($isBookmarked) { ?>
-                            <span class="remove_bookmark float_right">
-                                <a href="#" class="bookmarklink_torrent_<?=$groupID?> brackets" onclick="Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;">Remove bookmark</a>
-                            </span>
-<?php        } else { ?>
-                            <span class="add_bookmark float_right">
-                                <a href="#" class="bookmarklink_torrent_<?=$groupID?> brackets" onclick="Bookmark('torrent', <?=$groupID?>, 'Remove bookmark'); return false;">Bookmark</a>
-                            </span>
-<?php        } ?>
-                            <div class="tags"><?=$torrentTags->format()?></div>
-
-                        </div>
-                    </td>
-                    <td colspan="4" class="votes_info_td">
-                        <span style="white-space: nowrap;">
-                            <span class="favoritecount_small tooltip" title="<?=$upVotes . ($upVotes == 1 ? ' upvote' : ' upvotes')?>"><span id="upvotes"><?=number_format($upVotes)?></span> <span class="vote_album_up">&and;</span></span>
-                            &nbsp; &nbsp;
-                            <span class="favoritecount_small tooltip" title="<?=$downVotes . ($downVotes == 1 ? ' downvote' : ' downvotes')?>"><span id="downvotes"><?=number_format($downVotes)?></span> <span class="vote_album_down">&or;</span></span>
-                            &nbsp;
-                            <span style="float: right;"><span class="favoritecount_small" id="totalvotes"><?=number_format($totalVotes)?></span> Total</span>
-                        </span>
-                        <br />
-                        <span style="white-space: nowrap;">
-                            <span class="tooltip_interactive" title="&lt;span style=&quot;font-weight: bold;&quot;&gt;Score: <?=number_format($score * 100, 4)?>&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;This is the lower bound of the binomial confidence interval &lt;a href=&quot;wiki.php?action=article&amp;id=108&quot;&gt;described here&lt;/a&gt;, multiplied by 100." data-title-plain="Score: <?=number_format($score * 100, 4)?>. This is the lower bound of the binomial confidence interval described in the Favorite Album Votes wiki article, multiplied by 100.">Score: <span class="favoritecount_small"><?=number_format($score * 100, 1)?></span></span>
-                            &nbsp; | &nbsp;
-                            <span class="favoritecount_small"><?=number_format($upVotes / $totalVotes * 100, 1)?>%</span> positive
-                        </span>
-                    </td>
-                </tr>
-<?php
-        $lastRemasterYear = '-';
-        $lastRemasterTitle = '';
-        $lastRemasterRecordLabel = '';
-        $lastRemasterCatalogueNumber = '';
-        $lastMedia = '';
-
-        $editionID = 0;
-        unset($firstUnknown);
-
-        foreach ($torrents as $torrentID => $tinfo) {
-            $torrent = $torMan->findById($torrentID);
-            if (is_null($torrent)) {
-                continue;
-            }
-            $reported = $torMan->hasReport($Viewer, $torrentID);
-            if ($tinfo['Remastered'] && !$tinfo['RemasterYear']) {
-                $firstUnknown = !isset($firstUnknown);
-            }
-            $snatchedTorrentClass = $tinfo['IsSnatched'] ? ' snatched_torrent' : '';
-
-            if ($tinfo['RemasterTitle'] != $lastRemasterTitle
-                || $tinfo['RemasterYear'] != $lastRemasterYear
-                || $tinfo['RemasterRecordLabel'] != $lastRemasterRecordLabel
-                || $tinfo['RemasterCatalogueNumber'] != $lastRemasterCatalogueNumber
-                || (isset($firstUnknown) && $firstUnknown)
-                || $tinfo['Media'] != $lastMedia
-                ) {
-                $editionID++;
-?>
-        <tr class="group_torrent groupid_<?=$groupID?> edition<?=$snatchedGroupClass?> hidden">
-            <td colspan="7" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$groupID?>, <?=$editionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($tinfo, $group)?></strong></td>
-        </tr>
-<?php
-            }
-            $lastRemasterTitle = $tinfo['RemasterTitle'];
-            $lastRemasterYear = $tinfo['RemasterYear'];
-            $lastRemasterRecordLabel = $tinfo['RemasterRecordLabel'];
-            $lastRemasterCatalogueNumber = $tinfo['RemasterCatalogueNumber'];
-            $lastMedia = $tinfo['Media'];
-?>
-        <tr class="group_torrent torrent_row groupid_<?=$groupID?> edition_<?=$editionID?><?=$snatchedTorrentClass . $snatchedGroupClass?> hidden">
-            <td colspan="3">
-                <?= $Twig->render('torrent/action.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $tinfo,
-                ]) ?>
-                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$groupID?>&amp;torrentid=<?=$torrentID?>"><?=Torrents::torrent_info($tinfo)?><?php if ($reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
-            </td>
-            <td class="number_column nobr"><?=Format::get_size($tinfo['Size'])?></td>
-            <td class="number_column"><?=number_format($tinfo['Snatched'])?></td>
-            <td class="number_column<?=($tinfo['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($tinfo['Seeders'])?></td>
-            <td class="number_column"><?=number_format($tinfo['Leechers'])?></td>
-        </tr>
-<?php
-        }
-    } else { //if (count($torrents) > 1 || $groupCategoryID == 1)
-        // Viewing a type that does not require grouping
-        $torrentID = key($torrents);
-        $torrent = $torMan->findById($torrentID);
-        if (is_null($torrent)) {
-            continue;
-        }
-        $tinfo = current($torrents);
-        $tinfo['IsSnatched'] = $snatcher->showSnatch($torrent->id());
-
-        $displayName = $number .' - <a href="torrents.php?id='.$groupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$groupName.'</a>';
-        if ($tinfo['IsSnatched']) {
-            $displayName .= ' ' . Format::torrent_label('Snatched!');
-        }
-        if ($tinfo['FreeTorrent'] == '1') {
-            $displayName .= ' ' . Format::torrent_label('Freeleech!');
-        } elseif ($tinfo['FreeTorrent'] == '2') {
-            $displayName .= ' ' . Format::torrent_label('Neutral leech!');
-        } elseif ($torrent->hasToken($Viewer->id())) {
-            $displayName .= ' ' . Format::torrent_label('Personal freeleech!');
-        }
-        $snatchedTorrentClass = $tinfo['IsSnatched'] ? ' snatched_torrent' : '';
-?>
-        <tr class="torrent torrent_row<?=$snatchedTorrentClass . $snatchedGroupClass?>" id="group_<?=$groupID?>">
-            <td></td>
-            <td class="center cats_col">
-                <div title="<?=$torrentTags->title()?>" class="tooltip <?=Format::css_category($groupCategoryID)?> <?=$torrentTags->css_name()?>">
-                </div>
-            </td>
-            <td class="nobr big_info">
-<?php        if ($Viewer->option('CoverArt')) { ?>
-                <div class="group_image float_left clear">
-                    <?= $imgProxy->thumbnail($wikiImage, $groupCategoryID) ?>
-                </div>
-<?php        } ?>
-                <div class="group_info clear">
-                    <?= $Twig->render('torrent/action.twig', [
-                        'can_fl' => $Viewer->canSpendFLToken($torrent),
-                        'key'    => $Viewer->announceKey(),
-                        't'      => $tinfo,
-                        'extra'  => [
-                            "<a href=\"#\" id=\"bookmarklink_torrent_<?=$groupID?>\" " . $isBookmarked
-                                ? "class=\"remove_bookmark\" onclick=\"Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;\">Remove bookmark</a>"
-                                : "class=\"add_bookmark\" onclick=\"Bookmark('torrent', <?=$groupID?>, 'Remove bookmark'); return false;\">Bookmark</a>"
-                        ],
-                    ]) ?>
-                    <strong><?=$displayName?></strong>
-                    <div class="tags"><?=$torrentTags->format()?></div>
-                </div>
-            </td>
-            <td class="number_column nobr"><?=Format::get_size($tinfo['Size'])?></td>
-            <td class="number_column"><?=number_format($tinfo['Snatched'])?></td>
-            <td class="number_column<?=($tinfo['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($tinfo['Seeders'])?></td>
-            <td class="number_column"><?=number_format($tinfo['Leechers'])?></td>
-        </tr>
-<?php
-    } //if (count($torrents) > 1 || $groupCategoryID == 1)
-    $torrentTable .= ob_get_clean();
-}
-$urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
-?>
 <table class="torrent_table grouping cats m_table" id="discog_table">
     <tr class="colhead_dark">
         <td><!-- expand/collapse --></td>
@@ -325,18 +105,160 @@ $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
         <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
     </tr>
 <?php
-if ($topVotes === false) { ?>
-    <tr>
-        <td colspan="7" class="center">Server is busy processing another top list request. Please try again in a minute.</td>
-    </tr>
-<?php
-} elseif (count($topVotes) === 0) { ?>
+if (count($topVotes) === 0) { ?>
     <tr>
         <td colspan="7" class="center">No torrents were found that meet your criteria.</td>
     </tr>
 <?php
 } else {
-    echo $torrentTable;
+    foreach ($topVotes as $tgroupId => $result) {
+        $tgroup = $tgMan->findById($tgroupId);
+        if (is_null($tgroup)) {
+            continue;
+        }
+        $torrentIdList = $tgroup->torrentIdList();
+        if (count($torrentIdList) === 0) {
+            continue;
+        }
+        ++$number;
+        $sequence   = $result['sequence'];
+        $upVotes    = $result['Ups'];
+        $totalVotes = $result['Total'];
+        $score      = $result['Score'];
+        $downVotes  = $totalVotes - $upVotes;
+        $tagList    = $tgroup->tagList();
+        $primaryTag = current($tagList)['name'];
+        $snatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+
+        if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
+            // Grouped torrents
+?>
+    <tr class="group groupid_<?=$tgroupId?>_header discog<?=$snatchedGroupClass?>" id="group_<?=$tgroupId?>">
+        <td class="center">
+            <div id="showimg_<?=$tgroupId?>" class="show_torrents">
+                <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$tgroupId?>, this, event);" title="Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups on this page."></a>
+            </div>
+        </td>
+        <td class="center cats_col">
+            <div title="<?= ucfirst($primaryTag) ?>"
+                 class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+        </td>
+
+        <td class="big_info">
+<?php       if ($Viewer->option('CoverArt')) { ?>
+            <div class="group_image float_left clear">
+                <?= $imgProxy->thumbnail($tgroup->image(), $tgroup->categoryId()) ?>
+            </div>
+<?php       } ?>
+            <div class="group_info clear">
+                <strong><?= $result['sequence'] ?> - <?= $tgroup->link() ?><?php if ($tgroup->year()) { echo ' [' . $tgroup->year() . ']'; } ?></strong>
+<?php   if ($bookmark->isTorrentBookmarked($tgroupId)) { ?>
+            <span class="remove_bookmark float_right">
+                <a href="#" class="bookmarklink_torrent_<?=$tgroupId?> brackets" onclick="Unbookmark('torrent', <?=$tgroupId?>, 'Bookmark'); return false;">Remove bookmark</a>
+            </span>
+<?php       } else { ?>
+                <span class="add_bookmark float_right">
+                    <a href="#" class="bookmarklink_torrent_<?=$tgroupId?> brackets" onclick="Bookmark('torrent', <?=$tgroupId?>, 'Remove bookmark'); return false;">Bookmark</a>
+                </span>
+<?php       } ?>
+                <div class="tags"><?= implode(', ', array_map(
+                    fn($name) => "<a href=\"collages.php?action=search&amp;tags=$name\">$name</a>", $tgroup->tagNameList()
+                    )) ?></div>
+            </div>
+        </td>
+        <td colspan="4" class="votes_info_td">
+            <span style="white-space: nowrap;">
+                <span class="favoritecount_small tooltip" title="<?=$upVotes . ($upVotes == 1 ? ' upvote' : ' upvotes')?>"><span id="upvotes"><?=number_format($upVotes)?></span> <span class="vote_album_up">&#x25b2;</span></span>
+                &nbsp; &nbsp;
+                <span class="favoritecount_small tooltip" title="<?=$downVotes . ($downVotes == 1 ? ' downvote' : ' downvotes')?>"><span id="downvotes"><?=number_format($downVotes)?></span> <span class="vote_album_down">&#x25bc;</span></span>
+                &nbsp;
+                <span style="float: right;"><span class="favoritecount_small" id="totalvotes"><?=number_format($totalVotes)?></span> Total</span>
+            </span>
+            <br />
+            <span style="white-space: nowrap;">
+                <span class="tooltip_interactive" title="&lt;span style=&quot;font-weight: bold;&quot;&gt;Score: <?=number_format($score * 100, 4)?>&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;This is the lower bound of the binomial confidence interval &lt;a href=&quot;wiki.php?action=article&amp;id=108&quot;&gt;described here&lt;/a&gt;, multiplied by 100." data-title-plain="Score: <?=number_format($score * 100, 4)?>. This is the lower bound of the binomial confidence interval described in the Favorite Album Votes wiki article, multiplied by 100.">Score: <span class="favoritecount_small"><?=number_format($score * 100, 1)?></span></span>
+                &nbsp; | &nbsp;
+                <span class="favoritecount_small"><?=number_format($upVotes / $totalVotes * 100, 1)?>%</span> positive
+            </span>
+        </td>
+    </tr>
+<?php
+            $prev = '';
+            $editionID = 0;
+            unset($firstUnknown);
+
+            foreach ($torrentIdList as $torrentId) {
+                $torrent = $torMan->findById($torrentId);
+                if (is_null($torrent)) {
+                    continue;
+                }
+
+                $current = $torrent->remasterTuple();
+                if ($torrent->isRemasteredUnknown()) {
+                    $FirstUnknown = !isset($firstUnknown);
+                }
+                if ($prev != $current || isset($firstUnknown) && $firstUnknown) {
+                    $editionID++;
+?>
+    <tr class="group_torrent groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= $snatchedGroupClass ?>">
+        <td colspan="7" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?= $tgroupId ?>, <?= $editionID ?>, this, event)"
+            class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?>
+            </strong></td>
+    </tr>
+<?php
+                }
+                $prev = $current;
+?>
+    <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= ($snatcher->showSnatch($torrentId) ? ' snatched_torrent' : '') . $snatchedGroupClass ?>">
+        <td colspan="3">
+            <?= $Twig->render('torrent/action-v2.twig', [
+                'can_fl' => $Viewer->canSpendFLToken($torrent),
+                'key'    => $Viewer->announceKey(),
+                't'      => $torrent,
+            ]) ?>
+            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+        </td>
+        <td class="number_column nobr"><?=Format::get_size($torrent->size())?></td>
+        <td class="number_column"><?=number_format($torrent->snatchTotal())?></td>
+        <td class="number_column<?=$torrent->seederTotal() == 0 ? ' r00' : '' ?>"><?=number_format($torrent->seederTotal())?></td>
+        <td class="number_column"><?=number_format($torrent->leecherTotal())?></td>
+    </tr>
+<?php
+            }
+        } else {
+            // Viewing a type that does not require grouping
+            $torrentId = $torrentIdList[0];
+            $torrent = $torMan->findById($torrentId);
+?>
+    <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrentId) ? ' snatched_torrent' : '')
+        . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
+        <td></td>
+        <td class="td_collage_category center">
+            <div title="<?= ucfirst($primaryTag) ?>"
+                 class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+        </td>
+        <td class="td_info">
+            <?= $Twig->render('torrent/action-v2.twig', [
+                'can_fl' => $Viewer->canSpendFLToken($torrent),
+                'key'    => $Viewer->announceKey(),
+                't'      => $torrent,
+            ]) ?>
+            <strong><?= $tgroup->link() ?></strong>
+<?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
+            <?= $vote->setGroupId($tgroupId)->links($Viewer->auth()) ?>
+<?php   } ?>
+            <div class="tags"><?= implode(', ', array_map(
+                fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
+                )) ?></div>
+        </td>
+        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
+        <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
+        <td class="td_seeders m_td_right number_column<?= $torrent->seederTotal() ? '' : ' r00' ?>"><?= number_format($torrent->seederTotal()) ?></td>
+        <td class="td_leechers m_td_right number_column"><?= number_format($torrent->leecherTotal()) ?></td>
+    </tr>
+<?php
+        }
+    }
 }
 ?>
 </table>

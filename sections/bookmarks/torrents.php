@@ -261,8 +261,7 @@ foreach ($bookmarkList as $bm) {
                     'key'    => $Viewer->announceKey(),
                     't'      => $torrent,
                 ]) ?>
-                    &nbsp;&nbsp;&raquo;&nbsp; <a
-                            href="torrents.php?id=<?= $tgroupId ?>&amp;torrentid=<?= $torrentId ?>"><?= $torrent->label() ?></a>
+                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
                 </td>
                 <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
                 <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>

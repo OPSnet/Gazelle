@@ -178,7 +178,7 @@ foreach ($entryList as $tgroupId) {
     $tagList = $tgroup->tagList();
     $primaryTag = current($tagList)['name'];
     $Number++;
-    if (count($torrentIdList) > 1 || $tgroup->categoryName() == "Music") {
+    if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
         // Grouped torrents
 ?>
         <tr class="group groupid_<?=$tgroupId?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
@@ -254,7 +254,7 @@ foreach ($entryList as $tgroupId) {
                         'key'    => $Viewer->announceKey(),
                         't'      => $torrent,
                     ]) ?>
-                    &nbsp;&raquo;&nbsp;<a href="torrents.php?id=<?= $tgroupId ?>&amp;torrentid=<?= $torrentId ?>"><?= $torrent->label() ?></a>
+                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
                 </td>
                 <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
                 <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
