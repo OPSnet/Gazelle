@@ -634,16 +634,16 @@ class UploadForm extends \Gazelle\Base {
 <?php       } else { ?>
                 <td class="label">Title:</td>
 <?php       } ?>
-                <td><input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" /></td>
+                <td><input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title'] ?? '') ?>" /></td>
             </tr>
             <tr>
                 <td class="label">Tags:</td>
-                <td><input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
+                <td><input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList'] ?? '') ?>"<?=
                     $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /></td>
             </tr>
             <tr>
                 <td class="label">Image (optional):</td>
-                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> />
+                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image'] ?? '') ?>"<?=$this->Disabled?> />
                 <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
 <?php       if (IMAGE_HOST_BANNED) { ?>
                 <br />Images hosted on <?= implode(', ', IMAGE_HOST_BANNED) ?> are not allowed, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>
