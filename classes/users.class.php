@@ -80,7 +80,7 @@ class Users {
 
         $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
             . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
-            . ($Viewer->id() == $UserID ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
+            . ($Viewer->id() == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($user->warningExpiry())) : '')
             . '" class="tooltip" /></a>' : '';
         $Str .= ($IsEnabled && $user->isDisabled())
             ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>'
