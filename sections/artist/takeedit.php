@@ -54,7 +54,7 @@ if ($discogsId > 0) {
 }
 
 // Insert revision
-if (!$revisionId) { // edit
+if (!isset($revisionId)) { // edit
     $DB->prepared_query("
         INSERT INTO wiki_artists
                (PageID, Body, Image, UserID, Summary)
