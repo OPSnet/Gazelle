@@ -48,7 +48,8 @@ class Payment extends \Gazelle\Base {
     }
 
     public function list(): array {
-        if (($list = self::$cache->get_value(self::LIST_KEY)) === false) {
+        $list = self::$cache->get_value(self::LIST_KEY);
+        if ($list === false) {
             self::$db->prepared_query("
                 SELECT ID,
                     Text,
@@ -60,7 +61,7 @@ class Payment extends \Gazelle\Base {
                 ORDER BY Expiry
             ");
             $list = self::$db->to_array('ID', MYSQLI_ASSOC, false);
-            self::$cache->cache_value(self::LIST_KEY, $list, 86400 * 30);
+            self::$cache->cache_value(self::LIST_KEY, $list, 86400);
         }
 
         // update with latest forex rates
@@ -96,10 +97,22 @@ class Payment extends \Gazelle\Base {
     public function monthlyRental(): float {
         $rental = self::$cache->get_value(self::RENT_KEY);
         if ($rental === false) {
-            $rental = (float)array_reduce(
-                array_filter($this->list(), fn($p) => $p['Active']),
-                function ($sum = 0.0, array $s = []) { return $sum + $s['btcRent']; }
-            ) / 12;
+            $rental = (float)self::$db->scalar("
+                SELECT sum(p.AnnualRent/coalesce(CUR.rate, 1.0)) / 12
+                FROM payment_reminders p
+                LEFT JOIN (
+                    SELECT f.cc,
+                        f.rate
+                    FROM xbt_forex f
+                    INNER JOIN (
+                        SELECT cc,
+                            max(forex_date) AS forex_date
+                        FROM xbt_forex
+                        GROUP BY cc
+                    ) LATEST using (cc, forex_date)
+                ) CUR USING (cc)
+                WHERE p.active = 1;
+            ");
             self::$cache->cache_value(self::RENT_KEY, $rental, 86400);
         }
         return $rental;
