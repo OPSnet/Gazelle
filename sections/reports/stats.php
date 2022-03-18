@@ -1,6 +1,6 @@
 <?php
 
-if (!$Viewer->permitted('admin_reports') && !$Viewer->permitted('site_moderate_forums')) {
+if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
     error(403);
 }
 

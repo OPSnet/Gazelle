@@ -41,4 +41,40 @@ class Report extends \Gazelle\Base {
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
+
+    public function torrentOpenTotal(): int {
+        $count = self::$cache->get_value('num_torrent_reportsv2');
+        if ($count === false) {
+            $count = self::$db->scalar("
+                SELECT count(*) FROM reportsv2 WHERE Status = 'New'
+            ");
+            self::$cache->cache_value('num_torrent_reportsv2', $count, 3600);
+        }
+        return $count;
+    }
+
+    public function otherOpenTotal(): int {
+        $count = self::$cache->get_value('num_other_reports');
+        if ($count === false) {
+            $count = self::$db->scalar("
+                SELECT count(*) FROM reports WHERE Status = 'New'
+            ");
+            self::$cache->cache_value('num_other_reports', $count, 3600);
+        }
+        return $count;
+    }
+
+    public function forumOpenTotal(): int {
+        $count = self::$cache->get_value('num_forum_reports');
+        if ($count === false) {
+            $count = self::$db->scalar("
+                SELECT count(*)
+                FROM reports
+                WHERE Status = 'New'
+                    AND Type IN ('artist_comment', 'collages_comment', 'post', 'requests_comment', 'thread', 'torrents_comment')
+            ");
+            self::$cache->cache_value('num_forum_reports', $count, 3600);
+        }
+        return $count;
+    }
 }

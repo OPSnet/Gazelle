@@ -1,0 +1,52 @@
+{% from 'macro/form.twig' import selected %}
+<p>You are reporting the request:</p>
+<table>
+    <tr class="colhead">
+        <td>Title</td>
+        <td>Description</td>
+        <td>Filled?</td>
+    </tr>
+    <tr>
+        <td>{{ subject.title }}</td>
+        <td>{{ subject.description|bb_format }}</td>
+        <td><strong>{% if subject.isFilled %}Yes{% else %}No{% endif %}</strong></td>
+    </tr>
+</table>
+<br />
+<div class="box pad center">
+    <p><strong>It will greatly increase the turnover rate of the updates if you can fill in as much of the following details as possible.</strong></p>
+    <form class="create_form" id="report_form" name="report" action="" method="post">
+        <input type="hidden" name="action" value="takereport" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="id" value="{{ subject.id }}" />
+        <input type="hidden" name="type" value="{{ type }}" />
+        <table class="layout">
+            <tr>
+                <td class="label">Year (required)</td>
+                <td>
+                    <input type="text" size="4" name="year" class="required" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Release type</td>
+                <td>
+                    <select id="releasetype" name="releasetype">
+                        <option value="0">---</option>
+{% for id, name in release %}
+                        <option value="{{ id }}"{{ selected(id == subject.releaseType) }}>{{ name }}</option>
+{% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Comment</td>
+                <td>
+                    <textarea rows="8" cols="80" name="comment" class="required"></textarea>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <br />
+        <input type="submit" value="Submit report" />
+    </form>
+</div>

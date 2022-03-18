@@ -123,6 +123,10 @@ class Request extends BaseObject {
         return $this->info()['CategoryID'];
     }
 
+    public function categoryName(): int {
+        return CATEGORY[$this->info()['CategoryID'] - 1];
+    }
+
     public function description(): string {
         return $this->info()['Description'];
     }
@@ -137,6 +141,10 @@ class Request extends BaseObject {
 
     public function fillerId(): ?int {
         return $this->info()['FillerID'];
+    }
+
+    public function isFilled(): bool {
+        return (bool)$this->info()['FillerID'];
     }
 
     public function needCue(): bool {
