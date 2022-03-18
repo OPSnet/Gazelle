@@ -48,15 +48,17 @@ class XBT extends \Gazelle\Base {
      */
     public function latestRate(string $CC) {
         $key = sprintf(self::CACHE_KEY, $CC);
-        if (($rate = self::$cache->get_value($key)) === false) {
-            $rate = self::$db->scalar('
+        $rate = self::$cache->get_value($key);
+        if ($rate === false) {
+            $rate = self::$db->scalar("
                 SELECT rate
                 FROM xbt_forex
                 WHERE forex_date > now() - INTERVAL 6 HOUR
-                    AND cc = ? GROUP BY cc
+                    AND cc = ?
+                GROUP BY cc
                 ORDER BY forex_date DESC
                 LIMIT 1
-                ', $CC
+                ", $CC
             );
             if (is_null($rate)) {
                 $rate = $this->fetchRate($CC);
