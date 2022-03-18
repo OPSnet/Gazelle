@@ -1,0 +1,13 @@
+<p>You are reporting the request:</p>
+<table>
+    <tr class="colhead">
+        <td>Title</td>
+        <td>Description</td>
+        <td>Filled?</td>
+    </tr>
+    <tr>
+        <td>{{ subject.title }}</td>
+        <td>{{ subject.description|bb_format }}</td>
+        <td><strong>{% if subject.isFilled %}Yes{% else %}No{% endif %}</strong></td>
+    </tr>
+</table>

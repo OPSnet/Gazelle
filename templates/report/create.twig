@@ -1,0 +1,43 @@
+{{ header('Report a ' ~ reportType.title, {'js': 'bbcode,jquery.validate,form_validate'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Report {{ reportType.title }}</h2>
+    </div>
+    <h3>Reporting guidelines</h3>
+    <div class="box pad">
+        <p>Following these guidelines will help the moderators deal with your report in a timely fashion. </p>
+        <ul>
+{% for item in reportType.guidelines %}
+            <li>{{ item }}</li>
+{% endfor %}
+        </ul>
+        <p>In short, please include as much detail as possible when reporting. Thank you. </p>
+    </div>
+<?php
+
+{% include report.template with {
+    'release':     release,
+    'context':     report.context,
+    'subject':     report.subject,
+    'report_type': report_type,
+    'type':        type,
+    'viewer':      viewer,
+} only %}
+
+{% if report.showReason %}
+    <h3>Reason</h3>
+    <div class="box pad center">
+        <form class="create_form" name="report" id="report_form" action="" method="post">
+            <input type="hidden" name="action" value="takereport" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="id" value="{{ id }}" />
+            <input type="hidden" name="type" value="{{ type }}" />
+            <textarea class="required" rows="10" cols="95" name="reason"></textarea><br /><br />
+            <input type="submit" value="Submit report" />
+        </form>
+    </div>
+{% endif %}
+</div>
+<?php
+{{ footer() }}
+

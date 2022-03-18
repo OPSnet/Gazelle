@@ -1,0 +1,11 @@
+<p>You are reporting the {{ context.title }}:</p>
+<table>
+    <tr class="colhead">
+        <td>Username</td>
+        <td>Body</td>
+    </tr>
+    <tr>
+        <td>{{ subject.userId|user_url }}</td>
+        <td>{{ subject.body|bb_format }}</td>
+    </tr>
+</table>

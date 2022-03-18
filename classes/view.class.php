@@ -71,7 +71,7 @@ class View {
         $payMan = new Gazelle\Manager\Payment;
         if ($Viewer->permitted('users_mod')) {
             $activity->setStaff(new Gazelle\Staff($Viewer))
-                ->setReport(new Gazelle\Report)
+                ->setReport(new Gazelle\Stats\Report)
                 ->setPayment($payMan)
                 ->setApplicant(new Gazelle\Manager\Applicant)
                 ->setDb(new Gazelle\DB)

@@ -97,16 +97,16 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setReport(\Gazelle\Report $repoMan) {
+    public function setReport(\Gazelle\Stats\Report $repStat) {
         if ($this->user->permitted('admin_reports')) {
-            $open = $repoMan->openCount();
+            $open = $repStat->torrentOpenTotal();
             $this->setAction("<a class=\"nobr\" href=\"reportsv2.php\">$open Report" . plural($open) . '</a>');
-            $other = $repoMan->otherCount();
+            $other = $repStat->otherOpenTotal();
             if ($other > 0) {
                 $this->setAction("<a class=\"nobr\" href=\"reports.php\">$other Other report" . plural($other) . '</a>');
             }
         } elseif ($this->user->permitted('site_moderate_forums')) {
-            $open = $repoMan->forumCount();
+            $open = $repStat->forumThreadTrashTotal();
             if ($open > 0) {
                 $this->setAction("<a href=\"reports.php\">$open Forum report" . plural($open) . '</a>');
             }
