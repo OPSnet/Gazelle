@@ -17,7 +17,7 @@ if ($body === '') {
 
 $userMan = new Gazelle\Manager\User;
 $pmMan = new Gazelle\Manager\PM($Viewer);
-$pm = $pmMan->findById((int)$_POST['convid']);
+$pm = $pmMan->findById((int)($_POST['convid'] ?? 0));
 if ($pm) {
     $userMan->replyPM($recipient->id(), $Viewer->id(), $pm->subject(), $body, $pm->id());
 } else {
