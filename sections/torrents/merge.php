@@ -32,11 +32,12 @@ if (empty($_POST['confirm'])) {
 
 authorize();
 
-$oldId = $old->id();
+$log     = new Gazelle\Log;
+$oldId   = $old->id();
 $oldName = $old->name();
-$tgMan->merge($old, $new, $Viewer);
+$tgMan->merge($old, $new, $Viewer, $log);
 
-(new Gazelle\Log)->general("Group $oldId automatically deleted (No torrents have this group).")
+$log->general("Group $oldId automatically deleted (No torrents have this group).")
     ->group($new->id(), $Viewer->id(),
         "Merged Group $oldId ($oldName) to " . $new->id() . " (" . $new->name() . ")"
     )

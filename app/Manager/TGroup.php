@@ -134,7 +134,7 @@ class TGroup extends \Gazelle\Base {
         }
     }
 
-    public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user): bool {
+    public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user, \Gazelle\Log $log): bool {
         // Votes ninjutsu. This is so annoyingly complicated.
         // 1. Get a list of everybody who voted on the old group and clear their cache keys
         self::$db->prepared_query("
