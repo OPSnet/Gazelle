@@ -87,11 +87,11 @@ class RipLog extends BaseObject {
     }
 
     public function adjustedBy(): ?string {
-        return $this->info['adjustedBy'];
+        return $this->info['adjusted_by'];
     }
 
     public function adjustmentReason(): ?string {
-        return $this->info['adjustement_reason'];
+        return $this->info['adjustment_reason'];
     }
 
     public function ripper(): ?string {
