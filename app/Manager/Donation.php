@@ -268,15 +268,17 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function totalMonth(int $month) {
-        if (($donations = self::$cache->get_value("donations_month_$month")) === false) {
-            $donations = self::$db->scalar("
+    public function totalMonth(int $month): float {
+        $key = "donations_month_$month";
+        $donations = self::$cache->get_value($key);
+        if ($donations === false) {
+            $donations = (float)self::$db->scalar("
                 SELECT sum(xbt)
                 FROM donations
                 WHERE time >= CAST(DATE_FORMAT(NOW() ,'%Y-%m-01') as DATE) - INTERVAL ? MONTH
                 ", $month - 1
             );
-            self::$cache->cache_value("donations_month_$month", $donations, 3600 * 36);
+            self::$cache->cache_value($key, $donations, 3600 * 36);
         }
         return $donations;
     }
