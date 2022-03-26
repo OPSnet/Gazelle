@@ -36,7 +36,7 @@ class IPv4 extends \Gazelle\Base {
         $this->name = $name;
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE {$this->name} (
-                addr_n integer(10) unsigned NOT NULL PRIMARY KEY,
+                addr_n integer NOT NULL PRIMARY KEY,
                 addr_a varchar(15) CHARACTER SET ASCII NOT NULL,
                 KEY(addr_a)
             )
