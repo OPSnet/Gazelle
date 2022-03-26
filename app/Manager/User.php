@@ -1075,8 +1075,8 @@ class User extends \Gazelle\Base {
         // Store total seeded time for each user in a temp table
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_history_time (
-                UserID int(10) unsigned NOT NULL PRIMARY KEY,
-                SumTime bigint(20) unsigned NOT NULL DEFAULT 0
+                UserID int NOT NULL PRIMARY KEY,
+                SumTime bigint NOT NULL DEFAULT 0
             ) ENGINE=InnoDB
         ");
         self::$db->prepared_query("
@@ -1107,8 +1107,8 @@ class User extends \Gazelle\Base {
         // This rounds the results to the nearest integer because SeedingAvg is an int column.
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_history_weight_time (
-                UserID int(10) unsigned NOT NULL PRIMARY KEY,
-                SeedingAvg int(6) unsigned NOT NULL DEFAULT 0
+                UserID int NOT NULL PRIMARY KEY,
+                SeedingAvg int NOT NULL DEFAULT 0
             ) ENGINE=InnoDB
         ");
         self::$db->prepared_query("
@@ -1127,8 +1127,8 @@ class User extends \Gazelle\Base {
         // Get each user's amount of snatches of existing torrents
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_snatch (
-                UserID int unsigned PRIMARY KEY,
-                NumSnatches int(10) unsigned NOT NULL DEFAULT 0
+                UserID int PRIMARY KEY,
+                NumSnatches int NOT NULL DEFAULT 0
             ) ENGINE=InnoDB
         ");
         self::$db->prepared_query("
@@ -1143,7 +1143,7 @@ class User extends \Gazelle\Base {
         // Essentially take the total number of hours seeded this week and divide that by 72 hours * <NumSnatches>
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_snatch_weight (
-                UserID int unsigned PRIMARY KEY,
+                UserID int PRIMARY KEY,
                 fraction float(10) NOT NULL
             ) ENGINE=InnoDB
         ");

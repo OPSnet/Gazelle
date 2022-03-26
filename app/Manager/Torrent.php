@@ -281,10 +281,10 @@ class Torrent extends \Gazelle\Base {
     public function updateSeedingHistory(): array {
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_users_torrent_history (
-                UserID int(10) unsigned NOT NULL PRIMARY KEY,
-                NumTorrents int(6) unsigned NOT NULL DEFAULT 0,
-                SumTime bigint(20) unsigned NOT NULL DEFAULT 0,
-                SeedingAvg int(6) unsigned NOT NULL DEFAULT 0,
+                UserID int NOT NULL PRIMARY KEY,
+                NumTorrents int NOT NULL DEFAULT 0,
+                SumTime bigint NOT NULL DEFAULT 0,
+                SeedingAvg int NOT NULL DEFAULT 0,
                 KEY numtorrents_idx (NumTorrents)
             ) ENGINE=InnoDB
         ");

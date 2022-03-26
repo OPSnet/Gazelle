@@ -150,7 +150,7 @@ class Bonus extends \Gazelle\Base {
 
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE bonus_update (
-                user_id int(11) unsigned NOT NULL PRIMARY KEY,
+                user_id int NOT NULL PRIMARY KEY,
                 delta float(20, 5) NOT NULL
             )
         ");
