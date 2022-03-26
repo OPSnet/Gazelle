@@ -113,6 +113,7 @@ $name = $torrent->fullName() . ' (' . Format::get_size($torrent->size()) . ')';
 
 //Log and delete
 if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
+    $torrent->flush();
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
 } else {
     [$ok, $message] = $torrent->remove(
