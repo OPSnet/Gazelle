@@ -11,7 +11,7 @@ class NoZerodateForumsPosts extends AbstractMigration {
 
     public function down() {
         $this->execute("ALTER TABLE forums_posts
-            MODIFY AddedTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+            MODIFY AddedTime datetime NOT NULL
         ");
     }
 }

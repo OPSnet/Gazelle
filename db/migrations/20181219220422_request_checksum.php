@@ -28,19 +28,9 @@ class RequestChecksum extends AbstractMigration
      */
     public function up()
     {
-        $this->table('requests')
-            ->addColumn('Checksum', 'boolean', ['default' => false])
-            ->update();
-        $this->execute('ALTER TABLE requests MODIFY TimeFilled datetime');
-        $this->execute("UPDATE requests SET TimeFilled = null WHERE TimeFilled = '0000-00-00 00:00:00'");
     }
 
     public function down()
     {
-        $this->execute("UPDATE requests SET TimeFilled = '0000-00-00 00:00:00' WHERE TimeFilled IS NULL");
-        $this->execute("ALTER TABLE requests MODIFY TimeFilled datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
-        $this->table('requests')
-            ->removeColumn('Checksum')
-            ->update();
     }
 }

@@ -19,7 +19,7 @@ final class ReindexUsersComments extends AbstractMigration
         $this->execute("
             ALTER TABLE users_comments_last_read
                 DROP PRIMARY KEY,
-                DROP KEY IF EXISTS Page,
+                DROP KEY /* IF EXISTS */ Page,
                 ADD PRIMARY KEY (Page, PageID, UserID),
                 ADD KEY uclr_user_idx (UserID)
         ");
@@ -32,7 +32,7 @@ final class ReindexUsersComments extends AbstractMigration
         $this->execute("
             ALTER TABLE users_comments_last_read
                 DROP PRIMARY KEY,
-                DROP KEY IF EXISTS uclr_user_idx,
+                DROP KEY /* IF EXISTS */ uclr_user_idx,
                 ADD PRIMARY KEY (UserID, Page, PageID),
                 ADD KEY Page (Page, PageID)
         ");

@@ -8,6 +8,6 @@ class NoZerodateBlog extends AbstractMigration {
     }
 
     public function down() {
-        $this->execute("ALTER TABLE blog MODIFY Time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+        $this->execute("ALTER TABLE blog MODIFY Time datetime NOT NULL");
     }
 }

@@ -17,14 +17,14 @@ class DropSecret extends AbstractMigration
             die("Migration cannot proceed, use the source: " . __FILE__ . "\n");
         }
         $this->table('users_main')
-             ->removeColumn('Secret')
+             // ->removeColumn('Secret')
              ->changeColumn('Title', 'string', ['limit' => 255, 'default' => ''])
              ->update();
 
         $this->table('users_info')
-             ->changeColumn('Info', 'text', ['limit' => 65536, 'default' => ''])
-             ->changeColumn('AdminComment', 'text', ['limit' => 65536, 'default' => ''])
-             ->changeColumn('SiteOptions', 'text', ['limit' => 65536, 'default' => ''])
+             ->changeColumn('Info', 'text', ['limit' => 65536])
+             ->changeColumn('AdminComment', 'text', ['limit' => 65536])
+             ->changeColumn('SiteOptions', 'text', ['limit' => 65536])
              ->changeColumn('Warned', 'timestamp', ['null' => true])
              ->changeColumn('Avatar', 'string', ['limit' => 255, 'default' => ''])
              ->changeColumn('SupportFor', 'string', ['limit' => 255, 'default' => ''])

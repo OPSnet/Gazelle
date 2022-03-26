@@ -15,13 +15,13 @@ class XfuByUid extends AbstractMigration {
             die("Migration cannot proceed, use the source: " . __FILE__ . "\n");
         }
         $this->execute("ALTER TABLE xbt_files_users
-            ADD KEY IF NOT EXISTS xfu_uid_idx (uid)
+            ADD KEY /* IF NOT EXISTS */ xfu_uid_idx (uid)
         ");
     }
 
     public function down() {
         $this->execute("ALTER TABLE xbt_files_users
-            DROP KEY IF EXISTS xfu_uid_idx
+            DROP KEY /* IF EXISTS */ xfu_uid_idx
         ");
     }
 }

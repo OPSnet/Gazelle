@@ -8,6 +8,6 @@ class NoZerodateCollagesArtists extends AbstractMigration {
     }
 
     public function down() {
-        $this->execute("ALTER TABLE collages_artists MODIFY AddedOn datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+        $this->execute("ALTER TABLE collages_artists MODIFY AddedOn datetime NOT NULL");
     }
 }

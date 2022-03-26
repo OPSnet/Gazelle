@@ -5,12 +5,12 @@ use Phinx\Migration\AbstractMigration;
 class ContestClassRef extends AbstractMigration {
     public function up() {
         $this->execute("
-            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY IF EXISTS bonus_pool_contrib_ibfk_1;
-            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY IF EXISTS bonus_pool_contrib_ibfk_2;
+            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY /* IF EXISTS */ bonus_pool_contrib_ibfk_1;
+            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY /* IF EXISTS */ bonus_pool_contrib_ibfk_2;
         ");
         $this->execute("
-            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY IF EXISTS contest_has_bonus_pool_ibfk_1;
-            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY IF EXISTS contest_has_bonus_pool_ibfk_2;
+            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY /* IF EXISTS */ contest_has_bonus_pool_ibfk_1;
+            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY /* IF EXISTS */ contest_has_bonus_pool_ibfk_2;
         ");
         $this->execute("
             ALTER TABLE bonus_pool
@@ -44,9 +44,8 @@ class ContestClassRef extends AbstractMigration {
                 ADD CONSTRAINT bonus_pool_contrib_ibfk_2 FOREIGN KEY (user_id) REFERENCES users_main (ID)
         ");
         $this->execute("
-            ALTER TABLE contest DROP FOREIGN KEY IF EXISTS contest_type_fk;
-            ALTER TABLE contest_leaderboard DROP FOREIGN KEY IF EXISTS contest_fk;
-            ALTER TABLE contest_leaderboard DROP FOREIGN KEY IF EXISTS contest_leaderboard_fk;
+            ALTER TABLE contest DROP FOREIGN KEY /* IF EXISTS */ contest_type_fk;
+            ALTER TABLE contest_leaderboard DROP FOREIGN KEY /* IF EXISTS */ contest_leaderboard_fk;
         ");
         $this->execute("
             ALTER TABLE contest_leaderboard
@@ -92,12 +91,12 @@ class ContestClassRef extends AbstractMigration {
 
     public function down() {
         $this->execute("
-            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY IF EXISTS bonus_pool_contrib_ibfk_1;
-            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY IF EXISTS bonus_pool_contrib_ibfk_2;
+            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY /* IF EXISTS */ bonus_pool_contrib_ibfk_1;
+            ALTER TABLE bonus_pool_contrib DROP FOREIGN KEY /* IF EXISTS */ bonus_pool_contrib_ibfk_2;
         ");
         $this->execute("
-            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY IF EXISTS contest_has_bonus_pool_ibfk_1;
-            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY IF EXISTS contest_has_bonus_pool_ibfk_2;
+            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY /* IF EXISTS */ contest_has_bonus_pool_ibfk_1;
+            ALTER TABLE contest_has_bonus_pool DROP FOREIGN KEY /* IF EXISTS */ contest_has_bonus_pool_ibfk_2;
         ");
         $this->execute("
             ALTER TABLE bonus_pool
@@ -134,8 +133,8 @@ class ContestClassRef extends AbstractMigration {
             ALTER TABLE contest_has_bonus_pool ADD CONSTRAINT contest_has_bonus_pool_ibfk_1 FOREIGN KEY (BonusPoolID) REFERENCES bonus_pool (ID);
         ");
         $this->execute("
-            ALTER TABLE contest DROP FOREIGN KEY IF EXISTS contest_type_fk;
-            ALTER TABLE contest_leaderboard DROP FOREIGN KEY IF EXISTS contest_leaderboard_fk;
+            ALTER TABLE contest DROP FOREIGN KEY /* IF EXISTS */ contest_type_fk;
+            ALTER TABLE contest_leaderboard DROP FOREIGN KEY /* IF EXISTS */ contest_leaderboard_fk;
         ");
         $this->execute("
             ALTER TABLE contest_leaderboard

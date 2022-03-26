@@ -4,45 +4,52 @@ services:
   web:
     build: .
     ports:
-      - 8080:80
+      - 127.0.0.1:7001:80
     depends_on:
       - memcached
       - mysql
+      - pg
     volumes:
       - .:/var/www
       - .docker/web/nginx.conf:/etc/nginx/sites-available/gazelle.conf
     environment:
-      - ENV
+      - ENV=dev
       # These should match what you set for your mysql container below
       - MYSQL_USER=gazelle
       - MYSQL_PASSWORD=password
 
   memcached:
-    image: memcached:1.6.12-alpine
+    image: memcached:1.6.14-alpine
 
   pg:
     image: postgres:14
     ports:
-      - 54321:5432
+      - 127.0.0.1:54321:5432
     volumes:
-      - ./.docker/pg/data:/var/lib/postgresql/data
+      - ./.docker/data/pg:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=gzpg
       - POSTGRES_PASSWORD=gazpg
       - POSTGRES_USER=gus
 
   mysql:
-    image: mariadb:10.5.13-focal
+    image: percona:ps-8.0
     ports:
-      - 36000:3306
+      - 127.0.0.1:36000:3306
     volumes:
-      - ./.docker/mysql/mysqld_sql_mode.cnf:/etc/mysql/conf.d/mysqld_sql_mode.cnf
       - ./.docker/data/mysql:/var/lib/mysql
+      - ./.docker/mysql-home:/home/mysql
     environment:
       - MYSQL_DATABASE=gazelle
       - MYSQL_USER=gazelle
       - MYSQL_PASSWORD=password
-      - MYSQL_ROOT_PASSWORD=em%G9Lrey4^N
+      - MYSQL_ROOT_PASSWORD=sc5tlc9JSCC6
+    command: 
+      - /usr/sbin/mysqld
+      - --group-concat-max-len=1048576
+      - --character-set-server=utf8mb4
+      - --userstat=on
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
   sphinxsearch:
     build: ./.docker/sphinxsearch
@@ -60,7 +67,7 @@ services:
   ocelot:
     image: ocelot
     ports:
-      - 34000:34000
+      - 127.0.0.1:34000:34000
     depends_on:
       - mysql
     volumes:

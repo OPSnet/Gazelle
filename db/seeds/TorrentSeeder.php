@@ -26,7 +26,7 @@ TRUNCATE users_notifications_settings;
 SET FOREIGN_KEY_CHECKS = 1;
      */
     const DISCOGS_MAX = 11747136;
-    const TORRENTS = 20;
+    const TORRENTS = 10;
 
     private function getRandomDiscogsAlbum() {
         $id = rand(1, self::DISCOGS_MAX);
@@ -63,14 +63,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 
         $artists = [];
         $groups = [];
-        $tags = [
-            'rock' => ['id' => 1, 'genre' => 'rock'],
-            'pop' => ['id' => 2, 'genre' => 'pop'],
-            'female.fronted.symphonic.death.metal' => ['id' => 3, 'genre' => 'female.fronted.symphonic.death.metal']
-        ];
+        $tags = [];
 
-        $i = 0;
-        while ($i < self::TORRENTS) {
+        while (count($insertData['torrents']) <= self::TORRENTS) {
             // Avoid rate limit of 25 albums per minute
             sleep(2);
             $album = $this->getRandomDiscogsAlbum();
@@ -78,7 +73,7 @@ SET FOREIGN_KEY_CHECKS = 1;
                 continue;
             }
             $user_id = rand($lowerUserId, $upperUserId);
-            $this->output->writeln("Found torrent {$i}...");
+            $this->output->writeln("Found torrent ...");
 
             $artist = $album->artists[0];
             if (!isset($artists[$artist->name])) {
@@ -114,7 +109,6 @@ SET FOREIGN_KEY_CHECKS = 1;
                     'Year' => $album->year,
                     'CatalogueNumber' => $album->labels[0]->catno,
                     'RecordLabel' => $album->labels[0]->name,
-                    'Time' => '2018-03-22 02:24:19',
                     'RevisionID' => count($groups) + 1,
                     'WikiBody' => $wikiBody,
                     'WikiImage' => '',
@@ -127,7 +121,6 @@ SET FOREIGN_KEY_CHECKS = 1;
                     'Body' => $wikiBody,
                     'UserID' => $user_id,
                     'Summary' => 'Uploaded new torrent',
-                    'Time' => '2018-03-22 02:24:19',
                     'Image' => ''
                 ];
 
@@ -149,7 +142,7 @@ SET FOREIGN_KEY_CHECKS = 1;
                 $groups[$album->title] = ['id' => count($groups) + 1, 'album' => $album];
             }
 
-            $media = ($album->formats[0]->name === 'Vinyl') ? 'Vinyl' : 'CD';
+            $media = (isset($album->formats[0]) && $album->formats[0]->name === 'Vinyl') ? 'Vinyl' : 'CD';
 
             $torrent_id = count($insertData['torrents']) + 1;
             $files = [];
@@ -203,11 +196,6 @@ SET FOREIGN_KEY_CHECKS = 1;
                 'FreeTorrent' => 0,
                 'FreeLeechType' => 0
             ];
-
-            $insertData['torrents_leech_stats'][] = [
-                'TorrentID' => count($insertData['torrents']) + 1,
-            ];
-            $i++;
         }
 
         foreach ($insertData as $table => $data) {
@@ -215,5 +203,6 @@ SET FOREIGN_KEY_CHECKS = 1;
         }
 
         $this->execute('UPDATE tags SET Uses = ( SELECT COUNT(*) FROM torrents_tags WHERE torrents_tags.TagID = tags.ID GROUP BY TagID)');
+        $this->execute('INSERT INTO torrents_leech_stats (TorrentID) SELECT ID FROM torrents');
     }
 }

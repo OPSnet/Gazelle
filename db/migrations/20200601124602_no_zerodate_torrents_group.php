@@ -11,7 +11,7 @@ class NoZerodateTorrentsGroup extends AbstractMigration {
 
     public function down() {
         $this->execute("ALTER TABLE torrents_group
-            MODIFY Time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+            MODIFY Time datetime
         ");
     }
 }

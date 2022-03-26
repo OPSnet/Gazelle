@@ -31,9 +31,15 @@ class DropDonationEmail extends AbstractMigration
      * with the Table class.
      */
     public function up() {
-        $this->execute("ALTER TABLE users_donor_ranks DROP COLUMN IF EXISTS Email");
+        /*
+        $this->execute("
+            ALTER TABLE users_donor_ranks DROP COLUMN Email
+        ");
+        */
     }
     public function down() {
-        $this->execute("ALTER TABLE users_donor_ranks ADD COLUMN Email varchar(255)");
+        $this->execute("
+            ALTER TABLE users_donor_ranks ADD COLUMN Email varchar(255)
+        ");
     }
 }

@@ -55,7 +55,7 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'collages_torrents',
-                'old' => "AddedOn datetime NOT NULL DEFAULT '0000-00-00 00:00:00'",
+                'old' => "AddedOn datetime NOT NULL",
                 'new' => "AddedOn datetime NOT NULL DEFAULT current_timestamp()",
             ],
             [
@@ -66,7 +66,7 @@ class IndexRefactor extends AbstractMigration {
             [
                 't' => 'forums',
                 'old' => "CategoryID tinyint(4) DEFAULT NULL",
-                'new' => "CategoryID  tinyint(2) DEFAULT NULL",
+                'new' => "CategoryID tinyint(2) DEFAULT NULL",
             ],
             [
                 't' => 'forums_polls_votes',
@@ -85,7 +85,7 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'forums_topics',
-                'old' => "CreatedTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00'",
+                'old' => "CreatedTime datetime NOT NULL",
                 'new' => "CreatedTime datetime NOT NULL DEFAULT current_timestamp()",
             ],
             [
@@ -95,7 +95,7 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'forums_topics',
-                'old' => "CreatedTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00'",
+                'old' => "CreatedTime datetime NOT NULL",
                 'new' => "CreatedTime datetime DEFAULT current_timestamp()",
             ],
             [
@@ -175,8 +175,8 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'top10_history_torrents',
-                'old' => "Rank tinyint(4) NOT NULL DEFAULT 0",
-                'new' => "Rank tinyint(2) NOT NULL DEFAULT 0",
+                'old' => "`Rank` tinyint(4) NOT NULL DEFAULT 0",
+                'new' => "`Rank` tinyint(2) NOT NULL DEFAULT 0",
             ],
             [
                 't' => 'torrents',
@@ -185,12 +185,12 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'torrents',
-                'old' => "Time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'",
+                'old' => "Time datetime NOT NULL",
                 'new' => "Time datetime DEFAULT NULL",
             ],
             [
                 't' => 'torrents',
-                'old' => "LastReseedRequest datetime NOT NULL DEFAULT '0000-00-00 00:00:00'",
+                'old' => "LastReseedRequest datetime NOT NULL",
                 'new' => "LastReseedRequest datetime DEFAULT NULL",
             ],
             [
@@ -210,8 +210,8 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'users_donor_ranks',
-                'old' => "Rank tinyint(4) NOT NULL DEFAULT 0",
-                'new' => "Rank tinyint(2) NOT NULL DEFAULT 0",
+                'old' => "`Rank` tinyint(4) NOT NULL DEFAULT 0",
+                'new' => "`Rank` tinyint(2) NOT NULL DEFAULT 0",
             ],
             [
                 't' => 'users_donor_ranks',
@@ -270,38 +270,38 @@ class IndexRefactor extends AbstractMigration {
         return [
             [
                 't' => 'artists_alias',
-                'old' => "DROP KEY IF EXISTS name_idx", /* if rollback */
-                'new' => "ADD KEY IF NOT EXISTS name_idx (Name)",     /* if migrate */
+                'old' => "DROP KEY /* IF EXISTS */ name_idx", /* if rollback */
+                'new' => "ADD KEY /* IF NOT EXISTS */ name_idx (Name)",     /* if migrate */
             ],
             [
                 't' => 'artists_similar',
-                'old' => "ADD KEY IF NOT EXISTS ArtistID (ArtistID, SimilarID)",
-                'new' => "DROP KEY IF EXISTS ArtistID",
+                'old' => "ADD KEY /* IF NOT EXISTS */ ArtistID (ArtistID, SimilarID)",
+                'new' => "DROP KEY /* IF EXISTS */ ArtistID",
             ],
             [
                 't' => 'artists_similar',
-                'old' => "DROP KEY IF EXISTS as_similarid_idx",
-                'new' => "ADD KEY IF NOT EXISTS as_similarid_idx (SimilarID)",
+                'old' => "DROP KEY /* IF EXISTS */ as_similarid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ as_similarid_idx (SimilarID)",
             ],
             [
                 't' => 'collages_torrents',
-                'old' => "DROP KEY IF EXISTS group_idx",
-                'new' => "ADD KEY IF NOT EXISTS group_idx (GroupID)",
+                'old' => "DROP KEY /* IF EXISTS */ group_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ group_idx (GroupID)",
             ],
             [
                 't' => 'contest',
-                'old' => "DROP KEY IF EXISTS dateend_idx",
-                'new' => "ADD KEY IF NOT EXISTS dateend_idx (DateEnd)",
+                'old' => "DROP KEY /* IF EXISTS */ dateend_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ dateend_idx (DateEnd)",
             ],
             [
                 't' => 'do_not_upload',
-                'old' => "DROP KEY IF EXISTS sequence_idx",
-                'new' => "ADD KEY IF NOT EXISTS sequence_idx (Sequence)",
+                'old' => "DROP KEY /* IF EXISTS */ sequence_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ sequence_idx (Sequence)",
             ],
             [
                 't' => 'donations',
-                'old' => "ADD COLUMN IF NOT EXISTS Email varchar(255) NOT NULL",
-                'new' => "DROP COLUMN IF EXISTS Email",
+                'old' => "ADD COLUMN /* IF NOT EXISTS */ Email varchar(255) NOT NULL",
+                'new' => "DROP COLUMN /* IF EXISTS */ Email",
             ],
             [
                 't' => 'featured_albums',
@@ -315,74 +315,74 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'login_attempts',
-                'old' => "DROP KEY IF EXISTS attempts_idx",
-                'new' => "ADD KEY IF NOT EXISTS attempts_idx (Attempts)",
+                'old' => "DROP KEY /* IF EXISTS */ attempts_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ attempts_idx (Attempts)",
             ],
             [
                 't' => 'permissions',
-                'old' => "DROP KEY IF EXISTS secondary_name_idx",
-                'new' => "ADD KEY IF NOT EXISTS secondary_name_idx (Secondary, Name)",
+                'old' => "DROP KEY /* IF EXISTS */ secondary_name_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ secondary_name_idx (Secondary, Name)",
             ],
             [
                 't' => 'pm_conversations_users',
-                'old' => "DROP KEY IF EXISTS pcu_userid_unread_ininbox",
-                'new' => "ADD KEY IF NOT EXISTS pcu_userid_unread_ininbox (UserID, UnRead, InInbox)",
+                'old' => "DROP KEY /* IF EXISTS */ pcu_userid_unread_ininbox",
+                'new' => "ADD KEY /* IF NOT EXISTS */ pcu_userid_unread_ininbox (UserID, UnRead, InInbox)",
             ],
             [
                 't' => 'referral_users',
-                'old' => "DROP KEY IF EXISTS ru_invitekey_idx",
-                'new' => "ADD KEY IF NOT EXISTS ru_invitekey_idx (InviteKey)",
+                'old' => "DROP KEY /* IF EXISTS */ ru_invitekey_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ ru_invitekey_idx (InviteKey)",
             ],
 
             [
                 't' => 'reportsv2',
-                'old' => "ADD KEY IF NOT EXISTS ResolverID (ResolverID)",
-                'new' => "DROP KEY IF EXISTS ResolverID",
+                'old' => "ADD KEY /* IF NOT EXISTS */ ResolverID (ResolverID)",
+                'new' => "DROP KEY /* IF EXISTS */ ResolverID",
             ],
             [
                 't' => 'reportsv2',
-                'old' => "DROP KEY IF EXISTS resolver_idx",
-                'new' => "ADD KEY IF NOT EXISTS resolver_idx (ResolverID)",
+                'old' => "DROP KEY /* IF EXISTS */ resolver_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ resolver_idx (ResolverID)",
             ],
             [
                 't' => 'reportsv2',
-                'old' => "DROP KEY IF EXISTS r2_torrentid_status",
-                'new' => "ADD KEY IF NOT EXISTS r2_torrentid_status (TorrentID, Status)",
+                'old' => "DROP KEY /* IF EXISTS */ r2_torrentid_status",
+                'new' => "ADD KEY /* IF NOT EXISTS */ r2_torrentid_status (TorrentID, Status)",
             ],
             [
                 't' => 'reportsv2',
-                'old' => "DROP KEY IF EXISTS r2_lastchange_resolver_idx",
-                'new' => "ADD KEY IF NOT EXISTS r2_lastchange_resolver_idx (LastChangeTime, ResolverID)",
+                'old' => "DROP KEY /* IF EXISTS */ r2_lastchange_resolver_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ r2_lastchange_resolver_idx (LastChangeTime, ResolverID)",
             ],
             [
                 't' => 'requests_artists',
-                'old' => "DROP KEY IF EXISTS artistid_idx",
-                'new' => "ADD KEY IF NOT EXISTS artistid_idx (ArtistID)",
+                'old' => "DROP KEY /* IF EXISTS */ artistid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ artistid_idx (ArtistID)",
             ],
             [
                 't' => 'requests_artists',
-                'old' => "DROP KEY IF EXISTS aliasid_idx",
-                'new' => "ADD KEY IF NOT EXISTS aliasid_idx (AliasID)",
+                'old' => "DROP KEY /* IF EXISTS */ aliasid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ aliasid_idx (AliasID)",
             ],
             [
                 't' => 'staff_blog_visits',
-                'old' => "ADD UNIQUE KEY IF NOT EXISTS UserID (UserID)",
-                'new' => "DROP KEY IF EXISTS UserID",
+                'old' => "ADD UNIQUE KEY /* IF NOT EXISTS */ UserID (UserID)",
+                'new' => "DROP KEY /* IF EXISTS */ UserID",
             ],
             [
                 't' => 'staff_pm_conversations',
-                'old' => "DROP KEY IF EXISTS spc_user_unr_idx",
-                'new' => "ADD KEY IF NOT EXISTS spc_user_unr_idx (UserID, Unread)",
+                'old' => "DROP KEY /* IF EXISTS */ spc_user_unr_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ spc_user_unr_idx (UserID, Unread)",
             ],
             [
                 't' => 'staff_pm_messages',
-                'old' => "DROP KEY IF EXISTS convid_idx",
-                'new' => "ADD KEY IF NOT EXISTS convid_idx (ConvID)",
+                'old' => "DROP KEY /* IF EXISTS */ convid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ convid_idx (ConvID)",
             ],
             [
                 't' => 'stylesheets',
-                'old' => "DROP KEY IF EXISTS default_idx",
-                'new' => "ADD KEY IF NOT EXISTS default_idx (`Default`)",
+                'old' => "DROP KEY /* IF EXISTS */ default_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ default_idx (`Default`)",
             ],
             [
                 't' => 'torrents_bad_files',
@@ -426,38 +426,38 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'users_info',
-                'old' => "DROP KEY IF EXISTS ui_bandate_idx",
-                'new' => "ADD KEY IF NOT EXISTS ui_bandate_idx (BanDate)",
+                'old' => "DROP KEY /* IF EXISTS */ ui_bandate_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ ui_bandate_idx (BanDate)",
             ],
             [
                 't' => 'users_main',
-                'old' => "ADD KEY IF NOT EXISTS PassHash (PassHash)",
-                'new' => "DROP KEY IF EXISTS PassHash",
+                'old' => "ADD KEY /* IF NOT EXISTS */ PassHash (PassHash)",
+                'new' => "DROP KEY /* IF EXISTS */ PassHash",
             ],
             [
                 't' => 'users_notify_quoted',
-                'old' => "DROP KEY IF EXISTS page_pageid_idx",
-                'new' => "ADD KEY IF NOT EXISTS page_pageid_idx (Page,PageID)",
+                'old' => "DROP KEY /* IF EXISTS */ page_pageid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ page_pageid_idx (Page,PageID)",
             ],
             [
                 't' => 'users_subscriptions',
-                'old' => "DROP KEY IF EXISTS us_topicid_idx",
-                'new' => "ADD KEY IF NOT EXISTS us_topicid_idx (TopicID)",
+                'old' => "DROP KEY /* IF EXISTS */ us_topicid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ us_topicid_idx (TopicID)",
             ],
             [
                 't' => 'users_subscriptions_comments',
-                'old' => "DROP KEY IF EXISTS usc_pageid_idx",
-                'new' => "ADD KEY IF NOT EXISTS usc_pageid_idx (PageID)",
+                'old' => "DROP KEY /* IF EXISTS */ usc_pageid_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ usc_pageid_idx (PageID)",
             ],
             [
                 't' => 'wiki_aliases',
-                'old' => "DROP KEY IF EXISTS article_idx",
-                'new' => "ADD KEY IF NOT EXISTS article_idx (ArticleID)",
+                'old' => "DROP KEY /* IF EXISTS */ article_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ article_idx (ArticleID)",
             ],
             [
                 't' => 'xbt_files_history',
-                'old' => "DROP KEY IF EXISTS xfh_uid_fid_idx",
-                'new' => "ADD UNIQUE KEY IF NOT EXISTS xfh_uid_fid_idx (uid,fid)",
+                'old' => "DROP KEY /* IF EXISTS */ xfh_uid_fid_idx",
+                'new' => "ADD UNIQUE KEY /* IF NOT EXISTS */ xfh_uid_fid_idx (uid,fid)",
             ],
             [
                 't' => 'xbt_files_users',
@@ -466,13 +466,13 @@ class IndexRefactor extends AbstractMigration {
             ],
             [
                 't' => 'xbt_files_users',
-                'old' => "ADD KEY IF NOT EXISTS remaining_idx (remaining), ADD KEY IF NOT EXISTS uid_active (uid, active)",
-                'new' => "DROP KEY IF EXISTS remaining_idx, DROP KEY IF EXISTS uid_active",
+                'old' => "ADD KEY /* IF NOT EXISTS */ remaining_idx (remaining), ADD KEY /* IF NOT EXISTS */ uid_active (uid, active)",
+                'new' => "DROP KEY /* IF EXISTS */ remaining_idx, DROP KEY /* IF EXISTS */ uid_active",
             ],
             [
                 't' => 'xbt_files_users',
-                'old' => "DROP KEY IF EXISTS uid_active_remain_mtime_idx, DROP KEY IF EXISTS remain_mtime_idx",
-                'new' => "ADD KEY IF NOT EXISTS uid_active_remain_mtime_idx (uid, active, remaining, mtime), ADD KEY IF NOT EXISTS remain_mtime_idx (remaining, mtime)",
+                'old' => "DROP KEY /* IF EXISTS */ uid_active_remain_mtime_idx, DROP KEY /* IF EXISTS */ remain_mtime_idx",
+                'new' => "ADD KEY /* IF NOT EXISTS */ uid_active_remain_mtime_idx (uid, active, remaining, mtime), ADD KEY /* IF NOT EXISTS */ remain_mtime_idx (remaining, mtime)",
             ],
             [
                 't' => 'contest',

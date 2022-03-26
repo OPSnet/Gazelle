@@ -18,8 +18,8 @@ final class IndexXbtFilesUsers extends AbstractMigration
         }
         $this->execute("
             ALTER TABLE xbt_files_users
-                DROP KEY IF EXISTS xfu_uid_idx,
-                DROP KEY IF EXISTS fid_idx,
+                DROP KEY /* IF EXISTS */ xfu_uid_idx,
+                DROP KEY /* IF EXISTS */ fid_idx,
                 DROP PRIMARY KEY,
                 ADD PRIMARY KEY (fid, uid, peer_id)
         ");

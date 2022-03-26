@@ -61,7 +61,7 @@ class MigrateLeechStatTables extends AbstractMigration
             ADD COLUMN Leechers int(6) NOT NULL DEFAULT 0,
             ADD COLUMN Snatched int(10) unsigned NOT NULL DEFAULT 0,
             ADD COLUMN balance bigint(20) NOT NULL DEFAULT 0,
-            ADD COLUMN last_action datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+            ADD COLUMN last_action datetime NOT NULL DEFAULT NULL
         ");
         $this->execute("UPDATE torrents
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = torrents.ID) SET

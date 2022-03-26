@@ -5,7 +5,7 @@ use Phinx\Util\Literal;
 
 require_once(__DIR__ . '/../../lib/util.php'); // for randomString()
 
-class InitialUserSeeder extends AbstractSeed {
+class AaaInitialUserSeeder extends AbstractSeed {
     public function run() {
         /** @var \PDOStatement $stmt */
         $stmt = $this->getAdapter()->getConnection()->prepare("
@@ -25,6 +25,7 @@ class InitialUserSeeder extends AbstractSeed {
                 'Username' => 'admin',
                 'Email' => 'admin@example.com',
                 'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
+                'Secret' => randomString(32),
                 'torrent_pass' => randomString(32),
                 'PermissionID' => SYSOP,
                 'Invites' => STARTING_INVITES,
@@ -36,6 +37,7 @@ class InitialUserSeeder extends AbstractSeed {
                 'Username' => 'user',
                 'Email' => 'user@example.com',
                 'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
+                'Secret' => randomString(32),
                 'torrent_pass' => randomString(32),
                 'PermissionID' => USER,
                 'Invites' => STARTING_INVITES,
@@ -53,11 +55,9 @@ class InitialUserSeeder extends AbstractSeed {
         $this->table('user_last_access')->insert([
             [
                 'user_id' => $adminId,
-                'last_access' => Literal::from('now()'),
             ],
             [
                 'user_id' => $userId,
-                'last_access' => Literal::from('now()'),
             ],
         ])->saveData();
 
@@ -80,6 +80,9 @@ class InitialUserSeeder extends AbstractSeed {
                 'ShowTags' => 1,
                 'AuthKey' => '7d3b4750ea71502d25051875a250b71a',
                 'Inviter' => 0,
+                'Info' => 'Created by installation script',
+                'AdminComment' => '',
+                'SiteOptions' => serialize([]),
             ],
             [
                 'UserID' => $userId,
@@ -88,6 +91,9 @@ class InitialUserSeeder extends AbstractSeed {
                 'ShowTags' => 1,
                 'AuthKey' => 'a1189fa8554776c6de31b6b4e2d0faea',
                 'Inviter' => 0,
+                'Info' => 'Created by installation script',
+                'AdminComment' => '',
+                'SiteOptions' => serialize([]),
             ]
         ])->saveData();
 
@@ -95,14 +101,12 @@ class InitialUserSeeder extends AbstractSeed {
             [
                 'UserID' => $adminId,
                 'Email' => 'admin@example.com',
-                'Time' => Literal::from('now()'),
                 'IP' => '127.0.0.1',
                 'useragent' => 'initial-seed',
             ],
             [
                 'UserID' => $userId,
                 'Email' => 'user@example.com',
-                'Time' => Literal::from('now()'),
                 'IP' => '127.0.0.1',
                 'useragent' => 'initial-seed',
             ]
