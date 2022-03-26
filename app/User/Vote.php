@@ -189,7 +189,7 @@ class Vote extends \Gazelle\BaseUser {
     public function topVotes(): array {
         $key = 'top10_votes_' . $this->topConfig['limit']
             . ($this->topWhere
-                ? md5(implode('|', array_merge($this->topWhere, $this->topArgs, [(int)$this->topConfig['tagAll']])))
+                ? md5(implode('|', array_merge($this->topWhere, $this->topArgs, [(int)isset($this->topConfig['tagAll']]))))
             : '');
         $topVotes = self::$cache->get_value($key);
         if ($topVotes === false) {
