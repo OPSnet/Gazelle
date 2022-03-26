@@ -7,7 +7,6 @@
 .cache/
 .config/
 .docker/data/
-.docker/pg/data
 .idea/
 .vscode/
 .local/
@@ -20,6 +19,7 @@
 __MACOSX/
 
 /cache
+/db/seeded.txt
 /node_modules
 /public/static/font/
 /public/static/local/
@@ -28,6 +28,9 @@ __MACOSX/
 /mix-manifest.json
 /mix.js.map
 /yarn-error.log
+
+.docker/mysql-home/.mysql_history
+!.docker/mysql-home/.my.cnf
 
 /public/static/styles/**/*.css
 /public/static/styles/**/*.css.map

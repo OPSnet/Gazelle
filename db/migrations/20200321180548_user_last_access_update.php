@@ -34,7 +34,7 @@ class UserLastAccessUpdate extends AbstractMigration
             INSERT INTO user_last_access
             SELECT ID, LastAccess
             FROM users_main
-            WHERE LastAccess != '0000-00-00 00:00:00'
+            WHERE LastAccess IS NOT NULL
             ON DUPLICATE KEY UPDATE user_id = user_id
         ");
     }

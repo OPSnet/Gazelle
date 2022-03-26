@@ -29,7 +29,6 @@ class DeleteTorrent extends AbstractMigration
         $this->table('torrents')
              ->changeColumn('last_action', 'datetime', ['null' => true])
              ->update();
-        $this->execute("UPDATE torrents SET last_action = NULL WHERE last_action = '0000-00-00 00:00:00'");
 
         $this->table('deleted_torrents', ['id' => false, 'primary_key' => 'ID'])
              ->addColumn('ID', 'integer', ['length' => 10])
@@ -119,7 +118,6 @@ class DeleteTorrent extends AbstractMigration
     }
 
     public function down() {
-        $this->execute("UPDATE torrents SET last_action = '0000-00-00 00:00:00' WHERE last_action IS NULL");
         $this->table('torrents')
              ->changeColumn('last_action', 'datetime', ['null' => false])
              ->update();

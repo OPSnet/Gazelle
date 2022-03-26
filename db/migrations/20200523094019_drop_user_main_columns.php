@@ -18,8 +18,8 @@ class DropUserMainColumns extends AbstractMigration {
     public function down() {
         $this->execute("
             ALTER TABLE users_main
-                ADD COLUMN LastLogin datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-                ADD COLUMN LastAccess datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+                ADD COLUMN LastLogin datetime NOT NULL DEFAULT NULL,
+                ADD COLUMN LastAccess datetime NOT NULL DEFAULT NULL,
                 ADD COLUMN BonusPoints float(20,5) NOT NULL DEFAULT 0.00000,
                 ADD COLUMN RequiredRatioWork double(12,8) NOT NULL DEFAULT 0.00000000,
                 ADD COLUMN FLTokens int(10) NOT NULL DEFAULT 0,

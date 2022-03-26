@@ -23,5 +23,8 @@ define('RSS_HASH',     "");
 define('SEEDBOX_SALT', "");
 define('AVATAR_SALT',  "");
 
+define('SQL_PHINX_USER', 'root');
+define('SQL_PHINX_PASS', 'sc5tlc9JSCC6');
+
 // Docker setup runs the scheduler only once every 15 minutes
 define('SCHEDULER_DELAY', 1200);

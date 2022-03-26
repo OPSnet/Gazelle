@@ -26,14 +26,14 @@ final class MysqlUtf8mb4 extends AbstractMigration
         invites ip_bans irc_channels label_aliases lastfm_users log
         login_attempts nav_items news payment_reminders periodic_task
         periodic_task_history periodic_task_history_event permissions phinxlog
-        pm_conversations_users push_notifications_usage recovery recovery_buffer
+        pm_conversations_users push_notifications_usage recovery_buffer
         referral_accounts referral_users release_type reports reportsv2 requests
         requests_artists site_options sphinx_a sphinx_delta
         sphinx_index_last_pos sphinx_requests sphinx_requests_delta sphinx_t
         sphinx_tg staff_blog staff_groups staff_pm_conversations stylesheets
         tag_aliases tags thread_note thread_type top10_history
         top10_history_torrents torrent_attr torrent_group_attr torrents
-        torrents_artists torrents_logs torrents_tags_votes user user_attr
+        torrents_artists torrents_logs torrents_tags_votes user_attr
         user_seedbox users_comments_last_read users_enable_requests
         users_geodistribution users_history_emails users_history_ips
         users_history_passkeys users_history_passwords users_info users_main

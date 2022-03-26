@@ -6,7 +6,7 @@ needs. Gazelle is written in PHP, Twig, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
 * [Nginx](http://wiki.nginx.org/Main) (recommended)
-* [PHP 7.4.27+](https://www.php.net/) (required)
+* [PHP 8.1.4+](https://www.php.net/) (required)
 * [NodeJS 12+](https://nodejs.org/en/) (required)
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
@@ -80,7 +80,7 @@ page and tick everything.
 
 ### Ports
 The following ports are forwarded:
-* 80 -> 8080 (web)
+* 80 -> 7001 (web)
 * 3306 -> 36000 (mysql)
 * 34000 -> 34000 (ocelot)
 
@@ -107,19 +107,12 @@ Edit the resulting file and then apply it:
 
 `docker exec -it $WEBCONT vendor/bin/phinx migrate`
 
-To access the database, save the following in `~root/.my.cnf` of
-the database container:
-
-```
-    [mysql]
-    user = root
-    password = password
-    database = gazelle
-```
+To access the database, look at `.docker/mysql-home/.my.cnf`
+The credentials should match those used in the `docker-compose.yml` file.
 
 And then:
 
-`docker exec -it $(docker ps|awk '$2 ~ /^mariadb/ {print $1}') mysql`
+`docker exec -it $MYSQLCONT mysql`
 
 In the same vein, you can use `mysqldump` to perform a backup.
 

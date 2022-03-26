@@ -12,7 +12,7 @@ class ApiToken extends AbstractMigration
             ->addColumn('user_id', 'integer', ['limit' => 10, 'signed' => false])
             ->addColumn('name', 'string', ['limit' => 40])
             ->addColumn('token', 'string', ['limit' => 255])
-            ->addColumn('scope', 'text', ['default' => ''])
+            ->addColumn('scope', 'text')
             ->addColumn('created', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
             ->addColumn('revoked', 'integer', ['default' => 0, 'limit' => MysqlAdapter::INT_TINY])
             ->addIndex(['user_id'], ['unique' => false])

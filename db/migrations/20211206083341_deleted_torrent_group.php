@@ -20,7 +20,7 @@ final class DeletedTorrentGroup extends AbstractMigration
             ->addColumn('TagList', 'string', ['length' => 500, 'default' => ''])
             ->addColumn('Time', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
             ->addColumn('RevisionID', 'integer', ['length' => 12, 'null' => true])
-            ->addColumn('WikiBody', 'string', ['limit' => MysqlAdapter::TEXT_MEDIUM])
+            ->addColumn('WikiBody', 'text', ['limit' => MysqlAdapter::TEXT_MEDIUM])
             ->addColumn('WikiImage', 'string', ['length' => 255])
             ->addColumn('VanityHouse', 'integer', ['length' => 1, 'default' => 0, 'limit' => MysqlAdapter::INT_TINY])
             ->save();

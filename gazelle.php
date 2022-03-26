@@ -4,8 +4,8 @@ use Gazelle\Util\Crypto;
 
 // 1. Basic sanity checks and initialization
 
-if (PHP_VERSION_ID < 70427) {
-    die("Gazelle (Orpheus fork) requires at least PHP version 7.4.27 or 8.1.2");
+if (PHP_VERSION_ID < 80104) {
+    die("Gazelle (Orpheus fork) requires at least PHP version 8.1.4");
 }
 foreach (['memcached', 'mysqli'] as $e) {
     if (!extension_loaded($e)) {

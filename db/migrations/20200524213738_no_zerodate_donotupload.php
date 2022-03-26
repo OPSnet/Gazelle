@@ -8,6 +8,6 @@ class NoZerodateDonotupload extends AbstractMigration {
     }
 
     public function down() {
-        $this->execute("ALTER TABLE do_not_upload MODIFY Time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+        $this->execute("ALTER TABLE do_not_upload MODIFY Time datetime NOT NULL");
     }
 }

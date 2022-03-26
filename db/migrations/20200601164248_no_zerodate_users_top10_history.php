@@ -11,7 +11,7 @@ class NoZerodateUsersTop10History extends AbstractMigration {
 
     public function down() {
         $this->execute("ALTER TABLE top10_history
-            MODIFY Date datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+            MODIFY Date datetime
         ");
     }
 }

@@ -29,8 +29,7 @@ class NukeRecommendations extends AbstractMigration {
                 'limit' => '10',
             ])
             ->addColumn('Time', 'datetime', [
-                'null' => false,
-                'default' => '0000-00-00 00:00:00',
+                'null' => true,
             ])
             ->addIndex(['Time'], [
                 'name' => 'Time',

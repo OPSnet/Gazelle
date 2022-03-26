@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 PHP_VER=8.1
 
 run_service()
@@ -7,25 +9,20 @@ run_service()
     service "$1" start || exit 1
 }
 
-# We'll need these anyway so why not kill some time while waiting on MySQL to be ready
-if [ -n "$ENV" ] && [ "$ENV" == "prod" ]; then
-    su -c 'composer --version && composer install --no-progress --no-dev --optimize-autoloader --no-suggest; yarn --prod; yarn prod' gazelle
-else
-    su -c 'composer --version && composer install --no-progress; yarn; yarn dev' gazelle
+[ -f /var/www/lib/override.config.php ] || bash /var/www/.docker/web/generate-config.sh
+
+if [ ! -f /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini ]; then
+    echo "Initialize Boris..."
+    grep '^disable_functions' /etc/php/${PHP_VER}/cli/php.ini \
+        | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
+        > /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini
 fi
 
-# Wait for MySQL...
-counter=1
-while ! mysql -h mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "show databases;" > /dev/null 2>&1; do
-    sleep 1
-    counter=$((counter + 1))
-    if [ $((counter % 20)) -eq 0 ]; then
-        mysql -h mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "show databases;"
-        >&2 echo "Still waiting for MySQL (Count: $counter)."
-    fi;
+while ! nc -z mysql 3306
+do
+    echo "Waiting for MySQL..."
+    sleep 10
 done
-
-[ -f /var/www/lib/override.config.php ] || bash /var/www/.docker/web/generate-config.sh
 
 echo "Run migrations..."
 if ! FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; then
@@ -33,16 +30,14 @@ if ! FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; th
     exit 1
 fi
 
-echo -e "\n"
-
-if [ ! -f /srv/gazelle.txt ]; then
+if [ ! -f /var/www/db/seeded.txt ]; then
     echo "Run seed:run..."
-    if ! /var/www/vendor/bin/phinx seed:run -s InitialUserSeeder; then
+    if ! /var/www/vendor/bin/phinx seed:run; then
         echo "PHINX FAILED TO SEED"
         exit 1
     fi
-    touch /srv/gazelle.txt
-    echo -e "\n"
+    echo "Seeds have been run, delete to rerun" > /var/www/db/seeded.txt
+    chmod 400 /var/www/db/seeded.txt
 fi
 
 if [ ! -d /var/lib/gazelle/torrent ]; then
@@ -53,11 +48,10 @@ if [ ! -d /var/lib/gazelle/torrent ]; then
     chown -R gazelle /var/lib/gazelle
 fi
 
-if [ ! -f /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini ]; then
-    echo "Initialize Boris..."
-    grep '^disable_functions' /etc/php/${PHP_VER}/cli/php.ini \
-        | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
-        > /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini
+if [ "$ENV" == "prod" ]; then
+    su -c 'composer --version && composer install --no-progress --no-dev --optimize-autoloader --no-suggest; yarn --prod; npx browserslist@latest --update-db; yarn prod' gazelle
+else
+    su -c 'composer --version && composer install --no-progress; yarn; npx browserslist@latest --update-db; yarn dev' gazelle
 fi
 
 echo "Start services..."

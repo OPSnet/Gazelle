@@ -17,8 +17,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         cron \
         make \
-        mariadb-client \
         nginx \
+        netcat \
         php8.1 \
         php8.1-cli \
         php8.1-curl \

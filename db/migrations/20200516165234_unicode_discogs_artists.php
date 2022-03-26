@@ -7,7 +7,7 @@ class UnicodeDiscogsArtists extends AbstractMigration {
         $this->execute("ALTER TABLE artist_discogs
             MODIFY `stem` varchar(100) CHARACTER SET utf8mb4 NOT NULL COLLATE utf8mb4_bin,
             MODIFY `name` varchar(100) CHARACTER SET utf8mb4 NOT NULL COLLATE utf8mb4_bin,
-            ADD KEY IF NOT EXISTS ad_stem_idx (stem)
+            ADD KEY /* IF NOT EXISTS */ ad_stem_idx (stem)
         ");
     }
 
@@ -15,7 +15,7 @@ class UnicodeDiscogsArtists extends AbstractMigration {
         $this->execute("ALTER TABLE artist_discogs
             MODIFY `stem` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
             MODIFY `name` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
-            DROP KEY IF EXISTS ad_stem_idx
+            DROP KEY /* IF EXISTS */ ad_stem_idx
         ");
     }
 }

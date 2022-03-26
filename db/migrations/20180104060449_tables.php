@@ -30,12 +30,13 @@ DROP FUNCTION binomial_ci;");
         // database engine, you can move forward by uncommenting the following line
         // and then iterating until things work.
         // $this->down();
+        //
+        // Another alternative is to connect to the mysql container and run 'drop database gazelle; create database gazelle;'
 
         $this->execute("ALTER DATABASE CHARACTER SET 'utf8';");
         $this->execute("ALTER DATABASE COLLATE='utf8_swedish_ci';");
         $this->execute("
-CREATE FUNCTION IF NOT EXISTS `binomial_ci`(p int, n int) RETURNS float
-    DETERMINISTIC
+CREATE FUNCTION `binomial_ci`(p int, n int) RETURNS float DETERMINISTIC
 RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));
 ");
 
@@ -1927,7 +1928,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'encoding' => 'utf8',
             ])
             ->addColumn('StartTime', 'datetime', [
-                'null' => true,
+                'null' => false,
             ])
             ->addColumn('EndTime', 'datetime', [
                 'null' => true,
@@ -8925,11 +8926,6 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
         $this->table('wiki_aliases')->insert([['Alias' => 'wiki', 'UserID' => 1, 'ArticleID' => 1]])->save();
         $this->table('wiki_revisions')->insert([
           ['ID' => 1, 'Revision' => 1, 'Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
-        ])->save();
-        $this->table('tags')->insert([
-            ['Name' => 'rock', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
-            ['Name' => 'pop', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
-            ['Name' => 'female.fronted.symphonic.death.metal', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1]
         ])->save();
 
         $this->table('stylesheets')->insert([

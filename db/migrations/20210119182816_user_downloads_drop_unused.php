@@ -17,7 +17,7 @@ final class UserDownloadsDropUnused extends AbstractMigration
             die("Migration cannot proceed, use the source: " . __FILE__ . "\n");
         }
         $this->execute("
-            ALTER TABLE users_downloads DROP KEY IF EXISTS UserID
+            ALTER TABLE users_downloads DROP KEY /* IF EXISTS */ UserID
         ");
     }
 
@@ -26,7 +26,7 @@ final class UserDownloadsDropUnused extends AbstractMigration
             die("Migration cannot proceed, use the source: " . __FILE__ . "\n");
         }
         $this->execute("
-            ALTER TABLE users_downloads ADD KEY IF NOT EXISTS UserID (UserID)
+            ALTER TABLE users_downloads ADD KEY /* IF NOT EXISTS */ UserID (UserID)
         ");
     }
 }
