@@ -65,10 +65,7 @@ if ($threadInfo['Posts'] <= $PerPage) {
     }
 }
 
-$Page = max(1, isset($_GET['page'])
-    ? (int)$_GET['page']
-    : (int)ceil(min($threadInfo['Posts'], $PostNum) / $PerPage)
-);
+$Page = max(1, (int)($_GET['page'] ?? ceil(min($threadInfo['Posts'], $PostNum) / $PerPage)));
 if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
     $Page = (int)ceil($threadInfo['Posts'] / $PerPage);
 }
@@ -77,7 +74,7 @@ $paginator = new Gazelle\Util\Paginator($PerPage, $Page);
 $paginator->setTotal($threadInfo['Posts']);
 
 $firstOnPage = current($thread)['ID'] ?? 0;
-$lastOnPage = end($thread)['ID'];
+$lastOnPage = count($thread) ? end($thread)['ID'] : 0;
 if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPage * $Page) {
     $lastOnPage = $threadInfo['StickyPostID'];
 }
@@ -265,11 +262,15 @@ if ($threadInfo['NoPoll'] == 0) {
 
 // Squeeze in stickypost
 if ($threadInfo['StickyPostID']) {
-    if ($threadInfo['StickyPostID'] != current($thread)['ID']) {
-        array_unshift($thread, $threadInfo['StickyPost']);
-    }
-    if ($threadInfo['StickyPostID'] != $thread[count($thread) - 1]['ID']) {
-        $thread[] = $threadInfo['StickyPost'];
+    if (!$thread) {
+        $thread = [$threadInfo['StickyPost']];
+    } else {
+        if ($threadInfo['StickyPostID'] != current($thread)['ID']) {
+            array_unshift($thread, $threadInfo['StickyPost']);
+        }
+        if ($threadInfo['StickyPostID'] != $thread[count($thread) - 1]['ID']) {
+            $thread[] = $threadInfo['StickyPost'];
+        }
     }
 }
 
