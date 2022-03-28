@@ -29,7 +29,7 @@ if (!empty($_REQUEST['key'])) {
     } elseif (isset($_REQUEST['view']) || isset($_REQUEST['json'])) {
         foreach ($Keys as $Key) {
             foreach (CACHE_PERMISSION as $name => $permission) {
-                if (strpos($Key, $name) !== false && !$Viewer->permitted($permission)) {
+                if (str_contains($Key, $name) && !$Viewer->permitted($permission)) {
                     error(403);
                 }
             }
@@ -45,7 +45,7 @@ if (!empty($_REQUEST['key'])) {
         $shape = array_map(function ($s) use ($definitions) { return $definitions[$s];},
             array_intersect(array_keys($_REQUEST), array_keys($definitions))
         );
-        if (isset($_REQUEST["$namespace-free"]) && strpos($_REQUEST["$namespace-free"], '*') !== false) {
+        if (isset($_REQUEST["$namespace-free"]) && str_contains($_REQUEST["$namespace-free"], '*')) {
             $shape = array_merge($shape, preg_split('/\s+/', str_replace('*', '%d', $_REQUEST["$namespace-free"])));
         }
         $result = [$namespace => $flusher->multiFlush($namespace, $shape)];

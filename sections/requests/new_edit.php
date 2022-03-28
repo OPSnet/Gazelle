@@ -45,10 +45,10 @@ if (!$NewRequest && !isset($ReturnEdit)) {
     }
 
     $LogCue = $Request['LogCue'];
-    $NeedCue = (strpos($LogCue, 'Cue') !== false);
-    $NeedLog = (strpos($LogCue, 'Log') !== false);
+    $NeedCue = str_contains($LogCue, 'Cue');
+    $NeedLog = str_contains($LogCue, 'Log');
     if ($NeedLog) {
-        if (strpos($LogCue, '%') !== false) {
+        if (str_contains($LogCue, '%')) {
             preg_match('/(\d+)/', $LogCue, $match);
             $MinLogScore = (int)$match[1];
         }
@@ -71,7 +71,7 @@ if (!$NewRequest && !isset($ReturnEdit)) {
             $FormatArray = array_keys(FORMAT);
         } else {
             foreach (FORMAT as $Key => $Val) {
-                if (strpos($Request['FormatList'], $Val) !== false) {
+                if (str_contains($Request['FormatList'], $Val)) {
                     $FormatArray[] = $Key;
                 }
             }

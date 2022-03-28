@@ -92,14 +92,14 @@ class View {
         $navItems = (new Gazelle\Manager\User)->forumNavItemUserList($Viewer);
         foreach ($navItems as $n) {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
-            if (strpos($Tests, ':')) {
+            if (str_contains($Tests, ':')) {
                 $Parts = array_map('trim', explode(',', $Tests));
                 $Tests = [];
 
                 foreach ($Parts as $Part) {
                     $Tests[] = array_map($parseNavItem, explode(':', $Part));
                 }
-            } else if (strpos($Tests, ',')) {
+            } else if (str_contains($Tests, ',')) {
                 $Tests = array_map($parseNavItem, explode(',', $Tests));
             } else {
                 $Tests = [$Tests];

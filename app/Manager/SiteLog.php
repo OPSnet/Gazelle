@@ -91,7 +91,7 @@ class SiteLog extends \Gazelle\Base {
         $message = '';
         $color = $colon = false;
         for ($i = 0, $n = count($messageParts); $i < $n; $i++) {
-            if (strpos($messageParts[$i], SITE_URL) === 0) {
+            if (str_starts_with($messageParts[$i], SITE_URL)) {
                 $offset = strlen(SITE_URL) + 1; // trailing slash
                 $messageParts[$i] = '<a href="'.substr($messageParts[$i], $offset).'">'.substr($messageParts[$i], $offset).'</a>';
             }

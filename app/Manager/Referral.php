@@ -307,22 +307,14 @@ class Referral extends \Gazelle\Base {
         return $json["status"] === 'success';
     }
 
-    private function validateTentacleCookie($acc) {
-        $url = $acc["URL"];
-
-        $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
-        $match = strpos($result["response"], "authKey:");
-
-        return $match !== false;
+    private function validateTentacleCookie(array $acc): bool {
+        $result = $this->proxy->fetch($acc["URL"], [], $acc["Cookie"], false);
+        return str_contains($result["response"], "authKey:");
     }
 
-    private function validateLuminanceCookie($acc) {
-        $url = $acc["URL"];
-
-        $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
-        $match = strpos($result["response"], "authkey");
-
-        return $match !== false;
+    private function validateLuminanceCookie(array $acc): bool {
+        $result = $this->proxy->fetch($acc["URL"], [], $acc["Cookie"], false);
+        return str_contains($result["response"], "authkey");
     }
 
     public function loginAccount(&$acc) {
@@ -499,10 +491,7 @@ class Referral extends \Gazelle\Base {
                     $acc["Cookie"], false);
                 $json = json_decode($result["response"], true);
 
-                $profile = $json["response"]["profileText"];
-                $match = strpos($profile, $key);
-
-                if ($match !== false) {
+                if (str_contains($json["response"]["profileText"], $key)) {
                     return true;
                 } else {
                     return "Token not found. Please try again.";
@@ -520,10 +509,7 @@ class Referral extends \Gazelle\Base {
             "key" => $acc["Password"]], [], false);
         $json = json_decode($result["response"], true);
 
-        $profile = $json["response"]["profileText"];
-        $match = strpos($profile, $key);
-
-        if ($match !== false) {
+        if (str_contains($json["response"]["profileText"], $key)) {
             return true;
         } else {
             return "Token not found. Please try again.";
@@ -539,10 +525,7 @@ class Referral extends \Gazelle\Base {
 
         $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
 
-        $profile = $result["response"];
-        $match = strpos($profile, $key);
-
-        if ($match !== false) {
+        if (str_contains($result["response"], $key)) {
             return true;
         } else {
             return "Token not found. Please try again.";
@@ -558,10 +541,7 @@ class Referral extends \Gazelle\Base {
 
         $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
-        $profile = $result["response"];
-        $match = strpos($profile, $key);
-
-        if ($match !== false) {
+        if (str_contains($result["response"], $key)) {
             return true;
         } else {
             return "Token not found. Please try again.";
@@ -578,10 +558,7 @@ class Referral extends \Gazelle\Base {
         $result = $this->proxy->fetch($url, ["id" => $user],
             $acc["Cookie"], false);
 
-        $profile = $result["response"];
-        $match = strpos($profile, $key);
-
-        if ($match !== false) {
+        if (str_contains($result["response"], $key)) {
             return true;
         } else {
             return "Token not found. Please try again.";
@@ -595,13 +572,9 @@ class Referral extends \Gazelle\Base {
 
         $url = $acc["URL"] . 'user.php';
 
-        $result = $this->proxy->fetch($url, ["id" => $user],
-            $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
-        $profile = $result["response"];
-        $match = strpos($profile, $key);
-
-        if ($match !== false) {
+        if (str_contains($result["response"], $key)) {
             return true;
         } else {
             return "Token not found. Please try again.";

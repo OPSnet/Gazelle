@@ -75,7 +75,7 @@ div#preview {display: none;}
             </div><br />
             <div>
 <?php
-if (strpos($response['response'], '<html')) {
+if (str_contains($response['response'], '<html')) {
     $response['response'] = 'HTML body';
 }
 var_dump($response)
