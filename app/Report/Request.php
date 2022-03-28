@@ -13,6 +13,14 @@ class Request extends AbstractReport {
         return $this->isUpdate ? 'report/request-update.twig' : 'report/request.twig';
     }
 
+    public function bbLink(): string {
+        return "the request [url={$this->subject->url()}]" . display_str($this->subject->title()) . '[/url]';
+    }
+
+    public function title(): string {
+        return 'Request Report: ' . display_str($this->subject->title());
+    }
+
     public function isUpdate(bool $isUpdate) {
         $this->isUpdate = $isUpdate;
         return $this;

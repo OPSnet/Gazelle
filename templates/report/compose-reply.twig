@@ -1,0 +1,26 @@
+{{ header('Compose', {'js': 'inbox,bbcode'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Send a message to {{ user.id|user_url }}</h2>
+    </div>
+    <form class="send_form" name="message" action="reports.php" method="post" id="messageform">
+        <div class="box pad">
+            <input type="hidden" name="action" value="takecompose" />
+            <input type="hidden" name="toid" value="{{ user.id }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <div id="quickpost">
+                <h3>Subject</h3>
+                <input type="text" name="subject" size="95" value="{{ report.title }}" />
+                <br />
+                <h3>Body</h3>
+                {{ body.preview|raw }}
+                {{ body.field|raw }}
+            </div>
+            <div id="buttons" class="center">
+                {{ body.button|raw }}
+                <input type="submit" value="Send message" />
+            </div>
+        </div>
+    </form>
+</div>
+{{ footer() }}

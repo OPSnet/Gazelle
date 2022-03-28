@@ -13,6 +13,8 @@ abstract class AbstractReport extends \Gazelle\Base {
     protected array $context = [];
 
     abstract public function template(): string;
+    abstract public function bbLink(): string;
+    abstract public function title(): string;
 
     public function subject(): \Gazelle\Base {
         return $this->subject; /** @phpstan-ignore-line */
@@ -24,5 +26,12 @@ abstract class AbstractReport extends \Gazelle\Base {
 
     public function showReason(): bool {
         return true;
+    }
+
+    public function reason(): string {
+        return (string)self::$db->scalar("
+            SELECT Reason FROM reports WHERE ID = ?
+            ", $this->subject->id()
+        );
     }
 }
