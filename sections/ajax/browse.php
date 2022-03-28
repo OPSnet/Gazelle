@@ -138,6 +138,7 @@ foreach ($Results as $Key => $GroupID) {
         ];
     } else {
         // Viewing a type that does not require grouping
+        $torrent = $Torrents[0];
         $JsonGroups[] = [
             'groupId'        => $tgroup->id(),
             'groupName'      => $tgroup->name(),
