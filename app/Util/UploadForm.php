@@ -536,14 +536,14 @@ class UploadForm extends \Gazelle\Base {
             <tr id="title_tr">
                 <td class="label">Author - Title:</td>
                 <td>
-                    <input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" />
+                    <input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title'] ?? '') ?>" />
                     <p class="min_padding">Should only include the author if applicable.</p>
                 </td>
             </tr>
 <?php   } ?>
             <tr id="year_tr">
                 <td class="label">Year:</td>
-                <td><input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>" /></td>
+                <td><input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year'] ?? '') ?>" /></td>
             </tr>
             <tr>
                 <td class="label">Format:</td>
@@ -562,7 +562,7 @@ class UploadForm extends \Gazelle\Base {
                     <select id="bitrate" name="bitrate">
                         <option value="">---</option>
 <?php
-        if (!$this->NewTorrent && (!$Torrent['Bitrate'] || ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], ENCODING)))) {
+        if (!$this->NewTorrent && (!isset($Torrent['Bitrate']) || ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], ENCODING)))) {
             $OtherBitrate = true;
             if (substr($Torrent['Bitrate'], strlen($Torrent['Bitrate']) - strlen(' (VBR)')) == ' (VBR)') {
                 $Torrent['Bitrate'] = substr($Torrent['Bitrate'], 0, strlen($Torrent['Bitrate']) - 6);
@@ -571,8 +571,7 @@ class UploadForm extends \Gazelle\Base {
         } else {
             $OtherBitrate = false;
         }
-        $SimpleBitrate = explode(' ', $Torrent['Bitrate']);
-        $SimpleBitrate = $SimpleBitrate[0];
+        $SimpleBitrate = isset($Torrent['Bitrate']) ? (explode(' ', $Torrent['Bitrate']))[0] : null;
         foreach (ENCODING as $Bitrate) {
 ?>
                         <option value="<?= $Bitrate ?>"<?=
@@ -591,7 +590,7 @@ class UploadForm extends \Gazelle\Base {
             <tr>
                 <td class="label">Tags:</td>
                 <td>
-                    <input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
+                    <input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList'] ?? '') ?>"<?=
                         $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                     <br /><?= self::$twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
