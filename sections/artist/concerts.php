@@ -62,8 +62,8 @@ function get_concert_post_template($Artist, $Event) {
     $Website = '';
     if (!empty($Event['venue']['website'])) {
         $Url = $Event['venue']['website'];
-        if (strpos ($Url, '://') === false) {
-            $Url = 'http://' . $Url;
+        if (!str_contains($Url, '://')) {
+            $Url = 'https://' . $Url;
         }
         $EventTitle = "[url=" . $Event['venue']['website'] . "]" . $Event['venue']['name'] . "[/url]";
     } else {
@@ -77,8 +77,8 @@ function get_concert_post_template($Artist, $Event) {
     }
     if (!empty($Event['venue']['website'])) {
         $Url = $Event['venue']['website'];
-        if (strpos ($Url, '://') === false) {
-            $Url = 'http://' . $Url;
+        if (!str_contains($Url, '://')) {
+            $Url = 'https://' . $Url;
         }
         $Website = '[b]Website:[/b] ' . $Url;
     }

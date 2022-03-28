@@ -676,7 +676,7 @@ class User extends BaseObject {
         $paranoia = $this->paranoia();
         $level = count($paranoia);
         foreach ($paranoia as $p) {
-            if (strpos($p, '+') !== false) {
+            if (str_ends_with($p, '+')) {
                 $level++;
             }
         }

@@ -148,7 +148,7 @@ class Request extends BaseObject {
     }
 
     public function needCue(): bool {
-        return strpos($this->info()['LogCue'], 'Cue') !== false;
+        return str_contains($this->info()['LogCue'], 'Cue');
     }
 
     public function needEncoding(string $encoding): bool {
@@ -160,7 +160,7 @@ class Request extends BaseObject {
     }
 
     public function needLog(): bool {
-        return strpos($this->info()['LogCue'], 'Log') !== false;
+        return str_contains($this->info()['LogCue'], 'Log');
     }
 
     public function needLogChecksum(): bool {

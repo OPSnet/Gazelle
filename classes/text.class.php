@@ -835,7 +835,7 @@ class Text {
                         if ($Groups[$GroupID]) {
                             $Group = $Groups[$GroupID];
                             $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode(' ', $Group['TagList'])));
-                            if (strpos($Block['Attr'], 'noartist') === false) {
+                            if (!str_contains($Block['Attr'], 'noartist')) {
                                 $Str .= Artists::display_artists($Group['ExtendedArtists']);
                             }
                             $Str .= '<a title="' . $tagNames . '" href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
@@ -1197,7 +1197,7 @@ class Text {
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
-            if (strpos($Element->getAttribute('style'), 'text-align') !== false) {
+            if (str_contains($Element->getAttribute('style'), 'text-align')) {
                 $NewElement = $Document->createElement('align');
                 $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('align', str_replace('text-align: ', '', $Element->getAttribute('style')));
@@ -1209,23 +1209,23 @@ class Text {
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
-            if (strpos($Element->getAttribute('class'), 'size') !== false) {
+            if (str_contains($Element->getAttribute('class'), 'size')) {
                 $NewElement = $Document->createElement('size');
                 $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('size', str_replace('size', '', $Element->getAttribute('class')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
-            elseif (strpos($Element->getAttribute('style'), 'font-style: italic') !== false) {
+            elseif (str_contains($Element->getAttribute('style'), 'font-style: italic')) {
                 $NewElement = $Document->createElement('italic');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
-            elseif (strpos($Element->getAttribute('style'), 'text-decoration: underline') !== false) {
+            elseif (str_contains($Element->getAttribute('style'), 'text-decoration: underline')) {
                 $NewElement = $Document->createElement('underline');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
-            elseif (strpos($Element->getAttribute('style'), 'color: ') !== false) {
+            elseif (str_contains($Element->getAttribute('style'), 'color: ')) {
                 $NewElement = $Document->createElement('color');
                 $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('color', str_replace(['color: ', ';'], '', $Element->getAttribute('style')));
@@ -1407,7 +1407,7 @@ class Text {
     }
 
     protected static function bbcodeThreadUrl($thread, $postId = null) {
-        if (strpos($thread, ':') !== false) {
+        if (str_contains($thread, ':')) {
             [$threadId, $postId] = explode(':', $thread);
         } else {
             $threadId = $thread;

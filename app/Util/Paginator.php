@@ -79,7 +79,7 @@ class Paginator {
             $uri = preg_replace("/(?:(?<=\?)$param=[^&]+&?|&$param=[^&]+(?:(?=&)|$))/", '', $uri);
         }
         $uri = str_replace('&', '&amp;', $uri);
-        if (strpos($uri, '?') === false) {
+        if (!str_contains($uri, '?')) {
             $uri .= '?';
         }
 

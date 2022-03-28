@@ -7,13 +7,13 @@ if (!$Viewer->permittedAny('users_view_ips', 'users_view_email')) {
 $registration = new Gazelle\Manager\Registration;
 
 if ($_REQUEST['before_date']) {
-    if (strpos($_SERVER['REQUEST_URI'], '&before_date=') === false) {
+    if (!str_contains($_SERVER['REQUEST_URI'], '&before_date=')) {
         $_SERVER['REQUEST_URI'] .= "&before_date={$_POST['before_date']}";
     }
     $registration->setBeforeDate($_REQUEST['before_date']);
 }
 if ($_REQUEST['after_date']) {
-    if (strpos($_SERVER['REQUEST_URI'], '&after_date=') === false) {
+    if (!str_contains($_SERVER['REQUEST_URI'], '&after_date=')) {
         $_SERVER['REQUEST_URI'] .= "&after_date={$_POST['after_date']}";
     }
     $registration->setAfterDate($_REQUEST['after_date']);

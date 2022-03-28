@@ -14,7 +14,7 @@ $userId = $user->id();
 if (isset($_POST['action'])) {
     authorize();
     $user->modifyPermissionList(
-        array_filter($_POST, function ($p) {return strpos($p, 'perm_') === 0;}, ARRAY_FILTER_USE_KEY)
+        array_filter($_POST, function ($p) {return str_starts_with($p, 'perm_');}, ARRAY_FILTER_USE_KEY)
     );
 }
 
