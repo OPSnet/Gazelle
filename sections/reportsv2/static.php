@@ -212,6 +212,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
         if (!$GroupID && $Status != 'Resolved') {
             //Torrent already deleted
             $report->resolve('Report already dealt with (torrent deleted)');
+            $torMan->findById($TorrentID)?->flush();
 ?>
     <div id="report<?=$ReportID?>" class="report box pad center">
         <a href="reportsv2.php?view=report&amp;id=<?=$ReportID?>">Report <?=$ReportID?></a> for torrent <?=$TorrentID?> (deleted) has been automatically resolved. <input type="button" value="Hide" onclick="ClearReport(<?=$ReportID?>);" />

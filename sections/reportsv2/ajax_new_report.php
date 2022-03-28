@@ -85,7 +85,8 @@ if (!$GroupID) {
 </div>
 <?php
     $report->resolve('Report already dealt with (torrent deleted)');
-    die();
+    (new Gazelle\Manager\Torrent)->findById($TorrentID)?->flush();
+    exit;
 }
 $report->claim($Viewer->id());
 
