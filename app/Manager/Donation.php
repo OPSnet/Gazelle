@@ -280,7 +280,7 @@ class Donation extends \Gazelle\Base {
             );
             self::$cache->cache_value($key, $donations, 3600 * 36);
         }
-        return $donations;
+        return abs($donations); // https://github.com/php-memcached-dev/php-memcached/issues/500
     }
 
     public function expireRanks(): int {
