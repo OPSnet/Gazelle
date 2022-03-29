@@ -24,7 +24,7 @@ if (($_POST['submit'] ?? '') === 'Remove') {
 } elseif (isset($_POST['drag_drop_collage_sort_order'])) {
     $collage->updateSequence($_POST['drag_drop_collage_sort_order']);
 } else {
-    $sequence = (int)_POST['sort'];
+    $sequence = (int)$_POST['sort'];
     if (!$sequence) {
         error(404);
     }
