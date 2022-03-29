@@ -199,7 +199,7 @@ class Seedbox extends \Gazelle\BaseUser {
                             name = ?
                         WHERE user_id = ?
                             AND user_seedbox_id = ?
-                        ", $name, $this->user->id(), $this->hashid->decode($seedbox['id'])[0]
+                        ", mb_substr($name, 0, 100), $this->user->id(), $this->hashid->decode($seedbox['id'])[0]
                     );
                 } catch (\DB_MYSQL_DuplicateKeyException $e) {
                     // do nothing
@@ -284,7 +284,7 @@ class Seedbox extends \Gazelle\BaseUser {
                     INSERT INTO user_seedbox
                            (user_id, name, useragent, ipaddr)
                     VALUES (?,       ?,    ?,         inet_aton(?))
-                    ", $this->user->id(), $seedbox['name'], $seedbox['useragent'], $seedbox['ipv4addr']
+                    ", $this->user->id(), mb_substr($seedbox['name'], 0, 100), $seedbox['useragent'], $seedbox['ipv4addr']
                 );
                 $seedbox['id'] = $this->hashid->encode(self::$db->inserted_id());
             }
