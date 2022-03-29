@@ -44,12 +44,11 @@ class ReportV2 extends \Gazelle\Base {
         return $id ? new \Gazelle\ReportV2($id) : null;
     }
 
-    public function findRecentByTorrentId(int $torrentId, int $ViewerId): ?array {
-        return self::$db->scalar("
+    public function existsRecent(int $torrentId, int $ViewerId): bool {
+        return (bool)self::$db->scalar("
             SELECT ID
             FROM reportsv2
-            WHERE
-                ReportedTime > now() - INTERVAL 5 SECOND
+            WHERE ReportedTime > now() - INTERVAL 5 SECOND
                 AND TorrentID = ?
                 AND ReporterID = ?
             ", $torrentId, $ViewerId);
