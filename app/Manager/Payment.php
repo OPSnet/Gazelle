@@ -115,7 +115,11 @@ class Payment extends \Gazelle\Base {
             ");
             self::$cache->cache_value(self::RENT_KEY, $rental, 86400);
         }
-        return $rental;
+        /**
+         * FIXME!
+         * See: https://github.com/php-memcached-dev/php-memcached/issues/500
+         */
+        return abs($rental);
     }
 
     public function monthlyPercent(\Gazelle\Manager\Donation $donorMan): int {
