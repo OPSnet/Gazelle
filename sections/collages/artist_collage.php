@@ -19,7 +19,7 @@ foreach ($Artists as $id => $Artist) {
 }
 
 // Pad it out
-if ($NumGroups > $CollageCovers) {
+if ($CollageCovers && $NumGroups > $CollageCovers) {
     for ($i = $NumGroups + 1; $i <= ceil($NumGroups / $CollageCovers) * $CollageCovers; $i++) {
         $Render[] = '<li></li>';
     }
