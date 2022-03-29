@@ -105,7 +105,7 @@ $remasterTuple = $torrent->remasterTuple();
                                 <br />Last active: <?=time_diff($LastActive);?>
 <?php
         }
-        if (!is_null($LastActive) && time() - strtotime($LastActive) >= 345678 && time() - strtotime($torrent->lastReseedRequest()) >= 864000) {
+        if (!is_null($LastActive) && time() - strtotime($LastActive) >= 345678 && (is_null($torrent->lastReseedRequest()) || time() - strtotime($torrent->lastReseedRequest()) >= 864000)) {
 ?>)
                                 <br /><a href="torrents.php?action=reseed&amp;torrentid=<?= $torrentId ?>&amp;groupid=<?=($GroupID)?>" class="brackets">Request re-seed</a>
 <?php
