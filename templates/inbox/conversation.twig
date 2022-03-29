@@ -36,7 +36,7 @@
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose" />
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="toid" value="{{ pm.recipientList|join(',') }}" />
+            <input type="hidden" name="toid" value="{{ pm.recipientList|filter(v => v != viewer.id)|join(',') }}" />
             <input type="hidden" name="convid" value="{{ pm.id }}" />
             <textarea id="quickpost" class="required" name="body" cols="90" rows="10" onkeyup="resize('quickpost');"></textarea> <br />
             <div id="preview" class="box vertical_space body hidden"></div>
