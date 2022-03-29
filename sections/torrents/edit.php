@@ -99,7 +99,7 @@ if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || $Viewer->per
         case 'Comics':
         case 'E-Books':
         case 'E-Learning Videos':
-            $uploadForm->simple_form($Properties['CategoryID']);
+            $uploadForm->simple_form();
             break;
 
         default:
