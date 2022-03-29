@@ -61,7 +61,12 @@ class Activity extends \Gazelle\BaseUser {
         if ($this->user->permitted('admin_site_debug')) {
             $longRunning = $dbMan->longRunning();
             if ($longRunning > 0) {
-                $this->setAlert('<span style="color: red">' . $longRunning . ' DB operation' . plural($longRunning) . ' running.</span>');
+                $this->setAlert('<span style="color: red">' . $longRunning . ' long-running DB operation' . plural($longRunning) . '!</span>');
+            }
+            // If Ocelot can no longer write to xbt_files_users, it will drain after an hour
+            // Look for database locks and check the Ocelot log
+            if (!self::$db->scalar('SELECT fid FROM xbt_files_users LIMIT 1')) {
+                $this->setAlert('<span style="color: red">Ocelot not updating!</span>');
             }
         }
         return $this;
