@@ -551,7 +551,7 @@ class UploadForm extends \Gazelle\Base {
                     <select id="format" name="format">
                         <option value="">---</option>
 <?php   foreach (FORMAT as $Format) { ?>
-                        <option value="<?= $Format ?>"<?= $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
+                        <option value="<?= $Format ?>"<?= isset($Torrent['Format']) && $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
 <?php   } ?>
                     </select>
                 </td>
@@ -620,14 +620,14 @@ class UploadForm extends \Gazelle\Base {
 <?php
     }
 
-    function simple_form($CategoryID) {
+    function simple_form() {
         $Torrent = $this->Torrent;
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
 <?php
         if ($this->NewTorrent) {
-            if (CATEGORY[$CategoryID] == 'E-Books') {
+            if (CATEGORY[$this->categoryId] == 'E-Books') {
 ?>
                 <td class="label">Author - Title:</td>
 <?php       } else { ?>
