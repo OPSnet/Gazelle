@@ -96,7 +96,7 @@ if (empty($userComment)) {
     $Err = 'As useful as blank reports are, could you be a tiny bit more helpful? (Leave a comment)';
 }
 
-if ($reportMan->findRecentByTorrentId($torrent->id(), $Viewer->id())) {
+if ($reportMan->existsRecent($torrent->id(), $Viewer->id())) {
     $Err = "Slow down, you're moving too fast!";
 }
 
