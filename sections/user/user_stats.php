@@ -3,12 +3,13 @@
 $userMan = new Gazelle\Manager\User;
 if (!isset($_GET['userid'])) {
     $user = $Viewer;
-} elseif (!$Viewer->permitted('users_mod')) {
-    error(403);
 } else {
     $user = $userMan->findById((int)$_GET['userid']);
     if (is_null($user)) {
         error(404);
+    }
+    if ($user->id() != $Viewer->id() && !$Viewer->permitted('users_mod')) {
+        error(403);
     }
 }
 
