@@ -192,7 +192,7 @@ class Notification extends \Gazelle\BaseUser {
         return $affected;
     }
 
-    protected function valueToArray(string $value): array {
+    protected function valueToArray(?string $value): array {
         if (is_null($value) || in_array(trim($value), ['', '||'])) {
             return [];
         }
