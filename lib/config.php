@@ -249,9 +249,8 @@ defined('DEBUG_EMAIL') or define('DEBUG_EMAIL', false);
 // ------------------------------------------------------------------------
 // IRC settings
 
-defined('DISABLE_IRC')               or define('DISABLE_IRC', false);
-defined('IRC_SOCKET_LISTEN_ADDRESS') or define('IRC_SOCKET_LISTEN_ADDRESS', 'localhost');
-defined('IRC_SOCKET_LISTEN_PORT')    or define('IRC_SOCKET_LISTEN_PORT', 51010);
+defined('DISABLE_IRC')             or define('DISABLE_IRC', false);
+defined('IRC_HTTP_SOCKET_ADDRESS') or define('IRC_HTTP_SOCKET_ADDRESS', 'http://localhost:51011/');
 
 defined('BOT_NICK')          or define('BOT_NICK', 'Rippy');
 defined('BOT_SERVER')        or define('BOT_SERVER', 'localhost');
