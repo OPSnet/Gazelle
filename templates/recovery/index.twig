@@ -1,4 +1,12 @@
-<p style="text-align:center">Membership recovery</p>
+{{ header('Recovery') }}
+
+<div id="logo">
+<a href="/" style="margin-left: 0;"><img src="{{ constant('STATIC_SERVER') }}/styles/public/images/loginlogo.png" title="{{ constant('SITE_NAME') }}" /></a>
+</div>
+
+<div style="width: 700px; margin: auto" class="box pad thin">
+{% if constant('RECOVERY') %}
+<h3 style="text-align:center">Membership recovery</h3>
 
 <p>Some people are in the recovered backup, some are not. If you had registered before 2017-06-18,
 you are in. You will need to supply only your username and email or announce key.</p>
@@ -14,7 +22,7 @@ sufficient.</p>
 
 <h5>Your username</h5>
 
-<p>Should be obvious – your username on Apollo. When you receive your invite link, you have the
+<p>Should be obvious – your username on the previous site. When you receive your invite link, you have the
 chance to change it to something else if that is your wish.</p>
 
 <input type="text" name="username" />
@@ -29,7 +37,7 @@ is valid, assuming it is the the backup.</p>
 <h5>Your Password</h5>
 
 <p>This will be hashed upon reception and compared with the existing hash of your password.
-When you receive an invite to <?= SITE_NAME ?>, you should not reuse this password.</p>
+When you receive an invite to {{ constant('SITE_NAME') }}, you should not reuse this password.</p>
 
 <input type="password" name="password" />
 
@@ -88,3 +96,12 @@ Never paste it in any channel, a Staff member will ask you to send it via a priv
 same IP address.</p>
 
 </form>
+{% else %}
+<p>Recovery is currently closed.</p>
+
+<p>Please join <tt>{{ constant('BOT_SERVER') }}</tt> (port 6669 or +7000 for SSL) for
+more information (#disabled channel).</p>
+{% endif %}
+</div>
+
+{{ footer() }}
