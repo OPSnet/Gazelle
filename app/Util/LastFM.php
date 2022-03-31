@@ -27,7 +27,8 @@ class LastFM extends \Gazelle\Base {
         if (is_null($lastfmName)) {
             return null;
         }
-        $Response = self::$cache->get_value("lastfm_user_info_$lastfmName");
+        $key = 'lastfm_user_info_' . urlencode($lastfmName);
+        $Response = self::$cache->get_value($key);
         if ($Response === false) {
             $Response = $this->fetch("user.getInfo", ["user" => $lastfmName]);
             if (isset($Response['info']) && isset($Response['info']['user'])) {
@@ -39,7 +40,7 @@ class LastFM extends \Gazelle\Base {
                 $Response = null;
             }
             $Response['username'] = $lastfmName;
-            self::$cache->cache_value("lastfm_user_info_$lastfmName", $Response, 86400);
+            self::$cache->cache_value($key, $Response, 86400);
         }
         return $Response;
     }
