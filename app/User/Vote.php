@@ -507,14 +507,11 @@ class Vote extends \Gazelle\BaseUser {
             }
             $this->voteSummary = $voteSummary;
         }
-        switch ($mask) {
-            case self::UPVOTE:
-                return (int)$this->voteSummary['up'];
-            case self::DOWNVOTE:
-                return $this->voteSummary['total'] - $this->voteSummary['up'];
-            default:
-                return $this->voteSummary['total'];
-        }
+        return match($mask) {
+            self::UPVOTE   => (int)$this->voteSummary['up'],
+            self::DOWNVOTE => $this->voteSummary['total'] - $this->voteSummary['up'],
+            default        => $this->voteSummary['total'],
+        };
     }
 
     public function userPage(\Gazelle\Manager\TGroup $tgMan, int $mask, int $limit, int $offset): array {
