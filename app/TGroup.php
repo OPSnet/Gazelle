@@ -898,7 +898,6 @@ class TGroup extends BaseObject {
         }
 
         self::$db->commit();
-        $this->refresh($this->id());
         return true;
     }
 
