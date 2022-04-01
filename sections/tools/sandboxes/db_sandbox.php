@@ -23,67 +23,22 @@ if (isset($_GET['debug'])) {
     $textAreaRows = 8;
 }
 
-function print_row($Row, $Class) {
-    echo "<tr class='{$Class}'>".implode("\n", array_map(fn($v) => "<td>".($v === null ? "NULL" : $v)."</td>", $Row))."</tr>";
-}
-
-$Title = 'DB Sandbox';
-View::show_header($Title);
-
-?>
-<div class="linkbox">
-    <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
-    <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
-    <a href="tools.php?action=database_specifics" class="brackets">DB schema info</a>
-</div>
-<div class="header">
-    <h2><?=$Title?></h2>
-</div>
-<div class="thin pad box">
-    <form action="tools.php?action=db_sandbox" method='POST'>
-        <textarea style="width: 98%;" name="query" cols="90" rows="<?= $textAreaRows ?>"><?= $query ?></textarea><br /><br />
-        <input type="submit" value="Query" />
-    </form>
-</div>
-<?php
-
+$error  = false;
+$result = [];
 if ($execute) {
     try {
-        $success = true;
         $DB->prepared_query($query);
-    }
-    catch (DB_MYSQL_Exception $e) {
-        $success = false;
-?>
-    <div class="thin box pad">
-        <h3 style="display:inline">Query error</h3>
-        <div>Mysql error: <?= display_str($e->getMessage()) ?></div>
-    </div>
-<?php
-    }
-    if ($success) {
-        $n = $DB->record_count();
-?>
-<div class="thin" style="overflow-x: scroll">
-    <div>
-        <h3 style="display:inline">Query Results (<?= number_format($n) ?> row<?= plural($n) ?>)</h3>
-    </div>
-    <table>
-<?php
-
-$Cnt = 0;
-while ($Record = $DB->next_record(MYSQLI_ASSOC)) {
-    $Row = [];
-    if ($Cnt === 0) {
-        print_row(array_keys($Record), 'colhead');
-    }
-    print_row(array_values($Record), ($Cnt++ % 2) ? 'rowa' : 'rowb');
-}
-?>
-    </table>
-</div>
-
-<?php
+        $result = $DB->to_array(false, MYSQLI_ASSOC, false);
+    } catch (\Exception $e) {
+        $error = $e->getMessage();
+    } catch (\Error $e) {
+        $error = $e->getMessage();
     }
 }
-View::show_footer();
+
+echo $Twig->render('debug/db-sandbox.twig', [
+    'query'  => $query,
+    'rows'   => $textAreaRows,
+    'result' => $result,
+    'error'  => $error,
+]);

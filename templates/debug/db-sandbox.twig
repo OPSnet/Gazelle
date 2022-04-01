@@ -1,0 +1,50 @@
+{{ header('DB Sandbox') }}
+<div class="linkbox">
+    <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
+    <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
+    <a href="tools.php?action=database_specifics" class="brackets">DB schema info</a>
+</div>
+<div class="header">
+    <h2>DB Sandbox</h2>
+</div>
+<div class="thin pad box">
+    <div class="pad">Think about adding a <code>LIMIT 10</code> (or similar) on queries for which you are
+    unsure how many rows will be returned. This is to avoid exhausting memory, as the resultset is buffered in memory.</div>
+    <div class="pad">If two columns have the same name (e.g. <code>ID</code>), only the first column will be displayed.</div>
+    <form action="tools.php?action=db_sandbox" method='POST'>
+        <textarea style="width: 98%;" name="query" cols="90" rows="{{ rows }}">{{ query }}</textarea><br /><br />
+        <input type="submit" value="Query" />
+    </form>
+</div>
+
+{% if error or result %}
+    {% if error %}
+    <div class="thin box pad">
+        <h3 style="display:inline">Query error</h3>
+        <div>Mysql error: <code>{{ error }}</code></div>
+    </div>
+    {% else %}
+<div class="thin" style="overflow-x: scroll">
+    <div>
+        <h3 style="display:inline">Query Results ({{ result|length }} row{{ result|length|plural }})</h3>
+    </div>
+    <table>
+        {% for row in result %}
+            {% if loop.first %}
+        <tr class="colhead">
+                {% for heading in row|keys %}
+            <td>{{ heading }}</td>
+                {% endfor %}
+        </tr>
+            {% endif %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            {% for value in row %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+    {% endif %}
+{% endif %}
+{{ footer() }}
