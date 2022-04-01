@@ -52,7 +52,7 @@ switch($mode) {
 
 $DB->prepared_query("
     SELECT $tableColumn AS table_name,
-        engine,
+        engine AS engine,
         sum(table_rows) AS table_rows,
         avg(avg_row_length) AS avg_row_length,
         sum(data_length) AS data_length,
