@@ -120,7 +120,7 @@
 
 {{ _self.category('Developer Sandboxes', [
     ['BBCode sandbox',       'tools.php?action=bbcode_sandbox',            true],
-    ['DB Sandbox',           'tools.php?action=db_sandbox',                viewer.permitted('admin_site_debug')],
+    ['DB sandbox',           'tools.php?action=db_sandbox',                viewer.permitted('admin_site_debug')],
     ['Notification sandbox', 'tools.php?action=notification_sandbox',      viewer.permitted('admin_view_notifications')],
     ['Referral sandbox',     'tools.php?action=referral_sandbox',          viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
 ]) }}
