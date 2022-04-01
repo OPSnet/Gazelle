@@ -172,26 +172,18 @@ class User extends \Gazelle\Base {
         $viewedId = $viewed->id();
         if (!isset($cache[$viewedId])) {
             $imgProxy = (new \Gazelle\Util\ImageProxy)->setViewer($viewer);
-            switch ($viewer->avatarMode()) {
-                case 1:
-                    $avatar = STATIC_SERVER . '/common/avatars/default.png';
-                    break;
-                case 2:
-                    $avatar = $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
-                        ?: (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
-                            ->setSize(AVATAR_WIDTH)
-                            ->avatar($viewed->username());
-                    break;
-                case 3:
-                    $avatar = (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
+            $avatar = match($viewer->avatarMode()) {
+                1 => STATIC_SERVER . '/common/avatars/default.png',
+                2 => $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
+                    ?: (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
                         ->setSize(AVATAR_WIDTH)
-                        ->avatar($viewed->username());
-                    break;
-                default:
-                    $avatar = $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
-                        ?: STATIC_SERVER . '/common/avatars/default.png';
-                    break;
-            }
+                        ->avatar($viewed->username()),
+                3 => (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
+                    ->setSize(AVATAR_WIDTH)
+                    ->avatar($viewed->username()),
+                default => $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
+                    ?: STATIC_SERVER . '/common/avatars/default.png',
+            };
             $attrs = ['width="' . AVATAR_WIDTH . '"'];
             [$mouseover, $second] = $viewed->donorAvatar();
             if (!is_null($mouseover)) {
