@@ -1,0 +1,85 @@
+{{ header('Reports', {'js': 'bbcode,reports'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>Active Reports</h2>
+        <div class="linkbox">
+            <a href="reports.php">New</a> |
+            <a href="reports.php?view=old">Old</a> |
+            <a href="reports.php?action=stats">Stats</a>
+        </div>
+    </div>
+{{ paginator.linkbox|raw }}
+{% for item in list %}
+    {% set report = item.report %}
+        <div id="report_{{ report.id }}" style="margin-bottom: 1em;" class="pending_report_v1">
+            <table cellpadding="5" id="report_{{ report.id }}">
+                <tr>
+                    <td><strong>{{ report.link|raw }}</strong></td>
+                    <td>
+                        <strong>{{ type[report.subjectType].title }}</strong> was reported by {{ report.reporter.id|user_url }} {{ report.created|time_diff }}
+                        <a href="reports.php?action=compose&amp;toid={{ report.reporter.id }}&amp;reportid={{ report.id }}&amp;type={{ report.subjectType }}&amp;thingid={{ report.subjectId }}" class="brackets">Contact</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center" colspan="2">
+                        <strong>
+    {% if item.link %}
+        {{ item.link|raw }}
+    {% elseif item.subject %}
+        {{ item.subject.link|raw }}
+    {% else %}
+        No {{ item.label }} with the reported ID found
+    {% endif %}
+                        </strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ report.reason|bb_format }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+    {% if report.claimer.id == viewer.id %}
+                        <span id="claimed_{{ report.id }}">Claimed by {{ report.claimer.id|user_url }} <a href="#" onclick="unClaim({{ report.id }}); return false;" class="brackets">Unclaim</a></span>
+    {% elseif report.claimer.id %}
+                        <span id="claimed_{{ report.id }}">Claimed by {{ report.claimer.id|user_url }}</span>
+    {% else %}
+                        <a href="#" id="claim_{{ report.id }}" onclick="claim({{ report.id }}); return false;" class="brackets">Claim</a>
+    {% endif %}
+                        &nbsp;&nbsp;
+                        <a href="#" onclick="toggleNotes({{ report.id }}); return false;" class="brackets">Toggle notes</a>
+
+                        <div id="notes_div_{{ report.id }}" style="display: {% if notes %}block{% else %}none{% endif %};">
+                            <textarea cols="50" rows="3" id="notes_{{ report.id }}">{{ report.notes }}</textarea>
+                            <br />
+                            <input type="submit" onclick="saveNotes({{ report.id }})" value="Save" />
+                        </div>
+                    </td>
+                </tr>
+    {% if report.status != 'Resolved' %}
+                <tr>
+                    <td class="center" colspan="2">
+                        <form id="report_form_{{ report.id }}" action="">
+                            <input type="hidden" name="reportid" value="{{ report.id }}" />
+                            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                            <input type="submit" onclick="return resolve({{ report.id }},
+        {%- if not report.claimer or report.claimer.id == viewer.id %}true{% else %}false{% endif %})" name="submit" value="Resolve" />
+                        </form>
+                    </td>
+                </tr>
+    {% else %}
+                <tr>
+                    <td colspan="2">
+                        Resolved by {{ report.resolver.id|user_url }}
+                    </td>
+                </tr>
+    {% endif %}
+            </table>
+        </div>
+{% else %}
+    <div class="box pad thin">
+        <h4 style="text-align: center">No reports today, hooray!</h4>
+    </div>
+{% endfor %}
+{{ paginator.linkbox|raw }}
+</div>
+{{ footer() }}
