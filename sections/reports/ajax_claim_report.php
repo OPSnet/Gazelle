@@ -1,25 +1,20 @@
 <?php
 
-$postId = (int)$_POST['id'];
-if (!($postId && $Viewer->permitted('site_moderate_forums'))) {
-    json_error('no post id');
+if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
+    json_error('bad parameters');
 }
 
-$claimerId = $DB->scalar("
-    SELECT ClaimerID FROM reports WHERE ID = ?
-    ", $postId
-);
-if ($ClaimerID) {
+$report = (new Gazelle\Manager\Report)->findById((int)($_POST['id'] ?? 0));
+if (is_null($report)) {
+    json_error('no report id');
+}
+
+if ($report->isClaimed()) {
     print json_encode([
         'status' => 'dupe'
     ]);
 } else {
-    $DB->prepared_query("
-        UPDATE reports SET
-            ClaimerID = ?
-        WHERE ID = ?
-        ", $Viewer->id(), $postId
-    );
+    $report->claim($Viewer->id());
     print json_encode([
         'status' => 'success',
         'username' => $Viewer->username()

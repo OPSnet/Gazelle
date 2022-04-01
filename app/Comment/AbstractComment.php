@@ -26,7 +26,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), "Post #" . $this->id);
+        return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id);
     }
 
     public function __construct(int $pageId) {
