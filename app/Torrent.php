@@ -757,7 +757,7 @@ class Torrent extends BaseObject {
             $log['adjusted_checksum'] = ($log['AdjustedChecksum'] === '1');
             $log['checksum'] = ($log['Checksum'] === '1');
             $log['details'] = empty($log['Details']) ? [] : explode("\r\n", trim($log['Details']));
-            if ($log['adjusted'] && $log['checksum'] !== $log['adjustedChecksum']) {
+            if ($log['adjusted'] && $log['checksum'] !== $log['adjusted_checksum']) {
                 $log['details'][] = 'Bad/No Checksum(s)';
             }
         }
