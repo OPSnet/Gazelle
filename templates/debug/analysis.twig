@@ -26,6 +26,7 @@
     <tr><td class="colhead">Cache hits</td><td>{{ case.nr_cache|number_format }}</td></tr>
     <tr><td class="colhead">Seen</td><td>{{ case.seen|number_format }}</td></tr>
     <tr><td class="colhead">First</td><td>{{ case.created }}</td></tr>
+    <tr><td class="colhead">First User</td><td>{{ case.userId }}</td></tr>
     <tr><td class="colhead">Last</td><td>{{ case.updated }}</td></tr>
     <tr><td class="colhead">URI</td><td>{{ case.uri }}</td></tr>
     {% if case.logged_var is not empty %}
