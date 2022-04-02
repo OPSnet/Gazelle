@@ -17,6 +17,7 @@ class ErrorLog extends BaseObject {
         }
         $info = self::$db->rowAssoc("
             SELECT error_log_id,
+                user_id,
                 duration,
                 memory,
                 nr_query,
@@ -48,8 +49,16 @@ class ErrorLog extends BaseObject {
         return self::$db->affected_rows();
     }
 
+    public function created(): string {
+        return $this->info()['created'];
+    }
+
     public function duration(): float {
         return $this->info()['duration'];
+    }
+
+    public function errorList(): array {
+        return $this->info()['error_list'];
     }
 
     public function memory(): int {
@@ -64,12 +73,16 @@ class ErrorLog extends BaseObject {
         return $this->info()['nr_query'];
     }
 
+    public function request(): array {
+        return $this->info()['request'];
+    }
+
     public function seen(): int {
         return $this->info()['seen'];
     }
 
-    public function created(): string {
-        return $this->info()['created'];
+    public function trace(): array {
+        return $this->info()['trace'];
     }
 
     public function updated(): string {
@@ -80,15 +93,7 @@ class ErrorLog extends BaseObject {
         return $this->info()['uri'];
     }
 
-    public function trace(): array {
-        return $this->info()['trace'];
-    }
-
-    public function request(): array {
-        return $this->info()['request'];
-    }
-
-    public function errorList(): array {
-        return $this->info()['error_list'];
+    public function userId(): float {
+        return $this->info()['user_id'];
     }
 }
