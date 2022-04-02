@@ -92,25 +92,31 @@ class Debug {
     public function saveCase(string $message): int {
         $duration = microtime(true) - self::$startTime;
         if (!isset($_SERVER['REQUEST_URI'])) {
-            $uri = 'cli';
+            $uri    = 'cli';
+            $userId = 0;
         } else {
             $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             $uri = preg_replace('/(?<=[?&]auth=)\w+/', 'AUTH', $uri);
             $uri = preg_replace('/(?<=[?&]torrent_pass=)\w+/', 'HASH', $uri);
             $uri = preg_replace('/([?&]\w*id=)\d+/', '\1IDnnn', $uri);
+            global $Viewer;
+            if (isset($Viewer)) {
+                $userId = $Viewer->id();
+            }
         }
 
         $digest = md5($message, true);
         self::$db->prepared_query("
             INSERT INTO error_log
-                   (uri, duration, memory, nr_query, nr_cache, digest, trace, request, error_list, logged_var)
-            VALUES (?,   ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?,          ?)
+                   (uri, user_id, duration, memory, nr_query, nr_cache, digest, trace, request, error_list, logged_var)
+            VALUES (?,   ?,       ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?,          ?)
             ON DUPLICATE KEY UPDATE
                 updated = now(),
                 seen = seen + 1,
                 duration = ?
             ",
             $uri,
+            $userId,
             $duration,
             memory_get_usage(true),
             count($this->get_queries()),
