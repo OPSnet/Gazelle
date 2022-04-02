@@ -203,26 +203,34 @@ class Users extends \Gazelle\Base {
         ");
 
         self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, collage_total, collage_contrib)
-                SELECT ct.UserID, count(*), count(distinct ct.CollageID)
+            INSERT INTO user_summary_new (user_id, collage_total)
+                SELECT c.UserID, count(*)
+                FROM collages c
+                WHERE c.Deleted = '0'
+                GROUP BY c.UserID
+            ON DUPLICATE KEY UPDATE
+                collage_total = VALUES(collage_total)
+        ");
+
+        self::$db->prepared_query("
+            INSERT INTO user_summary_new (user_id, collage_contrib)
+                SELECT ct.UserID, count(*)
                 FROM collages c
                 INNER JOIN collages_torrents ct ON (ct.CollageID = c.ID)
                 WHERE c.Deleted = '0'
                 GROUP BY ct.UserID
             ON DUPLICATE KEY UPDATE
-                collage_total = VALUES(collage_total),
-                collage_contrib = VALUES(collage_contrib)
+                collage_contrib = collage_contrib + VALUES(collage_contrib)
         ");
 
         self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, collage_total, collage_contrib)
-                SELECT ca.UserID, count(*), count(distinct ca.CollageID)
+            INSERT INTO user_summary_new (user_id, collage_contrib)
+                SELECT ca.UserID, count(*)
                 FROM collages c
                 INNER JOIN collages_artists ca ON (ca.CollageID = c.ID)
                 WHERE c.Deleted = '0'
                 GROUP BY ca.UserID
             ON DUPLICATE KEY UPDATE
-                collage_total = collage_total + VALUES(collage_total),
                 collage_contrib = collage_contrib + VALUES(collage_contrib)
         ");
 
