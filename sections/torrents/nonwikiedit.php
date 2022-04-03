@@ -70,7 +70,7 @@ if ($log) {
     (new Gazelle\Log)->group($groupId, $Viewer->id(), ucfirst(implode(", ", $log)));
 
     $DB->prepared_query("
-        SELECT concat('torrent_download_', ID) as cachekey
+        SELECT concat('torrent_download_', ID) as cacheKey
         FROM torrents
         WHERE GroupID = ?
         ", $groupId
