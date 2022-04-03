@@ -49,7 +49,7 @@ $ownProfile = $userId === $Viewer->id();
 $class = (int)$_POST['Class'];
 $username = trim($_POST['Username']);
 $title = trim($_POST['Title']);
-$adminComment = trim($_POST['admincomment']);
+$adminComment = trim($_POST['admincomment'] ?? '');
 $secondaryClasses = array_filter(
     array_map('intval', $_POST['secondary_classes'] ?? [] ),
     fn($id) => $id > 0
@@ -78,11 +78,8 @@ if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
 if (isset($_POST['BonusPoints'])) {
     $bonusPoints = (float)$_POST['BonusPoints'];
 }
-$Collages = (int)$_POST['Collages'] ?? 0;
-$flTokens = isset($_POST['FLTokens']) ? trim($_POST['FLTokens']) : 0;
-if (!is_number($flTokens)) {
-    error(0);
-}
+$Collages = (int)($_POST['Collages'] ?? 0);
+$flTokens = (int)($_POST['FLTokens']) ?? 0);
 
 $warnLength = (int)$_POST['WarnLength'];
 $extendWarning = $_POST['ExtendWarning'] ?? '---';
