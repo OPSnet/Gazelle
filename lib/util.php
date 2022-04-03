@@ -316,6 +316,9 @@ function add_json_info($Json) {
  * @return array hydrated equivalent
  */
 function parseUrlArgs(string $urlArgs, string $param): array {
+    if (empty($urlArgs)) {
+        return [];
+    }
     $list = [];
     $pairs = explode('&', $urlArgs);
     foreach ($pairs as $p) {
