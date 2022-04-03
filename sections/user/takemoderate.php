@@ -56,7 +56,7 @@ $secondaryClasses = array_filter(
 );
 sort($secondaryClasses);
 $visible = isset($_POST['Visible']) ? '1' : '0';
-$unlimitedDownload = isset($_POST['unlimitedDownload']) ? 1 : 0;
+$unlimitedDownload = isset($_POST['unlimitedDownload']);
 $invites = (int)$_POST['Invites'];
 $supportFor = trim($_POST['SupportFor']);
 $changePassword = !empty($_POST['ChangePassword']);
@@ -214,14 +214,14 @@ if (!in_array((int)$bonusPoints, [(int)$cur['BonusPoints'], (int)($_POST['OldBon
     $editSummary[] = "bonus points changed from {$cur['BonusPoints']} to {$bonusPoints}";
 }
 
-if ($Collages != $Cur['Collages'] && $Collages != (int)$_POST['OldCollages']
+if ($Collages != $cur['Collages'] && $Collages != (int)$_POST['OldCollages']
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))) {
     $set[] = 'collages = ?';
     $args[] = $Collages;
-    $EditSummary[] = "personal collages changed from {$Cur['Collages']} to {$Collages}";
+    $EditSummary[] = "personal collages changed from {$cur['Collages']} to {$Collages}";
 }
 
-if ($unlimitedDownload != $cur['unlimitedDownload'] && $Viewer->permitted('admin_rate_limit_manage')) {
+if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('admin_rate_limit_manage')) {
     if ($user->toggleUnlimitedDownload($unlimitedDownload)) {
         $editSummary[] = "unlimited download " . strtolower(enabledStatus($unlimitedDownload));
     }
