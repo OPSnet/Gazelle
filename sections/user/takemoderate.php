@@ -47,7 +47,6 @@ $ownProfile = $userId === $Viewer->id();
 
 // Variables for database input
 $class = (int)$_POST['Class'];
-$username = trim($_POST['Username']);
 $title = trim($_POST['Title']);
 $adminComment = trim($_POST['admincomment'] ?? '');
 $secondaryClasses = array_filter(
@@ -79,7 +78,7 @@ if (isset($_POST['BonusPoints'])) {
     $bonusPoints = (float)$_POST['BonusPoints'];
 }
 $Collages = (int)($_POST['Collages'] ?? 0);
-$flTokens = (int)($_POST['FLTokens']) ?? 0);
+$flTokens = (int)($_POST['FLTokens'] ?? 0);
 
 $warnLength = (int)$_POST['WarnLength'];
 $extendWarning = $_POST['ExtendWarning'] ?? '---';
@@ -182,7 +181,7 @@ if ($resetIPHistory && $Viewer->permitted('users_edit_reset_keys')) {
 }
 
 if ($_POST['ResetEmailHistory'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->resetEmailHistory($username . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
+    $user->resetEmailHistory($cur['Username'] . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
     $editSummary[] = 'email history cleared';
 }
 
@@ -267,19 +266,22 @@ if ($Classes[$class]['Level'] != $cur['Class']
     $Cache->delete_value("donor_info_$userId");
 }
 
-if ($username !== $cur['Username'] && $Viewer->permitted('users_edit_usernames')) {
-    if (in_array($username, ['0', '1'])) {
-        error('You cannot set a username of "0" or "1".');
-        exit;
-    } elseif (strtolower($username) !== strtolower($cur['Username'])) {
-        $found = $userMan->findByUsername($username);
-        if ($found) {
-            $id = $found->id();
-            error('Username already in use by <a href="' . $found->url() . "\">$username</a>");
+if ($Viewer->permitted('users_edit_usernames')) {
+    $username = trim($_POST['Username']);
+    if ($username !== $cur['Username']) {
+        if (in_array($username, ['0', '1'])) {
+            error('You cannot set a username of "0" or "1".');
+            exit;
+        } elseif (strtolower($username) !== strtolower($cur['Username'])) {
+            $found = $userMan->findByUsername($username);
+            if ($found) {
+                $id = $found->id();
+                error('Username already in use by <a href="' . $found->url() . "\">$username</a>");
+            }
         }
         $set[] = 'Username = ?';
         $args[] = $username;
-        $editSummary[] = "username changed from ".$cur['Username']." to $username";
+        $editSummary[] = "username changed from {$cur['Username']} to $username";
     }
 }
 
