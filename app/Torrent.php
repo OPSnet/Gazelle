@@ -948,17 +948,11 @@ class Torrent extends BaseObject {
 
         if ($userId !== 0) {
             $key = sprintf(self::USER_RECENT_UPLOAD, $userId);
-            $RecentUploads = self::$cache->get_value($key);
-            if (is_array($RecentUploads)) {
-                foreach ($RecentUploads as $Key => $Recent) {
-                    if ($Recent['ID'] == $groupId) {
-                        $deleteKeys[] = $key;
-                        break;
-                    }
-                }
+            $recent = self::$cache->get_value($key);
+            if (is_array($recent) && in_array($groupId, $recent)) {
+                $deleteKeys[] = $key;
             }
         }
-
         
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id),
             "torrent_download_" . $this->id, "torrent_group_" . $groupId, "torrents_details_" . $groupId
