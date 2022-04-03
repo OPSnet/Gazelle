@@ -41,16 +41,14 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     foreach ($groupSubs as $s) {
         $GroupIDs = $s['groupIds'];
         $NewCount = count($GroupIDs);
+        $first = true;
         foreach ($GroupIDs as $GroupID) {
             $tgroup = $tgMan->findById($GroupID);
             if (is_null($tgroup)) {
                 continue;
             }
-            $GroupCategoryID = $tgroup->categoryId();
-            $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
-            $torrentList = $tgroup->torrentIdList();
-            $vh = $tgroup->isShowcase() ? ' [<abbr class="tooltip" title="This is a Showcase release">Showcase</abbr>]' : '';
-            if (count($torrentList) > 1 || $GroupCategoryID == 1) {
+            if ($first) {
+                $first = false;
 ?>
 <table style="margin-top: 8px;" class="subscribed_collages_table">
     <tr class="colhead_dark">
@@ -71,7 +69,6 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         </td>
     </tr>
 </table>
-
 <table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $s['collageId'] ?>">
     <tr class="colhead">
         <td width="1%"><!-- expand/collapse --></td>
@@ -81,6 +78,13 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
         <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
     </tr>
+<?php
+            }
+            $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+            $torrentList = $tgroup->torrentIdList();
+            $vh = $tgroup->isShowcase() ? ' [<abbr class="tooltip" title="This is a Showcase release">Showcase</abbr>]' : '';
+            if (count($torrentList) > 1 || $tgroup->categoryGrouped()) {
+?>
     <tr class="group groupid_<?= $s['collageId'] . $GroupID?>_header discog<?=$SnatchedGroupClass?>" id="group_<?= $s['collageId'] . $GroupID?>">
         <td class="center">
             <div id="showimg_<?= $s['collageId'] . $GroupID?>" class="<?=($ShowGroups ? 'hide' : 'show')?>_torrents">
@@ -90,7 +94,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td colspan="5" class="big_info">
 <?php if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->thumbnail($tgroup->image(), $GroupCategoryID) ?>
+                <?= $imgProxy->thumbnail($tgroup->image(), $tgroup->categoryId()) ?>
             </div>
 <?php } ?>
             <div class="group_info clear">
@@ -156,7 +160,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td class="td_info big_info">
 <?php           if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->thumbnail($tgroup->image(), $GroupCategoryID) ?>
+                <?= $imgProxy->thumbnail($tgroup->image(), $tgroup->categoryId()) ?>
             </div>
 <?php           } ?>
             <div class="group_info clear">
