@@ -5,37 +5,37 @@ if (!$Viewer->permitted('admin_manage_blog')) {
 }
 authorize();
 
-if (empty($_POST['title']) || empty($_POST['body'])) {
-    error('You must have a title and body for the blog post.');
+$body = trim($_POST['body']);
+if (empty($body)) {
+    error('The body of the blog article must not be empty');
 }
 
-$threadId = !isset($_POST['thread']) || $_POST['thread'] === '' ? '' : max(0, (int)$_POST['thread']);
-if ($threadId) {
-    $forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-    if (!$forum) {
-        error('No such thread exists!');
-    }
-} elseif ($threadId === '') {
-    $forum = new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
-    $threadId = $forum->addThread($Viewer->id(), $_POST['title'], $_POST['body']);
-    if (!$threadId) {
-        error(0);
-    }
-} else {
-    $threadId = null;
+$title = trim($_POST['title']);
+if (empty($title)) {
+    error('The title of the blog article must not be empty');
 }
 
-$blogMan = new Gazelle\Manager\Blog;
-$blog = $blogMan->create([
-    'title'     => trim($_POST['title']),
-    'body'      => trim($_POST['body']),
+$thread = match((int)($_POST['thread'] ?? -1)) {
+    -1 => null,
+     0 => (new Gazelle\Manager\ForumThread)->create(
+        forumId: ANNOUNCEMENT_FORUM_ID,
+        userId:  $Viewer->id(),
+        title:   $title,
+        body:    $body,
+    ),
+    default => (new Gazelle\Manager\ForumThread)->findById((int)$_POST['thread']),
+};
+
+$blog = (new Gazelle\Manager\Blog)->create([
+    'title'     => $title,
+    'body'      => $body,
     'important' => isset($_POST['important']) ? 1 : 0,
-    'threadId'  => $threadId,
+    'threadId'  => $thread?->id(),
     'userId'    => $Viewer->id(),
 ]);
 
-if (isset($_POST['subscribe']) && (int)$threadId) {
-    (new Gazelle\Subscription($Viewer))->subscribe($threadId);
+if ($thread && isset($_POST['subscribe'])) {
+    (new Gazelle\Subscription($Viewer))->subscribe($thread->id());
 }
 $notification = new Gazelle\Manager\Notification($Viewer->id());
 $notification->push($notification->pushableUsers($Viewer->id()), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);

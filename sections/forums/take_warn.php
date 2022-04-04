@@ -28,13 +28,14 @@ $forumPost = $forum->postInfo($postId);
 if (empty($forumPost)) {
     error("No forum post #$postId found");
 }
-$threadId = $forumPost['thread-id'];
-if (empty($forum->threadInfo($threadId))) {
+
+$thread = (new Gazelle\Manager\ForumThread)->findById($forumPost['thread-id']);
+if (is_null($thread)) {
     error(404);
 }
 $forum->editPost($user->id(), $postId, trim($_POST['body']));
 
-$URL = "forums.php?action=viewthread&amp;postid=$postId#post$postId";
+$URL = $forum->threadPostUrl($thread->id(), $postId);
 $Reason = trim($_POST['reason']);
 $WarningLength = $_POST['length'];
 if ($WarningLength !== 'verbal') {
@@ -59,11 +60,7 @@ $user->addForumWarning($adminComment)->addStaffNote($adminComment)->modify();
 $userMan->sendPM($user->id(), $Viewer->id(), $subject, $message);
 
 if ($forumPost['is-sticky']) {
-    $Cache->delete_value("thread_{$threadId}_info");
+    $thread->flush();
 }
 
-$Cache->delete_value("thread_{$threadId}_catalogue_"
-    . (int)floor((POSTS_PER_PAGE * $forumPost['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE)
-);
-
-header("Location: forums.php?action=viewthread&postid=$postId#post$postId");
+header("Location: {$thread->location()}&postid=$postId#post$postId");

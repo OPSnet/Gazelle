@@ -26,6 +26,7 @@
         <span style="float: left;" class="last_topic">
             <a href="forums.php?action=viewthread&amp;threadid={{ id }}" class="tooltip" data-title-plain="{{ title }}"{%
                 if title != cut_title %} title="{{ title }}"{% endif %}>{{ cut_title }}</a>
+            {%- if has_poll %} <span class="tooltip" title="There is a poll!">&#x1F5F3;</span>{% endif -%}
         </span>
 {% if is_read %}
         <span style="float: left;" class="{{ tooltip }} last_read" title="Jump to last read">

@@ -1,11 +1,10 @@
 <?php
 
-$threadId = (int)$_POST['threadid'];
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404, true);
 }
-[$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
+[$Question, $Answers, $Votes, $Featured, $Closed] = $thread->pollData();
 if ($Closed) {
     error(403, true);
 }
@@ -42,7 +41,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     }
 
     //Add our vote
-    if ($forum->addPollVote($Viewer->id(), $threadId, $Vote) && $Vote !== 0) {
+    if ($thread->addPollVote($Viewer->id(), $Vote) && $Vote !== 0) {
         $Votes[$Vote]++;
         $TotalVotes++;
         $MaxVotes++;
@@ -54,7 +53,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 ?>
         <ul class="poll nobullet">
 <?php
-        if ($forum->id() != STAFF_FORUM_ID) {
+        if ($thread->forum()->id() != STAFF_FORUM_ID) {
             for ($i = 1, $il = count($Answers); $i <= $il; $i++) {
                 if (!empty($Votes[$i]) && $TotalVotes > 0) {
                     $Ratio = $Votes[$i] / $MaxVotes;
@@ -74,7 +73,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             }
         } else {
             //Staff forum, output voters, not percentages
-            $vote = $forum->staffVote($threadId);
+            $vote = $thread->staffVote();
             foreach ($vote as list($StaffString, $StaffVoted)) {
 ?>
                 <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?=$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>

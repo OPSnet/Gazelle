@@ -4,8 +4,7 @@ namespace Gazelle;
 
 class Forum extends BaseObject {
 
-    const CACHE_TOC_MAIN    = 'forum_toc_main';
-    const CACHE_TOC_FORUM   = 'forum_toc_%d';
+    const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
     const CACHE_FORUM       = 'forum_%d';
     const CACHE_THREAD_INFO = 'thread_%d_info';
     const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
@@ -190,118 +189,6 @@ class Forum extends BaseObject {
         return $this->info()['num_threads'];
     }
 
-    public function addThread(int $userId, string $title, string $body): int {
-        // LastPostID is updated in updateTopic()
-        $qid = self::$db->get_query_id();
-        $db = new DB;
-        $db->relaxConstraints(true);
-        self::$db->prepared_query("
-            INSERT INTO forums_topics
-                   (ForumID, Title, AuthorID, LastPostAuthorID)
-            Values (?,       ?,        ?,                ?)
-            ", $this->id, $title, $userId, $userId
-        );
-        $threadId = self::$db->inserted_id();
-        $body = trim($body);
-        self::$db->prepared_query("
-            INSERT INTO forums_posts
-                   (TopicID, AuthorID, Body)
-            VALUES (?,       ?,        ?)
-            ", $threadId, $userId, $body
-        );
-        $postId = self::$db->inserted_id();
-        $this->updateTopic($userId, $threadId, $postId);
-        $db->relaxConstraints(false);
-        (new Stats\User($userId))->increment('forum_thread_total');
-        self::$cache->cache_value(sprintf(self::CACHE_CATALOG, $threadId, 0), [
-            $postId => [
-                'ID'           => $postId,
-                'AuthorID'     => $userId,
-                'AddedTime'    => sqltime(),
-                'Body'         => $body,
-                'EditedUserID' => 0,
-                'EditedTime'   => null,
-            ]
-        ]);
-        self::$db->set_query_id($qid);
-        return $threadId;
-    }
-
-    public function lockThread(int $threadId): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls SET
-                Closed = '0'
-            WHERE TopicID = ?
-            ", $threadId
-        );
-        $affected = self::$db->affected_rows();
-        $max = self::$db->scalar("
-            SELECT floor(NumPosts / ?) FROM forums_topics WHERE ID = ?
-            ", THREAD_CATALOGUE, $threadId
-        );
-        for ($i = 0; $i <= $max; $i++) {
-            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
-        }
-        self::$cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
-        self::$cache->delete_value("polls_$threadId");
-        return $affected;
-    }
-
-    public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title): int {
-        (new \Gazelle\Manager\Forum)->flushToc();
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_FORUM, $forumId),
-            sprintf(self::CACHE_FORUM, $this->id),
-            "zz_ft_{$threadId}", "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
-            sprintf(self::CACHE_TOC_FORUM, $this->id),
-            sprintf(self::CACHE_TOC_FORUM, $forumId),
-        ]);
-        self::$db->prepared_query("
-            UPDATE forums_topics SET
-                ForumID  = ?,
-                IsSticky = ?,
-                Ranking  = ?,
-                IsLocked = ?,
-                Title    = ?
-            WHERE ID = ?
-            ", $forumId, $sticky ? '1' : '0', $rank, $locked ? '1' : '0', trim($title),
-            $threadId
-        );
-        $affected = self::$db->affected_rows();
-        if ($forumId != $this->id) {
-            $this->adjustForumStats($this->id);
-            $this->adjustForumStats($forumId);
-        }
-        if ($locked) {
-            $this->lockThread($threadId);
-        }
-        return $affected;
-    }
-
-    public function removeThread(int $threadId): int {
-        self::$db->prepared_query("
-            DELETE ft, fp, unq
-            FROM forums_topics AS ft
-            LEFT JOIN forums_posts AS fp ON (fp.TopicID = ft.ID)
-            LEFT JOIN users_notify_quoted as unq ON (unq.PageID = ft.ID AND unq.Page = 'forums')
-            WHERE TopicID = ?
-            ", $threadId
-        );
-        $affected = self::$db->affected_rows();
-        $this->adjustForumStats($this->id);
-
-        (new Manager\Subscription)->move('forums', $threadId, null);
-
-        (new Manager\Forum)->flushToc();
-        self::$cache->deleteMulti([
-            "thread_{$threadId}",
-            sprintf(self::CACHE_FORUM, $this->id),
-            sprintf(self::CACHE_THREAD_INFO, $threadId),
-            sprintf(self::CACHE_TOC_FORUM, $this->id),
-        ]);
-        return $affected;
-    }
-
     /**
      * Adjust the number of topics and posts of a forum.
      * used when deleting a thread or moving a thread between forums.
@@ -310,7 +197,7 @@ class Forum extends BaseObject {
      * moving threads requires two calls and it just makes things
      * a bit clearer.
      */
-    protected function adjustForumStats(int $forumId): int {
+    public function adjustForumStats(int $forumId): int {
         /* Recalculate the correct values from first principles.
          * This does not happen very often, and only a moderator
          * pays the cost. At least this way the number correct
@@ -350,55 +237,6 @@ class Forum extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function addPost(int $userId, int $threadId, string $body): int {
-        $qid = self::$db->get_query_id();
-        self::$db->prepared_query("
-            INSERT INTO forums_posts
-                   (TopicID, AuthorID, Body)
-            VALUES (?,       ?,        ?)
-            ", $threadId, $userId, trim($body)
-        );
-        $postId = self::$db->inserted_id();
-        $this->updateTopic($userId, $threadId, $postId);
-        (new Stats\User($userId))->increment('forum_post_total');
-        self::$db->set_query_id($qid);
-        $info = $this->threadInfo($threadId);
-        $catId = (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
-        self::$cache->deleteMulti(["thread_{$threadId}_catalogue_{$catId}", "thread_{$threadId}_info"]);
-        return $postId;
-    }
-
-    public function stickyPost(int $userId, int $threadId, int $postId, bool $set): int {
-        // need to reset the post catalogues
-        [$bottom, $top] = self::$db->row("
-            SELECT
-                floor((ceil(count(*)               / ?) * ? - ?) / ?) AS bottom,
-                floor((ceil(sum(if(ID <= ?, 1, 0)) / ?) * ? - ?) / ?) AS top
-            FROM forums_posts
-            WHERE TopicID = ?
-            GROUP BY TopicID
-            ",        POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
-             $postId, POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
-            $threadId
-        );
-        if ($bottom === '') { // Gazelle null-to-string coercion sucks
-            return 0;
-        }
-        $this->addThreadNote($threadId, $userId, "Post $postId " . ($set ? "stickied" : "unstickied"));
-        self::$db->prepared_query("
-            UPDATE forums_topics SET
-                StickyPostID = ?
-            WHERE ID = ?
-            ", $set ? $postId : 0, $threadId
-        );
-        $affected = self::$db->affected_rows();
-        self::$cache->delete_value(sprintf(self::CACHE_THREAD_INFO, $threadId));
-        for ($i = $bottom; $i <= $top; ++$i) {
-            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $threadId, $i));
-        }
-        return $affected;
-    }
-
     public function priorPostTotal(int $postId): int {
         return self::$db->scalar("
             SELECT count(*)
@@ -407,343 +245,6 @@ class Forum extends BaseObject {
                 AND ID <= ?
             ", $postId, $postId
         );
-    }
-
-    /**
-     * Update the topic following the creation of a thread.
-     * (Most recent thread and sets last poster).
-     */
-    protected function updateTopic(int $userId, int $threadId, int $postId): int {
-        self::$db->prepared_query("
-            UPDATE forums_topics SET
-                NumPosts         = NumPosts + 1,
-                LastPostTime     = now(),
-                LastPostID       = ?,
-                LastPostAuthorID = ?
-            WHERE ID = ?
-            ", $postId, $userId, $threadId
-        );
-        $affected = self::$db->affected_rows();
-        $this->updateRoot($userId, $threadId, $postId);
-        return $affected;
-    }
-
-    public function addThreadNote(int $threadId, int $userId, string $notes): int {
-        self::$db->prepared_query("
-            INSERT INTO forums_topic_notes
-                   (TopicID, AuthorID, Body)
-            VALUES (?,       ?,        ?)
-            ", $threadId, $userId, $notes
-        );
-        return self::$db->inserted_id();
-    }
-
-    public function threadNotes(int $threadId): array {
-        self::$db->prepared_query("
-            SELECT ID, AuthorID, AddedTime, Body
-            FROM forums_topic_notes
-            WHERE TopicID = ?
-            ORDER BY ID ASC
-            ", $threadId
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    protected function updateRoot(int $userId, int $threadId, int $postId): int {
-        self::$db->prepared_query("
-            UPDATE forums f
-            INNER JOIN (
-                SELECT ft.ForumID,
-                    COUNT(DISTINCT ft.ID) as numThreads,
-                    COUNT(fp.ID) as numPosts
-                FROM forums_topics ft
-                INNER JOIN forums_posts fp ON (fp.TopicID = ft.ID)
-                WHERE ft.ForumID = ?
-            ) STATS ON (STATS.ForumID = f.ID) SET
-                f.NumTopics        = STATS.numThreads,
-                f.NumPosts         = STATS.numPosts,
-                f.LastPostID       = ?,
-                f.LastPostAuthorID = ?,
-                f.LastPostTopicID  = ?,
-                f.LastPostTime     = now()
-            WHERE f.ID = ?
-            ", $this->id, $postId,  $userId, $threadId, $this->id
-        );
-        $affected = self::$db->affected_rows();
-        (new \Gazelle\Manager\Forum)->flushToc();
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_FORUM, $this->id),
-            sprintf(self::CACHE_THREAD_INFO, $threadId),
-            sprintf(self::CACHE_TOC_FORUM, $this->id)
-        ]);
-        return $affected;
-    }
-
-    /**
-     * Add a poll to a thread.
-     * TODO: add a closing date
-     *
-     * @param int $threadId The thread
-     * @param string $question The poll question
-     * @param array $answers An array of answers (between 2 and 25)
-     * @param array $votes An array of votes (1 per answer)
-     * @return int poll id
-     */
-    public function addPoll(int $threadId, string $question, array $answers, array $votes): int {
-        self::$db->prepared_query("
-            INSERT INTO forums_polls
-                   (TopicID, Question, Answers)
-            VALUES (?,       ?,        ?)
-            ", $threadId, $question, serialize($answers)
-        );
-        self::$cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, '0'], 0);
-        return self::$db->inserted_id();
-    }
-
-    protected function fetchPollAnswers(int $threadId): array {
-        return unserialize(
-            self::$db->scalar("
-                SELECT Answers FROM forums_polls WHERE TopicID = ?
-                ", $threadId
-            )
-        );
-    }
-
-    protected function savePollAnswers(int $threadId, array $answers): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls SET
-                Answers = ?
-            WHERE TopicID = ?
-            ", serialize($answers), $threadId
-        );
-        self::$cache->delete_value("polls_$threadId");
-        return self::$db->affected_rows();
-    }
-
-    public function addPollAnswer(int $threadId, string $answer): int {
-        $answers = $this->fetchPollAnswers($threadId);
-        $answers[] = $answer;
-        return $this->savePollAnswers($threadId, $answers);
-    }
-
-    public function removedPollAnswer(int $threadId, int $item): int {
-        $answers = $this->fetchPollAnswers($threadId);
-        if (!$answers) {
-            return 0;
-        }
-        unset($answers[$item]);
-        $this->savePollAnswers($threadId, $answers);
-        self::$db->prepared_query("
-            DELETE FROM forums_polls_votes
-            WHERE Vote = ?
-                AND TopicID = ?
-            ", $item, $threadId
-        );
-        self::$cache->delete_value("polls_$threadId");
-        return self::$db->affected_rows();
-    }
-
-    public function addPollVote(int $userId, int $threadId, int $vote): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO forums_polls_votes
-                   (TopicID, UserID, Vote)
-            VALUES (?,       ?,      ?)
-            ", $threadId, $userId, $vote
-        );
-        $affected = self::$db->affected_rows();
-        if ($affected) {
-            self::$cache->delete_value("polls_$threadId");
-        }
-        return $affected;
-    }
-
-    public function modifyPollVote(int $userId, int $threadId, int $vote): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls_votes SET
-                Vote = ?
-            WHERE TopicID = ?
-                AND UserID = ?
-            ", $vote, $threadId, $userId
-        );
-        $affected = self::$db->affected_rows();
-        if ($affected) {
-            self::$cache->delete_value("polls_$threadId");
-        }
-        return $affected;
-    }
-
-    public function pollVote(int $userId, int $threadId): ?int {
-        return self::$db->scalar("
-            SELECT Vote FROM forums_polls_votes WHERE UserID = ?  AND TopicID = ?
-            ", $userId, $threadId
-        );
-    }
-
-    /**
-     * Get the data for a poll (TODO: spin off into a Poll object)
-     *
-     * @return array
-     * - string: question
-     * - array: answers
-     * - votes: recorded votes
-     * - featured: Featured on front page?
-     * - closed: Not more voting possible
-     */
-    public function pollData(int $threadId): array {
-        if (![$Question, $Answers, $Votes, $Featured, $Closed] = self::$cache->get_value('polls_'.$threadId)) {
-            [$Question, $Answers, $Featured, $Closed] = self::$db->row("
-                SELECT Question, Answers, Featured, Closed
-                FROM forums_polls
-                WHERE TopicID = ?
-                ", $threadId
-            );
-            if ($Featured == '') {
-                $Featured = null;
-            }
-            $Answers = unserialize($Answers);
-            self::$db->prepared_query("
-                SELECT Vote, count(*)
-                FROM forums_polls_votes
-                WHERE Vote != '0'
-                    AND TopicID = ?
-                GROUP BY Vote
-                ", $threadId
-            );
-            $VoteArray = self::$db->to_array(false, MYSQLI_NUM, false);
-            $Votes = [];
-            foreach ($VoteArray as $VoteSet) {
-                [$Key,$Value] = $VoteSet;
-                $Votes[$Key] = $Value;
-            }
-            for ($i = 1, $end = count($Answers); $i <= $end; ++$i) {
-                if (!isset($Votes[$i])) {
-                    $Votes[$i] = 0;
-                }
-            }
-            self::$cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $Closed], 0);
-        }
-        return [$Question, $Answers, $Votes, $Featured, $Closed];
-    }
-
-    public function pollDataExtended(int $threadId, int $userId): array {
-        [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
-        $userVote = self::$db->scalar("
-            SELECT Vote
-            FROM forums_polls_votes
-            WHERE Vote > 0
-                AND UserID = ?
-                AND TopicID = ?
-            ", $userId, $threadId
-        );
-        $max   = max($Votes) ?? 0;
-        $total = array_sum($Votes ?? []);
-        $tally = [];
-        foreach ($Votes as $key => $score) {
-            $tally[$key] = [
-                'answer'  => $Answers[$key],
-                'score'   => $score,
-                'ratio'   => $total ? ($score /   $max) * 100.0 : 0.0,
-                'percent' => $total ? ($score / $total) * 100.0 : 0.0,
-            ];
-        }
-        return [
-            'question'    => $Question,
-            'is_closed'   => (bool)$Closed,
-            'is_featured' => (bool)$Featured,
-            'tally'       => $tally,
-            'user_vote'   => $userVote,
-            'votes_max'   => $max,
-            'votes_total' => $total,
-        ];
-    }
-
-    /**
-     * TODO: feature and unfeature a poll.
-     */
-    public function moderatePoll(int $threadId, int $toFeature, int $toClose): int {
-        [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
-        $affected = 0;
-        if ($toFeature && !$Featured) {
-            self::$db->prepared_query("
-                UPDATE forums_polls SET
-                    Featured = now()
-                WHERE TopicID = ?
-                ", $threadId
-            );
-            $affected += self::$db->affected_rows();
-            $Featured = self::$db->scalar("
-                SELECT Featured FROM forums_polls WHERE TopicID = ?
-                ", $threadId
-            );
-            self::$cache->cache_value('polls_featured', $threadId ,0);
-        }
-
-        if ($toClose) {
-            self::$db->prepared_query("
-                UPDATE forums_polls SET
-                    Closed = ?
-                WHERE TopicID = ?
-                ", $Closed ? '1' : '0', $threadId
-            );
-            $affected += self::$db->affected_rows();
-        }
-        self::$cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
-        self::$cache->delete_value('polls_'.$threadId);
-        return $affected;
-    }
-
-    public function staffVote(int $threadId): array {
-        self::$db->prepared_query("
-            SELECT group_concat(um.Username SEPARATOR ', '),
-                fpv.Vote
-            FROM users_main AS um
-            INNER JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
-            WHERE fpv.TopicID = ?
-            GROUP BY fpv.Vote
-            ", $threadId
-        );
-        return self::$db->to_array(false, MYSQLI_NUM, false);
-    }
-
-    public function mergePost(int $userId, int $threadId, string $body): int {
-        [$postId, $oldBody] = self::$db->row("
-            SELECT ID, Body
-            FROM forums_posts
-            WHERE TopicID = ?
-                AND AuthorID = ?
-            ORDER BY ID DESC LIMIT 1
-            ", $threadId, $userId
-        );
-
-        // Edit the post
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            UPDATE forums_posts SET
-                EditedUserID = ?,
-                Body = CONCAT(Body, '\n\n', ?),
-                EditedTime = now()
-            WHERE ID = ?
-            ", $userId, trim($body), $postId
-        );
-
-        // Store edit history
-        self::$db->prepared_query("
-            INSERT INTO comments_edits
-                   (EditUser, PostID, Body, Page)
-            VALUES (?,        ?,      ?,   'forums')
-            ", $userId, $postId, $oldBody
-        );
-        self::$db->commit();
-
-        // Update the cache
-        $info = $this->threadInfo($threadId);
-        self::$cache->deleteMulti([
-            "edit_forum_" . $this->id,
-            "thread_{$threadId}_info",
-            "thread_{$threadId}_catalogue_"
-                . (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE),
-        ]);
-        return $postId;
     }
 
     public function editPost(int $userId, int $postId, string $body): int {
@@ -896,111 +397,6 @@ class Forum extends BaseObject {
         return true;
     }
 
-    /**
-     * Get information about a thread
-     * TODO: check if ever NumPosts != Posts
-     *
-     * @return array [Title ForumId AuthorID LastPostAuthorID StickyPostID Ranking NumPosts isLocked isSticky NoPoll Posts LastPostTime StickyPost]
-     */
-    public function threadInfo(int $threadId): array {
-        if (($info = self::$cache->get_value(sprintf(self::CACHE_THREAD_INFO, $threadId))) === false) {
-            self::$db->prepared_query("
-                SELECT t.Title,
-                    t.ForumID,
-                    t.AuthorID,
-                    t.LastPostAuthorID,
-                    t.StickyPostID,
-                    t.Ranking,
-                    t.NumPosts,
-                    t.IsLocked = '1' AS isLocked,
-                    t.IsSticky = '1' AS isSticky,
-                    isnull(p.TopicID) AS NoPoll,
-                    count(fp.id) AS Posts,
-                    max(fp.AddedTime) as LastPostTime
-                FROM forums_topics AS t
-                INNER JOIN forums_posts AS fp ON (fp.TopicID = t.ID)
-                LEFT JOIN forums_polls AS p ON (p.TopicID = t.ID)
-                WHERE t.ID = ?
-                GROUP BY t.ID
-                ", $threadId
-            );
-            if (!self::$db->has_results()) {
-                return [];
-            }
-            $info = self::$db->next_record(MYSQLI_ASSOC, false);
-            if ($info['StickyPostID']) {
-                $info['Posts']--;
-                $info['StickyPost'] = self::$db->rowAssoc("
-                    SELECT p.ID,
-                        p.AuthorID,
-                        p.AddedTime,
-                        p.Body,
-                        p.EditedUserID,
-                        p.EditedTime
-                    FROM forums_posts AS p
-                    WHERE p.TopicID = ? AND p.ID = ?
-                    ", $threadId, $info['StickyPostID']
-                );
-            }
-            self::$cache->cache_value(sprintf(self::CACHE_THREAD_INFO, $threadId), $info, 86400);
-        }
-        return $info;
-    }
-
-    /**
-     * The forum table of contents (the main /forums.php view)
-     *
-     * @return array
-     *  - string category name "Community"
-     *  containing an array of (one per forum):
-     *    - int 'ID' Forum id
-     *    - string 'Name' Forum name "The Lounge"
-     *    - string 'Description' Forum description "The Lounge"
-     *    - int 'NumTopics' Number of threads (topics)
-     *    - int 'NumPosts' Number of posts (sum of posts of all threads)
-     *    - int 'LastPostTopicID' Thread id of most recent post
-     *    - int 'MinClassRead' Min class read     \
-     *    - int 'MinClassWrite' Min class write   -+-- ACLs
-     *    - int 'MinClassCreate' Min class create /
-     *    - int 'Sort' Positional rank
-     *    - bool 'AutoLock' if true, forum will lock after AutoLockWeeks of inactivity
-     *    - int 'AutoLockWeeks' number of weeks for inactivity timer
-     *    - string 'Title' Title of most recent thread
-     *    - int 'LastPostAuthorID' User id of author of most recent post
-     *    - int 'LastPostID' Post id of most recent post
-     *    - timestamp 'LastPostTime' Date of most recent thread (creation or post)
-     *    - int 'IsSticky' Last post is locked (0/1)
-     *    - int 'IsLocked' Last post is sticky (0/1)
-     */
-    public function tableOfContentsMain(): array {
-        $toc = self::$cache->get_value(self::CACHE_TOC_MAIN);
-        if ($toc === false ) {
-            self::$db->prepared_query("
-                SELECT cat.Name AS categoryName, cat.ID AS categoryId,
-                    f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,
-                    f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
-                    f.Sort, f.AutoLock, f.AutoLockWeeks,
-                    ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked
-                FROM forums f
-                INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
-                LEFT JOIN forums_topics ft ON (ft.ID = f.LastPostTopicID)
-                ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
-            ");
-            $toc = [];
-            while ($row = self::$db->next_row(MYSQLI_ASSOC)) {
-                $category = $row['categoryName'];
-                unset($row['categoryName']);
-                $row['AutoLock'] = ($row['AutoLock'] == '1');
-                if (!isset($toc[$category])) {
-                    $toc[$category] = [];
-                }
-                $toc[$category][] = $row;
-            }
-            self::$cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);
-        }
-        return $toc;
-    }
-
     public function threadCount(): int {
         $toc = $this->tableOfContentsForum();
         return $toc ? current($toc)['threadCount'] : 0;
@@ -1028,13 +424,15 @@ class Forum extends BaseObject {
         $forumToc = null;
         if ($page > 1 || ($page == 1 && !$forumToc = self::$cache->get_value($key))) {
             self::$db->prepared_query("
-                SELECT ID, Title, AuthorID, IsLocked, IsSticky,
-                    NumPosts, LastPostID, LastPostTime, LastPostAuthorID,
+                SELECT ft.ID, ft.Title, ft.AuthorID, ft.IsLocked, ft.IsSticky,
+                    ft.NumPosts, ft.LastPostID, ft.LastPostTime, ft.LastPostAuthorID,
                     (SELECT count(*) from forums_topics WHERE IsSticky = '1' AND ForumID = ?) AS stickyCount,
-                    (SELECT count(*) from forums_topics WHERE ForumID = ?) AS threadCount
-                FROM forums_topics
-                WHERE ForumID = ?
-                ORDER BY Ranking DESC, IsSticky DESC, LastPostTime DESC
+                    (SELECT count(*) from forums_topics WHERE ForumID = ?) AS threadCount,
+                    (fp.TopicID IS NOT NULL AND fp.Closed = '0')  AS has_poll
+                FROM forums_topics ft
+                LEFT JOIN forums_polls fp ON (fp.TopicID = ft.ID)
+                WHERE ft.ForumID = ?
+                ORDER BY ft.Ranking DESC, ft.IsSticky DESC, ft.LastPostTime DESC
                 LIMIT ?, ?
                 ", $this->id, $this->id, $this->id, ($page - 1) * TOPICS_PER_PAGE, TOPICS_PER_PAGE
             );
@@ -1082,43 +480,6 @@ class Forum extends BaseObject {
         return $departmentList;
     }
 
-    /**
-     * Get a catalogue of thread posts
-     *
-     * @return array [post_id, author_id, added_time, body, editor_user_id, edited_time]
-     */
-    public function threadCatalog(int $threadId, int $perPage, int $page): array {
-        $chunk = (int)floor(($page - 1) * $perPage / THREAD_CATALOGUE);
-        $key = sprintf(self::CACHE_CATALOG, $threadId, $chunk);
-        if (!$catalogue = self::$cache->get_value($key)) {
-            $thread = $this->threadInfo($threadId);
-            self::$db->prepared_query("
-                SELECT p.ID,
-                    p.AuthorID,
-                    p.AddedTime,
-                    p.Body,
-                    p.EditedUserID,
-                    p.EditedTime
-                FROM forums_posts AS p
-                WHERE p.TopicID = ?
-                    AND p.ID != ?
-                LIMIT ? OFFSET ?
-                ", $threadId, $thread['StickyPostID'], THREAD_CATALOGUE, $chunk * THREAD_CATALOGUE
-            );
-            $catalogue = self::$db->to_array(false, MYSQLI_ASSOC, false);
-            if (!$thread['isLocked'] || $thread['isSticky']) {
-                self::$cache->cache_value($key, $catalogue, 0);
-            }
-        }
-        return $catalogue;
-    }
-
-    public function threadPage(int $threadId, int $perPage, int $page): array {
-        return array_slice($this->threadCatalog($threadId, $perPage, $page),
-            (($page - 1) * $perPage) % THREAD_CATALOGUE, $perPage, true
-        );
-    }
-
     public function userCatchup(int $userId) {
         self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
@@ -1128,18 +489,6 @@ class Forum extends BaseObject {
             WHERE ForumID = ?
             ON DUPLICATE KEY UPDATE PostID = LastPostID
             ", $userId, $this->id
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function userCatchupThread(int $userId, int $threadId, int $postId): int {
-        self::$db->prepared_query("
-            INSERT INTO forums_last_read_topics
-                   (UserID, TopicID, PostID)
-            VALUES (?,      ?,       ?)
-            ON DUPLICATE KEY UPDATE
-                PostID = ?
-            ", $userId, $threadId, $postId, $postId
         );
         return self::$db->affected_rows();
     }
@@ -1171,39 +520,5 @@ class Forum extends BaseObject {
             ", $perPage, $this->id, $userId
         );
         return self::$db->to_array('TopicID', MYSQLI_ASSOC, false);
-    }
-
-    public function clearUserLastRead(int $threadId): int {
-        self::$db->prepared_query("
-            DELETE FROM forums_last_read_topics
-            WHERE TopicID = ?
-            ", $threadId
-        );
-        return self::$db->affected_rows();
-    }
-
-    /**
-     * Return the last (highest previously read) post ID for a user in this thread.
-     */
-    public function userLastReadPost(int $userId, int $threadId): int {
-        return (int)self::$db->scalar("
-            SELECT PostID FROM forums_last_read_topics WHERE UserID = ? AND TopicID = ?
-            ", $userId, $threadId
-        );
-    }
-
-    /**
-     * The number of posts up to the given post in the thread
-     * if $hasSticky is true, count will be one less.
-     */
-    public function threadNumPosts(int $threadId, int $postId, bool $hasSticky): int {
-        $count = self::$db->scalar("
-            SELECT count(*)
-            FROM forums_posts
-            WHERE TopicID = ?
-                AND ID <= ?
-            ", $threadId, $postId
-        );
-        return $hasSticky ? $count - 1 : $count;
     }
 }

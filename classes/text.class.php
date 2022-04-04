@@ -1411,24 +1411,23 @@ class Text {
             return '[thread]' .  $thread . '[/thread]';
         }
 
-        $forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
-        if (is_null($forum)) {
+        $thread = (new \Gazelle\Manager\ForumThread)->findById($threadId);
+        if (is_null($thread)) {
             if ($postId) {
                 return '[thread]' .  $threadId . ':' . $postId . '[/thread]';
             } else {
                 return '[thread]' .  $threadId . '[/thread]';
             }
         }
-        if (!self::$viewer->readAccess($forum)) {
-            return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $forum->id(), 'restricted');
+        if (!self::$viewer->readAccess($thread->forum())) {
+            return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $thread->forum()->id(), 'restricted');
         }
 
-        $threadInfo = $forum->threadInfo($threadId);
         if ($postId) {
             return sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
-                $threadId, $postId, $postId, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title'], $postId);
+                $threadId, $postId, $postId, ($thread->isLocked() ? ICON_PADLOCK . ' ' : ''), $thread->title(), $postId);
         }
         return sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
-            $threadId, ($threadInfo['isLocked'] ? ICON_PADLOCK . ' ' : ''), $threadInfo['Title']);
+            $threadId, ($thread->isLocked() ? ICON_PADLOCK . ' ' : ''), $thread->title());
     }
 }

@@ -33,8 +33,8 @@ if (empty($_POST['body']) || empty($_POST['title'])) {
     header('Location: ' . redirectUrl($forum->url()));
     exit;
 }
-$Title = shortenString(trim($_POST['title']), 150, true, false);
-$Body = trim($_POST['body']);
+$title = shortenString(trim($_POST['title']), 150, true, false);
+$body = trim($_POST['body']);
 
 if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted('forums_polls_create')) {
     $needPoll = false;
@@ -60,16 +60,21 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted
     }
 }
 
-$threadId = $forum->addThread($Viewer->id(), $Title, $Body);
+$thread = (new Gazelle\Manager\ForumThread)->create(
+    forumId: $forum->id(),
+    userId:  $Viewer->id(),
+    title:   $title,
+    body:    $body,
+);
 if ($needPoll) {
-    $forum->addPoll($threadId, $Question, $Answers, $Votes);
+    $thread->addPoll($Question, $Answers, $Votes);
     if ($ForumID == STAFF_FORUM_ID) {
         Irc::sendRaw('PRIVMSG '.MOD_CHAN.' :Poll created by '.$Viewer->username().": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }
 }
 
 if (isset($_POST['subscribe'])) {
-    (new Gazelle\Subscription($Viewer))->subscribe($threadId);
+    (new Gazelle\Subscription($Viewer))->subscribe($thread->id());
 }
 
-header("Location: forums.php?action=viewthread&threadid=$threadId");
+header("Location: {$thread->location()}");

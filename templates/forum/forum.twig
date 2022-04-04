@@ -72,12 +72,13 @@
         </tr>
     {% endif %}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    <td class="td_read {{ thread.icon_class }} {{ tooltip }}" title="{ thread.icon_class|replace({'_': ' '})|ucfirstall }}"></td>
+    <td class="td_read {{ thread.icon_class }} {{ tooltip }}" title="{{ thread.icon_class|replace({'_': ' '})|ucfirstall }}"></td>
     <td class="td_latest">
         <span style="float: left;" class="last_topic">
             <strong>
                 <a href="forums.php?action=viewthread&amp;threadid={{ thread.ID }}" class="tooltip" data-title-plain="{{ thread.Title }}"{%
                     if thread.Title != thread.cut_title %} title="{{ thread.Title }}"{% endif %}>{{ thread.cut_title }}</a>
+                    {%- if thread.has_poll %} <span class="tooltip" title="There is a poll!">&#x1F5F3;</span>{% endif -%}
             </strong>
             {{ thread.page_links|raw }}
         </span>

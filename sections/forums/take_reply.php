@@ -5,29 +5,28 @@ if ($Viewer->disablePosting()) {
 }
 authorize();
 
-$threadId = (int)($_POST['thread'] ?? 0);
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404);
 }
-$ThreadInfo = $forum->threadInfo($threadId);
+$threadId = $thread->id();
+$forum    = $thread->forum();
 
-if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $ThreadInfo['isLocked'] && !$Viewer->permitted('site_moderate_forums')) {
+if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $thread->isLocked() && !$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
 
 // If you're not sending anything, go back
 $body = trim($_POST['quickpost'] ?? '');
 if ($body === '') {
-    header("Location: " .  $_SERVER['HTTP_REFERER'] ?? "forums.php?action=viewthread&threadid={$_POST['thread']}");
+    header("Location: " . redirectUrl($thread->location()));
     exit;
 }
 
-if ($ThreadInfo['LastPostAuthorID'] == $Viewer->id() && isset($_POST['merge'])) {
-    $postId = $forum->mergePost($Viewer->id(), $threadId, $body);
+if ($thread->lastAuthorId() == $Viewer->id() && isset($_POST['merge'])) {
+    $postId = $thread->mergePost($Viewer->id(), $body);
 } else {
-    $postId = $forum->addPost($Viewer->id(), $threadId, $body);
-    ++$ThreadInfo['Posts'];
+    $postId = $thread->addPost($Viewer->id(), $body);
 }
 
 (new Gazelle\User\Notification\Quote($Viewer))->create(
@@ -39,7 +38,4 @@ if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
 }
 (new Gazelle\Manager\Subscription)->flush('forums', $threadId);
 
-header("Location: forums.php?action=viewthread&threadid=$threadId&page="
-    . (int)ceil($ThreadInfo['Posts'] / $Viewer->postsPerPage())
-    . "#post$postId"
-);
+header("Location: {$thread->location()}&postid=$postId#post$postId");

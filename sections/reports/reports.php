@@ -29,6 +29,7 @@ $idList    = $search->page($paginator->limit(), $paginator->offset());
 $collageMan = new Gazelle\Manager\Collage;
 $commentMan = new Gazelle\Manager\Comment;
 $forumMan   = new Gazelle\Manager\Forum;
+$threadMan  = new Gazelle\Manager\ForumThread;
 $requestMan = new Gazelle\Manager\Request;
 $userMan    = new Gazelle\Manager\User;
 $reportMan  = (new Gazelle\Manager\Report)->setUserManager($userMan);
@@ -57,19 +58,14 @@ foreach ($idList as $id) {
             ];
             break;
         case 'thread':
-            $forum = $forumMan->findByThreadId($report->subjectId());
-            $link  = null;
-            if ($forum) {
-                $threadInfo = $forum->threadInfo($report->subjectId());
-                $user = $userMan->findById($threadInfo['AuthorID']);
-                $link = $forum->link() . ' &rsaquo; '
-                    . $forum->threadLink($report->subjectId(), $threadInfo['Title'])
-                    . ' created by ' . ($user ? $user->link() : 'System');
-            }
+            $thread = $threadMan->findById($report->subjectId());
             $context = [
                 'label'   => 'forum thread',
-                'subject' => $forum,
-                'link'    => $link,
+                'subject' => $thread,
+                'link'    => $thread
+                    ?  ($thread->forum()->link() . ' &rsaquo; ' . $thread->link()
+                        . ' created by ' . ($thread?->author()->link() ?? 'System'))
+                    : null,
             ];
             break;
         case 'post':
@@ -77,12 +73,11 @@ foreach ($idList as $id) {
             $link  = null;
             if ($forum) {
                 $postInfo = $forum->postInfo($report->subjectId());
-                $threadInfo = $forum->threadInfo($postInfo['thread-id']);
+                $thread = $threadMan->findById($postInfo['thread-id']);
                 $user = $userMan->findById($postInfo['user-id']);
-                $link = $forum->link() . ' &rsaquo; '
-                    . $forum->threadLink($postInfo['thread-id'], $threadInfo['Title']) . ' &rsaquo; '
-                    . $forum->threadPostLink($postInfo['thread-id'], $report->subjectId())
-                    . ' by ' . ($user ? $user->link() : 'System');
+                $link = $forum->link() . ' &rsaquo; ' . $thread->link() . ' &rsaquo; '
+                    . $forum->threadPostLink($thread->id(), $report->subjectId())
+                    . ' by ' . ($user?->link() ?? 'System');
             }
             $context = [
                 'label'   => 'forum post',

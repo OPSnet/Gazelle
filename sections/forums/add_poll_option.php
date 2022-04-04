@@ -5,14 +5,13 @@ if (!$Viewer->permitted('site_moderate_forums')) {
 }
 authorize();
 
-$threadId = (int)$_POST['threadid'];
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404);
 }
-if (!$forum->hasRevealVotes()) {
+if (!$thread->hasRevealVotes()) {
     error(403);
 }
-$forum->addPollAnswer($threadId, trim($_POST['new_option']));
+$thread->addPollAnswer(trim($_POST['new_option']));
 
-header("Location: forums.php?action=viewthread&threadid=$threadId");
+header("Location: " . $thread->location());

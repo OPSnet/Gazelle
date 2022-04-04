@@ -33,13 +33,7 @@ if (!$contest) {
     }
 }
 
-$threadId = $forumMan->findThreadIdByFeaturedPoll();
-if (!$threadId) {
-    $poll = false;
-} else {
-    $forum = $forumMan->findByThreadId($threadId);
-    $poll = $forum->pollDataExtended($threadId, $Viewer->id());
-}
+$thread = (new Gazelle\Manager\ForumThread)->findByFeaturedPoll();
 
 echo $Twig->render('index/private-sidebar.twig', [
     'auth'              => $Viewer->auth(),
@@ -49,8 +43,8 @@ echo $Twig->render('index/private-sidebar.twig', [
     'featured_aotm'     => $tgMan->featuredAlbumAotm(),
     'featured_showcase' => $tgMan->featuredAlbumShowcase(),
     'staff_blog'        => new Gazelle\Manager\StaffBlog,
-    'poll'              => $poll,
-    'poll_thread_id'    => $threadId,
+    'poll'              => $thread?->pollDataExtended($Viewer->id()),
+    'poll_thread_id'    => $thread?->id(),
     'request_stats'     => new Gazelle\Stats\Request,
     'snatch_stats'      => $Cache->get_value('stats_snatches'),
     'torrent_stats'     => new Gazelle\Stats\Torrent,

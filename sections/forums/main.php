@@ -1,7 +1,6 @@
 <?php
 
-$forumMan = new Gazelle\Manager\Forum();
-$toc = $forumMan->tableOfContentsMain();
+$toc = (new Gazelle\Manager\Forum())->tableOfContentsMain();
 
 View::show_header('Forums');
 ?>
@@ -47,6 +46,7 @@ foreach ($toc as $category => $forumList) {
             'icon_class'     => $iconClass,
             'id'             => $f['LastPostTopicID'],
             'is_read'        => $isRead,
+            'has_poll'       => $f['has_poll'],
             'last_post_time' => $f['LastPostTime'],
             'last_post_user' => $f['LastPostAuthorID'],
             'last_read_page' => $lastReadPage,

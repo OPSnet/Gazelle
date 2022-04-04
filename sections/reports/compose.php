@@ -53,14 +53,14 @@ switch ($type) {
         break;
 
     case 'thread':
-        $forum = (new Gazelle\Manager\Forum)->findByThreadId($id);
-        if (is_null($forum)) {
+        $thread = (new Gazelle\Manager\ForumThread)->findById($id);
+        if (is_null($thread)) {
             error(404);
         }
-        if (!$Viewer->readAccess($forum)) {
+        if (!$Viewer->readAccess($thread->forum())) {
             error(403);
         }
-        $report = (new Gazelle\Report\ForumThread($forum))->setContext($id);
+        $report = new Gazelle\Report\ForumThread($thread);
         break;
 
     case 'post':

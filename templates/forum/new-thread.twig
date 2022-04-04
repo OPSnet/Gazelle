@@ -69,7 +69,7 @@
                     <td></td>
                     <td>
                         <input id="subscribebox" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} onchange="$('#subscribeboxpreview').raw().checked=this.checked;" />
-                        <label for="subscribebox">Subscribe to topic</label>
+                        <label for="subscribebox">Subscribe to thread</label>
                     </td>
                 </tr>
 {% if viewer.permitted('forums_polls_create') %}
@@ -95,7 +95,7 @@
             </table>
             <div id="subscribediv" class="hidden">
                 <input id="subscribeboxpreview" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} />
-                <label for="subscribebox">Subscribe to topic</label>
+                <label for="subscribebox">Subscribe to thread</label>
             </div>
             <div id="buttons" class="center">
                 <input type="button" value="Preview" onclick="Newthread_Preview(1);" id="newthreadpreviewbutton" />
