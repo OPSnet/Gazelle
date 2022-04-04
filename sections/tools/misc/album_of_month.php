@@ -88,29 +88,36 @@ if (isset($_POST['GroupID'])) {
 
             //Get post title (album title)
             if ($Album['ArtistID'] != '0') {
-                $Title = $Album['Artist'] . ' - ' . $Album['Name'];
+                $title = "{$Album['Artist']} \xE2\x80\x93  {$Album['Name']}";
             } else {
-                $Title = $Album['Name'];
+                $title = $Album['Name'];
             }
 
             //Get post body
-            if (isset($_POST['Body']) && $_POST['Body'] != '') {
-                $Body = $_POST['Body'];
+            if (isset($_POST['Body']) && trim($_POST['Body']) != '') {
+                $body = trim($_POST['Body']);
             } else {
-                $Body = '[size=4]' . $Title . '[/size]' . "\n\n";
+                $body = '[size=4]' . $title . '[/size]' . "\n\n";
                 if (!empty($Album['WikiImage']))
-                    $Body .= '[img]' . $Album['WikiImage'] . '[/img]';
+                    $body .= '[img]' . $Album['WikiImage'] . '[/img]';
             }
 
-            //Add album of the month and create forum
+            // create forum and add album of the month
             $forum = new Gazelle\Forum(AOTM_FORUM_ID);
-            $DB->prepared_query('
+            $thread = (new Gazelle\Manager\ForumThread)->create(
+                forumId: $forum->id(),
+                userId:  $Viewer->id(),
+                title:   $title,
+                body:    $body,
+            );
+            $DB->prepared_query("
                 INSERT INTO featured_albums
                        (GroupID, ThreadID, Type)
                 VALUES (?,       ?,        0)
-                ', $GroupID, $forum->addThread($Viewer->id(), $Title, $Body)
+                ", $GroupID, $thread->id()
             );
             header("Location: /");
+            exit;
         }
     }
 }

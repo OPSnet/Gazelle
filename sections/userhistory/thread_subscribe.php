@@ -6,13 +6,12 @@ if ($Viewer->disableForums()) {
 }
 authorize();
 
-$threadId = (int)$_GET['threadid'];
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404);
 }
-if (!$Viewer->readAccess($forum)) {
+if (!$Viewer->readAccess($thread->forum())) {
     error(403);
 }
 
-(new Gazelle\Subscription($Viewer))->subscribe($threadId);
+(new Gazelle\Subscription($Viewer))->subscribe($thread->id());

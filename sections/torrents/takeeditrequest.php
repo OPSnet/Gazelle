@@ -6,14 +6,15 @@ if (!$tgroup) {
 }
 authorize();
 
-$threadId = (new Gazelle\Forum(EDITING_FORUM_ID))->addThread(
-    SYSTEM_USER_ID,
-    "Editing request \xE2\x80\x93 Torrent Group: " . $tgroup->name(),
-    $Twig->render('forum/edit-request-body.twig', [
+$thread = (new Gazelle\Manager\ForumThread)->create(
+    forumId: EDITING_FORUM_ID,
+    userId:  SYSTEM_USER_ID,
+    title:   "Editing request \xE2\x80\x93 Torrent Group: " . $tgroup->name(),
+    body:    $Twig->render('forum/edit-request-body.twig', [
         'link'    => '[torrent]' . $tgroup->id() . '[/torrent]',
         'details' => trim($_POST['edit_details']),
         'viewer'  => $Viewer,
-    ])
+    ]),
 );
 
-header("Location: forums.php?action=viewthread&threadid={$threadId}");
+header("Location: {$thread->location()}");

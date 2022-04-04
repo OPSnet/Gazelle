@@ -5,16 +5,15 @@ if (!$Viewer->permitted('site_moderate_forums')) {
 }
 authorize();
 
-$threadId = (int)$_POST['threadid'];
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404);
 }
-$body = trim($_POST['threadid'] ?? null);
+$body = trim($_POST['body'] ?? '');
 if (!strlen($body)) {
     error("Thread note cannot be empty");
 }
 
-$forum->addThreadNote($threadId, $Viewer->id(), $body);
+$thread->addThreadNote($Viewer->id(), $body);
 
-header("Location: forums.php?action=viewthread&threadid=$threadId#thread_notes");
+header("Location: {$thread->location()}#thread_notes");

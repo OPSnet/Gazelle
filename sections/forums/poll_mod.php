@@ -5,11 +5,10 @@ if (!$Viewer->permitted('forums_polls_moderate')) {
 }
 authorize();
 
-$threadId = (int)$_POST['threadid'];
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(0, true);
 }
-$forum->moderatePoll($threadId, isset($_POST['feature']), isset($_POST['close']));
+$thread->moderatePoll(isset($_POST['feature']), isset($_POST['close']));
 
-header('Location: ' . redirectUrl("forums.php?action=viewthread&threadid={$threadId}"));
+header('Location: ' . redirectUrl($thread->location()));

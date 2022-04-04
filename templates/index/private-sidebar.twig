@@ -81,7 +81,7 @@
 
 {%- if poll -%}
 <div class="box">
-    <div class="head colhead_dark"><strong>Poll{% if poll.is_closed %} [Closed]{% endif %}</strong></div>
+    <div class="head colhead_dark"><strong><a href="forums.php?action=viewthread&amp;threadid={{ poll_thread_id }}">Latest Poll &#x1F5F3;</a>{% if poll.is_closed %} [Closed]{% endif %}</strong></div>
     <div class="pad">
         <p><strong>{{ poll.question }}</strong></p>
     {% if poll.user_vote or poll.is_closed %}
@@ -114,7 +114,6 @@
         </form>
         </div>
     {% endif %}
-        <br /><strong>Topic:</strong> <a href="forums.php?action=viewthread&amp;threadid={{ poll_thread_id }}">Visit</a>
     </div>
 </div>
 {% endif -%}

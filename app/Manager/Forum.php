@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 class Forum extends \Gazelle\Base {
 
-    protected const CACHE_TOC        = 'forum_toc_mainv3';
+    protected const CACHE_TOC_MAIN   = 'forum_toc_main';
     protected const CACHE_LIST       = 'forum_list';
     protected const CACHE_TRANSITION = 'forum_transition';
     protected const ID_KEY           = 'zz_f_%d';
@@ -38,27 +38,6 @@ class Forum extends \Gazelle\Base {
             $id = self::$db->scalar("
                 SELECT ID FROM forums WHERE ID = ?
                 ", $forumId
-            );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 7200);
-            }
-        }
-        return $id ? new \Gazelle\Forum($id) : null;
-    }
-
-    /**
-     * Instantiate a forum from a thread ID.
-     *
-     * @param int id The thread ID.
-     * @return \Gazelle\Forum object
-     */
-    public function findByThreadId(int $threadId) {
-        $key = sprintf(self::ID_THREAD_KEY, $threadId);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT ForumID FROM forums_topics WHERE ID = ?
-                ", $threadId
             );
             if (!is_null($id)) {
                 self::$cache->cache_value($key, $id, 7200);
@@ -207,16 +186,19 @@ class Forum extends \Gazelle\Base {
      *    - int 'IsLocked' Last post is sticky (0/1)
      */
     public function tableOfContentsMain() {
-        if (!$toc = self::$cache->get_value(self::CACHE_TOC)) {
+        $toc = self::$cache->get_value(self::CACHE_TOC_MAIN);
+        if ($toc === false ) {
             self::$db->prepared_query("
                 SELECT cat.Name AS categoryName, cat.ID AS categoryId,
                     f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,
                     f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
                     f.Sort, f.AutoLock, f.AutoLockWeeks,
-                    ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked
+                    ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked,
+                    (fp.TopicID IS NOT NULL AND fp.Closed = '0') AS has_poll
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
                 LEFT JOIN forums_topics ft ON (ft.ID = f.LastPostTopicID)
+                LEFT JOIN forums_polls fp ON (fp.TopicID = ft.ID)
                 ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
             $toc = [];
@@ -228,7 +210,7 @@ class Forum extends \Gazelle\Base {
                 }
                 $toc[$category][] = $row;
             }
-            self::$cache->cache_value(self::CACHE_TOC, $toc, 86400 * 10);
+            self::$cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);
         }
         return $toc;
     }
@@ -347,7 +329,7 @@ class Forum extends \Gazelle\Base {
     }
 
     public function flushToc() {
-        self::$cache->delete_value(self::CACHE_TOC);
+        self::$cache->delete_value(self::CACHE_TOC_MAIN);
         return $this;
     }
 
@@ -439,49 +421,5 @@ class Forum extends \Gazelle\Base {
             ", $user->id(), ...$args
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function lockOldThreads(): int {
-        self::$db->prepared_query("
-            SELECT t.ID, t.ForumID
-            FROM forums_topics AS t
-            INNER JOIN forums AS f ON (t.ForumID = f.ID)
-            WHERE t.IsLocked = '0'
-                AND t.IsSticky = '0'
-                AND f.AutoLock = '1'
-                AND t.LastPostTime + INTERVAL f.AutoLockWeeks WEEK < now()
-        ");
-        $ids = self::$db->collect('ID');
-        $forumIDs = self::$db->collect('ForumID');
-
-        $forumMan = new \Gazelle\Manager\Forum;
-        if (count($ids) > 0) {
-            $placeholders = placeholders($ids);
-            self::$db->prepared_query("
-                UPDATE forums_topics SET
-                    IsLocked = '1'
-                WHERE ID IN ($placeholders)
-            ", ...$ids);
-
-            self::$db->prepared_query("
-                DELETE FROM forums_last_read_topics
-                WHERE TopicID IN ($placeholders)
-            ", ...$ids);
-
-            foreach ($ids as $id) {
-                self::$cache->begin_transaction("thread_$id".'_info');
-                self::$cache->update_row(false, ['IsLocked' => '1']);
-                self::$cache->commit_transaction(3600 * 24 * 30);
-                self::$cache->delete_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
-                self::$cache->delete_value("thread_$id".'_info', 3600 * 24 * 30);
-                $forumMan->findByThreadId($id)->addThreadNote($id, 0, 'Locked automatically by schedule');
-            }
-
-            $forumIDs = array_flip(array_flip($forumIDs));
-            foreach ($forumIDs as $forumID) {
-                self::$cache->delete_value("forums_$forumID");
-            }
-        }
-        return count($ids);
     }
 }

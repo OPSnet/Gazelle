@@ -18,11 +18,13 @@ if (!$Viewer->permitted('site_moderate_forums') && empty($_POST['transition'])) 
 authorize();
 
 $forumMan = new Gazelle\Manager\Forum;
-$threadId = (int)$_POST['threadid'];
-$forum = $forumMan->findByThreadId($threadId);
-if (is_null($forum)) {
+
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404);
 }
+$forum = $thread->forum();
+
 if (!$Viewer->writeAccess($forum)) {
     error(403);
 }
@@ -31,7 +33,7 @@ if (isset($_POST['delete'])) {
     if (!$Viewer->permitted('site_admin_forums')) {
         error(403);
     }
-    $forum->removeThread($threadId);
+    $thread->remove();
     header('Location: ' . $forum->url());
     exit;
 }
@@ -50,17 +52,16 @@ if (!isset($_POST['transition']) && $newTitle === '') {
 
 // Variables for database input
 $page      = (int)$_POST['page'];
-$locked    = isset($_POST['locked']) ? 1 : 0;
-$newSticky = isset($_POST['sticky']) ? 1 : 0;
+$locked    = (bool)isset($_POST['locked']);
+$newPinned = isset($_POST['sticky']) ? 1 : 0;
 $newRank   = (int)($_POST['ranking'] ?? 0);
 
-if (!$newSticky && $newRank > 0) {
+if (!$newPinned && $newRank > 0) {
     $newRank = 0;
 } elseif ($newRank < 0) {
     error('Ranking cannot be a negative value');
 }
 
-$threadInfo = $forum->threadInfo($threadId);
 if (isset($_POST['transition'])) {
     $transId = (int)$_POST['transition'];
     if ($transId < 1) {
@@ -76,21 +77,20 @@ if (isset($_POST['transition'])) {
                 error(403);
             }
             $newForum  = $forumMan->findById($transition['destination']);
-            $newSticky = $threadInfo['isSticky'];
-            $locked    = $threadInfo['isLocked'];
-            $newRank   = $threadInfo['Ranking'];
-            $newTitle  = $threadInfo['Title'];
+            $locked    = $thread->isLocked();
+            $newPinned = $thread->isPinned();
+            $newRank   = $thread->pinnedRanking();
+            $newTitle  = $thread->title();
             $action    = 'transitioning';
         }
     }
 }
 
 if ($locked && $Viewer->permitted('site_moderate_forums')) {
-    $forum->clearUserLastRead($threadId);
+    $thread->clearUserLastRead();
 }
 
-$forumId = $newForum ? $newForum->id() : $forum->id();
-$forum->editThread($threadId, $forumId, $newSticky, $newRank, $locked, $newTitle);
+$thread->editThread($newForum ? $newForum->id() : $forum->id(), $newPinned, $newRank, $locked, $newTitle);
 
 // topic notes and notifications
 $notes = [];
@@ -103,17 +103,17 @@ switch ($action ?? null) {
         $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";
         break;
     default:
-        if ($threadInfo['Title'] != $newTitle) {
-            $notes[] = "Title edited from \"{$threadInfo['Title']}\" to \"$newTitle\"";
+        if ($thread->title() != $newTitle) {
+            $notes[] = "Title edited from \"{$thread->title()}\" to \"$newTitle\"";
         }
-        if ($threadInfo['isLocked'] != $locked) {
-            $notes[] = $threadInfo['isLocked'] ? 'Unlocked' : 'Locked';
+        if ($thread->isLocked() != $locked) {
+            $notes[] = $thread->isLocked() ? 'Unlocked' : 'Locked';
         }
-        if ($threadInfo['isSticky'] != $newSticky) {
-            $notes[] = $threadInfo['isSticky'] ? 'Unpinned' : 'Pinned';
+        if ($thread->isPinned() != $newPinned) {
+            $notes[] = $thread->isPinned() ? 'Unpinned' : 'Pinned';
         }
-        if ($threadInfo['Ranking'] != $newRank) {
-            $notes[] = "Ranking changed from {$threadInfo['Ranking']} to $newRank";
+        if ($thread->pinnedRanking() != $newRank) {
+            $notes[] = "Ranking changed from {$thread->pinnedRanking()} to $newRank";
         }
         if ($newForum && $newForum->id() != $forum->id()) {
             $notes[] = "Moved from $oldUrl to $newUrl";
@@ -121,7 +121,7 @@ switch ($action ?? null) {
         break;
 }
 if ($notes) {
-    $forum->addThreadNote($threadId, $Viewer->id(), implode("\n", $notes));
+    $thread->addThreadNote($Viewer->id(), implode("\n", $notes));
 }
 
-header("Location: forums.php?action=viewthread&threadid=$threadId&page=$page");
+header("Location: {$thread->location()}&page=$page");

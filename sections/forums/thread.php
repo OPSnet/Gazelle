@@ -14,10 +14,11 @@ Things to expect in $_GET:
 // Enable TOC
 Text::$TOC = true;
 
+
 $forumMan = new Gazelle\Manager\Forum;
 if (isset($_GET['postid'])) {
     $postId = (int)$_GET['postid'];
-    $forum = $forumMan->findByPostId($postId);
+    $forum  = $forumMan->findByPostId($postId);
     if (is_null($forum)) {
         error(404);
     }
@@ -27,22 +28,20 @@ if (isset($_GET['postid'])) {
         );
         exit;
     }
-    $threadId = $forumMan->findThreadIdByPostId($postId);
+    $thread = (new Gazelle\Manager\ForumThread)->findById($forumMan->findThreadIdByPostId($postId));
 } elseif (isset($_GET['threadid'])) {
     $postId = false;
-    $threadId = (int)$_GET['threadid'];
-    $forum = $forumMan->findByThreadId($threadId);
-    if (is_null($forum)) {
+    $thread = (new Gazelle\Manager\ForumThread)->findById((int)$_GET['threadid']);
+    if (is_null($thread)) {
         error(404);
     }
+    $forum = $thread->forum();
 } else {
     error(404);
 }
-$forumId = $forum->id();
-$threadInfo = $forum->threadInfo($threadId);
-if (empty($threadInfo)) {
-    error(404);
-}
+$forumId  = $forum->id();
+$threadId = $thread->id();
+
 if (!$Viewer->readAccess($forum)) {
     error(403);
 }
@@ -53,30 +52,25 @@ $IsDonorForum = ($forumId == DONOR_FORUM);
 $PerPage = $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
-if ($threadInfo['Posts'] <= $PerPage) {
-    $PostNum = 1;
-} else {
-    if (isset($_GET['post'])) {
-        $PostNum = (int)($_GET['post'] ?? 1);
-    } elseif ($postId && $postId != $threadInfo['StickyPostID']) {
-        $PostNum = $forum->threadNumPosts($threadId, $postId, $threadInfo['StickyPostID'] < $postId);
-    } else {
-        $PostNum = 1;
-    }
-}
+$PostNum = match(true) {
+    $thread->postTotal() <= $PerPage              => 1,
+    isset($_GET['post'])                          => (int)$_GET['post'],
+    $postId && $postId != $thread->pinnedPostId() => $thread->lesserPostTotal($postId),
+    default                                       => 1,
+};
 
-$Page = max(1, (int)($_GET['page'] ?? ceil(min($threadInfo['Posts'], $PostNum) / $PerPage)));
-if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
-    $Page = (int)ceil($threadInfo['Posts'] / $PerPage);
+$Page = max(1, (int)($_GET['page'] ?? (int)ceil(min($thread->postTotal(), $PostNum) / $PerPage)));
+if (($Page - 1) * $PerPage > $thread->postTotal()) {
+    $Page = (int)ceil($thread->postTotal() / $PerPage);
 }
-$thread = $forum->threadPage($threadId, $PerPage, $Page);
+$slice = $thread->slice(perPage: $PerPage, page: $Page);
 $paginator = new Gazelle\Util\Paginator($PerPage, $Page);
-$paginator->setTotal($threadInfo['Posts']);
+$paginator->setTotal($thread->postTotal());
 
-$firstOnPage = current($thread)['ID'] ?? 0;
-$lastOnPage = count($thread) ? end($thread)['ID'] : 0;
-if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPage * $Page) {
-    $lastOnPage = $threadInfo['StickyPostID'];
+$firstOnPage = current($slice)['ID'] ?? 0;
+$lastOnPage = count($slice) ? end($slice)['ID'] : 0;
+if ($lastOnPage <= $thread->pinnedPostId() && $thread->postTotal() <= $PerPage * $Page) {
+    $lastOnPage = $thread->pinnedPostId();
 }
 
 $quote = new Gazelle\User\Quote($Viewer);
@@ -84,9 +78,9 @@ if ($quote->unreadTotal()) {
     $quote->clearThread($threadId, $firstOnPage, $lastOnPage);
 }
 
-$lastRead = $forum->userLastReadPost($Viewer->id(), $threadId);
+$lastRead = $thread->userLastReadPost($Viewer->id());
 if ($lastRead < $lastOnPage) {
-    $forum->userCatchupThread($Viewer->id(), $threadId, $lastOnPage);
+    $thread->catchup($Viewer->id(), $lastOnPage);
 }
 
 $isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribed($threadId);
@@ -99,7 +93,7 @@ $userMan = new Gazelle\Manager\User;
 $transitions = $forumMan->threadTransitionList($Viewer, $forumId);
 $department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
-View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
+View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($thread->title()),
      ['js' => 'comments,subscriptions,bbcode' . ($IsDonorForum ? ',donor' : '')]
 );
 echo $Twig->render('forum/header-thread.twig', [
@@ -109,12 +103,12 @@ echo $Twig->render('forum/header-thread.twig', [
     'is_subbed'    => $isSubscribed,
     'paginator'    => $paginator,
     'thread_id'    => $threadId,
-    'thread_title' => $threadInfo['Title'],
+    'thread_title' => $thread->title(),
     'transition'   => $transitions,
 ]);
 
-if ($threadInfo['NoPoll'] == 0) {
-    [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
+if ($thread->hasPoll()) {
+    [$Question, $Answers, $Votes, $Featured, $Closed] = $thread->pollData();
 
     if (!empty($Votes)) {
         $TotalVotes = array_sum($Votes);
@@ -125,7 +119,7 @@ if ($threadInfo['NoPoll'] == 0) {
     }
 
     $RevealVoters = $forum->hasRevealVotes();
-    $UserResponse = $forum->pollVote($Viewer->id(), $threadId);
+    $UserResponse = $thread->pollResponse($Viewer->id());
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
@@ -136,9 +130,9 @@ if ($threadInfo['NoPoll'] == 0) {
 ?>
     <div class="box thin clear">
         <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?><?php if ($Featured) { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
-        <div class="pad<?php if ($threadInfo['isLocked']) { echo ' hidden'; } ?>" id="threadpoll">
+        <div class="pad<?php if ($thread->isLocked()) { echo ' hidden'; } ?>" id="threadpoll">
             <p><strong><?=display_str($Question)?></strong></p>
-<?php if ($UserResponse !== null || $Closed || $threadInfo['isLocked']) { ?>
+<?php if ($UserResponse !== null || $Closed || $thread->isLocked()) { ?>
             <ul class="poll nobullet">
 <?php
         if (!$RevealVoters) {
@@ -261,24 +255,24 @@ if ($threadInfo['NoPoll'] == 0) {
 } //End Polls
 
 // Squeeze in stickypost
-if ($threadInfo['StickyPostID']) {
-    if (!$thread) {
-        $thread = [$threadInfo['StickyPost']];
+if ($thread->pinnedPostId()) {
+    if (!$slice) {
+        $slice = [$thread->pinnedPostInfo()];
     } else {
-        if ($threadInfo['StickyPostID'] != current($thread)['ID']) {
-            array_unshift($thread, $threadInfo['StickyPost']);
+        if ($thread->pinnedPostId() != current($slice)['ID']) {
+            array_unshift($slice, $thread->pinnedPostInfo());
         }
-        if ($threadInfo['StickyPostID'] != $thread[count($thread) - 1]['ID']) {
-            $thread[] = $threadInfo['StickyPost'];
+        if ($thread->pinnedPostId() != $slice[count($slice) - 1]['ID']) {
+            $slice[] = $thread->pinnedPostInfo();
         }
     }
 }
 
-foreach ($thread as $Key => $Post) {
+foreach ($slice as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
     $author = new Gazelle\User($AuthorID);
     $tableClass = ['forum_post', 'wrap_overflow', 'box vertical_margin'];
-    if (((!$threadInfo['isLocked'] || $threadInfo['isSticky'])
+    if (((!$thread->isLocked() || $thread->isPinned())
             && $PostID > $lastRead
             && strtotime($AddedTime) > $Viewer->forumCatchupEpoch()
             ) || (isset($RequestKey) && $Key == $RequestKey)
@@ -288,10 +282,10 @@ foreach ($thread as $Key => $Post) {
     if (!$Viewer->showAvatars()) {
         $tableClass[] = 'noavatar';
     }
-    if ($threadInfo['AuthorID'] == $AuthorID) {
+    if ($AuthorID == $thread->authorId()) {
         $tableClass[] = 'important_user';
     }
-    if ($PostID == $threadInfo['StickyPostID']) {
+    if ($PostID == $thread->pinnedPostId()) {
         $tableClass[] = 'sticky_post';
     }
 ?>
@@ -308,19 +302,19 @@ foreach ($thread as $Key => $Post) {
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
-<?php if (!$threadInfo['isLocked'] && !$Viewer->disablePosting()) { ?>
+<?php if (!$thread->isLocked() && !$Viewer->disablePosting()) { ?>
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?= $author->username() ?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
-    if ((!$threadInfo['isLocked'] && $Viewer->writeAccess($forum) && $AuthorID == $Viewer->id()) && !$Viewer->disablePosting() || $Viewer->permitted('site_moderate_forums')) {
+    if ((!$thread->isLocked() && $Viewer->writeAccess($forum) && $AuthorID == $Viewer->id()) && !$Viewer->disablePosting() || $Viewer->permitted('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
-<?php if ($Viewer->permitted('site_forum_post_delete') && $threadInfo['Posts'] > 1) { ?>
+<?php if ($Viewer->permitted('site_forum_post_delete') && $thread->postTotal() > 1) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>
 <?php
     }
-    if ($PostID == $threadInfo['StickyPostID']) { ?>
+    if ($PostID == $thread->pinnedPostId()) { ?>
                 <strong><span class="sticky_post_label" class="brackets">Pinned</span></strong>
 <?php   if ($Viewer->permitted('site_moderate_forums')) { ?>
                 - <a href="forums.php?action=sticky_post&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>&amp;remove=true&amp;auth=<?=$auth?>" title="Unpin this post" class="brackets tooltip">X</a>
@@ -382,22 +376,22 @@ foreach ($thread as $Key => $Post) {
 </table>
 <?php } ?>
 <div class="breadcrumbs">
-    <a href="forums.php">Forums</a> &rsaquo; <?= $forum->link() ?> &rsaquo; <?= display_str($threadInfo['Title']) ?>
+    <a href="forums.php">Forums</a> &rsaquo; <?= $forum->link() ?> &rsaquo; <?= display_str($thread->title()) ?>
 </div>
 <?php
 echo $paginator->linkbox();
-$lastPost = end($thread);
+$lastPost = end($slice);
 $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setPreviewManual(true);
 
-if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$threadInfo['isLocked'])) {
+if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$thread->isLocked())) {
     echo $Twig->render('reply.twig', [
         'auth'     => $auth,
         'action'   => 'reply',
         'forum'    => $forumId,
         'id'       => $threadId,
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id(),
-        'name'     => 'thread',
+        'name'     => 'threadid',
         'subbed'   => $isSubscribed,
         'textarea' => $textarea,
         'user'     => $Viewer,
@@ -426,7 +420,7 @@ if (count($transitions)) {
 <?php
 }
 if ($Viewer->permitted('site_moderate_forums')) {
-    $Notes = $forum->threadNotes($threadId);
+    $Notes = $thread->threadNotes($threadId);
 ?>
     <br />
     <h3 id="thread_notes">Thread notes</h3> <a href="#" onclick="$('#thread_notes_table').gtoggle(); return false;" class="brackets">Toggle</a>
@@ -459,25 +453,25 @@ if ($Viewer->permitted('site_moderate_forums')) {
             <tr>
                 <td class="label"><label for="sticky_thread_checkbox" title="Pin this thread at the top of the list of threads">Pin</label></td>
                 <td>
-                    <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"<?php if ($threadInfo['isSticky']) { echo ' checked="checked"'; } ?> tabindex="4" />
+                    <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"<?php if ($thread->isPinned()) { echo ' checked="checked"'; } ?> tabindex="4" />
                 </td>
             </tr>
-            <tr id="ranking_row"<?=!$threadInfo['isSticky'] ? ' class="hidden"' : ''?>>
+            <tr id="ranking_row"<?= $thread->isPinned() ? '' : ' class="hidden"' ?>>
                 <td class="label"><label for="thread_ranking_textbox">Ranking</label></td>
                 <td>
-                    <input type="text" id="thread_ranking_textbox" name="ranking" value="<?=$threadInfo['Ranking']?>" tabindex="5" />
+                    <input type="text" id="thread_ranking_textbox" name="ranking" value="<?=$thread->pinnedRanking()?>" tabindex="5" />
                 </td>
             </tr>
             <tr>
                 <td class="label"><label for="locked_thread_checkbox">Locked</label></td>
                 <td>
-                    <input type="checkbox" id="locked_thread_checkbox" name="locked"<?php if ($threadInfo['isLocked']) { echo ' checked="checked"'; } ?> tabindex="6" />
+                    <input type="checkbox" id="locked_thread_checkbox" name="locked"<?php if ($thread->isLocked()) { echo ' checked="checked"'; } ?> tabindex="6" />
                 </td>
             </tr>
             <tr>
                 <td class="label"><label for="thread_title_textbox">Title</label></td>
                 <td>
-                    <input type="text" id="thread_title_textbox" name="title" style="width: 75%;" value="<?=display_str($threadInfo['Title'])?>" tabindex="7" />
+                    <input type="text" id="thread_title_textbox" name="title" style="width: 75%;" value="<?=display_str($thread->title())?>" tabindex="7" />
                 </td>
             </tr>
             <tr>
@@ -503,7 +497,7 @@ if ($Viewer->permitted('site_moderate_forums')) {
 <?php       } ?>
                     <optgroup label="<?= $forum->categoryName() ?>">
 <?php   } ?>
-                        <option value="<?= $forumId ?>"<?php if ($threadInfo['ForumID'] == $forumId) { echo ' selected="selected"';} ?>><?=display_str($forum->name())?></option>
+                        <option value="<?= $forumId ?>"<?php if ($thread->forumId() == $forumId) { echo ' selected="selected"';} ?>><?=display_str($forum->name())?></option>
 <?php } // foreach ?>
                     </optgroup>
                     </select>

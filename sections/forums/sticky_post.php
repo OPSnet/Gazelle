@@ -5,9 +5,8 @@ if (!$Viewer->permitted('site_moderate_forums')) {
 }
 authorize();
 
-$threadId = (int)$_GET['threadid'];
-$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
-if (is_null($forum)) {
+$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($thread)) {
     error(404);
 }
 $postId = (int)$_GET['postid'];
@@ -15,6 +14,6 @@ if (!$postId) {
     error(404);
 }
 
-$forum->stickyPost($Viewer->id(), $threadId, $postId, empty($_GET['remove']));
+$thread->pinPost($Viewer->id(), $postId, empty($_GET['remove']));
 
-header('Location: forums.php?action=viewthread&threadid='.$threadId);
+header('Location: ' . $thread->location());
