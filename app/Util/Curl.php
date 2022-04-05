@@ -14,6 +14,8 @@ class Curl {
     protected $curl;
     protected $result;
     protected bool $useProxy = true;
+    protected array $option;
+    protected array $postData;
     protected CurlMethod $method = CurlMethod::GET;
 
     public function __construct() {
@@ -29,18 +31,29 @@ class Curl {
         return $this;
     }
 
+    public function setOption(int $option, $value): Curl {
+        $this->option[$option] = $value;
+        return $this;
+    }
+
+    /**
+     * Set the POST key/value parameters.
+     *
+     * Implicity switches the HTTP method to POST and sets the content-type
+     * to multipart/form-data.
+     */
+    public function setPostData(array $postData): Curl {
+        $this->method   = CurlMethod::POST;
+        $this->postData = $postData;
+        return $this;
+    }
+
     public function setUseProxy(bool $useProxy): Curl {
         $this->useProxy = $useProxy;
         return $this;
     }
 
     public function fetch(string $url): bool {
-        if (HTTP_PROXY && $this->useProxy) {
-            curl_setopt_array($this->curl, [
-                CURLOPT_HTTPPROXYTUNNEL => true,
-                CURLOPT_PROXY           => HTTP_PROXY,
-            ]);
-        }
         curl_setopt_array($this->curl, [
             CURLOPT_HEADER         => false,
             CURLOPT_FOLLOWLOCATION => true,
@@ -55,6 +68,19 @@ class Curl {
                 CurlMethod::PUT  => CURLOPT_PUT,
             } => true,
         ]);
+        if (HTTP_PROXY && $this->useProxy) {
+            curl_setopt_array($this->curl, [
+                CURLOPT_HTTPPROXYTUNNEL => true,
+                CURLOPT_PROXY           => HTTP_PROXY,
+            ]);
+        }
+        if (!empty($this->postData)) {
+            curl_setopt($this->curl, CURLOPT_POSTFIELDS, $this->postData);
+        }
+        if (!empty($this->option)) {
+            curl_setopt_array($this->curl, $this->option);
+        }
+
         $this->result = curl_exec($this->curl);
         return $this->result !== false || $this->responseCode() === 200;
     }
