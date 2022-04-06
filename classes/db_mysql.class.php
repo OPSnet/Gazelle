@@ -154,11 +154,7 @@ class DB_MYSQL {
             throw new DB_MYSQL_DuplicateKeyException;
         }
         global $Debug;
-        $DBError = 'MySQL: '.strval($Msg).' SQL error: '.strval($this->Errno).' ('.strval($this->Error).')';
-        if ($this->Errno == 1194) {
-            Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :' . $DBError);
-        }
-        $Debug->analysis('!dev DB Error', $DBError, 3600 * 24);
+        $Debug->saveCase("MySQL: error({$this->Errno}) {$this->Error} query=[$this->PreparedQuery]");
         throw new DB_MYSQL_Exception($DBError);
     }
 
@@ -209,9 +205,9 @@ class DB_MYSQL {
         $Query = trim($Query);
         $this->PreparedQuery = $Query;
         $this->Statement = $this->LinkID->prepare($Query);
-        $this->Errno = $this->LinkID->errno;
-        $this->Error = $this->LinkID->error;
         if ($this->Statement === false) {
+            $this->Errno = $this->LinkID->errno;
+            $this->Error = $this->LinkID->error;
             $this->Queries[] = ["$Query /* ERROR: {$this->Error} */", 0, null];
             $this->halt(sprintf("Invalid Query: %s(%d) [%s]", $this->Error, $this->Errno, $Query));
         }
@@ -284,7 +280,7 @@ class DB_MYSQL {
         return $this->execute(...$Parameters);
     }
 
-    private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
+    private function attempt_query($Query, Callable $Closure) {
         global $Debug;
         $QueryStartTime = microtime(true);
         // In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
@@ -313,18 +309,11 @@ class DB_MYSQL {
         $this->Errno = mysqli_errno($this->LinkID);
         if (!$this->QueryID && $this->Errno !== 0) {
             $this->Error = mysqli_error($this->LinkID);
-
-            if ($AutoHandle) {
-                $this->halt("Invalid Query: $Query");
-            } else {
-                return $this->Errno;
-            }
+            $this->halt("Invalid Query: $Query");
         }
 
         $this->Row = 0;
-        if ($AutoHandle) {
-            return $this->QueryID;
-        }
+        return $this->QueryID;
     }
 
     public function inserted_id() {
@@ -334,10 +323,7 @@ class DB_MYSQL {
     }
 
     public function next_row($type = MYSQLI_NUM) {
-        if ($this->LinkID) {
-            return mysqli_fetch_array($this->QueryID, $type);
-        }
-        return null;
+        return $this->LinkID ? mysqli_fetch_array($this->QueryID, $type) : null;
     }
 
     public function next_record($Type = MYSQLI_BOTH, $Escape = true, $Reverse = false) {
