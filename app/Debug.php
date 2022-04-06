@@ -14,6 +14,7 @@ class Debug {
     protected static Cache $cache;
     protected static \DB_MYSQL $db;
 
+    protected static int $caseCount = 0;
     protected static array $Errors = [];
     protected static array $Flags = [];
     protected static array $Perf = [];
@@ -90,6 +91,9 @@ class Debug {
     }
 
     public function saveCase(string $message): int {
+        if (self::$caseCount++) {
+            return 0;
+        }
         $duration = microtime(true) - self::$startTime;
         if (!isset($_SERVER['REQUEST_URI'])) {
             $uri    = 'cli';
