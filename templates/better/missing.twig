@@ -52,8 +52,8 @@
             <table width"=100%" class="torrent_table">
                 {% for id, group in results %}
                     <tr>
-                        <td><a href="torrents.php?groupid={{ id }}&amp;action=editgroup">[Edit]</a>&nbsp;&nbsp;{{ group.artist|raw }} - <a href="torrents.php?id={{ id }}" target="_blank">{{ group.name|raw }}</a></td>
-                    </tr>
+                        <td><a href="torrents.php?id={{ id }}&amp;action=editgroup">[Edit]</a>&nbsp;&nbsp;{{ group.artist|raw }} - <a href="torrents.php?id={{ id }}" target="_blank">{{ group.name|raw }}</a></td>
+                    </tr
                 {% endfor %}
             </table>
         {% else %}
