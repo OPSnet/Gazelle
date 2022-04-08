@@ -22,7 +22,11 @@ class Torrent extends BaseObject {
     }
 
     public function flush() {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->deleteMulti([
+            sprintf(self::CACHE_KEY, $this->id),
+            "torrent_group_{$this->groupId()}",
+            "torrents_details_{$this->groupId()}",
+        ]);
     }
 
     public function url(): string {
@@ -686,7 +690,7 @@ class Torrent extends BaseObject {
                 ", $this->id, $this->id
             );
         }
-        self::$cache->deleteMulti(["torrent_group_" . $this->groupId(), "torrents_details_" . $this->groupId()]);
+        $this->flush();
         return self::$db->affected_rows();
     }
 
@@ -841,13 +845,8 @@ class Torrent extends BaseObject {
             ", $summary->overallScore(), $summary->checksumStatus(),
                 $this->id
         );
-        $groupId = $this->groupId();
-        self::$cache->deleteMulti([
-            "torrent_group_" . $groupId,
-            "torrents_details_" . $groupId,
-            sprintf(self::CACHE_KEY, $groupId),
-            sprintf(TGroup::CACHE_TLIST_KEY, $groupId),
-        ]);
+        $this->flush();
+        self::$cache->delete_value(sprintf(TGroup::CACHE_TLIST_KEY, $this->groupId()));
         return self::$db->affected_rows();
     }
 
