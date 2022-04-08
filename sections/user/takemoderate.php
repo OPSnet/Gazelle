@@ -80,7 +80,7 @@ if (isset($_POST['BonusPoints'])) {
 $Collages = (int)($_POST['Collages'] ?? 0);
 $flTokens = (int)($_POST['FLTokens'] ?? 0);
 
-$warnLength = (int)$_POST['WarnLength'];
+$warnWeeks = (int)($_POST['WarnLength'] ?? 0);
 $extendWarning = $_POST['ExtendWarning'] ?? '---';
 $reduceWarning = $_POST['ReduceWarning'] ?? '---';
 $warnReason = trim($_POST['WarnReason']);
@@ -306,17 +306,17 @@ if ($Viewer->permitted('users_warn')) {
             $editSummary[] = 'warning removed';
         }
     } elseif (
-        (is_null($cur['Warned']) && $warnLength != '---')
+        (is_null($cur['Warned']) && $warnWeeks)
         ||
         ($cur['Warned'] && ($extendWarning != '---' || $reduceWarning != '---'))
     ) {
         if (is_null($cur['Warned'])) {
-            $weeksChange = $warnLength;
-            $duration = 'week' . plural($warnLength);
+            $weeksChange = $warnWeeks;
+            $duration = 'week' . plural($warnWeeks);
             $message = [
-                'summary' => "warned for $warnLength $duration",
+                'summary' => "warned for $warnWeeks $duration",
                 'subject' => 'You have received a warning',
-                'body'    => "You have been [url=wiki.php?action=article&amp;name=warnings]warned[/url] for $warnLength $duration",
+                'body'    => "You have been [url=wiki.php?action=article&amp;name=warnings]warned[/url] for $warnWeeks $duration",
             ];
         } else {
             $weeksChange = ($extendWarning != '---') ? $extendWarning : -$reduceWarning;
