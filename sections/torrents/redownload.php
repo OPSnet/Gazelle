@@ -42,7 +42,7 @@ switch ($_GET['type']) {
 $collector = new Gazelle\Collector\TList($Viewer, $user->username() . "-$label", 0);
 
 $DB->prepared_query("
-    SELECT t.ID
+    SELECT DISTINCT t.ID
     FROM torrents AS t
     INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
     $SQL
