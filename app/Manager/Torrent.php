@@ -119,7 +119,7 @@ class Torrent extends \Gazelle\Base {
      * @return array of ['id', 'link']
      */
     public function logFileList(int $userId): array {
-        $this->db->prepared_query("
+        self::$db->prepared_query("
             SELECT ID FROM torrents WHERE HasLog = '1' AND HasLogDB = '1' AND UserID = ?
             ", $userId
         );
