@@ -12,7 +12,7 @@ class LogfileSummary {
         $this->list = [];
     }
 
-    public function add (Logfile $log) {
+    public function add(Logfile $log) {
         $this->list[] = $log;
         $this->allChecksum = is_null($this->allChecksum)
             ? $log->checksum()
@@ -22,15 +22,15 @@ class LogfileSummary {
             : min($this->lowestScore, $log->score());
     }
 
-    public function checksum () {
+    public function checksum() {
         return $this->allChecksum;
     }
 
-    public function checksumStatus () {
+    public function checksumStatus() {
         return $this->allChecksum ? '1' : '0';
     }
 
-    public function overallScore () {
+    public function overallScore() {
         return is_null($this->lowestScore) ? 0 : $this->lowestScore;
     }
 

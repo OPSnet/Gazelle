@@ -155,7 +155,7 @@ class DB_MYSQL {
         }
         global $Debug;
         $Debug->saveCase("MySQL: error({$this->Errno}) {$this->Error} query=[$this->PreparedQuery]");
-        throw new DB_MYSQL_Exception($DBError);
+        throw new DB_MYSQL_Exception($Msg);
     }
 
     public function connect() {

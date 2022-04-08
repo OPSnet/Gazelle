@@ -81,6 +81,7 @@ class AddLog extends \Gazelle\Json {
                 'details'       => $logfile->detailsAsString()
             ];
         }
+        $this->torrent->updateLogScore($logfileSummary);
 
         [$score, $checksum] = self::$db->row("
             SELECT min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
