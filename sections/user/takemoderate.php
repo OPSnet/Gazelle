@@ -46,7 +46,7 @@ $userId = $user->id();
 $ownProfile = $userId === $Viewer->id();
 
 // Variables for database input
-$class = (int)$_POST['Class'];
+$class = (int)($_POST['Class'] ?? 0);
 $title = trim($_POST['Title']);
 $adminComment = trim($_POST['admincomment'] ?? '');
 $secondaryClasses = array_filter(
@@ -210,11 +210,11 @@ if (!in_array((int)$bonusPoints, [(int)$cur['BonusPoints'], (int)($_POST['OldBon
     $editSummary[] = "bonus points changed from {$cur['BonusPoints']} to {$bonusPoints}";
 }
 
-if ($Collages != $cur['Collages'] && $Collages != (int)$_POST['OldCollages']
+if ($Collages != $cur['collages'] && $Collages != (int)$_POST['OldCollages']
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))) {
     $set[] = 'collages = ?';
     $args[] = $Collages;
-    $EditSummary[] = "personal collages changed from {$cur['Collages']} to {$Collages}";
+    $EditSummary[] = "personal collages changed from {$cur['collages']} to {$Collages}";
 }
 
 if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('admin_rate_limit_manage')) {
@@ -247,23 +247,25 @@ if ($editRatio) {
 $set = [];
 $args = [];
 
-$Classes = $userMan->classList();
-if ($Classes[$class]['Level'] != $cur['Class']
-    && (
-        ($Classes[$class]['Level'] < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
-        || ($Classes[$class]['Level'] <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
-)) {
-    $set[] = 'PermissionID = ?';
-    $args[] = $class;
-    $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
+if ($class) {
+    $Classes = $userMan->classList();
+    if ($Classes[$class]['Level'] != $cur['Class']
+        && (
+            ($Classes[$class]['Level'] < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
+            || ($Classes[$class]['Level'] <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
+    )) {
+        $set[] = 'PermissionID = ?';
+        $args[] = $class;
+        $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
 
-    if ($user->supportCount($class, $cur['PermissionID']) === 2) {
-        if ($Classes[$class]['Level'] < $cur['Class']) {
-            $supportFor = '';
+        if ($user->supportCount($class, $cur['PermissionID']) === 2) {
+            if ($Classes[$class]['Level'] < $cur['Class']) {
+                $supportFor = '';
+            }
+            $Cache->delete_value('staff_ids');
         }
-        $Cache->delete_value('staff_ids');
+        $Cache->delete_value("donor_info_$userId");
     }
-    $Cache->delete_value("donor_info_$userId");
 }
 
 if ($Viewer->permitted('users_edit_usernames')) {
