@@ -734,7 +734,6 @@ class Text {
     }
 
     private static function to_html ($Array, $Rules) {
-        global $SSL;
         self::$Levels++;
         /*
          * Hax prevention
@@ -754,12 +753,8 @@ class Text {
         }
         $Str = '';
 
-        if (array_key_exists('Id', $Array)) {
-            if (!isset($Array[0])) {
-                global $Debug;
-                $Debug->log_var($Array, 'Text::to_html(' . randomString(4) . ')');
-            }
-            if (is_string($Array[0]) && count($Array) == 2) {
+        if (isset($Array['Id'])) {
+            if (isset($Array[0]) && is_string($Array[0]) && count($Array) == 2) {
                 self::$Levels--;
                 return self::smileys(self::userMention($Array[0]));
             }
