@@ -204,7 +204,7 @@ class Quote extends \Gazelle\BaseUser {
             case 'forums':
                 $thread = $threadMan->findById($q['threadId']);
                 $context = [
-                    'jump' => $forum->threadPostUrl($q['PageID'], $q['PostID']),
+                    'jump' => $thread->forum()->threadPostUrl($q['PageID'], $q['PostID']),
                     'link' => $thread->forum()->link() . ' &rsaquo; ' . $thread->link(),
                     'title' => 'Forums',
                 ];
