@@ -123,7 +123,7 @@ class Torrent extends \Gazelle\Base {
             SELECT ID FROM torrents WHERE HasLog = '1' AND HasLogDB = '1' AND UserID = ?
             ", $userId
         );
-        $torrentIds = $this->db->collect(0, false);
+        $torrentIds = self::$db->collect(0, false);
 
         $result = [];
         foreach ($torrentIds as $torrentId) {
