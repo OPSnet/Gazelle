@@ -150,13 +150,10 @@ foreach ($Results as $GroupID) {
     $GroupRecordLabel = $GroupInfo['RecordLabel'];
     $ReleaseType = $GroupInfo['ReleaseType'];
     if ($GroupResults) {
-        $GroupTime = $MaxSize = $TotalLeechers = $TotalSeeders = $TotalSnatched = 0;
+        $GroupTime = $MaxSize = 0;
         foreach ($Torrents as $T) {
             $GroupTime = max($GroupTime, strtotime($T['Time']));
             $MaxSize = max($MaxSize, $T['Size']);
-            $TotalLeechers += $T['Leechers'];
-            $TotalSeeders += $T['Seeders'];
-            $TotalSnatched += $T['Snatched'];
         }
     }
 
@@ -209,9 +206,9 @@ foreach ($Results as $GroupID) {
         </td>
         <td class="td_time nobr"><?=time_diff($GroupTime, 1)?></td>
         <td class="td_size number_column nobr"><?=Format::get_size($MaxSize)?> (Max)</td>
-        <td class="td_snatched number_column m_td_right"><?=number_format($TotalSnatched)?></td>
-        <td class="td_seeders number_column<?=($TotalSeeders == 0 ? ' r00' : '')?> m_td_right"><?=number_format($TotalSeeders)?></td>
-        <td class="td_leechers number_column m_td_right"><?=number_format($TotalLeechers)?></td>
+        <td class="td_snatched number_column m_td_right"><?=number_format($tgroup->stats()->snatchTotal())?></td>
+        <td class="td_seeders number_column<?= $tgroup->stats()->seedingTotal() == 0 ? ' r00' : '' ?> m_td_right"><?=number_format($tgroup->stats()->seedingTotal())?></td>
+        <td class="td_leechers number_column m_td_right"><?=number_format($tgroup->stats()->leechTotal())?></td>
     </tr>
 <?php
         $LastRemasterYear = '-';
@@ -263,10 +260,10 @@ foreach ($Results as $GroupID) {
 ?>
     <tr class="group_torrent groupid_<?=$GroupID?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
-            <?= $Twig->render('torrent/action.twig', [
+            <?= $Twig->render('torrent/action-v2.twig', [
                 'can_fl' => $Viewer->canSpendFLToken($torrent),
                 'key'    => $Viewer->announceKey(),
-                't'      => $Data,
+                't'      => $torrent,
             ]) ?>
             &raquo; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Data)?>
 <?php if ($Reported) { ?>
@@ -274,11 +271,11 @@ foreach ($Results as $GroupID) {
 <?php } ?></a>
         </td>
         <td class="td_file_count"><?=$Data['FileCount']?></td>
-        <td class="td_time nobr"><?=time_diff($Data['Time'], 1)?></td>
-        <td class="td_size number_column nobr"><?=Format::get_size($Data['Size'])?></td>
-        <td class="td_snatched number_column m_td_right"><?=number_format($Data['Snatched'])?></td>
-        <td class="td_seeders number_column<?=($Data['Seeders'] == 0) ? ' r00' : ''?> m_td_right"><?=number_format($Data['Seeders'])?></td>
-        <td class="td_leechers number_column m_td_right"><?=number_format($Data['Leechers'])?></td>
+        <td class="td_time nobr"><?=time_diff($torrent->uploadDate(), 1)?></td>
+        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
+        <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
+        <td class="td_seeders m_td_right number_column<?= $torrent->seederTotal() ? '' : ' r00' ?>"><?= number_format($torrent->seederTotal()) ?></td>
+        <td class="td_leechers m_td_right number_column"><?= number_format($torrent->leecherTotal()) ?></td>
     </tr>
 <?php
         }
@@ -321,10 +318,10 @@ foreach ($Results as $GroupID) {
             </div>
 <?php   } ?>
             <div class="group_info clear">
-                <?= $Twig->render('torrent/action.twig', [
+                <?= $Twig->render('torrent/action-v2.twig', [
                     'can_fl' => $Viewer->canSpendFLToken($torrent),
                     'key'    => $Viewer->announceKey(),
-                    't'      => $Data,
+                    't'      => $torrent,
                 ]) ?>
                 <?=$DisplayName?>
                 <div class="torrent_info"><?=$ExtraInfo?></div>
@@ -332,11 +329,11 @@ foreach ($Results as $GroupID) {
             </div>
         </td>
         <td class="td_file_count"><?=$Data['FileCount']?></td>
-        <td class="td_time nobr"><?=time_diff($Data['Time'], 1)?></td>
-        <td class="td_size number_column nobr"><?=Format::get_size($Data['Size'])?></td>
-        <td class="td_snatched m_td_right number_column"><?=number_format($Data['Snatched'])?></td>
-        <td class="td_seeders m_td_right number_column<?=($Data['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Data['Seeders'])?></td>
-        <td class="td_leechers m_td_right number_column"><?=number_format($Data['Leechers'])?></td>
+        <td class="td_time nobr"><?=time_diff($torrent->uploadDate(), 1)?></td>
+        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
+        <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
+        <td class="td_seeders m_td_right number_column<?= $torrent->seederTotal() ? '' : ' r00' ?>"><?= number_format($torrent->seederTotal()) ?></td>
+        <td class="td_leechers m_td_right number_column"><?= number_format($torrent->leecherTotal()) ?></td>
     </tr>
 <?php
     }
