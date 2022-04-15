@@ -109,33 +109,20 @@ class Debug {
             }
         }
 
-        $digest = md5($message, true);
-        self::$db->prepared_query("
-            INSERT INTO error_log
-                   (uri, user_id, duration, memory, nr_query, nr_cache, digest, trace, request, error_list, logged_var)
-            VALUES (?,   ?,       ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?,          ?)
-            ON DUPLICATE KEY UPDATE
-                updated = now(),
-                seen = seen + 1,
-                duration = ?
-            ",
-            $uri,
-            $userId,
-            $duration,
-            memory_get_usage(true),
-            count($this->get_queries()),
-            count($this->get_cache_keys()),
-            $digest,
-            $message,
-            json_encode($_REQUEST),
-            json_encode(self::$Errors),
-            json_encode(self::$LoggedVars),
-            $duration
+        $id = (new \Gazelle\Manager\ErrorLog)->create(
+           uri:       $uri,
+           userId:    $userId,
+           duration:  $duration,
+           memory:    memory_get_usage(true),
+           nrQuery:   count($this->get_queries()),
+           nrCache:   count($this->get_cache_keys()),
+           digest:    md5($message, true),
+           trace:     $message,
+           request:   json_encode($_REQUEST),
+           errorList: json_encode(self::$Errors),
+           loggedVar: json_encode(self::$LoggedVars),
         );
-        $id = self::$db->scalar("
-            SELECT error_log_id FROM error_log WHERE digest = ?
-            ", $digest
-        );
+
         self::$cache->cache_value(
             'analysis_'.$id, [
                 'URI'      => isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
@@ -156,6 +143,7 @@ class Debug {
             ],
             86400 * 2
         );
+
         return $id;
     }
 
