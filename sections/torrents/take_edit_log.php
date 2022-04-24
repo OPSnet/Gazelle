@@ -13,58 +13,57 @@ if (is_null($torrent)) {
     error(404);
 }
 
-$Adjusted = isset($_POST['adjusted']) ? '1' : '0';
-$AdjustedScore = 100;
-$AdjustedChecksum = isset($_POST['adjusted_checksum']) ? '1' : '0';
-$AdjustmentReason = $_POST['adjustment_reason'];
+$Adjusted          = isset($_POST['adjusted']);
+$AdjustedChecksum  = isset($_POST['adjusted_checksum']);
+$AdjustmentReason  = $_POST['adjustment_reason'];
+$AdjustedScore     = 100;
 $AdjustmentDetails = [];
 
-if ($AdjustedChecksum != $torrent->info()['Checksum']) {
-    $AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');
+if ($AdjustedChecksum != $torrent->logChecksum()) {
+    $AdjustmentDetails['checksum'] = 'Checksum manually ' . ($AdjustedChecksum ? 'validated' : 'invalidated');
 }
 
 $Deductions = [
-    ['read_mode_secure', 'Non-Secure Mode used', 20],
-    ['audio_cache', 'Defeat/disable audio cache should be yes', 10],
-    ['c2_points', 'C2 Pointers enabled', 10],
-    ['drive_offset', 'Incorrect drive offset', 5],
-    ['fill_offsets', 'Does not fill up missing offset samples with silence', 5],
-    ['deletes_ofsets', 'Deletes leading and trailing silent blocks', 5],
-    ['gap_handling', 'Gap handling should be appended to previous track', 10],
-    ['test_and_copy', 'Test & Copy not used', 10],
-    ['range_rip', 'Range Rip', 30],
-    ['null_samples', 'Null samples should be used in CRC calculations', 5],
-    ['eac_old', 'EAC older than 0.99', 30],
-    ['id3_tags', 'ID3 tags found', 1],
-    ['foreign_log', 'Unrecognized foreign log'],
-    ['combined_log', 'Combined log']
+    ['read_mode_secure', 20, 'Non-Secure Mode used'],
+    ['audio_cache',      10, 'Defeat/disable audio cache should be yes'],
+    ['c2_points',        10, 'C2 Pointers enabled'],
+    ['drive_offset',      5, 'Incorrect drive offset'],
+    ['fill_offsets',      5, 'Does not fill up missing offset samples with silence'],
+    ['deletes_ofsets',    5, 'Deletes leading and trailing silent blocks'],
+    ['gap_handling',     10, 'Gap handling should be appended to previous track'],
+    ['test_and_copy',    10, 'Test & Copy not used'],
+    ['range_rip',        30, 'Range Rip'],
+    ['null_samples',      5, 'Null samples should be used in CRC calculations'],
+    ['eac_old',          30, 'EAC older than 0.99'],
+    ['id3_tags',          1, 'ID3 tags found'],
+    ['foreign_log',       0, 'Unrecognized foreign log'],
+    ['combined_log',      0, 'Combined log']
 ];
 
-foreach ($Deductions as $Deduction) {
-    if (isset($_POST[$Deduction[0]])) {
-        $Text = $Deduction[1];
-        if (isset($Deduction[2]) && $Deduction[2] > 0) {
-            $Text .= " (-{$Deduction[2]} points)";
+foreach ($Deductions as list($tag, $deduction, $label)) {
+    if (isset($_POST[$tag])) {
+        $AdjustedScore -= $deduction;
+        if ($deduction > 0) {
+            $label .= " (-{$deduction} points)";
         }
-        $AdjustmentDetails[$Deduction[0]] = $Text;
-        $AdjustedScore -= $Deduction[2];
+        $AdjustmentDetails[$tag] = $label;
     }
 }
 
 $TrackDeductions = [
-    ['crc_mismatches', 'CRC mismatches', 30],
-    ['suspicious_positions', 'Suspicious positions', 20],
-    ['timing_problems', 'Timing problems', 20]
+    ['crc_mismatches',       30, 'CRC mismatches'],
+    ['suspicious_positions', 20, 'Suspicious positions'],
+    ['timing_problems',      20, 'Timing problems']
 ];
 
-foreach ($TrackDeductions as $Deduction) {
-    $Count = intval($_POST[$Deduction[0]]);
-    $Total = $Deduction[2] * $Count;
-    if ($Count > 0) {
-        $AdjustmentDetails[$Deduction[0]] = "{$Count} {$Deduction[1]} (-{$Total} points)";
+foreach ($TrackDeductions as list($tag, $deduction, $label)) {
+    $n = (int)($_POST[$tag] ?? 0);
+    if ($n > 0) {
+        $score = $n * $deduction;
+        $AdjustmentDetails[$tag] = "$n $label (-{$score} points)";
+        $AdjustmentDetails['tracks'][$tag] = $n;
+        $AdjustedScore -= $score;
     }
-    $AdjustmentDetails['tracks'][$Deduction[0]] = $Count;
-    $AdjustedScore -= $Total;
 }
 
 $torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $Viewer->id(), $AdjustmentReason, $AdjustmentDetails);
