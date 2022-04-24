@@ -24,6 +24,7 @@ class Torrent extends BaseObject {
     public function flush() {
         self::$cache->deleteMulti([
             sprintf(self::CACHE_KEY, $this->id),
+            sprintf(TGroup::CACHE_KEY, $this->groupId()),
             "torrent_group_{$this->groupId()}",
             "torrents_details_{$this->groupId()}",
         ]);
@@ -677,8 +678,8 @@ class Torrent extends BaseObject {
                 UPDATE torrents AS t
                 LEFT JOIN (
                     SELECT TorrentID,
-                        min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-                        min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+                        min(CASE WHEN Adjusted = '1' OR AdjustedScore != Score THEN AdjustedScore ELSE Score END) AS Score,
+                        min(CASE WHEN Adjusted = '1' OR AdjustedChecksum != Checksum THEN AdjustedChecksum ELSE Checksum END) AS Checksum
                     FROM torrents_logs
                     WHERE TorrentID = ?
                     GROUP BY TorrentID
@@ -694,12 +695,12 @@ class Torrent extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function adjustLogscore(int $logId, $adjusted, int $adjScore, $adjChecksum, int $adjBy, $adjReason, array $adjDetails): int {
+    public function adjustLogscore(int $logId, bool $adjusted, int $adjScore, bool $adjChecksum, int $adjBy, $adjReason, array $adjDetails): int {
         self::$db->prepared_query("
             UPDATE torrents_logs SET
                 Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
             WHERE TorrentID = ? AND LogID = ?
-            ", $adjusted, $adjScore, $adjChecksum, $adjBy, $adjReason, serialize($adjDetails),
+            ", $adjusted ? '1' : '0', $adjScore, $adjChecksum ? '1' : '0', $adjBy, $adjReason, serialize($adjDetails),
                 $this->id, $logId
         );
         if (self::$db->affected_rows() > 0) {
