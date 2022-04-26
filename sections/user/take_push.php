@@ -12,4 +12,4 @@ authorize();
 (new Gazelle\Manager\Notification)->push($user->id(),
     'Push!', 'You have been pushed by ' . $Viewer->username());
 
-header('Location: ' . $user->url() . '&action=edit');
+header('Location: ' . $user->location() . '&action=edit');

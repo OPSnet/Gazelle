@@ -352,4 +352,4 @@ if ($ResetPassword) {
     $user->logoutEverywhere();
 }
 
-header('Location: ' . $user->url() . '&action=edit');
+header('Location: ' . $user->location() . '&action=edit');

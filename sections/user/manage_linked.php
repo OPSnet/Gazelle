@@ -40,4 +40,4 @@ switch ($_REQUEST['dupeaction'] ?? '') {
         error(403);
 }
 
-header("Location: user.php?id={$userId}");
+header("Location: {$source->location()}");

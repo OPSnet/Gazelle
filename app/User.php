@@ -35,8 +35,12 @@ class User extends BaseObject {
         return 'users_main';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'user.php?id=' . $this->id;
+    }
+
+    public function url(): string {
+        return htmlentities($this->location());
     }
 
     public function link(): string {
