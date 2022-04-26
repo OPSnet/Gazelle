@@ -13,7 +13,7 @@ if (!empty($_GET['search'])) {
         $username = $match['username'];
         $found = (new Gazelle\Manager\User)->findByUsername($username);
         if ($found) {
-            header('Location: ' . $found->url());
+            header('Location: ' . $found->location());
             exit;
         }
         $_GET['username'] = $username;

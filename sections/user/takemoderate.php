@@ -669,4 +669,4 @@ if (isset($_POST['invite_source_update'])) {
     }
 }
 
-header('Location: ' . $user->url());
+header('Location: ' . $user->location());

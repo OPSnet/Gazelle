@@ -23,4 +23,4 @@ if (!$Viewer->permitted('users_edit_password')) {
 }
 $user->remove2FA()->modify();
 
-header('Location: user.php?userid=' . $userId);
+header("Location: {$user->location()}");
