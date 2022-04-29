@@ -3,6 +3,8 @@
 $View = empty($_GET['view']) ? '' : display_str($_GET['view']);
 
 $staffpmMan = new Gazelle\Manager\StaffPM;
+$userMan    = new Gazelle\Manager\User;
+
 $viewMap = [
     '' => [
         'status' => ['Unanswered'],
@@ -150,18 +152,17 @@ if ($Viewer->isFLS()) { ?>
                 </tr>
 <?php
     // List messages
-    $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
+    $ClassLevels = $userMan->classLevelList();
     $Row = 'a';
     foreach ($list as list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID, $LastUserID)) {
         $Row = $Row === 'a' ? 'b' : 'a';
 
         // Get assigned
         if ($AssignedToUser != '') {
-            $Assigned = Users::format_username($AssignedToUser, true, true, true, true);
+            $Assigned = $userMan->findByid($AssignedToUser)?->link() ?? 'System';
         } else {
             // Assigned to class
-            $Assigned = ($Level == 0) ? 'First Line Support' : $ClassLevels[$Level]['Name'];
-            // No + on Sysops
+            $Assigned = $Level ? $ClassLevels[$Level]['Name'] : 'First Line Support';
             if ($Assigned != 'Sysop') {
                 $Assigned .= '+';
             }
@@ -172,13 +173,13 @@ if ($Viewer->isFLS()) { ?>
                     <td class="center"><input type="checkbox" name="id[]" value="<?=$ID?>" /></td>
 <?php         } ?>
                     <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
-                    <td><?= Users::format_username($UserID, true, true, true, true) ?></td>
+                    <td><?= $userMan->findByid($UserID)?->link() ?? 'System' ?></td>
                     <td><?= time_diff($Date, 2, true) ?></td>
                     <td><?= $Assigned ?></td>
                     <td><?= max(0, $NumReplies - 1) ?></td>
-                    <td><?= Users::format_username($LastUserID, true) ?></td>
+                    <td><?= $userMan->findByid($LastUserID)?->link() ?></td>
 <?php        if ($viewingResolved) { ?>
-                    <td><?= Users::format_username($ResolverID, true) ?></td>
+                    <td><?= $userMan->findByid($ResolverID)?->link() ?></td>
 <?php        } ?>
                 </tr>
 <?php
