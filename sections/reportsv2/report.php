@@ -58,7 +58,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
                 <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
                 <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
-<?php if ($CategoryID == 1  && ($FirstUnknown || $remasterTuple != $torrent->remasterTuple())) { ?>
+<?php if ($tgroup->categoryName() == 'Music' && ($FirstUnknown || $remasterTuple != $torrent->remasterTuple())) { ?>
                 <tr class="releases_<?= $tgroup->releaseType() ?> groupid_<?= $GroupID ?> edition group_torrent">
                     <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?= $GroupID ?>, <?= $EditionID ?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?></strong></td>
                 </tr>
@@ -94,7 +94,7 @@ $remasterTuple = $torrent->remasterTuple();
                 <tr class="releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> torrentdetails pad<?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $torrentId) { ?> hidden<?php } ?>" id="torrent_<?= $torrentId ?>">
                     <td colspan="5">
                         <blockquote>
-                            Uploaded by <?=(Users::format_username($torrent->uploaderId(), false, false, false))?> <?=time_diff($torrent->uploadDate()) ?>
+                            Uploaded by <?= $torrent->uploader()->link() ?> <?=time_diff($torrent->uploadDate()) ?>
 <?php
     if (!$torrent->seederTotal()) {
         $LastActive = $torrent->lastActiveDate();

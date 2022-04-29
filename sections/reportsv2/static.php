@@ -14,9 +14,8 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
-$torMan = new Gazelle\Manager\Torrent;
-$userMan = new Gazelle\Manager\User;
-$Types = $reportMan->types();
+$torMan    = new Gazelle\Manager\Torrent;
+$userMan   = new Gazelle\Manager\User;
 
 $View = $_GET['view'];
 $ID = (int)($_GET['id'] ?? 0);
@@ -168,11 +167,12 @@ $DB->prepared_query("
     ", ...array_merge($args, [$paginator->limit(), $paginator->offset()])
 );
 $Reports = $DB->to_array(false, MYSQLI_NUM);
+$Types   = $reportMan->types();
 
-View::show_header('Reports V2', ['js' => 'reportsv2,bbcode,browse,torrent']);
+View::show_header('Torrent Reports', ['js' => 'reportsv2,bbcode,browse,torrent']);
 ?>
 <div class="header">
-    <h2><?=$Title?></h2>
+    <h2><?= $Title ?></h2>
 <?php require_once('header.php'); ?>
 </div>
 <div class="buttonbox pad center">
@@ -529,8 +529,10 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                     <td colspan="3">
                         <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-<?php                       $log = new Gazelle\Torrent\Log($TorrentID);
-                            $details = $log->logDetails(); ?>
+<?php
+                            $log = new Gazelle\Torrent\Log($TorrentID);
+                            $details = $log->logDetails();
+?>
                                 <ul class="nobullet logdetails">
 <?php                       if (!count($details)) { ?>
                                 <li class="nobr">No logs</li>
@@ -539,9 +541,9 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                 foreach ($details as $logId => $info) {
                                     if ($info['adjustment']) {
                                         $adj = $info['adjustment'];
+                                        $adjUser = $userMan->findById(adj['userId']);
 ?>
-                                <li class="nobr">Log adjusted by <?= Users::format_username($adj['userId'])
-                                    ?> from score <?= $adj['score']
+                                <li class="nobr">Log adjusted by <?= $adjUser->link() ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
 <?php
                                     }
@@ -575,9 +577,10 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                             } else {
                                 foreach ($details as $logId => $info) {
                                     if ($info['adjustment']) {
-                                        $adj = $info['adjustment']; ?>
-                                <li class="nobr">Log adjusted by <?= Users::format_username($adj['userId'])
-                                    ?> from score <?= $adj['score']
+                                        $adj = $info['adjustment'];
+                                        $adjUser = $userMan->findById(adj['userId']);
+?>
+                                <li class="nobr">Log adjusted by <?= $adjUser->link() ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
 <?php
                                     }
