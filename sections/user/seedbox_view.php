@@ -48,7 +48,7 @@ View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=Users::format_username($userId, false, false, false)?> &rsaquo; Seedboxes</h2>
+        <h2><?= $user->link() ?> &rsaquo; Seedboxes</h2>
         <div class="linkbox">
             <a href="user.php?action=seedbox&amp;userid=<?= $userId ?>" class="brackets">Configure</a>
             <a href="user.php?action=seedbox-view&amp;userid=<?= $userId ?>" class="brackets">View</a>
