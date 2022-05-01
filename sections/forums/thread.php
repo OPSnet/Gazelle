@@ -14,7 +14,6 @@ Things to expect in $_GET:
 // Enable TOC
 Text::$TOC = true;
 
-
 $forumMan = new Gazelle\Manager\Forum;
 if (isset($_GET['postid'])) {
     $postId = (int)$_GET['postid'];
@@ -272,10 +271,10 @@ foreach ($slice as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
     $author = new Gazelle\User($AuthorID);
     $tableClass = ['forum_post', 'wrap_overflow', 'box vertical_margin'];
-    if (((!$thread->isLocked() || $thread->isPinned())
+    if (
+        (!$thread->isLocked() || $thread->isPinned())
             && $PostID > $lastRead
             && strtotime($AddedTime) > $Viewer->forumCatchupEpoch()
-            ) || (isset($RequestKey) && $Key == $RequestKey)
         ) {
         $tableClass[] = 'forum_unread';
     }
