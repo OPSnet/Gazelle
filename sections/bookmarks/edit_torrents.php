@@ -28,9 +28,6 @@ View::show_header('Organize Bookmarks', ['js' => 'browse,jquery-ui,jquery.tables
 if (empty($TorrentList)) {
     echo $Twig->render('bookmark/none.twig');
 } else {
-    echo $Twig->render('bookmark/header.twig', [
-        'heading' => 'Organize Torrent Bookmarks',
-    ]);
 
     $list = [];
     foreach ($TorrentList as $groupId => $group) {
@@ -52,13 +49,8 @@ if (empty($TorrentList)) {
     }
 
     echo $Twig->render('bookmark/body.twig', [
-        'list' => $list,
-    ]);
-
-    echo $Twig->render('bookmark/footer.twig', [
+        'list'      => $list,
         'auth'      => $Viewer->auth(),
         'edit_type' => $_GET['type'] ?? 'torrents',
     ]);
 }
-
-View::show_footer();
