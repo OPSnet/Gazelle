@@ -376,8 +376,7 @@ class User extends BaseObject {
                 ', $this->id, $attrId
             );
             $toggled = self::$db->affected_rows() === 1;
-        }
-        elseif ($flag && !$attrId) {
+        } elseif ($flag && !$attrId) {
             self::$db->prepared_query('
                 INSERT INTO user_has_attr (UserID, UserAttrID)
                     SELECT ?, ID FROM user_attr WHERE Name = ?
@@ -556,15 +555,12 @@ class User extends BaseObject {
                     if ($rank == 0) {
                         $rank = 1;
                     }
-                    if ($this->specialDonorRank() === MAX_SPECIAL_RANK) {
-                        $donorHeart = 6;
-                    } elseif ($rank === 5) {
-                        $donorHeart = 4; // Two points between rank 4 and 5
-                    } elseif ($rank >= MAX_RANK) {
-                        $donorHeart = 5;
-                    } else {
-                        $donorHeart = $rank;
-                    }
+                    $donorHeart = match(true) {
+                        ($this->specialDonorRank() === MAX_SPECIAL_RANK) => 6,
+                        ($rank === 5)                                    => 4, // Two points between rank 4 and 5
+                        ($rank >= MAX_RANK)                              => 5,
+                        default                                          => $rank,
+                    };
                     $iconImage = STATIC_SERVER . '/common/symbols/'
                         . ($donorHeart === 1 ? 'donor.png' : "donor_{$donorHeart}.png");
                 }
@@ -689,16 +685,13 @@ class User extends BaseObject {
 
     public function paranoiaLabel(): string {
         $level = $this->paranoiaLevel();
-        if ($level > 20) {
-            return 'Very high';
-        } elseif ($level > 5) {
-            return 'High';
-        } elseif ($level > 1) {
-            return 'Low';
-        } elseif ($level == 1) {
-            return 'Very Low';
-        }
-        return 'Off';
+        return match(true) {
+            ($level > 20) => 'Very high',
+            ($level >  5) => 'High',
+            ($level >  1) => 'Low',
+            ($level == 1) => 'Very Low',
+            default       => 'Off',
+        };
     }
 
     // The following are used throughout the site:
@@ -2757,18 +2750,15 @@ class User extends BaseObject {
         if ($showOverflow && $overflow) {
             $label .= " (+$overflow)";
         }
-        if ($rank >= 6) {
-            $label .= ' [Gold]';
-        } elseif ($rank >= 4) {
-            $label .= ' [Silver]';
-        } elseif ($rank >= 3) {
-            $label .= ' [Bronze]';
-        } elseif ($rank >= 2) {
-            $label .= ' [Copper]';
-        } elseif ($rank >= 1) {
-            $label .= ' [Red]';
-        }
-        return $label;
+
+        return $label . match(true) {
+            ($rank >= 6) => ' [Gold]',
+            ($rank >= 4) => ' [Silver]',
+            ($rank >= 3) => ' [Bronze]',
+            ($rank >= 2) => ' [Copper]',
+            ($rank >= 1) => ' [Red]',
+            default      => '',
+        };
     }
 
     /**
