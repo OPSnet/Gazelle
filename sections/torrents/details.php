@@ -31,7 +31,7 @@ $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher      = new Gazelle\User\Snatch($Viewer);
 $vote          = new Gazelle\User\Vote($Viewer);
 
-$isSubscribed   = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $tgroupId);
+$isSubscribed   = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('torrents', $tgroupId);
 $releaseTypes   = (new Gazelle\ReleaseType)->list();
 $urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 

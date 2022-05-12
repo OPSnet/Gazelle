@@ -32,7 +32,7 @@ if ($thread->lastAuthorId() == $Viewer->id() && isset($_POST['merge'])) {
 (new Gazelle\User\Notification\Quote($Viewer))->create(
     new Gazelle\Manager\User, $body, $postId, 'forums', $threadId
 );
-$subscription = new Gazelle\Subscription($Viewer);
+$subscription = new Gazelle\User\Subscription($Viewer);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
     $subscription->subscribe($threadId);
 }

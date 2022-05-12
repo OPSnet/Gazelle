@@ -40,7 +40,7 @@ $blog->setUpdate('Body', $body)
     ->modify();
 
 if ($thread && isset($_POST['subscribe'])) {
-    (new Gazelle\Subscription($Viewer))->subscribe($thread->id());
+    (new Gazelle\User\Subscription($Viewer))->subscribe($thread->id());
 }
 
 header('Location: blog.php');

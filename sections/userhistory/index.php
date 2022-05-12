@@ -33,7 +33,7 @@ switch ($_GET['action'] ?? '') {
         break;
     case 'catchup':
         authorize();
-        (new Gazelle\Subscription($Viewer))->catchupSubscriptions();
+        (new Gazelle\User\Subscription($Viewer))->catchupSubscriptions();
         header('Location: userhistory.php?action=subscriptions');
         break;
     case 'collage_subscribe':

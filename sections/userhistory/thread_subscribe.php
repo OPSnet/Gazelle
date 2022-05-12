@@ -14,4 +14,4 @@ if (!$Viewer->readAccess($thread->forum())) {
     error(403);
 }
 
-json_print('success', (new Gazelle\Subscription($Viewer))->subscribe($thread->id()));
+json_print('success', (new Gazelle\User\Subscription($Viewer))->subscribe($thread->id()));

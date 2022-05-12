@@ -429,7 +429,7 @@ if ($NewRequest) {
     $Cache->delete_value('user_stats_'.$Viewer->id());
 
     if ($Viewer->option('AutoSubscribe')) {
-        (new Gazelle\Subscription($Viewer))->subscribeComments('requests', $RequestID);
+        (new Gazelle\User\Subscription($Viewer))->subscribeComments('requests', $RequestID);
     }
 
     $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.SITE_URL."/requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);

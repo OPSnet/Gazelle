@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Subscription extends BaseUser {
+class Subscription extends \Gazelle\BaseUser {
 
     /**
      * (Un)subscribe from a forum thread.
@@ -113,7 +113,7 @@ class Subscription extends BaseUser {
     public function unread(): int {
         $unread = self::$cache->get_value('subscriptions_user_new_' . $this->user->id());
         if ($unread === false) {
-            $unread = (new Manager\Forum)->unreadSubscribedForumTotal($this->user) + $this->unreadCommentTotal();
+            $unread = (new \Gazelle\Manager\Forum)->unreadSubscribedForumTotal($this->user) + $this->unreadCommentTotal();
             self::$cache->cache_value('subscriptions_user_new_' . $this->user->id(), $unread, 0);
         }
         return $unread;
@@ -218,7 +218,7 @@ class Subscription extends BaseUser {
     }
 
     public function latestSubscriptionList(bool $showUnread, int $limit, int $offset): array {
-        $forMan = new Manager\Forum;
+        $forMan = new \Gazelle\Manager\Forum;
         [$cond, $args] = $forMan->configureForUser($this->user);
         if ($showUnread) {
             $cond[] = "p.ID > if(t.IsLocked = '1' AND t.IsSticky = '0', p.ID, coalesce(lr.PostID, 0))";

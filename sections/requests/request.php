@@ -22,7 +22,7 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('requests', $requestId);
+$isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('requests', $requestId);
 $userMan = new Gazelle\Manager\User;
 $topVoteList = array_slice($request->userVoteList($userMan), 0, 5);
 $filler = $userMan->findById($request->fillerId());

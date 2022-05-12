@@ -35,7 +35,7 @@ $blog = (new Gazelle\Manager\Blog)->create([
 ]);
 
 if ($thread && isset($_POST['subscribe'])) {
-    (new Gazelle\Subscription($Viewer))->subscribe($thread->id());
+    (new Gazelle\User\Subscription($Viewer))->subscribe($thread->id());
 }
 $notification = new Gazelle\Manager\Notification($Viewer->id());
 $notification->push($notification->pushableUsers($Viewer->id()), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);

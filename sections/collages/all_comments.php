@@ -19,7 +19,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 echo $Twig->render('collage/comment.twig', [
     'collage'       => $collage,
     'comment'       => $commentPage,
-    'is_subscribed' => (new Gazelle\Subscription($Viewer))->isSubscribedComments('collages', $collage->id()),
+    'is_subscribed' => (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('collages', $collage->id()),
     'paginator'     => $paginator,
     'textarea'      => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
     'url'           => $_SERVER['REQUEST_URI'],

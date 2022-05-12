@@ -17,7 +17,7 @@ $stats      = new Gazelle\Stats\Artist($ArtistID);
 $vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
-$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
+$isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
 $name         = $Artist->name() ?? 'artist:' . $ArtistID;
 $Requests     = [];
 

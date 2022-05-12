@@ -149,7 +149,7 @@ foreach ($slice as $Key => $Post) {
     ];
 }
 
-$subscribed = (new Gazelle\Subscription($Viewer))->isSubscribed($thread->id());
+$subscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribed($thread->id());
 if ($subscribed) {
     $Cache->delete_value('subscriptions_user_new_' . $Viewer->id());
 }

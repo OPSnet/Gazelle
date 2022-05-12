@@ -3,22 +3,22 @@
 $artistMan  = new Gazelle\Manager\Artist;
 $collageMan = new Gazelle\Manager\Collage;
 $forumMan   = new Gazelle\Manager\Forum;
-$requestMan = new Gazelle\Manager\Request;
 $threadMan  = new Gazelle\Manager\ForumThread;
+$requestMan = new Gazelle\Manager\Request;
 $tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $userMan    = new Gazelle\Manager\User;
-$subscribe  = new Gazelle\Subscription($Viewer);
-
-$showUnread    = (bool)($_GET['showunread'] ?? true);
+$subscriber = new Gazelle\User\Subscription($Viewer);
+$showUnread = (bool)($_GET['showunread'] ?? true);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
-
-$paginator->setTotal($showUnread
-    ? $forumMan->unreadSubscribedForumTotal($Viewer) + $subscribe->unreadCommentTotal()
-    : $forumMan->subscribedForumTotal($Viewer) + $subscribe->commentTotal()
+$paginator->setTotal(
+    match($showUnread) {
+        true  => $forumMan->unreadSubscribedForumTotal($Viewer) + $subscriber->unreadCommentTotal(),
+        false => $forumMan->subscribedForumTotal($Viewer) + $subscriber->commentTotal(),
+    }
 );
 
-$Results = (new Gazelle\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
+$Results = (new Gazelle\User\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
 foreach ($Results as &$result) {
     $postLink = $result['PostID'] ? "&amp;postid={$result['PostID']}#post{$result['PostID']}" : '';
     switch ($result['Page']) {

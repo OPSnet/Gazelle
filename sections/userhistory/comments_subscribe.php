@@ -5,4 +5,4 @@ if (!in_array($_GET['page'], ['artist', 'collages', 'requests', 'torrents']) || 
 }
 authorize();
 
-(new Gazelle\Subscription($Viewer))->subscribeComments($_GET['page'], (int)$_GET['pageid']);
+(new Gazelle\User\Subscription($Viewer))->subscribeComments($_GET['page'], (int)$_GET['pageid']);

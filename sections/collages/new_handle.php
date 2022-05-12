@@ -66,7 +66,7 @@ $collage = $collageMan->create(
 
 if ($Viewer->option('AutoSubscribe')) {
     $collage->toggleSubscription($Viewer->id());
-    (new Gazelle\Subscription($Viewer))->subscribeComments('collages', $collage->id());
+    (new Gazelle\User\Subscription($Viewer))->subscribeComments('collages', $collage->id());
 }
 
 header('Location: ' . $collage->location());

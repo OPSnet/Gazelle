@@ -23,7 +23,7 @@ json_print("success", [
         'notifications'    => (new Gazelle\User\Notification\Torrent($Viewer))->unread(),
         'newAnnouncement'  => (new Gazelle\Manager\News)->latestId() < (new Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
         'newBlog'          => $latestBlog && $latestBlog->createdEpoch() < (new Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
-        'newSubscriptions' => (new Gazelle\Subscription($Viewer))->unread() > 0,
+        'newSubscriptions' => (new Gazelle\User\Subscription($Viewer))->unread() > 0,
     ],
     'userstats' => [
         'uploaded'           => $Viewer->uploadedSize(),
