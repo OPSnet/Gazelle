@@ -1296,7 +1296,25 @@ class User extends \Gazelle\Base {
         return $processed;
     }
 
-    public  function forumNavItemUserList(\Gazelle\User $user): array {
+    public function updateLastAccess(): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            INSERT INTO user_last_access (user_id, last_access)
+            SELECT ulad.user_id,
+                max(ulad.last_access)
+            FROM user_last_access_delta ulad
+            GROUP BY ulad.user_id
+            ON DUPLICATE KEY UPDATE last_access = VALUES(last_access)
+        ");
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            DELETE FROM user_last_access_delta
+        ");
+        self::$db->commit();
+        return $affected;
+    }
+
+    public function forumNavItemUserList(\Gazelle\User $user): array {
         $UserIds = $user->forumNavList();
         $NavItems = $this->forumNavItemList();
         $list = [];

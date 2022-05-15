@@ -64,7 +64,12 @@ json_print("success", [
     'profileText' => Text::full_format($user->infoProfile()),
     'stats' => [
         'joinedDate'    => $user->joinDate(),
-        'lastAccess'    => $user->propertyVisible($Viewer, 'lastseen') ? $user->lastAccess() : null,
+        'lastAccess'    => match(true) {
+            $Viewer->id() == $user->id()                => $user->lastAccessRealtime(),
+            $Viewer->isStaff()                          => $user->lastAccessRealtime(),
+            $user->propertyVisible($Viewer, 'lastseen') => $user->lastAccess(),
+            default                                     => null,
+        },
         'uploaded'      => $uploaded,
         'downloaded'    => $downloaded,
         'ratio'         => $ratio,

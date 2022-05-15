@@ -39,19 +39,22 @@ class Session extends \Gazelle\BaseUser {
         return isset($this->info()[$sessionId]);
     }
 
-    public function refresh(string $sessionId) {
-        if (strtotime($this->info()[$sessionId]['LastUpdate']) + 600 >= time()) {
+    public function refresh(string $sessionId): bool {
+        if (strtotime($this->info()[$sessionId]['LastUpdate']) > time() - 600) {
             // Update every 10 minutes
-            return;
+            return false;
         }
-        $userAgent = parse_user_agent();
-
+        // Pages with ajax calls that need a session refresh will hit this
+        // function multiple times simultaneously, thus producing excessive
+        // contention on the user_last_access table. To get around this, we
+        // do a cheap append to a delta table, and then reconsolidate to
+        // the real table every once in a while via the scheduler.
         self::$db->prepared_query("
-            UPDATE user_last_access SET
-                last_access = now()
-            WHERE user_id = ?
+            INSERT INTO user_last_access_delta (user_id) VALUES (?)
             ", $this->user->id()
         );
+
+        $userAgent = parse_user_agent();
         self::$db->prepared_query("
             UPDATE users_sessions SET
                 LastUpdate = now(),
@@ -67,6 +70,7 @@ class Session extends \Gazelle\BaseUser {
         );
         self::$cache->delete_value('users_sessions_' . $this->user->id());
         $this->info = [];
+        return true;
     }
 
     public function create(array $info): array {
