@@ -120,7 +120,12 @@
         </li>
 {% set visible = user.propertyVisible(preview_user, 'lastseen') %}
 {% if visible %}
-        <li{{ class_override(visible) }}>Last seen: {{ user.lastAccess|time_diff }}</li>
+        <li{{ class_override(visible) }}>Last seen: {% if viewer.id == user.id or viewer.isStaff -%}
+    {{- user.lastAccessRealtime|time_diff -}}
+    {%- else -%}
+    {{- user.lastAccess|time_diff -}}
+    {%- endif -%}
+    </li>
 {% endif %}
 
 {% set visible = user.propertyVisible(preview_user, 'uploaded') %}

@@ -1806,6 +1806,17 @@ class User extends BaseObject {
         ');
     }
 
+    public function lastAccessRealtime(): string {
+        return self::$db->scalar("
+            SELECT coalesce(max(ulad.last_access), ula.last_access)
+            FROM user_last_access ula
+            LEFT JOIN user_last_access_delta ulad USING (user_id)
+            WHERE ula.user_id = ?
+            GROUP BY ula.user_id
+            ", $this->id
+        );
+    }
+
     public function passwordCount(): int {
         return $this->getSingleValue('user_pw_count', '
             SELECT count(*) FROM users_history_passwords WHERE UserID = ?
