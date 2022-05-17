@@ -76,29 +76,32 @@ View::show_header("View request: $FullName", ['js' => 'comments,requests,bbcode,
 <?php if ($CanEdit) { ?>
             <a href="requests.php?action=edit&amp;id=<?=$RequestID?>" class="brackets">Edit</a>
 <?php
-    }
-    if ($Viewer->permitted('site_admin_requests')) { ?>
+}
+if ($Viewer->permitted('site_admin_requests')) { ?>
             <a href="requests.php?action=edit-bounty&amp;id=<?=$RequestID?>" class="brackets">Edit bounty</a>
 <?php
-    }
-    if ($UserCanEdit || $Viewer->permitted('site_moderate_requests')) { ?>
+}
+if ($UserCanEdit || $Viewer->permitted('site_moderate_requests')) {
+?>
             <a href="requests.php?action=delete&amp;id=<?=$RequestID?>" class="brackets">Delete</a>
 <?php
-    }
-    if ((new Gazelle\Bookmark($Viewer))->isRequestBookmarked($RequestID)) { ?>
+}
+if ((new Gazelle\User\Bookmark($Viewer))->isRequestBookmarked($RequestID)) {
+?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Unbookmark('request', <?=$RequestID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
-<?php    } else { ?>
+<?php } else { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Bookmark('request', <?=$RequestID?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
-<?php    } ?>
+<?php } ?>
             <a href="#" id="subscribelink_requests<?=$RequestID?>" class="brackets" onclick="SubscribeComments('requests',<?=$RequestID?>);return false;"><?=
                 $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
             <a href="reports.php?action=report&amp;type=request&amp;id=<?=$RequestID?>" class="brackets">Report request</a>
-<?php    if (!$IsFilled) { ?>
+<?php if (!$IsFilled) { ?>
             <a href="upload.php?requestid=<?=$RequestID?><?=($Request['GroupID'] ? "&amp;groupid={$Request['GroupID']}" : '')?>" class="brackets">Upload request</a>
-<?php    }
+<?php }
     if (!$IsFilled && ($Request['CategoryID'] === '0' || ($CategoryName === 'Music' && $Request['Year'] === '0'))) { ?>
             <a href="reports.php?action=report&amp;type=request_update&amp;id=<?=$RequestID?>" class="brackets">Request update</a>
-<?php }
+<?php
+}
 
 $encoded_title = urlencode(preg_replace("/\([^\)]+\)/", '', $Request['Title']));
 $encoded_artist = substr(str_replace('&amp;', 'and', $ArtistName), 0, -3);

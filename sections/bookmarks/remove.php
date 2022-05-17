@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-$bookmark = new \Gazelle\Bookmark($Viewer);
+$bookmark = new Gazelle\User\Bookmark($Viewer);
 try {
     $bookmark->remove($_GET['type'], (int)$_GET['id']);
 }

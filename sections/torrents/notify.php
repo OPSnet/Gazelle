@@ -152,7 +152,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         $FilterGroups[$Result['FilterID']][] = $Result;
     }
 
-    $bookmark = new \Gazelle\Bookmark($Viewer);
+    $bookmark = new Gazelle\User\Bookmark($Viewer);
     foreach ($FilterGroups as $FilterID => $FilterResults) {
 ?>
 <div class="header">

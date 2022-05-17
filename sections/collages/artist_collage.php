@@ -35,7 +35,7 @@ for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
 }
 
 echo $Twig->render('collage/header.twig', [
-    'bookmarked' => (new Gazelle\Bookmark($Viewer))->isCollageBookmarked($CollageID),
+    'bookmarked' => (new Gazelle\User\Bookmark($Viewer))->isCollageBookmarked($CollageID),
     'collage'    => $Collage,
     'object'     => 'artist',
     'viewer'     => $Viewer,

@@ -108,7 +108,7 @@ if ($NumResults == 0) {
 }
 
 $releaseTypes = (new Gazelle\ReleaseType)->list();
-$bookmark = new \Gazelle\Bookmark($Viewer);
+$bookmark = new \Gazelle\User\Bookmark($Viewer);
 $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 echo $paginator->linkbox()

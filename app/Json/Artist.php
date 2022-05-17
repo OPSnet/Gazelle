@@ -46,7 +46,7 @@ class Artist extends \Gazelle\Json {
         $JsonTorrents = [];
         $Tags = [];
         $NumTorrents = $NumSeeders = $NumLeechers = $NumSnatches = 0;
-        $bookmark = new \Gazelle\Bookmark($this->user);
+        $bookmark = new \Gazelle\User\Bookmark($this->user);
 
         foreach ($GroupIDs as $GroupID) {
             $tgroup = $this->tgMan->findById($GroupID);

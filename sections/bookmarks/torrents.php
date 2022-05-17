@@ -18,7 +18,7 @@ if (empty($_GET['userid'])) {
     $ownProfile = ($user->id() === $Viewer->id());
 }
 
-$bookmark = new Gazelle\Bookmark($user);
+$bookmark = new Gazelle\User\Bookmark($user);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);

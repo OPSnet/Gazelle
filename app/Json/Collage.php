@@ -120,7 +120,7 @@ class Collage extends \Gazelle\Json {
                 'locked'              => $this->collage->isLocked(),
                 'maxGroups'           => $this->collage->maxGroups(),
                 'maxGroupsPerUser'    => $this->collage->maxGroupsPerUser(),
-                'hasBookmarked'       => (new \Gazelle\Bookmark($this->user))->isCollageBookmarked($this->collage->id()),
+                'hasBookmarked'       => (new \Gazelle\User\Bookmark($this->user))->isCollageBookmarked($this->collage->id()),
                 'subscriberCount'     => $this->collage->numSubscribers(),
                 'torrentGroupIDList'  => $this->collage->entryList(),
             ],
