@@ -9,7 +9,7 @@ if (is_null($Artist)) {
 $Artist->loadArtistRole();
 $ArtistID = $Artist->id();
 
-$bookmark   = new Gazelle\Bookmark($Viewer);
+$bookmark   = new Gazelle\User\Bookmark($Viewer);
 $collageMan = new Gazelle\Manager\Collage;
 $tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);

@@ -33,7 +33,7 @@ if ($NumResults == 0) {
     ]);
 }
 
-$bookmark   = new Gazelle\Bookmark($Viewer);
+$bookmark   = new Gazelle\User\Bookmark($Viewer);
 $releaseMan = new Gazelle\ReleaseType;
 $tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);

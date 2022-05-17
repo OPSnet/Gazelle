@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Bookmark extends BaseUser {
+class Bookmark extends \Gazelle\BaseUser {
 
     protected array $all;
 
@@ -16,19 +16,19 @@ class Bookmark extends BaseUser {
     public function schema($type): array {
         switch ($type) {
             case 'torrent':
-                return [ 'bookmarks_torrents', 'GroupID' ];
+                return ['bookmarks_torrents', 'GroupID'];
                 break;
             case 'artist':
-                return [ 'bookmarks_artists', 'ArtistID' ];
+                return ['bookmarks_artists', 'ArtistID'];
                 break;
             case 'collage':
-                return [ 'bookmarks_collages', 'CollageID' ];
+                return ['bookmarks_collages', 'CollageID'];
                 break;
             case 'request':
-                return [ 'bookmarks_requests', 'RequestID' ];
+                return ['bookmarks_requests', 'RequestID'];
                 break;
             default:
-                throw new Exception\BookmarkUnknownTypeException($type);
+                return [null, null];
                 break;
         }
     }
@@ -116,7 +116,7 @@ class Bookmark extends BaseUser {
         return [$groupIds, $bookmarkData, \Torrents::get_groups($groupIds)];
     }
 
-    public function torrentArtistLeaderboard(Manager\Artist $artistMan): array {
+    public function torrentArtistLeaderboard(\Gazelle\Manager\Artist $artistMan): array {
         self::$db->prepared_query("
             SELECT ta.ArtistID AS id,
                 count(*) AS total
@@ -221,7 +221,7 @@ class Bookmark extends BaseUser {
     public function create(string $type, int $id) {
         [$table, $column] = $this->schema($type);
         if (!$id) {
-            throw new Exception\BookmarkIdentifierException($id);
+            throw new \Gazelle\Exception\BookmarkIdentifierException($id);
         }
         if (self::$db->scalar("
             SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
@@ -241,8 +241,8 @@ class Bookmark extends BaseUser {
                 );
                 self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
 
-                $torMan = (new Manager\Torrent)->setViewer($this->user);
-                $tgroup = (new Manager\TGroup)->findById($id);
+                $torMan = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
+                $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
                 $tgroup->stats()->increment('bookmark_total');
 
                 // RSS feed stuff
@@ -292,7 +292,7 @@ class Bookmark extends BaseUser {
     public function remove(string $type, int $id) {
         [$table, $column] = $this->schema($type);
         if (!$id) {
-            throw new Exception\BookmarkIdentifierException($id);
+            throw new \Gazelle\Exception\BookmarkIdentifierException($id);
         }
         self::$db->prepared_query("
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
@@ -304,7 +304,7 @@ class Bookmark extends BaseUser {
             switch ($type) {
             case 'torrent':
                 self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
-                (new TGroup($id))->stats()->increment('bookmark_total', -1);
+                (new \Gazelle\TGroup($id))->stats()->increment('bookmark_total', -1);
                 break;
             case 'request':
                 $this->updateRequests($id);

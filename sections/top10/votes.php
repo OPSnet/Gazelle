@@ -26,7 +26,7 @@ if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
 }
 $vote->setTopLimit($limit);
 
-$bookmark     = new Gazelle\Bookmark($Viewer);
+$bookmark     = new Gazelle\User\Bookmark($Viewer);
 $snatcher     = new Gazelle\User\Snatch($Viewer);
 $tgMan        = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan       = (new Gazelle\Manager\Torrent)->setViewer($Viewer);

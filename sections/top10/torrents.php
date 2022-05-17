@@ -1,6 +1,6 @@
 <?php
 
-$bookmark = new Gazelle\Bookmark($Viewer);
+$bookmark = new Gazelle\User\Bookmark($Viewer);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 $top10    = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
