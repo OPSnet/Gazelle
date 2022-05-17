@@ -42,8 +42,8 @@ class Quote extends \Gazelle\BaseUser {
     public function clearAll(): int {
         self::$db->prepared_query("
             UPDATE users_notify_quoted SET
-                UnRead = true
-            WHERE Unread = false
+                UnRead = false
+            WHERE Unread = true
                 AND UserID = ?
             ", $this->user->id()
         );
