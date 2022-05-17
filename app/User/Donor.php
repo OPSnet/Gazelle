@@ -1,10 +1,10 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Donor extends BaseUser {
+class Donor extends \Gazelle\BaseUser {
 
-    public function link(User $viewer): string {
+    public function link(\Gazelle\User $viewer): string {
         if (!$this->user->isDonor()) {
             return '';
         }
