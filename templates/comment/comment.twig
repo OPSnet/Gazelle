@@ -1,3 +1,4 @@
+{% set show_avatar = viewer.showAvatars %}
 <table class="forum_post box vertical_margin{{ show_avatar ? '' : ' noavatar' }}{{ unread ? ' forum_unread' : ''}}" id="post{{ id }}">
     <colgroup>
 {% if show_avatar %}
@@ -8,7 +9,7 @@
     <tr class="colhead_dark">
         <td colspan="{{ show_avatar ? 2 : 1 }}">
             <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ id }}</a>
-                <strong>{{ author.id|user_full }}</strong> {{ added_time|time_diff }} {{ heading|raw }}
+                <strong>{{ author.id|user_full }}</strong> {{ added_time|time_diff }} on {{ heading|raw }}
                 <span id="postcontrol-{{ id }}">
                 - <a href="#quickpost" onclick="Quote('{{ id }}','{{ author.username }}', true);" class="brackets">Quote</a>
 {%    if show_edit %}
@@ -18,8 +19,8 @@
             </div>
             <div id="bar{{ id }}" style="float: right;">
                 <a href="reports.php?action=report&amp;type=comment&amp;id={{ id }}" class="brackets">Report</a>
-{% if is_admin %}
-{%    if show_delete %}
+{% if viewer.permitted('site_admin_forums') %}
+{%    if viewer.permitted('site_forum_post_delete') %}
                 - <a href="#post{{ id }}" onclick="Delete('{{ id }}');" class="brackets">Delete</a>
 {%    endif %}
 {%    if show_warn %}
@@ -46,7 +47,7 @@
                 <br />
                 <br />
                 <span class="last_edited">
-{%    if is_admin %}
+{%    if viewer.permitted('site_admin_forums') %}
                 <a href="#content{{ id }}" onclick="LoadEdit('{{ page }}', {{ id }}, 1); return false;">&laquo;</a>
 {%    endif %}
                 Last edited by {{ editor.id|user_url }} {{ edit_time|time_diff }}</span>
