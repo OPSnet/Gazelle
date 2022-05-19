@@ -1804,13 +1804,13 @@ class User extends BaseObject {
         return max(0, $value - 1);
     }
 
-    public function lastAccess() {
+    public function lastAccess(): ?string {
         return $this->getSingleValue('user_last_access', '
             SELECT ula.last_access FROM user_last_access ula WHERE user_id = ?
         ');
     }
 
-    public function lastAccessRealtime(): string {
+    public function lastAccessRealtime(): ?string {
         return self::$db->scalar("
             SELECT coalesce(max(ulad.last_access), ula.last_access)
             FROM user_last_access ula
