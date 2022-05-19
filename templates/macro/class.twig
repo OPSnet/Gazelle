@@ -4,5 +4,5 @@
         {% if not class.Secondary and class.Level <= max_level %}
             <option value="{{ class.Level }}"{{ selected(class.Level == active) }}>{{ class.Name }}</option>
         {% endif %}
-    {% endfor %}}
+    {% endfor %}
 {% endmacro %}

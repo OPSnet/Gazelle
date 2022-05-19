@@ -1,41 +1,52 @@
-{% if seen == 1 %}
-<a name="{{ category_id }}"></a>
+{{ header('Forums') }}
+<div class="thin">
+    <h2>Forums</h2>
+    <div class="forum_list">
+{% for category, list in toc %}
+<a name="{{ category }}"></a>
 <h3>{{ category }}</h3>
 <table class="forum_index m_table">
-    <tr class="colhead">
-        <td style="width: 2%;"></td>
-        <td class="m_th_left" style="width: 25%;">Forum</td>
-        <td>Last Post</td>
-        <td class="m_th_right" style="width: 7%;">Topics</td>
-        <td class="m_th_right" style="width: 7%;">Posts</td>
-    </tr>
-{% endif %}
+<tr class="colhead">
+    <td style="width: 2%;"></td>
+    <td class="m_th_left" style="width: 20%;">Forum</td>
+    <td>Last Post</td>
+    <td class="m_th_right" style="width: 7%;">Threads</td>
+    <td class="m_th_right" style="width: 7%;">Posts</td>
+</tr>
+    {% for f in list %}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    <td class="td_read {{ icon_class }} {{ tooltip }}" title="{{ icon_class|replace({'_': ' '})|ucfirstall }}"></td>
+    <td class="td_read {{ f.icon_class }} {{ f.tooltip }}" title="{{ f.icon_class|replace({'_': ' '})|ucfirstall }}"></td>
     <td class="td_forum">
         <h4 class="min_padding">
-            <a class="{{ tooltip }}" href="forums.php?action=viewforum&amp;forumid={{ forum_id }}" title="{{ description }}">{{ name }}</a>
+            <a class="{{ f.tooltip }}" href="forums.php?action=viewforum&amp;forumid={{ f.forum_id }}" title="{{ f.description }}">{{ f.name }}</a>
         </h4>
     </td>
-{% if not threads %}
+        {% if not f.threads %}
     <td class="td_latest">
-        There are no topics here.{% if creator %} <a href="forums.php?action=new&amp;forumid={{ forum_id }}">Create one!</a>{% endif %}
+        There are no topics here.{% if creator %} <a href="forums.php?action=new&amp;forumid={{ f.forum_id }}">Create one!</a>{% endif %}
     </td>
-{% else %}
+        {% else %}
     <td class="td_latest">
         <span style="float: left;" class="last_topic">
-            <a href="forums.php?action=viewthread&amp;threadid={{ id }}" class="tooltip" data-title-plain="{{ title }}"{%
-                if title != cut_title %} title="{{ title }}"{% endif %}>{{ cut_title }}</a>
-            {%- if has_poll %} <span class="tooltip" title="There is a poll!">&#x1F5F3;</span>{% endif -%}
+            <a href="forums.php?action=viewthread&amp;threadid={{ f.id }}" class="tooltip" data-title-plain="{{ f.title }}"{%
+                if f.title != f.cut_title %} title="{{ f.title }}"{% endif %}>{{ f.cut_title }}</a>
+            {%- if f.has_poll %} <span class="tooltip" title="There is a poll!">&#x1F5F3;</span>{% endif -%}
         </span>
-{% if is_read %}
-        <span style="float: left;" class="{{ tooltip }} last_read" title="Jump to last read">
-            <a href="forums.php?action=viewthread&amp;threadid={{ id }}&amp;page={{ last_read_page }}#post{{ last_read_post }}"></a>
+            {% if f.is_read %}
+        <span style="float: left;" class="{{ f.tooltip }} last_read" title="Jump to last read">
+            <a href="forums.php?action=viewthread&amp;threadid={{ f.id }}&amp;page={{ f.last_read_page }}#post{{ f.last_read_post }}"></a>
         </span>
-{% endif %}
-        <span style="float: right;" class="last_poster">by {{ last_post_user|user_url|raw }} {{ last_post_time|time_diff(1) }}</span>
+            {% endif %}
+        <span style="float: right;" class="last_poster">by {{ f.last_post_user|user_url|raw }} {{ f.last_post_time|time_diff(1) }}</span>
     </td>
-{% endif %}
-    <td class="td_topic_count number_column m_td_right">{{ num_topics|number_format }}</td>
-    <td class="td_post_count number_column m_td_right">{{ num_posts|number_format }}</td>
+        {% endif %}
+    <td class="td_topic_count number_column m_td_right">{{ f.num_topics|number_format }}</td>
+    <td class="td_post_count number_column m_td_right">{{ f.num_posts|number_format }}</td>
 </tr>
+    {% endfor %}
+    </table>
+{% endfor %}
+</div>
+<div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=all&amp;auth={{ viewer.auth }}" class="brackets">Catch up</a></div>
+</div>
+{{ footer() }}

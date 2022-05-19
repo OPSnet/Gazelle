@@ -22,37 +22,38 @@
     </tr>
 {% for forum_list in toc %}
     {% for f in forum_list %}
+    {% set forum = f.forum %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <form class="manage_form" name="forums" action="" method="post">
-            <input type="hidden" name="id" value="{{ f.ID }}>" />
+            <input type="hidden" name="id" value="{{ forum.id }}>" />
             <input type="hidden" name="action" value="forum_alter" />
             <input type="hidden" name="auth" value="{{ auth }}" />
             <td>
                 <select name="categoryid">
         {% for id, name in category %}
-                    <option value="{{ id }}"{{ selected(id == f.categoryId) }}>{{ name }}</option>
+                    <option value="{{ id }}"{{ selected(id == forum.categoryId) }}>{{ name }}</option>
         {% endfor %}
             </td>
             <td>
-                <input type="text" size="2" name="sort" value="{{ f.Sort }}" />
+                <input type="text" size="2" name="sort" value="{{ forum.sequence }}" />
             </td>
             <td>
-                <input type="text" size="10" name="name" value="{{ f.Name }}" />
+                <input type="text" size="10" name="name" value="{{ forum.name }}" />
             </td>
             <td>
-                <input type="text" size="16" name="description" value="{{ f.Description }}" />
+                <input type="text" size="16" name="description" value="{{ forum.description }}" />
             </td>
             <td>R<br />W<br />C</td>
             <td>
-                <select name="minclassread">{{ class_option(1000, class_list, f.MinClassRead) }}</select><br />
-                <select name="minclasswrite">{{ class_option(1000, class_list, f.MinClassWrite) }}</select><br />
-                <select name="minclasscreate">{{ class_option(1000, class_list, f.MinClassCreate) }}</select><br />
+                <select name="minclassread">{{ class_option(1000, class_list, forum.minClassRead) }}</select><br />
+                <select name="minclasswrite">{{ class_option(1000, class_list, forum.minClassWrite) }}</select><br />
+                <select name="minclasscreate">{{ class_option(1000, class_list, forum.minClassCreate) }}</select><br />
             </td>
             <td>
-                <input type="checkbox" name="autolock"{{ checked(f.AutoLock) }} />
+                <input type="checkbox" name="autolock"{{ checked(forum.autoLock) }} />
             </td>
             <td>
-                <input type="text" size="4" name="autolockweeks" value="{{ f.AutoLockWeeks }}" />
+                <input type="text" size="4" name="autolockweeks" value="{{ forum.autoLockWeeks }}" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Edit" />

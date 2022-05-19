@@ -104,6 +104,14 @@ class Forum extends BaseObject {
         return $info;
     }
 
+    public function autoLock(): int {
+        return $this->info()['auto_lock'];
+    }
+
+    public function autoLockWeeks(): int {
+        return $this->info()['auto_lock_weeks'];
+    }
+
     public function categoryId(): int {
         return $this->info()['category_id'];
     }
@@ -121,11 +129,11 @@ class Forum extends BaseObject {
     }
 
     public function isLocked(): bool {
-        return $this->info()['is_locked'] ?? false;
+        return (bool)$this->info()['is_locked'];
     }
 
     public function isSticky(): bool {
-        return $this->info()['is_sticky'] ?? false;
+        return (bool)$this->info()['is_sticky'];
     }
 
     public function lastPostId(): int {
@@ -170,6 +178,10 @@ class Forum extends BaseObject {
 
     public function numThreads(): int {
         return $this->info()['num_threads'];
+    }
+
+    public function sequence(): int {
+        return $this->info()['sequence'];
     }
 
     /**

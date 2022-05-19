@@ -10,5 +10,5 @@ echo $Twig->render('admin/forum-management.twig', [
     'auth'       => $Viewer->auth(),
     'category'   => $forumMan->categoryList(),
     'class_list' => (new Gazelle\Manager\User)->classList(),
-    'toc'        => $forumMan->tableOfContentsMain(),
+    'toc'        => $forumMan->tableOfContents($Viewer),
 ]);

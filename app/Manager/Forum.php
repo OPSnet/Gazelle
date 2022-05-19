@@ -132,7 +132,7 @@ class Forum extends \Gazelle\BaseManager {
      *    - int 'IsSticky' Last post is locked (0/1)
      *    - int 'IsLocked' Last post is sticky (0/1)
      */
-    public function tableOfContentsMain() {
+    public function tableOfContentsMain(): array {
         $toc = self::$cache->get_value(self::CACHE_TOC_MAIN);
         if ($toc === false ) {
             self::$db->prepared_query("
@@ -160,6 +160,66 @@ class Forum extends \Gazelle\BaseManager {
             self::$cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);
         }
         return $toc;
+    }
+
+    public function tableOfContents(\Gazelle\User $user): array {
+        $toc = $this->tableOfContentsMain();
+        $userToc = [];
+        foreach ($toc as $category => $forumList) {
+            $seen = 0;
+            foreach ($forumList as $f) {
+                $forum = new \Gazelle\Forum($f['ID']);
+                if (!$user->readAccess($forum)) {
+                    continue;
+                }
+                $userLastRead = $forum->userLastRead($user->id(), $user->postsPerPage());
+                if (isset($userLastRead[$f['LastPostTopicID']])) {
+                    $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
+                    $lastReadPost = $userLastRead[$f['LastPostTopicID']]['PostID'];
+                    $catchup = $userLastRead[$f['LastPostTopicID']]['PostID'] >= $f['LastPostID']
+                        || $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
+                    $isRead = true;
+                } else {
+                    $lastReadPage = null;
+                    $lastReadPost = null;
+                    $catchup = $f['LastPostTime'] ? $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']) : false;
+                    $isRead = false;
+                }
+
+                if (!isset($toc[$category])) {
+                    $userToc[$category] = [];
+                }
+                $userToc[$category][] = [
+                    'creator'          => $f['MinClassCreate'] <= $user->classLevel(),
+                    'category'         => $category,
+                    'category_id'      => $f['categoryId'],
+                    'cut_title'        => shortenString($f['Title'] ?? '', 50, true),
+                    'description'      => $f['ID'] == DONOR_FORUM
+                        ? DONOR_FORUM_DESCRIPTION[rand(0, count(DONOR_FORUM_DESCRIPTION) - 1)]
+                        : $f['Description'],
+                    'forum'            => $forum,
+                    'forum_id'         => $f['ID'],
+                    'icon_class'       => (($f['IsLocked'] && !$f['IsSticky']) || $catchup ? 'read' : 'unread')
+                        . ($f['IsLocked'] ? '_locked' : '')
+                        . ($f['IsSticky'] ? '_sticky' : ''),
+                    'id'               => $f['LastPostTopicID'],
+                    'is_read'          => $isRead,
+                    'has_poll'         => $f['has_poll'],
+                    'last_post_time'   => $f['LastPostTime'],
+                    'last_post_user'   => $f['LastPostAuthorID'],
+                    'name'             => $f['Name'],
+                    'num_posts'        => $f['NumPosts'],
+                    'num_topics'       => $f['NumTopics'],
+                    'threads'          => $f['NumPosts'] > 0,
+                    'title'            => $f['Title'],
+                    'tooltip'          => $f['ID'] == DONOR_FORUM ? 'tooltip_gold' : 'tooltip',
+                    'first'            => (++$seen == 1), // implies <table> needs to be emitted
+                    'last_read_page'   => $lastReadPage,
+                    'last_read_post'   => $lastReadPost,
+                ];
+            }
+        }
+        return $userToc;
     }
 
     protected function flushTransition(): void {
