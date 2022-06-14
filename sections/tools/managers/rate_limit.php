@@ -1,4 +1,5 @@
 <?php
+
 if (!($Viewer->permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage'))) {
     error(403);
 }

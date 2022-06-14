@@ -3,6 +3,7 @@
 if (!$Viewer->permitted('admin_schedule')) {
     error(403);
 }
+
 authorize();
 
 $taskId = (int)($_REQUEST['id'] ?? 0);

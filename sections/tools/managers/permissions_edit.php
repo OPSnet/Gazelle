@@ -1,5 +1,9 @@
 <?php
 
+if (!$Viewer->permitted('admin_manage_permissions')) {
+    error(403);
+}
+
 $DB->prepared_query("
     SELECT ID, Name FROM staff_groups ORDER BY Sort
 ");

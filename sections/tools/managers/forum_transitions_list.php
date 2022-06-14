@@ -1,4 +1,5 @@
 <?php
+
 function forumList(array $list, $selected = 0) {
     $return = '';
     $cat = '';

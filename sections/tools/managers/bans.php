@@ -3,6 +3,7 @@
 if (!$Viewer->permitted('admin_manage_ipbans')) {
     error(403);
 }
+
 $IPv4Man = new Gazelle\Manager\IPv4;
 
 if (isset($_POST['submit'])) {

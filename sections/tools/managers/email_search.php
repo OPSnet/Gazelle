@@ -1,5 +1,9 @@
 <?php
 
+if (!$Viewer->permitted('users_view_email')) {
+    error(403);
+}
+
 $text      = '';
 $found     = 0;
 $list      = [];

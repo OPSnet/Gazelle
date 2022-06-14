@@ -1,5 +1,9 @@
 <?php
 
+if (!$Viewer->permitted('users_view_ips')) {
+    error(403);
+}
+
 $text      = '';
 $found     = 0;
 $column    = (int)($_POST['column'] ?? 0);

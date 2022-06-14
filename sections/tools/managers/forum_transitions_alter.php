@@ -3,6 +3,7 @@
 if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
+
 authorize();
 $forMan = new Gazelle\Manager\Forum;
 
