@@ -1,4 +1,5 @@
 <?php
+
 if (!($Viewer->permittedAny('users_mod', 'site_tag_aliases_read'))) {
     error(403);
 }

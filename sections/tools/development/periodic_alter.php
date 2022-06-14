@@ -1,9 +1,10 @@
 <?php
-authorize();
 
 if (!$Viewer->permitted('admin_periodic_task_manage')) {
     error(403);
 }
+
+authorize();
 
 $p = $_POST;
 $scheduler = new Gazelle\Schedule\Scheduler;

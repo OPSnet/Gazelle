@@ -1,5 +1,4 @@
 <?php
-set_time_limit(0);
 
 if (!$Viewer->permitted("admin_global_notification")) {
     error(403);
@@ -10,6 +9,8 @@ authorize();
 if (!is_number($_POST['class_id']) || empty($_POST['subject']) || empty($_POST['body'])) {
     error("Error in message form");
 }
+
+set_time_limit(0);
 
 $permissionId = $_POST['class_id'];
 $fromId = empty($_POST['from_system']) ? $Viewer->id() : 0;

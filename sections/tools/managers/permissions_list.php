@@ -1,4 +1,9 @@
 <?php
+
+if (!$Viewer->permitted('admin_manage_permissions')) {
+    error(403);
+}
+
 View::show_header('Manage Permissions');
 ?>
 <script type="text/javascript">//<![CDATA[
