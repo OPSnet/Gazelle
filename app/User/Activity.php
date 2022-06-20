@@ -111,7 +111,7 @@ class Activity extends \Gazelle\BaseUser {
                 $this->setAction("<a class=\"nobr\" href=\"reports.php\">$other Other report" . plural($other) . '</a>');
             }
         } elseif ($this->user->permitted('site_moderate_forums')) {
-            $open = $repStat->forumThreadTrashTotal();
+            $open = $repStat->forumOpenTotal();
             if ($open > 0) {
                 $this->setAction("<a href=\"reports.php\">$open Forum report" . plural($open) . '</a>');
             }
