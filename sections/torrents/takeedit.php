@@ -233,8 +233,8 @@ if (isset($_FILES['logfiles'])) {
             $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
             $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
         }
+        $torrent->updateLogScore($logfileSummary);
     }
-    $torrent->updateLogScore($logfileSummary);
 }
 
 // Update info for the torrent
