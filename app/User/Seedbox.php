@@ -145,19 +145,8 @@ class Seedbox extends \Gazelle\BaseUser {
                 'name'     => $torrent->fullLink(),
             ];
         }
-        if ($this->viewBy === self::VIEW_BY_NAME) {
-            usort($list, function ($x, $y) {
-                return $x['sortname'] === $y['sortname']
-                    ? $x['id'] <=> $y['id']
-                    : $x['sortname'] > $y['sortname'];
-            });
-        } else {
-            usort($list, function ($x, $y) {
-                return $x['folder'] === $y['folder']
-                    ? $x['id'] <=> $y['id']
-                    : $x['folder'] > $y['folder'];
-            });
-        }
+        $key = $this->viewBy === self::VIEW_BY_NAME ? 'sortname' : 'folder';
+        usort($list, fn ($x, $y) => $x[$key] <=> $y[$key] ?: $x['id'] <=> $y['id']);
         return $list;
     }
 

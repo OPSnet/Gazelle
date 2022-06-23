@@ -250,7 +250,7 @@ if ($musicRelease) {
         </div>
 <?php
     if ($Viewer->permitted('torrents_add_artist')) {
-        usort($section, function ($x, $y) {return $x['id'] <=> $y['id'];});
+        usort($section, fn ($x, $y) => $x['id'] <=> $y['id']);
 ?>
         <div class="box box_addartists">
             <div class="head"><strong>Add artist</strong><span style="float: right;" class="additional_add_artist"><a onclick="AddArtistField(); return false;" href="#" class="brackets">+</a></span></div>
