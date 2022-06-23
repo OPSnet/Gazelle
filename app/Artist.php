@@ -520,9 +520,7 @@ class Artist extends Base {
         // the aliases may need to be sorted
         foreach ($alias as &$a) {
             if ($a['alias']) {
-                uksort($a['alias'], function ($x, $y) use ($a) {
-                    return strcasecmp($a['alias'][$x]['name'], $a['alias'][$y]['name']);
-                });
+                uksort($a['alias'], fn ($x, $y) => strtolower($a['alias'][$x]['name']) <=> strtolower($a['alias'][$y]['name']));
             }
         }
         return $alias;
@@ -870,25 +868,17 @@ class Artist extends Base {
                 continue;
             }
             $related = $s['related'];
-            usort($related, function ($a, $b) use ($similar) {
-                return $similar[$a]['nrRelated'] <=> $similar[$b]['nrRelated'];
-            });
+            usort($related, fn ($a, $b) => $similar[$a]['nrRelated'] <=> $similar[$b]['nrRelated']);
             $s['related'] = $related;
         }
         unset($s);
 
         // Now sort the artists by most relations first
-        uksort($similar, function ($a, $b) use ($similar) {
-            $cmp = $similar[$b]['nrRelated'] <=> $similar[$a]['nrRelated'];
-            if ($cmp != 0) {
-                return $cmp;
-            }
-            $cmp = $similar[$b]['score'] <=> $similar[$a]['score'];
-            if ($cmp != 0) {
-                return $cmp;
-            }
-            return $similar[$b]['artist_id'] <=> $similar[$a]['artist_id'];
-        });
+        uksort($similar, fn ($a, $b)
+            => $similar[$b]['nrRelated'] <=> $similar[$a]['nrRelated']
+            ?: $similar[$b]['score']     <=> $similar[$a]['score']
+            ?: $similar[$b]['artist_id'] <=> $similar[$a]['artist_id']
+        );
 
         // Place the artists with the most relations first, and place
         // their relations near them, alternating on each side.

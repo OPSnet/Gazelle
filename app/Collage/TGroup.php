@@ -84,7 +84,7 @@ class TGroup extends AbstractCollage {
             }
             $this->contributors[$contribUserId]++;
         }
-        uasort($this->artists, function ($x, $y) { return $y['count'] <=> $x['count']; });
+        uasort($this->artists, fn ($x, $y) => $y['count'] <=> $x['count']);
         arsort($this->contributors);
         return count($this->groupIds);
     }

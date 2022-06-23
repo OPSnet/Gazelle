@@ -509,7 +509,7 @@ if (!empty($_GET)) {
 // Neither level nor ID is particularly useful when searching secondary classes, so sort them alphabetically.
 $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 $Secondaries = array_filter($ClassLevels, fn ($c) => $c['Secondary'] == '1');
-usort($Secondaries, function($c1, $c2) { return strcmp($c1['Name'], $c2['Name']); });
+usort($Secondaries, fn($c1, $c2) => $c1['Name'] <=> $c2['Name']);
 
 echo $Twig->render('admin/advanced-user-search.twig', [
     'page'          => $Results,
