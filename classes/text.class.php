@@ -827,7 +827,7 @@ class Text {
                     }
                     if ($GroupID) {
                         $Groups = Torrents::get_groups([$GroupID], true, true, false);
-                        if ($Groups[$GroupID]) {
+                        if (isset($Groups[$GroupID])) {
                             $Group = $Groups[$GroupID];
                             $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode(' ', $Group['TagList'])));
                             if (!str_contains($Block['Attr'], 'noartist')) {
