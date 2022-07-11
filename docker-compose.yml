@@ -45,11 +45,13 @@ services:
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=sc5tlc9JSCC6
     command: 
-      - /usr/sbin/mysqld
+      - mysqld
       - --group-concat-max-len=1048576
       - --character-set-server=utf8mb4
       - --userstat=on
       - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+      # neither sphinxsearch or ocelot are compatible with the mysql8 caching_sha2_password plugin
+      - --default-authentication-plugin=mysql_native_password
 
   sphinxsearch:
     build: ./.docker/sphinxsearch
