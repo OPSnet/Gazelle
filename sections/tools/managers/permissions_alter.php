@@ -46,8 +46,8 @@ if ($privilege && empty($_REQUEST['secondary']) == $privilege->isSecondary() && 
 
 $name         = $_REQUEST['name'];
 $forums       = $_REQUEST['forums'];
-$staffGroup   = isset($_REQUEST['staffgroup']);
 $displayStaff = isset($_REQUEST['displaystaff']);
+$staffGroup   = (int)$_REQUEST['staffgroup'];
 $level        = (int)$_REQUEST['level'];
 $secondary    = (int)isset($_REQUEST['secondary']);
 $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
@@ -56,6 +56,11 @@ foreach ($_REQUEST as $key => $perm) {
     if (substr($key, 0, 5) == 'perm_') {
         $values[substr($key, 5)] = (int)$perm;
     }
+}
+
+$DB->prepared_query("SELECT ID FROM staff_groups WHERE ID = ?", $staffGroup);
+if (!$DB->has_results()) {
+    $staffGroup = $privilege->staffGroup();
 }
 
 if (is_null($privilege)) {
@@ -79,7 +84,7 @@ if (is_null($privilege)) {
     if ($forums != $privilege->permittedForums()) {
         $privilege->setUpdate('PermittedForums', $forums);
     }
-    if ($forums != $privilege->staffGroup()) {
+    if ($staffGroup !== $privilege->staffGroup()) {
         $privilege->setUpdate('StaffGroup', $staffGroup);
     }
     $privilege->setUpdate('`Values`', serialize($values))
