@@ -147,7 +147,7 @@ SET FOREIGN_KEY_CHECKS = 1;
             $torrent_id = count($insertData['torrents']) + 1;
             $files = [];
             $fileList = [];
-            $delim = utf8_encode(chr(0xF7));
+            $delim = "\xC3\xB7"; // U+00F7 DIVISION SIGN
             foreach ($album->tracklist as $track) {
                 $length = rand(1, 45573573);
                 $name = "{$track->position}. {$track->title}.mp3";
