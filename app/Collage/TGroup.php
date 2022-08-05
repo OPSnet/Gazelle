@@ -5,6 +5,7 @@ namespace Gazelle\Collage;
 class TGroup extends AbstractCollage {
 
     protected array $groupIds = [];
+    protected array $sequence = [];
     protected array $torrents = [];
     protected array $torrentTags = [];
 
@@ -27,7 +28,8 @@ class TGroup extends AbstractCollage {
         $order = $this->holder->sortNewest() ? 'DESC' : 'ASC';
         self::$db->prepared_query("
             SELECT ct.GroupID,
-                ct.UserID
+                ct.UserID,
+                ct.Sort as sequence
             FROM collages_torrents AS ct
             INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
             WHERE ct.CollageID = ?
@@ -83,6 +85,7 @@ class TGroup extends AbstractCollage {
                 $this->contributors[$contribUserId] = 0;
             }
             $this->contributors[$contribUserId]++;
+            $this->sequence[$groupId] = $groupContribIds[$groupId]['sequence'];
         }
         uasort($this->artists, fn ($x, $y) => $y['count'] <=> $x['count']);
         arsort($this->contributors);
@@ -91,6 +94,10 @@ class TGroup extends AbstractCollage {
 
     public function entryList(): array {
         return $this->groupIds;
+    }
+
+    public function sequence(int $entryId): int {
+        return $this->sequence[$entryId] ?? 0;
     }
 
     protected function flushTarget(int $tgroupId): void {

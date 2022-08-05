@@ -72,6 +72,7 @@ class Collage extends BaseObject {
 
     public function numContributors() { return count(array_keys($this->contributors())); }
     public function numArtists() { return count($this->collage->artistList()); }
+    public function sequence(int $entryId) { return $this->collage->sequence($entryId); }
 
     public function info(): array {
         if (!isset($this->info)) {

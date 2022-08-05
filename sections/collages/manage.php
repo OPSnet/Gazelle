@@ -8,24 +8,9 @@ if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !$Viewer->per
     error(403);
 }
 
-$DB->prepared_query("
-    SELECT
-        ct.GroupID,
-        um.ID,
-        um.Username,
-        ct.Sort,
-        tg.CatalogueNumber
-    FROM collages_torrents AS ct
-    INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
-    LEFT JOIN users_main AS um ON (um.ID = ct.UserID)
-    WHERE ct.CollageID = ?
-    ORDER BY ct.Sort
-    ", $collage->id()
-);
-$GroupIDs = $DB->collect('GroupID');
-
-$CollageDataList = $DB->to_array('GroupID', MYSQLI_ASSOC);
-$TorrentList = count($GroupIDs) ? Torrents::get_groups($GroupIDs) : [];
+$tgroupIds = $collage->groupIds();
+$tgMan = new Gazelle\Manager\TGroup;
+$userMan = new Gazelle\Manager\User;
 
 View::show_header("Manage collage: " . $collage->name(), ['js' => 'jquery-ui,jquery.tablesorter,sort']);
 ?>
@@ -68,50 +53,29 @@ View::show_header("Manage collage: " . $collage->name(), ['js' => 'jquery-ui,jqu
 <?php
 
     $Number = 0;
-    foreach ($GroupIDs as $GroupID) {
-        if (!isset($TorrentList[$GroupID])) {
+    foreach ($tgroupIds as $tgroupId) {
+        $tgroup = $tgMan->findById($tgroupId);
+        if (is_null($tgroup)) {
             continue;
         }
-        $Group = $TorrentList[$GroupID];
-        $GroupYear = $Group['Year'];
-        $Artists = $Group['Artists'];
-        $ExtendedArtists = $Group['ExtendedArtists'];
-        [, $UserID, $Username, $Sort, $CatNum] = array_values($CollageDataList[$GroupID]);
-
         $Number++;
-
-        $DisplayName = '';
-        if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
-            unset($ExtendedArtists[2]);
-            unset($ExtendedArtists[3]);
-            $DisplayName = Artists::display_artists($ExtendedArtists, true, false);
-        } elseif (count($Artists) > 0) {
-            $DisplayName = Artists::display_artists(['1' => $Artists], true, false);
-        }
-        $TorrentLink = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\">" . $Group['Name'] . '</a>';
-        $GroupYear = $GroupYear > 0 ? $GroupYear : '';
-        if ($Group['VanityHouse']) {
-            $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
-        }
-
-        $AltCSS = ($Number % 2 === 0) ? 'rowa' : 'rowb';
 ?>
-            <tr class="drag <?=$AltCSS?>" id="li_<?=$GroupID?>">
+            <tr class="drag <?= ($Number % 2 === 0) ? 'rowa' : 'rowb' ?>" id="li_<?=$tgroup->id() ?>">
                 <form class="manage_form" name="collage" action="collages.php" method="post">
                     <td>
-                        <input class="sort_numbers" type="text" name="sort" value="<?=$Sort?>" id="sort_<?=$GroupID?>" size="4" />
+                        <input class="sort_numbers" type="text" name="sort" value="<?=$collage->sequence($tgroup->id()) ?>" id="sort_<?=$tgroup->id() ?>" size="4" />
                     </td>
                     <td><?=$Number?></td>
-                    <td><?=trim($CatNum) ?: '&nbsp;'?></td>
-                    <td><?=trim($GroupYear) ?: '&nbsp;'?></td>
-                    <td><?=trim($DisplayName) ?: '&nbsp;'?></td>
-                    <td><?=trim($TorrentLink)?></td>
-                    <td class="nobr"><?=Users::format_username($UserID, $Username, false, false, false)?></td>
+                    <td><?=$tgroup->catalogueNumber() ?: '&nbsp;'?></td>
+                    <td><?=$tgroup->year() ?: '&nbsp;'?></td>
+                    <td><?=$tgroup->artistHtml() ?: '&nbsp;'?></td>
+                    <td><a href="torrents.php?id= <?= $tgroup->id() ?>" class="tooltip" title="View torrent group"><?= $tgroup->name() ?></a></td>
+                    <td class="nobr"><?= $userMan->findById($collage->entryUserId($tgroupId))->link() ?></td>
                     <td class="nobr">
                         <input type="hidden" name="action" value="manage_handle" />
                         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                         <input type="hidden" name="collageid" value="<?=$collage->id() ?>" />
-                        <input type="hidden" name="groupid" value="<?=$GroupID?>" />
+                        <input type="hidden" name="groupid" value="<?=$tgroup->id()?>" />
                         <input type="submit" name="submit" value="Edit" />
                         <input type="submit" name="submit" value="Remove" />
                     </td>
