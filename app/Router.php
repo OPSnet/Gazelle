@@ -84,9 +84,8 @@ class Router {
         $request_method = strtoupper(empty($_SERVER['REQUEST_METHOD']) ? 'GET' : $_SERVER['REQUEST_METHOD']);
         if (isset($this->routes[$request_method]) && isset($this->routes[$request_method][$action])) {
             $method = $this->routes[$request_method][$action];
-        }
-        else {
-            throw new RouterException("Invalid action for '${request_method}' request method");
+        } else {
+            throw new RouterException("Invalid action for '{$request_method}' request method");
         }
 
         if (($this->authorize[$request_method] || $method['authorize']) && !$this->authorized()) {

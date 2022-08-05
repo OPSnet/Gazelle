@@ -7,7 +7,7 @@ if (!$Viewer->permitted('admin_site_debug')) {
 $proc = [];
 if (preg_match('/.*\/(.*)/', PHP_BINARY, $match, PREG_UNMATCHED_AS_NULL)) {
     $binary = $match[1] ?? 'php-fpm';
-    $ps = trim(`ps -C ${binary} -o pid --no-header`);
+    $ps = trim(`ps -C {$binary} -o pid --no-header`);
     $pidList = explode("\n", $ps);
     foreach ($pidList as $pid) {
         $p = $Cache->get_value("php_$pid");
