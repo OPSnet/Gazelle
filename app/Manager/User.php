@@ -939,11 +939,12 @@ class User extends \Gazelle\Base {
     }
 
     public function promotionCriteria(): array {
+        $GiB = 1024 * 1024 * 1024;
         $criteria = [
             USER => [
                 'From' => USER,
                 'To' => MEMBER,
-                'MinUpload' => 10 * 1024 * 1024 * 1024,
+                'MinUpload' => 10 * $GiB,
                 'MinRatio' => 0.7,
                 'MinUploads' => 0,
                 'Weeks' => 1
@@ -951,7 +952,7 @@ class User extends \Gazelle\Base {
             MEMBER => [
                 'From' => MEMBER,
                 'To' => POWER,
-                'MinUpload' => 25 * 1024 * 1024 * 1024,
+                'MinUpload' => 25 * $GiB,
                 'MinRatio' => 1.05,
                 'MinUploads' => 5,
                 'Weeks' => 2
@@ -959,7 +960,7 @@ class User extends \Gazelle\Base {
             POWER => [
                 'From' => POWER,
                 'To' => ELITE,
-                'MinUpload' => 100 * 1024 * 1024 * 1024,
+                'MinUpload' => 100 * $GiB,
                 'MinRatio' => 1.05,
                 'MinUploads' => 50,
                 'Weeks' => 4
@@ -967,7 +968,7 @@ class User extends \Gazelle\Base {
             ELITE => [
                 'From' => ELITE,
                 'To' => TORRENT_MASTER,
-                'MinUpload' => 500 * 1024 * 1024 * 1024,
+                'MinUpload' => 500 * $GiB,
                 'MinRatio' => 1.05,
                 'MinUploads' => 500,
                 'Weeks' => 8
@@ -975,16 +976,13 @@ class User extends \Gazelle\Base {
             TORRENT_MASTER => [
                 'From' => TORRENT_MASTER,
                 'To' => POWER_TM,
-                'MinUpload' => 500 * 1024 * 1024 * 1024,
+                'MinUpload' => 500 * $GiB,
                 'MinRatio' => 1.05,
                 'MinUploads' => 500,
                 'Weeks' => 8,
                 'Extra' => [
                     'Unique groups' => [
-                        'Query' => '
-                            SELECT count(DISTINCT GroupID) AS val
-                            FROM torrents
-                            WHERE UserID = users_main.ID',
+                        'Query' => 'us.unique_group_total',
                         'Count' => 500,
                         'Type' => 'int'
                     ]
@@ -993,21 +991,13 @@ class User extends \Gazelle\Base {
             POWER_TM => [
                 'From' => POWER_TM,
                 'To' => ELITE_TM,
-                'MinUpload' => 500 * 1024 * 1024 * 1024,
+                'MinUpload' => 500 * $GiB,
                 'MinRatio' => 1.05,
                 'MinUploads' => 500,
                 'Weeks' => 8,
                 'Extra' => [
                     '"Perfect" FLACs' => [
-                        'Query' => "
-                            SELECT count(DISTINCT t.GroupID)
-                            FROM torrents t
-                            WHERE t.Format = 'FLAC'
-                                AND (
-                                    (t.Media = 'CD' AND t.LogScore = 100)
-                                    OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
-                                )
-                                AND t.UserID = users_main.ID",
+                        'Query' => 'us.perfect_flac_total',
                         'Count' => 500,
                         'Type' => 'int'
                     ]
@@ -1016,21 +1006,13 @@ class User extends \Gazelle\Base {
             ELITE_TM => [
                 'From' => ELITE_TM,
                 'To' => ULTIMATE_TM,
-                'MinUpload' => 2 * 1024 * 1024 * 1024 * 1024,
+                'MinUpload' => 2048 * $GiB,
                 'MinRatio' => 1.05,
+                'MinUploads' => 2000,
                 'Weeks' => 12,
                 'Extra' => [
                     '"Perfecter" FLACs' => [
-                        'Query' => "
-                            SELECT count(DISTINCT t.GroupID)
-                            FROM torrents t
-                            WHERE t.Format = 'FLAC'
-                                AND (
-                                       (t.Media = 'CD' AND t.LogScore = 100)
-                                    OR t.Media IN ('Cassette', 'DAT')
-                                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless')
-                                )
-                                AND t.UserID = users_main.ID",
+                        'Query' => 'us.perfecter_flac_total',
                         'Count' => 2000,
                         'Type' => 'int'
                     ]
@@ -1040,21 +1022,139 @@ class User extends \Gazelle\Base {
         if (RECOVERY_DB) {
             $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
                'Query' => "
-                    SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(rb.final, 0)
+                    (SELECT uls.Uploaded + us.request_vote_size - coalesce(rb.final, 0)
                     FROM users_leech_stats uls
-                    LEFT JOIN
-                    (
-                        SELECT UserID, sum(Bounty) AS Bounty
-                        FROM requests_votes
-                        GROUP BY UserID
-                    ) b ON (b.UserID = uls.UserID)
+                    INNER JOIN user_summary us ON (us.user_id = uls.UserID)
                     LEFT JOIN recovery_buffer rb ON (rb.user_id = uls.UserID)
-                    WHERE uls.UserID = users_main.ID",
-               'Count' => 2 * 1024 * 1024 * 1024 * 1024,
+                    WHERE uls.UserID = um.ID)",
+               'Count' => 2048 * $GiB,
                'Type' => 'bytes'
             ];
         }
         return $criteria;
+    }
+
+    public function promote(bool $commit = true, \Gazelle\Schedule\Task $task = null): int {
+        $criteria = $this->promotionCriteria();
+        $promoted = 0;
+        foreach ($criteria as $level) {
+            $fromClass = $this->userclassName($level['From']);
+            $toClass = $this->userclassName($level['To']);
+            $query = "
+                SELECT um.ID
+                FROM users_main um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                INNER JOIN users_info         ui ON (ui.UserID = um.ID)
+                INNER JOIN user_summary       us ON (us.user_id = um.ID)
+                WHERE um.Enabled = '1'
+                    AND ui.Warned IS NULL
+                    AND um.PermissionID = ?
+                    AND uls.Uploaded + us.request_vote_size >= ?
+                    AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
+                    AND ui.JoinDate < now() - INTERVAL ? WEEK
+                    AND us.upload_total >= ?
+            ";
+            $args = [$level['From'], $level['MinUpload'], $level['MinRatio'], $level['Weeks'], $level['MinUploads']];
+
+            if (!empty($level['Extra'])) {
+                $query .= ' AND ' . implode(' AND ',
+                    array_map(function ($v) use (&$args) {
+                        $args[] = $v['Count'];
+                        return "{$v['Query']} >= ?";
+                    }, $level['Extra'])
+                );
+            }
+
+            self::$db->prepared_query($query, ...$args);
+            $userIds = self::$db->collect('ID');
+            $total = count($userIds);
+
+            if ($total) {
+                $task?->info("Promoting $total users from $fromClass to $toClass");
+                $promoted += $total;
+
+                foreach ($userIds as $userId) {
+                    $user = $this->findById($userId);
+                    $task?->debug("Promoting {$user->label()} from $fromClass to $toClass", $userId);
+                    if (!$commit) {
+                        continue;
+                    }
+
+                    $user->setUpdate('PermissionID', $level['To'])
+                        ->addStaffNote("Class changed to $toClass by System")
+                        ->modify();
+                    $this->sendPM($userId, 0,
+                        "You have been promoted to $toClass",
+                        "Congratulations on your promotion to $toClass!\n\nTo read more about "
+                            . SITE_NAME
+                            . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                    );
+                }
+            }
+        }
+        return $promoted;
+    }
+
+    public function demote(bool $commit = true, \Gazelle\Schedule\Task $task = null): int {
+        $criteria = array_reverse($this->promotionCriteria());
+        $demoted = 0;
+        foreach ($criteria as $level) {
+            $fromClass = $this->userclassName($level['To']);
+            $toClass = $this->userclassName($level['From']);
+            $task?->debug("Begin demoting users from $fromClass to $toClass");
+
+            $query = "
+                SELECT ID
+                FROM users_main um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                INNER JOIN users_info         ui ON (ui.UserID = um.ID)
+                INNER JOIN user_summary       us ON (us.user_id = um.ID)
+                WHERE um.Enabled = '1'
+                    AND um.PermissionID = ?
+                    AND (
+                        uls.Uploaded + us.request_vote_size < ?
+                        OR us.upload_total < ?
+            ";
+            $args = [$level['To'], $level['MinUpload'], $level['MinUploads']];
+
+            if (!empty($level['Extra'])) {
+                $query .= ' OR NOT ' . implode(' AND ',
+                    array_map(function ($v) use (&$args) {
+                        $args[] = $v['Count'];
+                        return "{$v['Query']} >= ?";
+                    }, $level['Extra'])
+                );
+            }
+            $query .= ')';
+
+            self::$db->prepared_query($query, ...$args);
+            $userIds = self::$db->collect('ID');
+            $total = count($userIds);
+
+            if (count($userIds) > 0) {
+                $task?->info("Demoting $total users from $fromClass to $toClass");
+                $demoted += $total;
+
+                foreach ($userIds as $userId) {
+                    $user = $this->findById($userId);
+                    $task?->debug("Demoting {$user->label()} from $fromClass to $toClass", $userId);
+                    if (!$commit) {
+                        continue;
+                    }
+
+                    $user->setUpdate('PermissionID', $level['To'])
+                        ->addStaffNote("Class changed to $toClass by System")
+                        ->modify();
+                    $this->sendPM($userId, 0,
+                        "You have been demoted to $toClass",
+                        "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
+                            . SITE_NAME
+                            . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                    );
+                }
+            }
+        }
+        return $demoted;
     }
 
     public function updateRatioRequirements(): int {
