@@ -504,14 +504,18 @@ class Request extends BaseObject {
                 ID, UserID, TimeAdded, LastVote, CategoryID, Title,
                 Year, ReleaseType, CatalogueNumber, RecordLabel, BitrateList,
                 FormatList, MediaList, LogCue, FillerID, TorrentID,
-                TimeFilled, Visible, Votes, Bounty, TagList,
-                ArtistList)
+                TimeFilled, Visible, Votes, Bounty, TagList, ArtistList)
             SELECT
                 r.ID, r.UserID, unix_timestamp(r.TimeAdded), unix_timestamp(r.LastVote), r.CategoryID, r.Title,
                 r.Year, r.ReleaseType, r.CatalogueNumber, r.RecordLabel, r.BitrateList,
                 r.FormatList, r.MediaList, r.LogCue, r.FillerID, r.TorrentID,
                 unix_timestamp(r.TimeFilled), r.Visible,
-                count(rv.UserID), sum(rv.Bounty) >> 10, group_concat(' ', REPLACE(t.Name, '.', '_')),
+                count(rv.UserID), sum(rv.Bounty) >> 10,
+                (
+                    SELECT group_concat(replace(t.Name, '.', '_') SEPARATOR ' ')
+                    FROM tags t
+                    INNER JOIN requests_tags AS rt ON (rt.TagID = t.ID AND rt.RequestID = ?)
+                ),
                 (
                     SELECT group_concat(aa.Name SEPARATOR ' ')
                     FROM requests_artists AS ra
@@ -520,12 +524,10 @@ class Request extends BaseObject {
                     GROUP BY ra.RequestID
                 )
             FROM requests AS r
-            INNER JOIN requests_tags AS rt ON (rt.TagID = r.ID)
-            INNER JOIN  tags AS t ON (t.ID = rt.TagID)
             LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID)
             WHERE r.ID = ?
             GROUP BY r.ID
-            ", $this->id, $this->id
+            ", $this->id, $this->id, $this->id
         );
         return self::$db->affected_rows();
     }
