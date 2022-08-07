@@ -541,7 +541,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                 foreach ($details as $logId => $info) {
                                     if ($info['adjustment']) {
                                         $adj = $info['adjustment'];
-                                        $adjUser = $userMan->findById(adj['userId']);
+                                        $adjUser = $userMan->findById($adj['userId']);
 ?>
                                 <li class="nobr">Log adjusted by <?= $adjUser->link() ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
@@ -578,7 +578,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                 foreach ($details as $logId => $info) {
                                     if ($info['adjustment']) {
                                         $adj = $info['adjustment'];
-                                        $adjUser = $userMan->findById(adj['userId']);
+                                        $adjUser = $userMan->findById($adj['userId']);
 ?>
                                 <li class="nobr">Log adjusted by <?= $adjUser->link() ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
