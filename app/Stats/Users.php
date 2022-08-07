@@ -357,6 +357,8 @@ class Users extends \Gazelle\Base {
                     coalesce(sum(rv.Bounty), 0) AS size,
                     count(*) AS total
                 FROM requests_votes rv
+                INNER JOIN requests r ON (r.ID = rv.RequestID)
+                WHERE r.UserID != r.FillerID
                 GROUP BY rv.UserID
             ON DUPLICATE KEY UPDATE
                 request_vote_size = VALUES(request_vote_size),

@@ -2218,11 +2218,17 @@ class User extends BaseObject {
         }
         if (isset($criteria['Extra'])) {
             foreach ($criteria['Extra'] as $req => $info) {
-                $query = str_replace('users_main.ID', '?', $info['Query']);
-                $params = array_fill(0, substr_count($query, '?'), $this->id);
-                $count = self::$db->scalar($query, ...$params);
-
-                $progress['Requirements'][$req] = [$count, $info['Count'], $info['Type']];
+                $query = $info['Query'];
+                if (str_starts_with($query, 'us.')) {
+                    $query = "SELECT $query FROM user_summary us WHERE user_id = ?";
+                } else {
+                    $query = str_replace('um.ID', '?', $query);
+                }
+                $progress['Requirements'][$req] = [
+                    self::$db->scalar($query, ...array_fill(0, substr_count($query, '?'), $this->id)),
+                    $info['Count'],
+                    $info['Type']
+                ];
             }
         }
         return $progress;
