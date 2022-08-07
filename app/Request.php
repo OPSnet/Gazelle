@@ -101,9 +101,9 @@ class Request extends BaseObject {
                 GROUP BY r.ID
                 ", $this->id
             );
-            $this->info['need_encoding'] = explode('|', $this->info['BitrateList']);
-            $this->info['need_format'] = explode('|', $this->info['FormatList']);
-            $this->info['need_media'] = explode('|', $this->info['MediaList']);
+            $this->info['need_encoding'] = explode('|', $this->info['BitrateList'] ?? '');
+            $this->info['need_format'] = explode('|', $this->info['FormatList'] ?? '');
+            $this->info['need_media'] = explode('|', $this->info['MediaList'] ?? '');
         }
         return $this->info;
     }
