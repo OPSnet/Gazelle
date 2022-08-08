@@ -5,14 +5,14 @@
     </div>
     <div class="thin box pad">
         <form class="send_form" name="warning" action="" onsubmit="quickpostform.submit_button.disabled = true;" method="post">
-            <input type="hidden" name="forumid" value="{{ form_id }}" />
+            <input type="hidden" name="forumid" value="{{ post.thread.forum.id }}" />
             <input type="hidden" name="auth" value="{{ auth }}" />
-            <input type="hidden" name="postid" value="{{ post_id }}" />
+            <input type="hidden" name="postid" value="{{ post.id }}" />
             <input type="hidden" name="userid" value="{{ user.id }}" />
             <input type="hidden" name="action" value="take_warn" />
             <table class="layout" align="center">
                 <tr>
-                    <td class="label">Reason:</td>
+                    <td class="label">Staff note:</td>
                     <td>
                         <input type="text" name="reason" size="60" />
                     </td>
@@ -38,7 +38,7 @@
                 <tr>
                     <td class="label">Edit post:</td>
                     <td>
-                        <textarea id="body" style="width: 95%;" tabindex="1" onkeyup="resize('body');" name="body" cols="90" rows="8">{{ body }}</textarea>
+                        <textarea id="body" style="width: 95%;" tabindex="1" onkeyup="resize('body');" name="body" cols="90" rows="8">{{ post.body }}</textarea>
                         <br />
                         <input type="submit" id="submit_button" value="Warn user" tabindex="1" />
                     </td>

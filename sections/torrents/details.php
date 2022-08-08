@@ -640,7 +640,7 @@ if (!$torrentList) {
 <?php       } else { ?>
                 Someone reported it
 <?php       } ?>
-                <?= time_diff($Report['ReportedTime'], 2, true, true) ?> for the reason <?= $ReportType['title'] ?>
+                <?= time_diff($Report['ReportedTime'], 2) ?> for the reason <?= $ReportType['title'] ?>
                 <blockquote><?= Text::full_format($Report['UserComment']) ?></blockquote>
             </td>
         </tr>

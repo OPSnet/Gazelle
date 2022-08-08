@@ -5,12 +5,11 @@ if (!$Viewer->permitted('site_forum_post_delete')) {
 }
 authorize();
 
-$postId = (int)($_GET['postid'] ?? 0);
-$forum = (new Gazelle\Manager\Forum)->findByPostId($postId);
-if (is_null($forum)) {
+$post = (new Gazelle\Manager\ForumPost)->findById((int)($_GET['postid'] ?? 0));
+if (is_null($post)) {
     error(404);
 }
 
-if (!$forum->removePost($postId)) {
+if (!$post->remove()) {
     error(404);
 }

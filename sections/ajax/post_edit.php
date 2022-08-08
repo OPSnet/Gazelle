@@ -8,7 +8,6 @@ $PostID = (int)$_GET['postid'];
 if (!$PostID) {
     die();
 }
-$Type = $_GET['type'] ?? '';
 if (!in_array($_GET['type'], ['forums', 'collages', 'requests', 'torrents', 'artist'])) {
     die();
 }
@@ -18,24 +17,17 @@ if ($_GET['depth'] != (int)$_GET['depth']) {
 $Depth = (int)$_GET['depth'];
 
 $commentMan = new Gazelle\Manager\Comment;
-$Edits = $commentMan->loadEdits($Type, $PostID);
+$Edits = $commentMan->loadEdits($_GET['type'], $PostID);
 
 [$UserID, $Time] = $Edits[$Depth];
 if ($Depth != 0) {
     $Body = $Edits[$Depth - 1][2];
 } else {
     //Not an edit, have to get from the original
-    switch ($Type) {
-        case 'forums':
-            $Body = (new Gazelle\Manager\Forum)->findByPostId($PostID)->postBody($PostID);
-            break;
-        case 'collages':
-        case 'requests':
-        case 'artist':
-        case 'torrents':
-            $Body = $commentMan->findById($PostID)->body();
-            break;
-    }
+    $Body = match($_GET['type']) {
+        'forums' => (new Gazelle\Manager\ForumPost)->findById($PostID)->body(),
+        default  => $commentMan->findById($PostID)->body(),
+    };
 }
 ?>
                 <?=Text::full_format($Body)?>
@@ -44,7 +36,7 @@ if ($Depth != 0) {
                 <span class="last_edited">
 <?php if ($Depth < count($Edits)) { ?>
 
-                    <a href="#edit_info_<?=$PostID?>" onclick="LoadEdit('<?=$Type?>', <?=$PostID?>, <?=($Depth + 1)?>); return false;">&laquo;</a>
+                    <a href="#edit_info_<?=$PostID?>" onclick="LoadEdit('<?= $_GET['type'] ?>', <?=$PostID?>, <?=($Depth + 1)?>); return false;">&laquo;</a>
                     <?=(($Depth == 0) ? 'Last edited by' : 'Edited by')?>
                     <?=Users::format_username($UserID, false, false, false) ?> <?=time_diff($Time, 2, true, true)?>
 
@@ -55,6 +47,6 @@ if ($Depth != 0) {
 
 if ($Depth > 0) {
 ?>
-                    <a href="#edit_info_<?=$PostID?>" onclick="LoadEdit('<?=$Type?>', <?=$PostID?>, <?=($Depth - 1)?>); return false;">&raquo;</a>
+                    <a href="#edit_info_<?=$PostID?>" onclick="LoadEdit('<?= $_GET['type'] ?>', <?=$PostID?>, <?=($Depth - 1)?>); return false;">&raquo;</a>
 <?php } ?>
                 </span>

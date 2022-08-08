@@ -11,35 +11,29 @@ Things to expect in $_GET:
 
 //---------- Things to sort out before it can start printing/generating content
 
-// Enable TOC
-Text::$TOC = true;
-
 $forumMan = new Gazelle\Manager\Forum;
 if (isset($_GET['postid'])) {
-    $postId = (int)$_GET['postid'];
-    $forum  = $forumMan->findByPostId($postId);
-    if (is_null($forum)) {
+    $post = (new Gazelle\Manager\ForumPost)->findById((int)$_GET['postid']);
+    if (is_null($post)) {
         error(404);
     }
     if (!isset($_GET['threadid'])) {
-        header("Location: forums.php?action=viewthread&threadid="
-            . $forumMan->findThreadIdByPostId($postId) . "&postid=$postId#post$postId"
-        );
+        header("Location: {$post->location()}");
         exit;
     }
-    $thread = (new Gazelle\Manager\ForumThread)->findById($forumMan->findThreadIdByPostId($postId));
+    $thread = $post->thread();
 } elseif (isset($_GET['threadid'])) {
-    $postId = false;
+    $post = null;
     $thread = (new Gazelle\Manager\ForumThread)->findById((int)$_GET['threadid']);
     if (is_null($thread)) {
         error(404);
     }
-    $forum = $thread->forum();
 } else {
     error(404);
 }
-$forumId  = $forum->id();
 $threadId = $thread->id();
+$forum = $thread->forum();
+$forumId = $forum->id();
 
 if (!$Viewer->readAccess($forum)) {
     error(403);
@@ -52,10 +46,9 @@ $PerPage = $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
 $PostNum = match(true) {
-    $thread->postTotal() <= $PerPage              => 1,
-    isset($_GET['post'])                          => (int)$_GET['post'],
-    $postId && $postId != $thread->pinnedPostId() => $thread->lesserPostTotal($postId),
-    default                                       => 1,
+    isset($_GET['post'])        => (int)$_GET['post'],
+    $post && !$post->isSticky() => $post->priorPostTotal(),
+    default                     => 1,
 };
 
 $Page = max(1, (int)($_GET['page'] ?? (int)ceil(min($thread->postTotal(), $PostNum) / $PerPage)));
@@ -266,6 +259,9 @@ if ($thread->pinnedPostId()) {
         }
     }
 }
+
+// Enable TOC
+Text::$TOC = true;
 
 foreach ($slice as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);

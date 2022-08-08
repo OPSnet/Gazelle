@@ -1393,12 +1393,11 @@ class Text {
     }
 
     protected static function bbcodePostUrl(int $postId) {
-        $forum = (new \Gazelle\Manager\Forum)->findByPostId($postId);
-        if (is_null($forum)) {
+        $post = (new \Gazelle\Manager\ForumPost)->findById($postId);
+        if (is_null($post)) {
             return null;
         }
-        $postInfo = $forum->postInfo($postId);
-        return self::bbcodeThreadUrl($postInfo['thread-id'], $postId);
+        return self::bbcodeThreadUrl($post->threadId(), $post->id());
     }
 
     protected static function bbcodeThreadUrl($thread, $postId = null) {

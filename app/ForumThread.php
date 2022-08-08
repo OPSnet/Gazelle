@@ -14,17 +14,20 @@ class ForumThread extends BaseObject {
     }
 
     public function flush() {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value("edit_forums_{$this->id}");
         (new Manager\Forum)->flushToc();
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_KEY, $this->id),
-            sprintf(self::CACHE_CATALOG, $this->id, 0),
-            sprintf(self::CACHE_CATALOG, $this->id, 
-                (int)floor(
-                    (POSTS_PER_PAGE * ceil($this->postTotal() / POSTS_PER_PAGE) - POSTS_PER_PAGE)
-                    / THREAD_CATALOGUE
-                )
-            ),
-        ]);
+        $last = $this->lastCatalog();
+        $this->flushCatalog($last, $last);
+    }
+
+    public function flushCatalog(int $begin, int $end) {
+        self::$cache->deleteMulti(
+            array_map(
+                fn($c) => sprintf(self::CACHE_CATALOG, $this->id, (int)floor((POSTS_PER_PAGE * $c) / THREAD_CATALOGUE)),
+                range($begin, $end)
+            )
+        );
     }
 
     public function location(): string {
@@ -58,7 +61,7 @@ class ForumThread extends BaseObject {
                     t.LastPostAuthorID  AS last_post_author_id,
                     t.StickyPostID      AS pinned_post_id,
                     t.Ranking           AS pinned_ranking,
-                    t.NumPosts          AS posts_total_summary,
+                    t.NumPosts          AS post_total_summary,
                     t.IsLocked = '1'    AS is_locked,
                     t.IsSticky = '1'    AS is_pinned,
                     isnull(p.TopicID)   AS no_poll,
@@ -73,7 +76,7 @@ class ForumThread extends BaseObject {
             );
             if ($info) {
                 if ($info['pinned_post_id']) {
-                    $info['posts_total']--;
+                    $info['post_total']--;
                 }
                 $info['pinned_post'] = self::$db->rowAssoc("
                     SELECT p.ID,
@@ -123,7 +126,7 @@ class ForumThread extends BaseObject {
     }
 
     public function isPinned(): bool {
-        return (bool)$this->info()['is_pinned'];
+        return (bool)$this->info()['is_locked'];
     }
 
     public function lastAuthorId(): int {
@@ -162,9 +165,17 @@ class ForumThread extends BaseObject {
         return $this->info()['title'];
     }
 
+    public function lastCatalog(): int {
+        return (int)floor($this->postTotal() / POSTS_PER_PAGE);
+    }
+
+    public function catalogEntry(int $page, int $perPage): int {
+        return (int)floor($perPage * ($page - 1) / THREAD_CATALOGUE);
+    }
+
     public function slice(int $page, int $perPage): array {
         // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
-        $catId = (int)floor(($perPage * ($page - 1)) / THREAD_CATALOGUE);
+        $catId = $this->catalogEntry(page: $page, perPage: $perPage);
         $key = sprintf(self::CACHE_CATALOG, $this->id, $catId);
         $catalogue = self::$cache->get_value($key);
         if ($catalogue === false) {
@@ -190,21 +201,14 @@ class ForumThread extends BaseObject {
     }
 
     public function addPost(int $userId, string $body): int {
-        self::$db->prepared_query("
-            INSERT INTO forums_posts
-                   (TopicID, AuthorID, Body)
-            VALUES (?,       ?,        ?)
-            ", $this->id, $userId, trim($body)
-        );
-        $postId = self::$db->inserted_id();
-
+        $post = (new Manager\ForumPost)->create($this->id, $userId, $body);
+        $postId = $post->id();
         $this->info();
+        $this->info['post_total_summary']++;
         $this->info['last_post_id']        = $postId;
         $this->info['last_post_author_id'] = $userId;
 
         $this->updateThread($userId, $postId);
-        $this->flush();
-        $this->forum()->flush();
         (new Stats\User($userId))->increment('forum_post_total');
         return $postId;
     }
@@ -240,8 +244,6 @@ class ForumThread extends BaseObject {
         self::$db->commit();
 
         $this->updateThread($userId, $postId);
-        $this->flush();
-        $this->forum()->flush();
         return $postId;
     }
 
@@ -264,11 +266,8 @@ class ForumThread extends BaseObject {
                 $this->lockThread();
             }
             if ($forumId != $this->forumId()) {
-                $forum = new Forum($forumId);
-                $forum->adjustForumStats($forumId);
-                $forum->flush();
+                $this->forum()->adjustForumStats($forumId);
             }
-            $this->forum()->adjustForumStats($forumId);
             $this->updateRoot(
                 ...self::$db->row("
                     SELECT AuthorID, ID
@@ -279,6 +278,7 @@ class ForumThread extends BaseObject {
                     ", $this->id
                 )
             );
+            $this->forum()->adjustForumStats($this->forumId());
             $this->flush();
         }
         return $affected;
@@ -308,7 +308,6 @@ class ForumThread extends BaseObject {
                 ", $this->id
             )
         );
-        $this->forum()->flush();
         $this->flush();
         return $affected;
     }
@@ -342,34 +341,13 @@ class ForumThread extends BaseObject {
             ", $this->id
         );
         $affected = self::$db->affected_rows();
-        $max = self::$db->scalar("
-            SELECT floor(NumPosts / ?) FROM forums_topics WHERE ID = ?
-            ", THREAD_CATALOGUE, $this->id
-        );
-        for ($i = 1; $i <= $max; $i++) {
-            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $this->id, $i));
-        }
         $this->flush();
+        $this->flushCatalog(0, $this->lastCatalog());
         self::$cache->delete_value("polls_{$this->id}");
         return $affected;
     }
 
     public function pinPost(int $userId, int $postId, bool $set): int {
-        // need to reset the post catalogues
-        [$bottom, $top] = self::$db->row("
-            SELECT
-                floor((ceil(count(*)               / ?) * ? - ?) / ?) AS bottom,
-                floor((ceil(sum(if(ID <= ?, 1, 0)) / ?) * ? - ?) / ?) AS top
-            FROM forums_posts
-            WHERE TopicID = ?
-            GROUP BY TopicID
-            ",        POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
-             $postId, POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
-            $this->id
-        );
-        if ($bottom === '') { // Gazelle null-to-string coercion sucks
-            return 0;
-        }
         $this->addThreadNote($userId, "Post $postId " . ($set ? "pinned" : "unpinned"));
         self::$db->prepared_query("
             UPDATE forums_topics SET
@@ -377,12 +355,9 @@ class ForumThread extends BaseObject {
             WHERE ID = ?
             ", $set ? $postId : 0, $this->id
         );
-        $affected = self::$db->affected_rows();
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        for ($i = $bottom; $i <= $top; ++$i) {
-            self::$cache->delete_value(sprintf(self::CACHE_CATALOG, $this->id, $i));
-        }
-        return $affected;
+        $this->flush();
+        $this->flushCatalog(0, $this->lastCatalog());
+        return self::$db->affected_rows();
     }
 
     protected function updateThread(int $userId, int $postId): int {
@@ -398,6 +373,9 @@ class ForumThread extends BaseObject {
         $affected = self::$db->affected_rows();
         if ($affected) {
             $this->updateRoot($userId, $postId);
+            (new \Gazelle\Manager\Forum)->flushToc();
+            $this->forum()->flush();
+            $this->flush();
         }
         return $affected;
     }
@@ -426,11 +404,7 @@ class ForumThread extends BaseObject {
             WHERE f.ID = ?
             ", $this->forumId(), $postId,  $userId, $this->id, $this->forumId()
         );
-        $affected = self::$db->affected_rows();
-        (new \Gazelle\Manager\Forum)->flushToc();
-        $this->forum()->flush();
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        return $affected;
+        return self::$db->affected_rows();
     }
 
     /**
@@ -672,8 +646,8 @@ class ForumThread extends BaseObject {
      * @return array [post_id, author_id, added_time, body, editor_user_id, edited_time]
      */
     public function threadCatalog(int $perPage, int $page): array {
-        $chunk = (int)floor(($page - 1) * $perPage / THREAD_CATALOGUE);
-        $key = sprintf(self::CACHE_CATALOG, $this->id, $chunk);
+        $catId = $this->catalogEntry(page: $page, perPage: $perPage);
+        $key = sprintf(self::CACHE_CATALOG, $this->id, $catId);
         $catalogue = self::$cache->get_value($key);
         if ($catalogue === false) {
             self::$db->prepared_query("
@@ -686,7 +660,7 @@ class ForumThread extends BaseObject {
                 WHERE p.TopicID = ?
                     AND p.ID != ?
                 LIMIT ? OFFSET ?
-                ", $this->id, $this->pinnedPostId(), THREAD_CATALOGUE, $chunk * THREAD_CATALOGUE
+                ", $this->id, $this->pinnedPostId(), THREAD_CATALOGUE, $catId * THREAD_CATALOGUE
             );
             $catalogue = self::$db->to_array(false, MYSQLI_ASSOC, false);
             if (!$thread->isLocked() || $thread->isPinned()) {
