@@ -60,14 +60,14 @@ switch ($type) {
         break;
 
     case 'post':
-        $forum = (new Gazelle\Manager\Forum)->findByPostId($id);
-        if (is_null($forum)) {
+        $post = (new Gazelle\Manager\ForumPost)->findById($id);
+        if (is_null($post)) {
             error(404);
         }
-        if (!$Viewer->readAccess($forum)) {
+        if (!$Viewer->readAccess($post->thread()->forum())) {
             error(403);
         }
-        $report = (new Gazelle\Report\ForumPost($forum))->setContext($id);
+        $report = new Gazelle\Report\ForumPost($post);
         break;
 
     case 'comment':

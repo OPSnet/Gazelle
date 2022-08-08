@@ -1,44 +1,39 @@
 <?php
 
 if ($Viewer->disablePosting()) {
-    error('Your posting privileges have been removed.');
+    error("Your posting privileges have been removed.", true);
 }
 authorize();
 
-$postId = (int)$_POST['post'];
-$forum = (new Gazelle\Manager\Forum)->findByPostId($postId);
-if (!$forum) {
-    error(404, true);
+$post = (new Gazelle\Manager\ForumPost)->findById((int)($_POST['post'] ?? 0));
+if (!$post) {
+    error("No forum post #{$_POST['post']} found", true);
 }
-if (!$Viewer->writeAccess($forum)) {
-    error('You lack the permission to edit this post.', true);
+$thread = $post->thread();
+if (!$Viewer->writeAccess($thread->forum())) {
+    error("You lack the permission to edit this post.", true);
 }
 
-$forumPost = $forum->postInfo($postId);
-if (empty($forumPost)) {
-    error("No forum post #$postId found");
+if ($thread->isLocked() && !$Viewer->permitted('site_moderate_forums')) {
+    error("You cannot edit a post in a locked thread.", true);
 }
-if ($forumPost['thread-locked'] && !$Viewer->permitted('site_moderate_forums')) {
-    error('You cannot edit a pos in a locked thread.', true);
-}
-if ($Viewer->id() != $forumPost['user-id']) {
+if ($Viewer->id() != $post->userId()) {
     if (!$Viewer->permitted('site_moderate_forums')) {
-        error(403, true);
+        error("You cannot edit someone else's post", true);
     }
     if ($_POST['pm'] ?? 0) {
-        (new Gazelle\Manager\User)->sendPM($forumPost['user-id'], 0,
-            "Your post #$postId has been edited",
+        (new Gazelle\Manager\User)->sendPM($post->userId(), 0,
+            "Your post #{$post->id()} has been edited",
             sprintf('One of your posts has been edited by [url=%s]%s[/url]: [url]%s[/url]',
-                $Viewer->url(), $Viewer->username(),
-                "/forums.php?action=viewthread&postid=$postId#post$postId"
+                $Viewer->url(), $Viewer->username(), $post->url()
             )
         );
     }
 }
 
-$forum->editPost($Viewer->id(), $postId, $_POST['body']);
+$post->edit($Viewer->id(), trim($_POST['body']));
 
 // This gets sent to the browser, which echoes it in place of the old body
-echo Text::full_format($forum->postBody($postId));
+echo Text::full_format($post->body());
 ?>
 <br /><br /><span class="last_edited">Last edited by <?= $Viewer->link() ?> Just now</span>

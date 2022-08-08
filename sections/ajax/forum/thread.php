@@ -17,24 +17,23 @@ $userMan = new Gazelle\Manager\User;
 if (!isset($_GET['threadid']) && isset($_GET['topicid'])) {
     $_GET['threadid'] = $_GET['topicid'];
 }
-$forumMan = new Gazelle\Manager\Forum;
+
 if (isset($_GET['postid'])) {
-    $postId = (int)$_GET['postid'];
-    $forum = $forumMan->findByPostId($postId);
-    if (is_null($forum)) {
+    $post = (new Gazelle\Manager\ForumPost)->findById((int)$_GET['postid']);
+    if (is_null($post)) {
         print json_die('failure', 'bad post id');
     }
-    $thread = (new Gazelle\Manager\ForumThread)->findById($forumMan->findThreadIdByPostId($postId));
+    $thread = $post->thread();
 } elseif (isset($_GET['threadid'])) {
-    $postId = false;
+    $post = false;
     $thread = (new Gazelle\Manager\ForumThread)->findById((int)$_GET['threadid']);
     if (is_null($thread)) {
         print json_die('failure', 'bad thread id');
     }
-    $forum = $thread->forum();
 } else {
     print json_die('failure', 'no post or thread id');
 }
+$forum = $thread->forum();
 
 // Make sure they're allowed to look at the page
 if (!$Viewer->readAccess($forum)) {
@@ -45,17 +44,11 @@ $forumId = $forum->id();
 $perPage = $_GET['pp'] ?? $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
-if ($thread->postTotal() <= $perPage) {
-    $PostNum = 1;
-} else {
-    if ((int)$_GET['post']) {
-        $PostNum = (int)$_GET['post'];
-    } elseif ($postId) {
-        $PostNum = $forum->priorPostTotal($postId);
-    } else {
-        $PostNum = 1;
-    }
-}
+$PostNum = match(true) {
+    isset($_GET['post'])        => (int)$_GET['post'],
+    $post && !$post->isSticky() => $post->priorPostTotal(),
+    default                     => 1,
+};
 
 $paginator = new Gazelle\Util\Paginator($perPage, (int)($_GET['page'] ?? ceil($PostNum / $perPage)));
 $paginator->setTotal($thread->postTotal());

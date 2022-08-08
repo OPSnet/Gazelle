@@ -30,6 +30,7 @@ $collageMan = new Gazelle\Manager\Collage;
 $commentMan = new Gazelle\Manager\Comment;
 $forumMan   = new Gazelle\Manager\Forum;
 $threadMan  = new Gazelle\Manager\ForumThread;
+$postMan    = new Gazelle\Manager\ForumPost;
 $requestMan = new Gazelle\Manager\Request;
 $userMan    = new Gazelle\Manager\User;
 $reportMan  = (new Gazelle\Manager\Report)->setUserManager($userMan);
@@ -69,19 +70,16 @@ foreach ($idList as $id) {
             ];
             break;
         case 'post':
-            $forum = $forumMan->findByPostId($report->subjectId());
+            $post = $postMan->findById($report->subjectId());
             $link  = null;
-            if ($forum) {
-                $postInfo = $forum->postInfo($report->subjectId());
-                $thread = $threadMan->findById($postInfo['thread-id']);
-                $user = $userMan->findById($postInfo['user-id']);
-                $link = $forum->link() . ' &rsaquo; ' . $thread->link() . ' &rsaquo; '
-                    . $forum->threadPostLink($thread->id(), $report->subjectId())
-                    . ' by ' . ($user?->link() ?? 'System');
+            if ($post) {
+                $thread = $post->thread();
+                $link = $thread->forum()->link() . ' &rsaquo; ' . $thread->link() . ' &rsaquo; ' . $post->link()
+                    . ' posted by ' . ($userMan->findById($post->userId())?->link() ?? 'System');
             }
             $context = [
                 'label'   => 'forum post',
-                'subject' => $forum,
+                'subject' => $post,
                 'link'    => $link,
             ];
             break;

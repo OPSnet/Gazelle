@@ -179,7 +179,7 @@ foreach ($fileList as $File) {
         }
 ?>
         <tr>
-            <td><?= $ReportLinks ?><?= time_diff($Report['ReportedTime'], 2, true, true) ?> for the reason <?= $ReportType['title'] ?>:
+            <td><?= $ReportLinks ?><?= time_diff($Report['ReportedTime'], 2) ?> for the reason <?= $ReportType['title'] ?>:
                 <blockquote><?= Text::full_format($Report['UserComment']) ?></blockquote>
             </td>
         </tr>

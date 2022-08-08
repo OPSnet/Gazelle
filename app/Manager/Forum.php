@@ -47,59 +47,6 @@ class Forum extends \Gazelle\Base {
     }
 
     /**
-     * Instantiate a forum from a post ID.
-     *
-     * @param int id The post ID.
-     * @return \Gazelle\Forum object
-     */
-    public function findByPostId(int $postId) {
-        $key = sprintf(self::ID_POST_KEY, $postId);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT t.ForumID
-                FROM forums_topics t
-                INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)
-                WHERE p.ID = ?
-                ", $postId
-            );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 7200);
-            }
-        }
-        return $id ? new \Gazelle\Forum($id) : null;
-    }
-
-    /**
-     * Find the thread of the poll featured on the front page.
-     *
-     * @return thread id or null
-     */
-    public function findThreadIdByFeaturedPoll(): ?int {
-        if (($threadId = self::$cache->get_value('polls_featured')) === false) {
-            $threadId = self::$db->scalar("
-                SELECT TopicID
-                FROM forums_polls
-                WHERE Featured IS NOT NULL
-                ORDER BY Featured DESC
-                LIMIT 1
-            ");
-            self::$cache->cache_value('polls_featured', $threadId, 86400 * 7);
-        }
-        return $threadId;
-    }
-
-    /**
-     * Get the thread ID from a post ID.
-     */
-    public function findThreadIdByPostId(int $postId): ?int {
-        return self::$db->scalar("
-            SELECT TopicID FROM forums_posts WHERE ID = ?
-            ", $postId
-        );
-    }
-
-    /**
      * Get list of forum names
      */
     public function nameList() {

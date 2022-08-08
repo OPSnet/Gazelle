@@ -84,10 +84,9 @@ class ForumThread extends \Gazelle\Base {
                 AND f.AutoLock = '1'
                 AND t.LastPostTime + INTERVAL f.AutoLockWeeks WEEK < now()
         ");
-        $ids = self::$db->collect('ID');
-        $forumIds = [];
 
-        if (count($ids) > 0) {
+        $ids = self::$db->collect('ID');
+        if ($ids) {
             $placeholders = placeholders($ids);
             self::$db->prepared_query("
                 UPDATE forums_topics SET
@@ -101,15 +100,11 @@ class ForumThread extends \Gazelle\Base {
             ", ...$ids);
 
             foreach ($ids as $id) {
-                $thread = $threadMan->findById($id);
+                $thread = $this->findById($id);
                 $thread->addThreadNote(0, 'Locked automatically by schedule');
                 $thread->flush();
-                $forumIds[$thread->forumId()] = true;
+                $thread->forum()->flush();
             }
-
-            self::$cache->deleteMulti(
-                array_map(fn($id) => "forums_$id", $forumIds)
-            );
         }
         return count($ids);
     }

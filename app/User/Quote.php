@@ -182,7 +182,7 @@ class Quote extends \Gazelle\BaseUser {
 
         $page = [];
         $forumMan = new \Gazelle\Manager\Forum;
-        $threadMan = new \Gazelle\Manager\ForumThread;
+        $postMan = new \Gazelle\Manager\ForumPost;
         $releaseType = new \Gazelle\ReleaseType;
         foreach ($quoteList as $q) {
             $context = [];
@@ -202,10 +202,10 @@ class Quote extends \Gazelle\BaseUser {
                 ];
                 break;
             case 'forums':
-                $thread = $threadMan->findById($q['threadId']);
+                $post = $postMan->findById($q['PostID']);
                 $context = [
-                    'jump' => $thread->forum()->threadPostUrl($q['PageID'], $q['PostID']),
-                    'link' => $thread->forum()->link() . ' &rsaquo; ' . $thread->link(),
+                    'jump'  => $post->url(),
+                    'link'  => $post->link(),
                     'title' => 'Forums',
                 ];
                 break;
