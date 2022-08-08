@@ -1,14 +1,15 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
-$tgMan = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$forMan    = new Gazelle\Manager\Forum;
+$threadMan = new Gazelle\Manager\ForumThread;
+$tgMan     = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$userMan   = new Gazelle\Manager\User;
 
 $showAvatars   = $Viewer->showAvatars();
 $showCollapsed = (bool)($_GET['collapse'] ?? true);
 $showUnread    = (bool)($_GET['showunread'] ?? true);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
-$forMan = new Gazelle\Manager\Forum;
 $subscribe = new Gazelle\Subscription($Viewer);
 if ($showUnread) {
     $total = $forMan->unreadSubscribedForumTotal($Viewer) + $subscribe->unreadCommentTotal();
@@ -104,13 +105,9 @@ if ($paginator->total()) {
                 }
                 break;
             case 'forums':
-                $Links = 'Forums &rsaquo; <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &rsaquo; ' .
-                    '<a href="forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] .
-                        '" class="tooltip" title="' . display_str($Result['Name']) . '">' .
-                        display_str(shortenString($Result['Name'], 75)) .
-                    '</a>';
-                $JumpLink = "forums.php?action=viewthread&amp;threadid={$Result['PageID']}"
-                    . ($Result['PostID'] ? "&amp;postid={$Result['PostID']}#post{$Result['PostID']}" : '');
+                $thread = $threadMan->findbyId($Result['PageID']);
+                $Links = 'Forums &rsaquo; ' . $thread->forum()->link() .  ' &rsaquo; ' . $thread->link();
+                $JumpLink = $thread->url() . ($Result['PostID'] ? "&amp;postid={$Result['PostID']}#post{$Result['PostID']}" : '');
                 break;
             default:
                 error(0);
@@ -155,7 +152,7 @@ if ($paginator->total()) {
                     <?=Text::full_format($Result['LastReadBody']) ?>
 <?php       if ($Result['LastReadEditedUserID']) { ?>
                     <br /><br />
-                    <span class="last_edited">Last edited by <?=Users::format_username($Result['LastReadEditedUserID'], false, false, false) ?> <?=time_diff($Result['LastReadEditedTime'])?></span>
+                    <span class="last_edited">Last edited by <?= $userMan->findById($Result['LastReadEditedUserID'])->link() ?> <?=time_diff($Result['LastReadEditedTime'])?></span>
 <?php       } ?>
                 </div>
             </td>
