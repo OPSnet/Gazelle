@@ -153,18 +153,24 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
-     *  a meta filename into a more useful array structure
+     *  Parse a meta filename into a more useful array structure
      *
      * @param string meta filename formatted as ".EXT sSIZEs NAME DELIMITER"
      * @return with the keys 'ext', 'size' and 'name'
      */
     public function splitMetaFilename(string $metaname): array {
-        preg_match('/^(\.\S+) s(\d+)s (.+) (?:&divide;|' . self::FILELIST_DELIM_UTF8 . ')$/', $metaname, $match);
+        if (preg_match('/^(\..*?) s(\d+)s (.+) (?:&divide;|' . self::FILELIST_DELIM_UTF8 . ')$/', $metaname, $match)) {
+            return [
+                'ext'  => $match[1] ?? null,
+                'size' => (int)$match[2] ?? 0,
+                // transform leading blanks into hard blanks so that it shows up in HTML
+                'name' => preg_replace_callback('/^(\s+)/', function ($s) { return str_repeat('&nbsp;', strlen($s[1])); }, $match[3] ?? ''),
+            ];
+        }
         return [
-            'ext'  => $match[1] ?? null,
-            'size' => (int)$match[2] ?? 0,
-            // transform leading blanks into hard blanks so that it shows up in HTML
-            'name' => preg_replace_callback('/^(\s+)/', function ($s) { return str_repeat('&nbsp;', strlen($s[1])); }, $match[3] ?? ''),
+            'ext'  => null,
+            'size' => 0,
+            'name' => null,
         ];
     }
 
