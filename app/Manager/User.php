@@ -328,7 +328,7 @@ class User extends \Gazelle\Base {
         }
         $userMan = new \Gazelle\Manager\User;
         foreach ($staff as &$group) {
-            $group = array_map(function ($userId) use ($userMan) { return $userMan->findById($userId); }, $group);
+            $group = array_map(fn ($userId) => $this->findById($userId), $group);
         }
         return $staff;
     }
