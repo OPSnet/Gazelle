@@ -4,6 +4,8 @@ use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 
 ini_set('max_file_uploads', 100);
+ini_set('upload_max_filesize', 1000000);
+
 define('MAX_FILENAME_LENGTH', 255);
 if (!defined('AJAX')) {
     authorize();
@@ -390,25 +392,6 @@ if (count($TooLongPaths) > 0) {
 }
 $Debug->set_flag('upload: torrent decoded');
 
-$logfileSummary = new Gazelle\LogfileSummary;
-if ($HasLog == '1') {
-    ini_set('upload_max_filesize', 1000000);
-    // Some browsers will report an empty file when you submit, prune those out
-    $_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], function($Name) { return !empty($Name); });
-    foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-        if (!$_FILES['logfiles']['size'][$Pos]) {
-            continue;
-        }
-
-        $logfile = new Gazelle\Logfile(
-            $_FILES['logfiles']['tmp_name'][$Pos],
-            $_FILES['logfiles']['name'][$Pos]
-        );
-        $logfileSummary->add($logfile);
-    }
-}
-$LogInDB = count($logfileSummary->all()) ? '1' : '0';
-
 $ExtraTorrentsInsert = [];
 // disable extra torrents when using ajax, just have them re-submit multiple times
 if ($isMusicUpload) {
@@ -482,6 +465,21 @@ if ($Err) {
 
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
+
+$logfileSummary = new Gazelle\LogfileSummary;
+if ($HasLog == '1' && isset($_FILES['logfiles'])) {
+    foreach (array_keys($_FILES['logfiles']['error']) as $n) {
+        if ($_FILES['logfiles']['error'][$n] == UPLOAD_ERR_OK) {
+            $logfileSummary->add(
+                new Gazelle\Logfile(
+                    $_FILES['logfiles']['tmp_name'][$n],
+                    $_FILES['logfiles']['name'][$n]
+                )
+            );
+        }
+    }
+}
+$LogInDB = count($logfileSummary->all()) ? '1' : '0';
 
 $NoRevision = false;
 if ($isMusicUpload) {
