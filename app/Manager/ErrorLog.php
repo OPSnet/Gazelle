@@ -51,8 +51,8 @@ class ErrorLog extends \Gazelle\Base {
         $id = self::$db->scalar("
             SELECT error_log_id
             FROM error_log
-            WHERE {$this->orderBy} > (SELECT {$this->orderBy} FROM error_log WHERE error_log_id = ?)
-            ORDER BY {$this->orderBy} ASC
+            WHERE updated > (SELECT updated FROM error_log WHERE error_log_id = ?)
+            ORDER BY updated ASC
             LIMIT 1
             ", $errorId
         );
@@ -63,8 +63,8 @@ class ErrorLog extends \Gazelle\Base {
         $id = self::$db->scalar("
             SELECT error_log_id
             FROM error_log
-            WHERE {$this->orderBy} < (SELECT {$this->orderBy} FROM error_log WHERE error_log_id = ?)
-            ORDER BY {$this->orderBy} DESC
+            WHERE updated < (SELECT updated FROM error_log WHERE error_log_id = ?)
+            ORDER BY updated DESC
             LIMIT 1
             ", $errorId
         );
