@@ -50,7 +50,6 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted
             continue;
         }
         $Answers[$i + 1] = $Answer;
-        $Votes[$i + 1] = 0;
     }
 
     if (count($Answers) < 2) {
@@ -67,7 +66,7 @@ $thread = (new Gazelle\Manager\ForumThread)->create(
     body:    $body,
 );
 if ($needPoll) {
-    $thread->addPoll($Question, $Answers, $Votes);
+    (new Gazelle\Manager\ForumPoll)->create($thread->id(), $Question, $Answers);
     if ($ForumID == STAFF_FORUM_ID) {
         Irc::sendRaw('PRIVMSG '.MOD_CHAN.' :Poll created by '.$Viewer->username().": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }

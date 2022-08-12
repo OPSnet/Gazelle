@@ -81,33 +81,33 @@
 
 {%- if poll -%}
 <div class="box">
-    <div class="head colhead_dark"><strong><a href="forums.php?action=viewthread&amp;threadid={{ poll_thread_id }}">Latest Poll &#x1F5F3;</a>{% if poll.is_closed %} [Closed]{% endif %}</strong></div>
+    <div class="head colhead_dark"><strong><a href="forums.php?action=viewthread&amp;threadid={{ poll.id }}">Latest Poll &#x1F5F3;</a>{% if poll.isClosed %} [Closed]{% endif %}</strong></div>
     <div class="pad">
         <p><strong>{{ poll.question }}</strong></p>
-    {% if poll.user_vote or poll.is_closed %}
+    {% if poll.response(viewer.id) or poll.isClosed %}
         <ul class="poll nobullet">
-        {% for id, vote in poll.tally %}
-            <li title="{{ vote.score }}">
-            {%- if id == poll.user_vote %}&raquo;&nbsp;{% endif -%}
-            {{ vote.answer }} ({{ vote.percent|number_format(2) }}%)</li>
-            <li title="{{ vote.score }}" class="graph">
+        {% for choice in poll.vote %}
+            <li title="{{ choice.score }}">
+            {%- if id == poll.response(viewer.id) %}&raquo;&nbsp;{% endif -%}
+            {{ choice.answer }} ({{ choice.percent|number_format(2) }}%)</li>
+            <li title="{{ choice.score }}" class="graph">
                 <span class="left_poll"></span>
-                <span class="center_poll" style="width: {{ vote.ratio|number_format(2) }}%;"></span>
+                <span class="center_poll" style="width: {{ choice.ratio|number_format(2) }}%;"></span>
                 <span class="right_poll"></span>
                 <br />
             </li>
         {% endfor %}
         </ul>
-        <strong>Votes:</strong> {{ poll.votes_total|number_format }}<br />
+        <strong>Votes:</strong> {{ poll.total|number_format }}<br />
     {% else %}
         <div id="poll_container">
         <form class="vote_form" name="poll" id="poll" action="">
             <input type="hidden" name="action" value="poll" />
             <input type="hidden" name="auth" value="{{ auth }}" />
-            <input type="hidden" name="threadid" value="{{ poll_thread_id }}" />
-        {% for id, vote in poll.tally %}
+            <input type="hidden" name="threadid" value="{{ poll.id }}" />
+        {% for id, choice in poll.vote %}
             <input type="radio" name="vote" id="answer_{{ id }}" value="{{ id }}" />
-            <label for="answer_{{ id }}">{{ vote.answer }}</label><br />
+            <label for="answer_{{ id }}">{{ choice.answer }}</label><br />
         {% endfor %}
             <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br /><br />
             <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response } );" value="Vote" />

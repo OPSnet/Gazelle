@@ -100,93 +100,73 @@ echo $Twig->render('forum/header-thread.twig', [
 ]);
 
 if ($thread->hasPoll()) {
-    [$Question, $Answers, $Votes, $Featured, $Closed] = $thread->pollData();
-
-    if (!empty($Votes)) {
-        $TotalVotes = array_sum($Votes);
-        $MaxVotes = max($Votes);
-    } else {
-        $TotalVotes = 0;
-        $MaxVotes = 0;
-    }
+    $poll = new Gazelle\ForumPoll($threadId);
 
     $RevealVoters = $forum->hasRevealVotes();
-    $UserResponse = $thread->pollResponse($Viewer->id());
-    if ($UserResponse > 0) {
-        $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
-    } else {
-        if (!is_null($UserResponse) && $RevealVoters) {
-            $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
-        }
+    $response = $poll->response($Viewer->id());
+    $answerList = $poll->vote();
+    if ($response > 0 || (!is_null($response) && $RevealVoters)) {
+        $answerList[$response]['answer'] = '&raquo; ' . $answerList[$response]['answer'];
     }
 ?>
     <div class="box thin clear">
-        <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?><?php if ($Featured) { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
+        <div class="head colhead_dark"><strong>Poll<?php if ($poll->isClosed()) { echo ' [Closed]'; } ?><?php if ($poll->isFeatured()) { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
         <div class="pad<?php if ($thread->isLocked()) { echo ' hidden'; } ?>" id="threadpoll">
-            <p><strong><?=display_str($Question)?></strong></p>
-<?php if ($UserResponse !== null || $Closed || $thread->isLocked()) { ?>
+            <p><strong><?=display_str($poll->question())?></strong></p>
+<?php if ($response !== null || $poll->isClosed() || $thread->isLocked()) { ?>
             <ul class="poll nobullet">
 <?php
         if (!$RevealVoters) {
-            foreach ($Answers as $i => $Answer) {
-                if (!empty($Votes[$i]) && $TotalVotes > 0) {
-                    $Ratio = $Votes[$i] / $MaxVotes;
-                    $Percent = $Votes[$i] / $TotalVotes;
-                } else {
-                    $Ratio = 0;
-                    $Percent = 0;
-                }
+            foreach ($answerList as $choice) {
 ?>
-                    <li><?=display_str($Answer)?> (<?=number_format($Percent * 100, 2)?>%)</li>
+                    <li><?=display_str($choice['answer'])?> (<?=number_format($choice['percent'], 2)?>%)</li>
                     <li class="graph">
                         <span class="left_poll"></span>
-                        <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
+                        <span class="center_poll" style="width: <?=number_format($choice['ratio'], 2)?>%;"></span>
                         <span class="right_poll"></span>
                     </li>
 <?php
             }
-            if ($Votes[0] ?? 0 > 0) {
+            if (isset($answerList[0]) and $anwerList[0]['total'] > 0) {
 ?>
-                <li><?=($UserResponse == '0' ? '&raquo; ' : '')?>(Blank) (<?=number_format((float)($Votes[0] ?? 0 / $TotalVotes * 100), 2)?>%)</li>
+                <li><?=($response == '0' ? '&raquo; ' : '')?>(Blank) (<?=number_format($answerList[0]['total'], 2)?>%)</li>
                 <li class="graph">
                     <span class="left_poll"></span>
-                    <span class="center_poll" style="width: <?=number_format((float)($Votes[0] / $MaxVotes * 100), 2)?>%;"></span>
+                    <span class="center_poll" style="width: <?=number_format($answerList[0]['ratio'], 2)?>%;"></span>
                     <span class="right_poll"></span>
                 </li>
 <?php       } ?>
             </ul>
             <br />
-            <strong>Votes:</strong> <?=number_format($TotalVotes)?><br /><br />
-<?php
-        } else {
-            //Staff forum, output voters, not percentages
-            $names = array_map(fn($s) => $s->username(), $userMan->staffList());
-            $staffCount = count($names);
-            $votes = $forum->staffVote($threadId);
-            $StaffVotes = [];
-            foreach ($votes as list($who, $Vote)) {
-                $StaffVotes[$Vote] = $who;
-                $names = array_diff($names, explode(', ', $who));
-            }
-?>
+            <strong>Votes:</strong> <?= number_format($poll->total()) ?><br /><br />
+<?php       } else { ?>
             <ul class="nobullet" id="poll_options">
-<?php       foreach ($Answers as $i => $Answer) { ?>
-                <li>
-                    <a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=<?=(int)$i?>"><?=$Answer == '' ? 'Blank' : display_str($Answer)?></a>
-                     - <?=$StaffVotes[$i]?>&nbsp;(<?=number_format(((float)$Votes[$i] / $TotalVotes) * 100, 2)?>%)
-                    <a href="forums.php?action=delete_poll_option&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=<?=(int)$i?>" onclick="return confirm('Are you sure you want to delete this poll option?');" class="brackets tooltip" title="Delete poll option">X</a>
-                </li>
+<?php
+            // Staff forum, output voters, not percentages
+            $totalStaff = 0;
+            $totalVoted = 0;
+            $vote = $poll->staffVote($userMan);
+            foreach ($vote as $response => $info) {
+                if ($response !== 'missing') {
+                    $totalStaff += count($info['who']);
+                    $totalVoted += count($info['who']);
+?>
+                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?= $response ?>"><?=empty($info['answer']) ? 'Abstain' : display_str($info['answer']) ?></a> <?=
+                    count ($info['who']) ? (" \xE2\x80\x93 " . implode(', ', array_map(fn($u) => $u->link(), $info['who']))) : "<i>none</i>"
+                ?></li>
+<?php
+                }
+            }
+            if (count($vote['missing']['who'])) {
+                $totalStaff += count($info['who']);
+?>
+                <li>Missing: <?= implode(', ', array_map(fn($u) => $u->link(), $vote['missing']['who'])) ?></li>
 <?php       } ?>
-                <li>
-                    <a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=0"><?=($UserResponse == '0' ? '&raquo; ' : '')?>Blank</a> - <?=$StaffVotes[0]?>&nbsp;(<?=number_format(((float)$Votes[0] / $TotalVotes) * 100, 2)?>%)
-                </li>
             </ul>
-<?php       if ($forumId == STAFF_FORUM_ID) { ?>
+<?php       if (in_array($forumId, FORUM_REVEAL_VOTE)) { ?>
             <br />
-            <strong>Votes:</strong> <?=number_format($staffCount - count($names))?> / <?=$staffCount?> current staff, <?=number_format($TotalVotes)?> total
+            <strong>Voted:</strong> <?=number_format($totalVoted)?> of <?=number_format($totalStaff)?> total. (You may click on a choice to change your vote).
             <br />
-            <strong>Missing votes:</strong> <?=implode(", ", $names); echo "\n";?>
-            <br /><br />
 <?php       } ?>
             <a href="#" onclick="AddPollOption(<?=$threadId?>); return false;" class="brackets">+</a>
 <?php
@@ -201,18 +181,18 @@ if ($thread->hasPoll()) {
                     <input type="hidden" name="large" value="1" />
                     <input type="hidden" name="threadid" value="<?=$threadId?>" />
                     <ul class="nobullet" id="poll_options">
-<?php    foreach ($Answers as $i => $Answer) { ?>
+<?php    foreach ($answerList as $response => $choice) { ?>
                         <li>
-                            <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
-                            <label for="answer_<?=$i?>"><?=display_str($Answer)?></label>
+                            <input type="radio" name="vote" id="answer_<?=$response?>" value="<?=$response?>" />
+                            <label for="answer_<?=$response?>"><?=display_str($choice['answer'])?></label>
                         </li>
 <?php    } ?>
                         <li>
                             <br />
-                            <input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br />
+                            <input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Abstain</label><br />
                         </li>
                     </ul>
-<?php    if ($forumId == STAFF_FORUM_ID) { ?>
+<?php    if ($Viewer->isStaff() && in_array($forumId, FORUM_REVEAL_VOTE)) { ?>
                     <a href="#" onclick="AddPollOption(<?=$threadId?>); return false;" class="brackets">+</a>
                     <br />
                     <br />
@@ -223,7 +203,7 @@ if ($thread->hasPoll()) {
 <?php
     }
     if ($Viewer->permitted('forums_polls_moderate') && !$RevealVoters) {
-        if (!$Featured) {
+        if (!$poll->isFeatured()) {
 ?>
             <form class="manage_form" name="poll" action="forums.php" method="post">
                 <input type="hidden" name="action" value="poll_mod" />
@@ -238,7 +218,7 @@ if ($thread->hasPoll()) {
                 <input type="hidden" name="auth" value="<?=$auth?>" />
                 <input type="hidden" name="threadid" value="<?=$threadId?>" />
                 <input type="hidden" name="close" value="1" />
-                <input type="submit" style="float: left;" value="<?=(!$Closed ? 'Close' : 'Open')?>" />
+                <input type="submit" style="float: left;" value="<?= $poll->isClosed() ? 'Open' : 'Close' ?>" />
             </form>
 <?php } ?>
         </div>

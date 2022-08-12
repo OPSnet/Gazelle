@@ -121,6 +121,10 @@ class ForumThread extends BaseObject {
         return !$this->info()['no_poll'];
     }
 
+    public function poll(): ForumPoll {
+        return new ForumPoll($this->id);
+    }
+
     public function isLocked(): bool {
         return (bool)$this->info()['is_locked'];
     }
@@ -247,8 +251,8 @@ class ForumThread extends BaseObject {
         return $postId;
     }
 
-
     public function editThread(int $forumId, bool $pinned, int $rank, bool $locked, string $title): int {
+        $oldForumId = $this->forumId();
         self::$db->prepared_query("
             UPDATE forums_topics SET
                 ForumID  = ?,
@@ -262,11 +266,11 @@ class ForumThread extends BaseObject {
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
-            if ($locked) {
-                $this->lockThread();
+            if ($locked && $this->hasPoll()) {
+                $this->poll()->close();
             }
-            if ($forumId != $this->forumId()) {
-                $this->forum()->adjustForumStats($forumId);
+            if ($forumId != $oldForumId) {
+                (new Forum($forumId))->adjust();
             }
             $this->updateRoot(
                 ...self::$db->row("
@@ -278,7 +282,8 @@ class ForumThread extends BaseObject {
                     ", $this->id
                 )
             );
-            $this->forum()->adjustForumStats($this->forumId());
+            $this->forum()->adjust();
+            $this->flushCatalog(0, $this->lastCatalog());
             $this->flush();
         }
         return $affected;
@@ -294,12 +299,12 @@ class ForumThread extends BaseObject {
             ", $this->id
         );
         $affected = self::$db->affected_rows();
-        $this->forum()->adjustForumStats($this->forumId());
+        $this->forum()->adjust();
 
         (new Manager\Subscription)->move('forums', $this->id, null);
 
         $this->updateRoot(
-            ...self::$db->selectRow("
+            ...self::$db->row("
                 SELECT AuthorID, ID
                 FROM forums_posts
                 WHERE TopicID = ?
@@ -331,20 +336,6 @@ class ForumThread extends BaseObject {
             ", $this->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function lockThread(): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls SET
-                Closed = '0'
-            WHERE TopicID = ?
-            ", $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        $this->flushCatalog(0, $this->lastCatalog());
-        self::$cache->delete_value("polls_{$this->id}");
-        return $affected;
     }
 
     public function pinPost(int $userId, int $postId, bool $set): int {
@@ -408,239 +399,6 @@ class ForumThread extends BaseObject {
     }
 
     /**
-     * Add a poll to a thread.
-     * TODO: add a closing date
-     *
-     * @param string $question The poll question
-     * @param array $answers An array of answers (between 2 and 25)
-     * @param array $votes An array of votes (1 per answer)
-     * @return int poll id
-     */
-    public function addPoll(string $question, array $answers, array $votes): int {
-        self::$db->prepared_query("
-            INSERT INTO forums_polls
-                   (TopicID, Question, Answers)
-            VALUES (?,       ?,        ?)
-            ", $this->id, $question, serialize($answers)
-        );
-        self::$cache->cache_value("polls_{$this->id}", [$question, $answers, $votes, null, '0'], 0);
-        return self::$db->inserted_id();
-    }
-
-    public function hasRevealVotes(): bool {
-        return $this->forum()->hasRevealVotes();
-    }
-
-    protected function fetchPollAnswers(): array {
-        return unserialize(
-            self::$db->scalar("
-                SELECT Answers FROM forums_polls WHERE TopicID = ?
-                ", $this->id
-            )
-        );
-    }
-
-    protected function savePollAnswers(array $answers): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls SET
-                Answers = ?
-            WHERE TopicID = ?
-            ", serialize($answers), $this->id
-        );
-        self::$cache->delete_value("polls_{$this->id}");
-        return self::$db->affected_rows();
-    }
-
-    public function addPollAnswer(string $answer): int {
-        $answers = $this->fetchPollAnswers($this->id);
-        $answers[] = $answer;
-        return $this->savePollAnswers($this->id, $answers);
-    }
-
-    public function removedPollAnswer(int $item): int {
-        $answers = $this->fetchPollAnswers($this->id);
-        if (!$answers) {
-            return 0;
-        }
-        unset($answers[$item]);
-        $this->savePollAnswers($this->id, $answers);
-        self::$db->prepared_query("
-            DELETE FROM forums_polls_votes
-            WHERE Vote = ?
-                AND TopicID = ?
-            ", $item, $this->id
-        );
-        self::$cache->delete_value("polls_{$this->id}");
-        return self::$db->affected_rows();
-    }
-
-    public function addPollVote(int $userId, int $vote): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO forums_polls_votes
-                   (TopicID, UserID, Vote)
-            VALUES (?,       ?,      ?)
-            ", $this->id, $userId, $vote
-        );
-        $affected = self::$db->affected_rows();
-        if ($affected) {
-            self::$cache->delete_value("polls_{$this->id}");
-        }
-        return $affected;
-    }
-
-    public function modifyPollVote(int $userId, int $vote): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls_votes SET
-                Vote = ?
-            WHERE TopicID = ?
-                AND UserID = ?
-            ", $vote, $this->id, $userId
-        );
-        $affected = self::$db->affected_rows();
-        if ($affected) {
-            self::$cache->delete_value("polls_{$this->id}");
-        }
-        return $affected;
-    }
-
-    public function pollResponse(int $userId): ?int {
-        return self::$db->scalar("
-            SELECT Vote
-            FROM forums_polls_votes
-            WHERE UserID = ?
-                AND TopicID = ?
-            ", $userId, $this->id
-        );
-    }
-
-    /**
-     * Get the data for a poll (TODO: spin off into a Poll object)
-     *
-     * @return array
-     * - string: question
-     * - array: answers
-     * - votes: recorded votes
-     * - featured: Featured on front page?
-     * - closed: Not more voting possible
-     */
-    public function pollData(): array {
-        $key = "polls_{$this->id}";
-        if (![$Question, $Answers, $Votes, $Featured, $Closed] = self::$cache->get_value($key)) {
-            [$Question, $Answers, $Featured, $Closed] = self::$db->row("
-                SELECT Question, Answers, Featured, Closed
-                FROM forums_polls
-                WHERE TopicID = ?
-                ", $this->id
-            );
-            if ($Featured == '') {
-                $Featured = null;
-            }
-            $Answers = unserialize($Answers);
-            self::$db->prepared_query("
-                SELECT Vote, count(*)
-                FROM forums_polls_votes
-                WHERE Vote != '0'
-                    AND TopicID = ?
-                GROUP BY Vote
-                ", $this->id
-            );
-            $VoteArray = self::$db->to_array(false, MYSQLI_NUM, false);
-            $Votes = [];
-            foreach ($VoteArray as $VoteSet) {
-                [$Key,$Value] = $VoteSet;
-                $Votes[$Key] = $Value;
-            }
-            for ($i = 1, $end = count($Answers); $i <= $end; ++$i) {
-                if (!isset($Votes[$i])) {
-                    $Votes[$i] = 0;
-                }
-            }
-            self::$cache->cache_value($key, [$Question, $Answers, $Votes, $Featured, $Closed], 0);
-        }
-        return [$Question, $Answers, $Votes, $Featured, $Closed];
-    }
-
-    public function pollDataExtended(int $userId): array {
-        [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($this->id);
-        $userVote = self::$db->scalar("
-            SELECT Vote
-            FROM forums_polls_votes
-            WHERE Vote > 0
-                AND UserID = ?
-                AND TopicID = ?
-            ", $userId, $this->id
-        );
-        $max   = max($Votes) ?? 0;
-        $total = array_sum($Votes ?? []);
-        $tally = [];
-        foreach ($Votes as $key => $score) {
-            $tally[$key] = [
-                'answer'  => $Answers[$key],
-                'score'   => $score,
-                'ratio'   => $total ? ($score /   $max) * 100.0 : 0.0,
-                'percent' => $total ? ($score / $total) * 100.0 : 0.0,
-            ];
-        }
-        return [
-            'question'    => $Question,
-            'is_closed'   => (bool)$Closed,
-            'is_featured' => (bool)$Featured,
-            'tally'       => $tally,
-            'user_vote'   => $userVote,
-            'votes_max'   => $max,
-            'votes_total' => $total,
-        ];
-    }
-
-    /**
-     * TODO: feature and unfeature a poll.
-     */
-    public function moderatePoll(int $toFeature, int $toClose): int {
-        [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($this->id);
-        $affected = 0;
-        if ($toFeature && !$Featured) {
-            self::$db->prepared_query("
-                UPDATE forums_polls SET
-                    Featured = now()
-                WHERE TopicID = ?
-                ", $this->id
-            );
-            $affected += self::$db->affected_rows();
-            $Featured = self::$db->scalar("
-                SELECT Featured FROM forums_polls WHERE TopicID = ?
-                ", $this->id
-            );
-            self::$cache->cache_value('polls_featured', $this->id ,0);
-        }
-
-        if ($toClose) {
-            self::$db->prepared_query("
-                UPDATE forums_polls SET
-                    Closed = ?
-                WHERE TopicID = ?
-                ", $Closed ? '1' : '0', $this->id
-            );
-            $affected += self::$db->affected_rows();
-        }
-        self::$cache->cache_value('polls_'.$this->id, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
-        self::$cache->delete_value('polls_'.$this->id);
-        return $affected;
-    }
-
-    public function staffVote(): array {
-        self::$db->prepared_query("
-            SELECT group_concat(um.Username SEPARATOR ', '),
-                fpv.Vote
-            FROM users_main AS um
-            INNER JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
-            WHERE fpv.TopicID = ?
-            GROUP BY fpv.Vote
-            ", $this->id
-        );
-        return self::$db->to_array(false, MYSQLI_NUM, false);
-    }
-
-    /**
      * Get a catalogue of thread posts
      *
      * @return array [post_id, author_id, added_time, body, editor_user_id, edited_time]
@@ -663,7 +421,7 @@ class ForumThread extends BaseObject {
                 ", $this->id, $this->pinnedPostId(), THREAD_CATALOGUE, $catId * THREAD_CATALOGUE
             );
             $catalogue = self::$db->to_array(false, MYSQLI_ASSOC, false);
-            if (!$thread->isLocked() || $thread->isPinned()) {
+            if (!$this->isLocked() || $this->isPinned()) {
                 self::$cache->cache_value($key, $catalogue, 0);
             }
         }

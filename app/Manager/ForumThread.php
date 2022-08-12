@@ -25,26 +25,6 @@ class ForumThread extends \Gazelle\Base {
     }
 
     /**
-     * Find the thread of the poll featured on the front page.
-     *
-     * @return thread id or null
-     */
-    public function findByFeaturedPoll(): ?\Gazelle\ForumThread {
-        $threadId = self::$cache->get_value('polls_featured');
-        if ($threadId === false) {
-            $threadId = self::$db->scalar("
-                SELECT TopicID
-                FROM forums_polls
-                WHERE Featured IS NOT NULL
-                ORDER BY Featured DESC
-                LIMIT 1
-            ");
-            self::$cache->cache_value('polls_featured', $threadId, 86400 * 7);
-        }
-        return $threadId ? new \Gazelle\ForumThread($threadId) : null;
-    }
-
-    /**
      * Find the thread from a post ID.
      */
     public function findByPostId(int $postId): ?\Gazelle\ForumThread {
