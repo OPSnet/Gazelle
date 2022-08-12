@@ -18,20 +18,15 @@ foreach ($Artists as $id => $Artist) {
     $Render[] = "<li class=\"image_group_$id\"><a href=\"artist.php?id=$id\">$image</a></li>";
 }
 
-// Pad it out
-if ($CollageCovers && $NumGroups > $CollageCovers) {
-    for ($i = $NumGroups + 1; $i <= ceil($NumGroups / $CollageCovers) * $CollageCovers; $i++) {
-        $Render[] = '<li></li>';
+if ($CollageCovers) {
+    if ($NumGroups > $CollageCovers) {
+        $Render = array_merge($Render,
+            array_fill(0, $CollageCovers * ceil($NumGroups/$CollageCovers) - $NumGroups, '<li></li>')
+        );
     }
-}
-
-for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
-    $Groups = array_slice($Render, $i * $CollageCovers, $CollageCovers);
-    $CollagePage = '';
-    foreach ($Groups as $Group) {
-        $CollagePage .= $Group;
+    for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
+        $CollagePages[] = implode('', array_slice($Render, $i * $CollageCovers, $CollageCovers));
     }
-    $CollagePages[] = $CollagePage;
 }
 
 echo $Twig->render('collage/header.twig', [

@@ -13,7 +13,7 @@ if ($Collage->isDeleted()) {
 
 $Collage->setViewer($Viewer);
 $CollageID = $Collage->id();
-$CollageCovers = ($Viewer->option('CollageCovers') ?? 25) * !(int)($Viewer->option('HideCollage'));
+$CollageCovers = ($Viewer->option('CollageCovers') ?: 25) * (1 - (int)$Viewer->option('HideCollage'));
 $CollagePages = [];
 $NumGroups = $Collage->numEntries();
 require_once($Collage->isArtist() ? 'artist_collage.php' : 'torrent_collage.php');
