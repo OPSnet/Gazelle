@@ -611,7 +611,7 @@ defined('EDITING_FORUM_ID') or define('EDITING_FORUM_ID', 34);
 defined('STAFF_FORUM_ID') or define('STAFF_FORUM_ID', 5);
 
 // Forums where voter names are revealed.
-defined('FORUM_REVEAL_VOTER') or define('FORUM_REVEAL_VOTER', []);
+defined('FORUM_REVEAL_VOTE') or define('FORUM_REVEAL_VOTE', []);
 
 // Where trashed threads go.
 defined('TRASH_FORUM_ID') or define('TRASH_FORUM_ID', 4);

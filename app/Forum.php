@@ -118,7 +118,7 @@ class Forum extends BaseObject {
     }
 
     public function hasRevealVotes(): bool {
-        return in_array($this->id, FORUM_REVEAL_VOTER);
+        return in_array($this->id, FORUM_REVEAL_VOTE);
     }
 
     public function isLocked(): bool {
@@ -181,10 +181,10 @@ class Forum extends BaseObject {
      * moving threads requires two calls and it just makes things
      * a bit clearer.
      */
-    public function adjustForumStats(int $forumId): int {
+    public function adjust(): int {
         /* Recalculate the correct values from first principles.
          * This does not happen very often, and only a moderator
-         * pays the cost. At least this way the number correct
+         * pays the cost. At least this way the numbers correct
          * themselves if ever they drift out of synch -- Spine
          */
         self::$db->prepared_query("
@@ -216,7 +216,7 @@ class Forum extends BaseObject {
                 f.LastPostAuthorID = POST.AuthorID,
                 f.LastPostTime     = POST.AddedTime
             WHERE f.ID = ?
-            ", $forumId, $forumId, $forumId
+            ", $this->id, $this->id, $this->id
         );
         $this->flush();
         return self::$db->affected_rows();

@@ -33,8 +33,6 @@ if (!$contest) {
     }
 }
 
-$thread = (new Gazelle\Manager\ForumThread)->findByFeaturedPoll();
-
 echo $Twig->render('index/private-sidebar.twig', [
     'auth'              => $Viewer->auth(),
     'blog'              => new Gazelle\Manager\Blog,
@@ -43,8 +41,7 @@ echo $Twig->render('index/private-sidebar.twig', [
     'featured_aotm'     => $tgMan->featuredAlbumAotm(),
     'featured_showcase' => $tgMan->featuredAlbumShowcase(),
     'staff_blog'        => new Gazelle\Manager\StaffBlog,
-    'poll'              => $thread?->pollDataExtended($Viewer->id()),
-    'poll_thread_id'    => $thread?->id(),
+    'poll'              => (new Gazelle\Manager\ForumPoll)->findByFeaturedPoll(),
     'request_stats'     => new Gazelle\Stats\Request,
     'snatch_stats'      => $Cache->get_value('stats_snatches'),
     'torrent_stats'     => new Gazelle\Stats\Torrent,

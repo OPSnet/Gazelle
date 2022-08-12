@@ -184,8 +184,7 @@ class ForumPost extends BaseObject {
         $db->relaxConstraints(false);
         self::$db->commit();
 
-        $forum = $this->thread()->forum();
-        $forum->adjustForumStats($forum->id());
+        $this->thread()->forum()->adjust();
         (new \Gazelle\Manager\Subscription)->flush('forums', $threadId);
 
         $thread->flush();

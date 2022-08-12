@@ -85,50 +85,24 @@ if ($_GET['updatelastread'] !== '0') {
 
 $JsonPoll = null;
 if ($thread->hasPoll()) {
-    [$Question, $Answers, $Votes, $Featured, $Closed] = $thread->pollData();
-    if (!empty($Votes)) {
-        $TotalVotes = array_sum($Votes);
-        $MaxVotes = max($Votes);
-    } else {
-        $TotalVotes = 0;
-        $MaxVotes = 0;
-    }
+    $poll = new Gazelle\ForumPoll($thread->id());
 
-    //Polls lose the you voted arrow thingy
-    $UserResponse = $thread->pollResponse($Viewer->id());
-    if ($UserResponse > 0) {
-        $Answers[$UserResponse] = '&raquo; ' . $Answers[$UserResponse];
-    } else {
-        if (!empty($UserResponse) && $forum->hasRevealVotes()) {
-            $Answers[$UserResponse] = '&raquo; ' . $Answers[$UserResponse];
-        }
+    $response = $thread->response($Viewer->id());
+    $answerList = $poll->vote();
+    if ($response > 0 || (!is_null($response) && $RevealVoters)) {
+        $answerList[$response]['asnswer'] = '&raquo; ' . $answerList[$response]['asnswer'];
     }
 
     $JsonPoll = [
-        'answers'    => [],
-        'closed'     => $Closed == 1,
-        'featured'   => (bool)$Featured,
-        'question'   => $Question,
-        'maxVotes'   => $MaxVotes,
-        'totalVotes' => $TotalVotes,
-        'voted'      => $UserResponse !== null || $Closed || $thread->isLocked(),
-        'vote'       => $UserResponse ? $UserResponse - 1 : null,
+        'answers'    => $answerList,
+        'closed'     => $poll->isClosed(),
+        'featured'   => $poll->isFeatured(),
+        'question'   => $poll->question(),
+        'maxVotes'   => $poll->max(),
+        'totalVotes' => $poll->total(),
+        'voted'      => $response !== null || $poll->isClosed() || $thread->isLocked(),
+        'vote'       => $response ? $response - 1 : null,
     ];
-
-    foreach ($Answers as $i => $Answer) {
-        if (!empty($Votes[$i]) && $TotalVotes > 0) {
-            $Ratio = $Votes[$i] / $MaxVotes;
-            $Percent = $Votes[$i] / $TotalVotes;
-        } else {
-            $Ratio = 0;
-            $Percent = 0;
-        }
-        $JsonPoll['answers'][] = [
-            'answer'  => $Answer,
-            'ratio'   => $Ratio,
-            'percent' => $Percent,
-        ];
-    }
 }
 
 // Squeeze in stickypost
@@ -192,7 +166,7 @@ print json_encode([
         'sticky'      => $thread->isPinned(),
         'currentPage' => $paginator->page(),
         'pages'       => $paginator->pages(),
-        'poll'        => empty($JsonPoll) ? null : $JsonPoll,
+        'poll'        => $JsonPoll,
         'posts'       => $JsonPosts,
     ]
 ]);

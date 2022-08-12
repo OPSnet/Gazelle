@@ -1,22 +1,14 @@
 <?php
 
-$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
-if (is_null($thread)) {
+$poll = (new Gazelle\Manager\ForumPoll)->findById((int)($_POST['threadid'] ?? 0));
+if (is_null($poll)) {
     error(404, true);
 }
-[$Question, $Answers, $Votes, $Featured, $Closed] = $thread->pollData();
-if ($Closed) {
+if ($poll->isClosed()) {
     error(403, true);
 }
 
-if (!empty($Votes)) {
-    $TotalVotes = array_sum($Votes);
-    $MaxVotes = max($Votes);
-} else {
-    $TotalVotes = 0;
-    $MaxVotes = 0;
-}
-
+$vote = $poll->vote();
 if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 ?>
 <span class="error">Please select an option.</span><br />
@@ -24,10 +16,10 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     <input type="hidden" name="action" value="poll" />
     <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
     <input type="hidden" name="large" value="<?=display_str($_POST['large'])?>" />
-    <input type="hidden" name="threadid" value="<?=$threadId?>" />
-<?php for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
+    <input type="hidden" name="threadid" value="<?= $poll->id() ?>" />
+<?php foreach ($vote as $i => $choice) { ?>
     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
-    <label for="answer_<?=$i?>"><?=display_str($Answers[$i])?></label><br />
+    <label for="answer_<?=$i?>"><?=display_str($choice['answer'])?></label><br />
 <?php } ?>
     <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br /><br />
     <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response });" value="Vote" />
@@ -35,53 +27,48 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 <?php
 } else {
     authorize();
-    $Vote = (int)$_POST['vote'];
-    if (!isset($Answers[$Vote]) && $Vote !== 0) {
+    $response = (int)$_POST['vote'];
+    if (!$poll->addVote($Viewer->id(), $response)) {
         error(0, true);
     }
+    $vote = $poll->vote(); // need to refresh the results to take the vote into account
 
-    //Add our vote
-    if ($thread->addPollVote($Viewer->id(), $Vote) && $Vote !== 0) {
-        $Votes[$Vote]++;
-        $TotalVotes++;
-        $MaxVotes++;
-    }
-
-    if ($Vote !== 0) {
-        $Answers[$Vote] = '=> ' . $Answers[$Vote];
+    if ($response !== 0) {
+        $vote[$response]['answer'] = '=> ' . $vote[$response]['answer'];
     }
 ?>
         <ul class="poll nobullet">
 <?php
-        if ($thread->forum()->id() != STAFF_FORUM_ID) {
-            for ($i = 1, $il = count($Answers); $i <= $il; $i++) {
-                if (!empty($Votes[$i]) && $TotalVotes > 0) {
-                    $Ratio = $Votes[$i] / $MaxVotes;
-                    $Percent = $Votes[$i] / $TotalVotes;
-                } else {
-                    $Ratio = 0;
-                    $Percent = 0;
-                }
+        if ($poll->hasRevealVotes()) {
+            $staffVote = $poll->staffVote(new Gazelle\Manager\User);
+            foreach ($staffVote as $response => $info) {
+                if ($response !== 'missing') {
 ?>
-                    <li><?=display_str($Answers[$i])?> (<?=number_format($Percent * 100, 2)?>%)</li>
-                    <li class="graph">
-                        <span class="left_poll"></span>
-                        <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
-                        <span class="right_poll"></span>
-                    </li>
+                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?= $response ?>"><?=empty($info['answer']) ? 'Abstain' : display_str($info['answer'])?></a> <?=
+                    count ($info['who']) ? (" \xE2\x80\x93 " . implode(', ', array_map(fn($u) => $u->link(), $info['who']))) : "<i>none</i>"
+                ?></li>
+<?php
+                }
+            }
+            if (count($staffVote['missing']['who'])) {
+?>
+                <li>Missing: <?= implode(', ', array_map(fn($u) => $u->link(), $staffVote['missing']['who'])) ?></li>
 <?php
             }
         } else {
-            //Staff forum, output voters, not percentages
-            $vote = $thread->staffVote();
-            foreach ($vote as list($StaffString, $StaffVoted)) {
+            foreach ($vote as $i => $choice) {
 ?>
-                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?=$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
+                    <li><?=display_str($choice['answer'])?> (<?=number_format($choice['percent'], 2)?>%)</li>
+                    <li class="graph">
+                        <span class="left_poll"></span>
+                        <span class="center_poll" style="width: <?=number_format($choice['ratio'], 2)?>%;"></span>
+                        <span class="right_poll"></span>
+                    </li>
 <?php
             }
         }
 ?>
         </ul>
-        <br /><strong>Votes:</strong> <?=number_format($TotalVotes)?>
+        <br /><strong>Votes:</strong> <?= number_format($poll->total()) ?>
 <?php
 }
