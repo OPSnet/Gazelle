@@ -193,7 +193,7 @@ foreach ($entryList as $tgroupId) {
                      class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
             </td>
             <td colspan="5">
-                <strong><?= $Number ?> - <?= $tgroup->displayNameHtml() ?></strong>
+                <strong><?= $Number ?> - <?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
                     <span class="float_right">
 <?php   if ($bookmark->isTorrentBookmarked($tgroupId)) { ?>
                     <span class="remove_bookmark">
