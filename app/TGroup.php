@@ -35,7 +35,11 @@ class TGroup extends BaseObject {
         return implode(" \xE2\x80\x93 ",
             array_filter([
                 $this->artistHtml(),
-                sprintf('<a href="%s" class="tooltip" title="View torrent group" dir="ltr">%s</a>', $this->url(), display_str($this->name())),
+                sprintf('<a href="%s" title="%s" class="tooltip" dir="ltr">%s</a>',
+                    $this->url(),
+                    $this->hashTag() ?: 'View torrent group',
+                    display_str($this->name())
+                ),
             ], fn($x) => !empty($x))
         );
     }
@@ -381,6 +385,10 @@ class TGroup extends BaseObject {
 
     public function tagNameList(): array {
         return array_map(fn($t) => $t['name'], $this->tagList());
+    }
+
+    public function hashTag(): string {
+        return implode(' ', array_map(fn($t) => htmlentities("#$t"), $this->tagNameList()));
     }
 
     public function time(): string {

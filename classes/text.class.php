@@ -305,7 +305,7 @@ class Text {
         parse_str($info['query'] ?? '', $args);
         $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
         global $Cache, $DB;
-        switch ($info['path']) {
+        switch ($info['path'] ?? '') {
             case '/artist.php':
                 $name = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
                     $args['id'] ?? 0);
@@ -332,24 +332,11 @@ class Text {
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
-                    $GroupID = $DB->scalar('
-                        SELECT tg.ID FROM torrents_group tg INNER JOIN torrents t ON (t.GroupID = tg.ID) WHERE t.ID = ?
-                        ', (int)$args['torrentid']
-                    );
-                } else {
-                    $GroupID = $DB->scalar('
-                        SELECT ID FROM torrents_group WHERE ID = ?
-                        ', $args['id'] ?? 0
-                    );
+                    return (new \Gazelle\Manager\Torrent)->findById($args['torrentid'])?->group()?->link();
+                } elseif (isset($args['id'])) {
+                    return (new \Gazelle\Manager\TGroup)->findById($args['id'])?->link();
                 }
-                if (!$GroupID) {
-                    return null;
-                }
-                $Group = Torrents::get_groups([$GroupID], true, true, false)[$GroupID];
-                $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode(' ', $Group['TagList'])));
-                return Artists::display_artists($Group['ExtendedArtists'])
-                    . sprintf('<a title="%s" href="%s?%s%s">%s</a>',
-                        $tagNames, $info['path'], $info['query'], $fragment, $Group['Name']);
+                return null;
 
             default:
                 return null;
