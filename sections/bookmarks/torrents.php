@@ -209,7 +209,7 @@ foreach ($bookmarkList as $bm) {
                      class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
             </td>
             <td class="td_info" colspan="5">
-                <strong><?= $tgroup->displayNameHtml() ?></strong>
+                <strong><?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
                 <span style="text-align: right;" class="float_right">
  <?php if ($ownProfile) { ?>
         <a href="#group_<?= $tgroupId ?>" class="brackets remove_bookmark"

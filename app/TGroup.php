@@ -427,10 +427,14 @@ class TGroup extends BaseObject {
         return array_map(fn($x) => "[$x]",
             array_filter([
                 $this->year(),
-                $this->isShowcase() ? 'Vanity House' : '',
+                $this->isShowcase() ? 'Showcase' : '',
                 $this->categoryId() === 1 ? $this->releaseTypeName() : '',
             ], fn($x) => !empty($x))
         );
+    }
+
+    public function suffix(): string {
+        return implode(' ', $this->displayNameSuffix());
     }
 
     public function displayNameHtml(): string {
