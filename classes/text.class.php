@@ -1389,11 +1389,11 @@ class Text {
 
     protected static function bbcodeThreadUrl($thread, $postId = null) {
         if (str_contains($thread, ':')) {
-            [$threadId, $postId] = explode(':', $thread);
+            [$threadId, $postId] = array_map('intval', explode(':', $thread));
         } else {
-            $threadId = $thread;
+            $threadId = (int)$thread;
         }
-        if (is_null($threadId)) {
+        if (!$threadId) {
             return '[thread]' .  $thread . '[/thread]';
         }
 
