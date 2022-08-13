@@ -582,7 +582,7 @@ class User extends \Gazelle\Base {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             INSERT INTO pm_conversations (Subject) VALUES (?)
-            ", $subject
+            ", mb_substr($subject, 0, 255)
         );
         $convId = self::$db->inserted_id();
 
