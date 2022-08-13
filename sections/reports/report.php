@@ -75,7 +75,7 @@ switch ($type) {
         if (is_null($comment)) {
             error(404);
         }
-        $report = (new Gazelle\Report\Comment($comment))->setContext($reportTypes[$type]['title']);
+        $report = (new Gazelle\Report\Comment($comment))->setContext($reportType[$type]['title']);
         break;
 }
 
