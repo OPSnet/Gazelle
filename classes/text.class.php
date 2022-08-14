@@ -573,13 +573,26 @@ class Text {
                 case 'forum':
                 case 'tex':
                 case 'thread':
+                    if ((int)$Block or preg_match('/\s*\d+:\d+/', $Block)) {
+                        $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block, 'Attr'=>$Attrib];
+                    } else {
+                        $Array[$ArrayPos] = "[{$TagName}]";
+                        $i = $TagPos + strlen($Tag[0][0]);
+                        ++$ArrayPos;
+                    }
                 case 'rule':
                 case 'user':
                     $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
                     break;
                 case 'pl':
                 case 'torrent':
-                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block, 'Attr'=>$Attrib];
+                    if ((int)$Block) {
+                        $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block, 'Attr'=>$Attrib];
+                    } else {
+                        $Array[$ArrayPos] = "[{$TagName}]";
+                        $i = $TagPos + strlen($Tag[0][0]);
+                        ++$ArrayPos;
+                    }
                     break;
                 case 'pre':
                 case 'code':
