@@ -278,6 +278,67 @@ class Request extends BaseObject {
         return $error;
     }
 
+    /**
+     * Vote on a request (transfer upload buffer from user to a request.
+     *
+     * return @bool vote was successful (user had sufficient buffer)
+     */
+    public function vote(User $user, int $amount): bool {
+        self::$db->begin_transaction();
+
+        self::$db->prepared_query("
+            UPDATE users_leech_stats SET
+                Uploaded = Uploaded - ?
+            WHERE Uploaded - ? >= 0
+                AND UserID = ?
+            ", $amount, $amount, $user->id()
+        );
+        if (self::$db->affected_rows() == 0) {
+            // Uploaded would turn negative
+            self::$db->rollback();
+            return false;
+        }
+
+        $bounty = $amount * (1 - REQUEST_TAX);
+        self::$db->prepared_query("
+            INSERT INTO requests_votes
+                   (RequestID, UserID, Bounty)
+            VALUES (?,         ?,      ?)
+            ON DUPLICATE KEY UPDATE Bounty = Bounty + ?
+            ", $this->id(), $user->id(), $bounty, $bounty
+        );
+        self::$db->prepared_query("
+            UPDATE requests SET
+                LastVote = now()
+            WHERE ID = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
+            INSERT INTO user_summary (user_id, request_vote_size, request_vote_total)
+                SELECT rv.UserID,
+                    coalesce(sum(rv.Bounty), 0) AS size,
+                    count(*) AS total
+                FROM requests_votes rv
+                INNER JOIN requests r ON (r.ID = rv.RequestID)
+                WHERE r.UserID != r.FillerID
+                    AND rv.UserID = ?
+                GROUP BY rv.UserID
+            ON DUPLICATE KEY UPDATE
+                request_vote_size = VALUES(request_vote_size),
+                request_vote_total = VALUES(request_vote_total)
+            ", $user->id()
+        );
+
+        $this->refreshSphinxDelta();
+        self::$db->commit();
+
+        $this->flush();
+        $this->artistFlush();
+        $user->flush();
+
+        return true;
+   }
+
     public function fill(User $user, Torrent $torrent): int {
         self::$db->prepared_query("
             UPDATE requests SET
