@@ -481,6 +481,10 @@ class Text {
                 // We're in a list. Find where it ends
                 $NewLine = $i;
                 do { // Look for \n[*]
+                    if ($NewLine <= strlen($Str)) {
+                        // invalid markup
+                        break;
+                    }
                     $NewLine = strpos($Str, "\n", $NewLine + 1);
                 } while ($NewLine !== false && substr($Str, $NewLine + 1, 1 + strlen($TagName)) == "[$TagName");
 
