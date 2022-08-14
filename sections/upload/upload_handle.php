@@ -282,17 +282,19 @@ if (!$Err && $isMusicUpload) {
         ];
         $ArtistRoleList = [];
         $ArtistNameList = [];
-        for ($i = 0, $end = count($Artists); $i < $end; $i++) {
-            $name = Gazelle\Artist::sanitize($Artists[$i]);
-            if ($name === '') {
-                continue;
-            }
-            $role = (int)$Importance[$i];
-            if (!in_array($name, $ArtistNameByRole[$role])) {
-                $ArtistNameByRole[$role][] = $name;
-                $ArtistForm[$role][] = ['name' => $name];
-                $ArtistRoleList[] = $role;
-                $ArtistNameList[] = $name;
+        if (is_array($Artists)) {
+            for ($i = 0, $end = count($Artists); $i < $end; $i++) {
+                $name = Gazelle\Artist::sanitize($Artists[$i]);
+                if ($name === '') {
+                    continue;
+                }
+                $role = (int)$Importance[$i];
+                if (!in_array($name, $ArtistNameByRole[$role])) {
+                    $ArtistNameByRole[$role][] = $name;
+                    $ArtistForm[$role][] = ['name' => $name];
+                    $ArtistRoleList[] = $role;
+                    $ArtistNameList[] = $name;
+                }
             }
         }
         if (empty($ArtistNameByRole[ARTIST_MAIN])) {
