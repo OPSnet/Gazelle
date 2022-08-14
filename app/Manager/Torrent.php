@@ -628,7 +628,9 @@ class Torrent extends \Gazelle\Base {
             $seen = [];
             $max = self::$db->record_count();
             $nr = 0;
+            $qid = self::$db->get_query_id();
             while ($nr < min($limit, $max)) {
+                self::$db->set_query_id($qid);
                 $row = self::$db->next_record(MYSQLI_ASSOC, false);
                 if (!$row) {
                     break;
