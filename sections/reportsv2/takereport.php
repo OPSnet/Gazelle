@@ -120,4 +120,4 @@ if ($torrent->uploaderId() != $Viewer->id()) {
     );
 }
 
-header('Location: ' . $torrent->url());
+header('Location: ' . $torrent->location());

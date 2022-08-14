@@ -10,7 +10,7 @@ $snatcher = new Gazelle\User\Snatch($Viewer);
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $torrent = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
     if ($torrent) {
-        header('Location: ' . $torrent->url());
+        header('Location: ' . $torrent->location());
         exit;
     }
 }
