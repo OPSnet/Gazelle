@@ -142,7 +142,7 @@ if (!empty($_REQUEST['action'])) {
             } elseif (isset($_GET['torrentid'])) {
                 $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
                 if ($torrent) {
-                    header('Location: ' . $torrent->url());
+                    header('Location: ' . $torrent->location());
                 } else {
                     header("Location: log.php?search=Torrent+" . $_GET['torrentid']);
                 }

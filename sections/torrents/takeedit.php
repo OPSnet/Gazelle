@@ -4,7 +4,8 @@ use OrpheusNET\Logchecker\Logchecker;
 
 authorize();
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)((int)$_POST['torrentid'] ?? 0));
+$torMan = new Gazelle\Manager\Torrent;
+$torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error(404);
 }
@@ -46,13 +47,13 @@ if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc']);
 }
 if ($Properties['Remastered']) {
-    $Properties['UnknownRelease'] = isset($_POST['unknown']) ? '1' : '0';
-    $Properties['RemasterYear'] = (int)$_POST['remaster_year'];
-    $Properties['RemasterTitle'] = trim($_POST['remaster_title']);
-    $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label']);
-    $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number']);
+    $Properties['UnknownRelease'] = isset($_POST['unknown']);
+    $Properties['RemasterYear'] = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
+    $Properties['RemasterTitle'] = trim($_POST['remaster_title'] ?? '');
+    $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label'] ?? '');
+    $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
 } else {
-    $Properties['UnknownRelease'] = 0;
+    $Properties['UnknownRelease'] = false;
     $Properties['RemasterYear'] = null;
     $Properties['RemasterTitle'] = '';
     $Properties['RemasterRecordLabel'] = '';
@@ -179,22 +180,25 @@ if ($Err) { // Show the upload form, with the data the user entered
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
-$DB->prepared_query("
+$current = $DB->rowAssoc("
     SELECT GroupID, Media, Format, Encoding, Scene, Description AS TorrentDescription,
         RemasterYear, Remastered, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber
     FROM torrents
     WHERE ID = ?
     ", $TorrentID
 );
-$current = $DB->next_record(MYSQLI_ASSOC, false);
 $change = [];
 foreach ($current as $key => $value) {
-    if (in_array($key, ['GroupID'])) {
+    if ($key == 'GroupID') {
         // Not needed here, used below
         continue;
     }
     if (isset($Properties[$key]) && $value !== $Properties[$key]) {
-        $change[] = sprintf('%s %s &rarr; %s', $key, $value, $Properties[$key]);
+        if (is_bool($Properties[$key])) {
+            $change[] = sprintf("%s %s \xE2\x86\x92 %s", $key, $value ? 'true' : 'false', $Properties[$key] ? 'true' : 'false');
+        } else {
+            $change[] = sprintf("%s %s \xE2\x86\x92 %s", $key, $value, $Properties[$key]);
+        }
     }
 }
 
@@ -204,22 +208,22 @@ $DB->begin_transaction(); // It's all or nothing
 if (isset($_FILES['logfiles'])) {
     $_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], fn($name) => !empty($name));
 
-    $logfileSummary = new \Gazelle\LogfileSummary;
+    $logfileSummary = new Gazelle\LogfileSummary;
     $logfiles = [];
     if (count($_FILES['logfiles']['name']) > 0) {
         ini_set('upload_max_filesize', 1000000);
-        $ripFiler = new \Gazelle\File\RipLog;
-        $htmlFiler = new \Gazelle\File\RipLogHTML;
+        $ripFiler = new Gazelle\File\RipLog;
+        $htmlFiler = new Gazelle\File\RipLogHTML;
         foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
             if (!$_FILES['logfiles']['size'][$Pos]) {
                 continue;
             }
-            $logfile = new \Gazelle\Logfile(
-                $_FILES['logfiles']['tmp_name'][$Pos],
-                $_FILES['logfiles']['name'][$Pos]
+            $logfileSummary->add(
+                new Gazelle\Logfile(
+                    $_FILES['logfiles']['tmp_name'][$Pos],
+                    $_FILES['logfiles']['name'][$Pos]
+                )
             );
-            $logfiles[] = $logfile;
-            $logfileSummary->add($logfile);
 
             $DB->prepared_query('
                 INSERT INTO torrents_logs
@@ -351,24 +355,15 @@ $DB->prepared_query("
 $DB->commit();
 
 if ($Viewer->permitted('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
-    (new Gazelle\Manager\Torrent)
-        ->setFreeleech($Viewer, [$TorrentID], $Properties['FreeLeech'], $Properties['FreeLeechType'], true, false);
+    $torrMan->setFreeleech($Viewer, [$TorrentID], $Properties['FreeLeech'], $Properties['FreeLeechType'], true, false);
 }
-(new \Gazelle\Manager\TGroup)->refresh($current['GroupID']);
+(new Gazelle\Manager\TGroup)->refresh($current['GroupID']);
 
-$name = $DB->scalar("
-    SELECT g.Name
-    FROM torrents_group g
-    INNER JOIN torrents t ON (t.GroupID = g.ID)
-    WHERE t.ID = ?
-    ", $TorrentID
-);
 $changeLog = implode(', ', $change);
 (new Gazelle\Log)->torrent($current['GroupID'], $TorrentID, $Viewer->id(), $changeLog)
-    ->general("Torrent $TorrentID ($name) in group {$current['GroupID']} was edited by "
+    ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$current['GroupID']} was edited by "
         . $Viewer->username() . " ($changeLog)");
 
-$Cache->deleteMulti(["torrents_details_{$current['GroupID']}", "torrent_download_$TorrentID"]);
-
-(new \Gazelle\Torrent($TorrentID))->flush();
-header("Location: torrents.php?id={$current['GroupID']}");
+$torrent->flush();
+$Cache->delete_value("torrent_download_$TorrentID");
+header("Location: " . $torrent->location());

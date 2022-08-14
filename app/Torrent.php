@@ -30,8 +30,12 @@ class Torrent extends BaseObject {
         ]);
     }
 
-    public function url(): string {
+    public function location(): string {
         return "torrents.php?groupId=" . $this->groupId() . '&torrentid=' . $this->id . '#' . $this->id;
+    }
+
+    public function url(): string {
+        return htmlentities($this->location());
     }
 
     public function link(): string {
