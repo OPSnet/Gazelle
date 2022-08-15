@@ -231,7 +231,7 @@ class Forum extends \Gazelle\Base {
 
         $userId = $user->id();
         $info['EffectiveClass']  = $user->effectiveClass();
-        $info['ExtraClasses']    = array_keys($user->secondaryClasses());
+        $info['ExtraClasses']    = array_keys((new \Gazelle\User\Privilege($user))->secondaryClassList());
         $info['Permissions']     = array_keys($user->info()['Permission']);
         $info['ExtraClassesOff'] = array_flip(array_map(fn($i) => -$i, $info['ExtraClasses']));
         $info['PermissionsOff']  = array_flip(array_map(fn($i) => "-$i", array_keys($user->info()['Permission'])));

@@ -452,7 +452,7 @@ Results ordered <select name="order">
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ u.user.link|raw }} {{ u.user_id|user_status(viewer)|raw }}</td>
             <td>{{ u.user.userclassName }}
-    {% for badge, title in u.user.secondaryBadges|filter((v, k) => k is not empty) %}
+    {% for badge, title in u.user|badge_list %}
         {% if loop.first %}
             <br />
         {% endif %}

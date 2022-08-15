@@ -16,7 +16,7 @@
         {%- if user.isDisabled -%}
         &nbsp;<a href="rules.php"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="Banished" title="Naughty person" class="tooltip" /></a>
         {%- endif -%}
-        {% for badge, name in user.secondaryBadges %}
+        {% for badge, name in badge_list %}
             <span class="tooltip secondary_class" title="{{ name }}">{{ badge }}</span>
         {% endfor %}
         {% if user.title -%}
@@ -28,7 +28,7 @@
 {% if not own_profile %}
         <a href="inbox.php?action=compose&amp;toid={{ user_id }}" class="brackets" title="Send a private message">Send PM</a>
     {% if not user.isFriend(viewer_id) %}
-        <a href="friends.php?action=add&amp;friendid={{ user_id }}&amp;auth={{ auth }}" class="brackets">Add to friends</a>
+        <a href="friends.php?action=add&amp;friendid={{ user_id }}&amp;auth={{ viewer.auth }}" class="brackets">Add to friends</a>
     {% endif %}
         <a href="reports.php?action=report&amp;type=user&amp;id={{ user_id }}" class="brackets">Report user</a>
 {% endif %}
@@ -104,7 +104,7 @@
             <li><input type="submit" name="flsubmit" value="Send" /></li>
         </ul>
         <input type="hidden" name="action" value="fltoken" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     </form>
     {% endif %}
 </div>

@@ -88,10 +88,9 @@ class Users {
 
         if ($Badges) {
             $badgeList = [];
-            foreach ($user->secondaryBadges() as $badge => $name) {
-                if ($name !== '') {
-                    $badgeList[] = '<span class="tooltip secondary_class" title="' . $name . '">' . $badge . '</span>';
-                }
+            $privilege = new Gazelle\User\Privilege($user);
+            foreach ($privilege->badgeList() as $badge => $name) {
+                $badgeList[] = '<span class="tooltip secondary_class" title="' . $name . '">' . $badge . '</span>';
             }
             if ($badgeList) {
                 $Str .= '&nbsp;'.implode('&nbsp;', $badgeList);

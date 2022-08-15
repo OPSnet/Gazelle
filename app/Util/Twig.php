@@ -32,6 +32,13 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'badge_list',
+            function (\Gazelle\User $user) {
+                return (new \Gazelle\User\Privilege($user))->badgeList();
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
             function ($text, $outputToc = true) {
                 return new \Twig\Markup(\Text::full_format($text, $outputToc), 'UTF-8');
