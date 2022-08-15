@@ -168,51 +168,15 @@ class User extends BaseObject {
         $this->info['RatioWatchEndsEpoch'] = $this->info['RatioWatchEnds']
             ? strtotime($this->info['RatioWatchEnds']) : 0;
 
-        // load their permissions
-        self::$db->prepared_query("
-            SELECT p.ID,
-                p.Level,
-                p.Name,
-                p.PermittedForums,
-                p.Secondary,
-                p.Values,
-                if(p.badge = '', NULL, p.badge) as badge
-            FROM permissions p
-            INNER JOIN users_levels ul ON (ul.PermissionID = p.ID)
-            WHERE ul.UserID = ?
-            ORDER BY p.Secondary, p.Level DESC
-            ", $this->id
-        );
-        $permissions = self::$db->to_array('ID', MYSQLI_ASSOC, false);
-        $this->info['secondary_badge'] = [];
-        $this->info['secondary_class'] = [];
-        $forumAccess = [];
-        $secondaryClassLevel = [];
-        $secondaryClassPerms = [];
-        foreach ($permissions as $p) {
-            if ($p['Secondary']) {
-                $this->info['secondary_badge'][$p['badge']] = $p['Name'];
-                $this->info['secondary_class'][$p['ID']] = $p['Name'];
-                $secondaryClassPerms = array_merge($secondaryClassPerms, unserialize($p['Values']));
-                $secondaryClassLevel[$p['ID']] = $p['Level'];
-            }
-            $allowed = array_map('intval', explode(',', $p['PermittedForums']) ?: []);
-            foreach ($allowed as $forumId) {
-                if ($forumId) {
-                    $forumAccess[$forumId] = true;
-                }
-            }
-        }
-        $this->info['effective_class'] = count($secondaryClassLevel)
-            ? max($this->info['Class'], ...array_values($secondaryClassLevel))
-            : $this->info['Class'];
+        $privilege = new User\Privilege($this);
+        $this->info['effective_class'] = max($this->info['Class'], $privilege->maxSecondaryLevel());
 
         $this->info['Permission'] = [];
         $primary = unserialize($this->info['primaryPermissions']) ?: [];
         foreach ($primary as $name => $value) {
             $this->info['Permission'][$name] = (bool)$value;
         }
-        foreach ($secondaryClassPerms as $name => $value) {
+        foreach ($privilege->secondaryPrivilegeList() as $name => $value) {
             $this->info['Permission'][$name] = (bool)$value;
         }
         $this->info['defaultPermission'] = $this->info['Permission'];
@@ -223,6 +187,7 @@ class User extends BaseObject {
             $this->info['Permission'][$name] = (bool)$value;
         }
 
+        $forumAccess = $privilege->allowedForumList(); // grants from secondary classes
         $allowed = array_map('intval', explode(',', $this->info['PermittedForums']) ?: []);
         foreach ($allowed as $forumId) {
             if ($forumId) {
@@ -253,6 +218,7 @@ class User extends BaseObject {
         );
         $this->info['attr'] = self::$db->to_pair('Name', 'ID', false);
         self::$cache->cache_value($key, $this->info, 3600);
+        self::$db->set_query_id($qid);
         return $this->info;
     }
 
@@ -353,14 +319,6 @@ class User extends BaseObject {
             ', $this->id
         );
         return self::$db->to_array('permName', MYSQLI_ASSOC, false);
-    }
-
-    public function secondaryClasses(): array {
-        return $this->info()['secondary_class'];
-    }
-
-    public function secondaryBadges(): array {
-        return $this->info()['secondary_badge'];
     }
 
     public function hasAttr(string $name): int {
@@ -851,7 +809,7 @@ class User extends BaseObject {
      * @return array of forum ids
      */
     public function forbiddenForums(): array {
-        return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === false;}));
+        return array_keys(array_filter($this->info()['forum_access'], fn ($v) => $v === false));
     }
 
     /**
@@ -860,7 +818,7 @@ class User extends BaseObject {
      * @return array of forum ids
      */
     public function permittedForums(): array {
-        return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === true;}));
+        return array_keys(array_filter($this->info()['forum_access'], fn ($v) => $v === true));
     }
 
     public function forbiddenForumsList(): string {
@@ -961,7 +919,10 @@ class User extends BaseObject {
     }
 
     public function flush() {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->deleteMulti([
+            sprintf(self::CACHE_KEY, $this->id),
+            sprintf(User\Privilege::CACHE_KEY, $this->id),
+        ]);
         $this->stats()->flush();
     }
 
@@ -1621,10 +1582,10 @@ class User extends BaseObject {
     public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
 
     public function isStaff(): bool         { return $this->info()['isStaff']; }
-    public function isDonor(): bool         { return isset($this->info()['secondary_class'][DONOR]) || $this->isStaff(); }
-    public function isFLS(): bool           { return isset($this->info()['secondary_class'][FLS_TEAM]); }
-    public function isInterviewer(): bool   { return isset($this->info()['secondary_class'][INTERVIEWER]); }
-    public function isRecruiter(): bool     { return isset($this->info()['secondary_class'][RECRUITER]); }
+    public function isDonor(): bool         { return (new User\Privilege($this))->isDonor() || $this->isStaff(); }
+    public function isFLS(): bool           { return (new User\Privilege($this))->isFLS(); }
+    public function isInterviewer(): bool   { return (new User\Privilege($this))->isInterviewer(); }
+    public function isRecruiter(): bool     { return (new User\Privilege($this))->isRecruiter(); }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
 
     public function warningExpiry(): ?string {

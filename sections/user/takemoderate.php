@@ -344,17 +344,17 @@ if ($Viewer->permitted('users_warn')) {
 $removedClasses = [];
 $addedClasses   = [];
 if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
-    $currentClasses = array_keys($cur['secondary_class']);
+    $currentClasses = array_keys((new Gazelle\User\Privilege($user))->secondaryClassList());
     sort($currentClasses);
     if (implode(',', $currentClasses) != implode(',', $secondaryClasses)) {
         $removedClasses = array_diff($currentClasses, $secondaryClasses);
         $addedClasses   = array_diff($secondaryClasses, $currentClasses);
         if (!empty($removedClasses)) {
-            $names = array_map(function ($c) use ($userMan) { return $userMan->userclassName($c); }, $removedClasses);
+            $names = array_map(fn ($c) => $userMan->userclassName($c), $removedClasses);
             $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
         }
         if (!empty($addedClasses)) {
-            $names = array_map(function ($c) use ($userMan) { return $userMan->userclassName($c); }, $addedClasses);
+            $names = array_map(fn ($c) => $userMan->userclassName($c), $addedClasses);
             $editSummary[] = "secondary classes added: " . implode(', ', $names);
         }
     }

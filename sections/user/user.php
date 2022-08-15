@@ -85,7 +85,7 @@ if (RECOVERY_DB && ($OwnProfile || $Viewer->permitted('users_mod'))) {
 
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
-    'auth'    => $Viewer->auth(),
+    'badge_list' => (new Gazelle\User\Privilege($User))->badgeList(),
     'freeleech' => [
         'item'  => $FL_Items,
         'other' => $FL_OTHER_tokens ?? null,
@@ -277,7 +277,7 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
             <div class="head colhead_dark">Personal</div>
             <ul class="stats nobullet">
                 <li>Class: <?= $userMan->userclassName($User->primaryClass()) ?></li>
-<?php if (($secondary = $User->secondaryClasses())) { ?>
+<?php if (($secondary = (new Gazelle\User\Privilege($User))->secondaryClassList())) { ?>
                 <li>
                     <ul class="stats">
 <?php
