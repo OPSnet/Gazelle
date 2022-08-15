@@ -19,7 +19,6 @@ class TGroup extends BaseObject {
     protected ArtistRole\TGroup $artistRole;
     protected User $viewer;
     protected array $info;
-    protected array $releaseTypes;
 
     protected Stats\TGroup $stats;
 
@@ -46,7 +45,6 @@ class TGroup extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
-        $this->releaseTypes = (new \Gazelle\ReleaseType)->list();
     }
 
     public function flush() {
@@ -371,7 +369,11 @@ class TGroup extends BaseObject {
     }
 
     public function releaseTypeName(): ?string {
-        return $this->info()['ReleaseType'] == 0 ? null : $this->releaseTypes[$this->releaseType()];
+        static $releaseTypes;
+        if (is_null($releaseTypes)) {
+            $releaseTypes = (new \Gazelle\ReleaseType)->list();
+        }
+        return $this->info()['ReleaseType'] == 0 ? null : $releaseTypes[$this->releaseType()];
     }
 
     public function tagList(): array {
