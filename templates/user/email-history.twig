@@ -54,7 +54,7 @@
         </td>
         <td>{{ r.useragent }}</td>
         <td>{{ r.user.isEnabled ? 'yes' : 'no' }}</td>
-        <td>{{ r.user.isDonor ? 'yes' : 'no' }}</td>
+        <td>{{ r.user is donor ? 'yes' : 'no' }}</td>
         <td>{{ r.user.isWarned ? r.user.endWarningDate(0) : 'no' }}</td>
     </tr>
 {% if loop.last %}

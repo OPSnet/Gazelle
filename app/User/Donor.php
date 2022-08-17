@@ -5,7 +5,7 @@ namespace Gazelle\User;
 class Donor extends \Gazelle\BaseUser {
 
     public function link(\Gazelle\User $viewer): string {
-        if (!$this->user->isDonor()) {
+        if (!(new Privilege($this->user))->isDonor()) {
             return '';
         }
         $override = $this->user->isStaff() ? false : $viewer->permitted('users_override_paranoia');

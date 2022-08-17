@@ -1,7 +1,7 @@
 <div class="box box_info box_userinfo_donor_stats">
     <div class="head colhead_dark">Donor Statistics</div>
     <ul class="stats nobullet">
-{% if not user.isDonor %}
+{% if not user is donor %}
 {%      if is_self %}
         <li>You haven't donated.</li>
 {%      else %}

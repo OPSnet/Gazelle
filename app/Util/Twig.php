@@ -278,6 +278,10 @@ class Twig {
             return is_nan($value);
         }));
 
+        $twig->addTest(new \Twig\TwigTest('donor', function ($user) {
+            return get_class($user) === 'Gazelle\\User' && (new \Gazelle\User\Privilege($user))->isDonor();
+        }));
+
         return $twig;
     }
 }

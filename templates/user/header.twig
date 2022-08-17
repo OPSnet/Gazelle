@@ -5,7 +5,7 @@
 <div class="thin">
     <div class="header">
         <h2>{{ user.username }}
-        {%- if user.isDonor and (own_profile or user.donorVisible or viewer.permitted('users_override_paranoia')) -%}
+        {%- if user is donor and (own_profile or user.donorVisible or viewer.permitted('users_override_paranoia')) -%}
         &nbsp;{{ user.donorHeart|raw -}}
         {%- endif -%}
         {%- if user.isWarned -%}
