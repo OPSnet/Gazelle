@@ -572,7 +572,6 @@ class Text {
                     }
                     $Array[$ArrayPos] = ['Type'=>'aud', 'Val'=>$Block];
                     break;
-                case 'artist':
                 case 'collage':
                 case 'forum':
                 case 'tex':
@@ -584,6 +583,8 @@ class Text {
                         $i = $TagPos + strlen($Tag[0][0]);
                         ++$ArrayPos;
                     }
+                    break;
+                case 'artist':
                 case 'rule':
                 case 'user':
                     $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
