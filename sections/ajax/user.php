@@ -93,7 +93,7 @@ json_print("success", [
         'class'        => $user->userclassName(),
         'paranoia'     => $user->paranoiaLevel(),
         'paranoiaText' => $user->paranoiaLabel(),
-        'donor'        => $user->isDonor(),
+        'donor'        => (new Gazelle\User\Privilege($user))->isDonor(),
         'warned'       => $user->isWarned(),
         'enabled'      => $user->isEnabled(),
         'passkey'      => $user->id() === $Viewer->id() ? $user->announceKey() : null,

@@ -34,7 +34,7 @@ foreach ($userIds as $userId) {
     $payload[] = [
         'userId'   => $user->id(),
         'username' => $user->username(),
-        'donor'    => $user->isDonor(),
+        'donor'    => (new Gazelle\User\Privilege($user))->isDonor(),
         'warned'   => $user->isWarned(),
         'enabled'  => $user->isEnabled(),
         'class'    => $user->userclassName(),

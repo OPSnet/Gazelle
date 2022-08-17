@@ -46,7 +46,7 @@ class Users {
 
         if ($Badges) {
             $DonorRank = $user->donorRank();
-            if ($DonorRank == 0 && $user->isDonor()) {
+            if ($DonorRank == 0 && (new \Gazelle\User\Privilege($user))->isDonor()) {
                 $DonorRank = 1;
             }
             if ($DonorRank > 0 && ($OverrideParanoia || $user->propertyVisible($Viewer, 'hide_donor_heart'))) {

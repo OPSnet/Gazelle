@@ -501,7 +501,7 @@ class User extends BaseObject {
 
     public function donorHeart(): string {
         if (!isset($this->donorHeart)) {
-            if (!$this->isDonor()) {
+            if (!(new User\Privilege($this))->isDonor()) {
                 $this->donorHeart = '';
             } else {
                 $enabled = $this->enabledDonorRewards();
@@ -1582,7 +1582,6 @@ class User extends BaseObject {
     public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
 
     public function isStaff(): bool         { return $this->info()['isStaff']; }
-    public function isDonor(): bool         { return (new User\Privilege($this))->isDonor() || $this->isStaff(); }
     public function isFLS(): bool           { return (new User\Privilege($this))->isFLS(); }
     public function isInterviewer(): bool   { return (new User\Privilege($this))->isInterviewer(); }
     public function isRecruiter(): bool     { return (new User\Privilege($this))->isRecruiter(); }

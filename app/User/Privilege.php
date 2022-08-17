@@ -12,7 +12,7 @@ class Privilege extends \Gazelle\BaseUser {
         if (!empty($this->info)) {
             return $this->info;
         }
-        $id = $this->user()->id();
+        $id = $this->user->id();
         $key = sprintf(self::CACHE_KEY, $id);
         $info = self::$cache->get_value($key);
         if ($info !== false) {
@@ -38,10 +38,10 @@ class Privilege extends \Gazelle\BaseUser {
         return $this->info;
     }
 
-    public function isDonor(): bool       { return isset($this->info[DONOR]); }
-    public function isFLS(): bool         { return isset($this->info[FLS_TEAM]); }
-    public function isInterviewer(): bool { return isset($this->info[INTERVIEWER]); }
-    public function isRecruiter(): bool   { return isset($this->info[RECRUITER]); }
+    public function isDonor(): bool       { return isset($this->info()[DONOR]) || $this->user->isStaff(); }
+    public function isFLS(): bool         { return isset($this->info()[FLS_TEAM]); }
+    public function isInterviewer(): bool { return isset($this->info()[INTERVIEWER]); }
+    public function isRecruiter(): bool   { return isset($this->info()[RECRUITER]); }
 
     public function allowedForumList(): array {
         $allowed = [];
