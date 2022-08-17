@@ -1,169 +1,89 @@
 <?php
 
-$forMan    = new Gazelle\Manager\Forum;
-$threadMan = new Gazelle\Manager\ForumThread;
-$tgMan     = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$userMan   = new Gazelle\Manager\User;
+$artistMan  = new Gazelle\Manager\Artist;
+$collageMan = new Gazelle\Manager\Collage;
+$forumMan   = new Gazelle\Manager\Forum;
+$requestMan = new Gazelle\Manager\Request;
+$threadMan  = new Gazelle\Manager\ForumThread;
+$tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$userMan    = new Gazelle\Manager\User;
+$subscribe  = new Gazelle\Subscription($Viewer);
 
-$showAvatars   = $Viewer->showAvatars();
-$showCollapsed = (bool)($_GET['collapse'] ?? true);
 $showUnread    = (bool)($_GET['showunread'] ?? true);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
-$subscribe = new Gazelle\Subscription($Viewer);
-if ($showUnread) {
-    $total = $forMan->unreadSubscribedForumTotal($Viewer) + $subscribe->unreadCommentTotal();
-} else {
-    $total = $forMan->subscribedForumTotal($Viewer) + $subscribe->commentTotal();
-}
-$paginator->setTotal($total);
+
+$paginator->setTotal($showUnread
+    ? $forumMan->unreadSubscribedForumTotal($Viewer) + $subscribe->unreadCommentTotal()
+    : $forumMan->subscribedForumTotal($Viewer) + $subscribe->commentTotal()
+);
 
 $Results = (new Gazelle\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
-
-$TorrentGroups = $Requests = [];
-foreach ($Results as $Result) {
-    if ($Result['Page'] == 'torrents') {
-        $TorrentGroups[] = $Result['PageID'];
-    } elseif ($Result['Page'] == 'requests') {
-        $Requests[] = $Result['PageID'];
+foreach ($Results as &$result) {
+    $postLink = $result['PostID'] ? "&amp;postid={$result['PostID']}#post{$result['PostID']}" : '';
+    switch ($result['Page']) {
+        case 'artist':
+            $artist = $artistMan->findById($result['PageID']);
+            if ($artist) {
+                $result = $result + [
+                    'jump' => $artist->url() . $postLink,
+                    'link' => 'Artist &rsaquo; ' . $artist->link(),
+                ];
+            }
+            break;
+        case 'collages':
+            $collage = $collageMan->findById($result['PageID']);
+            if ($collage) {
+                $result = $result + [
+                    'jump' => $collage->url() . $postLink,
+                    'link' => 'Collage &rsaquo; ' . $collage->link(),
+                ];
+            }
+            break;
+        case 'requests':
+            $request = $requestMan->findById($result['PageID']);
+            if ($request) {
+                $result = $result + [
+                    'jump' => $request->url() . $postLink,
+                    'link' => 'Request &rsaquo; ' . $request->categoryLink(),
+                ];
+            }
+            break;
+        case 'torrents':
+            $tgroup = $tgMan->findById($result['PageID']);
+            if ($tgroup) {
+                $result = $result + [
+                    'jump' => $tgroup->url() . $postLink,
+                    'link' => 'Torrent &rsaquo; ' . $tgroup->link() . ' ' . $tgroup->suffix(),
+                ];
+            }
+            break;
+        case 'forums':
+            $thread = $threadMan->findbyId($result['PageID']);
+            if ($thread) {
+                $result = $result + [
+                    'jump' => $thread->url() . $postLink,
+                    'link' => 'Forums &rsaquo; ' . $thread->forum()->link() .  ' &rsaquo; ' . $thread->link(),
+                ];
+            }
+            break;
+        default:
+            error(0);
+            break;
+    }
+    if (!empty($result['LastReadBody'])) {
+        $result['avatar'] = $userMan->avatarMarkup($Viewer, new Gazelle\User($result['LastReadUserID']));
+    }
+    if ($result['LastReadEditedUserID']) {
+        $result['editor_link'] = $userMan->findById($result['LastReadEditedUserID'])->link();
     }
 }
+unset($result);
 
-$TorrentGroups = Torrents::get_groups($TorrentGroups, true, true, false);
-$Requests = Requests::get_requests($Requests);
-
-View::show_header('Subscriptions', ['js' => 'subscriptions,comments,bbcode']);
-?>
-<div class="thin">
-    <div class="header">
-        <h2><?= $Viewer->link() ?></a> &rsaquo; Subscriptions<?=$showUnread ? ' with unread posts'
-            . ($paginator->total() ? ' (' . $paginator->total() . ' new)' : '') : ''?></h2>
-        <div class="linkbox">
-<?php if (!$showUnread) { ?>
-            <br /><br />
-            <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>
-<?php } else { ?>
-            <br /><br />
-            <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>
-<?php
-}
-if ($paginator->total()) {
-?>
-            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$showCollapsed ? 'Show' : 'Hide' ?> post bodies</a>
-<?php } ?>
-            <a href="userhistory.php?action=posts&amp;userid=<?=$Viewer->id()?>" class="brackets">Go to post history</a>
-            <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>
-            &nbsp;&nbsp;<a href="userhistory.php?action=catchup&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>
-        </div>
-    </div>
-<?php if (!$paginator->total()) { ?>
-    <div class="center">
-        No subscriptions<?=$showUnread ? ' with unread posts' : ''?>
-    </div>
-<?php } else {
-    echo $paginator->linkbox();
-    foreach ($Results as $Result) {
-        switch ($Result['Page']) {
-            case 'artist':
-                $Links = 'Artist &rsaquo; <a href="artist.php?id=' . $Result['PageID'] . '">' . display_str($Result['Name']) . '</a>';
-                $JumpLink = 'artist.php?id=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
-                break;
-            case 'collages':
-                $Links = 'Collage &rsaquo; <a href="collages.php?id=' . $Result['PageID'] . '">' . display_str($Result['Name']) . '</a>';
-                $JumpLink = 'collages.php?action=comments&collageid=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
-                break;
-            case 'requests':
-                if (isset($Requests[$Result['PageID']])) {
-                    $Request = $Requests[$Result['PageID']];
-                    $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
-
-                    $Links = 'Request &rsaquo; ';
-                    if ($CategoryName == 'Music' || $CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-                        $Links .= ($CategoryName == 'Music' ? Artists::display_artists(Requests::get_artists($Result['PageID'])) : '')
-                            . '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '" dir="ltr">' . $Request['Title'] . " [" . $Request['Year'] . "]</a>";
-                    } else {
-                        $Links .= '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '">' . $Request['Title'] . "</a>";
-                    }
-                    $JumpLink = 'requests.php?action=view&amp;id=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
-                }
-                break;
-            case 'torrents':
-                $tgroup = $tgMan->findById($Result['PageID']);
-                if (is_null($tgroup)) {
-                    continue 2;
-                }
-                if (isset($TorrentGroups[$Result['PageID']])) {
-                    $GroupInfo = $TorrentGroups[$Result['PageID']];
-                    $Links = 'Torrent &rsaquo; ' . $tgroup->link();
-                    if ($GroupInfo['Year'] > 0) {
-                        $Links .= " [" . $GroupInfo['Year'] . "]";
-                    }
-                    if ($GroupInfo['ReleaseType'] > 0) {
-                        $Links .= " [" . (new Gazelle\ReleaseType)->findNameById($GroupInfo['ReleaseType']) . "]";
-                    }
-                    $JumpLink = 'torrents.php?id=' . $GroupInfo['ID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
-                }
-                break;
-            case 'forums':
-                $thread = $threadMan->findbyId($Result['PageID']);
-                $Links = 'Forums &rsaquo; ' . $thread->forum()->link() .  ' &rsaquo; ' . $thread->link();
-                $JumpLink = $thread->url() . ($Result['PostID'] ? "&amp;postid={$Result['PostID']}#post{$Result['PostID']}" : '');
-                break;
-            default:
-                error(0);
-        }
-?>
-    <table class="forum_post box vertical_margin<?=(!$showAvatars ? ' noavatar' : '')?>">
-        <colgroup>
-<?php   if ($showAvatars) { ?>
-            <col class="col_avatar" />
-<?php   } ?>
-            <col class="col_post_body" />
-        </colgroup>
-        <tr class="colhead_dark notify_<?=$Result['Page']?>">
-            <td colspan="<?= $showAvatars ? 2 : 1 ?>">
-                <span style="float: left;">
-                    <?=$Links . ($Result['PostID'] < $Result['LastPost'] ? ' <span class="new">(New!)</span>' : '')?>
-                </span>
-                <span style="float: left;" class="tooltip last_read" title="Jump to last read">
-                    <a href="<?=$JumpLink?>"></a>
-                </span>
-<?php   if ($Result['Page'] == 'forums') { ?>
-                <span id="bar<?=$Result['PostID'] ?>" style="float: right;">
-                    <a href="#" onclick="Subscribe(<?=$Result['PageID']?>); return false;" id="subscribelink<?=$Result['PageID']?>" class="brackets">Unsubscribe</a>
-<?php   } else { ?>
-                <span id="bar_<?=$Result['Page'] . $Result['PostID'] ?>" style="float: right;">
-                    <a href="#" onclick="SubscribeComments('<?=$Result['Page']?>', <?=$Result['PageID']?>); return false;" id="subscribelink_<?=$Result['Page'] . $Result['PageID']?>" class="brackets">Unsubscribe</a>
-<?php   } ?>
-                    &nbsp;
-                    <a href="#">&uarr;</a>
-                </span>
-            </td>
-        </tr>
-<?php   if (!empty($Result['LastReadBody'])) { /* if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. */ ?>
-        <tr class="row<?=$showCollapsed ? ' hidden' : '' ?>">
-<?php       if ($showAvatars) { ?>
-            <td class="avatar" valign="top">
-                <?= $userMan->avatarMarkup($Viewer, new Gazelle\User($Result['LastReadUserID'])) ?>
-            </td>
-<?php       } ?>
-            <td class="body" valign="top">
-                <div class="content3">
-                    <?=Text::full_format($Result['LastReadBody']) ?>
-<?php       if ($Result['LastReadEditedUserID']) { ?>
-                    <br /><br />
-                    <span class="last_edited">Last edited by <?= $userMan->findById($Result['LastReadEditedUserID'])->link() ?> <?=time_diff($Result['LastReadEditedTime'])?></span>
-<?php       } ?>
-                </div>
-            </td>
-        </tr>
-<?php   } ?>
-    </table>
-<?php
-    }
-    echo $paginator->linkbox();
-}
-?>
-</div>
-<?php
-View::show_footer();
+echo $Twig->render('user/subscription-history.twig', [
+    'page'           => $Results,
+    'paginator'      => $paginator,
+    'show_collapsed' => (bool)($_GET['collapse'] ?? true),
+    'show_unread'    => $showUnread,
+    'viewer'         => $Viewer,
+]);

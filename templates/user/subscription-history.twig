@@ -1,0 +1,84 @@
+{% set show_avatar = viewer.showAvatars %}
+
+{{ header('Subscriptions', {'js': 'subscriptions,comments,bbcode'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{{ viewer.link|raw }}</a> &rsaquo; Subscriptions
+{%- if show_unread %} with unread posts{% endif -%}
+{%- if paginator.total %} {{ paginator.total }} new{% endif %}</h2>
+        <div class="linkbox">
+            <br /><br />
+{% if show_unread %}
+            <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>
+{% else %}
+            <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>
+{% endif %}
+
+{% if paginator.total %}
+            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets">
+    {%- if show_collapsed %}Show{% else %}Hide{% endif %} post bodies</a>
+{% endif %}
+            <a href="userhistory.php?action=posts&amp;userid={{ viewer.id }}" class="brackets">Go to post history</a>
+            <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>
+            &nbsp;&nbsp;<a href="userhistory.php?action=catchup&amp;auth={{ viewer.auth }}" class="brackets">Catch up</a>
+        </div>
+    </div>
+
+{% for result in page %}
+    {% if loop.first %}
+    {{ paginator.linkbox|raw }}
+    {% endif -%}
+    <table class="forum_post box vertical_margin{% if not show_avatar %}noavatar{% endif %}">
+        <colgroup>
+    {% if show_avatar %}
+            <col class="col_avatar" />
+    {% endif %}
+            <col class="col_post_body" />
+        </colgroup>
+        <tr class="colhead_dark notify_{{ result.page }}">
+            <td colspan="{% if show_avatar %}2{% else %}1{% endif %}">
+                <span style="float: left;">{{ result.link|raw }}</span>
+    {% if result.PostID < result.LastPost %} <span class="new">(New!)</span>{% endif %}
+    {% if result.PostID %}
+                <span style="float: left;" class="tooltip last_read" title="Jump to last read">
+                    <a href="{{ result.jump|raw }}"></a>
+                </span>
+    {% endif %}
+    {% if result.Page == 'forums' %}
+                <span id="bar{{ result.PostID }}" style="float: right;">
+                    <a href="#" onclick="Subscribe({{ result.PageID }}); return false;" id="subscribelink{{ result.PageID }}" class="brackets">Unsubscribe</a>
+    {% else %}
+                <span id="bar_{{ result.Page }}{{ result.PageID }}" style="float: right;">
+                    <a href="#" onclick="SubscribeComments('{{ result.Page }}', {{ result.PageID }}); return false;" id="subscribelink_{{ result.Page }}{{ result.PageID }}" class="brackets">Unsubscribe</a>
+    {% endif -%}
+                    &nbsp;<a href="#">&uarr;</a>
+                </span>
+            </td>
+        </tr>
+    {% if result.LastReadBody %}
+        <tr class="row{% if show_collapsed %} hidden{% endif %}">
+        {% if show_avatar %}
+            <td class="avatar" valign="top">{{ result.avatar|raw }}</td>
+        {% endif %}
+            <td class="body" valign="top">
+                <div class="content3">
+                    {{ result.LastReadBody|bb_format }}
+        {% if result.editor_link %}
+                    <br /><br />
+                    <span class="last_edited">Last edited by {{ result.editor_link }} {{ result.LastReadEditedTime|time_diff }}</span>
+        {% endif %}
+                </div>
+            </td>
+        </tr>
+    {% endif %}
+    </table>
+    {% if loop.last %}
+    {{ paginator.linkbox|raw }}
+    {% endif %}
+{% else %}
+    <div class="center">
+        No subscriptions{% if show_unread %} with unread posts{% endif %}
+    </div>
+{% endfor %}
+</div>
+{{ footer() }}

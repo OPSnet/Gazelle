@@ -21,6 +21,18 @@ class Request extends BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
     }
 
+    public function yearLink(): string {
+        return sprintf('<a href="%s">%s [%d]</a>', $this->url(), display_str($this->title()), $this->year());
+    }
+
+    public function categoryLink(): string {
+        return match($this->categoryName()) {
+            'Audiobooks', 'Comedy'  => $this->yearLink(),
+            'Music' => \Artists::display_artists(\Requests::get_artists($this->id)) . $this->yearLink(),
+            default => $this->link(),
+        };
+    }
+
     public function flush() {
         if ($this->info()['GroupID']) {
             self::$cache->delete_value("requests_group_" . $this->info()['GroupID']);
@@ -123,7 +135,7 @@ class Request extends BaseObject {
         return $this->info()['CategoryID'];
     }
 
-    public function categoryName(): int {
+    public function categoryName(): string {
         return CATEGORY[$this->info()['CategoryID'] - 1];
     }
 
@@ -195,7 +207,7 @@ class Request extends BaseObject {
 
     public function fullTitle() {
         $title = '';
-        if (CATEGORY[$this->info()['CategoryID'] - 1] === 'Music') {
+        if ($this->categoryName() === 'Music') {
             $title = \Artists::display_artists($this->artistList(), false, true);
         }
         return $title . $this->title();
