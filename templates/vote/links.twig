@@ -4,13 +4,13 @@
         if vote != 0 %} hidden{% endif %}" title="Upvote" onclick="UpVoteGroup({{ group_id }}, '{{
             viewer.auth }}'); return false;">&#x25b2;</a>
 <span id="voted_up_{{ group_id }}" class="tooltip small_upvoted{%
-    if vote == -1 or vote == 0 %} hidden{% endif %}" title="You have upvoted">&#x25b2;</span>
+    if vote in [-1, 0] %} hidden{% endif %}" title="You have upvoted">&#x25b2;</span>
 
 <a href="#" id="vote_down_{{ group_id }}" class="tooltip small_downvote vote_link_{{ group_id }}{%
     if vote != 0 %} hidden{% endif %}" title="Downvote" onclick="DownVoteGroup({{ group_id }}, '{{
         viewer.auth }}'); return false;">&#x25bc;</a>
 <span id="voted_down_{{ group_id }}" class="tooltip small_downvoted{%
-    if vote == 1 or vote == 0 %} hidden{% endif %}" title="You have downvoted">&#x25bc;</span>
+    if vote in [0, 1] %} hidden{% endif %}" title="You have downvoted">&#x25bc;</span>
 
 <a href="#" id="vote_clear_{{ group_id }}" class="tooltip small_clearvote{%
     if vote == 0 %} hidden{% endif %}" title="Clear your vote" onclick="UnvoteGroup({{ group_id }}, '{{

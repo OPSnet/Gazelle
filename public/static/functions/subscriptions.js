@@ -6,8 +6,7 @@ function Subscribe(threadid) {
                 subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(1) == 'U'
                     ? '[Subscribe]'
                     : '[Unsubscribe]';
-            }
-            else {
+            } else {
                 subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(0) == 'U'
                     ? "Subscribe"
                     : "Unsubscribe";

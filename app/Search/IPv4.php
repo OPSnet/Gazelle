@@ -107,7 +107,7 @@ class IPv4 extends \Gazelle\Base {
         ");
     }
 
-    public function snatchPage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function snatchList(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
         $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 

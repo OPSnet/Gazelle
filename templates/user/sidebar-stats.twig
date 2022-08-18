@@ -8,10 +8,14 @@
     <div class="head colhead_dark">Community</div>
     <ul class="stats nobullet">
         <li id="comm_posts">Forum threads: {{ stats.forumThreadTotal|number_format }}
-            {%- if stats.forumThreadTotal %} <a href="userhistory.php?action=topics&amp;userid={{ user_id }}" class="brackets">View</a>{% endif -%}
+{% if stats.forumThreadTotal %}
+            <a href="userhistory.php?action=topics&amp;userid={{ user_id }}" class="brackets">View</a>
+{% endif %}
         </li>
         <li id="comm_posts">Forum posts: {{ stats.forumPostTotal|number_format }}
-            {%- if stats.forumPostTotal %} <a href="userhistory.php?action=posts&amp;userid={{ user_id }}" class="brackets">View</a>{% endif -%}
+{% if stats.forumPostTotal %}
+            <a href="userhistory.php?action=posts&amp;userid={{ user_id }}" class="brackets">View</a>
+{% endif %}
         </li>
 {% if visible['torrentcomments+'] %}
         <li id="comm_torrcomm"{{ _self.class_override(visible['torrentcomments+']) }}>Torrent comments: {{ stats.commentTotal('torrents')|number_format }}
@@ -99,9 +103,8 @@
     {% if upload_total and visible['uploads'] %}
             <a href="torrents.php?type=uploaded&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['uploads']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
-            <a href="torrents.php?action=redownload&amp;type=uploads&amp;userid={{
-                user_id }}" onclick="return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the size of all torrents before redownloading.');" class="brackets{{
-                _self.override(visible['uploads']) }}">Download</a>
+            <a id="collect-upload" href="torrents.php?action=redownload&amp;type=uploads&amp;userid={{
+                user_id }}" class="brackets{{ _self.override(visible['uploads']) }}">Download</a>
         {% endif %}
     {% endif %}
         </li>
@@ -126,7 +129,9 @@
 {% if visible['downloaded'] %}
         <li id="comm_downloaded"{{ _self.class_override(visible['downloaded']) }}>Downloaded: {{ stats.downloadTotal|number_format }}
     {% if stats.downloadTotal != stats.downloadUnique %} ({{ stats.downloadUnique|number_format }} unique){% endif %}
-    {%- if stats.downloadTotal %} <a href="torrents.php?type=downloaded&amp;userid={{ user_id }}" class="brackets">View</a>{% endif -%}
+    {% if stats.downloadTotal %}
+            <a href="torrents.php?type=downloaded&amp;userid={{ user_id }}" class="brackets">View</a>
+    {% endif %}
         </li>
 {% endif %}
 
@@ -147,8 +152,7 @@
     {% if stats.snatchUnique and visible['snatched'] %}
             <a href="torrents.php?type=snatched&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['snatched']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
-            <a href="torrents.php?action=redownload&amp;type=snatches&amp;userid={{
-                user_id }}" onclick="return confirm('If you no longer have the content, your ratio WILL be affected, be sure to check the size of all torrents before redownloading.');" class="brackets">Download</a>
+            <a id="collect-snatch" href="torrents.php?action=redownload&amp;type=snatches&amp;userid={{ user_id }}" class="brackets">Download</a>
         {% endif %}
     {% endif %}
         </li>
@@ -158,8 +162,8 @@
         <li id="comm_seeding"{{ _self.class_override(visible['seeding+']) }}>Seeding: {{ stats.seedingTotal|number_format }}
     {% if stats.seedingTotal and visible['seeding'] %}
             <a href="torrents.php?type=seeding&amp;userid={{ user_id }}" class="brackets{{ _self.override(visible['seeding']) }}">View</a>
-        {% if viewer.permitteed('zip_downloader') %}
-            <a href="torrents.php?action=redownload&amp;type=seeding&amp;userid={{ user_id }}" onclick="return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the size of all torrents before redownloading.');" class="brackets">Download</a>
+        {% if viewer.permitted('zip_downloader') %}
+            <a id="collect-seeding" href="torrents.php?action=redownload&amp;type=seeding&amp;userid={{ user_id }}" class="brackets">Download</a>
         {% endif %}
     {% endif %}
         </li>

@@ -11,5 +11,6 @@ echo $Twig->render('forum/new-thread.twig', [
     'avatar'    => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
     'id'        => $forum->id(),
     'name'      => $forum->name(),
+    'textarea'  => new Gazelle\Util\Textarea('body', '', 90, 8),
     'viewer'    => $Viewer,
 ]);

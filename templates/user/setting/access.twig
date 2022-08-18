@@ -24,7 +24,7 @@
         <td>
             <div class="field_div">
                 <input type="text" size="50" name="irckey" id="irckey" value="{{ user.IRCKey }}" />
-                <input type="button" onclick="RandomIRCKey();" value="Generate IRC key" />
+                <input type="button" id="gen-irc-key" value="Generate IRC key" />
             </div>
                 <p class="min_padding">If set, this key will be used instead of your site password when authenticating with
                 {{ constant('BOT_NICK') }} on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span
