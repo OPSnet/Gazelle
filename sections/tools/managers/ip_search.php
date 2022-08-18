@@ -39,7 +39,7 @@ echo $Twig->render('admin/ip-search.twig', [
     'found'        => $found,
     'ip_list'      => $search ? $search->ipList() : '',
     'page_site'    => $search ? $search->sitePage($userMan, $limit, $offset) : null,
-    'page_snatch'  => $search ? $search->snatchPage($userMan, $limit, $offset) : null,
+    'page_snatch'  => $search ? $search->snatchList($userMan, $limit, $offset) : null,
     'page_tracker' => $search ? $search->trackerPage($userMan, $limit, $offset) : null,
     'paginator'    => $paginator,
     'text'         => new Gazelle\Util\Textarea('text', $text, 90, 10)

@@ -63,7 +63,10 @@
                 </tr>
                 <tr>
                     <td class="label">Body:</td>
-                    <td><textarea id="posttext" class="required" style="width: 98%;" onkeyup="resize('posttext');" name="body" cols="90" rows="8"></textarea></td>
+                    <td>
+                        {{ textarea.field|raw }}
+                        {{ textarea.preview|raw }}
+                    </td>
                 </tr>
                 <tr>
                     <td></td>
@@ -98,8 +101,7 @@
                 <label for="subscribebox">Subscribe to thread</label>
             </div>
             <div id="buttons" class="center">
-                <input type="button" value="Preview" onclick="Newthread_Preview(1);" id="newthreadpreviewbutton" />
-                <input type="button" value="Editor" onclick="Newthread_Preview(0);" id="newthreadeditbutton" class="hidden" />
+                {{ textarea.button|raw }}
                 <input type="submit" class="submit" id="submit_button" value="Create thread" />
             </div>
         </form>

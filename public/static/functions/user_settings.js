@@ -96,7 +96,26 @@ $(document).ready(function() {
             fetchPushbulletDevices($(this).val());
         }
     });
+
+    $("#paranoid-none").click(function() { ParanoiaResetOff(); });
+    $("#paranoid-stats").click(function() { ParanoiaResetStats(); });
+    $("#paranoid-all").click(function() { ParanoiaResetOn(); });
 });
+
+function ParanoiaResetOff() {
+    ParanoiaReset(true, 0);
+}
+
+function ParanoiaResetStats() {
+    ParanoiaReset(3, 0);
+    $('input[name=p_l_collages]').raw().checked = false;
+}
+
+function ParanoiaResetOn() {
+    ParanoiaReset(false, 0);
+    $('input[name=p_c_collages]').raw().checked = false;
+    $('input[name=p_l_collages]').raw().checked = false;
+}
 
 function fuzzyMatch(str, pattern){
     pattern = pattern.split("").reduce(function(a,b){ return a+".*"+b; });

@@ -1,19 +1,8 @@
-{{ header(user.username ~ ' &rsaquo; Permissions') }}
-<script type="text/javascript">//<![CDATA[
-function reset() {
-    for (i = 0; i < $('#permissionsform').raw().elements.length; i++) {
-        element = $('#permissionsform').raw().elements[i];
-        if (element.id.substr(0, 8) == 'default_') {
-            $('#' + element.id.substr(8)).raw().checked = element.checked;
-        }
-    }
-}
-//]]>
-</script>
+{{ header(user.username ~ ' &rsaquo; Permissions', {'js': 'user_perm'}) }}
 <div class="header">
     <h2><a href="{{ user.url }}" class="username">{{ user.username }}</a> &rsaquo; Permissions</h2>
     <div class="linkbox">
-        <a href="#" onclick="reset(); return false;" class="brackets">Defaults</a>
+        <a id="perm-defaults" href="#" class="brackets">Defaults</a>
         <a href="tools.php?action=permissions&id={{ user.primaryClass }}" class="brackets">Primary permissions</a>
     </div>
 </div>
@@ -22,8 +11,8 @@ function reset() {
     grant and revoke access to specific features. If you think that to add access
     to a feature, you need to uncheck everything else, <strong>YOU ARE
     WRONG</strong>. The check boxes on the left, which are grayed out, are the
-    standard permissions granted by their class (and donor/artist status). Any
-    changes you make to the right side will overwrite this.</p>
+    standard permissions granted by their user class. Any changes you make to
+    the right side will overwrite this.</p>
     <p>It's not complicated, and if you screw up, click the "Defaults" link at
     the top. It will reset the user to their respective features granted by
     class, then you can select or deselect the one or two things you want to

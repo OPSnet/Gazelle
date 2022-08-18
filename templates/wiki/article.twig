@@ -10,7 +10,7 @@
 {% endif %}
         <a href="wiki.php?action=revisions&amp;id={{ article.id }}" class="brackets">History</a>
 {% if viewer.permitted('admin_manage_wiki') and article.id != constant('INDEX_WIKI_PAGE_ID') %}
-        <a href="wiki.php?action=delete&amp;id={{ article.id }}&amp;auth={{ Viewer.auth }}" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its aliases and act like it never existed?')">Delete</a>
+        <a id="delete-confirm" href="wiki.php?action=delete&amp;id={{ article.id }}&amp;auth={{ Viewer.auth }}" class="brackets">Delete</a>
 {% endif %}
     </div>
 </div>

@@ -107,21 +107,6 @@ function ParanoiaReset(checkbox, drops) {
     }
 }
 
-function ParanoiaResetOff() {
-    ParanoiaReset(true, 0);
-}
-
-function ParanoiaResetStats() {
-    ParanoiaReset(3, 0);
-    $('input[name=p_l_collages]').raw().checked = false;
-}
-
-function ParanoiaResetOn() {
-    ParanoiaReset(false, 0);
-    $('input[name=p_c_collages]').raw().checked = false;
-    $('input[name=p_l_collages]').raw().checked = false;
-}
-
 addDOMLoadEvent(AlterParanoia);
 
 function ToggleWarningAdjust(selector) {
@@ -172,6 +157,10 @@ function RandomIRCKey() {
     irckey.value = randIRCKey;
 }
 
+function download_warning() {
+    return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the cumulative size of all torrents before redownloading!');
+}
+
 $(document).ready(function() {
     $("#random_password").click(function() {
         var length = 32,
@@ -182,4 +171,8 @@ $(document).ready(function() {
         }
         $('#change_password').val(password);
     });
+    $("#collect-upload").click(function() { return download_warning(); });
+    $("#collect-snatch").click(function() { return download_warning(); });
+    $("#collect-seeding").click(function() { return download_warning(); });
+    $("#gen-irc-key").click(function() { RandomIRCKey(); });
 });

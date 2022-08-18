@@ -304,7 +304,7 @@ class Torrent extends BaseObject {
     }
 
     public function unseeded(): bool {
-        return $this->info()['Seeders'] === 0;
+        return $this->seederTotal() === 0;
     }
 
     /**
@@ -1010,26 +1010,7 @@ class Torrent extends BaseObject {
         return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
-    public function peerlistTotal() {
-        $key = sprintf(self::CACHE_KEY_PEERLIST_TOTAL, $this->id);
-        if (($total = self::$cache->get_value($key)) === false) {
-            // force flush the first page of results
-            self::$cache->delete_value(sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, 0));
-            $total = self::$db->scalar("
-                SELECT count(*)
-                FROM xbt_files_users AS xfu
-                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
-                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                WHERE um.Visible = '1'
-                    AND xfu.fid = ?
-                ", $this->id
-            );
-            self::$cache->cache_value($key, $total, 300);
-        }
-        return $total;
-    }
-
-    public function peerlistPage(int $userId, int $limit, int $offset) {
+    public function seederList(int $userId, int $limit, int $offset) {
         $key = sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, $offset);
         $list = self::$cache->get_value($key);
         if ($list === false) {
@@ -1071,7 +1052,7 @@ class Torrent extends BaseObject {
         );
     }
 
-    public function downloadPage(int $limit, int $offset): array {
+    public function downloadList(int $limit, int $offset): array {
         self::$db->prepared_query("
             SELECT ud.UserID AS user_id,
                 min(ud.Time) AS timestamp,
@@ -1088,7 +1069,7 @@ class Torrent extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function snatchPage(int $limit, int $offset): array {
+    public function snatchList(int $limit, int $offset): array {
         self::$db->prepared_query("
             SELECT xs.uid AS user_id,
                 from_unixtime(xs.tstamp) AS timestamp,
