@@ -218,12 +218,11 @@ if (isset($_FILES['logfiles'])) {
             if (!$_FILES['logfiles']['size'][$Pos]) {
                 continue;
             }
-            $logfileSummary->add(
-                new Gazelle\Logfile(
-                    $_FILES['logfiles']['tmp_name'][$Pos],
-                    $_FILES['logfiles']['name'][$Pos]
-                )
+            $logfile = new Gazelle\Logfile(
+                $_FILES['logfiles']['tmp_name'][$Pos],
+                $_FILES['logfiles']['name'][$Pos]
             );
+            $logfileSummary->add($logfile);
 
             $DB->prepared_query('
                 INSERT INTO torrents_logs

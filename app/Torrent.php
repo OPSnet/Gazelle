@@ -31,7 +31,7 @@ class Torrent extends BaseObject {
     }
 
     public function location(): string {
-        return "torrents.php?groupId=" . $this->groupId() . '&torrentid=' . $this->id . '#' . $this->id;
+        return "torrents.php?groupId=" . $this->groupId() . '&torrentid=' . $this->id . '#torrent' . $this->id;
     }
 
     public function url(): string {

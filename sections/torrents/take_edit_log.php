@@ -68,4 +68,4 @@ foreach ($TrackDeductions as list($tag, $deduction, $label)) {
 
 $torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $Viewer->id(), $AdjustmentReason, $AdjustmentDetails);
 
-header('Location: ' . $torrent->url());
+header('Location: ' . $torrent->location());
