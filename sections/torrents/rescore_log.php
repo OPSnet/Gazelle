@@ -18,4 +18,4 @@ $logfile = new Gazelle\Logfile($logpath, basename($logpath));
 
 $torrent->rescoreLog($logId, $logfile, Logchecker::getLogcheckerVersion());
 
-header('Location: ' . $torrent->url());
+header('Location: ' . $torrent->location());

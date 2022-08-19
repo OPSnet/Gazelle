@@ -75,7 +75,6 @@ class Torrents {
         Do not change what is returned or the order thereof without updating:
             torrents, artists, collages, bookmarks, better, the front page,
         and anywhere else the get_groups function is used.
-        Update self::array_group(), too
         */
 
         if (count($NotFound) > 0) {
@@ -199,38 +198,6 @@ class Torrents {
             }
             return $Found;
         }
-    }
-
-    /**
-     * Returns a reconfigured array from a Torrent Group
-     *
-     * DEPRECATED.
-     * . added to avoid false positive grep matches
-     *
-     * Use this with extract.() instead of the volatile list($GroupID, ...)
-     * Then use the variables $GroupID, $GroupName, etc
-     *
-     * @example  extract.(Torrents::array_group($SomeGroup));
-     * @param array $Group torrent group
-     * @return array Re-key'd array
-     */
-    public static function array_group(array &$Group) {
-        return [
-            'GroupID' => $Group['ID'],
-            'GroupName' => $Group['Name'],
-            'GroupYear' => $Group['Year'],
-            'GroupCategoryID' => $Group['CategoryID'],
-            'GroupRecordLabel' => $Group['RecordLabel'],
-            'GroupCatalogueNumber' => $Group['CatalogueNumber'],
-            'GroupVanityHouse' => $Group['VanityHouse'],
-            'GroupFlags' => isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false],
-            'TagList' => $Group['TagList'],
-            'ReleaseType' => $Group['ReleaseType'],
-            'WikiImage' => $Group['WikiImage'],
-            'Torrents' => isset($Group['Torrents']) ? $Group['Torrents'] : [],
-            'Artists' => $Group['Artists'],
-            'ExtendedArtists' => $Group['ExtendedArtists']
-        ];
     }
 
     /**

@@ -1,0 +1,121 @@
+{% from 'macro/form.twig' import checked -%}
+{{ header("Edit Log", {'js': 'edit_log'}) }}
+<div class="thin">
+    <h2 class="center">Edit Log</h2>
+    <form action="torrents.php?action=take_editlog" method="post" name="edit_log">
+        <input type="hidden" name="logid" value="{{ tlog.id }}" />
+        <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
+        <table class="layout border">
+            <tr class="colhead">
+                <td colspan="3">Log Details</td>
+            </tr>
+            <tr>
+                <td>Torrent</td>
+                <td colspan="2">{{ torrent.link|raw }}</td>
+            </tr>
+            <tr>
+                <td>Log File</td>
+                <td colspan="2">{{ tlog.filename }} (<a href="view.php?type=riplog&id={{ torrent.id }}.{{ tlog.id }}" target="_blank">View Raw</a>)</td>
+            </tr>
+            <tr>
+                <td>Score</td>
+                <td colspan="2">{{ tlog.score }} (<a href="torrents.php?action=rescore_log&torrentid={{ torrent.id }}&logid={{ tlog.id }}">Rescore Log</a>)</td>
+            </tr>
+            <tr>
+                <td>Checksum</td>
+                <td colspan="2">{% if tlog.isChecksumOk %}Good{% else %}Missing/Invalid Checksum{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Log Validation Report</td>
+                <td colspan="2">
+{% for line in tlog.report %}
+    {% if loop.first %}
+                    <ul>
+    {% endif %}
+                        <li>{{ line }}</li>
+    {% if loop.last %}
+                    </ul>
+    {% endif %}
+{% endfor %}
+                </td>
+            </tr>
+            <tr class="colhead">
+                <td colspan="3">Manual Adjustment</td>
+            </tr>
+            <tr>
+                <td>Manually Adjusted</td>
+                <td colspan="2"><input type="checkbox" name="adjusted"{{ checked(tlog.isAdjusted) }} />
+{% if tlog.isAdjusted %}
+                    (By: {{ adjuster|raw }})
+{% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Adjusted Score</td>
+                <td colspan="2"><input type="text" size="4" name="adjusted_score" value="{{ tlog.adjustedScore }}" disabled="disabled" data-actual="100"/></td>
+            </tr>
+            <tr>
+                <td>Checksum Valid</td>
+                <td colspan="2"><input type="checkbox" name="adjusted_checksum"{{ checked(tlog.isAdjustedChecksumOk) }} /></td>
+            </tr>
+            <tr>
+                <td>Adjustment Reason</td>
+                <td colspan="2"><input type="text" name="adjustment_reason" value="{{ tlog.adjustmentReason }}" size="100" /></td>
+            </tr>
+            <tr>
+                <td rowspan="4">Audio Deductions</td>
+                <td><label><input type="checkbox" name="read_mode_secure"{{ checked(tlog.adjustment('read_mode_secure')) }} data-score="20"/> Non-Secure Mode used (-20 points)</label></td>
+                <td><label><input type="checkbox" name="audio_cache"{{ checked(tlog.adjustment('audio_cache')) }} data-score="10" /> Defeat/disable audio cache should be yes (-10 points)</label></td>
+            </tr>
+            <tr>
+                <td style="display: none"></td>
+                <td><label><input type="checkbox" name="c2_points"{{ checked(tlog.adjustment('c2_points')) }} data-score="10" /> C2 Pointers enabled (-10 points)</td>
+                <td><label><input type="checkbox" name="drive_offset" {{ checked(tlog.adjustment('drive_offset')) }} data-score="5" /> Incorrect drive offset (-5 points)</td>
+            </tr>
+            <tr>
+                <td style="display: none"></td>
+                <td><label><input type="checkbox" name="fill_offsets"{{ checked(tlog.adjustment('fill_offsets')) }} data-score="5" /> Does not fill up missing offset samples with silence (-5 points)</td>
+                <td><label><input type="checkbox" name="deletes_ofsets"{{ checked(tlog.adjustment('deletes_ofsets')) }} data-score="5" /> Deletes leading and trailing silent blocks (-5 points)</td>
+            </tr>
+            <tr>
+                <td style="display: none"></td>
+                <td><label><input type="checkbox" name="gap_handling" {{ checked(tlog.adjustment('gap_handling')) }} data-score="10" /> Gap handling should be appended to previous track (-10 points)</td>
+                <td><label><input type="checkbox" name="test_and_copy" {{ checked(tlog.adjustment('test_and_copy')) }} data-score="10" /> Test &amp; Copy not used (-10 points)</td>
+            </tr>
+            <tr>
+                <td rowspan="3">Track Deductions<br />(total tracks concerned)</td>
+                <td>CRC Mismatches (-30 each)</td>
+                <td><input type="number" size="3" name="crc_mismatches" value="{{ tlog.adjustmentTrack('crc_mismatches') }}" data-score="30"/></td>
+            </tr>
+            <tr>
+                <td style="display:none"></td>
+                <td>Suspicious Positions (-20 each)</td>
+                <td><input type="number" size="3" name="suspicious_positions" value="{{ tlog.adjustmentTrack('suspicious_positions') }}" data-score="20"/></td>
+            </tr>
+            <tr>
+                <td style="display:none"></td>
+                <td>Timing Problems (-20 each)</td>
+                <td><input type="number" size="3" name="timing_problems" value="{{ tlog.adjustmentTrack('timing_problems') }}" data-score="20"/></td>
+            </tr>
+            <tr>
+                <td rowspan="2">Non-Audio Deductions</td>
+                <td><label><input type="checkbox" name="range_rip" {{ checked(tlog.adjustment('range_rip')) }} data-score="30" /> Range Rip (-30 points)</td>
+                <td><label><input type="checkbox" name="null_samples" {{ checked(tlog.adjustment('null_samples')) }} data-score="5" /> Null samples should be used in CRC calculations (-5 points)</td>
+            </tr>
+            <tr>
+                <td style="display:none"></td>
+                <td><label><input type="checkbox" name="eac_old" {{ checked(tlog.adjustment('eac_old')) }} data-score="30" /> EAC older than 0.99 (-30 points)</td>
+                <td><label><input type="checkbox" name="id3_tags" {{ checked(tlog.adjustment('id3_tags')) }} data-score="1" /> ID3 tags found (-1 points)</td>
+            </tr>
+            <tr>
+                <td rowspan="1">Other Reaons</td>
+                <td><label><input type="checkbox" name="foreign_log" {{ checked(tlog.adjustment('foreign_log')) }} /> Foreign Log</label></td>
+                <td><label><input type="checkbox" name="combined_log" {{ checked(tlog.adjustment('combined_log')) }} /> Combined Log</label></td>
+            </tr>
+            <tr style="text-align: center">
+                <td colspan="3"><input type="submit" value="Rescore Log" /></td>
+            </tr>
+        </table>
+    </form>
+</div>
+{{ footer() }}

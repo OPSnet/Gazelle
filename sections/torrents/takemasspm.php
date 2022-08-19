@@ -23,4 +23,4 @@ if (!$validator->validate($_POST)) {
 }
 
 (new Gazelle\Manager\User)->sendSnatchPm($Viewer, $torrent, $subject, $message);
-header("Location: " . $torrent->url());
+header("Location: " . $torrent->location());
