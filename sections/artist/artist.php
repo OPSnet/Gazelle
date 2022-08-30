@@ -615,7 +615,8 @@ $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage-
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
 echo $Twig->render('comment/thread.twig', [
-    'page'      => $_SERVER['REQUEST_URI'],
+    'url'       => $_SERVER['REQUEST_URI'],
+    'page'      => $commentPage->page(),
     'thread'    => $commentPage->thread(),
     'unread'    => $commentPage->lastRead(),
     'paginator' => $paginator,

@@ -761,7 +761,8 @@ if (!empty($similar)) {
 <?php
 
 echo $Twig->render('comment/thread.twig', [
-    'page'      => $_SERVER['REQUEST_URI'],
+    'url'       => $_SERVER['REQUEST_URI'],
+    'page'      => $commentPage->page(),
     'thread'    => $commentPage->thread(),
     'unread'    => $commentPage->lastRead(),
     'paginator' => $paginator,
