@@ -13,10 +13,10 @@
         </ul>
         <p>In short, please include as much detail as possible when reporting. Thank you. </p>
     </div>
-<?php
 
 {% include report.template with {
     'release':     release,
+    'report':      report,
     'context':     report.context,
     'subject':     report.subject,
     'report_type': report_type,
@@ -38,6 +38,5 @@
     </div>
 {% endif %}
 </div>
-<?php
 {{ footer() }}
 

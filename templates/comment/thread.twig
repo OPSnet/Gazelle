@@ -9,7 +9,7 @@
         </colgroup>
         <tr class="colhead_dark">
             <td colspan="{{ viewer.showAvatars ? 2 : 1 }}">
-                <div style="float: left;"><a class="post_id" href="{{ "#{page}&postid=#{post.ID}#post#{post.ID}" }}">#{{ post.ID }}</a>
+                <div style="float: left;"><a class="post_id" href="{{ "#{url}&postid=#{post.ID}#post#{post.ID}" }}">#{{ post.ID }}</a>
                     <strong>{{ post.AuthorID|user_full }}</strong> {{ post.AddedTime|time_diff }}
                     <span id="postcontrol-{{ post.ID }}">
                     - <a href="#quickpost" onclick="Quote('{{ post.ID }}','{{ post.AuthorID }}', true);" class="brackets">Quote</a>

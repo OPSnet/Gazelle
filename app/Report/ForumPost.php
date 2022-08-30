@@ -13,7 +13,7 @@ class ForumPost extends AbstractReport {
     }
 
     public function bbLink(): string {
-        return "this post: [thread]{$this->subject->thread()->id()}:{$this->subject->id()}[/thread]";
+        return "[thread]{$this->subject->thread()->id()}:{$this->subject->id()}[/thread]";
     }
 
     public function title(): string {

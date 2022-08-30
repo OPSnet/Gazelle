@@ -37,7 +37,8 @@ View::show_header("Comments for collage " . $Collage->name(), ['js' => 'comments
     </div>
 <?php
 echo $Twig->render('comment/thread.twig', [
-    'page'      => $_SERVER['REQUEST_URI'],
+    'url'       => $_SERVER['REQUEST_URI'],
+    'page'      => $commentPage->page(),
     'thread'    => $commentPage->thread(),
     'unread'    => $commentPage->lastRead(),
     'paginator' => $paginator,

@@ -1,12 +1,12 @@
-<p>You are reporting the post:</p>
+<p>You are reporting the post {{ subject.thread.forum.name }} &raquo; {{ report.bbLink|bb_format }}</p>
 <table>
     <tr class="colhead">
-        <td>Username</td>
+        <td width="12%">Username</td>
         <td>Body</td>
     </tr>
     <tr>
-        <td>{{ context.author_id|user_url }}</td>
-        <td>{{ context.body|bb_format }}</td>
+        <td>{{ subject.userId|user_url }}</td>
+        <td>{{ subject.body|bb_format }}</td>
     </tr>
 </table>
 
