@@ -382,6 +382,9 @@ class Text {
 
     */
     public static function parse($Str, $ListPrefix = '') {
+        // Deal with list markup that is not list markup (e.g. [*] at EOL)
+        // such that "abc [*]" => "abc [[n]*]"
+        $Str = preg_replace('/(?<!\n\[)([*#])(?=\])/', '[n]\\1', $Str);
         $i = 0; // Pointer to keep track of where we are in $Str
         $Len = strlen($Str);
         $Array = [];
@@ -481,10 +484,6 @@ class Text {
                 // We're in a list. Find where it ends
                 $NewLine = $i;
                 do { // Look for \n[*]
-                    if ($NewLine <= strlen($Str)) {
-                        // invalid markup
-                        break;
-                    }
                     $NewLine = strpos($Str, "\n", $NewLine + 1);
                 } while ($NewLine !== false && substr($Str, $NewLine + 1, 1 + strlen($TagName)) == "[$TagName");
 
