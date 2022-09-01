@@ -1,0 +1,137 @@
+{{ header('Torrentt Reports', {'js': 'reportsv2'}) }}
+
+<div class="header">
+    <h2>Reports V2 Information</h2>
+    {%- include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
+</div>
+
+<div class="thin float_clear">
+<div class="two_columns pad">
+{% for interval, summary in resolved %}
+    <h3>
+    {%- if interval == 'total' -%}
+        Total weports resolved
+    {%- else -%}
+        Reports resolved in the last {{ interval }}
+    {%- endif -%}
+    </h3>
+    <table class="box border">
+    <tr class="colhead">
+        <td class="colhead_dark">Username</td>
+        <td class="colhead_dark number_column">Reports</td>
+    </tr>
+    {% for entry in summary %}
+    <tr{% if entry.user_id == viewr.user_id %} class="rowa"{% endif %}>
+        <td><a href="reportsv2.php?view=resolver&amp;id={{ entry.user_id }}">{{ entry.user_id|user_url }}</a></td>
+        <td class="number_column">{{ entry.total|number_format }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endfor %}
+
+<h3>Different view modes by person</h3>
+<div class="box pad">
+    <strong>By ID of torrent reported:</strong>
+    <ul>
+        <li>
+            Reports of torrents with ID = 1
+        </li>
+        <li>
+            <a href="reportsv2.php?view=torrent&amp;id=1">{{ constant('SITE_URL') }}/reportsv2.php?view=torrent&amp;id=1</a>
+        </li>
+    </ul>
+    <strong>By group ID of torrent reported:</strong>
+    <ul>
+        <li>
+            Reports of torrents within the group with ID = 1
+        </li>
+        <li>
+            <a href="reportsv2.php?view=group&amp;id=1">{{ constant('SITE_URL') }}/reportsv2.php?view=group&amp;id=1</a>
+        </li>
+    </ul>
+    <strong>By report ID:</strong>
+    <ul>
+        <li>
+            The report with ID = 1
+        </li>
+        <li>
+            <a href="reportsv2.php?view=report&amp;id=1">{{ constant('SITE_URL') }}/reportsv2.php?view=report&amp;id=1</a>
+        </li>
+    </ul>
+    <strong>By reporter ID:</strong>
+    <ul>
+        <li>
+            Reports created by {{ viewer.id|user_url }}
+        </li>
+        <li>
+            <a href="reportsv2.php?view=reporter&amp;id={{ viewer.id }}">{{ constant('SITE_URL') }}/reportsv2.php?view=reporter&amp;id={{ viewer.id }}</a>
+        </li>
+    </ul>
+    <strong>By uploader ID:</strong>
+    <ul>
+        <li>
+            Reports for torrents uploaded by {{ viewer.id|user_url }}
+        </li>
+        <li>
+            <a href="reportsv2.php?view=uploader&amp;id={{ viewer.id }}">{{ constant('SITE_URL') }}/reportsv2.php?view=uploader&amp;id={{ viewer.id }}</a>
+        </li>
+    </ul>
+    <strong>By resolver ID:</strong>
+    <ul>
+        <li>
+            Reports for torrents resolved by {{ viewer.id|user_url }}
+        </li>
+        <li>
+            <a href="reportsv2.php?view=resolver&amp;id={{ viewer.id }}">{{ constant('SITE_URL') }}/reportsv2.php?view=resolver&amp;id={{ viewer.id }}</a>
+        </li>
+    </ul>
+    <strong>User the search feature for anything more specific.</strong>
+</div>
+</div>
+
+<div class="two_columns pad">
+<h3>Currently assigned reports by staff member</h3>
+{% for entry in in_progress %}
+    {% if loop.first %}
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark">Staff Member</td>
+            <td class="colhead_dark number_column">Open</td>
+        </tr>
+    {% endif %}
+        <tr class="{% if entry.user_id == viewer.id %}rowa{% else %}rowb{% endif %}">
+            <td>
+                <a href="reportsv2.php?view=staff&amp;id=<{{ entry.user_id }}">{{ entry.user_id|user_url }}</a>
+            </td>
+            <td class="number_column">{{ entry.total|number_format }}</td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+{% else %}
+    <p>There are no claimed reports</p>
+{% endfor %}
+
+<h3>Different view modes by report type</h3>
+{% for entry in new %}
+    {% if loop.first %}
+    <table class="box border">
+        <tr class="colhead">
+            <td class="colhead_dark">Type</td>
+            <td class="colhead_dark number_column">Current Count</td>
+        </tr>
+    {% endif %}
+        <tr{% if entry.type == 'urgent' %} class="rowa" style="font-weight: bold;"{% endif %}>
+            <td><a href="reportsv2.php?view=type&amp;id={{ entry.type }}">{{ entry.title }}</a></td>
+            <td class="number_column">{{ entry.total|number_format }} </td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+{% else %}
+    <p>There are no open reports</p>
+{% endfor %}
+    </div>
+</div>
+{{ footer() }}
+
