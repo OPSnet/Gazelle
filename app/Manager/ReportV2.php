@@ -94,11 +94,11 @@ class ReportV2 extends \Gazelle\Base {
     public function inProgressSummary(): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
-                count(*)        AS nr
+                count(*)        AS total
             FROM reportsv2 AS r
             WHERE r.Status = 'InProgress'
             GROUP BY r.ResolverID
-            ORDER By nr DESC
+            ORDER BY total DESC
         ");
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
@@ -112,34 +112,37 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY Type
             ORDER BY Type
         ");
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+        $list =  self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$entry) {
+            $entry['title'] = $this->type($entry['type'])['title'];
+        }
+        unset($entry);
+        return $list;
     }
 
     public function resolvedSummary(): array {
         self::$db->prepared_query("
-            SELECT r.ResolverID,
-                um.Username,
-                count(*) AS Reports
+            SELECT r.ResolverID AS user_id,
+                count(*)        AS total
             FROM reportsv2 AS r
-            INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
+            WHERE r.ResolverID > 0
             GROUP BY r.ResolverID
-            ORDER BY Reports DESC
+            ORDER BY total DESC
         ");
-        return self::$db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     protected function resolvedLastInterval(string $interval): array {
         self::$db->prepared_query("
-            SELECT r.ResolverID,
-                um.Username,
-                count(*) AS Reports
+            SELECT r.ResolverID AS user_id,
+                count(*)        AS total
             FROM reportsv2 AS r
-            INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
-            WHERE r.LastChangeTime > now() - INTERVAL $interval
+            WHERE r.ResolverID > 0
+                AND  r.LastChangeTime > now() - INTERVAL $interval
             GROUP BY r.ResolverID
-            ORDER BY Reports DESC
+            ORDER BY total DESC
         ");
-        return self::$db->to_array(false, MYSQLI_NUM, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function resolvedLastDay(): array {
