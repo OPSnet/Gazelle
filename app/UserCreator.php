@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use Gazelle\Exception\UserCreatorException;
+use Gazelle\Util\Time;
 
 class UserCreator extends Base {
     protected $newInstall;
@@ -113,7 +114,7 @@ class UserCreator extends Base {
         $infoArgs[] = $this->id;
         if ($this->adminComment) {
             $infoFields[] = 'AdminComment';
-            $infoArgs[] = sqltime() . " - " . implode("\n", $this->adminComment);
+            $infoArgs[] = Time::sqlTime() . " - " . implode("\n", $this->adminComment);
         }
         self::$db->prepared_query("
             INSERT INTO users_info

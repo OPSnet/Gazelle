@@ -486,15 +486,15 @@ class Request extends BaseObject {
         );
         if (self::$db->affected_rows() == 1) {
             $this->informRequestFillerReduction($bounty, $staffName);
-            $message = sprintf("%s Refund of %s bounty (%s b) on %s by %s\n\n",
-                sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
+            $message = sprintf("Refund of %s bounty (%s b) on %s by %s\n\n",
+                \Format::get_size($bounty), $bounty, $this->url(), $staffName
             );
             self::$db->prepared_query("
                 UPDATE users_info ui
                 INNER JOIN users_leech_stats uls USING (UserID)
                 SET
                     uls.Uploaded = uls.Uploaded + ?,
-                    ui.AdminComment = concat(?, ui.AdminComment)
+                    ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
                 WHERE ui.UserId = ?
                 ", $bounty, $message, $userId
             );
@@ -518,12 +518,12 @@ class Request extends BaseObject {
         );
         if (self::$db->affected_rows() == 1) {
             $this->informRequestFillerReduction($bounty, $staffName);
-            $message = sprintf("%s Removal of %s bounty (%s b) on %s by %s\n\n",
-                sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
+            $message = sprintf("Removal of %s bounty (%s b) on %s by %s\n\n",
+                \Format::get_size($bounty), $bounty, $this->url(), $staffName
             );
             self::$db->prepared_query("
                 UPDATE users_info ui SET
-                    ui.AdminComment = concat(?, ui.AdminComment)
+                    ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
                 WHERE ui.UserId = ?
                 ", $message, $userId
             );
@@ -548,15 +548,15 @@ class Request extends BaseObject {
         if (!$fillerId) {
             return;
         }
-        $message = sprintf("%s Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
-            sqltime(), \Format::get_size($bounty), $bounty, $this->url(), $staffName
+        $message = sprintf("Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
+            \Format::get_size($bounty), $bounty, $this->url(), $staffName
         );
         self::$db->prepared_query("
             UPDATE users_info ui
             INNER JOIN users_leech_stats uls USING (UserID)
             SET
                 uls.Uploaded = uls.Uploaded - ?,
-                ui.AdminComment = concat(?, ui.AdminComment)
+                ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
             WHERE ui.UserId = ?
             ", $bounty, $message, $fillerId
         );

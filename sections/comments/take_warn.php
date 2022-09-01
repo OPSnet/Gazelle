@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Time;
+
 if (!$Viewer->permitted('users_warn')) {
     error(404);
 }
@@ -28,7 +30,7 @@ $Reason = trim($_POST['reason']);
 $PrivateMessage = trim($_POST['privatemessage']);
 if ($Length !== 'verbal') {
     $Time = (int)$Length * (7 * 24 * 60 * 60);
-    $WarnTime = time_plus($Time);
+    $WarnTime = Time::timePlus($Time);
     $userMan->warn($user->id(), $Time, "$url - $Reason", $Viewer->username());
     $subject = 'You have received a warning';
     $message = "You have received a $Length week warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";

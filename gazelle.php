@@ -1,6 +1,7 @@
 <?php
 
 use Gazelle\Util\Crypto;
+use Gazelle\Util\Time;
 
 // 1. Basic sanity checks and initialization
 
@@ -145,7 +146,7 @@ if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
 
 // for sections/tools/development/process_info.php
 $Cache->cache_value('php_' . getmypid(), [
-    'start'    => sqltime(),
+    'start'    => Time::sqlTime(),
     'document' => $Document,
     'query'    => $_SERVER['QUERY_STRING'],
     'get'      => $_GET,

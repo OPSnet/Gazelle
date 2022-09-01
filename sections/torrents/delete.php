@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Time;
+
 $TorrentID = (int)$_GET['torrentid'];
 if (!$TorrentID) {
     error(404);
@@ -32,7 +35,7 @@ if ($Viewer->id() != $UserID && !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
 
-if (time_ago($Time) > 3600 * 24 * 7 && !$Viewer->permitted('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
+if (Time::timeAgo($Time) > 3600 * 24 * 7 && !$Viewer->permitted('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
     error('You can no longer delete this torrent as it has been uploaded for over a week. If you now think there is a problem, please report the torrent instead.');
 }
 

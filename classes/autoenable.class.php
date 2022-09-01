@@ -1,6 +1,7 @@
 <?php
 
 use Gazelle\Util\Mail;
+use Gazelle\Util\Time;
 
 class AutoEnable {
 
@@ -231,7 +232,8 @@ class AutoEnable {
                 UPDATE users_enable_requests SET Token = NULL WHERE Token = ?
                 ", $Token
             );
-            if ($Timestamp < time_minus(3600 * 48)) {
+
+            if ($Timestamp < Time::timeMinus(3600 * 48)) {
                 // Old request
                 (new \Gazelle\User($UserID))->addStaffNote("Tried to use an expired enable token from ".$_SERVER['REMOTE_ADDR'])->modify();
                 $Err = "Token has expired. Please visit ".BOT_DISABLED_CHAN." on ".BOT_SERVER." to discuss this with staff.";

@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Time;
+
 if (!$Viewer->permitted('users_mod')) {
     error(404);
 }
@@ -39,7 +41,8 @@ View::show_header('Top 10 Torrents history!');
 if (!empty($_GET['date'])) {
     $Date = $_GET['date'];
     $SQLTime = $Date.' 00:00:00';
-    if (!validDate($SQLTime)) {
+
+    if (!Time::validDate($SQLTime)) {
         error('Something is wrong with the date you provided');
     }
 

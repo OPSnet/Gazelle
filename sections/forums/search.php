@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Time;
+
 $search = new Gazelle\Search\Forum($Viewer);
 $search->setSearchType($_GET['type'] ?? 'title')
     ->setSearchText(trim($_GET['search']) ?? '');
@@ -26,37 +28,33 @@ if (!empty($userSearch)) {
 
 $threadCreatedBefore = $_GET['thread_created_before'] ?? '';
 if (!empty($threadCreatedBefore)) {
-    if (is_valid_date($threadCreatedBefore)) {
-        $search->setThreadCreatedBefore($threadCreatedBefore);
-    } else {
+    if (!Time::isValidDate($threadCreatedBefore)) {
         error("Incorrect topic created before date");
     }
+    $search->setThreadCreatedBefore($threadCreatedBefore);
 }
 $threadCreatedAfter = $_GET['thread_created_after'] ?? '';
 if (!empty($threadCreatedAfter)) {
-    if (is_valid_date($threadCreatedAfter)) {
-        $search->setThreadCreatedAfter($threadCreatedAfter);
-    } else {
+    if (!Time::isValidDate($threadCreatedAfter)) {
         error("Incorrect topic created after date");
     }
+    $search->setThreadCreatedAfter($threadCreatedAfter);
 }
 
 if ($search->isBodySearch()) {
     $postCreatedBefore = $_GET['post_created_before'] ?? '';
     if (!empty($postCreatedBefore)) {
-        if (is_valid_date($postCreatedBefore)) {
-            $search->setPostCreatedBefore($postCreatedBefore);
-        } else {
+        if (!Time::isValidDate($postCreatedBefore)) {
             error("Incorrect post created before date");
         }
+        $search->setPostCreatedBefore($postCreatedBefore);
     }
     $postCreatedAfter = $_GET['post_created_after'] ?? '';
     if (!empty($postCreatedAfter)) {
-        if (is_valid_date($postCreatedAfter)) {
-            $search->setPostCreatedAfter($postCreatedAfter);
-        } else {
+        if (!Time::isValidDate($postCreatedAfter)) {
             error("Incorrect post created after date");
         }
+        $search->setPostCreatedAfter($postCreatedAfter);
     }
 }
 
