@@ -165,9 +165,11 @@ class User extends AbstractAPI {
             INNER user_flt   AS uf ON (uf.user_id = um.ID)
             SET
                 {$set},
-                ui.AdminComment = CONCAT('".sqltime()." - ".$Comment."\n\n', ui.AdminComment)
+                ui.AdminComment = CONCAT(now(), ' - ', ?, ui.AdminComment)
             WHERE
-                um.ID = ?", $Cur['ID']);
+                um.ID = ?
+            ", "$Comment\n\n", Cur['ID']
+        );
 
         return ['enabled' => true, 'user_id' => $Cur['ID'], 'username' => $Cur['Username']];
     }

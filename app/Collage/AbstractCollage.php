@@ -139,7 +139,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     }
 
     public function updateSequence(string $series): int {
-        $series = parseUrlArgs($series, 'li[]');
+        $series = $this->parseUrlArgs($series, 'li[]');
         if (empty($series)) {
             return 0;
         }
@@ -184,5 +184,38 @@ abstract class AbstractCollage extends \Gazelle\Base {
             ", $this->id
         );
         return self::$db->affected_rows();
+    }
+
+    /**
+     * Hydrate an array from a query string (everything that follow '?')
+     * This reimplements parse_str() and side-steps the issue of max_input_vars limits.
+     *
+     * Example:
+     * in: li[]=14&li[]=31&li[]=58&li[]=68&li[]=69&li[]=54&li[]=5, param=li[]
+     * parsed: ['li[]' => ['14', '31, '58', '68', '69', '5']]
+     * out: ['14', '31, '58', '68', '69', '5']
+     *
+     * @param string $urlArgs query string from url
+     * @param string $param url param to extract
+     * @return array hydrated equivalent
+     */
+    protected function parseUrlArgs(string $urlArgs, string $param): array {
+        if (empty($urlArgs)) {
+            return [];
+        }
+        $list = [];
+        $pairs = explode('&', $urlArgs);
+        foreach ($pairs as $p) {
+            [$name, $value] = explode('=', $p, 2);
+            if (!isset($list[$name])) {
+                $list[$name] = $value;
+            } else {
+                if (!is_array($list[$name])) {
+                    $list[$name] = [$list[$name]];
+                }
+                $list[$name][] = $value;
+            }
+        }
+        return array_key_exists($param, $list) ? $list[$param] : [];
     }
 }

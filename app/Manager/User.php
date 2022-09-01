@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Util\Time;
+
 class User extends \Gazelle\Base {
 
     protected const CACHE_STAFF = 'pm_staff_list';
@@ -770,7 +772,7 @@ class User extends \Gazelle\Base {
         if (is_null($current)) {
             // User was not already warned
             self::$cache->delete_value("u_$userId");
-            $warnTime = time_plus($duration);
+            $warnTime = Time::timePlus($duration);
             $warning = "Warned until $warnTime";
         } else {
             // User was already warned, appending new warning to old.

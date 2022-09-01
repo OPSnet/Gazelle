@@ -410,9 +410,9 @@ class Recovery extends Base {
         /* staff note */
         self::$db->prepared_query("
             UPDATE users_info
-            SET AdminComment = CONCAT(?, AdminComment)
+            SET AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
             WHERE UserID = ?
-            ", sqltime() . " mapped to previous id $prevUserId by $admin_username\n\n", $siteUserId
+            ", "mapped to previous id $prevUserId by $admin_username\n\n", $siteUserId
         );
         return true;
     }

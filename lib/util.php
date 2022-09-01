@@ -303,39 +303,6 @@ function add_json_info($Json) {
 }
 
 /**
- * Hydrate an array from a query string (everything that follow '?')
- * This reimplements parse_str() and side-steps the issue of max_input_vars limits.
- *
- * Example:
- * in: li[]=14&li[]=31&li[]=58&li[]=68&li[]=69&li[]=54&li[]=5, param=li[]
- * parsed: ['li[]' => ['14', '31, '58', '68', '69', '5']]
- * out: ['14', '31, '58', '68', '69', '5']
- *
- * @param string $urlArgs query string from url
- * @param string $param url param to extract
- * @return array hydrated equivalent
- */
-function parseUrlArgs(string $urlArgs, string $param): array {
-    if (empty($urlArgs)) {
-        return [];
-    }
-    $list = [];
-    $pairs = explode('&', $urlArgs);
-    foreach ($pairs as $p) {
-        [$name, $value] = explode('=', $p, 2);
-        if (!isset($list[$name])) {
-            $list[$name] = $value;
-        } else {
-            if (!is_array($list[$name])) {
-                $list[$name] = [$list[$name]];
-            }
-            $list[$name][] = $value;
-        }
-    }
-    return array_key_exists($param, $list) ? $list[$param] : [];
-}
-
-/**
  * Utility function that unserializes an array, and then if the unserialization fails,
  * it'll then return an empty array instead of a null or false which will break downstream
  * things that require an incoming array
@@ -488,51 +455,12 @@ function proxyCheck(string $IP): bool {
 
 /*** Time and date functions ***/
 
-function time_ago($TimeStamp) {
-    return Time::timeAgo($TimeStamp);
-}
-
 /*
  * Returns a <span> by default but can optionally return the raw time
  * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
  */
 function time_diff($TimeStamp, $Levels = 2, $Span = true, $Lowercase = false, $StartTime = false) {
     return Time::timeDiff($TimeStamp, $Levels, $Span, $Lowercase, $StartTime);
-}
-
-/**
- * Given a number of hours, convert it to a human readable time of
- * years, months, days, etc.
- *
- * @param int $Hours
- * @param int $Levels
- * @param bool $Span
- * @return string
- */
-function convert_hours($Hours,$Levels=2,$Span=true) {
-    return Time::convertHours($Hours, $Levels, $Span);
-}
-
-/* SQL utility functions */
-
-function time_plus($Offset) {
-    return Time::timePlus($Offset);
-}
-
-function time_minus($Offset, $Fuzzy = false) {
-    return Time::timeMinus($Offset, $Fuzzy);
-}
-
-function sqltime($timestamp = false) {
-    return Time::sqlTime($timestamp);
-}
-
-function validDate($DateString) {
-    return Time::validDate($DateString);
-}
-
-function is_valid_date($Date) {
-    return Time::isValidDate($Date);
 }
 
 /*** Paranoia functions ***/
@@ -812,20 +740,6 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
     return [$TorrentDetails, $TorrentList];
 }
 
-function get_torrent_info($TorrentID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
-    $GroupInfo = get_group_info((new Gazelle\Manager\Torrent)->findById($TorrentID)->id(), $RevisionID, $PersonalProperties, $ApiCall);
-    if (!$GroupInfo) {
-        return null;
-    }
-    foreach ($GroupInfo[1] as &$Torrent) {
-        //Remove unneeded entries
-        if ($Torrent['ID'] != $TorrentID) {
-            unset($GroupInfo[1][$Torrent['ID']]);
-        }
-        return $GroupInfo;
-    }
-}
-
 function get_group_requests($GroupID) {
     if (empty($GroupID) || !is_number($GroupID)) {
         return [];
@@ -864,7 +778,7 @@ function geoip($IP): string {
         $Long = sprintf('%u', ip2long($IP));
     }
     if (!$Long || $Long == 2130706433) { // No need to check cc for 127.0.0.1
-        return 'localhost';
+        return 'XX';
     }
     return '?';
 }

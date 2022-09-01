@@ -1,6 +1,7 @@
 <?php
 
 use Gazelle\Util\Mail;
+use Gazelle\Util\Time;
 
 authorize();
 
@@ -601,7 +602,7 @@ if (!(count($set) || count($leechSet) || count($editSummary)) && $reason) {
 if (count($editSummary)) {
     $summary = implode(', ', $editSummary) . ' by ' . $Viewer->username();
     $set[] = "AdminComment = ?";
-    $args[] = sqltime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
+    $args[] = Time::sqlTime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
 } elseif ($adminComment !== $cur['admincomment']) {
     $set[] = "AdminComment = ?";
     $args[] = $adminComment;
