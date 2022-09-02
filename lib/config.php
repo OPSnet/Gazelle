@@ -160,14 +160,23 @@ defined('GZPG_HOST') or define('GZPG_HOST', 'pg');
 // No need to change unless you're running on a non-standard port.
 defined('GZPG_PORT') or define('GZPG_PORT', 5432);
 
-// Name of the default schema
-defined('GZPG_DB') or define('GZPG_DB', 'gzpg');
+// Name of the default database
+defined('GZPG_DB') or define('GZPG_DB', 'gz');
 
 // Role name used by the website (with limited privileges)
-defined('GZPG_USER') or define('GZPG_USER', 'pguser');
+defined('GZPG_USER') or define('GZPG_USER', 'nyala');
 
 // Password of the above
-defined('GZPG_PASSWORD') or define('GZPG_PASSWORD', 'pgpw');
+defined('GZPG_PASSWORD') or define('GZPG_PASSWORD', 'nyalapw');
+
+// The DSN of the connection
+defined('GZPG_DSN') or define('GZPG_DSN',
+    'pgsql:host='      . GZPG_HOST
+        . ';port='     . GZPG_PORT
+        . ';dbname='   . GZPG_DB
+        . ';user='     . GZPG_USER
+        . ';password=' . GZPG_PASSWORD
+);
 
 // ------------------------------------------------------------------------
 // Sphinx settings
