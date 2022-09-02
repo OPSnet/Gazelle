@@ -242,7 +242,7 @@ class Cache extends \Memcached {
         if (!$this->InTransaction) {
             return false;
         }
-        self::$cache_value($this->MemcacheDBKey, $this->MemcacheDBArray, $Time);
+        self::cache_value($this->MemcacheDBKey, $this->MemcacheDBArray, $Time);
         $this->InTransaction = false;
     }
 

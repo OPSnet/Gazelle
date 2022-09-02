@@ -116,7 +116,7 @@ if ($OwnProfile || $Viewer->permitted('users_mod')) {
             switch ($type) {
             case 'time':
                 $percent = (time() - strtotime($current)) / $goal;
-                $current = Gazelle\Util\Time::timeDiff($current, 2, true, false, false, true);
+                $current = time_diff($current);
                 $goal = $goal / (86400 * 7);
                 $goal = "$goal week" . plural($goal);
                 break;

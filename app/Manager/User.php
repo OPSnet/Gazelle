@@ -772,7 +772,7 @@ class User extends \Gazelle\Base {
         if (is_null($current)) {
             // User was not already warned
             self::$cache->delete_value("u_$userId");
-            $warnTime = Time::timePlus($duration);
+            $warnTime = Time::offset($duration);
             $warning = "Warned until $warnTime";
         } else {
             // User was already warned, appending new warning to old.

@@ -11,7 +11,7 @@ class TimeTest extends TestCase {
      * @param $expected
      */
     function testTimeAgo($timestamp, $expected) {
-        $this->assertEquals($expected, Time::timeAgo($timestamp), '', 1);
+        $this->assertEquals($expected, Time::timeAgo($timestamp));
     }
 
     function providerTimestamp() {
@@ -52,9 +52,5 @@ class TimeTest extends TestCase {
 
     function testConvertHoursSpan() {
         $this->assertEquals('<span>228y3mo3w1d2h</span>', Time::convertHours(2000000, 5));
-    }
-
-    function testTimeOffset() {
-        $this->assertEquals(Time::timeOffset(-1), Time::timeMinus(1));
     }
 }

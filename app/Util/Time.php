@@ -4,7 +4,7 @@ namespace Gazelle\Util;
 
 class Time {
     /**
-     * Returns the number of seconds between now() and the inputed timestamp. If the timestamp
+     * Returns the number of seconds between now() and the given timestamp. If the timestamp
      * is an integer, we assume that's the nubmer of seconds you wish to subtract, otherwise
      * it's a string of a timestamp that we convert to a UNIX timestamp and then do a subtraction.
      * If the passed in $timestamp does not convert properly or is null, return false (error).
@@ -17,7 +17,9 @@ class Time {
             return false;
         }
 
-        if (($filter = filter_var($timestamp, FILTER_VALIDATE_INT)) === false) {
+        if (($filter = filter_var($timestamp, FILTER_VALIDATE_INT)) !== false) {
+            return $filter;
+        } else {
             if ($timestamp == '' || is_null($timestamp)) {
                 return false;
             }
@@ -27,12 +29,9 @@ class Time {
             }
             return time() - $timestamp;
         }
-        else {
-            return $filter;
-        }
     }
 
-    public static function timeDiff($timestamp, $levels = 2, $span = true, $lowercase = false, $starttime = false, $hideAgo = false) {
+    public static function diff($timestamp, $levels = 2, $span = true, $starttime = false, $hideAgo = false) {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
 
         if (!Type::isInteger($timestamp)) { // Assume that $timestamp is SQL timestamp
@@ -146,10 +145,6 @@ class Time {
             $return = 'Just now';
         } elseif (!$hideAgo) {
             $return .= ' ago';
-        }
-
-        if ($lowercase) {
-            $return = strtolower($return);
         }
 
         if ($span) {
@@ -277,47 +272,13 @@ class Time {
     }
 
     /**
-     * Utility function to generate a timestamp to insert into the database, given some offset and
-     * whether or not we will be 'fuzzy' (midnight for time) with the timestamp.
-     *
-     * @param int $offset
-     * @param bool $fuzzy
-     * @return false|string
-     */
-    public static function timeOffset($offset = 0, $fuzzy = false) {
-        if ($fuzzy) {
-            return date('Y-m-d 00:00:00', time() + $offset);
-        }
-        else {
-            return date('Y-m-d H:i:s', time() + $offset);
-        }
-    }
-
-    /**
-     * Legacy function from classes/util.class.php.
-     *
-     * @see Time::timeOffset()
-     * @deprecated Use Time::timeOffset() instead.
+     * Utility function to generate a timestamp to insert into the database, given some offset
      *
      * @param int $offset
      * @return false|string
      */
-    public static function timePlus($offset = 0) {
-        return static::timeOffset($offset);
-    }
-
-    /**
-     * Legacy function from classes/util.class.php.
-     *
-     * @see Time::timeOffset()
-     * @deprecated Use Time::timeOffset() instead.
-     *
-     * @param int  $offset
-     * @param bool $fuzzy
-     * @return false|string
-     */
-    public static function timeMinus($offset = 0, $fuzzy = false) {
-        return static::timeOffset(-$offset, $fuzzy);
+    public static function offset(int $offset) {
+        return date('Y-m-d H:i:s', time() + $offset);
     }
 
     public static function sqlTime($timestamp = false) {
@@ -357,15 +318,6 @@ class Time {
 
     public static function isValidDate($date) {
         return static::isValidDateTime($date, 'Y-m-d');
-    }
-
-    public static function isDate($date) {
-        list($year, $month, $day) = explode('-', $date);
-        return checkdate($month, $day, $year);
-    }
-
-    public static function isValidTime($time) {
-        return static::isValidDateTime($time, 'H:i');
     }
 
     public static function isValidDateTime($date_time, $format = 'Y-m-d H:i') {
