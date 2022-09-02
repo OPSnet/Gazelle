@@ -22,15 +22,13 @@ services:
     image: memcached:1.6.14-alpine
 
   pg:
-    image: postgres:14
+    image: postgres:14.5
     ports:
       - 127.0.0.1:54321:5432
     volumes:
       - ./.docker/data/pg:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=gzpg
       - POSTGRES_PASSWORD=gazpg
-      - POSTGRES_USER=gus
 
   mysql:
     image: percona:ps-8.0

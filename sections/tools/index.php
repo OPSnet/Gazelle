@@ -22,10 +22,12 @@ switch ($_REQUEST['action']) {
         require_once('managers/bonus_points.php');
         break;
 
+    case 'asn_search':
+        require_once('managers/asn_search.php');
+        break;
     case 'email_search':
         require_once('managers/email_search.php');
         break;
-
     case 'ip_ban':
         require_once('managers/bans.php');
         break;

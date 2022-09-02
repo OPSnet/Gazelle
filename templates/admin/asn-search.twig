@@ -1,0 +1,62 @@
+{{ header('ASN search') }}
+<div class="thin">
+
+<form method="get">
+<input type="hidden" name="action" value="asn_search" />
+
+<div class="box pad">
+ASN name: <input type="text" name="name" size="50" value="{{ name }}" />
+<input type="submit" value="Submit" />
+</div>
+</form>
+
+{% if result %}
+<div class="box pad">
+<h3>{{ result.info.name }} ({{ result.info.cc }})</h3>
+<ul class="nobullet">
+    {% for n in result.network %}
+    <li>{{ n.network }}</li>
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+
+{% if search %}
+<div class="linkbox">
+    <a href="tools.php?action=asn_search" class="brackets">Search</a>
+</div>
+<div class="box pad">Matching ASNs
+<table>
+    <tr>
+        <td class="colhead">ASN</td>
+        <td class="colhead">Country</td>
+        <td class="colhead">Name</td>
+        <td class="colhead">Total CIDR networks</td>
+    </tr>
+    {% for s in search %}
+    <tr>
+        <td>{{ s.id_asn }}</td>
+        <td>{{ s.cc }}</td>
+        <td><a href="tools.php?action=asn_search&asn={{ s.id_asn }}">{{ s.name }}</a></td>
+        <td>{{ s.total|number_format }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endif %}
+
+{% if similar %}
+<div class="box pad">
+<p>If you didn't find what you were looking for, try one of these variants:</p>
+<p>
+<ul class="nobullet">
+    {% for s in similar %}
+    <a href="tools.php?action=asn_search&name={{ s.word }}">{{ s.word }}</a>
+    {% endfor %}
+</p>
+</div>
+
+{% endif %}
+
+</div>
+{{ footer() }}
