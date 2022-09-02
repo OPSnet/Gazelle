@@ -28,23 +28,20 @@ class SiteInfo extends Base {
 
     public function uptime() {
         $in = fopen('/proc/uptime', 'r');
-        list($uptime, $idletime) = explode(' ', trim(fgets($in)));
+        [$uptime, $idletime] = explode(' ', trim(fgets($in)));
         fclose($in);
         $in = fopen('/proc/cpuinfo', 'r');
         $ncpu = 0;
         while (($line = fgets($in)) !== false) {
            if (preg_match('/^processor\s+:\s+\d+/', $line)) {
-            ++$ncpu;
+                ++$ncpu;
             }
         }
         fclose($in);
         $now = time();
-        $idletime = str_replace(' ago', '',
-            Time::timeDiff($now - (int)($idletime / $ncpu))
-        );
         return [
-            'uptime'   => Time::timeDiff($now - (int)$uptime),
-            'idletime' => $idletime,
+            'uptime'   => Time::diff($now - (int)$uptime),
+            'idletime' => Time::diff($now - (int)($idletime / $ncpu), 2, true, false, true),
         ];
     }
 
