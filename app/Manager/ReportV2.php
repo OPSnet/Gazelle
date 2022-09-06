@@ -91,7 +91,7 @@ class ReportV2 extends \Gazelle\Base {
         return $this->categories['master']['other']['title'];
     }
 
-    public function inProgressSummary(): array {
+    public function inProgressSummary(User $userMan): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS total
@@ -100,7 +100,12 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY total DESC
         ");
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+        $list =  self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$row) {
+            $row['user'] = $userMan->findById($row['user_id']);
+        }
+        unset($row);
+        return $list;
     }
 
     public function newSummary(): array {

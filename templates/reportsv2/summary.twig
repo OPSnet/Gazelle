@@ -101,7 +101,7 @@
     {% endif %}
         <tr class="{% if entry.user_id == viewer.id %}rowa{% else %}rowb{% endif %}">
             <td>
-                <a href="reportsv2.php?view=staff&amp;id=<{{ entry.user_id }}">{{ entry.user_id|user_url }}</a>
+                <a href="reportsv2.php?view=staff&amp;id={{ entry.user_id }}">{{ entry.user.username }}</a>
             </td>
             <td class="number_column">{{ entry.total|number_format }}</td>
         </tr>

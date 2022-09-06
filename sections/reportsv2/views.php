@@ -12,7 +12,7 @@ if (!$Viewer->permitted('admin_reports')) {
 $reportMan = new Gazelle\Manager\ReportV2;
 
 echo $Twig->render('reportsv2/summary.twig', [
-    'in_progress' => $reportMan->inProgressSummary(),
+    'in_progress' => $reportMan->inProgressSummary(new Gazelle\Manager\User),
     'new'         => $reportMan->newSummary(),
     'resolved'    => [
         'day'   => $reportMan->resolvedLastMonth(),
