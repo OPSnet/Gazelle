@@ -86,7 +86,7 @@ if (in_array($Short, ['comment', 'post', 'thread'])) {
 }
 
 foreach ($Channels as $Channel) {
-    Irc::sendRaw("PRIVMSG $Channel :$ReportID - ".$Viewer->username()." just reported a $Short: ".SITE_URL."/$Link : ".strtr($Reason, "\n", ' '));
+    Irc::sendMessage($Channel, "$ReportID - " . $Viewer->username() . " just reported a $Short: " . SITE_URL . "/$Link : " . strtr($Reason, "\n", ' '));
 }
 
 $Cache->delete_value('num_other_reports');

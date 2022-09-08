@@ -41,8 +41,8 @@ $Remaining = (int)$DB->scalar("
     SELECT count(*) FROM reports WHERE Status = 'New'
 ");
 foreach ($Channels as $Channel) {
-    Irc::sendRaw("PRIVMSG $Channel :Report $ReportID resolved by "
-        . preg_replace('/^(.{2})/', '$1·' , $Viewer->username())
+    Irc::sendMessage($Channel, "Report $ReportID resolved by "
+        . preg_replace('/^(.{2})/', '$1·', $Viewer->username())
         . " on site ({$Remaining} remaining)."
     );
 }

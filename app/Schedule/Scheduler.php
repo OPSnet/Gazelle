@@ -310,7 +310,7 @@ class Scheduler extends \Gazelle\Base {
                 function($value) { return count($value) > 0 && $value['migration_status'] === 'down'; });
 
         if (count($pendingMigrations)) {
-            Irc::sendChannel('Pending migrations found, scheduler cannot continue', LAB_CHAN);
+            Irc::sendMessage(LAB_CHAN, 'Pending migrations found, scheduler cannot continue');
             echo "Pending migrations found, aborting\n";
             return;
         }
@@ -352,7 +352,7 @@ class Scheduler extends \Gazelle\Base {
 
         $taskRunner = $this->createRunner($id, $task['name'], $task['classname'], $task['is_debug'] || $debug);
         if ($taskRunner === null) {
-            Irc::sendChannel('Failed to construct task '.$task['name'], LAB_CHAN);
+            Irc::sendMessage(LAB_CHAN, 'Failed to construct task ' . $task['name']);
             return -1;
         }
 

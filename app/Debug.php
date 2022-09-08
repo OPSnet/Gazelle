@@ -160,9 +160,9 @@ class Debug {
         }
         $case = $this->saveCase($Report);
         global $Document;
-        Irc::sendRaw('PRIVMSG '.LAB_CHAN." :{$Message} $Document "
-            . SITE_URL."/tools.php?action=analysis&case=$case "
-            . SITE_URL.'/'.$RequestURI
+        Irc::sendMessage(LAB_CHAN, "{$Message} $Document "
+            . SITE_URL . "/tools.php?action=analysis&case=$case "
+            . SITE_URL . '/' . $RequestURI
         );
     }
 

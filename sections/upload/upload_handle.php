@@ -810,7 +810,7 @@ $AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
     . " - \00304".SITE_URL."/torrents.php?id=$GroupID\003 / \00304".SITE_URL."/torrents.php?action=download&id=$TorrentID\003";
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
-Irc::sendRaw('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
+Irc::sendMessage('#ANNOUNCE', html_entity_decode($AnnounceSSL, ENT_QUOTES));
 $Debug->set_flag('upload: announced on irc');
 
 //******************************************************************************//

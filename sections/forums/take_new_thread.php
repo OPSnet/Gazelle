@@ -68,7 +68,7 @@ $thread = (new Gazelle\Manager\ForumThread)->create(
 if ($needPoll) {
     (new Gazelle\Manager\ForumPoll)->create($thread->id(), $Question, $Answers);
     if ($ForumID == STAFF_FORUM_ID) {
-        Irc::sendRaw('PRIVMSG '.MOD_CHAN.' :Poll created by '.$Viewer->username().": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
+        Irc::sendMessage(MOD_CHAN, 'Poll created by ' . $Viewer->username() . ": \"$Question\" " . SITE_URL . "/forums.php?action=viewthread&threadid=$threadId");
     }
 }
 

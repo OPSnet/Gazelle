@@ -61,8 +61,8 @@ if ($Viewer->permitted('admin_manage_blog')) {
                     ->setBody($body)
                     ->setAuthorId($Viewer->id())
                     ->modify();
-                Irc::sendRaw("PRIVMSG ".MOD_CHAN." :New staff blog: " . $blogMan->title()
-                    . " - " . SITE_URL."/staffblog.php#blog" . $blogMan->blogId()
+                Irc::sendMessage(MOD_CHAN, "New staff blog: " . $blogMan->title()
+                    . " - " . SITE_URL . "/staffblog.php#blog" . $blogMan->blogId()
                 );
                 header('Location: staffblog.php');
                 exit;
