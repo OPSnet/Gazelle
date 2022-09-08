@@ -40,6 +40,6 @@ if ($thread && isset($_POST['subscribe'])) {
 $notification = new Gazelle\Manager\Notification($Viewer->id());
 $notification->push($notification->pushableUsers($Viewer->id()), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);
 
-Gazelle\Util\Irc::sendRaw("PRIVMSG " . BOT_CHAN . " :New blog article: " . $blog->title());
+Gazelle\Util\Irc::sendMessage(BOT_CHAN, "New blog article: " . $blog->title());
 
 header('Location: blog.php');

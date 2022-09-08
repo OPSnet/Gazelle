@@ -39,15 +39,15 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
         if ($Cache->get_value('user_flood_' . $userId)) {
             $Cache->increment('user_flood_' . $userId);
         } else {
-            Irc::sendChannel(
+            Irc::sendMessage(
+                STATUS_CHAN,
                 SITE_URL . "/" . $Viewer->url()
                 . " (" . $Viewer->username() . ")"
                 . " (" . geoip($_SERVER['REMOTE_ADDR']) . ")"
                 . " accessing "
                 . SITE_URL . $_SERVER['REQUEST_URI']
-                . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')
-                . ' hit download rate limit',
-                STATUS_CHAN
+                . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
+                . ' hit download rate limit'
             );
             $Cache->cache_value('user_429_flood_' . $userId, 1, 3600);
         }

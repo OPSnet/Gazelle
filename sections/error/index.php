@@ -3,12 +3,12 @@
 use Gazelle\Util\Irc;
 
 function notify ($Viewer, $Channel, $Message) {
-    Irc::sendRaw("PRIVMSG "
-        . $Channel . " :" . $Message . " error by "
+    Irc::sendMessage($Channel,
+        $Message . " error by "
         . ($Viewer
-                ? SITE_URL . "/" . $Viewer->url() . " (" . $Viewer->username() . ")"
-                : $_SERVER['REMOTE_ADDR']
-          )
+            ? SITE_URL . "/" . $Viewer->url() . " (" . $Viewer->username() . ")"
+            : $_SERVER['REMOTE_ADDR']
+        )
         . " (" . geoip($_SERVER['REMOTE_ADDR']) . ")"
         . " accessing " . SITE_URL . $_SERVER['REQUEST_URI'] . ' (' . $_SERVER['REQUEST_METHOD'] . ')'
         . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')

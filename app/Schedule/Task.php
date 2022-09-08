@@ -65,7 +65,7 @@ abstract class Task extends \Gazelle\Base {
             ', $this->taskId);
             self::$cache->delete_value(Scheduler::CACHE_TASKS);
 
-            Irc::sendChannel('Task '.$this->name.' is no longer sane '.SITE_URL.'/tools.php?action=periodic&mode=detail&id='.$this->taskId, LAB_CHAN);
+            Irc::sendMessage(LAB_CHAN, 'Task ' . $this->name . ' is no longer sane ' . SITE_URL . '/tools.php?action=periodic&mode=detail&id=' . $this->taskId);
             // todo: send notifications to appropriate users
         } else if ($errorCount == 0 && !$sane) {
             self::$db->prepared_query('
@@ -75,7 +75,7 @@ abstract class Task extends \Gazelle\Base {
             ', $this->taskId);
             self::$cache->delete_value(Scheduler::CACHE_TASKS);
 
-            Irc::sendChannel('Task '.$this->name.' is now sane', LAB_CHAN);
+            Irc::sendMessage(LAB_CHAN, 'Task ' . $this->name . ' is now sane');
         }
         return $this->processed;
     }

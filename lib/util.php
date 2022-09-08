@@ -177,7 +177,8 @@ function authorize($Ajax = false): bool {
     if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
         return true;
     }
-    Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . $Viewer->username() . " just failed authorize on "
+    Irc::sendMessage(STATUS_CHAN,
+        $Viewer->username() . " just failed authorize on "
         . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
     error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
     return false;

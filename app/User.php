@@ -941,8 +941,7 @@ class User extends BaseObject {
             VALUES (?,      ?,     ?,  ?)
             ", $this->id, $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
-        Irc::sendRaw("PRIVMSG " . $this->username()
-            . " :Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
+        Irc::sendMessage($this->username(), "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
         (new Mail)->send($this->email(), 'Email address changed information for ' . SITE_NAME,
             self::$twig->render('email/email-address-change.twig', [
                 'ipaddr'     => $ipaddr,
@@ -963,8 +962,7 @@ class User extends BaseObject {
             VALUES (?,      ?,         ?)
             ", $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
-        Irc::sendRaw("PRIVMSG " . $this->username()
-            . " :Security alert: Your password was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
+        Irc::sendMessage($this->username(), "Security alert: Your password was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
         (new Mail)->send($this->email(), 'Password changed information for ' . SITE_NAME,
             self::$twig->render('email/password-change.twig', [
                 'ipaddr'     => $ipaddr,

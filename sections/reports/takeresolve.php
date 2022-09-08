@@ -52,7 +52,7 @@ $Remaining = $DB->scalar("
 ");
 
 foreach ($Channels as $Channel) {
-    Irc::sendRaw("PRIVMSG $Channel :Report $ReportID resolved by ".preg_replace('/^(.{2})/', '$1·', $Viewer->username()).' on site ('.(int)$Remaining.' remaining).');
+    Irc::sendMessage($Channel, "Report $ReportID resolved by " . preg_replace('/^(.{2})/', '$1·', $Viewer->username()) . ' on site (' . (int)$Remaining . ' remaining).');
 }
 
 $Cache->delete_value('num_other_reports');

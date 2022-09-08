@@ -50,10 +50,10 @@ class Tracker {
         $MaxAttempts = 3;
         $Err = false;
         if ($this->send_request($Get, $MaxAttempts, $Err) === false) {
-            Irc::sendRaw("PRIVMSG #tracker :$MaxAttempts $Err $Get");
+            Irc::sendMessage('#tracker', "$MaxAttempts $Err $Get");
             global $Cache;
             if ($Cache->get_value('ocelot_error_reported') === false) {
-                Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . " :Failed to update ocelot: $Err : $Get");
+                Irc::sendMessage(ADMIN_CHAN, "Failed to update ocelot: $Err : $Get");
                 $Cache->cache_value('ocelot_error_reported', true, 3600);
             }
             return false;
