@@ -10,5 +10,7 @@ if (is_null($user)) {
 }
 
 echo $Twig->render('user/email-history.twig', [
-    'user' => $user,
+    'asn'     => new Gazelle\Search\ASN,
+    'history' => new Gazelle\User\History($user),
+    'user'    => $user,
 ]);

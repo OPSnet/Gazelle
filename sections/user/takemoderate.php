@@ -172,27 +172,27 @@ if (!$lockType || $lockAccount == 0) {
 }
 
 if ($_POST['ResetRatioWatch'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->resetRatioWatch();
+    (new Gazelle\User\History($user))->resetRatioWatch();
     $editSummary[] = 'RatioWatch history reset';
 }
 
 if ($resetIPHistory && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->resetIpHistory();
+    (new Gazelle\User\History($user))->resetIp();
     $editSummary[] = 'IP history cleared';
 }
 
 if ($_POST['ResetEmailHistory'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->resetEmailHistory($cur['Username'] . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
+    (new Gazelle\User\History($user))->resetEmail($cur['Username'] . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
     $editSummary[] = 'email history cleared';
 }
 
 if ($_POST['ResetSnatchList'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->resetSnatched();
+    (new Gazelle\User\History($user))->resetSnatched();
     $editSummary[] = 'snatch list cleared';
 }
 
 if ($_POST['ResetDownloadList'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->resetDownloadList();
+    (new Gazelle\User\History($user))->resetDownloaded();
     $editSummary[] = 'download list cleared';
 }
 

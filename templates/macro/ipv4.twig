@@ -1,4 +1,12 @@
-{% macro ajax_ipv4(ip) -%}
+{%- macro asn(name, n) -%}
+    {% if n %}{{n}} / {{ name }}{% else %}{{ name }}{% endif %}
+{%- endmacro -%}
+
+{%- macro ip_search(ip) -%}
+    <a href="tools.php?action=ip_search&amp;ip={{ ip }}">{{ ip }}</a> <a href="https://whatismyipaddress.com/ip/{{ ip }}" class="brackets tooltip" title="What is my IP address?">WI</a>
+{%- endmacro -%}
+
+{%- macro rdns(ip) -%}
 <span class="host_{{ ip|replace({'.': '-'}) }}">Resolving host...
 <script type="text/javascript">
 $(document).ready(function() {
@@ -7,4 +15,4 @@ $(document).ready(function() {
     });
 });
 </script></span>
-{%- endmacro %}
+{%- endmacro -%}

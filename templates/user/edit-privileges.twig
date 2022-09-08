@@ -50,8 +50,8 @@
         <td>
             <input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
             <select name="HackedEmail">
-    {% for e in user.emailHistory %}
-                <option value="{{ e.0 }}">{{ e.0 }} - {{ e.1 }}</option>
+    {% for e in history.email(asn) %}
+                <option value="{{ e.email }}">{{ e.email }} - {{ e.created }}</option>
     {% endfor %}
             </select>
             <br />Use when disabling an account due to suspected misuse. (Checking this will disable the account).

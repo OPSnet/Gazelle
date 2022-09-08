@@ -18,9 +18,14 @@ class IPv4 extends \Gazelle\Base {
      * E.g. 1.1.1.1 is stored as ('1.1.1.1', 16843009)
      */
 
+    protected ASN $asn;
     protected string $name;
     protected int $column = 0;
     protected int $direction = 0;
+
+    public function __construct(ASN $asn) {
+        $this->asn = $asn;
+    }
 
     public function setColumn(int $column) {
         $this->column = $column;
@@ -77,13 +82,13 @@ class IPv4 extends \Gazelle\Base {
         ");
     }
 
-    public function sitePage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function siteList(int $limit, int $offset): array {
         $column = ['uhi.StartTime', 'uhi.EndTime', 's.addr_n', 's.addr_n'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query("
-            SELECT uhi.StartTime AS start,
-                uhi.EndTime      AS 'end',
+            SELECT uhi.StartTime AS first_seen,
+                uhi.EndTime      AS last_seen,
                 uhi.IP           AS ipv4,
                 uhi.UserID       AS user_id
             FROM users_history_ips uhi
@@ -92,9 +97,12 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
+        $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['user'] = $userMan->findById($row['user_id']);
+            $row['cc']   = $asnList[$row['ipv4']]['cc'];
+            $row['n']    = $asnList[$row['ipv4']]['n'];
+            $row['name'] = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }
@@ -107,13 +115,13 @@ class IPv4 extends \Gazelle\Base {
         ");
     }
 
-    public function snatchList(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function snatchList(int $limit, int $offset): array {
         $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query($sql = "
-            SELECT from_unixtime(min(xs.tstamp)) AS start,
-                from_unixtime(max(xs.tstamp))    AS 'end',
+            SELECT from_unixtime(min(xs.tstamp)) AS first_seen,
+                from_unixtime(max(xs.tstamp))    AS last_seen,
                 count(*)                         AS total,
                 xs.IP                            AS ipv4,
                 xs.uid                           AS user_id
@@ -124,9 +132,12 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
+        $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['user'] = $userMan->findById($row['user_id']);
+            $row['cc']   = $asnList[$row['ipv4']]['cc'];
+            $row['n']    = $asnList[$row['ipv4']]['n'];
+            $row['name'] = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }
@@ -139,13 +150,13 @@ class IPv4 extends \Gazelle\Base {
         ");
     }
 
-    public function trackerPage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function trackerList(int $limit, int $offset): array {
         $column = ['from_unixtime(min(xfu.mtime))', 'from_unixtime(max(xfu.mtime))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query($sql = "
-            SELECT from_unixtime(min(xfu.mtime)) AS start,
-                from_unixtime(max(xfu.mtime + xfu.timespent * 60)) AS 'end',
+            SELECT from_unixtime(min(xfu.mtime)) AS first_seen,
+                from_unixtime(max(xfu.mtime + xfu.timespent * 60)) AS last_seen,
                 count(*)                         AS total,
                 xfu.ip                           AS ipv4,
                 xfu.uid                          AS user_id
@@ -156,9 +167,12 @@ class IPv4 extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
+        $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['user'] = $userMan->findById($row['user_id']);
+            $row['cc']   = $asnList[$row['ipv4']]['cc'];
+            $row['n']    = $asnList[$row['ipv4']]['n'];
+            $row['name'] = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }

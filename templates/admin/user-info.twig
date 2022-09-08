@@ -3,13 +3,13 @@
 <h2>{{ user.id|user_url }} &rsaquo; Email and IP summary</h2>
 
 <table>
-<tr><th>Now</th><td colspan="2">{{ now }}</td></tr>
-<tr><th>Last seen</th><td colspan="2">{{ user.lastAccess|time_diff }}</td></tr>
-<tr><th>Joined</th><td colspan="2">{{ user.joinDate }}</td></tr>
+<tr><th>Now</th><td colspan="6">{{ now }}</td></tr>
+<tr><th>Last seen</th><td colspan="6">{{ user.lastAccess|time_diff }}</td></tr>
+<tr><th>Joined</th><td colspan="6">{{ user.joinDate }}</td></tr>
 
-{% include 'admin/user-info-email.twig' with {'info': user.emailHistory, 'title': 'Email History' } only %}
-{% include 'admin/user-info-email.twig' with {'info': user.siteIPv4History, 'title': 'Site IPv4 History' } only %}
-{% include 'admin/user-info-email.twig' with {'info': user.trackerIPv4History, 'title': 'Tracker IPv4 History' } only %}
+{% include 'admin/user-info-email.twig' with {'info': hist.email(asn),       'title': 'Email History' } only %}
+{% include 'admin/user-info-ipv4.twig'  with {'info': hist.siteIPv4(asn),    'title': 'Site IPv4 History' } only %}
+{% include 'admin/user-info-ipv4.twig'  with {'info': hist.trackerIPv4(asn), 'title': 'Tracker IPv4 History' } only %}
 
 </table>
 </div>

@@ -301,11 +301,9 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
                 </li>
 <?php
 }
+
 if ($Viewer->permitted('users_view_ips')) {
-?>
-                <li>IP: <?= $Twig->createTemplate("{{ ipaddr(ip) }}")->render(['ip' => $User->ipaddr()]) ?></li>
-                <li>Host: <?= get_host_by_ajax($User->ipaddr()) ?></li>
-<?php
+    echo $Twig->render('user/ip.twig', ['user' => $User]);
 }
 
 if ($Viewer->permitted('users_view_keys') || $OwnProfile) {
@@ -802,9 +800,11 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
     if ($Viewer->permitted('users_disable_posts') || $Viewer->permitted('users_disable_any')) {
         $fm = new Gazelle\Manager\Forum;
         echo $Twig->render('user/edit-privileges.twig', [
-            'user'   => $User,
-            'viewer' => $Viewer,
-            'forum'  => [
+            'asn'     => new Gazelle\Search\ASN,
+            'history' => new Gazelle\User\History($User),
+            'user'    => $User,
+            'viewer'  => $Viewer,
+            'forum'   => [
                 'restricted_names' => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->forbiddenForums())),
                 'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->permittedForums())),
             ],

@@ -33,8 +33,9 @@ class ASN extends \Gazelle\Base {
         $result = $this->pg->all("
             SELECT lu.ip,
                 an.network,
-                a.cc,
-                a.name
+                coalesce(a.cc, 'XX')        AS cc,
+                coalesce(a.name, 'unknown') AS name,
+                id_asn                      AS n
             FROM (SELECT unnest(ARRAY[" .  placeholders($ipList, "?::inet"). "]) as ip) AS lu
             LEFT JOIN geo.asn_network an ON (an.network >>= lu.ip)
             LEFT JOIN geo.asn a USING (id_asn)
