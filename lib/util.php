@@ -772,27 +772,3 @@ function geoip($IP): string {
     }
     return '?';
 }
-
-/**
- * Gets an hostname using AJAX
- *
- * @param string $IP the IP to fetch
- * @return string a span with JavaScript code
- */
-function get_host_by_ajax(string $IP): string {
-    static $IPs = [];
-    $Class = strtr($IP, '.', '-');
-    $HTML = '<span class="host_'.$Class.'">Resolving host...';
-    if (!isset($IPs[$IP])) {
-        $HTML .= '<script type="text/javascript">' .
-                '$(document).ready(function() {' .
-                    '$.get(\'tools.php?action=get_host&ip='.$IP.'\', function(host) {' .
-                        '$(\'.host_'.$Class.'\').html(host);' .
-                    '});' .
-                '});' .
-            '</script>';
-    }
-    $HTML .= '</span>';
-    $IPs[$IP] = 1;
-    return $HTML;
-}

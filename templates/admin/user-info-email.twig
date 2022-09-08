@@ -1,16 +1,28 @@
-<tr><th colspan="3">{{ title }}</th></tr>
+{% from 'macro/ipv4.twig' import asn, ip_search, rdns %}
+<tr><th colspan="7"><br />{{ title }}</th></tr>
+{% for r in info %}
+    {% if loop.first %}
 <tr>
-    <th>Address</th>
-    <th>Registered since</th>
-    <th>Registered from</th>
+    <th>IP</th>
+    <th>CC</th>
+    <th>Registered</th>
+    <th>ASN</th>
+    <th>rDNS</th>
+    <th>Email address</th>
+    <th>Useragent</th>
 </tr>
-{% for i in info %}
+    {% endif %}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    <td>{{ i.0 }}</td>
-    <td>{{ i.1 }}</td>
-    <td>{{ i.2 }}
-        <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ i.3 }}" class="brackets tooltip" title="Shared with other users?">S</a>
-        <a href="https://whatismyipaddress.com/ip/{{ i.3 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
-    </td>
+    <td>{{ ip_search(r.ipv4) }}</td>
+    <td>{{ r.cc }}</td>
+    <td>{{ r.created }}</td>
+    <td>{{ asn(r.name, r.n) }}</td>
+    <td>{{ rdns(r.ipv4) }}</td>
+    <td>{{ r.email }}</td>
+    <td>{{ r.useragent }}</td>
+</tr>
+{% else %}
+<tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    <td colspan="7">no records</td>
 </tr>
 {% endfor %}

@@ -4,43 +4,44 @@ if (!$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 
-$text      = '';
-$found     = 0;
 $column    = (int)($_POST['column'] ?? 0);
 $direction = (int)($_POST['direction'] ?? 0);
-$limit     = false;
-$offset    = false;
-$search    = false;
+$found     = 0;
+$limit     = 0;
+$offset    = 0;
+$search    = null;
 $paginator = new Gazelle\Util\Paginator(50, (int)($_GET['page'] ?? 1));
-$userMan   = new Gazelle\Manager\User;
 
-if (isset($_POST['text']) || isset($_GET['iplist'])) {
-    $search = (new Gazelle\Search\IPv4)
+$text = match(true) {
+    isset($_POST['text'])  => trim($_POST['text']),
+    isset($_GET['iplist']) => implode("\n", array_map(fn ($ip) => long2ip((int)base_convert($ip, 36, 10)), explode(',', $_GET['iplist']))),
+    isset($_GET['ip'])     => $_GET['ip'],
+    default                => '',
+};
+if ($text) {
+    $search = (new Gazelle\Search\IPv4(new Gazelle\Search\ASN))
         ->create('search_' . getmypid())
         ->setColumn($column)
         ->setDirection($direction);
-    $text = isset($_POST['text'])
-        ? trim($_POST['text'] ?? '')
-        : implode("\n", array_map(fn ($ip) => long2ip((int)base_convert($ip, 36, 10)), explode(',', $_GET['iplist'])));
-    $found = $search->add($text);
 
+    $found = $search->add($text);
     if ($found) {
-        $paginator->setTotal(max($search->siteTotal(), $search->snatchTotal(), $search->trackerTotal()))
-            ->setParam('iplist=' . $search->ipList());
+        $paginator->setParam('iplist=' . $search->ipList())
+            ->setTotal(max($search->siteTotal(), $search->snatchTotal(), $search->trackerTotal()));
         $limit  = $paginator->limit();
         $offset = $paginator->offset();
     }
 }
 
 echo $Twig->render('admin/ip-search.twig', [
-    'auth'         => $Viewer->auth(),
-    'column'       => $column,
-    'direction'    => $direction,
-    'found'        => $found,
-    'ip_list'      => $search ? $search->ipList() : '',
-    'page_site'    => $search ? $search->sitePage($userMan, $limit, $offset) : null,
-    'page_snatch'  => $search ? $search->snatchList($userMan, $limit, $offset) : null,
-    'page_tracker' => $search ? $search->trackerPage($userMan, $limit, $offset) : null,
-    'paginator'    => $paginator,
-    'text'         => new Gazelle\Util\Textarea('text', $text, 90, 10)
+    'auth'      => $Viewer->auth(),
+    'column'    => $column,
+    'direction' => $direction,
+    'found'     => $found,
+    'ip_list'   => $search?->ipList(),
+    'site'      => $search?->siteList($limit, $offset),
+    'snatch'    => $search?->snatchList($limit, $offset),
+    'tracker'   => $search?->trackerList($limit, $offset),
+    'paginator' => $paginator,
+    'text'      => new Gazelle\Util\Textarea('text', $text, 90, 10)
 ]);

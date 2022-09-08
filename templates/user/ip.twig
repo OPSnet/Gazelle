@@ -1,0 +1,2 @@
+{% from 'macro/ipv4.twig' import ip_search, rdns %}
+<li>IP: {{ ip_search(user.ipaddr) }} ({{ rdns(user.ipaddr) }})</li>

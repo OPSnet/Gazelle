@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected %}
-{% from 'macro/ipv4.twig' import ajax_ipv4 %}
+{% from 'macro/ipv4.twig' import asn, ip_search, rdns %}
 {{ header('Bulk Email Search') }}
 <div class="thin">
 <div class="header">
@@ -21,51 +21,71 @@
 {{ paginator.linkbox|raw }}
 
 <h3>Live addresses</h3>
+{% for r in live_page %}
+    {% if loop.first %}
 <table>
 <thead>
     <tr>
-    <th>Email address</th>
-    <th>Username</th>
-    <th>Joined</th>
     <th>Registered</th>
+    <th>CC</th>
+    <th>Joined</th>
+    <th>Username / Email</th>
+    <th>ASN</th>
+    <th>rDNS</th>
     </tr>
 </thead>
 <tbody>
-{% for r in live_page %}
+    {% endif %}
     <tr>
-    <td>{{ r.email }}</td>
-    <td>{% if r.user %}{{ r.user_id|user_full }}{% else %}User #{{ r.user_id }}{% endif %}</td>
+    <td>{{ ip_search(r.ipv4) }}</td>
+    <td>{{ r.cc }}</td>
     <td>{{ r.join_date }}</td>
-    <td>{{ r.ipv4 }} ({{ ajax_ipv4(r.ipv4) }}) <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a></td>
+    <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
+    <td>{{ asn(r.name, r.n) }}</td>
+    <td>{{ rdns(r.ipv4) }}</td>
     </tr>
-{% endfor %}
+    {% if loop.last %}
 </tbody>
 </table>
+    {% endif %}
+{% else %}
+<div>no records</div>
+{% endfor %}
 
 <br />
 <h3>Historical addresses</h3>
+{% for r in history_page %}
+    {% if loop.first %}
 <table>
 <thead>
     <tr>
-    <th>Email address</th>
-    <th>Username</th>
+    <th>Change IP</th>
+    <th>CC</th>
     <th>Joined</th>
     <th>Changed</th>
-    <th>Change IP</th>
+    <th>Username / Email</th>
+    <th>ASN</th>
+    <th>rDNS</th>
     </tr>
 </thead>
 <tbody>
-{% for r in history_page %}
+    {% endif %}
     <tr>
-    <td>{{ r.email }}</td>
-    <td>{% if r.user %}{{ r.user_id|user_full }}{% else %}User #{{ r.user_id }}{% endif %}</td>
+    <td>{{ ip_search(r.ipv4) }}</td>
+    <td>{{ r.cc }}</td>
     <td>{{ r.join_date }}</td>
     <td>{{ r.change_date }}</td>
-    <td>{{ r.ipv4 }} ({{ ajax_ipv4(r.ipv4) }}) <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a></td>
+    <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
+    <td>{{ asn(r.name, r.n) }}</td>
+    <td>{{ rdns(r.ipv4) }}</td>
     </tr>
-{% endfor %}
+    {% if loop.last %}
 </tbody>
 </table>
+    {% endif %}
+{% else %}
+<div>no records</div>
+{% endfor %}
 
 </div>
 {{ paginator.linkbox|raw }}

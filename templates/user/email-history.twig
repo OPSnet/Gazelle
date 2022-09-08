@@ -1,3 +1,4 @@
+{% from 'macro/ipv4.twig' import ip_search, rdns %}
 {{ header(user.username ~ " &rasquo; Email History") }}
 <div class="thin">
 <div class="header">
@@ -9,24 +10,26 @@
 <table>
     <tr>
         <th>Address</th>
-        <th>Registered since</th>
+        <th>Registered</th>
         <th>Registered from</th>
+        <th>IP</th>
+        <th>CC</th>
+        <th>ASN</th>
         <th>Useragent</th>
     </tr>
-{% for i in user.emailHistory  %}
+{% for r in history.email  %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-        <td>{{ i.0 }}</td>
-        <td>{{ i.1 }}</td>
-        <td>{{ i.2 }}
-            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ i.0 }}" class="brackets tooltip" title="Shared with other users?">S</a>
-            <a href="https://whatismyipaddress.com/ip/{{ i.0 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
-        </td>
-        <td>{{ i.3 }}</td>
+        <td>{{ r.email }}</td>
+        <td>{{ r.created }}</td>
+        <td>{{ ip_search(r.ipv4) }} ({{ rdns(r.ipv4) }})</td>
+        <td>{{ r.cc }}</td>
+        <td>{{ r.asn }}</td>
+        <td>{{ r.useragent }}</td>
     </tr>
 {% endfor %}
 </table>
 
-{% for r in user.emailDuplicateHistory %}
+{% for r in history.emailDuplicate(asn) %}
 {% if loop.first %}
 <br />
 <div class="header">
@@ -36,8 +39,10 @@
     <tr>
         <th>Username</th>
         <th>Email</th>
-        <th>Registered since</th>
-        <th>Registered from</th>
+        <th>Registered</th>
+        <th>IP</th>
+        <th>CC</th>
+        <th>ASN</th>
         <th>Useragent</th>
         <th>Enabled</th>
         <th>Donor</th>
@@ -48,10 +53,9 @@
         <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.user.email }}</td>
         <td>{{ r.created }}</td>
-        <td>{{ r.ipv4 }}
-            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ r.ipv4 }}" class="brackets tooltip" title="Shared with other users?">S</a>
-            <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
-        </td>
+        <td>{{ ip_search(r.ipv4) }} ({{ rdns(.r.ipv4) ]})</a></td>
+        <td>{{ r.cc }}</td>
+        <td>{{ r.asn }}</td>
         <td>{{ r.useragent }}</td>
         <td>{{ r.user.isEnabled ? 'yes' : 'no' }}</td>
         <td>{{ r.user is donor ? 'yes' : 'no' }}</td>

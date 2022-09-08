@@ -13,9 +13,14 @@ class Email extends \Gazelle\Base {
     public const CHANGED = 3;
     public const IP      = 4;
 
+    protected ASN $asn;
     protected string $name;
     protected int $column = 0;
     protected int $direction = 0;
+
+    public function __construct(ASN $asn) {
+        $this->asn = $asn;
+    }
 
     public function setColumn(int $column) {
         $this->column = $column;
@@ -45,6 +50,9 @@ class Email extends \Gazelle\Base {
     }
 
     public function add(array $list): int {
+        if (!$list) {
+            return 0;
+        }
         $placeholders = placeholders($list);
         self::$db->prepared_query("
             INSERT IGNORE INTO {$this->name} (email)
@@ -73,7 +81,7 @@ class Email extends \Gazelle\Base {
         ");
     }
 
-    public function livePage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function liveList(int $limit, int $offset): array {
         $column = ['um.Email', 'um.Username', 'ui.JoinDate', 'ui.JoinDate', 'inet_aton(um.IP)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
@@ -90,9 +98,12 @@ class Email extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
+        $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['user'] = $userMan->findById($row['user_id']);
+            $row['cc']   = $asnList[$row['ipv4']]['cc'];
+            $row['n']    = $asnList[$row['ipv4']]['n'];
+            $row['name'] = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }
@@ -105,7 +116,7 @@ class Email extends \Gazelle\Base {
         ");
     }
 
-    public function historyPage(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function historyList(int $limit, int $offset): array {
         $column = ['uhe.Email', 'um.Username', 'ui.JoinDate', 'uhe.Time', 'inet_aton(uhe.IP)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
         self::$db->prepared_query("
@@ -119,13 +130,17 @@ class Email extends \Gazelle\Base {
             INNER JOIN {$this->name} s ON (s.email = uhe.Email)
             INNER JOIN users_main   um ON (um.ID = uhe.UserID)
             INNER JOIN users_info   ui ON (ui.UserID = um.ID)
+            WHERE ui.JoinDate != uhe.Time
             ORDER BY $column $direction
             LIMIT ? OFFSET ?
             ", $limit, $offset
         );
+        $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['user'] = $userMan->findById($row['user_id']);
+            $row['cc']   = $asnList[$row['ipv4']]['cc'];
+            $row['n']    = $asnList[$row['ipv4']]['n'];
+            $row['name'] = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }

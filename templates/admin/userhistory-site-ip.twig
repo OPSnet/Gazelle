@@ -1,4 +1,4 @@
-{% from 'macro/ipv4.twig' import ajax_ipv4 %}
+{% from 'macro/ipv4.twig' import ip_search, rdns %}
 {{ header(user.username ~ " &rsaquo; IP address history", {'js': 'iphist'}) }}
 <div class="thin">
     <div class="header">
@@ -38,9 +38,9 @@
         <tr>
             <td>
             {% if not row.is_banned %}
-                {{ ajax_ipv4(row.ip_addr) }} ({{ row.ip_addr }})
+                 {{ ip_search(row.ip_addr) }} ({{ rdns(row.ip_addr) }})
             {% else %}
-            <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ajax_ipv4(row.ip_addr) }} ({{ row.ip_addr }})
+            <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ip_search(row.ip_addr) }} ({{ rdns(row.ip_addr) }})
                 <img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="IP ranned" title="IP banned" class="tooltip" />
             </a>
             {% endif %}

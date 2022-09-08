@@ -1,4 +1,4 @@
-{% from 'macro/ipv4.twig' import ajax_ipv4 %}
+{% from 'macro/ipv4.twig' import rdns %}
 {{ header('Dupe IPs') }}
 {% if list is empty %}
 <h2 align="center">There are currently no users with more than {{ constant('IP_OVERLAPS') }} IP overlaps.</h2>
@@ -15,7 +15,7 @@
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ item.user_id|user_full }}</td>
         <td>
-            <span style="float: left;">{{ ajax_ipv4(item.ipaddr) }} ({{ item.ipaddr }})</span><span style="float: right;"><a href="userhistory.php?action=ips&amp;userid={{ item.user_id }}" title="History" class="brackets tooltip">H</a> <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ item.ipaddr }}" title="Search" class="brackets tooltip">S</a></span>
+            <span style="float: left;">{{ item.ipaddr }} ({{ item.ipaddr }})</span><span style="float: right;"><a href="userhistory.php?action=ips&amp;userid={{ item.user_id }}" title="History" class="brackets tooltip">H</a> <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ item.ipaddr }}" title="Search" class="brackets tooltip">S</a></span>
         </td>
         <td>{{ item.uses|number_format }}</td>
         <td>{{ item.joined|time_diff }}</td>
