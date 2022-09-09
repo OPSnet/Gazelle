@@ -269,6 +269,7 @@ class Privilege extends \Gazelle\Base {
             'torrents_edit_vanityhouse' => 'Mark groups as Showcase',
             'artist_edit_vanityhouse' => 'Mark artists as Showcase',
             'site_tag_aliases_read' => 'View tag aliases',
+            'can_use_tor' => 'Can access the site over Tor',
         ];
     }
 }

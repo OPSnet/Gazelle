@@ -9,12 +9,13 @@ $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
 $login = new Gazelle\Login;
 
 if (isset($_POST['username'])) {
-    $user = $login->setUsername($_POST['username'])
-        ->setPassword($_POST['password'] ?? null)
-        ->set2FA($_POST['twofa'] ?? null)
-        ->setPersistent($_POST['keeplogged'] ?? false)
-        ->setWatch($watch)
-        ->login();
+    $user = $login->login(
+        username:   $_POST['username'],
+        password:   $_POST['password'] ?? '',
+        watch:      $watch,
+        twofa:      $_POST['twofa'] ?? '',
+        persistent: $_POST['keeplogged'] ?? false,
+    );
 
     if ($user) {
         if ($user->isDisabled()) {
@@ -27,7 +28,7 @@ if (isset($_POST['username'])) {
                     'samesite' => 'Lax',
                 ]);
             }
-            header("Location: /login.php?action=disabled");
+            header("Location: login.php?action=disabled");
             exit;
         }
 
@@ -42,20 +43,22 @@ if (isset($_POST['username'])) {
                 'useragent'   => $user->permitted('site_disable_ip_history') ? FAKE_USERAGENT : $_SERVER['HTTP_USER_AGENT'],
             ]);
             setcookie('session', $session->cookie($current['SessionID']), [
-                'expires'  => $login->persistent() * (time() + 60 * 60 * 24 * 90),
+                'expires'  => (int)$login->persistent() * (time() + 60 * 60 * 24 * 90),
                 'path'     => '/',
                 'secure'   => !DEBUG_MODE,
                 'httponly' => DEBUG_MODE,
                 'samesite' => 'Lax',
             ]);
-            header("Location: /index.php");
+            header("Location: index.php");
             exit;
         }
     }
 }
 
 echo $Twig->render('login/login.twig', [
-    'delta' => $watch->bannedEpoch() - time(),
-    'error' => $login->error(),
-    'watch' => $watch,
+    'delta'    => $watch->bannedEpoch() - time(),
+    'error'    => $login->error(),
+    'ip_addr'  => $_SERVER['REMOTE_ADDR'],
+    'tor_node' => BLOCK_TOR && (new Gazelle\Manager\Tor)->isExitNode($_SERVER['REMOTE_ADDR']),
+    'watch'    => $watch,
 ]);
