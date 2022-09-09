@@ -919,11 +919,10 @@ class User extends BaseObject {
     }
 
     public function flush() {
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_KEY, $this->id),
-            sprintf(User\Privilege::CACHE_KEY, $this->id),
-        ]);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value(sprintf(User\Privilege::CACHE_KEY, $this->id));
         $this->stats()->flush();
+        $this->info = [];
     }
 
     public function flushRecentSnatch() {

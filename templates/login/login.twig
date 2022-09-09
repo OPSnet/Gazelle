@@ -8,7 +8,12 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
 {% include 'logo.twig' %}
 
 <div class="main">
-<div class="auth">
+{% if tor_node %}
+    <div class="tor-login">
+    <b>WARNING:</b> You have connected to this page from a known Tor exit node ({{ ip_addr }}). If you have not been
+    granted clearance to do so, proceding to log into your account will result in an automatic ban.
+    </div>
+{% endif %}
 {% if error or delta > 0 or watch.nrAttempts > 0 %}
     <div class="warning-login">
     {% if error %}
@@ -41,6 +46,7 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
     {% endif %}
     </div>
 {% endif %}
+<div class="auth">
 {% if delta <= 0 %}
 <form class="auth_form" name="login" id="loginform" method="post" action="login.php" autocomplete="off">
     <div>

@@ -37,7 +37,7 @@
 <tbody>
     {% endif %}
     <tr>
-    <td>{{ ip_search(r.ipv4) }}</td>
+    <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4) }}</td>
     <td>{{ r.cc }}</td>
     <td>{{ r.join_date }}</td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
@@ -71,7 +71,7 @@
 <tbody>
     {% endif %}
     <tr>
-    <td>{{ ip_search(r.ipv4) }}</td>
+    <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4) }}</td>
     <td>{{ r.cc }}</td>
     <td>{{ r.join_date }}</td>
     <td>{{ r.change_date }}</td>

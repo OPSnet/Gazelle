@@ -1,0 +1,48 @@
+{% from 'macro/ipv4.twig' import asn, ip_search, rdns %}
+{{ header('Tor Exit Nodes') }}
+{% set list = tor.exitNodeList %}
+<div class="thin">
+
+<div class="header"><h2>Tor Exit Nodes</h2>
+<div>There are {{ list|length|number_format }} node{{ list|length|plural }} recorded.</div>
+</div>
+
+<table>
+    <tr>
+        <td class="colhead">IP</td>
+        <td class="colhead">Created</td>
+        <td class="colhead">CC</td>
+        <td class="colhead">ASN</td>
+    </tr>
+{% for r in tor.exitNodeList %}
+    <tr>
+        <td>{{ ip_search(r.ipv4) }}</td>
+        <td>{{ r.created|time_diff }}</td>
+        <td>{{ r.cc }}</td>
+        <td>{{ asn(r.name, r.id_asn) }}</td>
+    </tr>
+{% endfor %}
+</table>
+<br />
+
+{% if viewer.permitted('site_disable_ip_history') %}
+<div class="box pad">
+<div class="pad">The list may be updated by pasting the results of https://check.torproject.org/torbulkexitlist below<br />
+Note: the posted addresses become the new list. Existing addresses not listed in the paste will be removed. In other words,
+pasting an empty string will remove all addresses, which has the effect of allowing all Tor exit nodes.
+</div>
+<form method="post" action="">
+<input type="hidden" name="action" value="tor_node" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<textarea name="exitlist" cols="90" rows="10"></textarea>
+<br />
+<br />
+<input type="submit" value="Update" />
+</form>
+</div>
+{% endif %}
+
+</div>
+
+</div>
+{{ footer() }}

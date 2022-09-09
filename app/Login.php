@@ -11,52 +11,27 @@ class Login extends Base {
     public const ERR_UNCONFIRMED = 4;
 
     protected int $error = self::NO_ERROR;
-    protected int $persistent = 0;
+    protected bool $persistent = false;
     protected int $userId = 0;
     protected string $ipaddr;
     protected string $password;
-    protected $twofa; // no idea?
+    protected string $twofa;
     protected string $username;
     protected LoginWatch $watch;
 
     public function __construct() {
-        $this->ipaddr = $_SERVER['REMOTE_ADDR'];
-    }
-
-    public function setPassword(string $password) {
-        $this->password = $password;
-        return $this;
-    }
-
-    public function setPersistent(int $persistent) {
-        $this->persistent = $persistent ? 1 : 0;
-        return $this;
-    }
-
-    public function setWatch(LoginWatch $watch) {
-        $this->watch = $watch;
-        return $this;
-    }
-
-    public function set2FA($twofa) {
-        $this->twofa = trim($twofa);
-        return $this;
-    }
-
-    public function setUsername(string $username) {
-        $this->username = trim($username);
-        return $this;
+        $this->ipaddr = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.2';
     }
 
     public function error(): int {
         return $this->error;
     }
 
-    public function ipaddr(): ?string {
+    public function ipaddr(): string {
         return $this->ipaddr;
     }
 
-    public function persistent(): ?int {
+    public function persistent(): bool {
         return $this->persistent;
     }
 
@@ -72,7 +47,19 @@ class Login extends Base {
      *
      * @return \Gazelle\User|null on failure, reason will be available from error()
      */
-    public function login(): ?User {
+    public function login(
+        string $username,
+        string $password,
+        LoginWatch $watch,
+        bool $persistent = false,
+        string $twofa    = '',
+    ): ?User {
+        $this->username   = $username;
+        $this->password   = $password;
+        $this->watch      = $watch;
+        $this->persistent = $persistent;
+        $this->twofa      = trim($twofa);
+
         $begin = microtime(true);
         $user = $this->attemptLogin();
         if ($user) {
@@ -158,6 +145,13 @@ class Login extends Base {
         if ($user->isUnconfirmed()) {
             $this->error = self::ERR_UNCONFIRMED;
             return null;
+        }
+
+        // Did they come in over Tor?
+        if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor)->isExitNode($this->ipaddr)) {
+            $userMan->disableUserList([$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
+            // return a newly disabled instance
+            return $userMan->findById($user->id());
         }
 
         // We have a user!

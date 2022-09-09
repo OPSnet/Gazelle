@@ -100,9 +100,10 @@ class IPv4 extends \Gazelle\Base {
         $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
+            $row['cc']     = $asnList[$row['ipv4']]['cc'];
+            $row['is_tor'] = $asnList[$row['ipv4']]['is_tor'];
+            $row['n']      = $asnList[$row['ipv4']]['n'];
+            $row['name']   = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }
@@ -135,9 +136,10 @@ class IPv4 extends \Gazelle\Base {
         $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
+            $row['cc']     = $asnList[$row['ipv4']]['cc'];
+            $row['is_tor'] = $asnList[$row['ipv4']]['is_tor'];
+            $row['n']      = $asnList[$row['ipv4']]['n'];
+            $row['name']   = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }
@@ -170,9 +172,10 @@ class IPv4 extends \Gazelle\Base {
         $asnList = $this->asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
+            $row['cc']     = $asnList[$row['ipv4']]['cc'];
+            $row['is_tor'] = $asnList[$row['ipv4']]['is_tor'];
+            $row['n']      = $asnList[$row['ipv4']]['n'];
+            $row['name']   = $asnList[$row['ipv4']]['name'];
         }
         return $list;
     }

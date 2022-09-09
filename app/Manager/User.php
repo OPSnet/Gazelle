@@ -11,6 +11,7 @@ class User extends \Gazelle\Base {
     protected const USERNAME_KEY = 'zz_unam_%s';
 
     public const DISABLE_MANUAL     = 1;
+    public const DISABLE_TOR        = 2;
     public const DISABLE_INACTIVITY = 3;
     public const DISABLE_TREEBAN    = 4;
 
@@ -833,10 +834,7 @@ class User extends \Gazelle\Base {
             ", ...$userIds
         );
         foreach ($userIds as $userId) {
-            self::$cache->deleteMulti([
-                "u_$userId", "user_stats_$userId", "users_sessions_$userId"
-            ]);
-
+            $this->findById($userId)?->flush();
         }
         $this->flushEnabledUsersCount();
 

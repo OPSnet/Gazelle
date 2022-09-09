@@ -9,17 +9,33 @@ class Pg {
         $this->pdo = new \PDO($dsn);
     }
 
+    public function pdo() {
+        return $this->pdo;
+    }
+
+    public function prepared_query($query, ...$args): int {
+        $st = $this->pdo->prepare($query);
+        if ($st->execute([...$args])) {
+            return $st->rowCount();
+        } else {
+            return 0;
+        }
+    }
+
     protected function fetchRow(string $query, int $mode, ...$args): array {
         $st = $this->pdo->prepare($query);
-        if (!$st->execute([...$args])) {
-            return [];
+        if ($st !== false && $st->execute([...$args])) {
+            $result = $st->fetch($mode);
+            if ($result) {
+                return $result;
+            }
         }
-        return $st->fetch($mode);
+        return [];
     }
 
     public function scalar(string $query, ...$args) {
         $row = $this->fetchRow($query, \PDO::FETCH_NUM, ...$args);
-        return $row ? $row[0] : null;
+        return empty($row) ? null : $row[0];
     }
 
     public function row(string $query, ...$args): array {
