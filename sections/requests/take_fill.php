@@ -20,8 +20,8 @@ if (is_null($request)) {
 $error = [];
 $torrent = null;
 $tgMan = new Gazelle\Manager\Torrent;
-if (!empty($_GET['torrentid'])) {
-    $torrent = $tgMan->findById((int)$_GET['torrentid']);
+if (!empty($_REEQUEST['torrentid'])) {
+    $torrent = $tgMan->findById((int)$_REQUEST['torrentid']);
 } else {
     if (empty($_REQUEST['link'])) {
         $error[] = print_or_return('You forgot to supply a link to the filling torrent');
@@ -66,7 +66,7 @@ if (defined('AJAX')) {
         'fillerName' => $filler->username(),
         'bounty'     => $requeset->bounty(),
     ];
-    if ($_GET['action'] === 'request_fill') {
+    if ($_REQUEST['action'] === 'request_fill') {
         json_print('success', $data);
     } else {
         return $data;
