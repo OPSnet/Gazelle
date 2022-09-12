@@ -1937,21 +1937,22 @@ class User extends BaseObject {
                 ", $bounty, $this->id
             );
         } else {
+            // removing, $bounty is negative
             $this->flush();
             $uploaded = $this->uploadedSize();
-            if ($bounty > $uploaded) {
+            if ($uploaded + $bounty < 0) {
                 // If we can't take it all out of upload, zero that out and add whatever is left as download.
                 self::$db->prepared_query("
                     UPDATE users_leech_stats SET
                         Uploaded = 0,
                         Downloaded = Downloaded + ?
                     WHERE UserID = ?
-                    ", $bounty - $uploaded, $this->id
+                    ", $uploaded + $bounty, $this->id
                 );
             } else {
                 self::$db->prepared_query("
                     UPDATE users_leech_stats SET
-                        Uploaded = Uploaded - ?
+                        Uploaded = Uploaded + ?
                     WHERE UserID = ?
                     ", $bounty, $this->id
                 );
