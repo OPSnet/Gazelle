@@ -1,0 +1,21 @@
+<strong>Inbox actions {{ history.heading }}</strong>
+{% for r in history.list %}
+    {% if loop.first %}
+<table class="noborder">
+    <tr class="colhead">
+        <td>Username</td>
+        <td>Replies</td>
+        <td>{{ column_title }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td><a href="/reportsv2.php?view=resolver&amp;id={{ r.user_id }}">{{ r.user.username }}</a></td>
+        <td>{{ r.total|number_format }}</td>
+        <td>{{ r.total2|number_format }}</td>
+    </tr>
+    {% if loop.last %}
+</table>
+    {% endif %}
+{% else %}
+    <div>No actions</div>
+{% endfor %}

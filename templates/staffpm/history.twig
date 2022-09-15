@@ -1,0 +1,36 @@
+{{ header('Staff Inbox') }}
+<div class="thin">
+    <div class="linkbox">
+{% if viewer.isStaff %}
+        <a href="staffpm.php" class="brackets">View your unanswered</a>
+{% endif %}
+        <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
+        <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
+        <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
+        <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+        <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
+{% if viewer.isFLS %}
+        <span class="tooltip" title="The Staff PMs that you created are here."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
+{% endif %}
+    </div>
+    <div class="head">Statistics</div>
+    <div class="box pad">
+    <table>
+    <tr>
+        <td style="width: 50%; vertical-align: top;">
+{% for interval in left %}
+    {% include 'staffpm/history-list.twig' with {'column_title': column_title, 'history': interval} only %}
+            <br /><br />
+{% endfor %}
+        </td>
+        <td style="vertical-align: top;">
+{% for interval in right %}
+    {% include 'staffpm/history-list.twig' with {'column_title': column_title, 'history': interval} only %}
+            <br /><br />
+{% endfor %}
+        </td>
+    </tr>
+    </table>
+    </div>
+</div>
+{{ footer() }}

@@ -138,4 +138,51 @@ class StaffPM extends \Gazelle\Base {
         }
         return $heading;
     }
+
+    public function history(bool $isStaffView, User $userMan, int $classLevel, array $userIds, int $interval): array {
+        $list = $isStaffView
+            ? $this->staffHistory($classLevel, $userIds, $interval)
+            : $this->userHistory($classLevel, $userIds, $interval);
+        foreach ($list as &$row) {
+            $row['user'] = $userMan->findById($row['user_id']);
+        }
+        unset($row);
+        return $list;
+    }
+
+    public function staffHistory(int $classLevel, array $userIds, int $interval): array {
+        self::$db->prepared_query("
+            SELECT um.ID as user_id,
+                count(distinct spm.ID) AS total,
+                count(distinct spc.ID) AS total2
+            FROM users_main um
+            INNER JOIN permissions           p   ON (p.ID = um.PermissionID)
+            INNER JOIN staff_pm_messages     spm ON (spm.UserID = um.ID)
+            LEFT JOIN staff_pm_conversations spc ON (spc.ResolverID = um.ID AND spc.Status = 'Resolved' AND spc.Date > now() - INTERVAL ? DAY)
+            WHERE spm.SentDate > now() - INTERVAL ? DAY
+                AND p.Level <= ?
+                AND um.ID IN (" . placeholders($userIds) .")
+            GROUP BY um.ID
+            ORDER BY total DESC, total2 DESC
+        ", $interval, $interval, $classLevel, ...$userIds);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function userHistory(int $classLevel, array $userIds, int $interval): array {
+        self::$db->prepared_query("
+            SELECT um.ID as user_id,
+                count(distinct spm.ID) AS total,
+                count(distinct spc.ID) AS total2
+            FROM users_main um
+            INNER JOIN permissions           p   ON (p.ID = um.PermissionID)
+            INNER JOIN staff_pm_messages     spm ON (spm.UserID = um.ID)
+            LEFT JOIN staff_pm_conversations spc ON (spc.UserID = um.ID AND spc.Date > now() - INTERVAL ? DAY)
+            WHERE spm.SentDate > now() - INTERVAL ? DAY
+                AND p.Level <= ?
+                AND um.ID NOT IN (" . placeholders($userIds) .")
+            GROUP BY um.ID
+            ORDER BY total DESC, total2 DESC
+        ", $interval, $interval, $classLevel, ...$userIds);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }
