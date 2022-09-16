@@ -10,15 +10,16 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
+$userMan   = new Gazelle\Manager\User;
 
 echo $Twig->render('reportsv2/summary.twig', [
-    'in_progress' => $reportMan->inProgressSummary(new Gazelle\Manager\User),
+    'in_progress' => $reportMan->inProgressSummary($userMan),
     'new'         => $reportMan->newSummary(),
     'resolved'    => [
-        'day'   => $reportMan->resolvedLastMonth(),
-        'week'  => $reportMan->resolvedLastMonth(),
-        'month' => $reportMan->resolvedLastMonth(),
-        'total' => $reportMan->resolvedSummary(),
+        'day'   => $reportMan->resolvedLastDay($userMan),
+        'week'  => $reportMan->resolvedLastWeek($userMan),
+        'month' => $reportMan->resolvedLastMonth($userMan),
+        'total' => $reportMan->resolvedSummary($userMan),
     ],
-    'viewer'      => $Viewer,
+    'viewer' => $Viewer,
 ]);

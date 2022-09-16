@@ -284,7 +284,6 @@ if ($ExtraIDs) { ?>
                     . ($ExtraHasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log"
                     . ($ExtraHasLogDB ? ": {$ExtraLogScore}%" : '').')</a>' : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MiB)';
             }
-            $ExtraLinkName = display_str($ExtraLinkName);
 ?>
                 <?=($First ? '' : '<br />')?><?=$ExtraLinkName?>
                 <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
