@@ -19,15 +19,15 @@
 <input type="hidden" name="action" value="analysis_list" />
 <table width="100%">
     <tr class="colhead">
-        <td>Case</td>
-        <td>Duration</td>
-        <td>Memory</td>
-        <td>Errors</td>
-        <td>Queries</td>
-        <td>Cache</td>
-        <td>Seen</td>
-        <td>First</td>
-        <td>Latest</td>
+        <td class="nobr">{{ heading|column('id') }}</td>
+        <td class="nobr">{{ heading|column('duration') }}</td>
+        <td class="nobr">{{ heading|column('memory') }}</td>
+        <td class="nobr">{{ heading|column('error') }}</td>
+        <td class="nobr">{{ heading|column('nr_query') }}</td>
+        <td class="nobr">{{ heading|column('nr_cache') }}</td>
+        <td class="nobr">{{ heading|column('seen') }}</td>
+        <td class="nobr">{{ heading|column('created') }}</td>
+        <td class="nobr">{{ heading|column('updated') }}</td>
         <td>URI</td>
         <td style="text-align: center">Toggle<br /><input type="checkbox" id="clear-all" name="clear-all" /></td>
     </tr>
