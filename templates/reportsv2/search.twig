@@ -2,7 +2,7 @@
 {{ header('Reports V2', {'js': 'reportsv2'}) }}
 <div class="header">
     <h2>Search Reports</h2>
-<?php require_once('header.php'); ?>
+    {%- include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
 </div>
 {% if list %}
 {{ paginator.linkbox|raw }}

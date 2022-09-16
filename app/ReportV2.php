@@ -41,8 +41,9 @@ class ReportV2 extends BaseObject {
             VALUES (?,      ?)
             ", $this->moderatorId, $this->torrentId
         );
-        self::$cache->delete_value("torrents_details_" . $this->groupId);
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        (new TGroup($this->groupId))?->flush();
+        return $affected;
     }
 
     public function claim(int $userId): bool {

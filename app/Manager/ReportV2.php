@@ -91,23 +91,6 @@ class ReportV2 extends \Gazelle\Base {
         return $this->categories['master']['other']['title'];
     }
 
-    public function inProgressSummary(User $userMan): array {
-        self::$db->prepared_query("
-            SELECT r.ResolverID AS user_id,
-                count(*)        AS total
-            FROM reportsv2 AS r
-            WHERE r.Status = 'InProgress'
-            GROUP BY r.ResolverID
-            ORDER BY total DESC
-        ");
-        $list =  self::$db->to_array(false, MYSQLI_ASSOC, false);
-        foreach ($list as &$row) {
-            $row['user'] = $userMan->findById($row['user_id']);
-        }
-        unset($row);
-        return $list;
-    }
-
     public function newSummary(): array {
         self::$db->prepared_query("
             SELECT Type  AS type,
@@ -117,15 +100,34 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY Type
             ORDER BY Type
         ");
-        $list =  self::$db->to_array(false, MYSQLI_ASSOC, false);
-        foreach ($list as &$entry) {
-            $entry['title'] = $this->type($entry['type'])['title'];
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$row) {
+            $row['title'] = $this->type($row['type'])['title'];
         }
-        unset($entry);
         return $list;
     }
 
-    public function resolvedSummary(): array {
+    protected function decorateUser(User $userMan, array $list): array {
+        foreach ($list as &$row) {
+            $row['user'] = $userMan->findById($row['user_id']);
+        }
+        unset($row);
+        return $list;
+    }
+
+    public function inProgressSummary(User $userMan): array {
+        self::$db->prepared_query("
+            SELECT r.ResolverID AS user_id,
+                count(*)        AS total
+            FROM reportsv2 AS r
+            WHERE r.Status = 'InProgress'
+            GROUP BY r.ResolverID
+            ORDER BY total DESC
+        ");
+        return $this->decorateUser($userMan, self::$db->to_array(false, MYSQLI_ASSOC, false));
+    }
+
+    public function resolvedSummary(User $userMan): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS total
@@ -134,10 +136,10 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY total DESC
         ");
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+        return $this->decorateUser($userMan, self::$db->to_array(false, MYSQLI_ASSOC, false));
     }
 
-    protected function resolvedLastInterval(string $interval): array {
+    protected function resolvedLastInterval(User $userMan, string $interval): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS total
@@ -147,19 +149,19 @@ class ReportV2 extends \Gazelle\Base {
             GROUP BY r.ResolverID
             ORDER BY total DESC
         ");
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+        return $this->decorateUser($userMan, self::$db->to_array(false, MYSQLI_ASSOC, false));
     }
 
-    public function resolvedLastDay(): array {
-        return $this->resolvedLastInterval('1 DAY');
+    public function resolvedLastDay(User $userMan): array {
+        return $this->resolvedLastInterval($userMan, '1 DAY');
     }
 
-    public function resolvedLastWeek(): array {
-        return $this->resolvedLastInterval('1 WEEK');
+    public function resolvedLastWeek(User $userMan): array {
+        return $this->resolvedLastInterval($userMan, '1 WEEK');
     }
 
-    public function resolvedLastMonth(): array {
-        return $this->resolvedLastInterval('1 MONTH');
+    public function resolvedLastMonth(User $userMan): array {
+        return $this->resolvedLastInterval($userMan, '1 MONTH');
     }
 
     /**
@@ -247,7 +249,7 @@ class ReportV2 extends \Gazelle\Base {
     }
 
     public function searchTotal(): int {
-        [$cond, $args, $delcond, $delargs] = $this->searchConfigure();;
+        [$cond, $args, $delcond, $delargs] = $this->searchConfigure();
         $where = (count($cond) == 0 && count($delcond) == 0)
             ? ''
             : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
