@@ -48,6 +48,9 @@ class Privilege extends \Gazelle\BaseUser {
         foreach ($this->info() as $p) {
             foreach (array_map('intval', explode(',', $p['PermittedForums'])) as $forumId) {
                 if ($forumId) {
+                    if ($forumId == INVITATION_FORUM_ID && $this->user->disableInvites()) {
+                        continue;
+                    }
                     $allowed[$forumId] = true;
                 }
             }

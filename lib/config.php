@@ -634,6 +634,9 @@ defined('VANITY_HOUSE_FORUM_ID') or define('VANITY_HOUSE_FORUM_ID', 18);
 // The client whitelist suggestion forum.
 defined('CLIENT_WHITELIST_FORUM_ID') or define('CLIENT_WHITELIST_FORUM_ID', 680);
 
+// The invitations forum.
+defined('INVITATION_FORUM_ID') or define('INVITATION_FORUM_ID', 39);
+
 // Number of thread posts per cache key.
 defined('THREAD_CATALOGUE') or define('THREAD_CATALOGUE', 500);
 
