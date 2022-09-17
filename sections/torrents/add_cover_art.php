@@ -5,20 +5,22 @@ if (!$Viewer->permitted('site_edit_wiki')) {
 }
 authorize();
 
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_POST['groupid']);
-if (is_null($tgroup)) {
-    error(404);
-}
-$summaryList = $_POST['summary'];
-$imageList = $_POST['image'];
+$summaryList = $_POST['summary'] ?? [];
+$imageList   = $_POST['image'] ?? [];
 if (count($imageList) != count($summaryList)) {
     error('Missing an image or a summary');
 }
 
+$tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['groupid'] ?? 0));
+if (is_null($tgroup)) {
+    error(404);
+}
+
 $imgProxy = new Gazelle\Util\ImageProxy;
-$logger = new Gazelle\Log;
-for ($i = 0, $end = count($imageList); $i < $end; $i++) {
-    $image = trim($imageList[$i]);
+$logger   = new Gazelle\Log;
+
+foreach ($imageList as $n => $image) {
+    $image = trim($image);
     if (!preg_match(IMAGE_REGEXP, $image)) {
         error(display_str($image) . " does not look like a valid image url");
     }
@@ -26,7 +28,7 @@ for ($i = 0, $end = count($imageList); $i < $end; $i++) {
     if ($banned) {
         error("Please rehost images from $banned elsewhere.");
     }
-    $tgroup->addCoverArt($image, trim($summaryList[$i]), $Viewer->id(), $logger);
+    $tgroup->addCoverArt($image, trim($summaryList[$n]), $Viewer->id(), $logger);
 }
 
 header('Location: ' . redirectUrl($tgroup->url()));
