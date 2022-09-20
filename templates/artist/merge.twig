@@ -1,0 +1,18 @@
+{{ header('Merging Artists') }}
+<div class="header">
+    <h2>Confirm merge</h2>
+</div>
+<form class="merge_form" name="artist" action="artist.php" method="post">
+    <input type="hidden" name="action" value="change_artistid" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="artistid" value="{{ artist.id }}" />
+    <input type="hidden" name="newartistid" value="{{ new.id }}" />
+    <input type="hidden" name="confirm" value="1" />
+    <div style="text-align: center;">
+        <p>Please confirm that you wish to make <a href="artist.php?id={{ artist.id }}">{{ artist.name }} ({{ artist.id }})</a>
+            into a non-redirecting alias of <a href="artist.php?id={{ new.id }}">{{ new.name }} ({{ new.id }})</a>.</p>
+        <br />
+        <input type="submit" value="Confirm" />
+    </div>
+</form>
+{{ footer() }}
