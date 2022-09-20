@@ -1,0 +1,34 @@
+{{ header("Comments for collage " ~ collage.name, {'js': 'comments,bbcode,subscriptions'}) }}
+<div class="thin">
+    <div class="header">
+        <h2><a href="collages.php">Collages</a> &rsaquo; {{ collage.link|raw }}</h2>
+        <div class="linkbox">
+            <a href="#" id="subscribelink_collages{{ collage.id }}" class="brackets" onclick="SubscribeComments('collages', {{ collage.id }}); return false;">
+            {%- if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif -%}
+            </a>
+        </div>
+    </div>
+
+{%- include 'comment/thread.twig' with {
+    'url':       url,
+    'page':      comment.page,
+    'thread':    comment.thread,
+    'unread':    comment.lastRead,
+    'paginator': paginator,
+    'viewer':    viewer,
+} only %}
+
+{%- include 'reply.twig' with {
+    'action':   'take_post',
+    'auth':     viewer.auth,
+    'avatar':   avatar,
+    'id':       collage.id,
+    'name':     'pageid',
+    'subbed':   is_subscribed,
+    'textarea': textarea,
+    'url':      'comments.php?page=collages',
+    'user':     viewer,
+} only %}
+</div>
+{{ footer() }}
+
