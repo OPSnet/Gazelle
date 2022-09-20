@@ -421,6 +421,19 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
     </div>
 
     <div class="main_column">
+<?php
+echo $Twig->render('collage/summary.twig', [
+    'class'   => 'collage_rows',
+    'object'  => 'album',
+    'summary' => $collageMan->tgroupGeneralSummary($GroupID),
+]);
+
+echo $Twig->render('collage/summary.twig', [
+    'class'   => 'personal_rows',
+    'object'  => 'album',
+    'summary' => $collageMan->tgroupPersonalSummary($GroupID),
+]);
+?>
         <table class="torrent_table details<?= $tgroup->isSnatched() ? ' snatched' : ''?> m_table" id="torrent_details">
             <tr class="colhead_dark">
                 <td class="m_th_left" width="80%"><strong>Torrents</strong></td>
@@ -707,18 +720,6 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
         </div>
 <?php
 }
-
-echo $Twig->render('collage/summary.twig', [
-    'class'   => 'collage_rows',
-    'object'  => 'album',
-    'summary' => $collageMan->tgroupGeneralSummary($GroupID),
-]);
-
-echo $Twig->render('collage/summary.twig', [
-    'class'   => 'personal_rows',
-    'object'  => 'album',
-    'summary' => $collageMan->tgroupPersonalSummary($GroupID),
-]);
 
 // Matched Votes
 $similar = $vote->similarVote();

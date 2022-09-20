@@ -248,6 +248,11 @@ foreach (ZIP_OPTION as $Option) {
     </div>
     <div class="main_column">
 
+<?= $Twig->render('collage/summary.twig', [
+    'class'   => 'collage_rows',
+    'object'  => 'artist',
+    'summary' => $collageMan->artistSummary($ArtistID),
+]) ?>
 <div id="discog_table">
     <div class="box center">
 <?php
@@ -411,12 +416,6 @@ if ($sections = $Artist->sections()) {
             </div>
 <?php
 } /* all sections */
-
-echo $Twig->render('collage/summary.twig', [
-    'class'   => 'collage_rows',
-    'object'  => 'artist',
-    'summary' => $collageMan->artistSummary($ArtistID),
-]);
 
 if ($Requests) {
 ?>
