@@ -21,7 +21,7 @@
         <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets" onclick="Bookmark('collage', {{ collage.id }}, 'Remove bookmark'); return false;">Bookmark</a>
 {% endif %}
 {% if collage.userCanContribute(viewer) %}
-        <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ collage.id }}" class="brackets">Manage {{ object }}s</a>
+        <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ collage.id }}" class="brackets">Manage entries</a>
 {% endif %}
         <a href="reports.php?action=report&amp;type=collage&amp;id={{ collage.id }}" class="brackets">Report collage</a>
 {% if viewer.permitted('site_collages_delete') or collage.isOwner(viewer.id) %}
