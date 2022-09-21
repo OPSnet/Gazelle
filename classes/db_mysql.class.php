@@ -505,6 +505,21 @@ class DB_MYSQL {
         return $result[0];
     }
 
+    /**
+     * Does a table.column exist in the database? This helps when code needs to
+     * deal with (legitimate) variations in the schema.
+     */
+    public function entityExists(string $table, string $column): bool {
+        return (bool)$this->scalar("
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = ?
+                AND table_name = ?
+                AND column_name = ?
+            ", SQLDB, $table, $column
+        );
+    }
+
     public function set_query_id(&$ResultSet) {
         $this->QueryID = $ResultSet;
         $this->Row = 0;

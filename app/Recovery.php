@@ -275,8 +275,8 @@ class Recovery extends Base {
         return true;
     }
 
-    public function getDetails(int $id): ?array {
-        return self::$db->row("
+    public function info(int $id): ?array {
+        return self::$db->rowAssoc("
             SELECT
                 recovery_id, state, admin_user_id, created_dt, updated_dt,
                 token, username, ipaddr, password_ok, email, email_clean,
@@ -298,7 +298,7 @@ class Recovery extends Base {
         }
 
         $condition = implode(' AND ', $cond);
-        self::$db->prepared_query("
+        return self::$db->rowAssoc("
             SELECT
                 recovery_id, state, admin_user_id, created_dt, updated_dt,
                 token, username, ipaddr, password_ok, email, email_clean,
@@ -307,21 +307,36 @@ class Recovery extends Base {
             WHERE $condition
             ", ...$args
         );
-        return self::$db->next_record();
     }
 
     protected function candidateSql(): string {
-        return sprintf('
-            SELECT m.Username, m.torrent_pass, m.Email, m.Uploaded, m.Downloaded, m.Enabled, m.PermissionID, m.ID as UserID,
-                (SELECT count(t.ID) FROM %s.torrents t WHERE m.ID = t.UserID) as nr_torrents,
-                group_concat(DISTINCT(h.IP) ORDER BY h.ip) as ips
-            FROM %s.users_main m LEFT JOIN %s.users_history_ips h ON (m.ID = h.UserID)
-            ', RECOVERY_DB, RECOVERY_DB, RECOVERY_DB
-        );
+        return match(true) {
+            self::$db->entityExists('users_main', 'Uploaded') =>
+                sprintf('
+                    SELECT m.Username, m.torrent_pass, m.Email, m.Uploaded, m.Downloaded, m.Enabled, m.PermissionID, m.ID as UserID,
+                        (SELECT count(t.ID) FROM %s.torrents t WHERE m.ID = t.UserID) as nr_torrents,
+                        group_concat(DISTINCT(h.IP) ORDER BY h.ip) as ips
+                    FROM %s.users_main m
+                    LEFT JOIN %s.users_history_ips h ON (m.ID = h.UserID)
+                    ', RECOVERY_DB, RECOVERY_DB, RECOVERY_DB
+                ),
+            self::$db->entityExists('users_leech_stats', 'Uploaded') =>
+                sprintf('
+                    SELECT m.Username, m.torrent_pass, m.Email, uls.Uploaded, uls.Downloaded, m.Enabled, m.PermissionID, m.ID as UserID,
+                        (SELECT count(t.ID) FROM %s.torrents t WHERE m.ID = t.UserID) as nr_torrents,
+                        group_concat(DISTINCT(h.IP) ORDER BY h.ip) as ips
+                    FROM %s.users_main m
+                    INNER JOIN %s.users_leech_stats uls ON (uls.UserID = m.ID)
+                    LEFT JOIN %s.users_history_ips h ON (m.ID = h.UserID)
+                    ', RECOVERY_DB, RECOVERY_DB, RECOVERY_DB, RECOVERY_DB
+                ),
+            default => throw new \Exception('Cannot determine recovery schema')
+        };
+
     }
 
     public function findCandidate(string $username): ?array {
-        return self::$db->row($this->candidateSql() . "
+        return self::$db->rowAssoc($this->candidateSql() . "
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
@@ -332,7 +347,7 @@ class Recovery extends Base {
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
-        return self::$db->to_array();
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function findByAnnounce(string $announce): array {
@@ -340,7 +355,7 @@ class Recovery extends Base {
             WHERE m.torrent_pass LIKE ? GROUP BY m.torrent_pass
             ", $announce
         );
-        return self::$db->to_array();
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function findByEmail(string $email): array {
@@ -348,7 +363,7 @@ class Recovery extends Base {
             WHERE m.Email LIKE ? GROUP BY m.Email
             ", $email
         );
-        return self::$db->to_array();
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function findById(int $id): array {
@@ -356,7 +371,7 @@ class Recovery extends Base {
             WHERE m.ID = ? GROUP BY m.ID
             ", $id
         );
-        return self::$db->to_array();
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     protected function userDetailsSql($schema = null): string {
