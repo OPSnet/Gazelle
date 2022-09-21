@@ -1,0 +1,122 @@
+{{ header('Recovery view user') }}
+<div class="thin">
+
+<div class="linkbox">
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
+    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
+</div>
+
+<div class="thin">
+<?php
+{% if not info %}
+<h3>Nobody home</h3>
+
+<p>No recovery request matched the search terms<p>
+<blockquote>
+<ul>
+    {% for t in terms %}
+        {% for field, value in t %}
+    <li>{{ field }}: <tt>{{ value }}</tt></li>
+        {% endfor %}
+    {% endfor %}
+</ul>
+</blockquote>
+
+{% else %} 
+
+<h3>View recovery details for {{ info.username }}</h3>
+
+<div class="box">
+    <div class="head">Registration details</div>
+    <div class="pad">
+    <table>
+        <tr>
+            <th>Username</th>
+            <td>{{ info.username }}</td>
+            <td>{% if candidate %}<font color="#008000">Username matches (ID={{ candidate.id }})</font>{% else %}<font color="#800000">No match for username</font>{% endif %}</td>
+            <th>state</th>
+            <td>{{ info.state }}</td>
+        </tr>
+    {% if candidate %}
+        <tr>
+            <td>{{ candidate.enabled }}</td>
+            <td>{{ candidate.user_class }}</th>
+            <td>{{ candidate.nr_torrents|number_format }} torrent{{ candidate.nr_torrents|plural }}</td>
+            <td>{{ candidate.uploaded|octet_size }} up</td>
+            <td>{{ candidate.downloaded|octet_size }} down</td>
+        </tr>
+    {% endif %}
+        <tr>
+            <th>Password verified</th>
+            <td colspan="2">{% if info.password_ok %}Yes{% else %}No{% endif %}</td>
+            <th>Claimed by</th>
+            <td>{{ info.admin_user_id|user_url }}</td>
+        </tr>
+        <tr>
+            <th>email</th>
+            <td>
+            {% if info.email == info.email_clean %}
+                {{ info.email }}
+            {% else %}
+                {{ info.email_clean }}<br />(cleaned from {{ info.email }})
+            {% endif %}
+            <td>{{ candidate.email }}</td>
+            <th>Created</th>
+            <td>{{ info.created_dt|time_diff }}</td>
+        </tr>
+        <tr>
+            <th>Announce key</th>
+            <td>{{ info.announce }}</td>
+            <td>{{ candidate.torrent_pass }}</td>
+            <th>Updated</th>
+            <td>{{ info.updated_dt|time_diff }}</td>
+        </tr>
+        <tr>
+            <th>Remote IP</th>
+            <td>{{ info.ipaddr }}</td>
+            <td>{{ candidate.ips|default('')|replace({',': '<br />'}) }}</td>
+            <th>Token</th>
+            <td><tt>{{ info.token }}</tt></td>
+        </tr>
+        <tr>
+            <th>Screenshot info</th>
+            <td colspan="4">{{ info.screenshot }}</td>
+        </tr>
+        <tr>
+            <th>Invitation email</th>
+            <td colspan="4"><pre>{{ info.invite }}</pre></td>
+        </tr>
+        <tr>
+            <th>info</th>
+            <td colspan="4"><pre>{{ info.info }}</pre></td>
+        </tr>
+        <tr>
+            <th>log</th>
+            <td colspan="4"><pre>{{ info.log }}<pre></td>
+        </tr>
+    </table>
+
+    {% if info.state in ['PENDING', 'VALIDATED'] %}
+    <h2>Actions</h2>
+    <p><a class="brackets" href="/recovery.php?action=admin&amp;task=accept&amp;id={{ id }}&amp;auth={{ viewer.auth }}">Accept</a> - An invite will be emailed to the user</p>
+    <p><a class="brackets" href="/recovery.php?action=admin&amp;task=deny&amp;id={{ id }}&amp;auth={{ viewer.auth }}">Deny</a> - The request is denied, no e-mail will be sent</p>
+        {% if info.admin_user_id == viewer.id %}
+    <p><a class="brackets" href="/recovery.php?action=admin&amp;task=unclaim&amp;id={{ id }}">Unclaim</a> - Release the claim on this request, you don't know what to do.</p>
+        {% else %}
+    <p><a class="brackets" href="/recovery.php?action=view&amp;id={{ id }}&amp;claim={{ viewer.id }}">Claim</a> - Claim this request, you need to contact the person via IRC.</p>
+        {% endif %}
+    {% endif %}
+</div>
+</div>
+
+<?php
+{% endif %}
+
+</div>
+</div>
+{{ footer() }}

@@ -1,0 +1,80 @@
+{{ header('Recovery browse users') }}
+<div class="thin">
+
+<div class="linkbox">
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
+    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
+</div>
+
+{% if list is not null %}
+<div class="box pad">
+    {% for list as r %}
+        {% if loop.first %}
+<div class="head">Users matched search criteria</div>
+<p>The following {{ class }} match <b>{{ target }}</b> in the previous site</p>
+
+<table>
+<tr>
+<th>Username</th>
+<th>ID</th>
+<th>Email</th>
+<th>Uploaded</th>
+<th>Downloaded</th>
+<th>Enabled</th>
+<th>Torrents</th>
+<th>Announce</th>
+</tr>
+        {% endif %}
+<tr>
+<td>{{ r.Username }}</td>
+<td>{{ r.UserID }}</td>
+<td>{{ r.Email }}</td>
+<td title="{{ r.Uploaded }}">{{ r.Uploaded|octet_size }}</td>
+<td title="{{ r.Downloaded }}">{{ r.Downloaded|octet_size }}</td>
+<td>{{ r.Enabled }}</td>
+<td>{{ r.nr_torrents }}</td>
+<td>{{ r.torrent_pass }}</td>
+</tr>
+        {% if loop.last %}
+</table>
+        {% endif %}
+</div>
+    {% else %}
+    <p>No {{ class }} matched <b>{{ target }}</b></p>
+    {% endfor %}
+{% endif %}
+
+<div class="box">
+    <div class="head">Browse recovery details</div>
+
+    <div class="pad">
+        <form method="post" action="/recovery.php?action=browse">
+        <p>Enter one of the following fields to search for members in the backup (Use <tt>%</tt> as a wildcard character, <i>e.g.</i> <tt>C17%</tt>).</p>
+        <table>
+            <tr>
+                <th>Username</th>
+                <td><input type="text" name="username" width="20" /></td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td><input type="text" name="email" width="20" /></td>
+            </tr>
+            <tr>
+                <th>Announce</th>
+                <td><input type="text" name="announce" width="20" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Browse" /></td>
+            </tr>
+        </table>
+        </form>
+    </div>
+</div>
+{{ footer() }}
+
