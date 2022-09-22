@@ -182,9 +182,7 @@ class Wiki extends BaseObject {
     /**
      * Add an alias to an existing article
      *
-     * @param string $alias
-     * @param int $userId user id of the person adding the alias
-     * @throws \DB_MYSQL_DuplicateKeyException if alias already exists on another article
+     * @throws DB\Mysql_DuplicateKeyException if alias already exists on another article
      */
     public function addAlias(string $alias, int $userId): int {
         self::$db->prepared_query("

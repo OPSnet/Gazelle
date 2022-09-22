@@ -179,7 +179,7 @@ if (!file_exists($file)) {
     try {
         require_once($file);
     }
-    catch (\DB_MYSQL_Exception $e) {
+    catch (Gazelle\DB\Mysql_Exception $e) {
         if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
             echo $Twig->render('error-db.twig', [
                 'message' => $e->getMessage(),
@@ -201,17 +201,17 @@ if ($Router->hasRoutes()) {
         /** @noinspection PhpIncludeInspection */
         require_once($Router->getRoute($action));
     }
-    catch (\Gazelle\Exception\RouterException $exception) {
+    catch (Gazelle\Exception\RouterException $exception) {
         error(404);
     }
-    catch (\Gazelle\Exception\InvalidAccessException $exception) {
+    catch (Gazelle\Exception\InvalidAccessException $exception) {
         error(403);
     }
-    catch (\DB_MYSQL_Exception $e) {
+    catch (Gazelle\DB\Mysql_Exception $e) {
         $Debug->saveError($e);
         error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
         $Debug->saveError($e);
     }
 }

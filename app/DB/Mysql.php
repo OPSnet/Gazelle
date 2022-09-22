@@ -1,6 +1,6 @@
 <?php
 
-use \Gazelle\Util\Irc;
+namespace Gazelle\DB;
 
 //-----------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////////////
@@ -14,12 +14,6 @@ Everything returned by this class is automatically escaped for output. This can 
 turned off by setting $Escape to false in next_record or to_array.
 
 //--------- Basic usage -------------------------------------------------------------
-
-* Creating the object.
-
-require(SERVER_ROOT.'/classes/mysql.class.php');
-$DB = new DB_MYSQL;
------
 
 * Making a query
 
@@ -41,12 +35,12 @@ $array = $DB->next_record();
 
 * The conventional way of retrieving a row from a result set is as follows:
 
-list($All, $Columns, $That, $You, $Select) = $DB->next_record();
+[$All, $Columns, $That, $You, $Select[ = $DB->next_record();
 -----
 
 * This is how you loop over the result set:
 
-while (list($All, $Columns, $That, $You, $Select) = $DB->next_record()) {
+while ([$All, $Columns, $That, $You, $Select] = $DB->next_record()) {
     echo "Do stuff with $All of the ".$Columns.$That.$You.$Select;
 }
 -----
@@ -101,14 +95,13 @@ set_query_id($ResultSet)
 
     Of course, this example is contrived, but you get the point.
 
-
 -------------------------------------------------------------------------------------
 *///---------------------------------------------------------------------------------
 
-class DB_MYSQL_Exception extends Exception {}
-class DB_MYSQL_DuplicateKeyException extends DB_MYSQL_Exception {}
+class Mysql_Exception extends \Exception {}
+class Mysql_DuplicateKeyException extends Mysql_Exception {}
 
-class DB_MYSQL {
+class Mysql {
     /** @var mysqli|bool */
     public $LinkID = false;
     /** @var mysqli_result|bool */
@@ -151,11 +144,11 @@ class DB_MYSQL {
 
     private function halt($Msg) {
         if ($this->Errno == 1062) {
-            throw new DB_MYSQL_DuplicateKeyException;
+            throw new Mysql_DuplicateKeyException;
         }
         global $Debug;
         $Debug->saveCase("MySQL: error({$this->Errno}) {$this->Error} query=[$this->PreparedQuery]");
-        throw new DB_MYSQL_Exception($Msg);
+        throw new Mysql_Exception($Msg);
     }
 
     public function connect() {
@@ -191,8 +184,8 @@ class DB_MYSQL {
      * Prepares an SQL statement for execution with data.
      *
      * Normally, you'll most likely just want to be using
-     * DB_MYSQL::prepared_query to call both DB_MYSQL::prepare
-     * and DB_MYSQL::execute for one-off queries, you can use
+     * Mysql::prepared_query to call both Mysql::prepare()
+     * and Mysql::execute() for one-off queries, you can use
      * this separately in the case where you plan to be running
      * this query repeatedly while just changing the bound
      * parameters (such as if doing a bulk update or the like).
@@ -253,7 +246,7 @@ class DB_MYSQL {
                 return $Statement->get_result();
             } catch (\mysqli_sql_exception $e) {
                 if (mysqli_error($this->LinkID) == 1062) {
-                    throw new DB_MYSQL_DuplicateKeyException;
+                    throw new Mysql_DuplicateKeyException;
                 }
             }
         };
@@ -265,7 +258,7 @@ class DB_MYSQL {
     /**
      * Prepare and execute a prepared query returning the result set.
      *
-     * Utility function that wraps DB_MYSQL::prepare and DB_MYSQL::execute
+     * Utility function that wraps Mysql::prepare() and Mysql::execute()
      * as most times, the query is going to be one-off and this will save
      * on keystrokes. If you do plan to be executing a prepared query
      * multiple times with different bound parameters, you'll want to call

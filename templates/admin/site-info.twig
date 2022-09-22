@@ -48,9 +48,14 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>PHP</h3>
     <div class="box pad">
-        PHP Version: {{ php_version }} <br />
+        Version: {{ php_version }} <br />
         <a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br />
         <div id="phpinfo">{{ phpinfo|raw }}</div>
+    </div>
+
+    <h3>Mysql</h3>
+    <div class="box pad">
+        Version: {{ mysql_version }}
     </div>
 
     <h3>Git</h3>

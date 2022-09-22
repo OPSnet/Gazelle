@@ -289,7 +289,7 @@ class Bonus extends \Gazelle\BaseUser {
                 VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
                 ", $this->user->id(), 'feature-seedbox'
             );
-        } catch (\DB_MYSQL_DuplicateKeyException $e) {
+        } catch (\Gazelle\DB\Mysql_DuplicateKeyException $e) {
             // no point in buying a second time
             self::$db->rollback();
             return false;

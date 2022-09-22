@@ -12,7 +12,7 @@ class Debug {
     protected const MAX_MEMORY = 80 * 1024 * 1024; //Maximum memory used per pageload
 
     protected static Cache $cache;
-    protected static \DB_MYSQL $db;
+    protected static DB\Mysql $db;
 
     protected static int $caseCount = 0;
     protected static array $Errors = [];
@@ -23,7 +23,7 @@ class Debug {
     protected static float $startTime;
     protected static $cpuTime = false;
 
-    public function __construct(\Gazelle\Cache $cache, \DB_MYSQL $db) {
+    public function __construct(\Gazelle\Cache $cache, DB\Mysql $db) {
         if (self::$cpuTime === false) {
             $r = getrusage();
             self::$cpuTime = $r['ru_utime.tv_sec'] * 1000000 + $r['ru_utime.tv_usec'];
