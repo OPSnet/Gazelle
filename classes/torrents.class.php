@@ -4,6 +4,39 @@ class Torrents {
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
 
     /**
+     * Torrent Labels
+     * Map a common display string to a CSS class
+     * Indexes are lower case
+     * Note the "tl_" prefix for "torrent label"
+     *
+     * There are five basic types:
+     * * tl_free (leech status)
+     * * tl_snatched
+     * * tl_reported
+     * * tl_approved
+     * * tl_notice (default)
+     *
+     * @var array Strings
+     */
+    private static $TorrentLabels = [
+        'default'  => 'tl_notice',
+        'snatched' => 'tl_snatched',
+
+        'freeleech'          => 'tl_free',
+        'neutral leech'      => 'tl_free tl_neutral',
+        'personal freeleech' => 'tl_free tl_personal',
+
+        'reported'              => 'tl_reported',
+        'bad tags'              => 'tl_reported tl_bad_tags',
+        'bad folders'           => 'tl_reported tl_bad_folders',
+        'bad file names'        => 'tl_reported tl_bad_file_names',
+        'missing lineage'       => 'tl_reported tl_missing_lineage',
+        'cassette approved'     => 'tl_approved tl_cassette',
+        'lossy master approved' => 'tl_approved tl_lossy_master',
+        'lossy web approved'    => 'tl_approved tl_lossy_web'
+    ];
+
+    /**
      * Function to get data and torrents for an array of GroupIDs. Order of keys doesn't matter
      *
      * @param array $GroupIDs
@@ -201,6 +234,20 @@ class Torrents {
     }
 
     /**
+     * Creates a strong element that notes the torrent's state.
+     * E.g.: snatched/freeleech/neutral leech/reported
+     *
+     * @param string $Text Display text
+     * @return string Text wrapped in <strong>
+     */
+    public static function label($Text) {
+        $Class = self::$TorrentLabels[mb_ereg_replace('[^\w\d\s]+', '', strtolower($Text))]
+            ?? self::$TorrentLabels['default'];
+        return sprintf('<strong class="torrent_label tooltip %1$s" title="%2$s" style="white-space: nowrap;">%2$s</strong>',
+                display_str($Class), display_str($Text));
+    }
+
+    /**
      * Format the information about a torrent.
      * @param array $Data an array a subset of the following keys:
      *    Format, Encoding, HasLog, LogScore, HasCue, Media, Scene, RemasterYear
@@ -251,47 +298,47 @@ class Torrents {
             }
         }
         if (!empty($Data['IsSnatched'])) {
-            $Info[] = Format::torrent_label('Snatched!');
+            $Info[] = self::label('Snatched!');
         }
         if (isset($Data['FreeTorrent'])) {
             if ($Data['FreeTorrent'] == '1') {
-                $Info[] = Format::torrent_label('Freeleech!');
+                $Info[] = self::label('Freeleech!');
             }
             if ($Data['FreeTorrent'] == '2') {
-                $Info[] = Format::torrent_label('Neutral Leech!');
+                $Info[] = self::label('Neutral Leech!');
             }
         }
         if (!empty($Data['PersonalFL'])) {
-            $Info[] = Format::torrent_label('Personal Freeleech!');
+            $Info[] = self::label('Personal Freeleech!');
         }
         if (!empty($Data['Reported'])) {
-            $Info[] = Format::torrent_label('Reported');
+            $Info[] = self::label('Reported');
         }
 
         if ($ShowFlags) {
             if ($Data['HasLog'] && $Data['HasLogDB'] && !in_array($Data['LogChecksum'], ['1', true])) {
-                $Info[] = Format::torrent_label('Bad/Missing Checksum');
+                $Info[] = self::label('Bad/Missing Checksum');
             }
             if (in_array($Data['BadTags'], ['1', true])) {
-                $Info[] = Format::torrent_label('Bad Tags');
+                $Info[] = self::label('Bad Tags');
             }
             if (in_array($Data['BadFolders'], ['1', true])) {
-                $Info[] = Format::torrent_label('Bad Folders');
+                $Info[] = self::label('Bad Folders');
             }
             if (in_array($Data['MissingLineage'], ['1', true])) {
-                $Info[] = Format::torrent_label('Missing Lineage');
+                $Info[] = self::label('Missing Lineage');
             }
             if (in_array($Data['CassetteApproved'], ['1', true])) {
-                $Info[] = Format::torrent_label('Cassette Approved');
+                $Info[] = self::label('Cassette Approved');
             }
             if (in_array($Data['LossymasterApproved'], ['1', true])) {
-                $Info[] = Format::torrent_label('Lossy Master Approved');
+                $Info[] = self::label('Lossy Master Approved');
             }
             if (in_array($Data['LossywebApproved'], ['1', true])) {
-                $Info[] = Format::torrent_label('Lossy WEB Approved');
+                $Info[] = self::label('Lossy WEB Approved');
             }
             if (in_array($Data['BadFiles'], ['1', true])) {
-                $Info[] = Format::torrent_label('Bad File Names');
+                $Info[] = self::label('Bad File Names');
             }
         }
 
