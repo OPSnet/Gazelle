@@ -298,7 +298,7 @@ foreach ($Results as $GroupID) {
             }
             $ExtraInfo = Torrents::torrent_info($Data, true, true);
         } elseif ($Data['IsSnatched']) {
-            $ExtraInfo = Format::torrent_label('Snatched!');
+            $ExtraInfo = "<strong class=\"torrent_label tooltip tl_snatched\" title=\"Snatched!\" style=\"white-space: nowrap;\">Snatched!</strong>";
         } else {
             $ExtraInfo = '';
         }

@@ -1,38 +1,5 @@
 <?php
 class Format {
-    /**
-     * Torrent Labels
-     * Map a common display string to a CSS class
-     * Indexes are lower case
-     * Note the "tl_" prefix for "torrent label"
-     *
-     * There are five basic types:
-     * * tl_free (leech status)
-     * * tl_snatched
-     * * tl_reported
-     * * tl_approved
-     * * tl_notice (default)
-     *
-     * @var array Strings
-     */
-    private static $TorrentLabels = [
-        'default'  => 'tl_notice',
-        'snatched' => 'tl_snatched',
-
-        'freeleech'          => 'tl_free',
-        'neutral leech'      => 'tl_free tl_neutral',
-        'personal freeleech' => 'tl_free tl_personal',
-
-        'reported'              => 'tl_reported',
-        'bad tags'              => 'tl_reported tl_bad_tags',
-        'bad folders'           => 'tl_reported tl_bad_folders',
-        'bad file names'        => 'tl_reported tl_bad_file_names',
-        'missing lineage'       => 'tl_reported tl_missing_lineage',
-        'cassette approved'     => 'tl_approved tl_cassete',
-        'lossy master approved' => 'tl_approved tl_lossy_master',
-        'lossy web approved'    => 'tl_approved tl_lossy_web'
-    ];
-
 
     /**
      * Gets the CSS class corresponding to a ratio
@@ -55,7 +22,6 @@ class Format {
         if ($Ratio < 5) { return 'r20'; }
         return 'r50';
     }
-
 
     /**
      * Calculates and formats a ratio.
@@ -217,20 +183,6 @@ class Format {
                 echo " $Attribute=\"$Attribute\"";
             }
         }
-    }
-
-    /**
-     * Creates a strong element that notes the torrent's state.
-     * E.g.: snatched/freeleech/neutral leech/reported
-     *
-     * @param string $Text Display text
-     * @return string Text wrapped in <strong>
-     */
-    public static function torrent_label($Text) {
-        $Class = self::$TorrentLabels[mb_ereg_replace('[^\w\d\s]+', '', strtolower($Text))]
-            ?? self::$TorrentLabels['default'];
-        return sprintf('<strong class="torrent_label tooltip %1$s" title="%2$s" style="white-space: nowrap;">%2$s</strong>',
-                display_str($Class), display_str($Text));
     }
 
     /**
