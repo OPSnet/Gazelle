@@ -70,30 +70,6 @@ class Tags {
     }
 
     /**
-     * Reset the internal state to create a new tagset
-     * TODO: rewrite this shit to hold state per-object
-     *       instead of per-class.
-     */
-    public static function reset() {
-        self::$All = [];
-    }
-
-    /**
-     * @return string Primary Tag
-     */
-    public function get_primary() {
-        return $this->Primary;
-    }
-
-    /**
-     * Set the primary tag
-     * @param string $Primary
-     */
-    public function set_primary($Primary) {
-        $this->Primary = (string)$Primary;
-    }
-
-    /**
      * Formats primary tag as a title
      * @return string Title
      */
@@ -107,30 +83,6 @@ class Tags {
      */
     public function css_name() {
         return 'tags_' . str_replace('.', '_', $this->Primary);
-    }
-
-    /**
-     * @return array Tags
-     */
-    public function get_tags() {
-        return $this->Tags;
-    }
-
-    /**
-     * @return array All tags
-     */
-    public static function all() {
-        return self::$All;
-    }
-
-    /**
-     * Counts and sorts All tags
-     * @return array All tags sorted
-     */
-    public static function sorted() {
-        $Sorted = array_count_values(self::$All);
-        arsort($Sorted);
-        return $Sorted;
     }
 
     /**
@@ -149,42 +101,6 @@ class Tags {
             }
         }
         return implode(', ', $this->TagLink);
-    }
-
-    /** Render the HTML of the list of top tags
-     *
-     * @param int $Max Max number of items to get
-     * @param string $Link  Page query where more items of this tag type can be found
-     * @param string $ArtistName Optional artist
-     * @return string set of HTML <li> elements
-     */
-    public static function topAsHTML($Max = 5, $Link = 'torrents.php?taglist=', $ArtistName = '') {
-        if (empty(self::$All)) {
-            return '<li>No torrent tags</li>';
-        }
-        if (!empty($ArtistName)) {
-            $ArtistName = '&amp;artistname=' . urlencode($ArtistName)
-                . '&amp;action=advanced&amp;searchsubmit=1';
-        }
-        $html = '';
-        foreach (array_slice(self::sorted(), 0, $Max) as $TagName => $Total) {
-            $html .= sprintf('<li><a href="%s">%s</a> (%s)</li>' . "\n",
-                $Link . display_str($TagName) . $ArtistName,
-                display_str($TagName),
-                $Total
-            );
-        }
-        return $html;
-    }
-
-    /**
-     * Format a list of top tags
-     * @param int $Max Max number of items to get
-     * @param string $Link  Page query where more items of this tag type can be found
-     * @param string $ArtistName Optional artist
-     */
-    public static function format_top($Max = 5, $Link = 'torrents.php?taglist=', $ArtistName = '') {
-        echo self::topAsHTML($Max, $Link, $ArtistName);
     }
 
     /**
