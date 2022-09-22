@@ -190,7 +190,7 @@ class Seedbox extends \Gazelle\BaseUser {
                             AND user_seedbox_id = ?
                         ", mb_substr($name, 0, 100), $this->user->id(), $this->hashid->decode($seedbox['id'])[0]
                     );
-                } catch (\DB_MYSQL_DuplicateKeyException $e) {
+                } catch (\Gazelle\DB\Mysql_DuplicateKeyException $e) {
                     // do nothing
                 } finally {
                     $n += self::$db->affected_rows();

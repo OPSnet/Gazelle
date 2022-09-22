@@ -92,7 +92,7 @@ class DB extends Base {
             if (self::$db->affected_rows() == 0) {
                 return [false, "condition selected 0 rows"];
             }
-        } catch (\DB_MYSQL_DuplicateKeyException $e) {
+        } catch (DB\Mysql_DuplicateKeyException $e) {
             // do nothing, for some reason it was already deleted
         }
 

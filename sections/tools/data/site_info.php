@@ -48,6 +48,7 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'composer_version' => $info->composerVersion(),
         'package'          => $info->composerPackages(),
         'phinx'            => $info->phinx(),
+        'mysql_version'    => $DB->scalar('SELECT @@version'),
         'no_pk'            => $info->tablesWithoutPK(),
     ]);
 }
