@@ -303,6 +303,10 @@ function add_json_info($Json) {
     return $Json;
 }
 
+function dump($thing) {
+    echo "<pre>" . json_encode($thing, JSON_PRETTY_PRINT) . "</pre>";
+}
+
 /**
  * Utility function that unserializes an array, and then if the unserialization fails,
  * it'll then return an empty array instead of a null or false which will break downstream
