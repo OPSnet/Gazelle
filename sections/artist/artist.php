@@ -628,14 +628,13 @@ $textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
 $textarea->setPreviewManual(true);
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $authKey,
-    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
+    'avatar'   => $userMan->avatarMarkup($Viewer, $Viewer),
     'id'       => $ArtistID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => $textarea,
     'url'      => 'comments.php?page=artist',
-    'user'     => $Viewer,
+    'viewer'   => $Viewer,
 ]);
 ?>
         </div>
