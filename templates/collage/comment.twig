@@ -20,14 +20,13 @@
 
 {%- include 'reply.twig' with {
     'action':   'take_post',
-    'auth':     viewer.auth,
     'avatar':   avatar,
     'id':       collage.id,
     'name':     'pageid',
     'subbed':   is_subscribed,
     'textarea': textarea,
     'url':      'comments.php?page=collages',
-    'user':     viewer,
+    'viewer':   viewer,
 } only %}
 </div>
 {{ footer() }}

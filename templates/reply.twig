@@ -1,21 +1,21 @@
 {% from 'macro/form.twig' import checked %}
 <br />
 <div id="reply_box">
-{% if user.disablePosting %}
+{% if viewer.disablePosting %}
     <h4>Your posting privileges have been removed</h3>
 {% else %}
     <h3>{% if forum %}Post reply{% else %}Post comment{% endif %}</h3>
     <div class="box pad">
         <table class="forum_post box vertical_margin hidden preview_wrap" id="{{ textarea.previewId }}">
             <colgroup>
-{% if user.showAvatars %}
+{% if viewer.showAvatars %}
                 <col class="col_avatar" />
 {% endif %}
                 <col class="col_post_body" />
             </colgroup>
             <tr class="colhead_dark">
-                <td{% if user.showAvatars %} colspan="2"{% endif %}>
-                    <div style="float: left;"><a href="#quickreplypreview">#------</a> by <strong>{{ user.id|user_full }}</strong> Just now
+                <td{% if viewer.showAvatars %} colspan="2"{% endif %}>
+                    <div style="float: left;"><a href="#quickreplypreview">#------</a> by <strong>{{ viewer.id|user_full }}</strong> Just now
                     </div>
                     <div style="float: right;">
                         <a href="#quickreplypreview" class="brackets">Report</a>
@@ -25,7 +25,7 @@
                 </td>
             </tr>
             <tr>
-{% if user.showAvatars %}
+{% if viewer.showAvatars %}
                 <td class="avatar" valign="top">
                     {{ avatar|raw }}
                 </td>
@@ -37,7 +37,7 @@
         </table>
         <form class="send_form center" name="reply" id="quickpostform" action="{{ url }}" method="post"{% if not admin %} onsubmit="quickpostform.submit_button.disabled = true;"{% endif %}>
             <input type="hidden" name="action" value="{{ action }}" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="{{ name }}" value="{{ id }}" />
             <div id="quickreplytext">
                 {{ textarea.field|raw }}
@@ -45,13 +45,13 @@
             </div>
             <div class="preview_submit">
 {% if not subbed %}
-                <input id="subscribebox" type="checkbox" name="subscribe" tabindex="2"{{ checked(user.option('AutoSubscribe')) }} />
+                <input id="subscribebox" type="checkbox" name="subscribe" tabindex="2"{{ checked(viewer.option('AutoSubscribe')) }} />
                 <label for="subscribebox">Subscribe</label>
 {% endif %}
 {% if merge %}
                 <input id="mergebox" type="checkbox" name="merge" tabindex="2" {{ checked(merge) }} />
                 <label for="mergebox">Merge</label>
-    {% if not user.option('DisableAutoSave') %}
+    {% if not viewer.option('DisableAutoSave') %}
                 <script type="application/javascript">
                     var storedTempTextarea = new StoreText('quickpost', 'quickpostform', {{ id }});
                 </script>

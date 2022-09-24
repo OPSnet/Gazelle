@@ -772,14 +772,13 @@ echo $Twig->render('comment/thread.twig', [
 
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'auth'     => $Viewer->auth() ,
     'avatar'   => $userMan->avatarMarkup($Viewer, $Viewer),
     'id'       => $GroupID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => (new Gazelle\Util\Textarea('quickpost', ''))->setPreviewManual(true),
     'url'      => 'comments.php?page=torrents',
-    'user'     => $Viewer,
+    'viewer'   => $Viewer,
 ]);
 ?>
     </div>
