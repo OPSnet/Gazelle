@@ -60,7 +60,7 @@ foreach ($Results as $Key => $GroupID) {
         }
     } else {
         $torrent = $torMan->findById($Key);
-        if ($torrent) {
+        if (!is_null($torrent)) {
             $Torrents[] = $torrent;
         }
     }
