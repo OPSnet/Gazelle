@@ -151,7 +151,12 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'permissions':
-        // this is retarded and doesn't always alter things but it's better than being in __FILE__
+        require_once('managers/permissions_list.php');
+        break;
+    case 'privilege-edit':
+        require_once('managers/permissions_edit.php');
+        break;
+    case 'privilege-alter':
         require_once('managers/permissions_alter.php');
         break;
     case 'privilege_matrix':

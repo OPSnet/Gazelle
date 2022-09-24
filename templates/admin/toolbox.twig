@@ -27,10 +27,10 @@
     ['Applicant manager',        'apply.php?action=admin',            viewer.permitted('admin_manage_applicants')],
     ['Auto-Enable requests',     'tools.php?action=enable_requests',  FEATURE_EMAIL_REENABLE],
     ['Database encryption key',  'tools.php?action=dbkey',            viewer.permitted('admin_site_debug')],
-    ['Permissions manager',      'tools.php?action=permissions',      viewer.permitted('admin_manage_permissions')],
     ['Privilege matrix',         'tools.php?action=privilege_matrix', viewer.permitted('admin_manage_permissions')],
     ['Reports V1',               'reports.php',                       viewer.permittedAny('admin_reports', 'site_moderate_forums')],
     ['Staff page group manager', 'tools.php?action=staff_groups',     viewer.permitted('admin_manage_permissions')],
+    ['Userclass manager',        'tools.php?action=permissions',      viewer.permitted('admin_manage_permissions')],
 ]) }}
 
 {{ _self.category('Announcements', [

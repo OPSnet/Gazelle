@@ -36,12 +36,16 @@ class Privilege extends \Gazelle\Base {
         return $this;
     }
 
-    public function create(string $name, int $level, bool $secondary, string $forums, array $values, bool $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
+    public function create(string $name, int $level, bool $secondary, string $forums, array $values, int  $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
+        $staffGroupId = $displayStaff
+            ? self::$db->scalar("SELECT ID FROM staff_groups WHERE ID = ?", $staffGroup)
+            : 0;
+
         self::$db->prepared_query('
             INSERT INTO permissions
                    (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
             VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
-            ', $name, $level, $secondary, $forums, serialize($values), (int)$staffGroup, $badge, $displayStaff ? '1' : '0'
+            ', $name, $level, (int)$secondary, $forums, serialize($values), $staffGroupId, $badge, $displayStaff ? '1' : '0'
         );
         self::$cache->deleteMulti(['user_class', 'staff_class']);
         return new \Gazelle\Privilege(self::$db->inserted_id());
@@ -94,6 +98,37 @@ class Privilege extends \Gazelle\Base {
             }
         }
         return $this->info;
+    }
+
+    public function staffGroupList(): array {
+        self::$db->prepared_query("
+            SELECT ID AS id,
+                Name AS name
+            FROM staff_groups
+            ORDER BY Sort
+        ");
+        return self::$db->to_pair('id', 'name', false);
+    }
+
+    /**
+     * Statistics on how many people are in the different user classes.
+     */
+    public function usageList(): array {
+        self::$db->prepared_query("
+            SELECT p.ID     AS id,
+                p.Name      AS name,
+                p.Level     AS level,
+                p.Secondary AS is_secondary,
+                sg.Name     AS staff_group,
+                count(um.ID) + count(DISTINCT ul.UserID) AS total
+            FROM permissions AS p
+            LEFT JOIN staff_groups AS sg ON (sg.ID = p.StaffGroup)
+            LEFT JOIN users_main   AS um ON (um.PermissionID = p.ID)
+            LEFT JOIN users_levels AS ul ON (ul.PermissionID = p.ID)
+            GROUP BY p.ID
+            ORDER BY p.Secondary ASC, p.Level ASC
+        ");
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**
@@ -215,7 +250,7 @@ class Privilege extends \Gazelle\Base {
             'admin_clear_cache' => 'Invalidate an object cache',
             'admin_global_notification' => 'Send global notifications and direct messages',
             'admin_whitelist' => 'Manage authorized Bittorrent clients',
-            'admin_manage_permissions' => 'Edit user permissions',
+            'admin_manage_permissions' => 'Edit userclasses',
             'admin_recovery' => 'Manage account recovery',
             'admin_manage_wiki' => 'Manage wiki access',
             'admin_staffpm_stats' => 'View Staff PM stats',
