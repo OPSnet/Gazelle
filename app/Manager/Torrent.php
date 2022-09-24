@@ -653,4 +653,73 @@ class Torrent extends \Gazelle\Base {
         }
         return array_map(fn($id) => $this->findById($id), $latest);
     }
+
+    /**
+     * This is a bit of an ugly hack, used to render PL bbcode links from the \Text class
+     */
+
+    public static function renderPL(int $id, array $attr): ?string {
+        $torrent = (new self)->findById($id);
+        $meta = '';
+        $wantMeta = !(in_array('nometa', $attr) || in_array('title', $attr));
+
+        if (!is_null($torrent)) {
+            $tgroup = $torrent->group();
+            if ($wantMeta && $tgroup->categoryName() === 'Music') {
+                $meta = self::metaPL(
+                    $torrent->media(), $torrent->format(), $torrent->encoding(),
+                    $torrent->hasCue(), $torrent->hasLog(), $torrent->hasLogDb(), $torrent->logscore()
+                );
+            }
+            $isDeleted = false;
+        } else {
+            $deleted = self::$db->rowAssoc("
+                SELECT GroupID, Format, Encoding, Media, HasCue, HasLog, HasLogDB, LogScore
+                FROM deleted_torrents
+                WHERE ID = ?
+                ", $id
+            );
+            if (is_null($deleted)) {
+                return null;
+            }
+            $tgroup = (new \Gazelle\Manager\TGroup)->findById((int)$deleted['GroupID']);
+            if (is_null($tgroup)) {
+                return null;
+            }
+            if ($wantMeta && $tgroup->categoryName() === 'Music') {
+                $meta = self::metaPL(
+                    $deleted['Media'], $deleted['Format'], $deleted['Encoding'],
+                    (bool)$deleted['HasCue'], (bool)$deleted['HasLog'], (bool)$deleted['HasLogDB'], (int)$deleted['LogScore']
+                );
+            }
+            $isDeleted = true;
+        }
+        $year = in_array('noyear', $attr) || in_array('title', $attr) ? '' : " [{$tgroup->year()}]";
+        $releaseType = ($tgroup->categoryName() !== 'Music' || in_array('noreleasetype', $attr) || in_array('title', $attr))
+            ? '' : (' [' . $tgroup->releaseTypeName() . ']');
+        $url = '';
+        if (!(in_array('noartist', $attr) || in_array('title', $attr))) {
+            $url = $tgroup->artistHtml() . " \xE2\x80\x93 ";
+        }
+        return $url . sprintf(
+            '<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s</a>%s',
+            $tgroup->hashTag(), $tgroup->id(), $id, $id, $tgroup->name(), $year, $releaseType,
+            $meta . ($isDeleted ? ' <i>deleted</i>' : '')
+        );
+    }
+
+    protected static function metaPL(string $media, string $format, string $encoding, bool $hasCue, bool $hasLog, bool $hasLogDb, int $logscore) {
+        $meta = [$media, $format, $encoding];
+        if ($hasCue) {
+            $meta[] = 'Cue';
+        }
+        if ($hasLog) {
+            $log = 'Log';
+            if ($hasLogDb) {
+                $log .= " {$logScore}%";
+            }
+            $meta[] = "$log";
+        }
+        return ' (' . implode('/', $meta) . ')';
+    }
 }
