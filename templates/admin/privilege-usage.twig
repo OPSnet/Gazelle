@@ -1,0 +1,50 @@
+{{ header('Manage Privileges') }}
+<div class="thin">
+    <div class="header">
+        <div class="linkbox">
+            <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
+            <a href="tools.php?action=permissions&amp;id=new" class="brackets">Create a new useclass</a>
+        </div>
+    </div>
+    <h2>Userclass management</h2>
+{% for r in list %}
+    {% if loop.first %}
+    <table width="100%">
+        <tr class="colhead">
+            <td style="width: 160px">Userclass name</td>
+            <td style="width: 160px">Staff group</td>
+            <td style="text-align:right; width: 80px">User count</td>
+            <td class="center">Actions</td>
+            <td>Level</td>
+        </tr>
+    {% endif %}
+        <tr>
+            <td><a href="tools.php?action=privilege-edit&amp;id={{ r.id }}">{{ r.name }}</a></td>
+            <td>{{ r.staff_group }}</td>
+            <td style="text-align:right"><a href="user.php?action=search&amp;{% if r.is_secondary %}secclass{% else %}class[]{% endif %}={{ r.id }}">{{ r.total|number_format }}</a></td>
+            <td class="center">
+    {% if not r.total %}
+                <a href="#" title="Remove {{ r.name }} userclass?" onclick="return confirmDelete({{ r.id }});" class="tooltip brackets">Remove</a>
+    {% endif %}
+            </td>
+            <td>{{ r.level }}{% if r.is_secondary %} (Secondary){% endif %}</td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+{% else %}
+    <h2 align="center">There are no privilege classes.</h2>
+{% endfor %}
+</div>
+
+<script type="text/javascript">//<![CDATA[
+function confirmDelete(id) {
+    if (confirm("Are you sure you want to remove this permission class?")) {
+        location.href = "tools.php?action=privilege-alter&auth={{ viewer.auth }}&removeid=" + id;
+    }
+    return false;
+}
+//]]>
+</script>
+
+{{ footer() }}

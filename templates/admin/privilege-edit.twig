@@ -2,17 +2,18 @@
 {{ header('Manage Permissions', {'js': 'validate'}) }}
 {{ js|raw }}
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
-    <input type="hidden" name="action" value="permissions" />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="action" value="privilege-alter" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+{% if privilege.id %}
     <input type="hidden" name="id" value="{{ privilege.id }}" />
+{% endif %}
     <div class="linkbox">
-        <a href="tools.php?action=permissions" class="brackets">Back to permission list</a>
+        <a href="tools.php?action=permissions" class="brackets">Userclass list</a>
         <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
-        <a href="tools.php" class="brackets">Back to tools</a>
     </div>
     <table class="permission_head layout">
         <tr>
-            <td class="label">Permission name</td>
+            <td class="label">Userclass name</td>
             <td><input type="text" name="name" id="name" value="{{ privilege.name }}" /></td>
         </tr>
         <tr>
@@ -25,14 +26,11 @@
         </tr>
         <tr>
             <td class="label">Show on staff page</td>
-            <td><input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }} /></td>
-        </tr>
-        <tr>
-            <td class="label">Staff page group</td>
             <td>
-                <select name="staffgroup" id="staffgroup">
-{% for group in group_list %}
-                    <option value="{{ group.ID }}"{{ selected(group.ID == privilege.staffGroup) }}>{{ group.Name }}</option>
+                <input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }} />
+                in <select name="staffgroup" id="staffgroup">
+{% for id, name in group_list %}
+                    <option value="{{ id }}"{{ selected(id == privilege.staffGroup) }}>{{ name }}</option>
 {% endfor %}
                 </select>
             </td>
@@ -49,7 +47,7 @@
 {% endif %}
 {% if privilege.id %}
         <tr>
-            <td class="label">Current users in this class</td>
+            <td class="label">Total users in this class</td>
             <td>{{ privilege.userTotal|number_format }}&nbsp;<a href="/user.php?action=search&class[]={{ privilege.id }}" class="brackets">View</a></td>
         </tr>
 {% endif %}

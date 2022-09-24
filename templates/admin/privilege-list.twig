@@ -19,7 +19,6 @@
                     {{ privilege(default, user, 'site_make_bookmarks') }}
                     {{ privilege(default, user, 'site_edit_wiki') }}
                     {{ privilege(default, user, 'zip_downloader') }}
-
                 </td>
             </tr>
         </table>
@@ -95,7 +94,7 @@
             </tr>
             <tr>
                 <td>
-                    * Only applies to users with the same or lower class level<br />
+                    <ul><li>Only applies to users with the same or lower class level</li></ul>
                     {{ privilege(default, user, 'users_mod') }}
                     {{ privilege(default, user, 'users_edit_usernames') }}
                     {{ privilege(default, user, 'users_edit_ratio') }}
@@ -220,5 +219,5 @@
             </tr>
         </table>
     </div>
-    <div class="submit_container"><input type="submit" name="submit" value="Save Permission Class" /></div>
+    <div class="submit_container"><div class="left"><input type="submit" name="submit" value="Save Privileges" />
 </div>

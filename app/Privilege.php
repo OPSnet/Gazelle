@@ -100,6 +100,7 @@ class Privilege extends BaseObject {
             );
             $this->userFlush(self::$db->collect(0, false));
         }
+        self::$cache->deleteMulti(['user_class', 'staff_class']);
         return $modified;
     }
 
