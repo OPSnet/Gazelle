@@ -818,7 +818,11 @@ class Text {
                     $Str .= self::bbcodeThreadUrl($Block['Val']);
                     break;
                 case 'pl':
-                    $Str .= \Torrents::bbcodeUrl($Block['Val'], $Block['Attr']);
+                    $pl = \Gazelle\Manager\Torrent::renderPL(
+                        (int)$Block['Val'],
+                        preg_split('/\s*,\s*/m', strtolower($Block['Attr']), -1, PREG_SPLIT_NO_EMPTY)
+                    );
+                    $Str .= is_null($pl) ? "[pl]{$Block['Val']}[/pl]" : $pl;
                     break;
                 case 'torrent':
                     $GroupID = false;
