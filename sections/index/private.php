@@ -51,7 +51,7 @@ echo $Twig->render('index/private-sidebar.twig', [
 ]);
 
 echo $Twig->render('index/private-main.twig', [
-    'admin'   => $Viewer->permitted('admin_manage_news'),
+    'admin'   => (int)$Viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
     'latest'  => $torMan->latestUploads(5),
     'news'    => $newsMan->headlines(),

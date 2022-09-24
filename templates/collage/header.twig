@@ -9,16 +9,19 @@
 {% endif %}
         <br /><br />
 {% if viewer.permitted('site_collages_subscribe') %}
-        <a href="#" id="subscribelink{{ collage.id }}" class="brackets" onclick="CollageSubscribe({{ collage.id }}); return false;">
+        {{- dom.click('#subscribelink' ~ collage.id, "CollageSubscribe(" ~ collage.id ~ "); return false;") -}}
+        <a href="#" id="subscribelink{{ collage.id }}" class="brackets">
     {%- if collage.isSubscribed(viewer.id) %}Unsubscribe{% else %}Subscribe{% endif %}</a>
 {% endif %}
 {% if viewer.permitted('site_collages_delete') or (viewer.permitted('site_edit_wiki') and not collage.isLocked) %}
         <a href="collages.php?action=edit&amp;collageid={{ collage.id }}" class="brackets">Edit description</a>
 {% endif %}
 {% if bookmarked %}
-        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets" onclick="Unbookmark('collage', {{ collage.id }}, 'Bookmark'); return false;">Remove bookmark</a>
+        {{- dom.click('#bookmarklink_collage_' ~ collage.id, "Unbookmark('collage', " ~ collage.id ~ ", 'Bookmark'); return false;") -}}
+        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets">Remove bookmark</a>
 {% else %}
-        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets" onclick="Bookmark('collage', {{ collage.id }}, 'Remove bookmark'); return false;">Bookmark</a>
+        {{- dom.click('#bookmarklink_collage_' ~ collage.id, "Bookmark('collage', " ~ collage.id ~ ", 'Remove bookmark'); return false;") -}}
+        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets">Bookmark</a>
 {% endif %}
 {% if collage.userCanContribute(viewer) %}
         <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ collage.id }}" class="brackets">Manage entries</a>

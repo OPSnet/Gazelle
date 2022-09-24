@@ -29,13 +29,16 @@
         </div>
 
 {% for article in news[0:5] %}
-        <div id="news{{ article.0 }}" class="box news_post">
+        <div class="box news_post">
             <div class="head">
                 <strong>{{ article.1|bb_format }}</strong> {{ article.3|time_diff }}
 {% if admin %}
                 - <a href="tools.php?action=editnews&amp;id={{ article.0 }}" class="brackets">Edit</a>
 {% endif %}
-            <span style="float: right;"><a href="#" onclick="$('#newsbody{{ article.0 }}').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
+
+{%- set name = 'news' ~ article[0] -%}
+{{- dom.click(name, "$('#newsbody" ~ article[0] ~ "').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide') ? 'Show' : 'Hide'; return false;") -}}
+            <span id="{{ name }}" style="float: right;" class="brackets">Hide</span>
             </div>
 
             <div id="newsbody{{ article.0 }}" class="pad">{{ article.2|bb_format }}</div>
@@ -44,7 +47,8 @@
 
         <div id="more_news" class="box">
             <div class="head">
-                <em><span><a href="#" onclick="news_ajax(event, 3, 5, {{ admin ? 1 : 0 }}, false); return false;">Click to load more news</a>.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
+                {{- dom.click('#more-news-loader', "news_ajax(event, 3, 5, " ~ admin ~ ", false); return false;") -}}
+                <em><span id="more-news-loader">Click to load more news.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
             </div>
         </div>
     </div>

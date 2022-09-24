@@ -1,8 +1,12 @@
 {% from 'macro/paginator.twig' import pager %}
+{% set result %}
 {% for peer in list %}
     {% if loop.first %}
 <h4>List of Seeders</h4>
-<div class="linkbox">{{ pager('show_peers', torrent_id, paginator.page, paginator.pages)|raw }}</div>
+{% set linkbox %}
+<div class="linkbox">{{ pager('show_seeders', torrent_id, paginator.page, paginator.pages)|raw }}</div>
+{% endset %}
+{{ linkbox|raw }}
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
         <td>User</td>
@@ -13,8 +17,8 @@
         <td>IP Address</td>
         <td>Useragent</td>
         {% if is_admin %}
-        <td><img src="{{ url_stem }}leechers.png" class="tooltip" alt="Downloaded?" title="Downloaded?" /></td>
-        <td><img src="{{ url_stem }}snatched.png" class="tooltip" alt="Snatched?" title="Snatched?" /></td>
+        <td><img src="{{ url_stem|raw }}leechers.png" class="tooltip" alt="Downloaded?" title="Downloaded?" /></td>
+        <td><img src="{{ url_stem|raw }}snatched.png" class="tooltip" alt="Snatched?" title="Snatched?" /></td>
         {% endif %}
     </tr>
     {% endif %}
@@ -49,8 +53,10 @@
     </tr>
     {% if loop.last %}
 </table>
-<div class="linkbox">{{ pager('show_peers', torrent_id, paginator.page, paginator.pages)|raw }}</div>
+{{ linkbox|raw }}
     {% endif %}
 {% else %}
 <div style="text-align: center">No current seeders</div>
 {% endfor %}
+{% endset %}
+{{ {'page': paginator.page, 'pages': paginator.pages, 'debug': list, 'html': result}|json_encode|raw }}

@@ -592,7 +592,7 @@ if (!$torrentList) {
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
                         <a href="#" class="brackets tooltip" onclick="show_snatches('<?=$TorrentID?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
 <?php } ?>
-                        <a href="#" class="brackets tooltip" onclick="show_peers('<?=$TorrentID?>', 0); return false;" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
+                        <a href="#" class="brackets tooltip" onclick="show_seeders('<?=$TorrentID?>', 0); return false;" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
                         <a href="#" class="brackets" onclick="show_files('<?=$TorrentID?>'); return false;">View contents</a>
 <?php if ($reportTotal) { ?>
                         <a href="#" class="brackets" onclick="show_reported('<?=$TorrentID?>'); return false;">View report information</a>

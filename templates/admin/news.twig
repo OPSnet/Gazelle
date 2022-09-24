@@ -36,7 +36,8 @@
     {% endfor %}
     <div id="more_news" class="box">
         <div class="head">
-            <em><span><a href="#" onclick="news_ajax(event, 3, 0, 1, '{{ auth }}'); return false;">Click to load more news</a>.</span></em>
+            {{- dom.click('#news-loader', "news_ajax(event, 3, 0, 1, authkey); return false;") -}}
+            <em><span id="news-loader">Click to load more news.</span></em>
         </div>
     </div>
 {% endif %}

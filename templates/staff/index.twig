@@ -13,7 +13,8 @@
         <h3>Contact Staff</h3>
         <div id="below_box">
             <p>If you are looking for help with a general question, we appreciate it if you would only message through the staff inbox, where we can all help you.</p>
-            <p>You can do that by <strong><a href="#" onclick="$('#compose').gtoggle(); return false;">sending a Staff PM</a></strong>.</p>
+            {{- dom.click('#open-compose', "$('#compose').gtoggle(); return false;") }}
+            <p>You can do that by <strong><a href="#" id="open-compose">sending a Staff PM</a></strong>.</p>
             <p>If you'd like to join our staff, please feel free to <strong><a href="apply.php">apply</a></strong>!</p>
         </div>
     </div>

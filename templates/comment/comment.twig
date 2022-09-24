@@ -11,9 +11,11 @@
             <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ id }}</a>
                 <strong>{{ author.id|user_full }}</strong> {{ added_time|time_diff }} on {{ heading|raw }}
                 <span id="postcontrol-{{ id }}">
-                - <a href="#quickpost" onclick="Quote('{{ id }}','{{ author.username }}', true);" class="brackets">Quote</a>
+                {{- dom.click('#quote-' ~ id, "Quote('" ~ id ~ "','" ~ author.username ~ "', true)") -}}
+                - <a href="#quickpost" id="quote-{{ id }}" class="brackets">Quote</a>
 {%    if show_edit %}
-                - <a href="#post{{ id }}" onclick="Edit_Form('{{ id }}','{{ key }}');" class="brackets">Edit</a>
+                {{- dom.click('#edit-' ~ id, "Edit_Form('" ~ id ~ "','" ~ key ~ "')") -}}
+                - <a href="#post{{ id }}" id="edit-{{ id }}" class="brackets">Edit</a>
 {%    endif %}
                 </span>
             </div>
@@ -21,14 +23,16 @@
                 <a href="reports.php?action=report&amp;type=comment&amp;id={{ id }}" class="brackets">Report</a>
 {% if viewer.permitted('site_admin_forums') %}
 {%    if viewer.permitted('site_forum_post_delete') %}
-                - <a href="#post{{ id }}" onclick="Delete('{{ id }}');" class="brackets">Delete</a>
+                {{- dom.click('#remove-' ~ id, "Delete('" ~ id ~ "')") -}}
+                - <a href="#post{{ id }}" id="remove-{{ id }}" class="brackets">Delete</a>
 {%    endif %}
 {%    if show_warn %}
                 <form class="manage_form hidden" name="user" id="warn{{ id }}" action="comments.php" method="post">
                     <input type="hidden" name="action" value="warn" />
                     <input type="hidden" name="postid" value="{{ id }}" />
                 </form>
-                - <a href="#" onclick="$('#warn{{ id }}').raw().submit(); return false;" class="brackets">Warn</a>
+                {{- dom.click('#warn-' ~ id, "$('#warn" ~ id ~ "').raw().submit(); return false;") -}}
+                - <a href="#" id="warn-{{ id }}" class="brackets">Warn</a>
 {%     endif %}
                 &nbsp;
                 <a href="#">&uarr;</a>
@@ -48,7 +52,8 @@
                 <br />
                 <span class="last_edited">
 {%    if viewer.permitted('site_admin_forums') %}
-                <a href="#content{{ id }}" onclick="LoadEdit('{{ page }}', {{ id }}, 1); return false;">&laquo;</a>
+                {{- dom.click('#load-edit-' ~ id, "LoadEdit('" ~ page ~ "', " ~ id ~ ", 1); return false;") -}}
+                <a href="#content{{ id }}" id="load-edit-{{ id }}">&laquo;</a>
 {%    endif %}
                 Last edited by {{ editor.id|user_url }} {{ edit_time|time_diff }}</span>
 {% endif %}

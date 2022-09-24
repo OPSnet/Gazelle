@@ -1,12 +1,8 @@
 {% macro pager(action, torrent_id, page, pages) %}
-    {% if pages > 1 %}
-        {% for p in 1 .. pages %}
-            {% if not loop.first %} | {% endif %}
-            {% if page == p %}
-                {{ p }}
-            {% else %}
-                <a href="#" onclick="{{ action }}({{ torrent_id }}, {{ p }})">{{ p }}</a>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-{% endmacro %}
+    {%- if pages > 1 %}
+        {%- for p in 1 .. pages %}
+            {%- if not loop.first %}·{% endif -%}
+            <span class="{% if p == page %}pager-cur {% endif %}pager-link pager-{{ p }}">{{ p }}</span>
+        {%- endfor %}
+    {%- endif %}
+{%- endmacro %}

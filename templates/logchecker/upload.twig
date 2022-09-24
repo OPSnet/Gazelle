@@ -38,8 +38,10 @@
                     <td colspan="2" id="logfields">
                         Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>.
                         <br />
-                        <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a>
-                        <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+                        {{- dom.click('#log-add', "AddLogField();") -}}
+                        {{- dom.click('#log-del', "RemoveLogField();") -}}
+                        <a href="javascript:;" id="log-add" class="brackets">+</a>
+                        <a href="javascript:;" id="log-del" class="brackets">&minus;</a>
                         Add or remove additional logfiles for multi-disc releases.<br />
                         <input id="file" type="file" accept="{{ accepted }}" name="logfiles[]" size="50" required />
                     </td>

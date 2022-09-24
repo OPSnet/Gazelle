@@ -1,0 +1,47 @@
+From: Spine
+To: Developers
+Date: 2021-10-31
+Subject: Orpheus Development Papers #8 - Manipulating the DOM
+Version: 1
+
+Traditional Gazelle markup blithely mixes HTML and Javascript together,
+e.g.:
+
+  <input type="button" value="Preview" onclick="Quick_Preview();" />
+
+This is not a good practice and prevents using CSP nonces to prevent
+unwanted code injection into the site. An attempt is made to tackle this
+problem, in the guise of the Dominator.
+
+At it's simplest, this is simply the caching of Javascript actions (onclick,
+onchange) that need to be attached to DOM elements and are dumped at the end
+of the page, and are loaded by a DocumentReady event.
+
+This usually involves add an id to an element (in order to be able to attach
+to the element afterwards). For instance in templates/staffpm/message.twig
+
+    <input type="button" onclick="Assign();" value="Assign" />
+
+becomes
+
+    {{- dom.click('#assign', "Assign();") -}}
+    <input type="button" id="assign" value="Assign" />
+
+The theory being that it is important to keep the Javascript action close to
+the HTML element that requires it (principle of locality), while not
+emitting the action until the page has been loaded.
+
+Sometimes there is a JS file that is pulled in from the header() method, in
+which case a DocumentReady handler can be added there (when in fact there is
+not one already present). In such cases it may be clearer to add the action
+there.
+
+Actions that are only actionable by staff should preferrably use the
+Dominator. The less code that is sent to the client, the better.
+
+Of particular note, the torrent detail pages have a number of subsections
+that are pulled in via Ajax (the lists of downloaders, snatchers and
+seeders). All of these lists are subject to pagination. As such, the HTML
+result that is returned from the Ajax call (to be attached to the DOM)
+itself needs onclick event attached to it in order to make pagination work.
+The present code works, but is a bit cumbersome and possibly over complex.

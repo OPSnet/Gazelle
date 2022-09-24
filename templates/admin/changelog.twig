@@ -39,7 +39,8 @@
                     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                     <input type="hidden" name="change_id" value="{{ change.id }}" />
                 </form>
-                <a href="#" onclick="$('#delete_{{ change.id }}').raw().submit(); return false;" class="brackets">Delete</a>
+                {{- dom.click('#changelog-rm-' ~ change.id, "$('#delete_" ~ change.id ~ "').raw().submit(); return false;") -}}
+                <a href="#" id="changelog-rm-{{ change.id }}" class="brackets">Delete</a>
             </span>
     {% endif %}
         </div>
