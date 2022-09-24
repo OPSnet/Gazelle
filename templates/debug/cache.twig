@@ -1,10 +1,12 @@
 {% set nr = list|length %}
 {% for key, value in list %}
     {% if loop.first %}
+    {%- set name = 'debug_cache_t_' ~ key -%}
+    {{- dom.click('.view-key', "$(this).parent().next().children().gtoggle(); return false;") -}}
 <table class="layout" width="100%">
     <tr>
         <td><strong><a href="#" id="debug-view-cache" class="brackets">View</a>
-        {{ nr|number_format }} Cache key{% if nr > 1 %}s{% endif %}
+        {{ nr|number_format }} Cache key{{ nr|plural }}
         ({{ time|number_format(2) }} ms)</strong> (mean: {{ (time/nr)|number_format(5) }} ms):</td>
     </tr>
 </table>
@@ -12,7 +14,7 @@
     {% endif %}
     <tr>
         <td class="label nobr debug_info debug_cache_key">
-            <a href="#" onclick="$('#debug_cache_{{ key }}').gtoggle(); return false;">{{ key }}</a>
+            <span class="view-key">{{ key }}</span>
             <a href="tools.php?action=clear_cache&amp;key={{ key }}&amp;type=clear" target="_blank" class="brackets tooltip" title="Flush this cache key">Flush</a>
         </td>
         <td class="debug_data debug_cache_data">

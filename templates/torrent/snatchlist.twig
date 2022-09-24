@@ -1,15 +1,19 @@
 {% from 'macro/paginator.twig' import pager %}
-{% for snatch in page %}
+{% set result %}
+{% for snatch in list %}
     {% if loop.first %}
 <h4 class="tooltip" title="List of users that have reported a snatch to the tracker">List of Snatchers</h4>
+{% set linkbox %}
 <div class="linkbox">{{ pager('show_snatches', torrent_id, paginator.page, paginator.pages)|raw }}</div>
+{% endset %}
+{{ linkbox|raw }}
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
         {% for n in range(1, 2) %}
         <td>User</td>
         <td>Time</td>
-        <td><img src="{{ url_stem }}leechers.png" class="tooltip" alt="Downloaded?" title="Downloaded?" /></td>
-        <td><img src="{{ url_stem }}seeders.png" class="tooltip" alt="Seeding?" title="Seeding?" /></td>
+        <td><img src="{{ url_stem|raw }}leechers.png" class="tooltip" alt="Downloaded?" title="Downloaded?" /></td>
+        <td><img src="{{ url_stem|raw }}seeders.png" class="tooltip" alt="Seeding?" title="Seeding?" /></td>
         {% endfor %}
     </tr>
     <tr>
@@ -24,8 +28,10 @@
     {% if loop.last %}
     </tr>
 </table>
-<div class="linkbox">{{ pager('show_snatches', torrent_id, paginator.page, paginator.pages)|raw }}</div>
+{{ linkbox|raw }}
     {% endif %}
 {% else %}
 <div style="text-align: center">No snatches recorded</div>
 {% endfor %}
+{% endset %}
+{{ {'page': paginator.page, 'pages': paginator.pages, 'debug': list, 'html': result}|json_encode|raw }}

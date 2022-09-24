@@ -123,7 +123,7 @@ $remasterTuple = $torrent->remasterTuple();
                             <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $torrentId ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
                             <a href="#" class="brackets tooltip" onclick="show_snatches('<?= $torrentId ?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
 <?php } ?>
-                            <a href="#" class="brackets" onclick="show_peers('<?= $torrentId ?>', 0); return false;">View seeders</a>
+                            <a href="#" class="brackets" onclick="show_seeders('<?= $torrentId ?>', 0); return false;">View seeders</a>
                             <a href="#" class="brackets" onclick="show_files('<?= $torrentId ?>'); return false;">View contents</a>
 <?php if ($Reported) { ?>
                             <a href="#" class="brackets" onclick="show_reported('<?= $torrentId ?>'); return false;">View report information</a>

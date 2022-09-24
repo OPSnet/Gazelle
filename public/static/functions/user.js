@@ -171,6 +171,7 @@ $(document).ready(function() {
         }
         $('#change_password').val(password);
     });
+
     $("#collect-upload").click(function() { return download_warning(); });
     $("#collect-snatch").click(function() { return download_warning(); });
     $("#collect-seeding").click(function() { return download_warning(); });

@@ -8,7 +8,7 @@ if (is_null($torrent)) {
 $paginator = new Gazelle\Util\Paginator(PEERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($torrent->seederTotal());
 
-echo $Twig->render('torrent/peerlist.twig', [
+echo $Twig->render('torrent/seederlist.twig', [
     'is_admin'   => $Viewer->permitted('users_mod'),
     'list'       => $torrent->seederList($Viewer->id(), $paginator->limit(), $paginator->offset()),
     'paginator'  => $paginator,

@@ -277,7 +277,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
                         <a href="#" class="brackets tooltip" onclick="show_snatches('<?=($TorrentID)?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
-                        <a href="#" class="brackets" onclick="show_peers('<?=($TorrentID)?>', 0); return false;">Seeders</a>
+                        <a href="#" class="brackets" onclick="show_seeders('<?=($TorrentID)?>', 0); return false;">Seeders</a>
                         <a href="#" class="brackets" onclick="show_files('<?=($TorrentID)?>'); return false;">Contents</a>
                         <div id="viewlog_<?=$TorrentID?>" class="hidden"></div>
                         <div id="peers_<?=$TorrentID?>" class="hidden"></div>
@@ -477,7 +477,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?= $ExtraID ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $ExtraID ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
                         <a href="#" class="brackets tooltip" onclick="show_snatches('<?= $ExtraID ?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
-                        <a href="#" class="brackets" onclick="show_peers('<?= $ExtraID ?>', 0); return false;">Seeders</a>
+                        <a href="#" class="brackets" onclick="show_seeders('<?= $ExtraID ?>', 0); return false;">Seeders</a>
                         <a href="#" class="brackets" onclick="show_files('<?= $ExtraID ?>'); return false;">Contents</a>
                         <div id="viewlog_<?= $ExtraID ?>" class="hidden"></div>
                         <div id="peers_<?= $ExtraID ?>" class="hidden"></div>

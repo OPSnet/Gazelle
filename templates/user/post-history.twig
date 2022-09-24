@@ -1,7 +1,7 @@
 {{ header(user.username ~ " &rsaquo; " ~ title, {'js': 'subscriptions,comments,bbcode'}) }}
 <div class="thin">
     <div class="header">
-        <h2><a href="{{ user.url }}">{{ user.username }}</a> &rsaquo; {{ title }}</h2>
+        <h2>{{ user.link|raw }} &rsaquo; {{ title }}</h2>
         <div class="linkbox">
             <br /><br />
 {% if not own_profile %}
@@ -60,8 +60,9 @@
             {% endif %}
         {% endif %}
                 <span id="bar{{ p.post_id }}" style="float: right;">
-        {% if own_profile and not p.thread_id in subscriptions %}
-                    <a href="#" onclick="Subscribe({{ p.thread_id }}); $('.subscribelink{{ p.thread_id }}').remove(); return false;" class="brackets subscribelink{{ p.thread_id }}">Subscribe</a>
+        {% if own_profile and p.thread_id not in subscriptions %}
+                    {{- dom.click('#sub-' ~ p.thread_id, "Subscribe(" ~ p.thread_id ~ "); $('.subscribelink" ~ p.thread_id ~ "').remove(); return false;") -}}
+                    <a href="#" id="sub-{{ p.thread_id }}" class="brackets subscribelink{{ p.thread_id }}">Subscribe</a>
                     &nbsp;
         {% endif %}
                     <a href="#">&uarr;</a>
@@ -82,7 +83,8 @@
                     <br /><br />
                     <span class="last_edited">
                 {%- if is_fmod -%}
-                    <a href="#content{{ p.post_id }}" onclick="LoadEdit({{ p.post_id }}, 1);">&laquo;</a>
+                    {{- dom.click('#post-hist-' ~ p.post_id, "LoadEdit('forums', " ~ p.post_id ~ ", 1); return false") -}}
+                    <a href="#content{{ p.post_id }}" id="post-hist-{{ p.post_id }}">&laquo;</a>
                 {%- endif %}
                     Last edited by {{ p.edited_user_id|user_url }} {{ p.edited_time|time_diff }}
                     </span>

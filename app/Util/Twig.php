@@ -282,7 +282,8 @@ class Twig {
             return get_class($user) === 'Gazelle\\User' && (new \Gazelle\User\Privilege($user))->isDonor();
         }));
 
+        $twig->addGlobal('dom', new \Gazelle\Util\Dominator);
+
         return $twig;
     }
 }
-

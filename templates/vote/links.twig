@@ -1,18 +1,18 @@
 <span class="votespan brackets" style="white-space: nowrap;">
 {%- if viewer.permitted('site_album_votes') %}vote:
+{{- dom.click('#vote_up_' ~ group_id, "UpVoteGroup(" ~ group_id ~ ", authkey); return false;") -}}
+{{- dom.click('#vote_down_' ~ group_id, "DownVoteGroup(" ~ group_id ~ ", authkey); return false;") -}}
+{{- dom.click('#vote_clear_' ~ group_id, "UnvoteGroup(" ~ group_id ~ ", authkey); return false;") -}}
 <a href="#" id="vote_up_{{ group_id }}" class="tooltip small_upvote vote_link_{{ group_id }}{%
-        if vote != 0 %} hidden{% endif %}" title="Upvote" onclick="UpVoteGroup({{ group_id }}, '{{
-            viewer.auth }}'); return false;">&#x25b2;</a>
+    if vote != 0 %} hidden{% endif %}" title="Upvote">&#x25b2;</a>
 <span id="voted_up_{{ group_id }}" class="tooltip small_upvoted{%
     if vote in [-1, 0] %} hidden{% endif %}" title="You have upvoted">&#x25b2;</span>
 
 <a href="#" id="vote_down_{{ group_id }}" class="tooltip small_downvote vote_link_{{ group_id }}{%
-    if vote != 0 %} hidden{% endif %}" title="Downvote" onclick="DownVoteGroup({{ group_id }}, '{{
-        viewer.auth }}'); return false;">&#x25bc;</a>
+    if vote != 0 %} hidden{% endif %}" title="Downvote">&#x25bc;</a>
 <span id="voted_down_{{ group_id }}" class="tooltip small_downvoted{%
     if vote in [0, 1] %} hidden{% endif %}" title="You have downvoted">&#x25bc;</span>
 
 <a href="#" id="vote_clear_{{ group_id }}" class="tooltip small_clearvote{%
-    if vote == 0 %} hidden{% endif %}" title="Clear your vote" onclick="UnvoteGroup({{ group_id }}, '{{
-        viewer.auth }}'); return false;">&#x2715;</a>
+    if vote == 0 %} hidden{% endif %}" title="Clear your vote">&#x2715;</a>
 {% endif %}score: <span id="votescore-{{ group_id }}">{{ (score * 100.0)|number_format(1) }}</span></span>

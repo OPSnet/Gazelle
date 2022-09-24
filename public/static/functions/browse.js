@@ -1,36 +1,85 @@
-function show_peers (TorrentID, Page) {
+function show_downloads_load (torrentid, page) {
+    $('#downloads_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
+    $.ajax({
+        url: 'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + torrentid,
+        success: function(json) {
+            var response = JSON.parse(json);
+            $('#downloads_' + torrentid).gshow().raw().innerHTML = response.html;
+            for (p = 1; p <= response.pages; ++p) {
+                if (p != response.page) {
+                    $('.pager-' + p).attr(
+                        'onclick',
+                        "show_downloads(" + torrentid + ", " + $('.pager-' + p).raw().innerHTML + ")"
+                    );
+                }
+            }
+        }
+    });
+}
+
+function show_snatches_load (torrentid, page) {
+    $('#snatches_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
+    $.ajax({
+        url: 'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + torrentid,
+        success: function(json) {
+            var response = JSON.parse(json);
+            $('#snatches_' + torrentid).gshow().raw().innerHTML = response.html;
+            for (p = 1; p <= response.pages; ++p) {
+                if (p != response.page) {
+                    $('.pager-' + p).attr(
+                        'onclick',
+                        "show_snatches(" + torrentid + ", " + $('.pager-' + p).raw().innerHTML + ")"
+                    );
+                }
+            }
+        }
+    });
+}
+
+function show_seeders_load (torrentid, page) {
+    $('#peers_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
+    $.ajax({
+        url: 'torrents.php?action=peerlist&page=' + page + '&torrentid=' + torrentid,
+        success: function(json) {
+            var response = JSON.parse(json);
+            $('#peers_' + torrentid).gshow().raw().innerHTML = response.html;
+            for (p = 1; p <= response.pages; ++p) {
+                if (p != response.page) {
+                    $('.pager-' + p).attr(
+                        'onclick',
+                        "show_seeders(" + torrentid + ", " + $('.pager-' + p).raw().innerHTML + ")"
+                    );
+                }
+            }
+        }
+    });
+}
+
+function show_downloads (TorrentID, Page) {
     if (Page > 0) {
-        ajax.get('torrents.php?action=peerlist&page=' + Page + '&torrentid=' + TorrentID, function(response) {
-            $('#peers_' + TorrentID).gshow().raw().innerHTML = response;
-        });
+        show_downloads_load(TorrentID, Page);
     } else {
-        if ($('#peers_' + TorrentID).raw().innerHTML === '') {
-            $('#peers_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            ajax.get('torrents.php?action=peerlist&torrentid=' + TorrentID, function(response) {
-                $('#peers_' + TorrentID).gshow().raw().innerHTML = response;
-            });
+        if ($('#downloads_' + TorrentID).raw().innerHTML === '') {
+            $('#downloads_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
+            show_downloads_load(TorrentID, 1);
         } else {
-            $('#peers_' + TorrentID).gtoggle();
+            $('#downloads_' + TorrentID).gtoggle();
         }
     }
     $('#viewlog_' + TorrentID).ghide();
+    $('#peers_' + TorrentID).ghide();
     $('#snatches_' + TorrentID).ghide();
-    $('#downloads_' + TorrentID).ghide();
     $('#files_' + TorrentID).ghide();
     $('#reported_' + TorrentID).ghide();
 }
 
 function show_snatches (TorrentID, Page) {
     if (Page > 0) {
-        ajax.get('torrents.php?action=snatchlist&page=' + Page + '&torrentid=' + TorrentID, function(response) {
-            $('#snatches_' + TorrentID).gshow().raw().innerHTML = response;
-        });
+        show_snatches_load(TorrentID, Page);
     } else {
         if ($('#snatches_' + TorrentID).raw().innerHTML === '') {
             $('#snatches_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            ajax.get('torrents.php?action=snatchlist&torrentid=' + TorrentID, function(response) {
-                $('#snatches_' + TorrentID).gshow().raw().innerHTML = response;
-            });
+            show_snatches_load(TorrentID, 1);
         } else {
             $('#snatches_' + TorrentID).gtoggle();
         }
@@ -42,24 +91,20 @@ function show_snatches (TorrentID, Page) {
     $('#reported_' + TorrentID).ghide();
 }
 
-function show_downloads (TorrentID, Page) {
+function show_seeders (TorrentID, Page) {
     if (Page > 0) {
-        ajax.get('torrents.php?action=downloadlist&page=' + Page + '&torrentid=' + TorrentID, function(response) {
-            $('#downloads_' + TorrentID).gshow().raw().innerHTML = response;
-        });
+        show_seeders_load(TorrentID, Page);
     } else {
-        if ($('#downloads_' + TorrentID).raw().innerHTML === '') {
-            $('#downloads_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            ajax.get('torrents.php?action=downloadlist&torrentid=' + TorrentID, function(response) {
-                $('#downloads_' + TorrentID).raw().innerHTML = response;
-            });
+        if ($('#peers_' + TorrentID).raw().innerHTML === '') {
+            $('#peers_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
+            show_seeders_load(TorrentID, 1);
         } else {
-            $('#downloads_' + TorrentID).gtoggle();
+            $('#peers_' + TorrentID).gtoggle();
         }
     }
     $('#viewlog_' + TorrentID).ghide();
-    $('#peers_' + TorrentID).ghide();
     $('#snatches_' + TorrentID).ghide();
+    $('#downloads_' + TorrentID).ghide();
     $('#files_' + TorrentID).ghide();
     $('#reported_' + TorrentID).ghide();
 }

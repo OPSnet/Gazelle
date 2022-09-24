@@ -6,7 +6,9 @@
     <input type="hidden" id="form_comment_hash" name="form_comment_hash" value="{{ hash }}" />
     <div class="box box2" id="l_a_box">
         <div class="head">
-            Linked Accounts ({{ list|length }}) <a href="#" onclick="$('.linkedaccounts').gtoggle(); return false;" class="brackets">View</a>
+            {{- dom.click('#view-linked', "$('.linkedaccounts').gtoggle(); return false;") -}}
+            Linked Accounts ({{ list|length }})
+            <a href="#" id="view-linked" class="brackets">View/Edit</a>
         </div>
         <table width="100%" class="layout hidden linkedaccounts">
 {% for u in list %}
@@ -14,7 +16,9 @@
             <tr>
     {% endif %}
                 <td align="left">{{ u.user_id|user_full }}
-                <a href="user.php?action=dupes&amp;dupeaction=remove&amp;auth={{ auth }}&amp;userid={{ user_id }}&amp;removeid={{ u.user_id }}" onclick="return confirm('Are you sure you wish to remove {{ u.username }} from this group?');" class="brackets tooltip" title="Remove linked account">X</a>
+                {{- dom.click('#remove-link-' ~ u.user_id, "return confirm('Are you sure you wish to remove " ~ u.username ~ " from this group?');") -}}
+                <a id="remove-link-{{ u.user_id }}" href="user.php?action=dupes&amp;dupeaction=remove&amp;auth={{ auth }}&amp;userid={{
+                    user_id }}&amp;removeid={{ u.user_id }}" class="remove-link brackets tooltip" title="Remove linked account">X</a>
                 </td>
     {% if not loop.last %}
         {% if loop.index0 > 0 and loop.index % 4 == 0 %}
@@ -40,7 +44,8 @@
                     <div id="editdupecomments" class="{{ list|length ? 'hidden' : '' }}">
                         <textarea name="dupecomments" onkeyup="resize('dupecommentsbox');" id="dupecommentsbox" cols="65" rows="5" style="width: 98%;"> {{ comments }}</textarea>
                     </div>
-                    <span style="float: right;"><a href="#" onclick="$('#dupecomments').gtoggle(); $('#editdupecomments').gtoggle(); resize('dupecommentsbox'); return false;" class="brackets">Edit linked account comments</a></span>
+                    {{- dom.click('#dupe-edit', "$('#dupecomments').gtoggle(); $('#editdupecomments').gtoggle(); resize('dupecommentsbox'); return false;") -}}
+                    <span style="float: right;"><a id="dupe-edit" href="#" class="brackets">Edit linked account comments</a></span>
                 </td>
             </tr>
         </table>

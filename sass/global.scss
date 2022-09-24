@@ -816,6 +816,21 @@ input[type="search"] {
     max-width: 800px;
 }
 
+.pager-link {
+  margin: 0px 2px;
+  padding: 1px 3px;
+}
+
+.pager-cur {
+  border: 1px solid #178c36;
+  color: #178c36;
+}
+
+.pager-link:hover {
+  border: 1px solid #1fd54f;
+  color: #1fd54f;
+}
+
 .rot90-container {
   position: relative;
   display: inline-block;
@@ -838,7 +853,7 @@ input[type="search"] {
 #user .twofa_text {
     font-size: 14px;
     margin-top: 10px;
-    font-weight: 600
+    font-weight: 600;
 }
 
 .debug_table {
