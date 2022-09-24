@@ -414,10 +414,18 @@ class Torrent {
                 $this->SphQL->where('categoryid', $CategoryFilter);
                 break;
 
+            case 'releasetype':
+                $id = (new \Gazelle\ReleaseType)->findIdByName($Value);
+                if ($id !== false) {
+                    $this->SphQL->where('ReleaseType', $id);
+                }
+                break;
+
             default:
                 if (!is_number($Value) && self::$Attributes[$Attribute] !== false) {
                     // Check if the submitted value can be converted to a valid one
                     $ValidValuesVarname = self::$Attributes[$Attribute];
+                    // This code is incomprehensible, I would like to kill the original dev
                     global $$ValidValuesVarname;
                     $ValidValues = array_map('strtolower', $$ValidValuesVarname);
                     if (($Value = array_search(strtolower($Value), $ValidValues)) === false) {
