@@ -4,6 +4,14 @@ namespace Gazelle\User;
 
 class History extends \Gazelle\BaseUser {
 
+    public function __construct(
+        \Gazelle\User $user,
+        protected string $column = 'ip',
+        protected string $direction = 'up'
+    ) {
+        parent::__construct($user);
+    }
+
     /**
      * Email history
      *
@@ -63,6 +71,12 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function siteIPv4(\Gazelle\Search\ASN $asn): array {
+        $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
+        $orderBy = match($this->column) {
+            'ip'    => "inet_aton(IP) $dir, StartTime $dir, EndTime $dir",
+            'first' => "StartTime $dir, inet_aton(IP) $dir, EndTime $dir",
+            'last'  => "EndTime $dir, inet_aton(IP) $dir, StartTime $dir",
+        };
         self::$db->prepared_query("
             SELECT IP                         AS ipv4,
                 min(StartTime)                AS first_seen,
@@ -70,7 +84,7 @@ class History extends \Gazelle\BaseUser {
             FROM users_history_ips
             WHERE UserID = ?
             GROUP BY IP
-            ORDER BY inet_aton(IP), StartTime DESC, EndTime DESC
+            ORDER BY $orderBy
             ", $this->user->id()
         );
         $asnList = $asn->findByIpList(self::$db->collect('ipv4', false));
@@ -85,6 +99,12 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function trackerIPv4(\Gazelle\Search\ASN $asn): array {
+        $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
+        $orderBy = match($this->column) {
+            'ip'    => "IP $dir, from_unixtime(min(tstamp)) $dir, from_unixtime(max(tstamp)) $dir",
+            'first' => "from_unixtime(min(tstamp)) $dir, IP $dir, from_unixtime(max(tstamp)) $dir",
+            'last'  => "from_unixtime(max(tstamp)) $dir, IP $dir, from_unixtime(min(tstamp)) $dir",
+        };
         self::$db->prepared_query("
             SELECT IP                      AS ipv4,
                 from_unixtime(min(tstamp)) AS first_seen,
@@ -92,7 +112,7 @@ class History extends \Gazelle\BaseUser {
             FROM xbt_snatched
             WHERE uid = ?
             GROUP BY inet_aton(IP)
-            ORDER BY tstamp DESC
+            ORDER BY $orderBy
             ", $this->user->id()
         );
         $asnList = $asn->findByIpList(self::$db->collect('ipv4', false));

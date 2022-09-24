@@ -9,9 +9,14 @@ if (is_null($user)) {
     error(404);
 }
 
+$column    = $_GET['col'] ?? 'ip';
+$direction = $_GET['dir'] ?? 'up';
+
 echo $Twig->render('admin/user-info.twig', [
-    'now'  => Date('Y-m-d H:i:s'),
-    'asn'  => new Gazelle\Search\ASN,
-    'user' => $user,
-    'hist' => new Gazelle\User\History($user),
+    'asn'       => new Gazelle\Search\ASN,
+    'column'    => $column,
+    'direction' => $direction,
+    'hist'      => new Gazelle\User\History($user, $column, $direction),
+    'now'       => Date('Y-m-d H:i:s'),
+    'user'      => $user,
 ]);
