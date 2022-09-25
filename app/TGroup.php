@@ -316,7 +316,7 @@ class TGroup extends BaseObject {
 
     public function cover(): string {
         return $this->info()['Image']
-            ?? (STATIC_SERVER . '/common/noartwork/' . strotolower($this->categoryName()) . ".png");
+            ?? (STATIC_SERVER . '/common/noartwork/' . strtolower($this->categoryName()) . ".png");
     }
 
     public function description(): string {
@@ -1074,7 +1074,7 @@ class TGroup extends BaseObject {
     /**
      * Return info about the deleted masterings of a torrent group.
      *
-     * @param return array of strings imploded by '!!'
+     * @return array of strings imploded by '!!'
      *  [torrent_id, remastered, title, year, record_label, catalogue_number]
      */
     public function deletedMasteringList(): array {
