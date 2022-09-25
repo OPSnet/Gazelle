@@ -12,7 +12,7 @@
                 <div style="float: left;"><a class="post_id" href="{{ "#{url}&postid=#{post.ID}#post#{post.ID}" }}">#{{ post.ID }}</a>
                     <strong>{{ post.AuthorID|user_full }}</strong> {{ post.AddedTime|time_diff }}
                     <span id="postcontrol-{{ post.ID }}">
-                    - <a href="#quickpost" onclick="Quote('{{ post.ID }}','{{ post.AuthorID }}', true);" class="brackets">Quote</a>
+                    - <a href="#quickpost" onclick="Quote('{{ post.ID }}','{{ post.Username }}', true);" class="brackets">Quote</a>
     {% if (viewer.permitted('site_moderate_forums')) or (post.AuthorID == viewer.Id) %}
                     - <a href="#post{{ post.ID }}" onclick="Edit_Form('{{ post.ID }}','{{ key }}');" class="brackets">Edit</a>
     {% endif %}
