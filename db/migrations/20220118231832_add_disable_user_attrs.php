@@ -6,7 +6,7 @@ use Phinx\Migration\AbstractMigration;
 final class AddDisableUserAttrs extends AbstractMigration
 {
     public function up(): void
-    {   
+    {
          $rows = [
             ['Name' => 'disable-avatar', 'Description' => 'This user has avatar privileges disabled'],
             ['Name' => 'disable-forums', 'Description' => 'This user has forum privileges disabled'],

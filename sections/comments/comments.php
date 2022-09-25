@@ -221,9 +221,9 @@ if ($Action == 'requests') {
     $Artists = Artists::get_artists($GroupIDs);
 }
 
-$Links = implode(' ', 
+$Links = implode(' ',
     // show links to the other types of pages having comments
-    array_map(fn($a) => "<a href=\"comments.php?action=$a$linkId\" class=\"brackets\">" . ucfirst(rtrim($a, 's')) . ' comments</a>', 
+    array_map(fn($a) => "<a href=\"comments.php?action=$a$linkId\" class=\"brackets\">" . ucfirst(rtrim($a, 's')) . ' comments</a>',
         array_filter(['artist', 'collages', 'requests', 'torrents'], fn($a) => $a != $Action)
     )
 );

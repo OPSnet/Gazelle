@@ -12,7 +12,7 @@ class Irc
         $curl->setUseProxy(false)
             ->setMethod(CurlMethod::POST)
             ->setOption(CURLOPT_POSTFIELDS, $message)
-            ->setOption(CURLOPT_HTTPHEADER, array('Content-Type: plain/text'));
+            ->setOption(CURLOPT_HTTPHEADER, ['Content-Type: plain/text']);
         $url = IRC_HTTP_SOCKET_ADDRESS . 'irc_msg/' . urlencode($target);
         return $curl->fetch($url);
     }
