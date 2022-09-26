@@ -138,7 +138,7 @@ class History extends \Gazelle\BaseUser {
             ", $this->user->id()
         );
         $n += self::$db->affected_rows();
-        $this->flush();
+        $this->user->flush();
         return $n;
     }
 
@@ -146,7 +146,7 @@ class History extends \Gazelle\BaseUser {
         self::$db->prepared_query('
             DELETE FROM users_downloads
             WHERE UserID = ?
-            ', $this->id
+            ', $this->user->id()
         );
         return self::$db->affected_rows();
     }
@@ -169,7 +169,7 @@ class History extends \Gazelle\BaseUser {
             WHERE ID = ?
             ", $email, $this->user->id()
         );
-        $this->flush();
+        $this->user->flush();
         return self::$db->affected_rows() === 1;
     }
 
@@ -180,9 +180,9 @@ class History extends \Gazelle\BaseUser {
                 RatioWatchDownload = 0,
                 RatioWatchTimes = 0
             WHERE UserID = ?
-            ", $this->id
+            ", $this->user->id()
         );
-        $this->flush();
+        $this->user->flush();
         return self::$db->affected_rows() === 1;
     }
 
@@ -190,9 +190,9 @@ class History extends \Gazelle\BaseUser {
         self::$db->prepared_query("
             DELETE FROM xbt_snatched
             WHERE uid = ?
-            ", $this->id
+            ", $this->user->id()
         );
-        $this->flushRecentSnatch();
+        $this->user->flushRecentSnatch();
         return self::$db->affected_rows();
     }
 }

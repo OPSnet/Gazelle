@@ -17,7 +17,7 @@
         <th>ASN</th>
         <th>Useragent</th>
     </tr>
-{% for r in history.email  %}
+{% for r in history.email(asn)  %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ r.email }}</td>
         <td>{{ r.created }}</td>
@@ -53,7 +53,7 @@
         <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.user.email }}</td>
         <td>{{ r.created }}</td>
-        <td>{{ ip_search(r.ipv4) }} ({{ rdns(.r.ipv4) ]})</a></td>
+        <td>{{ ip_search(r.ipv4) }} ({{ rdns(r.ipv4) }})</a></td>
         <td>{{ r.cc }}</td>
         <td>{{ r.asn }}</td>
         <td>{{ r.useragent }}</td>
