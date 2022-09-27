@@ -15,13 +15,14 @@
     "lint:php:phpcs": "vendor/bin/phpcs -p",
     "lint:php": "yarn lint:php:internal && yarn lint:php:phpcs",
     "lint:php:fix": "./.bin/phpcbf",
-    "pre-commit": "yarn lint:php:fix"
+    "pre-commit": "yarn lint:php:fix",
+    "prepare": "husky install"
   },
   "license": "Unlicense",
   "devDependencies": {
     "browser-sync": "^2.27.5",
     "browser-sync-webpack-plugin": "^2.2.2",
-    "husky": "^4.2.5",
+    "husky": "^8.0.1",
     "lint-staged": "^10.5.0",
     "stylelint": "^13.3.2",
     "stylelint-checkstyle-formatter": "^0.1.2",
@@ -37,11 +38,6 @@
     "sass-loader": "^9.0.2",
     "sharp": "^0.25.4",
     "webpack": "^4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged --verbose"
-    }
   },
   "lint-staged": {
     "*.php": [
