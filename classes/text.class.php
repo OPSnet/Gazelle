@@ -384,7 +384,7 @@ class Text {
     public static function parse($Str, $ListPrefix = '') {
         // Deal with list markup that is not list markup (e.g. [*] at EOL)
         // such that "abc [*]" => "abc [[n]*]"
-        $Str = preg_replace('/(?<!\n\[)([*#])(?=\])/', '[n]\\1', $Str);
+        $Str = preg_replace('/(?<!\n\[)(?<!^\[)([*#])(?=\])/', '[n]\\1', $Str);
         $i = 0; // Pointer to keep track of where we are in $Str
         $Len = strlen($Str);
         $Array = [];
