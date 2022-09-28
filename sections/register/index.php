@@ -11,11 +11,7 @@ if (isset($_REQUEST['confirm'])) {
 
 } elseif (OPEN_REGISTRATION || isset($_REQUEST['invite'])) {
     if ($_REQUEST['invite']) {
-        // If they haven't submitted the form, check to see if their invite is good
-        if (!$DB->scalar("
-            SELECT InviteKey FROM invites WHERE InviteKey = ?
-            ", $_GET['invite']
-        )) {
+        if (!(new Gazelle\Manager\Invite)->inviteExists($_GET['invite'])) {
             echo $Twig->render('register/no-invite.twig');
             exit;
         }
@@ -94,16 +90,16 @@ if (isset($_REQUEST['confirm'])) {
         }
     }
     echo $Twig->render('register/create.twig', [
-        'error'     => $error,
+        'error'     => $error ?? false,
         'js'        => $validator->generateJS('registerform'),
         'sent'      => $emailSent ?? false,
         'invite'    => $_REQUEST['invite'] ?? null,
         'is_new'    => $newInstall ?? false,
-        'username'  => $_REQUEST['username'],
+        'username'  => $_REQUEST['username'] ?? '',
         'email'     => $_REQUEST['email'] ?? $InviteEmail,
-        'readrules' => $_REQUEST['readrules'],
-        'readwiki'  => $_REQUEST['readwiki'],
-        'agereq'    => $_REQUEST['agereq'],
+        'readrules' => $_REQUEST['readrules'] ?? false,
+        'readwiki'  => $_REQUEST['readwiki'] ?? false,
+        'agereq'    => $_REQUEST['agereq'] ?? false,
     ]);
 
 } elseif (!OPEN_REGISTRATION) {

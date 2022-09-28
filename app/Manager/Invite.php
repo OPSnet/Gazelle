@@ -27,6 +27,13 @@ class Invite extends \Gazelle\Base {
         ");
     }
 
+    public function inviteExists(string $key): bool {
+        return (bool)self::$db->scalar("
+            SELECT InviteKey FROM invites WHERE InviteKey = ?
+            ", $key
+        );
+    }
+
     /**
      * Get a page of pending invites
      *
