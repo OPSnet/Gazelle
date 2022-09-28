@@ -31,17 +31,17 @@
 {% for article in news[0:5] %}
         <div class="box news_post">
             <div class="head">
-                <strong>{{ article.1|bb_format }}</strong> {{ article.3|time_diff }}
+                <strong>{{ article.title|bb_format }}</strong> {{ article.created|time_diff }}
 {% if admin %}
-                - <a href="tools.php?action=editnews&amp;id={{ article.0 }}" class="brackets">Edit</a>
+                - <a href="tools.php?action=editnews&amp;id={{ article.id }}" class="brackets">Edit</a>
 {% endif %}
 
-{%- set name = 'news' ~ article[0] -%}
-{{- dom.click(name, "$('#newsbody" ~ article[0] ~ "').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide') ? 'Show' : 'Hide'; return false;") -}}
-            <span id="{{ name }}" style="float: right;" class="brackets">Hide</span>
+{%- set name = 'news' ~ article.id -%}
+{{- dom.click("#" ~ name, "$('#newsbody" ~ article.id ~ "').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide') ? 'Show' : 'Hide'; return false;") -}}
+            <span id="{{ name }}" style="float: right; cursor: pointer;" class="brackets">Hide</span>
             </div>
 
-            <div id="newsbody{{ article.0 }}" class="pad">{{ article.2|bb_format }}</div>
+            <div id="newsbody{{ article.id }}" class="pad">{{ article.body|bb_format }}</div>
         </div>
 {% endfor %}
 

@@ -21,7 +21,7 @@ json_print("success", [
     'notifications' => [
         'messages'         => $Viewer->inboxUnreadCount(),
         'notifications'    => (new Gazelle\User\Notification\Torrent($Viewer))->unread(),
-        'newAnnouncement'  => (new Gazelle\Manager\News)->latest() < (new Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
+        'newAnnouncement'  => (new Gazelle\Manager\News)->latestId() < (new Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
         'newBlog'          => $latestBlog && $latestBlog->createdEpoch() < (new Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
         'newSubscriptions' => (new Gazelle\Subscription($Viewer))->unread() > 0,
     ],

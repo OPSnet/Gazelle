@@ -17,7 +17,7 @@ class News extends AbstractNotification {
 
     public function load(): bool {
         $newsMan = new \Gazelle\Manager\News;
-        [$newsId, $title] = $newsMan->latest();
+        ["id" => $newsId, "title" => $title] = $newsMan->latest();
         if ($newsId === -1) {
             return false;
         }
