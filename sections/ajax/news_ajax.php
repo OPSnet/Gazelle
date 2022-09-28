@@ -1,37 +1,11 @@
 <?php
-//Don't allow bigger queries than specified below regardless of called function
-$SizeLimit = 10;
 
-$Offset = (int)$_GET['offset'];
-$Count = (int)$_GET['count'];
+$limit  = (int)($_GET['count'] ?? 0);
+$offset = (int)($_GET['offset'] ?? 0);
 
-if (!isset($_GET['count']) || !isset($_GET['offset']) || $Count <= 0 || $Offset < 0 || $Count > $SizeLimit) {
+if ($limit <= 0 || $offset < 0 || $limit > 10) {
+    // Never allow more than 10 items
     json_die('failure');
 }
 
-$DB->prepared_query("
-    SELECT
-        ID,
-        Title,
-        Body,
-        Time
-    FROM news
-    ORDER BY Time DESC
-    LIMIT ?, ?
-    ", $Offset, $Count
-);
-
-Text::$TOC = true;
-
-$items = [];
-while ($article = $DB->next_record(MYSQLI_NUM, false)) {
-    [$id, $title, $body, $time] = $article;
-    $items[] = [
-        $id,
-        Text::full_format($title),
-        time_diff($time),
-        Text::full_format($body),
-    ];
-}
-
-json_print('success', ['items' => $items]);
+(new Gazelle\Json\News($limit, $offset))->setVersion(2)->emit();

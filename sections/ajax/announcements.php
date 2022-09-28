@@ -2,7 +2,7 @@
 
 $newsMan = new Gazelle\Manager\News;
 $newsReader = new \Gazelle\WitnessTable\UserReadNews;
-if ($newsMan->latest() < $newsReader->lastRead($Viewer->id())) {
+if ($newsMan->latestId() < $newsReader->lastRead($Viewer->id())) {
     $newsReader->witness($Viewer->id());
 }
 

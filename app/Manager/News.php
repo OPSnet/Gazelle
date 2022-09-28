@@ -47,6 +47,20 @@ class News extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
+    public function list(int $limit, int $offset): array {
+        self::$db->prepared_query("
+            SELECT ID AS id,
+                Title AS title,
+                Body  AS body,
+                Time  AS created
+            FROM news
+            ORDER BY Time DESC
+            LIMIT ? OFFSET ?
+            ", $limit, $offset
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     /**
      * Get a number of most recent articles.
      * (hard-coded to 20 max, otherwise cache invalidation becomes difficult)
@@ -54,14 +68,9 @@ class News extends \Gazelle\Base {
      * @return array [id, title, body, creation date]
      */
     public function headlines(): array {
-        if (($headlines = self::$cache->get_value(self::CACHE_KEY)) === false) {
-            self::$db->prepared_query("
-                SELECT ID, Title, Body, Time
-                FROM news
-                ORDER BY Time DESC
-                LIMIT 20
-            ");
-            $headlines = self::$db->to_array(false, MYSQLI_NUM, false);
+        $headlines = self::$cache->get_value(self::CACHE_KEY);
+        if ($headlines === false) {
+            $headlines = $this->list(20, 0);
             self::$cache->cache_value(self::CACHE_KEY, $headlines, 0);
         }
         return $headlines;
@@ -89,7 +98,7 @@ class News extends \Gazelle\Base {
      */
     public function latest(): array {
         $headlines = $this->headlines();
-        return $headlines[0] ?? [-1, null, null, null];
+        return $headlines[0] ?? ["id" => -1, "title" => null, "body" => null, "created" => null];
     }
 
     /**
@@ -99,7 +108,7 @@ class News extends \Gazelle\Base {
      * @return int $id news article id
      */
     public function latestId(): int {
-        [$newsId] = $this->latest();
+        return $this->latest()['id'];
         return $newsId;
     }
 
@@ -108,6 +117,6 @@ class News extends \Gazelle\Base {
      */
     public function latestEpoch(): int {
         $latest = $this->headlines();
-        return isset($latest[4]) ? strtotime($latest[4]) : 0;
+        return isset($latest['created']) ? strtotime($latest['created']) : 0;
     }
 }
