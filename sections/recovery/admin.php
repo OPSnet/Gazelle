@@ -37,79 +37,14 @@ if (isset($_GET['task'])) {
     }
 }
 
+$state = $_GET['state'] ?? 'pending';
 $paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$State = $_GET['state'] ?? 'pending';
-$paginator->setTotal($recovery->getTotal($State, $Viewer->id()));
-$Info  = $recovery->getList($paginator->limit(), $paginator->offset(), $State, $Viewer->id());
+$paginator->setTotal($recovery->total($state, $Viewer->id()));
 
-View::show_header('Recovery administration');
-?>
-<div class="thin">
-
-<div class="linkbox">
-    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
-    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
-    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
-    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
-    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
-    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
-    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
-</div>
-
-<form method="post" action="/recovery.php?action=admin">
-<table>
-<tr><th>Token</th><td><input type="text" width="30" name="token" /></td>
-<th>Username</th><td><input type="text" width="30" name="username" /></td></tr>
-<tr><th>Announce</th><td><input type="text" width="30" name="announce" /></td>
-<th>Email</th><td><input type="text" width="30" name="email" /></td></tr>
-<tr><td></td><td colspan="3"><input type="submit" value="Search" /></td></tr>
-</table>
-
-<h3><?= $paginator->total() ?> <?= $State ?> recovery requests</h3>
-
-<?php if (isset($message)) { ?>
-<h5><?= $message ?></h5>
-<?php } ?>
-
-<?= $paginator->linkbox() ?>
-
-<div class="box">
-    <div class="head">Registrations</div>
-    <div class="pad">
-        <table>
-            <tr class="colhead">
-                <th>ID</th>
-                <th>Username</th>
-                <th>Token</th>
-                <th>Email</th>
-                <th>Announce</th>
-                <th>Created</th>
-                <th>Updated</th>
-                <th>Action</th>
-            </tr>
-<?php foreach ($Info as $i) { ?>
-            <tr>
-                <td><?= $i['recovery_id'] ?></td>
-                <td><?= $i['username'] ?></td>
-                <td><tt><?= $i['token'] ?></tt></td>
-                <td><?= $i['email'] ?></td>
-                <td><?= $i['announce'] ?></td>
-                <td><?= time_diff($i['created_dt']) ?></td>
-                <td><?= time_diff($i['updated_dt']) ?></td>
-                <td>
-                    <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
-<?php   if ($i['state'] == 'PENDING') { ?>
-                    <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= $Viewer->id() ?>">Claim</a>
-<?php   } ?>
-                </td>
-            </tr>
-<?php } ?>
-        </table>
-    </div>
-</div>
-
-<?= $paginator->linkbox() ?>
-
-</div>
-<?php
-View::show_footer();
+echo $Twig->render('recovery/admin.twig', [
+    'list'        => $recovery->page($paginator->limit(), $paginator->offset(), $state, $Viewer->id()),
+    'message'     => $message ?? null,
+    'paginator'   => $paginator,
+    'state'       => $state,
+    'viewer'      => $Viewer,
+]);

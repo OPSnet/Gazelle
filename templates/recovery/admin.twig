@@ -1,0 +1,70 @@
+{{ header('Recovery administration') }}
+<div class="thin">
+
+<div class="linkbox">
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
+    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
+</div>
+
+<form method="post" action="/recovery.php?action=admin">
+<table>
+<tr><th>Token</th><td><input type="text" width="30" name="token" /></td>
+<th>Username</th><td><input type="text" width="30" name="username" /></td></tr>
+<tr><th>Announce</th><td><input type="text" width="30" name="announce" /></td>
+<th>Email</th><td><input type="text" width="30" name="email" /></td></tr>
+<tr><td></td><td colspan="3"><input type="submit" value="Search" /></td></tr>
+</table>
+
+<h3>{{ paginator.total }} {{ state }} recovery request{{ paginator.total|plural }}</h3>
+
+{% if message %}
+<h5>{{ message }}</h5>
+{% endif %}
+
+{{ paginator.linkbox|raw }}
+
+<div class="box">
+    <div class="head">Registrations</div>
+    <div class="pad">
+        <table>
+            <tr class="colhead">
+                <th>ID</th>
+                <th>Username</th>
+                <th>Token</th>
+                <th>Email</th>
+                <th>Announce</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th>Action</th>
+            </tr>
+{% for r in list %}
+            <tr>
+                <td>{{ r.recovery_id }}</td>
+                <td>{{ r.username }}</td>
+                <td><tt>{{ r.token }}</tt></td>
+                <td>{{ r.email }}</td>
+                <td>{{ r.announce }}</td>
+                <td><?= r.created_dt|time_diff }}</td>
+                <td><?= r.updated_dt|time_diff }}</td>
+                <td>
+                    <a class="brackets" href="/recovery.php?action=view&amp;id={{ r.recovery_id }}">View</a>
+    {% if state == 'PENDING' %}
+                    <a class="brackets" href="/recovery.php?action=view&amp;id={{ r.recovery_id }}&amp;claim={{ viewer.id }}">Claim</a>
+    {% endif %}
+                </td>
+            </tr>
+{% endfor %}
+        </table>
+    </div>
+</div>
+
+{{ paginator.linkbox|raw }}
+
+</div>
+{{ footer() }}
+

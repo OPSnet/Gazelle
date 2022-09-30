@@ -76,10 +76,10 @@ class Recovery extends Base {
         return [true, $filename];
     }
 
-    public function checkPassword(string $user, string $pw): bool {
-        $prevhash = self::$db->prepared_query("
+    public function checkPassword(string $username, string $pw): bool {
+        $prevhash = self::$db->scalar("
             SELECT PassHash FROM ' . RECOVERY_DB . '.users_main WHERE Username = ?
-            ", $user
+            ", $username
         );
         return password_verify($pw, $prevhash ?? chr(0));
     }
@@ -102,7 +102,7 @@ class Recovery extends Base {
         return self::$db->affected_rows();
     }
 
-    public function getTotal(string $state, int $admin_id): int {
+    public function total(string $state, int $admin_id): int {
         switch (strtoupper($state)) {
             case 'CLAIMED':
                 return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id);
@@ -117,7 +117,7 @@ class Recovery extends Base {
         return 0;
     }
 
-    public function getList(int $limit, int $offset, string $state, int $admin_id): array {
+    public function page(int $limit, int $offset, string $state, int $admin_id): array {
         $sql_header = 'SELECT recovery_id, username, token, email, announce, created_dt, updated_dt, state FROM recovery';
         $sql_footer = 'ORDER BY updated_dt DESC LIMIT ? OFFSET ?';
         switch (strtoupper($state)) {
