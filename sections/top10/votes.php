@@ -218,10 +218,7 @@ if (count($topVotes) === 0) { ?>
             ]) ?>
             &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
         </td>
-        <td class="number_column nobr"><?=Format::get_size($torrent->size())?></td>
-        <td class="number_column"><?=number_format($torrent->snatchTotal())?></td>
-        <td class="number_column<?=$torrent->seederTotal() == 0 ? ' r00' : '' ?>"><?=number_format($torrent->seederTotal())?></td>
-        <td class="number_column"><?=number_format($torrent->leecherTotal())?></td>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
 <?php
             }
@@ -251,10 +248,7 @@ if (count($topVotes) === 0) { ?>
                 fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
                 )) ?></div>
         </td>
-        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
-        <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
-        <td class="td_seeders m_td_right number_column<?= $torrent->seederTotal() ? '' : ' r00' ?>"><?= number_format($torrent->seederTotal()) ?></td>
-        <td class="td_leechers m_td_right number_column"><?= number_format($torrent->leecherTotal()) ?></td>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
 <?php
         }

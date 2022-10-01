@@ -137,10 +137,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
             ]) ?>
             &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
         </td>
-        <td class="number_column nobr"><?=Format::get_size($torrent->size())?></td>
-        <td class="number_column"><?=number_format($torrent->snatchTotal())?></td>
-        <td class="number_column<?= $torrent->seederTotal() == 0 ? ' r00' : ''?>"><?= number_format($torrent->seederTotal()) ?></td>
-        <td class="number_column"><?=number_format($torrent->leecherTotal())?></td>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
 <?php
                 } /* foreach ($torrentList) */
@@ -173,10 +170,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                 <div class="tags"><?=$TorrentTags->format()?></div>
             </div>
         </td>
-        <td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
-        <td class="td_snatched m_td_right number_column"><?=number_format($Torrent['Snatched'])?></td>
-        <td class="td_seeders m_td_right number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Torrent['Seeders'])?></td>
-        <td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
 <?php
             }

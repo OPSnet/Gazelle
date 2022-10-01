@@ -400,10 +400,7 @@ if ($sections = $Artist->sections()) {
                 ]) ?>
                 &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
             </td>
-            <td class="td_size number_column nobr"><?=Format::get_size($torrent->size()) ?></td>
-            <td class="td_snatched number_column m_td_right"><?=number_format($torrent->snatchTotal()) ?></td>
-            <td class="td_seeders number_column<?= $torrent->seederTotal() ? '' : ' r00' ?> m_td_right"><?=number_format($torrent->seederTotal()) ?></td>
-            <td class="td_leechers number_column m_td_right"><?=number_format($torrent->leecherTotal()) ?></td>
+            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
         </tr>
 <?php
             unset($torrent);

@@ -1,0 +1,4 @@
+<td class="number_column td_size nobr">{{ torrent.size|octet_size }}</td>
+<td class="number_column m_td_right td_snatched">{{ torrent.snatchTotal|number_format }}</td>
+<td class="number_column m_td_right td_seeders{% if torrent.seederTotal == 0 %} r00{% endif %}">{{ torrent.seederTotal|number_format }}</td>
+<td class="number_column m_td_right td_leechers">{{ torrent.leecherTotal|number_format }}</td>
