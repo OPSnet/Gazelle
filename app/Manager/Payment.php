@@ -143,4 +143,13 @@ class Payment extends \Gazelle\Base {
         }
         return $due;
     }
+
+    public function soon(): array {
+        return self::$db->rowAssoc("
+            SELECT count(*) as total,
+                min(Expiry) as next
+            FROM payment_reminders
+            WHERE Active = 1 AND Expiry < now() + INTERVAL 1 WEEK
+        ");
+    }
 }

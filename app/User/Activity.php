@@ -61,7 +61,8 @@ class Activity extends \Gazelle\BaseUser {
         if ($this->user->permitted('admin_site_debug')) {
             $longRunning = $dbMan->longRunning();
             if ($longRunning > 0) {
-                $this->setAlert('<span style="color: red">' . $longRunning . ' long-running DB operation' . plural($longRunning) . '!</span>');
+                $message = "$longRunning long-running DB operation" . plural($longRunning);
+                $this->setAlert("<span title=\"$message\" class=\"sys-error\">DB</span>");
             }
             // If Ocelot can no longer write to xbt_files_users, it will drain after an hour
             // Look for database locks and check the Ocelot log
@@ -74,15 +75,10 @@ class Activity extends \Gazelle\BaseUser {
 
     public function setPayment(\Gazelle\Manager\Payment $payMan) {
         if ($this->user->permitted('admin_manage_payments')) {
-            $due = $payMan->due();
-            if ($due) {
-                $alert = '<a class="nobr" href="tools.php?action=payment_list">Payments due</a>';
-                foreach ($due as $p) {
-                    [$Text, $Expiry] = array_values($p);
-                    $Color = strtotime($Expiry) < (strtotime('+3 days')) ? 'red' : 'orange';
-                    $alert .= sprintf(' | <span style="color: %s">%s: %s</span>', $Color, $Text, date('Y-m-d', strtotime($Expiry)));
-                }
-                $this->setAlert($alert);
+            $soon = $payMan->soon();
+            if ($soon && $soon['total']) {
+                $class = strtotime($soon['next']) < strtotime('+3 days') ? 'sys-error' : 'sys-warning';
+                $this->setAlert("<a href=\"tools.php?action=payment_list\"><span title=\"Next payment due: {$soon['next']}, {$soon['total']} due within 1 week\" class=\"tooltip $class\">PAY</span></a>");
             }
         }
         return $this;
@@ -104,12 +100,9 @@ class Activity extends \Gazelle\BaseUser {
 
     public function setReport(\Gazelle\Stats\Report $repStat) {
         if ($this->user->permitted('admin_reports')) {
-            $open = $repStat->torrentOpenTotal();
-            $this->setAction("<a class=\"nobr\" href=\"reportsv2.php\">$open Report" . plural($open) . '</a>');
-            $other = $repStat->otherOpenTotal();
-            if ($other > 0) {
-                $this->setAction("<a class=\"nobr\" href=\"reports.php\">$other Other report" . plural($other) . '</a>');
-            }
+            $this->setAction("Reports:<a class=\"nobr tooltip\" title=\"Torrent reports\" href=\"reportsv2.php\"> {$repStat->torrentOpenTotal()}
+                </a>/<a class=\"nobr tooltip\" title=\"Other reports\" href=\"reports.php\"> {$repStat->otherOpenTotal()} </a>"
+            );
         } elseif ($this->user->permitted('site_moderate_forums')) {
             $open = $repStat->forumOpenTotal();
             if ($open > 0) {
@@ -124,16 +117,13 @@ class Activity extends \Gazelle\BaseUser {
             $lastSchedulerRun = self::$db->scalar("
                 SELECT now() - max(launch_time) FROM periodic_task_history
             ");
+            if ($lastSchedulerRun > SCHEDULER_DELAY) {
+                $this->setAlert("<span class=\"sys-error\" title=\"Cron scheduler not running\">CRON</span>");
+            }
             $insane = $scheduler->getInsaneTasks();
             if ($insane) {
-                $this->setAlert(
-                    $insane == 1
-                    ? '<a href="tools.php?action=periodic&amp;mode=view">There is an insane task</a>'
-                    : sprintf('<a href="tools.php?action=periodic&amp;mode=view">%d insane tasks</a>', $insane)
-                );
-            }
-            if ($lastSchedulerRun > SCHEDULER_DELAY) {
-                $this->setAlert('<span style="color: red">Scheduler not running</span>');
+                $plural = plural($insane);
+                $this->setAlert("<a title=\"$insane insane task$plural\" href=\"tools.php?action=periodic&amp;mode=view\"><span class=\"sys-error\">TASK</span></a>");
             }
         }
         return $this;

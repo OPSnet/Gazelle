@@ -175,6 +175,20 @@ strong.important_text_alt {
     color: #dd0000;
 }
 
+.sys-error {
+  color: red;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-caps: small-caps;
+}
+
+.sys-warning {
+  color: orange;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-caps: small-caps;
+}
+
 /* Make [+] on add multiple artists stay at the bottom (on torrent details page) */
 div#AddArtists {
     position: relative;
