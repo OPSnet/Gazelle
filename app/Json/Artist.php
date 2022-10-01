@@ -3,31 +3,14 @@
 namespace Gazelle\Json;
 
 class Artist extends \Gazelle\Json {
-    protected \Gazelle\Artist          $artist;
-    protected \Gazelle\User            $user;
-    protected \Gazelle\Manager\TGroup  $tgMan;
-    protected \Gazelle\Manager\Torrent $torMan;
     protected bool $releasesOnly = false;
 
-    public function setArtist(\Gazelle\Artist $artist) {
-        $this->artist = $artist;
-        return $this;
-    }
-
-    public function setTGroupManager(\Gazelle\Manager\TGroup $tgMan) {
-        $this->tgMan = $tgMan;
-        return $this;
-    }
-
-    public function setTorrentManager(\Gazelle\Manager\Torrent $torMan) {
-        $this->torMan = $torMan;
-        return $this;
-    }
-
-    public function setViewer(\Gazelle\User $user) {
-        $this->user = $user;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\Artist          $artist,
+        protected \Gazelle\User            $user,
+        protected \Gazelle\Manager\TGroup  $tgMan,
+        protected \Gazelle\Manager\Torrent $torMan
+    ) { }
 
     public function setReleasesOnly(bool $releasesOnly) {
         $this->releasesOnly = $releasesOnly;

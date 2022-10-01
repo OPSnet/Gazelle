@@ -3,14 +3,11 @@
 namespace Gazelle\Json;
 
 class RipLog extends \Gazelle\Json {
-    protected int $logId;
-    protected int $torrentId;
 
-    public function setTorrentLog(int $torrentId, int $logId) {
-        $this->logId     = $logId;
-        $this->torrentId = $torrentId;
-        return $this;
-    }
+    public function __construct(
+        protected int $torrentId,
+        protected int $logId,
+    ) { }
 
     public function payload(): array {
         try {

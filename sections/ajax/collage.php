@@ -1,17 +1,10 @@
 <?php
 
-$json = new Gazelle\Json\Collage;
-
-$collageMan = new Gazelle\Manager\Collage;
-$collage = $collageMan->findById((int)($_GET['id'] ?? 0));
+$collage = (new Gazelle\Manager\Collage)->findById((int)($_GET['id'] ?? 0));
 if (is_null($collage)) {
-    $json->failure('bad parameters');
-    exit;
+    json_die('bad parameters');
 }
 
-$json->setVersion(2)
-    ->setCollage($collage)
-    ->setTGroupManager(new Gazelle\Manager\TGroup)
-    ->setTorrentManager(new Gazelle\Manager\Torrent)
-    ->setUser($Viewer)
+(new Gazelle\Json\Collage($collage, $Viewer, new Gazelle\Manager\TGroup, new Gazelle\Manager\Torrent))
+    ->setVersion(2)
     ->emit();

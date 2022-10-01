@@ -1,14 +1,15 @@
 <?php
 
-$json = new Gazelle\Json\Inbox;
+$json = new Gazelle\Json\Inbox(
+    $Viewer,
+    $_GET['type'] ?? 'inbox',
+    (int)($_GET['page'] ?? 1),
+    (bool)(($_GET['sort'] ?? 'unread') === 'unread'),
+    new Gazelle\Manager\User,
+);
 
 if (!empty($_GET['search'])) {
     $json->setSearch($_GET['searchtype'] ?? 'subject', $_GET['search']);
 }
 
-$json->setVersion(1)
-    ->setPage((int)($_GET['page'] ?? 1))
-    ->setUnreadFirst(($_GET['sort'] ?? 'unread') === 'unread')
-    ->setFolder($_GET['type'] ?? 'inbox')
-    ->setViewer($Viewer)
-    ->emit();
+$json->setVersion(1)->emit();

@@ -9,35 +9,13 @@ use Gazelle\LogfileSummary;
 use OrpheusNET\Logchecker\Logchecker;
 
 class AddLog extends \Gazelle\Json {
-    protected \Gazelle\Torrent $torrent;
-    protected \Gazelle\User $user;
-    protected bool $showSnatched = false;
-    protected array $files;
-
-    public function setTorrent(\Gazelle\Torrent $torrent) {
-        $this->torrent = $torrent;
-        return $this;
-    }
-
-    public function setViewer(\Gazelle\User $user) {
-        $this->user = $user;
-        return $this;
-    }
-
-    public function setLogFiles(array $files) {
-        $this->files = $files;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\Torrent $torrent,
+        protected \Gazelle\User $user,
+        protected array $files,
+    ) {}
 
     public function payload(): ?array {
-        if (is_null($this->torrent)) {
-            $this->failure('torrent not found');
-            return null;
-        }
-        if (is_null($this->user)) {
-            $this->failure('viewer not set');
-            return null;
-        }
         if ($this->user->id() !== $this->torrent->uploaderId() && !$this->user->permitted('admin_add_log')) {
             $this->failure('Not the torrent owner or moderator');
             return null;
