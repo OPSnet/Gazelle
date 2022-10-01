@@ -104,11 +104,14 @@ if ($Viewer->permitted('zip_downloader')) {
 <?php
     $Idx = 0;
     $limit = min($NumGroups, $CollageCovers);
-    while ($Idx < $limit) {
-        $tgroup = $tgMan->findById($entryList[$Idx]);
+    foreach ($entryList as $tgroupId) {
+        $tgroup = $tgMan->findById($tgroupId);
         if ($tgroup) {
             echo $collMan->coverRow($tgroup);
             ++$Idx;
+        }
+        if ($Idx > $limit) {
+            break;
         }
     }
 ?>
