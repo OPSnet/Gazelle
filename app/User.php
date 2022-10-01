@@ -1520,19 +1520,6 @@ class User extends BaseObject {
         return $this->allowedPersonalCollages() > $this->activePersonalCollages();
     }
 
-    public function personalCollages(): array {
-        self::$db->prepared_query("
-            SELECT ID, Name
-            FROM collages
-            WHERE UserID = ?
-                AND CategoryID = 0
-                AND Deleted = '0'
-            ORDER BY Featured DESC, Name ASC
-            ", $this->id
-        );
-        return self::$db->to_array(false, MYSQLI_NUM, false);
-    }
-
     public function collageUnreadCount(): int {
         if (($new = self::$cache->get_value(sprintf(Collage::SUBS_NEW_KEY, $this->id))) === false) {
             $new = self::$db->scalar("

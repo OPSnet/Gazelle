@@ -48,6 +48,19 @@ class Collage extends \Gazelle\Base {
         ));
     }
 
+    public function findPersonalByUserId(int $userId): array {
+        self::$db->prepared_query("
+            SELECT ID
+            FROM collages
+            WHERE UserID = ?
+                AND CategoryID = 0
+                AND Deleted = '0'
+            ORDER BY Featured DESC, Name ASC
+            ", $userId
+        );
+        return array_map(fn ($id) => $this->findById($id), self::$db->collect(0, false));
+    }
+
     public function recoverById(int $id) {
         $collageId = self::$db->scalar("SELECT ID FROM collages WHERE ID = ?", $id);
         if ($collageId !== null) {

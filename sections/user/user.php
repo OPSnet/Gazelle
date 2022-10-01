@@ -464,43 +464,30 @@ if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('vi
     ]);
 }
 
-$Collages = $User->personalCollages();
 $FirstCol = true;
-foreach ($Collages as $CollageInfo) {
-    [$CollageID, $CName] = $CollageInfo;
-    $DB->prepared_query('
-        SELECT ct.GroupID,
-            tg.WikiImage,
-            tg.CategoryID
-        FROM collages_torrents AS ct
-        INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
-        WHERE ct.CollageID = ?
-        ORDER BY ct.Sort
-        LIMIT 5
-        ', $CollageID
-    );
-    $Collage = $DB->to_array(false, MYSQLI_ASSOC, false);
+$Collages = (new Gazelle\Manager\Collage)->findPersonalByUserId($UserID);
+foreach ($Collages as $collage) {
 ?>
-    <table class="layout recent" id="collage<?=$CollageID?>_box" cellpadding="0" cellspacing="0" border="0">
+    <table class="layout recent" id="collage<?=$collage->id()?>_box" cellpadding="0" cellspacing="0" border="0">
         <tr class="colhead">
             <td colspan="5">
                 <span style="float: left;">
-                    <?=display_str($CName)?> - <a href="collages.php?id=<?=$CollageID?>" class="brackets">See full</a>
+                    <?=display_str($collage->name())?> - <a href="collages.php?id=<?=$collage->id()?>" class="brackets">See full</a>
                 </span>
                 <span style="float: right;">
-                    <a href="#" onclick="$('#collage<?=$CollageID?>_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=$FirstCol ? 'Hide' : 'Show' ?></a>
+                    <a href="#" onclick="$('#collage<?=$collage->id()?>_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=$FirstCol ? 'Hide' : 'Show' ?></a>
                 </span>
             </td>
         </tr>
         <tr class="images<?=$FirstCol ? '' : ' hidden'?>">
 <?php
-    foreach ($Collage as $C) {
-            $Group = Torrents::get_groups([$C['GroupID']], true, true, false);
-            $Name = Artists::display_artists(['1' => $Group[$C['GroupID']]['Artists']], false, true) . $Group[$C['GroupID']]['Name'];
+    $list = array_slice($collage->groupIds(), 0, 5);
+    foreach ($list as $tgroupId) {
+        $tgroup = $tgMan->findById($tgroupId);
 ?>
             <td>
-                <a href="torrents.php?id=<?= $C['GroupID'] ?>">
-                    <img class="tooltip" title="<?= $Name ?>" src="<?= $imgProxy->process($C['WikiImage']) ?>" alt="<?= $Name ?>" width="107" />
+                <a href="torrents.php?id=<?= $tgroupId ?>">
+                    <img class="tooltip" title="<?= $tgroup->displayNameText() ?>" src="<?= $imgProxy->process($tgroup->cover()) ?>" width="107" />
                 </a>
             </td>
 <?php    } ?>
