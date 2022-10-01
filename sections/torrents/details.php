@@ -512,10 +512,7 @@ if (!$torrentList) {
 ?>
                     <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;">&#x25B6; <?= $torrent->label() ?></a>
                 </td>
-                <td class="td_size number_column nobr"><?=Format::get_size($torrent->size())?></td>
-                <td class="td_snatched m_td_right number_column"><?=number_format($torrent->snatchTotal())?></td>
-                <td class="td_seeders m_td_right number_column <?= $torrent->seederTotal() == 0 ? ' r00' : '' ?>"><?=number_format($torrent->seederTotal())?></td>
-                <td class="td_leechers m_td_right number_column"><?=number_format($torrent->leecherTotal())?></td>
+                <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
             </tr>
             <tr class="releases_<?=$tgroup->releaseType() ?> groupid_<?=$GroupID?> edition_<?=$EditionID?> torrentdetails pad <?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $TorrentID) { ?>hidden<?php } ?>" id="torrent_<?=$TorrentID; ?>">
                 <td colspan="5">

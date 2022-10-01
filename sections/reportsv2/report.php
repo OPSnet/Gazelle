@@ -86,10 +86,7 @@ $remasterTuple = $torrent->remasterTuple();
                         &raquo; <a href="#" onclick="$('#torrent_<?= $torrentId ?>').gtoggle(); return false;"><?=
                             implode(' / ', $torrent->labelList()) ?></a>
                     </td>
-                    <td class="number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
-                    <td class="number_column"><?= number_format($torrent->snatchTotal()) ?></td>
-                    <td class="number_column"><?= number_format($torrent->seederTotal()) ?></td>
-                    <td class="number_column"><?= number_format($torrent->leecherTotal()) ?></td>
+                    <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
                 </tr>
                 <tr class="releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> torrentdetails pad<?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $torrentId) { ?> hidden<?php } ?>" id="torrent_<?= $torrentId ?>">
                     <td colspan="5">

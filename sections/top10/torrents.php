@@ -179,10 +179,10 @@ foreach ($context as $c) {
         <td class="cats_col"></td>
         <td class="m_th_left m_th_left_collapsable">Name</td>
         <td style="text-align: right;">Size</td>
-        <td style="text-align: right;">Transferred</td>
         <td style="text-align: right;" class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
         <td style="text-align: right;" class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
         <td style="text-align: right;" class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td style="text-align: right;">Transferred</td>
     </tr>
 <?php
     // Server is already processing a top10 query. Starting another one will make things slow
@@ -248,11 +248,8 @@ foreach ($context as $c) {
                 <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
             </div>
         </td>
-        <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
         <td class="td_data number_column nobr"><?=Format::get_size($data)?></td>
-        <td class="td_snatched number_column m_td_right"><?= number_format($torrent->snatchTotal()) ?></td>
-        <td class="td_seeders number_column m_td_right"><?= number_format($torrent->seederTotal()) ?></td>
-        <td class="td_leechers number_column m_td_right"><?= number_format($torrent->leecherTotal()) ?></td>
     </tr>
 <?php } ?>
     </table><br />

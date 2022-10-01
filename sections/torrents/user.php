@@ -524,10 +524,7 @@ foreach (CATEGORY as $catKey => $catName) {
                 </div>
             </td>
             <td class="td_time nobr"><?=time_diff($torrent->uploadDate(), 1)?></td>
-            <td class="td_size number_column nobr"><?= Format::get_size($torrent->size()) ?></td>
-            <td class="td_snatched m_td_right number_column"><?= number_format($torrent->snatchTotal()) ?></td>
-            <td class="td_seeders m_td_right number_column<?= $torrent->seederTotal() ? '' : ' r00' ?>"><?= number_format($torrent->seederTotal()) ?></td>
-            <td class="td_leechers m_td_right number_column"><?= number_format($torrent->leecherTotal()) ?></td>
+            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
         </tr>
 <?php
     } /* foreach */ ?>
