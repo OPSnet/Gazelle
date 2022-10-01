@@ -3,30 +3,13 @@
 namespace Gazelle\Json;
 
 class Collage extends \Gazelle\Json {
-    protected \Gazelle\Collage         $collage;
-    protected \Gazelle\Manager\TGroup  $tgMan;
-    protected \Gazelle\Manager\Torrent $torMan;
-    protected \Gazelle\User            $user;
 
-    public function setCollage(\Gazelle\Collage $collage) {
-        $this->collage = $collage;
-        return $this;
-    }
-
-    public function setTGroupManager(\Gazelle\Manager\TGroup $tgMan) {
-        $this->tgMan = $tgMan;
-        return $this;
-    }
-
-    public function setTorrentManager(\Gazelle\Manager\Torrent $torMan) {
-        $this->torMan = $torMan;
-        return $this;
-    }
-
-    public function setUser(\Gazelle\User $user) {
-        $this->user = $user;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\Collage         $collage,
+        protected \Gazelle\User            $user,
+        protected \Gazelle\Manager\TGroup  $tgMan,
+        protected \Gazelle\Manager\Torrent $torMan,
+    ) { }
 
     public function artistPayload(): array {
         return $this->collage->nameList();
@@ -90,23 +73,6 @@ class Collage extends \Gazelle\Json {
     }
 
     public function payload(): ?array {
-        if (!isset($this->collage)) {
-            $this->failure('collage not set');
-            return null;
-        }
-        if (!isset($this->tgMan)) {
-            $this->failure('torrent group manager not set');
-            return null;
-        }
-        if (!isset($this->torMan)) {
-            $this->failure('torrent manager not set');
-            return null;
-        }
-        if (!isset($this->user)) {
-            $this->failure('user not set');
-            return null;
-        }
-
         return array_merge(
             [
                 'id'                  => $this->collage->id(),

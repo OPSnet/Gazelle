@@ -3,22 +3,16 @@
 namespace Gazelle\Json;
 
 class TGroup extends \Gazelle\Json {
-    protected \Gazelle\TGroup $tgroup;
-    protected \Gazelle\User $user;
 
-    public function setTGroup(\Gazelle\TGroup $tgroup) {
-        $this->tgroup = $tgroup;
-        return $this;
-    }
-
-    public function setViewer(\Gazelle\User $user) {
-        $this->user = $user;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\TGroup $tgroup,
+        protected \Gazelle\User $user,
+        protected \Gazelle\Manager\Torrent $torMan,
+    ) { }
 
     public function tgroupPayload(): array {
         $tgroup = $this->tgroup;
-        if ($tgroup->categoryId() != 1) {
+        if ($tgroup->categoryName() != 'Music') {
             $musicInfo = null;
         } else {
             $role = $tgroup->artistRole()->idList();
@@ -55,34 +49,16 @@ class TGroup extends \Gazelle\Json {
         ];
     }
 
-    public function payload(): ?array {
-        if (!isset($this->tgroup)) {
-            $this->failure('group not set');
-            return null;
-        }
-        if (!isset($this->user)) {
-            $this->failure('viewer not set');
-            return null;
-        }
-
-        $ids     =  $this->tgroup->torrentIdList();
-        $details = [];
-        $torMan  = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
-
-        foreach ($ids as $torrentId) {
-            $torrent = $torMan->findById($torrentId);
-            if ($torrent) {
-                $details[] = (new Torrent)
-                    ->setTorrent($torrent)
-                    ->setViewer($this->user)
-                    ->torrentPayload();
-            }
-        }
-
+    public function payload(): array {
         return [
             'group' => $this->tgroupPayload(),
-            'torrents' => $details,
+            'torrents' => array_filter(
+                array_map(
+                    fn ($id) => $this->torMan->findById($id),
+                    $this->tgroup->torrentIdList()
+                ),
+                fn ($torrent) => $torrent
+            )
         ];
     }
 }
-

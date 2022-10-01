@@ -3,22 +3,14 @@
 namespace Gazelle\Json;
 
 class Torrent extends \Gazelle\Json {
-    protected \Gazelle\Torrent $torrent;
-    protected \Gazelle\User $user;
-    protected bool $showSnatched = false;
 
-    public function setTorrent(\Gazelle\Torrent $torrent) {
-        $this->torrent = $torrent;
-        return $this;
-    }
-
-    public function setViewer(\Gazelle\User $user) {
-        $this->user = $user;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\Torrent $torrent,
+        protected \Gazelle\User $user,
+        protected \Gazelle\Manager\Torrent $torMan,
+    ) { }
 
     public function torrentPayload(): array {
-        $torMan  = new \Gazelle\Manager\Torrent;
         $torrent = $this->torrent->setViewer($this->user);
         return array_merge(
             (new \Gazelle\User\Snatch($this->user))->isSnatched($torrent->id()) || $torrent->uploaderId() == $this->user->id()
@@ -49,11 +41,11 @@ class Torrent extends \Gazelle\Json {
                 'leechers'      => $torrent->leecherTotal(),
                 'snatched'      => $torrent->snatchTotal(),
                 'freeTorrent'   => $torrent->freeleechStatus(),
-                'reported'      => $torMan->hasReport($this->user, $torrent->id()),
+                'reported'      => $this->torMan->hasReport($this->user, $torrent->id()),
                 'time'          => $torrent->uploadDate(),
                 'description'   => $torrent->description(),
                 'fileList'      => implode('|||',
-                    array_map(function ($f) use ($torMan) {return $torMan->apiFilename($f);}, $torrent->filelist())
+                    array_map(fn ($f) => $this->torMan->apiFilename($f), $torrent->filelist())
                 ),
                 'filePath'      => $torrent->path(),
                 'userId'        => $torrent->uploaderId(),
@@ -63,21 +55,9 @@ class Torrent extends \Gazelle\Json {
     }
 
     public function payload(): ?array {
-        if (!isset($this->torrent)) {
-            $this->failure('torrent not set');
-            return null;
-        }
-        if (!isset($this->user)) {
-            $this->failure('viewer not set');
-            return null;
-        }
-
         return [
             'group' => $this->torrent->hasTGroup()
-                ? (new TGroup)
-                    ->setViewer($this->user)
-                    ->setTGroup($this->torrent->group())
-                    ->tgroupPayload()
+                ? (new TGroup($this->torrent->group(), $this->user, $this->torMan))->tgroupPayload()
                 : null, // an orphan torrent
             'torrent' => $this->torrentPayload(),
         ];

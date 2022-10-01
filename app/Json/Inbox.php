@@ -5,40 +5,18 @@ namespace Gazelle\Json;
 class Inbox extends \Gazelle\Json {
 
     protected string $dateColumn;
-    protected int $page = 1;
-    protected bool $unreadFirst = false;
-    protected \Gazelle\User $user;
 
-    protected $cond = [];
-    protected $args = [];
-    protected $join = [];
+    protected array $cond = [];
+    protected array $args = [];
+    protected array $join = [];
 
-    public function setViewer(\Gazelle\User $user) {
-        $this->user = $user;
-        return $this;
-    }
-
-    public function setFolder(string $folder) {
-        switch ($folder) {
-            case 'inbox':
-                $this->dateColumn = 'cu.ReceivedDate';
-                $this->cond[] = "cu.InInbox = '1'";
-                break;
-            case 'sentbox':
-                $this->dateColumn = 'cu.SentDate';
-                $this->cond[] = "cu.InSentbox = '1'";
-                break;
-            default:
-                $this->failure('bad folder');
-                break;
-        }
-        return $this;
-    }
-
-    public function setPage(int $page) {
-        $this->page = $page;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\User $user,
+        protected string $folder,
+        protected int $page,
+        protected bool $unreadFirst,
+        protected \Gazelle\Manager\User $userMan,
+    ) { }
 
     public function setSearch(string $searchType, string $search) {
         $search = trim($search);
@@ -65,12 +43,20 @@ class Inbox extends \Gazelle\Json {
         }
     }
 
-    public function setUnreadFirst(bool $unreadFirst) {
-        $this->unreadFirst = $unreadFirst;
-        return $this;
-    }
-
     public function payload(): ?array {
+        switch ($this->folder) {
+            case 'inbox':
+                $this->dateColumn = 'cu.ReceivedDate';
+                $this->cond[] = "cu.InInbox = '1'";
+                break;
+            case 'sentbox':
+                $this->dateColumn = 'cu.SentDate';
+                $this->cond[] = "cu.InSentbox = '1'";
+                break;
+            default:
+                $this->failure('bad folder');
+                break;
+        }
         $total = self::$db->scalar("
             SELECT count(DISTINCT c.ID)
             FROM pm_conversations AS c
@@ -104,18 +90,17 @@ class Inbox extends \Gazelle\Json {
             ", $this->user->id(), $this->user->id(), ...$this->args
         );
 
-        $userMan = new \Gazelle\Manager\User;
         $user = [];
         $messages = [];
         $qid = self::$db->get_query_id();
         while ([$convId, $subject, $unread, $sticky, $forwardedId, $senderId, $actionDate] = self::$db->next_record()) {
             $senderId = (int)$senderId;
             if ($senderId && !isset($user[$senderId])) {
-                $user[$senderId] = $userMan->findById($senderId);
+                $user[$senderId] = $this->userMan->findById($senderId);
             }
             $forwardedId = (int)$forwardedId;
             if ($forwardedId && !isset($user[$forwardedId])) {
-                $user[$forwardedId] = $userMan->findById($forwardedId);
+                $user[$forwardedId] = $this->userMan->findById($forwardedId);
             }
             $messages[] = [
                 'convId'        => (int)$convId,
@@ -129,7 +114,7 @@ class Inbox extends \Gazelle\Json {
                 'avatar'        => $senderId ? $user[$senderId]->avatar() : null,
                 'warned'        => $senderId ? $user[$senderId]->isWarned() : false,
                 'enabled'       => $senderId ? $user[$senderId]->isEnabled() : false,
-                'donor'         => $senderId ? (new Gazelle\User\Privilege($user[$senderId]))->isDonor() : false,
+                'donor'         => $senderId ? (new \Gazelle\User\Privilege($user[$senderId]))->isDonor() : false,
                 'date'          => $actionDate,
             ];
             self::$db->set_query_id($qid);
