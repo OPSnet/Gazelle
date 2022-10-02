@@ -1,10 +1,10 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Manager;
 
 use Gazelle\Util\Mail;
 
-class Recovery extends Base {
+class Recovery extends \Gazelle\Base {
 
     public function checkEmail(string $raw): ?array {
         $raw = strtolower(trim($raw));
@@ -433,7 +433,7 @@ class Recovery extends Base {
     }
 
     public function boostUpload() {
-        $userMan = new Manager\User;
+        $userMan = new User;
         $sql = sprintf("
             SELECT HIST.Username, HIST.mapped_id, HIST.UserID, HIST.Uploaded, HIST.Downloaded, HIST.Bounty, HIST.nr_torrents, HIST.userclass,
                 round(
