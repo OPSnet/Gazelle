@@ -3,12 +3,18 @@
 namespace Gazelle\Stats;
 
 class Users extends \Gazelle\Base {
+
+    protected const USER_BROWSER  = 'stat_user_browser';
+    protected const USER_CLASS    = 'stat_user_class';
+    protected const USER_PLATFORM = 'stat_user_platform';
+
     /**
      * The annual flow of users: people registered and disabled
-     * @return array keyed by month [month, joined, disabled]
      */
     public function flow(): array {
-        if (!$flow = self::$cache->get_value('stat-user-timeline')) {
+        $flow = self::$cache->get_value('stat-user-timeline');
+        $flow = false;
+        if ($flow === false) {
             /* Mysql does not implement a full outer join, so if there is a month with
              * no joiners, any banned users in that same month will not appear.
              * Mysql does not implement sequence generators as in Postgres, so if there
@@ -32,78 +38,89 @@ class Users extends \Gazelle\Base {
                 ) D USING (M)
                 ORDER BY J.M;
             ");
-            $flow = self::$db->to_array('Mon');
+            $flow = self::$db->to_array('Mon', MYSQLI_ASSOC, false);
             self::$cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
         }
-        return $flow ?: [];
+        return $flow;
     }
 
     /**
-     * Count of users aggregated by primary class
-     * @return array [class name, user count]
+     * Reformat the output of a label, total query to simplify the consumption by highcharts
      */
-    public function classDistribution(): array {
-        if (!$dist = self::$cache->get_value('stat-user-class')) {
-            self::$db->prepared_query("
-                SELECT p.Name, count(*) AS Users
-                FROM users_main AS m
-                INNER JOIN permissions AS p ON (m.PermissionID = p.ID)
-                WHERE m.Enabled = '1'
-                GROUP BY p.Name
-                ORDER BY Users DESC
-            ");
-            $dist = self::$db->to_array('Name');
-            self::$cache->cache_value('stat-user-class', $dist, 86400);
+    protected function reformatDist(array $result): array {
+        $dist = [];
+        foreach ($result as $label => $total) {
+            $dist[] = [
+                'name' => $label,
+                'y'    => $total,
+            ];
         }
-        return $dist ?: [];
+        return $dist;
     }
 
     /**
-     * Count of users aggregated by OS platform
-     * @return array [platform, user count]
-     */
-    public function platformDistribution(): array {
-        if (!$dist = self::$cache->get_value('stat-user-platform')) {
-            self::$db->prepared_query("
-                SELECT OperatingSystem, count(*) AS Users
-                FROM users_sessions
-                GROUP BY OperatingSystem
-                ORDER BY Users DESC
-            ");
-            $dist = self::$db->to_array();
-            self::$cache->cache_value('stat-user-platform', $dist, 86400);
-        }
-        return $dist ?: [];
-    }
-
-    /**
-     * Count of users aggregated by browser
-     * @return array [browser, user count]
+     * Users aggregated by browser
      */
     public function browserDistribution(): array {
-        if (!$dist = self::$cache->get_value('stat-user-browser')) {
+        $dist = self::$cache->get_value(self::USER_BROWSER);
+        if ($dist === false) {
             self::$db->prepared_query("
-                SELECT Browser, count(*) AS Users
+                SELECT Browser AS label,
+                    count(*) AS total
                 FROM users_sessions
-                GROUP BY Browser
-                ORDER BY Users DESC
+                GROUP BY label
+                ORDER BY total DESC
             ");
-            $dist = self::$db->to_array();
-            self::$cache->cache_value('stat-user-browser', $dist, 86400);
+            $dist = $this->reformatDist(self::$db->to_pair('label', 'total', false));
+            self::$cache->cache_value(self::USER_BROWSER, $dist, 86400);
         }
-        return $dist ?: [];
+        return $dist;
+    }
+
+    /**
+     * Users aggregated by primary class
+     */
+    public function classDistribution(): array {
+        $dist = self::$cache->get_value(self::USER_CLASS);
+        if ($dist === false) {
+            self::$db->prepared_query("
+                SELECT p.Name AS label,
+                    count(*)  AS total
+                FROM users_main AS um
+                INNER JOIN permissions AS p ON (um.PermissionID = p.ID)
+                WHERE um.Enabled = '1'
+                GROUP BY label
+                ORDER BY p.Level
+            ");
+            $dist = $this->reformatDist(self::$db->to_pair('label', 'total', false));
+            self::$cache->cache_value(self::USER_CLASS, $dist, 86400);
+        }
+        return $dist;
+    }
+
+    /**
+     * Users aggregated by OS platform
+     */
+    public function platformDistribution(): array {
+        $dist = self::$cache->get_value(self::USER_PLATFORM);
+        $dist = false;
+        if ($dist === false) {
+            self::$db->prepared_query("
+                SELECT OperatingSystem AS label,
+                    count(*) AS total
+                FROM users_sessions
+                GROUP BY label
+                ORDER BY total DESC
+            ");
+            $dist = $this->reformatDist(self::$db->to_pair('label', 'total', false));
+            self::$cache->cache_value(self::USER_PLATFORM, $dist, 86400);
+        }
+        return $dist;
     }
 
     /**
      * Country aggregates.
      * TODO: this is really fucked
-     *
-     * @return array List of country
-     * @return array Country rank
-     * @return array Country user total
-     * @return int Country with least users
-     * @return int Country with most users
-     * @return int Log increments
      */
     public function geodistribution(): array {
         if (![$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements] = self::$cache->get_value('geodistribution')) {

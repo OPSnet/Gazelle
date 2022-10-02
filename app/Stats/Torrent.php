@@ -7,8 +7,10 @@ class Torrent extends \Gazelle\Base {
     protected array $stats;
     protected array $peerStats;
 
-    const CACHE_KEY = 'stats_global_torrent';
-    const PEER_KEY  = 'stats_global_peer';
+    const CACHE_KEY      = 'stats_global_torrent';
+    const PEER_KEY       = 'stats_global_peer';
+    const TORRENT_FLOW   = 'stats_tflow';
+    const CATEGORY_TOTAL = 'stats_tcat';
 
     public function __construct() {
         $this->stats = self::$cache->get_value(self::CACHE_KEY) ?: $this->init();
@@ -95,13 +97,12 @@ class Torrent extends \Gazelle\Base {
         return $stats;
     }
 
-    /* Get the yearly torrent flows (added, removed and net per month)
-     * @return array
-     *      - array keyed by month with [net, add, del]
-     *      - array keyed by month with [category-id]
+    /**
+     * Yearly torrent flows (added, removed and net per month)
      */
-    public function yearlyFlow(): array {
-        if (!([$flow, $torrentCat] = self::$cache->get_value('torrentflow'))) {
+    public function flow(): array {
+        $flow = self::$cache->get_value(self::TORRENT_FLOW);
+        if ($flow === false) {
             self::$db->prepared_query("
                 SELECT date_format(t.Time,'%Y-%m') AS Month,
                     count(*) as t_net
@@ -110,31 +111,55 @@ class Torrent extends \Gazelle\Base {
                 ORDER BY Time DESC
                 LIMIT 12
             ");
-            $net = self::$db->to_array('Month', MYSQLI_ASSOC, false);
+            $flow = self::$db->to_array('Month', MYSQLI_ASSOC, false);
+            $beginMonth = end($flow)['Month'] . '-01';
+            $endMonth = reset($flow)['Month'] . '-01';
 
             self::$db->prepared_query("
                 SELECT date_format(Time,'%Y-%m') as Month,
                     sum(Message LIKE 'Torrent % was uploaded by %') AS t_add,
                     sum(Message LIKE 'Torrent % was deleted %')     AS t_del
                 FROM log
+                WHERE Time BETWEEN ? AND last_day(?)
                 GROUP BY Month order by Time DESC
-                LIMIT 12
-            ");
-            $flow = array_merge_recursive($net, self::$db->to_array('Month', MYSQLI_ASSOC, false));
-            asort($flow);
-            $flow = array_slice($flow, -12);
+                ", $beginMonth, $endMonth
+            );
+            $delta = self::$db->to_array('Month', MYSQLI_ASSOC, false);
+            foreach (array_keys($flow) as $m) {
+                $flow[$m]['t_add'] = (int)($delta[$m]['t_add'] ?? 0);
+                $flow[$m]['t_del'] = -(int)($delta[$m]['t_del'] ?? 0);
+            }
+            $flow = array_reverse($flow);
+            self::$cache->cache_value(self::TORRENT_FLOW, $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
+        }
+        return $flow;
+    }
 
+    /**
+     * Get the totals by category
+     */
+    public function categoryTotal(): array {
+        $total = self::$cache->get_value(self::CATEGORY_TOTAL);
+        $total = false;
+        if ($total === false) {
             self::$db->prepared_query("
-                SELECT tg.CategoryID, count(*)
+                SELECT tg.CategoryID,
+                    count(*) as total
                 FROM torrents AS t
                 INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
                 GROUP BY tg.CategoryID
                 ORDER BY 2 DESC
             ");
-            $torrentCat = self::$db->to_array();
-            self::$cache->cache_value('torrentflow', [$flow, $torrentCat], mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
+            $total = [];
+            foreach (self::$db->to_pair('CategoryID', 'total', false) as $cat => $value) {
+                $total[] = [
+                    'name' => CATEGORY[$cat - 1],
+                    'y'    => $value,
+                ];
+            }
+            self::$cache->cache_value(self::CATEGORY_TOTAL, $total, mktime(0, 0, 0, date('n') + 1, 2));
         }
-        return [$flow, $torrentCat];
+        return $total;
     }
 
     /**

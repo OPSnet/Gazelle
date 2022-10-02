@@ -1,0 +1,79 @@
+{{ header('Detailed torrent statistics', {'js': 'highcharts,highcharts_custom'}) }}
+<div class="linkbox">
+    <a href="stats.php?action=users" class="brackets">User Stats</a>
+</div>
+<h1 id="Torrent_Upload"><a href="#Torrent_Upload">Uploads by month</a></h1>
+<div class="box pad center">
+    <figure class="highcharts-figure"><div id="flow"></div></figure>
+</div>
+<h1 id="Torrent_Category"><a href="#Torrent_Category">Category breakdown</a></h1>
+<div class="box pad center">
+    <figure class="highcharts-figure"><div id="category"></div></figure>
+</div>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('flow', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: false,
+    credits: { enabled: false },
+    xAxis: { categories: {{ flow.month|json_encode|raw }}, },
+    yAxis: [
+        { // Primary yAxis
+            labels: { format: '{value}', style: { color: Highcharts.getOptions().colors[2] }},
+            title: { text: 'Change', style: { color: Highcharts.getOptions().colors[2] }},
+            opposite: true,
+
+        }, { // Secondary yAxis
+            title: { text: 'Net total', style: { color: Highcharts.getOptions().colors[0] }},
+            labels: { format: '{value}', style: { color: Highcharts.getOptions().colors[0] }},
+        }
+    ],
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    legend: { itemStyle: {color: 'silver'}, itemHoverStyle: {color: 'gainsboro' }},
+    plotOptions: { column: { stacking: 'normal' } },
+    series: [
+        { type: 'column', name: 'Created', yAxis: 0, color: 'darkgreen', data: {{ flow.add|json_encode|raw }} },
+        { type: 'column', name: 'Removed', yAxis: 0, color: 'darkred', data: {{ flow.del|json_encode|raw }} },
+        { type: 'spline', name: 'Net', yAxis: 1,
+            marker: { lineWidth: 2, color: 'teal', fillColor: 'steelblue'},
+            data: {{ flow.net|json_encode|raw }},
+        },
+    ]
+});
+
+Highcharts.chart('category', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: false,
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Upload types',
+        data: {{ category|json_encode|raw }}
+    }],
+})});
+</script>
+
+{{ footer() }}
