@@ -9,7 +9,7 @@ $currId   = false;
 $result   = false;
 $confirm  = false;
 $messsage = false;
-$recovery = new Gazelle\Recovery;
+$recovery = new Gazelle\Manager\Recovery;
 
 if (isset($_POST['curr']) && isset($_POST['prev'])) {
     authorize();
