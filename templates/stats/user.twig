@@ -1,0 +1,140 @@
+{{ header('Detailed User Statistics', {'js': 'highcharts,highcharts_custom'}) }}
+
+<div class="linkbox">
+    <a href="stats.php?action=torrents" class="brackets">Torrent Stats</a>
+</div>
+
+<div class="box pad center">
+    <figure class="highcharts-figure"><div id="user-flow"></div></figure>
+    <br />
+    <figure class="highcharts-figure"><div id="user-class"></div></figure>
+    <br />
+    <figure class="highcharts-figure"><div id="user-platform"></div></figure>
+    <br />
+    <figure class="highcharts-figure"><div id="user-browser"></div></figure>
+    <br />
+    <figure class="highcharts-figure"><div id="user-world"></div></figure>
+</div>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-flow', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Flow',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    xAxis: {
+        categories: {{ flow.month|json_encode|raw }}
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    legend: { itemStyle: {color: 'silver'}, itemHoverStyle: {color: 'gainsboro' }},
+    plotOptions: { column: { stacking: 'normal' }},
+    series: [
+        { name: 'Enabled',  color: 'darkgreen', data: {{ flow.add|json_encode|raw }} },
+        { name: 'Disabled', color: 'darkred', data: {{ flow.del|json_encode|raw }} },
+        { type: 'spline', name: 'Change',
+            marker: { lineWidth: 2, color: 'teal', fillColor: 'steelblue'},
+            data: {{ flow.net|json_encode|raw }},
+        },
+    ]
+});
+
+Highcharts.chart('user-class', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Classes',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Classes',
+        data: {{ distribution.class|json_encode|raw }},
+    }],
+});
+
+Highcharts.chart('user-platform', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Platforms',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Platforms',
+        data: {{ distribution.platform|json_encode|raw }},
+    }],
+});
+
+Highcharts.chart('user-browser', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'Browsers',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Browsers',
+        data: {{ distribution.browser|json_encode|raw }},
+    }],
+});
+
+});
+</script>
+{{ footer() }}
