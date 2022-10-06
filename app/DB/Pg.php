@@ -9,12 +9,16 @@ class Pg {
         $this->pdo = new \PDO($dsn);
     }
 
-    public function pdo() {
+    public function pdo(): \PDO {
         return $this->pdo;
     }
 
-    public function prepared_query($query, ...$args): int {
-        $st = $this->pdo->prepare($query);
+    public function prepare(string $query): \PDOStatement {
+        return $this->pdo->prepare($query);
+    }
+
+    public function prepared_query(string $query, ...$args): int {
+        $st = $this->prepare($query);
         if ($st->execute([...$args])) {
             return $st->rowCount();
         } else {
