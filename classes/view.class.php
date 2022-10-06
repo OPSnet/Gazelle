@@ -75,7 +75,9 @@ class View {
                 ->setPayment($payMan)
                 ->setApplicant(new Gazelle\Manager\Applicant)
                 ->setDb(new Gazelle\DB)
-                ->setScheduler(new Gazelle\Schedule\Scheduler);
+                ->setScheduler(new Gazelle\Schedule\Scheduler)
+                ->setSSLHost(new Gazelle\Manager\SSLHost)
+                ;
 
             if (OPEN_EXTERNAL_REFERRALS) {
                 $activity->setReferral(new Gazelle\Manager\Referral);

@@ -37,6 +37,9 @@ switch ($_REQUEST['action']) {
     case 'quick_ban':
         require_once('managers/quick_ban.php');
         break;
+    case 'ssl_host':
+        require_once('managers/ssl_host.php');
+        break;
     case 'tor_node':
         require_once('managers/tor_node.php');
         break;

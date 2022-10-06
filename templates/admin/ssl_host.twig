@@ -1,0 +1,50 @@
+{{ header('SSL Host Certificates') }}
+<div class="thin">
+
+<div class="header">
+    <h2>SSL Host Certificates</h2>
+</div>
+
+<div class="box pad thin">
+
+<form method="post" action="">
+<input type="hidden" name="action" value="ssl_host" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<table>
+    <tr>
+        <td class="colhead">Hostname</td>
+        <td class="colhead">Port</td>
+        <td class="colhead">Created</td>
+        <td class="colhead">Not before</td>
+        <td class="colhead">Not after</td>
+        <td class="colhead">Remove?</td>
+    </tr>
+{% for r in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>{{ r.hostname }}</td>
+        <td>{{ r.port }}</td>
+        <td>{{ r.created|time_diff }}</td>
+        <td class="nobr">{{ r.not_before }} ({{ r.not_before|time_diff }})</td>
+        <td class="nobr">{{ r.not_after }} ({{ r.not_after|time_diff }})</td>
+        <td><input type="checkbox" name="id-{{ r.id }}" /></td>
+    </tr>
+{% endfor %}
+    <tr>
+        <td colspan="6"><br />Create new entry</td>
+    </tr>
+    <tr>
+        <td><input type="text" size="30" name="hostname" /></td>
+        <td><input type="text" size="3" name="port" /></td>
+        <td colspan="4">&nbsp;</td>
+    </tr>
+</table>
+<br />
+
+<input type="submit" value="Update" />
+</form>
+</div>
+
+</div>
+
+</div>
+{{ footer() }}

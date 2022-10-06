@@ -129,6 +129,22 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
+    public function setSSLHost(\Gazelle\Manager\SSLHost $ssl) {
+        if ($this->user->permitted('site_debug')) {
+            $soon = $ssl->expirySoon('1 DAY');
+            $url = "tools.php?action=ssl_host";
+            if ($soon) {
+                $this->setAlert("<a title=\"SSL Certificate will expire in one day\" href=\"$url\"><span class=\"sys-error\">SSL</span></a>");
+            } else {
+                $soon = $ssl->expirySoon('1 WEEK');
+                if ($soon) {
+                    $this->setAlert("<a title=\"SSL Certificate will expire in one week\" href=\"$url\"><span class=\"sys-warning\">SSL</span></a>");
+                }
+            }
+        }
+        return $this;
+    }
+
     public function setStaff(\Gazelle\Staff $staff) {
         if ($staff->blogAlert()) {
             $this->setAlert('<a class="nobr" href="staffblog.php">New staff blog post!</a>');
