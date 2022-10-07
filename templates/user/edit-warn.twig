@@ -8,10 +8,11 @@
     <tr>
         <td class="label">Warned:</td>
         <td>
-            <input type="checkbox" name="Warned"{{ checked(is_warned) }} />{{ is_warned ? ' until ' ~ until : '' }}
+            <input type="checkbox" name="Warned"{{ checked(user.isWarned) }} />
+            {% if user.isWarned %} until {{ user.warningExpiry }}{% endif %}
         </td>
     </tr>
-{% if not is_warned %}
+{% if not user.isWarned %}
     <tr>
         <td class="label">Expiration:</td>
         <td>

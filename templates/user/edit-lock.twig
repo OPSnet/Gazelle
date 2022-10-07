@@ -8,7 +8,7 @@
     <tr>
         <td class="label">Lock Account:</td>
         <td>
-            <input type="checkbox" name="LockAccount" id="LockAccount"{{ checked(is_locked) }} /> You must give the reason below when locking.
+            <input type="checkbox" name="LockAccount" id="LockAccount"{{ checked(user.isLocked) }} /> You must give the reason below when locking.
         </td>
     </tr>
     <tr>
@@ -16,11 +16,11 @@
         <td>
             <select name="LockType">
                 <option value="---">---</option>
-                <option value="{{ staff_lock }}" {{ checked(is_locked) }}>Staff Lock</option>
+                <option value="{{ constant('STAFF_LOCKED') }}" {{ checked(user.isLocked) }}>Staff Lock</option>
             </select>
         </td>
     </tr>
-{% if can_logout %}
+{% if viewer.permitted('users_logout') %}
     <tr>
         <td class="label">Log out:</td>
         <td><input type="checkbox" name="Logout" id="LogOut" /></td>
