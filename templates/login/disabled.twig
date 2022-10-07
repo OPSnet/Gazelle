@@ -13,8 +13,22 @@ function toggle_visibility(id) {
 {% if auto %}
 <div style="width: 100%">
 <div style="width: 60%; margin: 0 auto;">
-{{ message }}
-<br /><br /><a href='login.php?action=disabled'>Back</a>
+{% if enabler %}
+    {% if enabler.isPending %}
+Your request to re-enable your account has been received. You can expect
+a reply message in your email within 48 hours.<br />
+If you do not receive an email after 48 hours have passed, please visit us
+on IRC for assistance in {{ constant('BOT_DISABLED_CHAN') }}
+on {{ constant('BOT_SERVER') }}
+    {% elseif enabler.isRejected %}
+Your request to re-enable your account has been rejected.<br />
+This may be because a request is already pending for your username,
+or because a recent request was denied.<br /><br />
+You are encouraged to discuss this with staff by visiting {{ constant('BOT_DISABLED_CHAN') }}
+on {{ constant('BOT_SERVER') }}
+    {% endif %}
+{% endif %}
+<br /><br /><a href='/'>Back</a>
 </div>
 </div>
 {% else %}
@@ -33,7 +47,8 @@ account associated with your account at {{ constant('SITE_NAME') }} if you
 cannot do so, please see below.</p>
 
 <form action="" method="POST">
-    <input type="email" class="inputtext" placeholder="Email Address" name="email" required /> <input type="submit" value="Enable" />
+    <input type="email" class="inputtext" placeholder="Email Address" name="email" required />
+    <input type="submit" value="Enable" />
     <input type="hidden" name="username" value="{{ username }}" />
 </form>
 <br />

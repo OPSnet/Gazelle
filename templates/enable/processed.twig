@@ -1,0 +1,10 @@
+{{ header("Enable Request Processed") }}
+
+<div class="box pad thin">
+{% if success %}
+    You have successfully reenabled your account. You may now <a href="/">login</a>.
+{% else %}
+    Your account could not be enabled. Please visit {{ BOT_DISABLED_CHAN }} on {{ BOT_SERVER }}
+{% endif %}
+
+{{ footer() }}

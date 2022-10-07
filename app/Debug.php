@@ -104,9 +104,7 @@ class Debug {
             $uri = preg_replace('/(?<=[?&]torrent_pass=)\w+/', 'HASH', $uri);
             $uri = preg_replace('/([?&]\w*id=)\d+/', '\1IDnnn', $uri);
             global $Viewer;
-            if (isset($Viewer)) {
-                $userId = $Viewer->id();
-            }
+            $userId = (int)$Viewer?->id();
         }
 
         $id = (new \Gazelle\Manager\ErrorLog)->create(

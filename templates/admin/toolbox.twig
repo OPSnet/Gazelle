@@ -25,7 +25,6 @@
 
 {{ _self.category('Administration', [
     ['Applicant manager',        'apply.php?action=admin',            viewer.permitted('admin_manage_applicants')],
-    ['Auto-Enable requests',     'tools.php?action=enable_requests',  FEATURE_EMAIL_REENABLE],
     ['Database encryption key',  'tools.php?action=dbkey',            viewer.permitted('admin_site_debug')],
     ['IRC channel manager',      'tools.php?action=irc',              viewer.permitted('admin_manage_forums')],
     ['Permissions manager',      'tools.php?action=permissions',      viewer.permitted('admin_manage_permissions')],
@@ -54,16 +53,17 @@
 </div><div class="toolbox_container">
 
 {{ _self.category('User management', [
-    ['Create user',         'tools.php?action=create_user',       viewer.permitted('admin_create_users')],
-    ['Login watch',         'tools.php?action=login_watch',       viewer.permitted('admin_login_watch')],
-    ['Invite pool',         'tools.php?action=invite_pool',       viewer.permitted('users_view_invites')],
-    ['Invite tree manager', 'tools.php?action=manipulate_tree',   true],
-    ['Special users',       'tools.php?action=special_users',     viewer.permitted('admin_manage_permissions')],
-    ['Recovery',            'recovery.php?action=admin',          viewer.permitted('admin_recovery')],
-    ['Referral accounts',   'tools.php?action=referral_accounts', viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
-    ['Referred users',      'tools.php?action=referral_users',    viewer.permitted('admin_view_referrals')],
-    ['Registration log',    'tools.php?action=registration_log',  viewer.permitted('users_view_email')],
-    ['User flow',           'tools.php?action=user_flow',         viewer.permitted('site_view_flow')],
+    ['Auto-Enable requests', 'tools.php?action=enable_requests',   constant('FEATURE_EMAIL_REENABLE')],
+    ['Create user',          'tools.php?action=create_user',       viewer.permitted('admin_create_users')],
+    ['Login watch',          'tools.php?action=login_watch',       viewer.permitted('admin_login_watch')],
+    ['Invite pool',          'tools.php?action=invite_pool',       viewer.permitted('users_view_invites')],
+    ['Invite tree manager',  'tools.php?action=manipulate_tree',   true],
+    ['Special users',        'tools.php?action=special_users',     viewer.permitted('admin_manage_permissions')],
+    ['Recovery',             'recovery.php?action=admin',          viewer.permitted('admin_recovery')],
+    ['Referral accounts',    'tools.php?action=referral_accounts', viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
+    ['Referred users',       'tools.php?action=referral_users',    viewer.permitted('admin_view_referrals')],
+    ['Registration log',     'tools.php?action=registration_log',  viewer.permitted('users_view_email')],
+    ['User flow',            'tools.php?action=user_flow',         viewer.permitted('site_view_flow')],
 ]) }}
 
 {{ _self.category('Community', [
