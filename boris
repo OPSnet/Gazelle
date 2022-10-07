@@ -15,6 +15,7 @@ if ($remove) {
 
 define('BORIS', 1);
 $_SERVER['HTTP_USER_AGENT'] = 'boris';
+$_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require_once(__DIR__ . '/lib/bootstrap.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');

@@ -15,8 +15,7 @@ $paginator = new Gazelle\Util\Paginator(50, (int)($_GET['page'] ?? 1));
 
 $text = match(true) {
     isset($_POST['text'])     => trim($_POST['text']),
-    isset($_GET['emaillist']) => implode("\n", array_map(fn ($ip) => long2ip((int)base_convert($ip, 36, 10)), explode(',', $_GET['emaillist']))),
-    isset($_GET['ip'])        => $_GET['ip'],
+    isset($_GET['emaillist']) => implode("\n", explode(',', $_GET['emaillist'])),
     default                   => '',
 };
 if ($text) {

@@ -149,13 +149,8 @@ class Activity extends \Gazelle\BaseUser {
         if ($staff->blogAlert()) {
             $this->setAlert('<a class="nobr" href="staffblog.php">New staff blog post!</a>');
         }
-
         if (FEATURE_EMAIL_REENABLE) {
-            $total = self::$cache->get_value(\AutoEnable::CACHE_KEY_NAME);
-            if ($total === false) {
-                $total = self::$db->scalar("SELECT count(*) FROM users_enable_requests WHERE Outcome IS NULL");
-                self::$cache->cache_value(\AutoEnable::CACHE_KEY_NAME, $total);
-            }
+            $total = (new \Gazelle\Manager\AutoEnable)->openTotal();
             if ($total > 0) {
                 $this->setAction('<a class="nobr" href="tools.php?action=enable_requests">' . $total . " Enable request" . plural($total) . "</a>");
             }

@@ -1,16 +1,15 @@
 <?php
 
-if (!isset($Viewer) || !isset($_GET['token']) || !FEATURE_EMAIL_REENABLE) {
+if (!FEATURE_EMAIL_REENABLE || !isset($_GET['token'])) {
     header("Location: index.php");
     exit;
 }
 
-if (isset($_GET['token'])) {
-    $Err = AutoEnable::handle_token($_GET['token']);
+$enabler = (new Gazelle\Manager\AutoEnable)->findByToken($_GET['token']);
+if (is_null($enabler)) {
+    error('invalid enable token');
 }
 
-View::show_header("Enable Request");
-
-echo $Err; // This will always be set
-
-View::show_footer();
+echo $Twig->render('enable/processed.twig', [
+    'success' => $enabler->processToken($_GET['token']),
+]);

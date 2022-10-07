@@ -1,0 +1,154 @@
+{% from 'macro/form.twig' import checked, selected %}
+{{ header("Enable Requests", {'js': 'enable_requests'}) }}
+<div class="header">
+    <h2>Auto-Enable Requests</h2>
+</div>
+<div align="center">
+    <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#search_form').gtoggle(); return false;">Search</a>
+    <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#scores').gtoggle(); return false;">Scores</a>
+</div><br />
+<div class="thin">
+{% for r in total %}
+    {% if loop.first %}
+    <table id="scores" class="hidden" style="width: 50%; margin: 0 auto;">
+        <tr>
+            <th>Username</th>
+            <th>Checked</th>
+        </tr>
+    {% endif %}
+        <tr>
+            <td>{{ r.user_id|user_url }}</td>
+            <td>{{ r.total|number_format }}</td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+{% endfor %}
+    <form action="" method="GET" id="search_form"{% if not search %} class="hidden"{% endif %}>
+        <input type="hidden" name="action" value="enable_requests" />
+        <input type="hidden" name="view" value="{{ view }}" />
+        <input type="hidden" name="search" value="1" />
+        <table>
+            <tr>
+                <td class="label">Username</td>
+                <td><input type="text" name="username" value="{{ username }}" /></td>
+            </tr>
+            <tr>
+                <td class="label">Handled By</td>
+                <td><input type="text" name="handled_username" value="{{ admin }}" /></td>
+            </tr>
+            <tr>
+                <td class="label">Outcome</td>
+                <td>
+                    <select name="outcome_search">
+                        <option value="">---</option>
+                        <option value="{{ outcome.approved }}"{{ selected(outcome_search == outcome.approved) }}>Approved</option>
+                        <option value="{{ outcome.denied }}"{{ selected(outcome_search == outcome.dendied) }}>Denied</option>
+                        <option value="{{ outcome.discarded }}{{ selected(outcome_search == outcome.discarded) }}">Discarded</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Include Checked</td>
+                <td><input type="checkbox" name="show_checked"{{ checked(show_checked) }} /></td>
+            </tr>
+            <tr>
+                <td class="label">Order By</td>
+                <td>
+                    <select name="order">
+                        <option value="submitted_timestamp"{{ selected(order == 'submitted_timestamp') }}>Submitted Timestamp</option>
+                        <option value="outcome"{{ selected(order == 'outcome') }}>Outcome</option>
+                        <option value="handled_timestamp"{{ selected(order == 'handled_timestamp') }}>Handled Timestamp</option>
+                    </select>&nbsp;
+                    <select name="sort">
+                        <option value="desc"{{ selected(sort == 'desc') }}>Descending</option>
+                        <option value="asc"{{ selected(sort == 'asc') }}>Ascending</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=2><input type="submit" value="Search" /></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+{% for r in page %}
+    {% if loop.first %}
+    {{ paginator.linkbox|raw }}
+    <div class="box pad">
+    Before proceeding with an enable, you should perform searches on the IP address
+    used and the given email address to verify that someone is not trying to take
+    over an inactive account.
+    <br /><br />Denying a request will send an email to the address they specified,
+    inviting them to come to IRC. Discarding a request does not send anything and
+    also halts the workflow.
+    <br /><br />Approbing a request sends them an email which contains a special link to
+    allow them to log back in and reenable their account with no further
+    intervention required on your part. In other words, they are not automatically
+    reenabled, they still need to follow up on the email
+    </div>
+    <br />
+    <table width="100%">
+        <tr class="colhead">
+            <td class="center"><input type="checkbox" id="check_all" /></td>
+            <td>Username</td>
+            <td class="nobr">Email Address</td>
+            <td class="nobr">IP Address</td>
+            <td class="nobr">{{ header.emit('submitted_timestamp')|raw }}</td>
+            <td class="nobr">Ban Reason</td>
+            <td class="nobr">Comment<?= $ShowChecked ? ' / Checked By' : ''?></td>
+            <td class="nobr">Submit{{ header.emit('handled_timestamp')|raw }}</td>
+        {% if show_checked %}
+            <td>outcome{{ header.emit('outcome')|raw }}</td>
+        {% endif %}
+        </tr>
+    {% endif %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}" id="row_{{ r.id }}">
+            <td class="center">
+    {% if r.isPending %}
+                <input type="checkbox" id="multi" data-id="{{ r.id }}" />
+    {% endif %}
+            </td>
+            <td>{{ r.user.id|user_url }}</td>
+            <td><a href="/tools.php?action=email_search&emaillist={{ r.email }}">{{ r.email }}</td>
+            <td><a href="/tools.php?action=ip_search&ip={{ r.ipv4 }}">{{ r.ipv4 }}</a></td>
+            <td>{{ r.created|time_diff }}</td>
+            <td>{% if r.banReason == 3 %}<b>Inactivity</b>{% else %}Other ({{ r.banReason }}){% endif %}</td>
+    {% if not r.isPending %}
+            <td>{{ r.admin_user_id|user_url }}</td>
+            <td>{{ r.handled }}</td>
+    {% endif %}
+            <td><input class="inputtext" type="text" id="comment{{ r.id }}" placeholder="Comment" /></td>
+            <td>
+                <input type="submit" id="outcome" value="Approve" data-id="{{ r.id }}" />
+                <input type="submit" id="outcome" value="Reject" data-id="{{ r.id }}" />
+                <input type="submit" id="outcome" value="Discard" data-id="{{ r.id }}" />
+            </td>
+    {% if show_checked %}
+            <td>{{ r.outcomeLabel }}
+        {% if r.isDiscarded %}
+                <a href="" id="unresolve" onclick="return false;" class="brackets" data-id="{{ r.id }}">Unresolve</a>
+        {% endif %}
+            </td>
+    {% endif %}
+        </tr>
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td>&nbsp;</td>
+            <td colspan="6">{{ r.useragent }}</td>
+            <td colspan="{{ show_checked ? 3 : 4 }}">-</td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {{ paginator.linkbox|raw }}
+<div style="padding-bottom: 11px;">
+    <input type="submit" id="outcome" value="Approve Selected" />
+    <input type="submit" id="outcome" value="Reject Selected" />
+    <input type="submit" id="outcome" value="Discard Selected" />
+</div>
+    {% endif %}
+{% else %}
+    <h2 align="center">No new pending auto enable requests{% if view %} in this view{% endif %}.</h2>
+{% endfor %}
+{{ footer() }}
+
