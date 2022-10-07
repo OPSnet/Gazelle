@@ -90,6 +90,28 @@ class UploadForm extends \Gazelle\Base {
         $Torrent = $this->Torrent;
         $IsRemaster = !empty($Torrent['Remastered']);
         $UnknownRelease = !$this->NewTorrent && $IsRemaster && !$Torrent['RemasterYear'];
+        $GroupRemasters = [];
+
+        if ($Torrent['GroupID'] ?? null) {
+            self::$db->prepared_query("
+                SELECT ID,
+                    RemasterYear,
+                    RemasterTitle,
+                    RemasterRecordLabel,
+                    RemasterCatalogueNumber
+                FROM torrents
+                WHERE Remastered = '1'
+                    AND RemasterYear != 0
+                    AND GroupID = ?
+                ORDER BY RemasterYear DESC,
+                    RemasterTitle DESC,
+                    RemasterRecordLabel DESC,
+                    RemasterCatalogueNumber DESC
+                ", $Torrent['GroupID']
+            );
+            // need BOTH for release selector
+            $GroupRemasters = self::$db->to_array(false, MYSQLI_BOTH, false);
+        }
 
         if ($this->NewTorrent) {
             $HasLog = false;
@@ -102,27 +124,6 @@ class UploadForm extends \Gazelle\Base {
             $LossymasterApproved = false;
             $LossywebApproved = false;
         } else {
-            if ($Torrent['GroupID']) {
-                self::$db->prepared_query("
-                    SELECT ID,
-                        RemasterYear,
-                        RemasterTitle,
-                        RemasterRecordLabel,
-                        RemasterCatalogueNumber
-                    FROM torrents
-                    WHERE Remastered = '1'
-                        AND RemasterYear != 0
-                        AND GroupID = ?
-                    ORDER BY RemasterYear DESC,
-                        RemasterTitle DESC,
-                        RemasterRecordLabel DESC,
-                        RemasterCatalogueNumber DESC
-                    ", $Torrent['GroupID']
-                );
-                // need BOTH for release selector
-                $GroupRemasters = self::$db->to_array(false, MYSQLI_BOTH, false);
-            }
-
             $HasLog = $Torrent['HasLog'];
             $HasCue = $Torrent['HasCue'];
             $BadTags = $Torrent['BadTags'];
