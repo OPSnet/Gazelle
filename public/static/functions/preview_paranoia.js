@@ -36,7 +36,7 @@
             // Get rid of trailing comma.
             paranoiaString = paranoiaString.substring(0, paranoiaString.length - 1);
             // Get user ID from URL parameter.
-            var userId = getURLParameter("userid");
+            var userId = getURLParameter("id");
             // Open a new tab with specified paranoia settings.
             window.open('user.php?id=' + encodeURIComponent(userId) + '&preview=1&paranoia=' + encodeURIComponent(paranoiaString), '_blank');
         });
