@@ -744,11 +744,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $OwnProfile)) {
         echo $Twig->render('user/edit-buffer.twig', [
-            'up'             => $User->uploadedSize(),
-            'down'           => $User->downloadedSize(),
-            'bonus'          => $User->bonusPointsTotal(),
-            'collages'       => $User->paidPersonalCollages(),
-            'donor_collages' => $User->personalDonorCollages(),
+            'user' => $User,
         ]);
     }
 
@@ -776,8 +772,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_edit_password')) {
         echo $Twig->render('user/edit-password.twig', [
-            'key_2fa' => $User->TFAKey(),
-            'user_id' => $UserID,
+            'user' => $User,
         ]);
     }
 ?>
@@ -812,16 +807,14 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_warn')) {
         echo $Twig->render('user/edit-warn.twig', [
-            'is_warned' => $User->isWarned(),
-            'until'     => $User->warningExpiry(),
+            'user' => $User,
         ]);
     }
 
     if ($Viewer->permitted('users_disable_any')) {
         echo $Twig->render('user/edit-lock.twig', [
-            'is_locked'  => $User->isLocked(),
-            'staff_lock' => STAFF_LOCKED,
-            'can_logout' => $Viewer->permitted('users_logout'),
+            'user'   => $User,
+            'viewer' => $Viewer,
         ]);
     }
 

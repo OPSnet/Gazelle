@@ -1,31 +1,31 @@
 <tr>
     <td class="label tooltip" title="Upload amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Uploaded:</td>
     <td>
-        <input type="hidden" name="OldUploaded" value="{{ up }}" />
-        <input type="text" size="20" name="Uploaded" value="{{ up }}" />
+        <input type="hidden" name="OldUploaded" value="{{ user.uploadedSize }}" />
+        <input type="text" size="20" name="Uploaded" value="{{ user.uploadedSize }}" />
     </td>
 </tr>
 <tr>
     <td class="label tooltip" title="Download amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Downloaded:</td>
     <td>
-        <input type="hidden" name="OldDownloaded" value="{{ down }}" />
-        <input type="text" size="20" name="Downloaded" value="{{ down }}" />
+        <input type="hidden" name="OldDownloaded" value="{{ user.downloadedSize }}" />
+        <input type="text" size="20" name="Downloaded" value="{{ user.downloadedSize }}" />
     </td>
 </tr>
 <tr>
     <td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
     <td>
-        <input type="hidden" name="OldBonusPoints" value="{{ bonus }}" />
-        <input type="text" size="20" name="BonusPoints" value="{{ bonus }}" />
+        <input type="hidden" name="OldBonusPoints" value="{{ user.bonusPointsTotal }}" />
+        <input type="text" size="20" name="BonusPoints" value="{{ user.bonusPointsTotal }}" />
     </td>
 </tr>
 <tr>
     <td class="label tooltip" title="Personal Collages.">Personal Collages:</td>
     <td>
-        <input type="hidden" name="OldCollages" value="{{ collages }}" />
-        <input type="text" size="20" name="Collages" value="{{ collages }}" />
-{% if donor_collages > 0 %}
-            <p>Donor perks provide an extra {{ donor_collages }} collages <em>in addition</em> to this amount.</p>
+        <input type="hidden" name="OldCollages" value="{{ user.paidPersonalCollages }}" />
+        <input type="text" size="20" name="Collages" value="{{ user.paidPersonalCollages }}" />
+{% if user.personalDonorCollages > 0 %}
+            <p>Donor perks provide an extra {{ user.personalDonorCollages }} collage{{ user.personalDonorCollages|plural }} <em>in addition</em> to this amount.</p>
 {% endif %}
     </td>
 </tr>
