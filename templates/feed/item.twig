@@ -1,0 +1,17 @@
+
+        $Date = 
+        $Site = SITE_URL . '/';
+        $Item = "\t\t<item>\n";
+        $Item .= "\t\t\t<title><![CDATA[$Title]]></title>\n";
+        $Item .= "\t\t\t<description><![CDATA[$Description]]></description>\n";
+        $Item .= "\t\t\t<pubDate>$Date</pubDate>\n";
+        $Item .= "\t\t\t<link>$Site$Page</link>\n";
+        $Item .= "\t\t\t<guid>$Site$Page</guid>\n";
+        if ($Comments != '') {
+            $Item .= "\t\t\t<comments>$Site$Comments</comments>\n";
+        }
+        if ($Category != '') {
+            $Item .= "\t\t\t<category><![CDATA[$Category]]></category>\n";
+        }
+        $Item .= "\t\t\t<dc:creator>$Creator</dc:creator>\n\t\t</item>\n";
+        return $Item;

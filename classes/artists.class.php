@@ -260,49 +260,4 @@ class Artists {
             return $Artist['name'];
         }
     }
-
-    /**
-     * Deletes an artist and their requests, wiki, and tags.
-     * Does NOT delete their torrents.
-     *
-     * @param int $ArtistID
-     */
-    public static function delete_artist($ArtistID, \Gazelle\User $user) {
-        global $Cache, $DB;
-        $QueryID = $DB->get_query_id();
-        $Name = $DB->scalar("
-            SELECT Name FROM artists_group WHERE ArtistID = ?
-            ", $ArtistID
-        );
-
-        // Delete requests
-        $DB->prepared_query("
-            SELECT RequestID FROM requests_artists WHERE ArtistID = ?
-            ", $ArtistID
-        );
-        $RequestIDs = $DB->collect(0);
-        $DB->begin_transaction();
-        foreach ($RequestIDs as $RequestID) {
-            $DB->prepared_query('DELETE FROM requests WHERE ID = ?', $RequestID);
-            $DB->prepared_query('DELETE FROM requests_artists WHERE RequestID = ?', $RequestID);
-            $DB->prepared_query('DELETE FROM requests_tags WHERE RequestID = ?', $RequestID);
-            $DB->prepared_query('DELETE FROM requests_votes WHERE RequestID = ?', $RequestID);
-        }
-
-        $DB->prepared_query('DELETE FROM artists_alias WHERE ArtistID = ?', $ArtistID);
-        $DB->prepared_query('DELETE FROM artists_group WHERE ArtistID = ?', $ArtistID);
-        $DB->prepared_query('DELETE FROM artists_tags WHERE ArtistID = ?', $ArtistID);
-        $DB->prepared_query('DELETE FROM wiki_artists WHERE PageID = ?', $ArtistID);
-
-        (new \Gazelle\Manager\Comment)->remove('artist', $ArtistID);
-        (new \Gazelle\Log)->general("Artist $ArtistID ($Name) was deleted by " . $user->username());
-        $DB->commit();
-
-        $Cache->delete_value('zz_a_' . $ArtistID);
-        $Cache->delete_value('artist_' . $ArtistID);
-        $Cache->delete_value('artist_groups_' . $ArtistID);
-        $Cache->decrement('stats_artist_count');
-
-        $DB->set_query_id($QueryID);
-    }
 }

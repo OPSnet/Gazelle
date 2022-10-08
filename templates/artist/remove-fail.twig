@@ -1,0 +1,39 @@
+{{ header('Artist deletion') }}
+
+{% for tgroup in tgroup_list %}
+    {% if loop.first %}
+<div class="pad thin">
+    There are still torrents that have <a href="artist.php?id={{ artist.id }}" class="tooltip" title="View artist" dir="ltr">{{ artist.name }}</a> as an artist.<br />
+    Please remove the artist from these torrents manually before attempting to delete.<br />
+    <div class="box pad">
+        <ul>
+    {% endif %}
+            <li>
+                <a href="torrents.php?id={{ tgroup.id }}" class="tooltip" title="View torrent group" dir="ltr">{{ tgroup.name }}</a>
+            </li>
+    {% if loop.last %}
+        </ul>
+    </div>
+</div>
+    {% endif %}
+{% endfor %}
+
+{% for request in request_list %}
+    {% if loop.first %}
+<div class="pad thin">
+    There are still requests that have <a href="artist.php?id={{ artist.id }}" class="tooltip" title="View artist" dir="ltr">{{ artist.name }}</a> as an artist.<br />
+    Please remove the artist from these requests manually before attempting to delete.<br />
+    <div class="box pad">
+        <ul>
+    {% endif %}
+            <li>
+                <a href="requests.php?action=view&amp;id={{ request.id }}" class="tooltip" title="View request" dir="ltr">{{ request.title }}</a>
+            </li>
+    {% if loop.last %}
+        </ul>
+    </div>
+</div>
+    {% endif %}
+{% endfor %}
+
+{{ footer() }}

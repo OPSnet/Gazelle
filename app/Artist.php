@@ -553,6 +553,32 @@ class Artist extends Base {
         return $requests;
     }
 
+    public function requestIdUsage(): array {
+        self::$db->prepared_query("
+            SELECT r.ID
+            FROM requests AS r
+            INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
+            WHERE ra.ArtistID = ?
+            ", $this->id
+        );
+        return self::$db->collect(0, false);
+    }
+
+    public function tgroupIdUsage(): array {
+        self::$db->prepared_query("
+            SELECT tg.ID
+            FROM torrents_group AS tg
+            INNER JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+            WHERE ta.ArtistID = ?
+            ", $this->id
+        );
+        return self::$db->collect(0, false);
+    }
+
+    public function usageTotal(): int {
+        return count($this->requestIdUsage()) + count($this->tgroupIdUsage());
+    }
+
     /**
      * Sets the Discogs ID for the artist and returns the number of affected rows.
      */
@@ -1008,5 +1034,33 @@ class Artist extends Base {
         $similarArtist->flushCache();
         self::$cache->deleteMulti(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
         return true;
+    }
+
+    /**
+     * Deletes an artist and their wiki and tags.
+     * Does NOT delete their requests or torrents.
+     */
+    public function remove(User $user, Log $logger): int {
+        $qid  = self::$db->get_query_id();
+        $id   = $this->id;
+        $name = $this->name();
+
+        self::$db->begin_transaction();
+        self::$db->prepared_query("DELETE FROM artists_alias WHERE ArtistID = ?", $id);
+        self::$db->prepared_query("DELETE FROM artists_group WHERE ArtistID = ?", $id);
+        self::$db->prepared_query("DELETE FROM artists_tags WHERE ArtistID = ?", $id);
+        self::$db->prepared_query("DELETE FROM wiki_artists WHERE PageID = ?", $id);
+
+        (new \Gazelle\Manager\Comment)->remove('artist', $id);
+        $logger->general("Artist $id ($name) was deleted by " . $user->username());
+        self::$db->commit();
+
+        self::$cache->delete_value('zz_a_' . $id);
+        self::$cache->delete_value('artist_' . $id);
+        self::$cache->delete_value('artist_groups_' . $id);
+        self::$cache->decrement('stats_artist_count');
+
+        self::$db->set_query_id($qid);
+        return 1;
     }
 }

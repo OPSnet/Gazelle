@@ -668,7 +668,7 @@ class TGroup extends BaseObject {
         return count($add);
     }
 
-    public function removeArtist(int $artistId, int $role): bool {
+    public function removeArtist(Artist $artist, int $role): bool {
         if (!isset($this->viewer)) {
             // we don't know who you are
             return false;
@@ -678,24 +678,13 @@ class TGroup extends BaseObject {
             WHERE GroupID = ?
                 AND ArtistID = ?
                 AND Importance = ?
-            ', $this->id, $artistId, $role
+            ', $this->id, $artist->id(), $role
         );
         if (!self::$db->affected_rows()) {
             return false;
         }
-        $unused = (bool)self::$db->scalar("
-            SELECT 1
-            FROM artists_group ag
-            LEFT JOIN torrents_artists ta USING (ArtistID)
-            LEFT JOIN requests_artists ra USING (ArtistID)
-            WHERE ta.ArtistID IS NULL
-                AND ra.artistID IS NULL
-                AND ag.ArtistID = ?
-            ", $artistId
-        );
-        if ($unused) {
-            // The last group to use this artist
-            \Artists::delete_artist($artistId, $this->viewer);
+        if ($artist->usageTotal() === 0) {
+            $artist->remove($this->viewer, new Log);
         }
         $this->flush();
         return true;
@@ -976,27 +965,13 @@ class TGroup extends BaseObject {
             DELETE FROM torrents_artists WHERE GroupID = ?
             ", $this->id
         );
+        $logger = new Log;
         foreach ($Artists as $ArtistID) {
-            // Get a count of how many groups or requests use the artist ID
-            $ReqCount = self::$db->scalar("
-                SELECT count(ag.ArtistID)
-                FROM artists_group AS ag
-                INNER JOIN requests_artists AS ra USING (ArtistID)
-                WHERE ag.ArtistID = ?
-                ", $ArtistID
-            );
-            $GroupCount = self::$db->scalar("
-                SELECT count(ag.ArtistID)
-                FROM artists_group AS ag
-                INNER JOIN torrents_artists AS ta USING (ArtistID)
-                WHERE ag.ArtistID = ?
-                ", $ArtistID
-            );
-            if ($ReqCount + $GroupCount === 0) {
-                //The only group to use this artist
-                \Artists::delete_artist($ArtistID, $user);
+            $artist = new Artist($ArtistID);
+            if ($artist->usageTotal() === 0) {
+                $artist->remove($user, $logger);
             } else {
-                //Not the only group, still need to clear cache
+                // Not the only group, still need to clear cache
                 self::$cache->delete_value("artist_groups_$ArtistID");
             }
         }
