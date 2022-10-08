@@ -532,6 +532,16 @@ class TGroup extends BaseObject {
         return self::$db->affected_rows();
     }
 
+    public function primaryArtist(): ?Artist {
+        $roleList = $this->artistRole()->roleList();
+        foreach (['dj', 'composer', 'conductor', 'main'] as $role) {
+            if (count($roleList[$role])) {
+                return new Artist($roleList[$role][0]['id']);
+            }
+        }
+        return null;
+    }
+
     /**
      * Generate an HTML anchor or the name for an artist
      */

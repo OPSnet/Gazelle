@@ -28,6 +28,8 @@ if ($Title === '') {
 $NewCategoryID = (int)($_POST['newcategoryid'] ?? 0);
 if (!$NewCategoryID) {
     error('Bad category');
+} elseif ($NewCategoryID === $old->categoryId()) {
+    error("Cannot change category to same category ({$old->categoryName()})");
 }
 
 switch (CATEGORY[$NewCategoryID - 1]) {
