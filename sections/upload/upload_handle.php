@@ -44,7 +44,7 @@ $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
 $Properties['ReleaseType'] = $_POST['releasetype'] ?? null;
 $Properties['Scene'] = !empty($_POST['scene']) ? '1' : '0';
-$Properties['Format'] = trim($_POST['format']);
+$Properties['Format'] = isset($_POST['format']) ? trim($_POST['format']) : null;
 $Properties['Media'] = trim($_POST['media'] ?? '');
 $Properties['Encoding'] = trim($_POST['bitrate'] ?? '');
 if ($Properties['Encoding'] === 'Other') {
