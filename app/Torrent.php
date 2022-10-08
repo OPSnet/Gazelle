@@ -87,7 +87,7 @@ class Torrent extends BaseObject {
      * How many tokens are required to download for free?
      */
     public function tokenCount(): int {
-        return ceil($this->size() / BYTES_PER_FREELEECH_TOKEN);
+        return (int)ceil($this->size() / BYTES_PER_FREELEECH_TOKEN);
     }
 
     /**
@@ -341,8 +341,12 @@ class Torrent extends BaseObject {
 
     public function freeleechStatus(): string {
         return $this->info()['FreeTorrent'];
-
     }
+
+    public function freeleechType(): string {
+        return $this->info()['FreeLeechType'];
+    }
+
     /**
      * Group ID this torrent belongs to
      */

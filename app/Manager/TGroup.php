@@ -46,8 +46,6 @@ class TGroup extends \Gazelle\Base {
 
     /**
      * Map a torrenthash to a group id
-     * @param string $hash
-     * @return int The group id if found, otherwise null
      */
     public function findByTorrentInfohash(string $hash) {
         $id = self::$db->scalar("
@@ -59,8 +57,6 @@ class TGroup extends \Gazelle\Base {
 
     /**
      * Update the cache and sphinx delta index to keep everything up-to-date.
-     *
-     * @param int groupId
      */
     public function refresh(int $groupId) {
         $qid = self::$db->get_query_id();
@@ -82,18 +78,24 @@ class TGroup extends \Gazelle\Base {
 
         self::$db->begin_transaction();
         // todo: remove this legacy code once TagList replacement is confirmed working
-        self::$db->prepared_query("
-            UPDATE torrents_group SET
-                TagList = (
-                    SELECT REPLACE(GROUP_CONCAT(tags.Name SEPARATOR ' '), '.', '_')
-                    FROM torrents_tags AS t
-                    INNER JOIN tags ON (tags.ID = t.TagID)
-                    WHERE t.GroupID = ?
-                    GROUP BY t.GroupID
-                )
-            WHERE ID = ?
-            ", $groupId, $groupId
+        $hasTags = (bool)self::$db->scalar("
+            SELECT 1 FROM torrents_tags tt WHERE tt.GroupID = ? LIMIT 1
+            ", $groupId
         );
+        if ($hasTags) {
+            self::$db->prepared_query("
+                UPDATE torrents_group SET
+                    TagList = (
+                        SELECT REPLACE(GROUP_CONCAT(tags.Name SEPARATOR ' '), '.', '_')
+                        FROM torrents_tags AS t
+                        INNER JOIN tags ON (tags.ID = t.TagID)
+                        WHERE t.GroupID = ?
+                        GROUP BY t.GroupID
+                    )
+                WHERE ID = ?
+                ", $groupId, $groupId
+            );
+        }
 
         self::$db->prepared_query("
             REPLACE INTO sphinx_delta
@@ -108,12 +110,12 @@ class TGroup extends \Gazelle\Base {
                 cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
                 coalesce(t.RemasterYear, 0), t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
                 replace(replace(t.FileList, '_', ' '), '/', ' ') AS FileList,
-                replace(group_concat(t2.Name SEPARATOR ' '), '.', '_'), ?, ?
+                replace(group_concat(coalesce(t2.Name, '') SEPARATOR ' '), '.', '_'), ?, ?
             FROM torrents t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             INNER JOIN torrents_group g ON (g.ID = t.GroupID)
-            INNER JOIN torrents_tags tt ON (tt.GroupID = g.ID)
-            INNER JOIN tags t2 ON (t2.ID = tt.TagID)
+            LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
+            LEFT JOIN tags t2 ON (t2.ID = tt.TagID)
             WHERE g.ID = ?
             GROUP BY t.ID
             ", $voteScore, $artistName, $groupId
@@ -263,7 +265,7 @@ class TGroup extends \Gazelle\Base {
             ", $new->id(), $old->id()
         );
 
-        $old->remove($user, $log);
+        $old->remove($user);
         self::$db->commit();
 
         $this->refresh($new->id());
