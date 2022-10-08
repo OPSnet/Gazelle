@@ -21,7 +21,7 @@ if (is_null($artist)) {
 $artistId = $artist->id();
 $artistName = $artist->name();
 
-if ($tgroup->setViewer($Viewer)->removeArtist($artistId, $role)) {
+if ($tgroup->setViewer($Viewer)->removeArtist($artist, $role)) {
     $tgMan->refresh($tgroup->id());
 }
 
