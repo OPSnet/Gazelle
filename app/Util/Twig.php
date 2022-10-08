@@ -289,12 +289,16 @@ class Twig {
             );
         }));
 
+        $twig->addTest(new \Twig\TwigTest('donor', function ($user) {
+            return get_class($user) === 'Gazelle\\User' && (new \Gazelle\User\Privilege($user))->isDonor();
+        }));
+
         $twig->addTest(new \Twig\TwigTest('nan', function ($value) {
             return is_nan($value);
         }));
 
-        $twig->addTest(new \Twig\TwigTest('donor', function ($user) {
-            return get_class($user) === 'Gazelle\\User' && (new \Gazelle\User\Privilege($user))->isDonor();
+        $twig->addTest(new \Twig\TwigTest('request_fill', function ($contest) {
+            return $contest instanceof \Gazelle\Contest\RequestFill;
         }));
 
         $twig->addGlobal('dom', new \Gazelle\Util\Dominator);

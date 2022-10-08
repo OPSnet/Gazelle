@@ -1,6 +1,5 @@
-{% if list is not empty %}
-    {% for contest in list %}
-        {% if loop.first %}
+{% for contest in list %}
+    {% if loop.first %}
 <div class="box pad">
     <table>
         <tr class="colhead">
@@ -11,15 +10,14 @@
         </tr>
         {% endif %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>{%- if current == contest.id -%}&nbsp;{{ pointer|raw }}{%- endif -%}
+            <td>{%- if current.id == contest.id -%}&nbsp;{{ "\xE2\x98\x9E" }}{%- endif -%}
                 <a href="contest.php?action=admin&id={{ contest.id }}">{{ contest.name }}</a></td>
             <td>{{ contest.contestType }}</td>
             <td>{{ contest.dateBegin }}</td>
             <td>{{ contest.dateEnd }}</td>
         </tr>
-        {% if loop.last %}
+    {% if loop.last %}
     </table>
-        {% endif %}
-    {% endfor %}
 </div>
-{% endif %}
+    {% endif %}
+{% endfor %}

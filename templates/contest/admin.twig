@@ -1,0 +1,72 @@
+{{ header('contest admin') }}
+
+<div class="thin">
+    <div class="header">
+        <h2>Contest admin</h2>
+        <div class="linkbox">
+            <a href="contest.php" class="brackets">Intro</a>
+            <a href="contest.php?action=leaderboard" class="brackets">Leaderboard</a>
+{% if create %}
+            <a href="contest.php?action=admin" class="brackets">Admin</a>
+{% else %}
+            <a href="contest.php?action=create" class="brackets">Create</a>
+{% endif %}
+        </div>
+    </div>
+
+{% if saved %}
+    <p>Contest information saved.</p>
+{% endif %}
+
+{% if not create %}
+    {% include 'contest/list.twig' with {
+        'viewer':  viewer,
+        'current': contest,
+        'list':    list,
+        'type':    type,
+        } only
+    %}
+{% endif %}
+
+{% if contest is request_fill %}
+    <div class="box pad">
+        <h2>Request pairs</h2>
+    {% for pair in contest.requestPairs %}
+        {% if loop.first %}
+        <p>The following members have filled out more than one request for the same member.</p>
+        <table>
+            <tr class="colhead">
+                <td>Request filler</td>
+                <td>Request creator</td>
+                <td>Filled</td>
+            </tr>
+        {% endif %}
+            <tr>
+                <td>{{ pair.FillerID|user_url }}</td>
+                <td>{{ pair.UserID|user_url }}</td>
+                <td>{{ pair.nr|number_format }}</td>
+            </tr>
+        {% if loop.last %}
+        </table>
+        {% endif %}
+    {% else %}
+        <p>No members have filled out more than one request for the same member.</p>
+    {% endfor %}
+    </div>
+{% endif %}
+
+{% if create or contest %}
+    {% include 'contest/admin-form.twig' with {
+        'action':     create ? 'contest.php?action=create' : 'contest.php?action=admin&id=' ~ contest.id,
+        'auth':       viewer.auth,
+        'contest':    contest,
+        'create':     create,
+        'type':       type,
+        'intro':      intro,
+        'user_count': user_count,
+    } only
+    %}
+{% endif %}
+
+</div>
+{{ footer() }}
