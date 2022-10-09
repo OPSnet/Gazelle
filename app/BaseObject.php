@@ -8,7 +8,6 @@ abstract class BaseObject extends Base {
 
     /* used for handling updates */
     protected array $updateField = [];
-    protected array $updateFieldRaw = [];
 
     public function __construct(int $id) {
         $this->id = $id;
@@ -24,17 +23,11 @@ abstract class BaseObject extends Base {
     }
 
     public function dirty(): bool {
-        return !empty($this->updateField)
-            || !empty($this->updateFieldRaw);
+        return !empty($this->updateField);
     }
 
     public function setUpdate(string $field, $value) {
         $this->updateField[$field] = $value;
-        return $this;
-    }
-
-    public function setUpdateRaw(string $field) {
-        $this->updateFieldRaw[] = $field;
         return $this;
     }
 
@@ -47,8 +40,7 @@ abstract class BaseObject extends Base {
             return false;
         }
         $set = implode(', ', array_merge(
-            array_map(fn($f) => "$f = ?", array_keys($this->updateField)),
-            $this->updateFieldRaw
+            array_map(fn($f) => "$f = ?", array_keys($this->updateField))
         ));
         $args = array_merge(
             array_values($this->updateField),
