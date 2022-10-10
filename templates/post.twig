@@ -1,0 +1,15 @@
+{{ body|bb_format }}
+<br />
+<br />
+<span class="last_edited">
+{%- if initial -%}
+    <em>Original Post</em>
+{%- else -%}
+    <a href="#edit_info_{{ post_id }}" onclick="LoadEdit('{{ page_type }}', {{ post_id }}, {{ depth + 1 }}); return false;">&laquo; </a>
+    {%- if depth %}Edited by {% else %}Last edited by {% endif -%}
+    {{ user_id|user_url }} {{ edit_time|time_diff }}
+{%- endif -%}
+{%- if depth -%}
+    <a href="#edit_info_{{ post_id }}" onclick="LoadEdit('{{ page_type }}', {{ post_id }}, {{ depth - 1 }}); return false;"> &raquo;</a>
+{%- endif -%}
+</span>
