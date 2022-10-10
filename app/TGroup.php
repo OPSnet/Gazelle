@@ -382,7 +382,11 @@ class TGroup extends BaseObject {
 
     public function primaryTag(): string {
         $tagList = $this->tagList();
-        return $tagList ? current($tagList)['name'] : '';
+        return $tagList ? ucfirst(current($tagList)['name']) : '';
+    }
+
+    public function primaryTagCss(): string {
+        return 'tags_' .  str_replace('.', '_', $this->primaryTag());
     }
 
     public function tagNameList(): array {

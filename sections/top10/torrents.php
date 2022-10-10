@@ -221,8 +221,7 @@ foreach ($context as $c) {
     <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '')
         . ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
-        <td class="center cats_col m_hidden"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?=
-            $tgroup->categoryCss() ?> tags_<?= str_replace('.', '_', $tgroup->primaryTag()) ?>"></div></td>
+        <td class="center cats_col m_hidden"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div></td>
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">

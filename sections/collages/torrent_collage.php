@@ -178,8 +178,6 @@ foreach ($entryList as $tgroupId) {
         continue;
     }
     $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
-    $tagList = $tgroup->tagList();
-    $primaryTag = current($tagList)['name'];
     $Number++;
     if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
         // Grouped torrents
@@ -192,8 +190,7 @@ foreach ($entryList as $tgroupId) {
                 </div>
             </td>
             <td class="center">
-                <div title="<?= ucfirst($primaryTag) ?>"
-                     class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
             <td colspan="5">
                 <strong><?= $Number ?> - <?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
@@ -272,8 +269,7 @@ foreach ($entryList as $tgroupId) {
             . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
             <td></td>
             <td class="td_collage_category center">
-                <div title="<?= ucfirst($primaryTag) ?>"
-                     class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
             <td class="td_info">
                 <?= $Twig->render('torrent/action-v2.twig', [

@@ -491,14 +491,12 @@ foreach (CATEGORY as $catKey => $catName) {
         }
         $tgroup = $torrent->group();
         $tagList = $tgroup->tagList();
-        $primaryTag = current($tagList)['name'];
 ?>
         <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
             . ($tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '')
             ?>">
             <td class="center cats_col">
-                <div title="<?= ucfirst($primaryTag) ?>"
-                     class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
             <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>

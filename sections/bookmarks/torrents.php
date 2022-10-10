@@ -194,7 +194,6 @@ foreach ($bookmarkList as $bm) {
 
     if (count($torrentIdList) > 1 || $tgroup->categoryId() == 1) {
         $tagList = $tgroup->tagList();
-        $primaryTag = current($tagList)['name'];
         // Grouped torrents
 ?>
         <tr class="group groupid_<?=$tgroupId?>_header discog" id="group_<?= $tgroupId ?>">
@@ -205,8 +204,7 @@ foreach ($bookmarkList as $bm) {
                 </div>
             </td>
             <td class="m_hidden center">
-                <div title="<?= ucfirst($primaryTag) ?>"
-                     class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
             <td class="td_info" colspan="5">
                 <strong><?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
@@ -278,9 +276,7 @@ foreach ($bookmarkList as $bm) {
         <tr class="torrent torrent_row<?= $SnatchedTorrentClass . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
             <td></td>
             <td class="center">
-                <div title="<?= '$TorrentTags->title()' ?>"
-                     class="tooltip <?= $tgroup->categoryCss() ?> <?= '$TorrentTags->css_name()' ?>">
-                </div>
+                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
             <td>
                 <?= $Twig->render('torrent/action-v2.twig', [
@@ -289,7 +285,9 @@ foreach ($bookmarkList as $bm) {
                     't'      => $torrent,
                 ]) ?>
                 <strong><?= $tgroup->displayNameText() ?></strong>
-                <div class="tags"><?= '$TorrentTags->format()' ?></div>
+                <div class="tags"><?= implode(', ',
+                    array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
+                    ) ?></div>
 <?php if ($ownProfile) { ?>
                     <span class="float_right float_clear"><a href="#group_<?= $tgroupId
                         ?>" class="brackets remove_bookmark" onclick="Unbookmark('torrent', <?= $tgroupId ?>, ''); return false;">Remove bookmark</a></span>

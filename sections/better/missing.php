@@ -39,7 +39,7 @@ $filter = in_array($_GET['filter'] ?? '', $filters) ? $_GET['filter'] : $filters
 $type = in_array($_GET['type'] ?? '', $types) ? $_GET['type'] : $types[0];
 $search = $_GET['search'] ?? '';
 
-$better = new Gazelle\Manager\Better(new Gazelle\ReleaseType);
+$better = new Gazelle\Manager\Better;
 
 if ($Viewer->permitted('admin_reports') && in_array($type, $attrTypes) && $remove = (int)($_GET['remove'] ?? 0)) {
     $better->removeAttribute($type, $remove);
@@ -75,23 +75,35 @@ switch ($mode) {
         }, $results);
         break;
     case 'torrents':
-        $results = $better->twigGroups($results);
+        $torMan = (new \Gazelle\Manager\Torrent)->setViewer($Viewer);
+        $snatcher = new \Gazelle\User\Snatch($Viewer);
+        foreach ($results as &$item) {
+            $torrent = $torMan->findById($item['ID']);
+            $tokensToUse = $torrent->tokenCount();
+            $s = plural($tokensToUse);
+            $item = $item + [
+                'group_id'   => $torrent->groupId(),
+                'snatched'   => $snatcher->isSnatched($torrent->id()),
+                'name'       => $torrent->group()->link(),
+                'tags'       => implode(', ', array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $torrent->group()->tagNameList())),
+                'token'      => $Viewer->canSpendFLToken($torrent),
+                'fl_message' => $torrent->seederTotal() == 0
+                    ? "Warning! This torrent is not seeded at the moment, are you sure you want to use $tokensToUse token$s here?"
+                    : "Use $tokensToUse token$s here?",
+            ];
+        }
+        unset($item);
         break;
 }
 
 echo $Twig->render('better/missing.twig', [
-    'mode'           => $mode,
-    'results'        => $results,
-    'result_count'   => $resultCount,
-    'filters'        => $filters,
-    'search'         => $search,
-    'types'          => $types,
-    'auth_key'       => $Viewer->auth(),
-    'torrent_pass'   => $Viewer->announceKey(),
-    'torrent_ids'    => $mode !== 'torrents' ? null : implode(',', array_keys($results)),
-    'paginator'      => $paginator,
-    'perms'          => [
-        'zip_downloader' => $Viewer->permitted('zip_downloader'),
-        'admin_reports'  => $Viewer->permitted('admin_reports'),
-    ],
+    'mode'         => $mode,
+    'results'      => $results,
+    'result_count' => $resultCount,
+    'filters'      => $filters,
+    'search'       => $search,
+    'types'        => $types,
+    'torrent_ids'  => $mode !== 'torrents' ? null : implode(',', array_keys($results)),
+    'paginator'    => $paginator,
+    'viewer'       => $Viewer,
 ]);

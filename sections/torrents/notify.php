@@ -196,7 +196,6 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 
             $tgroup = $torrent->group();
             $tagList = $tgroup->tagList();
-            $primaryTag = current($tagList)['name'];
             $roleIdList = (new Gazelle\ArtistRole\TGroup($tgroup->id()))->idList();
             $match = [];
             foreach ($roleIdList as $role) {
@@ -216,8 +215,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             <input type="checkbox" class="notify_box notify_box_<?=$FilterID?>" value="<?=$TorrentID?>" id="clear_<?=$TorrentID?>" tabindex="1" />
         </td>
         <td class="center cats_col">
-            <div title="<?= ucfirst($primaryTag) ?>"
-                 class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+            <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
         </td>
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>

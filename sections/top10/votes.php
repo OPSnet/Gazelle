@@ -126,8 +126,6 @@ if (count($topVotes) === 0) { ?>
         $totalVotes = $result['Total'];
         $score      = $result['Score'];
         $downVotes  = $totalVotes - $upVotes;
-        $tagList    = $tgroup->tagList();
-        $primaryTag = current($tagList)['name'];
         $snatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
 
         if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
@@ -140,8 +138,7 @@ if (count($topVotes) === 0) { ?>
             </div>
         </td>
         <td class="center cats_col">
-            <div title="<?= ucfirst($primaryTag) ?>"
-                 class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+            <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
         </td>
 
         <td class="big_info">
@@ -231,8 +228,8 @@ if (count($topVotes) === 0) { ?>
         . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
         <td></td>
         <td class="td_collage_category center">
-            <div title="<?= ucfirst($primaryTag) ?>"
-                 class="tooltip <?= $tgroup->categoryCss() ?> tags_<?=  str_replace('.', '_', $primaryTag) ?>"></div>
+            <div title="<?= ucfirst($tgroup->primaryTag()) ?>"
+                 class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
         </td>
         <td class="td_info">
             <?= $Twig->render('torrent/action-v2.twig', [
