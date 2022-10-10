@@ -180,7 +180,7 @@ foreach ($Results as $GroupID) {
             </div>
         </td>
         <td class="center cats_col">
-            <div title="<?=$TorrentTags->title()?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$TorrentTags->css_name()?>">
+            <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>">
             </div>
         </td>
         <td colspan="2" class="td_info big_info">
@@ -201,7 +201,9 @@ foreach ($Results as $GroupID) {
                 </span>
 <?php    } ?>
                 <br />
-                <div class="tags"><?= $TorrentTags->format("torrents.php?action={$searchMode}&amp;taglist=") ?></div>
+                <div class="tags"><?= implode(', ',
+                    array_map(fn($name) => "<a href=\"torrents.php?action={$searchMode}&amp;taglist=$name\">$name</a>", $tgroup->tagNameList())
+                    ) ?></div>
             </div>
         </td>
         <td class="td_time nobr"><?=time_diff($GroupTime, 1)?></td>
@@ -306,7 +308,7 @@ foreach ($Results as $GroupID) {
         <td></td>
 <?php   } ?>
         <td class="center cats_col m_cats_col m_td_left">
-            <div title="<?=$TorrentTags->title()?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$TorrentTags->css_name()?>"></div>
+            <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
         </td>
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
@@ -322,7 +324,9 @@ foreach ($Results as $GroupID) {
                 ]) ?>
                 <?=$DisplayName?>
                 <div class="torrent_info"><?=$ExtraInfo?></div>
-                <div class="tags"><?=$TorrentTags->format("torrents.php?action={$searchMode}&amp;taglist=")?></div>
+                <div class="tags"><?= implode(', ',
+                    array_map(fn($name) => "<a href=\"torrents.php?action={$searchMode}&amp;taglist=$name\">$name</a>", $tgroup->tagNameList())
+                    ) ?></div>
             </div>
         </td>
         <td class="td_file_count"><?=$Data['FileCount']?></td>

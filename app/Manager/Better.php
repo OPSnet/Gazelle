@@ -4,18 +4,12 @@ namespace Gazelle\Manager;
 
 class Better extends \Gazelle\Base
 {
-    protected $releaseTypes;
-
     private $badMap = [
         'files'   => 'torrents_bad_files',
         'folders' => 'torrents_bad_folders',
         'lineage' => 'torrents_missing_lineage',
         'tags'    => 'torrents_bad_tags',
     ];
-
-    public function __construct(\Gazelle\ReleaseType $releaseMan) {
-        $this->releaseTypes = $releaseMan->list();
-    }
 
     public function removeAttribute(string $type, int $id) {
         $table = $this->badMap[$type] ?? null;
@@ -306,58 +300,5 @@ class Better extends \Gazelle\Base
             LIMIT 50
         ");
         return array_map(function ($id) use ($torMan) { return $torMan->findById($id); }, self::$db->collect(0));
-    }
-
-    public function twigGroups(array $results) {
-        $releaseTypes = $this->releaseTypes;
-        global $Viewer; // TODO: this function is a mess, make it worse until it can be made better
-        $torMan = (new \Gazelle\Manager\Torrent)->setViewer($Viewer);
-        return array_reduce($results, function ($acc, $item) use ($releaseTypes, $Viewer, $torMan) {
-            $torrentId = $item['ID'];
-            $torrent = $torMan->findById($torrentId);
-            $group = $item['Group'];
-            $groupId = $group['ID'];
-            $groupYear = $group['Year'];
-            $groupName = $group['Name'];
-            $groupFlags = isset($group['Flags']) ? $group['Flags'] : ['IsSnatched' => false];
-            $groupTorrents = isset($group['Torrents']) ? $group['Torrents'] : [];
-            $releaseType = $group['ReleaseType'];
-            $tags = new \Tags($group['TagList']);
-            $extendedArtists = $group['ExtendedArtists'];
-
-            if (!empty($extendedArtists[1]) || !empty($extendedArtists[4]) || !empty($extendedArtists[5]) || !empty($extendedArtists[6])) {
-                unset($extendedArtists[2]);
-                unset($extendedArtists[3]);
-                $displayName = \Artists::display_artists($extendedArtists);
-            } else {
-                $displayName = '';
-            }
-            $displayName .= "<a href=\"torrents.php?id=$groupId&amp;torrentid=$torrentId#torrent$torrentId\">$groupName";
-            if ($groupYear > 0) {
-                $displayName .= " [$groupYear]";
-            }
-            if ($releaseType > 0) {
-                $displayName .= ' ['.$releaseTypes[$releaseType].']';
-            }
-            $extraInfo = \Torrents::torrent_info($groupTorrents[$torrentId]);
-            if ($extraInfo) {
-                $displayName .= " - $extraInfo";
-            }
-            $displayName .= '</a>';
-
-            $tokensToUse = $torrent->tokenCount();
-            $s = plural($tokensToUse);
-            $acc[$torrentId] = [
-                'group_id'   => $groupId,
-                'snatched'   => $groupTorrents[$torrentId]['IsSnatched'] ?? false,
-                'name'       => $displayName,
-                'tags'       => $tags->format(),
-                'token'      => $Viewer->canSpendFLToken($torrent),
-                'fl_message' => $groupTorrents[$torrentId]['Seeders'] == 0
-                    ? "Warning! This torrent is not seeded at the moment, are you sure you want to use $tokensToUse token$s here?"
-                    : "Use $tokensToUse token$s here?",
-            ];
-            return $acc;
-        }, []);
     }
 }

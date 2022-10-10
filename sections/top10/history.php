@@ -6,6 +6,8 @@ if (!$Viewer->permitted('users_mod')) {
     error(404);
 }
 
+$tgMan = Gazelle\Manager\TGroup;
+
 View::show_header('Top 10 Torrents history!');
 ?>
 <div class="thin">
@@ -112,10 +114,13 @@ if (!empty($_GET['date'])) {
             $Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
             $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Detail;
 
-        // highlight every other row
+        $tgroup = $tgMan->findById($GroupID);
         $Highlight = ($Rank % 2 ? 'a' : 'b');
+        // highlight every other row
 
-        if ($GroupID) {
+        if (is_null($tgroup)) {
+            $DisplayName = "$TitleString (Deleted)";
+        } else {
             // Group still exists
             $DisplayName = '';
 
@@ -171,20 +176,18 @@ if (!empty($_GET['date'])) {
             }
 
             $DisplayName .= $ExtraInfo;
-            $TorrentTags = new Tags($TorrentTags);
-        } else {
-            $DisplayName = "$TitleString (Deleted)";
-            $TorrentTags = new Tags($TagString);
         } // if ($GroupID)
 
 ?>
     <tr class="group_torrent row<?=$Highlight?>">
         <td style="padding: 8px; text-align: center;"><strong><?=$Rank?></strong></td>
-        <td class="center cats_col"><div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div></td>
+        <td class="center cats_col"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$tgroup->primaryTagCss() ?>"></div></td>
         <td>
         <span><?=($GroupID ? '<a href="torrents.php?action=download&amp;id='.$TorrentID.'&amp;torrent_pass='.$Viewer->announceKey().' title="Download" class="brackets tooltip">DL</a>' : '(Deleted)')?></span>
             <?=$DisplayName?>
-            <div class="tags"><?=$TorrentTags->format()?></div>
+            <div class="tags"><?= implode(', ',
+                array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
+                ) ?></div>
         </td>
     </tr>
 <?php

@@ -151,8 +151,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     <tr class="torrent<?= $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '' ?>" id="group_<?= $s['collageId'] . $GroupID?>">
         <td></td>
         <td class="td_collage_category center">
-            <div title="<?=$TorrentTags->title()?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$TorrentTags->css_name()?>">
-            </div>
+            <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
         </td>
         <td class="td_info big_info">
 <?php           if ($Viewer->option('CoverArt')) { ?>
@@ -167,7 +166,9 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     't'      => $torrent,
                 ]) ?>
                 <strong><?= $torrent->link() ?></strong>
-                <div class="tags"><?=$TorrentTags->format()?></div>
+                <div class="tags"><?= implode(', ',
+                    array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
+                    ) ?></div>
             </div>
         </td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>

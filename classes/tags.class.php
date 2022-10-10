@@ -70,40 +70,6 @@ class Tags {
     }
 
     /**
-     * Formats primary tag as a title
-     * @return string Title
-     */
-    public function title() {
-        return ucwords(str_replace('.', ' ', $this->Primary));
-    }
-
-    /**
-     * Formats primary tag as a CSS class
-     * @return string CSS Class Name
-     */
-    public function css_name() {
-        return 'tags_' . str_replace('.', '_', $this->Primary);
-    }
-
-    /**
-     * Formats tags
-     * @param string $Link Link to a taglist page
-     * @param string $ArtistName Restrict tag search by this artist
-     * @return string List of tag links
-     */
-    public function format($Link = 'torrents.php?taglist=', $ArtistName = '') {
-        if (!empty($ArtistName)) {
-            $ArtistName = "&amp;artistname=" . urlencode($ArtistName) . "&amp;action=advanced&amp;searchsubmit=1";
-        }
-        foreach ($this->Tags as $Tag) {
-            if (empty($this->TagLink[$Tag])) {
-                $this->TagLink[$Tag] = '<a href="' . $Link . $Tag . $ArtistName . '">' . $Tag . '</a>';
-            }
-        }
-        return implode(', ', $this->TagLink);
-    }
-
-    /**
      * General purpose method to get all tag aliases from the DB
      * @return array
      */
@@ -200,15 +166,11 @@ class Tags {
             }
         }
 
-        // 'All' tags
         if ($TagType == 1) {
-            $SearchWords = array_merge($Tags['include'], $Tags['exclude']);
-            if (!empty($Tags)) {
-                $QueryParts[] = implode(' ', $SearchWords);
-            }
-        }
-        // 'Any' tags
-        else {
+            // 'All' tags
+            $QueryParts[] = implode(' ', array_merge($Tags['include'], $Tags['exclude']));
+        } else {
+            // 'Any' tags
             if (!empty($Tags['include'])) {
                 $QueryParts[] = '( ' . implode(' | ', $Tags['include']) . ' )';
             }

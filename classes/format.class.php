@@ -184,14 +184,4 @@ class Format {
             }
         }
     }
-
-    /**
-     * Formats a CSS class name from a Category ID
-     * @global array $Categories
-     * @param int|string $CategoryID This number will be subtracted by one
-     * @return string
-     */
-    public static function css_category($CategoryID = 1) {
-        return 'cats_' . strtolower(str_replace(['-', ' '], '', CATEGORY[$CategoryID - 1]));
-    }
 }

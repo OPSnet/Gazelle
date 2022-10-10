@@ -41,13 +41,13 @@
     <div class="box pad">
         <div class="torrent">
             <h3>There are {{ result_count }} {{ mode }} remaining
-                {% if mode == 'torrents' and result_count > 1 and perms.zip_downloader %}
+                {% if mode == 'torrents' and result_count > 1 and viewer.permitted('zip_downloader') %}
                     {% include 'better/zip.twig' with {torrent_ids: torrent_ids} only %}
                 {% endif %}
             </h3>
         </div>
         {% if mode is same as('torrents') %}
-            {% include 'better/torrents.twig' with {results: results, auth_key: auth_key, torrent_pass: torrent_pass, tokens: tokens} only %}
+            {% include 'better/torrents.twig' with {results: results, viewer: viewer, tokens: tokens} only %}
         {% elseif mode is same as('groups') %}
             <table width"=100%" class="torrent_table">
                 {% for id, group in results %}
