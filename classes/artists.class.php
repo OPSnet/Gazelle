@@ -85,41 +85,6 @@ class Artists {
     }
 
     /**
-     * Return artists of a group as an array of types (main, composer, guest, ...)
-     * @param int $GroupID
-     * @return array - associative array with the keys:
-     *    (composers, dj, artists, with, conductor, remixedBy, producer)
-     *    If there are no artists of a given type, the array will be empty,
-     *    otherwise each artist is represented as an [id, name] array.
-     */
-    public static function get_artist_by_type($GroupID) {
-        $map = [
-            1 => 'artists',
-            2 => 'with',
-            3 => 'remixedBy',
-            4 => 'composers',
-            5 => 'conductor',
-            6 => 'dj',
-            7 => 'producer',
-            8 => 'arranger',
-        ];
-        $artist = self::get_artists([$GroupID])[$GroupID];
-
-        $result = [];
-        foreach ($map as $type => $label) {
-            $result[$label] = !isset($artist[$type])
-                ? []
-                : array_map(
-                    function ($x) {
-                        return ['id' => $x['id'], 'name' => $x['name']];
-                    },
-                    $artist[$type]
-                );
-        }
-        return $result;
-    }
-
-    /**
      * Format an array of artists for display.
      * TODO: Revisit the logic of this, see if we can helper-function the copypasta.
      *
