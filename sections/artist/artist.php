@@ -612,24 +612,20 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 
 echo $Twig->render('comment/thread.twig', [
     'url'       => $_SERVER['REQUEST_URI'],
-    'page'      => $commentPage->page(),
-    'thread'    => $commentPage->thread(),
-    'unread'    => $commentPage->lastRead(),
+    'comment'   => $commentPage,
     'paginator' => $paginator,
     'userMan'   => $userMan,
     'viewer'    => $Viewer,
 ]);
 
-$textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
-$textarea->setPreviewManual(true);
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'avatar'   => $userMan->avatarMarkup($Viewer, $Viewer),
     'id'       => $ArtistID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
-    'textarea' => $textarea,
+    'textarea' => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
     'url'      => 'comments.php?page=artist',
+    'userMan'  => $userMan,
     'viewer'   => $Viewer,
 ]);
 ?>

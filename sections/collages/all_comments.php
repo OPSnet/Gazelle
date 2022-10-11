@@ -16,16 +16,13 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
-$textarea->setPreviewManual(true);
-
 echo $Twig->render('collage/comment.twig', [
-    'avatar'        => (new Gazelle\Manager\User)->avatarMarkup($Viewer, $Viewer),
     'collage'       => $collage,
     'comment'       => $commentPage,
     'is_subscribed' => (new Gazelle\Subscription($Viewer))->isSubscribedComments('collages', $collage->id()),
     'paginator'     => $paginator,
-    'textarea'      => $textarea,
+    'textarea'      => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
     'url'           => $_SERVER['REQUEST_URI'],
+    'userMan'       => new Gazelle\Manager\User,
     'viewer'        => $Viewer,
 ]);
