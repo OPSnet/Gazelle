@@ -1,10 +1,13 @@
 {{ paginator.linkbox|raw }}
-{% for post in thread %}
-    <table class="forum_post box vertical_margin{{ viewer.showAvatars ? '' : ' noavatar' }}{{ (post.ID > unread) ? ' forum_unread' : ''}}" id="post{{ post.ID }}">
+{% for post in comment.thread %}
+    <table id="post{{ post.ID }}" class="forum_post box vertical_margin
+        {%- if not viewer.showAvatars %} noavatar{% endif -%}
+        {%- if post.ID > comment.lastRead %} forum_unread{% endif -%}
+        ">
         <colgroup>
-    {% if viewer.showAvatars %}
+    {%- if viewer.showAvatars -%}
             <col class="col_avatar" />
-    {% endif %}
+    {%- endif -%}
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark">
@@ -49,7 +52,7 @@
                     <br />
                     <span class="last_edited">
     {%    if viewer.permitted('site_admin_forums') %}
-                    <a href="#content{{ post.ID }}" onclick="LoadEdit('{{ page }}', {{ post.ID }}, 1); return false;">&laquo;</a>
+                    <a href="#content{{ post.ID }}" onclick="LoadEdit('{{ comment.page }}', {{ post.ID }}, 1); return false;">&laquo;</a>
     {%    endif %}
                     Last edited by {{ post.EditedUserID|user_url }} {{ post.EditedTime|time_diff }}</span>
     {% endif %}

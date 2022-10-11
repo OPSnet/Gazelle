@@ -760,9 +760,7 @@ if (!empty($similar)) {
 
 echo $Twig->render('comment/thread.twig', [
     'url'       => $_SERVER['REQUEST_URI'],
-    'page'      => $commentPage->page(),
-    'thread'    => $commentPage->thread(),
-    'unread'    => $commentPage->lastRead(),
+    'comment'   => $commentPage,
     'paginator' => $paginator,
     'userMan'   => $userMan,
     'viewer'    => $Viewer,
@@ -770,12 +768,12 @@ echo $Twig->render('comment/thread.twig', [
 
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'avatar'   => $userMan->avatarMarkup($Viewer, $Viewer),
     'id'       => $GroupID,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => (new Gazelle\Util\Textarea('quickpost', ''))->setPreviewManual(true),
     'url'      => 'comments.php?page=torrents',
+    'userMan'  => $userMan,
     'viewer'   => $Viewer,
 ]);
 ?>

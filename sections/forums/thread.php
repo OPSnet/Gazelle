@@ -356,19 +356,17 @@ foreach ($slice as $Key => $Post) {
 <?php
 echo $paginator->linkbox();
 $lastPost = end($slice);
-$textarea = new Gazelle\Util\Textarea('quickpost', '', 90, 8);
-$textarea->setPreviewManual(true);
 
 if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$thread->isLocked())) {
     echo $Twig->render('reply.twig', [
         'action'   => 'reply',
-        'avatar'   => $userMan->avatarMarkup($Viewer, $Viewer),
         'forum'    => $forumId,
         'id'       => $threadId,
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id(),
         'name'     => 'threadid',
         'subbed'   => $isSubscribed,
-        'textarea' => $textarea,
+        'textarea' => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
+        'userMan'  => $userMan,
         'viewer'   => $Viewer,
     ]);
 }
