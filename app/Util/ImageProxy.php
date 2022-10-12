@@ -55,12 +55,12 @@ class ImageProxy {
     /**
      * Cover art thumbnail in browse, on artist pages etc.
      */
-    public function thumbnail(string $url, int $CategoryID): string {
-        if ($url) {
-            $Src = $this->process($url, true);
-            $Lightbox = $this->process($url);
+    public function tgroupThumbnail(\Gazelle\TGroup $tgroup): string {
+        if ($tgroup->image()) {
+            $Src = $this->process($tgroup->image(), true);
+            $Lightbox = $this->process($tgroup->image());
         } else {
-            $Src = STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$CategoryID - 1];
+            $Src = STATIC_SERVER . '/common/noartwork/' . strtolower($tgroup->categoryName()) . '.png';
             $Lightbox = $Src;
         }
         return "<img src=\"$Src\" width=\"90\" height=\"90\" alt=\"Cover\" onclick=\"lightbox.init('$Lightbox', 90)\" />";

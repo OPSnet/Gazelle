@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class TGroup extends BaseObject {
 
-    const CACHE_KEY          = 'tg2_%d';
+    const CACHE_KEY          = 'tg_%d';
     const CACHE_TLIST_KEY    = 'tlist_%d';
     const CACHE_COVERART_KEY = 'tg_cover_%d';
     const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
@@ -185,15 +185,18 @@ class TGroup extends BaseObject {
                 tg.CategoryID,
                 tg.Time,
                 tg.VanityHouse,
-                group_concat(t.Name ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)           AS tagNames,
-                group_concat(t.ID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)             AS tagIds,
-                group_concat(t.UserID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name)         AS tagVoteUserIds,
-                group_concat(tt.PositiveVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagUpvotes,
-                group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, t.Name) AS tagDownvotes,
-                (tgha.TorrentGroupID IS NOT NULL) AS noCoverArt
+                group_concat(tag.Name ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)         AS tagNames,
+                group_concat(tag.ID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)           AS tagIds,
+                group_concat(tag.UserID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)       AS tagVoteUserIds,
+                group_concat(tt.PositiveVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name) AS tagUpvotes,
+                group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name) AS tagDownvotes,
+                (tgha.TorrentGroupID IS NOT NULL) AS noCoverArt,
+                max(coalesce(t.Size, 0)) AS max_torrent_size,
+                max(coalesce(t.Time, '2000-01-01 00:00:00')) AS most_recent_upload
             FROM torrents_group AS tg
+            LEFT JOIN torrents AS t ON (t.GroupID = tg.ID)
             LEFT JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
-            LEFT JOIN tags as t ON (t.ID = tt.TagID)
+            LEFT JOIN tags as tag ON (tag.ID = tt.TagID)
             LEFT JOIN torrent_group_has_attr AS tgha ON (tgha.TorrentGroupID = tg.ID
                 AND tgha.TorrentGroupAttrID = (SELECT tga.ID FROM torrent_group_attr tga WHERE tga.Name = 'no-cover-art')
             )
@@ -351,6 +354,14 @@ class TGroup extends BaseObject {
 
     public function label(): string {
         return $this->id . " (" . $this->name() . ")";
+    }
+
+    public function maxTorrentSize(): int {
+        return $this->info()['max_torrent_size'];
+    }
+
+    public function mostRecentUpload(): string {
+        return $this->info()['most_recent_upload'];
     }
 
     public function name(): string {

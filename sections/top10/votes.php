@@ -144,7 +144,7 @@ if (count($topVotes) === 0) { ?>
         <td class="big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->thumbnail($tgroup->image(), $tgroup->categoryId()) ?>
+                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">
