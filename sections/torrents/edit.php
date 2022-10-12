@@ -48,7 +48,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
             'ID'                      => $torrentId,
             'Media'                   => $torrent->media(),
             'Format'                  => $torrent->format(),
-            'Encoding AS Bitrate'     => $torrent->encoding(),
+            'Bitrate'                 => $torrent->encoding(),
             'RemasterYear'            => $torrent->remasterYear(),
             'Remastered'              => $torrent->isRemastered(),
             'RemasterTitle'           => $torrent->remasterTitle(),

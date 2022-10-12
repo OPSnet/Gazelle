@@ -415,7 +415,7 @@ class UploadForm extends \Gazelle\Base {
                         <option value="<?= $Bitrate ?>"<?=
             ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
                 ? ' selected="selected"' : '' ?>
-            ?><?= $Bitrate ?></option>
+            ><?= $Bitrate ?></option>
 
 <?php   } ?>
                     </select>
