@@ -52,13 +52,13 @@ class TGroup extends \Gazelle\Json {
     public function payload(): array {
         return [
             'group' => $this->tgroupPayload(),
-            'torrents' => array_filter(
-                array_map(
-                    fn ($id) => $this->torMan->findById($id),
-                    $this->tgroup->torrentIdList()
-                ),
-                fn ($torrent) => $torrent
-            )
+            'torrents' => array_reduce($this->tgroup->torrentIdList(), function ($acc, $id) {
+                $torrent = $this->torMan->findById($id);
+                if ($torrent) {
+                    $acc[] = (new Torrent($torrent, $this->user, $this->torMan))->torrentPayload();
+                }
+                return $acc;
+            }, []),
         ];
     }
 }
