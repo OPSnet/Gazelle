@@ -269,7 +269,7 @@ class Forum extends \Gazelle\BaseUser {
         }
         // full text search needed?
         $words = array_unique(explode(' ', $this->searchText));
-        if ($this->splitWords && !empty($words)) {
+        if ($this->splitWords) {
             $args = array_merge($args, $words);
             $cond = array_merge($cond,
                 array_fill(

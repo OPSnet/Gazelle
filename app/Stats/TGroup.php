@@ -27,7 +27,7 @@ class TGroup extends \Gazelle\BaseObject {
     }
 
     public function flush() {
-        self::$cache->delete_key(sprintf(self::CACHE_GENERAL, $this->id));
+        self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
     }
 
     /**

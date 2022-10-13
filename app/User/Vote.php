@@ -25,6 +25,7 @@ class Vote extends \Gazelle\BaseUser {
     protected array $topArgs   = [];
     protected array $userVote;
     protected array $voteSummary;
+    protected int $groupId;
 
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);

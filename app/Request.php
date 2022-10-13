@@ -505,8 +505,6 @@ class Request extends BaseObject {
 
     /**
      * Remove the bounty of a user on a request
-     * @param int $userId ID of user
-     * @param int $staffName name of staff performing the operation
      */
     public function removeBounty(int $userId, string $staffName) {
         $bounty = $this->userBounty($userId);
@@ -534,9 +532,6 @@ class Request extends BaseObject {
 
     /**
      * Inform the filler of a request that their bounty was reduced
-     *
-     * @param int $bounty The amount of bounty reduction
-     * @param int $staffName name of staff performing the operation
      */
     public function informRequestFillerReduction(int $bounty, string $staffName) {
         [$fillerId, $fillDate] = self::$db->row("

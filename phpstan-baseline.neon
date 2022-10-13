@@ -403,23 +403,3 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(string interval Mysql interval \\(HOUR, DAY, MONTH, YEAR\\.\\.\\.\\)\\)\\: Unexpected token \"interval\", expected variable at offset 414$#"
 			count: 1
 			path: app/Stats/Bonus.php
-
-		-
-			message: "#^Cannot access offset 'totalBounty' on false\\.$#"
-			count: 1
-			path: app/Stats/Economic.php
-
-		-
-			message: "#^Cannot access offset 'totalDownload' on false\\.$#"
-			count: 1
-			path: app/Stats/Economic.php
-
-		-
-			message: "#^Cannot access offset 'totalEnabled' on false\\.$#"
-			count: 1
-			path: app/Stats/Economic.php
-
-		-
-			message: "#^Cannot access offset 'totalUpload' on false\\.$#"
-			count: 1
-			path: app/Stats/Economic.php
