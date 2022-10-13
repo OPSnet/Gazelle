@@ -59,7 +59,7 @@ class Collage extends BaseObject {
     public function updated() { return $this->info()['updated']; }
 
     public function numEntries() { return $this->info()['torrent_total']; }
-    public function groupIds() { return $this->collage->groupIdList(); }
+    public function groupIds() { return $this->collage->groupIdList(); } /** @phpstan-ignore-line */
 
     public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
     public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
@@ -72,7 +72,7 @@ class Collage extends BaseObject {
 
     public function numContributors() { return count(array_keys($this->contributors())); }
     public function numArtists() { return count($this->collage->artistList()); }
-    public function sequence(int $entryId) { return $this->collage->sequence($entryId); }
+    public function sequence(int $entryId) { return $this->collage->sequence($entryId); } /** @phpstan-ignore-line */
 
     public function info(): array {
         if (!isset($this->info)) {
@@ -80,19 +80,19 @@ class Collage extends BaseObject {
             $info = self::$cache->get_value($key);
             if ($info === false) {
                 $info = self::$db->rowAssoc("
-                    SELECT c.Deleted        AS is_deleted,
-                        c.TagList           AS tag_string,
-                        c.UserID            AS user_id,
-                        c.CategoryID        AS category_id,
-                        c.Updated           AS updated,
-                        c.Subscribers       AS subscriber_total,
-                        c.NumTorrents       AS torrent_total,
-                        c.MaxGroups         AS group_max,
-                        c.MaxGroupsPerUser  AS group_max_per_user,
-                        c.Locked            AS is_locked,
-                        c.Name              AS name,
-                        c.Description       AS description,
-                        c.Featured          AS is_featured,
+                    SELECT c.Deleted       AS is_deleted,
+                        c.TagList          AS tag_string,
+                        c.UserID           AS user_id,
+                        c.CategoryID       AS category_id,
+                        c.Updated          AS updated,
+                        c.Subscribers      AS subscriber_total,
+                        c.NumTorrents      AS torrent_total,
+                        c.MaxGroups        AS group_max,
+                        c.MaxGroupsPerUser AS group_max_per_user,
+                        c.Locked           AS is_locked,
+                        c.Name             AS name,
+                        c.Description      AS description,
+                        c.Featured         AS is_featured,
                         CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
                     FROM collages c
                     LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
@@ -243,17 +243,10 @@ class Collage extends BaseObject {
      * Get artists names of a collage for the ajax representation.
      */
     public function nameList(): array {
-        return $this->collage->nameList();
+        return $this->collage->nameList(); /** @phpstan-ignore-line */
     }
 
     /*** TORRENT COLLAGES ***/
-
-    /**
-     * Get torrents of a collage to display
-     */
-    public function torrentList(): array {
-        return $this->collage->torrentList();
-    }
 
     /** Get top artists of the collage
      * @param int $limit Number of entries to return (default 5, -1 for all)
@@ -269,8 +262,8 @@ class Collage extends BaseObject {
      */
     public function topTags(int $limit = 5): array {
         return $limit == -1
-            ? $this->collage->torrentTagList()
-            : array_slice($this->collage->torrentTagList(), 0, $limit, true);
+            ? $this->collage->torrentTagList() /** @phpstan-ignore-line */
+            : array_slice($this->collage->torrentTagList(), 0, $limit, true); /** @phpstan-ignore-line */
     }
 
     /*** UPDATE METHODS ***/
