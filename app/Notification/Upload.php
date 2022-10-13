@@ -10,8 +10,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Trace notification results on/off
-     *
-     * @param bool debug on/off
      */
     public function setDebug(int $debug) {
         $this->debug = $debug;
@@ -21,7 +19,7 @@ class Upload extends \Gazelle\Base {
     /**
      * Add a list of artists that will trigger a notification
      *
-     * @param array array of artist roles and lists of artist ( of artists (id, id, id)
+     * @param array $artistList of artist roles and lists of artist ( of artists (id, id, id)
      *  [main => [1, 2, 3], guest => [4, 5, 6], ...]
      */
     public function addArtists(array $artistList) {
@@ -58,8 +56,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add tags that trigger a notification
-     *
-     * @param array List of tags
      */
     public function addTags(array $tagList) {
         $tags = ["unf.Tags = ''"];
@@ -76,8 +72,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add a release category that triggers a notification
-     *
-     * @param string category
      */
     public function addCategory(string $category) {
         return $this->addDimension('Categories', $category);
@@ -88,8 +82,6 @@ class Upload extends \Gazelle\Base {
      * paranoid, nobody is notified. Otherwise everyone except the uploader
      * is notified. The uploader is notified if they explicitly set a
      * notification on their own username.
-     *
-     * @param int user id of the uploader
      */
     public function addUser(\Gazelle\User $uploader) {
         $this->cond[] = "((Users = '' AND UserId != ?) OR (Users LIKE concat('%|', ?, '|%')))";
@@ -100,9 +92,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add a generic dimension that triggers a notification
-     *
-     * @param string column The name of the DB column to look at
-     * @param string dimension the value (if empty, column matches empty string)
      */
     protected function addDimension(string $column, string $dimension) {
         if (!$dimension) {
@@ -116,8 +105,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add an optional release type that triggers a notification
-     *
-     * @param string release type (Album, EP, ...)
      */
     public function addReleaseType(string $releaseType) {
         return $this->addDimension('ReleaseTypes', $releaseType);
@@ -125,8 +112,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add an optional format that triggers a notification
-     *
-     * @param string format
      */
     public function addFormat(string $format) {
         return $this->addDimension('Formats', $format);
@@ -134,8 +119,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add an optional encoding that triggers a notification
-     *
-     * @param string encoding
      */
     public function addEncodings(string $encoding) {
         return $this->addDimension('Encodings', $encoding);
@@ -143,8 +126,6 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add an optional media that triggers a notification
-     *
-     * @param string media
      */
     public function addMedia(string $media) {
         return $this->addDimension('Media', $media);
@@ -152,10 +133,7 @@ class Upload extends \Gazelle\Base {
 
     /**
      * Add a year that triggers a notification
-     *
-     * @param ?int original year
-     * @param ?int remaster year
-    */
+     */
     public function addYear($originalYear, $remasterYear) {
         $default = "unf.FromYear = 0 AND unf.ToYear = 0";
         if ($originalYear && $remasterYear && ($originalYear !== $remasterYear)) {
@@ -189,10 +167,6 @@ class Upload extends \Gazelle\Base {
     /**
      * Trigger the notification: create the notifications for everyone
      *
-     * @param int Group ID of the release
-     * @param int Torrent ID of the releas
-     * @param Feed an RSS feed object
-     * @param string Feed item
      * @return int Number of users notified
      */
     public function trigger(int $groupId, int $torrentId, \Feed $feed, string $item): int {

@@ -105,7 +105,6 @@ class StaffPM extends BaseObject {
      * - They are FLS and it has not yet been assigned, or assigned to them
      * - They are Staff and the conversation is viewable at their class level
      *
-     * @param Gazelle\User viewer
      * @return bool Can they see it?
      */
     public function visible(User $viewer): bool {

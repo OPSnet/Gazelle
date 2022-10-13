@@ -104,7 +104,7 @@ class Contest extends Base {
     }
 
     public function leaderboard(int $limit, int $offset): array {
-        return $this->type->leaderboard($limit, $offset);
+        return $this->type->leaderboard($limit, $offset); /** @phpstan-ignore-line */
     }
 
     public function name(): string {
@@ -210,7 +210,7 @@ class Contest extends Base {
         $pages = range(0, (int)(ceil($n)/CONTEST_ENTRIES_PER_PAGE) - 1);
         foreach ($pages as $p) {
             self::$cache->delete_value(sprintf(self::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, $p));
-            $this->type->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p);
+            $this->type->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p); /** @phpstan-ignore-line */
         }
         return $n;
     }

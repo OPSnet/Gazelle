@@ -42,7 +42,7 @@ class User extends \Gazelle\BaseObject {
     /**
      * Get the total number of comments made by page type
      *
-     * @param string page name [artist, collages requests torrents]
+     * @param string $page name [artist, collages requests torrents]
      * @return int number of comments, 0 if page is invalid
      */
     public function commentTotal(string $page): int {

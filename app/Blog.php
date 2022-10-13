@@ -82,8 +82,6 @@ class Blog extends BaseObject {
 
     /**
      * The forum thread ID of the blog
-     *
-     * @return ID of thread or null if none was defined
      */
     public function threadId(): ?int {
         return $this->info()['thread_id'];

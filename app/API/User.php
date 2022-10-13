@@ -168,7 +168,7 @@ class User extends AbstractAPI {
                 ui.AdminComment = CONCAT(now(), ' - ', ?, ui.AdminComment)
             WHERE
                 um.ID = ?
-            ", "$Comment\n\n", Cur['ID']
+            ", "$Comment\n\n", $Cur['ID']
         );
 
         return ['enabled' => true, 'user_id' => $Cur['ID'], 'username' => $Cur['Username']];

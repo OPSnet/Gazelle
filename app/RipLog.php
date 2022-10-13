@@ -20,9 +20,8 @@ class RipLog extends BaseObject {
 
     /**
      * RipLog constructor.
-     * @param  int torrent ID
-     * @param  int log ID
-     * @throws Gazelle\Exception\ResourceNotFoundException
+     *
+     * @throws \Gazelle\Exception\ResourceNotFoundException
      */
     public function __construct(int $torrentId, int $logId) {
         parent::__construct($logId);

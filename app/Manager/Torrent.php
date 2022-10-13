@@ -63,7 +63,6 @@ class Torrent extends \Gazelle\Base {
      * How many other uploads share the same folder path?
      * NB: Ignore single files that are not in a directory
      *
-     * @param string $folder base path in the torrent
      * @return array of Gazelle\Torrent objects;
      */
     public function findAllByFoldername(string $folder): array {
@@ -141,8 +140,6 @@ class Torrent extends \Gazelle\Base {
     /**
      * Create a string that contains file info in a format that's easy to use for Sphinx
      *
-     * @param  string  $Name file path
-     * @param  int  $Size file size
      * @return string with the format .EXT sSIZEs NAME DELIMITER
      */
     public function metaFilename(string $name, int $size): string {
@@ -153,10 +150,9 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
-     *  Parse a meta filename into a more useful array structure
+     * Parse a meta filename into a more useful array structure
      *
-     * @param string meta filename formatted as ".EXT sSIZEs NAME DELIMITER"
-     * @return with the keys 'ext', 'size' and 'name'
+     * @return array with the keys 'ext', 'size' and 'name'
      */
     public function splitMetaFilename(string $metaname): array {
         if (preg_match('/^(\..*?) s(\d+)s (.+) (?:&divide;|' . self::FILELIST_DELIM_UTF8 . ')$/', $metaname, $match)) {
@@ -177,7 +173,7 @@ class Torrent extends \Gazelle\Base {
     /**
      * Create a string that contains file info in the old format for the API
      *
-     * @param string $File string with the format .EXT sSIZEs NAME DELIMITER
+     * @param string $metaname string with the format .EXT sSIZEs NAME DELIMITER
      * @return string with the format NAME{{{SIZE}}}
      */
     public function apiFilename(string $metaname): string {
@@ -189,7 +185,6 @@ class Torrent extends \Gazelle\Base {
      * Regenerate a torrent's file list from its meta data,
      * update the database record and clear relevant cache keys
      *
-     * @param int torrentId
      * @return int number of files regenned
      */
     public function regenerateFilelist(int $torrentId): int {
@@ -246,7 +241,6 @@ class Torrent extends \Gazelle\Base {
     /**
      * Aggregate the audio files per audio type
      *
-     * @param string filelist
      * @return array of array of [ac3, flac, m4a, mp3] => count
      */
     function audioMap(string $fileList): array {
@@ -301,7 +295,6 @@ class Torrent extends \Gazelle\Base {
     /**
      * Are there any reports associated with this torrent?
      *
-     * @param int torrent id
      * @return bool Yes there are
      */
     public function hasReport(\Gazelle\User $viewer, int $torrentId): bool {
@@ -406,7 +399,6 @@ class Torrent extends \Gazelle\Base {
     /**
      * Freeleech / neutral leech / normalise a set of torrents
      *
-     * @param array $TorrentIDs An array of torrent IDs to iterate over
      * @param string $leechLevel 0 = normal, 1 = FL, 2 = NL
      * @param string $reason 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
      * @param bool $all true = all torrents are made FL, false = only lossless torrents are made FL
@@ -535,6 +527,7 @@ class Torrent extends \Gazelle\Base {
                 }
                 $LastGroupID = $GroupID;
             }
+            $Changed = false;
             while ($LastGroupID == $GroupID) {
                 $RowNum++;
                 if (isset($CachedStats) && is_array($CachedStats[$TorrentID])) {
@@ -558,7 +551,7 @@ class Torrent extends \Gazelle\Base {
                 $LastGroupID = $GroupID;
                 [$TorrentID, $GroupID, $Seeders, $Leechers, $Snatches] = self::$db->next_record(MYSQLI_NUM, false);
             }
-            if ($Changed) {
+            if (isset($CachedData) && $Changed) {
                 self::$cache->cache_value("torrent_group_$LastGroupID", $CachedData, 7200);
                 unset($CachedStats);
                 $UpdatedKeys++;
@@ -708,7 +701,7 @@ class Torrent extends \Gazelle\Base {
         );
     }
 
-    protected static function metaPL(string $media, string $format, string $encoding, bool $hasCue, bool $hasLog, bool $hasLogDb, int $logscore) {
+    protected static function metaPL(string $media, string $format, string $encoding, bool $hasCue, bool $hasLog, bool $hasLogDb, int $logScore) {
         $meta = [$media, $format, $encoding];
         if ($hasCue) {
             $meta[] = 'Cue';

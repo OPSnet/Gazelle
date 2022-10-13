@@ -37,10 +37,8 @@ class Applicant extends \Gazelle\Base {
      *  last_UserID   - user ID of the most recent person to comment in the thread
      *  last_Username - username of the most recent person to comment in the thread
      *  last_Created  - the timestamp of the most recent comment
-     * @param $page int The page number to fetch (50 entries) defaults to 1
-     * @param $resolved int Should resolved applications be included (defaults to no).
-     * @param $userId int If non-zero, return applications of this userId
-     * @return a list of Applicant information
+     *
+     * @return array list of Applicant information
      */
     public function list(int $page = 1, bool $resolved = false, int $userId = 0): array {
         $key = sprintf($resolved ? self::CACHE_KEY_RESOLVED : self::CACHE_KEY_OPEN, $page);

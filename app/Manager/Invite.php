@@ -8,8 +8,6 @@ class Invite extends \Gazelle\Base {
 
     /**
      * Set a text filter on email addresses
-     *
-     * @param string email address fragment
      */
     public function setSearch(string $search) {
         $this->search = $search;
@@ -37,8 +35,6 @@ class Invite extends \Gazelle\Base {
     /**
      * Get a page of pending invites
      *
-     * @param int limit
-     * @param int offset
      * @return array list of pending invites [inviter_id, ipaddr, invite_key, expires, email]
      */
     public function pendingInvites(int $limit, int $offset): array {
@@ -69,7 +65,6 @@ class Invite extends \Gazelle\Base {
     /**
      * Remove an invite
      *
-     * @param string invite key
      * @return bool true if something was actually removed
      */
     public function removeInviteKey(string $key): bool {

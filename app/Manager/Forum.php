@@ -13,7 +13,7 @@ class Forum extends \Gazelle\Base {
 
     /**
      * Create a forum
-     * @param array hash of values (keyed on lowercase column names)
+     * @param array $args hash of values (keyed on lowercase column names)
      */
     public function create(array $args) {
         self::$db->prepared_query("
@@ -289,7 +289,7 @@ class Forum extends \Gazelle\Base {
      *
      * It is a pre-requisite that the `forums` table have the alias f.
      *
-     * @param Gazelle\User viewer
+     * @param \Gazelle\User $user
      * @return array of [conditions, args]
      */
     public function configureForUser(\Gazelle\User $user): array {

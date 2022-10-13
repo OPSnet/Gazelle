@@ -212,7 +212,7 @@ class Referral extends \Gazelle\Base {
 
     public function getReferredUsers($startDate, $endDate, $site, $username, $invite, \Gazelle\Util\Paginator $paginator, $view) {
         if (empty($startDate)) {
-            $startDate = \Gazelle\Util\Time::timeOffset(-(3600 * 24 * 30), true);
+            $startDate = \Gazelle\Util\Time::offset(-3600 * 24 * 30);
         }
 
         $filter = ['ru.Created BETWEEN ? AND coalesce(?, now())'];

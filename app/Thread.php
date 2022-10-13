@@ -38,7 +38,7 @@ class Thread extends BaseObject {
             }
             self::$cache->cache_value($key, [$this->type, $this->created], 86400);
         }
-        return $this->refresh(); /* load the story */
+        $this->refresh(); /* load the story */
     }
 
     /**

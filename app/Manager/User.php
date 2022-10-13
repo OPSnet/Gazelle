@@ -17,11 +17,8 @@ class User extends \Gazelle\Base {
 
     /**
      * Get a User object based on a magic field (id or @name)
-     *
-     * @param mixed name (numeric ID or @username)
-     * @return \Gazelle\User object or null if not found
      */
-    public function find($name) {
+    public function find($name): ?\Gazelle\User {
         if (substr($name, 0, 1) === '@') {
             return $this->findByUsername(substr($name, 1));
         } elseif ((int)$name > 0) {
@@ -114,7 +111,6 @@ class User extends \Gazelle\Base {
      * Get a User object from their email address
      * (used for password reset)
      *
-     * @param string username
      * @return \Gazelle\User object or null if not found
      */
     public function findByEmail(string $email): ?\Gazelle\User {
@@ -126,7 +122,6 @@ class User extends \Gazelle\Base {
     /**
      * Get a User object from their announceKey
      *
-     * @param string announceKey
      * @return \Gazelle\User object or null if not found
      */
     public function findByAnnounceKey(string $announceKey): ?\Gazelle\User {
@@ -138,7 +133,6 @@ class User extends \Gazelle\Base {
     /**
      * Get a User object from their password reset key
      *
-     * @param string key
      * @return \Gazelle\User object or null if not found
      */
     public function findByResetKey(string $key): ?\Gazelle\User {
@@ -166,9 +160,6 @@ class User extends \Gazelle\Base {
 
     /**
      * Generate HTML for a user's avatar
-     *
-     * @param Gazelle\User viewer Who is doing the viewing, to determine how to fallback if no avatar is available
-     * @param Gazelle\User viewed Which avatar is being viewed
      */
     public function avatarMarkup(\Gazelle\User $viewer, \Gazelle\User $viewed): string {
         static $cache = [];
@@ -222,7 +213,6 @@ class User extends \Gazelle\Base {
     /**
      * Textual name of a userclass (a.k.a users_main.PermissionID)
      *
-     * @param int permission id
      * @return string class name
      */
     public function userclassName(int $id): ?string {
@@ -395,8 +385,6 @@ class User extends \Gazelle\Base {
     /**
      * Get a page of userflow details
      *
-     * @param int limit of resultset
-     * @param int offset of resultset
      * @return array of array [day, month, joined, manual, ratio, inactivity]
      */
     public function userflowDetails(int $limit, int $offset): array {
@@ -480,7 +468,6 @@ class User extends \Gazelle\Base {
     /**
      * Disable a user from being able to use invites
      *
-     * @param int user id
      * @return bool success (if invite status was changed)
      */
     public function disableInvites(int $userId): bool {
@@ -551,7 +538,7 @@ class User extends \Gazelle\Base {
 
     /**
      * How many unresolved torrent reports are there for this user?
-     * @param int User ID
+     *
      * @return int number of unresolved reports
      */
     public function unresolvedReportsTotal(int $userId): int {
@@ -568,11 +555,6 @@ class User extends \Gazelle\Base {
     /**
      * Sends a PM from $FromId to $ToId.
      *
-     * @param string $toId ID of user to send PM to. If $toId is an array and $convId is empty, a message will be sent to multiple users.
-     * @param string $fromId ID of user to send PM from, 0 to send from system
-     * @param string $subject
-     * @param string $body
-     * @param int $convId The conversation the message goes in. Leave blank to start a new conversation.
      * @return int conversation Id
      */
     public function sendPM(int $toId, int $fromId, string $subject, string $body): int {
@@ -612,11 +594,6 @@ class User extends \Gazelle\Base {
     /**
      * Send a reply from $FromId to $ToId.
      *
-     * @param string $toId ID of user to send PM to. If $toId is an array and $convId is empty, a message will be sent to multiple users.
-     * @param string $fromId ID of user to send PM from, 0 to send from system
-     * @param string $subject
-     * @param string $body
-     * @param int $convId The conversation the message goes in. Leave blank to start a new conversation.
      * @return int conversation Id
      */
     public function replyPM(int $toId, int $fromId, string $subject, string $body, int $convId): int {
@@ -760,9 +737,6 @@ class User extends \Gazelle\Base {
     /**
      * Warn a user.
      *
-     * @param int $userId
-     * @param int $duration length of warning in seconds
-     * @param string $reason
      * @return int 1 if user was warned
      */
     public function warn(int $userId, int $duration, string $reason, string $staffName): int {
@@ -801,9 +775,6 @@ class User extends \Gazelle\Base {
     /**
      * Disable a list of users.
      *
-     * @param array userIds (use [$userId] to disable a single user).
-     * @param string staff note
-     * @param int reason for disabling
      * @return int number of users disabled
      */
     public function disableUserList(array $userIds, string $comment, int $reason): int {

@@ -21,9 +21,7 @@ class ForumPoll extends BaseObject {
     }
 
     public function link(): string {
-        return sprintf('<a href="%s" class="tooltip" title="%s">%s</a>',
-            $this->url(), display_str($this->name()), display_str(shortenString($this->name(), 75))
-        );
+        return $this->thread()->link();
     }
 
     public function flush() {
@@ -248,7 +246,7 @@ class ForumPoll extends BaseObject {
                 UPDATE forums_polls SET
                     Closed = ?
                 WHERE TopicID = ?
-                ", $Closed ? '1' : '0', $this->id
+                ", $toClose ? '1' : '0', $this->id
             );
             $affected += self::$db->affected_rows();
         }
@@ -262,8 +260,8 @@ class ForumPoll extends BaseObject {
      * There is also a 'missing' key that lists all staff members who
      * have not yet voted on the poll.
      *
-     * @param Manager\User a user manager object to hydrate user ids.
-     * @ret
+     * @param Manager\User $userMan a user manager object to hydrate user ids.
+     * @return array of vites
      */
     public function staffVote(Manager\User $userMan): array {
         $vote = $this->vote();
@@ -281,7 +279,7 @@ class ForumPoll extends BaseObject {
             WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
             ", $this->id, FORUM_MOD
         );
-        $result = self::$db->to_pair('user_id', 'response', false, MYSQLI_NUM, false);
+        $result = self::$db->to_pair('user_id', 'response', false);
         foreach ($result as $userId => $response) {
             $vote[$response ?? 'missing']['who'][] = $userMan->findById($userId);
         }

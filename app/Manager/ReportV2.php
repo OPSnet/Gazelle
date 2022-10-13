@@ -166,9 +166,6 @@ class ReportV2 extends \Gazelle\Base {
 
     /**
      * How many open reports exist for this group
-     *
-     * @param int Group ID
-     * @return number of reports
      */
     public function totalReportsGroup(int $groupId): int {
         return self::$db->scalar("
@@ -183,9 +180,6 @@ class ReportV2 extends \Gazelle\Base {
 
     /**
      * How many open reports exist for this uploader
-     *
-     * @param int User ID of uploader
-     * @return number of reports
      */
     public function totalReportsUploader(int $userId): int {
         return self::$db->scalar("

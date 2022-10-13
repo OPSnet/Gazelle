@@ -38,9 +38,6 @@ class SiteOption extends \Gazelle\Base {
     /**
      * Create a new option key/value pair.
      *
-     * @param string Name of option
-     * @param string Value of option
-     * @param string Mandatory comment
      * @return int ID of option (or null on failure e.g. duplicate name)
      */
     public function create(string $name, string $value, string $comment): ?int {
@@ -61,10 +58,6 @@ class SiteOption extends \Gazelle\Base {
     /**
      * Modify an option (both the name and value may be changed)
      *
-     * @param int ID of option
-     * @param string Name of option
-     * @param string Value of option
-     * @param string Mandatory comment
      * @return int 1 if option was updated, otherwise 0
      */
     public function modify(int $id, string $name, string $value, string $comment): int {
@@ -87,7 +80,6 @@ class SiteOption extends \Gazelle\Base {
     /**
      * Remove an option by name
      *
-     * @param string Name of option
      * @return int 1 if option was removed, otherwise 0
      */
     public function remove(string $name): int {

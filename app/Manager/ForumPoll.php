@@ -26,8 +26,6 @@ class ForumPoll extends \Gazelle\Base {
 
     /**
      * Find the poll featured on the front page.
-     *
-     * @return poll or null
      */
     public function findByFeaturedPoll(): ?\Gazelle\ForumPoll {
         $pollId = self::$cache->get_value('polls_featured');
@@ -46,11 +44,6 @@ class ForumPoll extends \Gazelle\Base {
 
     /**
      * Create a poll for forum thread
-     *
-     * @param string $question The poll question
-     * @param array $answers An array of answers (between 2 and 25)
-     * @param array $votes An array of votes (1 per answer)
-     * @return ForumPoll
      */
     public function create(int $threadId, string $question, array $answerList): \Gazelle\ForumPoll {
         self::$db->prepared_query("

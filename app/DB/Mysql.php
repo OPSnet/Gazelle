@@ -102,9 +102,9 @@ class Mysql_Exception extends \Exception {}
 class Mysql_DuplicateKeyException extends Mysql_Exception {}
 
 class Mysql {
-    /** @var mysqli|bool */
+    /** @var \mysqli|bool */
     public $LinkID = false;
-    /** @var mysqli_result|bool */
+    /** @var \mysqli_result|bool */
     protected $QueryID = false;
     protected $Record = [];
     protected $Row;
@@ -190,7 +190,7 @@ class Mysql {
      * this query repeatedly while just changing the bound
      * parameters (such as if doing a bulk update or the like).
      *
-     * @return mysqli_stmt|bool Returns a statement object
+     * @return \mysqli_stmt|bool Returns a statement object
      *                          or FALSE if an error occurred.
      */
     public function prepare($Query) {
@@ -215,13 +215,13 @@ class Mysql {
      * integer (i), double (d), or string (s)).
      *
      * @param  array $Parameters,... variables for the query
-     * @return mysqli_result|bool Returns a mysqli_result object
+     * @return \mysqli_result|bool Returns a mysqli_result object
      *                            for successful SELECT queries,
      *                            or TRUE for other successful DML queries
      *                            or FALSE on failure.
      */
     public function execute(...$Parameters) {
-        /** @var mysqli_stmt $Statement */
+        /** @var \mysqli_stmt $Statement */
         $Statement = &$this->Statement;
 
         if (count($Parameters) > 0) {
@@ -266,7 +266,7 @@ class Mysql {
      *
      * @param string $Query
      * @param mixed ...$Parameters
-     * @return bool|mysqli_result
+     * @return bool|\mysqli_result
      */
     public function prepared_query($Query, ...$Parameters) {
         $this->prepare($Query);

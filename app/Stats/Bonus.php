@@ -30,9 +30,6 @@ class Bonus extends \Gazelle\Base {
      *  ('MONTH', 1,  1) = Beginning one month ago, the prior month of expenditure
      *  ('WEEK', 26,  4) = Beginning 26 weeks ago, 4 weeks prior expenditure
      *
-     * @param string interval Mysql interval (HOUR, DAY, MONTH, YEAR...)
-     * @param int offset number of intervals back in time
-     * @param int length number of intervals
      * @return array of array of [title, total] aggregated over interval range
      */
     public function expenditureRange(string $interval, int $offset, int $length): array {
@@ -61,9 +58,9 @@ class Bonus extends \Gazelle\Base {
      *  ('MONTH', 1,  1) = Beginning one month ago, the prior month of acquisition
      *  ('WEEK', 26,  4) = Beginning 26 weeks ago, 4 weeks prior acquisition
      *
-     * @param string interval Mysql interval (HOUR, DAY, MONTH, YEAR...)
-     * @param int offset number of intervals back in time
-     * @param int length number of intervals
+     * @param string $interval Mysql interval (HOUR, DAY, MONTH, YEAR...)
+     * @param int $offset number of intervals back in time
+     * @param int $length number of intervals
      * @return array of array of [title, total] aggregated over interval range
      */
     public function accrualRange(string $interval, int $offset, int $length): array {
@@ -100,7 +97,6 @@ class Bonus extends \Gazelle\Base {
     /**
      * N members with the most accrued bonus points
      *
-     * @param int n
      * @return array of array of [user_id, total]
      */
     public function topHoarders(int $n): array {
@@ -118,7 +114,6 @@ class Bonus extends \Gazelle\Base {
     /**
      * N members with the most bonus points spent
      *
-     * @param int n
      * @return array of array of [user_id, total]
      */
     public function topSpenders(int $n): array {
@@ -137,7 +132,6 @@ class Bonus extends \Gazelle\Base {
     /**
      * N members with the most bonus points contributed to bonus pools
      *
-     * @param int n
      * @return array of array of [user_id, total]
      */
     public function topPoolContributors(int $n): array {
@@ -156,7 +150,6 @@ class Bonus extends \Gazelle\Base {
     /**
      * N members with the most bonus points spent in aggregate
      *
-     * @param int n
      * @return array of array of [user_id, total]
      */
     public function topAggregateSpenders(int $n): array {

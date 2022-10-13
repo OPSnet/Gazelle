@@ -20,5 +20,3 @@ parameters:
     parallel:
         maximumNumberOfProcesses: 1
     ignoreErrors:
-        # lib/bootstrap.php declares these variables, and thus available everywhere.
-        - '/Variable \$(Cache|DB|Debug|Twig) might not be defined\./'

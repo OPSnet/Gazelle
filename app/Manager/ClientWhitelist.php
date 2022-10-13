@@ -75,7 +75,6 @@ class ClientWhitelist extends \Gazelle\Base {
     /**
      * Remove a client
      *
-     * @param int $clientID The ID of the client
      * @return int 0/1 Whether a client was found
      */
     public function remove(int $clientId) {

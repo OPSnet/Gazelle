@@ -165,7 +165,6 @@ class Comment extends \Gazelle\Base {
 
     /**
      * Load recent collage comments. Used for displaying recent comments on collage pages.
-     * @param int $CollageID ID of the collage
      * @return array ($Comments)
      *     $Comments
      *         ID: Comment ID

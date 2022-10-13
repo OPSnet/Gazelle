@@ -52,15 +52,8 @@ class Wiki extends \Gazelle\Base {
 
     /**
      * Create a wiki article
-     *
-     * @param string title
-     * @param string body
-     * @param int minimum class to read
-     * @param int minimum class to modify
-     * @param int author id
-     * @return int article id
      */
-    public function create(string $title, string $body, int $minRead, int $minEdit, int $userId) {
+    public function create(string $title, string $body, int $minRead, int $minEdit, int $userId): \Gazelle\Wiki {
         $title = trim($title);
         self::$db->begin_transaction();
         self::$db->prepared_query("
@@ -78,10 +71,6 @@ class Wiki extends \Gazelle\Base {
     /**
      * Determine what the read and write access levels should be, based on the editor
      *
-     * @param int can the viewer administrate the wiki
-     * @param int viewer class
-     * @param int the proposed read class
-     * @param int the proposed edit class
      * @return array [read class, edit class, error]
      * The error entry will be non-null in case of an error and read and edit will be null.
      */

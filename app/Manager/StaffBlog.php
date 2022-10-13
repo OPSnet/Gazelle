@@ -20,8 +20,6 @@ class StaffBlog extends \Gazelle\Base {
 
     /**
      * Update the last visited timestamp
-     *
-     * @param int ID of the vistort
      */
     public function visit(int $userId) {
         self::$db->prepared_query("
@@ -89,7 +87,6 @@ class StaffBlog extends \Gazelle\Base {
     /**
      * When was the blog read by a user?
      *
-     * @param int user id
      * @return int epoch
      */
     public function readBy(\Gazelle\User $user) {
@@ -108,8 +105,6 @@ class StaffBlog extends \Gazelle\Base {
     /**
      * Set the ID of a blog post. If this is set, calling modify()
      * will issue an update, rather than an insert.
-     *
-     * @param int blog id
      */
     public function setId(int $blogId) {
         $this->blogId = $blogId;
@@ -118,8 +113,6 @@ class StaffBlog extends \Gazelle\Base {
 
     /**
      * Set the author user ID of a blog post. Used during creation of a post.
-     *
-     * @param int user id
      */
     public function setAuthorId(int $userId) {
         $this->authorId = $userId;
@@ -128,8 +121,6 @@ class StaffBlog extends \Gazelle\Base {
 
     /**
      * Set the title of a blog post
-     *
-     * @param string title of the blog post
      */
     public function setTitle(string $title) {
         $this->title = $title;
@@ -138,8 +129,6 @@ class StaffBlog extends \Gazelle\Base {
 
     /**
      * Set the body of a blog post
-     *
-     * @param string body of the blog post
      */
     public function setBody(string $body) {
         $this->body = $body;
@@ -183,9 +172,6 @@ class StaffBlog extends \Gazelle\Base {
             DELETE FROM staff_blog WHERE ID = ?
             ", $blogId
         );
-        $this->blogId = null;
-        $this->body = null;
-        $this->title = null;
         self::$cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
         return self::$db->affected_rows() === 1;
     }

@@ -26,7 +26,7 @@ class Report extends \Gazelle\Base {
             }
         }
         if (!$id) {
-            return $null;
+            return null;
         }
         $report = new \Gazelle\Report($id);
         if (isset($this->userMan)) {

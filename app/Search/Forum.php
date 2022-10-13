@@ -57,7 +57,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Set search mode (by topic title or post body)
      *
-     * @param string mode (if 'body' then search in post bodies, anything else defaults to thread title)
+     * @param string $mode (if 'body' then search in post bodies, anything else defaults to thread title)
      */
     public function setSearchType(string $mode) {
         $this->threadTitleSearch = ($mode !== 'body');
@@ -67,7 +67,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Are we searching in the bodies of posts?
      *
-     * @return true is this is a body search
+     * @return bool is this is a body search
      */
     public function isBodySearch(): bool {
         // all that for one lousy pun
@@ -76,8 +76,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Set search text (will be split on whitespace into multiple words)
-     *
-     * @param string text
      */
     public function setSearchText(string $searchText) {
         $this->searchText = $searchText;
@@ -86,8 +84,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Set name of author to search for
-     *
-     * @param string username
      */
     public function setAuthor(string $username) {
         $this->authorName = trim($username);
@@ -104,8 +100,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Set the list of forum IDs within which to search
-     *
-     * @param array list of forum IDs
      */
     public function setForumList(array $list) {
         $this->selectedForums = [];
@@ -119,8 +113,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * When searching on post history, will all posts in a thread be grouped?
-     *
-     * @param bool set whether post history is grouped
      */
     public function setShowGrouped(bool $showGrouped) {
         $this->showGrouped = $showGrouped;
@@ -129,8 +121,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * When searching on post history, are only unread posts wanted?
-     *
-     * @param bool set whether only unread posts are wanted
      */
     public function setShowUnread(bool $showUnread) {
         $this->showUnread = $showUnread;
@@ -139,9 +129,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Save a condition related to forums
-     *
-     * @param string The SQL condition with one or more placeholders
-     * @param mixed The values to bind to the placeholders
      */
     protected function setForumCond(string $condition, $arg) {
         $this->forumCond[] = $condition;
@@ -155,9 +142,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Save a condition related to thread searches
-     *
-     * @param string The SQL condition with one or more placeholders
-     * @param mixed The values to bind to the placeholders
      */
     protected function setThreadCond(string $condition, $arg) {
         $this->threadCond[] = $condition;
@@ -171,8 +155,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Limit the search to threads created before this date
-     *
-     * @param string date (yyyy/mm/dd)
      */
     public function setThreadCreatedBefore(string $date) {
         return $this->setThreadCond('t.CreatedTime <= ?', $date);
@@ -180,8 +162,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Limit the search to threads created after this date
-     *
-     * @param string date (yyyy/mm/dd)
      */
     public function setThreadCreatedAfter(string $date) {
         return $this->setThreadCond('t.CreatedTime >= ?', $date);
@@ -194,9 +174,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Save a condition related to post searches
-     *
-     * @param string The SQL condition with one or more placeholders
-     * @param mixed The values to bind to the placeholders
      */
     protected function setPostCond(string $condition, $arg) {
         $this->postCond[] = $condition;
@@ -210,8 +187,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Limit the search to posts created before this date
-     *
-     * @param string date (yyyy/mm/dd)
      */
     public function setPostCreatedBefore(string $date) {
         return $this->setPostCond('p.AddedTime <= ?', $date);
@@ -219,8 +194,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Limit the search to threads created after this date
-     *
-     * @param string date (yyyy/mm/dd)
      */
     public function setPostCreatedAfter(string $date) {
         return $this->setPostCond('p.AddedTime >= ?', $date);
@@ -230,8 +203,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Do we need to split the search words for a full text search?
-     *
-     * @param bool do we split? (e.g. not on thread title lookups)
      */
     public function setSplitWords(bool $splitWords) {
         $this->splitWords = $splitWords;
@@ -269,7 +240,7 @@ class Forum extends \Gazelle\BaseUser {
         }
         // full text search needed?
         $words = array_unique(explode(' ', $this->searchText));
-        if ($this->splitWords && !empty($words)) {
+        if ($this->splitWords) {
             $args = array_merge($args, $words);
             $cond = array_merge($cond,
                 array_fill(
@@ -316,8 +287,6 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Return the total number of rows the unpaginated query would return
      * (so that we can set up pagination links)
-     *
-     * @param int number of rows
      */
     public function totalHits(): int {
         [$cond, $args] = $this->setSplitWords(true)->configure();
@@ -332,8 +301,6 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Return a paginated section of the result set
-     *
-     * @param array a collection of results
      */
     public function results(\Gazelle\Util\Paginator $paginator): array {
         [$cond, $args] = $this->setSplitWords(true)->configure();
@@ -393,8 +360,6 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Return a list of threads created by a user
      *
-     * @param int Number of threads to fetch (limit)
-     * @param int From whence in the list (offset)
      * @return array of [thread_id, thread_title, created_time, last_post_time, forum_id, forum_title]
      */
     public function threadsByUserPage(int $limit, int $offset): array {
