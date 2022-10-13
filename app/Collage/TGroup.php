@@ -6,7 +6,6 @@ class TGroup extends AbstractCollage {
 
     protected array $groupIds = [];
     protected array $sequence = [];
-    protected array $torrents = [];
     protected array $torrentTags = [];
 
     public function entryTable(): string { return 'collages_torrents'; }
@@ -16,15 +15,25 @@ class TGroup extends AbstractCollage {
         return $this->groupIds;
     }
 
-    public function torrentList(): array {
-        return $this->torrents;
-    }
-
     public function torrentTagList(): array {
         return $this->torrentTags;
     }
 
     public function load(): int {
+        // in case of a tie in tag usage counts, order by first past the post
+        self::$db->prepared_query("
+            SELECT count(*) AS \"count\",
+                tag.name AS tag
+            FROM collages_torrents   AS ct
+            INNER JOIN torrents_tags AS tt USING (groupid)
+            INNER JOIN tags          AS tag ON (tag.id = tt.tagid)
+            WHERE ct.collageid = ?
+            GROUP BY tag.name
+            ORDER BY 1 DESC, ct.AddedOn
+            ", $this->holder->id()
+        );
+        $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC, false);
+
         $order = $this->holder->sortNewest() ? 'DESC' : 'ASC';
         self::$db->prepared_query("
             SELECT ct.GroupID,
@@ -39,45 +48,25 @@ class TGroup extends AbstractCollage {
         $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
         $groupIds = array_keys($groupContribIds);
 
-        if (count($groupIds) > 0) {
-            $this->torrents = \Torrents::get_groups($groupIds);
-        }
-
-        // in case of a tie in tag usage counts, order by first past the post
-        self::$db->prepared_query("
-            SELECT count(*) as \"count\",
-                tag.name AS tag
-            FROM collages_torrents   AS ct
-            INNER JOIN torrents_tags AS tt USING (groupid)
-            INNER JOIN tags          AS tag ON (tag.id = tt.tagid)
-            WHERE ct.collageid = ?
-            GROUP BY tag.name
-            ORDER BY 1 DESC, ct.AddedOn
-            ", $this->holder->id()
-        );
-        $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC, false);
-
+        $tgMan = new \Gazelle\Manager\TGroup;
         foreach ($groupIds as $groupId) {
-            if (!isset($this->torrents[$groupId])) {
+            $tgroup = $tgMan->findById($groupId);
+            if (is_null($tgroup)) {
                 continue;
             }
             $this->groupIds[] = $groupId;
-            $group = $this->torrents[$groupId];
-            $extendedArtists = $group['ExtendedArtists'];
-            $artists =
-                (empty($extendedArtists[1]) && empty($extendedArtists[4]) && empty($extendedArtists[5]) && empty($extendedArtists[6]))
-                ? $group['Artists']
-                : array_merge((array)$extendedArtists[1], (array)$extendedArtists[4], (array)$extendedArtists[5], (array)$extendedArtists[6]);
-
-            foreach ($artists as $artist) {
-                if (!isset($this->artists[$artist['id']])) {
-                    $this->artists[$artist['id']] = [
-                        'count' => 0,
-                        'id'    => (int)$artist['id'],
-                        'name'  => $artist['name'],
-                    ];
+            $roleList = $tgroup->artistRole()->roleList();
+            foreach (['main', 'conductor', 'composer', 'dj'] as $role) {
+                foreach ($roleList[$role] as $artistInfo) {
+                    if (!isset($this->artists[$artistInfo['id']])) {
+                        $this->artists[$artistInfo['id']] = [
+                            'count' => 0,
+                            'id'    => $artistInfo['id'],
+                            'name'  => $artistInfo['name'],
+                        ];
+                    }
+                    $this->artists[$artistInfo['id']]['count']++;
                 }
-                $this->artists[$artist['id']]['count']++;
             }
 
             $contribUserId = $groupContribIds[$groupId]['UserID'];
