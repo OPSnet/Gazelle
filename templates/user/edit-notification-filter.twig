@@ -78,7 +78,7 @@
                 <td class="label"><strong>Only these categories</strong></td>
                 <td>
     {% for key, name in constant('CATEGORY') %}
-                    <input type="checkbox" name="categories{{ loop.index }}[]" id="cat_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Categories) }} />
+                    <input type="checkbox" name="categories{{ loop.parent.loop.index }}[]" id="cat_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Categories) }} />
                     <label for="cat_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
     {% endfor %}
                 </td>
@@ -87,7 +87,7 @@
                 <td class="label"><strong>Only these types</strong></td>
                 <td>
     {% for key, name in release_type %}
-                    <input type="checkbox" name="releasetypes{{ loop.index }}[]" id="rt_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.ReleaseTypes) }} />
+                    <input type="checkbox" name="releasetypes{{ loop.parent.loop.index }}[]" id="rt_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.ReleaseTypes) }} />
                     <label for="rt_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
     {% endfor %}
                </td>
@@ -96,7 +96,7 @@
                 <td class="label"><strong>Only these formats</strong></td>
                 <td>
     {% for key, name in constant('FORMAT') %}
-                    <input type="checkbox" name="formats{{ loop.index }}[]" id="for_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Formats) }} />
+                    <input type="checkbox" name="formats{{ loop.parent.loop.index }}[]" id="for_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Formats) }} />
                     <label for="for_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
     {% endfor %}
                 </td>
@@ -105,7 +105,7 @@
                 <td class="label"><strong>Only these bitrates</strong></td>
                 <td>
     {% for key, name in constant('ENCODING') %}
-                    <input type="checkbox" name="bitrates{{ loop.index }}[]" id="enc_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Encodings) }} />
+                    <input type="checkbox" name="bitrates{{ loop.parent.loop.index }}[]" id="enc_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Encodings) }} />
                     <label for="enc_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
     {% endfor %}
                 </td>
@@ -114,7 +114,7 @@
                 <td class="label"><strong>Only these media</strong></td>
                 <td>
     {% for key, name in constant('MEDIA') %}
-                    <input type="checkbox" name="media{{ loop.index }}[]" id="med_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Media) }} />
+                    <input type="checkbox" name="media{{ loop.parent.loop.index }}[]" id="med_{{ key }}_{{ filter.ID }}" value="{{ key }}"{{ checked(name in filter.Media) }} />
                     <label for="med_{{ key }}_{{ filter.ID }}">{{ name }}</label>&nbsp;
     {% endfor %}
                 </td>
