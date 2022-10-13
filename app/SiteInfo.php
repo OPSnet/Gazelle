@@ -28,7 +28,7 @@ class SiteInfo extends Base {
 
     public function uptime() {
         $in = fopen('/proc/uptime', 'r');
-        [$uptime, $idletime] = explode(' ', trim(fgets($in)));
+        [$uptime, $idletime] = array_map('floatval', explode(' ', trim(fgets($in))));
         fclose($in);
         $in = fopen('/proc/cpuinfo', 'r');
         $ncpu = 0;
@@ -40,8 +40,8 @@ class SiteInfo extends Base {
         fclose($in);
         $now = time();
         return [
-            'uptime'   => Time::diff($now - (int)$uptime),
-            'idletime' => Time::diff($now - (int)($idletime / $ncpu), 2, true, false, true),
+            'uptime'   => Time::diff($now - $uptime),
+            'idletime' => Time::diff($now - ($idletime / $ncpu), 2, true, false, true),
         ];
     }
 
