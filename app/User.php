@@ -321,8 +321,8 @@ class User extends BaseObject {
         return self::$db->to_array('permName', MYSQLI_ASSOC, false);
     }
 
-    public function hasAttr(string $name): int {
-        return $this->info()['attr'][$name] ?? 0;
+    public function hasAttr(string $name): bool {
+        return isset($this->info()['attr'][$name]);
     }
 
     public function toggleAttr(string $attr, bool $flag): bool {
@@ -1833,6 +1833,8 @@ class User extends BaseObject {
             } elseif (isset($releaseType[$key])) {
                 $checked = $val;
                 $val = $releaseType[$key];
+            } else {
+                $checked = true;
             }
             $order[] = ['id' => $key. '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
         }
