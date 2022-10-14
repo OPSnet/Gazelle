@@ -18,7 +18,7 @@ switch ($type) {
         if (is_null($user)) {
             error(404);
         }
-        $report = new Gazelle\Report\User($user);
+        $report = new Gazelle\Report\User($id, $user);
         break;
 
     case 'request':
@@ -26,7 +26,7 @@ switch ($type) {
         if (is_null($request)) {
             error(404);
         }
-        $report = new Gazelle\Report\Request($request);
+        $report = new Gazelle\Report\Request($id, $request);
         break;
 
     case 'request_update':
@@ -37,7 +37,7 @@ switch ($type) {
         if ($request->isFilled() || $request->categoryName() != 'Music' || $request->year() != 0) {
             error(403);
         }
-        $report = (new Gazelle\Report\Request($request))->isUpdate(true);
+        $report = (new Gazelle\Report\Request($id, $request))->isUpdate(true);
         break;
 
     case 'collage':
@@ -45,7 +45,7 @@ switch ($type) {
         if (is_null($collage)) {
             error(404);
         }
-        $report = new Gazelle\Report\Collage($collage);
+        $report = new Gazelle\Report\Collage($id, $collage);
         break;
 
     case 'thread':
@@ -56,7 +56,7 @@ switch ($type) {
         if (!$Viewer->readAccess($thread->forum())) {
             error(403);
         }
-        $report = new Gazelle\Report\ForumThread($thread);
+        $report = new Gazelle\Report\ForumThread($id, $thread);
         break;
 
     case 'post':
@@ -67,7 +67,7 @@ switch ($type) {
         if (!$Viewer->readAccess($post->thread()->forum())) {
             error(403);
         }
-        $report = new Gazelle\Report\ForumPost($post);
+        $report = new Gazelle\Report\ForumPost($id, $post);
         break;
 
     case 'comment':
@@ -75,7 +75,7 @@ switch ($type) {
         if (is_null($comment)) {
             error(404);
         }
-        $report = (new Gazelle\Report\Comment($comment))->setContext($reportType['title']);
+        $report = (new Gazelle\Report\Comment($id, $comment))->setContext($reportType['title']);
         break;
 }
 

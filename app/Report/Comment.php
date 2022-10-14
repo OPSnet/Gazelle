@@ -4,6 +4,7 @@ namespace Gazelle\Report;
 
 class Comment extends AbstractReport {
     public function __construct(
+        protected int $reportId,
         protected \Gazelle\Comment\AbstractComment $subject
     ) { }
 

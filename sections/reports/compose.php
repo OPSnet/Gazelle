@@ -4,10 +4,10 @@ if (!$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
 
-$ReportID = (int)($_GET['reportid'] ?? 0);
+$reportId = (int)($_GET['reportid'] ?? 0);
 $id       = (int)($_GET['thingid'] ?? 0);
 $type     = $_GET['type'] ?? null;
-if (!$ReportID || !$id || is_null($type)) {
+if (!$reportId || !$id || is_null($type)) {
     error(403);
 }
 
@@ -32,7 +32,7 @@ switch ($type) {
         if (is_null($reported)) {
             error(404);
         }
-        $report = new Gazelle\Report\User($reported);
+        $report = new Gazelle\Report\User($reportId, $reported);
         break;
 
     case 'request':
@@ -41,7 +41,7 @@ switch ($type) {
         if (is_null($request)) {
             error(404);
         }
-        $report = new Gazelle\Report\Request($request);
+        $report = new Gazelle\Report\Request($reportId, $request);
         break;
 
     case 'collage':
@@ -49,7 +49,7 @@ switch ($type) {
         if (is_null($collage)) {
             error(404);
         }
-        $report = new Gazelle\Report\Collage($collage);
+        $report = new Gazelle\Report\Collage($reportId, $collage);
         break;
 
     case 'thread':
@@ -60,7 +60,7 @@ switch ($type) {
         if (!$Viewer->readAccess($thread->forum())) {
             error(403);
         }
-        $report = new Gazelle\Report\ForumThread($thread);
+        $report = new Gazelle\Report\ForumThread($reportId, $thread);
         break;
 
     case 'post':
@@ -71,7 +71,7 @@ switch ($type) {
         if (!$Viewer->readAccess($post->thread()->forum())) {
             error(403);
         }
-        $report = new Gazelle\Report\ForumPost($post);
+        $report = new Gazelle\Report\ForumPost($reportId, $post);
         break;
 
     case 'comment':
@@ -79,7 +79,7 @@ switch ($type) {
         if (is_null($comment)) {
             error(404);
         }
-        $report = (new Gazelle\Report\Comment($comment))->setContext($reportType['title']);
+        $report = (new Gazelle\Report\Comment($reportId, $comment))->setContext($reportType['title']);
         break;
 
     default:

@@ -5,6 +5,7 @@ namespace Gazelle\Report;
 class ForumPost extends AbstractReport {
 
     public function __construct(
+        protected int $reportId,
         protected \Gazelle\ForumPost $subject
     ) { }
 

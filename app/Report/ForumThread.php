@@ -5,6 +5,7 @@ namespace Gazelle\Report;
 class ForumThread extends AbstractReport {
 
     public function __construct(
+        protected int $reportId,
         protected \Gazelle\ForumThread $subject
     ) { }
 
@@ -13,10 +14,10 @@ class ForumThread extends AbstractReport {
     }
 
     public function bbLink(): string {
-        return "the forum thread [url={$this->subject->id()}]" . display_str($this->title()) . '[/url]';
+        return "the forum thread [thread]{$this->subject->id()}[/thread]";
     }
 
     public function title(): string {
-        return 'Forum Thread Report: ' . display_str($this->title());
+        return 'Forum Thread Report: ' . display_str($this->subject->title());
     }
 }

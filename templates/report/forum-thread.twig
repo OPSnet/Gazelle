@@ -1,12 +1,12 @@
 <p>You are reporting the thread:</p>
 <table>
     <tr class="colhead">
-        <td width="12%">Username</td>
+        <td width="12%">Author</td>
         <td>Title</td>
     </tr>
     <tr>
-        <td>{{ context.author_id|user_url }}</td>
-        <td>{{ context.title }}</td>
+        <td>{{ report.subject.author.id|user_url }}</td>
+        <td>{{ ("[thread]" ~ report.subject.id ~ "[/thread]")|bb_format }}</td>
     </tr>
 </table>
 
