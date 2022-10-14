@@ -31,7 +31,7 @@ abstract class AbstractReport extends \Gazelle\Base {
     public function reason(): string {
         return (string)self::$db->scalar("
             SELECT Reason FROM reports WHERE ID = ?
-            ", $this->subject->id() /** @phpstan-ignore-line */
+            ", $this->reportId /** @phpstan-ignore-line */
         );
     }
 }

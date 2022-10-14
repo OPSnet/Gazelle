@@ -17,7 +17,9 @@
                     <td><strong>{{ report.link|raw }}</strong></td>
                     <td>
                         <strong>{{ type[report.subjectType].title }}</strong> was reported by {{ report.reporter.id|user_url }} {{ report.created|time_diff }}
+    {% if report.reporter.id != viewer.id %}
                         <a href="reports.php?action=compose&amp;toid={{ report.reporter.id }}&amp;reportid={{ report.id }}&amp;type={{ report.subjectType }}&amp;thingid={{ report.subjectId }}" class="brackets">Contact</a>
+    {% endif %}
                     </td>
                 </tr>
                 <tr>
