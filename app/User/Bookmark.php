@@ -14,23 +14,13 @@ class Bookmark extends \Gazelle\BaseUser {
      * @param string $type the type to get the schema for
      */
     public function schema($type): array {
-        switch ($type) {
-            case 'torrent':
-                return ['bookmarks_torrents', 'GroupID'];
-                break;
-            case 'artist':
-                return ['bookmarks_artists', 'ArtistID'];
-                break;
-            case 'collage':
-                return ['bookmarks_collages', 'CollageID'];
-                break;
-            case 'request':
-                return ['bookmarks_requests', 'RequestID'];
-                break;
-            default:
-                return [null, null];
-                break;
-        }
+        return match($type) {
+            'artist'  => ['bookmarks_artists',  'ArtistID'],
+            'collage' => ['bookmarks_collages', 'CollageID'],
+            'request' => ['bookmarks_requests', 'RequestID'],
+            'torrent' => ['bookmarks_torrents', 'GroupID'],
+            default   => [null, null],
+        };
     }
 
     /**
@@ -97,23 +87,26 @@ class Bookmark extends \Gazelle\BaseUser {
      * Returns an array with User Bookmark data: group IDs, collage data, torrent data
      * @return array Group IDs, Bookmark Data, Torrent List
      */
-    public function torrentBookmarks(): array {
-        [$groupIds, $bookmarkData] = self::$cache->get_value("bookmarks_group_ids_" . $this->user->id());
-        if (!$groupIds) {
+    public function tgroupBookmarkList(): array {
+        $key = "bookmarks_group_ids_" . $this->user->id();
+        $bookmarkList = self::$cache->get_value($key);
+        $bookmarkList = false;
+        if ($bookmarkList === false) {
             $qid = self::$db->get_query_id();
             self::$db->prepared_query("
-                SELECT GroupID, Sort, `Time`
-                FROM bookmarks_torrents b
+                SELECT GroupID,
+                    Sort,
+                    `Time`
+                FROM bookmarks_torrents
                 WHERE UserID = ?
-                ORDER BY Sort, `Time` ASC
+                ORDER BY Sort, `Time`
                 ", $this->user->id()
             );
-            $groupIds = self::$db->collect('GroupID');
-            $bookmarkData = self::$db->to_array('GroupID', MYSQLI_ASSOC);
+            $bookmarkList = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
             self::$db->set_query_id($qid);
-            self::$cache->cache_value("bookmarks_group_ids_" . $this->user->id(), [$groupIds, $bookmarkData], 3600);
+            self::$cache->cache_value($key, $bookmarkList, 3600);
         }
-        return [$groupIds, $bookmarkData, \Torrents::get_groups($groupIds)];
+        return $bookmarkList;
     }
 
     public function torrentArtistLeaderboard(\Gazelle\Manager\Artist $artistMan): array {

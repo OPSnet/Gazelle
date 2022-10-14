@@ -2222,33 +2222,6 @@ class User extends BaseObject {
     }
 
     /**
-     * Returns an array with User Bookmark data: group IDs, collage data, torrent data
-     * @return array Group IDs, Bookmark Data, Torrent List
-     */
-    public function bookmarkList(): array {
-        $key = "bookmarks_group_ids_" . $this->id;
-        if (($info = self::$cache->get_value($key)) !== false) {
-            [$groupIds, $bookmarks] = $info;
-        } else {
-            $qid = self::$db->get_query_id();
-            self::$db->prepared_query("
-                SELECT GroupID,
-                    Sort,
-                    `Time`
-                FROM bookmarks_torrents
-                WHERE UserID = ?
-                ORDER BY Sort, `Time`
-                ", $this->id
-            );
-            $groupIds = self::$db->collect('GroupID');
-            $bookmarks = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
-            self::$db->set_query_id($qid);
-            self::$cache->cache_value($key, [$groupIds, $bookmarks], 3600);
-        }
-        return [$groupIds, $bookmarks, \Torrents::get_groups($groupIds)];
-    }
-
-    /**
      * Get the donation history of the user
      *
      * @return array of array of [amount, date, currency, reason, source, addedby, rank, totalrank]
