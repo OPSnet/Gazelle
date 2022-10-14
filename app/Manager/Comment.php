@@ -4,6 +4,8 @@ namespace Gazelle\Manager;
 
 class Comment extends \Gazelle\Base {
 
+    const CATALOG = '%s_comments_%d_cat_%d';
+
     protected function className(string $page): string {
         switch ($page) {
             case 'artist':
@@ -51,7 +53,7 @@ class Comment extends \Gazelle\Base {
             ", TORRENT_COMMENTS_PER_PAGE, TORRENT_COMMENTS_PER_PAGE, THREAD_CATALOGUE, $page, $pageId
         );
         self::$cache->deleteMulti([
-            "{$page}_comments_{$pageId}_catalogue_{$catalogueId}",
+            sprintf(self::CATALOG, $page, $pageId, $catalogueId),
             "{$page}_comments_{$pageId}"
         ]);
         if ($page == 'collages') {
@@ -96,7 +98,7 @@ class Comment extends \Gazelle\Base {
         $subscription->move($page, $pageId, $targetPageId);
 
         for ($i = 0; $i <= $last; ++$i) {
-            self::$cache->delete_value($page . "_comments_$targetPageId" . "_catalogue_$i");
+            self::$cache->delete_value(sprintf(self::CATALOG, $page, $targetPageId, $i));
         }
         self::$cache->delete_value($page."_comments_$targetPageId");
     }
@@ -138,7 +140,7 @@ class Comment extends \Gazelle\Base {
 
         // Clear cache
         for ($i = 0; $i <= $last; ++$i) {
-            self::$cache->delete_value($page . '_comments_' . $pageId . '_catalogue_' . $i);
+            self::$cache->delete_value(sprintf(self::CATALOG, $page, $pageId, $i));
         }
         self::$cache->delete_value($page . '_comments_' . $pageId);
 
