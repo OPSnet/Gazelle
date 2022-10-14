@@ -181,9 +181,11 @@ class Quote extends \Gazelle\BaseUser {
         );
 
         $page = [];
-        $forumMan = new \Gazelle\Manager\Forum;
-        $postMan = new \Gazelle\Manager\ForumPost;
+        $forumMan    = new \Gazelle\Manager\Forum;
+        $postMan     = new \Gazelle\Manager\ForumPost;
         $releaseType = new \Gazelle\ReleaseType;
+        $tgMan       = new \Gazelle\Manager\TGroup;
+
         foreach ($quoteList as $q) {
             $context = [];
             switch ($q['Page']) {
@@ -214,38 +216,27 @@ class Quote extends \Gazelle\BaseUser {
                     continue 2;
                 }
                 $request = $requestList[$q['PageID']];
-                switch (CATEGORY[$request['CategoryID'] - 1]) {
-                    case 'Music':
-                        $link = \Artists::display_artists(\Requests::get_artists($q['PageID']))
-                            . sprintf('<a href="requests.php?action=view&amp;id=%d" dir="ltr">%s [%d]</a>',
-                                $q['PageID'], $request['Title'], $request['Year']);
-                        break;
-                    case 'Audiobooks':
-                    case 'Comedy':
-                        $link = sprintf('<a href="requests.php?action=view&amp;id=%d" dir="ltr">%s [%d]</a>',
-                                $q['PageID'], $request['Title'], $request['Year']);
-                        break;
-                    default:
-                        $link = sprintf('<a href="requests.php?action=view&amp;id=%d" dir="ltr">%s</a>',
-                                $q['PageID'], $request['Title']);
-                        break;
-                }
+                $ahref = "a href=\"requests.php?action=view&amp;id={$q['PageID']}\" dir=\"ltr\"";
                 $context = [
                     'jump'  => "requests.php?action=view&amp;id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link'  => $link,
+                    'link'  => match(CATEGORY[$request['CategoryID'] - 1]) {
+                        'Audiobooks',
+                        'Music' => \Artists::display_artists(\Requests::get_artists($q['PageID']))
+                            . "<$ahref>{$request['Title']} [{$request['Year']}]</a>",
+                        'Comedy' => "<$ahref>{$request['Title']} [{$request['Year']}]</a>",
+                        default  => "<$ahref>{$request['Title']}</a>",
+                    },
                     'title' => 'Request',
                 ];
                 break;
             case 'torrents':
-                if (!isset($torrentList[$q['PageID']])) {
+                $tgroup = $tgMan->findById($q['PageID']);
+                if (is_null($tgroup)) {
                     continue 2;
                 }
-                $group = $torrentList[$q['PageID']];
                 $context = [
                     'jump' => "torrents.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link' => \Artists::display_artists($group['ExtendedArtists'])
-                        . sprintf('<a href="torrents.php?id=%d" dir="ltr">%s [%d] [%s]</a>',
-                            $q['PageID'], $group['Name'], $group['Year'], $releaseType->findNameById($group['ReleaseType'])),
+                    'link' => $tgroup->link(),
                     'title' => 'Torrent',
                 ];
                 break;

@@ -12,7 +12,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     protected $viewer;
 
     protected const PAGE_TOTAL = '%s_comments_%d';
-    protected const CATALOG = '%s_comments_%d_catalogue_%d';
 
     abstract public function page(): string;
     abstract public function pageUrl(): string;
@@ -136,8 +135,9 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
         // Cache catalogue from which the page is selected
         $CatalogueID = (int)floor(TORRENT_COMMENTS_PER_PAGE * ($this->pageNum - 1) / THREAD_CATALOGUE);
-        $catKey = sprintf(self::CATALOG, $page, $pageId, $CatalogueID);
-        if (($Catalogue = self::$cache->get_value($catKey)) === false) {
+        $catKey = sprintf(\Gazelle\Manager\Comment::CATALOG, $page, $pageId, $CatalogueID);
+        $Catalogue = self::$cache->get_value($catKey);
+        if ($Catalogue === false) {
             self::$db->prepared_query("
                 SELECT c.ID,
                     c.AuthorID,
@@ -145,8 +145,10 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                     c.Body,
                     c.EditedUserID,
                     c.EditedTime,
-                    u.Username
+                    u.Username,
+                    a.Username AS author_name
                 FROM comments AS c
+                LEFT JOIN users_main AS a ON (a.ID = c.AuthorID)
                 LEFT JOIN users_main AS u ON (u.ID = c.EditedUserID)
                 WHERE c.Page = ? AND c.PageID = ?
                 ORDER BY c.ID
@@ -253,8 +255,9 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         self::$cache->deleteMulti([
             "edit_{$page}_" . $this->id,
             "{$page}_comments_" . $this->pageId,
-            "{$page}_comments_{$this->pageId}_catalogue_"
-                . (int)floor((($commentPage - 1) * TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE),
+            sprintf(\Gazelle\Manager\Comment::CATALOG, $page, $this->pageId,
+                (int)floor((($commentPage - 1) * TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE)
+            ),
         ]);
 
         if ($page == 'collages') {
@@ -302,12 +305,11 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             "{$page}_comments_" . $this->pageId,
         ]);
 
-        //We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
+        // We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
         $current = floor((TORRENT_COMMENTS_PER_PAGE * $commentPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         $last = floor((TORRENT_COMMENTS_PER_PAGE * $commentPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
-        $keyStem = "{$page}_comments_{$this->pageId}_catalogue_";
         for ($i = $current; $i <= $last; ++$i) {
-            self::$cache->delete_value($keyStem . $i);
+            self::$cache->delete_value(sprintf(\Gazelle\Manager\Comment::CATALOG, $page, $this->pageId, $i));
         }
 
         if ($page === 'collages') {
