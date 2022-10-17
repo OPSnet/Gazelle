@@ -30,34 +30,39 @@ class Subscription extends BaseUser {
 
     /**
      * (Un)subscribe from comments.
-     * @param string $Page 'artist', 'collages', 'requests' or 'torrents'
-     * @param int $PageID ArtistID, CollageID, RequestID or GroupID
+     * @param string $page 'artist', 'collages', 'requests' or 'torrents'
+     * @param int $pageID ArtistID, CollageID, RequestID or GroupID
      */
-    public function subscribeComments(string $Page, int $PageID) {
+    public function subscribeComments(string $page, int $pageID) {
         $qid = self::$db->get_query_id();
-        $UserCommentSubscriptions = $this->commentSubscriptions();
-        $Key = $this->isSubscribedComments($Page, $PageID);
-        if ($Key !== false) {
+        $subscriptions = $this->commentSubscriptions();
+        $key = -1;
+        foreach ($subscriptions as $k => $entry) {
+            if ($entry[0] === $page && $entry[1] === $pageID) {
+                $key = $k;
+                break;
+            }
+        }
+        if ($key !== -1) {
             self::$db->prepared_query('
                 DELETE FROM users_subscriptions_comments
                 WHERE UserID = ?
                     AND Page = ?
                     AND PageID = ?
-                ', $this->user->id(), $Page, $PageID
+                ', $this->user->id(), $page, $pageID
             );
-            unset($UserCommentSubscriptions[$Key]);
+            unset($subscriptions[$key]);
         } else {
             self::$db->prepared_query('
                 INSERT IGNORE INTO users_subscriptions_comments
                     (UserID, Page, PageID)
                 VALUES
                     (?,      ?,    ?)
-                ', $this->user->id(), $Page, $PageID
+                ', $this->user->id(), $page, $pageID
             );
-            array_push($UserCommentSubscriptions, [$Page, $PageID]);
+            array_push($subscriptions, [$page, $pageID]);
         }
-        self::$cache->replace_value("subscriptions_comments_user_" . $this->user->id(), $UserCommentSubscriptions, 0);
-        self::$cache->delete_value("subscriptions_comments_user_new_" . $this->user->id());
+        self::$cache->replace_value("subscriptions_comments_user_" . $this->user->id(), $subscriptions, 0);
         self::$db->set_query_id($qid);
     }
 
