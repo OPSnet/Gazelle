@@ -17,7 +17,7 @@ class ForumThread extends BaseObject {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value("edit_forums_{$this->id}");
         (new Manager\Forum)->flushToc();
-        $last = $this->lastCatalog();
+        $last = $this->lastPage();
         $this->flushCatalog($last, $last);
     }
 
@@ -169,8 +169,12 @@ class ForumThread extends BaseObject {
         return $this->info()['title'];
     }
 
-    public function lastCatalog(): int {
+    public function lastPage(): int {
         return (int)floor($this->postTotal() / POSTS_PER_PAGE);
+    }
+
+    public function lastCatalog(): int {
+        return (int)floor($this->postTotal() / THREAD_CATALOGUE);
     }
 
     public function catalogEntry(int $page, int $perPage): int {
@@ -283,7 +287,7 @@ class ForumThread extends BaseObject {
                 )
             );
             $this->forum()->adjust();
-            $this->flushCatalog(0, $this->lastCatalog());
+            $this->flushCatalog(0, $this->lastPage());
             $this->flush();
         }
         return $affected;
@@ -347,7 +351,7 @@ class ForumThread extends BaseObject {
             ", $set ? $postId : 0, $this->id
         );
         $this->flush();
-        $this->flushCatalog(0, $this->lastCatalog());
+        $this->flushCatalog(0, $this->lastPage());
         return self::$db->affected_rows();
     }
 

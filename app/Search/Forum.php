@@ -388,14 +388,10 @@ class Forum extends \Gazelle\BaseUser {
         [$from, $cond, $args] = $this->configurePostHistory();
         return self::$db->scalar("
             SELECT count(*)
-            FROM (
-                SELECT count(1)
-                $from
-                WHERE
-                " . implode(' AND ', $cond) . "
-                GROUP BY t.ID
-            ) THREAD
-            ", ...$args
+            $from
+            WHERE
+            " . implode(' AND ', $cond)
+            , ...$args
         );
     }
 

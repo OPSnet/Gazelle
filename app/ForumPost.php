@@ -128,6 +128,12 @@ class ForumPost extends BaseObject {
 
         $this->flush();
         $this->info();
+        $thread = $this->thread();
+        $postCatalogEntry = $thread->catalogEntry($this->page(), POSTS_PER_PAGE);
+        $finalCatalogEntry = $thread->catalogEntry($this->threadPageTotal(), POSTS_PER_PAGE);
+        if ($postCatalogEntry < $finalCatalogEntry) {
+            $this->thread()->flushCatalog($this->page() - 1, $this->page() - 1);
+        }
         $this->info['body'] = $body;
         return $affected;
     }
