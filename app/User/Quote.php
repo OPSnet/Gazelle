@@ -175,10 +175,6 @@ class Quote extends \Gazelle\BaseUser {
             array_column(array_filter($quoteList, function ($x) { return $x['Page'] === 'requests'; }), 'PageID'),
             true
         );
-        $torrentList = \Torrents::get_groups(
-            array_column(array_filter($quoteList, function ($x) { return $x['Page'] === 'torrents'; }), 'PageID'),
-            true, true, false
-        );
 
         $page = [];
         $forumMan    = new \Gazelle\Manager\Forum;
