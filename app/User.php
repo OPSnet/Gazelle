@@ -2359,7 +2359,7 @@ class User extends BaseObject {
         $progress = [
             'Class' => (new Manager\User)->userclassName($criteria['To']),
             'Requirements' => [
-                'Upload' => [$this->uploadedSize() + $this->stats()->requestBountySize(), $criteria['MinUpload'], 'bytes'],
+                'Upload' => [$this->uploadedSize(), $criteria['MinUpload'], 'bytes'],
                 'Ratio' => [$this->downloadedSize() == 0 ? '∞'
                     : $this->uploadedSize() / $this->downloadedSize(), $criteria['MinRatio'], 'float'],
                 'Time' => [
