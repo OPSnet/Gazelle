@@ -6,6 +6,7 @@
     <tr class="colhead">
         <td>{{ heading.emit('name')|raw }}</td>
         <td>Description</td>
+        <td>Theme</td>
         <td>Default</td>
         <td>{{ heading.emit('enabled')|raw }}</td>
         <td>{{ heading.emit('total')|raw }}</td>
@@ -14,6 +15,7 @@
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ s.name }}</td>
         <td>{{ s.description }}</td>
+        <td>{{ s.theme }}</td>
         <td>{% if s.initial %}Default{% endif %}</td>
         <td>{{ s.total_enabled|number_format }}</td>
         <td>{{ s.total|number_format }}</td>

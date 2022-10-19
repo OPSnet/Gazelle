@@ -4,7 +4,7 @@ namespace Gazelle\User;
 
 class Stylesheet extends \Gazelle\BaseUser {
 
-    protected const CACHE_KEY = 'u_ss_%d';
+    protected const CACHE_KEY = 'u_ss2_%d';
     protected array $info;
 
     public function flush() {
@@ -22,7 +22,8 @@ class Stylesheet extends \Gazelle\BaseUser {
                 SELECT s.ID                          AS style_id,
                     s.Name                           AS name,
                     lower(replace(s.Name, ' ', '_')) AS css_name,
-                    ui.StyleURL                      AS style_url
+                    ui.StyleURL                      AS style_url,
+                    s.theme
                 FROM stylesheets s
                 INNER JOIN users_info ui ON (ui.StyleID = s.ID)
                 WHERE ui.UserID = ?
@@ -65,6 +66,10 @@ class Stylesheet extends \Gazelle\BaseUser {
 
     public function styleUrl(): ?string {
         return $this->info()['style_url'];
+    }
+
+    public function theme(): string {
+        return $this->info()['theme'];
     }
 
     public function url(): string {

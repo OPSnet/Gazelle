@@ -13,7 +13,8 @@ class Stylesheet extends \Gazelle\Base {
                 self::$db->prepared_query("
                     SELECT ID,
                         lower(replace(Name, ' ', '_')) AS Name,
-                        Name AS ProperName
+                        Name AS ProperName,
+                        theme
                     FROM stylesheets
                     ORDER BY ID ASC
                 ");
@@ -31,6 +32,7 @@ class Stylesheet extends \Gazelle\Base {
                 s.Name              AS name,
                 s.Description       AS description,
                 s.Default           AS initial,
+                s.theme,
                 ifnull(ui.total, 0) AS total_enabled,
                 ifnull(ud.total, 0) AS total
             FROM stylesheets AS s
