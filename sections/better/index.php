@@ -1,13 +1,10 @@
 <?php
 
 switch ($_GET['method'] ?? '') {
-    case 'missing':
-        require_once('missing.php');
-        break;
-    case 'single':
-        require_once('single.php');
+    case 'transcode':
+        require_once('transcode.php');
         break;
     default:
-        require_once('transcode.php');
+        require_once('better.php');
         break;
 }

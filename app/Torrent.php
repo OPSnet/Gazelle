@@ -867,6 +867,17 @@ class Torrent extends BaseObject {
         return self::$db->affected_rows();
     }
 
+    public function clearFlagTable(string $tableName): int {
+        if (in_array($tableName, ['torrents_bad_files', 'torrents_bad_folders', 'torrents_bad_tags', 'torrents_missing_lineage'])) {
+            self::$db->prepared_query("
+                DELETE FROM $tableName WHERE TorrentID = ?
+                ", $this->id
+            );
+            return self::$db->affected_rows();
+        }
+        return -1;
+    }
+
     /**
      * Remove a torrent.
      */

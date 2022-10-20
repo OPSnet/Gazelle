@@ -9,11 +9,7 @@
 {{ header('Transcode Search') }}
 <div class="thin">
     <h2>Transcodes</h2>
-    <div class="linkbox">
-        <a class="brackets" href="better.php?method=transcode">Transcodes</a>
-        <a class="brackets" href="better.php?method=missing">Missing</a>
-        <a class="brackets" href="better.php?method=single">Single Seeded</a>
-    </div>
+{% include 'better/links.twig' only %}
     <form class="search_form" name="transcodes" action="" method="get">
         <input type="hidden" name="method" value="transcode" />
         <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">

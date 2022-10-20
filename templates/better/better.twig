@@ -1,0 +1,113 @@
+{% from 'macro/form.twig' import selected -%}
+{{ header('Missing Search') }}
+<div class="thin">
+<h2>{% if type == 'single' %}Single seeded{% else %}Attaining perfection{% endif %}</h2>
+{% include 'better/links.twig' only %}
+<form class="search_form" name="missing" action="" method="get">
+<input type="hidden" name="method" value="{% if type == "single" %}single{% else %}missing{% endif %}" />
+<table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
+{% if type == 'single' %}
+    <tr>
+        <td class="label"><strong>Uploader</strong></td>
+        <td>
+            <input type="search" name="uploader" size="20" value="{{ uploader.id }}" />
+            {% if uploader %} ({{ uploader.id|user_url }}){% endif %}
+            <br />Search by userid or @username (e.g. {{ viewer.id }} or @{{ viewer.username }})
+        </td>
+{% else %}
+    <tr>
+        <td class="label"><strong>Category</strong></td>
+        <td>
+            <select name="filter">
+                <option value="all"{{ selected(filter == 'all') }}>All</option>
+                <option value="snatched"{{ selected(filter == 'snatched') }}>Snatched</option>
+                <option value="uploaded"{{ selected(filter == 'uploaded') }}>Uploaded</option>
+            </select>
+            <select name="type">
+                <option value="checksum"{{ selected(type == 'checksum') }}>Missing Checksums</option>
+                <option value="tags"{{ selected(type == 'tags') }}>Bad Tags</option>
+                <option value="folders"{{ selected(type == 'folders') }}>Bad Folders</option>
+                <option value="files"{{ selected(type == 'files') }}>Bad Files</option>
+                <option value="lineage"{{ selected(type == 'lineage') }}>Missing Lineage</option>
+                <option value="artwork"{{ selected(type == 'artwork') }}>Missing Artwork</option>
+                <option value="artistimg"{{ selected(type == 'artistimg') }}>Missing Artist Images</option>
+                <option value="artistcollage"{{ selected(type == 'artistcollage') }}>Missing Artists Images in Artist Collages</option>
+                <option value="artistdesc"{{ selected(type == 'artistdesc') }}>Missing Artist Descriptions</option>
+                <option value="artistdiscogs"{{ selected(type == 'artistdiscogs') }}>Missing Artist Discogs ID</option>
+            </select>
+        </td>
+    </tr>
+{% endif %}
+    <tr>
+        <td class="label"><strong>Filter in title/name</strong></td>
+        <td>
+            <input type="search" name="search" size="20" value="{{ better.search }}" />
+        </td>
+    </tr>
+    <tr><td>&nbsp;</td><td><input type="submit" value="Search" /></td></tr>
+</table>
+</form>
+{% set list = better.list(paginator.limit, paginator.offset) %}
+{% set list_total = list|length %}
+{% set size = list|map(t => "#{t.size}")|reduce((sum, s) => sum + s, 0) %}
+<div class="box pad">
+    <div class="torrent">
+        <h3>{{ better.heading }}</h3>
+    {% if better.mode != 'torrent' %}
+        <h4>There {% if better.total == 1 %}is{% else %}are{% endif %} {{ better.total }} {{ better.mode }}{% if better.total != 1 %}s{% endif %} remaining</h4>
+    {% elseif better.total > 1 and viewer.permitted('zip_downloader') %}
+        <h4>Here are {{ list_total }}{% if type == 'single' and better.total > 50 %} random{% endif %} torrent{{ list_total|plural }}
+        {% if better.total > 50 %} of {{ better.total }} remaining{% endif %}
+            <span class="torrents_links_block">
+                <a class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{
+                    list|map(t => "#{t.id}")|join(',')
+                }}" onclick="return confirm('If you do not have the content, your ratio WILL be affected; be sure to check the size of all torrents before downloading.');">Download All</a>
+                <br />(size: {{ size|octet_size }})
+            </span>
+        </h4>
+    {% endif %}
+    </div>
+{{ paginator.linkbox|raw }}
+<table width"=100%" class="torrent_table">
+{% for item in list %}
+    {% if better.mode == 'torrent' %}
+    <tr class="torrent row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>
+            <span class="torrent_links_block">
+            <a href="torrents.php?action=download&amp;id={{ item.id }}&amp;torrent_pass={{ viewer.announceKey }}" class="brackets tooltip" title="Download">DL</a>
+        {% if viewer.canSpendFLToken(item) %}
+            {% set token_count = item.tokenCount %}
+            {% set token_amount = token_count == 1 ? '1 token' : token_count ~ ' tokens' %}
+            | <a href="torrents.php?action=download&amp;id={{ item.id }}&amp;torrent_pass={{ viewer.announceKey }}&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('
+            {%- if item.seederTotal == 0 -%}
+                Warning! This torrent is not seeded at the moment, are you sure you want to use {{ token_amount }} here?
+            {%- else -%}
+                Use {{ token_amount }} here?
+            {%- endif -%}
+            ');">FL</a>
+        {% endif %}
+            </span>
+        {% if item.group.categoryName == 'Music' %}{{ item.group.artistHtml|raw }} {{ "\xE2\x80\x93" }} {% endif %}
+        {{ item.link|raw }} {{ item.label|raw }}
+        {% if type != 'single' and viewer.permitted('admin_reports') %}
+            <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ item.id }}&amp;filter={{ filter }}&amp;search={{ item.search }}" title="Remove the {{ type }} flag" class="brackets">X</a>
+        {% endif %}
+            <div class="tags">{{ item.group.tagList|map(tag => "\##{tag.name}")|join(', ') }}</div>i{{ item.size|octet_size }}
+        </td>
+    </tr>
+    {% elseif better.mode == 'group' %}
+    <tr>
+        <td><a href="torrents.php?id={{ item.id }}&amp;action=editgroup">[Edit]</a>&nbsp;&nbsp;{{ item.link|raw }}
+            <div class="tags">{{ item.tagList|map(tag => "\##{tag.name}")|join(', ') }}</div>
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td><a href="artist.php?artistid={{ id }}&amp;action=edit">[Edit]</a>&nbsp;&nbsp;{{ item.link|raw }}</td>
+    </tr>
+    {% endif %}
+{% endfor %}
+</table>
+{{ paginator.linkbox|raw }}
+</div>
+{{ footer() }}
