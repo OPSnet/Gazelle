@@ -197,12 +197,7 @@ foreach ($bookmarkList as $bm) {
         // Grouped torrents
 ?>
         <tr class="group groupid_<?=$tgroupId?>_header discog" id="group_<?= $tgroupId ?>">
-            <td class="td_collapse m_td_left center">
-                <div id="showimg_<?= $tgroupId ?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
-                    <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $tgroupId ?>, this, event);"
-                       title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collape all groups on this page."></a>
-                </div>
-            </td>
+<?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $tgroupId ]) ?>
             <td class="m_hidden center">
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>

@@ -157,11 +157,7 @@ foreach ($Results as $GroupID) {
     if ($GroupResults && (count($torrentList) > 1 || $tgroup->categoryGrouped())) {
 ?>
     <tr class="group groupid_<?=$GroupID?>_header<?=$SnatchedGroupClass?>">
-        <td class="td_collapse center m_td_left">
-            <div id="showimg_<?= $tgroup->id() ?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
-                <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$tgroup->id()?>, this, event)" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups on this page."></a>
-            </div>
-        </td>
+<?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $tgroup->id() ]) ?>
         <td class="center cats_col">
             <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>">
             </div>

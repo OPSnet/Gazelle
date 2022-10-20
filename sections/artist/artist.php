@@ -315,49 +315,44 @@ if ($sections = $Artist->sections()) {
         $isSnatched = $tgroup->isSnatched($Viewer->id());
 
 ?>
-            <tr class="releases_<?= $sectionId ?> group groupid_<?= $groupId ?>_header discog<?=
-                ($sectionClosed ? ' hidden' : '') . ($isSnatched ? ' snatched_group' : '') ?>">
-                    <td class="td_collapse center m_td_left">
-                        <div id="showimg_<?=$groupId?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
-                            <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $groupId ?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
-                        </div>
-                    </td>
-                    <td colspan="5" class="td_info big_info">
+            <tr class="releases_<?= $sectionId ?> group groupid_<?= $groupId ?>_header discog<?= ($sectionClosed ? ' hidden' : '') . ($isSnatched ? ' snatched_group' : '') ?>">
+<?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $groupId ]) ?>
+                <td colspan="5" class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
-                        <div class="group_image float_left clear">
-                            <?= $imgProxy->tgroupThumbnail($tgroup) ?>
-                        </div>
+                    <div class="group_image float_left clear">
+                        <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                    </div>
 <?php   } ?>
-                        <div class="group_info clear">
-                            <strong><?= $tgroup->link() ?>
+                    <div class="group_info clear">
+                        <strong><?= $tgroup->link() ?>
 <?php   if ($tgroup->year()) { ?>
-                            [<?= $tgroup->year() ?>]
+                        [<?= $tgroup->year() ?>]
 <?php   } ?>
-                            </strong>
-                            <span class="float_right">
+                        </strong>
+                        <span class="float_right">
 <?php   if ($bookmark->isTorrentBookmarked($groupId)) { ?>
-                            <span class="remove_bookmark">
-                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
-                                    $groupId ?>" class="brackets" onclick="Unbookmark('torrent', <?=
-                                    $groupId ?>, 'Bookmark'); return false;">Remove bookmark</a>
-                            </span>
+                        <span class="remove_bookmark">
+                             <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
+                                $groupId ?>" class="brackets" onclick="Unbookmark('torrent', <?=
+                                $groupId ?>, 'Bookmark'); return false;">Remove bookmark</a>
+                        </span>
 <?php   } else { ?>
-                            <span class="add_bookmark">
-                                <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
-                                    $groupId ?>" class="brackets" onclick="Bookmark('torrent', <?=
-                                    $groupId ?>, 'Remove bookmark'); return false;">Bookmark</a>
-                            </span>
+                        <span class="add_bookmark">
+                            <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
+                                $groupId ?>" class="brackets" onclick="Bookmark('torrent', <?=
+                                $groupId ?>, 'Remove bookmark'); return false;">Bookmark</a>
+                        </span>
 <?php
         }
         if (!$Viewer->option('NoVoteLinks')) {
 ?>
-                            <br /><?= $vote->setGroupId($groupId)->links() ?>
+                        <br /><?= $vote->setGroupId($groupId)->links() ?>
 <?php   } ?>
-                            </span>
-                            <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>
-                        </div>
-                    </td>
-                </tr>
+                        </span>
+                        <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>
+                    </div>
+                </td>
+            </tr>
 <?php
         $snatcher = new Gazelle\User\Snatch($Viewer);
         $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
