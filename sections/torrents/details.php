@@ -497,14 +497,12 @@ if (!$torrentList) {
                 <td class="td_info">
 <?php
         echo $Twig->render('torrent/action-v2.twig', [
-            'can_fl' => $Viewer->canSpendFLToken($torrent),
-            'key'    => $Viewer->announceKey(),
-            't'      => $torrent,
-            'edit'   => $Viewer->permitted('torrents_edit')
-                || (($torrent->uploaderId() == $Viewer->id() && !$Viewer->disableWiki()) && !$torrent->isRemasteredUnknown()),
-            'remove' => $Viewer->permitted('torrents_delete') || $torrent->uploaderId() == $Viewer->id(),
-            'pl'     => true,
-            'extra'  => [
+            'edit'    => true,
+            'pl'      => true,
+            'remove'  => true,
+            'torrent' => $torrent,
+            'viewer'  => $Viewer,
+            'extra'   => [
                 "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . $tgroup->displayNameText()
                     . " [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
             ],

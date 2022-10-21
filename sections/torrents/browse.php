@@ -47,7 +47,7 @@ if (isset($_GET['setdefault'])) {
 if (isset($_GET['searchsubmit'])) {
     $GroupResults = !empty($_GET['group_results']);
 } else {
-    $GroupResults = ($Viewer->option('DisableGrouping2') ?? 0) === 0;
+    $GroupResults = (bool)$Viewer->option('DisableGrouping2') === false;
 }
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
@@ -59,7 +59,7 @@ $Search = new Gazelle\Search\Torrent(
     TORRENTS_PER_PAGE,
     $Viewer->permitted('site_search_many')
 );
-$Results = $Search->query($_GET);
+$Results = array_unique($Search->query($_GET));
 $RealNumResults = $NumResults = $Search->record_count();
 if (!$Viewer->permitted('site_search_many')) {
     $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
@@ -111,7 +111,7 @@ $releaseTypes = (new Gazelle\ReleaseType)->list();
 $bookmark = new \Gazelle\User\Bookmark($Viewer);
 $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
-echo $paginator->linkbox()
+echo $paginator->linkbox();
 ?>
 
 <table class="torrent_table cats <?=$GroupResults ? 'grouping' : 'no_grouping'?> m_table" id="torrent_table">
@@ -142,14 +142,6 @@ foreach ($Results as $GroupID) {
     $torrentList = $tgroup->torrentIdList();
     if (empty($torrentList)) {
         continue;
-    }
-
-    if ($GroupResults) {
-        $GroupTime = $tgroup->mostRecentUpload();
-        $MaxSize   = $tgroup->maxTorrentSize();
-    } else {
-        $GroupTime = '';
-        $MaxSize   = 0;
     }
 
     $SnatchedGroupClass = $tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '';
@@ -184,8 +176,8 @@ foreach ($Results as $GroupID) {
             </div>
         </td>
         <td></td>
-        <td class="td_time nobr"><?=time_diff($GroupTime, 1)?></td>
-        <td class="td_size number_column nobr"><?=Format::get_size($MaxSize)?> (Max)</td>
+        <td class="td_time nobr"><?=time_diff($tgroup->mostRecentUpload(), 1)?></td>
+        <td class="td_size number_column nobr"><?=Format::get_size($tgroup->maxTorrentSize())?> (Max)</td>
         <td class="td_snatched number_column m_td_right"><?=number_format($tgroup->stats()->snatchTotal())?></td>
         <td class="td_seeders number_column<?= $tgroup->stats()->seedingTotal() == 0 ? ' r00' : '' ?> m_td_right"><?=number_format($tgroup->stats()->seedingTotal())?></td>
         <td class="td_leechers number_column m_td_right"><?=number_format($tgroup->stats()->leechTotal())?></td>
@@ -221,11 +213,11 @@ foreach ($Results as $GroupID) {
     <tr class="group_torrent groupid_<?=$tgroup->id()?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
             <?= $Twig->render('torrent/action-v2.twig', [
-                'can_fl' => $Viewer->canSpendFLToken($torrent),
-                'key'    => $Viewer->announceKey(),
-                't'      => $torrent,
+                'pl'      => true,
+                'torrent' => $torrent,
+                'viewer'  => $Viewer,
             ]) ?>
-            &raquo; <a href="torrents.php?id=<?=$tgroup->id()?>&amp;torrentid=<?=$torrent->id()?>"><?= $torrent->label() ?></a>
+            &raquo; <a href="torrents.php?id=<?=$tgroup->id()?>&amp;torrentid=<?=$torrent->id()?>"><?= implode(' / ', $torrent->labelList()) ?></a>
         </td>
         <td class="td_file_count"><?=$torrent->fileTotal()?></td>
         <td class="td_time nobr"><?=time_diff($torrent->uploadDate(), 1)?></td>
@@ -236,33 +228,32 @@ foreach ($Results as $GroupID) {
     } else {
         // Viewing a type that does not require grouping
 
-        $torrent = $torMan->findById(current($torrentList));
-        if (is_null($torrent)) {
-            continue;
-        }
-        $SnatchedTorrentClass = $tgroup->isSnatched() ? ' snatched_torrent' : '';
+        foreach ($torrentList as $torrentId) {
+            $torrent = $torMan->findById($torrentId);
+            if (is_null($torrent)) {
+                continue;
+            }
+            $SnatchedTorrentClass = $tgroup->isSnatched() ? ' snatched_torrent' : '';
 ?>
     <tr class="torrent<?=$SnatchedTorrentClass . $SnatchedGroupClass?>">
-<?php   if ($GroupResults) { ?>
+<?php       if ($GroupResults) { ?>
         <td></td>
-<?php   } ?>
+<?php       } ?>
         <td class="center cats_col m_cats_col m_td_left">
             <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
         </td>
         <td class="td_info big_info">
-<?php   if ($Viewer->option('CoverArt')) { ?>
+<?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
                 <?= $imgProxy->tgroupThumbnail($tgroup) ?>
             </div>
-<?php   } ?>
+<?php       } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
                 ]) ?>
-                <?= $tgroup->link() ?>
-                <div class="torrent_info"><?= $tgroup->label() ?></div>
+                <?= $torrent->fullLink() ?>
                 <div class="tags"><?= implode(', ',
                     array_map(fn($name) => "<a href=\"torrents.php?action={$searchMode}&amp;taglist=$name\">$name</a>", $tgroup->tagNameList())
                     ) ?></div>
@@ -273,6 +264,7 @@ foreach ($Results as $GroupID) {
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
 <?php
+        }
     }
 }
 ?>

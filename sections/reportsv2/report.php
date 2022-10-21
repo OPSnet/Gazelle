@@ -71,17 +71,11 @@ $remasterTuple = $torrent->remasterTuple();
                     $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '' ?>" style="font-weight: normal;" id="torrent<?= $torrentId ?>">
                     <td>
                         <?= $Twig->render('torrent/action-v2.twig', [
-                            'can_fl' => $Viewer->canSpendFLToken($torrent),
-                            'key'    => $Viewer->announceKey(),
-                            't'      => $torrent,
-                            'edit' => $Viewer->permitted('torrents_edit')
-                                || (
-                                    $torrent->uploaderId() == $Viewer->id()
-                                    && !$Viewer->disableWiki()
-                                    && !$torrent->isRemasteredUnknown()
-                                ),
-                            'remove' => $Viewer->permitted('torrents_delete') || $torrent->uploaderId() == $Viewer->id(),
-                            'pl'     => true,
+                            'edit'    => true,
+                            'pl'      => true,
+                            'remove'  => true,
+                            'torrent' => $torrent,
+                            'viewer'  => $Viewer,
                         ]) ?>
                         &raquo; <a href="#" onclick="$('#torrent_<?= $torrentId ?>').gtoggle(); return false;"><?=
                             implode(' / ', $torrent->labelList()) ?></a>

@@ -238,9 +238,8 @@ foreach ($entryList as $tgroupId) {
                 . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                     <?= $Twig->render('torrent/action-v2.twig', [
-                        'can_fl' => $Viewer->canSpendFLToken($torrent),
-                        'key'    => $Viewer->announceKey(),
-                        't'      => $torrent,
+                        'torrent' => $torrent,
+                        'viewer'  => $Viewer,
                     ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
                 </td>
@@ -261,9 +260,8 @@ foreach ($entryList as $tgroupId) {
             </td>
             <td class="td_info">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
                 ]) ?>
                 <strong><?= $tgroup->link() ?></strong>
 <?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>

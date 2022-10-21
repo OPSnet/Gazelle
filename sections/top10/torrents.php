@@ -230,9 +230,8 @@ foreach ($context as $c) {
 <?php   } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
                 ]) ?>
                 <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torMan->hasReport($Viewer, $torrentId)) { ?> - <strong class="torrent_label tl_reported">Reported</strong>
 <?php

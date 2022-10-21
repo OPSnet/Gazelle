@@ -205,9 +205,8 @@ if (count($topVotes) === 0) { ?>
     <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= ($snatcher->showSnatch($torrentId) ? ' snatched_torrent' : '') . $snatchedGroupClass ?>">
         <td colspan="3">
             <?= $Twig->render('torrent/action-v2.twig', [
-                'can_fl' => $Viewer->canSpendFLToken($torrent),
-                'key'    => $Viewer->announceKey(),
-                't'      => $torrent,
+                'torrent' => $torrent,
+                'viewer'  => $Viewer,
             ]) ?>
             &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
         </td>
@@ -229,9 +228,8 @@ if (count($topVotes) === 0) { ?>
         </td>
         <td class="td_info">
             <?= $Twig->render('torrent/action-v2.twig', [
-                'can_fl' => $Viewer->canSpendFLToken($torrent),
-                'key'    => $Viewer->announceKey(),
-                't'      => $torrent,
+                'torrent' => $torrent,
+                'viewer'  => $Viewer,
             ]) ?>
             <strong><?= $tgroup->link() ?></strong>
 <?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>

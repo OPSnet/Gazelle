@@ -43,7 +43,12 @@ class Torrent extends BaseObject {
     }
 
     public function fullLink(): string {
-        $link = $this->group()->link();
+        $link = implode(" \xE2\x80\x93 ",
+            array_filter([
+                $this->group()->artistHtml(),
+                $this->link(),
+            ], fn($x) => !empty($x))
+        );
         $edition = $this->edition();
         if ($edition) {
             $link .= " [$edition]";

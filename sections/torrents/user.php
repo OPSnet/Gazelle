@@ -506,9 +506,8 @@ foreach (CATEGORY as $catKey => $catName) {
 <?php    } ?>
                 <div class="group_info clear">
                     <?= $Twig->render('torrent/action-v2.twig', [
-                        'can_fl' => $Viewer->canSpendFLToken($torrent),
-                        'key'    => $Viewer->announceKey(),
-                        't'      => $torrent,
+                        'torrent' => $torrent,
+                        'viewer'  => $Viewer,
                     ]) ?>
                     <?= $torrent->fullLink() ?>
 <?php   if (!$Viewer->option('NoVoteLinks')) { ?>

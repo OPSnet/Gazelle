@@ -378,10 +378,10 @@ if ($sections = $Artist->sections()) {
         <tr class="releases_<?=$sectionId?> torrent_row groupid_<?=$groupId?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
             <td class="td_info" colspan="2">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
-                    'extra'  => [
+                    'pl'      => true,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
+                    'extra'   => [
                         "<a href=\"ajax.php?action=torrent&amp;id=$torrentId\" download=\""
                             . $torrent->fullName() . " $torrentId [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
                     ],

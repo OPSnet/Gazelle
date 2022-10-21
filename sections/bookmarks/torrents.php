@@ -250,9 +250,8 @@ foreach ($bookmarkList as $bm) {
             <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
                 ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
                 </td>
@@ -275,9 +274,8 @@ foreach ($bookmarkList as $bm) {
             </td>
             <td>
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
                 ]) ?>
                 <strong><?= $tgroup->displayNameText() ?></strong>
                 <div class="tags"><?= implode(', ',

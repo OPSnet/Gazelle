@@ -225,10 +225,9 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 <?php       } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
-                    'extra'  => [
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
+                    'extra'   => [
                         $ownProfile ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
                     ],
                 ]) ?>

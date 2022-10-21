@@ -131,9 +131,8 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
             $EditionID?> hidden<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '') . $SnatchedGroupClass?>">
         <td colspan="2">
             <?= $Twig->render('torrent/action-v2.twig', [
-                'can_fl' => $Viewer->canSpendFLToken($torrent),
-                'key'    => $Viewer->announceKey(),
-                't'      => $torrent,
+                'torrent' => $torrent,
+                'viewer'  => $Viewer,
             ]) ?>
             &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
         </td>
@@ -161,9 +160,8 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 <?php           } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action-v2.twig', [
-                    'can_fl' => $Viewer->canSpendFLToken($torrent),
-                    'key'    => $Viewer->announceKey(),
-                    't'      => $torrent,
+                    'torrent' => $torrent,
+                    'viewer'  => $Viewer,
                 ]) ?>
                 <strong><?= $torrent->link() ?></strong>
                 <div class="tags"><?= implode(', ',
