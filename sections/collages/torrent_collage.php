@@ -190,19 +190,12 @@ foreach ($entryList as $tgroupId) {
             <td colspan="5">
                 <strong><?= $Number ?> - <?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
                     <span class="float_right">
-<?php   if ($bookmark->isTorrentBookmarked($tgroupId)) { ?>
-                    <span class="remove_bookmark">
-                        <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $tgroupId ?>"
-                           class="remove_bookmark brackets"
-                           onclick="Unbookmark('torrent', <?= $tgroupId ?>, 'Bookmark'); return false;">Remove bookmark</a>
-                    </span>
-<?php   } else { ?>
-                    <span class="add_bookmark">
-                        <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $tgroupId ?>" class="add_bookmark brackets"
-                           onclick="Bookmark('torrent', <?= $tgroupId ?>, 'Remove bookmark'); return false;">Bookmark</a>
-                    </span>
 <?php
-        }
+        echo $Twig->render('bookmark/action.twig', [
+            'class'         => 'torrent',
+            'id'            => $tgroupId,
+            'is_bookmarked' => $bookmark->isTorrentBookmarked($tgroupId),
+        ]);
         if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
                     <br /><?= $vote->setGroupId($tgroupId)->links() ?>

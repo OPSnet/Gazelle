@@ -238,16 +238,12 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
                     <strong class="new">New!</strong>
 <?php
             }
-            if ($bookmark->isTorrentBookmarked($tgroup->id())) {
+            echo $Twig->render('bookmark/action.twig', [
+                'class'         => 'torrent',
+                'id'            => $tgroup->id(),
+                'is_bookmarked' => $bookmark->isTorrentBookmarked($tgroup->id()),
+            ]);
 ?>
-                    <span class="remove_bookmark float_right">
-                        <a href="#" id="bookmarklink_torrent_<?=$tgroup->id()?>" class="brackets" onclick="Unbookmark('torrent', <?=$tgroup->id()?>, 'Bookmark'); return false;">Remove bookmark</a>
-                    </span>
-<?php       } else { ?>
-                    <span class="add_bookmark float_right">
-                        <a href="#" id="bookmarklink_torrent_<?=$tgroup->id()?>" class="brackets" onclick="Bookmark('torrent', <?=$tgroup->id()?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?php       } ?>
-                    </span>
                 </div>
                 <div class="tags"><?= implode(', ', array_map(
                     fn($name) => "<a href=\"torrents.php?taglists={$name}\">$name</a>",

@@ -162,7 +162,7 @@ foreach ($Results as $GroupID) {
             <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>">
             </div>
         </td>
-        <td colspan="2" class="td_info big_info">
+        <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
                 <?= $imgProxy->tgroupThumbnail($tgroup) ?>
@@ -170,21 +170,20 @@ foreach ($Results as $GroupID) {
 <?php    } ?>
             <div class="group_info clear">
                 <?= $tgroup->link() ?> <?= $tgroup->suffix() ?>
-<?php    if ($bookmark->isTorrentBookmarked($tgroup->id())) { ?>
-                <span class="remove_bookmark float_right">
-                    <a href="#" id="bookmarklink_torrent_<?=$tgroup->id()?>" class="brackets" onclick="Unbookmark('torrent', <?=$tgroup->id()?>, 'Bookmark'); return false;">Remove bookmark</a>
+                <span style="float: right">
+                <?= $Twig->render('bookmark/action.twig', [
+                    'class'         => 'torrent',
+                    'id'            => $tgroup->id(),
+                    'is_bookmarked' => $bookmark->isTorrentBookmarked($tgroup->id()),
+                ]) ?>
                 </span>
-<?php    } else { ?>
-                <span class="add_bookmark float_right">
-                    <a href="#" id="bookmarklink_torrent_<?=$tgroup->id()?>" class="brackets" onclick="Bookmark('torrent', <?=$tgroup->id()?>, 'Remove bookmark'); return false;">Bookmark</a>
-                </span>
-<?php    } ?>
                 <br />
                 <div class="tags"><?= implode(', ',
                     array_map(fn($name) => "<a href=\"torrents.php?action={$searchMode}&amp;taglist=$name\">$name</a>", $tgroup->tagNameList())
                     ) ?></div>
             </div>
         </td>
+        <td></td>
         <td class="td_time nobr"><?=time_diff($GroupTime, 1)?></td>
         <td class="td_size number_column nobr"><?=Format::get_size($MaxSize)?> (Max)</td>
         <td class="td_snatched number_column m_td_right"><?=number_format($tgroup->stats()->snatchTotal())?></td>

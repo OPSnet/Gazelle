@@ -46,12 +46,12 @@ if ($Viewer->permitted('site_torrents_notify')) {
 <?php
     }
 }
-
-if ($bookmark->isArtistBookmarked($ArtistID)) { ?>
-            <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
-<?php } else { ?>
-            <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
-<?php } ?>
+echo $Twig->render('bookmark/action.twig', [
+    'class'         => 'artist',
+    'id'            => $ArtistID,
+    'is_bookmarked' => $bookmark->isArtistBookmarked($ArtistID),
+]);
+?>
             <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?=
                 $ArtistID ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 
@@ -252,7 +252,7 @@ foreach (ZIP_OPTION as $Option) {
     'class'   => 'collage_rows',
     'object'  => 'artist',
     'summary' => $collageMan->artistSummary($ArtistID),
-]) ?>
+]); ?>
 <div id="discog_table">
     <div class="box center">
 <?php
@@ -330,20 +330,13 @@ if ($sections = $Artist->sections()) {
 <?php   } ?>
                         </strong>
                         <span class="float_right">
-<?php   if ($bookmark->isTorrentBookmarked($groupId)) { ?>
-                        <span class="remove_bookmark">
-                             <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
-                                $groupId ?>" class="brackets" onclick="Unbookmark('torrent', <?=
-                                $groupId ?>, 'Bookmark'); return false;">Remove bookmark</a>
-                        </span>
-<?php   } else { ?>
-                        <span class="add_bookmark">
-                            <a style="float: right;" href="#" id="bookmarklink_torrent_<?=
-                                $groupId ?>" class="brackets" onclick="Bookmark('torrent', <?=
-                                $groupId ?>, 'Remove bookmark'); return false;">Bookmark</a>
-                        </span>
 <?php
-        }
+        echo $Twig->render('bookmark/action.twig', [
+            'class'         => 'torrent',
+            'id'            => $groupId,
+            'is_bookmarked' => $bookmark->isTorrentBookmarked($groupId),
+        ]);
+
         if (!$Viewer->option('NoVoteLinks')) {
 ?>
                         <br /><?= $vote->setGroupId($groupId)->links() ?>

@@ -93,12 +93,12 @@ View::show_header(display_str($title), ['js' => 'browse,comments,torrent,bbcode,
             <a href="<?= $tgroup->url() ?>&amp;action=revert&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
 <?php
 }
-if ((new Gazelle\User\Bookmark($Viewer))->isTorrentBookmarked($GroupID)) {
+echo $Twig->render('bookmark/action.twig', [
+    'class'         => 'torrent',
+    'id'            => $tgroup->id(),
+    'is_bookmarked' => (new Gazelle\User\Bookmark($Viewer))->isTorrentBookmarked($tgroup->id()),
+]);
 ?>
-            <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="remove_bookmark brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
-<?php } else { ?>
-            <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="add_bookmark brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?php } ?>
             <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=
                 $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 <?php if ($musicRelease) { ?>

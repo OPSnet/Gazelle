@@ -149,27 +149,23 @@ if (count($topVotes) === 0) { ?>
 <?php       } ?>
             <div class="group_info clear">
                 <strong><?= $result['sequence'] ?> - <?= $tgroup->link() ?><?php if ($tgroup->year()) { echo ' [' . $tgroup->year() . ']'; } ?></strong>
-<?php   if ($bookmark->isTorrentBookmarked($tgroupId)) { ?>
-            <span class="remove_bookmark float_right">
-                <a href="#" class="bookmarklink_torrent_<?=$tgroupId?> brackets" onclick="Unbookmark('torrent', <?=$tgroupId?>, 'Bookmark'); return false;">Remove bookmark</a>
-            </span>
-<?php       } else { ?>
-                <span class="add_bookmark float_right">
-                    <a href="#" class="bookmarklink_torrent_<?=$tgroupId?> brackets" onclick="Bookmark('torrent', <?=$tgroupId?>, 'Remove bookmark'); return false;">Bookmark</a>
-                </span>
-<?php       } ?>
                 <div class="tags"><?= implode(', ', array_map(
                     fn($name) => "<a href=\"collages.php?action=search&amp;tags=$name\">$name</a>", $tgroup->tagNameList()
                     )) ?></div>
             </div>
         </td>
         <td colspan="4" class="votes_info_td">
+            <?= $Twig->render('bookmark/action.twig', [
+                'class'         => 'torrent',
+                'id'            => $tgroupId,
+                'is_bookmarked' => $bookmark->isTorrentBookmarked($tgroupId),
+            ]) ?><br />
             <span style="white-space: nowrap;">
                 <span class="favoritecount_small tooltip" title="<?=$upVotes . ($upVotes == 1 ? ' upvote' : ' upvotes')?>"><span id="upvotes"><?=number_format($upVotes)?></span> <span class="vote_album_up">&#x25b2;</span></span>
                 &nbsp; &nbsp;
                 <span class="favoritecount_small tooltip" title="<?=$downVotes . ($downVotes == 1 ? ' downvote' : ' downvotes')?>"><span id="downvotes"><?=number_format($downVotes)?></span> <span class="vote_album_down">&#x25bc;</span></span>
                 &nbsp;
-                <span style="float: right;"><span class="favoritecount_small" id="totalvotes"><?=number_format($totalVotes)?></span> Total</span>
+                <span class="favoritecount_small" id="totalvotes"><?=number_format($totalVotes)?></span> Total
             </span>
             <br />
             <span style="white-space: nowrap;">

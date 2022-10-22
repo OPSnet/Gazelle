@@ -211,17 +211,14 @@ class Bookmark extends \Gazelle\BaseUser {
      * @param string $type (on of artist, collage, request, torrent)
      * @param int $id The ID of the object
      */
-    public function create(string $type, int $id) {
+    public function create(string $type, int $id): bool {
         [$table, $column] = $this->schema($type);
-        if (!$id) {
-            throw new \Gazelle\Exception\BookmarkIdentifierException($id);
-        }
         if (self::$db->scalar("
             SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
             ", $this->user->id(), $id
         )) {
             // overbooked
-            return;
+            return false;
         }
         switch($type) {
             case 'torrent':
@@ -232,7 +229,7 @@ class Bookmark extends \Gazelle\BaseUser {
                         (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
                     )", $id, $this->user->id(), $this->user->id()
                 );
-                self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
+                self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
 
                 $torMan = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
                 $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
@@ -274,6 +271,7 @@ class Bookmark extends \Gazelle\BaseUser {
                 self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
                 break;
         }
+        return true;
     }
 
     /**

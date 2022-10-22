@@ -234,16 +234,15 @@ foreach ($context as $c) {
                     'key'    => $Viewer->announceKey(),
                     't'      => $torrent,
                 ]) ?>
-                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torMan->hasReport($Viewer, $torrentId)) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>
-<?php   if ($isBookmarked) { ?>
-                <span class="remove_bookmark float_right">
-                    <a href="#" id="bookmarklink_torrent_<?=$groupId?>" class="bookmarklink_torrent_<?=$groupId?> brackets" onclick="Unbookmark('torrent', <?=$groupId?>, 'Bookmark'); return false;">Remove bookmark</a>
-                </span>
-<?php   } else { ?>
-                <span class="add_bookmark float_right">
-                    <a href="#" id="bookmarklink_torrent_<?=$groupId?>" class="bookmarklink_torrent_<?=$groupId?> brackets" onclick="Bookmark('torrent', <?=$groupId?>, 'Remove bookmark'); return false;">Bookmark</a>
-                </span>
-<?php   } ?>
+                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torMan->hasReport($Viewer, $torrentId)) { ?> - <strong class="torrent_label tl_reported">Reported</strong>
+<?php
+    }
+    echo $Twig->render('bookmark/action.twig', [
+        'class'         => 'torrent',
+        'id'            => $groupId,
+        'is_bookmarked' => $isBookmarked,
+    ]);
+?>
                 <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
             </div>
         </td>
