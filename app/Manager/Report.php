@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Report extends \Gazelle\Base {
+class Report extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_r_%d';
 

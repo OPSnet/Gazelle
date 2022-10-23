@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Request extends \Gazelle\Base {
+class Request extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_r_%d';
 

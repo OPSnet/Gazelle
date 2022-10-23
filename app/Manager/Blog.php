@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Blog extends \Gazelle\Base {
+class Blog extends \Gazelle\BaseManager {
 
     const CACHE_KEY = 'blog';
     const ID_KEY = 'zz_blog_%d';

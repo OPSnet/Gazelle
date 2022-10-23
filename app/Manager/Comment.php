@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Comment extends \Gazelle\Base {
+class Comment extends \Gazelle\BaseManager {
 
     const CATALOG = '%s_comments_%d_cat_%d';
 
@@ -21,7 +21,7 @@ class Comment extends \Gazelle\Base {
         }
     }
 
-    public function findById(int $postId) {
+    public function findById(int $postId): ?\Gazelle\Comment\AbstractComment {
         [$page, $pageId] = self::$db->row("
             SELECT Page, PageID FROM comments WHERE ID = ?
             ", $postId

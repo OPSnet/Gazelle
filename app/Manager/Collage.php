@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Collage extends \Gazelle\Base {
+class Collage extends \Gazelle\BaseManager {
 
     protected const CACHE_DEFAULT_ARTIST = 'collage_default_artist_%d';
     protected const CACHE_DEFAULT_GROUP  = 'collage_default_group_%d';

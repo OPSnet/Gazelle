@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class AutoEnable extends \Gazelle\Base {
+class AutoEnable extends \Gazelle\BaseManager {
 
     // Outcomes
     const PENDING   = 0;

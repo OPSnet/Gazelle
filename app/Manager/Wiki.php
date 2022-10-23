@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Wiki extends \Gazelle\Base {
+class Wiki extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_w_%d';
 

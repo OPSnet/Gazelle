@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class TGroup extends \Gazelle\Base {
+class TGroup extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_tg_%d';
 

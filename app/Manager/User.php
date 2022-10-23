@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 use Gazelle\Util\Time;
 
-class User extends \Gazelle\Base {
+class User extends \Gazelle\BaseManager {
 
     protected const CACHE_STAFF = 'pm_staff_list';
     protected const ID_KEY = 'zz_u_%d';
@@ -858,7 +858,7 @@ class User extends \Gazelle\Base {
         return self::$db->scalar("
             SELECT count(*)
             FROM users_main AS um
-            INNER JOIN users_eonor_ranks AS d ON (d.UserID = um.ID)
+            INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
             INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
         ");
     }

@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class ErrorLog extends \Gazelle\Base {
+class ErrorLog extends \Gazelle\BaseManager {
 
     protected string $filter;
 

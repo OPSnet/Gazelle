@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Artist extends \Gazelle\Base {
+class Artist extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_a_%d';
     protected const ROLE_KEY = 'artist_role';
 

@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class StaffPM extends \Gazelle\Base {
+class StaffPM extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_spm_%d';
 

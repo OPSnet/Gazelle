@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Forum extends \Gazelle\Base {
+class Forum extends \Gazelle\BaseManager {
 
     protected const CACHE_TOC_MAIN   = 'forum_toc_main';
     protected const CACHE_LIST       = 'forum_list';

@@ -1,6 +1,8 @@
 #! /usr/bin/env php
 <?php
 
+error_reporting(E_ALL);
+
 $remove = [];
 foreach (['pcntl_fork', 'pcntl_signal', 'pcntl_signal_dispatch', 'pcntl_waitpid'] as $function) {
     if (!function_exists($function)) {
@@ -32,15 +34,18 @@ $preload = [
     'collMan'     => new Gazelle\Manager\Collage,
     'forMan'      => new Gazelle\Manager\Forum,
     'pg'          => new Gazelle\DB\Pg(GZPG_DSN),
+    'postMan'     => new Gazelle\Manager\ForumPost,
     'privMan'     => new Gazelle\Manager\Privilege,
     'tagMan'      => new Gazelle\Manager\Tag,
     'tgMan'       => new Gazelle\Manager\TGroup,
+    'threadMan'   => new Gazelle\Manager\ForumThread,
     'torMan'      => new Gazelle\Manager\Torrent,
     'userMan'     => new Gazelle\Manager\User,
 ];
 
 printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));
 $b->setLocal($preload);
+
 $b->start();
 
 /*

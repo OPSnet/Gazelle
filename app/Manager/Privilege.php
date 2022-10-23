@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Privilege extends \Gazelle\Base {
+class Privilege extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_prv_%d';
     protected const CACHE_KEY = 'privilege_list';
 

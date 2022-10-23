@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class ForumPoll extends \Gazelle\Base {
+class ForumPoll extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_fpoll_%d';
 

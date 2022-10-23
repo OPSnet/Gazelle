@@ -6,6 +6,38 @@ use Gazelle\Util\Mail;
 
 class Recovery extends \Gazelle\Base {
 
+    public function findById(int $id): array {
+        self::$db->prepared_query($this->candidateSql() . "
+            WHERE m.ID = ? GROUP BY m.ID
+            ", $id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function findByUsername(string $username): array {
+        self::$db->prepared_query($this->candidateSql() . "
+            WHERE m.Username LIKE ? GROUP BY m.Username
+            ", $username
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function findByAnnounce(string $announce): array {
+        self::$db->prepared_query($this->candidateSql() . "
+            WHERE m.torrent_pass LIKE ? GROUP BY m.torrent_pass
+            ", $announce
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function findByEmail(string $email): array {
+        self::$db->prepared_query($this->candidateSql() . "
+            WHERE m.Email LIKE ? GROUP BY m.Email
+            ", $email
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function checkEmail(string $raw): ?array {
         $raw = strtolower(trim($raw));
         $parts = explode('@', $raw);
@@ -340,38 +372,6 @@ class Recovery extends \Gazelle\Base {
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
-    }
-
-    public function findByUsername(string $username): array {
-        self::$db->prepared_query($this->candidateSql() . "
-            WHERE m.Username LIKE ? GROUP BY m.Username
-            ", $username
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function findByAnnounce(string $announce): array {
-        self::$db->prepared_query($this->candidateSql() . "
-            WHERE m.torrent_pass LIKE ? GROUP BY m.torrent_pass
-            ", $announce
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function findByEmail(string $email): array {
-        self::$db->prepared_query($this->candidateSql() . "
-            WHERE m.Email LIKE ? GROUP BY m.Email
-            ", $email
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function findById(int $id): array {
-        self::$db->prepared_query($this->candidateSql() . "
-            WHERE m.ID = ? GROUP BY m.ID
-            ", $id
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     protected function userDetailsSql($schema = null): string {

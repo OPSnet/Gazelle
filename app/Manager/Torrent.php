@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Torrent extends \Gazelle\Base {
+class Torrent extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_t_%d';
 
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_%d';

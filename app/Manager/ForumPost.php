@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class ForumPost extends \Gazelle\Base {
+class ForumPost extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_fp_%d';
 

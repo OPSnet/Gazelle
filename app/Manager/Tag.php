@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Tag extends \Gazelle\Base {
+class Tag extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_tag_%d';
 

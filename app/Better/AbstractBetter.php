@@ -19,7 +19,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
     public function __construct(
         protected \Gazelle\User $user,
         protected string $filter,
-        protected \Gazelle\Base $manager,
+        protected \Gazelle\BaseManager $manager,
     ) { }
 
     /**
@@ -121,7 +121,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
 
     public function list(int $limit, int $offset): array {
         self::$db->prepared_query($this->listSql(), ...[...$this->args, $limit, $offset]);
-        return array_map(fn ($id) => $this->manager->findById($id), self::$db->collect(0, false)); /** @phpstan-ignore-line */
+        return array_map(fn ($id) => $this->manager->findById($id), self::$db->collect(0, false));
     }
 
     protected function totalCacheKey(): string {

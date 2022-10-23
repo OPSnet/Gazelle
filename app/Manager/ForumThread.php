@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class ForumThread extends \Gazelle\Base {
+class ForumThread extends \Gazelle\BaseManager {
 
     protected const ID_KEY = 'zz_ft_%d';
 
