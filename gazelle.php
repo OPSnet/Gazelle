@@ -27,6 +27,7 @@ if ($PathInfo['dirname'] !== '/') {
 // 2. Start the engine
 
 require_once(__DIR__ . '/lib/bootstrap.php');
+global $Cache, $DB, $Debug, $Twig; // shut up phpstan
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
@@ -136,7 +137,9 @@ if ($Viewer) {
         $Document = 'locked';
     }
 
-    \Text::init($Viewer);
+    // To proxify images (or not), or e.g. not render the name of a thread
+    // for a user who may lack the privileges to see it in the first place.
+    \Text::setViewer($Viewer);
 }
 
 $Debug->set_flag('load page');

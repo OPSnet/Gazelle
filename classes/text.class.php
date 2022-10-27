@@ -190,9 +190,13 @@ class Text {
      */
     public static bool $TOC = false;
 
+    // Sometimes we need a viewer context to determine how to render something.
+    // This will be configured correctly for the website, but it can be set up
+    // manually in boris is you need to render something that requires knowledge
+    // of a user context. But most of the time you can forget about this.
     private static \Gazelle\User $viewer;
 
-    public static function init(\Gazelle\User $viewer) {
+    public static function setViewer(\Gazelle\User $viewer) {
         self::$viewer = $viewer;
     }
 
@@ -764,7 +768,8 @@ class Text {
             }
         }
 
-        $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer(self::$viewer);
+        // May need to instantiate this with a User object
+        $imgProxy = null;
 
         foreach ($Array as $Key=>$Block) {
             if ($Key === 'Id') {
@@ -983,6 +988,9 @@ class Text {
                         if ($LocalURL) {
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'.$Block['Val'].'" src="'.$LocalURL.'" />';
                         } else {
+                            if (is_null($imgProxy)) {
+                                $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer(self::$viewer);
+                            }
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'
                                 . $Block['Val'].'" src="' . $imgProxy->process($Block['Val']) . '" />';
                         }
@@ -1156,7 +1164,7 @@ class Text {
     }
 
     private static function smileys($Str) {
-        if (self::$viewer->option('DisableSmileys')) {
+        if (!isset(self::$viewer) || self::$viewer->option('DisableSmileys')) {
             return $Str;
         }
         if (count(self::$ProcessedSmileys) == 0 && count(self::$Smileys) > 0) {
