@@ -82,6 +82,13 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'repeat',
+            function ($text, $number) {
+                return str_repeat($text, $number);
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'shorten',
             function (string $text, int $length) {
                 return shortenString($text, $length);

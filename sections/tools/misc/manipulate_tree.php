@@ -28,7 +28,7 @@ if ($_POST['id']) {
     }
     $username = $user->username();
 
-    $inviteTree = new Gazelle\InviteTree($user->id());
+    $inviteTree = new Gazelle\User\InviteTree($user);
     if (!$inviteTree->treeId()) {
         $message = "No invite tree exists for $username";
     } else {

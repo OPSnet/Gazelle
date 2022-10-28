@@ -515,7 +515,7 @@ if ($Viewer->permitted('users_edit_usernames')) {
 }
 
 if ($Viewer->permitted('users_view_invites')) {
-    $tree = new Gazelle\InviteTree($UserID);
+    $tree = new Gazelle\User\InviteTree($User);
     if ($tree->hasInvitees()) {
 ?>
         <div class="box" id="invitetree_box">
@@ -523,10 +523,11 @@ if ($Viewer->permitted('users_view_invites')) {
                 Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
             </div>
             <div id="invitetree" class="hidden">
-                <?= $Twig->render('user/invite-tree.twig', array_merge(
-                    ['user' => $User],
-                    (new Gazelle\InviteTree($UserID))->details(),
-                )) ?>
+                <?= $Twig->render('user/invite-tree.twig', [
+                    ...(new Gazelle\User\InviteTree($User))->details($userMan, $Viewer),
+                    'user'   => $User,
+                    'viewer' => $Viewer,
+                ]) ?>
             </div>
         </div>
 <?php

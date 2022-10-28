@@ -1,6 +1,7 @@
 <?php
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
+global $DB;
 
 $DB->prepared_query("
     DELETE FROM invite_tree
@@ -15,7 +16,7 @@ $inv = [];
 while ([$invitee, $inviter] = $DB->next_record()) {
     $save = $DB->get_query_id();
     if (!isset($inv[$inviter])) {
-        $inv[$inviter] = new Gazelle\InviteTree($inviter);
+        $inv[$inviter] = new Gazelle\User\InviteTree(new Gazelle\User($inviter));
     }
     $inv[$inviter]->add($invitee);
     $DB->set_query_id($save);

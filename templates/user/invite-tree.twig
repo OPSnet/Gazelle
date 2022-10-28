@@ -1,21 +1,29 @@
 {% if info.total == 0 %}
 <p>Nobody turned up to the gig.</p>
 {% else %}
+{% set invitee_total = info.total %}
 <p>
-    This tree has {{ info.total|number_format }} entries, {{ info.branch|number_format }} branches, and a depth of {{ depth }}.
+    This tree has {{ invitee_total|number_format }} entries, {{ info.branch|number_format }} branches, and a height of {{ height }}.
     It has
-{%- if classes|length > 1 -%}
-{%-  for c in classes -%}
+{%- for class_name, total in classes -%}
         {{ loop.last ? ' and' : (loop.first ? '' : ',') }}
-        {{ c|raw }}
-{%-   endfor -%}
-{%- else -%}
-    {{ classes.0 }}
-{%- endif -%}.
+        {{ total }}
+        {% if total == 1 -%}
+            {{ class_name }}
+        {%- else -%}
+            {%- if class_name == 'Torrent Celebrity' -%}
+                Torrent Celebrities
+            {%- else -%}
+                {{ class_name }}s
+            {%- endif -%}
+        {%- endif %}
+        ({{ (total / invitee_total * 100)|number_format }}%)
+{%- endfor -%}.
+
 {{ info.disabled }}{% if info.disabled == 1 %} user is {% else %} users are {% endif %}
-disabled ({{ (info.disabled / info.total * 100)|number_format }}%)
+disabled ({{ (info.disabled / invitee_total * 100)|number_format }}%)
 and {{ info.donor }}{% if info.donor == 1 %} user has {% else %} users have {% endif %}
-donated ({{ (info.donor / info.total * 100)|number_format }}%).
+donated ({{ (info.donor / invitee_total * 100)|number_format }}%).
 </p>
 
 <p>
@@ -24,7 +32,7 @@ donated ({{ (info.donor / info.total * 100)|number_format }}%).
     aggregate ratio is <span class="stat">{{ ratio(info.upload_top, info.download_top) }}</span>.
 </p>
 
-{% if depth > 1 %}
+{% if height > 1 %}
 <p>
     The total amount uploaded by the entire tree is {{ info.upload_total|octet_size }};
     the total amount downloaded is {{ info.download_total|octet_size }} and the
@@ -34,11 +42,43 @@ donated ({{ (info.donor / info.total * 100)|number_format }}%).
 
 {% if info.paranoid %}
 <p style="font-weight: bold;">
-{{ info.paranoid }} user{{ info.paranoid == 1 ? '' : 's' }} ({{ (info.paranoid / info.total * 100)|number_format }}%)
+{{ info.paranoid }} user{{ info.paranoid|plural }} ({{ (info.paranoid / invitee_total * 100)|number_format }}%)
 {{ info.paranoid == 1 ? 'is' : 'are' }} too paranoid to have their stats shown here,
 and {{ info.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and download totals.
 </p>
 {% endif %}
 
+{% set max_depth  = depth %}
+{% set prev_depth = depth %}
+
+{% for invitee in info.tree %}
+    {% if invitee.depth > prev_depth %}
+        {{ '<ul class="invitetree"><li>'|repeat(invitee.depth - prev_depth)|raw }}
+    {% elseif invitee.depth < prev_depth %}
+        {{ '</li></ul>'|repeat(prev_depth - invitee.depth)|raw }}
+        </li>
+        <li>
+    {% else %}
+        </li>
+        <li>
+    {% endif %}
+    <strong>{{ invitee.user.id|user_full }}</strong>
+    {% if max_depth < invitee.depth %}
+        {% set max_depth = invitee.depth %}
+    {% endif %}
+    {% set prev_depth = invitee.depth %}
+
+    {% set paranoia = invitee.user.propertyVisibleMulti(viewer, ['uploaded', 'downloaded']) -%}
+    {% if paranoia == constant('PARANOIA_HIDE') -%}
+        &nbsp;Hidden
+    {%- else -%}
+        {% if paranoia == constant('PARANOIA_OVERRIDDEN') %}<i>{% endif %}
+        Uploaded:&nbsp;<strong>{{ invitee.user.uploadedSize|octet_size }}</strong>
+        Downloaded:&nbsp;<strong>{{ invitee.user.downloadedSize|octet_size }}</strong>
+        Ratio:&nbsp;<strong>{{ ratio(invitee.user.uploadedSize, invitee.user.downloadedSize) }}</strong>,
+        {% if paranoia == constant('PARANOIA_OVERRIDDEN') %}</i>{% endif %}
+        joined: {{ invitee.user.joinDate|time_diff }}
+    {%- endif -%}
+{% endfor %}
+{{ '</li></ul>'|repeat(prev_depth - depth)|raw }}
 {% endif %}
-{{ markup|raw }}

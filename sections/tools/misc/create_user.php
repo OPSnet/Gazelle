@@ -39,7 +39,7 @@ if (isset($_POST['Username'])) {
                 break;
         }
     }
-    header ("Location: " . $user->url());
+    header ("Location: " . $user->location());
     exit;
 }
 

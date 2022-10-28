@@ -8,9 +8,8 @@ use Gazelle\Util\Time;
 class UserCreator extends Base {
     protected $newInstall;
 
-    protected $adminComment;
-    protected $email;
-    protected $enabled;
+    protected array $adminComment = [];
+    protected array $email = [];
     protected $id;
     protected $inviteKey;
     protected $ipaddr;
@@ -19,18 +18,11 @@ class UserCreator extends Base {
     protected $announceKey;
     protected $username;
 
-    public function __construct() {
-        $this->adminComment = [];
-        $this->email = [];
-    }
-
     public function create() {
         $this->newInstall = !self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
         if ($this->newInstall) {
-            $this->enabled = true;
             $this->permissionId = SYSOP;
         } else {
-            $this->enabled = false;
             $this->permissionId = USER;
         }
         if (!$this->ipaddr) {
@@ -54,7 +46,7 @@ class UserCreator extends Base {
         $infoArgs = [randomString()];
 
         if (!$this->inviteKey) {
-            $inviterId = null;
+            $inviter = null;
         } else {
             [$inviterId, $inviterReason, $email] = self::$db->row("
                 SELECT InviterID, Reason, Email
@@ -62,7 +54,8 @@ class UserCreator extends Base {
                 WHERE InviteKey = ?
                 ", $this->inviteKey
             );
-            if (is_null($inviterId)) {
+            $inviter = (new Manager\User)->findById((int)$inviterId);
+            if (is_null($inviter)) {
                 throw new UserCreatorException('invitation');
             }
             if ($this->email && strtolower($email) != strtolower($this->email[0])) {
@@ -89,7 +82,7 @@ class UserCreator extends Base {
         ];
         $mainArgs = [
             $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
-            $this->permissionId, $this->enabled ? '1' : '0', STARTING_INVITES, geoip($this->ipaddr)
+            $this->permissionId, $this->permissionId == SYSOP ? '1' : '0', STARTING_INVITES, geoip($this->ipaddr)
         ];
 
         if ($this->id) {
@@ -123,10 +116,10 @@ class UserCreator extends Base {
             ", ...$infoArgs
         );
 
-        if ($inviterId) {
+        if ($inviter) {
             (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $this->id);
-            (new InviteTree($inviterId))->add($this->id);
-            (new Stats\User($inviterId))->increment('invited_total');
+            (new User\InviteTree($inviter))->add($this->id);
+            (new Stats\User($inviter->id()))->increment('invited_total');
             self::$db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
                 ", $this->inviteKey
@@ -202,7 +195,6 @@ class UserCreator extends Base {
         $this->newInstall   = false;
         $this->adminComment = [];
         $this->email        = [];
-        $this->enabled      = false;
         $this->id           = null;
         $this->announceKey  = null;
         $this->inviteKey    = null;

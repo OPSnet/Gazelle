@@ -51,7 +51,7 @@ if (isset($_REQUEST['confirm'])) {
                         'announce_key' => $user->announceKey(),
                     ])
                 );
-                (new Gazelle\Manager\User)->sendPM( $user->id(), 0,
+                (new Gazelle\Manager\User)->sendPM($user->id(), 0,
                     "Welcome to " . SITE_NAME,
                     $Twig->render('register/welcome.twig', [
                         'username'     => $username,
@@ -63,6 +63,9 @@ if (isset($_REQUEST['confirm'])) {
             }
             catch (Gazelle\Exception\UserCreatorException $e) {
                 switch ($e->getMessage()) {
+                    case 'duplicate':
+                        $error = 'Someone already took that username :-(';
+                        break;
                     case 'email':
                         $error = 'No email address given';
                         break;
