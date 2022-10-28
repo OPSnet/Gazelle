@@ -74,15 +74,6 @@ function check_paranoia_here($Setting) {
 
 [$ClassRatio, $Buffer] = $User->buffer();
 
-if (RECOVERY_DB && ($OwnProfile || $Viewer->permitted('users_mod'))) {
-    $recovered = $DB->scalar("
-        SELECT final FROM recovery_buffer WHERE user_id = ?
-        ", $UserID
-    );
-} else {
-    $recovered = null;
-}
-
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
     'badge_list' => (new Gazelle\User\Privilege($User))->badgeList(),
@@ -92,7 +83,6 @@ echo $Twig->render('user/header.twig', [
     ],
     'hourly_rate'  => $userBonus->hourlyRate(),
     'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer,
-    'recovered'    => $recovered,
     'user'         => $User,
     'userMan'      => $userMan,
     'viewer'       => $Viewer,

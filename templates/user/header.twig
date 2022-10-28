@@ -150,6 +150,7 @@
 {% endif %}
 
 {% if own_profile or viewer.permitted('users_mod') %}
+    {% set recovered = user.recoveryFinalSize %}
     {% if recovered %}
         <li class="tooltip" title="Recovered from previous site: {{ recovered|octet_size(5) }}">Recovered: {{ recovered|octet_size }}</li>
     {% elseif viewer.permitted('users_mod') %}

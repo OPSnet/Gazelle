@@ -6,7 +6,6 @@ use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
 
 class User extends BaseObject {
-
     const CACHE_KEY          = 'u2_%d';
     const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
     const CACHE_NOTIFY       = 'u_notify_%d';
@@ -737,6 +736,16 @@ class User extends BaseObject {
 
     public function ratioWatchExpiry(): ?string {
         return $this->info()['RatioWatchEnds'];
+    }
+
+    public function recoveryFinalSize(): ?float {
+        if (RECOVERY_DB) {
+            return self::$db->scalar("
+                SELECT final FROM recovery_buffer WHERE user_id = ?
+                ", $this->id
+            );
+        }
+        return null;
     }
 
     public function requiredRatio(): float {
