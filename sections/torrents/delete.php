@@ -211,7 +211,7 @@ View::show_header('Delete torrent', ['js' => 'reportsv2']);
                         </div>
 <?php
 }
-        $UploaderOthers = $userMan->unresolvedReportsTotal($UploaderID);
+        $UploaderOthers = (new Gazelle\Stats\User($UploaderID))->unresolvedReportsTotal();
         if ($UploaderOthers > 0) {
 ?>
                         <div style="text-align: right;">

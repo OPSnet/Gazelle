@@ -3,7 +3,6 @@
 namespace Gazelle\Stats;
 
 class User extends \Gazelle\BaseObject {
-
     /**
      * This class offloads all the counting operations you might
      * want to do with a User (so that the User class does not
@@ -278,5 +277,21 @@ class User extends \Gazelle\BaseObject {
             self::$cache->cache_value($key, $charts, 3600);
         }
         return $charts;
+    }
+
+    /**
+     * How many unresolved torrent reports are there for this user?
+     *
+     * @return int number of unresolved reports
+     */
+    public function unresolvedReportsTotal(): int {
+        return self::$db->scalar("
+            SELECT count(*)
+            FROM reportsv2 AS r
+            INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
+            WHERE r.Status != 'Resolved'
+                AND t.UserID = ?
+            ", $this->id
+        );
     }
 }
