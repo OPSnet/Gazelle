@@ -43,6 +43,12 @@ switch ($_REQUEST['action']) {
     case 'tor_node':
         require_once('managers/tor_node.php');
         break;
+    case 'torrent_report_edit':
+        require_once('managers/torrent_report_edit.php');
+        break;
+    case 'torrent_report_view':
+        require_once('managers/torrent_report_view.php');
+        break;
 
     case 'categories':
         require_once('managers/categories_list.php');

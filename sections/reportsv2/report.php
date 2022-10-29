@@ -13,7 +13,7 @@ if (is_null($torrent)) {
     exit;
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $Types     = $reportMan->types();
 $snatcher  = new Gazelle\User\Snatch($Viewer);
 $urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();

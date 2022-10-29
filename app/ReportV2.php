@@ -4,6 +4,7 @@ namespace Gazelle;
 
 class ReportV2 extends BaseObject {
 
+    protected array $info;
     protected int $moderatorId;
     protected int $groupId;
     protected int $torrentId;
@@ -32,6 +33,41 @@ class ReportV2 extends BaseObject {
     public function setTorrentId(int $torrentId) {
         $this->torrentId = $torrentId;
         return $this;
+    }
+
+    public function info(): array {
+        if (!isset($this->info)) {
+            $this->info = self::$db->rowAssoc("
+                SELECT ReporterID  AS reporter_id,
+                    ResolverID     AS resolver_id,
+                    TorrentID      AS torrent_id,
+                    Type           AS type,
+                    UserComment    AS reason,
+                    Status         AS status,
+                    ReportedTime   AS created,
+                    LastChangeTime AS modified,
+                    Track          AS tracks,
+                    Image          AS image,
+                    ExtraID        AS other_id,
+                    Link           AS link,
+                    LogMessage     AS message
+                FROM reportsv2
+                WHERE ID = ?
+                ", $this->id
+            );
+        }
+        return $this->info;
+    }
+
+    public function type(): string {
+        return $this->info()['type'];
+    }
+
+    public function reportType(): array {
+        /**
+         ** WARNING: UGLY HACK
+         **/
+        return (new \Gazelle\Manager\Torrent\Report)->type($this->type());
     }
 
     public function setTorrentFlag(string $tableName): int {

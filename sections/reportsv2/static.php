@@ -13,8 +13,8 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
 $torMan    = new Gazelle\Manager\Torrent;
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $userMan   = new Gazelle\Manager\User;
 
 $View = $_GET['view'];
@@ -543,7 +543,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                         $adj = $info['adjustment'];
                                         $adjUser = $userMan->findById($adj['userId']);
 ?>
-                                <li class="nobr">Log adjusted by <?= $adjUser->link() ?> from score <?= $adj['score']
+                                <li>Log adjusted <?= $adjUser ? "by {$adjUser->link()}" : '' ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
 <?php
                                     }
@@ -552,7 +552,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                     }
                                     foreach ($info['status'] as $s) {
 ?>
-                                <li class="nobr"><?= $s ?></li>
+                                <li><?= $s ?></li>
 <?php                               } ?>
                                 <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?=
@@ -580,7 +580,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                         $adj = $info['adjustment'];
                                         $adjUser = $userMan->findById($adj['userId']);
 ?>
-                                <li class="nobr">Log adjusted by <?= $adjUser->link() ?> from score <?= $adj['score']
+                                <li>Log adjusted <?= $adjUser ? "by {$adjUser->link()}" : '' ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
 <?php
                                     }
@@ -589,7 +589,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                                     }
                                     foreach ($info['status'] as $s) {
 ?>
-                                <li class="nobr"><?= $s ?></li>
+                                <li><?= $s ?></li>
 <?php                               } ?>
                                 <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?=

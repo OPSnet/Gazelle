@@ -90,17 +90,9 @@ if (!$GroupID) {
 }
 $report->claim($Viewer->id());
 
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
-if (array_key_exists($Type, $Types[$CategoryID])) {
-    $ReportType = $Types[$CategoryID][$Type];
-} elseif (array_key_exists($Type,$Types['master'])) {
-    $ReportType = $Types['master'][$Type];
-} else {
-    //There was a type but it wasn't an option!
-    $Type = 'other';
-    $ReportType = $Types['master']['other'];
-}
+$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
+$ReportType = $reportMan->type($Type);
+
 $RemasterDisplayString = $Remastered ? remasterInfo($RemasterTitle, $RemasterYear) : '';
 
 if ($ArtistID == 0 && empty($ArtistName)) {

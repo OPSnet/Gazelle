@@ -18,25 +18,15 @@ if (!$CategoryID) {
     error("report category not set");
 }
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+$torMan = new Gazelle\Manager\Torrent;
+$torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error(404);
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
-if (!isset($_POST['type'])) {
-    error(404);
-} elseif (array_key_exists($_POST['type'], $Types[$CategoryID])) {
-    $Type = $_POST['type'];
-    $ReportType = $Types[$CategoryID][$Type];
-} elseif (array_key_exists($_POST['type'], $Types['master'])) {
-    $Type = $_POST['type'];
-    $ReportType = $Types['master'][$Type];
-} else {
-    //There was a type but it wasn't an option!
-    error(403);
-}
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
+$Type = $_POST['type'];
+$ReportType = $reportMan->type($Type);
 
 foreach ($ReportType['report_fields'] as $Field => $Value) {
     if ($Value == '1') {
@@ -104,11 +94,7 @@ if (!empty($Err)) {
     error($Err);
 }
 
-$reportMan->createReport($Viewer->id(), $torrent->id(), $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links);
-
-$Cache->delete_value("reports_torrent_" . $torrent->id());
-$Cache->increment('num_torrent_reportsv2');
-$torrent->flush();
+$reportMan->createReport($torrent, $Viewer, $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links);
 if ($torrent->uploaderId() != $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($torrent->uploaderId(), 0,
         "One of your torrents has been reported",

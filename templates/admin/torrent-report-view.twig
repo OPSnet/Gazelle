@@ -1,0 +1,48 @@
+{{ header('Torrent Report Configuration') }}
+<div class="thin">
+
+<div class="header">
+    <h2>Torrent Report Configuration</h2>
+</div>
+
+<div class="box pad thin">
+
+<table>
+    <tr>
+        <td class="colhead">Type</td>
+        <td class="colhead">Name</td>
+        <td class="colhead">Active</td>
+        <td class="colhead">Admin</td>
+        <td class="colhead">Category Name</td>
+        <td class="colhead">Sequence</td>
+        <td class="colhead">Need Image</td>
+        <td class="colhead">Need Link</td>
+        <td class="colhead">Need Sitelink</td>
+        <td class="colhead">Need Track info</td>
+        <td class="colhead">Delete on resolve</td>
+        <td class="colhead">No Upload on resolve</td>
+        <td class="colhead">Weeks warned</td>
+    </tr>
+{% for r in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td><a href="tools.php?action=torrent_report_edit&amp;id={{ r.id }}"><b>{{ r.type }}</b></a></td>
+        <td>{{ r.name }}</td>
+        <td>{{ r.isActive|truth }}</td>
+        <td>{{ r.isAdmin|truth }}</td>
+        <td>{{ r.categoryName }}</td>
+        <td>{{ r.sequence }}</td>
+        <td>{{ r.needImage }}</td>
+        <td>{{ r.needLink }}</td>
+        <td>{{ r.needSitelink }}</td>
+        <td>{{ r.needTrack }}</td>
+        <td>{{ r.resolveDelete|truth }}</td>
+        <td>{{ r.resolveUpload|truth }}</td>
+        <td>{{ r.resolveWarn }}</td>
+    </tr>
+{% endfor %}
+</table>
+<br />
+
+</div>
+</div>
+{{ footer() }}

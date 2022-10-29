@@ -22,6 +22,10 @@ abstract class BaseObject extends Base {
         return $this->id;
     }
 
+    public function pkName(): string {
+        return "ID";
+    }
+
     public function dirty(): bool {
         return !empty($this->updateField);
     }
@@ -47,7 +51,7 @@ abstract class BaseObject extends Base {
         );
         $args[] = $this->id;
         self::$db->prepared_query(
-            "UPDATE " . $this->tableName() . " SET $set WHERE ID = ?",
+            "UPDATE {$this->tableName()} SET $set WHERE {$this->pkName()} = ?",
             ...$args
         );
         $success = (self::$db->affected_rows() === 1);

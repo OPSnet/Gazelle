@@ -30,7 +30,7 @@ $vote       = (new Gazelle\User\Vote($Viewer))->setGroupId($GroupID);
 
 $isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $GroupID);
 $releaseTypes = (new Gazelle\ReleaseType)->list();
-$reportTypes  = (new Gazelle\Manager\ReportV2)->types();
+$reportTypes  = (new Gazelle\Manager\Torrent\Report($torMan))->types();
 $urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
 $categoryId   = $tgroup->categoryId();

@@ -1,9 +1,8 @@
 <?php
 
-namespace Gazelle\Manager;
+namespace Gazelle\Manager\Torrent;
 
-class ReportV2 extends \Gazelle\BaseManager {
-
+class Report extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_r2_%d';
 
     protected array $categories = [
@@ -20,13 +19,34 @@ class ReportV2 extends \Gazelle\BaseManager {
     protected array $types;
     protected $filter;
 
-    public function createReport(string $viewerId, int $torrentID, string $type, string $userComment, string$tracks, string $images, string $extraIDs, string $links): void {
+    public function create(\Gazelle\Torrent $torrent, \Gazelle\User $user, string $type, string $reason, int $otherId): \Gazelle\ReportV2 {
+        self::$db->prepared_query("
+            INSERT INTO reportsv2
+                   (ReporterID, TorrentID, Type, UserComment, ExtraID)
+            VALUES (?,          ?,         ?,    ?,           ?      )
+            ", $user->id(), $torrent->id(), $this->typeKey($type), $reason, $otherId
+        );
+        $id = self::$db->inserted_id();
+        self::$cache->delete_value("reports_torrent_{$torrent->id()}");
+        self::$cache->increment('num_torrent_reportsv2');
+        $torrent->flush();
+
+        return $this->findById($id);
+    }
+
+    public function createReport(\Gazelle\Torrent $torrent, \Gazelle\User $user, string $type, string $reason, string $tracks, string $images, string $extraIDs, string $links): \Gazelle\ReportV2 {
         self::$db->prepared_query("
             INSERT INTO reportsv2
                    (ReporterID, TorrentID, Type, UserComment, Track, Image, ExtraID, Link)
             VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
-            ", $viewerId, $torrentID, $type, $userComment, $tracks, $images, $extraIDs, $links
+            ", $user->id(), $torrent->id(), $type, $reason, $tracks, $images, $extraIDs, $links
         );
+        $id = self::$db->inserted_id();
+        self::$cache->delete_value("reports_torrent_{$torrent->id()}");
+        self::$cache->increment('num_torrent_reportsv2');
+        $torrent->flush();
+
+        return $this->findById($id);
     }
 
     public function findById(int $reportId): ?\Gazelle\ReportV2 {
@@ -54,15 +74,28 @@ class ReportV2 extends \Gazelle\BaseManager {
             ", $torrentId, $ViewerId);
     }
 
+    public function categories(): array {
+        return $this->categories;
+    }
+
     public function types(): array {
         if (!isset($this->types)) {
-            $this->types = require('ReportV2Types.php');
+            $this->types = require_once(__DIR__ . '/../ReportV2Types.php');
         }
         return $this->types;
     }
 
-    public function categories(): array {
-        return $this->categories;
+    public function typeKey(string $type): string {
+        $types = $this->types();
+        if (array_key_exists($type, $types['master'])) {
+            return $type;
+        }
+        foreach ($this->categories as $category => $name) {
+            if (array_key_exists($type, $types[$category])) {
+                return $type;
+            }
+        }
+        return 'other';
     }
 
     public function type(string $type): array {
@@ -75,7 +108,7 @@ class ReportV2 extends \Gazelle\BaseManager {
                 return $types[$category][$type];
             }
         }
-        return $this->categories['master']['other'];
+        return $this->types['master']['other'];
     }
 
     public function typeName(string $type): string {
@@ -89,6 +122,15 @@ class ReportV2 extends \Gazelle\BaseManager {
             }
         }
         return $this->categories['master']['other']['title'];
+    }
+
+    public function resolveOptions(string $type): array {
+        $resolveOptions = $this->type($type)['resolve_options'];
+        return [
+            $resolveOptions['delete'],
+            $resolveOptions['upload'],
+            $resolveOptions['warn'],
+        ];
     }
 
     public function newSummary(): array {
@@ -107,7 +149,7 @@ class ReportV2 extends \Gazelle\BaseManager {
         return $list;
     }
 
-    protected function decorateUser(User $userMan, array $list): array {
+    protected function decorateUser(\Gazelle\Manager\User $userMan, array $list): array {
         foreach ($list as &$row) {
             $row['user'] = $userMan->findById($row['user_id']);
         }
@@ -115,7 +157,7 @@ class ReportV2 extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function inProgressSummary(User $userMan): array {
+    public function inProgressSummary(\Gazelle\Manager\User $userMan): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS total
@@ -127,7 +169,7 @@ class ReportV2 extends \Gazelle\BaseManager {
         return $this->decorateUser($userMan, self::$db->to_array(false, MYSQLI_ASSOC, false));
     }
 
-    public function resolvedSummary(User $userMan): array {
+    public function resolvedSummary(\Gazelle\Manager\User $userMan): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS total
@@ -139,7 +181,7 @@ class ReportV2 extends \Gazelle\BaseManager {
         return $this->decorateUser($userMan, self::$db->to_array(false, MYSQLI_ASSOC, false));
     }
 
-    protected function resolvedLastInterval(User $userMan, string $interval): array {
+    protected function resolvedLastInterval(\Gazelle\Manager\User $userMan, string $interval): array {
         self::$db->prepared_query("
             SELECT r.ResolverID AS user_id,
                 count(*)        AS total
@@ -152,15 +194,15 @@ class ReportV2 extends \Gazelle\BaseManager {
         return $this->decorateUser($userMan, self::$db->to_array(false, MYSQLI_ASSOC, false));
     }
 
-    public function resolvedLastDay(User $userMan): array {
+    public function resolvedLastDay(\Gazelle\Manager\User $userMan): array {
         return $this->resolvedLastInterval($userMan, '1 DAY');
     }
 
-    public function resolvedLastWeek(User $userMan): array {
+    public function resolvedLastWeek(\Gazelle\Manager\User $userMan): array {
         return $this->resolvedLastInterval($userMan, '1 WEEK');
     }
 
-    public function resolvedLastMonth(User $userMan): array {
+    public function resolvedLastMonth(\Gazelle\Manager\User $userMan): array {
         return $this->resolvedLastInterval($userMan, '1 MONTH');
     }
 
@@ -270,7 +312,7 @@ class ReportV2 extends \Gazelle\BaseManager {
         );
     }
 
-    public function searchList(Torrent $torMan, User $userMan, int $limit, int $offset): array {
+    public function searchList(\Gazelle\Manager\Torrent $torMan, \Gazelle\Manager\User $userMan, int $limit, int $offset): array {
         [$cond, $args, $delcond, $delargs] = $this->searchConfigure();
         $where = (count($cond) == 0 && count($delcond) == 0)
             ? ''

@@ -32,7 +32,7 @@ if (!isset($_POST['from_delete'])) {
     echo 'Hax occurred in from_delete';
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
+$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $Types = $reportMan->types();
 if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
     $ReportType = $Types[$CategoryID][$_POST['type']];

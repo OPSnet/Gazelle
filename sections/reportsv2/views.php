@@ -9,7 +9,7 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
+$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $userMan   = new Gazelle\Manager\User;
 
 echo $Twig->render('reportsv2/summary.twig', [

@@ -75,6 +75,13 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'truth',
+            function (bool $truth) {
+                return $truth ? "\xe2\x9c\x85" : "\xe2\x9d\x8c";
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'plural',
             function ($number, $plural = 's') {
                 return plural($number, $plural);

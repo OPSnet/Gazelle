@@ -3,7 +3,6 @@
 namespace Gazelle\Torrent;
 
 class Log extends \Gazelle\Base {
-
     protected $id; // id of the torrent
 
     public function __construct($id) {
@@ -25,6 +24,7 @@ class Log extends \Gazelle\Base {
         self::$db->prepared_query("
             SELECT LogID,
                 Adjusted,
+                Adjusted = '1' AS is_adjusted,
                 AdjustedBy,
                 AdjustmentReason,
                 coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
@@ -42,7 +42,7 @@ class Log extends \Gazelle\Base {
         $htmlFiler = new \Gazelle\File\RipLogHTML;
         foreach ($logs as $log) {
             $details[$log['LogID']] = [
-                'adjustment' => $log['Adjusted'] === '0'
+                'adjustment' => !$log['is_adjusted']
                     ? []
                     : [
                         'userId'   => $log['AdjustedBy'],

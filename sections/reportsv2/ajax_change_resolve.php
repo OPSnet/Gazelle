@@ -8,37 +8,10 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-if (is_number($_GET['id'])) {
-    $ReportID = $_GET['id'];
-} else {
-    echo 'HAX on report ID';
-    die();
+$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
+$report = $reportMan->findById((int)($_GET['id'] ?? 0));
+if (is_null($report)) {
+    json_error(404);
 }
 
-if (!isset($_GET['categoryid'])) {
-    echo 'HAX on categoryid';
-    die();
-} else {
-    $CategoryID = $_GET['categoryid'];
-}
-
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
-if (!isset($_GET['type'])) {
-    error(404);
-} elseif (array_key_exists($_GET['type'], $Types[$CategoryID])) {
-    $ReportType = $Types[$CategoryID][$_GET['type']];
-} elseif (array_key_exists($_GET['type'], $Types['master'])) {
-    $ReportType = $Types['master'][$_GET['type']];
-} else {
-    //There was a type but it wasn't an option!
-    echo 'HAX on section type';
-    die();
-}
-
-$Array = [];
-$Array[0] = $ReportType['resolve_options']['delete'];
-$Array[1] = $ReportType['resolve_options']['upload'];
-$Array[2] = $ReportType['resolve_options']['warn'];
-
-echo json_encode($Array);
+echo json_encode($reportMan->resolveOptions($_GET['type'] ?? ''));

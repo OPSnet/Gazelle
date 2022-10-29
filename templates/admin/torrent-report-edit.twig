@@ -1,0 +1,169 @@
+{% from 'macro/form.twig' import checked, selected -%}
+{{ header('Torrent Report Configuration – ' ~ config.name) }}
+<div class="thin">
+
+<div class="header">
+    <h2><a href="tools.php?action=torrent_report_view">Torrent Report Configuration</a> &rsaquo; {{ config.name}}</h2>
+</div>
+
+<div class="box pad thin">
+
+<form method="post" action="">
+<input type="hidden" name="action" value="torrent_report_edit" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+
+<table>
+    <tr>
+        <td class="colhead">Type</td>
+        <td>{{ config.type }}<br />
+        <br />Name that must be unique across all categories</td>
+    </tr>
+    <tr>
+        <td class="colhead">Name</td>
+        <td>{{ config.name }}
+        <br /><input type="text" name="name" size="20" value="{{ config.name }}" />
+        <br />Name visible on the site</td>
+    </tr>
+    <tr>
+        <td class="colhead">Active</td>
+        <td>{{ config.isActive|truth }} <input type="checkbox" name="is_active"{{ checked(config.isActive) }} />
+        <br />Old report types cannot be deleted (assuming they have been used in
+        the past. They can, however, be deactived, and will not be proposed as
+        a report type in the future.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Admin</td>
+        <td>{{ config.isAdmin|truth }} <input type="checkbox" name="is_admin"{{ checked(config.isAdmin) }} />
+        <br />Admin-level report types are only available to Staff.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Category</td>
+        <td>{{ config.categoryName }}
+        <br /><select name="category_id">
+{% for c in category %}
+            <option value="{{ c.id }}"{{ selected(config.categoryId == c.id) }}>{{ c.name }}</option>
+{% endfor %}
+        </select>
+        <br />To which specific category of uploads does this report apply. "Global" applies to any category.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Sequence</td>
+        <td>{{ config.sequence }}
+        <br /><input type="number" name="sequence" size="4" value="{{ config.sequence }}" />
+        <br />Used to sort different report types into a logical order.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Tracker reason</td>
+        <td>{{ config.trackerReason }}
+        <br /><input type="number" name="tracker_reason" size="4" value="{{ config.trackerReason }}" />
+        <br />Used to transmit the reason for an unregistered torrent to the tracker (not fully implemented in Ocelot).</td>
+    </tr>
+    <tr>
+        <td class="colhead">Need Image</td>
+        <td>{{ config.needImage }}
+        <br /><select name="need_image">
+{% for value in config.needImageList %}
+            <option value="{{ value }}"{{ selected(config.needImage == value) }}>{{ value }}</option>
+{% endfor %}
+        </select>
+        <br />The report (optionally) requires a link to an image.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Need Link</td>
+        <td>{{ config.needLink }}
+        <br /><select name="need_link">
+{% for value in config.needLinkList %}
+            <option value="{{ value }}"{{ selected(config.needLink == value) }}>{{ value }}</option>
+{% endfor %}
+        </select>
+        <br />The report (optionally) requires a link to an external site.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Need Sitelink</td>
+        <td>{{ config.needSitelink }}
+        <br /><select name="need_sitelink">
+{% for value in config.needSitelinkList %}
+            <option value="{{ value }}"{{ selected(config.needSiteLink == value) }}>{{ value }}</option>
+{% endfor %}
+        </select>
+        <br />The report (optionally) requires a link to page onsite.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Need Track info</td>
+        <td>{{ config.needTrack }}
+        <br /><select name="need_track">
+{% for value in config.needTrackList %}
+            <option value="{{ value }}"{{ selected(config.needTrack == value) }}>{{ value }}</option>
+{% endfor %}
+        </select>
+        <br />Track info must be supplied for this report. The option 'all' gives the reporter the possibility of selecting an "All" shortcut.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Delete on resolve</td>
+        <td>{{ config.resolveDelete|truth }} <input type="checkbox" name="resolve_delete"{{ checked(config.resolveDelete) }} />
+        <br />Resolving a report of this type will delete the torrent (although this can always be changed when handling the report).</td>
+    </tr>
+    <tr>
+        <td class="colhead">No Upload on resolve</td>
+        <td>{{ config.resolveUpload|truth }} <input type="checkbox" name="resolve_upload"{{ checked(config.resolveUpload) }} />
+        <br />Resolving a report of this type will take away upload privileges from the uploader.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Weeks warned</td>
+        <td>{{ config.resolveWarn }}
+        <br /><input type="number" name="resolve_warn" size="4" value="{{ config.resolveWarn }}" />
+        <br />Resolving a report of this type will warn uploader for this many weeks.</td>
+    </tr>
+    <tr>
+        <td class="colhead">Explanation</td>
+        <td>{{ explanation.emit|raw }}
+        <br />This explanation is provided to the reporter to assist them with filling out the report.</td>
+    </tr>
+    <tr>
+        <td class="colhead">PM Body</td>
+        <td>{{ pm.emit|raw }}
+        <br />This message will be sent as a PM to the uploader when the report is created.</td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="submit" name="submit" value="Update" /></td>
+    </tr>
+    <tr>
+        <td class="colhead">Log message</td>
+        <td>{{ config.resolve_log }}
+        <br /><input type="text" name="resolve_log" size="20" value="{{ config.resolveLog }}" />
+        <br />Message to use a basis for the report log (optional)</td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="submit" name="submit" value="Update" /></td>
+    </tr>
+</table>
+</form>
+<br />
+<h4>Revision history</h4>
+{% for r in config.history %}
+    {% if loop.first %}
+        {% set total = config.history|length %}
+<table>
+    <tr>
+        <td class="colhead">Revision</td>
+        <td class="colhead">Author</td>
+        <td class="colhead">Date</td>
+        <td class="colhead">Change set</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td>{{ total - loop.index0 }}</td>
+        <td>{{ r.user_id|user_url }}</td>
+        <td>{{ r.created|time_diff }}</td>
+        <td><a name="revision-{{ total - loop.index0 }}"></a>{{ r.change_set|map(c => "#{c.field}: #{c.old} → #{c.new}")|join(', ') }}</td>
+    </tr>
+    {% if loop.last %}
+</table>
+    {% endif %}
+{% else %}
+<div>None</div>
+{% endfor %}
+
+</div>
+</div>
+{{ footer() }}

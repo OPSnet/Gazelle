@@ -78,7 +78,7 @@ View::show_header('Delete torrent', ['js' => 'reportsv2']);
 <?php if ($Viewer->permitted('admin_reports')) { ?>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 <?php
-    $reportMan = new Gazelle\Manager\ReportV2;
+    $reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
     $Types = $reportMan->types();
 
     [$GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID,

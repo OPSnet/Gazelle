@@ -12,8 +12,8 @@ if (!$Viewer->permitted('admin_reports')) {
 authorize();
 
 $fromReportPage = !isset($_POST['from_delete']);
-
-$reportMan = new Gazelle\Manager\ReportV2;
+$torMan = new Gazelle\Manager\Torrent;
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $Types = $reportMan->types();
 
 $report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
@@ -74,7 +74,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
     exit;
 }
 
-$torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
+$torrent = $torMan->findById($torrentId);
 if (is_null($torrent)) {
     $report->moderatorResolve($Viewer->id(), 'Report already dealt with (torrent deleted).');
     $Cache->decrement('num_torrent_reportsv2');

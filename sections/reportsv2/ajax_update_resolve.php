@@ -15,7 +15,7 @@ if (!$id) {
     error("No report ID");
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
+$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $Types = $reportMan->types();
 $TypeList = $Types['master'];
 $CategoryID = (int)$_GET['categoryid'];

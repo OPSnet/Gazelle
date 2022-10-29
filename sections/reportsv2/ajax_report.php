@@ -8,16 +8,8 @@ authorize();
 
 $CategoryID = $_POST['categoryid'];
 
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
-if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
-    $ReportType = $Types[$CategoryID][$_POST['type']];
-} elseif (array_key_exists($_POST['type'],$Types['master'])) {
-    $ReportType = $Types['master'][$_POST['type']];
-} else {
-    echo 'HAX IN REPORT TYPE';
-    die();
-}
+$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
+$ReportType = $reportMan->type($_POST['type']);
 
 ?>
 <ul>
