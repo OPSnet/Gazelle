@@ -1,180 +1,191 @@
-body {
-    background-color: #041813;
-    font-family: Bitstream Vera Sans, Tahoma, sans-serif;
-    color: #e0e0e0;
-}
-
-a {
-    color: #178c36;
-    text-decoration: none;
-}
-
-a:hover {
-    color: #1fd54f;
-    text-decoration:underline;
-}
-
-input[type="text"], input[type="password"] {
-    padding: 1px 3px 0px 3px;
-    font-family: "tahoma", "arial", "helvetica", "sans-serif";
-    font-size: 8pt;
-    width: 200px;
-}
-
-input[type="text"]:valid, input[type="password"]:valid {
-    border-style: none;
-}
-
-input[type="text"]:invalid, input[type="password"]:invalid {
-    border-top-style: none;
-    border-bottom-style: none;
-    border-left-style: none;
-    border-right-style: solid 2px;
-    border-color: red;
-}
-
-#head, #foot {
-    height: 3%;
-    min-height: 10px;
-    width: 100%;
-    background-color: #041813;
-    overflow: hidden;
-}
-
-#maincontent {
-    width: 100%;
-    height: 94%;
-    margin-bottom: 50px;
-}
-
-#logo {
-    height: 170px;
-    width: 100%;
-    margin-top: 60px;
-    text-align: center;
-}
-
-.action {
-    width: 100%;
-}
-
-.action-bar {
-    display: block;
-    width: max-content;
-    margin: 20px auto;
-    font-size: 0.8em;
-}
-
-.pwrecover {
-    width: max-content;
-    margin: 20px auto;
-}
-
-.action-bar a {
-    padding: 0 10px;
-}
-
-.main {
-    width: 100%;
-}
-
-.referral {
-    width: 80%;
-    margin: 0 auto;
-}
-
-.para {
-    width: max-content;
-    margin: 0 auto;
-    font-size: 0.9em;
-    line-height: 1.2em;
-    padding-top: 18px;
-}
-
-.enter {
-    width: 100%;
-    margin: 20px 0;
-}
-
-.enter a {
-    display: block;
-    width: max-content;
-    margin: 0 auto;
-    font-size: 1.2em;
+#head {
+  height: 3%;
+  min-height: 10px;
+  overflow: hidden;
+  width: 100%;
 }
 
 #foot {
-    text-align: center;
-    position: fixed;
-    bottom: 0;
-    min-height: 20px;
+  bottom: 0;
+  height: 3%;
+  min-height: 20px;
+  overflow: hidden;
+  position: fixed;
+  text-align: center;
+  width: 100%;
 }
 
-.links {
-    font-size: 0.8em;
+#logo {
+  height: 170px;
+  margin-top: 60px;
+  text-align: center;
+  width: 100%;
 }
 
-.auth {
-    width: max-content;
-    margin: 0 auto;
-}
-
-.main label {
-    font-size: 0.85em;
-    width: 90px;
-    display: inline-block;
-    line-height: 1.8em;
-}
-
-.main .submit {
-    margin: 10px 0 0 80px;
-}
-
-.auth_form a {
-    display: block;
-    font-size: 0.7em;
-    margin-top: 10px;
-    margin-left: 80px;
-}
-
-.referral label {
-    width: 130px;
-    display: inline-block;
-    line-height: 1.8em;
-}
-
-.referral > .submit {
-    margin: 10px 0;
+#maincontent {
+  height: 94%;
+  margin-bottom: 50px;
+  width: 100%;
 }
 
 #referral-code {
-    color: #f5f5f5;
-    padding: 10px;
-    background-color: #151515;
-    text-align: center;
+  background-color: #151515;
+  color: #f5f5f5;
+  padding: 10px;
+  text-align: center;
 }
 
-.hidden {
-    display: none;
+input[type="text"], input[type="password"] {
+  font-family: "tahoma", "arial", "helvetica", "sans-serif";
+  font-size: 8pt;
+  padding: 1px 3px 0px 3px;
+  width: 200px;
 }
 
-.info {
-    color: green;
-    font-weight: bold;
+input[type="text"]:valid, input[type="password"]:valid {
+  border-style: none;
 }
 
-.warning-login {
-    text-align: center;
-    margin: 50px 0;
-    font-weight: 550;
-    color: #ff9617;
+input[type="text"]:invalid, input[type="password"]:invalid {
+  border-top-style: none;
+  border-bottom-style: none;
+  border-left-style: none;
+  border-right-style: solid 2px;
+  border-color: red;
 }
 
-.warning {
-    font-weight: 550;
-    color: #ff9617;
+body {
+  background-color: #041813;
+  font-family: Bitstream Vera Sans, Tahoma, sans-serif;
+  color: #e0e0e0;
+}
+
+a {
+  color: #178c36;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #1fd54f;
+  text-decoration:underline;
+}
+
+.action {
+  width: 100%;
+}
+
+.action-bar {
+  display: block;
+  font-size: 0.8em;
+  margin: 20px auto;
+  width: max-content;
+}
+
+.action-bar a {
+  padding: 0 10px;
+}
+
+.auth {
+  margin: 0 auto;
+  width: max-content;
+}
+
+.auth_form a {
+  display: block;
+  font-size: 0.7em;
+  margin-left: 80px;
+  margin-top: 10px;
 }
 
 .center {
-    text-align: center;
+  text-align: center;
+}
+
+.enter {
+  margin: 20px 0;
+  width: 100%;
+}
+
+.enter a {
+  display: block;
+  font-size: 1.2em;
+  margin: 0 auto;
+  width: max-content;
+}
+
+.hidden {
+  display: none;
+}
+
+.info {
+  color: green;
+  font-weight: bold;
+}
+
+.links {
+  font-size: 0.8em;
+}
+
+.main {
+  width: 100%;
+}
+
+.main label {
+  display: inline-block;
+  font-size: 0.85em;
+  line-height: 1.8em;
+  width: 90px;
+}
+
+.main .submit {
+  margin: 10px 0 0 80px;
+}
+
+.para {
+  font-size: 0.9em;
+  line-height: 1.2em;
+  margin: 0 auto;
+  padding-top: 18px;
+  width: max-content;
+}
+
+.pwrecover {
+  margin: 20px auto;
+  width: max-content;
+}
+
+.referral {
+  margin: 0 auto;
+  width: 80%;
+}
+
+.referral label {
+  display: inline-block;
+  line-height: 1.8em;
+  width: 130px;
+}
+
+.referral > .submit {
+  margin: 10px 0;
+}
+
+.tor-login {
+  border: 2px solid #ff0000;
+  color: #f01000;
+  margin: 0 auto 20px;
+  padding: 10px;
+  text-align: center;
+  width: 48%;
+}
+
+.warning {
+  color: #ff9617;
+  font-weight: 550;
+}
+
+.warning-login {
+  color: #ff9617;
+  font-weight: 550;
+  margin: 50px 0;
+  text-align: center;
 }
