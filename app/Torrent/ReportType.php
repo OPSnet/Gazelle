@@ -3,7 +3,6 @@
 namespace Gazelle\Torrent;
 
 class ReportType extends \Gazelle\BaseObject {
-
     const CACHE_KEY = 'trepcfg_%d';
 
     protected array $info;
@@ -15,6 +14,9 @@ class ReportType extends \Gazelle\BaseObject {
 
     public function flush() {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::ID_KEY, $this->id));
+        self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::NAME_KEY, $this->id));
+        self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::TYPE_KEY, $this->id));
     }
 
     public function location(): string {
@@ -30,7 +32,6 @@ class ReportType extends \Gazelle\BaseObject {
     public function info(): array {
         $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
-        $info = false;
         if ($info === false) {
             $info = self::$db->rowAssoc("
                 SELECT r.name,
@@ -175,6 +176,14 @@ class ReportType extends \Gazelle\BaseObject {
 
     public function resolveLog(): ?string {
         return $this->info()['resolve_log'];
+    }
+
+    public function resolveOptions(): array {
+        return [
+            $this->resolveDelete(),
+            $this->resolveUpload(),
+            $this->resolveWarn(),
+        ];
     }
 
     public function resolveUpload(): bool {

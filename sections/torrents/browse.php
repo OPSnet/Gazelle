@@ -2,10 +2,11 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-$tagMan = new Gazelle\Manager\Tag;
-$tgMan  = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
+$reportMan = new Gazelle\Manager\Torrent\Report;
+$tagMan    = new Gazelle\Manager\Tag;
+$tgMan     = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$snatcher  = new Gazelle\User\Snatch($Viewer);
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $torrent = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
@@ -208,7 +209,6 @@ foreach ($Results as $GroupID) {
             }
             $prev = $current;
             $SnatchedTorrentClass = $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '';
-            $Reported = $torrent->hasReport($Viewer);
 ?>
     <tr class="group_torrent groupid_<?=$tgroup->id()?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">

@@ -6,7 +6,7 @@ class Torrent extends BaseObject {
     const CACHE_KEY                = 't3_%d';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
-    const CACHE_REPORTLIST         = 't_rpt_%s_%d';
+    const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
     const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
@@ -27,7 +27,7 @@ class Torrent extends BaseObject {
     }
 
     public function location(): string {
-        return "torrents.php?groupId=" . $this->groupId() . '&torrentid=' . $this->id . '#torrent' . $this->id;
+        return "torrents.php?id=" . $this->groupId() . '&torrentid=' . $this->id . '#torrent' . $this->id;
     }
 
     public function url(): string {
@@ -48,6 +48,24 @@ class Torrent extends BaseObject {
         $edition = $this->edition();
         if ($edition) {
             $link .= " [$edition]";
+        }
+        $label = $this->label();
+        if ($label) {
+            $link .= " [$label]";
+        }
+        return $link;
+    }
+
+    public function fullEditionLink(): string {
+        $link = implode(" \xE2\x80\x93 ",
+            array_filter([
+                $this->group()->artistHtml(),
+                sprintf('<a href="%s">%s</a>', $this->group()->url(), display_str($this->group()->name())),
+            ], fn($x) => !empty($x))
+        );
+        $edition = $this->edition();
+        if ($edition) {
+            $link .= " [<a href=\"{$this->url()}\">$edition</a>]";
         }
         $label = $this->label();
         if ($label) {
@@ -278,7 +296,15 @@ class Torrent extends BaseObject {
         }
         if ($info['Media'] === 'CD') {
             if ($info['HasLog']) {
-                $label[] = 'Log' . ($info['HasLogDB'] ? " ({$info['LogScore']}%)" : '');
+                if (!$info['HasLogDB']) {
+                    $label[] = '<span class="tooltip" title="There is a logifile in the torrent, but it has not been uploaded to the site!">Log</span>';
+                } else {
+                    if (isset($this->viewer) && $this->viewer->isStaff()) {
+                        $label[] = "(<a href=\"torrents.php?action=viewlog&torrentid={$this->id}&groupid={$this->groupId()}\">Log {$info['LogScore']}%)</a>";
+                    } else {
+                        $label[] = "(Log {$info['LogScore']}%)";
+                    }
+                }
             }
             if ($info['HasCue']) {
                 $label[] = 'Cue';

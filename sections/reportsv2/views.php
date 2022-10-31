@@ -9,12 +9,13 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$userMan   = new Gazelle\Manager\User;
+$reportMan     = new Gazelle\Manager\Torrent\Report;
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$userMan       = new Gazelle\Manager\User;
 
 echo $Twig->render('reportsv2/summary.twig', [
     'in_progress' => $reportMan->inProgressSummary($userMan),
-    'new'         => $reportMan->newSummary(),
+    'new'         => $reportMan->newSummary($reportTypeMan),
     'resolved'    => [
         'day'   => $reportMan->resolvedLastDay($userMan),
         'week'  => $reportMan->resolvedLastWeek($userMan),

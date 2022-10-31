@@ -9,7 +9,6 @@ class Torrent extends \Gazelle\BaseManager {
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     const CACHE_FOLDERNAME         = 'foldername_%s';
-    const CACHE_REPORTLIST         = 'reports_torrent_%d';
     const FOLDER_SALT              = "v1\x01";
     const FILELIST_DELIM_UTF8 = "\xC3\xB7";
 
@@ -259,37 +258,6 @@ class Torrent extends \Gazelle\BaseManager {
             }
         }
         return $map;
-    }
-
-    /**
-     * Get the reports associated with a torrent
-     * Non-admin users do not see Edited reports
-     *
-     * @return array of array of [ID, ReporterID, Type, UserComment, ReportedTime]
-     */
-    public function reportList(\Gazelle\User $viewer, int $torrentId): array {
-        $key = sprintf(self::CACHE_REPORTLIST, $torrentId);
-        $list = self::$cache->get_value($key);
-        if ($list === false) {
-            $qid = self::$db->get_query_id();
-            self::$db->prepared_query("
-                SELECT ID,
-                    ReporterID,
-                    Type,
-                    UserComment,
-                    ReportedTime
-                FROM reportsv2
-                WHERE TorrentID = ?
-                    AND Status != 'Resolved'",
-                $torrentId
-            );
-            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-            self::$db->set_query_id($qid);
-            self::$cache->cache_value($key, $list, 7200);
-        }
-        return $viewer->permitted('admin_reports')
-            ? $list
-            : array_filter($list, function ($report) { return $report['Type'] !== 'edited'; });
     }
 
     /**

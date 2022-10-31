@@ -7,18 +7,28 @@
  */
 
 if (!$Viewer->permitted('admin_reports')) {
-    error(403);
+    json_die("failure", "forbidden");
 }
+
 authorize();
 
 $fromReportPage = !isset($_POST['from_delete']);
-$torMan = new Gazelle\Manager\Torrent;
-$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
-$Types = $reportMan->types();
+$reportMan      = new Gazelle\Manager\Torrent\Report;
 
 $report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
 if (is_null($report)) {
-    error("error report id");
+    json_die("failure", "error report id");
+}
+
+$torrent = $report->torrent();
+if (is_null($torrent)) {
+    $report->moderatorResolve($Viewer->id(), 'Report already dealt with (torrent deleted).');
+    $Cache->decrement('num_torrent_reportsv2');
+    json_die("failure", "torrent already deleted?");
+}
+$torrentId = $torrent->id();
+if (isset($_POST['delete']) && $torrent->isUploadLocked()) {
+    json_die("You requested to delete the torrent $torrentId, but this is currently not possible because the upload process is still running. Please try again later.");
 }
 
 $modNote = trim($_POST['uploader_pm']);
@@ -28,33 +38,7 @@ if ($_POST['pm_type'] != 'Uploader') {
 
 $weeksWarned = (int)$_POST['warning'];
 if (!in_array($weeksWarned, range(0, 8))) {
-    error("error weeks warning");
-}
-
-$reportTypeId = (int)$_POST['categoryid'];
-if (!$reportTypeId) {
-    error("error report type id");
-}
-
-if (!isset($_POST['resolve_type'])) {
-    error("No Resolve Type");
-} elseif (array_key_exists($_POST['resolve_type'], $Types[$reportTypeId])) {
-    $ResolveType = $Types[$reportTypeId][$_POST['resolve_type']];
-} elseif (array_key_exists($_POST['resolve_type'], $Types['master'])) {
-    $ResolveType = $Types['master'][$_POST['resolve_type']];
-} elseif (!in_array($_POST['resolve_type'], ['manual', 'dismiss'])) {
-    //There was a type but it wasn't an option!
-    error("Invalid Resolve Type");
-}
-
-$torrentId = (int)($_POST['torrentid'] ?? 0);
-if (!$torrentId) {
-    error("error torrent id");
-}
-$report->setTorrentId($torrentId);
-$torrent = $torMan->findById($torrentId);
-if (isset($_POST['delete']) && $torrent->isUploadLocked()) {
-    error("You requested to delete the torrent $torrentId, but this is currently not possible because the upload process is still running. Please try again later.");
+    json_die("failure", "error weeks warning");
 }
 
 if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) {
@@ -75,18 +59,12 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
     exit;
 }
 
-$torrent = $torMan->findById($torrentId);
-if (is_null($torrent)) {
-    $report->moderatorResolve($Viewer->id(), 'Report already dealt with (torrent deleted).');
-    $Cache->decrement('num_torrent_reportsv2');
-}
-
 if ($fromReportPage && !$report->moderatorResolve($Viewer->id(), $_POST['comment'] ?? '')) {
     echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
     exit;
 }
 
-$report->setModeratorId($Viewer->id())->setGroupId($torrent->groupId())->setTorrentId($torrentId);
+$report->setModeratorId($Viewer->id());
 
 if ($_POST['resolve_type'] === 'tags_lots') {
     $report->setTorrentFlag('torrents_bad_tags');
@@ -111,6 +89,7 @@ $adminMessage = trim($_POST['admin_message']);
 $logMessage = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
 $uploader = $torrent->uploader();
 $name = $torrent->fullName() . ' (' . Format::get_size($torrent->size()) . ')';
+$reportTypeName = $report->reportType()->name();
 
 //Log and delete
 if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
@@ -119,8 +98,8 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
 } else {
     [$ok, $message] = $torrent->remove(
         $Viewer->id(),
-        sprintf('%s (%s)', $ResolveType['title'], $logMessage ?? 'none'),
-        $ResolveType['reason']
+        sprintf('%s (%s)', $reportTypeName, $logMessage ?? 'none'),
+        $report->reportType()->trackerReason()
     );
     if (!$ok) {
         echo "Failure: $message<br />";
@@ -129,7 +108,7 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
 
     $Log = "Torrent $torrentId ($name) uploaded by " . $uploader->username()
         . " was deleted by " . $Viewer->username()
-        . ($_POST['resolve_type'] == 'custom' ? '' : ' for the reason: ' . $ResolveType['title'] . ".")
+        . ($_POST['resolve_type'] == 'custom' ? '' : " for the reason: {$reportTypeName}.")
         . ($logMessage ? " $logMessage" : '');
 
     $TrumpID = 0;
@@ -147,7 +126,7 @@ if ($revokeUpload) {
 
 if ($weeksWarned > 0) {
     $WarnLength = $weeksWarned * (7 * 86400);
-    $Reason = "Uploader of torrent ($torrentId) $name which was resolved with the preset: {$ResolveType['title']}.";
+    $Reason = "Uploader of torrent ($torrentId) $name which was resolved with the preset: $reportTypeName.";
     if ($adminMessage) {
         $Reason .= " ($adminMessage)";
     }
@@ -159,8 +138,8 @@ if ($weeksWarned > 0) {
     $staffNote = null;
     if ($revokeUpload) {
         $staffNote = 'Upload privileges removed by '.$Viewer->username()
-            . "\nReason: Uploader of torrent ($torrentId) $name which was [url=". $report->url() . "]resolved with the preset: "
-            . $ResolveType['title'] . "[/url].";
+            . "\nReason: Uploader of torrent ($torrentId) $name which was [url="
+            . $report->url() . "]resolved with the preset: {$reportTypeName}[/url].";
     }
     if ($adminMessage) {
         // They did nothing of note, but still want to mark it (Or upload and mark)
@@ -182,7 +161,7 @@ if ($modNote || $weeksWarned > 0 || isset($_POST['delete']) || $SendPM) {
         . (isset($_POST['delete']) ? 'and has been deleted.' : 'but not deleted.')
     ];
 
-    $Preset = $ResolveType['resolve_options']['pm'];
+    $Preset = $report->reportType()->pmBody();
     if ($Preset != '') {
          $message[] = "Reason: $Preset";
     }
@@ -212,5 +191,5 @@ $Cache->delete_value("reports_torrent_$torrentId");
 // Now we've done everything, update the DB with values
 if ($fromReportPage) {
     $Cache->decrement('num_torrent_reportsv2');
-    $report->finalize($_POST['resolve_type'], $Log, $_POST['comment']);
+    $report->finalize($Log, $_POST['comment']);
 }

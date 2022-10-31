@@ -5,13 +5,12 @@
  */
 
 if (!$Viewer->permitted('admin_reports')) {
-    error(403);
+    json_error("forbidden");
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$report = $reportMan->findById((int)($_GET['id'] ?? 0));
-if (is_null($report)) {
-    json_error(404);
+$reportType = (new Gazelle\Manager\Torrent\ReportType)->findByType($_GET['type'] ?? '');
+if (is_null($reportType)) {
+    json_error("bad type");
 }
 
-echo json_encode($reportMan->resolveOptions($_GET['type'] ?? ''));
+echo json_encode($reportType->resolveOptions());

@@ -128,7 +128,7 @@
         </tr>
     {% endif %}
         <tr{% if entry.type == 'urgent' %} class="rowa" style="font-weight: bold;"{% endif %}>
-            <td><a href="reportsv2.php?view=type&amp;id={{ entry.type }}">{{ entry.title }}</a></td>
+            <td><a href="reportsv2.php?view=type&amp;id={{ entry.type }}">{{ entry.name }}</a></td>
             <td class="number_column">{{ entry.total|number_format }} </td>
         </tr>
     {% if loop.last %}

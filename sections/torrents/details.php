@@ -20,27 +20,28 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$artistMan  = new Gazelle\Manager\Artist;
-$collageMan = new Gazelle\Manager\Collage;
-$userMan    = new Gazelle\Manager\User;
-$snatcher   = new Gazelle\User\Snatch($Viewer);
-$torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$imgProxy   = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
-$vote       = (new Gazelle\User\Vote($Viewer))->setGroupId($GroupID);
+$artistMan     = new Gazelle\Manager\Artist;
+$collageMan    = new Gazelle\Manager\Collage;
+$reportMan     = new Gazelle\Manager\Torrent\Report;
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$userMan       = new Gazelle\Manager\User;
+$imgProxy      = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$snatcher      = new Gazelle\User\Snatch($Viewer);
+$vote          = (new Gazelle\User\Vote($Viewer))->setGroupId($GroupID);
 
-$isSubscribed = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $GroupID);
-$releaseTypes = (new Gazelle\ReleaseType)->list();
-$reportTypes  = (new Gazelle\Manager\Torrent\Report($torMan))->types();
-$urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$isSubscribed   = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $GroupID);
+$releaseTypes   = (new Gazelle\ReleaseType)->list();
+$urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
-$categoryId   = $tgroup->categoryId();
-$musicRelease = $tgroup->categoryName() == 'Music';
-$tagList      = $tgroup->tagList();
-$year         = $tgroup->year();
-$title        = $tgroup->displayNameText();
-$coverArt     = $tgroup->coverArt($userMan);
-$torrentList  = $tgroup->torrentIdList();
-$removed      = $torrentList ? [] : $tgroup->deletedMasteringList();
+$categoryId     = $tgroup->categoryId();
+$musicRelease   = $tgroup->categoryName() == 'Music';
+$tagList        = $tgroup->tagList();
+$year           = $tgroup->year();
+$title          = $tgroup->displayNameText();
+$coverArt       = $tgroup->coverArt($userMan);
+$torrentList    = $tgroup->torrentIdList();
+$removed        = $torrentList ? [] : $tgroup->deletedMasteringList();
 
 if (!$musicRelease) {
     $rankList = [];
@@ -489,7 +490,7 @@ if (!$torrentList) {
         $prev = $current;
 
         $reportTotal = $torrent->reportTotal();
-        $reportList  = $torMan->reportList($Viewer, $TorrentID);
+        $reportList  = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
     ?>
             <tr class="torrent_row releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$GroupID?> edition_<?= $EditionID
                 ?> group_torrent<?= $snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : ''
@@ -629,26 +630,17 @@ if (!$torrentList) {
             <td>This torrent has <?= $reportTotal ?> active report<?= plural($reportTotal) ?>:</td>
         </tr>
 <?php
-        foreach ($reportList as $Report) {
-            $reporter = $userMan->findById($Report['ReporterID']);
-            if (isset($reportTypes[$categoryId][$Report['Type']])) {
-                $ReportType = $reportTypes[$categoryId][$Report['Type']];
-            } elseif (isset($reportTypes['master'][$Report['Type']])) {
-                $ReportType = $reportTypes['master'][$Report['Type']];
-            } else {
-                //There was a type but it wasn't an option!
-                $ReportType = $reportTypes['master']['other'];
-            }
+        foreach ($reportList as $report) {
 ?>
         <tr>
             <td>
 <?php       if ($Viewer->permitted('admin_reports')) { ?>
-                <?= $reporter->link() ?> <a href="reportsv2.php?view=report&amp;id=<?= $Report['ID'] ?>">reported it</a>
+                <?= $userMan->findById($report->reporterId())?->link() ?? 'System' ?> <a href="<?= $report->url() ?>">reported it</a>
 <?php       } else { ?>
                 Someone reported it
 <?php       } ?>
-                <?= time_diff($Report['ReportedTime'], 2) ?> for the reason <?= $ReportType['title'] ?>
-                <blockquote><?= Text::full_format($Report['UserComment']) ?></blockquote>
+                <?= time_diff($report->created(), 1) ?> for the reason <?= $report->reportType()->name() ?>
+                <blockquote><?= Text::full_format($report->reason()) ?></blockquote>
             </td>
         </tr>
 <?php   } ?>

@@ -2,79 +2,109 @@
 /*
  * The backend to changing the report type when making a report.
  * It prints out the relevant report_messages from the array, then
- * prints the relevant report_fields and whether they're required.
+ * prints the relevant report fields and whether they're required.
  */
+
 authorize();
 
-$CategoryID = $_POST['categoryid'];
-
-$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$ReportType = $reportMan->type($_POST['type']);
-
+$reportType = (new Gazelle\Manager\Torrent\ReportType)->findByType($_POST['type'] ?? '');
+if (is_null($reportType)) {
+    json_error("bad parameters");
+}
 ?>
 <ul>
-<?php foreach ($ReportType['report_messages'] as $Message) { ?>
-    <li><?=$Message?></li>
-<?php } ?>
+    <li><?= Text::full_format($reportType->explanation()) ?></li>
 </ul>
 <br />
 <table class="layout border" cellpadding="3" cellspacing="1" border="0" width="100%">
-<?php if (array_key_exists('image', $ReportType['report_fields'])) { ?>
+<?php
+$needImage = $reportType->needImage();
+if ($needImage !== 'none') {
+?>
     <tr>
         <td class="label">
-            Image(s)<?=($ReportType['report_fields']['image'] == '1' ? ' <strong class="important_text">(Required)</strong>:' : '')?>
+            Image(s)<?=
+    match($needImage) {
+        'required' => ' <strong class="important_text">(Required)</strong>',
+        'optional' => ' (Optional)',
+        default    => '',
+    } ?>:
         </td>
         <td>
-            <input id="image" type="text" name="image" size="50" value="<?=(!empty($_POST['image']) ? display_str($_POST['image']) : '')?>" />
+            <input id="image" type="text" name="image" size="50" value="<?= display_str($_POST['image'] ?? '') ?>" />
         </td>
     </tr>
 <?php
 }
-if (array_key_exists('track', $ReportType['report_fields'])) {
-?>
-    <tr>
-        <td class="label">
-            Track Number(s)<?=($ReportType['report_fields']['track'] == '1' || $ReportType['report_fields']['track'] == '2' ? ' <strong class="important_text">(Required)</strong>:' : '')?>
-        </td>
-        <td>
-            <input id="track" type="text" name="track" size="8" value="<?=(!empty($_POST['track']) ? display_str($_POST['track']) : '')?>" /><?=($ReportType['report_fields']['track'] == '1' ? '<input id="all_tracks" type="checkbox" onclick="AllTracks()" /> All' : '')?>
-        </td>
-    </tr>
-<?php
-}
-if (array_key_exists('link', $ReportType['report_fields'])) {
-?>
-    <tr>
-        <td class="label">
-            Link(s) to external source<?=($ReportType['report_fields']['link'] == '1' ? ' <strong class="important_text">(Required)</strong>:' : '')?>
-        </td>
-        <td>
-            <input id="link" type="text" name="link" size="50" value="<?=(!empty($_POST['link']) ? display_str($_POST['link']) : '')?>" />
-        </td>
-    </tr>
-<?php
-}
-if (array_key_exists('sitelink', $ReportType['report_fields'])) {
-?>
-    <tr>
-        <td class="label">
-            Permalink to <strong>other relevant</strong> torrent(s)<?=($ReportType['report_fields']['sitelink'] == '1' ? ' <strong class="important_text">(Required)</strong>:' : '')?>
-        </td>
-        <td>
-            <input id="sitelink" type="text" name="sitelink" size="50" value="<?=(!empty($_POST['sitelink']) ? display_str($_POST['sitelink']) : '')?>" />
-        </td>
-    </tr>
 
-<?php
-}
-if (array_key_exists('proofimages', $ReportType['report_fields'])) {
+$needTrack = $reportType->needTrack();
+if ($needTrack !== 'none') {
 ?>
     <tr>
         <td class="label">
-            Link(s) to proof images<?=($ReportType['report_fields']['proofimages'] == '1' ? ' <strong class="important_text">(Required)</strong>:' : '')?>:
+            Track Number(s)<?= in_array($needTrack, ['all', 'required']) ? ' <strong class="important_text">(Required)</strong>:' : '' ?>
         </td>
         <td>
-            <input id="image" type="text" name="image" size="50" value="<?=(!empty($_POST['proofimages']) ? display_str($_POST['proofimages']) : '')?>" />
+            <input id="track" type="text" name="track" size="8" value="<?= display_str($_POST['track'] ?? '') ?>" />
+            <?= $needTrack === 'all' ? '<input id="all_tracks" type="checkbox" onclick="AllTracks()" /> All' : ''?>
+        </td>
+    </tr>
+<?php
+}
+
+$needLink = $reportType->needLink();
+if ($needLink !== 'none') {
+?>
+    <tr>
+        <td class="label">
+            Link(s) to external source<?=
+    match($needLink) {
+        'required' => ' <strong class="important_text">(Required)</strong>',
+        'optional' => ' (Optional)',
+        default    => '',
+    } ?>:
+        </td>
+        <td>
+            <input id="link" type="text" name="link" size="50" value="<?= display_str($_POST['link'] ?? '') ?>" />
+        </td>
+    </tr>
+<?php
+}
+
+$needSitelink = $reportType->needSitelink();
+if ($needSitelink !== 'none') {
+?>
+    <tr>
+        <td class="label">
+            Permalink to <strong>other relevant</strong> torrent(s)<?=
+    match($needSitelink) {
+        'required' => ' <strong class="important_text">(Required)</strong>',
+        'optional' => ' (Optional)',
+        default    => '',
+    } ?>:
+        </td>
+        <td>
+            <input id="sitelink" type="text" name="sitelink" size="50" value="<?= display_str($_POST['sitelink'] ?? '') ?>" />
+        </td>
+    </tr>
+<?php
+}
+
+$needImage = $reportType->needImage();
+if ($needImage !== 'none') {
+?>
+    <tr>
+        <td class="label">
+            Link(s) to <?= $needImage == 'proof' ? 'proof ' : '' ?>images<?=
+    match($needSitelink) {
+        'proof',
+        'required' => ' <strong class="important_text">(Required)</strong>',
+        'optional' => ' (Optional)',
+        default    => '',
+    } ?>:
+        </td>
+        <td>
+            <input id="image" type="text" name="image" size="50" value="<?= display_str($_POST['images'] ?? '') ?>" />
         </td>
     </tr>
 <?php } ?>
@@ -83,7 +113,7 @@ if (array_key_exists('proofimages', $ReportType['report_fields'])) {
             Comments <strong class="important_text">(Required)</strong>:
         </td>
         <td>
-            <textarea id="extra" rows="5" cols="60" name="extra"><?=display_str($_POST['extra'])?></textarea>
+            <textarea id="extra" rows="5" cols="60" name="extra"><?= display_str($_POST['extra'] ?? '') ?></textarea>
         </td>
     </tr>
 </table>

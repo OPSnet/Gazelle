@@ -3,7 +3,7 @@
 namespace Gazelle\Manager\Torrent;
 
 class Report extends \Gazelle\BaseManager {
-    protected const ID_KEY = 'zz_r2_%d';
+    protected const ID_KEY = 'zz_tr_%d';
 
     protected array $categories = [
         'master' => 'General',
@@ -16,32 +16,27 @@ class Report extends \Gazelle\BaseManager {
         '7' => 'Comics',
     ];
 
-    protected array $types;
-    protected $filter;
+    protected array $filter;
 
-    public function create(\Gazelle\Torrent $torrent, \Gazelle\User $user, string $type, string $reason, int $otherId): \Gazelle\ReportV2 {
+    public function create(
+        \Gazelle\Torrent            $torrent,
+        \Gazelle\User               $user,
+        \Gazelle\Torrent\ReportType $reportType,
+        string $reason,
+        string $otherIdList,
+        string $track = '',
+        string $image = '',
+        string $link  = '',
+    ): \Gazelle\Torrent\Report {
         self::$db->prepared_query("
             INSERT INTO reportsv2
-                   (ReporterID, TorrentID, Type, UserComment, ExtraID)
-            VALUES (?,          ?,         ?,    ?,           ?      )
-            ", $user->id(), $torrent->id(), $this->typeKey($type), $reason, $otherId
-        );
-        $id = self::$db->inserted_id();
-        self::$cache->delete_value("reports_torrent_{$torrent->id()}");
-        self::$cache->increment('num_torrent_reportsv2');
-        $torrent->flush();
-
-        return $this->findById($id);
-    }
-
-    public function createReport(\Gazelle\Torrent $torrent, \Gazelle\User $user, string $type, string $reason, string $tracks, string $images, string $extraIDs, string $links): \Gazelle\ReportV2 {
-        self::$db->prepared_query("
-            INSERT INTO reportsv2
-                   (ReporterID, TorrentID, Type, UserComment, Track, Image, ExtraID, Link)
+                   (ReporterID, TorrentID, Type, UserComment, ExtraID, Track, Image, Link)
             VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
-            ", $user->id(), $torrent->id(), $type, $reason, $tracks, $images, $extraIDs, $links
+            ", $user->id(), $torrent->id(), $reportType->type(), $reason, $otherIdList, $track, $image, $link
         );
         $id = self::$db->inserted_id();
+        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'a', $torrent->id()));
+        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'u', $torrent->id()));
         self::$cache->delete_value("reports_torrent_{$torrent->id()}");
         self::$cache->increment('num_torrent_reportsv2');
         $torrent->flush();
@@ -49,7 +44,7 @@ class Report extends \Gazelle\BaseManager {
         return $this->findById($id);
     }
 
-    public function findById(int $reportId): ?\Gazelle\ReportV2 {
+    public function findById(int $reportId): ?\Gazelle\Torrent\Report {
         $key = sprintf(self::ID_KEY, $reportId);
         $id = self::$cache->get_value($key);
         if ($id === false) {
@@ -61,7 +56,19 @@ class Report extends \Gazelle\BaseManager {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }
-        return $id ? new \Gazelle\ReportV2($id) : null;
+        return $id ? new \Gazelle\Torrent\Report($reportId) : null;
+    }
+
+    public function findNewest(): ?\Gazelle\Torrent\Report {
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT ID
+                FROM reportsv2
+                WHERE r.Status = 'New'
+                ORDER BY ReportedTime ASC
+                LIMIT 1
+            ")
+        );
     }
 
     public function existsRecent(int $torrentId, int $ViewerId): bool {
@@ -78,62 +85,7 @@ class Report extends \Gazelle\BaseManager {
         return $this->categories;
     }
 
-    public function types(): array {
-        if (!isset($this->types)) {
-            $this->types = require_once(__DIR__ . '/../ReportV2Types.php');
-        }
-        return $this->types;
-    }
-
-    public function typeKey(string $type): string {
-        $types = $this->types();
-        if (array_key_exists($type, $types['master'])) {
-            return $type;
-        }
-        foreach ($this->categories as $category => $name) {
-            if (array_key_exists($type, $types[$category])) {
-                return $type;
-            }
-        }
-        return 'other';
-    }
-
-    public function type(string $type): array {
-        $types = $this->types();
-        if (array_key_exists($type, $types['master'])) {
-            return $types['master'][$type];
-        }
-        foreach ($this->categories as $category => $name) {
-            if (array_key_exists($type, $types[$category])) {
-                return $types[$category][$type];
-            }
-        }
-        return $this->types['master']['other'];
-    }
-
-    public function typeName(string $type): string {
-        $types = $this->types();
-        if (array_key_exists($type, $types['master'])) {
-            return $this->categories['master'] . ' &rsaquo; ' . $types['master'][$type]['title'];
-        }
-        foreach ($this->categories as $category => $name) {
-            if (array_key_exists($type, $types[$category])) {
-                return $name . ' &rsaquo; ' . $types[$category][$type]['title'];
-            }
-        }
-        return $this->categories['master']['other']['title'];
-    }
-
-    public function resolveOptions(string $type): array {
-        $resolveOptions = $this->type($type)['resolve_options'];
-        return [
-            $resolveOptions['delete'],
-            $resolveOptions['upload'],
-            $resolveOptions['warn'],
-        ];
-    }
-
-    public function newSummary(): array {
+    public function newSummary(ReportType $reportTypeMan): array {
         self::$db->prepared_query("
             SELECT Type  AS type,
                 count(*) AS total
@@ -144,7 +96,7 @@ class Report extends \Gazelle\BaseManager {
         ");
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$row) {
-            $row['title'] = $this->type($row['type'])['title'];
+            $row['name'] = $reportTypeMan->findByType($row['type'])->name();
         }
         return $list;
     }

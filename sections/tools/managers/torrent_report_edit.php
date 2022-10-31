@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
 }
 
 echo $Twig->render('admin/torrent-report-edit.twig', [
-    'category'    => (new Gazelle\Manager\Category)->reportList(),
+    'category'    => (new Gazelle\Manager\Category)->categoryList(),
     'config'      => $config,
     'pm'          => new Gazelle\Util\Textarea('pm_body', $config->pmBody() ?? ''),
     'explanation' => new Gazelle\Util\Textarea('explanation', $config->explanation()),

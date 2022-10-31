@@ -31,7 +31,7 @@ class Category extends \Gazelle\Base {
      * Category names for reports.
      * There is an extra "Global" category for reports that apply to all upload categories.
      */
-    public function reportList(): array {
+    public function categoryList(): array {
         if (!isset($this->info['report'])) {
             $list = self::$cache->get_value(self::REPORT_KEY);
             if ($list === false) {

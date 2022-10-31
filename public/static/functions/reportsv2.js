@@ -9,12 +9,12 @@ function ChangeResolve(reportid) {
         + '&type=' + $('#resolve_type' + reportid).val()
         + '&categoryid=' + $('#categoryid' + reportid).val();
     $.getJSON(url, function(x) {
-        $('#delete' + reportid).prop('checked', x[0] == '1');
+        $('#delete' + reportid).prop('checked', x[0] == true);
         if ($('#uploaderid' + reportid).val() == $('#reporterid' + reportid).val()) {
             $('#upload' + reportid).prop('checked', false);
             $('#warning' + reportid).val('0');
         } else {
-            $('#upload' + reportid).prop('checked', x[1] == '1');
+            $('#upload' + reportid).prop('checked', x[1] == true);
             $('#warning' + reportid).val(x[2]);
         }
         $('#update_resolve' + reportid).enable();
@@ -29,12 +29,12 @@ function Load(reportid) {
         + '&type=' + $('#resolve_type' + reportid).val()
         + '&categoryid=' + $('#categoryid' + reportid).val();
     $.getJSON(url, function(x) {
-        $('#delete' + reportid).prop('checked', x[0] == '1');
+        $('#delete' + reportid).prop('checked', x[0] == true);
         if ($('#uploaderid' + reportid).val() == $('#reporterid' + reportid).val()) {
             $('#upload' + reportid).prop('checked', false);
             $('#warning' + reportid).val('0');
         } else {
-            $('#upload' + reportid).prop('checked', x[1] == '1');
+            $('#upload' + reportid).prop('checked', x[1] == true);
             $('#warning' + reportid).val(x[2]);
         }
         $('#update_resolve' + reportid).enable();
@@ -161,7 +161,7 @@ function ClearReport(reportid) {
 function Grab(reportid) {
     if (reportid) {
         $.get("reportsv2.php?action=ajax_grab_report&id=" + reportid, function(response) {
-            if (response == '1') {
+            if (response == 1) {
                 $('#grab' + reportid).disable();
             } else {
                 alert('Grab failed for some reason :/');
@@ -171,7 +171,7 @@ function Grab(reportid) {
         $('#all_reports input[name="reportid"]').each(function() {
             var reportid = this.value;
             $.get("reportsv2.php?action=ajax_grab_report&id=" + reportid, function(response) {
-                if (response == '1') {
+                if (response == 1) {
                     $('#grab' + reportid).disable();
                 } else {
                     alert("One of those grabs failed, sorry I can't be more useful :P");
@@ -198,16 +198,15 @@ function UpdateResolve(reportid) {
 }
 
 
-function Switch(reportid, torrentid, otherid) {
+function Switch(reportid, otherid) {
     // We want to switch positions of the reported torrent
     // This entails invalidating the current report and creating a new with the correct preset.
     Dismiss(reportid);
 
     var report = {
         auth: authkey,
-        torrentid: otherid,
-        type: $('#type' + reportid).val(),
-        otherid: torrentid
+        reportid: reportid,
+        otherid: otherid,
     };
 
     $.post('reportsv2.php?action=ajax_create_report', report, function(response) {

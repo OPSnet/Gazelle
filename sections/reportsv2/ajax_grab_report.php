@@ -4,7 +4,6 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$id = (int)($_GET['id'] ?? 0);
-if ($id) {
-    echo (new Gazelle\ReportV2($id))->claim($Viewer->id());
-}
+echo (new Gazelle\Manager\Torrent\Report)
+    ->findById((int)($_GET['id'] ?? 0))
+    ?->claim($Viewer->id()) ?? 0;

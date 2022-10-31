@@ -1,11 +1,12 @@
 <?php
 
-$bookmark = new Gazelle\User\Bookmark($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
-$top10    = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$reportMan = new Gazelle\Manager\Torrent\Report;
+$bookmark  = new Gazelle\User\Bookmark($Viewer);
+$snatcher  = new Gazelle\User\Snatch($Viewer);
+$top10     = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
+$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$imgProxy  = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';
@@ -233,15 +234,15 @@ foreach ($context as $c) {
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                 ]) ?>
-                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torrent->hasReport($Viewer)) { ?> - <strong class="torrent_label tl_reported">Reported</strong>
-<?php
-    }
-    echo $Twig->render('bookmark/action.twig', [
-        'class'         => 'torrent',
-        'id'            => $groupId,
-        'is_bookmarked' => $isBookmarked,
-    ]);
-?>
+                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->labelList() ?>]
+<?php   if ($torrent->hasReport($Viewer)) { ?>
+                - <strong class="torrent_label tl_reported">Reported</strong>
+<?php   } ?>
+                <?= $Twig->render('bookmark/action.twig', [
+                    'class'         => 'torrent',
+                    'id'            => $groupId,
+                    'is_bookmarked' => $isBookmarked,
+                ]); ?>
                 <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
             </div>
         </td>

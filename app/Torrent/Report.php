@@ -1,16 +1,16 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Torrent;
 
-class ReportV2 extends BaseObject {
-
+class Report extends \Gazelle\BaseObject {
     protected array $info;
     protected int $moderatorId;
-    protected int $groupId;
-    protected int $torrentId;
+    protected \Gazelle\Torrent|null|bool $torrent = false;
 
     public function tableName(): string { return 'reportsv2'; }
-    public function flush() {}
+    public function flush() {
+        $this->info = [];
+    }
 
     public function url(): string {
         return "reportsv2.php?view=report&amp;id=" . $this->id;
@@ -25,31 +25,22 @@ class ReportV2 extends BaseObject {
         return $this;
     }
 
-    public function setGroupId(int $groupId) {
-        $this->groupId = $groupId;
-        return $this;
-    }
-
-    public function setTorrentId(int $torrentId) {
-        $this->torrentId = $torrentId;
-        return $this;
-    }
-
     public function info(): array {
-        if (!isset($this->info)) {
+        if (!isset($this->info) || $this->info === []) {
             $this->info = self::$db->rowAssoc("
                 SELECT ReporterID  AS reporter_id,
                     ResolverID     AS resolver_id,
                     TorrentID      AS torrent_id,
                     Type           AS type,
+                    ModComment     AS comment,
                     UserComment    AS reason,
                     Status         AS status,
                     ReportedTime   AS created,
                     LastChangeTime AS modified,
-                    Track          AS tracks,
+                    Track          AS track_list,
                     Image          AS image,
                     ExtraID        AS other_id,
-                    Link           AS link,
+                    Link           AS external_link,
                     LogMessage     AS message
                 FROM reportsv2
                 WHERE ID = ?
@@ -59,15 +50,92 @@ class ReportV2 extends BaseObject {
         return $this->info;
     }
 
-    public function type(): string {
-        return $this->info()['type'];
+    public function comment(): ?string {
+        return $this->info()['comment'];
     }
 
-    public function reportType(): array {
-        /**
-         ** WARNING: UGLY HACK
-         **/
-        return (new \Gazelle\Manager\Torrent\Report)->type($this->type());
+    public function created(): string {
+        return $this->info()['created'];
+    }
+
+    public function externalLink(): array {
+        $list = $this->info()['external_link'];
+        if (is_null($list) || $list === '') {
+            return [];
+        }
+        return preg_split('/\s+/', $list);
+    }
+
+    public function image(): array {
+        $list = $this->info()['image'];
+        if (is_null($list) || $list === '') {
+            return [];
+        }
+        return preg_split('/\s+/', $list);
+    }
+
+    public function message(): ?string {
+        return $this->info()['message'];
+    }
+
+    public function modified(): string {
+        return $this->info()['modified'];
+    }
+
+    public function otherIdList(): array {
+        $list = $this->info()['other_id'];
+        if (is_null($list) || $list === '') {
+            return [];
+        }
+        return array_map('intval', preg_split('/\s+/', $list));
+    }
+
+    public function reason(): string {
+        return $this->info()['reason'] ?? '-No reason given-';
+    }
+
+    public function reporterId(): int {
+        return $this->info()['reporter_id'];
+    }
+
+    public function reportType(): \Gazelle\Torrent\ReportType {
+        return (new \Gazelle\Manager\Torrent\ReportType)->findByType($this->type());
+    }
+
+    public function resolverId(): int {
+        return $this->info()['resolver_id'];
+    }
+
+    public function status(): string {
+        return $this->info()['status'];
+    }
+
+    /**
+     * Note: the torrent may no longer exist, e.g. resolving a report may delete
+     * the torrent (even if the report knows the torrent id). This is why the
+     * code must start from false and transition to either NULL or a Torrent.
+     */
+    public function torrent(): ?\Gazelle\Torrent {
+        if ($this->torrent === false) {
+            $this->torrent = (new \Gazelle\Manager\Torrent)->findById($this->torrentId());
+        }
+        return $this->torrent;
+    }
+
+    public function torrentId(): int {
+        return $this->info()['torrent_id'];
+    }
+
+    public function trackList(): array {
+        $list = $this->info()['track_list'];
+        if (is_null($list) || $list === '') {
+            return [];
+        }
+        return array_map('intval', preg_split('/\D+/', $list));
+    }
+
+    public function type(): string {
+        return $this->info()['type'];
     }
 
     public function setTorrentFlag(string $tableName): int {
@@ -75,14 +143,14 @@ class ReportV2 extends BaseObject {
             INSERT IGNORE INTO {$tableName}
                    (UserID, TorrentID)
             VALUES (?,      ?)
-            ", $this->moderatorId, $this->torrentId
+            ", $this->moderatorId, $this->torrent->id()
         );
         $affected = self::$db->affected_rows();
-        (new TGroup($this->groupId))?->flush();
+        $this->torrent->flush();
         return $affected;
     }
 
-    public function claim(int $userId): bool {
+    public function claim(int $userId): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 LastChangeTime = now(),
@@ -91,7 +159,7 @@ class ReportV2 extends BaseObject {
             WHERE ID = ?
             ", $userId, $this->id
         );
-        return self::$db->affected_rows() === 1;
+        return self::$db->affected_rows();
     }
 
     /**
@@ -127,7 +195,7 @@ class ReportV2 extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function moderatorResolve(int $userId, string $message): bool {
+    public function moderatorResolve(int $userId, string $message): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 Status = 'Resolved',
@@ -138,33 +206,37 @@ class ReportV2 extends BaseObject {
                 AND ID = ?
             ", $userId, $message, $this->id
         );
-        (new \Gazelle\Torrent($this->torrentId))->flush();
-        return self::$db->affected_rows() > 0;
+        $this->torrent->flush();
+        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'a', $this->torrentId()));
+        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'u', $this->torrentId()));
+        return self::$db->affected_rows();
     }
 
     /**
      * Finalize a report: log the final details post-resolve
      */
-    public function finalize(string $resolveType, string $log, string $message): bool {
+    public function finalize(string $log, string $message): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 LastChangeTime = now(),
-                Type = ?,
                 LogMessage = ?,
                 ModComment = ?
             WHERE ID = ?
-            ", $resolveType, $log, $message, $this->id
+            ", $log, $message, $this->id
         );
-        return self::$db->affected_rows() === 1;
+        $this->torrent->flush();
+        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'a', $this->torrentId()));
+        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'u', $this->torrentId()));
+        return self::$db->affected_rows();
     }
 
-    public function changeType(string $type): int {
+    public function changeType(\Gazelle\Torrent\ReportType $rt): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 LastChangeTime = now(),
                 Type = ?
             WHERE ID = ?
-            ", $type, $this->id
+            ", $rt->type(), $this->id
         );
         return self::$db->affected_rows();
     }
@@ -172,7 +244,7 @@ class ReportV2 extends BaseObject {
     /**
      * Update the comment of a report
      */
-    public function comment(string $comment): int {
+    public function modifyComment(string $comment): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 LastChangeTime = now(),

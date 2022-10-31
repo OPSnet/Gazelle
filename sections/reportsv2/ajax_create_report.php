@@ -2,10 +2,9 @@
 /*
  * This page is for creating a report using AJAX.
  * It should have the following posted fields:
- *     [auth] => AUTH_KEY
- *    [torrentid] => TORRENT_ID
- *    [type] => TYPE
- *    [otherid] => OTHER_ID
+ *    [auth]
+ *    [reportid]  this report
+ *    [otherid]   related torrent
  *
  * It should not be used on site as is, except in its current use (Switch) as it is lacking for any purpose but this.
  */
@@ -14,35 +13,40 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-if (!isset($_POST['type'])) {
-    json_die('Missing Type');
-}
-
 authorize();
 
-$torMan = new Gazelle\Manager\Torrent;
-$torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
-if (is_null($torrent)) {
-    json_die('No Torrent ID');
+$other = (new Gazelle\Manager\Torrent)->findById((int)$_POST['otherid']);
+if (is_null($other)) {
+    json_error("bad other id");
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-if ($reportMan->existsRecent($torrent->id(), $Viewer->id())) {
-    exit;
+$reportMan = new Gazelle\Manager\Torrent\Report;
+if ($reportMan->existsRecent($other->id(), $Viewer->id())) {
+    json_error("too soon");
+}
+$report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
+if (is_null($report)) {
+    json_error("bad report id");
 }
 
-$reason = trim($_POST['extra'] ?? '');
-$report = $reportMan->create($torrent, $Viewer, $_POST['type'] ?? 'other', $reason, (int)$_POST['otherid']);
+$new = $reportMan->create(
+    torrent:     $other,
+    user:        new Gazelle\User($report->reporterId()),
+    reportType:  $report->reportType(),
+    reason:      $report->reason(),
+    image:       implode(' ', $report->image()),
+    otherIdList: (string)$report->torrentId(),
+);
 
-if ($torrent->uploaderId() != $Viewer->id()) {
-    (new Gazelle\Manager\User)->sendPM($torrent->uploaderId(), 0,
+if ($other->uploaderId() != $Viewer->id()) {
+    (new Gazelle\Manager\User)->sendPM($other->uploaderId(), 0,
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.twig', [
-            'id'     => $torrent->id(),
-            'title'  => $report->reportType()['title'],
-            'reason' => $reason,
+            'id'     => $other->id(),
+            'title'  => $new->reportType()->name(),
+            'reason' => $new->reason(),
         ])
     );
 }
 
-echo $report->id();
+echo $new->id();

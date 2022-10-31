@@ -2,30 +2,24 @@
 // perform the back end of updating a resolve type
 
 if (!$Viewer->permitted('admin_reports')) {
-    error(403);
+    json_die("failure", "forbidden");
 }
+
 authorize();
 
-if (empty($_GET['newresolve'])) {
-    error("No new resolve");
+$reportType = (new Gazelle\Manager\Torrent\ReportType)->findByType($_GET['newresolve'] ?? '');
+if (is_null($reportType)) {
+    json_error("bad newresolve");
 }
 
-$id = (int)$_GET['reportid'];
-if (!$id) {
-    error("No report ID");
+$report = (new Gazelle\Manager\Torrent\Report)->findById((int)($_GET['reportid'] ?? 0));
+if (is_null($report)) {
+    json_error("bad reportid");
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$Types = $reportMan->types();
-$TypeList = $Types['master'];
-$CategoryID = (int)$_GET['categoryid'];
-if (!empty($Types[$CategoryID])) {
-    $TypeList = array_merge($TypeList, $Types[$CategoryID]);
-}
+json_print("success", [
+    'old'     => $report->reportType()->type(),
+    'new'     => $reportType->type(),
+    'success' => $report->changeType($reportType),
+]);
 
-$NewType = $_GET['newresolve'];
-if (!array_key_exists($NewType, $TypeList)) {
-    error("No resolve from that category");
-}
-
-(new Gazelle\ReportV2($id))->changeType($NewType);

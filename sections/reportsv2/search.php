@@ -4,17 +4,15 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$userMan    = new Gazelle\Manager\User;
-$reportMan  = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$Types      = $reportMan->types();
-$categories = $reportMan->categories();
+$userMan       = new Gazelle\Manager\User;
+$reportMan     = new Gazelle\Manager\Torrent\Report;
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$categories    = $reportMan->categories();
 
-$reportNameCache = [];
-foreach ($categories as $label => $key) {
-    foreach (array_keys($Types[$label]) as $type) {
-        $reportNameCache[$type] = $Types[$label][$type]['title'] . " ($key)";
-    }
-}
+$reportNameCache = array_map(
+    fn ($rt) => "{$rt->name()} ({$rt->categoryName()})",
+    $reportTypeMan->list()
+);
 
 $filter = [];
 if (isset($_GET['report-type'])) {

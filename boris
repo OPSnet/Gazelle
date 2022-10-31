@@ -40,6 +40,8 @@ $preload = [
     'tgMan'       => new Gazelle\Manager\TGroup,
     'threadMan'   => new Gazelle\Manager\ForumThread,
     'torMan'      => new Gazelle\Manager\Torrent,
+    'repMan'      => new Gazelle\Manager\Torrent\Report,
+    'repTypeMan'  => new Gazelle\Manager\Torrent\ReportType,
     'userMan'     => new Gazelle\Manager\User,
 ];
 

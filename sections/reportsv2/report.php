@@ -13,32 +13,20 @@ if (is_null($torrent)) {
     exit;
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
-$Types     = $reportMan->types();
-$snatcher  = new Gazelle\User\Snatch($Viewer);
-$urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
-$userMan   = new Gazelle\Manager\User;
-
 $tgroup        = $torrent->group();
 $GroupID       = $tgroup->id();
 $CategoryID    = $tgroup->categoryId();
 $remasterTuple = false;
 $FirstUnknown  = $torrent->isRemasteredUnknown();
-$Reports       = $torMan->reportList($Viewer, $torrentId);
-$NumReports    = count($Reports);
-$Reported      = $NumReports > 0;
 $EditionID     = 0;
 
-if (empty($Types[$CategoryID])) {
-    $TypeList = $Types['master'];
-} else {
-    $TypeList = $Types['master'] + $Types[$CategoryID];
-    $Priorities = [];
-    foreach ($TypeList as $Key => $Value) {
-        $Priorities[$Key] = $Value['priority'];
-    }
-    array_multisort($Priorities, SORT_ASC, $TypeList);
-}
+$reportMan      = new Gazelle\Manager\Torrent\Report;
+$reportTypeMan  = new Gazelle\Manager\Torrent\ReportType;
+$reportTypeList = $reportTypeMan->categoryList($CategoryID);
+$snatcher       = new Gazelle\User\Snatch($Viewer);
+$urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$userMan        = new Gazelle\Manager\User;
+$reportList     = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
 
 View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
 ?>
@@ -116,7 +104,7 @@ $remasterTuple = $torrent->remasterTuple();
 <?php } ?>
                             <a href="#" class="brackets" onclick="show_seeders('<?= $torrentId ?>', 0); return false;">View seeders</a>
                             <a href="#" class="brackets" onclick="show_files('<?= $torrentId ?>'); return false;">View contents</a>
-<?php if ($Reported) { ?>
+<?php if (count($reportList)) { ?>
                             <a href="#" class="brackets" onclick="show_reported('<?= $torrentId ?>'); return false;">View report information</a>
 <?php } ?>
                         </div>
@@ -144,33 +132,24 @@ foreach ($torrent->fileList() as $file) {
 </table>
 </div>
 
-<?php if ($Reported) { ?>
+<?php if (count($reportList)) { ?>
                         <div id="reported_<?= $torrentId ?>" class="hidden">
     <table class="reportinfo_table">
         <tr class="colhead_dark" style="font-weight: bold;">
-            <td>This torrent has <?= $NumReports ?> active report<?= plural($NumReports) ?>:</td>
+            <td>This torrent has <?= count($reportList) ?> active report<?= plural(count($reportList)) ?>:</td>
         </tr>
 <?php
-    foreach ($Reports as $Report) {
-        if ($Viewer->permitted('admin_reports')) {
-            $ReporterID = $Report['ReporterID'];
-            $ReporterName = $userMan->findById($ReporterID)->username();
-            $ReportLinks = "<a href=\"user.php?id=$ReporterID\">$ReporterName</a> <a href=\"reportsv2.php?view=report&amp;id={$Report['ID']}\">reported it</a>";
-        } else {
-            $ReportLinks = 'Someone reported it';
-        }
-        if (isset($Types[$CategoryID][$Report['Type']])) {
-            $ReportType = $Types[$CategoryID][$Report['Type']];
-        } elseif (isset($Types['master'][$Report['Type']])) {
-            $ReportType = $Types['master'][$Report['Type']];
-        } else {
-            //There was a type but it wasn't an option!
-            $ReportType = $Types['master']['other'];
-        }
+    foreach ($reportList as $report) {
 ?>
         <tr>
-            <td><?= $ReportLinks ?><?= time_diff($Report['ReportedTime'], 2) ?> for the reason <?= $ReportType['title'] ?>:
-                <blockquote><?= Text::full_format($Report['UserComment']) ?></blockquote>
+            <td>
+<?php   if ($Viewer->permitted('admin_reports')) { ?>
+            <?= $userMan->findById($report->reporterId())?->link() ?? 'System' ?> <a href=\"<?= $report->url() ?>\">reported it</a>
+<?php   } else { ?>
+            Someone reported it
+<?php   } ?>
+            <?= time_diff($report->created(), 1) ?> for the reason <?= $report->reportType()->name() ?>:
+                <blockquote><?= Text::full_format($report->reason()) ?></blockquote>
             </td>
         </tr>
 <?php } ?>
@@ -202,8 +181,8 @@ if (!empty($torrent->description())) {
                     <td class="label">Reason:</td>
                     <td>
                         <select id="type" name="type" onchange="ChangeReportType();">
-<?php foreach ($TypeList as $Type => $Data) { ?>
-            <option value="<?=($Type)?>"><?=($Data['title'])?></option>
+<?php foreach ($reportTypeList as $rt) { ?>
+            <option value="<?= $rt->type() ?>"><?= $rt->name() ?></option>
 <?php } ?>
                         </select>
                     </td>
@@ -224,7 +203,7 @@ if (!empty($torrent->description())) {
                 <script type="text/javascript">ChangeReportType();</script>
             </div>
         </div>
-    <input type="submit" value="Submit report" />
+    <input type="submit" value="Create report" />
     </form>
 </div>
 <?php

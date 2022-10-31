@@ -4,7 +4,6 @@
  * It checks for (in order):
  * 1. The usual POST injections, then checks that things.
  * 2. Things that are required by the report type are filled
- *     ('1' in the report_fields array).
  * 3. Things that are filled are filled with correct things.
  * 4. That the torrent you're reporting still exists.
  *
@@ -13,95 +12,100 @@
 
 authorize();
 
-$CategoryID = (int)$_POST['categoryid'];
-if (!$CategoryID) {
-    error("report category not set");
-}
-
 $torMan = new Gazelle\Manager\Torrent;
 $torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error(404);
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
-$Type = $_POST['type'];
-$ReportType = $reportMan->type($Type);
+$reportMan = new Gazelle\Manager\Torrent\Report;
+if ($reportMan->existsRecent($torrent->id(), $Viewer->id())) {
+    error("Slow down, you're moving too fast!");
+}
 
-foreach ($ReportType['report_fields'] as $Field => $Value) {
-    if ($Value == '1') {
-        if (empty($_POST[$Field])) {
-            $Err = "You are missing a required field ($Field) for a " . $ReportType['title'] . ' report.';
-        }
+$reportType = (new Gazelle\Manager\Torrent\ReportType)->findByType($_POST['type'] ?? '');
+if (is_null($reportType)) {
+    error("bad report type");
+}
+
+if ($reportType->needImage() === 'required') {
+    $field = 'image';
+    if (empty($_POST[$field])) {
+        error("You are missing a required field ($field) for a {$reportType->name()} report.");
     }
 }
 
-if (empty($_POST['sitelink'])) {
-    $ExtraIDs = '';
-} else {
-    $torMan = new Gazelle\Manager\Torrent;
-    if (!preg_match_all(TORRENT_REGEXP, $_POST['sitelink'], $match)) {
-        $Err = 'The permalink was incorrect. Please copy the torrent permalink URL, which is labelled as [PL] and is found next to the [DL] buttons.';
-    } else {
+$ExtraIDs = '';
+if ($reportType->needSitelink() !== 'none') {
+    $sitelink = trim($_POST['sitelink'] ?? '');
+    if (!($sitelink === '' && $reportType->needSitelink() === 'optional')) {
+        if (!preg_match_all(TORRENT_REGEXP, $sitelink, $match)) {
+            error("The permalink was incorrect. Please copy the torrent permalink URL, which is labelled as [PL] and is found next to the [DL] buttons.");
+        }
         $all = $match['id'];
         if (in_array($torrent->id(), $all)) {
-            $Err = "The extra permalinks you gave included the link to the torrent you're reporting!";
+            error("The extra permalinks you gave included the link to the torrent you're reporting!");
         }
         $ExtraIDs = implode(' ', $all);
     }
 }
 
-if (empty($_POST['link'])) {
-    $Links = '';
-} else {
-    if (preg_match_all(URL_REGEXP, $_POST['link'], $match)) {
+$Links = '';
+if ($reportType->needLink() !== 'none') {
+    $link = trim($_POST['link'] ?? '');
+    if (!($link === '' && $reportType->needLink() === 'optional')) {
+        if (!preg_match_all(URL_REGEXP, $_POST['link'], $match)) {
+            error("The extra links you provided weren't links...");
+        }
         $Links = implode(' ', $match[1]);
-    } else {
-        $Err = "The extra links you provided weren't links...";
     }
 }
 
-if (empty($_POST['image'])) {
-    $Images = '';
-} else {
-    if (preg_match_all(IMAGE_REGEXP, trim($_POST['image']), $match)) {
+$Images = '';
+if ($reportType->needImage() !== 'none') {
+    $image = trim($_POST['image'] ?? '');
+    if (!($image === '' && $reportType->needImage() === 'optional')) {
+        if (!preg_match_all(IMAGE_REGEXP, trim($_POST['image']), $match)) {
+            error("The extra image links you provided weren't links to images...");
+        }
         $Images = implode(' ', $match[1]);
-    } else {
-        $Err = "The extra image links you provided weren't links to images...";
     }
 }
 
-if (empty($_POST['track'])) {
-    $Tracks = '';
-} else {
-    if (preg_match('/(\d+(?:\s+\d+)*)|all/is', $_POST['track'], $Matches)) {
-        $Tracks = $Matches[0];
-    } else {
-        $Err = 'Tracks should be given in a space-separated list of numbers with no other characters.';
+$trackList = '';
+if ($reportType->needTrack() !== 'none') {
+    $trackList = trim($_POST['track']);
+    if ($trackList !== 'all') {
+        $trackList = implode(' ', array_filter(array_map('intval', preg_split('/\D+/', $n)), fn ($n) => $n));
+        if ($trackList === '') {
+            error('Tracks should be given in a space-separated list of numbers with no other characters, or "all".');
+        }
     }
 }
 
-$userComment = trim($_POST['extra']);
-if (empty($userComment)) {
-    $Err = 'As useful as blank reports are, could you be a tiny bit more helpful? (Leave a comment)';
+$reason = trim($_POST['extra']);
+if (empty($reason)) {
+    error("As useful as blank reports are, could you be a tiny bit more helpful? (Leave a comment)");
 }
 
-if ($reportMan->existsRecent($torrent->id(), $Viewer->id())) {
-    $Err = "Slow down, you're moving too fast!";
-}
+$report = $reportMan->create(
+    torrent:     $torrent,
+    user:        $Viewer,
+    reportType:  $reportType,
+    reason:      $reason,
+    otherIdList: $ExtraIDs,
+    track:       $trackList,
+    image:       $Images,
+    link:        $Links,
+);
 
-if (!empty($Err)) {
-    error($Err);
-}
-
-$reportMan->createReport($torrent, $Viewer, $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links);
-if ($torrent->uploaderId() != $Viewer->id()) {
+if ($reportType->type() != 'edited' && $torrent->uploaderId() != $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($torrent->uploaderId(), 0,
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.twig', [
             'id'     => $torrent->id(),
-            'title'  => $ReportType['title'],
-            'reason' => $userComment,
+            'title'  => $reportType->name(),
+            'reason' => $report->reason(),
         ])
     );
 }

@@ -1,9 +1,9 @@
 <?php
+
 if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$id = (int)$_GET['id'];
-if ($id) {
-    (new Gazelle\ReportV2($id))->unclaim();
-}
+(new Gazelle\Manager\Torrent\Report)
+    ->findById((int)($_GET['id'] ?? 0))
+    ?->unclaim();
