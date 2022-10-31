@@ -5,7 +5,6 @@ namespace Gazelle\Manager;
 use Gazelle\Util\Time;
 
 class User extends \Gazelle\BaseManager {
-
     protected const CACHE_STAFF = 'pm_staff_list';
     protected const ID_KEY = 'zz_u_%d';
     protected const USERNAME_KEY = 'zz_unam_%s';
@@ -765,7 +764,7 @@ class User extends \Gazelle\BaseManager {
             UPDATE users_info SET
                 WarnedTimes = WarnedTimes + 1,
                 Warned = ?,
-                AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
+                AdminComment = concat(now(), ' - ', ?, AdminComment)
             WHERE UserID = ?
             ", $warnTime, "$warning by $staffName\nReason: $reason\n\n", $userId
         );
@@ -785,7 +784,7 @@ class User extends \Gazelle\BaseManager {
                 um.Enabled = '2',
                 um.can_leech = '0',
                 ui.BanDate = now(),
-                ui.AdminComment = CONCAT(now(), ' - ', ?, ui.AdminComment),
+                ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment),
                 ui.BanReason = ?
             WHERE um.ID IN (" . placeholders($userIds) . ")
             ", "$comment\n\n", $reason, ...$userIds
@@ -1365,6 +1364,58 @@ class User extends \Gazelle\BaseManager {
         }
         self::$cache->deleteMulti(array_keys($clear));
         return $processed;
+    }
+
+    public function triggerRatioWatch(\Gazelle\Tracker $tracker, \Gazelle\Schedule\Task $task = null): int {
+        $userQuery = self::$db->prepared_query("
+            SELECT um.ID, um.torrent_pass
+            FROM users_info AS ui
+            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
+            WHERE ui.RatioWatchEnds < now()
+                AND um.Enabled = '1'
+                AND um.can_leech != '0'
+        ");
+
+        $idList  = self::$db->collect('ID');
+        if (count($idList) == 0) {
+            return 0;
+        }
+        $passkeys = self::$db->collect('torrent_pass');
+
+        self::$db->begin_transaction();
+        $placeholders = placeholders($idList);
+        self::$db->prepared_query("
+            UPDATE users_info AS ui
+            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
+            SET um.can_leech = '0',
+                ui.AdminComment = concat(now(), ' - Leeching ability disabled by ratio watch system - required ratio: ', um.RequiredRatio, '\n\n', ui.AdminComment)
+            WHERE um.ID IN($placeholders)
+            ", ...$idList
+        );
+
+        self::$db->prepared_query("
+            DELETE FROM users_torrent_history
+            WHERE UserID IN ($placeholders)
+            ", ...$idList
+        );
+        self::$db->commit();
+
+        foreach ($idList as $userId) {
+            $this->findById($userId)?->flush();
+            $this->sendPM($userId, 0,
+                'Your downloading privileges have been disabled',
+                "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
+            );
+            if ($task) {
+                $task->debug("Disabled leech for $userId", $userId);
+            }
+        }
+
+        foreach ($passkeys as $passkey) {
+            $tracker->update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '0']);
+        }
+
+        return count($idList);
     }
 
     public function updateLastAccess(): int {
