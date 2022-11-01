@@ -237,7 +237,7 @@ function parse_user_agent(): array {
  * @param boolean $NoHTML If true, the header/footer won't be shown, just the description.
  * @param boolean $Log If true, the user is given a link to search $Log in the site log.
  */
-function error($Error, $NoHTML = false, $Log = false) {
+function error($Error, $NoHTML = false, $Log = false): never {
     global $Debug, $Document, $Viewer, $Twig;
     require_once(__DIR__ . '/../sections/error/index.php');
     if (isset($Viewer)) {
@@ -249,9 +249,9 @@ function error($Error, $NoHTML = false, $Log = false) {
 /**
  * Print JSON status result with an optional message and die.
  */
-function json_die($Status, $Message="bad parameters") {
+function json_die($Status, $Message="bad parameters"): never {
     json_print($Status, $Message);
-    die();
+    exit;
 }
 
 /**
@@ -269,9 +269,9 @@ function json_print($Status, $Message) {
     print(json_encode(add_json_info($response)));
 }
 
-function json_error($Code) {
+function json_error($Code): never {
     echo json_encode(add_json_info(['status' => 'failure', 'error' => $Code, 'response' => []]));
-    die();
+    exit;
 }
 
 function json_or_error($JsonError, $Error = null, $NoHTML = false) {
