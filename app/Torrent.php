@@ -3,10 +3,10 @@
 namespace Gazelle;
 
 class Torrent extends BaseObject {
-
     const CACHE_KEY                = 't3_%d';
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
+    const CACHE_REPORTLIST         = 't_rpt_%s_%d';
     const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
@@ -86,6 +86,46 @@ class Torrent extends BaseObject {
     public function setViewer(User $viewer) {
         $this->viewer = $viewer;
         return $this;
+    }
+
+    public function hasReport(\Gazelle\User $viewer): bool {
+        return count($this->reportIdList($viewer)) > 0;
+    }
+
+    /**
+     * Get the reports associated with this torrent
+     * Non-admin users do not see Edited reports
+     *
+     * @return array of \Gazelle\Torrent\Report
+     */
+    public function reportIdList(\Gazelle\User $viewer): array {
+        $key = sprintf(self::CACHE_REPORTLIST, $viewer->permitted('admin_reports') ? 'a' : 'u', $this->id());
+        $list = self::$cache->get_value($key);
+        if ($list === false) {
+            $qid = self::$db->get_query_id();
+            if ($viewer->permitted('admin_reports')) {
+                self::$db->prepared_query("
+                    SELECT ID
+                    FROM reportsv2
+                    WHERE Status != 'Resolved'
+                        AND TorrentID = ?
+                    ", $this->id
+                );
+            } else {
+                self::$db->prepared_query("
+                    SELECT ID
+                    FROM reportsv2
+                    WHERE Status != 'Resolved'
+                        AND Type != 'edited'
+                        AND TorrentID = ?
+                    ", $this->id
+                );
+            }
+            $list = self::$db->collect(0, false);
+            self::$db->set_query_id($qid);
+            self::$cache->cache_value($key, $list, 7200);
+        }
+        return $list;
     }
 
     /**

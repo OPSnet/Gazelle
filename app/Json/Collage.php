@@ -49,7 +49,7 @@ class Collage extends \Gazelle\Json {
                     'leechers'                => $torrent->leecherTotal(),
                     'snatched'                => $torrent->snatchTotal(),
                     'freeTorrent'             => $torrent->isFreeleech(),
-                    'reported'                => $this->torMan->hasReport($this->user, $torrentId),
+                    'reported'                => $torrent->hasReport($this->user),
                     'time'                    => $torrent->uploadDate(),
                 ];
             }

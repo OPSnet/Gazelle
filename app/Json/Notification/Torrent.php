@@ -4,9 +4,9 @@ namespace Gazelle\Json\Notification;
 
 class Torrent extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\User\Notification\Torrent  $notifier,
-        protected \Gazelle\Util\Paginator             $paginator,
-        protected \Gazelle\Manager\Torrent            $torMan,
+        protected \Gazelle\User\Notification\Torrent $notifier,
+        protected \Gazelle\Util\Paginator            $paginator,
+        protected \Gazelle\Manager\Torrent           $torMan,
     ) {}
 
     public function torrentPayload(array $info): array {
@@ -44,7 +44,7 @@ class Torrent extends \Gazelle\Json {
             'ripLogIds'       => $torrent->ripLogIdList(),
             'freeTorrent'     => $torrent->isFreeleech(),
             'isNeutralLeech'  => $torrent->isFreeleech(),
-            'reported'        => $this->torMan->hasReport($this->notifier->user(), $torrent->id()),
+            'reported'        => $torrent->hasReport($this->notifier->user()),
             'time'            => $torrent->uploadDate(),
             'description'     => $torrent->description(),
             'filter'          => $info['filter_name'],

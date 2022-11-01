@@ -293,15 +293,6 @@ class Torrent extends \Gazelle\BaseManager {
     }
 
     /**
-     * Are there any reports associated with this torrent?
-     *
-     * @return bool Yes there are
-     */
-    public function hasReport(\Gazelle\User $viewer, int $torrentId): bool {
-        return count($this->reportList($viewer, $torrentId)) > 0;
-    }
-
-    /**
      * Record who's seeding how much, used for ratio watch
      */
     public function updateSeedingHistory(): array {

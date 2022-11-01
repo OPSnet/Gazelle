@@ -233,7 +233,7 @@ foreach ($context as $c) {
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                 ]) ?>
-                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torMan->hasReport($Viewer, $torrentId)) { ?> - <strong class="torrent_label tl_reported">Reported</strong>
+                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= $torrent->label() ?>]<?php if ($torrent->hasReport($Viewer)) { ?> - <strong class="torrent_label tl_reported">Reported</strong>
 <?php
     }
     echo $Twig->render('bookmark/action.twig', [

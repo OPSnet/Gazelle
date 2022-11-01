@@ -208,7 +208,7 @@ foreach ($Results as $GroupID) {
             }
             $prev = $current;
             $SnatchedTorrentClass = $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '';
-            $Reported = $torMan->hasReport($Viewer, $torrent->id());
+            $Reported = $torrent->hasReport($Viewer);
 ?>
     <tr class="group_torrent groupid_<?=$tgroup->id()?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
