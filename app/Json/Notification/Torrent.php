@@ -3,24 +3,11 @@
 namespace Gazelle\Json\Notification;
 
 class Torrent extends \Gazelle\Json {
-    protected \Gazelle\User\Notification\Torrent  $notifier;
-    protected \Gazelle\Util\Paginator             $paginator;
-    protected \Gazelle\Manager\Torrent            $torMan;
-
-    public function setNotifier(\Gazelle\User\Notification\Torrent $notifier) {
-        $this->notifier = $notifier;
-        return $this;
-    }
-
-    public function setPaginator(\Gazelle\Util\Paginator $paginator) {
-        $this->paginator = $paginator;
-        return $this;
-    }
-
-    public function setTorrentManager(\Gazelle\Manager\Torrent $torMan) {
-        $this->torMan = $torMan;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\User\Notification\Torrent  $notifier,
+        protected \Gazelle\Util\Paginator             $paginator,
+        protected \Gazelle\Manager\Torrent            $torMan,
+    ) {}
 
     public function torrentPayload(array $info): array {
         $torrent = $info['torrent'];
@@ -65,21 +52,7 @@ class Torrent extends \Gazelle\Json {
     }
 
     public function payload(): ?array {
-        if (!isset($this->notifier)) {
-            $this->failure('notifier not set');
-            return null;
-        }
-        if (!isset($this->paginator)) {
-            $this->failure('paginator not set');
-            return null;
-        }
-        if (!isset($this->torMan)) {
-            $this->failure('torrent manager not set');
-            return null;
-        }
-
         $this->paginator->setTotal($this->notifier->total());
-
         return [
             'currentPage' => $this->paginator->page(),
             'pages'       => $this->paginator->pages(),

@@ -3,12 +3,11 @@
 namespace Gazelle\Json\Bookmark;
 
 class TGroup extends \Gazelle\Json {
-
     public function __construct(
         protected \Gazelle\User\Bookmark   $userBookmark,
         protected \Gazelle\Manager\TGroup  $tgMan,
         protected \Gazelle\Manager\Torrent $torMan,
-    ) { }
+    ) {}
 
     public function payload(): array {
         $list = [];

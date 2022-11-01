@@ -3,7 +3,7 @@
 namespace Gazelle\Json;
 
 class News extends \Gazelle\Json {
-    public function __construct(protected int $limit, protected int $offset) { }
+    public function __construct(protected int $limit, protected int $offset) {}
 
     public function payload(): array {
         \Text::$TOC = true;

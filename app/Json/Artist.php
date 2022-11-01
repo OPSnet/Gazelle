@@ -10,7 +10,7 @@ class Artist extends \Gazelle\Json {
         protected \Gazelle\User            $user,
         protected \Gazelle\Manager\TGroup  $tgMan,
         protected \Gazelle\Manager\Torrent $torMan
-    ) { }
+    ) {}
 
     public function setReleasesOnly(bool $releasesOnly) {
         $this->releasesOnly = $releasesOnly;

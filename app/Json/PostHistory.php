@@ -3,12 +3,11 @@
 namespace Gazelle\Json;
 
 class PostHistory extends \Gazelle\Json {
-
     public function __construct(
         protected \Gazelle\Search\Forum $search,
         protected \Gazelle\Manager\User $userMan,
         protected \Gazelle\Util\Paginator $paginator,
-    ) { }
+    ) {}
 
     public function payload(): array {
         $this->paginator->setTotal($this->search->postHistoryTotal());

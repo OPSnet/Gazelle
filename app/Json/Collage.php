@@ -3,13 +3,12 @@
 namespace Gazelle\Json;
 
 class Collage extends \Gazelle\Json {
-
     public function __construct(
         protected \Gazelle\Collage         $collage,
         protected \Gazelle\User            $user,
         protected \Gazelle\Manager\TGroup  $tgMan,
         protected \Gazelle\Manager\Torrent $torMan,
-    ) { }
+    ) {}
 
     public function artistPayload(): array {
         return $this->collage->nameList();

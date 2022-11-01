@@ -6,7 +6,7 @@ class PM  extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\PM $pm,
         protected \Gazelle\Manager\User $userMan,
-    ) { }
+    ) {}
 
     public function payload(): array {
         $user = [];

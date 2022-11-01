@@ -3,7 +3,6 @@
 namespace Gazelle\Json;
 
 class TGroupList extends \Gazelle\Json {
-
     public function __construct(
         protected \Gazelle\User\Bookmark   $bookmark,
         protected \Gazelle\User\Snatch     $snatcher,
@@ -13,7 +12,7 @@ class TGroupList extends \Gazelle\Json {
         protected bool  $groupResults,
         protected int   $total,
         protected int   $page
-    ) { }
+    ) {}
 
     public function payload(): array {
         $list = [];

@@ -3,7 +3,6 @@
 namespace Gazelle\Json;
 
 class Inbox extends \Gazelle\Json {
-
     protected string $dateColumn;
 
     protected array $cond = [];
@@ -16,7 +15,7 @@ class Inbox extends \Gazelle\Json {
         protected int $page,
         protected bool $unreadFirst,
         protected \Gazelle\Manager\User $userMan,
-    ) { }
+    ) {}
 
     public function setSearch(string $searchType, string $search) {
         $search = trim($search);

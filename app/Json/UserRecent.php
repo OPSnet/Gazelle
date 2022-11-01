@@ -3,14 +3,13 @@
 namespace Gazelle\Json;
 
 class UserRecent extends \Gazelle\Json {
-
     protected int $limit = 15;
 
     public function __construct(
         protected \Gazelle\User $user,
         protected \Gazelle\User $viewer,
         protected \Gazelle\Manager\TGroup $tgMan,
-    ) { }
+    ) {}
 
     public function setLimit(int $limit) {
         $this->limit = $limit;

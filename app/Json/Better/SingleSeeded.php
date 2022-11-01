@@ -3,11 +3,10 @@
 namespace Gazelle\Json\Better;
 
 class SingleSeeded extends \Gazelle\Json {
-
     public function __construct(
         protected \Gazelle\User                $user,
         protected \Gazelle\Better\SingleSeeded $better,
-    ) { }
+    ) {}
 
     public function payload(): array {
         return array_map(

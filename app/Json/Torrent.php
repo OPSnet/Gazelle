@@ -3,12 +3,11 @@
 namespace Gazelle\Json;
 
 class Torrent extends \Gazelle\Json {
-
     public function __construct(
         protected \Gazelle\Torrent $torrent,
         protected \Gazelle\User $user,
         protected \Gazelle\Manager\Torrent $torMan,
-    ) { }
+    ) {}
 
     public function torrentPayload(): array {
         $torrent = $this->torrent->setViewer($this->user);
