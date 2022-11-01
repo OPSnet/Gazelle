@@ -469,6 +469,10 @@ class Torrent extends BaseObject {
         return $this->info()['Scene'];
     }
 
+    public function isUploadLocked(): bool {
+        return (bool)self::$cache->get_value("torrent_{$this->id}_lock");
+    }
+
     public function lastReseedRequest(): ?string {
         return $this->info()['LastReseedRequest'];
     }

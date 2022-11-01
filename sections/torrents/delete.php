@@ -7,7 +7,8 @@ if (!$TorrentID) {
     error(404);
 }
 
-if ($Cache->get_value('torrent_'.$TorrentID.'_lock')) {
+$torrent = (new Gazelle\Manager\Torrent)->findById($TorrentID);
+if ($torrent->isUploadLocked()) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 

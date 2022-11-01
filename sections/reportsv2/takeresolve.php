@@ -52,7 +52,8 @@ if (!$torrentId) {
     error("error torrent id");
 }
 $report->setTorrentId($torrentId);
-if (isset($_POST['delete']) && $Cache->get_value("torrent_$torrentId".'_lock')) {
+$torrent = $torMan->findById($torrentId);
+if (isset($_POST['delete']) && $torrent->isUploadLocked()) {
     error("You requested to delete the torrent $torrentId, but this is currently not possible because the upload process is still running. Please try again later.");
 }
 

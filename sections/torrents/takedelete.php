@@ -15,7 +15,7 @@ if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT
     error('You have recently deleted ' . USER_TORRENT_DELETE_MAX
         . ' torrents. Please contact a staff member if you need to delete more.');
 }
-if ($Cache->get_value("torrent_{$torrentId}_lock")) {
+if ($torrent->isUploadLocked()) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
