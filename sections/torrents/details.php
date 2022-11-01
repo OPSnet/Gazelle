@@ -535,7 +535,7 @@ if (!$torrentList) {
         }
     }
 ?>
-                            Uploaded by <?= $torrent->uploader()->link() ?> <?=time_diff($torrent->uploadDate());?>
+                            Uploaded by <?= $torrent->uploader()->link() ?> <?=time_diff($torrent->created());?>
 <?php
     if ($torrent->seederTotal() == 0) {
         $lastActive = $torrent->lastActiveEpoch();

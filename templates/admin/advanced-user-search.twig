@@ -460,7 +460,7 @@ Results ordered <select name="order">
     {% endfor %}
             </td>
             <td>{{ u.user.email }}</td>
-            <td>{{ u.user.joinDate|time_diff(1) }}<br />{{ u.user.lastAccess|time_diff(1) }}</td>
+            <td>{{ u.user.created|time_diff(1) }}<br />{{ u.user.lastAccess|time_diff(1) }}</td>
             <td>{{ u.user.uploadedSize|octet_size }}</td>
             <td>{{ u.user.downloadedSize|octet_size }}</td>
             <td>{{ ratio(u.user.uploadedSize, u.user.downloadedSize) }}</td>

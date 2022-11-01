@@ -57,7 +57,7 @@ $reporter = $userMan->findById($report->reporterId());
         <td colspan="3">
             <?=$linkName?>
             <a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
-            uploaded by <?= $uploader->link() ?></a> <?=time_diff($torrent->uploadDate()) ?>
+            uploaded by <?= $uploader->link() ?></a> <?=time_diff($torrent->created()) ?>
             <br />
             <div style="text-align: right;">was reported by <?= $reporter->link() ?> <?=time_diff($report->created())?> for the reason: <strong><?= $report->reportType->name() ?></strong></div>
 <?php
@@ -146,7 +146,7 @@ if ($report->otherIdList()) {
                 <?= $n++ == 0 ? '' : '<br />' ?>
                 <?= $extra->fullEditionLink() ?> (<?= number_format($extra->size() / (1024 * 1024), 2) ?> MiB)
                 <a href="torrents.php?action=download&amp;id=<?=$extra->id() ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
-                uploaded by <?= $extra->uploader()->link() ?> <?=time_diff($extra->uploadDate()) ?> <a href="#" onclick="Switch(<?= $reportId ?>, <?= $extra->id() ?>); return false;" class="brackets">Switch</a>
+                uploaded by <?= $extra->uploader()->link() ?> <?=time_diff($extra->created()) ?> <a href="#" onclick="Switch(<?= $reportId ?>, <?= $extra->id() ?>); return false;" class="brackets">Switch</a>
 <?php
         }
     }

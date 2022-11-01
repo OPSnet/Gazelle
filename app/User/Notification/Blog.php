@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class Blog extends AbstractNotification {
-
     public function className(): string {
         return 'information';
     }
@@ -21,7 +20,7 @@ class Blog extends AbstractNotification {
         $lastRead = (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user->id());
 
         // You must be new around here.
-        $newJoiner = is_null($lastRead) && $latest->createdEpoch() > strtotime($this->user->joinDate());
+        $newJoiner = is_null($lastRead) && $latest->createdEpoch() > strtotime($this->user->created());
 
         if ($newJoiner || (!$newJoiner && $latest->id() > $lastRead)) {
             $this->title   = "Blog: " . $latest->title();

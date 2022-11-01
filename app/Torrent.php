@@ -439,7 +439,7 @@ class Torrent extends TorrentAbstract {
         $notify = self::$db->to_array('id', MYSQLI_ASSOC, false);
         $notify[$this->uploaderId()] = [
             'action' => 'uploaded',
-            'tdate'  => $this->uploadDate(),
+            'tdate'  => $this->created(),
         ];
 
         $userMan   = new Manager\User;

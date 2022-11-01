@@ -109,6 +109,10 @@ abstract class TorrentAbstract extends BaseObject {
         return false;
     }
 
+    public function created(): string {
+        return $this->info()['Time'];
+    }
+
     /**
      * Get the encoding of this upload
      */
@@ -406,15 +410,11 @@ abstract class TorrentAbstract extends BaseObject {
         return $this->seederTotal() === 0;
     }
 
-    public function uploadDate(): string {
-        return $this->info()['Time'];
-    }
-
     /**
      * Was it uploaded less than an hour ago? (Request fill grace period)
      */
     public function uploadGracePeriod(): bool {
-        return strtotime($this->uploadDate()) > date('U') - 3600;
+        return strtotime($this->created()) > date('U') - 3600;
     }
 
     /**

@@ -178,7 +178,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             </div>
         </td>
         <td class="td_file_count"><?= $torrent->fileTotal() ?></td>
-        <td class="td_time nobr"><?= time_diff($torrent->uploadDate(), 1) ?></td>
+        <td class="td_time nobr"><?= time_diff($torrent->created(), 1) ?></td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
 <?php   } ?>

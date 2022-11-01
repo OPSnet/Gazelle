@@ -43,7 +43,7 @@ class TGroup extends \Gazelle\Json {
                     'leechers'                => $torrent->leecherTotal(),
                     'seeders'                 => $torrent->seederTotal(),
                     'snatched'                => $torrent->snatchTotal(),
-                    'time'                    => $torrent->uploadDate(),
+                    'time'                    => $torrent->created(),
                     'hasFile'                 => $torrent->hasLogDb(),
                 ];
             }

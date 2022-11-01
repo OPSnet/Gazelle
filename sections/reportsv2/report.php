@@ -73,7 +73,7 @@ $remasterTuple = $torrent->remasterTuple();
                 <tr class="releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> torrentdetails pad<?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $torrentId) { ?> hidden<?php } ?>" id="torrent_<?= $torrentId ?>">
                     <td colspan="5">
                         <blockquote>
-                            Uploaded by <?= $torrent->uploader()->link() ?> <?=time_diff($torrent->uploadDate()) ?>
+                            Uploaded by <?= $torrent->uploader()->link() ?> <?=time_diff($torrent->created()) ?>
 <?php
     if (!$torrent->seederTotal()) {
         $LastActive = $torrent->lastActiveDate();

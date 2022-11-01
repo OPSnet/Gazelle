@@ -554,7 +554,7 @@ class User extends BaseObject {
         return $this->info()['IRCKey'];
     }
 
-    public function joinDate() {
+    public function created() {
         return $this->info()['JoinDate'];
     }
 
@@ -2004,7 +2004,7 @@ class User extends BaseObject {
                 'Ratio' => [$this->downloadedSize() == 0 ? '∞'
                     : $this->uploadedSize() / $this->downloadedSize(), $criteria['MinRatio'], 'float'],
                 'Time' => [
-                    $this->joinDate(),
+                    $this->created(),
                     $criteria['Weeks'] * 7 * 24 * 60 * 60,
                     'time'
                 ],

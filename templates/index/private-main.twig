@@ -17,7 +17,7 @@
             <div class="head">
             <ul class="collage_images" id="collage_page0">
 {% for t in latest %}
-    {% set title = t.name ~ '<br />(' ~ t.group.tagNameList|join(', ') ~ ')<br />uploaded by ' ~ t.uploader.username ~ ' ' ~ t.uploadDate|time_diff %}
+    {% set title = t.name ~ '<br />(' ~ t.group.tagNameList|join(', ') ~ ')<br />uploaded by ' ~ t.uploader.username ~ ' ' ~ t.created|time_diff %}
     {% set alt = title|replace({'<br />': ' '}) %}
                 <li class="image_group_{{ t.groupId }}">
                 <a href="torrents.php?id={{ t.groupId }}&amp;torrentid={{ t.id }}#torrent{{ t.id }}">

@@ -27,7 +27,7 @@ if ($Viewer->id() != $uploaderId && !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
 
-if (Time::timeAgo($torrent->uploadDate()) > 3600 * 24 * 7 && !$Viewer->permitted('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
+if (Time::timeAgo($torrent->created()) > 3600 * 24 * 7 && !$Viewer->permitted('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
     error('You can no longer delete this torrent as it has been uploaded for over a week. If you now think there is a problem, please report the torrent instead.');
 }
 
@@ -93,7 +93,7 @@ if ($Viewer->permitted('admin_reports')) {
                 <td colspan="3">
                     <?= $torrent->fullLink() ?> <?= $size ?>
                     <a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" class="brackets tooltip" title="Download">DL</a>
-                    uploaded by <?= $torrent->uploader()->link() ?> <?= time_diff($torrent->uploadDate()) ?>
+                    uploaded by <?= $torrent->uploader()->link() ?> <?= time_diff($torrent->created()) ?>
                     <br />
 <?php
     $GroupOthers = $torrent->group()->unresolvedReportsTotal();

@@ -134,7 +134,7 @@ if ($search->canUnclaim($Viewer)) {
                             </table>
                         </div>
                         <br /><span class="report_reporter">reported by <a href="user.php?id=<?= $report->reporterId() ?>"><?= $reporterName ?></a> <?=time_diff($report->created())?> for the reason: <strong><?= $report->reportType()->name() ?></strong></span>
-                        <br />uploaded by <a href="user.php?id=<?= $uploaderId ?>"><?= $uploaderName  ?></a> on <span title="<?= time_diff($torrent?->uploadDate(), 3, false) ?>"><?= $torrent?->uploadDate() ?></span>
+                        <br />uploaded by <a href="user.php?id=<?= $uploaderId ?>"><?= $uploaderName  ?></a> on <span title="<?= time_diff($torrent?->created(), 3, false) ?>"><?= $torrent?->created() ?></span>
                         <br />Last action: <?= $torrent?->lastActiveDate() ?: 'Never' ?>
                         <br /><span class="report_torrent_file_ext">Audio files present:
 <?php
@@ -269,8 +269,8 @@ if ($search->canUnclaim($Viewer)) {
                         </table>
                         </div>
                         <br />uploaded by <a href="user.php?id=<?=$extra->uploaderId() ?>"><?=$extra->uploader()?->username() ?? 'System' ?></a> on <span title="<?=
-                            time_diff($extra->uploadDate(), 3, false) ?>"><?= $extra->uploadDate() ?> (<?=
-                            strtotime($extra->uploadDate()) < strtotime($torrent?->uploadDate() ?? '2000-01-01 00:00:00') ? 'older upload' : 'more recent upload' ?>)</span>
+                            time_diff($extra->created(), 3, false) ?>"><?= $extra->created() ?> (<?=
+                            strtotime($extra->created()) < strtotime($torrent?->created() ?? '2000-01-01 00:00:00') ? 'older upload' : 'more recent upload' ?>)</span>
                         <br />Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>
                         <br /><span>Audio files present:
 <?php

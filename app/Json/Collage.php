@@ -50,7 +50,7 @@ class Collage extends \Gazelle\Json {
                     'snatched'                => $torrent->snatchTotal(),
                     'freeTorrent'             => $torrent->isFreeleech(),
                     'reported'                => $torrent->hasReport($this->user),
-                    'time'                    => $torrent->uploadDate(),
+                    'time'                    => $torrent->created(),
                 ];
             }
             $payload[] = [

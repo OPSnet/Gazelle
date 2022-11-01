@@ -63,7 +63,7 @@ class User extends \Gazelle\Json {
             'isFriend'    => (new \Gazelle\User\Friend($user))->isFriend($viewer->id()),
             'profileText' => \Text::full_format($user->infoProfile()),
             'stats' => [
-                'joinedDate'    => $user->joinDate(),
+                'joinedDate'    => $user->created(),
                 'lastAccess'    => match(true) {
                     $viewer->id() == $user->id()                => $user->lastAccessRealtime(),
                     $viewer->isStaff()                          => $user->lastAccessRealtime(),

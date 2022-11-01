@@ -77,7 +77,7 @@ and {{ info.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and d
         Downloaded:&nbsp;<strong>{{ invitee.user.downloadedSize|octet_size }}</strong>
         Ratio:&nbsp;<strong>{{ ratio(invitee.user.uploadedSize, invitee.user.downloadedSize) }}</strong>,
         {% if paranoia == constant('PARANOIA_OVERRIDDEN') %}</i>{% endif %}
-        joined: {{ invitee.user.joinDate|time_diff }}
+        joined: {{ invitee.user.created|time_diff }}
     {%- endif -%}
 {% endfor %}
 {{ '</li></ul>'|repeat(prev_depth - depth)|raw }}

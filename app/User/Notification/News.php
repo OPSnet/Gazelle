@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class News extends AbstractNotification {
-
     public function className(): string {
         return 'information';
     }
@@ -25,7 +24,7 @@ class News extends AbstractNotification {
 
         // You must be new around here.
         $newJoiner = is_null($lastRead)
-            && $newsMan->latest() > strtotime($this->user->joinDate());
+            && $newsMan->latest() > strtotime($this->user->created());
 
         if ($newJoiner || (!$newJoiner && $newsId > $lastRead)) {
             $this->title   = "Announcement: $title";

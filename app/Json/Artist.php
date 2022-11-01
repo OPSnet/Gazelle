@@ -83,7 +83,7 @@ class Artist extends \Gazelle\Json {
                     'leechers'             => $torrent->leecherTotal(),
                     'seeders'              => $torrent->seederTotal(),
                     'snatched'             => $torrent->snatchTotal(),
-                    'time'                 => $torrent->uploadDate(),
+                    'time'                 => $torrent->created(),
                     'hasFile'              => $torrent->id(), /* legacy wtf */
                 ];
             }

@@ -41,7 +41,7 @@ class Torrent extends \Gazelle\Json {
                 'snatched'      => $torrent->snatchTotal(),
                 'freeTorrent'   => $torrent->freeleechStatus(),
                 'reported'      => $torrent->hasReport($this->user),
-                'time'          => $torrent->uploadDate(),
+                'time'          => $torrent->created(),
                 'description'   => $torrent->description(),
                 'fileList'      => implode('|||',
                     array_map(fn ($f) => $this->torMan->apiFilename($f), $torrent->fileList())

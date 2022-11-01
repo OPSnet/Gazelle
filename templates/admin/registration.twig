@@ -125,9 +125,9 @@
                 TODO
             </td>
             <td>
-                <span style="white-space: nowrap">{{- user.joinDate|time_diff -}}</span>
+                <span style="white-space: nowrap">{{- user.created|time_diff -}}</span>
                 <br />
-                <span style="white-space: nowrap">{{- user.inviter.joinDate|time_diff -}}</span>
+                <span style="white-space: nowrap">{{- user.inviter.created|time_diff -}}</span>
             </td>
         </tr>
     {% endfor %}
