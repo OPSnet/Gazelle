@@ -22,12 +22,8 @@ class Torrent extends BaseObject {
     }
 
     public function flush() {
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_KEY, $this->id),
-            sprintf(TGroup::CACHE_KEY, $this->groupId()),
-            "torrent_group_{$this->groupId()}",
-            "torrents_details_{$this->groupId()}",
-        ]);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        $this->group()->flush();
     }
 
     public function location(): string {

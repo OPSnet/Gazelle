@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class TGroup extends BaseObject {
-
     const CACHE_KEY          = 'tg_%d';
     const CACHE_TLIST_KEY    = 'tlist_%d';
     const CACHE_COVERART_KEY = 'tg_cover_%d';
@@ -54,6 +53,7 @@ class TGroup extends BaseObject {
             sprintf(self::CACHE_TLIST_KEY, $this->id),
             sprintf(self::CACHE_COVERART_KEY, $this->id),
             'torrents_details_' . $this->id,
+            'torrents_group_' . $this->id,
         ]);
     }
 
