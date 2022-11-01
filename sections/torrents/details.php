@@ -614,9 +614,8 @@ if (!$torrentList) {
                                 </td>
                             </tr>
 <?php
-        $file = $torrent->fileList();
-        foreach ($file as $fileData) {
-            $info = $torMan->splitMetaFilename($fileData);
+        foreach ($torrent->fileList() as $file) {
+            $info = $torMan->splitMetaFilename($file);
 ?>
                             <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?=
                                 Format::get_size($info['size']) ?></td></tr>

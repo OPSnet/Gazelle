@@ -4,8 +4,8 @@ namespace Gazelle\Json;
 
 class Torrent extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Torrent $torrent,
-        protected \Gazelle\User $user,
+        protected \Gazelle\Torrent         $torrent,
+        protected \Gazelle\User            $user,
         protected \Gazelle\Manager\Torrent $torMan,
     ) {}
 
@@ -44,7 +44,7 @@ class Torrent extends \Gazelle\Json {
                 'time'          => $torrent->uploadDate(),
                 'description'   => $torrent->description(),
                 'fileList'      => implode('|||',
-                    array_map(fn ($f) => $this->torMan->apiFilename($f), $torrent->filelist())
+                    array_map(fn ($f) => $this->torMan->apiFilename($f), $torrent->fileList())
                 ),
                 'filePath'      => $torrent->path(),
                 'userId'        => $torrent->uploaderId(),

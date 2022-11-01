@@ -243,9 +243,9 @@ class Torrent extends \Gazelle\BaseManager {
      *
      * @return array of array of [ac3, flac, m4a, mp3] => count
      */
-    function audioMap(string $fileList): array {
+    function audioMap(array $fileList): array {
         $map = [];
-        foreach (explode("\n", strtolower($fileList)) as $file) {
+        foreach ($fileList as $file) {
             $info = $this->splitMetaFilename($file);
             if (is_null($info['ext'])) {
                 continue;
@@ -652,7 +652,7 @@ class Torrent extends \Gazelle\BaseManager {
             if ($wantMeta && $tgroup->categoryName() === 'Music') {
                 $meta = self::metaPL(
                     $torrent->media(), $torrent->format(), $torrent->encoding(),
-                    $torrent->hasCue(), $torrent->hasLog(), $torrent->hasLogDb(), $torrent->logscore()
+                    $torrent->hasCue(), $torrent->hasLog(), $torrent->hasLogDb(), $torrent->logScore()
                 );
             }
             $isDeleted = false;

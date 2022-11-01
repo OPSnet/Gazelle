@@ -369,7 +369,7 @@ class Torrent extends BaseObject {
     /**
      * Get the files of this upload
      */
-    public function filelist(): array {
+    public function fileList(): array {
         return $this->info()['FileList'];
     }
 
