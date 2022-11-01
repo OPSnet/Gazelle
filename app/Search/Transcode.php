@@ -40,7 +40,7 @@ class Transcode extends \Gazelle\Base {
     public function __construct(
         protected \Gazelle\User $user,
         protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent
-    ) { }
+    ) {}
 
     public function setModeSeeding() {
         $this->mode = self::MODE_SEEDING;

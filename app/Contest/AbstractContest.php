@@ -39,15 +39,11 @@ trait TorrentLeaderboard {
 }
 
 abstract class AbstractContest extends \Gazelle\Base {
-    protected $id;
-    protected $begin;
-    protected $end;
-
-    public function __construct(int $id, string $begin, string $end) {
-        $this->id    = $id;
-        $this->begin = $begin;
-        $this->end   = $end;
-    }
+    public function __construct(
+        protected readonly int $id,
+        protected string $begin,
+        protected string $end,
+    ) {}
 
     abstract public function ranker(): array;
     abstract public function participationStats(): array;

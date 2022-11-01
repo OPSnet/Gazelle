@@ -5,22 +5,16 @@ namespace Gazelle\Schedule;
 use \Gazelle\Util\Irc;
 
 abstract class Task extends \Gazelle\Base {
-    protected $taskId;
-    protected $name;
-    protected $isDebug;
-    protected $startTime;
-    protected $historyId;
+    protected array $events = [];
+    protected int $processed = 0;
+    protected float $startTime;
+    protected int $historyId;
 
-    protected $events;
-    protected $processed;
-
-    public function __construct(int $taskId, string $name, bool $isDebug) {
-        $this->taskId = $taskId;
-        $this->name = $name;
-        $this->isDebug = $isDebug;
-        $this->events = [];
-        $this->processed = 0;
-    }
+    public function __construct(
+        protected readonly int $taskId,
+        protected readonly string $name,
+        protected readonly bool $isDebug,
+    ) {}
 
     public function begin() {
         $this->startTime = microtime(true);
@@ -84,7 +78,7 @@ abstract class Task extends \Gazelle\Base {
         if (!$this->isDebug && $severity === 'debug') {
             return;
         }
-        $this->events[] = new Event($severity, $message, $reference);
+        $this->events[] = new Event($severity, $message, $reference, \Gazelle\Util\Time::sqlTime());
     }
 
     public function debug(string $message, int $reference = 0) {

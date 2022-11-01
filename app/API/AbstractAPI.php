@@ -3,11 +3,9 @@
 namespace Gazelle\API;
 
 abstract class AbstractAPI extends \Gazelle\Base {
-    protected $config;
-
-    public function __construct(array $config) {
-        $this->config = $config;
-    }
+    public function __construct(
+        protected array $config,
+    ) {}
 
     abstract public function run();
 }

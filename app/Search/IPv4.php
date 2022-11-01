@@ -3,7 +3,6 @@
 namespace Gazelle\Search;
 
 class IPv4 extends \Gazelle\Base {
-
     public const ASC = 0;
     public const DESC = 1;
 
@@ -18,14 +17,13 @@ class IPv4 extends \Gazelle\Base {
      * E.g. 1.1.1.1 is stored as ('1.1.1.1', 16843009)
      */
 
-    protected ASN $asn;
     protected string $name;
     protected int $column = 0;
     protected int $direction = 0;
 
-    public function __construct(ASN $asn) {
-        $this->asn = $asn;
-    }
+    public function __construct(
+        protected ASN $asn,
+    ) {}
 
     public function setColumn(int $column) {
         $this->column = $column;

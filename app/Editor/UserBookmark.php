@@ -3,14 +3,11 @@
 namespace Gazelle\Editor;
 
 class UserBookmark extends \Gazelle\Base {
-
     protected const CACHE_KEY = 'bookmarks_group_ids_%d';
 
-    protected int $userId;
-
-    public function __construct(int $userId) {
-        $this->userId = $userId;
-    }
+    public function __construct(
+        protected readonly int $userId,
+    ) {}
 
     /**
      * Uses (checkboxes) $_POST['remove'] to delete entries.

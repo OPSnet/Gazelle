@@ -3,20 +3,17 @@
 namespace Gazelle\Manager;
 
 class SiteLog extends \Gazelle\Base {
-    protected $debug;
     protected $logQuery;
     protected $totalMatches;
     protected $queryStatus;
     protected $queryError;
     protected $qid;
-    protected $usernames;
-    protected $userMan;
+    protected $usernames = [];
 
-    public function __construct (\Gazelle\Debug $debug) {
-        $this->debug = $debug;
-        $this->usernames = [];
-        $this->userMan = new \Gazelle\Manager\User;
-    }
+    public function __construct (
+        protected \Gazelle\Debug $debug,
+        protected \Gazelle\Manager\User $userMan,
+    ) {}
 
     public function totalMatches() { return $this->totalMatches; }
     public function error()        { return $this->queryStatus; }

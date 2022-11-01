@@ -3,11 +3,10 @@
 namespace Gazelle\Report;
 
 class ForumThread extends AbstractReport {
-
     public function __construct(
         protected int $reportId,
-        protected \Gazelle\ForumThread $subject
-    ) { }
+        protected \Gazelle\ForumThread $subject,
+    ) {}
 
     public function template(): string {
         return 'report/forum-thread.twig';

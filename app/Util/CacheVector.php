@@ -3,7 +3,6 @@
 namespace Gazelle\Util;
 
 class CacheVector extends \Gazelle\Base {
-
     /**
      * A simple bit vector implementation to handle lookups on a large range of
      * values. The idea is to use a string and map each value as a bit within a
@@ -16,16 +15,14 @@ class CacheVector extends \Gazelle\Base {
      * The initial use case is to represent the snatches a user has made.
      */
 
-    protected int    $expiry;
-    protected int    $length;
-    protected string $key;
     protected string $bitvec;
     protected bool   $empty;
 
-    public function __construct(string $key, int $length, int $expiry) {
-        $this->key    = $key;
-        $this->length = $length;
-        $this->expiry = $expiry;
+    public function __construct(
+        protected readonly string $key,
+        protected readonly int $length,
+        protected int $expiry
+    ) {
         $bitvec = self::$cache->get_value($this->key);
         if ($bitvec === false) {
             $this->bitvec = str_repeat(chr(0), $this->length);

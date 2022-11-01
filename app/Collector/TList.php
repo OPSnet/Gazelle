@@ -3,13 +3,8 @@
 namespace Gazelle\Collector;
 
 class TList extends \Gazelle\Collector {
-
     protected $ids = [];
     protected $all = false;
-
-    public function __construct(\Gazelle\User $user, string $title, int $orderBy) {
-        parent::__construct($user, $title, $orderBy);
-    }
 
     public function setList(array $ids) {
         $this->ids = $ids;

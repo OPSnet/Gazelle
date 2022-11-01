@@ -3,11 +3,9 @@
 namespace Gazelle\Torrent;
 
 class Log extends \Gazelle\Base {
-    protected $id; // id of the torrent
-
-    public function __construct($id) {
-        $this->id = $id;
-    }
+    public function __construct(
+        protected readonly int $id,
+    ) {}
 
     /**
      * Get the summary of the logfiles associated with a torrent

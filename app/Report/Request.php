@@ -6,8 +6,8 @@ class Request extends AbstractReport {
     protected bool $isUpdate = false;
 
     public function __construct(
-        protected int $reportId,
-        protected \Gazelle\Request $subject
+        protected readonly int $reportId,
+        protected readonly \Gazelle\Request $subject,
     ) { }
 
     public function template(): string {

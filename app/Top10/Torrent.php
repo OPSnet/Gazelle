@@ -3,14 +3,10 @@
 namespace Gazelle\Top10;
 
 class Torrent extends \Gazelle\Base {
-
-    protected array $formats;
-    protected \Gazelle\User $viewer;
-
-    public function __construct (array $formats, \Gazelle\User $viewer) {
-        $this->formats = $formats;
-        $this->viewer = $viewer;
-    }
+    public function __construct (
+        protected readonly array $formats,
+        protected readonly \Gazelle\User $viewer,
+    ) {}
 
     public function getTopTorrents($getParameters, $details = 'all', $limit = 10) {
         $cacheKey = 'top10_v2_' . $details . '_' . md5(implode('', $getParameters)) . '_' . $limit;

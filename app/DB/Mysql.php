@@ -118,21 +118,14 @@ class Mysql {
     public array $Queries = [];
     public float $Time = 0.0;
 
-    protected string $Database = '';
-    protected string $Server = '';
-    protected string $User = '';
-    protected string $Pass = '';
-    protected int $Port = 0;
-    protected string $Socket = '';
-
-    public function __construct(string $Database, string $User, string $Pass, string $Server, int $Port, string $Socket) {
-        $this->Database = $Database;
-        $this->Server = $Server;
-        $this->User = $User;
-        $this->Pass = $Pass;
-        $this->Port = $Port;
-        $this->Socket = $Socket;
-    }
+    public function __construct(
+        protected readonly string $Database,
+        protected readonly string $User,
+        protected readonly string $Pass,
+        protected readonly string $Server,
+        protected readonly int $Port,
+        protected readonly string $Socket,
+    ) {}
 
     public function disableQueryLog() {
         $this->queryLog = false;

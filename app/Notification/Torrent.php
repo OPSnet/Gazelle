@@ -3,14 +3,14 @@
 namespace Gazelle\Notification;
 
 class Torrent extends \Gazelle\Base {
-    protected $userId;
     protected $cond;
     protected $args;
 
-    public function __construct(int $userId) {
+    public function __construct(
+        protected readonly int $userId,
+    ) {
         $this->cond = ['unt.UserID = ?'];
         $this->args = [$userId];
-        $this->userId = $userId;
     }
 
     protected function flush(): void {

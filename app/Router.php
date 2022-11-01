@@ -19,15 +19,14 @@ use Gazelle\Exception\RouterException;
 class Router {
     private $authorize = ['GET' => false, 'POST' => true];
     private $routes = ['GET' => [], 'POST' => []];
-    private $auth_key = null;
 
     /**
      * Router constructor.
      * @param string $auth_key Authorization key for a user
      */
-    public function __construct($auth_key = '') {
-        $this->auth_key = $auth_key;
-    }
+    public function __construct(
+        protected readonly string $auth_key = ''
+    ) {}
 
     /**
      * @param string|array $methods

@@ -7,8 +7,6 @@ class Paginator {
     protected string $anchor = '';
     protected string $param = '';
     protected string $linkbox;
-    protected int $perPage;
-    protected int $page;
     protected int $total = 0;
     protected int $linkCount = 10;
 
@@ -19,10 +17,10 @@ class Paginator {
      * @param int $perPage Results to show per page
      * @param int $page current page
      */
-    public function __construct(int $perPage, int $page) {
-        $this->perPage = $perPage;
-        $this->page = $page;
-    }
+    public function __construct(
+        protected readonly int $perPage,
+        protected int $page
+    ) {}
 
     public function page(): int {
         return $this->page;

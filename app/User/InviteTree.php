@@ -14,7 +14,7 @@ class InviteTree extends \Gazelle\Base {
 
     public function __construct(
         protected \Gazelle\User $user
-    ) { }
+    ) {}
 
     public function info(): array {
         if (empty($this->info)) {

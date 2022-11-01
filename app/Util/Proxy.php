@@ -3,13 +3,10 @@
 namespace Gazelle\Util;
 
 class Proxy {
-    private $key;
-    private $bouncer;
-
-    public function __construct($key, $bouncer) {
-        $this->key = $key;
-        $this->bouncer = $bouncer;
-    }
+    public function __construct(
+        protected readonly string $key,
+        protected readonly string $bouncer
+    ) {}
 
     public function fetch($url, $params, $cookies, $post, $headers = []) {
         $data = Crypto::encrypt(json_encode(['url' => $url, 'params' => $params,

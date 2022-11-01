@@ -7,7 +7,9 @@ class StaffPM extends BaseObject {
     protected $author;
     protected $assigned;
 
-    public function __construct(int $id) {
+    public function __construct(
+        protected int $id,
+    ) {
         parent::__construct($id);
         $this->info = self::$db->rowAssoc("
             SELECT spm.Subject     AS subject,

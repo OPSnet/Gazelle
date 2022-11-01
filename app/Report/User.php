@@ -4,8 +4,8 @@ namespace Gazelle\Report;
 
 class User extends AbstractReport {
     public function __construct(
-        protected int $reportId,
-        protected \Gazelle\User $subject
+        protected readonly int $reportId,
+        protected readonly \Gazelle\User $subject,
     ) { }
 
     public function template(): string {

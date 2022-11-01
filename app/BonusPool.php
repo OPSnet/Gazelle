@@ -3,13 +3,11 @@
 namespace Gazelle;
 
 class BonusPool extends Base {
-    protected $id;
-
     const CACHE_SENT = 'bonuspool_sent_%d';
 
-    public function __construct (int $id) {
-        $this->id = $id;
-    }
+    public function __construct (
+        protected readonly int $id,
+    ) {}
 
     public function contribute(int $user_id, $value_recv, $value_sent): int {
         self::$db->prepared_query("

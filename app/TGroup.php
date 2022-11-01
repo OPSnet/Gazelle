@@ -42,10 +42,6 @@ class TGroup extends BaseObject {
         );
     }
 
-    public function __construct(int $id) {
-        parent::__construct($id);
-    }
-
     public function flush() {
         $this->info = [];
         self::$cache->deleteMulti([

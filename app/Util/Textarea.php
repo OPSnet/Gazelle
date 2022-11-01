@@ -3,14 +3,9 @@
 namespace Gazelle\Util;
 
 class Textarea extends \Gazelle\Base {
-
     protected static array $list = [];
 
     protected int $id;
-    protected int $rows;
-    protected int $cols;
-    protected string $name;
-    protected string $value;
     protected bool $previewManual = false;
     protected array $extra = [];
 
@@ -43,12 +38,13 @@ class Textarea extends \Gazelle\Base {
      * @param int $cols  cols attribute
      * @param int $rows  rows attribute
      */
-    public function __construct(string $name, string $value, int $cols = 72, int $rows = 10) {
+    public function __construct(
+        protected readonly string $name,
+        protected readonly string $value,
+        protected readonly int $cols = 72,
+        protected readonly int $rows = 10
+    ) {
         $this->id     = count(self::$list);
-        $this->name   = $name;
-        $this->value  = $value;
-        $this->cols   = $cols;
-        $this->rows   = $rows;
         self::$list[] = "[{$this->id}, '$name']";
     }
 

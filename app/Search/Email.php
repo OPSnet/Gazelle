@@ -3,7 +3,6 @@
 namespace Gazelle\Search;
 
 class Email extends \Gazelle\Base {
-
     public const ASC = 0;
     public const DESC = 1;
 
@@ -13,14 +12,13 @@ class Email extends \Gazelle\Base {
     public const CHANGED = 3;
     public const IP      = 4;
 
-    protected ASN $asn;
     protected string $name;
     protected int $column = 0;
     protected int $direction = 0;
 
-    public function __construct(ASN $asn) {
-        $this->asn = $asn;
-    }
+    public function __construct(
+        protected ASN $asn,
+    ) {}
 
     public function setColumn(int $column) {
         $this->column = $column;

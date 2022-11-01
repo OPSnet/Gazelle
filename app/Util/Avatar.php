@@ -3,13 +3,11 @@
 namespace Gazelle\Util;
 
 class Avatar {
-    protected $mode;
-    protected $size;
+    protected int $size = 150;
 
-    public function __construct(int $mode) {
-        $this->mode = $mode;
-        $this->size = 150;
-    }
+    public function __construct(
+        protected readonly int $mode
+    ) {}
 
     public function setSize(int $size) {
         $this->size = $size;

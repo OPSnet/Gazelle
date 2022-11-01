@@ -3,15 +3,13 @@
 namespace Gazelle;
 
 abstract class BaseObject extends Base {
-
-    protected int $id;
-
     /* used for handling updates */
-    protected array $updateField = [];
+    protected array $updateField;
 
-    public function __construct(int $id) {
-        $this->id = $id;
-    }
+    // FIXME: StaffPM breaks readonly-ness due to inheritance
+    public function __construct(
+        protected int $id,
+    ) {}
 
     abstract public function tableName(): string;
     abstract public function flush();

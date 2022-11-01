@@ -44,8 +44,6 @@ abstract class Collector extends Base  {
     const CHUNK_SIZE = 100;
     const ORDER_BY = ['t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC'];
 
-    protected $user;
-    protected $orderBy;
     protected $sql  = '';
     protected $args = [];
     protected $qid  = false;
@@ -57,7 +55,6 @@ abstract class Collector extends Base  {
     protected $error = [];
     protected $skipped = [];
     protected $startTime;
-    protected $title;
     protected $zip;
     protected $torMan;
 
@@ -67,11 +64,12 @@ abstract class Collector extends Base  {
     /**
      * Create a Zip object and store the query results
      */
-    public function __construct(\Gazelle\User $user, $title, $orderBy) {
+    public function __construct(
+        protected \Gazelle\User $user,
+        protected readonly string $title,
+        protected readonly int $orderBy,
+    ) {
         self::$cache->disableLocalCache(); // The internal cache is almost completely useless for this
-        $this->title = $title;
-        $this->user = $user;
-        $this->orderBy = $orderBy;
         $this->startTime = microtime(true);
 
         $options = new \ZipStream\Option\Archive;
