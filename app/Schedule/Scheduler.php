@@ -5,7 +5,6 @@ namespace Gazelle\Schedule;
 use \Gazelle\Util\Irc;
 
 class Scheduler extends \Gazelle\Base {
-
     const CACHE_TASKS = 'scheduled_tasks';
 
     public function getTask(int $id) {
@@ -315,22 +314,43 @@ class Scheduler extends \Gazelle\Base {
             return;
         }
 
-        self::$db->prepared_query('
-            SELECT pt.periodic_task_id
-            FROM periodic_task pt
-            WHERE pt.is_enabled IS TRUE
-                AND NOT EXISTS (
-                    SELECT 1
+        /**
+         * We attempt to run as many tasks as we can within a minute. If a task
+         * runs over the TTL, it will be noted as in progress, so the next
+         * invocation of the scheduler will ignore it. When the task finally
+         * returns, this invocation will exit.
+         */
+
+        $TTL = microtime(true) + 58;
+        while (microtime(true) < $TTL) {
+            $taskId = self::$db->scalar("
+                SELECT pt.periodic_task_id
+                FROM periodic_task pt
+                LEFT JOIN (
+                    SELECT pth.periodic_task_id,
+                    max(pth.launch_time) AS launch_time
                     FROM periodic_task_history pth
-                    WHERE pth.periodic_task_id = pt.periodic_task_id
-                        AND now() < (pth.launch_time + INTERVAL ((pth.duration_ms / 1000) + pt.period) SECOND)
-                ) OR pt.run_now IS TRUE
-        ');
-
-        $toRun = self::$db->collect('periodic_task_id');
-
-        foreach ($toRun as $id) {
-            $this->runTask($id);
+                    WHERE pth.status = 'completed'
+                    GROUP BY pth.periodic_task_id
+                ) last USING (periodic_task_id)
+                WHERE pt.is_enabled IS TRUE
+                    AND pt.is_sane IS TRUE
+                    AND (
+                        last.periodic_task_id is null
+                        OR last.launch_time + INTERVAL pt.period SECOND < now()
+                        OR pt.run_now IS TRUE
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1 FROM periodic_task_history r
+                        WHERE r.status = 'running'
+                            AND r.periodic_task_id = pt.periodic_task_id
+                    )
+                LIMIT 1
+            ");
+            if (is_null($taskId)) {
+                break;
+            }
+            $this->runTask($taskId);
         }
     }
 
