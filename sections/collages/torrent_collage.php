@@ -178,48 +178,50 @@ foreach ($entryList as $tgroupId) {
         continue;
     }
     $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+    $prev = '';
+    $EditionID = 0;
+    unset($FirstUnknown);
     $Number++;
-    if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
-        // Grouped torrents
-?>
-        <tr class="group groupid_<?=$tgroupId?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
-<?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $tgroupId ]) ?>
-            <td class="center">
-                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
-            </td>
-            <td colspan="5">
-                <strong><?= $Number ?> - <?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
-                    <span class="float_right">
-<?php
-        echo $Twig->render('bookmark/action.twig', [
-            'class'         => 'torrent',
-            'id'            => $tgroupId,
-            'is_bookmarked' => $bookmark->isTorrentBookmarked($tgroupId),
-        ]);
-        if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
-?>
-                    <br /><?= $vote->setGroupId($tgroupId)->links() ?>
-<?php   } ?>
-                    </span>
-                <div class="tags"><?= implode(', ', array_map(
-                    fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
-                    )) ?></div>
-            </td>
-        </tr>
-<?php
-        $prev = '';
-        $EditionID = 0;
-        unset($FirstUnknown);
+    foreach ($torrentIdList as $torrentId) {
+        $torrent = $torMan->findById($torrentId);
+        if (is_null($torrent)) {
+            continue;
+        }
 
-        foreach ($torrentIdList as $torrentId) {
-            $torrent = $torMan->findById($torrentId);
-            if (is_null($torrent)) {
-                continue;
+        if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
+            if ($prev === '') {
+            // Grouped torrents
+?>
+            <tr class="group groupid_<?=$tgroupId?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
+<?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $tgroupId ]) ?>
+                <td class="center">
+                    <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
+                </td>
+                <td colspan="5">
+                    <strong><?= $Number ?> – <?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
+                        <span class="float_right">
+<?php
+                echo $Twig->render('bookmark/action.twig', [
+                    'class'         => 'torrent',
+                    'id'            => $tgroupId,
+                    'is_bookmarked' => $bookmark->isTorrentBookmarked($tgroupId),
+                ]);
+                if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
+?>
+                        <br /><?= $vote->setGroupId($tgroupId)->links() ?>
+<?php           } ?>
+                        </span>
+                    <div class="tags"><?= implode(', ', array_map(
+                        fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
+                        )) ?></div>
+                </td>
+            </tr>
+<?php
             }
+
             if ($torrent->isRemasteredUnknown()) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-
             $current = $torrent->remasterTuple();
             if ($prev != $current || (isset($FirstUnknown) && $FirstUnknown)) {
                 $EditionID++;
@@ -242,37 +244,29 @@ foreach ($entryList as $tgroupId) {
                         'viewer'  => $Viewer,
                     ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+<?php   } else { ?>
+            <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
+                . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
+                <td></td>
+                <td class="td_collage_category center">
+                    <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
+                </td>
+                <td class="td_info">
+                    <?= $Twig->render('torrent/action-v2.twig', [
+                        'torrent' => $torrent,
+                        'viewer'  => $Viewer,
+                    ]) ?>
+                    <?= $Number ?> – <strong><?= $tgroup->link() ?></strong>
+<?php       if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
+                    <?= $vote->setGroupId($tgroupId)->links($Viewer->auth()) ?>
+<?php       } ?>
+                    <div class="tags">
+                        <?= implode(', ', array_map( fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList())) ?>
+                    </div>
+    <?php } ?>
                 </td>
                 <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
             </tr>
-<?php
-        }
-    } else {
-        // Viewing a type that does not require grouping
-        $torrentId = $torrentIdList[0];
-        $torrent = $torMan->findById($torrentId);
-?>
-        <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
-            . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
-            <td></td>
-            <td class="td_collage_category center">
-                <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
-            </td>
-            <td class="td_info">
-                <?= $Twig->render('torrent/action-v2.twig', [
-                    'torrent' => $torrent,
-                    'viewer'  => $Viewer,
-                ]) ?>
-                <strong><?= $tgroup->link() ?></strong>
-<?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-                <?= $vote->setGroupId($tgroupId)->links($Viewer->auth()) ?>
-<?php   } ?>
-                <div class="tags"><?= implode(', ', array_map(
-                    fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
-                    )) ?></div>
-            </td>
-            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
-        </tr>
 <?php
     }
 }
