@@ -339,7 +339,7 @@ if ($sections = $Artist->sections()) {
 
         if (!$Viewer->option('NoVoteLinks')) {
 ?>
-                        <br /><?= $vote->setGroupId($groupId)->links() ?>
+                        <br /><?= $vote->links($groupId) ?>
 <?php   } ?>
                         </span>
                         <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>
@@ -386,7 +386,7 @@ if ($sections = $Artist->sections()) {
                             . $torrent->fullName() . " $torrentId [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
                     ],
                 ]) ?>
-                &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+                &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
             </td>
             <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
         </tr>

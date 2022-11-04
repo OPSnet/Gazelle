@@ -152,12 +152,12 @@ if ($lastfmInfo)  {
     ]);
 }
 
-$Vote             = new Vote($User);
+$vote             = new Vote($User);
 $stats            = $User->stats();
 $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
 $ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0;
-$releaseVotes     = $Vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
+$releaseVotes     = $vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
 $bonusPointsSpent = $userBonus->pointsSpent();
 $torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
@@ -448,7 +448,7 @@ if (check_paranoia_here('uploads')) {
 
 if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('view-release-votes')) {
     echo $Twig->render('user/recent-vote.twig', [
-        'recent'    => $Vote->recent($tgMan),
+        'recent'    => $vote->recent($tgMan),
         'show_link' => $OwnProfile || !$User->hasAttr('hide-vote-history') || $Viewer->permitted('view-release-votes'),
         'user_id'   => $UserID,
     ]);

@@ -208,7 +208,7 @@ if (count($topVotes) === 0) { ?>
                 'torrent' => $torrent,
                 'viewer'  => $Viewer,
             ]) ?>
-            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
         </td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>
@@ -233,7 +233,7 @@ if (count($topVotes) === 0) { ?>
             ]) ?>
             <strong><?= $tgroup->link() ?></strong>
 <?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-            <?= $vote->setGroupId($tgroupId)->links($Viewer->auth()) ?>
+            <?= $vote->links($tgroupId) ?>
 <?php   } ?>
             <div class="tags"><?= implode(', ', array_map(
                 fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()

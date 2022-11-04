@@ -10,7 +10,7 @@ console.log(info);
     $('#totalvotes').raw().innerHTML = info.response.total;
     $('#votescore').raw().innerHTML = (info.response.score * 100).toFixed(1);
     if (info.response.total == 0) {
-        $('#votepercent').raw().innerHTML = '100.0%';
+        $('#votepercent').raw().innerHTML = '&mdash;';
     } else {
         $('#votepercent').raw().innerHTML = ((info.response.up / info.response.total) * 100).toFixed(1) + '%';
     }

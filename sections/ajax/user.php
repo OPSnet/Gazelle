@@ -20,8 +20,7 @@ if (!$user->propertyVisibleMulti($Viewer, ['requestsfilled_count', 'requestsfill
     $TotalSpent     = $stats->requestVoteSize();
 }
 
-$vote             = new Vote($user);
-$releaseVotes     = $vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
+$releaseVotes     = (new Vote($user))->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
 $ForumPosts       = $stats->forumPostTotal();
 $Uploads          = $user->propertyVisible($Viewer, 'uploads+')     ? $stats->uploadTotal() : null;
 $ArtistsAdded     = $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : null;

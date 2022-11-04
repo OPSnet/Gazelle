@@ -5,11 +5,11 @@ $tgroup = (new Gazelle\Manager\TGroup)->setViewer($Viewer)->findById((int)($_GET
 if (is_null($tgroup)) {
     error(404);
 }
-$GroupID = $tgroup->id();
+$tgroupId = $tgroup->id();
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-$commentPage = new Gazelle\Comment\Torrent($GroupID);
+$commentPage = new Gazelle\Comment\Torrent($tgroupId);
 if (isset($_GET['postid'])) {
     $commentPage->setPostId((int)$_GET['postid']);
 } elseif (isset($_GET['page'])) {
@@ -28,9 +28,9 @@ $torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $userMan       = new Gazelle\Manager\User;
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher      = new Gazelle\User\Snatch($Viewer);
-$vote          = (new Gazelle\User\Vote($Viewer))->setGroupId($GroupID);
+$vote          = new Gazelle\User\Vote($Viewer);
 
-$isSubscribed   = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $GroupID);
+$isSubscribed   = (new Gazelle\Subscription($Viewer))->isSubscribedComments('torrents', $tgroupId);
 $releaseTypes   = (new Gazelle\ReleaseType)->list();
 $urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
@@ -51,17 +51,17 @@ if (!$musicRelease) {
     $advanced  = $Viewer->permitted('site_advanced_top10');
     $rankList = [
         'overall' => [
-            'rank' => $vote->rankOverall(),
+            'rank' => $vote->rankOverall($tgroupId),
             'title' => '<a href="top10.php?type=votes">overall</a>',
         ],
         'decade' => [
-            'rank' => $vote->rankDecade($year),
+            'rank' => $vote->rankDecade($tgroupId, $year),
             'title' => $advanced
                 ? "for the <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$decade&amp;year2=$decadeEnd\">{$decade}s</a>"
                 : "for the {$decade}s",
         ],
         'year' => [
-            'rank' => $vote->rankYear($year),
+            'rank' => $vote->rankYear($tgroupId, $year),
             'title' => $advanced
                 ? "for <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$year\">$year</a>"
                 : "for $year",
@@ -100,15 +100,15 @@ echo $Twig->render('bookmark/action.twig', [
     'is_bookmarked' => (new Gazelle\User\Bookmark($Viewer))->isTorrentBookmarked($tgroup->id()),
 ]);
 ?>
-            <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=
+            <a href="#" id="subscribelink_torrents<?=$tgroupId?>" class="brackets" onclick="SubscribeComments('torrents', <?=$tgroupId?>); return false;"><?=
                 $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 <?php if ($musicRelease) { ?>
-            <a href="upload.php?groupid=<?=$GroupID?>" class="brackets">Add format</a>
+            <a href="upload.php?groupid=<?=$tgroupId?>" class="brackets">Add format</a>
 <?php
 }
 if ($Viewer->permitted('site_submit_requests')) {
 ?>
-            <a href="requests.php?action=new&amp;groupid=<?=$GroupID?>" class="brackets">Request format</a>
+            <a href="requests.php?action=new&amp;groupid=<?=$tgroupId?>" class="brackets">Request format</a>
 <?php } ?>
             <a href="<?= $tgroup->url() ?>&amp;action=history" class="brackets">View history</a>
             <a href="<?= $tgroup->url() ?>&amp;action=grouplog" class="brackets">View log</a>
@@ -180,7 +180,7 @@ $Index++;
                         added by <?= $c['userlink'] ?>
 <?php } ?>
                         <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('ajax.php?action=torrent_remove_cover_art&amp;auth=<?=
-                            $Viewer->auth() ?>&amp;id=<?= $c['ID'] ?>&amp;groupid=<?= $GroupID ?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
+                            $Viewer->auth() ?>&amp;id=<?= $c['ID'] ?>&amp;groupid=<?= $tgroupId ?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
                     </li>
                 </ul>
             </div>
@@ -202,7 +202,7 @@ $Index++;
                     <div id="add_cover">
                         <input type="hidden" name="action" value="add_cover_art" />
                         <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                        <input type="hidden" name="groupid" value="<?=$GroupID?>" />
+                        <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
                     </div>
                 </form>
             </div>
@@ -237,7 +237,7 @@ if ($musicRelease) {
 <?php           if ($Viewer->permitted('torrents_edit')) { ?>
                     (<span class="tooltip" title="Artist alias ID"><?= $artist->getAlias($artist->name())
                         ?></span>)&nbsp;<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth='+authkey+'&amp;groupid=<?=
-                        $GroupID ?>&amp;artistid=<?= $artist->id() ?>&amp;importance=<?=
+                        $tgroupId ?>&amp;artistid=<?= $artist->id() ?>&amp;importance=<?=
                         $s['id'] ?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?=
                         $s['role'] ?>">X</a></span>
 <?php           } ?>
@@ -260,7 +260,7 @@ if ($musicRelease) {
                     <div id="AddArtists">
                         <input type="hidden" name="action" value="add_alias" />
                         <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                        <input type="hidden" name="groupid" value="<?=$GroupID?>" />
+                        <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
                         <input type="text" id="artist" name="aliasname[]" size="17"<?=
                             $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <select name="importance[]">
@@ -285,7 +285,7 @@ if ($musicRelease) {
                 <div class="box pad">
                     <form action="collages.php" method="post">
 <?php
-        $collageList = $collageMan->addToCollageDefault($Viewer->id(), $GroupID);
+        $collageList = $collageMan->addToCollageDefault($Viewer->id(), $tgroupId);
         if (empty($collageList)) {
 ?>
                     <div>Search for a collage name:</div>
@@ -300,7 +300,7 @@ if ($musicRelease) {
 <?php   } ?>
                     <input type="text" id="collage_ref" name="collage_ref" data-gazelle-autocomplete="true" size="25" />
                     <input type="hidden" name="action" value="add_torrent" />
-                    <input type="hidden" name="groupid" value="<?= $GroupID ?>" />
+                    <input type="hidden" name="groupid" value="<?= $tgroupId ?>" />
                     <input type="hidden" name="userid" value="<?= $Viewer->id() ?>" />
                     <input type="hidden" name="auth" value="<?= $Viewer->auth()  ?>" />
                     <br /><br /><input type="submit" value="Add" />
@@ -348,17 +348,12 @@ echo $Twig->render('tgroup/stats.twig', [
 ]);
 
 echo $Twig->render('vote/box.twig', [
-    'group_id' => $GroupID,
-    'percent'  => $vote->total() ? $vote->totalUp() / $vote->total() * 100 : '&mdash;',
-    'total'    => $vote->total(),
-    'up'       => $vote->totalUp(),
-    'down'     => $vote->totalDown(),
-    'score'    => $vote->score($vote->total(), $vote->totalUp()) * 100,
-    'vote'     => $vote->vote(),
+    'group_id' => $tgroupId,
+    'vote'     => $vote,
     'viewer'   => $Viewer,
 ]);
 
-$DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
+$DeletedTag = $Cache->get_value("deleted_tags_$tgroupId" . '_' . $Viewer->id());
 ?>
         <div class="box box_tags">
             <div class="head">
@@ -367,7 +362,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
                     <form style="display: none;" id="undo_tag_delete_form" name="tags" action="ajax.php" method="post">
                         <input type="hidden" name="action" value="add_tag" />
                         <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                        <input type="hidden" name="groupid" value="<?=$GroupID?>" />
+                        <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
                         <input type="hidden" name="tagname" value="<?=$DeletedTag?>" />
                         <input type="hidden" name="undo" value="true" />
                     </form>
@@ -383,16 +378,16 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
                 <li>
                     <a href="torrents.php?taglist=<?=$tag['name']?>" style="float: left; display: block;"><?=display_str($tag['name'])?></a>
                     <div style="float: right; display: block; letter-spacing: -1px;" class="edit_tags_votes">
-                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="tooltip vote_tag_up">&#x25b2;</a>
+                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="tooltip vote_tag_up">&#x25b2;</a>
                     <?= $tag['score'] ?>
-                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag down" class="tooltip vote_tag_down">&#x25bc;</a>
+                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag down" class="tooltip vote_tag_down">&#x25bc;</a>
 <?php       if ($Viewer->permitted('users_warn')) { ?>
                     <a href="user.php?id=<?= $tag['userId'] ?>" title="View the profile of the user that added this tag" class="brackets tooltip view_tag_user">U</a>
 <?php
             }
             if (!$Viewer->disableTagging() && $Viewer->permitted('site_delete_tag')) {
 ?>
-                    <span class="remove remove_tag"><a href="ajax.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
+                    <span class="remove remove_tag"><a href="ajax.php?action=delete_tag&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
 <?php       } ?>
                     </div>
                     <br style="clear: both;" />
@@ -409,7 +404,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
                 <form class="add_form" name="tags" action="ajax.php" method="post">
                     <input type="hidden" name="action" value="add_tag" />
                     <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                    <input type="hidden" name="groupid" value="<?=$GroupID?>" />
+                    <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
                     <input type="text" name="tagname" id="tagname" size="20"<?=
                         $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                     <input type="submit" value="+" />
@@ -426,13 +421,13 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID" . '_' . $Viewer->id());
 echo $Twig->render('collage/summary.twig', [
     'class'   => 'collage_rows',
     'object'  => 'album',
-    'summary' => $collageMan->tgroupGeneralSummary($GroupID),
+    'summary' => $collageMan->tgroupGeneralSummary($tgroupId),
 ]);
 
 echo $Twig->render('collage/summary.twig', [
     'class'   => 'personal_rows',
     'object'  => 'album',
-    'summary' => $collageMan->tgroupPersonalSummary($GroupID),
+    'summary' => $collageMan->tgroupPersonalSummary($tgroupId),
 ]);
 ?>
         <table class="torrent_table details<?= $tgroup->isSnatched() ? ' snatched' : ''?> m_table" id="torrent_details">
@@ -449,7 +444,7 @@ if (!$torrentList) {
     foreach ($removed as $info) {
         $mastering = implode('/', [$info['year'], $info['title'], $info['record_label'], $info['catalogue_number'], $info['media']]);
 ?>
-            <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$GroupID?> edition group_torrent">
+            <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition group_torrent">
                 <td colspan="5" class="edition_info"><strong>[<?= $mastering ?>]</strong></td>
             </tr>
             <tr>
@@ -481,8 +476,8 @@ if (!$torrentList) {
         if ($tgroup->categoryGrouped() && ($prev != $current || $FirstUnknown)) {
             $EditionID++;
 ?>
-            <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$GroupID?> edition group_torrent">
-                <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=
+            <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition group_torrent">
+                <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$tgroupId?>, <?=
                     $EditionID?>, this, event);" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group." class="tooltip">&ndash;</a> <?= $torrent->edition() ?></strong></td>
             </tr>
 <?php
@@ -492,7 +487,7 @@ if (!$torrentList) {
         $reportTotal = $torrent->reportTotal();
         $reportList  = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
     ?>
-            <tr class="torrent_row releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$GroupID?> edition_<?= $EditionID
+            <tr class="torrent_row releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition_<?= $EditionID
                 ?> group_torrent<?= $snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : ''
                 ?>" style="font-weight: normal;" id="torrent<?= $TorrentID ?>">
                 <td class="td_info">
@@ -513,7 +508,7 @@ if (!$torrentList) {
                 </td>
                 <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
             </tr>
-            <tr class="releases_<?=$tgroup->releaseType() ?> groupid_<?=$GroupID?> edition_<?=$EditionID?> torrentdetails pad <?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $TorrentID) { ?>hidden<?php } ?>" id="torrent_<?=$TorrentID; ?>">
+            <tr class="releases_<?=$tgroup->releaseType() ?> groupid_<?=$tgroupId?> edition_<?=$EditionID?> torrentdetails pad <?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $TorrentID) { ?>hidden<?php } ?>" id="torrent_<?=$TorrentID; ?>">
                 <td colspan="5">
                     <div id="release_<?=$TorrentID?>" class="no_overflow">
                         <blockquote>
@@ -561,7 +556,7 @@ if (!$torrentList) {
         ) {
 ?>
                             <br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=
-                                $GroupID?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
+                                $tgroupId?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
 <?php
         }
     }
@@ -573,7 +568,7 @@ if (!$torrentList) {
                     </div>
                     <div class="linkbox">
 <?php if ($Viewer->permitted('site_moderate_requests')) { ?>
-                        <a href="torrents.php?action=masspm&amp;id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>" class="brackets">Mass PM snatchers</a>
+                        <a href="torrents.php?action=masspm&amp;id=<?=$tgroupId?>&amp;torrentid=<?=$TorrentID?>" class="brackets">Mass PM snatchers</a>
 <?php
     }
     if ($torrent->media() === 'CD' && $torrent->hasLog() && $torrent->hasLogDb()) {
@@ -659,7 +654,7 @@ if (!$torrentList) {
 <?php
 }
 
-$Requests = get_group_requests($GroupID);
+$Requests = get_group_requests($tgroupId);
 if ($Viewer->disableRequests() && count($Requests) > 0) {
     $i = 0;
 ?>
@@ -708,7 +703,7 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
 }
 
 // Matched Votes
-$similar = $vote->similarVote();
+$similar = $vote->similarVote($tgroupId);
 if (!empty($similar)) {
 ?>
         <table class="vote_matches_table" id="vote_matches">
@@ -757,7 +752,7 @@ echo $Twig->render('comment/thread.twig', [
 
 echo $Twig->render('reply.twig', [
     'action'   => 'take_post',
-    'id'       => $GroupID,
+    'id'       => $tgroupId,
     'name'     => 'pageid',
     'subbed'   => $isSubscribed,
     'textarea' => (new Gazelle\Util\Textarea('quickpost', ''))->setPreviewManual(true),

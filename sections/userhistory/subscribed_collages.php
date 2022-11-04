@@ -134,7 +134,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                 'torrent' => $torrent,
                 'viewer'  => $Viewer,
             ]) ?>
-            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
         </td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
     </tr>

@@ -5,22 +5,21 @@ if (!$Viewer->permitted('site_album_votes')) {
     json_error('forbidden');
 }
 
-$groupId = (int)$_REQUEST['groupid'];
-if (!$groupId) {
+$tgroupId = (int)$_REQUEST['groupid'];
+if (!$tgroupId) {
     json_error('no such group');
 }
 $vote = new Gazelle\User\Vote($Viewer);
-$vote->setGroupId($groupId);
 
 if ($_REQUEST['do'] == 'unvote') {
-    [$ok, $message] = $vote->clear();
+    [$ok, $message] = $vote->clear($tgroupId);
 } elseif ($_REQUEST['do'] == 'vote') {
     switch($_REQUEST['vote']) {
         case 'up':
-            [$ok, $message] = $vote->upvote();
+            [$ok, $message] = $vote->upvote($tgroupId);
             break;
         case 'down':
-            [$ok, $message] = $vote->downvote();
+            [$ok, $message] = $vote->downvote($tgroupId);
             break;
         default:
             json_error('bad vote');
@@ -33,9 +32,9 @@ if (!$ok) {
 }
 json_print('success', [
     'action' => $message,
-    'id'     => $groupId,
-    'total'  => $vote->total(),
-    'up'     => $vote->totalUp(),
-    'down'   => $vote->totalDown(),
-    'score'  => $vote->score($vote->total(), $vote->totalUp()),
+    'id'     => $tgroupId,
+    'total'  => $vote->total($tgroupId),
+    'up'     => $vote->totalUp($tgroupId),
+    'down'   => $vote->totalDown($tgroupId),
+    'score'  => $vote->score($vote->total($tgroupId), $vote->totalUp($tgroupId)),
 ]);

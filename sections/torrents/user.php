@@ -512,7 +512,7 @@ foreach (CATEGORY as $catKey => $catName) {
                     <?= $torrent->fullLink() ?>
 <?php   if (!$Viewer->option('NoVoteLinks')) { ?>
                     <br />
-                    <span class="float_right"><?= $vote->setGroupId($tgroup->id())->links() ?></span>
+                    <span class="float_right"><?= $vote->links($tgroup->id()) ?></span>
 <?php   } ?>
                     <div class="tags"><?= implode(', ', array_map(
                         fn($name) => "<a href=\"torrents.php?type={$action}&amp;userid={$userId}&amp;tags=$name\">$name</a>",
