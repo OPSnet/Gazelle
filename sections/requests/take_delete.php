@@ -11,7 +11,7 @@ if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_re
 }
 
 $reason = trim($_POST['reason']);
-$title = $request->fullTitle();
+$title = $request->text();
 if ($request->userId() !== $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($request->userId(), 0,
         'A request you created has been deleted',

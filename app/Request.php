@@ -3,11 +3,11 @@
 namespace Gazelle;
 
 class Request extends BaseObject {
-    protected array $info;
-
     protected const CACHE_REQUEST = "request_%d";
     protected const CACHE_ARTIST  = "request_artists_%d";
     protected const CACHE_VOTE    = "request_votes_%d";
+
+    protected array $info;
 
     public function tableName(): string {
         return 'requests';
@@ -21,15 +21,65 @@ class Request extends BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
     }
 
-    public function yearLink(): string {
-        return sprintf('<a href="%s">%s [%d]</a>', $this->url(), display_str($this->title()), $this->year());
+    /**
+     * Display a title on the request page itself. If there are artists in the name,
+     * they will be linkified, and the request title itself will not
+     */
+    public function selfLink(): string {
+        $title = display_str($this->title());
+        return match($this->categoryName()) {
+            'Music' =>
+                "{$this->artistRole()->link()} – "
+                . ($this->isFilled()
+                    ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
+                    : $title
+                )
+                . " [{$this->year()}]",
+
+            'Audiobooks', 'Comedy' => $this->isFilled()
+                ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a> [{$this->year()}]"
+                : "$title [{$this->year()}]",
+
+            default => $this->isFilled()
+                ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
+                : $title,
+        };
     }
 
-    public function categoryLink(): string {
+    /**
+     * Display the title of a request, with all fields linkified where it makes sense.
+     */
+    public function smartLink(): string {
+        $title = display_str($this->title());
         return match($this->categoryName()) {
-            'Audiobooks', 'Comedy'  => $this->yearLink(),
-            'Music' => \Artists::display_artists(\Requests::get_artists($this->id)) . $this->yearLink(),
-            default => $this->link(),
+            'Music' =>
+                "{$this->artistRole()->link()} – "
+                . ($this->isFilled()
+                    ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
+                    : "<a href=\"{$this->url()}\">$title</a> [{$this->year()}]"
+                )
+                . " [{$this->year()}]",
+
+            'Audiobooks', 'Comedy' => $this->isFilled()
+                ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a> [{$this->year()}]"
+                : "<a href=\"{$this->url()}\">$title</a> [{$this->year()}]",
+
+            default => $this->isFilled()
+                ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
+                : "<a href=\"{$this->url()}\">$title</a>",
+        };
+    }
+
+    /**
+     * Display the full title of the request with no links.
+     */
+    public function text(): string {
+        $title = display_str($this->title());
+        return match($this->categoryName()) {
+            'Music'       => "{$this->artistRole()->text()} – $title [{$this->year()}]",
+            'Audiobooks',
+            'Comedy'      => "$title [{$this->year()}]",
+            default       => $title,
         };
     }
 
@@ -56,47 +106,27 @@ class Request extends BaseObject {
         ]);
     }
 
-    public function remove(): bool {
-        self::$db->begin_transaction();
-        self::$db->prepared_query("DELETE FROM requests_votes WHERE RequestID = ?", $this->id);
-        self::$db->prepared_query("DELETE FROM requests_tags WHERE RequestID = ?", $this->id);
-        self::$db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
-        $affected = self::$db->affected_rows();
-        self::$db->prepared_query("
-            SELECT ArtistID FROM requests_artists WHERE RequestID = ?
-            ", $this->id
-        );
-        $artisIds = self::$db->collect(0);
-        self::$db->prepared_query('
-            DELETE FROM requests_artists WHERE RequestID = ?', $this->id
-        );
-        self::$db->prepared_query("
-            REPLACE INTO sphinx_requests_delta (ID) VALUES (?)
-            ", $this->id
-        );
-        (new \Gazelle\Manager\Comment)->remove('requests', $this->id);
-        self::$db->commit();
-
-        foreach ($artisIds as $artistId) {
-            self::$cache->delete_value("artists_requests_$artistId");
-        }
-        $this->flush();
-
-        return $affected != 0;
+    public function artistRole(): ArtistRole\Request {
+        return new ArtistRole\Request($this->id, new Manager\Artist);
     }
 
-    protected function info(): array {
+    public function info(): array {
         if (!isset($this->info)) {
-            $this->info = self::$db->rowAssoc("
+            $info = self::$db->rowAssoc("
                 SELECT r.UserID,
                     r.FillerID,
+                    r.TimeAdded,
+                    r.TimeFilled,
+                    r.LastVote,
                     r.CategoryID,
+                    c.name AS category_name,
                     r.Title,
                     r.Description,
                     r.Year,
                     r.Image,
                     r.CatalogueNumber,
                     r.ReleaseType,
+                    coalesce(rel.Name, 'Unknown') AS release_type_name,
                     r.RecordLabel,
                     r.GroupID,
                     r.TorrentID,
@@ -105,26 +135,56 @@ class Request extends BaseObject {
                     r.BitrateList,
                     r.FormatList,
                     r.MediaList,
+                    r.OCLC,
                     group_concat(t.Name ORDER BY t.Name) as tagList
                 FROM requests r
                 INNER JOIN requests_tags AS rt ON (rt.RequestID = r.ID)
                 INNER JOIN tags AS t ON (rt.TagID = t.ID)
+                INNER JOIN category c ON (c.category_id = r.CategoryID)
+                LEFT JOIN release_type rel ON (rel.ID = r.ReleaseType)
                 WHERE r.ID = ?
                 GROUP BY r.ID
                 ", $this->id
             );
-            $this->info['need_encoding'] = explode('|', $this->info['BitrateList'] ?? '');
-            $this->info['need_format'] = explode('|', $this->info['FormatList'] ?? '');
-            $this->info['need_media'] = explode('|', $this->info['MediaList'] ?? '');
+
+            self::$db->prepared_query("
+                SELECT rv.UserID AS user_id,
+                    rv.Bounty    AS bounty
+                FROM requests_votes AS rv
+                WHERE rv.RequestID = ?
+                ORDER BY rv.Bounty DESC
+                ", $this->id
+            );
+            $info['user_vote_list'] = self::$db->to_array(false, MYSQLI_ASSOC, false);
+
+            self::$db->prepared_query("
+                SELECT t.Name
+                FROM requests_tags AS rt
+                INNER JOIN tags AS t ON (t.ID = rt.TagID)
+                WHERE rt.RequestID = ?
+                ORDER BY rt.TagID ASC
+                ", $this->id
+            );
+            $info['tag'] = self::$db->collect('Name', false);
+
+            $info['need_encoding'] = explode('|', $info['BitrateList'] ?? '');
+            $info['need_format'] = explode('|', $info['FormatList'] ?? '');
+            $info['need_media'] = explode('|', $info['MediaList'] ?? '');
+            $this->info = $info;
         }
         return $this->info;
     }
 
-    public function bountyTotal(): int {
-        return (int)self::$db->scalar("
-            SELECT sum(Bounty) FROM requests_votes WHERE RequestID = ?
-            ", $this->id
-        );
+    public function canEditOwn(User $user): bool {
+        return !$this->isFilled() && $user->id() == $this->userId() && count($this->userIdVoteList()) < 2;
+    }
+
+    public function canEdit(User $user): bool {
+        return $this->canEditOwn($user) || $user->permittedAny('site_moderate_requests', 'site_edit_requests');
+    }
+
+    public function canVote(User $user): bool {
+        return !$this->isFilled() && $user->permitted('site_vote');
     }
 
     public function catalogueNumber(): string {
@@ -136,19 +196,38 @@ class Request extends BaseObject {
     }
 
     public function categoryName(): string {
-        return CATEGORY[$this->info()['CategoryID'] - 1];
+        return $this->info()['category_name'];
+    }
+
+    public function created(): string {
+        return $this->info()['TimeAdded'];
     }
 
     public function description(): string {
         return $this->info()['Description'];
     }
 
-    public function image(): ?string {
-        return $this->info()['Image'];
+    public function descriptionEncoding(): ?string {
+        $need = $this->info()['need_encoding'];
+        return empty($need) ? null : implode(', ', $need);
     }
 
-    public function userId(): int {
-        return $this->info()['UserID'];
+    public function descriptionFormat(): ?string {
+        $need = $this->info()['need_format'];
+        return empty($need) ? null : implode(', ', $need);
+    }
+
+    public function descriptionLogCue(): ?string {
+        return $this->info()['LogCue'];
+    }
+
+    public function descriptionMedia(): ?string {
+        $need = $this->info()['need_media'];
+        return empty($need) ? null : implode(', ', $need);
+    }
+
+    public function tgroupId(): ?int {
+        return $this->info()['GroupID'];
     }
 
     public function fillerId(): ?int {
@@ -157,6 +236,14 @@ class Request extends BaseObject {
 
     public function isFilled(): bool {
         return (bool)$this->info()['FillerID'];
+    }
+
+    public function image(): ?string {
+        return $this->info()['Image'];
+    }
+
+    public function lastVoteDate(): string {
+        return $this->info()['LastVote'];
     }
 
     public function needCue(): bool {
@@ -189,8 +276,24 @@ class Request extends BaseObject {
         return in_array($media, $this->info()['need_media']);
     }
 
+    public function oclcList(): ?string {
+        $oclc = str_replace(' ', '', $this->info()['OCLC']);
+        if ($oclc === '') {
+            return null;
+        }
+        return implode(', ',
+            array_map(fn ($id) => "<a href=\"https://www.worldcat.org/oclc/{$id}\">{$id}</a>",
+                explode(',', $oclc)
+            )
+        );
+    }
+
     public function recordLabel(): ?string {
         return $this->info()['RecordLabel'];
+    }
+
+    public function releaseTypeName(): string {
+        return $this->info()['release_type_name'];
     }
 
     public function releaseType(): int {
@@ -198,27 +301,44 @@ class Request extends BaseObject {
     }
 
     public function tagNameList(): array {
-        return explode(',', $this->info()['tagList']);
+        return $this->info()['tag'];
     }
 
     public function title(): string {
         return $this->info()['Title'];
     }
 
-    public function fullTitle() {
-        $title = '';
-        if ($this->categoryName() === 'Music') {
-            $title = \Artists::display_artists($this->artistList(), false, true);
-        }
-        return $title . $this->title();
-    }
-
     public function torrentId(): ?int {
         return $this->info()['TorrentID'];
     }
 
+    public function userId(): int {
+        return $this->info()['UserID'];
+    }
+
     public function year(): int {
-        return $this->info()['Year'];
+        return (int)$this->info()['Year'];
+    }
+
+    public function userIdVoteList(): array {
+        return $this->info()['user_vote_list'];
+    }
+
+    public function userVoteList(Manager\User $manager): array {
+        $list = $this->userIdVoteList();
+        foreach ($list as &$user) {
+            $user['user'] = $manager->findById($user['user_id']);
+        }
+        unset($user);
+        return $list;
+    }
+
+    public function bountyTotal(): int {
+        return array_sum(array_column($this->userIdVoteList(), 'bounty'));
+    }
+
+    public function userVotedTotal(): int {
+        return count($this->userIdVoteList());
     }
 
     public function artistList(): array {
@@ -461,11 +581,9 @@ class Request extends BaseObject {
 
     /**
      * Get the total bounty that a user has added to a request
-     * @param int $userId ID of user
-     * @return int keyed by user ID
      */
-    public function userBounty(int $userId) {
-        return self::$db->scalar("
+    public function userBounty(int $userId): int {
+        return (int)self::$db->scalar("
             SELECT Bounty
             FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
@@ -598,5 +716,34 @@ class Request extends BaseObject {
             ", $this->id, $this->id, $this->id
         );
         return self::$db->affected_rows();
+    }
+
+    public function remove(): bool {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("DELETE FROM requests_votes WHERE RequestID = ?", $this->id);
+        self::$db->prepared_query("DELETE FROM requests_tags WHERE RequestID = ?", $this->id);
+        self::$db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            SELECT ArtistID FROM requests_artists WHERE RequestID = ?
+            ", $this->id
+        );
+        $artisIds = self::$db->collect(0);
+        self::$db->prepared_query('
+            DELETE FROM requests_artists WHERE RequestID = ?', $this->id
+        );
+        self::$db->prepared_query("
+            REPLACE INTO sphinx_requests_delta (ID) VALUES (?)
+            ", $this->id
+        );
+        (new \Gazelle\Manager\Comment)->remove('requests', $this->id);
+        self::$db->commit();
+
+        foreach ($artisIds as $artistId) {
+            self::$cache->delete_value("artists_requests_$artistId");
+        }
+        $this->flush();
+
+        return $affected != 0;
     }
 }

@@ -45,7 +45,7 @@ foreach ($Results as &$result) {
             if ($request) {
                 $result = $result + [
                     'jump' => $request->url() . $postLink,
-                    'link' => 'Request &rsaquo; ' . $request->categoryLink(),
+                    'link' => 'Request &rsaquo; ' . $request->smartLink(),
                 ];
             }
             break;

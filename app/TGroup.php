@@ -284,7 +284,7 @@ class TGroup extends BaseObject {
 
     public function artistRole(): ArtistRole\TGroup {
         if (!isset($this->artistRole)) {
-            $this->artistRole = new ArtistRole\TGroup($this->id);
+            $this->artistRole = new ArtistRole\TGroup($this->id, new Manager\Artist);
         }
         return $this->artistRole;
     }

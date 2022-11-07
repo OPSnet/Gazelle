@@ -3,7 +3,7 @@ function Vote(amount, requestid) {
         amount = parseInt($('#amount').raw().value);
     }
     if (amount == 0) {
-        amount = 20 * 1024 * 1024;
+        amount = 100 * 1024 * 1024;
     }
 
     var index;
