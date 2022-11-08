@@ -3,10 +3,10 @@
 $reportMan = new Gazelle\Manager\Torrent\Report;
 $bookmark  = new Gazelle\User\Bookmark($Viewer);
 $snatcher  = new Gazelle\User\Snatch($Viewer);
+$imgProxy  = new Gazelle\Util\ImageProxy($Viewer);
 $top10     = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
-$imgProxy  = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
     $details = 'all';

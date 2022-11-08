@@ -22,7 +22,7 @@ $bookmark = new Gazelle\User\Bookmark($user);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$collMan  = (new Gazelle\Manager\Collage)->setImageProxy((new Gazelle\Util\ImageProxy)->setViewer($Viewer));
+$collMan  = (new Gazelle\Manager\Collage)->setImageProxy(new Gazelle\Util\ImageProxy($Viewer));
 
 $paginator = new Gazelle\Util\Paginator(200, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($bookmark->torrentTotal());

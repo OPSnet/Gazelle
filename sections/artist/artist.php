@@ -72,7 +72,7 @@ echo $Twig->render('bookmark/action.twig', [
 
     <div class="sidebar">
 <?php
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 if ($Artist->image()) {
     $image = $imgProxy->process($Artist->image());
 ?>

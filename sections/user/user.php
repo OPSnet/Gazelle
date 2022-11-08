@@ -54,7 +54,7 @@ if ($UserID == $Viewer->id()) {
 $FA_Key = null;
 
 // Image proxy CTs
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->title()))
     ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
         function ($m) use ($imgProxy) {

@@ -3,7 +3,6 @@
 namespace Gazelle\User;
 
 class Donor extends \Gazelle\BaseUser {
-
     public function link(\Gazelle\User $viewer): string {
         if (!(new Privilege($this->user))->isDonor()) {
             return '';
@@ -16,7 +15,7 @@ class Donor extends \Gazelle\BaseUser {
         $rewards = $this->user->donorRewards();
 
         if ($enabled['HasCustomDonorIcon'] && !empty($rewards['CustomIcon'])) {
-            $image = (new \Gazelle\Util\ImageProxy)->setViewer($viewer)
+            $image = (new \Gazelle\Util\ImageProxy($viewer))
                 ->process($rewards['CustomIcon'], 'donoricon', $this->user->id());
         } else {
             $rank = $this->user->donorRank();

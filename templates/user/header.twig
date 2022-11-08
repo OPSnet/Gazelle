@@ -6,7 +6,7 @@
     <div class="header">
         <h2>{{ user.username }}
         {%- if user is donor and (own_profile or user.donorVisible or viewer.permitted('users_override_paranoia')) -%}
-        &nbsp;{{ user.donorHeart|raw -}}
+        &nbsp;{{ user.donorHeart(viewer)|raw -}}
         {%- endif -%}
         {%- if user.isWarned -%}
             &nbsp;<a href="wiki.php?action=article&amp;name=warnings"><img src="{{

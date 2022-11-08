@@ -63,7 +63,7 @@ if (($_GET['action'] ?? '') == 'revert') {
         if (!preg_match(IMAGE_REGEXP, $Image)) {
             error(display_str($Image) . " does not look like a valid image url");
         }
-        $banned = (new Gazelle\Util\ImageProxy)->badHost($Image);
+        $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($Image);
         if ($banned) {
             error("Please rehost images from $banned elsewhere.");
         }

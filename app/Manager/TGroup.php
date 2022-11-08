@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_tg_%d';
 
     const CACHE_KEY_FEATURED = 'featured_%d';
@@ -296,7 +295,7 @@ class TGroup extends \Gazelle\BaseManager {
             if (!is_null($featured)) {
                 global $Viewer; // FIXME this wrong
                 $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
-                $featured['image']       = (new \Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($featured['WikiImage']);
+                $featured['image']       = (new \Gazelle\Util\ImageProxy($Viewer))->process($featured['WikiImage']);
             }
             self::$cache->cache_value($key, $featured, 86400 * 7);
         }

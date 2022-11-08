@@ -4,17 +4,14 @@ namespace Gazelle\Util;
 
 /**
  * ImageProxy class
- * There are a few uses, mixed up here.s
+ * There are a few uses, mixed up here.
  *  - check if the image hoster is allowed
  *  - prepare image urls to be curled through a proxy to prevent client IP addresses from leaking
  */
+
 class ImageProxy {
-
-    protected \Gazelle\User $viewer;
-
-    public function setViewer(\Gazelle\User $viewer) {
-        $this->viewer = $viewer;
-        return $this;
+    public function __construct(
+        protected readonly \Gazelle\User $viewer) {
     }
 
     /**
@@ -39,7 +36,7 @@ class ImageProxy {
      * @return string
      */
     public function process($url, $check = false, $UserID = false) {
-        if (empty($url) || !isset($this->viewer) || (isset($this->viewer) && !$this->viewer->permitted('site_proxy_images'))) {
+        if (empty($url) || !$this->viewer->permitted('site_proxy_images')) {
             return $url;
         }
         $extra = '';

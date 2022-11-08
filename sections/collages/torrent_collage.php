@@ -3,7 +3,7 @@
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $bookmark = new Gazelle\User\Bookmark($Viewer);
-$collMan  = (new Gazelle\Manager\Collage)->setImageProxy((new \Gazelle\Util\ImageProxy)->setViewer($Viewer));
+$collMan  = (new Gazelle\Manager\Collage)->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
 $urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $vote     = new Gazelle\User\Vote($Viewer);
 $snatcher = new Gazelle\User\Snatch($Viewer);

@@ -3,7 +3,6 @@
 namespace Gazelle\Util;
 
 class Twig {
-
     protected static \Gazelle\Manager\User $userMan;
 
     public static function setUserMan(\Gazelle\Manager\User $userMan) {
@@ -62,7 +61,8 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'image',
             function ($i) {
-                return new \Twig\Markup((new ImageProxy)->process($i), 'UTF-8');
+                global $Viewer; // this is sad
+                return new \Twig\Markup((new ImageProxy($Viewer))->process($i), 'UTF-8');
             }
         ));
 
@@ -188,8 +188,9 @@ class Twig {
         }));
 
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
+            global $Viewer;
             return new \Twig\Markup(
-                (new ImageProxy)->process($icon, 'donoricon', $userId),
+                (new ImageProxy($Viewer))->process($icon, 'donoricon', $userId),
                 'UTF-8'
             );
         }));

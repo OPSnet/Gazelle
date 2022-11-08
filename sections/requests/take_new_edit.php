@@ -78,7 +78,7 @@ if (empty($_POST['image'])) {
     if (!preg_match(IMAGE_REGEXP, $Image)) {
         $Err = display_str($Image) . " does not look like a valid image url";
     }
-    $banned = (new Gazelle\Util\ImageProxy)->badHost($Image);
+    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($Image);
     if ($banned) {
         $Err = "Please rehost images from $banned elsewhere.";
     }

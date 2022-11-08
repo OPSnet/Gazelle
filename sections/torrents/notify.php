@@ -111,7 +111,7 @@ if (!empty($GroupIDs)) {
     }
 }
 
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 

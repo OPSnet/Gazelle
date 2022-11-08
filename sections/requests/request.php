@@ -122,7 +122,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                 <div class="pad">
 <?php
         if (!empty($Request['Image'])) {
-            $image = (new Gazelle\Util\ImageProxy)->setViewer($Viewer)->process($Request['Image']);
+            $image = (new Gazelle\Util\ImageProxy($Viewer))->process($Request['Image']);
 ?>
                     <p align="center"><img style="width: 100%;" src="<?= $image ?>" alt="<?=
                         $FullName?>" onclick="lightbox.init('<?= $image ?>', 220);" /></p>

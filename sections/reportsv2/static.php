@@ -17,7 +17,7 @@ $torMan        = new Gazelle\Manager\Torrent;
 $reportMan     = new Gazelle\Manager\Torrent\Report;
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $userMan       = new Gazelle\Manager\User;
-$imgProxy      = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $ripFiler      = new \Gazelle\File\RipLog;
 $htmlFiler     = new \Gazelle\File\RipLogHTML;
 

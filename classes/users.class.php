@@ -23,7 +23,7 @@ class Users {
         }
 
         global $Viewer; // FIXME this is wrong
-        $imgProxy =  (new \Gazelle\Util\ImageProxy)->setViewer($Viewer);
+        $imgProxy = new \Gazelle\Util\ImageProxy($Viewer);
         $Classes = $userMan->classList();
         if ($user->primaryClass() < $Classes[MOD]['Level']) {
             $OverrideParanoia = $Viewer->permitted('users_override_paranoia', $user->primaryClass());

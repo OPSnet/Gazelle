@@ -26,7 +26,7 @@ $reportMan     = new Gazelle\Manager\Torrent\Report;
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $userMan       = new Gazelle\Manager\User;
-$imgProxy      = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher      = new Gazelle\User\Snatch($Viewer);
 $vote          = (new Gazelle\User\Vote($Viewer))->setGroupId($GroupID);
 

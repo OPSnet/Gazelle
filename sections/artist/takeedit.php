@@ -38,7 +38,7 @@ if (!empty($image)) {
     if (!preg_match(IMAGE_REGEXP, $image)) {
         error(display_str($image) . " does not look like a valid image url");
     }
-    $banned = (new Gazelle\Util\ImageProxy)->badHost($image);
+    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($image);
     if ($banned) {
         error("Please rehost images from $banned elsewhere.");
     }

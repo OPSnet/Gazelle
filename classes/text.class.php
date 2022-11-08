@@ -989,7 +989,7 @@ class Text {
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'.$Block['Val'].'" src="'.$LocalURL.'" />';
                         } else {
                             if (is_null($imgProxy)) {
-                                $imgProxy = (new Gazelle\Util\ImageProxy)->setViewer(self::$viewer);
+                                $imgProxy = new Gazelle\Util\ImageProxy(self::$viewer);
                             }
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'
                                 . $Block['Val'].'" src="' . $imgProxy->process($Block['Val']) . '" />';

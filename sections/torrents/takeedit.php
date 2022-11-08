@@ -167,7 +167,7 @@ if (!$Err && isset($Properties['Image'])) {
         $Err = display_str($Properties['Image']) . " does not look like a valid image url";
     }
 
-    $banned = (new Gazelle\Util\ImageProxy)->badHost($Properties['Image']);
+    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($Properties['Image']);
     if ($banned) {
         $Err = "Please rehost images from $banned elsewhere.";
     }

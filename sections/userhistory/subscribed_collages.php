@@ -11,7 +11,7 @@ $artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), !$ShowAll);
 
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 $urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 

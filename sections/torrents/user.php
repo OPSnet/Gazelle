@@ -320,7 +320,7 @@ $action       = display_str($_GET['type']);
 $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);

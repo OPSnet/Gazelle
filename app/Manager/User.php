@@ -164,7 +164,7 @@ class User extends \Gazelle\BaseManager {
         static $cache = [];
         $viewedId = $viewed->id();
         if (!isset($cache[$viewedId])) {
-            $imgProxy = (new \Gazelle\Util\ImageProxy)->setViewer($viewer);
+            $imgProxy = new \Gazelle\Util\ImageProxy($viewer);
             $avatar = match($viewer->avatarMode()) {
                 1 => STATIC_SERVER . '/common/avatars/default.png',
                 2 => $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)

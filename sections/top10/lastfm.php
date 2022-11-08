@@ -19,7 +19,7 @@ switch ($Category) {
         break;
 }
 
-$imgproxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgproxy = new Gazelle\Util\ImageProxy($Viewer);
 
 View::show_header('Last.fm', ['js' => 'jquery.imagesloaded,jquery.wookmark,top10', 'css' => 'tiles']);
 ?>

@@ -7,7 +7,7 @@ $NumGroupsByUser = 0;
 $Render = [];
 $ArtistTable = '';
 
-$imgProxy = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 foreach ($Artists as $id => $Artist) {
     $name = display_str($Artist['name']);
     $image = $Artist['image']

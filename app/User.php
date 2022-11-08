@@ -498,7 +498,7 @@ class User extends BaseObject {
         return $this->donorVisible;
     }
 
-    public function donorHeart(): string {
+    public function donorHeart(User $user): string {
         if (!isset($this->donorHeart)) {
             if (!(new User\Privilege($this))->isDonor()) {
                 $this->donorHeart = '';
@@ -506,7 +506,7 @@ class User extends BaseObject {
                 $enabled = $this->enabledDonorRewards();
                 $reward = $this->donorRewards();
                 if ($enabled['HasCustomDonorIcon'] && $reward['CustomIcon']) {
-                    $iconImage = (new Util\ImageProxy)->process($reward['CustomIcon'], 'donoricon', $this->id);
+                    $iconImage = (new Util\ImageProxy($user))->process($reward['CustomIcon'], 'donoricon', $this->id);
                 } else {
                     $rank = $this->donorRank();
                     if ($rank == 0) {

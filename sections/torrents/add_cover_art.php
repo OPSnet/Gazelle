@@ -16,7 +16,7 @@ if (is_null($tgroup)) {
     error(404);
 }
 
-$imgProxy = new Gazelle\Util\ImageProxy;
+$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $logger   = new Gazelle\Log;
 
 foreach ($imageList as $n => $image) {

@@ -28,9 +28,9 @@ $vote->setTopLimit($limit);
 
 $bookmark     = new Gazelle\User\Bookmark($Viewer);
 $snatcher     = new Gazelle\User\Snatch($Viewer);
+$imgProxy     = new Gazelle\Util\ImageProxy($Viewer);
 $tgMan        = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan       = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$imgProxy     = (new Gazelle\Util\ImageProxy)->setViewer($Viewer);
 $urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $topVotes     = $vote->topVotes();
 $number       = 0;
