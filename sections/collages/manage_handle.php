@@ -32,4 +32,4 @@ if (($_POST['submit'] ?? '') === 'Remove') {
 }
 $collage->flush();
 
-header('Location: ' . $collage->url() . '&action=manage');
+header('Location: ' . $collage->location() . '&action=manage');

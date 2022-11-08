@@ -30,7 +30,7 @@ if (isset($_POST['forum'])) {
 
 // If you're not sending anything, go back
 if (empty($_POST['body']) || empty($_POST['title'])) {
-    header('Location: ' . redirectUrl($forum->url()));
+    header('Location: ' . redirectUrl($forum->location()));
     exit;
 }
 $title = shortenString(trim($_POST['title']), 150, true, false);

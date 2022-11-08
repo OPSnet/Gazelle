@@ -22,7 +22,7 @@ class Tag extends BaseObject {
         return 'tags';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'torrents.php?taglist=' . $this->name();
     }
 

@@ -75,4 +75,4 @@ $Cache->deleteMulti([
 $log->group($new->id(), $Viewer->id(), "merged group $oldId")
     ->general("Torrent " . $torrent->id() , " was edited by " . $Viewer->label());
 
-header('Location: ' . $new->url());
+header('Location: ' . $new->location());

@@ -72,5 +72,5 @@ if (defined('AJAX')) {
         return $data;
     }
 } else {
-    header('Location: ' . $request->url());
+    header('Location: ' . $request->location());
 }

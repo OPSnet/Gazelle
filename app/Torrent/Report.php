@@ -11,8 +11,8 @@ class Report extends \Gazelle\BaseObject {
         $this->info = [];
     }
 
-    public function url(): string {
-        return "reportsv2.php?view=report&amp;id=" . $this->id;
+    public function location(): string {
+        return "reportsv2.php?view=report&id=" . $this->id;
     }
 
     public function link(): string {

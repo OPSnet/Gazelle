@@ -15,4 +15,4 @@ try {
     error('The alias you attempted to add is already assigned to an article.');
 }
 
-header('Location: ' . $article->url());
+header('Location: ' . $article->location());

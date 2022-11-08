@@ -88,4 +88,4 @@ foreach ($groupIds as $groupId) {
     $collage->addEntry($groupId, $Viewer->id());
 }
 $collageMan->flushDefaultGroup($Viewer->id());
-header('Location: ' . $collage->url());
+header('Location: ' . $collage->location());

@@ -9,7 +9,7 @@ class Artist extends \Gazelle\BaseObject {
 
     public function tableName(): string { return '/* artist stats */'; }
 
-    public function url(): string {
+    public function location(): string {
         return 'artist.php?id=' . $this->id;
     }
 

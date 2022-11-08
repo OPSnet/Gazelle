@@ -3,14 +3,13 @@
 namespace Gazelle;
 
 class Report extends BaseObject {
-
     protected array $info;
     protected Manager\User $userMan;
 
     public function tableName(): string { return 'reports'; }
     public function flush() {}
 
-    public function url(): string {
+    public function location(): string {
         return "reports.php?id={$this->id}#report{$this->id}";
     }
 

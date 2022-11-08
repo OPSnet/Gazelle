@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class ForumPoll extends BaseObject {
-
     const CACHE_KEY = 'forum_poll_%d';
 
     protected array $info;
@@ -14,10 +13,6 @@ class ForumPoll extends BaseObject {
 
     public function location(): string {
         return "forums.php?action=viewthread&threadid={$this->id}";
-    }
-
-    public function url(): string {
-        return htmlentities($this->location());
     }
 
     public function link(): string {

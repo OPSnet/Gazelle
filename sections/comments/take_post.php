@@ -23,4 +23,4 @@ if (isset($_POST['subscribe']) && !$subscription->isSubscribedComments($page, $p
     $subscription->subscribeComments($page, $pageId);
 }
 
-header('Location: ' . $comment->url());
+header('Location: ' . $comment->location());

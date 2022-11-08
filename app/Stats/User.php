@@ -23,7 +23,7 @@ class User extends \Gazelle\BaseObject {
         return 'user_summary';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'user.php?action=stats&userid=' . $this->id;
     }
 

@@ -20,7 +20,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return 'comments';
     }
 
-    public function url(): string {
+    public function location(): string {
         return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}";
     }
 

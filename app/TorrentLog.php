@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class TorrentLog extends BaseObject {
-
     protected Torrent $torrent;
     protected array $info;
 
@@ -26,10 +25,6 @@ class TorrentLog extends BaseObject {
 
     public function location(): string {
         return $this->torrent->location();
-    }
-
-    public function url(): string {
-        return $this->torrent->url();
     }
 
     public function link(): string {

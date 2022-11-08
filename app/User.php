@@ -38,10 +38,6 @@ class User extends BaseObject {
         return 'user.php?id=' . $this->id;
     }
 
-    public function url(): string {
-        return htmlentities($this->location());
-    }
-
     public function link(): string {
         return sprintf('<a href="%s">%s</a>', $this->url(), $this->username());
     }

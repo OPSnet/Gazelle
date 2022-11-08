@@ -39,7 +39,7 @@ foreach ($Tags as $tagName) {
             if (defined('AJAX')) {
                 json_error('you have already voted on this tag');
             } else {
-                header('Location: ' . $tgroup->url());
+                header('Location: ' . $tgroup->location());
             }
             exit;
         }
@@ -60,4 +60,4 @@ if (AJAX) {
     exit;
 }
 
-header('Location: ' . $tgroup->url());
+header('Location: ' . $tgroup->location());

@@ -17,4 +17,4 @@ if ($request->fillerId() === 0
 
 $request->unfill($Viewer, trim($_POST['reason']));
 
-header('Location: ' . $request->url());
+header('Location: ' . $request->location());

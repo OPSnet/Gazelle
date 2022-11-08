@@ -42,7 +42,7 @@ class NotificationFilter extends BaseObject {
         return 'users_notify_filters';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'user.php?action=notify';
     }
 

@@ -5,4 +5,4 @@ try {
 } catch (\Gazelle\Exception\ResourceNotFoundException $e) {
     error(404);
 }
-header('Location: ' . $comment->url());
+header('Location: ' . $comment->location());

@@ -13,7 +13,7 @@ class Request extends BaseObject {
         return 'requests';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'requests.php?action=view&id=' . $this->id;
     }
 

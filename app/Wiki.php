@@ -43,7 +43,7 @@ class Wiki extends BaseObject {
         return 'wiki_articles';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'wiki.php?action=article&id=' . $this->id;
     }
 

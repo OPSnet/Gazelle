@@ -12,10 +12,10 @@ class Thread extends BaseObject {
     protected $created; // date created
     protected $story;   // the array of notes in the conversation
 
-    public function tableName(): string { return 'thread'; }
-    public function url(): string { return ''; }
-    public function link(): string { return ''; }
     public function flush() {}
+    public function link(): string { return ''; }
+    public function location(): string { return ''; }
+    public function tableName(): string { return 'thread'; }
 
     protected const CACHE_KEY = "thread_%d";
     protected const STORY_KEY = "thread_story_%d";

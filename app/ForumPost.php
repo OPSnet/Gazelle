@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class ForumPost extends BaseObject {
-
     const CACHE_KEY     = 'fpost_%d';
 
     protected array $info;
@@ -19,10 +18,6 @@ class ForumPost extends BaseObject {
 
     public function location(): string {
         return "forums.php?action=viewthread&threadid={$this->threadId()}&postid={$this->id}#post{$this->id}";
-    }
-
-    public function url(): string {
-        return htmlentities($this->location());
     }
 
     public function link(): string {

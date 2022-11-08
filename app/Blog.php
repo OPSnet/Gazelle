@@ -3,14 +3,13 @@
 namespace Gazelle;
 
 class Blog extends BaseObject {
-
     const CACHE_KEY = 'blog_%d';
 
     protected array $info;
 
     public function tableName(): string { return 'blog'; }
 
-    public function url(): string {
+    public function location(): string {
         return 'blog.php?id=' . $this->id . '#blog' . $this->id;
     }
 

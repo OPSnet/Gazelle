@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Collage extends BaseObject {
-
     /**
      * A Gazelle\Collage is a holder object that delegates most functionality to
      * an underlying Gazelle\Collage\AbstractCollage object. The latter knows
@@ -35,7 +34,7 @@ class Collage extends BaseObject {
 
     public function tableName(): string { return 'collages'; }
 
-    public function url(): string {
+    public function location(): string {
         return 'collages.php?id=' . $this->id;
     }
 

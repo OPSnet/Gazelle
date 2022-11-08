@@ -69,4 +69,4 @@ if ($Viewer->option('AutoSubscribe')) {
     (new Gazelle\Subscription($Viewer))->subscribeComments('collages', $collage->id());
 }
 
-header('Location: ' . $collage->url());
+header('Location: ' . $collage->location());

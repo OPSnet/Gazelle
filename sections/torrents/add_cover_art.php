@@ -31,4 +31,4 @@ foreach ($imageList as $n => $image) {
     $tgroup->addCoverArt($image, trim($summaryList[$n]), $Viewer->id(), $logger);
 }
 
-header('Location: ' . redirectUrl($tgroup->url()));
+header('Location: ' . redirectUrl($tgroup->location()));

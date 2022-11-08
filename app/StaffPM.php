@@ -35,7 +35,7 @@ class StaffPM extends BaseObject {
         return 'staff_pm_conversations';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'staffpm.php?action=viewconv&id=' . $this->id;
     }
 

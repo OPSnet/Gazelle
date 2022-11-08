@@ -96,4 +96,4 @@ if ($logInfo) {
     (new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), implode(', ', $logInfo));
 }
 
-header('Location: ' . $tgroup->url());
+header('Location: ' . $tgroup->location());

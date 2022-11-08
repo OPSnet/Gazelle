@@ -34,7 +34,7 @@ if (isset($_POST['delete'])) {
         error(403);
     }
     $thread->remove();
-    header('Location: ' . $forum->url());
+    header('Location: ' . $forum->location());
     exit;
 }
 

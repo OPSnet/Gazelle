@@ -76,4 +76,4 @@ if ($Viewer->permitted('site_collages_delete')) {
 }
 
 $collage->modify();
-header('Location: ' . $collage->url());
+header('Location: ' . $collage->location());

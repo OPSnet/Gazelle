@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class ForumThread extends BaseObject {
-
     const CACHE_KEY     = 'fthread_%d';
     const CACHE_CATALOG = 'fthread_cat_%d_%d';
 
@@ -32,10 +31,6 @@ class ForumThread extends BaseObject {
 
     public function location(): string {
         return "forums.php?action=viewthread&threadid={$this->id}";
-    }
-
-    public function url(): string {
-        return htmlentities($this->location());
     }
 
     public function link(): string {

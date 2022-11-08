@@ -25,4 +25,4 @@ if ($error) {
 $article = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer->id());
 (new Gazelle\Log)->general("Wiki article " . $article->id() . "\"$title\" was created by " . $Viewer->username());
 
-header('Location: ' . $article->url());
+header('Location: ' . $article->location());

@@ -85,4 +85,4 @@ foreach ($ID as $artistId) {
     $collage->addEntry($artistId, $Viewer->id());
 }
 $collageMan->flushDefaultArtist($Viewer->id());
-header('Location: ' . $collage->url());
+header('Location: ' . $collage->location());

@@ -11,13 +11,17 @@ abstract class BaseObject extends Base {
         protected int $id,
     ) {}
 
-    abstract public function tableName(): string;
     abstract public function flush();
-    abstract public function url(): string;
     abstract public function link(): string;
+    abstract public function location(): string;
+    abstract public function tableName(): string;
 
     public function id(): int {
         return $this->id;
+    }
+
+    public function url(): string {
+        return htmlentities($this->location());
     }
 
     public function pkName(): string {

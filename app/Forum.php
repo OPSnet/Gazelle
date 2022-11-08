@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Forum extends BaseObject {
-
     const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
     const CACHE_FORUM       = 'forum_%d';
     const CACHE_THREAD_INFO = 'thread_%d_info';
@@ -13,7 +12,7 @@ class Forum extends BaseObject {
         return 'forums';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'forums.php?action=viewforum&forumid=' . $this->id;
     }
 

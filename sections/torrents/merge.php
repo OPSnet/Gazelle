@@ -43,4 +43,4 @@ $log->general("Group $oldId automatically deleted (No torrents have this group).
     )
     ->merge($oldId, $new->id());
 
-header('Location: ' . $new->url());
+header('Location: ' . $new->location());

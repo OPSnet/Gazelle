@@ -25,7 +25,7 @@ class TGroup extends BaseObject {
         return 'torrents_group';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'torrents.php?id=' . $this->id;
     }
 

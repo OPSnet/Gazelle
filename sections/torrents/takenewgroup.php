@@ -86,4 +86,4 @@ $Cache->deleteMulti([
 $log->group($new->id(), $Viewer->id(), "split from group $oldId")
     ->general("Torrent " . $torrent->id() . " was split out from group $oldId to " . $new->id() . " by " . $Viewer->label());
 
-header('Location: ' . $new->url());
+header('Location: ' . $new->location());

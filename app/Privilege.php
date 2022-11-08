@@ -9,7 +9,7 @@ class Privilege extends BaseObject {
         return 'permissions';
     }
 
-    public function url(): string {
+    public function location(): string {
         return '';
     }
 

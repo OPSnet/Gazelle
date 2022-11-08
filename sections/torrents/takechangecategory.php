@@ -115,4 +115,4 @@ $Cache->deleteMulti([
 $log->group($new->id(), $Viewer->id(), "category changed from $oldCategoryId to " . $new->categoryId() . ", merged from group $oldId")
     ->general("Torrent " . $torrent->id() . " was changed to category " . $new->categoryId() . " by " . $Viewer->label());
 
-header('Location: ' . $new->url());
+header('Location: ' . $new->location());

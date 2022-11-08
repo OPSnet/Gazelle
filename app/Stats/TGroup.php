@@ -3,7 +3,6 @@
 namespace Gazelle\Stats;
 
 class TGroup extends \Gazelle\BaseObject {
-
     /**
      * This class offloads all the counting operations you might
      * want to do with a TGroup.
@@ -18,7 +17,7 @@ class TGroup extends \Gazelle\BaseObject {
         return 'tgroup_summary';
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'torrents.php?id=' . $this->id;
     }
 

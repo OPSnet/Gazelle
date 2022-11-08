@@ -30,4 +30,4 @@ $article->setUpdate('Body', trim($_POST['body']))
     ->setUpdate('MinClassRead', $minRead)
     ->modify();
 
-header('Location: ' . $article->url());
+header('Location: ' . $article->location());
