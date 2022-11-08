@@ -4,7 +4,6 @@ namespace Gazelle\Torrent;
 
 class Report extends \Gazelle\BaseObject {
     protected array $info;
-    protected int $moderatorId;
     protected \Gazelle\Torrent|null|bool $torrent = false;
 
     public function tableName(): string { return 'reportsv2'; }
@@ -18,11 +17,6 @@ class Report extends \Gazelle\BaseObject {
 
     public function link(): string {
         return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id());
-    }
-
-    public function setModeratorId(int $moderatorId) {
-        $this->moderatorId = $moderatorId;
-        return $this;
     }
 
     public function info(): array {
@@ -138,12 +132,12 @@ class Report extends \Gazelle\BaseObject {
         return $this->info()['type'];
     }
 
-    public function setTorrentFlag(string $tableName): int {
+    public function setTorrentFlag(int $userId, string $tableName): int {
         self::$db->prepared_query("
             INSERT IGNORE INTO {$tableName}
                    (UserID, TorrentID)
             VALUES (?,      ?)
-            ", $this->moderatorId, $this->torrent->id()
+            ", $userId, $this->torrent->id()
         );
         $affected = self::$db->affected_rows();
         $this->torrent->flush();

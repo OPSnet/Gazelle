@@ -64,32 +64,30 @@ if ($fromReportPage && !$report->moderatorResolve($Viewer->id(), $_POST['comment
     exit;
 }
 
-$report->setModeratorId($Viewer->id());
-
 if ($_POST['resolve_type'] === 'tags_lots') {
-    $report->setTorrentFlag('torrents_bad_tags');
+    $report->setTorrentFlag($Viewer->id(), 'torrents_bad_tags');
     $SendPM = true;
 }
 elseif ($_POST['resolve_type'] === 'folders_bad') {
-    $report->setTorrentFlag('torrents_bad_folders');
+    $report->setTorrentFlag($Viewer->id(), 'torrents_bad_folders');
     $SendPM = true;
 }
 elseif ($_POST['resolve_type'] === 'filename') {
-    $report->setTorrentFlag('torrents_bad_files');
+    $report->setTorrentFlag($Viewer->id(), 'torrents_bad_files');
     $SendPM = true;
 }
 elseif ($_POST['resolve_type'] === 'lineage') {
-    $report->setTorrentFlag('torrents_missing_lineage');
+    $report->setTorrentFlag($Viewer->id(), 'torrents_missing_lineage');
 }
 elseif ($_POST['resolve_type'] === 'lossyapproval') {
-    $report->setTorrentFlag('torrents_lossymaster_approved');
+    $report->setTorrentFlag($Viewer->id(), 'torrents_lossymaster_approved');
 }
 
-$adminMessage = trim($_POST['admin_message']);
-$logMessage = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
-$uploader = $torrent->uploader();
-$name = $torrent->fullName() . ' (' . Format::get_size($torrent->size()) . ')';
+$adminMessage   = trim($_POST['admin_message']);
+$logMessage     = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
+$name           = $torrent->fullName() . ' (' . Format::get_size($torrent->size()) . ')';
 $reportTypeName = $report->reportType()->name();
+$uploader       = $torrent->uploader();
 
 //Log and delete
 if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
