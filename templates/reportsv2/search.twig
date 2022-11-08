@@ -22,7 +22,7 @@
         <tbody>
 {% for r in list %}
         <tr>
-            <td align="right"><a href="/reportsv2.php?view=report&id={{ r.ID }}">{{ r.ID }}</a></td>
+            <td align="right"><a href="/reportsv2.php?view=report&id={{ r.report_id }}">{{ r.report_id }}</a></td>
             <td>{{ r.uploader.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.reporter.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.resolver.username ?? '<i>unclaimed</i>'|raw }}</td>
@@ -76,8 +76,8 @@
                 <td>
                     <select multiple="multiple" size="8" name="report-type[]">
                         <option value="0">Don't Care</option>
-{% for key, label in name_cache %}
-                        <option value="{{ key }}"{{ selected(key in report_type) }}>{{ label }}</option>
+{% for rt in name_cache %}
+                        <option value="{{ rt.id }}"{{ selected(rt.type in report_type) }}>{{ rt.name }} ({{ rt.categoryName }})</option>
 {% endfor %}
                     </select>
                 </td>

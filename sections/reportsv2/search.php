@@ -9,16 +9,12 @@ $reportMan     = new Gazelle\Manager\Torrent\Report;
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $categories    = $reportMan->categories();
 
-$reportNameCache = array_map(
-    fn ($rt) => "{$rt->name()} ({$rt->categoryName()})",
-    $reportTypeMan->list()
-);
-
 $filter = [];
 if (isset($_GET['report-type'])) {
     foreach ($_GET['report-type'] as $t) {
-        if (array_key_exists($t, $reportNameCache)) {
-            $filter['report-type'][] = $t;
+        $reportType = $reportTypeMan->findById((int)$t);
+        if ($reportType) {
+            $filter['report-type'][] = $reportType->type();
         }
     }
 }
@@ -75,7 +71,7 @@ echo $Twig->render('reportsv2/search.twig', [
     'list'        => $list,
     'dt_from'     => $dtFrom,
     'dt_until'    => $dtUntil,
-    'name_cache'  => $reportNameCache,
+    'name_cache'  => $reportTypeMan->list(),
     'report_type' => $_GET['report-type'] ?? [],
     'torrent_id'  => $_GET['torrent'] ?? null,
     'group_id'    => $_GET['group'] ?? null,

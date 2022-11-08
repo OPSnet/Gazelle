@@ -126,7 +126,7 @@ function UpdateComment(reportid) {
 
 function GiveBack(reportid) {
     if (reportid) {
-        $.get("reportsv2.php?action=ajax_giveback_report&id=" + reportid, function(response) {
+        $.get("reportsv2.php?action=ajax_unclaim&id=" + reportid, function(response) {
             if (response) {
                 alert(response);
             }
@@ -134,7 +134,7 @@ function GiveBack(reportid) {
         $('#report' + reportid).remove();
     } else {
         $('#all_reports input[name="reportid"]').each(function() {
-            $.get("reportsv2.php?action=ajax_giveback_report&id=" + this.value, function(response) {
+            $.get("reportsv2.php?action=ajax_unclaim&id=" + this.value, function(response) {
                 if (response) {
                     alert(response);
                 }
@@ -160,7 +160,7 @@ function ClearReport(reportid) {
 
 function Grab(reportid) {
     if (reportid) {
-        $.get("reportsv2.php?action=ajax_grab_report&id=" + reportid, function(response) {
+        $.get("reportsv2.php?action=ajax_claim&id=" + reportid, function(response) {
             if (response == 1) {
                 $('#grab' + reportid).disable();
             } else {
@@ -170,7 +170,7 @@ function Grab(reportid) {
     } else {
         $('#all_reports input[name="reportid"]').each(function() {
             var reportid = this.value;
-            $.get("reportsv2.php?action=ajax_grab_report&id=" + reportid, function(response) {
+            $.get("reportsv2.php?action=ajax_claim&id=" + reportid, function(response) {
                 if (response == 1) {
                     $('#grab' + reportid).disable();
                 } else {
@@ -209,7 +209,7 @@ function Switch(reportid, otherid) {
         otherid: otherid,
     };
 
-    $.post('reportsv2.php?action=ajax_create_report', report, function(response) {
+    $.post('reportsv2.php?action=ajax_switch', report, function(response) {
         //Returns new report ID.
         if (isNaN(response)) {
             alert(response);

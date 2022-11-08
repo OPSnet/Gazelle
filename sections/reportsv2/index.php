@@ -34,11 +34,11 @@ if (!isset($_REQUEST['action'])) {
         case 'ajax_take_pm':
             require_once('ajax_take_pm.php');
             break;
-        case 'ajax_grab_report':
-            require_once('ajax_grab_report.php');
+        case 'ajax_claim':
+            require_once('ajax_claim.php');
             break;
-        case 'ajax_giveback_report':
-            require_once('ajax_giveback_report.php');
+        case 'ajax_unclaim':
+            require_once('ajax_unclaim.php');
             break;
         case 'ajax_update_comment':
             require_once('ajax_update_comment.php');
@@ -46,8 +46,8 @@ if (!isset($_REQUEST['action'])) {
         case 'ajax_update_resolve':
             require_once('ajax_update_resolve.php');
             break;
-        case 'ajax_create_report':
-            require_once('ajax_create_report.php');
+        case 'ajax_switch':
+            require_once('ajax_switch.php');
             break;
     }
 }

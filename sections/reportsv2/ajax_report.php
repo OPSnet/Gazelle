@@ -23,15 +23,16 @@ if ($needImage !== 'none') {
 ?>
     <tr>
         <td class="label">
-            Image(s)<?=
-    match($needImage) {
+            Link(s) to <?= $needImage == 'proof' ? 'proof ' : '' ?>images<?=
+    match($needSitelink) {
+        'proof',
         'required' => ' <strong class="important_text">(Required)</strong>',
         'optional' => ' (Optional)',
         default    => '',
     } ?>:
         </td>
         <td>
-            <input id="image" type="text" name="image" size="50" value="<?= display_str($_POST['image'] ?? '') ?>" />
+            <textarea id="image" name="image" rows="5" cols="60"><?= display_str($_POST['image'] ?? '') ?></textarea>
         </td>
     </tr>
 <?php
@@ -85,26 +86,6 @@ if ($needSitelink !== 'none') {
         </td>
         <td>
             <input id="sitelink" type="text" name="sitelink" size="50" value="<?= display_str($_POST['sitelink'] ?? '') ?>" />
-        </td>
-    </tr>
-<?php
-}
-
-$needImage = $reportType->needImage();
-if ($needImage !== 'none') {
-?>
-    <tr>
-        <td class="label">
-            Link(s) to <?= $needImage == 'proof' ? 'proof ' : '' ?>images<?=
-    match($needSitelink) {
-        'proof',
-        'required' => ' <strong class="important_text">(Required)</strong>',
-        'optional' => ' (Optional)',
-        default    => '',
-    } ?>:
-        </td>
-        <td>
-            <input id="image" type="text" name="image" size="50" value="<?= display_str($_POST['images'] ?? '') ?>" />
         </td>
     </tr>
 <?php } ?>

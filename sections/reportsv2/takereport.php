@@ -38,7 +38,11 @@ if ($reportType->needImage() === 'required') {
 $ExtraIDs = '';
 if ($reportType->needSitelink() !== 'none') {
     $sitelink = trim($_POST['sitelink'] ?? '');
-    if (!($sitelink === '' && $reportType->needSitelink() === 'optional')) {
+    if ($sitelink === '') {
+        if ($reportType->needSitelink() === 'required') {
+            error("You must supply a permalink [PL] in your report");
+        }
+    } else {
         if (!preg_match_all(TORRENT_REGEXP, $sitelink, $match)) {
             error("The permalink was incorrect. Please copy the torrent permalink URL, which is labelled as [PL] and is found next to the [DL] buttons.");
         }
@@ -53,7 +57,9 @@ if ($reportType->needSitelink() !== 'none') {
 $Links = '';
 if ($reportType->needLink() !== 'none') {
     $link = trim($_POST['link'] ?? '');
-    if (!($link === '' && $reportType->needLink() === 'optional')) {
+    if ($link === '' && $reportType->needLink() === 'required') {
+        error("You must supply one or more links in your report");
+    } else {
         if (!preg_match_all(URL_REGEXP, $_POST['link'], $match)) {
             error("The extra links you provided weren't links...");
         }
@@ -64,7 +70,11 @@ if ($reportType->needLink() !== 'none') {
 $Images = '';
 if ($reportType->needImage() !== 'none') {
     $image = trim($_POST['image'] ?? '');
-    if (!($image === '' && $reportType->needImage() === 'optional')) {
+    if ($image === '') {
+        if ($reportType->needImage() === 'required') {
+            error("You must supply one or more images in your report");
+        }
+    } else {
         if (!preg_match_all(IMAGE_REGEXP, trim($_POST['image']), $match)) {
             error("The extra image links you provided weren't links to images...");
         }
@@ -76,8 +86,8 @@ $trackList = '';
 if ($reportType->needTrack() !== 'none') {
     $trackList = trim($_POST['track']);
     if ($trackList !== 'all') {
-        $trackList = implode(' ', array_filter(array_map('intval', preg_split('/\D+/', $n)), fn ($n) => $n));
-        if ($trackList === '') {
+        $trackList = implode(' ', array_filter(array_map('intval', preg_split('/\D+/', $trackList)), fn ($n) => $n));
+        if ($reportType->needTrack() === 'required' && $trackList === '') {
             error('Tracks should be given in a space-separated list of numbers with no other characters, or "all".');
         }
     }

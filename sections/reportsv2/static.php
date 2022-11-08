@@ -17,136 +17,43 @@ $torMan        = new Gazelle\Manager\Torrent;
 $reportMan     = new Gazelle\Manager\Torrent\Report;
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $userMan       = new Gazelle\Manager\User;
+$search        = new Gazelle\Search\Torrent\Report($_GET['view'] ?? '', $_GET['id'] ?? '', $reportTypeMan, $userMan);
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
-$ripFiler      = new \Gazelle\File\RipLog;
-$htmlFiler     = new \Gazelle\File\RipLogHTML;
+$ripFiler      = new Gazelle\File\RipLog;
+$htmlFiler     = new Gazelle\File\RipLogHTML;
 
-$View = $_GET['view'];
-$ID = (int)($_GET['id'] ?? 0);
-if (!$ID && isset($_GET['id'])) {
-    $reportType = $reportTypeMan->findByType($_GET['id']);
-}
-
-$orderBy = 'ORDER BY r.ReportedTime ASC';
-$cond = [];
-$args = [];
-if (!$ID) {
-    switch ($View) {
-        case 'resolved':
-            $Title = 'Resolved reports';
-            $cond[] = "r.Status = 'Resolved'";
-            $orderBy = 'ORDER BY r.LastChangeTime DESC';
-            break;
-        case 'unauto':
-            $Title = 'New reports, not auto assigned!';
-            $cond[] = "r.Status = 'New'";
-            break;
-        case 'type':
-            $Title = "All new reports of type {$reportType->name()}";
-            $cond[] = "r.Status = 'New' AND r.Type = ?";
-            $args[] = $reportType->type();
-            break;
-        default:
-            error(404);
-            break;
-    }
-} else {
-    $Username = $DB->scalar("
-        SELECT Username FROM users_main WHERE ID = ?
-        ", $ID
-    );
-    switch ($View) {
-        case 'staff':
-            $Title = ($Username ?: $ID) . "'s in-progress reports";
-            $cond[] = "r.Status = 'InProgress' AND r.ResolverID = ?";
-            $args[] = $ID;
-            break;
-        case 'resolver':
-            $Title = ($Username ?: $ID) . "'s resolved reports";
-            $cond[] = "r.Status = 'Resolved' AND r.ResolverID = ?";
-            $args[] = $ID;
-            $orderBy = 'ORDER BY r.LastChangeTime DESC';
-            break;
-        case 'group':
-            $Title = "Unresolved reports for the group $ID";
-            $cond[] = "r.Status != 'Resolved' AND tg.ID = ?";
-            $args[] = $ID;
-            break;
-        case 'torrent':
-            $Title = "All reports for the torrent $ID";
-            $cond[] = 'r.TorrentID = ?';
-            $args[] = $ID;
-            break;
-        case 'report':
-            $Title = "Viewing resolution of report $ID";
-            $cond[] = 'r.ID = ?';
-            $args[] = $ID;
-            break;
-        case 'reporter':
-            $Title = 'All torrents reported by ' . ($Username ?: "user $ID");
-            $cond[] = 'r.ReporterID = ?';
-            $args[] = $ID;
-            $orderBy = 'ORDER BY r.ReportedTime DESC';
-            break;
-        case 'uploader':
-            $Title = 'All torrents uploaded by ' . ($Username ?: "user $ID");
-            $cond[] = "r.Status != 'Resolved' AND t.UserID = ?";
-            $args[] = $ID;
-            break;
-        default:
-            error(404);
-            break;
-    }
-}
-
-$tables = "reportsv2 AS r
-    LEFT JOIN torrents AS t ON (t.ID = r.TorrentID)
-    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)";
-
-$Results = $DB->scalar("
-    SELECT count(*) FROM $tables WHERE
-    " . implode("\n    AND ", $cond), ...$args
-);
 $paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($Results);
+$paginator->setTotal($search->total());
 
-$DB->prepared_query("
-    SELECT r.ID
-    FROM $tables
-    WHERE " . implode("\n    AND ", $cond) . "
-    GROUP BY r.ID
-    $orderBy
-    LIMIT ? OFFSET ?
-    ", ...array_merge($args, [$paginator->limit(), $paginator->offset()])
-);
-$Reports = $DB->collect(0, false);
+$page = $search->page($reportMan, $paginator->limit(), $paginator->offset());
 
 View::show_header('Torrent Reports', ['js' => 'reportsv2,bbcode,browse,torrent']);
 ?>
 <div class="header">
-    <h2><?= $Title ?></h2>
+    <h2><?= $search->title() ?></h2>
 <?php require_once('header.php'); ?>
 </div>
 <div class="buttonbox pad center">
-<?php if ($View !== 'resolved') { ?>
+<?php if ($search->mode() !== 'resolved') { ?>
     <span class="tooltip" title="Resolves *all* checked reports with their respective resolutions"><input type="button" onclick="MultiResolve();" value="Multi-resolve" /></span>
     <span class="tooltip" title="Assigns all of the reports on the page to you!"><input type="button" onclick="Grab();" value="Claim all" /></span>
 <?php
 }
-if ($View === 'staff' && $Viewer->id() == $ID) { ?>
+if ($search->canUnclaim($Viewer)) {
+?>
     | <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all" /></span>
 <?php } ?>
 </div>
 <?= $paginator->linkbox() ?>
-<div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
-<?php if (count($Reports) === 0) { ?>
+<div id="all_reports">
+<?php if (count($page) === 0) { ?>
     <div class="box pad center">
-        <strong>No new reports! \o/</strong>
+        <strong>No reports here! \o/</strong>
     </div>
 <?php
 } else {
-    foreach ($Reports as $reportId) {
-        $report = $reportMan->findById($reportId);
+    foreach ($page as $report) {
+        $reportId   = $report->id();
         $reporterId = $report->reporterId();
         $resolverId = $report->resolverId();
         $reporterName = $userMan->findById($reporterId)?->username() ?? 'System';
@@ -176,7 +83,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
             $uploaderName = $userMan->findById((int)$uploaderId)?->username() ?? 'System';
 ?>
     <div id="report<?= $reportId ?>">
-        <form class="manage_form" name="report" id="reportform_<?= $reportId ?>" action="reports.php" method="post">
+        <form class="manage_form" style="80%" name="report" id="reportform_<?= $reportId ?>" action="reports.php" method="post">
 <?php
 /*
 * Some of these are for takeresolve, namely the ones that aren't inputs, some for the JavaScript.
@@ -197,7 +104,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
             <table class="box layout" cellpadding="5">
                 <tr>
                     <td class="label"><a href="reportsv2.php?view=report&amp;id=<?= $reportId ?>">Reported</a> torrent:</td>
-                    <td colspan="3">
+                    <td>
                         <?= $link ?> <?= $size ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?=( $torrentId )?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
@@ -296,7 +203,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php       if ($report->trackList()) { ?>
                 <tr>
                     <td class="label">Relevant tracks:</td>
-                    <td colspan="3">
+                    <td>
                         <?= implode(' ', $report->trackList()) ?>
                     </td>
                 </tr>
@@ -306,7 +213,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
             if ($report->externalLink()) { ?>
                 <tr>
                     <td class="label">Relevant links:</td>
-                    <td colspan="3">
+                    <td>
 <?php
                 foreach ($report->externalLink() as $link) {
 
@@ -325,7 +232,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 ?>
                 <tr>
                     <td class="label">Relevant other torrents:</td>
-                    <td colspan="3">
+                    <td>
 <?php
                 $n = 0;
                 foreach ($report->otherIdList() as $extraId) {
@@ -384,7 +291,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php                   if ($torrent?->hasLog() || $extra->hasLog()) { ?>
                 <tr>
                     <td class="label">Logfiles:</td>
-                    <td colspan="3">
+                    <td>
                         <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
 <?php
@@ -476,7 +383,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php                   } ?>
                 <tr>
                     <td class="label">Switch:</td>
-                    <td colspan="3"><a href="#" onclick="Switch(<?= $reportId ?>, <?= $extraId ?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
+                    <td><a href="#" onclick="Switch(<?= $reportId ?>, <?= $extraId ?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
 <?php
                     }
                 }
@@ -489,7 +396,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 ?>
                 <tr>
                     <td class="label">Relevant images:</td>
-                    <td colspan="3">
+                    <td>
 <?php
                 foreach ($report->image() as $image) {
 ?>
@@ -501,12 +408,12 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php       } ?>
                 <tr>
                     <td class="label">User comment:</td>
-                    <td colspan="3" class="wrap_overflow"><?= Text::full_format($report->reason()) ?></td>
+                    <td class="wrap_overflow"><?= Text::full_format($report->reason()) ?></td>
                 </tr>
 <?php       if ($report->status() == 'InProgress') { /* BEGIN MOD STUFF */ ?>
                 <tr>
                     <td class="label">In progress by:</td>
-                    <td colspan="3">
+                    <td>
                         <a href="user.php?id=<?= $resolverId ?>"><?= $resolverName ?></a>
                     </td>
                 </tr>
@@ -516,7 +423,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 ?>
                 <tr>
                     <td class="label">Report comment:</td>
-                    <td colspan="3">
+                    <td>
                         <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= display_str($report->comment()) ?>" />
                         <input type="button" value="Update now" onclick="UpdateComment(<?= $reportId ?>);" />
                     </td>
@@ -525,7 +432,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                     <td class="label">
                         <a href="javascript:Load('<?= $reportId ?>')" class="tooltip" title="Click here to reset the resolution options to their default values.">Resolve</a>:
                     </td>
-                    <td colspan="3">
+                    <td>
                         <select name="resolve_type" id="resolve_type<?= $reportId ?>" onchange="ChangeResolve(<?= $reportId ?>);">
 <?php           foreach ($reportTypeMan->categoryList($categoryId) as $rt) { ?>
                             <option value="<?= $rt->type() ?>"><?= $rt->name() ?></option>
@@ -562,7 +469,7 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                             <option value="Reporter" selected="selected">Reporter</option>
                         </select>:
                     </td>
-                    <td colspan="3">
+                    <td>
                         <textarea name="uploader_pm" id="uploader_pm<?= $reportId ?>" cols="50" rows="2"></textarea>
                         <input type="button" value="Send now" onclick="SendPM(<?= $reportId ?>);" />
                     </td>
@@ -572,13 +479,16 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
                     <td>
                         <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= trim($report->message() ?? '') ?>" />
                     </td>
-                    <td class="label" title="These notes will be added to the user profile"><strong>Extra</strong> staff notes:</td>
+                <tr>
+                    <td class="label"><strong>Extra</strong> staff notes:</span>
                     <td>
                         <input type="text" name="admin_message" id="admin_message<?= $reportId ?>" size="40" />
+                        (These notes will be added to the user profile)
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="text-align: center;">
+                    <td>&nbsp;</td>
+                    <td>
                         <input type="button" value="Invalidate report" onclick="Dismiss(<?= $reportId ?>);" />
                         | <input type="button" value="Resolve report manually" onclick="ManualResolve(<?= $reportId ?>);" />
 <?php           if ($report->status() == 'InProgress' && $Viewer->id() == $resolverId) { ?>
@@ -595,31 +505,32 @@ if ($View === 'staff' && $Viewer->id() == $ID) { ?>
 <?php       } else { ?>
                 <tr>
                     <td class="label">Resolver:</td>
-                    <td colspan="3">
+                    <td>
                         <a href="user.php?id=<?=$resolverId?>"><?= $resolverName ?></a>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Resolve time:</td>
-                    <td colspan="3">
+                    <td>
                         <?= time_diff($report->modified()) ?>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Report comments:</td>
-                    <td colspan="3">
+                    <td>
                         <?= display_str($report->comment()) ?>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Log message:</td>
-                    <td colspan="3">
+                    <td>
                         <?= $report->message() ?? '' ?>
                     </td>
                 </tr>
 <?php           if ($torrent ) { ?>
                 <tr>
-                    <td colspan="4" style="text-align: center;">
+                    <td>&nbsp;</td>
+                    <td>
                         <input id="grab<?= $reportId ?>" type="button" value="Claim" onclick="Grab(<?= $reportId ?>);" />
                     </td>
                 </tr>

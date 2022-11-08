@@ -271,7 +271,7 @@ class Report extends \Gazelle\BaseManager {
             : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
 
         self::$db->prepared_query("
-            SELECT r.ID,
+            SELECT r.ID      AS report_id,
                 r.ReporterID AS reporter_id,
                 r.ResolverID AS resolver_id,
                 r.TorrentID  AS torrent_id,
@@ -310,7 +310,7 @@ class Report extends \Gazelle\BaseManager {
                 }
             }
             $r['reporter'] = $cache[$r['reporter_id']];
-            $r['resolver'] = $cache[$r['resolver_id']];
+            $r['resolver'] = $cache[$r['resolver_id']] ?? null; // unclaimed
             $r['uploader'] = $cache[$r['uploader_id']] ?? null; // sometimes there is no uploader information
             $r['torrent']  = $torMan->findById($r['torrent_id']);
             $list[] = $r;
