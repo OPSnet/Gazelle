@@ -3,7 +3,6 @@
 namespace Gazelle\User;
 
 class Bookmark extends \Gazelle\BaseUser {
-
     protected array $all;
 
     /**
@@ -92,18 +91,16 @@ class Bookmark extends \Gazelle\BaseUser {
         $bookmarkList = self::$cache->get_value($key);
         $bookmarkList = false;
         if ($bookmarkList === false) {
-            $qid = self::$db->get_query_id();
             self::$db->prepared_query("
-                SELECT GroupID,
-                    Sort,
-                    `Time`
+                SELECT GroupID AS tgroup_id,
+                    Sort       AS sequence,
+                    `Time`     AS created
                 FROM bookmarks_torrents
                 WHERE UserID = ?
                 ORDER BY Sort, `Time`
                 ", $this->user->id()
             );
-            $bookmarkList = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
-            self::$db->set_query_id($qid);
+            $bookmarkList = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $bookmarkList, 3600);
         }
         return $bookmarkList;

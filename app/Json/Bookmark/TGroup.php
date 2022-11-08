@@ -12,7 +12,7 @@ class TGroup extends \Gazelle\Json {
     public function payload(): array {
         $list = [];
         foreach ($this->userBookmark->tgroupBookmarkList() as $bookmark) {
-            $tgroup = $this->tgMan->findById($bookmark['GroupID']);
+            $tgroup = $this->tgMan->findById($bookmark['tgroup_id']);
             if (is_null($tgroup)) {
                 continue;
             }

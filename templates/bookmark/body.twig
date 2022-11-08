@@ -1,6 +1,11 @@
+{{ header(user.username ~ '&rsaquo; Organize torrrent bookmarks', {'js': 'browse,jquery-ui,jquery.tablesorter,sort'}) }}
+{% for b in list %}
+    {% if loop.first %}
 <div class="thin">
 <div class="header">
-    <h2>Organize Torrent Bookmarks</h2>
+    <h2>{{ user.id|user_url }} &rsaquo; <a href="bookmarks.php?type=torrents
+        {%- if user.id != viewer.id %}&amp;user_id={{ user.id }}{% endif -%}
+        ">Torrent Bookmarks</a> &rsaquo; Manage</h2>
 </div>
 <table width="100%" class="layout">
     <tr class="colhead"><td id="sorting_head">Sorting</td></tr>
@@ -33,19 +38,19 @@
         </tr>
     </thead>
     <tbody>
-{% for b in list %}
-    <tr class="drag row{{ cycle(['a', 'b'], loop.index0) }}" id="li_{{ b.group_id }}">
+    {% endif %}
+    <tr class="drag row{{ cycle(['a', 'b'], loop.index0) }}" id="li_{{ b.tgroup_id }}">
         <td>
-            <input class="sort_numbers" type="text" name="sort[{{ b.group_id }}]" value="{{ b.sequence }}" id="sort_{{ b.group_id }}" size="4" />
+            <input class="sort_numbers" type="text" name="sort[{{ b.tgroup_id }}]" value="{{ b.sequence }}" id="sort_{{ b.tgroup_id }}" size="4" />
         </td>
         <td>{{ loop.index }}</td>
         <td>{{ b.year }}</td>
-        <td>{{ b.artist|raw }}{% if showcase %} [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]{% endif %}</td>
-        <td><a href="torrents.php?id={{ b.group_id }}" class="tooltip" title="View torrent">{{ b.name }}</a></td>
-        <td class="nobr tooltip" title="{{ b.added }}">{{ b.added|time_diff }}</td>
-        <td class="center"><input type="checkbox" name="remove[{{ b.group_id }}]" value="" /></td>
+        <td>{{ b.link_artist|raw }}{% if b.showcase %} [<abbr class="tooltip" title="This is a Showcase release">SC</abbr>]{% endif %}</td>
+        <td>{{ b.link_tgroup|raw }}</td>
+        <td class="nobr tooltip" title="{{ b.created }}">{{ b.created|time_diff }}</td>
+        <td class="center"><input type="checkbox" name="remove[{{ b.tgroup_id }}]" value="" /></td>
     </tr>
-{% endfor %}
+    {% if loop.last %}
 </tbody>
 </table>
 <div class="drag_drop_save">
@@ -55,8 +60,17 @@
 <div>
     <input type="hidden" name="action" value="mass_edit" />
     <input type="hidden" name="type" value="{{ edit_type }}" />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
 </div>
 </form>
 </div>
+    {% endif %}
+{% else %}
+<div class="header">
+    <h2>No torrents found.</h2>
+</div>
+<div class="box pad" align="center">
+    <p>Add some torrents and come back later.</p>
+</div>
+{% endfor %}
 {{ footer() }}

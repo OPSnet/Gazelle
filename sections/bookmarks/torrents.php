@@ -32,9 +32,8 @@ $NumGroups         = count($bookmarkList);
 $artistLeaderboard = $bookmark->torrentArtistLeaderboard(new Gazelle\Manager\Artist);
 $tagLeaderboard    = $bookmark->torrentTagLeaderboard();
 $CollageCovers     = $Viewer->option('CollageCovers') ?? 25;
-$title             = $user->username() . " &rsaquo; Bookmarked torrent groups";
 
-View::show_header($title, ['js' => 'browse,collage']);
+View::show_header($user->username() . " &rsaquo; Bookmarked torrent groups", $title, ['js' => 'browse,collage']);
 ?>
 <div class="thin">
     <div class="header">
@@ -42,7 +41,9 @@ View::show_header($title, ['js' => 'browse,collage']);
             $Viewer->auth() ?>&amp;user=<?= $Viewer->id() ?>&amp;auth=<?=
             $Viewer->rssAuth() ?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?=
             $Viewer->auth()?>&amp;name=<?=urlencode(SITE_NAME . ': Bookmarked Torrents')?>"><img src="<?=
-            STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?= $title ?></h2>
+            STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?>
+            <?= $user->link() ?> &rsaquo; Bookmarked torrent groups
+        </h2>
         <div class="linkbox">
             <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
             <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
