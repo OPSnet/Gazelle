@@ -3,12 +3,16 @@
 namespace Gazelle;
 
 class NotificationFilter extends BaseObject {
-    /** @var array */
-    protected $info;
+    protected array $info;
 
     protected const DIMENSION = [
         'artist', 'recordLabel', 'tag', 'notTag', 'category', 'format', 'encoding', 'media', 'user'
     ];
+
+    public function flush() {}
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
+    public function location(): string { return 'user.php?action=notify'; }
+    public function tableName(): string { return 'users_notify_filters'; }
 
     public function __construct(int $id) {
         parent::__construct($id);
@@ -38,22 +42,6 @@ class NotificationFilter extends BaseObject {
         }
     }
 
-    public function tableName(): string {
-        return 'users_notify_filters';
-    }
-
-    public function location(): string {
-        return 'user.php?action=notify';
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), $this->url());
-    }
-
-    public function flush() {
-        return $this;
-    }
-
     protected function expand($info): array {
         if (is_null($info) || $info === '') {
             return [];
@@ -62,11 +50,18 @@ class NotificationFilter extends BaseObject {
         if ($info === '||') {
             return [];
         }
-        $expand = explode('|', substr($info, 1, strlen($info) - 2));
-        return $expand;
+        return explode('|', substr($info, 1, strlen($info) - 2));
     }
 
     public function info(): array {
         return $this->info;
+    }
+
+    public function artistList(): array {
+        return $this->info()['artist'];
+    }
+
+    public function label(): string {
+        return $this->info()['label'];
     }
 }

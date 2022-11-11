@@ -6,28 +6,6 @@ if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);
 }
 
-$imgTag = '<img src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
-    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
-$headerMap = [
-    'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],
-    'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Time'],
-    'size'     => ['dbColumn' => 't.Size',        'defaultSort' => 'desc', 'text' => 'Size'],
-    'snatched' => ['dbColumn' => 'tls.Snatched',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
-    'seeders'  => ['dbColumn' => 'tls.Seeders',   'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders')],
-    'leechers' => ['dbColumn' => 'tls.Leechers',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'leechers', 'Leechers', 'Leechers')],
-];
-$header = new SortableTableHeader('time', $headerMap);
-$OrderBy = $header->getOrderBy();
-$OrderDir = $header->getOrderDir();
-$headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
-
-$from = "FROM users_notify_torrents AS unt
-    INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
-    INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)";
-if ($OrderBy == 'tg.Year') {
-    $from .= " INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)";
-}
-
 if ($Viewer->permitted('users_mod') && (int)($_GET['userid'] ?? 0)) {
     $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
     if (is_null($user)) {
@@ -39,80 +17,46 @@ if ($Viewer->permitted('users_mod') && (int)($_GET['userid'] ?? 0)) {
 $UserID = $user->id();
 $ownProfile = $UserID === $Viewer->id();
 
-$cond = ['unt.UserID = ?'];
-$args = [$UserID];
-$FilterID = (int)($_GET['filterid'] ?? 0);
-if ($FilterID) {
-    $cond[] = 'FilterID = ?';
-    $args[] = $FilterID;
+$imgTag = '<img src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
+    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+$headerMap = [
+    'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],
+    'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Time'],
+    'size'     => ['dbColumn' => 't.Size',        'defaultSort' => 'desc', 'text' => 'Size'],
+    'snatched' => ['dbColumn' => 'tls.Snatched',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
+    'seeders'  => ['dbColumn' => 'tls.Seeders',   'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders')],
+    'leechers' => ['dbColumn' => 'tls.Leechers',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'leechers', 'Leechers', 'Leechers')],
+];
+$header = new SortableTableHeader('time', $headerMap);
+$headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
+
+$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$notifier = new Gazelle\User\NotificationSearch($user, $header->getOrderBy(), $header->getOrderDir(), $torMan);
+if (isset($_GET['filterid'])) {
+    $notifier->setFilter((int)$_GET['filterid']);
 }
-$where = implode(' AND ', $cond);
 
 $paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($DB->scalar("
-    SELECT count(*) $from WHERE $where
-    ", ...$args
-));
-array_push($args, $paginator->limit(), $paginator->offset());
-$DB->prepared_query("
-    SELECT unt.TorrentID,
-        unt.UnRead,
-        unt.FilterID,
-        t.GroupID
-    $from
-    WHERE $where
-    ORDER BY $OrderBy $OrderDir
-    LIMIT ? OFFSET ?
-    ", ...$args
-);
-$Results = $DB->to_array(false, MYSQLI_ASSOC, false);
+$paginator->setTotal($notifier->total());
 
-$GroupIDs = $FilterIDs = $UnReadIDs = [];
-foreach ($Results as $Torrent) {
-    $GroupIDs[$Torrent['GroupID']] = 1;
-    $FilterIDs[$Torrent['FilterID']] = 1;
-    if ($Torrent['UnRead']) {
-        $UnReadIDs[] = $Torrent['TorrentID'];
-    }
+$page = $notifier->page($paginator->limit(), $paginator->offset());
+$filterList = [];
+foreach (array_unique(array_map(fn($n) => $n['filter_id'], $page)) as $filterId) {
+    $filterList[$filterId] = new Gazelle\NotificationFilter($filterId);
 }
 
-if (!empty($GroupIDs)) {
-    $GroupIDs = array_keys($GroupIDs);
-    $FilterIDs = array_keys($FilterIDs);
-    $TorrentGroups = Torrents::get_groups($GroupIDs);
-
-    // Get the relevant filter labels
-    $DB->prepared_query("
-        SELECT ID, Label, Artists
-        FROM users_notify_filters
-        WHERE ID IN (" . placeholders($FilterIDs) . ")
-        ", ...$FilterIDs
-    );
-    $Filters = $DB->to_array('ID', MYSQLI_ASSOC, false);
-    foreach ($Filters as &$Filter) {
-        $Filter['Artists'] = explode('|', trim($Filter['Artists'], '|'));
-        foreach ($Filter['Artists'] as &$FilterArtist) {
-            $FilterArtist = mb_strtolower($FilterArtist, 'UTF-8');
-        }
-        $Filter['Artists'] = array_flip($Filter['Artists']);
-    }
-    unset($Filter);
-
-    if (!empty($UnReadIDs)) {
-        //Clear before header but after query so as to not have the alert bar on this page load
-        $DB->prepared_query("
-            UPDATE users_notify_torrents SET
-                UnRead = 0
-            WHERE UserID = ?
-                AND TorrentID IN (" . placeholders($UnReadIDs) . ")
-            ", $Viewer->id(), ...$UnReadIDs
-        );
-        $Cache->delete_value('user_notify_upload_'.$Viewer->id());
-    }
+$unread = array_map(
+    fn ($n) => $n['TorrentID'],
+    array_filter(
+        $page,
+        fn ($n) => $n['unread'] == 1
+    )
+);
+if ($unread) {
+    $notifier->clearUnread($unread);
 }
 
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $snatcher = new Gazelle\User\Snatch($Viewer);
 
 View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notifications', ['js' => 'notifications']);
@@ -122,7 +66,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
     <h2>Latest notifications</h2>
 </div>
 <div class="linkbox">
-<?php if ($FilterID) { ?>
+<?php if ($notifier->filterId()) { ?>
     <a href="torrents.php?action=notify<?= $ownProfile ? '' : "&amp;userid=$UserID" ?>" class="brackets">View all</a>&nbsp;&nbsp;&nbsp;
 <?php } elseif ($ownProfile) { ?>
     <a href="torrents.php?action=notify_clear&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old</a>&nbsp;&nbsp;&nbsp;
@@ -131,7 +75,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 <?php } ?>
     <a href="user.php?action=notify" class="brackets">Edit filters</a>&nbsp;&nbsp;&nbsp;
 </div>
-<?php if (empty($Results)) { ?>
+<?php if (empty($page)) { ?>
 <table class="layout border">
     <tr class="rowb">
         <td colspan="8" class="center">
@@ -143,26 +87,22 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 } else {
     echo $paginator->linkbox();
     $FilterGroups = [];
-    foreach ($Results as $Result) {
-        if (!isset($FilterGroups[$Result['FilterID']])) {
-            $FilterGroups[$Result['FilterID']] = [
-                'FilterLabel' => $Filters[$Result['FilterID']]['Label'] ?? false,
+    foreach ($page as $Result) {
+        if (!isset($FilterGroups[$Result['filter_id']])) {
+            $FilterGroups[$Result['filter_id']] = [
+                'FilterLabel' => $filterList[$Result['filter_id']]->label(),
             ];
         }
-        $FilterGroups[$Result['FilterID']][] = $Result;
+        $FilterGroups[$Result['filter_id']][] = $Result;
     }
 
     $bookmark = new Gazelle\User\Bookmark($Viewer);
     foreach ($FilterGroups as $FilterID => $FilterResults) {
+        $filter = $filterList[$FilterID];
 ?>
 <div class="header">
     <h3>
-<?php
-        if ($FilterResults['FilterLabel'] !== false) { ?>
         Matches for <a href="torrents.php?action=notify&amp;filterid=<?=$FilterID . ($ownProfile ? "" : "&amp;userid=$UserID") ?>"><?=$FilterResults['FilterLabel']?></a>
-<?php   } else { ?>
-        Matches for unknown filter[<?=$FilterID?>]
-<?php   } ?>
     </h3>
 </div>
 <div class="linkbox notify_filter_links">
@@ -189,26 +129,12 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         unset($FilterResults['FilterLabel']);
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
-            $torrent = $torMan->findById($TorrentID);
-            if (is_null($torrent)) {
-                continue;
-            }
-
+            $torrent = $Result['torrent'];
             $tgroup = $torrent->group();
-            $tagList = $tgroup->tagList();
-            $roleIdList = (new Gazelle\ArtistRole\TGroup($tgroup->id()))->idList();
-            $match = [];
-            foreach ($roleIdList as $role) {
-                foreach ($role as $artist) {
-                    if (isset($Filters[$FilterID]['Artists'][mb_strtolower($artist['name'])])) {
-                        $match[] = $artist['name'];
-                    }
-                }
-            }
-            $MatchingArtistsText = ($match ? 'Caught by filter for '.implode(', ', $match) : '');
+            $match = $tgroup->artistRole()->matchName($filter->artistList());
 ?>
     <tr id="torrent<?= $TorrentID ?>" class="torrent torrent_row<?=
-        ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
+        ($snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : '')
         . ($tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '')
         ?>">
         <td class="m_td_left td_checkbox" style="text-align: center;">
@@ -233,7 +159,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
                 ]) ?>
                 <strong><?= $torrent->fullLink() ?></strong>
                 <div class="torrent_info">
-<?php       if ($Result['UnRead']) { ?>
+<?php       if ($Result['unread']) { ?>
                     <strong class="new">New!</strong>
 <?php
             }
@@ -248,7 +174,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
                     fn($name) => "<a href=\"torrents.php?taglists={$name}\">$name</a>",
                     $tgroup->tagNameList()))
                     ?></div>
-                <?= display_str($MatchingArtistsText) ?>
+                <?= display_str($match ? 'Caught by filter for ' . implode(', ', $match) : '') ?>
             </div>
         </td>
         <td class="td_file_count"><?= $torrent->fileTotal() ?></td>

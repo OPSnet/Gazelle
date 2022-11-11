@@ -17,6 +17,13 @@ class Notification extends \Gazelle\BaseUser {
     protected string $document;
     protected string $action;
 
+    // for results page
+    protected bool $dirty = true;
+    protected bool $orderByYear = false;
+    protected string $baseQuery;
+    protected array $cond = [];
+    protected array $args = [];
+
     // TODO: methodize
     protected static $Types = [
         'Blog',

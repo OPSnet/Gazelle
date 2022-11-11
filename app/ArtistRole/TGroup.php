@@ -3,7 +3,6 @@
 namespace Gazelle\ArtistRole;
 
 class TGroup extends \Gazelle\ArtistRole {
-
     protected const MAP = [
         1 => 'main',
         2 => 'guest',
@@ -97,6 +96,23 @@ class TGroup extends \Gazelle\ArtistRole {
             $legacy[array_search($id, self::MAP)] = empty($list) ? null : $list;
         }
         return $legacy;
+    }
+
+    public function matchName(array $matchList): array {
+        if (!$matchList) {
+            return [];
+        }
+        $matchList = array_flip(array_map('mb_strtolower', $matchList));
+        $matched = [];
+        $roleList = $this->roleList();
+        foreach ($roleList as $artistList) {
+            foreach ($artistList as $artist) {
+                if (isset($matchList[mb_strtolower($artist['name'])])) {
+                    $matched[] = $artist['name'];
+                }
+            }
+        }
+        return array_unique($matched);
     }
 
     protected function init() {
