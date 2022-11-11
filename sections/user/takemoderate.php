@@ -81,25 +81,25 @@ if (isset($_POST['BonusPoints'])) {
 $Collages = (int)($_POST['Collages'] ?? 0);
 $flTokens = (int)($_POST['FLTokens'] ?? 0);
 
-$warnWeeks = (int)($_POST['WarnLength'] ?? 0);
-$extendWarning = $_POST['ExtendWarning'] ?? '---';
-$reduceWarning = $_POST['ReduceWarning'] ?? '---';
-$warnReason = trim($_POST['WarnReason']);
-$userReason = trim($_POST['UserReason']);
-$disableAvatar = isset($_POST['DisableAvatar']) ? 1 : 0;
-$disableInvites = isset($_POST['DisableInvites']) ? 1 : 0;
-$disablePosting = isset($_POST['DisablePosting']) ? 1 : 0;
-$disablePoints = isset($_POST['DisablePoints']) ? 1 : 0;
-$disableForums = isset($_POST['DisableForums']) ? 1 : 0;
-$disableTagging = isset($_POST['DisableTagging']) ? 1 : 0;
-$disableUpload = isset($_POST['DisableUpload']) ? 1 : 0;
-$disableWiki = isset($_POST['DisableWiki']) ? 1 : 0;
-$disablePM = isset($_POST['DisablePM']) ? 1 : 0;
-$disableIRC = isset($_POST['DisableIRC']) ? 1 : 0;
-$disableRequests = isset($_POST['DisableRequests']) ? 1 : 0;
-$disableLeech = isset($_POST['DisableLeech']) ? 0 : 1;
-$lockAccount = isset($_POST['LockAccount']) ? 1 : 0;
-$lockType = (int)$_POST['LockType'];
+$warnWeeks        = (int)($_POST['WarnLength'] ?? 0);
+$extendWarning   = $_POST['ExtendWarning'] ?? '---';
+$reduceWarning   = $_POST['ReduceWarning'] ?? '---';
+$warnReason      = trim($_POST['WarnReason']);
+$userReason      = trim($_POST['UserReason']);
+$disableAvatar   = isset($_POST['DisableAvatar']);
+$disableInvites  = isset($_POST['DisableInvites']);
+$disablePosting  = isset($_POST['DisablePosting']);
+$disablePoints   = isset($_POST['DisablePoints']);
+$disableForums   = isset($_POST['DisableForums']);
+$disableTagging  = isset($_POST['DisableTagging']);
+$disableUpload   = isset($_POST['DisableUpload']);
+$disableWiki     = isset($_POST['DisableWiki']);
+$disablePM       = isset($_POST['DisablePM']);
+$disableIRC      = isset($_POST['DisableIRC']);
+$disableRequests = isset($_POST['DisableRequests']);
+$disableLeech    = isset($_POST['DisableLeech']) ? 0 : 1;
+$lockAccount     = isset($_POST['LockAccount']);
+$lockType        = (int)$_POST['LockType'];
 
 $enableUser = (int)$_POST['UserStatus'];
 $resetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
@@ -200,6 +200,7 @@ if ($logoutSession && $Viewer->permitted('users_logout')) {
     $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\User\Session($user))->dropAll() . ")";
 }
 
+$editRatio = $Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile);
 if ($flTokens != $cur['FLTokens'] && ($editRatio || $Viewer->permitted('admin_manage_user_fls'))) {
     $editSummary[] = "freeleech tokens changed from {$cur['FLTokens']} to $flTokens";
 }
@@ -226,7 +227,6 @@ if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('
 
 $leechSet = [];
 $leechArgs = [];
-$editRatio = $Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile);
 if ($editRatio) {
     if ($uploaded != $cur['Uploaded'] && $uploaded != $_POST['OldUploaded']) {
         $leechSet[] = 'Uploaded = ?';
@@ -274,7 +274,6 @@ if ($Viewer->permitted('users_edit_usernames')) {
     if ($username !== $cur['Username']) {
         if (in_array($username, ['0', '1'])) {
             error('You cannot set a username of "0" or "1".');
-            exit;
         } elseif (strtolower($username) !== strtolower($cur['Username'])) {
             $found = $userMan->findByUsername($username);
             if ($found) {
@@ -431,42 +430,42 @@ if ($Viewer->permitted('users_disable_any')) {
             . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech).")";
         $user->toggleAttr('disable-leech', !$disableLeech);
     }
-    if ($disableInvites != $user->disableInvites()) {
+    if ($disableInvites !== $user->disableInvites()) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
         $editSummary[] = 'invites privileges ' . revoked($disableInvites);
         $user->toggleAttr('disable-invites', $disableInvites);
     }
-    if ($disableAvatar != $user->disableAvatar()) {
+    if ($disableAvatar !== $user->disableAvatar()) {
         $privChange[] = 'Your avatar privileges have been ' . revoked($disableAvatar);
         $editSummary[] = 'avatar privileges ' . revoked($disableAvatar);
         $user->toggleAttr('disable-avatar', $disableAvatar);
     }
-    if ($disablePoints != $user->disableBonusPoints()) {
+    if ($disablePoints !== $user->disableBonusPoints()) {
         $privChange[] = 'Your bonus points acquisition has been ' . revoked($disablePoints);
         $editSummary[] = 'points privileges ' . revoked($disablePoints);
         $user->toggleAttr('disable-bonus-points', $disablePoints);
     }
-    if ($disableTagging != $user->disableTagging()) {
+    if ($disableTagging !== $user->disableTagging()) {
         $privChange[] = 'Your tagging privileges have been ' . revoked($disableTagging);
         $editSummary[] = 'tagging privileges ' . revoked($disableTagging);
         $user->toggleAttr('disable-tagging', $disableTagging);
     }
-    if ($disableUpload != $user->disableUpload()) {
+    if ($disableUpload !== $user->disableUpload()) {
         $privChange[] = 'Your upload privileges have been ' . revoked($disableUpload);
         $editSummary[] = 'upload privileges ' . revoked($disableUpload);
         $user->toggleAttr('disable-upload', $disableUpload);
     }
-    if ($disableWiki != $user->disableWiki()) {
+    if ($disableWiki !== $user->disableWiki()) {
         $privChange[] = 'Your site editing privileges have been ' . revoked($disableWiki);
         $editSummary[] = 'wiki privileges ' . revoked($disableWiki);
         $user->toggleAttr('disable-wiki', $disableWiki);
     }
-    if ($disablePM != $user->disablePm()) {
+    if ($disablePM !== $user->disablePm()) {
         $privChange[] = 'Your private messate (PM) privileges have been ' . revoked($disablePM);
         $editSummary[] = 'PM privileges ' . revoked($disablePM);
         $user->toggleAttr('disable-pm', $disablePM);
     }
-    if ($disableRequests != $user->disableRequests()) {
+    if ($disableRequests !== $user->disableRequests()) {
         $privChange[] = 'Your request privileges have been ' . revoked($disableRequests);
         $editSummary[] = 'request privileges ' . revoked($disableRequests);
         $user->toggleAttr('disable-requests', $disableRequests);
@@ -474,20 +473,20 @@ if ($Viewer->permitted('users_disable_any')) {
 }
 
 if ($Viewer->permitted('users_disable_posts')) {
-    if ($disablePosting != $user->disablePosting()) {
+    if ($disablePosting !== $user->disablePosting()) {
         $privChange[] = 'Your forum posting privileges have been ' . revoked($disablePosting);
         $editSummary[] = 'posting privileges ' . revoked($disablePosting);
         $user->toggleAttr('disable-posting', $disablePosting);
     }
 
-    if ($disableForums != $user->disableForums()) {
+    if ($disableForums !== $user->disableForums()) {
         $privChange[] = 'Your forum access has been ' . revoked($disableForums);
         $editSummary[] = 'forums privileges ' . revoked($disableForums);
         $user->toggleAttr('disable-forums', $disableForums);
     }
 }
 
-if ($disableIRC != $user->disableIRC()) {
+if ($disableIRC !== $user->disableIRC()) {
     $privChange[] = 'Your IRC privileges have been ' . revoked($disableIRC);
     $editSummary[] = 'IRC privileges ' . revoked($disableIRC);
     $user->toggleAttr('disable-irc', $disableIRC);

@@ -321,19 +321,21 @@ class User extends BaseObject {
     }
 
     public function toggleAttr(string $attr, bool $flag): bool {
-        $attrId = $this->hasAttr($attr);
+        $hasAttr = $this->hasAttr($attr);
         $toggled = false;
-        if (!$flag && $attrId) {
-            self::$db->prepared_query('
-                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
-                ', $this->id, $attrId
+        if (!$flag && $hasAttr) {
+            self::$db->prepared_query("
+                DELETE FROM user_has_attr
+                WHERE UserID = ?
+                    AND UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?)
+                ", $this->id, $attr
             );
             $toggled = self::$db->affected_rows() === 1;
-        } elseif ($flag && !$attrId) {
-            self::$db->prepared_query('
+        } elseif ($flag && !$hasAttr) {
+            self::$db->prepared_query("
                 INSERT INTO user_has_attr (UserID, UserAttrID)
                     SELECT ?, ID FROM user_attr WHERE Name = ?
-                ', $this->id, $attr
+                ", $this->id, $attr
             );
             $toggled = self::$db->affected_rows() === 1;
         }
