@@ -87,7 +87,7 @@
             ');">FL</a>
         {% endif %}
             </span>
-        {% if item.group.categoryName == 'Music' %}{{ item.group.artistHtml|raw }} {{ "\xE2\x80\x93" }} {% endif %}
+        {% if item.group.categoryName == 'Music' %}{{ item.group.artistLink|raw }} {{ "\xE2\x80\x93" }} {% endif %}
         {{ item.link|raw }} {{ item.label|raw }}
         {% if type != 'single' and viewer.permitted('admin_reports') %}
             <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ item.id }}&amp;filter={{ filter }}&amp;search={{ item.search }}" title="Remove the {{ type }} flag" class="brackets">X</a>

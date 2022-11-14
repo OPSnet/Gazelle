@@ -9,7 +9,7 @@
         <span style="font-size: 16pt" title="Downvoted" class="center tooltip vote_tag_down">&#x25bc;</span>
     {%- endif -%}
     </span>
-    <span>{{ v.tgroup.artistHtml|raw }} &ndash; <a href="torrents.php?id={{ v.group_id }}">{{ v.tgroup.name }}</a></span>
+    <span>{{ v.tgroup.artistLink|raw }} &ndash; <a href="torrents.php?id={{ v.group_id }}">{{ v.tgroup.name }}</a></span>
 </div>
 {% endfor %}
 </div>

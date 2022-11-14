@@ -12,14 +12,12 @@ class TGroup extends BaseObject {
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
 
-    protected int $artistDisplay = self::ARTIST_DISPLAY_HTML;
-    protected int $revisionId = 0;
-    protected bool $showFallbackImage = true;
-    protected ArtistRole\TGroup $artistRole;
-    protected User $viewer;
+    protected int   $revisionId = 0;
+    protected bool  $showFallbackImage = true;
     protected array $info;
-
-    protected Stats\TGroup $stats;
+    protected ArtistRole\TGroup $artistRole;
+    protected User              $viewer;
+    protected Stats\TGroup      $stats;
 
     public function tableName(): string {
         return 'torrents_group';
@@ -30,16 +28,21 @@ class TGroup extends BaseObject {
     }
 
     public function link(): string {
-        return implode(" \xE2\x80\x93 ",
-            array_filter([
-                $this->artistHtml(),
-                sprintf('<a href="%s" title="%s" class="tooltip" dir="ltr">%s</a>',
-                    $this->url(),
-                    $this->hashTag() ?: 'View torrent group',
-                    display_str($this->name())
-                ),
-            ], fn($x) => !empty($x))
-        );
+        $url = "<a href=\"{$this->url()}\" title=\"" . ($this->hashTag() ?: 'View torrent group')
+            . '" dir="ltr">' . display_str($this->name()) . '</a>';
+        return match($this->categoryName()) {
+            'Music'       => "{$this->artistLink()} – $url [{$this->year()}]",
+            'Audiobooks',
+            'Comedy'      => "$url [{$this->year()}]",
+            default       => $url,
+        };
+    }
+
+    /**
+     * Generate the artist name. (Individual artists will be clickable, or VA)
+     */
+    public function artistLink(): string {
+        return $this->artistRole()->link();
     }
 
     public function flush() {
@@ -279,7 +282,7 @@ class TGroup extends BaseObject {
     }
 
     public function artistName(): string {
-        return $this->artistHtml(self::ARTIST_DISPLAY_TEXT);
+        return $this->artistRole()->text();
     }
 
     public function artistRole(): ArtistRole\TGroup {
@@ -427,7 +430,7 @@ class TGroup extends BaseObject {
     public function displayTorrentLink(int $torrentId): string {
         return implode(" \xE2\x80\x93 ",
             array_filter([
-                $this->artistHtml(),
+                $this->artistLink(),
                 sprintf(
                     '<a href="torrents.php?id=%d&amp;torrentid=%d#torrent%d" dir="ltr">%s</a>',
                         $this->id, $torrentId, $torrentId, $this->name()
@@ -454,7 +457,7 @@ class TGroup extends BaseObject {
         return implode(' ', [
             implode(" \xE2\x80\x93 ",
                 array_filter([
-                    $this->artistHtml(),
+                    $this->artistLink(),
                     '<span dir="ltr">' . display_str($this->name()) . '</span>',
                 ], fn($x) => !empty($x))
             ),
@@ -551,89 +554,6 @@ class TGroup extends BaseObject {
             }
         }
         return null;
-    }
-
-    /**
-     * Generate an HTML anchor or the name for an artist
-     */
-    protected function artistLink(array $info, int $renderMode): string {
-        return $renderMode === self::ARTIST_DISPLAY_HTML
-            ? '<a href="artist.php?id=' . $info['id'] . '" dir="ltr">' . display_str($info['name']) . '</a>'
-            : $info['name'];
-    }
-
-    /**
-     * Generate the artist name. (Individual artists will be clickable, or VA)
-     * TODO: refactor calls into artistName()
-     */
-    public function artistHtml(int $renderMode = self::ARTIST_DISPLAY_HTML): string {
-        static $nameCache = [self::ARTIST_DISPLAY_HTML => [], self::ARTIST_DISPLAY_TEXT => []];
-        if (isset($nameCache[$renderMode][$this->id])) {
-            return $nameCache[$renderMode][$this->id];
-        }
-
-        $roleList = $this->artistRole()->roleList();
-        $composerCount = count($roleList['composer']);
-        $conductorCount = count($roleList['conductor']);
-        $arrangerCount = count($roleList['arranger']);
-        $djCount = count($roleList['dj']);
-        $mainCount = count($roleList['main']);
-        if ($composerCount + $mainCount + $conductorCount + $djCount == 0) {
-            return $nameCache[$renderMode][$this->id] = '';
-        }
-
-        $and = $renderMode === self::ARTIST_DISPLAY_HTML ? ' &amp; ' : ' & ';
-        $chunk = [];
-        if ($djCount == 1) {
-            $chunk[] = $this->artistLink($roleList['dj'][0], $renderMode);
-        } elseif ($djCount == 2) {
-            $chunk[] = $this->artistLink($roleList['dj'][0], $renderMode) . $and . $this->artistLink($roleList['dj'][1], $renderMode);
-        } elseif ($djCount > 2) {
-            $chunk[] = 'Various DJs';
-        } else {
-            if ($composerCount > 0) {
-                if ($composerCount == 1) {
-                    $chunk[] = $this->artistLink($roleList['composer'][0], $renderMode);
-                } elseif ($composerCount == 2) {
-                    $chunk[] = $this->artistLink($roleList['composer'][0], $renderMode) . $and . $this->artistLink($roleList['composer'][1], $renderMode);
-                } else {
-                    $chunk[] = 'Various Composers';
-                }
-                if ($mainCount + $conductorCount > 0) {
-                    $chunk[] = 'performed by';
-                }
-            }
-
-            if ($composerCount > 0
-                && $mainCount > 1
-                && $conductorCount > 1
-            ) {
-                $chunk[] = 'Various Artists';
-            } else {
-                if ($mainCount == 1) {
-                    $chunk[] = $this->artistLink($roleList['main'][0], $renderMode);
-                } elseif ($mainCount == 2) {
-                    $chunk[] = $this->artistLink($roleList['main'][0], $renderMode) . $and . $this->artistLink($roleList['main'][1], $renderMode);
-                } elseif ($mainCount > 2) {
-                    $chunk[] = 'Various Artists';
-                }
-
-                if ($conductorCount > 0
-                    && $mainCount + $composerCount > 0
-                    && ($composerCount < 3 || $mainCount > 0)
-                ) {
-                    $chunk[] = 'under';
-                }
-                if ($conductorCount == 1) {
-                    $chunk[] = $this->artistLink($roleList['conductor'][0], $renderMode);
-                } elseif ($conductorCount == 2) {
-                    $chunk[] = $this->artistLink($roleList['conductor'][0], $renderMode) . $and . $this->artistLink($roleList['conductor'][1], $renderMode);
-                } elseif ($conductorCount > 2) {
-                    $chunk[] = 'Various Conductors';
-                }
-            }
-        }
-        return $nameCache[$renderMode][$this->id] = implode(' ', $chunk);
     }
 
     /**

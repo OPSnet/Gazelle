@@ -46,7 +46,7 @@
                 <td>{{ loop.index }}</td>
                 <td>{{ tgroup.catalogueNumber|default('&nbsp;')|raw }}</td>
                 <td>{{ tgroup.year|default('&nbsp;')|raw }}</td>
-                <td>{{ tgroup.artistHtml|raw|default('&nbsp;')|raw }}</td>
+                <td>{{ tgroup.artistLink|raw|default('&nbsp;')|raw }}</td>
                 <td><a href="torrents.php?id= {{ id }}" class="tooltip" title="View torrent group">{{ tgroup.name }}</a></td>
                 <td class="nobr">{{ collage.entryUserId(id)|user_url }}</td>
                 <td class="nobr">

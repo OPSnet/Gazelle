@@ -6,6 +6,7 @@ class TGroupList extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\User\Bookmark   $bookmark,
         protected \Gazelle\User\Snatch     $snatcher,
+        protected \Gazelle\Manager\Artist  $artistMan,
         protected \Gazelle\Manager\TGroup  $tgMan,
         protected \Gazelle\Manager\Torrent $torMan,
         protected array $result,
@@ -48,7 +49,7 @@ class TGroupList extends \Gazelle\Json {
                     $groupList[] = [
                         'torrentId'               => $torrent->id(),
                         'editionId'               => $EditionID,
-                        'artists'                 => (new \Gazelle\ArtistRole\TGroup($tgroup->id()))->rolelist()['main'],
+                        'artists'                 => (new \Gazelle\ArtistRole\TGroup($tgroup->id(), $this->artistMan))->rolelist()['main'],
                         'remastered'              => $torrent->isRemastered(),
                         'remasterYear'            => $torrent->remasterYear(),
                         'remasterRecordLabel'     => $torrent->remasterRecordLabel() ?? '',

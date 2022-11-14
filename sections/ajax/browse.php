@@ -37,6 +37,7 @@ if ($resultTotal == 0) {
 (new Gazelle\Json\TGroupList(
     new Gazelle\User\Bookmark($Viewer),
     new Gazelle\User\Snatch($Viewer),
+    new Gazelle\Manager\Artist,
     (new Gazelle\Manager\TGroup)->setViewer($Viewer),
     (new Gazelle\Manager\Torrent)->setViewer($Viewer),
     array_values($Results),

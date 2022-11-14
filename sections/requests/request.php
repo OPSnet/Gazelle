@@ -97,71 +97,71 @@ if ($request->categoryName() === 'Music') {
         <div class="box box_artists">
             <div class="head"><strong>Artists</strong></div>
             <ul class="stats nobullet">
-<?php if (isset($roleList['Composer'])) { ?>
+<?php if (isset($roleList['composer'])) { ?>
                 <li class="artists_composer"><strong>Composers:</strong></li>
-<?php   foreach ($roleList['Composer'] as $a) { ?>
+<?php   foreach ($roleList['composer'] as $a) { ?>
                 <li class="artists_composer"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['DJ'])) {
+    if (isset($roleList['dj'])) {
 ?>
                 <li class="artists_dj"><strong>DJ / Compiler:</strong></li>
-<?php   foreach ($roleList['DJ'] as $a) { ?>
+<?php   foreach ($roleList['dj'] as $a) { ?>
                 <li class="artists_dj"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['Main'])) {
-        if (isset($roleList['DJ'])) {
+    if (isset($roleList['main'])) {
+        if (isset($roleList['dj'])) {
 ?>
                 <li class="artists_main"><strong>Artists</strong></li>
-<?php   } elseif (isset($roleList['Composer'])) { ?>
-                <li class="artists_main"><strong>Performers</strong></li>
+<?php   } elseif (isset($roleList['composer'])) { ?>
+                <li class="artists_main"><strong>Performers:</strong></li>
 <?php
         }
-        foreach ($roleList['Main'] as $a) {
+        foreach ($roleList['main'] as $a) {
 ?>
                 <li class="artists_main"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['Guest'])) {
+    if (isset($roleList['guest'])) {
 ?>
                 <li class="artists_with"><strong>With:</strong></li>
-<?php foreach ($roleList['Guest'] as $a) { ?>
+<?php foreach ($roleList['guest'] as $a) { ?>
                 <li class="artists_with"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['Conductor'])) {
+    if (isset($roleList['conductor'])) {
 ?>
                 <li class="artists_conductor"><strong>Conducted by:</strong></li>
-<?php foreach ($roleList['Conductor'] as $a) { ?>
+<?php foreach ($roleList['conductor'] as $a) { ?>
                 <li class="artists_conductor"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['Remixer'])) {
+    if (isset($roleList['remixer'])) {
 ?>
                 <li class="artists_remix"><strong>Remixed by:</strong></li>
-<?php foreach ($roleList['Remixer'] as $a) { ?>
+<?php foreach ($roleList['remixer'] as $a) { ?>
                 <li class="artists_remix"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['Producer'])) {
+    if (isset($roleList['producer'])) {
 ?>
                 <li class="artists_producer"><strong>Produced by:</strong></li>
-<?php foreach ($roleList['Producer'] as $a) { ?>
+<?php foreach ($roleList['producer'] as $a) { ?>
                 <li class="artists_producer"><?= $a['artist']->link() ?></li>
 <?php
         }
     }
-    if (isset($roleList['Arranger'])) {
+    if (isset($roleList['arranger'])) {
 ?>
                 <li class="artists_arranger"><strong>Arranged by:</strong></li>
-<?php foreach ($roleList['Arranger'] as $a) { ?>
+<?php foreach ($roleList['arranger'] as $a) { ?>
                 <li class="artists_arranger"><?= $a['artist']->link() ?></li>
 <?php
         }

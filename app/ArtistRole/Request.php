@@ -3,25 +3,19 @@
 namespace Gazelle\ArtistRole;
 
 class Request extends \Gazelle\ArtistRole {
-    protected array $artistList;
-
-    protected function artistList(): array {
-        if (!isset($this->artistList)) {
-            self::$db->prepared_query("
-                SELECT r.artist_role_id,
-                    r.name      AS role_name,
-                    ra.ArtistID AS artist_id,
-                    aa.Name     AS name
-                FROM requests_artists AS ra
-                INNER JOIN artist_role r ON (r.artist_role_id = ra.Importance)
-                INNER JOIN artists_alias AS aa USING (AliasID)
-                WHERE ra.RequestID = ?
-                ORDER BY r.artist_role_id ASC, aa.Name ASC
-                ", $this->id
-            );
-            $this->artistList = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        }
-        return $this->artistList;
+    protected function artistListQuery(): \mysqli_result {
+        return self::$db->prepared_query("
+            SELECT r.artist_role_id,
+                r.slug      AS slug,
+                ra.ArtistID AS artist_id,
+                aa.Name     AS name
+            FROM requests_artists AS ra
+            INNER JOIN artist_role r ON (r.artist_role_id = ra.Importance)
+            INNER JOIN artists_alias AS aa USING (AliasID)
+            WHERE ra.RequestID = ?
+            ORDER BY r.artist_role_id ASC, aa.Name ASC
+            ", $this->id
+        );
     }
 
     /**
@@ -54,7 +48,7 @@ class Request extends \Gazelle\ArtistRole {
         }
         $list = [];
         foreach ($this->artistList as $artist) {
-            $roleName = $artist['role_name'];
+            $roleName = $artist['slug'];
             if (!isset($list[$roleName])) {
                 $list[$roleName] = [];
             }

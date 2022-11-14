@@ -37,7 +37,7 @@ class Torrent extends BaseObject {
     public function fullLink(): string {
         $link = implode(" \xE2\x80\x93 ",
             array_filter([
-                $this->group()->artistHtml(),
+                $this->group()->artistLink(),
                 $this->link(),
             ], fn($x) => !empty($x))
         );
@@ -55,7 +55,7 @@ class Torrent extends BaseObject {
     public function fullEditionLink(): string {
         $link = implode(" \xE2\x80\x93 ",
             array_filter([
-                $this->group()->artistHtml(),
+                $this->group()->artistLink(),
                 sprintf('<a href="%s">%s</a>', $this->group()->url(), display_str($this->group()->name())),
             ], fn($x) => !empty($x))
         );
@@ -252,6 +252,9 @@ class Torrent extends BaseObject {
      */
     public function edition(): string {
         $tgroup = $this->group();
+        if ($tgroup->categoryName() !== 'Music') {
+            return '';
+        }
         if ($this->isRemastered()) {
             $edition = [
                 $this->remasterRecordLabel() ?? $tgroup->recordLabel(),
@@ -374,7 +377,7 @@ class Torrent extends BaseObject {
      * Get the encoding of this upload
      */
     public function description(): string {
-        return $this->info()['Description'];
+        return $this->info()['Description'] ?? '';
     }
 
     /**

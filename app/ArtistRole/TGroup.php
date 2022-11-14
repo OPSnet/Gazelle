@@ -14,8 +14,36 @@ class TGroup extends \Gazelle\ArtistRole {
         8 => 'arranger',
     ];
 
-    protected array $roleList;
-    protected array $idList;
+    protected function artistListQuery(): \mysqli_result {
+        return self::$db->prepared_query("
+            SELECT ta.Importance,
+                ta.ArtistID,
+                aa.Name,
+                ta.AliasID
+            FROM torrents_artists AS ta
+            INNER JOIN artists_alias AS aa USING (AliasID)
+            WHERE ta.GroupID = ?
+            ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
+            ", $this->id
+        );
+    }
+
+    protected function init() {
+        $this->artistList = $this->artistList();
+        $this->roleList = array_fill_keys(array_values(self::MAP), []);
+        $this->idList = [];
+        while ([$role, $artistId, $artistName, $aliasId] = self::$db->next_record(MYSQLI_NUM, false)) {
+            $this->idList[$role][] = [
+                'id'      => $artistId,
+                'name'    => $artistName,
+            ];
+            $this->roleList[self::MAP[$role]][] = [
+                'id'      => $artistId,
+                'aliasid' => $aliasId,
+                'name'    => $artistName,
+            ];
+        }
+    }
 
     /**
      * A readable representation of the artists grouped by their roles in a
@@ -113,32 +141,5 @@ class TGroup extends \Gazelle\ArtistRole {
             }
         }
         return array_unique($matched);
-    }
-
-    protected function init() {
-        self::$db->prepared_query("
-            SELECT ta.Importance,
-                ta.ArtistID,
-                aa.Name,
-                ta.AliasID
-            FROM torrents_artists AS ta
-            INNER JOIN artists_alias AS aa USING (AliasID)
-            WHERE ta.GroupID = ?
-            ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
-            ", $this->id
-        );
-        $this->roleList = array_fill_keys(array_values(self::MAP), []);
-        $this->idList = [];
-        while ([$role, $artistId, $artistName, $aliasId] = self::$db->next_record(MYSQLI_NUM, false)) {
-            $this->idList[$role][] = [
-                'id'      => $artistId,
-                'name'    => $artistName,
-            ];
-            $this->roleList[self::MAP[$role]][] = [
-                'id'      => $artistId,
-                'aliasid' => $aliasId,
-                'name'    => $artistName,
-            ];
-        }
     }
 }

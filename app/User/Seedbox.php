@@ -87,6 +87,7 @@ class Seedbox extends \Gazelle\BaseUser {
                     xfu.ip = inet_ntoa(sx.ipaddr)
                 AND xfu.useragent = sx.useragent
                 AND xfu.active = 1
+                AND xfu.ip != ''
                 AND xfu.uid = ?
             )
             INNER JOIN torrents t ON (t.ID = xfu.fid)
@@ -141,7 +142,7 @@ class Seedbox extends \Gazelle\BaseUser {
                 'id'       => $tid,
                 'folder'   => $torrent->path(),
                 'sortname' => $torrent->group()->name(),
-                'artist'   => $torrent->group()->artistHtml(),
+                'artist'   => $torrent->group()->artistLink(),
                 'name'     => $torrent->fullLink(),
             ];
         }
