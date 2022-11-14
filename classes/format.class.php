@@ -117,7 +117,6 @@ class Format {
         return number_format($Size, $Levels) . $Units[$Steps];
     }
 
-
     /**
      * Format a number as a multiple of its highest power of 1000 (e.g. 10035 -> '10.04k')
      *
@@ -142,7 +141,6 @@ class Format {
         }
     }
 
-
     /**
      * Given a formatted string of a size, get the number of bytes it represents.
      *
@@ -161,27 +159,6 @@ class Format {
             case 'g': return round($Value * 1073741824);
             case 't': return round($Value * 1099511627776);
             default: return 0;
-        }
-    }
-
-
-    /**
-     * Convenience function to echo out selected="selected" and checked="checked" so you don't have to.
-     *
-     * @param string $Name the name of the option in the select (or field in $Array)
-     * @param mixed $Value the value that the option must be for the option to be marked as selected or checked
-     * @param string $Attribute The value returned/echoed is $Attribute="$Attribute" with a leading space
-     * @param array $Array The array the option is in, defaults to GET.
-     * @return void
-     */
-    public static function selected($Name, $Value, $Attribute = 'selected', $Array = []) {
-        if (empty($Array)) {
-            $Array = $_GET;
-        }
-        if (isset($Array[$Name]) && $Array[$Name] !== '') {
-            if ($Array[$Name] == $Value) {
-                echo " $Attribute=\"$Attribute\"";
-            }
         }
     }
 }

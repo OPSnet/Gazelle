@@ -28,7 +28,7 @@ class ErrorLog extends \Gazelle\BaseManager {
                 INSERT INTO error_log
                        (uri, user_id, duration, memory, nr_query, nr_cache, digest, trace, request, error_list, logged_var)
                 VALUES (?,   ?,       ?,        ?,      ?,        ?,        ?,      ?,     ?,       ?,          ?)
-                ", $uri, $userId, $duration, $memory, $nrQuery, $nrCache, $digest, $trace, $request, $errorList, $loggedVar
+                ", substr($uri, 0, 255), $userId, $duration, $memory, $nrQuery, $nrCache, $digest, $trace, $request, $errorList, $loggedVar
             );
             $id = self::$db->inserted_id();
         }

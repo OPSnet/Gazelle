@@ -56,7 +56,7 @@ class Request extends BaseObject {
                 "{$this->artistRole()->link()} – "
                 . ($this->isFilled()
                     ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
-                    : "<a href=\"{$this->url()}\">$title</a> [{$this->year()}]"
+                    : "<a href=\"{$this->url()}\">$title</a>"
                 )
                 . " [{$this->year()}]",
 
@@ -232,6 +232,10 @@ class Request extends BaseObject {
 
     public function fillerId(): ?int {
         return $this->info()['FillerID'];
+    }
+
+    public function fillDate(): ?string {
+        return $this->info()['TimeFilled'];
     }
 
     public function isFilled(): bool {
