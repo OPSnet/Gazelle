@@ -129,7 +129,7 @@ class Email extends \Gazelle\Base {
             INNER JOIN {$this->name} s ON (s.email = uhe.Email)
             INNER JOIN users_main   um ON (um.ID = uhe.UserID)
             INNER JOIN users_info   ui ON (ui.UserID = um.ID)
-            WHERE ui.JoinDate != uhe.Time
+            WHERE ((ui.JoinDate = uhe.Time and uhe.Email != um.Email) OR ui.JoinDate != uhe.Time)
             ORDER BY $column $direction
             LIMIT ? OFFSET ?
             ", $limit, $offset
