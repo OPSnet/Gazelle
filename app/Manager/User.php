@@ -1372,7 +1372,7 @@ class User extends \Gazelle\BaseManager {
             UPDATE users_info AS ui
             INNER JOIN users_main AS um ON (um.ID = ui.UserID)
             SET um.can_leech = '0',
-                ui.AdminComment = concat(now(), ' - Leeching ability disabled by ratio watch system - required ratio: ', um.RequiredRatio, '\n\n', ui.AdminComment)
+                ui.AdminComment = concat(now(), ' - Leeching ability suspended by ratio watch system - required ratio: ', um.RequiredRatio, '\n\n', ui.AdminComment)
             WHERE um.ID IN($placeholders)
             ", ...$idList
         );
@@ -1387,7 +1387,7 @@ class User extends \Gazelle\BaseManager {
         foreach ($idList as $userId) {
             $this->findById($userId)?->flush();
             $this->sendPM($userId, 0,
-                'Your downloading privileges have been disabled',
+                'Your downloading privileges have been suspended',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
             );
             if ($task) {

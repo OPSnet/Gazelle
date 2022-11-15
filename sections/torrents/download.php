@@ -62,7 +62,7 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
 
 if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
     if (!$Viewer->canSpendFLToken($torrent)) {
-        json_or_error('You cannot use tokens here (leeching disabled or already freeleech).');
+        json_or_error('You cannot use tokens here (leeching suspended or already freeleech).');
     }
 
     // First make sure this isn't already FL, and if it is, do nothing

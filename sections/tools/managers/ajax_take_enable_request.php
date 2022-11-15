@@ -5,7 +5,7 @@ if (!$Viewer->permitted('users_mod')) {
 }
 
 if (!FEATURE_EMAIL_REENABLE) {
-    json_error("This feature is currently disabled.");
+    json_error("This feature is currently deactivated.");
 }
 
 $enableMan = new Gazelle\Manager\AutoEnable;

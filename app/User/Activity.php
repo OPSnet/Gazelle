@@ -34,10 +34,10 @@ class Activity extends \Gazelle\BaseUser {
         if ($this->user->onRatioWatch()) {
             $this->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: You have '
                 . time_diff($this->user->ratioWatchExpiry(), 3)
-                . ' to get your ratio over your required ratio or your leeching abilities will be disabled.'
+                . ' to get your ratio over your required ratio or your leeching abilities will be suspended.'
             );
         } elseif (!$this->user->canLeech()) {
-            $this->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: Your downloading privileges are disabled until you meet your required ratio.');
+            $this->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: Your downloading privileges are suspended until you meet your required ratio.');
         }
         if ($this->user->permitted('users_mod')) {
             $this->setAction('<a class="nobr" href="tools.php">Toolbox</a>');

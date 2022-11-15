@@ -132,7 +132,7 @@ var_dump($response)
 <div class="thin box pad">
 <?php if ($referralManager->readOnly) { ?>
     <p>
-        <strong class="important_text">DB key not loaded - accounts disabled</strong>
+        <strong class="important_text">DB key not loaded - accounts suspended</strong>
     </p>
 <?php } else if (empty($referralAccounts)) { ?>
     <h3>Auto</h3>

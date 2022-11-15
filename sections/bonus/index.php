@@ -1,7 +1,7 @@
 <?php
 
 if ($Viewer->disableBonusPoints()) {
-    error('Your points have been disabled.');
+    error('Your bonus points have been deactivated.');
 }
 
 const DEFAULT_PAGE = 'store.php';
