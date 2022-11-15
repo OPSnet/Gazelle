@@ -181,9 +181,7 @@ class Bonus extends \Gazelle\Base {
         self::$db->prepared_query("
             SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ
         ");
-        if ($task) {
-            $task->info('bonus_update table constructed');
-        }
+        $task?->info('bonus_update table constructed');
 
         self::$db->prepared_query("
             INSERT INTO user_bonus
@@ -193,9 +191,7 @@ class Bonus extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE points = points + bu.delta
         ");
         $processed = self::$db->affected_rows();
-        if ($task) {
-            $task->info('user_bonus updated');
-        }
+        $task?->info('user_bonus updated');
 
         /* flush their stats */
         self::$db->prepared_query("
