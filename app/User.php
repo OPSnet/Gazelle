@@ -1632,6 +1632,21 @@ class User extends BaseObject {
         return $this->disableInvites() ? 0 : $this->info()['Invites'];
     }
 
+    public function decrementInviteCount(): int {
+        if ($this->permitted('site_send_unlimited_invites')) {
+            return 0;
+        }
+        self::$db->prepared_query("
+            UPDATE users_main SET
+                Invites = GREATEST(Invites, 1) - 1
+            WHERE ID = ?
+            ", $this->id
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
+    }
+
     public function pendingInviteCount(): int {
         return $this->getSingleValue('user_inv_pending', '
             SELECT count(*)

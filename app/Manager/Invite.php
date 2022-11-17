@@ -6,12 +6,39 @@ class Invite extends \Gazelle\Base {
 
     protected $search;
 
+    public function findUserByKey(string $inviteKey, User $manager): ?\Gazelle\User {
+        return $manager->findById(
+            (int)self::$db->scalar("
+                SELECT InviterID FROM invites WHERE InviteKey = ?
+                ", $inviteKey
+            )
+        );
+    }
+
     /**
      * Set a text filter on email addresses
      */
     public function setSearch(string $search) {
         $this->search = $search;
         return $this;
+    }
+
+    public function create(\Gazelle\User $user, string $email, string $reason, string $source): ?\Gazelle\Invite {
+        self::$db->begin_transaction();
+        $inviteKey = randomString();
+        self::$db->prepared_query("
+            INSERT INTO invites
+                   (InviterID, InviteKey, Email, Reason, Expires)
+            VALUES (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)
+            ", $user->id(), $inviteKey, $email, trim($_POST['reason'] ?? '')
+        );
+        $invite = new \Gazelle\Invite($inviteKey);
+        $user->decrementInviteCount();
+        if (preg_match('/^s-(\d+)$/', $source, $match)) {
+            (new \Gazelle\Manager\InviteSource)->createPendingInviteSource($match[1], $inviteKey);
+        }
+        self::$db->commit();
+        return $invite;
     }
 
     /**
@@ -25,9 +52,19 @@ class Invite extends \Gazelle\Base {
         ");
     }
 
+    public function emailExists(\Gazelle\User $user, string $email): bool {
+        return (bool)self::$db->scalar("
+            SELECT 1
+            FROM invites
+            WHERE InviterID = ?
+                AND Email = ?
+            ", $user->id(), $email
+        );
+    }
+
     public function inviteExists(string $key): bool {
         return (bool)self::$db->scalar("
-            SELECT InviteKey FROM invites WHERE InviteKey = ?
+            SELECT 1 FROM invites WHERE InviteKey = ?
             ", $key
         );
     }

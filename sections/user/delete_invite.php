@@ -1,17 +1,15 @@
 <?php
+
 authorize();
 
-$inviteKey = trim($_GET['invite']);
-$userId = $DB->scalar("
-    SELECT InviterID FROM invites WHERE InviteKey = ?
-    ", $inviteKey
-);
-if (is_null($userId)) {
+$inviteKey = trim($_GET['invite'] ?? '');
+$user = (new Gazelle\Manager\Invite)->findUserByKey($inviteKey, new Gazelle\Manager\User);
+if (is_null($user)) {
     error(404);
 }
-if ($userId != $Viewer->id()) {
+if ($user->id() != $Viewer->id()) {
     error(403);
 }
 
-(new Gazelle\User($userId))->removeInvite($inviteKey);
+$user->removeInvite($inviteKey);
 header('Location: user.php?action=invite');
