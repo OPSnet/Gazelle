@@ -56,6 +56,17 @@ class TGroup extends BaseObject {
         ]);
     }
 
+    public function flushTorrentDownload(): TGroup {
+        self::$db->prepared_query("
+            SELECT concat('torrent_download_', ID) as cacheKey
+            FROM torrents
+            WHERE GroupID = ?
+            ", $this->id
+        );
+        self::$cache->deleteMulti(self::$db->collect('cacheKey'));
+        return $this;
+    }
+
     /**
      * Delegate stats methods to the Stats\TGroup class
      */
@@ -470,6 +481,19 @@ class TGroup extends BaseObject {
             implode(" \xE2\x80\x93 ", array_filter([$this->artistName(), $this->name()], fn($x) => !empty($x))),
             ...$this->displayNameSuffix()
         ]);
+    }
+
+    /**
+     * Is the user allowed to edit this group? They can if they have the appropriate privilege,
+     * or, for User or Members etc, if they own an upload in the group (they have a stake in the game) if the user is in
+     * a entry-level userclass.
+     */
+    public function canEdit(User $user): bool {
+        return $user->permitted('torrents_edit')
+            || (bool)self::$db->scalar("
+                    SELECT 1 FROM torrents WHERE GroupID = ? AND UserID = ? LIMIT 1
+                    ", $this->id, $user->id()
+                );
     }
 
     public function addCoverArt(string $image, string $summary, int $userId, \Gazelle\Log $logger): int {

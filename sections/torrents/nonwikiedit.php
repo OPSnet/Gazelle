@@ -2,82 +2,49 @@
 
 authorize();
 
-$groupId = (int)$_POST['groupid'];
-if (!$groupId) {
+$tgMan = new Gazelle\Manager\TGroup;
+$tgroup = $tgMan->findById((int)($_POST['groupid']));
+if (is_null($tgroup)) {
     error(404);
 }
 
-//Usual perm checks
-if (!$Viewer->permitted('torrents_edit')) {
-    if (!$DB->scalar("
-        SELECT ID FROM torrents WHERE GroupID = ? AND UserID = ?
-        ", $groupId, $Viewer->id()
-    )) {
-        error(403);
-    }
+if (!$tgroup->canEdit($Viewer)) {
+    error(403);
 }
 
 $log = [];
 if (isset($_POST['freeleechtype']) && $Viewer->permitted('torrents_freeleech')) {
-    if (in_array($_POST['freeleechtype'], ['0', '1', '2'])) {
-        $Free = $_POST['freeleechtype'];
-    } else {
-        $Free = '0';
-    }
-
-    if (isset($_POST['freeleechreason']) && in_array($_POST['freeleechreason'], ['0', '1', '2', '3'])) {
-        $FreeType = $_POST['freeleechreason'];
-    } else {
+    if (!in_array($_POST['freeleechreason'] ?? '', ['0', '1', '2', '3'])) {
         error(404);
     }
-    $log[] = "freeleech type=$Free reason=$FreeType";
-    $DB->prepared_query("
-        SELECT ID FROM torrents WHERE GroupID = ?
-        ", $groupId
-    );
-    (new Gazelle\Manager\Torrent)
-        ->setFreeleech($Viewer, $DB->collect('ID', false), $Free, $FreeType, false, false);
+    $reason = $_POST['freeleechreason'];
+    $free = in_array($_POST['freeleechtype'], ['0', '1', '2']) ? $_POST['freeleechtype'] : '0';
+    $log[] = "freeleech type=$free reason=$reason";
+    (new Gazelle\Manager\Torrent)->setFreeleech($Viewer, $tgroup->torrentIdList(), $free, $reason, false, false);
 }
 
 $year = (int)trim($_POST['year']);
+if ($tgroup->year() != $year) {
+    $tgroup->setUpdate('Year', $year);
+    $log[] = "year {$tgroup->year()} => $year";
+}
+
 $recordLabel = trim($_POST['record_label']);
+if ($tgroup->recordLabel() != $recordLabel) {
+    $tgroup->setUpdate('RecordLabel', $recordLabel);
+    $log[] = "record label \"{$tgroup->recordLabel()}\" => \"$recordLabel\"";
+}
+
 $catNumber = trim($_POST['catalogue_number']);
-
-// Get some info for the group log
-[$oldYear, $oldRecLabel, $oldCatNumber] = $DB->row("
-    SELECT Year, RecordLabel, CatalogueNumber FROM torrents_group WHERE ID = ?
-", $groupId);
-
-if ($oldYear != $year) {
-    $log[] = "year $oldYear => $year";
-}
-if ($oldRecLabel != $recordLabel) {
-    $log[] = "record label \"$oldRecLabel\" => \"$recordLabel\"";
-}
-if ($oldCatNumber != $catNumber) {
-    $log[] = "cat number \"$oldCatNumber\" => \"$catNumber\"";
+if ($tgroup->catalogueNumber() != $catNumber) {
+    $tgroup->setUpdate('CatalogueNumber', $catNumber);
+    $log[] = "cat number \"{$tgroup->catalogueNumber()}\" => \"$catNumber\"";
 }
 
-if ($log) {
-    $DB->prepared_query("
-        UPDATE torrents_group SET
-            Year = ?,
-            RecordLabel = ?,
-            CatalogueNumber = ?
-        WHERE ID = ?
-        ", $year, $recordLabel, $catNumber, $groupId
-    );
-    (new Gazelle\Log)->group($groupId, $Viewer->id(), ucfirst(implode(", ", $log)));
-
-    $DB->prepared_query("
-        SELECT concat('torrent_download_', ID) as cacheKey
-        FROM torrents
-        WHERE GroupID = ?
-        ", $groupId
-    );
-    $Cache->deleteMulti($DB->collect('cacheKey'));
-
-    (new \Gazelle\Manager\TGroup)->refresh($groupId);
+if ($tgroup->dirty()) {
+    (new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), ucfirst(implode(", ", $log)));
+    $tgroup->flushTorrentDownload()->modify();
+    $tgMan->refresh($tgroup->id());
 }
 
-header("Location: torrents.php?id=$groupId");
+header("Location: " . $tgroup->location());
