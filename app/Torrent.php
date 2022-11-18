@@ -296,7 +296,7 @@ class Torrent extends BaseObject {
         if ($info['Media'] === 'CD') {
             if ($info['HasLog']) {
                 if (!$info['HasLogDB']) {
-                    $label[] = '<span class="tooltip" title="There is a logifile in the torrent, but it has not been uploaded to the site!">Log</span>';
+                    $label[] = '<span class="tooltip" style="float: none" title="There is a logifile in the torrent, but it has not been uploaded to the site!">Log</span>';
                 } else {
                     if (isset($this->viewer) && $this->viewer->isStaff()) {
                         $label[] = "(<a href=\"torrents.php?action=viewlog&torrentid={$this->id}&groupid={$this->groupId()}\">Log {$info['LogScore']}%)</a>";
@@ -813,6 +813,37 @@ class Torrent extends BaseObject {
             return $this->modifyLogscore();
         }
         return 0;
+    }
+
+    /**
+     * Remove all logfiles attached to this upload
+     *
+     * @return int number of logfiles removed
+     */
+    public function removeAllLogs(User $user, File\RipLog $ripLog, File\RipLogHTML $ripLogHtml, Log $logger): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            DELETE FROM torrents_logs WHERE TorrentID = ?
+            ", $this->id
+        );
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            UPDATE torrents SET
+                HasLog      = '1',
+                HasLogDB    = '0',
+                LogChecksum = '0',
+                LogScore    = 0
+            WHERE ID = ?
+            ", $this->id
+        );
+        $logger->torrent($this->groupId(), $this->id, $user->id(), "All logs removed from torrent");
+        self::$db->commit();
+        $this->flush();
+
+        $ripLog->remove([$this->id, null]);
+        $ripLogHtml->remove([$this->id, null]);
+
+        return $affected;
     }
 
     public function logfileList(\Gazelle\File\RipLog $ripFiler, \Gazelle\File\RipLogHTML $htmlFiler): array {
