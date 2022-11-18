@@ -934,15 +934,27 @@ class Torrent extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function clearFlagTable(string $tableName): int {
-        if (in_array($tableName, ['torrents_bad_files', 'torrents_bad_folders', 'torrents_bad_tags', 'torrents_missing_lineage'])) {
-            self::$db->prepared_query("
-                DELETE FROM $tableName WHERE TorrentID = ?
-                ", $this->id
-            );
-            return self::$db->affected_rows();
-        }
-        return -1;
+    public function hasFlag(TorrentFlag $flag): bool {
+        return (bool)self::$db->scalar("
+            SELECT 1 FROM {$flag->value} WHERE TorrentID = ?
+            ", $this->id
+        );
+    }
+
+    public function addFlag(TorrentFlag $flag, User $user): int {
+        self::$db->prepared_query("
+            INSERT IGNORE INTO {$flag->value} (TorrentID, UserID) VALUES (?, ?)
+            ", $this->id, $user->id()
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function removeFlag(TorrentFlag $flag): int {
+        self::$db->prepared_query("
+            DELETE FROM {$flag->value} WHERE TorrentID = ?
+            ", $this->id
+        );
+        return self::$db->affected_rows();
     }
 
     /**

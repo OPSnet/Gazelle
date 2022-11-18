@@ -132,14 +132,8 @@ class Report extends \Gazelle\BaseObject {
         return $this->info()['type'];
     }
 
-    public function setTorrentFlag(int $userId, string $tableName): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO {$tableName}
-                   (UserID, TorrentID)
-            VALUES (?,      ?)
-            ", $userId, $this->torrent->id()
-        );
-        $affected = self::$db->affected_rows();
+    public function addTorrentFlag(\Gazelle\TorrentFlag $flag, \Gazelle\User $user): int {
+        $affected = $this->torrent->addFlag($flag, $user);
         $this->torrent->flush();
         return $affected;
     }

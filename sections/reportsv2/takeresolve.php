@@ -65,22 +65,22 @@ if ($fromReportPage && !$report->moderatorResolve($Viewer->id(), $_POST['comment
 }
 
 if ($_POST['resolve_type'] === 'tags_lots') {
-    $report->setTorrentFlag($Viewer->id(), 'torrents_bad_tags');
+    $report->addTorrentFlag(Gazelle\TorrentFlag::badTag, $Viewer);
     $SendPM = true;
 }
 elseif ($_POST['resolve_type'] === 'folders_bad') {
-    $report->setTorrentFlag($Viewer->id(), 'torrents_bad_folders');
+    $report->addTorrentFlag(Gazelle\TorrentFlag::badFolder, $Viewer);
     $SendPM = true;
 }
 elseif ($_POST['resolve_type'] === 'filename') {
-    $report->setTorrentFlag($Viewer->id(), 'torrents_bad_files');
+    $report->addTorrentFlag(Gazelle\TorrentFlag::badFile, $Viewer);
     $SendPM = true;
 }
 elseif ($_POST['resolve_type'] === 'lineage') {
-    $report->setTorrentFlag($Viewer->id(), 'torrents_missing_lineage');
+    $report->addTorrentFlag(Gazelle\TorrentFlag::noLineage, $Viewer);
 }
 elseif ($_POST['resolve_type'] === 'lossyapproval') {
-    $report->setTorrentFlag($Viewer->id(), 'torrents_lossymaster_approved');
+    $report->addTorrentFlag(Gazelle\TorrentFlag::lossyMaster, $Viewer);
 }
 
 $adminMessage   = trim($_POST['admin_message']);

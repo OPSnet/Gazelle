@@ -34,7 +34,7 @@ $better = match($type) {
 if (isset($_GET['remove']) && $better instanceof Gazelle\Better\Bad && $Viewer->permitted('admin_reports')) {
     $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['remove']);
     if ($torrent) {
-        $torrent->clearFlagTable($better->tableName());
+        $torrent->removeFlag($better->torrentFlag());
     }
 }
 

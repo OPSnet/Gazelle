@@ -4,32 +4,32 @@ namespace Gazelle\Better;
 
 class Bad extends AbstractBetter {
 
-    protected string $tableName;
+    protected \Gazelle\TorrentFlag $torrentFlag;
 
     public function mode(): string {
         return 'torrent';
     }
 
     public function setBadType(string $bad): Bad {
-        $this->tableName = match($bad) {
-            'files'   => 'torrents_bad_files',
-            'folders' => 'torrents_bad_folders',
-            'lineage' => 'torrents_missing_lineage',
-            'tags'    => 'torrents_bad_tags',
+        $this->torrentFlag = match($bad) {
+            'files'   => \Gazelle\TorrentFlag::badFile,
+            'folders' => \Gazelle\TorrentFlag::badFolder,
+            'lineage' => \Gazelle\TorrentFlag::noLineage,
+            'tags'    => \Gazelle\TorrentFlag::badTag,
         };
         return $this;
     }
 
-    public function tableName(): string {
-        return $this->tableName;
+    public function torrentFlag(): \Gazelle\TorrentFlag {
+        return $this->torrentFlag;
     }
 
     public function heading(): string {
-        return match($this->tableName) {
-            'torrents_bad_files'       => 'Releases with with bad filenames',
-            'torrents_bad_folders'     => 'Releases with with bad folders',
-            'torrents_missing_lineage' => 'Releases with missing lineage details',
-            'torrents_bad_tags'        => 'Releases with with bad tags',
+        return match($this->torrentFlag) {
+            \Gazelle\TorrentFlag::badFile   => 'Releases with with bad filenames',
+            \Gazelle\TorrentFlag::badFolder => 'Releases with with bad folders',
+            \Gazelle\TorrentFlag::noLineage => 'Releases with missing lineage details',
+            \Gazelle\TorrentFlag::badTag    => 'Releases with with bad tags',
         };
     }
 
@@ -38,7 +38,7 @@ class Bad extends AbstractBetter {
         $this->baseQuery = "
             FROM torrents t
             INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN {$this->tableName} bad ON (bad.TorrentID = t.ID)
+            INNER JOIN {$this->torrentFlag->value} bad ON (bad.TorrentID = t.ID)
             ";
         $this->orderBy = "ORDER BY bad.TimeAdded ASC";
 

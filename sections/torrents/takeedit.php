@@ -265,81 +265,23 @@ if ($Viewer->permitted('users_mod')) {
         $args = array_merge($args, ['0', '0']);
     }
 
-    $bfiID = $DB->scalar('SELECT TorrentID FROM torrents_bad_files WHERE TorrentID = ?', $TorrentID);
-    if (!$bfiID && $Properties['BadFiles']) {
-        $change[] = 'Bad Files checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_bad_files (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($bfiID && !$Properties['BadFiles']) {
-        $change[] = 'Bad Files cleared';
-        $DB->prepared_query('DELETE FROM torrents_bad_files WHERE TorrentID = ?', $TorrentID);
-    }
-
-    $bfID = $DB->scalar('SELECT TorrentID FROM torrents_bad_folders WHERE TorrentID = ?', $TorrentID);
-    if (!$bfID && $Properties['BadFolders']) {
-        $change[] = 'Bad Folders checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_bad_folders (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($bfID && !$Properties['BadFolders']) {
-        $change[] = 'Bad Folders cleared';
-        $DB->prepared_query('DELETE FROM torrents_bad_folders WHERE TorrentID = ?', $TorrentID);
-    }
-
-    $btID = $DB->scalar('SELECT TorrentID FROM torrents_bad_tags WHERE TorrentID = ?', $TorrentID);
-    if (!$btID && $Properties['BadTags']) {
-        $change[] = 'Bad Tags checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_bad_tags (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($btID && !$Properties['BadTags']) {
-        $change[] = 'Bad Tags cleared';
-        $DB->prepared_query('DELETE FROM torrents_bad_tags WHERE TorrentID = ?', $TorrentID);
-    }
-
-    $caID = $DB->scalar('SELECT TorrentID FROM torrents_cassette_approved WHERE TorrentID = ?', $TorrentID);
-    if (!$caID && $Properties['CassetteApproved']) {
-        $change[] = 'Cassette Approved checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_cassette_approved (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($caID && !$Properties['CassetteApproved']) {
-        $change[] = 'Cassette Approved cleared';
-        $DB->prepared_query('DELETE FROM torrents_cassette_approved WHERE TorrentID = ?', $TorrentID);
-    }
-
-    $lmaID = $DB->scalar('SELECT TorrentID FROM torrents_lossymaster_approved WHERE TorrentID = ?', $TorrentID);
-    if (!$lmaID && $Properties['LossymasterApproved']) {
-        $change[] = 'Lossy Master checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_lossymaster_approved (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($lmaID && !$Properties['LossymasterApproved']) {
-        $change[] = 'Lossy Master cleared';
-        $DB->prepared_query('DELETE FROM torrents_lossymaster_approved WHERE TorrentID = ?', $TorrentID);
-    }
-
-    $lwID = $DB->scalar('SELECT TorrentID FROM torrents_lossyweb_approved WHERE TorrentID = ?', $TorrentID);
-    if (!$lwID && $Properties['LossywebApproved']) {
-        $change[] = 'Lossy WEB checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_lossyweb_approved (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($lwID && !$Properties['LossywebApproved']) {
-        $change[] = 'Lossy WEB cleared';
-        $DB->prepared_query('DELETE FROM torrents_lossyweb_approved WHERE TorrentID = ?', $TorrentID);
-    }
-
-    $mlID = $DB->scalar('SELECT TorrentID FROM torrents_missing_lineage WHERE TorrentID = ?', $TorrentID);
-    if (!$mlID && $Properties['Lineage']) {
-        $change[] = 'Missing Lineage checked';
-        $DB->prepared_query('INSERT IGNORE INTO torrents_missing_lineage (TorrentID, UserID) VALUES (?, ?)',
-            $TorrentID, $Viewer->id()
-        );
-    } elseif ($mlID && !$Properties['Lineage']) {
-        $change[] = 'Missing Lineage cleared';
-        $DB->prepared_query('DELETE FROM torrents_missing_lineage WHERE TorrentID = ?', $TorrentID);
+    foreach ([
+        (object)['flag' => Gazelle\TorrentFlag::badFile,     'property' => 'BadFiles'],
+        (object)['flag' => Gazelle\TorrentFlag::badFolder,   'property' => 'BadFolders'],
+        (object)['flag' => Gazelle\TorrentFlag::badTag,      'property' => 'BadTags'],
+        (object)['flag' => Gazelle\TorrentFlag::cassette,    'property' => 'CassetteApproved'],
+        (object)['flag' => Gazelle\TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
+        (object)['flag' => Gazelle\TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
+        (object)['flag' => Gazelle\TorrentFlag::noLineage,   'property' => 'Lineage'],
+    ] as $f) {
+        $exists = $torrent->hasFlag($f->flag);
+        if (!$exists && $Properties[$f->property]) {
+            $change[] = "{$f->flag->label()} checked";
+            $torrent->addFlag($f->flag, $Viewer);
+        } elseif ($exists && !$Properties[$f->property]) {
+            $change[] = "{$f->flag->label()} cleared";
+            $torrent->removeFlag($f->flag);
+        }
     }
 }
 
