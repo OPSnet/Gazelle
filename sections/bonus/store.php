@@ -33,7 +33,7 @@ if (($_GET['action'] ?? '') == 'donate') {
 <div class="alertbar blend">Warning! You cannot donate negative or no points!</div>
 <?php } elseif ($Viewer->bonusPointsTotal() < $value) { ?>
 <div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int)$Viewer->bonusPointsTotal()) ?> points.</div>
-<?php } elseif ((new Gazelle\Bonus($Viewer))->donate((int)$_POST['poolid'], $value)) { ?>
+<?php } elseif ($bonus->donate((int)$_POST['poolid'], $value)) { ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
 <?php } else { ?>
 <div class="alertbar blend">No bonus points donated, insufficient funds.</div>
