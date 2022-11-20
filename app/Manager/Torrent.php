@@ -426,6 +426,11 @@ class Torrent extends \Gazelle\BaseManager {
     public function updatePeerlists(): array {
         self::$cache->disableLocalCache();
         self::$db->prepared_query("
+            DELETE FROM xbt_files_users
+            WHERE mtime < unix_timestamp(NOW() - INTERVAL 6 HOUR)
+        ");
+        $purged = self::$db->affected_rows();
+        self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_torrents_peerlists (
                 TorrentID int NOT NULL PRIMARY KEY,
                 GroupID   int,
@@ -526,7 +531,7 @@ class Torrent extends \Gazelle\BaseManager {
             FROM tmp_torrents_peerlists
         ");
         self::$db->commit();
-        return [$UpdatedKeys, $UncachedGroups];
+        return [$UpdatedKeys + $purged, $UncachedGroups];
     }
 
     /**
