@@ -32,13 +32,12 @@ class Torrent extends \Gazelle\Base {
     public function media() { return $this->stats['media']; }
 
     protected function init(): array {
-        $userMan = new \Gazelle\Manager\User;
         $stats = [
             'day'       => [],
             'week'      => [],
             'month'     => [],
             'quarter'   => [],
-            'total-users' => $userMan->getEnabledUsersCount(),
+            'total-users' => (new \Gazelle\Stats\Users)->enabledUserTotal(),
         ];
 
         [$stats['torrent-count'], $stats['total-size'], $stats['total-files']] = self::$db->row('

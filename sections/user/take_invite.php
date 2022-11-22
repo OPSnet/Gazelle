@@ -2,15 +2,12 @@
 
 authorize();
 
-if (!$Viewer->canInvite()) {
-    error(403);
-}
 if (!isset($_POST['agreement'])) {
     error("You must agree to the conditions for sending invitations.");
 }
 
 // Can the site allow an invite to be spent?
-if (!((new Gazelle\Manager\User)->newUsersAllowed() || $Viewer->permitted('site_can_invite_always'))) {
+if (!(new Gazelle\Stats\Users)->newUsersAllowed($Viewer)) {
     error(403);
 }
 $email = trim($_POST['email'] ?? '');

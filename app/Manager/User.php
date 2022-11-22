@@ -436,27 +436,6 @@ class User extends \Gazelle\BaseManager {
     }
 
     /**
-     * Get the count of enabled users.
-     *
-     * @return integer Number of enabled users (this is cached).
-     */
-    public function getEnabledUsersCount(): int {
-        if (($count = self::$cache->get_value('stats_user_count')) == false) {
-            $count = self::$db->scalar("SELECT count(*) FROM users_main WHERE Enabled = '1'");
-            self::$cache->cache_value('stats_user_count', $count, 7200);
-        }
-        return $count;
-    }
-
-    /**
-     * Can new members be invited at this time?
-     * @return bool Yes we can
-     */
-    public function newUsersAllowed(): bool {
-        return USER_LIMIT === 0 || $this->getEnabledUsersCount() < USER_LIMIT;
-    }
-
-    /**
      * Flush the cached count of enabled users.
      */
     public function flushEnabledUsersCount() {

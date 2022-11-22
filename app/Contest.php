@@ -166,7 +166,7 @@ class Contest extends Base {
     }
 
     public function bonusPerUser(): float {
-        return $this->bonusPoolTotal() * $this->bonusUser / (new Manager\User())->getEnabledUsersCount();
+        return $this->bonusPoolTotal() * $this->bonusUser / (new Stats\Users())->enabledUserTotal();
     }
 
     public function bonusPerContest(): float {

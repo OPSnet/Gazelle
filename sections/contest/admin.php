@@ -98,7 +98,7 @@ if ($create || $contest) {
         'create'     => $create,
         'type'       => $contestTypes,
         'intro'      => new Gazelle\Util\Textarea('description', $create ? '' : $contest->description(), 60, 8),
-        'user_count' => (new \Gazelle\Manager\User())->getEnabledUsersCount(),
+        'user_count' => (new \Gazelle\Stats\Users)->enabledUserTotal(),
     ]);
 ?>
 </div>

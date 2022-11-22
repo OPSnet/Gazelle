@@ -1,9 +1,12 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
-$user = empty($_REQUEST['userid']) ? $Viewer : $userMan->findById((int)$_REQUEST['userid']);
-if (is_null($user)) {
-    error(404);
+if (!isset($_REQUEST['userid'])) {
+    $user = $Viewer;
+} else {
+    $user = (new Gazelle\Manager\User)->findById((int)$_REQUEST['userid']);
+    if (is_null($user)) {
+        error(404);
+    }
 }
 $userId = $user->id();
 $ownProfile = $user->id() == $Viewer->id();
@@ -42,7 +45,7 @@ echo $Twig->render('user/invited.twig', [
     'heading'        => $heading,
     'invited'        => $user->inviteList($heading->getOrderBy(), $heading->getOrderDir()),
     'inviter_config' => $invSourceMan->inviterConfigurationActive($userId),
-    'invites_open'   => $userMan->newUsersAllowed() || $user->permitted('site_can_invite_always'),
+    'invites_open'   => (new Gazelle\Stats\Users)->newUsersAllowed($user),
     'invite_source'  => $invSourceMan->userSource($userId),
     'own_profile'    => $ownProfile,
     'user'           => $user,

@@ -488,4 +488,33 @@ class Users extends \Gazelle\Base {
         ");
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
+
+    /**
+     * Get the number of enabled users.
+     *
+     * @return int Number of enabled users (this is cached).
+     */
+    public function enabledUserTotal(): int {
+        $total = self::$cache->get_value('stats_user_count');
+        if ($total === false) {
+            $total = self::$db->scalar("
+                SELECT count(*) FROM users_main WHERE Enabled = '1'
+            ");
+            self::$cache->cache_value('stats_user_count', $total, 7200);
+        }
+        return $total;
+    }
+
+    /**
+     * Can new members be invited at this time?
+     * @return bool Yes we can
+     */
+    public function newUsersAllowed(\Gazelle\User $user): bool {
+        return $user->canInvite()
+            && (
+                   USER_LIMIT === 0
+                || $this->enabledUserTotal() < USER_LIMIT
+                || $user->permitted('site_can_invite_always')
+            );
+    }
 }

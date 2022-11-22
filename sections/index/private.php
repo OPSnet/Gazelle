@@ -45,7 +45,7 @@ echo $Twig->render('index/private-sidebar.twig', [
     'request_stats'     => new Gazelle\Stats\Request,
     'snatch_stats'      => $Cache->get_value('stats_snatches'),
     'torrent_stats'     => new Gazelle\Stats\Torrent,
-    'user_count'        => $userMan->getEnabledUsersCount(),
+    'user_count'        => $userStats->enabledUserTotal(),
     'user_stats'        => $userStats->globalActivityStats(),
     'viewer'            => $Viewer,
 ]);

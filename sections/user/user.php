@@ -319,7 +319,7 @@ if ($Viewer->permitted('users_view_invites')) {
     }
 ?>
                 <li>Invited by: <?= $Invited ?></li>
-                <li>Invites: <?= $User->disableInvites() ? 'X' : number_format($User->inviteCount()) ?>
+                <li>Invites: <?= $User->disableInvites() ? 'X' : number_format($User->unusedInviteTotal()) ?>
                     <?= '(' . $User->pendingInviteCount() . ' in use)' ?></li>
 <?php
 }
@@ -741,7 +741,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_edit_invites')) {
         echo $Twig->render('user/edit-invite.twig', [
-            'amount' => $User->inviteCount(),
+            'amount' => $User->unusedInviteTotal(),
         ]);
     }
 

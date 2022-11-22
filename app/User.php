@@ -1628,7 +1628,7 @@ class User extends BaseObject {
         return $this->info()['Inviter'] ? new User($this->info()['Inviter']) : null;
     }
 
-    public function inviteCount(): int {
+    public function unusedInviteTotal(): int {
         return $this->disableInvites() ? 0 : $this->info()['Invites'];
     }
 
@@ -2142,10 +2142,10 @@ class User extends BaseObject {
      * @return boolean false if they have been naughty, otherwise true
      */
     public function canInvite(): bool {
-        return !$this->disableInvites()
-            && !$this->onRatioWatch()
+        return !$this->onRatioWatch()
             && $this->canLeech()
-            && ($this->info()['Invites'] > 0 || $this->permitted('site_send_unlimited_invites'));
+            && ($this->unusedInviteTotal() || $this->permitted('site_send_unlimited_invites'))
+            ;
     }
 
     /**
