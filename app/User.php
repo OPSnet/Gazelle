@@ -1981,7 +1981,7 @@ class User extends BaseObject {
         });
         $criteria = end($demotion);
 
-        $effectiveUpload = $this->uploadedSize() + (new Stats\User($this->id))->requestBountyTotal();
+        $effectiveUpload = $this->uploadedSize() + $this->stats()->requestBountySize();
         if ($criteria) {
             $ratio = $criteria['Ratio'];
         } else {
@@ -2000,7 +2000,7 @@ class User extends BaseObject {
         $progress = [
             'Class' => (new Manager\User)->userclassName($criteria['To']),
             'Requirements' => [
-                'Upload' => [$this->uploadedSize() + $this->stats()->requestBountySize(), $criteria['MinUpload'], 'bytes'],
+                'Upload' => [$this->uploadedSize() + $this->stats()->requestVoteSize(), $criteria['MinUpload'], 'bytes'],
                 'Ratio' => [$this->downloadedSize() == 0 ? '∞'
                     : $this->uploadedSize() / $this->downloadedSize(), $criteria['MinRatio'], 'float'],
                 'Time' => [

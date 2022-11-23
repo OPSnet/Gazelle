@@ -368,6 +368,10 @@ class Users extends \Gazelle\Base {
                 request_created_total = VALUES(request_created_total)
         ");
 
+        /**
+         * Note: exclude the bounty voted by a user on a request they filled themselves,
+         * as that increase has already been accounted for in users_leech_stats.Uploaded
+         */
         self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, request_vote_size, request_vote_total)
                 SELECT rv.UserID,

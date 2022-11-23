@@ -955,7 +955,7 @@ class User extends \Gazelle\BaseManager {
         if (RECOVERY_DB) {
             $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
                'Query' => "
-                    (SELECT uls.Uploaded + us.request_vote_size - coalesce(rb.final, 0)
+                    (SELECT uls.Uploaded + us.request_bounty_size - coalesce(rb.final, 0)
                     FROM users_leech_stats uls
                     INNER JOIN user_summary us ON (us.user_id = uls.UserID)
                     LEFT JOIN recovery_buffer rb ON (rb.user_id = uls.UserID)
@@ -967,12 +967,11 @@ class User extends \Gazelle\BaseManager {
         return $criteria;
     }
 
-    public function promote(bool $commit = true, \Gazelle\Schedule\Task $task = null): int {
-        $criteria = $this->promotionCriteria();
-        $promoted = 0;
-        foreach ($criteria as $level) {
+    public function promote(\Gazelle\Schedule\Task $task = null, bool $commit = true): int {
+        $processed = 0;
+        foreach ($this->promotionCriteria() as $level) {
             $fromClass = $this->userclassName($level['From']);
-            $toClass = $this->userclassName($level['To']);
+            $toClass   = $this->userclassName($level['To']);
             $query = "
                 SELECT um.ID
                 FROM users_main um
@@ -982,7 +981,7 @@ class User extends \Gazelle\BaseManager {
                 WHERE um.Enabled = '1'
                     AND ui.Warned IS NULL
                     AND um.PermissionID = ?
-                    AND uls.Uploaded + us.request_vote_size >= ?
+                    AND uls.Uploaded + us.request_bounty_size >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                     AND ui.JoinDate < now() - INTERVAL ? WEEK
                     AND us.upload_total >= ?
@@ -999,41 +998,36 @@ class User extends \Gazelle\BaseManager {
             }
 
             self::$db->prepared_query($query, ...$args);
-            $userIds = self::$db->collect('ID');
-            $total = count($userIds);
-
-            if ($total) {
-                $task?->info("Promoting $total users from $fromClass to $toClass");
-                $promoted += $total;
-
-                foreach ($userIds as $userId) {
-                    $user = $this->findById($userId);
-                    $task?->debug("Promoting {$user->label()} from $fromClass to $toClass", $userId);
-                    if (!$commit) {
-                        continue;
-                    }
-
-                    $user->setUpdate('PermissionID', $level['To'])
-                        ->addStaffNote("Class changed to $toClass by System")
-                        ->modify();
-                    $this->sendPM($userId, 0,
-                        "You have been promoted to $toClass",
-                        "Congratulations on your promotion to $toClass!\n\nTo read more about "
-                            . SITE_NAME
-                            . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
-                    );
+            foreach (self::$db->collect('ID', false) as $userId) {
+                $user = $this->findById($userId);
+                if (is_null($user)) {
+                    continue;
                 }
+                ++$processed;
+                $task?->debug("Promoting {$user->label()} from $fromClass to $toClass", $userId);
+                if (!$commit) {
+                    continue;
+                }
+
+                $user->setUpdate('PermissionID', $level['To'])
+                    ->addStaffNote("Class changed to $toClass by System")
+                    ->modify();
+                $this->sendPM($userId, 0,
+                    "You have been promoted to $toClass",
+                    "Congratulations on your promotion to $toClass!\n\nTo read more about "
+                        . SITE_NAME
+                        . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                );
             }
         }
-        return $promoted;
+        return $processed;
     }
 
-    public function demote(bool $commit = true, \Gazelle\Schedule\Task $task = null): int {
-        $criteria = array_reverse($this->promotionCriteria());
-        $demoted = 0;
-        foreach ($criteria as $level) {
-            $fromClass = $this->userclassName($level['To']);
-            $toClass = $this->userclassName($level['From']);
+    public function demote(\Gazelle\Schedule\Task $task = null, bool $commit = true): int {
+        $processed = 0;
+        foreach (array_reverse($this->promotionCriteria()) as $level) {
+            $fromClass = $this->userclassName($level['To']);  // note: To/From are reversed
+            $toClass   = $this->userclassName($level['From']);
             $task?->debug("Begin demoting users from $fromClass to $toClass");
 
             $query = "
@@ -1045,7 +1039,7 @@ class User extends \Gazelle\BaseManager {
                 WHERE um.Enabled = '1'
                     AND um.PermissionID = ?
                     AND (
-                        uls.Uploaded + us.request_vote_size < ?
+                        uls.Uploaded + us.request_bounty_size < ?
                         OR us.upload_total < ?
             ";
             $args = [$level['To'], $level['MinUpload'], $level['MinUploads']];
@@ -1061,33 +1055,29 @@ class User extends \Gazelle\BaseManager {
             $query .= ')';
 
             self::$db->prepared_query($query, ...$args);
-            $userIds = self::$db->collect('ID');
-            $total = count($userIds);
-
-            if (count($userIds) > 0) {
-                $task?->info("Demoting $total users from $fromClass to $toClass");
-                $demoted += $total;
-
-                foreach ($userIds as $userId) {
-                    $user = $this->findById($userId);
-                    $task?->debug("Demoting {$user->label()} from $fromClass to $toClass", $userId);
-                    if (!$commit) {
-                        continue;
-                    }
-
-                    $user->setUpdate('PermissionID', $level['To'])
-                        ->addStaffNote("Class changed to $toClass by System")
-                        ->modify();
-                    $this->sendPM($userId, 0,
-                        "You have been demoted to $toClass",
-                        "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
-                            . SITE_NAME
-                            . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
-                    );
+            foreach (self::$db->collect('ID', false) as $userId) {
+                $user = $this->findById($userId);
+                if (is_null($user)) {
+                    continue;
                 }
+                ++$processed;
+                $task?->debug("Demoting {$user->label()} from $fromClass to $toClass", $userId);
+                if (!$commit) {
+                    continue;
+                }
+
+                $user->setUpdate('PermissionID', $level['From'])
+                    ->addStaffNote("Class changed to $toClass by System")
+                    ->modify();
+                $this->sendPM($userId, 0,
+                    "You have been demoted to $toClass",
+                    "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
+                        . SITE_NAME
+                        . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                );
             }
         }
-        return $demoted;
+        return $processed;
     }
 
     public function updateRatioRequirements(): int {
