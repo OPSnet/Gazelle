@@ -1,38 +1,21 @@
 <?php
+
 authorize();
-
-$GroupID = $_POST['groupid'];
-$OldGroupID = $GroupID;
-$NewName = $_POST['name'];
-
-if (!$GroupID || !is_number($GroupID)) {
-    error(404);
-}
-
-if (empty($NewName)) {
-    error('Torrent groups must have a name');
-}
 
 if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$OldName = $DB->scalar("
-    SELECT Name
-    FROM torrents_group
-    WHERE ID = ?
-    ", $GroupID
-);
+$name = trim($_POST['name'] ?? '');
+if (empty($name)) {
+    error('Torrent groups must have a name');
+}
 
-$DB->prepared_query("
-    UPDATE torrents_group SET
-        Name = ?
-    WHERE ID = ?
-    ", $NewName, $GroupID
-);
+$tgMan = new \Gazelle\Manager\TGroup;
+$tgroup = $tgMan->findById((int)($_POST['groupid'] ?? 0));
+if (is_null($tgroup)) {
+    error(404);
+}
 
-(new \Gazelle\Manager\TGroup)->refresh($GroupID);
-(new Gazelle\Log)->group($GroupID, $Viewer->id(), "renamed to \"$NewName\" from \"$OldName\"")
-    ->general("Torrent Group $GroupID ($OldName) was renamed to \"$NewName\" from \"$OldName\" by " . $Viewer->username());
-
-header("Location: torrents.php?id=$GroupID");
+$tgroup->rename($name, $Viewer, $tgMan, new Gazelle\Log);
+header("Location: {$tgroup->location()}");

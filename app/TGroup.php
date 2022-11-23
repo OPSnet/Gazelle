@@ -1010,6 +1010,17 @@ class TGroup extends BaseObject {
         return true;
     }
 
+    public function rename(string $name, User $user, Manager\TGroup $manager, Log $logger): int {
+        $oldName = $this->name();
+        $success = $this->setUpdate('Name', $name)->modify();
+        if ($success) {
+            $manager->refresh($this->id);
+            $logger->group($this->id, $user->id(), "renamed to \"$name\" from \"$oldName\"")
+                ->general("Torrent Group {$this->id} was renamed to \"$name\" from \"$oldName\" by {$user->username()}");
+        }
+        return $success;
+    }
+
     /**
      * Return info about the deleted masterings of a torrent group.
      *
