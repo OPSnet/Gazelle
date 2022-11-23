@@ -5,5 +5,6 @@ if (!$Viewer->permitted('site_view_flow')) {
 }
 
 echo $Twig->render('admin/stats/torrent.twig', [
-    'stats' => new Gazelle\Stats\Torrent,
+    'torr_stat' => new Gazelle\Stats\Torrent,
+    'user_stat' => new Gazelle\Stats\Users,
 ]);

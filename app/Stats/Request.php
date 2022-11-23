@@ -3,32 +3,35 @@
 namespace Gazelle\Stats;
 
 class Request extends \Gazelle\Base {
-    protected $requestCount  = false;
-    protected $filledCount   = false;
-    protected $filledPercent = false;
+    protected const CACHE_KEY = 'stats_req';
 
-    public function __construct() {
-        $info = self::$cache->get_value('stats_requests');
-        if ($info !== false) {
-            [$this->requestCount, $this->filledCount] = $info;
-        } else {
-            [$this->requestCount, $this->filledCount] = self::$db->row("
-                SELECT count(*), sum(FillerID > 0) FROM requests
+    protected array $info;
+
+    public function info() {
+        $info = self::$cache->get_value(self::CACHE_KEY);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT count(*)                 AS total,
+                    sum(if(FillerID > 0, 1, 0)) AS filled
+                FROM requests
             ");
-            self::$cache->cache_value('stats_requests', [$this->requestCount, $this->filledCount], 3600 * 3 + rand(0, 1800)); // three hours plus fuzz
+            self::$cache->cache_value(self::CACHE_KEY, $info, 3600 * 3 + rand(0, 1800)); // three hours plus fuzz
+            $this->info = $info;
         }
-        $this->filledPercent = $this->requestCount > 0 ? $this->filledCount / $this->requestCount * 100 : 0.0;
+        return $info;
     }
 
-    public function requestCount(): int {
-        return $this->requestCount;
+    public function total(): int {
+        return $this->info()['total'];
     }
 
-    public function filledCount(): int {
-        return $this->filledCount;
+    public function filledTotal(): int {
+        return $this->info()['filled'];
     }
 
     public function filledPercent(): float {
-        return $this->filledPercent;
+        return $this->total() > 0
+            ? $this->filledTotal() / $this->total() * 100
+            : 0.0;
     }
 }

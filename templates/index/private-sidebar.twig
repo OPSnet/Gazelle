@@ -103,7 +103,7 @@
         <div id="poll_container">
         <form class="vote_form" name="poll" id="poll" action="">
             <input type="hidden" name="action" value="poll" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="threadid" value="{{ poll.id }}" />
         {% for id, choice in poll.vote %}
             <input type="radio" name="vote" id="answer_{{ id }}" value="{{ id }}" />
@@ -122,25 +122,26 @@
     <div class="head colhead_dark"><strong>Stats</strong></div>
     <ul class="stats nobullet">
 {% if constant('USER_LIMIT') > 0 %}
+    {% set user_count = user_stats.enabledUserTotal %}
         <li>Maximum users: {{ constant('USER_LIMIT')|number_format }}</li>
 {% endif %}
         <li>Enabled users: {{ user_count|number_format }} <a href="stats.php?action=users" class="brackets">Details</a></li>
-        <li>Users active today: {{ user_stats.Day }} ({{ (user_stats.Day / user_count * 100)|number_format(2) }}%)</li>
-        <li>Users active this week: {{ user_stats.Week }} ({{ (user_stats.Week / user_count * 100)|number_format(2) }}%)</li>
-        <li>Users active this month: {{ user_stats.Month }} ({{ (user_stats.Month / user_count * 100)|number_format(2) }}%)</li>
-        <li>Torrents: {{ torrent_stats.torrentCount|number_format }}</li>
-        <li>Releases: {{ torrent_stats.albumCount|number_format }}</li>
-        <li>Artists: {{ torrent_stats.artistCount|number_format }}</li>
-        <li>"Perfect" FLACs: {{ torrent_stats.perfectCount|number_format }}</li>
+        <li>Users active today: {{ user_stats.dayActiveTotal }} ({{ (user_stats.dayActiveTotal / user_count * 100)|number_format(2) }}%)</li>
+        <li>Users active this week: {{ user_stats.weekActiveTotal }} ({{ (user_stats.weekActiveTotal / user_count * 100)|number_format(2) }}%)</li>
+        <li>Users active this month: {{ user_stats.monthActiveTotal }} ({{ (user_stats.monthActiveTotal / user_count * 100)|number_format(2) }}%)</li>
+        <li>Torrents: {{ torrent_stats.torrentTotal|number_format }}</li>
+        <li>Releases: {{ torrent_stats.albumTotal|number_format }}</li>
+        <li>Artists: {{ torrent_stats.artistTotal|number_format }}</li>
+        <li>"Perfect" FLACs: {{ torrent_stats.perfectFlacTotal|number_format }}</li>
         <li>Collages: {{ collage_count|number_format }}</li>
-        <li>Requests: {{ request_stats.requestCount|number_format }} ({{ request_stats.filledPercent|number_format(2) }}% filled)</li>
+        <li>Requests: {{ request_stats.total|number_format }} ({{ request_stats.filledPercent|number_format(2) }}% filled)</li>
 {% if snatch_stats %}
-        <li>Snatches: {{ snatch_stats|number_format }}</li>
+        <li>Snatches: {{ user_stats.snatchTotal|number_format }}</li>
 {% endif %}
-        <li>Peers: {{ torrent_stats.peerCount|number_format }}</li>
-        <li>Seeders: {{ torrent_stats.seederCount|number_format }}</li>
-        <li>Leechers: {{ torrent_stats.leecherCount|number_format }}</li>
-        <li>Seeder/leecher ratio: {{ ratio(torrent_stats.seederCount, torrent_stats.leecherCount)|raw }}</li>
+        <li>Peers: {{ user_stats.peerTotal|number_format }}</li>
+        <li>Seeders: {{ user_stats.seederTotal|number_format }}</li>
+        <li>Leechers: {{ user_stats.leecherTotal|number_format }}</li>
+        <li>Seeder/leecher ratio: {{ ratio(user_stats.seederTotal, user_stats.leecherTotal)|raw }}</li>
     </ul>
 </div>
 

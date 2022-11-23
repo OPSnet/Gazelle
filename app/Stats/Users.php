@@ -3,17 +3,18 @@
 namespace Gazelle\Stats;
 
 class Users extends \Gazelle\Base {
+    protected const USER_BROWSER  = 'stat_u_browser';
+    protected const USER_CLASS    = 'stat_u_class';
+    protected const USER_PLATFORM = 'stat_u_platform';
+    protected const FLOW          = 'stat_flow';
 
-    protected const USER_BROWSER  = 'stat_user_browser';
-    protected const USER_CLASS    = 'stat_user_class';
-    protected const USER_PLATFORM = 'stat_user_platform';
+    protected array $info;
 
     /**
      * The annual flow of users: people registered and disabled
      */
     public function flow(): array {
-        $flow = self::$cache->get_value('stat-user-timeline');
-        $flow = false;
+        $flow = self::$cache->get_value(self::FLOW);
         if ($flow === false) {
             /* Mysql does not implement a full outer join, so if there is a month with
              * no joiners, any banned users in that same month will not appear.
@@ -22,24 +23,31 @@ class Users extends \Gazelle\Base {
              * Deal with it. - Spine
              */
             self::$db->prepared_query("
-                SELECT J.Mon, J.n as Joined, coalesce(D.n, 0) as Disabled
+                SELECT J.Mon,
+                    J.n              AS new,
+                    coalesce(D.n, 0) AS disabled
                 FROM (
-                    SELECT DATE_FORMAT(JoinDate,'%Y%m') as M, DATE_FORMAT(JoinDate, '%b %Y') AS Mon, count(*) AS n
+                    SELECT DATE_FORMAT(JoinDate,'%Y%m') AS M,
+                        DATE_FORMAT(JoinDate, '%b %Y')  AS Mon,
+                        count(*)                        AS n
                     FROM users_info
-                    WHERE JoinDate BETWEEN last_day(now()) - INTERVAL 13 MONTH + INTERVAL 1 DAY
-                        AND last_day(now()) - INTERVAL 1 MONTH
-                    GROUP BY M) J
+                    GROUP BY M
+                    ORDER BY 1 DESC
+                    LIMIT 1, 12
+                    ) J
                 LEFT JOIN (
-                    SELECT DATE_FORMAT(BanDate, '%Y%m') AS M, DATE_FORMAT(BanDate, '%b %Y') AS Mon, count(*) AS n
+                    SELECT DATE_FORMAT(BanDate, '%Y%m') AS M,
+                        DATE_FORMAT(BanDate, '%b %Y')   AS Mon,
+                        count(*)                        AS n
                     FROM users_info
-                    WHERE BanDate BETWEEN last_day(now()) - INTERVAL 13 MONTH + INTERVAL 1 DAY
-                        AND last_day(now()) - INTERVAL 1 MONTH
                     GROUP By M
+                    ORDER BY 1 DESC
+                    LIMIT 1, 12
                 ) D USING (M)
                 ORDER BY J.M;
             ");
             $flow = self::$db->to_array('Mon', MYSQLI_ASSOC, false);
-            self::$cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
+            self::$cache->cache_value(self::FLOW, $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
         }
         return $flow;
     }
@@ -61,7 +69,7 @@ class Users extends \Gazelle\Base {
     /**
      * Users aggregated by browser
      */
-    public function browserDistribution(): array {
+    public function browserDistributionList(): array {
         $dist = self::$cache->get_value(self::USER_BROWSER);
         if ($dist === false) {
             self::$db->prepared_query("
@@ -71,16 +79,20 @@ class Users extends \Gazelle\Base {
                 GROUP BY label
                 ORDER BY total DESC
             ");
-            $dist = $this->reformatDist(self::$db->to_pair('label', 'total', false));
+            $dist = self::$db->to_pair('label', 'total', false);
             self::$cache->cache_value(self::USER_BROWSER, $dist, 86400);
         }
         return $dist;
     }
 
+    public function browserDistribution(): array {
+        return $this->reformatDist($this->browserDistributionList());
+    }
+
     /**
      * Users aggregated by primary class
      */
-    public function classDistribution(): array {
+    public function userclassDistributionList(): array {
         $dist = self::$cache->get_value(self::USER_CLASS);
         if ($dist === false) {
             self::$db->prepared_query("
@@ -92,18 +104,21 @@ class Users extends \Gazelle\Base {
                 GROUP BY label
                 ORDER BY p.Level
             ");
-            $dist = $this->reformatDist(self::$db->to_pair('label', 'total', false));
+            $dist = self::$db->to_pair('label', 'total', false);
             self::$cache->cache_value(self::USER_CLASS, $dist, 86400);
         }
         return $dist;
     }
 
+    public function userclassDistribution(): array {
+        return $this->reformatDist($this->userclassDistributionList());
+    }
+
     /**
      * Users aggregated by OS platform
      */
-    public function platformDistribution(): array {
+    public function platformDistributionList(): array {
         $dist = self::$cache->get_value(self::USER_PLATFORM);
-        $dist = false;
         if ($dist === false) {
             self::$db->prepared_query("
                 SELECT OperatingSystem AS label,
@@ -112,10 +127,14 @@ class Users extends \Gazelle\Base {
                 GROUP BY label
                 ORDER BY total DESC
             ");
-            $dist = $this->reformatDist(self::$db->to_pair('label', 'total', false));
+            $dist = self::$db->to_pair('label', 'total', false);
             self::$cache->cache_value(self::USER_PLATFORM, $dist, 86400);
         }
         return $dist;
+    }
+
+    public function platformDistribution(): array {
+        return $this->reformatDist($this->platformDistributionList());
     }
 
     /**
@@ -162,42 +181,127 @@ class Users extends \Gazelle\Base {
         return [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements];
     }
 
-    public function frontPage(): int {
-        self::$cache->cache_value('stats_snatches',
-            (int)self::$db->scalar("SELECT count(*) FROM xbt_snatched"),
-            0
-        );
-        self::$cache->cache_value('stats_peers', [
-                (int)self::$db->scalar("SELECT count(*) FROM xbt_files_users WHERE active = 1 AND remaining = 0"),
-                (int)self::$db->scalar("SELECT count(*) FROM xbt_files_users WHERE active = 1 AND remaining > 0"),
-            ], 0
-        );
-        return self::$cache->get_value('stats_peers')[1];
+    public function peerStat(): array {
+        if (!isset($this->info)) {
+            $this->info = [];
+        }
+        if (!isset($this->info['xbt_files_users'])) {
+            $stat = self::$cache->get_value('stat_xbt_fu');
+            if ($stat === false) {
+                $stat = array_map('intval',
+                    self::$db->rowAssoc("
+                        SELECT count(*)                  AS peer_total,
+                            sum(if(remaining = 0, 1, 0)) AS seeder_total,
+                            sum(if(remaining > 0, 1, 0)) AS leecher_total
+                        FROM xbt_files_users
+                        WHERE active = 1
+                    ") ?? ['seeder_total' => 0, 'leecher_total' => 0]
+                );
+                self::$cache->cache_value('stat_xbt_fu', $stat, 3600 + rand(0, 120));
+            }
+            $this->info['xbt_files_users'] = $stat;
+        }
+        return $this->info['xbt_files_users'];
+    }
+
+    public function leecherTotal(): int {
+        return $this->peerStat()['leecher_total'];
+    }
+
+    public function peerTotal(): int {
+        return $this->peerStat()['peer_total'];
+    }
+
+    public function seederTotal(): int {
+        return $this->peerStat()['seeder_total'];
+    }
+
+    public function snatchTotal(): int {
+        if (!isset($this->info)) {
+            $this->info = [];
+        }
+        if (!isset($this->info['snatch'])) {
+            $total = self::$cache->get_value('stats_snatch');
+            if ($total === false) {
+                $total = (int)self::$db->scalar("SELECT count(*) FROM xbt_snatched");
+                self::$cache->cache_value('stats_snatch', $total, 3600 + rand(0, 12));
+            }
+            $this->info['snatch'] = $total;
+        }
+        return $this->info['snatch'];
     }
 
     /**
-     * Get the number of enabled users last day/week/month
+     * Get the number of enabled users.
      *
-     * @return array [Day, Week, Month]
+     * @return int Number of enabled users (this is cached).
      */
-    public function globalActivityStats(): array {
-        $stats = self::$cache->get_value('stats_users');
-        if ($stats === false) {
-            $stats = array_map(fn($n) => (int)$n,
-                self::$db->rowAssoc("
-                    SELECT
-                        sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
-                        sum(ula.last_access > now() - INTERVAL 1 WEEK) AS Week,
-                        sum(ula.last_access > now() - INTERVAL 1 MONTH) AS Month
-                    FROM users_main um
-                    INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-                    WHERE um.Enabled = '1'
-                        AND ula.last_access > now() - INTERVAL 1 MONTH
-                ")
-            );
-            self::$cache->cache_value('stats_users', $stats, 7200);
+    public function enabledUserTotal(): int {
+        if (!isset($this->info)) {
+            $this->info = [];
         }
-        return $stats;
+        if (!isset($this->info['enabled'])) {
+            $total = self::$cache->get_value('stats_user_count');
+            if ($total === false) {
+                $total = self::$db->scalar("
+                    SELECT count(*) FROM users_main WHERE Enabled = '1'
+                ");
+                self::$cache->cache_value('stats_user_count', $total, 7200);
+            }
+            $this->info['enabled'] = $total;
+        }
+        return $this->info['enabled'];
+    }
+
+    /**
+     * Can new members be invited at this time?
+     * @return bool Yes we can
+     */
+    public function newUsersAllowed(\Gazelle\User $user): bool {
+        return $user->canInvite()
+            && (
+                   USER_LIMIT === 0
+                || $this->enabledUserTotal() < USER_LIMIT
+                || $user->permitted('site_can_invite_always')
+            );
+    }
+
+    public function activityStat(): array {
+        if (!isset($this->info)) {
+            $this->info = [];
+        }
+        if (!isset($this->info['active'])) {
+            $active = self::$cache->get_value('stats_user_active');
+            if ($active === false) {
+                $active = array_map('intval',
+                    self::$db->rowAssoc("
+                        SELECT
+                            sum(ula.last_access > now() - INTERVAL 1 DAY)   AS active_day,
+                            sum(ula.last_access > now() - INTERVAL 1 WEEK)  AS active_week,
+                            sum(ula.last_access > now() - INTERVAL 1 MONTH) AS active_month
+                        FROM users_main um
+                        INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+                        WHERE um.Enabled = '1'
+                            AND ula.last_access > now() - INTERVAL 1 MONTH
+                    ") ?? ['active_day' => 0, 'active_week' => 0, 'active_month' => 0]
+                );
+                self::$cache->cache_value('stats_user_active', $active, 7200 + rand(0, 300));
+            }
+            $this->info['active'] = $active;
+        }
+        return $this->info['active'];
+    }
+
+    public function dayActiveTotal(): int {
+        return $this->activityStat()['active_day'];
+    }
+
+    public function weekActiveTotal(): int {
+        return $this->activityStat()['active_week'];
+    }
+
+    public function monthActiveTotal(): int {
+        return $this->activityStat()['active_month'];
     }
 
     public function refresh(): int {
@@ -491,34 +595,5 @@ class Users extends \Gazelle\Base {
             ORDER BY total DESC, name, version
         ");
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    /**
-     * Get the number of enabled users.
-     *
-     * @return int Number of enabled users (this is cached).
-     */
-    public function enabledUserTotal(): int {
-        $total = self::$cache->get_value('stats_user_count');
-        if ($total === false) {
-            $total = self::$db->scalar("
-                SELECT count(*) FROM users_main WHERE Enabled = '1'
-            ");
-            self::$cache->cache_value('stats_user_count', $total, 7200);
-        }
-        return $total;
-    }
-
-    /**
-     * Can new members be invited at this time?
-     * @return bool Yes we can
-     */
-    public function newUsersAllowed(\Gazelle\User $user): bool {
-        return $user->canInvite()
-            && (
-                   USER_LIMIT === 0
-                || $this->enabledUserTotal() < USER_LIMIT
-                || $user->permitted('site_can_invite_always')
-            );
     }
 }

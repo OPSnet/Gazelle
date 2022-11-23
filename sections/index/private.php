@@ -2,13 +2,9 @@
 Text::$TOC = true;
 
 $contestMan = new Gazelle\Manager\Contest;
-$forumMan   = new Gazelle\Manager\Forum;
 $newsMan    = new Gazelle\Manager\News;
 $newsReader = new Gazelle\WitnessTable\UserReadNews;
 $tgMan      = new Gazelle\Manager\TGroup;
-$torMan     = new Gazelle\Manager\Torrent;
-$userMan    = new Gazelle\Manager\User;
-$userStats  = new Gazelle\Stats\Users;
 
 if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMan->latestId()) {
     $newsReader->witness($Viewer->id());
@@ -25,6 +21,7 @@ if (!$contest) {
             $leaderboard = [];
         } else {
             $leaderboard = array_slice($leaderboard, 0, 3);
+            $userMan = new Gazelle\Manager\User;
             foreach ($leaderboard as &$entry) {
                 $entry['username'] = $userMan->findById($entry['user_id'])->username();
             }
@@ -34,7 +31,6 @@ if (!$contest) {
 }
 
 echo $Twig->render('index/private-sidebar.twig', [
-    'auth'              => $Viewer->auth(),
     'blog'              => new Gazelle\Manager\Blog,
     'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
     'leaderboard'       => $leaderboard,
@@ -43,16 +39,14 @@ echo $Twig->render('index/private-sidebar.twig', [
     'staff_blog'        => new Gazelle\Manager\StaffBlog,
     'poll'              => (new Gazelle\Manager\ForumPoll)->findByFeaturedPoll(),
     'request_stats'     => new Gazelle\Stats\Request,
-    'snatch_stats'      => $Cache->get_value('stats_snatches'),
     'torrent_stats'     => new Gazelle\Stats\Torrent,
-    'user_count'        => $userStats->enabledUserTotal(),
-    'user_stats'        => $userStats->globalActivityStats(),
+    'user_stats'        => new Gazelle\Stats\Users,
     'viewer'            => $Viewer,
 ]);
 
 echo $Twig->render('index/private-main.twig', [
     'admin'   => (int)$Viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
-    'latest'  => $torMan->latestUploads(5),
+    'latest'  => (new Gazelle\Manager\Torrent)->latestUploads(5),
     'news'    => $newsMan->headlines(),
 ]);

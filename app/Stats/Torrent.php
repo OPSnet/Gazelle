@@ -3,97 +3,111 @@
 namespace Gazelle\Stats;
 
 class Torrent extends \Gazelle\Base {
+    protected array $info;
 
-    protected array $stats;
-    protected array $peerStats;
+    const CACHE_KEY      = 'stat_global_torrent';
+    const PEER_KEY       = 'stat_global_peer';
+    const TORRENT_FLOW   = 'stat_tflow';
+    const CATEGORY_TOTAL = 'stat_tcat';
 
-    const CACHE_KEY      = 'stats_global_torrent';
-    const PEER_KEY       = 'stats_global_peer';
-    const TORRENT_FLOW   = 'stats_tflow';
-    const CATEGORY_TOTAL = 'stats_tcat';
+    public function torrentTotal()           { return $this->info()['torrent-total']; }
+    public function totalFiles()             { return $this->info()['total-files']; }
+    public function totalSize()              { return $this->info()['total-size']; }
+    public function amount(string $interval) { return $this->info()[$interval]['count']; }
+    public function files(string $interval)  { return $this->info()[$interval]['files']; }
+    public function size(string $interval)   { return $this->info()[$interval]['size']; }
+    public function category()               { return $this->info()['category']; }
+    public function format()                 { return $this->info()['format']; }
+    public function formatMonth()            { return $this->info()['format-month']; }
+    public function media()                  { return $this->info()['media']; }
 
-    public function __construct() {
-        $this->stats = self::$cache->get_value(self::CACHE_KEY) ?: $this->init();
-    }
+    public function info(): array {
+        if (!isset($this->info)) {
+            $info = self::$cache->get_value(self::CACHE_KEY);
+            if ($info === false) {
+                $info = [
+                    'day'       => [],
+                    'week'      => [],
+                    'month'     => [],
+                    'quarter'   => [],
+                ];
 
-    public function torrentCount() { return $this->stats['torrent-count']; }
+                [$info['torrent-total'], $info['total-size'], $info['total-files']] = self::$db->row("
+                    SELECT count(*),
+                        coalesce(sum(Size), 0),
+                        coalesce(sum(FileCount), 0)
+                    FROM torrents
+                ");
 
-    public function totalFiles() { return $this->stats['total-files']; }
-    public function totalSize() { return $this->stats['total-size']; }
-    public function totalUsers() { return $this->stats['total-users']; }
+                [$info['day']['count'], $info['day']['size'], $info['day']['files']] = self::$db->row("
+                    SELECT count(*),
+                        coalesce(sum(Size), 0),
+                        coalesce(sum(FileCount), 0)
+                    FROM torrents
+                    WHERE Time > now() - INTERVAL 1 DAY
+                ");
 
-    public function amount(string $interval) { return $this->stats[$interval]['count']; }
-    public function files(string $interval) { return $this->stats[$interval]['files']; }
-    public function size(string $interval) { return $this->stats[$interval]['size']; }
+                [$info['week']['count'], $info['week']['size'], $info['week']['files']] = self::$db->row("
+                    SELECT count(*),
+                        coalesce(sum(Size), 0),
+                        coalesce(sum(FileCount), 0)
+                    FROM torrents
+                    WHERE Time > now() - INTERVAL 7 DAY
+                ");
 
-    public function category() { return $this->stats['category']; }
-    public function format() { return $this->stats['format']; }
-    public function formatMonth() { return $this->stats['format-month']; }
-    public function media() { return $this->stats['media']; }
+                [$info['month']['count'], $info['month']['size'], $info['month']['files']] = self::$db->row("
+                    SELECT count(*),
+                        coalesce(sum(Size), 0),
+                        coalesce(sum(FileCount), 0)
+                    FROM torrents
+                    WHERE Time > now() - INTERVAL 30 DAY
+                ");
 
-    protected function init(): array {
-        $stats = [
-            'day'       => [],
-            'week'      => [],
-            'month'     => [],
-            'quarter'   => [],
-            'total-users' => (new \Gazelle\Stats\Users)->enabledUserTotal(),
-        ];
+                [$info['quarter']['count'], $info['quarter']['size'], $info['quarter']['files']] = self::$db->row('
+                    SELECT count(*),
+                        coalesce(sum(Size), 0),
+                        coalesce(sum(FileCount), 0)
+                    FROM torrents
+                    WHERE Time > now() - INTERVAL 120 DAY
+                ');
 
-        [$stats['torrent-count'], $stats['total-size'], $stats['total-files']] = self::$db->row('
-            SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents
-        ');
+                self::$db->prepared_query("
+                    SELECT Format, Encoding, count(*) as n
+                    FROM torrents
+                    GROUP BY Format, Encoding WITH ROLLUP
+                ");
+                $info['format'] = self::$db->to_array(false, MYSQLI_NUM, false);
 
-        [$stats['day']['count'], $stats['day']['size'], $stats['day']['files']] = self::$db->row('
-            SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 1 DAY
-        ');
+                self::$db->prepared_query("
+                    SELECT Format, Encoding, count(*) as n
+                    FROM torrents
+                    WHERE Time > now() - INTERVAL 1 MONTH
+                    GROUP BY Format, Encoding WITH ROLLUP
+                ");
+                $info['format-month'] = self::$db->to_array(false, MYSQLI_NUM, false);
 
-        [$stats['week']['count'], $stats['week']['size'], $stats['week']['files']] = self::$db->row('
-            SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 7 DAY
-        ');
+                self::$db->prepared_query("
+                    SELECT t.Media, count(*) as n
+                    FROM torrents t
+                    GROUP BY t.Media WITH ROLLUP
+                ");
+                $info['media'] = self::$db->to_array(false, MYSQLI_NUM, false);
 
-        [$stats['month']['count'], $stats['month']['size'], $stats['month']['files']] = self::$db->row('
-            SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 30 DAY
-        ');
+                self::$db->prepared_query("
+                    SELECT tg.CategoryID, count(*) AS n
+                    FROM torrents_group tg
+                    WHERE EXISTS (
+                        SELECT 1 FROM torrents t WHERE t.GroupID = tg.ID)
+                    GROUP BY tg.CategoryID
+                    ORDER BY 2 DESC
+                ");
+                $info['category'] = self::$db->to_array(false, MYSQLI_NUM, false);
 
-        [$stats['quarter']['count'], $stats['quarter']['size'], $stats['quarter']['files']] = self::$db->row('
-            SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 120 DAY
-        ');
-
-        self::$db->prepared_query('
-            SELECT Format, Encoding, count(*) as n
-            FROM torrents
-            GROUP BY Format, Encoding WITH ROLLUP
-        ');
-        $stats['format'] = self::$db->to_array(false, MYSQLI_NUM);
-
-        self::$db->prepared_query('
-            SELECT Format, Encoding, count(*) as n
-            FROM torrents
-            WHERE Time > now() - INTERVAL 1 MONTH
-            GROUP BY Format, Encoding WITH ROLLUP
-        ');
-        $stats['format-month'] = self::$db->to_array(false, MYSQLI_NUM);
-
-        self::$db->prepared_query('
-            SELECT t.Media, count(*) as n
-            FROM torrents t
-            GROUP BY t.Media WITH ROLLUP
-        ');
-        $stats['media'] = self::$db->to_array(false, MYSQLI_NUM);
-
-        self::$db->prepared_query('
-            SELECT tg.CategoryID, count(*) AS n
-            FROM torrents_group tg
-            WHERE EXISTS (
-                SELECT 1 FROM torrents t WHERE t.GroupID = tg.ID)
-            GROUP BY tg.CategoryID
-            ORDER BY 2 DESC
-        ');
-        $stats['category'] = self::$db->to_array(false, MYSQLI_NUM);
-
-        self::$cache->cache_value(self::CACHE_KEY, $this->stats = $stats, 7200);
-        return $stats;
+                self::$cache->cache_value(self::CACHE_KEY, $info, 7200);
+            }
+            $this->info = $info;
+        }
+        return $this->info;
     }
 
     /**
@@ -137,10 +151,9 @@ class Torrent extends \Gazelle\Base {
     /**
      * Get the totals by category
      */
-    public function categoryTotal(): array {
-        $total = self::$cache->get_value(self::CATEGORY_TOTAL);
-        $total = false;
-        if ($total === false) {
+    public function categoryList(): array {
+        $list = self::$cache->get_value(self::CATEGORY_TOTAL);
+        if ($list === false) {
             self::$db->prepared_query("
                 SELECT tg.CategoryID,
                     count(*) as total
@@ -149,53 +162,58 @@ class Torrent extends \Gazelle\Base {
                 GROUP BY tg.CategoryID
                 ORDER BY 2 DESC
             ");
-            $total = [];
-            foreach (self::$db->to_pair('CategoryID', 'total', false) as $cat => $value) {
-                $total[] = [
-                    'name' => CATEGORY[$cat - 1],
-                    'y'    => $value,
-                ];
-            }
-            self::$cache->cache_value(self::CATEGORY_TOTAL, $total, mktime(0, 0, 0, date('n') + 1, 2));
+            $list = self::$db->to_pair('CategoryID', 'total', false);
+            self::$cache->cache_value(self::CATEGORY_TOTAL, $list, mktime(0, 0, 0, date('n') + 1, 2));
+        }
+        return $list;
+    }
+
+    public function categoryTotal(): array {
+        $list = [];
+        foreach ($this->categoryList() as $cat => $value) {
+            $list[] = [
+                'name' => CATEGORY[$cat - 1],
+                'y'    => $value,
+            ];
+        }
+        return $list;
+    }
+
+    /**
+     * Total number of albums (category 1 == Music) uploaded
+     */
+    public function albumTotal(): int {
+        $total = self::$cache->get_value('stats_album_count');
+        if ($total === false) {
+            $total = self::$db->scalar("
+                SELECT count(*) FROM torrents_group WHERE CategoryID = 1
+            ");
+            self::$cache->cache_value('stats_album_count', $total, 7200 + rand(0, 300));
         }
         return $total;
     }
 
     /**
-     * Get the number of albums (category 1 == Music)
-     * @return int count
+     * Total number of artists
      */
-    public function albumCount(): int {
-        if (($count = self::$cache->get_value('stats_album_count')) === false) {
-            $count = self::$db->scalar("
-                SELECT count(*) FROM torrents_group WHERE CategoryID = 1
-            ");
-            self::$cache->cache_value('stats_album_count', $count, 7200 + rand(0, 300));
-        }
-        return $count;
-    }
-
-    /**
-     * Get the number of artists
-     * @return int count
-     */
-    public function artistCount(): int {
-        if (($count = self::$cache->get_value('stats_artist_count')) === false) {
-            $count = self::$db->scalar("
+    public function artistTotal(): int {
+        $total = self::$cache->get_value('stats_artist_count');
+        if ($total === false) {
+            $total = self::$db->scalar("
                 SELECT count(*) FROM artists_group
             ");
-            self::$cache->cache_value('stats_artist_count', $count, 7200 + rand(0, 300));
+            self::$cache->cache_value('stats_artist_count', $total, 7200 + rand(0, 300));
         }
-        return $count;
+        return $total;
     }
 
     /**
-     * Get the number of perfect flacs
-     * @return int count
+     * Total number of perfect flacs uploaded
      */
-    public function perfectCount(): int {
-        if (($count = self::$cache->get_value('stats_perfect_count')) === false) {
-            $count = self::$db->scalar("
+    public function perfectFlacTotal(): int {
+        $total = self::$cache->get_value('stats_perfect_total');
+        if ($total === false) {
+            $total = self::$db->scalar("
                 SELECT count(*)
                 FROM torrents
                 WHERE Format = 'FLAC'
@@ -205,42 +223,8 @@ class Torrent extends \Gazelle\Base {
                         (Media in ('BD', 'DVD', 'Soundboard', 'WEB', 'Vinyl'))
                     )
             ");
-            self::$cache->cache_value('stats_perfect_count', $count, 7200 + rand(0, 300));
+            self::$cache->cache_value('stats_perfect_total', $total, 7200 + rand(0, 300));
         }
-        return $count;
-    }
-
-    public function leecherCount(): int {
-        return $this->peerStats()['leech_total'];
-    }
-
-    public function seederCount(): int {
-        return $this->peerStats()['seeding_total'];
-    }
-
-    public function peerCount(): int {
-        return $this->leecherCount() + $this->seederCount();
-    }
-
-    public function peerStats(): array {
-        if (!empty($this->peerStats)) {
-            return $this->peerStats;
-        }
-        $stats = self::$cache->get_value(self::PEER_KEY);
-        if ($stats === false) {
-            $stats = self::$db->rowAssoc("
-                SELECT sum(leech_total) AS leech_total,
-                    sum(seeding_total) AS seeding_total
-                FROM user_summary
-            ");
-            if ($stats) {
-                $stats = array_map(fn($n) => (int)$n, $stats);
-            } else {
-                $stats = ['leech_total' => 0, 'seeding_total' => 0];
-            }
-            self::$cache->cache_value(self::PEER_KEY, $stats, 3600);
-        }
-        $this->peerStats = $stats;
-        return $this->peerStats;
+        return $total;
     }
 }
