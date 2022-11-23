@@ -10,7 +10,7 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 $torMan    = new Gazelle\Manager\Torrent;
-$reportMan = new Gazelle\Manager\Torrent\Report;
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $userMan   = new Gazelle\Manager\User;
 
 $report    = $reportMan->findNewest();

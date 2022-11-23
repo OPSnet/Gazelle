@@ -20,7 +20,7 @@ $remasterTuple = false;
 $FirstUnknown  = $torrent->isRemasteredUnknown();
 $EditionID     = 0;
 
-$reportMan      = new Gazelle\Manager\Torrent\Report;
+$reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $reportTypeMan  = new Gazelle\Manager\Torrent\ReportType;
 $reportTypeList = $reportTypeMan->categoryList($CategoryID);
 $snatcher       = new Gazelle\User\Snatch($Viewer);

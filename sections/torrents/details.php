@@ -22,9 +22,9 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 
 $artistMan     = new Gazelle\Manager\Artist;
 $collageMan    = new Gazelle\Manager\Collage;
-$reportMan     = new Gazelle\Manager\Torrent\Report;
-$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $userMan       = new Gazelle\Manager\User;
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher      = new Gazelle\User\Snatch($Viewer);

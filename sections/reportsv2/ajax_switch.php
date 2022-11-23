@@ -14,13 +14,13 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 authorize();
-
-$other = (new Gazelle\Manager\Torrent)->findById((int)$_POST['otherid']);
+$torMan = new Gazelle\Manager\Torrent;
+$other = $torMan->findById((int)$_POST['otherid']);
 if (is_null($other)) {
     json_error("bad other id");
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report;
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 if ($reportMan->existsRecent($other->id(), $Viewer->id())) {
     json_error("too soon");
 }

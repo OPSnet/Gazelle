@@ -2,8 +2,7 @@
 
 namespace Gazelle;
 
-class Torrent extends BaseObject {
-    const CACHE_KEY                = 't3_%d';
+class Torrent extends TorrentAbstract {
     const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
@@ -11,46 +10,11 @@ class Torrent extends BaseObject {
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
 
-    protected TGroup $tgroup;
-    protected bool $isDeleted = false;
     protected $tokenCache;
     protected $updateTime;
-    protected User $viewer;
 
-    public function tableName(): string {
-        return 'torrents';
-    }
-
-    public function flush() {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        $this->group()->flush();
-    }
-
-    public function location(): string {
-        return "torrents.php?id=" . $this->groupId() . '&torrentid=' . $this->id . '#torrent' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->group()->name()));
-    }
-
-    public function fullLink(): string {
-        $link = implode(" \xE2\x80\x93 ",
-            array_filter([
-                $this->group()->artistLink(),
-                $this->link(),
-            ], fn($x) => !empty($x))
-        );
-        $edition = $this->edition();
-        if ($edition) {
-            $link .= " [$edition]";
-        }
-        $label = $this->label();
-        if ($label) {
-            $link .= " [$label]";
-        }
-        return $link;
-    }
+    public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
+    public function tableName(): string { return 'torrents'; }
 
     public function fullEditionLink(): string {
         $link = implode(" \xE2\x80\x93 ",
@@ -68,10 +32,6 @@ class Torrent extends BaseObject {
             $link .= " [$label]";
         }
         return $link;
-    }
-
-    public function labelLink(): string {
-        return '<a href="' . $this->url() . '">' . $this->label() . '</a>';
     }
 
     public function name(): string {
@@ -98,15 +58,97 @@ class Torrent extends BaseObject {
         return $this;
     }
 
+    public function infoRow(): ?array {
+        return self::$db->rowAssoc("
+            SELECT t.GroupID,
+                t.UserID,
+                t.Media,
+                t.Format,
+                t.Encoding,
+                t.Remastered,
+                t.RemasterYear,
+                t.RemasterTitle,
+                t.RemasterCatalogueNumber,
+                t.RemasterRecordLabel,
+                t.Scene,
+                t.HasLog,
+                t.HasCue,
+                t.HasLogDB,
+                t.LogScore,
+                t.LogChecksum,
+                hex(t.info_hash) AS info_hash,
+                t.info_hash      AS info_hash_raw,
+                t.FileCount,
+                t.FileList,
+                t.FilePath,
+                t.Size,
+                t.FreeTorrent,
+                t.FreeLeechType,
+                t.Time,
+                t.Description,
+                t.LastReseedRequest,
+                tls.Seeders,
+                tls.Leechers,
+                tls.Snatched,
+                tls.last_action,
+                tbt.TorrentID          AS BadTags,
+                tbf.TorrentID          AS BadFolders,
+                tfi.TorrentID          AS BadFiles,
+                mli.TorrentID          AS MissingLineage,
+                cas.TorrentID          AS CassetteApproved,
+                lma.TorrentID          AS LossymasterApproved,
+                lwa.TorrentID          AS LossywebApproved,
+                group_concat(tl.LogID) AS ripLogIds
+            FROM torrents t
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            LEFT JOIN torrents_bad_tags             AS tbt ON (tbt.TorrentID = t.ID)
+            LEFT JOIN torrents_bad_folders          AS tbf ON (tbf.TorrentID = t.ID)
+            LEFT JOIN torrents_bad_files            AS tfi ON (tfi.TorrentID = t.ID)
+            LEFT JOIN torrents_missing_lineage      AS mli ON (mli.TorrentID = t.ID)
+            LEFT JOIN torrents_cassette_approved    AS cas ON (cas.TorrentID = t.ID)
+            LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+            LEFT JOIN torrents_lossyweb_approved    AS lwa ON (lwa.TorrentID = t.ID)
+            LEFT JOIN torrents_logs                 AS tl  ON (tl.TorrentID  = t.ID)
+            WHERE t.ID = ?
+            GROUP BY t.ID
+            ", $this->id
+        );
+    }
+
     public function hasReport(\Gazelle\User $viewer): bool {
         return count($this->reportIdList($viewer)) > 0;
+    }
+
+    /**
+     * Check if the viewer has an active freeleech token on this torrent
+     */
+    public function hasToken(int $userId): bool {
+        if (!$this->tokenCache) {
+            $key = "users_tokens_" . $userId;
+            $this->tokenCache = self::$cache->get_value($key);
+            if ($this->tokenCache === false) {
+                $qid = self::$db->get_query_id();
+                self::$db->prepared_query("
+                    SELECT TorrentID FROM users_freeleeches WHERE Expired = 0 AND UserID = ?
+                    ", $userId
+                );
+                $this->tokenCache = array_fill_keys(self::$db->collect('TorrentID', false), true);
+                self::$db->set_query_id($qid);
+                self::$cache->cache_value($key, $this->tokenCache, 3600);
+            }
+        }
+        return isset($this->tokenCache[$this->id]);
+    }
+
+    public function isUploadLocked(): bool {
+        return (bool)self::$cache->get_value("torrent_{$this->id}_lock");
     }
 
     /**
      * Get the reports associated with this torrent
      * Non-admin users do not see Edited reports
      *
-     * @return array of \Gazelle\Torrent\Report
+     * @return array of ids of \Gazelle\Torrent\Report
      */
     public function reportIdList(\Gazelle\User $viewer): array {
         $key = sprintf(self::CACHE_REPORTLIST, $viewer->permitted('admin_reports') ? 'a' : 'u', $this->id());
@@ -136,552 +178,6 @@ class Torrent extends BaseObject {
             self::$cache->cache_value($key, $list, 7200);
         }
         return $list;
-    }
-
-    /**
-     * How many tokens are required to download for free?
-     */
-    public function tokenCount(): int {
-        return (int)ceil($this->size() / BYTES_PER_FREELEECH_TOKEN);
-    }
-
-    /**
-     * Check if the viewer has an active freeleech token on a torrent
-     */
-    public function hasToken(int $userId): bool {
-        if (!$this->tokenCache) {
-            $key = "users_tokens_" . $userId;
-            $this->tokenCache = self::$cache->get_value($key);
-            if ($this->tokenCache === false) {
-                $qid = self::$db->get_query_id();
-                self::$db->prepared_query("
-                    SELECT TorrentID FROM users_freeleeches WHERE Expired = 0 AND UserID = ?
-                    ", $userId
-                );
-                $this->tokenCache = array_fill_keys(self::$db->collect('TorrentID', false), true);
-                self::$db->set_query_id($qid);
-                self::$cache->cache_value($key, $this->tokenCache, 3600);
-            }
-        }
-        return isset($this->tokenCache[$this->id]);
-    }
-
-    /**
-     * Get the metadata of the torrent
-     *
-     * @return array of many things
-     */
-    public function info(): array {
-        $key = sprintf(self::CACHE_KEY, $this->id);
-        $info = self::$cache->get_value($key);
-        if ($info === false) {
-            $template = "SELECT t.GroupID, t.UserID, t.Media, t.Format, t.Encoding,
-                    t.Remastered, t.RemasterYear, t.RemasterTitle, t.RemasterCatalogueNumber, t.RemasterRecordLabel,
-                    t.Scene, t.HasLog, t.HasCue, t.HasLogDB, t.LogScore, t.LogChecksum,
-                    hex(t.info_hash) as info_hash, t.info_hash as info_hash_raw,
-                    t.FileCount, t.FileList, t.FilePath, t.Size,
-                    t.FreeTorrent, t.FreeLeechType, t.Time, t.Description, t.LastReseedRequest,
-                    tls.Seeders, tls.Leechers, tls.Snatched, tls.last_action,
-                    tbt.TorrentID AS BadTags, tbf.TorrentID AS BadFolders, tfi.TorrentID AS BadFiles, ml.TorrentID  AS MissingLineage,
-                    ca.TorrentID  AS CassetteApproved, lma.TorrentID AS LossymasterApproved, lwa.TorrentID AS LossywebApproved,
-                    group_concat(tl.LogID) as ripLogIds
-                FROM %table% t
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
-                LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
-                LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
-                LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
-                LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
-                LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
-                WHERE t.ID = ?
-                GROUP BY t.ID
-            ";
-            $info = self::$db->rowAssoc(str_replace('%table%', 'torrents', $template), $this->id);
-            if (is_null($info)) {
-                $info = self::$db->rowAssoc(str_replace('%table%', 'deleted_torrents', $template), $this->id);
-                $this->isDeleted = true;
-            }
-            if (is_null($info)) {
-                return [];
-            }
-            foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear']
-                as $nullable
-            ) {
-                $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
-            }
-            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene']
-                as $zerotruth
-            ) {
-                $info[$zerotruth] = !($info[$zerotruth] == '0');
-            }
-            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage']
-                as $emptytruth
-            ) {
-                $info[$emptytruth] = !($info[$emptytruth] == '');
-            }
-
-            $info['ripLogIds'] = empty($info['ripLogIds']) ? [] : array_map('intval', explode(',', $info['ripLogIds']));
-            $info['LogCount'] = count($info['ripLogIds']);
-            $info['FileList'] = explode("\n", $info['FileList']);
-            $info['Reported'] = self::$db->scalar("
-                SELECT count(*)
-                FROM reportsv2 r
-                WHERE r.Status != 'Resolved'
-                    AND r.TorrentID = ?
-                ", $this->id
-            );
-
-            self::$cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
-        }
-
-        if (isset($this->viewer)) {
-            $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewer->id());
-            $info['IsSnatched'] = (new User\Snatch($this->viewer))->showSnatch($this->id);
-        } else {
-            $info['PersonalFL'] = false;
-            $info['IsSnatched'] = false;
-        }
-
-        return $info;
-    }
-
-    /**
-     * Generate the edition of the torrent
-     */
-    public function edition(): string {
-        $tgroup = $this->group();
-        if ($tgroup->categoryName() !== 'Music') {
-            return '';
-        }
-        if ($this->isRemastered()) {
-            $edition = [
-                $this->remasterRecordLabel() ?? $tgroup->recordLabel(),
-                $this->remasterCatalogueNumber() ?? $tgroup->catalogueNumber(),
-                $this->remasterTitle(),
-                $this->media(),
-            ];
-        } elseif ($tgroup->recordLabel() || $tgroup->catalogueNumber()) {
-            $edition = [
-                $tgroup->recordLabel(),
-                $tgroup->catalogueNumber(),
-                $this->media(),
-            ];
-        } else {
-            $edition = [
-                'Original Release',
-                $this->media(),
-            ];
-        }
-        return ($this->isRemastered() ? ($this->remasterYear() ?? $tgroup->year()) : $tgroup->year())
-            . " \xE2\x80\x93 " . implode(' / ', array_filter($edition, fn($e) => !is_null($e)));
-    }
-
-    protected function labelElement($class, $text): string {
-        return sprintf('<strong class="torrent_label tooltip %s" title="%s" style="white-space: nowrap;">%s</strong>',
-            $class, $text, $text
-        );
-    }
-
-    public function shortLabelList(): array {
-        $info = $this->info();
-        $label = [];
-        if (!empty($info['Format'])) {
-            $label[] = $info['Format'];
-        }
-        if (!empty($info['Encoding'])) {
-            $label[] = $info['Encoding'];
-        }
-        if ($info['Media'] === 'CD') {
-            if ($info['HasLog']) {
-                if (!$info['HasLogDB']) {
-                    $label[] = '<span class="tooltip" style="float: none" title="There is a logifile in the torrent, but it has not been uploaded to the site!">Log</span>';
-                } else {
-                    if (isset($this->viewer) && $this->viewer->isStaff()) {
-                        $label[] = "(<a href=\"torrents.php?action=viewlog&torrentid={$this->id}&groupid={$this->groupId()}\">Log {$info['LogScore']}%)</a>";
-                    } else {
-                        $label[] = "(Log {$info['LogScore']}%)";
-                    }
-                }
-            }
-            if ($info['HasCue']) {
-                $label[] = 'Cue';
-            }
-        }
-        if ($info['Scene']) {
-            $label[] = 'Scene';
-        }
-        return $label;
-    }
-
-    public function labelList(): array {
-        $info = $this->info();
-        $label = $this->shortLabelList();
-
-        if (isset($this->viewer) && (new User\Snatch($this->viewer))->showSnatch($this->id)) {
-            $label[] = $this->labelElement('tl_snatched', 'Snatched!');
-        }
-        if (isset($info['FreeTorrent'])) {
-            if ($info['FreeTorrent'] == '1') {
-                $label[] = $this->labelElement('tl_free', 'Freeleech!');
-            } elseif ($info['FreeTorrent'] == '2') {
-                $label[] = $this->labelElement('tl_free tl_neutral', 'Neutral Leech!');
-            }
-        } elseif ($info['PersonalFL']) {
-            $label[] = $this->labelElement('tl_free tl_personal', 'Personal Freeleech!');
-        }
-        if ($info['Media'] === 'CD' && $info['HasLog'] && $info['HasLogDB'] && !$info['LogChecksum']) {
-            $label[] = $this->labelElement('tl_notice', 'Bad/Missing Checksum');
-        }
-        if ($this->hasBadTags()) {
-            $label[] = $this->labelElement('tl_reported tl_bad_tags', 'Bad Tags');
-        }
-        if ($this->hasBadFolders()) {
-            $label[] = $this->labelElement('tl_reported tl_bad_folders', 'Bad Folders');
-        }
-        if ($this->hasBadFiles()) {
-            $label[] = $this->labelElement('tl_reported tl_bad_filenames', 'Bad File Names');
-        }
-        if ($this->hasMissingLineage()) {
-            $label[] = $this->labelElement('tl_reported tl_missing_lineage', 'Missing Lineage');
-        }
-        if ($this->hasCassetteApproved()) {
-            $label[] = $this->labelElement('tl_approved tl_cassette', 'Cassette Approved');
-        }
-        if ($this->hasLossymasterApproved()) {
-            $label[] = $this->labelElement('tl_approved tl_lossy_master', 'Lossy Master Approved');
-        }
-        if ($this->hasLossywebApproved()) {
-            $label[] = $this->labelElement('tl_approved tl_lossy_web', 'Lossy WEB Approved');
-        }
-        if (isset($info['Reported']) && $info['Reported']) {
-            $label[] = $this->labelElement('tl_reported', 'Reported');
-        }
-        return $label;
-    }
-
-    public function shortLabel(): string {
-        return implode(' / ', $this->shortLabelList());
-    }
-
-    public function label(): string {
-        return implode(' / ', $this->labelList());
-    }
-
-    public function unseeded(): bool {
-        return $this->seederTotal() === 0;
-    }
-
-    /**
-     * Get the encoding of this upload
-     */
-    public function description(): string {
-        return $this->info()['Description'] ?? '';
-    }
-
-    /**
-     * Get the encoding of this upload. Null for non-music uploads.
-     */
-    public function encoding(): ?string {
-        return $this->info()['Encoding'];
-    }
-
-    public function fileTotal(): int {
-        return $this->info()['FileCount'];
-    }
-
-    /**
-     * Get the files of this upload
-     */
-    public function fileList(): array {
-        return $this->info()['FileList'];
-    }
-
-    /**
-     * Get the format of this upload. Null for non-music uploads.
-     */
-    public function format(): ?string {
-        return $this->info()['Format'];
-    }
-
-    public function freeleechStatus(): string {
-        return $this->info()['FreeTorrent'];
-    }
-
-    public function freeleechType(): string {
-        return $this->info()['FreeLeechType'];
-    }
-
-    /**
-     * Group ID this torrent belongs to
-     */
-    public function groupId(): int {
-        return $this->info()['GroupID'];
-    }
-
-    /**
-     * Get the torrent group in which this torrent belongs.
-     */
-    public function group(): TGroup {
-        if (!isset($this->tgroup)) {
-            $this->tgroup = new TGroup($this->info()['GroupID']);
-        }
-        return $this->tgroup;
-    }
-
-    /**
-     * It is possible that a torrent can be orphaned from a group, in which case the
-     * TGroup property cannot be instantiated, even though the Torrent object can.
-     * This method can be used to verify that group() can be called. (See ReportsV2).
-     */
-    public function hasTGroup(): bool {
-        return (new Manager\TGroup)->findById($this->info()['GroupID']) instanceof TGroup;
-    }
-
-    public function hasBadFiles(): bool {
-        return $this->info()['BadFiles'];
-    }
-
-    public function hasBadFolders(): bool {
-        return $this->info()['BadFolders'];
-    }
-
-    public function hasBadTags(): bool {
-        return $this->info()['BadTags'];
-    }
-
-    public function hasCassetteApproved(): bool {
-        return $this->info()['CassetteApproved'];
-    }
-
-    public function hasLossymasterApproved(): bool {
-        return $this->info()['LossymasterApproved'];
-    }
-
-    public function hasLossywebApproved(): bool {
-        return $this->info()['LossywebApproved'];
-    }
-
-    public function hasMissingLineage(): bool {
-        return $this->info()['MissingLineage'];
-    }
-
-    public function isFreeleech(): bool {
-        return $this->info()['FreeTorrent'] == '1';
-    }
-
-    public function isFreeleechPersonal(): bool {
-        return $this->info()['PersonalFL'];
-    }
-
-    public function isNeutralleech(): bool {
-        return $this->info()['FreeTorrent'] == '2';
-    }
-
-    /**
-     * Is this a remastered release?
-     */
-    public function isRemastered(): bool {
-        return $this->info()['Remastered'] ?? false;
-    }
-
-    public function isRemasteredUnknown(): bool {
-        return $this->isRemastered() && !$this->remasterYear();
-    }
-
-    public function isScene(): bool {
-        return $this->info()['Scene'];
-    }
-
-    public function isUploadLocked(): bool {
-        return (bool)self::$cache->get_value("torrent_{$this->id}_lock");
-    }
-
-    public function lastReseedRequest(): ?string {
-        return $this->info()['LastReseedRequest'];
-    }
-
-    /**
-     * Does it have a .cue file?
-     */
-    public function hasCue(): bool {
-        return $this->info()['HasCue'];
-    }
-
-    /**
-     * Does it have logs?
-     */
-    public function hasLog(): bool {
-        return $this->info()['HasLog'];
-    }
-
-    /**
-     * Does it have uploaded logs?
-     */
-    public function hasLogDb(): bool {
-        return $this->info()['HasLogDB'];
-    }
-
-    /**
-     * The infohash of this torrent
-     *
-     * @return string hexified infohash
-     */
-    public function infohash(): string {
-        return $this->info()['info_hash'];
-    }
-
-    /**
-     * The infohash of this torrent (binary)
-     *
-     * @return string raw infohash
-     */
-    public function infohashBinary(): string {
-        return $this->info()['info_hash_raw'];
-    }
-
-    public function lastActiveDate(): ?string {
-        return $this->info()['last_action'];
-    }
-
-    public function lastActiveEpoch(): int {
-        return strtotime($this->lastActiveDate() ?? 0);
-    }
-
-    /**
-     * The number of leechers of this torrent
-     */
-    public function leecherTotal(): int {
-        return $this->info()['Leechers'];
-    }
-
-    /**
-     * The log score of this torrent
-     */
-    public function logChecksum(): bool {
-        return $this->info()['LogChecksum'];
-    }
-
-    /**
-     * The log score of this torrent
-     */
-    public function logScore(): int {
-        return $this->info()['LogScore'];
-    }
-
-    /**
-     * The media of this torrent. Will be null for non-music uploads.
-     */
-    public function media(): ?string {
-        return $this->info()['Media'];
-    }
-
-    public function path(): string {
-        return $this->info()['FilePath'];
-    }
-
-    public function remasterCatalogueNumber(): ?string {
-        return $this->info()['RemasterCatalogueNumber'];
-    }
-
-    public function remasterRecordLabel(): ?string {
-        return $this->info()['RemasterRecordLabel'];
-    }
-
-    public function remasterTitle(): ?string {
-        return $this->info()['RemasterTitle'];
-    }
-
-    public function remasterYear(): ?int {
-        return $this->info()['RemasterYear'];
-    }
-
-    public function remasterTuple(): string {
-        return implode('!!', [
-            $this->media(),
-            $this->remasterTitle(),
-            $this->remasterYear(),
-            $this->remasterRecordLabel(),
-            $this->remasterCatalogueNumber(),
-        ]);
-    }
-
-    public function reportTotal(): int {
-        return $this->info()['Reported'];
-    }
-
-    public function ripLogIdList(): array {
-        return $this->info()['ripLogIds'];
-    }
-
-    public function seederTotal(): int {
-        return $this->info()['Seeders'];
-    }
-
-    /**
-     * The size (in bytes) of this upload
-     */
-    public function size(): int {
-        return $this->info()['Size'];
-    }
-
-    public function snatchTotal(): int {
-        return $this->info()['Snatched'];
-    }
-
-    public function uploadDate(): string {
-        return $this->info()['Time'];
-    }
-
-    /**
-     * Was it uploaded less than an hour ago? (Request fill grace period)
-     */
-    public function uploadGracePeriod(): bool {
-        return strtotime($this->uploadDate()) > date('U') - 3600;
-    }
-
-    /**
-     * The uploader ID of this torrent
-     */
-    public function uploaderId(): int {
-        return $this->info()['UserID'];
-    }
-
-    /**
-     * The uploader of this torrent
-     */
-    public function uploader(): User {
-        return new User($this->uploaderId());
-    }
-
-    public function isPerfectFlac(): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM torrents t
-            WHERE t.Format = 'FLAC'
-                AND (
-                    (t.Media = 'CD' AND t.LogScore = 100)
-                    OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT'))
-                )
-                AND ID = ?
-            ", $this->id
-        );
-    }
-
-    public function isPerfecterFlac(): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM torrents t
-            WHERE t.Format = 'FLAC'
-                AND (
-                    (t.Media = 'CD' AND t.LogScore = 100)
-                    OR t.Media IN ('Cassette', 'DAT')
-                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless')
-                )
-                AND ID = ?
-            ", $this->id
-        );
     }
 
     /**
@@ -737,6 +233,75 @@ class Torrent extends BaseObject {
         return $tor->getEncode();
     }
 
+    public function addLogDb(Logfile $logfile, string $version): int {
+        self::$db->prepared_query('
+            INSERT INTO torrents_logs
+                   (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
+            VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                 ?)
+            ', $this->id, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
+                $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
+                \OrpheusNET\Logchecker\Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
+        );
+        return self::$db->inserted_id();
+    }
+
+    public function adjustLogscore(int $logId, bool $adjusted, int $adjScore, bool $adjChecksum, int $adjBy, $adjReason, array $adjDetails): int {
+        self::$db->prepared_query("
+            UPDATE torrents_logs SET
+                Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
+            WHERE TorrentID = ? AND LogID = ?
+            ", $adjusted ? '1' : '0', $adjScore, $adjChecksum ? '1' : '0', $adjBy, $adjReason, serialize($adjDetails),
+                $this->id, $logId
+        );
+        if (self::$db->affected_rows() > 0) {
+            return $this->modifyLogscore();
+        }
+        return 0;
+    }
+
+    public function clearLog(int $logId): int {
+        self::$db->prepared_query("
+            DELETE FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
+            ", $this->id, $logId
+        );
+        if (self::$db->affected_rows() > 0) {
+            return $this->modifyLogscore();
+        }
+        return 0;
+    }
+
+    public function logfileList(\Gazelle\File\RipLog $ripFiler, \Gazelle\File\RipLogHTML $htmlFiler): array {
+        self::$db->prepared_query("
+            SELECT LogID AS id,
+                Score,
+                `Checksum`,
+                Adjusted,
+                AdjustedBy,
+                AdjustedScore,
+                AdjustedChecksum,
+                AdjustmentReason,
+                coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
+                Details
+            FROM torrents_logs
+            WHERE TorrentID = ?
+            ", $this->id
+        );
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($list as &$log) {
+            $log['has_riplog'] = $ripFiler->exists([$this->id, $log['id']]);
+            $log['html_log'] = $htmlFiler->get([$this->id, $log['id']]);
+            $log['adjustment_details'] = unserialize($log['AdjustmentDetails']);
+            $log['adjusted'] = ($log['Adjusted'] === '1');
+            $log['adjusted_checksum'] = ($log['AdjustedChecksum'] === '1');
+            $log['checksum'] = ($log['Checksum'] === '1');
+            $log['details'] = empty($log['Details']) ? [] : explode("\r\n", trim($log['Details']));
+            if ($log['adjusted'] && $log['checksum'] !== $log['adjusted_checksum']) {
+                $log['details'][] = 'Bad/No Checksum(s)';
+            }
+        }
+        return $list;
+    }
+
     public function modifyLogscore(): int {
         $count = self::$db->scalar("
             SELECT count(*) FROM torrents_logs WHERE TorrentID = ?
@@ -773,31 +338,6 @@ class Torrent extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function adjustLogscore(int $logId, bool $adjusted, int $adjScore, bool $adjChecksum, int $adjBy, $adjReason, array $adjDetails): int {
-        self::$db->prepared_query("
-            UPDATE torrents_logs SET
-                Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
-            WHERE TorrentID = ? AND LogID = ?
-            ", $adjusted ? '1' : '0', $adjScore, $adjChecksum ? '1' : '0', $adjBy, $adjReason, serialize($adjDetails),
-                $this->id, $logId
-        );
-        if (self::$db->affected_rows() > 0) {
-            return $this->modifyLogscore();
-        }
-        return 0;
-    }
-
-    public function clearLog(int $logId): int {
-        self::$db->prepared_query("
-            DELETE FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
-            ", $this->id, $logId
-        );
-        if (self::$db->affected_rows() > 0) {
-            return $this->modifyLogscore();
-        }
-        return 0;
-    }
-
     public function rescoreLog(int $logId, \Gazelle\Logfile $logfile, string $version): int {
         self::$db->prepared_query("
             UPDATE torrents_logs SET
@@ -813,6 +353,21 @@ class Torrent extends BaseObject {
             return $this->modifyLogscore();
         }
         return 0;
+    }
+
+    public function updateLogScore(LogfileSummary $summary): int {
+        self::$db->prepared_query("
+            UPDATE torrents SET
+                HasLogDB = '1',
+                LogScore = ?,
+                LogChecksum = ?
+            WHERE ID = ?
+            ", $summary->overallScore(), $summary->checksumStatus(),
+                $this->id
+        );
+        $this->flush();
+        self::$cache->delete_value(sprintf(TGroup::CACHE_TLIST_KEY, $this->groupId()));
+        return self::$db->affected_rows();
     }
 
     /**
@@ -846,36 +401,12 @@ class Torrent extends BaseObject {
         return $affected;
     }
 
-    public function logfileList(\Gazelle\File\RipLog $ripFiler, \Gazelle\File\RipLogHTML $htmlFiler): array {
-        self::$db->prepared_query("
-            SELECT LogID AS id,
-                Score,
-                `Checksum`,
-                Adjusted,
-                AdjustedBy,
-                AdjustedScore,
-                AdjustedChecksum,
-                AdjustmentReason,
-                coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
-                Details
-            FROM torrents_logs
-            WHERE TorrentID = ?
-            ", $this->id
+    public function removeLogDb(): int {
+        self::$db->prepared_query('
+            DELETE FROM torrents_logs WHERE TorrentID = ?
+            ', $this->id
         );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        foreach ($list as &$log) {
-            $log['has_riplog'] = $ripFiler->exists([$this->id, $log['id']]);
-            $log['html_log'] = $htmlFiler->get([$this->id, $log['id']]);
-            $log['adjustment_details'] = unserialize($log['AdjustmentDetails']);
-            $log['adjusted'] = ($log['Adjusted'] === '1');
-            $log['adjusted_checksum'] = ($log['AdjustedChecksum'] === '1');
-            $log['checksum'] = ($log['Checksum'] === '1');
-            $log['details'] = empty($log['Details']) ? [] : explode("\r\n", trim($log['Details']));
-            if ($log['adjusted'] && $log['checksum'] !== $log['adjusted_checksum']) {
-                $log['details'][] = 'Bad/No Checksum(s)';
-            }
-        }
-        return $list;
+        return self::$db->affected_rows();
     }
 
     /**
@@ -931,41 +462,6 @@ class Torrent extends BaseObject {
             );
         }
         return count($notify);
-    }
-
-    public function addLogDb(Logfile $logfile, string $version): int {
-        self::$db->prepared_query('
-            INSERT INTO torrents_logs
-                   (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
-            VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                 ?)
-            ', $this->id, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
-                $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-                \OrpheusNET\Logchecker\Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
-        );
-        return self::$db->inserted_id();
-    }
-
-    public function updateLogScore(LogfileSummary $summary): int {
-        self::$db->prepared_query("
-            UPDATE torrents SET
-                HasLogDB = '1',
-                LogScore = ?,
-                LogChecksum = ?
-            WHERE ID = ?
-            ", $summary->overallScore(), $summary->checksumStatus(),
-                $this->id
-        );
-        $this->flush();
-        self::$cache->delete_value(sprintf(TGroup::CACHE_TLIST_KEY, $this->groupId()));
-        return self::$db->affected_rows();
-    }
-
-    public function removeLogDb(): int {
-        self::$db->prepared_query('
-            DELETE FROM torrents_logs WHERE TorrentID = ?
-            ', $this->id
-        );
-        return self::$db->affected_rows();
     }
 
     public function hasFlag(TorrentFlag $flag): bool {

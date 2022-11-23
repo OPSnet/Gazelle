@@ -18,6 +18,10 @@ class Report extends \Gazelle\BaseManager {
 
     protected array $filter;
 
+    public function __construct(
+        protected \Gazelle\Manager\Torrent $torMan,
+    ) {}
+
     public function create(
         \Gazelle\Torrent            $torrent,
         \Gazelle\User               $user,
@@ -56,7 +60,7 @@ class Report extends \Gazelle\BaseManager {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }
-        return $id ? new \Gazelle\Torrent\Report($reportId) : null;
+        return $id ? new \Gazelle\Torrent\Report($reportId, $this->torMan) : null;
     }
 
     public function findNewest(): ?\Gazelle\Torrent\Report {
@@ -192,6 +196,9 @@ class Report extends \Gazelle\BaseManager {
     }
 
     protected function searchConfigure(): array {
+        if (!isset($this->filter)) {
+            return [[], [], [], []];
+        }
         $cond = [];
         $args = [];
         $delcond = [];
@@ -264,24 +271,21 @@ class Report extends \Gazelle\BaseManager {
         );
     }
 
-    public function searchList(\Gazelle\Manager\Torrent $torMan, \Gazelle\Manager\User $userMan, int $limit, int $offset): array {
+    public function searchList(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
         [$cond, $args, $delcond, $delargs] = $this->searchConfigure();
         $where = (count($cond) == 0 && count($delcond) == 0)
             ? ''
             : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
 
         self::$db->prepared_query("
-            SELECT r.ID      AS report_id,
-                r.ReporterID AS reporter_id,
-                r.ResolverID AS resolver_id,
-                r.TorrentID  AS torrent_id,
+            SELECT r.ID                       AS report_id,
+                r.ReporterID                  AS reporter_id,
+                r.ResolverID                  AS resolver_id,
+                r.TorrentID                   AS torrent_id,
+                coalesce(t.UserID, dt.UserID) AS uploader_id,
+                dt.ID IS NOT NULL             AS is_deleted,
                 r.Type,
-                r.ReportedTime,
-                coalesce(t.UserID, dt.UserID)     AS uploader_id,
-                coalesce(t.GroupID, dt.GroupID)   AS group_id,
-                coalesce(t.Media, dt.Media)       AS media,
-                coalesce(t.Format, dt.Format)     AS format,
-                coalesce(t.Encoding, dt.Encoding) AS encoding
+                r.ReportedTime
             FROM reportsv2 r
             LEFT JOIN torrents t          ON (t.ID = r.TorrentID)
             LEFT JOIN deleted_torrents dt ON (dt.ID = r.TorrentID)
@@ -292,7 +296,7 @@ class Report extends \Gazelle\BaseManager {
                 INNER JOIN reportsv2 r using (TorrentID)
                 WHERE " . implode(' AND ', array_merge(["t.Info NOT LIKE 'uploaded%'"], $cond)) . "
                 GROUP BY t.TorrentID
-            ) LASTLOG USING (TorrentID)
+            ) LASTLOG ON (LASTLOG.TorrentID = r.TorrentID)
             LEFT JOIN group_log gl ON (gl.ID = LASTLOG.ID)
             $where
             ORDER BY r.ReportedTime DESC
@@ -312,7 +316,9 @@ class Report extends \Gazelle\BaseManager {
             $r['reporter'] = $cache[$r['reporter_id']];
             $r['resolver'] = $cache[$r['resolver_id']] ?? null; // unclaimed
             $r['uploader'] = $cache[$r['uploader_id']] ?? null; // sometimes there is no uploader information
-            $r['torrent']  = $torMan->findById($r['torrent_id']);
+            $r['torrent']  = $r['is_deleted']
+                ? $this->torMan->findDeletedById($r['torrent_id'])
+                : $this->torMan->findById($r['torrent_id']);
             $list[] = $r;
         }
         return $list;

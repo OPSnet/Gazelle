@@ -25,6 +25,7 @@ require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 $b = new Boris\Boris(SITE_NAME . '> ');
 $b->setInspector(new Boris\ExportInspector);
 
+$torMan = new Gazelle\Manager\Torrent;
 $preload = [
     'cache'       => $Cache,
     'db'          => $DB,
@@ -39,8 +40,8 @@ $preload = [
     'tagMan'      => new Gazelle\Manager\Tag,
     'tgMan'       => new Gazelle\Manager\TGroup,
     'threadMan'   => new Gazelle\Manager\ForumThread,
-    'torMan'      => new Gazelle\Manager\Torrent,
-    'repMan'      => new Gazelle\Manager\Torrent\Report,
+    'torMan'      => $torMan,
+    'repMan'      => new Gazelle\Manager\Torrent\Report($torMan),
     'repTypeMan'  => new Gazelle\Manager\Torrent\ReportType,
     'userMan'     => new Gazelle\Manager\User,
 ];

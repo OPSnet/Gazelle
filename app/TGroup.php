@@ -453,7 +453,6 @@ class TGroup extends BaseObject {
     protected function displayNameSuffix(): array {
         return array_map(fn($x) => "[$x]",
             array_filter([
-                $this->year(),
                 $this->isShowcase() ? 'Showcase' : '',
                 $this->categoryId() === 1 ? $this->releaseTypeName() : '',
             ], fn($x) => !empty($x))

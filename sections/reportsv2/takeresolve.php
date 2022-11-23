@@ -13,7 +13,7 @@ if (!$Viewer->permitted('admin_reports')) {
 authorize();
 
 $fromReportPage = !isset($_POST['from_delete']);
-$reportMan      = new Gazelle\Manager\Torrent\Report;
+$reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 
 $report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
 if (is_null($report)) {

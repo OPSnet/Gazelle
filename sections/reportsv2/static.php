@@ -14,7 +14,7 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 $torMan        = new Gazelle\Manager\Torrent;
-$reportMan     = new Gazelle\Manager\Torrent\Report;
+$reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $userMan       = new Gazelle\Manager\User;
 $search        = new Gazelle\Search\Torrent\Report($_GET['view'] ?? '', $_GET['id'] ?? '', $reportTypeMan, $userMan);
@@ -72,14 +72,13 @@ if ($search->canUnclaim($Viewer)) {
             $reportType   = $report->reportType();
             $torrent      = $report->torrent();
             $torrentId    = $report->torrentId();
-            $torrentInfo  = $torrent ? $torrent->setViewer($Viewer)->info() : Gazelle\Torrent\Deleted::info($torrentId);
 
-            $tgroupId     = $torrentInfo['GroupID'];
+            $tgroupId     = $torrent->groupId();
             $categoryId   = (int)((new Gazelle\TGroup($tgroupId))?->categoryId());
-            $size         = '(' . number_format($torrentInfo['Size'] / (1024 * 1024), 2) . ' MiB)';
+            $size         = '(' . number_format($torrent->size() / (1024 * 1024), 2) . ' MiB)';
             $link         = $torrent?->fullEditionLink() ?? 'deleted torrent';
             $RawName      = ($torrent?->fullName() ?? 'delete torrent') . " $size";
-            $uploaderId   = $torrentInfo['UserID'];
+            $uploaderId   = $torrent->uploaderId();
             $uploaderName = $userMan->findById((int)$uploaderId)?->username() ?? 'System';
 ?>
     <div id="report<?= $reportId ?>">

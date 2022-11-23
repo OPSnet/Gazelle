@@ -3,7 +3,7 @@
 use Gazelle\Util\Time;
 
 $torMan        = new Gazelle\Manager\Torrent;
-$reportMan     = new Gazelle\Manager\Torrent\Report;
+$reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $userMan       = new Gazelle\Manager\User;
 

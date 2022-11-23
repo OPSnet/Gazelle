@@ -2,10 +2,10 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-$reportMan = new Gazelle\Manager\Torrent\Report;
+$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $tagMan    = new Gazelle\Manager\Tag;
 $tgMan     = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $snatcher  = new Gazelle\User\Snatch($Viewer);
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
@@ -217,7 +217,7 @@ foreach ($Results as $GroupID) {
                 'torrent' => $torrent,
                 'viewer'  => $Viewer,
             ]) ?>
-            &raquo; <a href="torrents.php?id=<?=$tgroup->id()?>&amp;torrentid=<?=$torrent->id()?>"><?= implode(' / ', $torrent->labelList()) ?></a>
+            &raquo; <?= $torrent->shortLabelLink() ?>
         </td>
         <td class="td_file_count"><?=$torrent->fileTotal()?></td>
         <td class="td_time nobr"><?=time_diff($torrent->uploadDate(), 1)?></td>

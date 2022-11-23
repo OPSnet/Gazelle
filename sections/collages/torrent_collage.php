@@ -240,10 +240,11 @@ foreach ($entryList as $tgroupId) {
                 . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                     <?= $Twig->render('torrent/action-v2.twig', [
+                        'pl'      => true,
                         'torrent' => $torrent,
                         'viewer'  => $Viewer,
                     ]) ?>
-                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
 <?php   } else { ?>
             <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
                 . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
@@ -253,6 +254,7 @@ foreach ($entryList as $tgroupId) {
                 </td>
                 <td class="td_info">
                     <?= $Twig->render('torrent/action-v2.twig', [
+                        'pl'      => true,
                         'torrent' => $torrent,
                         'viewer'  => $Viewer,
                     ]) ?>

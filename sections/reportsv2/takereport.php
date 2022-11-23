@@ -18,7 +18,7 @@ if (is_null($torrent)) {
     error(404);
 }
 
-$reportMan = new Gazelle\Manager\Torrent\Report;
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 if ($reportMan->existsRecent($torrent->id(), $Viewer->id())) {
     error("Slow down, you're moving too fast!");
 }
@@ -59,8 +59,8 @@ if ($reportType->needLink() !== 'none') {
     $link = trim($_POST['link'] ?? '');
     if ($link === '' && $reportType->needLink() === 'required') {
         error("You must supply one or more links in your report");
-    } else {
-        if (!preg_match_all(URL_REGEXP, $_POST['link'], $match)) {
+    } elseif ($link != '') {
+        if (!preg_match_all(URL_REGEXP, $link, $match)) {
             error("The extra links you provided weren't links...");
         }
         $Links = implode(' ', $match[1]);
@@ -74,8 +74,8 @@ if ($reportType->needImage() !== 'none') {
         if ($reportType->needImage() === 'required') {
             error("You must supply one or more images in your report");
         }
-    } else {
-        if (!preg_match_all(IMAGE_REGEXP, trim($_POST['image']), $match)) {
+    } elseif ($image != '') {
+        if (!preg_match_all(IMAGE_REGEXP, $image, $match)) {
             error("The extra image links you provided weren't links to images...");
         }
         $Images = implode(' ', $match[1]);

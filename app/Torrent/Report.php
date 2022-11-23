@@ -4,7 +4,14 @@ namespace Gazelle\Torrent;
 
 class Report extends \Gazelle\BaseObject {
     protected array $info;
-    protected \Gazelle\Torrent|null|bool $torrent = false;
+    protected \Gazelle\TorrentAbstract|null|bool $torrent = false;
+
+    public function __construct(
+        int $id,
+        protected \Gazelle\Manager\Torrent $torMan,
+    ) {
+        parent::__construct($id);
+    }
 
     public function tableName(): string { return 'reportsv2'; }
     public function flush() {
@@ -109,9 +116,12 @@ class Report extends \Gazelle\BaseObject {
      * the torrent (even if the report knows the torrent id). This is why the
      * code must start from false and transition to either NULL or a Torrent.
      */
-    public function torrent(): ?\Gazelle\Torrent {
+    public function torrent(): ?\Gazelle\TorrentAbstract {
         if ($this->torrent === false) {
-            $this->torrent = (new \Gazelle\Manager\Torrent)->findById($this->torrentId());
+            $this->torrent = $this->torMan->findById($this->torrentId());
+            if (is_null($this->torrent)) {
+                $this->torrent = $this->torMan->findDeletedById($this->torrentId());
+            }
         }
         return $this->torrent;
     }

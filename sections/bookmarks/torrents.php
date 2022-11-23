@@ -251,10 +251,11 @@ foreach ($bookmarkList as $bm) {
             <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                 <?= $Twig->render('torrent/action-v2.twig', [
+                    'pl'      => true,
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                 ]) ?>
-                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->labelLink() ?>
+                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
                 </td>
                 <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
             </tr>

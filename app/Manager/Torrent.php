@@ -51,6 +51,14 @@ class Torrent extends \Gazelle\BaseManager {
         return $torrent;
     }
 
+    public function findDeletedById(int $torrentId): ?\Gazelle\TorrentDeleted {
+        $found = (bool)self::$db->scalar("
+            SELECT 1 FROM deleted_torrents WHERE ID = ?
+            ", $torrentId
+        );
+        return $found ? new \Gazelle\TorrentDeleted($torrentId) : null;
+    }
+
     public function findByInfohash(string $hash) {
         return $this->findById((int)self::$db->scalar("
             SELECT id FROM torrents WHERE info_hash = unhex(?)

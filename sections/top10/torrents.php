@@ -1,11 +1,11 @@
 <?php
 
-$reportMan = new Gazelle\Manager\Torrent\Report;
+$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $bookmark  = new Gazelle\User\Bookmark($Viewer);
 $snatcher  = new Gazelle\User\Snatch($Viewer);
 $imgProxy  = new Gazelle\Util\ImageProxy($Viewer);
 $top10     = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
-$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
 if (!empty($_GET['advanced']) && $Viewer->permitted('site_advanced_top10')) {
@@ -231,10 +231,12 @@ foreach ($context as $c) {
 <?php   } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action-v2.twig', [
+                    'pl'      => true,
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                 ]) ?>
-                <strong><?= $tgroup->link() ?></strong><br />[<?= $torrent->edition() ?>] [<?= implode(' / ', $torrent->labelList()) ?>]
+                <strong><?= $tgroup->link() ?></strong> <?= $torrent->shortLabelLink() ?>
+                <br />[<?= $torrent->edition() ?>]
 <?php   if ($torrent->hasReport($Viewer)) { ?>
                 - <strong class="torrent_label tl_reported">Reported</strong>
 <?php   } ?>

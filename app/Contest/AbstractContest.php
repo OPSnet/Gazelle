@@ -7,7 +7,8 @@ trait TorrentLeaderboard {
         $key = sprintf(\Gazelle\Contest::CONTEST_LEADERBOARD_CACHE_KEY,
             $this->id, (int)($offset/CONTEST_ENTRIES_PER_PAGE)
         );
-        if (($leaderboard = self::$cache->get_value($key)) === false) {
+        $leaderboard = self::$cache->get_value($key);
+        if ($leaderboard === false) {
             self::$db->prepared_query("
                 SELECT
                     l.user_id,
@@ -30,7 +31,7 @@ trait TorrentLeaderboard {
             for ($i = 0, $leaderboardCount = count($leaderboard); $i < $leaderboardCount; $i++) {
                 $torrent = $torMan->findById($leaderboard[$i]['last_entry_id']);
                 $leaderboard[$i]['last_entry_link']
-                    = $torrent->link() . ' [' . $torrent->label() . ']';
+                    = $torrent->groupLink() . ' ' . $torrent->label();
             }
             self::$cache->cache_value($key, $leaderboard, 3600);
         }

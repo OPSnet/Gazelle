@@ -26,16 +26,15 @@
             <td>{{ r.uploader.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.reporter.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.resolver.username ?? '<i>unclaimed</i>'|raw }}</td>
-            <td>{% if r.torrent %}
-                    {% if r.torrent.hasTGroup %}
-                        {{ r.torrent.group.link|raw }}
-                    {% else %}
-                        <i>Deleted/Merged Group #{{ r.torrent.groupId }}</i>
-                    {% endif %}
-                    <br />[{{ r.torrent.shortLabel }}]
+            <td>
+                {% if r.torrent.isDeleted %}<i>Deleted {% endif %}
+                {% if r.torrent.hasTGroup %}
+                    {{ r.torrent.groupLink|raw }} {{ r.torrent.edition}}
                 {% else %}
-                    <a href="log.php?search=Torrent+{{ r.torrent_id }}">Deleted Torrent #{{ r.torrent_id }}</a>
+                    <i>Deleted/Merged Group #{{ r.torrent.groupId }}</i>
                 {% endif %}
+                <br />{{ r.torrent.label|raw }}
+                {% if r.torrent.isDeleted %}</i>{% endif %}
             </td>
             <td class="nowrap">{{ name_cache[r.Type] }}</td>
             <td>{{ r.ReportedTime|time_diff }}</td>

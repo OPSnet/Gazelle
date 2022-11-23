@@ -5,7 +5,7 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 $userMan       = new Gazelle\Manager\User;
-$reportMan     = new Gazelle\Manager\Torrent\Report;
+$reportMan     = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $categories    = $reportMan->categories();
 
@@ -62,10 +62,9 @@ if (!$filter) {
 } else {
     $reportMan->setSearchFilter($filter);
     $paginator->setTotal($reportMan->searchTotal());
-    $list = $reportMan->searchList(new Gazelle\Manager\Torrent, $userMan, $paginator->limit(), $paginator->offset());
+    $list = $reportMan->searchList($userMan, $paginator->limit(), $paginator->offset());
 }
 
-try {
 echo $Twig->render('reportsv2/search.twig', [
     'paginator'   => $paginator,
     'list'        => $list,
@@ -79,6 +78,3 @@ echo $Twig->render('reportsv2/search.twig', [
     'reporter'    => $_GET['reporter'] ?? null,
     'uploader'    => $_GET['uploader'] ?? null,
 ]);
-} catch (\Exception $e) {
-echo $e->getMessage();
-}
