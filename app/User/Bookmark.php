@@ -302,6 +302,23 @@ class Bookmark extends \Gazelle\BaseUser {
         }
     }
 
+    public function removeSnatched(): int {
+        self::$db->prepared_query("
+            DELETE b
+            FROM bookmarks_torrents AS b
+            INNER JOIN (
+                SELECT DISTINCT t.GroupID
+                FROM torrents AS t
+                INNER JOIN xbt_snatched AS s ON (s.fid = t.ID)
+                WHERE s.uid = ?
+            ) AS s USING (GroupID)
+            WHERE b.UserID = ?
+            ", $this->user->id(), $this->user->id()
+        );
+        self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
+        return self::$db->affected_rows();
+    }
+
     protected function updateRequests(int $requestId) {
         self::$db->prepared_query("
             SELECT UserID FROM bookmarks_requests WHERE RequestID = ?
