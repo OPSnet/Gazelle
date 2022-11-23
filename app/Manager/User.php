@@ -1414,4 +1414,12 @@ class User extends \Gazelle\BaseManager {
         }
         return $list;
     }
+
+    public function checkPassword(string $password): string {
+        return $password === ''
+            || (bool)self::$db->scalar("
+                SELECT 1 FROM bad_passwords WHERE Password = ?
+                ", $password
+            ) ? 'false' : 'true';
+    }
 }
