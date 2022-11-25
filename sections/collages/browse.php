@@ -57,6 +57,7 @@ echo $Twig->render('collage/browse.twig', [
     'input'     => $_GET,
     'page'      => $search->page($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
+    'personal'  => (new Gazelle\Manager\Collage)->findPersonalByUserId($Viewer->id()),
     'search'    => $search,
     'viewer'    => $Viewer,
 ]);

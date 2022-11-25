@@ -14,7 +14,7 @@
     {% if search.userLink %}
         <h2>{{ search.userLink|raw }} &rsaquo; {% if search.isContributor %}Collage contributions{% else %}Collages{% endif %}</h2>
     {% else %}
-        <h2>{% if page %}Collage contributions{% else %}Collages{% endif %}</h2>
+        <h2>{% if search.isFilteredView %}Collage contributions{% else %}Collages{% endif %}</h2>
     {% endif %}
 {% endif %}
     </div>
@@ -46,18 +46,17 @@
                 <tr id="tagfilter">
                     <td class="label">Tags (comma-separated):</td>
                     <td>
-                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{% if viewer.hasAutocomplete('other') %} data-gazelle-autocomplete="true"{% endif %} /><br />
-                        <label><input type="radio" name="tags_type" value="0"{{ checked(not search.isTagAll) }} /> Any</label>&nbsp;&nbsp;
+                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{% if viewer.hasAutocomplete('other') %} data-gazelle-autocomplete="true"{% endif %} />
+                        <br /><br />
                         <label><input type="radio" name="tags_type" value="1"{{ checked(search.isTagAll) }} /> All</label>
+                        <label><input type="radio" name="tags_type" value="0"{{ checked(not search.isTagAll) }} /> Any</label>&nbsp;&nbsp;
                     </td>
                 </tr>
                 <tr id="categories">
                     <td class="label">Categories:</td>
                     <td>
-    {% for id, name in constant('COLLAGE') %}
-                        <span style=" white-space: nowrap;">
-                        <label><input type="checkbox" class="collagecat" value="1" name="cats[{{ id }}]"{{ checked(search.isSelectedCategory(id)) }} /> {{ name }}</label>
-                        </span>
+    {% for id, name in constant('COLLAGE')|sort %}
+                        <label class="cat-choice"><input type="checkbox" class="collagecat" value="1" name="cats[{{ id }}]"{{ checked(search.isSelectedCategory(id)) }} /> {{ name }}</label>
         {% if loop.index % 5 %}&nbsp;&nbsp;&nbsp;{% else %}<br />{% endif %}
     {% endfor %}
                         <br />
@@ -94,12 +93,12 @@
 
     <div class="linkbox">
 {% if not is_bookmark %}
-    {% set active = viewer.activePersonalCollages %}
     {% if viewer.canCreatePersonalCollage or viewer.permitted('site_collages_create') %}
         <a href="collages.php?action=new" class="brackets">New collage</a>
     {% endif %}
+    {% set active = personal|length %}
     {% if active == 1 %}
-        <a href="collages.php?id={{ viewer.personalCollages.0.0.0 }}" class="brackets">Personal collage</a>
+        <a href="collages.php?id={{ personal[0].id }}" class="brackets">Personal collage</a>
     {% elseif active > 1 %}
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
     {% endif %}

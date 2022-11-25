@@ -34,7 +34,7 @@
 {% endfor %}
                     </select>
                     <br />
-{% if viewer.permitted('site_collages_create') %}can general<br />{% endif %}
+{% if viewer.permitted('site_collages_create') %}<br />{% endif %}
 {% include 'collage/description.twig' with {
         'general_allowed': viewer.permitted('site_collages_create'),
         'personal_allowed': viewer.canCreatePersonalCollage,

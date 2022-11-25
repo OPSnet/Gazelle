@@ -55,17 +55,20 @@ class TGroup extends AbstractCollage {
                 continue;
             }
             $this->groupIds[] = $groupId;
-            $roleList = $tgroup->artistRole()->roleList();
-            foreach (['main', 'conductor', 'composer', 'dj'] as $role) {
-                foreach ($roleList[$role] as $artistInfo) {
-                    if (!isset($this->artists[$artistInfo['id']])) {
-                        $this->artists[$artistInfo['id']] = [
-                            'count' => 0,
-                            'id'    => $artistInfo['id'],
-                            'name'  => $artistInfo['name'],
-                        ];
+            $artistRole = $tgroup->artistRole();
+            if ($artistRole) {
+                $roleList = $artistRole->roleList();
+                foreach (['main', 'conductor', 'composer', 'dj'] as $role) {
+                    foreach ($roleList[$role] as $artistInfo) {
+                        if (!isset($this->artists[$artistInfo['id']])) {
+                            $this->artists[$artistInfo['id']] = [
+                                'count' => 0,
+                                'id'    => $artistInfo['id'],
+                                'name'  => $artistInfo['name'],
+                            ];
+                        }
+                        $this->artists[$artistInfo['id']]['count']++;
                     }
-                    $this->artists[$artistInfo['id']]['count']++;
                 }
             }
 

@@ -30,6 +30,10 @@ class Collage extends \Gazelle\Base {
         return $this->header;
     }
 
+    public function isFilteredView(): bool {
+        return count($this->where) > 1;
+    }
+
     public function isBookmarkView(): bool {
         return $this->bookmarkView;
     }
