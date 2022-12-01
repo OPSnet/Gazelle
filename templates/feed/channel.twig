@@ -1,9 +1,7 @@
-$Site = SITE_URL . '/';
-<title>{{ title }} :: {{ constant('SITE_NAME') }} </title>
+<title>{{ title }} :: {{ constant('SITE_NAME') }}</title>
 <link>{{ constant('SITE_URL') }}/</link>
 <description>{{ description }}</description>
 <language>en-us</language>
 <lastBuildDate>{{ date }}</lastBuildDate>
 <docs>http://blogs.law.harvard.edu/tech/rss</docs>
-<generator>Orpheus Feed Class</generator>
-
+<generator>{{ constant('SITE_NAME') }} Feed Class</generator>

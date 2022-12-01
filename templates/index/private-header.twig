@@ -18,7 +18,7 @@
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_news{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - News" />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_blog{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Blog" />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_changelog{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Change Log" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ viewer.announce_key}}{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - P.T.N." />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ viewer.announceKey }}{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - P.T.N." />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_all{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - All Torrents" />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_music{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Music Torrents" />
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_apps{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - Application Torrents" />
@@ -34,7 +34,7 @@
 <link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless24{{ auth_args|raw }}" title="{{ constant('SITE_NAME') }} - 24bit Lossless Torrents" />
 {% if viewer.permitted('site_torrents_notify') %}
 {%     for id, name in viewer.notifyFilters %}
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ id }}_{{ viewer.announce_key }}{{ auth_args|raw }}&amp;name={{ name }}" title="{{ constant('SITE_NAME') }} - {{ name }}" />
+<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ id }}_{{ viewer.announceKey }}{{ auth_args|raw }}&amp;name={{ name }}" title="{{ constant('SITE_NAME') }} - {{ name }}" />
 {%     endfor %}
 {% endif %}
 

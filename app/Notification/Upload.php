@@ -169,7 +169,7 @@ class Upload extends \Gazelle\Base {
      *
      * @return int Number of users notified
      */
-    public function trigger(int $groupId, int $torrentId, \Feed $feed, string $item): int {
+    public function trigger(int $groupId, int $torrentId, \Gazelle\Feed $feed, string $item): int {
         $results = $this->lookup();
         $nr = count($results);
         $file = $this->debug ? (TMPDIR . "/notification.$torrentId") : '/dev/null';

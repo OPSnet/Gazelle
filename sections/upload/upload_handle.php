@@ -843,11 +843,12 @@ if (defined('AJAX')) {
     }
 
     // TODO: this is copy-pasted
-    $Feed = new Feed;
+    $Feed = new Gazelle\Feed;
     $Item = $Feed->item(
         $Title,
         Text::strip_bbcode($Properties['GroupDescription']),
-        "torrents.php?action=download&amp;id={$TorrentID}&amp;torrent_pass=[[PASSKEY]]",
+        "torrents.php?action=download&id={$TorrentID}&torrent_pass=[[PASSKEY]]",
+        date('r'),
         $Viewer->username(),
         'torrents.php?id=' . $GroupID,
         implode(',', $tagList)
@@ -960,11 +961,12 @@ if (!$IsNewGroup) {
 
 if (!in_array('notifications', $Viewer->paranoia())) {
     // For RSS
-    $Feed = new Feed;
+    $Feed = new Gazelle\Feed;
     $Item = $Feed->item(
         $Title,
         Text::strip_bbcode($Properties['GroupDescription']),
-        "torrents.php?action=download&amp;id={$TorrentID}&amp;torrent_pass=[[PASSKEY]]",
+        "torrents.php?action=download&id={$TorrentID}&torrent_pass=[[PASSKEY]]",
+        date('r'),
         $Viewer->username(),
         'torrents.php?id=' . $GroupID,
         implode(',', $tagList)

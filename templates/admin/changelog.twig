@@ -31,7 +31,7 @@
 {% for change in list %}
     <div class="box box2 change_log_entry">
         <div class="head">
-            <span>{{ change.date }} by {{ change.author }}</span>
+            <span>{{ change.created }} by {{ change.author }}</span>
     {% if viewer.permitted('users_mod') %}
             <span style="float: right;">
                 <form id="delete_{{ change.id }}" method="post" action="">
