@@ -21,10 +21,11 @@ if ($NewRequest && ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->per
 $RequestTaxPercent = REQUEST_TAX * 100;
 
 if (!$NewRequest && !isset($ReturnEdit)) {
-    $Request = Requests::get_request($RequestID);
-    if ($Request === false) {
+    $request = (new Gazelle\Manager\Request)->findById($RequestID);
+    if (is_null($request)) {
         error(404);
     }
+    $Request = Requests::get_request($RequestID);
 
     // Define these variables to simplify _GET['groupid'] requests later on
     $CategoryID = $Request['CategoryID'];
@@ -34,8 +35,7 @@ if (!$NewRequest && !isset($ReturnEdit)) {
     $ReleaseType = $Request['ReleaseType'];
     $GroupID = $Request['GroupID'];
 
-    $VoteArray = Requests::get_votes_array($RequestID);
-    $VoteCount = count($VoteArray['Voters']);
+    $VoteCount = $request->userVotedTotal();
     $IsFilled = !empty($Request['TorrentID']);
     $ownRequest = $Viewer->id() == $Request['UserID'];
     $CanEdit = (!$IsFilled && $ownRequest && $VoteCount < 2)
@@ -384,19 +384,19 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr id="voting">
                     <td class="label">Bounty (MiB)</td>
                     <td>
-                        <input type="text" id="amount_box" size="8" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
+                        <input type="text" id="amount_box" size="8" value="<?= !empty($Bounty) ? $Bounty : REQUEST_MIN ?>" />
                         <select id="unit" name="unit" onchange="Calculate();">
                             <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MiB</option>
                             <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GiB</option>
                         </select>
                         <?= REQUEST_TAX > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
-                        <p>Bounty must be greater than or equal to 100 MiB.</p>
+                        <p>Bounty must be greater than or equal to <?= REQUEST_MIN ?> MiB.</p>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Bounty information</td>
                     <td>
-                        <input type="hidden" id="amount" name="amount" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
+                        <input type="hidden" id="amount" name="amount" value="<?= !empty($Bounty) ? $Bounty : REQUEST_MIN * 1024 * 1024 ?>" />
                         <input type="hidden" id="current_uploaded" value="<?=$Viewer->uploadedSize()?>" />
                         <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
                         <input type='hidden' id='request_tax' value="<?=REQUEST_TAX?>" />
@@ -404,7 +404,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             ? 'Bounty after tax: <strong><span id="bounty_after_tax">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span></strong><br />'
                             : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>
-                        If you add the entered <strong><span id="new_bounty">100.00 MiB</span></strong> of bounty, your new stats will be: <br />
+                        If you add the entered <strong><span id="new_bounty"><?= REQUEST_MIN ?>.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
                         Ratio: <span id="new_ratio"><?=Format::get_ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize())?></span>
                     </td>

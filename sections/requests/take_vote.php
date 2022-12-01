@@ -13,7 +13,7 @@ if (is_null($request)) {
     echo "missing";
 } elseif ($request->isFilled()) {
     echo "filled";
-} elseif(!$request->vote($Viewer, max((int)($_GET['amount'] ?? 0), REQUEST_MIN))) {
+} elseif(!$request->vote($Viewer, max((int)($_GET['amount'] ?? 0), REQUEST_MIN * 1024 * 1024))) {
     echo "bankrupt";
 } else {
     echo "success";

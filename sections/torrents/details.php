@@ -25,6 +25,7 @@ $collageMan    = new Gazelle\Manager\Collage;
 $torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$requestMan    = new Gazelle\Manager\Request;
 $userMan       = new Gazelle\Manager\User;
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher      = new Gazelle\User\Snatch($Viewer);
@@ -671,8 +672,7 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
                 </tr>
 <?php
     foreach ($Requests as $Request) {
-        $RequestVotes = Requests::get_votes_array($Request['ID']);
-
+        $request = $requestMan->findById($Request['ID']);
         if ($Request['BitrateList'] != '') {
             $BitrateString = implode(', ', explode('|', $Request['BitrateList']));
             $FormatString = implode(', ', explode('|', $Request['FormatList']));
@@ -689,12 +689,12 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
                 <tr class="requestrows <?=(++$i % 2 ? 'rowa' : 'rowb')?>">
                     <td><a href="requests.php?action=view&amp;id=<?=$Request['ID']?>"><?=$FormatString?> / <?=$BitrateString?> / <?=$MediaString?></a></td>
                     <td>
-                        <span id="vote_count_<?=$Request['ID']?>"><?=count($RequestVotes['Voters'])?></span>
+                        <span id="vote_count_<?=$Request['ID']?>"><?= $request->userVotedTotal() ?></span>
 <?php       if ($Viewer->permitted('site_album_votes')) { ?>
                         &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$Request['ID']?>)" class="brackets">+</a>
 <?php       } ?>
                     </td>
-                    <td><?=Format::get_size($RequestVotes['TotalBounty'])?></td>
+                    <td><?= Format::get_size($request->bountyTotal()) ?></td>
                 </tr>
 <?php } ?>
             </table>

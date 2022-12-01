@@ -239,43 +239,4 @@ class Requests {
         }
         return $Results;
     }
-
-    public static function get_votes_array($RequestID) {
-        global $Cache, $DB;
-        $RequestVotes = $Cache->get_value("request_votes_$RequestID");
-        if (!is_array($RequestVotes)) {
-            $QueryID = $DB->get_query_id();
-            $DB->prepared_query('
-                SELECT
-                    rv.UserID,
-                    rv.Bounty,
-                    u.Username
-                FROM requests_votes AS rv
-                LEFT JOIN users_main AS u ON (u.ID = rv.UserID)
-                WHERE rv.RequestID = ?
-                ORDER BY rv.Bounty DESC',
-                $RequestID);
-            if (!$DB->has_results()) {
-                return [
-                    'TotalBounty' => 0,
-                    'Voters' => []
-                ];
-            }
-            $Votes = $DB->to_array();
-
-            $RequestVotes = [];
-            $RequestVotes['TotalBounty'] = array_sum($DB->collect('Bounty'));
-
-            $VotesArray = [];
-            foreach ($Votes as $Vote) {
-                list($UserID, $Bounty, $Username) = $Vote;
-                $VotesArray[] = ['UserID' => $UserID, 'Username' => $Username, 'Bounty' => $Bounty];
-            }
-
-            $RequestVotes['Voters'] = $VotesArray;
-            $Cache->cache_value("request_votes_$RequestID", $RequestVotes);
-            $DB->set_query_id($QueryID);
-        }
-        return $RequestVotes;
-    }
 }

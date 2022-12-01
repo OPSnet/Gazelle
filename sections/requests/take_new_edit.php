@@ -25,16 +25,13 @@ if ($NewRequest) {
         error(403);
     }
 } else {
-    $RequestID = (int)$_POST['requestid'];
-    if (!$RequestID) {
+    $request = (new Gazelle\Manager\Request)->findById((int)($_POST['requestid'] ?? 0));
+    if (is_null($request)) {
         error(404);
     }
+    $RequestID = $request->id();
     $Request = Requests::get_request($RequestID);
-    if ($Request === false) {
-        error(404);
-    }
-    $VoteArray = Requests::get_votes_array($RequestID);
-    $VoteCount = count($VoteArray['Voters']);
+    $VoteCount = $request->userVotedTotal();
     $IsFilled = !empty($Request['TorrentID']);
 
     $CanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2)
@@ -52,8 +49,8 @@ if ($NewRequest) {
         $Bounty = trim($_POST['amount']);
         if (!intval($Bounty)) {
             $Err = 'Your entered bounty is not a number';
-        } elseif ($Bounty < 100 * 1024 * 1024) {
-            $Err = 'Minimum bounty is 100 MiB.';
+        } elseif ($Bounty < REQUEST_MIN * 1024 * 1024) {
+            $Err = 'Minimum bounty is ' . REQUEST_MIN . ' MiB.';
         }
         $Bytes = $Bounty; //From MiB to B
     }

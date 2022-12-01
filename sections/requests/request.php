@@ -296,7 +296,7 @@ if ($request->tgroupId()) {
                     <span id="votecount"><?=number_format($request->userVotedTotal()) ?></span>
 <?php if ($request->canVote($Viewer)) { ?>
                     &nbsp;&nbsp;<a href="javascript:Vote(0)" class="brackets"><strong>+</strong></a>
-                    <strong>Costs <?=Format::get_size(REQUEST_MIN)?></strong>
+                    <strong>Costs <?= REQUEST_MIN ?> MiB</strong>
 <?php } ?>
                 </td>
             </tr>
@@ -318,7 +318,7 @@ if ($request->canVote($Viewer)) {
                         <option value="gb">GiB</option>
                     </select>
                     <?= REQUEST_TAX > 0 ? "<strong>" . REQUEST_TAX * 100 . "% of this is deducted as tax by the system.</strong>" : '' ?>
-                    <p>Bounty must be greater than or equal to 100 MiB.</p>
+                    <p>Bounty must be greater than or equal to <?= REQUEST_MIN ?> MiB.</p>
                 </td>
             </tr>
             <tr>

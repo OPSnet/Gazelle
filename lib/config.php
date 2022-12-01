@@ -343,7 +343,7 @@ defined('BYTES_PER_FREELEECH_TOKEN') or define('BYTES_PER_FREELEECH_TOKEN', 512 
 defined('FREELEECH_TOKEN_EXPIRY_DAYS') or define('FREELEECH_TOKEN_EXPIRY_DAYS', 30);
 
 // How much buffer does a request vote represent?
-defined('REQUEST_MIN') or define('REQUEST_MIN', 100 * 1024 * 1024); // 100 MiB
+defined('REQUEST_MIN') or define('REQUEST_MIN', 100); // in MiB
 
 // How much request buffer is removed as tax? (0 = none, 0.1 = 10%, 0.25 = 25% and so on).
 defined('REQUEST_TAX') or define('REQUEST_TAX', 0.0);

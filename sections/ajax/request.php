@@ -3,22 +3,20 @@ $RequestTax = REQUEST_TAX;
 
 // Minimum and default amount of upload to remove from the user when they vote.
 // Also change in static/functions/requests.js
-$MinimumVote = 20 * 1024 * 1024;
+$MinimumVote = REQUEST_MIN * 1024 * 1024;
 
 /*
  * This is the page that displays the request to the end user after being created.
  */
 
-$requestId = (int)($_GET['id'] ?? 0);
-if (!$requestId) {
+$request = (new Gazelle\Manager\Request)->findById((int)($_GET['id'] ?? 0));
+if (is_null($request)) {
     json_die("failure");
 }
+$requestId = $request->id();
 
 //First things first, lets get the data for the request.
 $Request = Requests::get_request($requestId);
-if ($Request === false) {
-    json_die("failure");
-}
 
 $userMan = new Gazelle\Manager\User;
 
@@ -41,22 +39,18 @@ if ($CategoryName == 'Music') {
 }
 
 //Votes time
-$RequestVotes = Requests::get_votes_array($requestId);
-$VoteCount = count($RequestVotes['Voters']);
+$VoteCount = $request->userVotedTotal();
 $UserCanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2);
 $CanEdit = ($UserCanEdit || $Viewer->permitted('site_moderate_requests'));
 
 $JsonTopContributors = [];
-$VoteMax = ($VoteCount < 5 ? $VoteCount : 5);
-for ($i = 0; $i < $VoteMax; $i++) {
-    $User = array_shift($RequestVotes['Voters']);
+foreach (array_slice($request->userVoteList($userMan), 0, 5) as $vote) {
     $JsonTopContributors[] = [
-        'userId'   => (int)$User['UserID'],
-        'userName' => $User['Username'],
-        'bounty'   => (int)$User['Bounty']
+        'userId'   => $vote['user_id'],
+        'userName' => $vote['user']->username(),
+        'bounty'   => $vote['bounty'],
     ];
 }
-reset($RequestVotes['Voters']);
 
 $commentPage = new Gazelle\Comment\Request($requestId);
 if (isset($_GET['page'])) {
@@ -107,7 +101,7 @@ json_print('success', [
     'voteCount'       => $VoteCount,
     'lastVote'        => $Request['LastVote'],
     'topContributors' => $JsonTopContributors,
-    'totalBounty'     => $RequestVotes['TotalBounty'],
+    'totalBounty'     => $request->bountyTotal(),
     'categoryId'      => $CategoryID,
     'categoryName'    => $CategoryName,
     'title'           => $Request['Title'],
