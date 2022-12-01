@@ -136,26 +136,6 @@ function safeFilename(string $name): string {
 }
 
 /**
- * This function formats a string containing a torrent's remaster information.
- *
- * @param string  $RemasterTitle - the title of the remaster information
- * @param string  $RemasterYear - the year of the remaster information
- * @return string remaster info
- */
-function remasterInfo($RemasterTitle, $RemasterYear): string {
-    if ($RemasterTitle != '' && $RemasterYear != '') {
-        $info = "$RemasterTitle - $RemasterYear";
-    } elseif ($RemasterTitle != '' && $RemasterYear == '') {
-        $info = $RemasterTitle;
-    } elseif ($RemasterTitle == '' && $RemasterYear != '') {
-        $info = $RemasterYear;
-    } else {
-        return '';
-    }
-    return " &lsaquo;{$info}&rsaquo;";
-}
-
-/**
  * Determine the redirect header to use based on the client HTTP_REFERER or fallback
  *
  * @param string $fallback URL to use HTTP_REFERER is empty
