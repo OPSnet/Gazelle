@@ -26,9 +26,8 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 <div class="thin">
     <h3>OS</h3>
     <div class="box pad">
-        <span style="width: 70px; display: inline-block">Uptime:</span> {{ uptime.uptime|raw }} <br />
-        <span style="width: 70px; display: inline-block">Idle time:</span> {{ uptime.idletime|raw }} <br /><br />
-
+        <span style="width: 70px; display: inline-block">Uptime:</span> {{ site_info.uptime.uptime|raw }} <br />
+        <span style="width: 70px; display: inline-block">Idle time:</span> {{ site_info.uptime.idletime|raw }} <br /><br />
         <span style="width: 100px; display: inline-block">User:</span> {{ uid }} <br />
         <span style="width: 100px; display: inline-block">Group:</span> {{ euid }} <br />
         <span style="width: 100px; display: inline-block">Effective User:</span> {{ euid }} <br />
@@ -50,7 +49,7 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
     <div class="box pad">
         Version: {{ php_version }} <br />
         <a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br />
-        <div id="phpinfo">{{ phpinfo|raw }}</div>
+        <div id="phpinfo">{{ site_info.phpinfo|raw }}</div>
     </div>
 
     <h3>Mysql</h3>
@@ -60,34 +59,36 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>Git</h3>
     <div class="box pad">
-        <span style="width: 150px; display: inline-block;">Branch:</span> {{ git_branch }}<br />
-        <span style="width: 150px; display: inline-block;">Local Hash:</span> {{ git_hash }}<br />
-        <span style="width: 150px; display: inline-block;">Remote Hash:</span> {{ git_hash_remote }}
+        <span style="width: 150px; display: inline-block;">Branch:</span> {{ site_info.gitBranch }}<br />
+        <span style="width: 150px; display: inline-block;">Local Hash:</span> {{ site_info.gitHash }}<br />
+        <span style="width: 150px; display: inline-block;">Remote Hash:</span> {{ site_info.gitHashRemote }}
     </div>
 
     <h3>Tables lacking a primary key</h3>
     <div class="box pad">
-{% if no_pk is empty %}
-    <p>All tables have a primary key defined</p>
-{% else %}
+{% for table in site_info.tablesWithoutPK %}
+    {% if loop.first %}
     <ul class="stats nobullet">
-    {% for table in no_pk %}
+    {% endif %}
         <li><a href="/tools.php?action=database_specifics&table={{ table }}">{{ table }}</a></li>
-    {% endfor %}
+    {% if loop.last %}
     </ul>
-{% endif %}
+    {% endif %}
+{% else %}
+    <p>All tables have a primary key defined</p>
+{% endfor %}
     </div>
 
     <h3>Composer</h3>
     <div class="box pad">
-        Composer Version: {{ composer_version }}<br />
+        Composer Version: {{ site_info.composerVersion }}<br />
         <table>
             <tr class="colhead">
                 <td>Package</td>
                 <td>Requirement</td>
                 <td>Installed</td>
             </tr>
-{% for p in package %}
+{% for p in site_info.composerPackages %}
             <tr>
                 <td>{{ p.name }}</td>
                 <td>{{ p.require }}</td>
@@ -99,14 +100,14 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>Phinx</h3>
     <div class="box pad">
-        {{ phinx.version }}<br />
+        {{ site_info.phinx.version }}<br />
         <table>
             <tr class='colhead'>
                 <td>Status</td>
                 <td>Migration ID</td>
                 <td>Migration Name</td>
             </tr>
-{% for m in phinx.migration %}
+{% for m in site_info.phinx.migration %}
             <tr>
                 <td>{{ m.migration_status }}</td>
                 <td>{{ m.migration_id }}</td>

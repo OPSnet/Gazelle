@@ -12,8 +12,6 @@ function gid ($id) {
     return sprintf("%s(%d)", posix_getgrgid($id)['name'], $id);
 }
 
-$info = new Gazelle\SiteInfo;
-
 if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
     $config = new Gazelle\UserRank\Configuration(RANKING_WEIGHT);
     $names = array_keys(RANKING_WEIGHT);
@@ -35,20 +33,12 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'uid'              => uid(posix_getuid()),
         'gid'              => gid(posix_getgid()),
         'euid'             => uid(posix_geteuid()),
-        'egid'             => uid(posix_getegid()),
+        'egid'             => gid(posix_getegid()),
         'openssl_strong'   => $strong,
-        'uptime'           => $info->uptime(),
+        'mysql_version'    => $DB->scalar('SELECT @@version'),
+        'php_version'      => phpversion(),
+        'site_info'        => new Gazelle\SiteInfo,
         'timestamp_php'    => date('Y-m-d H:i:s'),
         'timestamp_db'     => $DB->scalar("SELECT now()"),
-        'phpinfo'          => $info->phpinfo(),
-        'php_version'      => phpversion(),
-        'git_branch'       => $info->gitBranch(),
-        'git_hash'         => $info->gitHash(),
-        'git_hash_remote'  => $info->gitHashRemote(),
-        'composer_version' => $info->composerVersion(),
-        'package'          => $info->composerPackages(),
-        'phinx'            => $info->phinx(),
-        'mysql_version'    => $DB->scalar('SELECT @@version'),
-        'no_pk'            => $info->tablesWithoutPK(),
     ]);
 }
