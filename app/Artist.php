@@ -91,8 +91,12 @@ class Artist extends Base {
         }
     }
 
-    public function url(): string {
+    public function location(): string {
         return 'artist.php?id=' . $this->id;
+    }
+
+    public function url(): string {
+        return htmlentities($this->location());
     }
 
     public function link(): string {

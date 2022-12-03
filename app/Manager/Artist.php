@@ -67,6 +67,22 @@ class Artist extends \Gazelle\BaseManager {
         return $id ? new \Gazelle\Artist($id, $revisionId): null;
     }
 
+    public function findRandom(): ?\Gazelle\Artist {
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT r1.artist_id
+                FROM artist_usage r1,
+                (SELECT rand() * max(artist_id) AS artist_id FROM artist_usage) AS r2
+                WHERE r1.artist_id >= r2.artist_id
+                    AND r1.role in ('1', '3', '4', '5', '6', '7')
+                GROUP BY r1.artist_id
+                HAVING sum(r1.uses) >= ?
+                LIMIT 1
+                ", RANDOM_ARTIST_MIN_ENTRIES
+            )
+        );
+    }
+
     public function fetchArtistIdAndAliasId(string $name): ?array {
         self::$db->prepared_query('
             SELECT AliasID, ArtistID, Redirect, Name

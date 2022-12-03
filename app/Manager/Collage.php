@@ -48,6 +48,26 @@ class Collage extends \Gazelle\BaseManager {
         ));
     }
 
+    public function findRandom(): ?\Gazelle\Collage {
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT r1.ID
+                FROM collages AS r1,
+                    (
+                        SELECT rand() * max(ID) AS ID
+                        FROM collages
+                        WHERE Deleted = '0'
+                            AND NumTorrents >= ?
+                    ) AS r2
+                WHERE r1.ID >= r2.ID
+                    AND r1.Deleted = '0'
+                    AND NumTorrents >= ?
+                LIMIT 1
+                ", RANDOM_COLLAGE_MIN_ENTRIES, RANDOM_COLLAGE_MIN_ENTRIES
+            )
+        );
+    }
+
     public function findPersonalByUserId(int $userId): array {
         self::$db->prepared_query("
             SELECT ID

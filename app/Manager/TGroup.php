@@ -46,12 +46,27 @@ class TGroup extends \Gazelle\BaseManager {
     /**
      * Map a torrenthash to a group id
      */
-    public function findByTorrentInfohash(string $hash) {
+    public function findByTorrentInfohash(string $hash): ?\Gazelle\TGroup {
         $id = self::$db->scalar("
             SELECT GroupID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );
         return $id ? new \Gazelle\TGroup($id) : null;
+    }
+
+    public function findRandom(): ?\Gazelle\TGroup {
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT r1.ID
+                FROM torrents_group AS r1
+                INNER JOIN torrents t ON (r1.ID = t.GroupID)
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID AND tls.Seeders >= ?),
+                (SELECT rand() * max(ID) AS ID FROM torrents_group) AS r2
+                WHERE r1.ID >= r2.ID
+                LIMIT 1
+                ", RANDOM_TORRENT_MIN_SEEDS
+            )
+        );
     }
 
     /**
