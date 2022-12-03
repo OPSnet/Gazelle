@@ -538,8 +538,8 @@ class User extends BaseObject {
         return $this->info()['Email'];
     }
 
-    public function infoProfile() {
-        return $this->info()['Info'];
+    public function infoProfile(): string {
+        return $this->info()['Info'] ?? '';
     }
 
     public function infoTitle(): string {
