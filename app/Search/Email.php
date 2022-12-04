@@ -35,7 +35,7 @@ class Email extends \Gazelle\Base {
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE {$this->name} (
                 email varchar(255) NOT NULL PRIMARY KEY
-            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
         ");
         return $this;
     }
