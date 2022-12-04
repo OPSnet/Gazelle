@@ -40,7 +40,6 @@ $heading = new \Gazelle\Util\SortableTableHeader('joined', [
 ]);
 
 echo $Twig->render('user/invited.twig', [
-    'auth'           => $user->auth(),
     'edit_source'    => ($_GET['edit'] ?? '') === 'source',
     'heading'        => $heading,
     'invited'        => $user->inviteList($heading->getOrderBy(), $heading->getOrderDir()),
@@ -50,6 +49,5 @@ echo $Twig->render('user/invited.twig', [
     'own_profile'    => $ownProfile,
     'user'           => $user,
     'user_source'    => $invSourceMan->userSource($userId),
-    'view_pool'      => $user->permitted('users_view_invites'),
     'wiki_article'   => 116,
 ]);

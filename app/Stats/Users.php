@@ -258,12 +258,11 @@ class Users extends \Gazelle\Base {
      * @return bool Yes we can
      */
     public function newUsersAllowed(\Gazelle\User $user): bool {
-        return $user->canInvite()
-            && (
-                   USER_LIMIT === 0
-                || $this->enabledUserTotal() < USER_LIMIT
-                || $user->permitted('site_can_invite_always')
-            );
+        return (
+               USER_LIMIT === 0
+            || $this->enabledUserTotal() < USER_LIMIT
+            || $user->permitted('site_can_invite_always')
+        );
     }
 
     public function activityStat(): array {

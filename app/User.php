@@ -2137,15 +2137,16 @@ class User extends BaseObject {
      *  - invites not disabled
      *  - not on ratio watch
      *  - leeching privs not suspended
-     *  - has at least one invite to spend
      *
      * @return boolean false if they have been naughty, otherwise true
      */
     public function canInvite(): bool {
-        return !$this->onRatioWatch()
-            && $this->canLeech()
-            && ($this->unusedInviteTotal() || $this->permitted('site_send_unlimited_invites'))
-            ;
+        return $this->permitted('site_send_unlimited_invites')
+            || (
+                  !$this->onRatioWatch()
+                && $this->canLeech()
+                && $this->canPurchaseInvite()
+            );
     }
 
     /**
