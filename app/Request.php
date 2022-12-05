@@ -176,7 +176,7 @@ class Request extends BaseObject {
     }
 
     public function canEditOwn(User $user): bool {
-        return !$this->isFilled() && $user->id() == $this->userId() && count($this->userIdVoteList()) < 2;
+        return !$this->isFilled() && $user->id() == $this->userId() && $this->userVotedTotal() < 2;
     }
 
     public function canEdit(User $user): bool {
@@ -232,6 +232,11 @@ class Request extends BaseObject {
 
     public function fillDate(): ?string {
         return $this->info()['TimeFilled'];
+    }
+
+    public function userVote(User $user): ?array {
+        $vote =  array_filter($this->userIdVoteList(), fn ($r) => $r['user_id'] === $user->id());
+        return $vote ? current($vote) : null;
     }
 
     public function isFilled(): bool {
@@ -500,6 +505,8 @@ class Request extends BaseObject {
    }
 
     public function fill(User $user, Torrent $torrent): int {
+        $bounty = $this->bountyTotal();
+        self::$db->begin_transaction();
         self::$db->prepared_query("
             UPDATE requests SET
                 TimeFilled = now(),
@@ -516,10 +523,9 @@ class Request extends BaseObject {
                 ", $torrent->id(), $user->id(), $this->id
             ), false
         );
+        self::$db->commit();
 
-        $bounty = $this->bountyTotal();
         $user->addBounty($bounty);
-
         $name = $torrent->group()->displayNameText();
         $message = "One of your requests&nbsp;&mdash;&nbsp;[url=requests.php?action=view&amp;id="
             . $this->id . "]$name" . "[/url]&nbsp;&mdash;&nbsp;has been filled. You can view it here: [pl]"
