@@ -156,7 +156,7 @@ class User extends BaseObject {
         $this->info['NavItems']    = array_map('trim', explode(',', $this->info['NavItems'] ?? ''));
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
-        $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: [];
+        $this->info['SiteOptions'] = $this->info['SiteOptions'] ? unserialize($this->info['SiteOptions']) : [];
         if (!isset($this->info['SiteOptions']['HttpsTracker'])) {
             $this->info['SiteOptions']['HttpsTracker'] = true;
         }
