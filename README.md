@@ -119,6 +119,19 @@ for both Composer and NPM, run this when powering it up:
 
 `ENV=prod docker-compose up`
 
+#### Gitlab CI testrunner
+`Dockerfile-gitlab` can be used to create a Docker container suitable for
+running the test suite in a Gitlab CI runner. The included `.gitlab-ci.yml`
+config runs unit tests with phpunit and afterwards end-to-end tests with
+cypress.
+
+To build the container, get the sql files from the OPSnet/gazelle-e2e-testing-docker
+repo and place them alongside the `Dockerfile-gitlab`. Then run
+
+    docker build -f Dockerfile-gitlab -t gazelle-e2e-testing:latest --compress .
+
+in the gazelle repo's root directory (this one).
+
 ## Contact and Discussion
 Feel free to join #develop on irc.orpheus.network to discuss any
 questions concerning Gazelle (or any of the repos published by

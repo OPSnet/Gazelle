@@ -1,0 +1,108 @@
+stages:
+  - test
+
+# in gitlab you should define these variables:
+#   MYSQL_DATABASE - database name prefix
+#   MYSQL_PASSWORD - mysql user password
+#   MYSQL_USER - mysql username
+#   MYSQL_ROOT_PASSWORD - mysql root password
+#   PG_DATABASE - postgres database
+#   PG_PASSWORD - postgres user password
+#   PG_USER - postgres username
+#
+# optional variables that can be set:
+#   WAIT_ON_FINISH - sleep for 1h after successful execution, useful for debugging
+#   MYSQL_INIT_DB - create fresh DB with phinx, don't restore sql dump
+
+variables:
+  POSTGRES_DATABASE: ${PG_DATABASE}_${CI_COMMIT_SHORT_SHA}
+  POSTGRES_USER: $PG_USER
+  POSTGRES_PASSWORD: $PG_PASSWORD
+  MYSQL_DATABASE: ${MYSQL_DATABASE}_${CI_COMMIT_SHORT_SHA}
+  MYSQL_USER: $MYSQL_USER
+  MYSQL_PASSWORD: $MYSQL_PASSWORD
+  MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+  MEMCACHED_NAMESPACE: $CI_COMMIT_SHORT_SHA
+
+e2e-tests:
+  stage: test
+  image:
+    name: gazelle-e2e-testing
+    #entrypoint: ["/bin/bash", "/var/www/.docker/web/entrypoint-testing.sh"]
+    entrypoint: [""]
+  services:
+    - name: memcached:1.6.17-alpine
+      alias: memcached
+    - name: postgres:14.6-alpine
+      alias: postgres
+    - name: percona:ps-8.0.29-21
+      alias: mysql
+      command:
+        - --group-concat-max-len=1048576
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_0900_ai_ci
+        - --userstat=on
+        - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+        # neither sphinxsearch or ocelot are compatible with the mysql8 caching_sha2_password plugin
+        - --authentication-policy=mysql_native_password
+  variables:
+    ENV: dev
+    MYSQL_HOST: mysql
+    PGHOST: postgres
+    POSTGRES_DB_USER: gazelle
+    PGUSER: $POSTGRES_DB_USER
+    PGDATABASE: $POSTGRES_DATABASE
+    #ELECTRON_RUN_AS_NODE: 1
+  cache:
+    - key:
+        files:
+          - composer.json
+          - composer.lock
+        prefix: vendor
+      paths:
+        - vendor
+        - .composer
+    - key:
+        files:
+          - package.json
+          - yarn.lock
+        prefix: yarn
+      paths:
+        - node_modules
+        - .yarn-cache
+    - key:
+        files:
+          - .docker/sphinxsearch/sphinx.conf
+        prefix: sphinx
+      paths:
+        - .sphinxsearch
+  coverage: /^\s*Lines:\s*\d+.\d+\%/
+  script:
+    - sed -i 's|gazelle\.php|gazelle-coverage.php|' public/index.php
+    - /bin/bash "${CI_PROJECT_DIR}/.docker/web/entrypoint-testing.sh"
+    - su gazelle -c "composer exec -- phpunit --coverage-php /tmp/coverage/phpunit.cov"
+    - yarn run cypress run
+    # note: phpcov has problems if .cov files are somewhere in the src tree
+    - su gazelle -c '/opt/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'
+    - test "$WAIT_ON_FINISH" && sleep 3600 || exit 0
+
+# Sonarqube main image: mc1arke/sonarqube-with-community-branch-plugin:9.5-community
+# scanner requires SONAR_HOST_URL and SONAR_TOKEN
+#sonarqube:
+#  stage: analysis
+#  image:
+#    name: sonarsource/sonar-scanner-cli:latest
+#    entrypoint: [""]
+#  variables:
+#    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+#    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+#  cache:
+#    key: "${CI_JOB_NAME}"
+#    paths:
+#      - .sonar/cache
+#  script:
+#    - sonar-scanner -Dsonar.qualitygate.wait=true
+#  allow_failure: true
+#  only:
+#    - merge_requests
+#    - master

@@ -1,12 +1,14 @@
+/*
 create role nyala with password 'nyalapw' login;
 
 create database gz with owner nyala;
 
 \c gz nyala
+*/
 
 create extension pg_trgm;
 
-create schema geo authorization nyala;
+create schema geo authorization CURRENT_ROLE;
 
 create table geo.asn (
     id_asn bigint not null primary key,
