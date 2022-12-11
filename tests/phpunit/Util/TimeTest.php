@@ -16,7 +16,6 @@ class TimeTest extends TestCase {
 
     function providerTimestamp() {
         return [
-            ['0000-00-00 00:00:00', false],
             [null, false],
             ['not a valid timestamp', false],
             ['5', 5],
