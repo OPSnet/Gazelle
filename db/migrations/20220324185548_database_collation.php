@@ -6,7 +6,7 @@ use Phinx\Migration\AbstractMigration;
 final class DatabaseCollation extends AbstractMigration {
     public function change(): void {
         $this->query("
-            ALTER DATABASE gazelle CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+            ALTER DATABASE " . $this->adapter->getOptions()["name"] . " CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
             ALTER TABLE xbt_files_history CONVERT TO CHARACTER SET utf8mb4;
             ALTER TABLE xbt_snatched CONVERT TO CHARACTER SET utf8mb4;
             alter table api_applications COLLATE utf8mb4_0900_ai_ci;
