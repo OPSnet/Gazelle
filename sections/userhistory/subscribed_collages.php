@@ -4,10 +4,10 @@ if (!$Viewer->permitted('site_collages_subscribe')) {
     error(403);
 }
 
-$ShowAll = !empty($_GET['showall']);
+$viewAll = (bool)($_GET['showall'] ?? 0);
 $collMan = new Gazelle\Manager\Collage;
-$groupSubs  = $collMan->subscribedGroupCollageList($Viewer->id(), !$ShowAll);
-$artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), !$ShowAll);
+$groupSubs  = $collMan->subscribedTGroupCollageList($Viewer->id(), $viewAll);
+$artistSubs = $collMan->subscribedArtistCollageList($Viewer->id(), $viewAll);
 
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
@@ -19,9 +19,9 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= $Viewer->link() ?> &rsaquo; Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
+        <h2><?= $Viewer->link() ?> &rsaquo; Subscribed collages<?=($viewAll ? '' : ' with new additions')?></h2>
         <div class="linkbox">
-<?php if ($ShowAll) { ?>
+<?php if ($viewAll) { ?>
             <br /><br />
             <a href="userhistory.php?action=subscribed_collages&amp;showall=0" class="brackets">Only display collages with new additions</a>&nbsp;&nbsp;&nbsp;
 <?php } else { ?>
@@ -33,14 +33,14 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     </div>
 <?php if (!count($groupSubs)) { ?>
     <div class="center">
-        No subscribed collages<?=($ShowAll ? '' : ' with new additions')?>
+        No subscribed collages<?=($viewAll ? '' : ' with new additions')?>
     </div>
 <?php
 } else {
     $ShowGroups = 0;
     foreach ($groupSubs as $s) {
         $GroupIDs = $s['groupIds'];
-        $NewCount = count($GroupIDs);
+        $new = $viewAll ? 0 : count($GroupIDs);
         $first = true;
         foreach ($GroupIDs as $GroupID) {
             $tgroup = $tgMan->findById($GroupID);
@@ -54,12 +54,15 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     <tr class="colhead_dark">
         <td>
             <span style="float: left;">
-                <strong><a href="collages.php?id=<?= $s['collageId'] ?>"><?= $s['name'] ?></a></strong> (<?=$NewCount?> new torrent<?= plural($NewCount) ?>)
+                <strong><a href="collages.php?id=<?= $s['collageId'] ?>"><?= $s['name'] ?></a></strong>
+<?php           if (!$viewAll) { ?>
+                (<?=$new?> new torrent<?= plural($new) ?>)
+<?php           } ?>
             </span>
             <span style="float: right;">
-<?php if ($NewCount) { ?>
+<?php if ($new) { ?>
                 <a href="#" onclick="$('#discog_table_<?= $s['collageId'] ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=
-                $ShowAll ? 'Show' : 'Hide' ?></a>
+                $viewAll ? 'Show' : 'Hide' ?></a>
                 &nbsp;&nbsp;&nbsp;
                 <a href="userhistory.php?action=catchup_collages&amp;auth=<?= $Viewer->auth() ?>&amp;collageid=<?= $s['collageId'] ?>" class="brackets">Catch up</a>
                 &nbsp;&nbsp;&nbsp;
@@ -69,7 +72,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         </td>
     </tr>
 </table>
-<table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $s['collageId'] ?>">
+<table class="torrent_table<?=$viewAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $s['collageId'] ?>">
     <tr class="colhead">
         <td width="1%"><!-- expand/collapse --></td>
         <td class="m_th_left" width="70%"><strong>Torrents</strong></td>
@@ -182,21 +185,24 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 
 if ($artistSubs) {
 ?>
-        <h2>Subscribed artist collages<?=($ShowAll ? '' : ' with new additions')?></h2>
+        <h2>Subscribed artist collages<?=($viewAll ? '' : ' with new additions')?></h2>
 <?php
     foreach ($artistSubs as $s) {
-        $new = count($s['artistIds']);
+        $new = $viewAll ? 0 : count($s['artistIds']);
 ?>
 <table style="margin-top: 8px;" class="subscribed_collages_table">
     <tr class="colhead_dark">
         <td>
             <span style="float: left;">
-                <strong><a href="collages.php?id=<?= $s['collageId'] ?>"><?= $s['name'] ?></a></strong> (<?= $new ?> new artist<?= plural($new) ?>)
+                <strong><a href="collages.php?id=<?= $s['collageId'] ?>"><?= $s['name'] ?></a></strong>
+<?php           if (!$viewAll) { ?>
+                (<?= $new ?> new artist<?= plural($new) ?>)
+<?php           } ?>
             </span>
             <span style="float: right;">
 <?php   if ($new) { ?>
                 <a href="#" onclick="$('#discog_table_<?= $s['collageId'] ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=
-                    $ShowAll ? 'Show' : 'Hide' ?></a>
+                    $viewAll ? 'Show' : 'Hide' ?></a>
                 &nbsp;&nbsp;&nbsp;
                 <a href="userhistory.php?action=catchup_collages&amp;auth=<?= $Viewer->auth() ?>&amp;collageid=<?= $s['collageId'] ?>" class="brackets">Catch up</a>
                 &nbsp;&nbsp;&nbsp;
@@ -206,7 +212,7 @@ if ($artistSubs) {
         </td>
     </tr>
 </table>
-<table class="artist_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $s['collageId'] ?>">
+<table class="artist_table<?=$viewAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $s['collageId'] ?>">
 <?php   foreach ($s['artistIds'] as $artistId) { ?>
     <tr class="colhead">
         <td><?= (new Gazelle\Artist($artistId))->link() ?></td>

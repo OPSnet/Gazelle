@@ -299,14 +299,14 @@ class Collage extends \Gazelle\BaseManager {
         return $autocomplete;
     }
 
-    public function subscribedGroupCollageList(int $userId, bool $showRecent): array {
+    public function subscribedTGroupCollageList(int $userId, bool $viewAll): array {
         $cond = ['s.UserID = ?'];
         $args = [$userId];
-        if ($showRecent) {
+        if ($viewAll) {
+            $groupIds = 'min(ct.GroupID)';
+        } else {
             $cond[] = 'ct.AddedOn > s.LastVisit';
             $groupIds = 'group_concat(ct.GroupID ORDER BY ct.AddedOn)';
-        } else {
-            $groupIds = 'group_concat(if(ct.AddedOn > s.LastVisit, ct.GroupID, NULL) ORDER BY ct.AddedOn)';
         }
         self::$db->prepared_query("
             SELECT c.ID       AS collageId,
@@ -329,14 +329,14 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function subscribedArtistCollageList(int $userId, bool $showRecent): array {
+    public function subscribedArtistCollageList(int $userId, bool $viewAll): array {
         $cond = ['s.UserID = ?'];
         $args = [$userId];
-        if ($showRecent) {
+        if ($viewAll) {
+            $artistIds = 'min(ca.ArtistID)';
+        } else {
             $cond[] = 'ca.AddedOn > s.LastVisit';
             $artistIds = 'group_concat(ca.ArtistID ORDER BY ca.AddedOn)';
-        } else {
-            $artistIds = 'group_concat(if(ca.AddedOn > s.LastVisit, ca.ArtistID, NULL) ORDER BY ca.AddedOn)';
         }
         self::$db->prepared_query("
             SELECT c.ID       AS collageId,
