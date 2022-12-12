@@ -546,13 +546,18 @@ if (!$torrentList) {
         if ($delta > 1576800000) {
 ?>
                             <br />Last active: Never
-<?php   } elseif ($delta >= 1209600) { // If last active is >= 2 weeks ago, output in bold ?>
+<?php   } elseif ($delta >= 86400 * 14) { ?>
                             <br /><strong>Last active: <?=time_diff($torrent->lastActiveDate()); ?></strong>
 <?php   } else { ?>
                             <br />Last active: <?= time_diff($torrent->lastActiveDate()); ?>
 <?php
         }
-        if (($delta >= 345678 && $torrent->lastReseedRequest() && time() - strtotime($torrent->lastReseedRequest()) >= 864000)
+        if ($delta >= 86400 * 3
+            && (
+                is_null($torrent->lastReseedRequest())
+                ||
+                time() - strtotime($torrent->lastReseedRequest()) >= 864000
+            )
             || $Viewer->permitted('users_mod')
         ) {
 ?>
