@@ -487,9 +487,9 @@ abstract class TorrentAbstract extends BaseObject {
                     $label[] = '<span class="tooltip" style="float: none" title="There is a logifile in the torrent, but it has not been uploaded to the site!">Log</span>';
                 } else {
                     if (isset($this->viewer) && $this->viewer->isStaff()) {
-                        $label[] = "(<a href=\"torrents.php?action=viewlog&torrentid={$this->id}&groupid={$this->groupId()}\">Log {$info['LogScore']}%)</a>";
+                        $label[] = "<a href=\"torrents.php?action=viewlog&torrentid={$this->id}&groupid={$this->groupId()}\">Log ({$info['LogScore']}%)</a>";
                     } else {
-                        $label[] = "(Log {$info['LogScore']}%)";
+                        $label[] = "Log ({$info['LogScore']}%)";
                     }
                 }
             }

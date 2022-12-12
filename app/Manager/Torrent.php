@@ -681,10 +681,10 @@ class Torrent extends \Gazelle\BaseManager {
         if ($hasLog) {
             $log = 'Log';
             if ($hasLogDb) {
-                $log .= " {$logScore}%";
+                $log .= " ({$logScore}%)";
             }
             $meta[] = "$log";
         }
-        return ' (' . implode('/', $meta) . ')';
+        return ' ' . implode('/', $meta);
     }
 }
