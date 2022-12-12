@@ -14,6 +14,7 @@ class ForumPost extends BaseObject {
     public function flush() {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->thread()->flush();
+        $this->info = [];
     }
 
     public function location(): string {
