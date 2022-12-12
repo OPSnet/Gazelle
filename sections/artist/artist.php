@@ -386,7 +386,7 @@ if ($sections = $Artist->sections()) {
                             . $torrent->fullName() . " $torrentId [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
                     ],
                 ]) ?>
-                &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
+                &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->label() ?>
             </td>
             <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
         </tr>
