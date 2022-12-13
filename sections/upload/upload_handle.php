@@ -333,11 +333,15 @@ $torrent = $torMan->findByInfohash(bin2hex($InfoHash));
 if ($torrent) {
     $torrentId = $torrent->id();
     if ($torrentFiler->exists($torrentId)) {
-        $Err = "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
+        $Err = defined('AJAX')
+           ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
+           : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
     } else {
         // A lost torrent
         $torrentFiler->put($bencoder->getEncode(), $torrentId);
-        $Err = "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>";
+        $Err = defined('AJAX')
+            ? "Thank you for fixing this torrent (torrentid=$torrentId)"
+            : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>";
     }
 }
 
@@ -386,9 +390,9 @@ foreach ($FileList as $FileInfo) {
     $TmpFileList[] = $torMan->metaFilename($Name, $Size);
 }
 if (count($TooLongPaths) > 0) {
-    $Err = 'The torrent contained one or more files with too long a name: <ul>'
-        . implode('', $TooLongPaths)
-        . '</ul><br />';
+    $Err = defined('AJAX')
+        ? ['The torrent contained one or more files with too long a name', ['list' => $TooLongPaths]]
+        : ('The torrent contained one or more files with too long a name: <ul>' . implode('', $TooLongPaths) . '</ul><br />');
 }
 $Debug->set_flag('upload: torrent decoded');
 
@@ -424,7 +428,9 @@ if ($isMusicUpload) {
                 $Err = $checker->checkFile($categoryName, $ExtraName);
             }
             if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($ExtraDirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
-                $Err = "The torrent contained one or more files with too long of a name: <br />$ExtraDirName/$ExtraName";
+                $Err = defined('AJAX')
+                    ? "The torrent contained one or more files with too long a name: $ExtraDirName/$ExtraName"
+                    : "The torrent contained one or more files with too long a name: <br />$ExtraDirName/$ExtraName";
                 break;
             }
             $ExtraTmpFileList[] = $torMan->metaFilename($ExtraName, $ExtraSize);
@@ -443,10 +449,14 @@ if ($isMusicUpload) {
         if ($torrent) {
             $torrentId = $torrent->id();
             if ($torrentFiler->exists($torrentId)) {
-                $Err = "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
+                $Err = defined('AJAX')
+                   ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
+                   : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
             } else {
                 $torrentFiler->put($ThisInsert['TorEnc'], $torrentId);
-                $Err = "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent.</a>";
+                $Err = defined('AJAX')
+                    ? "Thank you for fixing this torrent (torrentid=$torrentId)"
+                    : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>";
             }
         }
     }
