@@ -532,23 +532,15 @@ if ($Viewer->permitted('users_give_donor')) {
 
 // Requests
 if (!$Viewer->disableRequests() && check_paranoia_here('requestsvoted_list')) {
-    $SphQL = new SphinxqlQuery();
-    $SphQLResult = $SphQL->select('id, votes, bounty')
-        ->from('requests, requests_delta')
-        ->where('userid', $UserID)
-        ->where('torrentid', 0)
-        ->order_by('votes', 'desc')
-        ->order_by('bounty', 'desc')
-        ->limit(0, 100, 100) // Limit to 100 requests
-        ->sphinxquery();
-    if ($SphQLResult->has_results()) {
-        $SphRequests = $SphQLResult->to_array('id', MYSQLI_ASSOC);
+    $requestList = (new Gazelle\Manager\Request)->findUnfilledByUser($User, 100);
+    $hide = count($requestList) > 5;
+    if ($requestList) {
 ?>
         <div class="box" id="requests_box">
             <div class="head">
-                Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">View</a>
+                Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">Toggle</a>
             </div>
-            <div id="requests" class="request_table hidden">
+            <div id="requests" class="request_table <?= $hide ? ' hidden' : '' ?>">
                 <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
                     <tr class="colhead_dark">
                         <td style="width: 48%;">
@@ -566,48 +558,29 @@ if (!$Viewer->disableRequests() && check_paranoia_here('requestsvoted_list')) {
                     </tr>
 <?php
         $Row = 'a';
-        $Requests = Requests::get_requests(array_keys($SphRequests));
-        foreach ($SphRequests as $RequestID => $SphRequest) {
-            $Request = $Requests[$RequestID];
-            $VotesCount = $SphRequest['votes'];
-            $Bounty = $SphRequest['bounty'] * 1024; // Sphinx stores bounty in kB
-            $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
-
-            if ($CategoryName == 'Music') {
-                $ArtistForm = Requests::get_artists($RequestID);
-                $ArtistLink = Artists::display_artists($ArtistForm, true, true);
-                $FullName = "$ArtistLink<a href=\"requests.php?action=view&amp;id=$RequestID\">{$Request['Title']} [{$Request['Year']}]</a>";
-            } elseif ($CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\">{$Request['Title']} [{$Request['Year']}]</a>";
-            } else {
-                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\">{$Request['Title']}</a>";
-            }
+        foreach ($requestList as $request) {
 ?>
                     <tr class="row<?=$Row === 'b' ? 'a' : 'b'?>">
                         <td>
-                            <?=$FullName ?>
+                            <?= $request->smartLink() ?>
                             <div class="tags">
-<?php
-            $Tags = $Request['Tags'];
-            $TagList = [];
-            foreach ($Tags as $TagID => $TagName) {
-                $TagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
-            }
-?>
-                                <?= implode(', ', $TagList) ?>
+                                <?= implode(', ', array_map(
+                                    fn ($tag) => "<a href=\"requests.php?tags=$tag\">" . display_str($tag) . '</a>',
+                                    $request->tagNameList()
+                                )) ?>
                             </div>
                         </td>
                         <td>
-                            <span id="vote_count_<?=$RequestID?>"><?=$VotesCount?></span>
+                            <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>
 <?php            if ($Viewer->permitted('site_vote')) { ?>
-                            &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets">+</a>
+                            &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $request->id() ?>)" class="brackets">+</a>
 <?php            } ?>
                         </td>
                         <td>
-                            <span id="bounty_<?=$RequestID?>"><?=Format::get_size($Bounty)?></span>
+                            <span id="bounty_<?= $request->id() ?>"><?= Format::get_size($request->bountyTotal()) ?></span>
                         </td>
                         <td>
-                            <?=time_diff($Request['TimeAdded']) ?>
+                            <?= time_diff($request->created()) ?>
                         </td>
                     </tr>
 <?php        } ?>
