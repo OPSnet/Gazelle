@@ -1,56 +1,5 @@
 <?php
 class Requests {
-    /**
-     * Update the sphinx requests delta table for a request.
-     *
-     * @param int $RequestID
-     */
-    public static function update_sphinx_requests($RequestID) {
-        global $Cache, $DB;
-        $QueryID = $DB->get_query_id();
-
-        $DB->prepared_query("
-            SELECT REPLACE(t.Name, '.', '_')
-            FROM tags AS t
-            INNER JOIN requests_tags AS rt ON t.ID = rt.TagID
-            WHERE rt.RequestID = ?", $RequestID);
-        $TagList = $DB->collect(0, false);
-
-        $DB->prepared_query('
-            REPLACE INTO sphinx_requests_delta (
-                ID, UserID, TimeAdded, LastVote, CategoryID, Title,
-                Year, ReleaseType, CatalogueNumber, RecordLabel, BitrateList,
-                FormatList, MediaList, LogCue, FillerID, TorrentID,
-                TimeFilled, Visible, Votes, Bounty, TagList)
-            SELECT
-                ID, r.UserID, UNIX_TIMESTAMP(TimeAdded) AS TimeAdded,
-                UNIX_TIMESTAMP(LastVote) AS LastVote, CategoryID, Title,
-                Year, ReleaseType, CatalogueNumber, RecordLabel, BitrateList,
-                FormatList, MediaList, LogCue, FillerID, TorrentID,
-                UNIX_TIMESTAMP(TimeFilled) AS TimeFilled, Visible,
-                COUNT(rv.UserID) AS Votes, SUM(rv.Bounty) >> 10 AS Bounty,
-                ?
-            FROM requests AS r
-            LEFT JOIN requests_votes AS rv ON rv.RequestID = r.ID
-            WHERE r.ID = ?
-            GROUP BY r.ID',
-            implode(' ', $TagList), $RequestID);
-        $DB->prepared_query("
-            UPDATE sphinx_requests_delta
-            SET ArtistList = (
-                    SELECT GROUP_CONCAT(aa.Name SEPARATOR ' ')
-                    FROM requests_artists AS ra
-                        JOIN artists_alias AS aa ON aa.AliasID = ra.AliasID
-                    WHERE ra.RequestID = $RequestID
-                    GROUP BY NULL
-                    )
-            WHERE ID = ?", $RequestID);
-        $DB->set_query_id($QueryID);
-
-        $Cache->delete_value("request_$RequestID");
-    }
-
-
 
     /**
      * Function to get data from an array of $RequestIDs. Order of keys doesn't matter (let's keep it that way).

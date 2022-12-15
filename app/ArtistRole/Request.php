@@ -42,6 +42,16 @@ class Request extends \Gazelle\ArtistRole {
         return $list;
     }
 
+    public function nameList(): array {
+        $list = [];
+        foreach ($this->idList() as $role => $artistList) {
+            foreach ($artistList as $artist) {
+                $list[$artist['name']] = true;
+            }
+        }
+        return array_keys($list);
+    }
+
     public function roleList(): array {
         if (!isset($this->artistList)) {
             $this->artistList = $this->artistList();

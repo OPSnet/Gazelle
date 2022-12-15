@@ -155,9 +155,9 @@ if (isset($_POST['confirm'])) {
         }
     }
     if (!empty($Requests)) {
+        $reqMan = new Gazelle\Manager\Request;
         foreach ($Requests as $RequestID) {
-            $Cache->delete_value("request_artists_$RequestID");
-            Requests::update_sphinx_requests($RequestID);
+            $reqMan->findById($RequestID)?->updateSphinx();
         }
     }
     if (!empty($BookmarkUsers)) {

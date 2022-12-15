@@ -288,7 +288,7 @@ class Artist extends Base {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function rename(int $userId, int $aliasId, string $name): void {
+    public function rename(int $userId, int $aliasId, string $name, Manager\Request $reqMan): void {
         self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, UserID, Redirect)
@@ -331,8 +331,7 @@ class Artist extends Base {
             ", $targetId, $aliasId
         );
         foreach ($requests as $requestId) {
-            self::$cache->delete_value("request_artists_$requestId"); // Delete request artist cache
-            \Requests::update_sphinx_requests($requestId);
+            $reqMan->findById($requestId)->updateSphinx();
         }
     }
 
@@ -757,7 +756,7 @@ class Artist extends Base {
         self::$cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
     }
 
-    public function removeSimilar(int $similarId): bool {
+    public function removeSimilar(int $similarId, Manager\Artist $artMan, Manager\Request $reqMan): bool {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             SELECT ArtistID FROM artists_similar WHERE SimilarID = ?
@@ -780,10 +779,10 @@ class Artist extends Base {
             DELETE FROM artists_similar WHERE SimilarID = ?
             ", $similarId
         );
-        $manager = new Manager\Artist;
         foreach ($artistIds as $id) {
-            $manager->findById($id)->flushCache();
             self::$cache->delete_value("similar_positions_$id");
+            $artMan->findById($id)?->flushCache();
+            $reqMan->findById($id)?->updateSphinx();
         }
         self::$db->commit();
         return true;

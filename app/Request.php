@@ -337,6 +337,10 @@ class Request extends BaseObject {
         return $this->info()['GroupID'];
     }
 
+    public function tagNameToSphinx(): string {
+        return implode(' ', array_map(fn ($t) => str_replace('.', '_', $t), $this->tagNameList()));
+    }
+
     public function title(): string {
         return $this->info()['Title'];
     }
@@ -494,7 +498,7 @@ class Request extends BaseObject {
             ", $user->id()
         );
 
-        $this->refreshSphinxDelta();
+        $this->updateSphinx();
         self::$db->commit();
 
         $this->flush();
@@ -516,7 +520,7 @@ class Request extends BaseObject {
             ", $user->id(), $torrent->id(), $this->id
         );
         $updated = self::$db->affected_rows();
-        $this->refreshSphinxDelta();
+        $this->updateSphinx();
         (new \SphinxqlQuery())->raw_query(
             sprintf("
                 UPDATE requests, requests_delta SET torrentid = %d, fillerid = %d WHERE id = %d
@@ -566,7 +570,7 @@ class Request extends BaseObject {
             ", $this->id
         );
         $updated = self::$db->affected_rows();
-        $this->refreshSphinxDelta();
+        $this->updateSphinx();
         $filler->addBounty(-$bounty);
         self::$db->commit();
 
@@ -628,7 +632,7 @@ class Request extends BaseObject {
     /**
      * Refund the bounty of a user on a request
      */
-    public function refundBounty(int $userId, string $staffName) {
+    public function refundBounty(int $userId, string $staffName): int {
         $bounty = $this->userBounty($userId);
         self::$db->begin_transaction();
         self::$db->prepared_query("
@@ -636,7 +640,8 @@ class Request extends BaseObject {
             WHERE RequestID = ? AND UserID = ?
             ", $this->id, $userId
         );
-        if (self::$db->affected_rows() == 1) {
+        $affected = self::$db->affected_rows();
+        if ($affected) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("Refund of %s bounty (%s b) on %s by %s\n\n",
                 \Format::get_size($bounty), $bounty, $this->url(), $staffName
@@ -650,15 +655,16 @@ class Request extends BaseObject {
                 WHERE ui.UserId = ?
                 ", $bounty, $message, $userId
             );
+            self::$cache->delete_value("user_stats_$userId");
         }
         self::$db->commit();
-        self::$cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
+        return $affected;
     }
 
     /**
      * Remove the bounty of a user on a request
      */
-    public function removeBounty(int $userId, string $staffName) {
+    public function removeBounty(int $userId, string $staffName): int {
         $bounty = $this->userBounty($userId);
         self::$db->begin_transaction();
         self::$db->prepared_query("
@@ -666,7 +672,8 @@ class Request extends BaseObject {
             WHERE RequestID = ? AND UserID = ?
             ", $this->id, $userId
         );
-        if (self::$db->affected_rows() == 1) {
+        $affected = self::$db->affected_rows();
+        if ($affected) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("Removal of %s bounty (%s b) on %s by %s\n\n",
                 \Format::get_size($bounty), $bounty, $this->url(), $staffName
@@ -677,15 +684,16 @@ class Request extends BaseObject {
                 WHERE ui.UserId = ?
                 ", $message, $userId
             );
+            self::$cache->delete_value("user_stats_$userId");
         }
         self::$db->commit();
-        self::$cache->deleteMulti(["request_" . $this->id, "request_votes_" . $this->id]);
+        return $affected;
     }
 
     /**
      * Inform the filler of a request that their bounty was reduced
      */
-    public function informRequestFillerReduction(int $bounty, string $staffName) {
+    public function informRequestFillerReduction(int $bounty, string $staffName): int {
         [$fillerId, $fillDate] = self::$db->row("
             SELECT FillerID, date(TimeFilled)
             FROM requests
@@ -693,7 +701,7 @@ class Request extends BaseObject {
             ", $this->id
         );
         if (!$fillerId) {
-            return;
+            return 0;
         }
         $message = sprintf("Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
             \Format::get_size($bounty), $bounty, $this->url(), $staffName
@@ -707,18 +715,24 @@ class Request extends BaseObject {
             WHERE ui.UserId = ?
             ", $bounty, $message, $fillerId
         );
-        self::$cache->delete_value("user_stats_$fillerId");
-        (new Manager\User)->sendPM($fillerId, 0, "Bounty was reduced on a request you filled",
-            self::$twig->render('request/bounty-reduction.twig', [
-                'bounty'      => $bounty,
-                'fill_date'   => $fillDate,
-                'request_url' => $this->url(),
-                'staff_name'  => $staffName,
-            ])
-        );
+        $affected = self::$db->affected_rows();
+        if ($affected) {
+            (new Manager\User)->sendPM($fillerId, 0, "Bounty was reduced on a request you filled",
+                self::$twig->render('request/bounty-reduction.twig', [
+                    'bounty'      => $bounty,
+                    'fill_date'   => $fillDate,
+                    'request_url' => $this->url(),
+                    'staff_name'  => $staffName,
+                ])
+            );
+        }
+        return $affected;
     }
 
-    public function refreshSphinxDelta(): int {
+    /**
+     * Update the sphinx requests delta table.
+     */
+    public function updateSphinx(): int {
         self::$db->prepared_query("
             REPLACE INTO sphinx_requests_delta (
                 ID, UserID, TimeAdded, LastVote, CategoryID, Title,
@@ -726,30 +740,40 @@ class Request extends BaseObject {
                 FormatList, MediaList, LogCue, FillerID, TorrentID,
                 TimeFilled, Visible, Votes, Bounty, TagList, ArtistList)
             SELECT
-                r.ID, r.UserID, unix_timestamp(r.TimeAdded), unix_timestamp(r.LastVote), r.CategoryID, r.Title,
-                r.Year, r.ReleaseType, r.CatalogueNumber, r.RecordLabel, r.BitrateList,
-                r.FormatList, r.MediaList, r.LogCue, r.FillerID, r.TorrentID,
-                unix_timestamp(r.TimeFilled), r.Visible,
-                count(rv.UserID), sum(rv.Bounty) >> 10,
-                (
-                    SELECT group_concat(replace(t.Name, '.', '_') SEPARATOR ' ')
-                    FROM tags t
-                    INNER JOIN requests_tags AS rt ON (rt.TagID = t.ID AND rt.RequestID = ?)
-                ),
-                (
-                    SELECT group_concat(aa.Name SEPARATOR ' ')
-                    FROM requests_artists AS ra
-                    INNER JOIN artists_alias AS aa USING (AliasID)
-                    WHERE ra.RequestID = ?
-                    GROUP BY ra.RequestID
-                )
+                ID, r.UserID, UNIX_TIMESTAMP(TimeAdded) AS TimeAdded,
+                UNIX_TIMESTAMP(LastVote) AS LastVote, CategoryID, Title,
+                Year, ReleaseType, CatalogueNumber, RecordLabel, BitrateList,
+                FormatList, MediaList, LogCue, FillerID, TorrentID,
+                UNIX_TIMESTAMP(TimeFilled) AS TimeFilled, Visible,
+                COUNT(rv.UserID) AS Votes, SUM(rv.Bounty) >> 10 AS Bounty,
+                ?, ?
             FROM requests AS r
             LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID)
             WHERE r.ID = ?
             GROUP BY r.ID
-            ", $this->id, $this->id, $this->id
+            ", $this->tagNameToSphinx(), implode(' ', $this->artistRole()->nameList()), $this->id
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
+    }
+
+    public function updateBookmarkStats() {
+        self::$db->prepared_query("
+            SELECT UserID FROM bookmarks_requests WHERE RequestID = ?
+            ", $this->id
+        );
+        if (self::$db->record_count() > 100) {
+            // Sphinx doesn't like huge MVA updates. Update sphinx_requests_delta
+            // and live with the <= 1 minute delay if we have more than 100 bookmarkers
+            $this->updateSphinx();
+        } else {
+            (new \SphinxqlQuery)->raw_query(
+                "UPDATE requests, requests_delta SET bookmarker = ("
+                . implode(',', self::$db->collect('UserID'))
+                . ") WHERE id = {$this->id}"
+            );
+        }
     }
 
     public function remove(): bool {
@@ -777,7 +801,6 @@ class Request extends BaseObject {
             self::$cache->delete_value("artists_requests_$artistId");
         }
         $this->flush();
-
         return $affected != 0;
     }
 }

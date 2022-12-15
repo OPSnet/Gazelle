@@ -259,7 +259,6 @@ class Bookmark extends \Gazelle\BaseUser {
                     ", $id, $this->user->id()
                 );
                 self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
-                $this->updateRequests($id);
                 break;
             default:
                 self::$db->prepared_query("
@@ -289,17 +288,9 @@ class Bookmark extends \Gazelle\BaseUser {
         );
         self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
 
-        if (self::$db->affected_rows()) {
-            switch ($type) {
-            case 'torrent':
-                self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
-                (new \Gazelle\TGroup($id))->stats()->increment('bookmark_total', -1);
-                break;
-            case 'request':
-                $this->updateRequests($id);
-            default:
-                break;
-            }
+        if ($type === 'torrent' && self::$db->affected_rows()) {
+            self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
+            (new \Gazelle\TGroup($id))->stats()->increment('bookmark_total', -1);
         }
     }
 
@@ -318,24 +309,5 @@ class Bookmark extends \Gazelle\BaseUser {
         );
         self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
         return self::$db->affected_rows();
-    }
-
-    protected function updateRequests(int $requestId) {
-        self::$db->prepared_query("
-            SELECT UserID FROM bookmarks_requests WHERE RequestID = ?
-            ", $requestId
-        );
-        if (self::$db->record_count() > 100) {
-            // Sphinx doesn't like huge MVA updates. Update sphinx_requests_delta
-            // and live with the <= 1 minute delay if we have more than 100 bookmarkers
-            \Requests::update_sphinx_requests($requestId);
-        } else {
-            $SphQL = new \SphinxqlQuery();
-            $SphQL->raw_query(
-                "UPDATE requests, requests_delta SET bookmarker = ("
-                . implode(',', self::$db->collect('UserID'))
-                . ") WHERE id = $requestId"
-            );
-        }
     }
 }

@@ -439,6 +439,8 @@ if ($NewRequest) {
     $Cache->delete_value("request_artists_$RequestID");
 }
 
-Requests::update_sphinx_requests($RequestID);
+if (isset($request)) {
+    $request->updateSphinx();
+}
 
 header("Location: requests.php?action=view&id=$RequestID");

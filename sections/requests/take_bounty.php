@@ -67,13 +67,6 @@ foreach ($refund as $userId) {
 foreach ($remove as $userId) {
     $request->removeBounty($userId, $Viewer->username());
 }
-
-if ($request || $remove) {
-    $Cache->deleteMulti(array_merge(
-        ["request_$requestId", "request_votes_$requestId"],
-        array_map(fn($x) => "user_stats_$x", $refund)
-    ));
-    Requests::update_sphinx_requests($request->id());
-}
+$request->updateSphinx();
 
 header('Location: ' . $request->location());

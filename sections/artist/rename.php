@@ -21,6 +21,8 @@ if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
+$reqMan = new Gazelle\Manager\Request;
+
 $artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     error(404);
@@ -49,7 +51,7 @@ list($TargetAliasID, $TargetArtistID) = $DB->row("
 
 if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     // no merge, just rename
-    $artist->rename($Viewer->id(), $oldAliasId, $newName);
+    $artist->rename($Viewer->id(), $oldAliasId, $newName, $reqMan);
     $TargetArtistID = $ArtistID;
 } else {
     // Merge stuff
@@ -130,8 +132,7 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     );
     if (!empty($Requests)) {
         foreach ($Requests as $RequestID) {
-            $Cache->delete_value("request_artists_$RequestID");
-            Requests::update_sphinx_requests($RequestID);
+            $reqMan->findById($RequestID)?->updateSphinx();
         }
     }
     if ($ArtistID != $TargetArtistID) {
@@ -177,11 +178,8 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
             WHERE ArtistID = ?
             ", $ArtistID
         );
-        if (!empty($Requests)) {
-            foreach ($Requests as $RequestID) {
-                $Cache->delete_value("request_artists_$RequestID");
-                Requests::update_sphinx_requests($RequestID);
-            }
+        foreach ($Requests as $RequestID) {
+            $reqMan->findById($RequestID)?->updateSphinx();
         }
         (new \Gazelle\Manager\Comment)->merge('artist', $ArtistID, $TargetArtistID);
     }
