@@ -52,10 +52,7 @@ foreach (array_slice($request->userVoteList($userMan), 0, 5) as $vote) {
     ];
 }
 
-$commentPage = new Gazelle\Comment\Request($requestId);
-if (isset($_GET['page'])) {
-    $commentPage->setPageNum((int)$_GET['page']);
-}
+$commentPage = new Gazelle\Comment\Request($requestId, (int)($_GET['page'] ?? 1), (int)($_GET['post'] ?? 0));
 $thread = $commentPage->load()->thread();
 
 $authorCache = [];

@@ -3,10 +3,8 @@
 namespace Gazelle\Comment;
 
 abstract class AbstractComment extends \Gazelle\BaseObject {
-    protected $pageId;
     protected $userId;
     protected $lastRead = 0;
-    protected $pageNum;     // which page to view
     protected $total = 0;   // number of comments
     protected $thread = []; // the page of comments
     protected $viewer;
@@ -28,9 +26,12 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id);
     }
 
-    public function __construct(int $pageId) {
-        parent::__construct(0);
-        $this->pageId = $pageId;
+    public function __construct(
+        protected int $pageId,
+        protected int $pageNum,
+        protected int $id,
+    ) {
+        parent::__construct($id);
     }
 
     public function lastRead(): int {
@@ -72,16 +73,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return $this;
     }
 
-    public function setPageNum(int $pageNum) {
-        $this->pageNum = $pageNum;
-        return $this;
-    }
-
-    public function setPostId(int $id) {
-        $this->id = $id;
-        return $this;
-    }
-
     public function setViewer(\Gazelle\User $viewer) {
         $this->viewer = $viewer;
         return $this;
@@ -117,7 +108,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             self::$cache->cache_value($key, $this->total, 0);
         }
 
-        if (is_null($this->pageNum)) {
+        if (!$this->pageNum) {
             // default to final page, or page where specified post is found
             if (!$this->id) {
                 $this->pageNum = $this->total ? (int)ceil($this->total / TORRENT_COMMENTS_PER_PAGE) : 1;

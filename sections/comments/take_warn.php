@@ -11,16 +11,15 @@ foreach (['reason', 'privatemessage', 'body', 'length', 'postid'] as $var) {
     }
 }
 
-try {
-    $comment = (new Gazelle\Manager\Comment)->findById((int)($_REQUEST['postid'] ?? 0));
-} catch (\Gazelle\Exception\ResourceNotFoundException $e) {
+$comment = (new Gazelle\Manager\Comment)->findById((int)($_REQUEST['postid'] ?? 0));
+if (is_null($comment)) {
     error(404);
 }
-$user = new Gazelle\User($comment->userId());
-if ($user->classLevel() > $Viewer->classLevel()) {
+$userMan = new Gazelle\Manager\User;
+$user = $userMan->findById($comment->userId());
+if (is_null($user) || $user->classLevel() > $Viewer->classLevel()) {
     error(403);
 }
-$userMan = new Gazelle\Manager\User;
 
 $url = SITE_URL . '/' . $comment->url();
 $comment->setBody(trim($_POST['body']))->modify();

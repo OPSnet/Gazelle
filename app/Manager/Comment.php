@@ -27,18 +27,16 @@ class Comment extends \Gazelle\BaseManager {
             ", $postId
         );
         if (is_null($page)) {
-            throw new \Gazelle\Exception\ResourceNotFoundException($postId);
+            return null;
         }
         $className = $this->className($page);
-        return (new $className($pageId))->setPostId($postId);
+        return new $className($pageId, 0, $postId);
     }
 
     /**
      * Post a comment on an artist, request or torrent page.
-     *
-     * @return int ID of the new comment
      */
-    public function create(int $userId, string $page, int $pageId, string $body) {
+    public function create(int $userId, string $page, int $pageId, string $body): \Gazelle\Comment\AbstractComment {
         self::$db->prepared_query("
             INSERT INTO comments
                    (Page, PageID, AuthorID, Body)
@@ -66,7 +64,7 @@ class Comment extends \Gazelle\BaseManager {
         (new Subscription)->flush($page, $pageId);
 
         $className = $this->className($page);
-        return (new $className($pageId))->setPostId($postId);
+        return new $className($pageId, 0, $postId);
     }
 
     public function merge(string $page, int $pageId, int $targetPageId) {

@@ -9,12 +9,7 @@ $tgroupId = $tgroup->id();
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-$commentPage = new Gazelle\Comment\Torrent($tgroupId);
-if (isset($_GET['postid'])) {
-    $commentPage->setPostId((int)$_GET['postid']);
-} elseif (isset($_GET['page'])) {
-    $commentPage->setPageNum((int)$_GET['page']);
-}
+$commentPage = new Gazelle\Comment\Torrent($tgroupId, (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());

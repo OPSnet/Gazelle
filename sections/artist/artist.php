@@ -587,12 +587,7 @@ if (LASTFM_API_KEY) {
 ?>
     <div id="artistcomments">
 <?php
-$commentPage = new Gazelle\Comment\Artist($ArtistID);
-if (isset($_GET['postid'])) {
-    $commentPage->setPostId((int)$_GET['postid']);
-} elseif (isset($_GET['page'])) {
-    $commentPage->setPageNum((int)$_GET['page']);
-}
+$commentPage = new Gazelle\Comment\Artist($ArtistID, (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());

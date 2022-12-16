@@ -4,10 +4,7 @@ if (!$groupId) {
     json_die("failure");
 }
 
-$commentPage = new Gazelle\Comment\Torrent($groupId);
-if (isset($_GET['page'])) {
-    $commentPage->setPageNum((int)$_GET['page']);
-}
+$commentPage = new Gazelle\Comment\Torrent($groupId, (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
 $thread = $commentPage->load()->thread();
 
 $userCache = [];
