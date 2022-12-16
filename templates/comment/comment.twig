@@ -1,4 +1,5 @@
 {% set show_avatar = viewer.showAvatars %}
+{% set own_comment = author.id == viewer.id %}
 <table class="forum_post box vertical_margin{{ show_avatar ? '' : ' noavatar' }}{{ unread ? ' forum_unread' : ''}}" id="post{{ id }}">
     <colgroup>
 {% if show_avatar %}
@@ -13,7 +14,7 @@
                 <span id="postcontrol-{{ id }}">
                 {{- dom.click('#quote-' ~ id, "Quote('" ~ id ~ "','" ~ author.username ~ "', true)") -}}
                 - <a href="#quickpost" id="quote-{{ id }}" class="brackets">Quote</a>
-{%    if show_edit %}
+{%    if own_comment or viewer.permitted('site_moderate_forums') %}
                 {{- dom.click('#edit-' ~ id, "Edit_Form('" ~ id ~ "','" ~ key ~ "')") -}}
                 - <a href="#post{{ id }}" id="edit-{{ id }}" class="brackets">Edit</a>
 {%    endif %}
@@ -26,7 +27,7 @@
                 {{- dom.click('#remove-' ~ id, "Delete('" ~ id ~ "')") -}}
                 - <a href="#post{{ id }}" id="remove-{{ id }}" class="brackets">Delete</a>
 {%    endif %}
-{%    if show_warn %}
+{%    if not own_comment and viewer.permitted('users_warn') and viewer.classLevel >= author.classLevel %}
                 <form class="manage_form hidden" name="user" id="warn{{ id }}" action="comments.php" method="post">
                     <input type="hidden" name="action" value="warn" />
                     <input type="hidden" name="postid" value="{{ id }}" />

@@ -254,7 +254,6 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
     $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
         $author = new Gazelle\User($AuthorID);
-        $ownComment = $AuthorID == $Viewer->id();
         echo $Twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,
             'author'      => $author,
@@ -269,10 +268,8 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
                 'requests' => Artists::display_artists($Artists[$PageID]) . " <a href=\"requests.php?action=view&id=$PageID\">$Name</a>",
                 'torrents' => Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>",
             },
-            'show_edit'   => $Viewer->permitted('site_moderate_forums') || $ownComment,
-            'show_warn'   => $Viewer->permitted('users_warn') && !$ownComment && $Viewer->classLevel() >= $author->classLevel(),
-            'url'         => $commentMan->findById($PostID)->url(),
             'page'        => $Action,
+            'url'         => $commentMan->findById($PostID)->url(),
             'viewer'      => $Viewer,
         ]);
         $DB->set_query_id($Comments);
