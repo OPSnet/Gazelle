@@ -171,15 +171,12 @@ class Quote extends \Gazelle\BaseUser {
             ", ...$args
         );
         $quoteList = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        $requestList = \Requests::get_requests(
-            array_column(array_filter($quoteList, function ($x) { return $x['Page'] === 'requests'; }), 'PageID'),
-            true
-        );
 
         $page = [];
         $forumMan    = new \Gazelle\Manager\Forum;
         $postMan     = new \Gazelle\Manager\ForumPost;
         $releaseType = new \Gazelle\ReleaseType;
+        $reqMan      = new \Gazelle\Manager\Request;
         $tgMan       = new \Gazelle\Manager\TGroup;
 
         foreach ($quoteList as $q) {
@@ -208,20 +205,13 @@ class Quote extends \Gazelle\BaseUser {
                 ];
                 break;
             case 'requests':
-                if (!isset($requestList[$q['PageID']])) {
+                $request = $reqMan->findById($q['PageID']);
+                if (is_null($request)) {
                     continue 2;
                 }
-                $request = $requestList[$q['PageID']];
-                $ahref = "a href=\"requests.php?action=view&amp;id={$q['PageID']}\" dir=\"ltr\"";
                 $context = [
-                    'jump'  => "requests.php?action=view&amp;id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link'  => match(CATEGORY[$request['CategoryID'] - 1]) {
-                        'Audiobooks',
-                        'Music' => \Artists::display_artists(\Requests::get_artists($q['PageID']))
-                            . "<$ahref>{$request['Title']} [{$request['Year']}]</a>",
-                        'Comedy' => "<$ahref>{$request['Title']} [{$request['Year']}]</a>",
-                        default  => "<$ahref>{$request['Title']}</a>",
-                    },
+                    'jump'  => $request->url() . "&amp;postid={$q['PostID']}#post{$q['PostID']}",
+                    'link'  => $request->smartLink(),
                     'title' => 'Request',
                 ];
                 break;
