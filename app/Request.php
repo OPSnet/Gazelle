@@ -226,10 +226,6 @@ class Request extends BaseObject {
         return empty($need) ? null : implode(', ', $need);
     }
 
-    public function tgroupId(): ?int {
-        return $this->info()['GroupID'];
-    }
-
     public function fillerId(): ?int {
         return $this->info()['FillerID'];
     }
@@ -248,6 +244,30 @@ class Request extends BaseObject {
 
     public function lastVoteDate(): string {
         return $this->info()['LastVote'];
+    }
+
+    public function legacyFormatList(): string {
+        return $this->info()['FormatList'];
+    }
+
+    public function legacyEncodingList(): string {
+        return $this->info()['BitrateList'];
+    }
+
+    public function legacyLogChecksum(): string {
+        return $this->info()['Checksum'];
+    }
+
+    public function legacyLogCue(): string {
+        return $this->info()['LogCue'];
+    }
+
+    public function legacyMediaList(): string {
+        return $this->info()['MediaList'];
+    }
+
+    public function legacyOCLC(): string {
+        return $this->info()['OCLC'];
     }
 
     public function needCue(): bool {
@@ -306,6 +326,10 @@ class Request extends BaseObject {
 
     public function tagNameList(): array {
         return $this->info()['tag'];
+    }
+
+    public function tgroupId(): ?int {
+        return $this->info()['GroupID'];
     }
 
     public function title(): string {
