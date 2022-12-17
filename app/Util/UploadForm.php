@@ -296,7 +296,7 @@ class UploadForm extends \Gazelle\Base {
                 if ($Line != $LastLine) {
                     $LastLine = $Line;
 ?>
-                            <option value="<?=$Index?>"<?=(($Remaster['ID'] == $this->Torrent['ID']) ? ' selected="selected"' : '')?>><?=$Line?></option>
+                            <option value="<?=$Index?>"<?= !$this->NewTorrent && $Remaster['ID'] == $this->Torrent['ID'] ? ' selected="selected"' : '' ?>><?=$Line?></option>
 <?php
                 }
             }
