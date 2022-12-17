@@ -50,23 +50,10 @@ class Request extends BaseObject {
      * Display the title of a request, with all fields linkified where it makes sense.
      */
     public function smartLink(): string {
-        $title = display_str($this->title());
         return match($this->categoryName()) {
-            'Music' =>
-                "{$this->artistRole()->link()} – "
-                . ($this->isFilled()
-                    ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
-                    : "<a href=\"{$this->url()}\">$title</a>"
-                )
-                . " [{$this->year()}]",
-
-            'Audiobooks', 'Comedy' => $this->isFilled()
-                ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a> [{$this->year()}]"
-                : "<a href=\"{$this->url()}\">$title</a> [{$this->year()}]",
-
-            default => $this->isFilled()
-                ? "<a href=\"torrents.php?torrentid={$this->torrentId()}\" dir=\"ltr\">$title</a>"
-                : "<a href=\"{$this->url()}\">$title</a>",
+            'Music'                => "{$this->artistRole()->link()} – {$this->link()} [{$this->year()}]",
+            'Audiobooks', 'Comedy' => "{$this->link()} [{$this->year()}]",
+            default                => $this->link(),
         };
     }
 
