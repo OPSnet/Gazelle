@@ -122,7 +122,7 @@ class Notification extends \Gazelle\BaseUser {
         }
         $global = new Notification\GlobalNotification($this->user);
         if ($global->load()) {
-            $alert['Global'] = $global->setDisplay($noty ? self::DISPLAY_POPUP : DISPLAY_TRADITIONAL);
+            $alert['Global'] = $global->setDisplay($noty ? self::DISPLAY_POPUP : self::DISPLAY_TRADITIONAL);
         }
         $this->alert = $alert;
         return $this->alert;
