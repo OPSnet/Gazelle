@@ -100,29 +100,15 @@ View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbra
     </table>
 </div><?= $dnuHide ? '<br />' : '' ?>
 <?php
-$GenreTags = (new Gazelle\Manager\Tag)->genreList();
 $uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err);
 if (isset($categoryId)) {
     // we have been require'd from upload_handle
     $uploadForm->setCategoryId($categoryId);
 }
-$uploadForm->head();
-switch (CATEGORY[($categoryId ?? 1) - 1]) {
-    case 'Audiobooks':
-    case 'Comedy':
-        $uploadForm->audiobook_form();
-        break;
-
-    case 'Applications':
-    case 'Comics':
-    case 'E-Books':
-    case 'E-Learning Videos':
-        $uploadForm->simple_form($categoryId);
-        break;
-
-    case 'Music':
-    default:
-        $uploadForm->music_form($GenreTags);
-        break;
-}
-$uploadForm->foot(true);
+echo $uploadForm->head();
+echo match (CATEGORY[($categoryId ?? 1) - 1]) {
+    'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
+    'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form($categoryId),
+    default                                                  => $uploadForm->music_form((new Gazelle\Manager\Tag)->genreList()),
+};
+echo $uploadForm->foot(true);

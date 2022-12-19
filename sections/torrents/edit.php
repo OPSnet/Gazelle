@@ -79,29 +79,14 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         false
     );
     $uploadForm->setCategoryId($categoryId);
-    $uploadForm->head();
-    switch ($categoryName) {
-        case 'Music':
-            $uploadForm->music_form('');
-            break;
-
-        case 'Audiobooks':
-        case 'Comedy':
-            $uploadForm->audiobook_form();
-            break;
-
-        case 'Applications':
-        case 'Comics':
-        case 'E-Books':
-        case 'E-Learning Videos':
-            $uploadForm->simple_form();
-            break;
-
-        default:
-            $uploadForm->music_form('');
-    }
-    $uploadForm->foot(false);
-}
+    echo $uploadForm->head();
+    echo match($categoryName) {
+        'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
+        'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
+        default                                                  => $uploadForm->music_form([]),
+    };
+    echo $uploadForm->foot(false);
+};
 if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $isMusic)) {
 ?>
 <div class="thin">

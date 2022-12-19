@@ -30,7 +30,7 @@ class UploadForm extends \Gazelle\Base {
     const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
     const JSON_INPUT_ACCEPT = ['application/json', '.json'];
 
-    function __construct(\Gazelle\User $user, $Torrent = false, $Error = false, $NewTorrent = true) {
+    public function __construct(\Gazelle\User $user, $Torrent = false, $Error = false, $NewTorrent = true) {
         $this->user = $user;
         $this->NewTorrent = $NewTorrent;
         $this->Torrent = $Torrent;
@@ -42,7 +42,7 @@ class UploadForm extends \Gazelle\Base {
         }
     }
 
-    public function setCategoryId(int $categoryId) {
+    public function setCategoryId(int $categoryId): UploadForm {
         // FIXME: the upload form counts categories from zero
         $this->categoryId = $categoryId - 1;
         return $this;
@@ -53,19 +53,19 @@ class UploadForm extends \Gazelle\Base {
      * We want to get rid eval()'ing Javascript code, and this produces
      * something that can be added to the DOM and the engine will run it.
      */
-    function albumReleaseJS() {
+    function albumReleaseJS(): string {
         $groupDesc = new Textarea('album_desc', '');
         $relDesc   = new Textarea('release_desc', '');
         return Textarea::factory();
     }
 
-    function descriptionJS() {
+    function descriptionJS(): string {
         $groupDesc = new Textarea('desc', '');
         return Textarea::factory();
     }
 
-    function head() {
-        echo self::$twig->render('upload/header.twig', [
+    function head(): string {
+        return self::$twig->render('upload/header.twig', [
             'announce'    => $this->user->announceUrl(),
             'auth'        => $this->user->auth(),
             'category_id' => $this->categoryId,
@@ -76,8 +76,8 @@ class UploadForm extends \Gazelle\Base {
         ]);
     }
 
-    function foot(bool $showFooter) {
-        echo self::$twig->render('upload/footer.twig', [
+    function foot(bool $showFooter): string {
+        return self::$twig->render('upload/footer.twig', [
             'is_new'      => (int)$this->NewTorrent,
             'info'        => $this->Torrent,
             'show_footer' => $showFooter,
@@ -85,7 +85,7 @@ class UploadForm extends \Gazelle\Base {
         ]);
     }
 
-    function music_form($GenreTags) {
+    function music_form(array $GenreTags): string {
         $QueryID = self::$db->get_query_id();
         $Torrent = $this->Torrent;
         $IsRemaster = !empty($Torrent['Remastered']);
@@ -136,6 +136,7 @@ class UploadForm extends \Gazelle\Base {
         }
 
         $releaseTypes = (new \Gazelle\ReleaseType)->list();
+        ob_start();
 ?>
         <div id="musicbrainz_popup" style="display: none;">
             <a href="#null" id="popup_close">x</a>
@@ -527,10 +528,12 @@ class UploadForm extends \Gazelle\Base {
         </table>
 <?php
         self::$db->set_query_id($QueryID);
+        return ob_get_clean();
     }
 
-    function audiobook_form() {
+    function audiobook_form(): string {
         $Torrent = $this->Torrent;
+        ob_start();
 ?>
         <table id="form-audiobook" cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
@@ -619,10 +622,12 @@ class UploadForm extends \Gazelle\Base {
             </tr>
         </table>
 <?php
+        return ob_get_clean();
     }
 
-    function simple_form() {
+    function simple_form(): string {
         $Torrent = $this->Torrent;
+        ob_start();
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
@@ -659,5 +664,6 @@ class UploadForm extends \Gazelle\Base {
 <?php   } ?>
         </table>
 <?php
+        return ob_get_clean();
     }
 }

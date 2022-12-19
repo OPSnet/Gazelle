@@ -10,7 +10,7 @@ switch (CATEGORY[$_GET['categoryid']]) {
         if ($emitJS) {
             echo $uploadForm->albumReleaseJS();
         } else {
-            $uploadForm->music_form((new Gazelle\Manager\Tag)->genreList());
+            echo $uploadForm->music_form((new Gazelle\Manager\Tag)->genreList());
         }
         break;
 
@@ -19,7 +19,7 @@ switch (CATEGORY[$_GET['categoryid']]) {
         if ($emitJS) {
             echo $uploadForm->albumReleaseJS();
         } else {
-            $uploadForm->audiobook_form();
+            echo $uploadForm->audiobook_form();
         }
         break;
 
@@ -30,7 +30,7 @@ switch (CATEGORY[$_GET['categoryid']]) {
         if ($emitJS) {
             echo $uploadForm->descriptionJS();
         } else {
-            $uploadForm->simple_form();
+            echo $uploadForm->simple_form();
         }
         break;
     default:
