@@ -69,7 +69,7 @@
     {% for entry in leaderboard %}
         <tr>
             <td><a href="user.php?id={{ entry.user_id }}">{{ entry.username }}</a></td>
-            <td>{{ entry.entry_count }}</td>
+            <td>{{ entry.entry_count|number_format }}</td>
         </tr>
     {% endfor %}
     </table>

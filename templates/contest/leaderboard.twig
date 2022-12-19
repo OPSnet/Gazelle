@@ -46,7 +46,7 @@
         <td class="nowrap"><a href="user.php?id={{ entry.user_id }}">{{ entry.username}}</a>{% if entry.user_id == viewer.id %} (that's you!){% endif %}</td>
         <td>{{ entry.last_entry_link|raw }}</td>
         <td class="nowrap">{{ entry.last_upload|time_diff }} </td>
-        <td>{{ entry.entry_count }}</td>
+        <td>{{ entry.entry_count|number_format }}</td>
     </tr>
     {% endfor %}
 </table>
