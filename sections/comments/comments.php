@@ -210,15 +210,18 @@ $Comments = $DB->prepared_query("
     ", ...[...$joinArgs, ...$condArgs, $paginator->limit(), $paginator->offset()]
 );
 
+$requestList = [];
+$tgroupList = [];
 if ($Action == 'requests') {
-    $RequestIDs = array_flip(array_flip($DB->collect('PageID')));
-    $Artists = [];
-    foreach ($RequestIDs as $RequestID) {
-        $Artists[$RequestID] = Requests::get_artists($RequestID);
+    $requestMan = new Gazelle\Manager\Request;
+    foreach (array_flip(array_flip($DB->collect('PageID'))) as $id) {
+        $requestList[$id] = $requestMan->findById($id);
     }
 } elseif ($Action == 'torrents') {
-    $GroupIDs = array_flip(array_flip($DB->collect('PageID')));
-    $Artists = Artists::get_artists($GroupIDs);
+    $tgtMan = new Gazelle\Manager\TGroup;
+    foreach (array_flip(array_flip($DB->collect('PageID'))) as $id) {
+        $tgroupList[$id] = $tgMan->findById($id);
+    }
 }
 
 $Links = implode(' ',
@@ -265,8 +268,8 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
             'heading'     => match($Page) {
                 'artist'   => "<a href=\"artist.php?id=$PageID\">$Name</a>",
                 'collages' => "<a href=\"collages.php?id=$PageID\">$Name</a>",
-                'requests' => Artists::display_artists($Artists[$PageID]) . " <a href=\"requests.php?action=view&id=$PageID\">$Name</a>",
-                'torrents' => Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>",
+                'requests' => $requestList[$PageID]->smartLink(),
+                'torrents' => $tgroupList[$PageID]->link(),
             },
             'page'        => $Action,
             'url'         => $commentMan->findById($PostID)->url(),
