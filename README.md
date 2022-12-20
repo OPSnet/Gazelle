@@ -10,21 +10,8 @@ needs. Gazelle is written in PHP, Twig, JavaScript, and MySQL.
 * [NodeJS 12+](https://nodejs.org/en/) (required)
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
+* [ocelot](https://github.com/OPSnet/Ocelot) (required)
 * [procps-ng](http://sourceforge.net/projects/procps-ng/) (recommended)
-
-
-## Gazelle/Ocelot Compile-time Dependencies
-* [Git](http://git-scm.com/) (required)
-* [ocelot](https://github.com/OPSnet/Ocelot)
-* [GCC/G++](http://gcc.gnu.org/) (4.7+ required; 4.8.1+ recommended)
-* [Boost](http://www.boost.org/) (1.55.0+ required)
-
-## Gazelle/Ocelot Compile-time Dependencies
-* [Git](http://git-scm.com/) (required)
-* [GCC/G++](http://gcc.gnu.org/) (4.7+ required; 4.8.1+ recommended)
-* [Boost](http://www.boost.org/) (1.55.0+ required)
-
-_Note: This list may not be exhaustive._
 
 ## Logchecker
 To fully utilize the Logchecker, you must install the following
@@ -47,13 +34,13 @@ Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
 
 ### Ocelot
-The [ocelot](https://github.com/OPSnet/Ocelot) repository is used to build
-build the Ocelot image. To keep things simple, check out the source in a
+The [ocelot](https://github.com/OPSnet/Ocelot) repository is used to build the Ocelot image. To keep things simple, check out the source in a
 sibling directory to Gazelle.
 
 ```bash
-git clone https://github.com/OPSnet/ocelot
-docker build . -t ocelot
+$ git clone https://github.com/OPSnet/ocelot
+$ cd ocelot
+$ docker build . -t ocelot
 ```
 
 ### Gazelle
