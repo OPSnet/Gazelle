@@ -173,7 +173,7 @@ class Bonus extends \Gazelle\Base {
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
                 AND NOT EXISTS (
                     SELECT 1 FROM user_has_attr uha
-                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points'))
                     WHERE uha.UserID = um.ID
                 )
             GROUP BY xfu.uid
