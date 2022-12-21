@@ -296,7 +296,10 @@ class TGroup extends BaseObject {
         return $this->artistRole()->text();
     }
 
-    public function artistRole(): ArtistRole\TGroup {
+    public function artistRole(): ?ArtistRole\TGroup {
+        if ($this->categoryName() !== 'Music') {
+            return null;
+        }
         if (!isset($this->artistRole)) {
             $this->artistRole = new ArtistRole\TGroup($this->id, new Manager\Artist);
         }

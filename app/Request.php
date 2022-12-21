@@ -93,7 +93,10 @@ class Request extends BaseObject {
         ]);
     }
 
-    public function artistRole(): ArtistRole\Request {
+    public function artistRole(): ?ArtistRole\Request {
+        if ($this->categoryName() !== 'Music') {
+            return null;
+        }
         return new ArtistRole\Request($this->id, new Manager\Artist);
     }
 
@@ -267,11 +270,19 @@ class Request extends BaseObject {
     }
 
     public function needEncoding(string $encoding): bool {
-        return in_array($encoding, $this->info()['need_encoding']);
+        return in_array($encoding, $this->needEncodingList());
+    }
+
+    public function needEncodingList(): array {
+        return $this->info()['need_encoding'];
     }
 
     public function needFormat(string $format): bool {
-        return in_array($format, $this->info()['need_format']);
+        return in_array($format, $this->needFormatList());
+    }
+
+    public function needFormatList(): array {
+        return $this->info()['need_format'];
     }
 
     public function needLog(): bool {
@@ -289,7 +300,11 @@ class Request extends BaseObject {
     }
 
     public function needMedia(string $media): bool {
-        return in_array($media, $this->info()['need_media']);
+        return in_array($media, $this->needMediaList());
+    }
+
+    public function needMediaList(): array {
+        return $this->info()['need_media'];
     }
 
     public function oclcList(): ?string {

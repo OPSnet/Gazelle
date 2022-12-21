@@ -11,6 +11,7 @@ abstract class ArtistRole extends \Gazelle\Base {
     protected array $idList;
 
     abstract protected function artistListQuery(): \mysqli_result;
+    abstract public function idList(): array;
     abstract public function roleList(): array;
 
     public function __construct(
@@ -38,6 +39,30 @@ abstract class ArtistRole extends \Gazelle\Base {
      */
     public function text(): string {
         return $this->renderRole(self::RENDER_TEXT);
+    }
+
+    /**
+     * A readable representation of the artists grouped by their roles in a
+     * release group. All artist roles are present as arrays (no need to see if
+     * the key exists). Like roleList() but some of the key names change.
+     *   'main'     becomes 'artists'
+     *   'guest'    becomes 'with'
+     *   'remixer'  becomes 'remixedBy'
+     *   'composer' becomes 'composers'
+     * A role is an array of two keys: ["id" => 801, "name" => "The Group"]
+     */
+    public function roleListByType(): array {
+        $list = $this->idList();
+        return [
+            'artists'   => $list[ARTIST_MAIN] ?? [],
+            'with'      => $list[ARTIST_GUEST] ?? [],
+            'remixedBy' => $list[ARTIST_REMIXER] ?? [],
+            'composers' => $list[ARTIST_COMPOSER] ?? [],
+            'conductor' => $list[ARTIST_CONDUCTOR] ?? [],
+            'dj'        => $list[ARTIST_DJ] ?? [],
+            'producer'  => $list[ARTIST_PRODUCER] ?? [],
+            'arranger'  => $list[ARTIST_ARRANGER] ?? [],
+        ];
     }
 
     protected function renderRole(int $mode): string {

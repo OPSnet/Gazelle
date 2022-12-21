@@ -46,6 +46,35 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return $this->thread;
     }
 
+    public function threadList(\Gazelle\Manager\User $manager): array {
+        $cache = [];
+        $list  = [];
+        foreach ($this->thread() as $post) {
+            [$postId, $userId, $created, $body, $editedUserID, $editedTime, $editedUsername] = array_values($post);
+            if (!isset($cache[$userId])) {
+                $cache[$userId] = $manager->findById($userId);
+            }
+            $author = $cache[$userId];
+            $list[] = [
+                'postId'         => $postId,
+                'authorId'       => $userId,
+                'name'           => $author->username(),
+                'donor'          => (new \Gazelle\User\Privilege($author))->isDonor(),
+                'warned'         => $author->isWarned(),
+                'enabled'        => $author->isEnabled(),
+                'class'          => $manager->userclassName($author->primaryClass()),
+                'addedTime'      => $created,
+                'avatar'         => $author->avatar(),
+                'bbBody'         => $body,
+                'comment'        => \Text::full_format($body),
+                'editedUserId'   => $editedUserID,
+                'editedUsername' => $editedUsername,
+                'editedTime'     => $editedTime
+            ];
+        }
+        return $list;
+    }
+
     public function total(): int {
         return $this->total;
     }

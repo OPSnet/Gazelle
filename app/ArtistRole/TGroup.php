@@ -73,10 +73,7 @@ class TGroup extends \Gazelle\ArtistRole {
      * A role is an array of two keys: ["id" => 801, "name" => "The Group"]
      */
     public function roleListByType(): array {
-        if (!isset($this->idList)) {
-            $this->init();
-        }
-        $list = $this->idList;
+        $list = $this->idList();
         return [
             'artists'   => $list[ARTIST_MAIN] ?? [],
             'with'      => $list[ARTIST_GUEST] ?? [],
