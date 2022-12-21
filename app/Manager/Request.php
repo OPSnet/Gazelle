@@ -31,7 +31,7 @@ class Request extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT r.ID
             FROM requests r
-            INNER JOIN requests_votes v ON (v.requestid = r.id)
+            INNER JOIN requests_votes v ON (v.RequestID = r.ID)
             WHERE r.TorrentID = 0
                 AND r.UserID = ?
             GROUP BY r.ID
@@ -40,5 +40,27 @@ class Request extends \Gazelle\BaseManager {
             ", $user->id(), $limit
         );
         return array_map(fn($id) => $this->findById($id), self::$db->collect(0, false));
+    }
+
+    public function findByArtist(\Gazelle\Artist $artist): array {
+        $artistId = $artist->id();
+        $key = sprintf(\Gazelle\Artist::CACHE_REQUEST_ARTIST, $artistId);
+        $requestList = self::$cache->get_value($key);
+        if ($requestList === false) {
+            self::$db->prepared_query("
+                SELECT r.ID
+                FROM requests AS r
+                INNER JOIN requests_votes v ON (v.RequestID = r.id)
+                INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
+                WHERE r.TorrentID = 0
+                    AND ra.ArtistID = ?
+                GROUP BY r.ID
+                ORDER BY count(v.UserID) DESC, sum(v.Bounty) DESC
+                ", $artistId
+            );
+            $requestList = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $requestList, 3600);
+        }
+        return array_map(fn($id) => $this->findById($id), $requestList);
     }
 }

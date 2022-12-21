@@ -320,12 +320,12 @@ class Request extends BaseObject {
         return $this->info()['tag'];
     }
 
-    public function tgroupId(): ?int {
-        return $this->info()['GroupID'];
-    }
-
     public function tagNameToSphinx(): string {
         return implode(' ', array_map(fn ($t) => str_replace('.', '_', $t), $this->tagNameList()));
+    }
+
+    public function tgroupId(): ?int {
+        return $this->info()['GroupID'];
     }
 
     public function title(): string {

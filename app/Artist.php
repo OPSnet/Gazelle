@@ -3,8 +3,11 @@
 namespace Gazelle;
 
 class Artist extends Base {
-    protected int $id = 0;
-    protected int $revisionId = 0;
+    const CACHE_REQUEST_ARTIST      = 'artists_requests_%d';
+
+    protected const CACHE_PREFIX    = 'artist_%d';
+    protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
+
     protected $artistRole;
     protected int $nrGroups = 0;
 
@@ -35,22 +38,12 @@ class Artist extends Base {
     protected $vanity;
     protected $similar = [];
 
-    protected int $nrLeechers = 0;
-    protected int $nrSnatches = 0;
-    protected int $nrSeeders = 0;
-    protected int $nrTorrents = 0;
+    protected Stats\Artist $stats;
 
-    protected const CACHE_PREFIX = 'artist_';
-    protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
-
-    /**
-     * Artist constructor.
-     * @param  int  $id
-     * @param  int|null  $revisionId
-     */
-    public function __construct(int $id, $revisionId = null) {
-        $this->id = $id;
-        $this->revisionId = $revisionId ?? 0;
+    public function __construct(
+        protected int $id,
+        protected int $revisionId = 0
+    ) {
 
         $cacheKey = $this->cacheKey();
         if (($info = self::$cache->get_value($cacheKey)) !== false) {
@@ -91,6 +84,10 @@ class Artist extends Base {
         }
     }
 
+    public function id(): int {
+        return $this->id;
+    }
+
     public function location(): string {
         return 'artist.php?id=' . $this->id;
     }
@@ -101,6 +98,24 @@ class Artist extends Base {
 
     public function link(): string {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name));
+    }
+
+    protected function cacheKey(): string {
+        return sprintf(self::CACHE_PREFIX, $this->id)
+            . ($this->revisionId ? '_r' . $this->revisionId : '');
+    }
+
+    public function flushCache(): int {
+        self::$db->prepared_query("
+            SELECT DISTINCT concat('groups_artists_', GroupID)
+            FROM torrents_artists
+            WHERE ArtistID = ?
+            ", $this->id
+        );
+        $cacheKeys = self::$db->collect(0, false);
+        self::$cache->deleteMulti($cacheKeys);
+        self::$cache->delete_value($this->cacheKey());
+        return count($cacheKeys);
     }
 
     protected function loadAttr(): array {
@@ -234,20 +249,11 @@ class Artist extends Base {
         return $this->section;
     }
 
-    public function nrLeechers(): int {
-        return $this->nrLeechers;
-    }
-
-    public function nrSnatches(): int {
-        return $this->nrSnatches;
-    }
-
-    public function nrSeeders(): int {
-        return $this->nrSeeders;
-    }
-
-    public function nrTorrents(): int {
-        return $this->nrTorrents;
+    public function stats(): Stats\Artist{
+        if (!isset($this->stats)) {
+            $this->stats = new Stats\Artist($this->id);
+        }
+        return $this->stats;
     }
 
     public function name(): ?string {
@@ -333,25 +339,6 @@ class Artist extends Base {
         foreach ($requests as $requestId) {
             $reqMan->findById($requestId)->updateSphinx();
         }
-    }
-
-    public function cacheKey(): string {
-        // TODO: change to protected when sections/ajax/artist.php is refactored
-        return self::CACHE_PREFIX . $this->id
-            . ($this->revisionId ? '_r' . $this->revisionId : '');
-    }
-
-    public function flushCache(): int {
-        self::$db->prepared_query("
-            SELECT DISTINCT concat('groups_artists_', GroupID)
-            FROM torrents_artists
-            WHERE ArtistID = ?
-            ", $this->id
-        );
-        $cacheKeys = self::$db->collect(0, false);
-        self::$cache->deleteMulti($cacheKeys);
-        self::$cache->delete_value($this->cacheKey());
-        return count($cacheKeys);
     }
 
     /**
@@ -529,33 +516,6 @@ class Artist extends Base {
         return $alias;
     }
 
-    public function requests(): array {
-        $requests = self::$cache->get_value("artists_requests_" . $this->id);
-        if (empty($requests)) {
-            self::$db->prepared_query('
-                SELECT
-                    r.ID,
-                    r.CategoryID,
-                    r.Title,
-                    r.Year,
-                    r.TimeAdded,
-                    count(rv.UserID) AS Votes,
-                    sum(rv.Bounty) AS Bounty
-                FROM requests AS r
-                LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID)
-                LEFT JOIN requests_artists AS ra ON (r.ID = ra.RequestID)
-                WHERE r.TorrentID = 0
-                    AND ra.ArtistID = ?
-                GROUP BY r.ID
-                ORDER BY Votes DESC
-                ', $this->id
-            );
-            $requests = self::$db->has_results() ? self::$db->to_array('ID', MYSQLI_ASSOC, false) : [];
-            self::$cache->cache_value("artists_requests_" . $this->id, $requests, 3600);
-        }
-        return $requests;
-    }
-
     public function requestIdUsage(): array {
         self::$db->prepared_query("
             SELECT r.ID
@@ -690,10 +650,6 @@ class Artist extends Base {
         $name = preg_replace('/^(?:\xE2\x80\x8E|\s)+/', '', $name);
         $name = preg_replace('/(?:\xE2\x80\x8E|\s)+$/', '', $name);
         return preg_replace('/ +/', ' ', $name);
-    }
-
-    public function id(): int {
-        return $this->id;
     }
 
     public function revisionList(): array {

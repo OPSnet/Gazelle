@@ -19,7 +19,7 @@ $vote       = new Gazelle\User\Vote($Viewer);
 $authKey      = $Viewer->auth();
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
 $name         = $Artist->name() ?? 'artist:' . $ArtistID;
-$Requests     = [];
+$requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request)->findByArtist($Artist);
 
 View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscriptions']);
 ?>
@@ -281,8 +281,7 @@ if ($sections = $Artist->sections()) {
 <?php
     }
 
-    $Requests = $Viewer->disableRequests() ? [] : $Artist->requests();
-    if (count($Requests)) {
+    if ($requestList) {
 ?>
     <a href="#requests" class="brackets">Requests</a>
 <?php } ?>
@@ -402,7 +401,7 @@ if ($sections = $Artist->sections()) {
 <?php
 } /* all sections */
 
-if ($Requests) {
+if ($requestList) {
 ?>
     <table cellpadding="6" cellspacing="1" border="0" class="request_table border" width="100%" id="requests">
         <tr class="colhead_dark">
@@ -421,48 +420,26 @@ if ($Requests) {
             </td>
         </tr>
 <?php
-    $Tags = Requests::get_tags(array_keys($Requests));
     $Row = 'b';
-    foreach ($Requests as $RequestID => $Request) {
-            $CategoryName = CATEGORY[$Request['CategoryID'] - 1];
-            $Title = display_str($Request['Title']);
-            if ($CategoryName == 'Music') {
-                $ArtistForm = Requests::get_artists($RequestID);
-                $ArtistLink = Artists::display_artists($ArtistForm, true, true);
-                $FullName = $ArtistLink."<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Title</span> [{$Request['Year']}]</a>";
-            } elseif ($CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Title</span> [{$Request['Year']}]</a>";
-            } else {
-                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\" dir=\"ltr\">$Title</a>";
-            }
-
-            if (!empty($Tags[$RequestID])) {
-                $ReqTagList = [];
-                foreach ($Tags[$RequestID] as $TagID => $TagName) {
-                    $ReqTagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
-                }
-                $ReqTagList = implode(', ', $ReqTagList);
-            } else {
-                $ReqTagList = '';
-            }
+    foreach ($requestList as $request) {
 ?>
         <tr class="row<?=($Row === 'b' ? 'a' : 'b')?>">
             <td>
-                <?=$FullName?>
-                <div class="tags"><?=$ReqTagList?></div>
+                <?= $request->smartLink() ?>
+                <div class="tags"><?= implode(' ', $request->tagNameList()) ?></div>
             </td>
             <td class="nobr">
-                <span id="vote_count_<?=$RequestID?>"><?=$Request['Votes']?></span>
+                <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>
 <?php       if ($Viewer->permitted('site_album_votes')) { ?>
                 <input type="hidden" id="auth" name="auth" value="<?=$authKey?>" />
-                &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
+                &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $request->id() ?>)" class="brackets"><strong>+</strong></a>
 <?php       } ?>
             </td>
             <td class="nobr">
-                <span id="bounty_<?=$RequestID?>"><?=Format::get_size($Request['Bounty'])?></span>
+                <span id="bounty_<?= $request->id() ?>"><?= Format::get_size($request->bountyTotal()) ?></span>
             </td>
             <td>
-                <?=time_diff($Request['TimeAdded'])?>
+                <?= time_diff($request->created()) ?>
             </td>
         </tr>
 <?php   } ?>

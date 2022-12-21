@@ -8,6 +8,8 @@ class Artist extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\Artist          $artist,
         protected \Gazelle\User            $user,
+        protected \Gazelle\User\Bookmark   $bookmark,
+        protected \Gazelle\Manager\Request $requestMan,
         protected \Gazelle\Manager\TGroup  $tgMan,
         protected \Gazelle\Manager\Torrent $torMan
     ) {}
@@ -18,18 +20,13 @@ class Artist extends \Gazelle\Json {
     }
 
     public function payload(): ?array {
-        if (!$this->user) {
-            $this->failure('viewer not set');
-            return null;
-        }
-        $artistId = $this->artist->id();
-        $this->artist->loadArtistRole();
-        $GroupIDs = $this->artist->groupIds();
+        $artist   = $this->artist;
+        $artistId = $artist->id();
+        $artist->loadArtistRole();
+        $GroupIDs = $artist->groupIds();
 
         $JsonTorrents = [];
         $Tags = [];
-        $NumTorrents = $NumSeeders = $NumLeechers = $NumSnatches = 0;
-        $bookmark = new \Gazelle\User\Bookmark($this->user);
 
         foreach ($GroupIDs as $GroupID) {
             $tgroup = $this->tgMan->findById($GroupID);
@@ -58,10 +55,6 @@ class Artist extends \Gazelle\Json {
                 if (is_null($torrent)) {
                     continue;
                 }
-                $NumTorrents++;
-                $NumSeeders += $torrent->seederTotal();
-                $NumLeechers += $torrent->leecherTotal();
-                $NumSnatches += $torrent->snatchTotal();
 
                 $InnerTorrents[] = [
                     'id'                   => $torrent->id(),
@@ -98,7 +91,7 @@ class Artist extends \Gazelle\Json {
                 'releaseType'          => (int)$tgroup->releaseType(),
                 'wikiImage'            => $tgroup->image(),
                 'groupVanityHouse'     => $tgroup->isShowcase(),
-                'hasBookmarked'        => $bookmark->isTorrentBookmarked($GroupID),
+                'hasBookmarked'        => $this->bookmark->isTorrentBookmarked($GroupID),
                 'artists'              => $artists,
                 'extendedArtists'      => $tgroup->artistRole()->legacyList(),
                 'torrent'              => $InnerTorrents,
@@ -106,7 +99,7 @@ class Artist extends \Gazelle\Json {
         }
 
         $JsonSimilar = [];
-        $similar = $this->artist->similarArtists();
+        $similar = $artist->similarArtists();
         foreach ($similar as $s) {
             $JsonSimilar[] = [
                 'artistId'  => $s['ArtistID'],
@@ -116,49 +109,49 @@ class Artist extends \Gazelle\Json {
             ];
         }
 
-        $JsonRequests = [];
+        $requestList = [];
         if (!$this->user->disableRequests()) {
-            $Requests = $this->artist->requests();
-            foreach ($Requests as $RequestID => $Request) {
-                $JsonRequests[] = [
-                    'requestId'  => $RequestID,
-                    'categoryId' => $Request['CategoryID'],
-                    'title'      => $Request['Title'],
-                    'year'       => $Request['Year'],
-                    'timeAdded'  => $Request['TimeAdded'],
-                    'votes'      => $Request['Votes'],
-                    'bounty'     => (int)$Request['Bounty']
-                ];
-            }
+            $requestList = array_map(
+                fn ($r) => [
+                    'requestId'  => $r->id(),
+                    'categoryId' => $r->categoryId(),
+                    'title'      => $r->title(),
+                    'year'       => $r->year(),
+                    'timeAdded'  => $r->created(),
+                    'votes'      => $r->userVotedTotal(),
+                    'bounty'     => $r->bountyTotal(),
+                ], $this->requestMan->findByArtist($artist)
+            );
         }
 
-        $name = $this->artist->name();
+        $name = $artist->name();
         if (is_null($name)) {
             global $Debug;
             $Debug->analysis("Artist has null name", $artistId, 3600 * 168);
         }
+        $stats = $artist->stats();
         return [
             'id'             => $artistId,
             'name'           => $name,
             'notificationsEnabled' =>
                 is_null($name) ? false : $this->user->hasArtistNotification($name),
-            'hasBookmarked'  => $bookmark->isArtistBookmarked($artistId),
-            'image'          => $this->artist->image(),
-            'body'           => \Text::full_format($this->artist->body()),
-            'bodyBbcode'     => $this->artist->body(),
-            'vanityHouse'    => $this->artist->vanityHouse(),
+            'hasBookmarked'  => $this->bookmark->isArtistBookmarked($artistId),
+            'image'          => $artist->image(),
+            'body'           => \Text::full_format($artist->body()),
+            'bodyBbcode'     => $artist->body(),
+            'vanityHouse'    => $artist->vanityHouse(),
             'tags'           => array_values($Tags),
             'similarArtists' => $JsonSimilar,
             'statistics' => [
-                'numGroups'   => count($GroupIDs),
-                'numTorrents' => $NumTorrents,
-                'numSeeders'  => $NumSeeders,
-                'numLeechers' => $NumLeechers,
-                'numSnatches' => $NumSnatches,
-                'numRequests' => count($JsonRequests),
+                'numGroups'   => $stats->tgroupTotal(),
+                'numTorrents' => $stats->torrentTotal(),
+                'numSeeders'  => $stats->seederTotal(),
+                'numLeechers' => $stats->leecherTotal(),
+                'numSnatches' => $stats->snatchTotal(),
+                'numRequests' => count($requestList),
             ],
             'torrentgroup' => $JsonTorrents,
-            'requests'     => $JsonRequests,
+            'requests'     => $requestList,
         ];
     }
 
