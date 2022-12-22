@@ -3,9 +3,9 @@
 namespace Gazelle\Search;
 
 class Request extends \Gazelle\Base {
-    protected bool $bookmarkView;
     protected bool $negate;
     protected int $total;
+    protected int $bookmarkerId;
     protected string $text;
     protected string $title;
     protected string $tagList;
@@ -23,14 +23,13 @@ class Request extends \Gazelle\Base {
     }
 
     public function isBookmarkView(): bool {
-        return isset($this->bookmarkView);
+        return isset($this->bookmarkerId);
     }
 
     public function setBookmarker(\Gazelle\User $user): Request {
-        $this->bookmarkView = true;
-        $this->text = "{$user->username()} &rsaquo; Bookmarked requests";
-        $this->title = "{$user->link()} &rsaquo; Bookmarked requests";
-        $this->sphinxq->where('bookmarker', $user->id());
+        $this->text         = "{$user->username()} &rsaquo; Bookmarked requests";
+        $this->title        = "{$user->link()} &rsaquo; Bookmarked requests";
+        $this->bookmarkerId = $user->id();
         return $this;
     }
 
@@ -235,11 +234,56 @@ class Request extends \Gazelle\Base {
     }
 
     public function execute(string $orderBy, string $direction): int {
-        $this->sphinxq->select('id')->from('requests, requests_delta');
-        $this->sphinxq->order_by($orderBy, $direction);
-        $result      = $this->sphinxq->sphinxquery();
-        $this->total = (int)$result->get_meta('total_found');
-        $this->list  = array_map(fn ($id) => $this->manager->findById($id), array_keys($result->to_array('id')));
+        if (isset($this->bookmarkerId)) {
+            switch($orderBy) {
+                case 'bounty':
+                    $needVoteTable = true;
+                    $orderBy       = 'sum(rv.Bounty)';
+                    break;
+                case 'filled':
+                    $needVoteTable = false;
+                    $orderBy       = 'if(r.TorrentID = 0, 1, 0)';
+                    break;
+                case 'lastvote':
+                    $needVoteTable = false;
+                    $orderBy       = 'r.LastVote';
+                    break;
+                case 'votes':
+                    $needVoteTable = true;
+                    $orderBy       = 'count(rv.RequestID)';
+                    break;
+                default:
+                    $needVoteTable = false;
+                    $orderBy       = 'br.Time';
+                    break;
+            }
+            if ($needVoteTable) {
+                $voteJoin = 'INNER JOIN requests_votes rv USING (RequestID)';
+                $groupBy  = 'GROUP BY r.ID';
+            } else {
+                $voteJoin = '';
+                $groupBy  = '';
+            }
+            self::$db->prepared_query("
+                SELECT r.ID
+                FROM requests r
+                INNER JOIN bookmarks_requests br ON (br.RequestID = r.ID)
+                $voteJoin
+                WHERE br.UserID = ?
+                $groupBy
+                ORDER BY $orderBy $direction
+                ", $this->bookmarkerId
+            );
+            $list = self::$db->collect(0, false);
+            $this->total = count($list);
+        } else {
+            $this->sphinxq->select('id')->from('requests, requests_delta');
+            $this->sphinxq->order_by($orderBy, $direction);
+            $result      = $this->sphinxq->sphinxquery();
+            $this->total = (int)$result->get_meta('total_found');
+            $list = array_keys($result->to_array('id'));
+        }
+        $this->list = array_map(fn ($id) => $this->manager->findById($id), $list);
         return count($this->list);
     }
 
