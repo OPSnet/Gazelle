@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import checked %}
-{{ header('Login') }}
+{{ header('Login', {'js': 'password'}) }}
 
 <span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br /><br /></span>
 <noscript><span class="warning-login">{{ constant('SITE_NAME') }} requires JavaScript to function properly.
@@ -56,6 +56,7 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
     <div>
     <label for="password">Password</label>
     <input type="password" name="password" id="password" class="inputtext" required="required" pattern=".{6,}" placeholder="Password" />
+    <span id="password_toggle">&#x1FAE3;</span>
     </div>
     <div>
     <label title="2FA key (or recovery key), if configured" for="keeplogged">2FA Key</label>

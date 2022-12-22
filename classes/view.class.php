@@ -17,36 +17,36 @@ class View {
         }
         $pageTitle .= SITE_NAME;
 
+        $js = [
+            'jquery',
+            'script_start',
+            'ajax.class',
+            'global',
+        ];
+        if (DEBUG_MODE || $Viewer?->permitted('site_debug')) {
+            array_push($js, 'jquery-migrate', 'debug');
+        }
+        if (!empty($option['js'])) {
+            array_push($js, ...explode(',', $option['js']));
+        }
+
         if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
+            array_push($js, 'cookie.class', 'storage.class');
             echo $Twig->render('index/public-header.twig', [
                 'page_title' => html_entity_decode($pageTitle),
+                'script'     => array_map(fn($s) => "$s.js", $js),
             ]);
             return;
         }
+        array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min');
         $Style = [
             'global.css',
         ];
         if (!empty($option['css'])) {
             array_push($Style, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
         }
-
-        $Scripts = [
-            'jquery',
-            'jquery.autocomplete',
-            'jquery.countdown.min',
-            'script_start',
-            'ajax.class',
-            'global',
-            'autocomplete',
-        ];
-        if (!empty($option['js'])) {
-            array_push($Scripts, ...explode(',', $option['js']));
-        }
-        if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
-            array_push($Scripts, 'jquery-migrate', 'debug');
-        }
         if ($Viewer->option('Tooltipster') ?? 1) {
-            array_push($Scripts, 'tooltipster', 'tooltipster_settings');
+            array_push($js, 'tooltipster', 'tooltipster_settings');
             $Style[] = 'tooltipster/style.css';
         }
         if ($Viewer->option('UseOpenDyslexic')) {
@@ -65,7 +65,7 @@ class View {
             }
         }
         if ($notifier->useNoty()) {
-            array_push($Scripts, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
+            array_push($js, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
         }
 
         $payMan = new Gazelle\Manager\Payment;
@@ -138,7 +138,7 @@ class View {
         echo $Twig->render('index/private-header.twig', [
             'auth_args'   => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
             'page_title'  => html_entity_decode($pageTitle),
-            'script'      => array_map(fn($s) => "$s.js", $Scripts),
+            'script'      => array_map(fn($s) => "$s.js", $js),
             'style'       => new Gazelle\User\Stylesheet($Viewer),
             'style_extra' => $Style,
             'viewer'      => $Viewer,

@@ -135,18 +135,18 @@ if (isset($_POST['p_donor_stats'])) {
 
 $NewEmail = false;
 if ($user->email() != $_POST['email']) {
-    if (!$Viewer->permitted('users_edit_profiles') && !$user->validatePassword($_POST['cur_pass'])) {
+    if (!$Viewer->permitted('users_edit_profiles') && !$user->validatePassword($_POST['password'])) {
         error('You must enter your current password when changing your email address.');
     }
     $NewEmail = $_POST['email'];
 }
 
 $ResetPassword = false;
-if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
-    if (!$user->validatePassword($_POST['cur_pass'])) {
+if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
+    if (!$user->validatePassword($_POST['password'])) {
         error('You did not enter the correct password.');
     } else {
-        if ($_POST['cur_pass'] == $_POST['new_pass_1']) {
+        if ($_POST['password'] == $_POST['new_pass_1']) {
             error('Your new password cannot be the same as your old password.');
         } else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
             error('You did not enter the same password twice.');

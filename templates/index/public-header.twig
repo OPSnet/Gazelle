@@ -9,15 +9,9 @@
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 {{ css('public/style.css') }}
-{{ script('jquery.js') }}
-{% if constant('DEBUG_MODE') %}
-{{ script('jquery-migrate.js') }}
-{% endif %}
-{{ script('script_start.js') }}
-{{ script('ajax.class.js') }}
-{{ script('cookie.class.js') }}
-{{ script('storage.class.js') }}
-{{ script('global.js') }}
+{% for js in script %}
+{{ script(js) }}
+{% endfor %}
 </head>
 <body>
 <div id="maincontent">

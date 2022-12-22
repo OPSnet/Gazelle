@@ -99,7 +99,7 @@ function calculateComplexity(password) {
 
     if (isUserPage()) {
         irckey = $("#irckey").val();
-        oldPassword =$("#cur_pass").val();
+        oldPassword =$("#password").val();
     }
 
     if (length >= 8 && length < 20) {

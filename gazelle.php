@@ -155,7 +155,7 @@ $Cache->cache_value('php_' . getmypid(), [
     'get'      => $_GET,
     'post'     => array_diff_key(
         $_POST,
-        array_fill_keys(['password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true)
+        array_fill_keys(['password', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true)
     )
 ], 600);
 
