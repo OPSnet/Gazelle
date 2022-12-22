@@ -644,43 +644,6 @@ class TGroup extends BaseObject {
         return true;
     }
 
-    public function torrentList(): array {
-        if (isset($this->viewer)) {
-            $showSnatched = (bool)$this->viewer->option('ShowSnatched');
-            $snatcher = new User\Snatch($this->viewer);
-        } else {
-            $showSnatched = false;
-            $snatcher = false;
-        }
-        $list = $this->rawTorrentList();
-        foreach ($list as &$info) {
-            foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear']
-                as $nullable
-            ) {
-                $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
-            }
-            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene']
-                as $zerotruth
-            ) {
-                $info[$zerotruth] = !($info[$zerotruth] == '0');
-            }
-            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage']
-                as $emptytruth
-            ) {
-                $info[$emptytruth] = !($info[$emptytruth] == '');
-            }
-            if ($showSnatched) {
-                $torrent = new Torrent($info['ID']);
-                $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $torrent->hasToken($this->viewer->id());
-                $info['IsSnatched'] = $snatcher->isSnatched($torrent->id());
-            } else {
-                $info['PersonalFL'] = false;
-                $info['IsSnatched'] = false;
-            }
-        }
-        return $list;
-    }
-
     public function rawTorrentList(): array {
         $key = sprintf(self::CACHE_TLIST_KEY, $this->id);
         if (!$this->revisionId) {

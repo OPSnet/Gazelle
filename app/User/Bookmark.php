@@ -234,9 +234,8 @@ class Bookmark extends \Gazelle\BaseUser {
 
                 // RSS feed stuff
                 $Feed = new \Gazelle\Feed;
-                $list  = $tgroup->torrentList();
-                foreach ($list as $t) {
-                    $torrent = $torMan->findById($t['ID']);
+                foreach ($tgroup->torrentIdList() as $id) {
+                    $torrent = $torMan->findById($id);
                     if (is_null($torrent)) {
                         continue;
                     }
@@ -244,7 +243,7 @@ class Bookmark extends \Gazelle\BaseUser {
                         $Feed->item(
                             $torrent->name() . ' ' . '[' . $torrent->label() .']',
                             \Text::strip_bbcode($tgroup->description()),
-                            "torrents.php?action=download&id={$t['ID']}&torrent_pass=[[PASSKEY]]",
+                            "torrents.php?action=download&id={$id}&torrent_pass=[[PASSKEY]]",
                             date('r'),
                             $this->user->username(),
                             $torrent->group()->location(),
