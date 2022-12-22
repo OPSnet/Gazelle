@@ -106,10 +106,8 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
         WHERE AliasID = ?
         ", $oldAliasId
     );
-    if (!empty($Groups)) {
-        foreach ($Groups as $GroupID) {
-            $tgroupMan->refresh($GroupID);
-        }
+    foreach ($Groups as $id) {
+        $tgroupMan->findById($id)?->refresh();
     }
     $DB->prepared_query("
         SELECT RequestID
@@ -154,10 +152,8 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
             WHERE ArtistID = ?
             ", $ArtistID
         );
-        if (!empty($Groups)) {
-            foreach ($Groups as $GroupID) {
-                $tgroupMan->refresh($GroupID);
-            }
+        foreach ($Groups as $id) {
+            $tgroupMan->findById($id)?->refresh();
         }
 
         $DB->prepared_query("

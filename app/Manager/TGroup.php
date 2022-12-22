@@ -69,87 +69,6 @@ class TGroup extends \Gazelle\BaseManager {
         );
     }
 
-    /**
-     * Update the cache and sphinx delta index to keep everything up-to-date.
-     */
-    public function refresh(int $groupId) {
-        $qid = self::$db->get_query_id();
-
-        $voteScore = (int)self::$db->scalar("
-            SELECT Score FROM torrents_votes WHERE GroupID = ?
-            ", $groupId
-        );
-
-        $artistName = (string)self::$db->scalar("
-            SELECT group_concat(aa.Name separator ' ')
-            FROM torrents_artists AS ta
-            INNER JOIN artists_alias AS aa USING (AliasID)
-            WHERE ta.Importance IN ('1', '4', '5', '6')
-                AND ta.GroupID = ?
-            GROUP BY ta.GroupID
-            ", $groupId
-        );
-
-        self::$db->begin_transaction();
-        // todo: remove this legacy code once TagList replacement is confirmed working
-        $hasTags = (bool)self::$db->scalar("
-            SELECT 1 FROM torrents_tags tt WHERE tt.GroupID = ? LIMIT 1
-            ", $groupId
-        );
-        if ($hasTags) {
-            self::$db->prepared_query("
-                UPDATE torrents_group SET
-                    TagList = (
-                        SELECT REPLACE(GROUP_CONCAT(tags.Name SEPARATOR ' '), '.', '_')
-                        FROM torrents_tags AS t
-                        INNER JOIN tags ON (tags.ID = t.TagID)
-                        WHERE t.GroupID = ?
-                        GROUP BY t.GroupID
-                    )
-                WHERE ID = ?
-                ", $groupId, $groupId
-            );
-        }
-
-        self::$db->prepared_query("
-            REPLACE INTO sphinx_delta
-                (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType, RecordLabel,
-                CatalogueNumber, VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
-                HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
-                RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
-            SELECT
-                t.ID, g.ID, g.Name, g.Year, g.CategoryID, t.Time, g.ReleaseType,
-                g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
-                tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
-                cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
-                coalesce(t.RemasterYear, 0), t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
-                replace(replace(t.FileList, '_', ' '), '/', ' ') AS FileList,
-                replace(group_concat(coalesce(t2.Name, '') SEPARATOR ' '), '.', '_'), ?, ?
-            FROM torrents t
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            INNER JOIN torrents_group g ON (g.ID = t.GroupID)
-            LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
-            LEFT JOIN tags t2 ON (t2.ID = tt.TagID)
-            WHERE g.ID = ?
-            GROUP BY t.ID
-            ", $voteScore, $artistName, $groupId
-        );
-        self::$db->commit();
-        self::$db->set_query_id($qid);
-
-        self::$cache->deleteMulti([
-            sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),
-            sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $groupId),
-            "groups_artists_$groupId", "torrents_details_$groupId", "torrent_group_$groupId", "torrent_group_light_$groupId"
-        ]);
-        $info = \Artists::get_artist($groupId);
-        foreach ($info as $roles => $role) {
-            foreach ($role as $artist) {
-                self::$cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
-            }
-        }
-    }
-
     public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user, \Gazelle\Log $log): bool {
         // Votes ninjutsu. This is so annoyingly complicated.
         // 1. Get a list of everybody who voted on the old group and clear their cache keys
@@ -282,7 +201,7 @@ class TGroup extends \Gazelle\BaseManager {
         $old->remove($user);
         self::$db->commit();
 
-        $this->refresh($new->id());
+        $new->refresh();
 
         self::$cache->deleteMulti([
             "requests_group_" . $new->id(),

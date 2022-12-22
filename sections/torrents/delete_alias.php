@@ -22,7 +22,7 @@ $artistId = $artist->id();
 $artistName = $artist->name();
 
 if ($tgroup->setViewer($Viewer)->removeArtist($artist, $role)) {
-    $tgMan->refresh($tgroup->id());
+    $tgroup->refresh();
 }
 
 $label = "$artistId ($artistName) [" . ARTIST_TYPE[$role] . "]";

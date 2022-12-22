@@ -516,16 +516,6 @@ class Torrent extends TorrentAbstract {
         ]);
         self::$cache->decrement('stats_torrent_count');
 
-        $group = $this->group();
-        $groupId = $group->id();
-        $Count = self::$db->scalar("
-            SELECT count(*) FROM torrents WHERE GroupID = ?
-            ", $groupId
-        );
-        if ($Count > 0) {
-            (new Manager\TGroup)->refresh($groupId);
-        }
-
         $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $this->id]]);
         $manager->softDelete(SQLDB, 'torrents_bad_files',              [['TorrentID', $this->id]]);
         $manager->softDelete(SQLDB, 'torrents_bad_folders',            [['TorrentID', $this->id]]);
@@ -574,6 +564,7 @@ class Torrent extends TorrentAbstract {
         $deleteKeys = self::$db->collect('ck', false);
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $this->id]]);
 
+        $groupId = $this->group()->id();
         if ($userId !== 0) {
             $key = sprintf(self::USER_RECENT_UPLOAD, $userId);
             $recent = self::$cache->get_value($key);
@@ -586,6 +577,7 @@ class Torrent extends TorrentAbstract {
             "torrent_download_" . $this->id, "torrent_group_" . $groupId, "torrents_details_" . $groupId
         );
         self::$cache->deleteMulti($deleteKeys);
+        $this->group()->refresh();
 
         $sizeMB = number_format($this->info()['Size'] / (1024 * 1024), 2) . ' MiB';
         $username = $userId ? (new Manager\User)->findById($userId)->username() : 'system';

@@ -760,6 +760,87 @@ class TGroup extends BaseObject {
         );
     }
 
+    /**
+     * Update the cache and sphinx delta index to keep everything up-to-date.
+     */
+    public function refresh() {
+        $qid = self::$db->get_query_id();
+
+        $voteScore = (int)self::$db->scalar("
+            SELECT Score FROM torrents_votes WHERE GroupID = ?
+            ", $this->id
+        );
+
+        $artistName = (string)self::$db->scalar("
+            SELECT group_concat(aa.Name separator ' ')
+            FROM torrents_artists AS ta
+            INNER JOIN artists_alias AS aa USING (AliasID)
+            WHERE ta.Importance IN ('1', '4', '5', '6')
+                AND ta.GroupID = ?
+            GROUP BY ta.GroupID
+            ", $this->id
+        );
+
+        self::$db->begin_transaction();
+        // todo: remove this legacy code once TagList replacement is confirmed working
+        $hasTags = (bool)self::$db->scalar("
+            SELECT 1 FROM torrents_tags tt WHERE tt.GroupID = ? LIMIT 1
+            ", $this->id
+        );
+        if ($hasTags) {
+            self::$db->prepared_query("
+                UPDATE torrents_group SET
+                    TagList = (
+                        SELECT REPLACE(GROUP_CONCAT(tags.Name SEPARATOR ' '), '.', '_')
+                        FROM torrents_tags AS t
+                        INNER JOIN tags ON (tags.ID = t.TagID)
+                        WHERE t.GroupID = ?
+                        GROUP BY t.GroupID
+                    )
+                WHERE ID = ?
+                ", $this->id, $this->id
+            );
+        }
+
+        self::$db->prepared_query("
+            REPLACE INTO sphinx_delta
+                (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType, RecordLabel,
+                CatalogueNumber, VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
+                HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
+                RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
+            SELECT
+                t.ID, g.ID, g.Name, g.Year, g.CategoryID, t.Time, g.ReleaseType,
+                g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
+                tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
+                cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
+                coalesce(t.RemasterYear, 0), t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
+                replace(replace(t.FileList, '_', ' '), '/', ' ') AS FileList,
+                replace(group_concat(coalesce(t2.Name, '') SEPARATOR ' '), '.', '_'), ?, ?
+            FROM torrents t
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            INNER JOIN torrents_group g ON (g.ID = t.GroupID)
+            LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
+            LEFT JOIN tags t2 ON (t2.ID = tt.TagID)
+            WHERE g.ID = ?
+            GROUP BY t.ID
+            ", $voteScore, $artistName, $this->id
+        );
+        self::$db->commit();
+
+        self::$cache->deleteMulti([
+            sprintf(self::CACHE_KEY, $this->id()),
+            sprintf(self::CACHE_TLIST_KEY, $this->id()),
+            "torrents_details_{$this->id()}", "torrent_group_{$this->id()}",
+            "groups_artists_{$this->id()}", "torrent_group_light_{$this->id()}"
+        ]);
+        foreach ($this->artistRole()->idList() as $role) {
+            foreach ($role as $artist) {
+                self::$cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
+            }
+        }
+        self::$db->set_query_id($qid);
+    }
+
     public function addTagVote(int $userId, int $tagId, string $way): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
@@ -842,7 +923,7 @@ class TGroup extends BaseObject {
             ", $this->id, $body, $image, $userId, mb_substr(trim($summary), 0, 100)
         );
         $revisionId = self::$db->inserted_id();
-        (new \Gazelle\Manager\TGroup)->refresh($this->id);
+        $this->refresh();
         return $revisionId;
     }
 
@@ -980,7 +1061,7 @@ class TGroup extends BaseObject {
         $oldName = $this->name();
         $success = $this->setUpdate('Name', $name)->modify();
         if ($success) {
-            $manager->refresh($this->id);
+            $this->refresh();
             $logger->group($this->id, $user->id(), "renamed to \"$name\" from \"$oldName\"")
                 ->general("Torrent Group {$this->id} was renamed to \"$name\" from \"$oldName\" by {$user->username()}");
         }

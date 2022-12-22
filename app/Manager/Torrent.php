@@ -416,7 +416,7 @@ class Torrent extends \Gazelle\BaseManager {
 
         $tgMan = new TGroup;
         foreach ($GroupIDs as $id) {
-            $tgMan->refresh($id);
+            $tgMan->findById($id)->refresh();
         }
 
         $groupLog = new \Gazelle\Log;

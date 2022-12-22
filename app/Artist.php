@@ -323,7 +323,7 @@ class Artist extends Base {
         );
         $tgroupMan = new Manager\TGroup;
         foreach ($groups as $groupId) {
-            $tgroupMan->refresh($groupId);
+            $tgroupMan->findById($groupId)?->refresh();
         }
 
         // process artists in requests

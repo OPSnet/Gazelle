@@ -51,7 +51,7 @@ foreach ($Tags as $tagName) {
     }
 }
 
-$tgMan->refresh($tgroupId);
+$tgroup->refresh();
 if (AJAX) {
     json_print('success', [
         'added'    => $added,

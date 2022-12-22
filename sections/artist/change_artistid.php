@@ -151,7 +151,7 @@ if (isset($_POST['confirm'])) {
     if (!empty($Groups)) {
         $tgroupMan = new \Gazelle\Manager\TGroup;
         foreach ($Groups as $GroupID) {
-            $tgroupMan->refresh($GroupID);
+            $tgroupMan->findById($GroupID)?->refresh();
         }
     }
     if (!empty($Requests)) {

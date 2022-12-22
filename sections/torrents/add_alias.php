@@ -8,7 +8,7 @@ if (is_null($tgroup)) {
 }
 
 if ($tgroup->addArtists($Viewer, $_POST['importance'], $_POST['aliasname'])) {
-    $tgMan->refresh($tgroup->id());
+    $tgroup->refresh();
 }
 
 header('Location: ' . redirectUrl($tgroup->location()));

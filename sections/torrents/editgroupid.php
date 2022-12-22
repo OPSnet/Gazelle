@@ -53,7 +53,7 @@ $oldId = $old->id();
 
 if ($DB->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) {
     $old->flush();
-    $tgMan->refresh($oldId);
+    $old->refresh();
 } else {
     // TODO: votes etc!
 
@@ -65,7 +65,7 @@ if ($DB->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) 
 }
 
 $new->flush();
-$tgMan->refresh($new->id());
+$new->refresh();
 $torrent->flush();
 $Cache->deleteMulti([
     "torrents_details_" . $oldId,

@@ -751,7 +751,7 @@ if (!$Viewer->disableBonusPoints()) {
     $bonus->addPoints($bonusTotal);
 }
 
-$tgroupMan->refresh($GroupID);
+$tgroupMan->findById($GroupID)->refresh();
 $torMan->flushFoldernameCache($DirName);
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
     $torMan->flushLatestUploads(5);

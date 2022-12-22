@@ -94,7 +94,7 @@ $oldCategoryId = $old->categoryId();
 // Delete old group if needed
 if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
     $old->flush();
-    $tgMan->refresh($oldId);
+    $old->refresh();
 } else {
     // TODO: votes etc.
 
@@ -106,7 +106,7 @@ if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
 }
 
 $new->flush();
-$tgMan->refresh($new->id());
+$new->refresh();
 $Cache->deleteMulti([
     "torrents_details_" . $oldId,
     "torrent_download_" . $torrent->id(),

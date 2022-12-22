@@ -102,6 +102,6 @@ if (count($CleanArtists) > 0) {
                 ->general("$change in group {$GroupID} ({$GroupName}) by user " . $Viewer->label());
         }
     }
-    (new \Gazelle\Manager\TGroup)->refresh($GroupID);
+    (new \Gazelle\Manager\TGroup)->findById($GroupID)?->refresh();
     header("Location: torrents.php?id=$GroupID");
 }
