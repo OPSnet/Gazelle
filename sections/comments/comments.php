@@ -218,7 +218,7 @@ if ($Action == 'requests') {
         $requestList[$id] = $requestMan->findById($id);
     }
 } elseif ($Action == 'torrents') {
-    $tgtMan = new Gazelle\Manager\TGroup;
+    $tgMan = new Gazelle\Manager\TGroup;
     foreach (array_flip(array_flip($DB->collect('PageID'))) as $id) {
         $tgroupList[$id] = $tgMan->findById($id);
     }

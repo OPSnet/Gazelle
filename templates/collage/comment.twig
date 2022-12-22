@@ -10,22 +10,17 @@
     </div>
 
 {%- include 'comment/thread.twig' with {
-    'url':       url,
+    'action':    'take_post',
+    'id':        collage.id,
     'comment':   comment,
+    'name':      'pageid',
     'paginator': paginator,
+    'subbed':    is_subscribed,
+    'textarea':  textarea,
+    'url':       url,
+    'url_stem':  'comments.php?page=collages',
     'userMan':   userMan,
     'viewer':    viewer,
-} only %}
-
-{%- include 'reply.twig' with {
-    'action':   'take_post',
-    'id':       collage.id,
-    'name':     'pageid',
-    'subbed':   is_subscribed,
-    'textarea': textarea,
-    'url':      'comments.php?page=collages',
-    'userMan':  userMan,
-    'viewer':   viewer,
 } only %}
 </div>
 {{ footer() }}

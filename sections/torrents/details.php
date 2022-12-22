@@ -9,7 +9,7 @@ $tgroupId = $tgroup->id();
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-$commentPage = new Gazelle\Comment\Torrent($tgroupId, (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
+$commentPage = new Gazelle\Comment\Torrent($tgroupId, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
@@ -740,27 +740,19 @@ if (!empty($similar)) {
 <?php } ?>
             </div>
         </div>
-<?php
-
-echo $Twig->render('comment/thread.twig', [
-    'url'       => $_SERVER['REQUEST_URI'],
+<?= $Twig->render('comment/thread.twig', [
+    'action'    => 'take_post',
+    'id'        => $tgroupId,
     'comment'   => $commentPage,
+    'name'      => 'pageid',
     'paginator' => $paginator,
+    'subbed'    => $isSubscribed,
+    'textarea'  => (new Gazelle\Util\Textarea('quickpost', ''))->setPreviewManual(true),
+    'url'       => $_SERVER['REQUEST_URI'],
+    'url_stem'  => 'comments.php?page=torrents',
     'userMan'   => $userMan,
     'viewer'    => $Viewer,
-]);
-
-echo $Twig->render('reply.twig', [
-    'action'   => 'take_post',
-    'id'       => $tgroupId,
-    'name'     => 'pageid',
-    'subbed'   => $isSubscribed,
-    'textarea' => (new Gazelle\Util\Textarea('quickpost', ''))->setPreviewManual(true),
-    'url'      => 'comments.php?page=torrents',
-    'userMan'  => $userMan,
-    'viewer'   => $Viewer,
-]);
-?>
+]) ?>
     </div>
 </div>
 <?php

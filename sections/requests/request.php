@@ -10,7 +10,7 @@ if (is_null($request)) {
 }
 $requestId = $request->id();
 
-$commentPage = new Gazelle\Comment\Request($requestId, (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
+$commentPage = new Gazelle\Comment\Request($requestId, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
@@ -385,27 +385,19 @@ if ($request->canVote($Viewer)) {
             <div class="pad"><?= Text::full_format( $request->description()) ?></div>
         </div>
     <div id="request_comments">
-<?php
-
-echo $Twig->render('comment/thread.twig', [
-    'url'       => $_SERVER['REQUEST_URI'],
+<?= $Twig->render('comment/thread.twig', [
+    'action'    => 'take_post',
+    'id'        => $requestId,
     'comment'   => $commentPage,
+    'name'      => 'pageid',
     'paginator' => $paginator,
+    'subbed'    => $isSubscribed,
+    'textarea'  => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
+    'url'       => $_SERVER['REQUEST_URI'],
+    'url_stem'  => 'comments.php?page=requests',
     'userMan'   => $userMan,
     'viewer'    => $Viewer,
-]);
-
-echo $Twig->render('reply.twig', [
-    'action'   => 'take_post',
-    'id'       => $requestId,
-    'name'     => 'pageid',
-    'subbed'   => $isSubscribed,
-    'textarea' => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
-    'url'      => 'comments.php?page=requests',
-    'userMan'  => $userMan,
-    'viewer'   => $Viewer,
-]);
-?>
+]) ?>
         </div>
     </div>
 </div>

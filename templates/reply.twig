@@ -35,7 +35,7 @@
                 </td>
             </tr>
         </table>
-        <form class="send_form center" name="reply" id="quickpostform" action="{{ url }}" method="post"{% if not admin %} onsubmit="quickpostform.submit_button.disabled = true;"{% endif %}>
+        <form class="send_form center" name="reply" id="quickpostform" action="{{ url_stem }}" method="post"{% if not admin %} onsubmit="quickpostform.submit_button.disabled = true;"{% endif %}>
             <input type="hidden" name="action" value="{{ action }}" />
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="{{ name }}" value="{{ id }}" />

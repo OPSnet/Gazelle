@@ -5,7 +5,7 @@ if (is_null($collage)) {
     error(404);
 }
 
-$commentPage = new Gazelle\Comment\Collage($collage->id(), (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
+$commentPage = new Gazelle\Comment\Collage($collage->id(), (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());

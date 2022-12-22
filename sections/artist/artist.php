@@ -564,29 +564,24 @@ if (LASTFM_API_KEY) {
 ?>
     <div id="artistcomments">
 <?php
-$commentPage = new Gazelle\Comment\Artist($ArtistID, (int)($_GET['page'] ?? 1), (int)($_GET['postid'] ?? 0));
+$commentPage = new Gazelle\Comment\Artist($ArtistID, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
 echo $Twig->render('comment/thread.twig', [
-    'url'       => $_SERVER['REQUEST_URI'],
+    'action'    => 'take_post',
+    'id'        => $ArtistID,
+    'name'      => 'pageid',
     'comment'   => $commentPage,
     'paginator' => $paginator,
+    'subbed'    => $isSubscribed,
+    'textarea'  => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
+    'url'       => $_SERVER['REQUEST_URI'],
+    'url_stem'  => 'comments.php?page=artist',
     'userMan'   => $userMan,
     'viewer'    => $Viewer,
-]);
-
-echo $Twig->render('reply.twig', [
-    'action'   => 'take_post',
-    'id'       => $ArtistID,
-    'name'     => 'pageid',
-    'subbed'   => $isSubscribed,
-    'textarea' => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
-    'url'      => 'comments.php?page=artist',
-    'userMan'  => $userMan,
-    'viewer'   => $Viewer,
 ]);
 ?>
         </div>

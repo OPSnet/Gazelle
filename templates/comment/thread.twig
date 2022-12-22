@@ -62,3 +62,15 @@
     </table>
 {% endfor %}
 {{ paginator.linkbox|raw }}
+{% include 'reply.twig' with
+    {
+        'action':   action,
+        'id':       id,
+        'name':     name,
+        'subbed':   subbed,
+        'textarea': textarea,
+        'url_stem': url_stem,
+        'userMan':  userMan,
+        'viewer':   viewer,
+    }
+    only %}
