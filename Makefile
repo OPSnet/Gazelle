@@ -50,7 +50,7 @@ lint-css:
 lint-php:
 	yarn lint:php:internal
 	yarn lint:php:phpcs || exit 0
-	composer phpstan
+	composer phpstan analyse --configuration misc/phpstan.neon
 
 .PHONY: lint-twig
 lint-twig:

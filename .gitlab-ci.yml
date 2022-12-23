@@ -1,4 +1,5 @@
 stages:
+  - analyze
   - test
 
 # in gitlab you must define these variables:
@@ -24,6 +25,26 @@ variables:
   MYSQL_PASSWORD: $MYSQL_PASSWORD
   MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
   MEMCACHED_NAMESPACE: $CI_COMMIT_SHORT_SHA
+  YARN_CACHE_FOLDER: ${CI_PROJECT_DIR}/.yarn-cache
+  COMPOSER_HOME: ${CI_PROJECT_DIR}/.composer
+
+phpstan:
+  stage: analyze
+  image:
+    name: gazelle-phpstan:latest
+    entrypoint: [""]
+  cache:
+    - key:
+        files:
+          - composer.json
+          - composer.lock
+        prefix: vendor
+      paths:
+        - vendor
+        - .composer
+  script:
+    - composer install --no-progress
+    - phpstan analyse --configuration misc/phpstan.neon
 
 e2e-tests:
   stage: test

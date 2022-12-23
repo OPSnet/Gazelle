@@ -132,6 +132,10 @@ repo and place them alongside the `Dockerfile-gitlab`. Then run
 
 in the gazelle repo's root directory (this one).
 
+Similarly, the phpstan container can be built with
+
+    docker build -t gazelle-phpstan:latest -f .docker/Dockerfile-phpstan --compress .docker
+
 ## Contact and Discussion
 Feel free to join #develop on irc.orpheus.network to discuss any
 questions concerning Gazelle (or any of the repos published by

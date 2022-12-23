@@ -1,0 +1,22 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 7
+    stubFiles:
+        - ../lib/stub/memcached.stub
+    bootstrapFiles:
+        - ../lib/config.php
+    scanFiles:
+        - ../lib/bootstrap.php
+        - ../lib/util.php
+    paths:
+        - ../app
+        - ../classes
+        - ../db
+        - ../scripts
+        - ../tests
+        - ../sections
+    parallel:
+        maximumNumberOfProcesses: 1
+    ignoreErrors:

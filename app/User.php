@@ -745,7 +745,7 @@ class User extends BaseObject {
                 ", $this->id
             );
         }
-        return null; /** @phpstan-ignore-line */
+        return null;
     }
 
     public function requiredRatio(): float {
