@@ -655,13 +655,14 @@ if (!$torrentList) {
 <?php
 }
 
-$Requests = get_group_requests($tgroupId);
-if ($Viewer->disableRequests() && count($Requests) > 0) {
-    $i = 0;
+if (!$Viewer->disableRequests()) {
+    $requestList = $requestMan->findByTGroup($tgroup);
+    if ($requestList) {
+        $i = 0;
 ?>
         <div class="box">
             <div class="head">
-                <span style="font-weight: bold;">Requests (<?=number_format(count($Requests))?>)</span>
+                <span style="font-weight: bold;">Requests (<?=number_format(count($requestList))?>)</span>
                 <a href="#" style="float: right;" onclick="$('#requests').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a>
             </div>
             <table id="requests" class="request_table hidden">
@@ -670,28 +671,16 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
                     <td>Votes</td>
                     <td>Bounty</td>
                 </tr>
-<?php
-    foreach ($Requests as $Request) {
-        $request = $requestMan->findById($Request['ID']);
-        if ($Request['BitrateList'] != '') {
-            $BitrateString = implode(', ', explode('|', $Request['BitrateList']));
-            $FormatString = implode(', ', explode('|', $Request['FormatList']));
-            $MediaString = implode(', ', explode('|', $Request['MediaList']));
-            if ($Request['LogCue']) {
-                $FormatString .= ' - '.$Request['LogCue'];
-            }
-        } else {
-            $BitrateString = 'Unknown';
-            $FormatString = 'Unknown';
-            $MediaString = 'Unknown';
-        }
-?>
+<?php foreach ($requestList as $request) { ?>
                 <tr class="requestrows <?=(++$i % 2 ? 'rowa' : 'rowb')?>">
-                    <td><a href="requests.php?action=view&amp;id=<?=$Request['ID']?>"><?=$FormatString?> / <?=$BitrateString?> / <?=$MediaString?></a></td>
+                    <td><a href="requests.php?action=view&amp;id=<?= $request->id() ?>"><?=
+                        implode(', ', $request->needFormatList())
+                        . ($request->needLog() || $request->needCue() ? " - {$request->legacyLogCue()}" : '')
+                        ?> / <?= implode(', ', $request->needEncodingList()) ?> / <?= implode(', ', $request->needFormatList()) ?></a></td>
                     <td>
-                        <span id="vote_count_<?=$Request['ID']?>"><?= $request->userVotedTotal() ?></span>
+                        <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>
 <?php       if ($Viewer->permitted('site_album_votes')) { ?>
-                        &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$Request['ID']?>)" class="brackets">+</a>
+                        &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $request->id() ?>)" class="brackets">+</a>
 <?php       } ?>
                     </td>
                     <td><?= Format::get_size($request->bountyTotal()) ?></td>
@@ -700,6 +689,7 @@ if ($Viewer->disableRequests() && count($Requests) > 0) {
             </table>
         </div>
 <?php
+    }
 }
 
 // Matched Votes

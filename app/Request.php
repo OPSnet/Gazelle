@@ -157,9 +157,9 @@ class Request extends BaseObject {
             );
             $info['tag'] = self::$db->collect('Name', false);
 
-            $info['need_encoding'] = explode('|', $info['BitrateList'] ?? '');
-            $info['need_format'] = explode('|', $info['FormatList'] ?? '');
-            $info['need_media'] = explode('|', $info['MediaList'] ?? '');
+            $info['need_encoding'] = explode('|', $info['BitrateList'] ?? 'Unknown');
+            $info['need_format'] = explode('|', $info['FormatList'] ?? 'Unknown');
+            $info['need_media'] = explode('|', $info['MediaList'] ?? 'Unknown');
             $this->info = $info;
         }
         return $this->info;

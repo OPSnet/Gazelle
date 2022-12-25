@@ -43,24 +43,43 @@ class Request extends \Gazelle\BaseManager {
     }
 
     public function findByArtist(\Gazelle\Artist $artist): array {
-        $artistId = $artist->id();
-        $key = sprintf(\Gazelle\Artist::CACHE_REQUEST_ARTIST, $artistId);
+        $key = sprintf(\Gazelle\Artist::CACHE_REQUEST_ARTIST, $artist->id());
         $requestList = self::$cache->get_value($key);
         if ($requestList === false) {
             self::$db->prepared_query("
                 SELECT r.ID
                 FROM requests AS r
-                INNER JOIN requests_votes v ON (v.RequestID = r.id)
+                INNER JOIN requests_votes v ON (v.RequestID = r.ID)
                 INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
                 WHERE r.TorrentID = 0
                     AND ra.ArtistID = ?
                 GROUP BY r.ID
                 ORDER BY count(v.UserID) DESC, sum(v.Bounty) DESC
-                ", $artistId
+                ", $artist->id()
             );
             $requestList = self::$db->collect(0, false);
             self::$cache->cache_value($key, $requestList, 3600);
         }
         return array_map(fn($id) => $this->findById($id), $requestList);
     }
+
+    public function findByTGroup(\Gazelle\TGroup $tgroup): array {
+        $key = sprintf(\Gazelle\TGroup::CACHE_REQUEST_TGROUP, $tgroup->id());
+        $requestList = self::$cache->get_value($key);
+        if ($requestList === false) {
+            self::$db->prepared_query("
+                SELECT r.ID
+                FROM requests AS r
+                INNER JOIN torrents_group tg ON (tg.ID = r.GroupID)
+                WHERE r.TorrentID = 0
+                    AND tg.ID = ?
+                ORDER BY r.TimeAdded ASC
+                ", $tgroup->id()
+            );
+            $requestList = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $requestList, 3600);
+        }
+        return array_map(fn($id) => $this->findById($id), $requestList);
+    }
+
 }

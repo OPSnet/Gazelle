@@ -3,11 +3,12 @@
 namespace Gazelle;
 
 class TGroup extends BaseObject {
-    const CACHE_KEY          = 'tg_%d';
-    const CACHE_TLIST_KEY    = 'tlist_%d';
-    const CACHE_COVERART_KEY = 'tg_cover_%d';
-    const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
-    const USER_RECENT_UPLOAD = 'u_recent_up_%d';
+    const CACHE_KEY            = 'tg_%d';
+    const CACHE_TLIST_KEY      = 'tlist_%d';
+    const CACHE_COVERART_KEY   = 'tg_cover_%d';
+    const USER_RECENT_SNATCH   = 'u_recent_snatch_%d';
+    const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
+    const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
     const ARTIST_DISPLAY_TEXT = 1;
     const ARTIST_DISPLAY_HTML = 2;
