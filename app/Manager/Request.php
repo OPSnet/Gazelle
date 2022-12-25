@@ -82,4 +82,15 @@ class Request extends \Gazelle\BaseManager {
         return array_map(fn($id) => $this->findById($id), $requestList);
     }
 
+    public function findByTorrentReported(\Gazelle\TorrentAbstract $torrent): array {
+        self::$db->prepared_query("
+            SELECT DISTINCT req.ID
+            FROM requests AS req
+            INNER JOIN reportsv2 AS rep ON (rep.TorrentID = req.TorrentID)
+            WHERE rep.Status != 'Resolved'
+                AND req.TorrentID = ?
+            ",  $torrent->id()
+        );
+        return array_map(fn($id) => $this->findById($id), self::$db->collect(0, false));
+    }
 }

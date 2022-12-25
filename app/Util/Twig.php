@@ -67,6 +67,17 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'linkify',
+            function ($link) {
+                $local = \Text::local_url($link);
+                if ($local !== false) {
+                    $link = \Text::resolve_url($link);
+                }
+                return new \Twig\Markup("<a href=\"$link\">$link</a>", 'UTF-8');
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'octet_size',
             function ($size, array $option = []) {
                 return \Format::get_size($size, empty($option) ? 2 : $option[0]);

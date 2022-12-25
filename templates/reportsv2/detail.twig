@@ -1,0 +1,52 @@
+{% set torrent = report.torrent %}
+{% if torrent.description %}
+                        <br /><div class="report_torrent_info" title="Release description of reported torrent">Release info: {{ torrent.description|bb_format }}</div>
+{% endif %}
+{% if report.status != 'resolved' %}
+    {% set tgroup_id = torrent.group.id %}
+    {% set group_total = manager.totalReportsGroup(tgroup_id) %}
+    {% if group_total > 1 %}
+        {% set group_total = group_total - 1 %}
+                        <div style="text-align: right;">
+                            <a href="reportsv2.php?view=group&amp;id={{ tgroup_id }}">There
+        {%- if group_total > 1 %} are {{ group_total }} other reports {% else %} is 1 other report {% endif -%}
+                                for torrents in this group</a>
+                        </div>
+    {% endif %}
+    {% set uploader_id = torrent.uploaderId %}
+    {% set uploaded_total = manager.totalReportsUploader(uploader_id) %}
+    {% if uploaded_total > 1 %}
+        {% set uploaded_total = uploaded_total - 1 %}
+                        <div style="text-align: right;">
+                            <a href="reportsv2.php?view=uploader&amp;id={{ uploader_id }}">There
+        {%- if upload_total > 1 %} are {{ upload_total }} other reports {% else %} is 1 other report {% endif -%}
+                                for torrents uploaded by this user</a>
+                        </div>
+    {% endif %}
+    {% for request in request_list %}
+                        <div style="text-align: right;">
+                            <strong class="important_text">{{ request.fillerId|user_url }} used this torrent to fill <a href="{{
+                                request.url }}">this request</a> {{ request.fillDate|time_diff }}</strong>
+                        </div>
+    {% endfor %}
+{% endif %}
+                    </td>
+                </tr>
+{% if report.trackList %}
+                <tr>
+                    <td class="label">Relevant tracks:</td>
+                    <td> {{ report.trackList|join(' ') }} </td>
+                </tr>
+{% endif %}
+{% for link in report.externalLink %}
+    {% if loop.first %}
+                <tr>
+                    <td class="label">Relevant links:</td>
+                    <td>
+    {% endif %}
+        {{ link|linkify }}
+    {% if loop.last %}
+                    </td>
+                </tr>
+    {% endif %}
+{% endfor %}

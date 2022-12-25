@@ -16,6 +16,7 @@ if (!$Viewer->permitted('admin_reports')) {
 $torMan        = new Gazelle\Manager\Torrent;
 $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$requestMan    = new Gazelle\Manager\Request;
 $userMan       = new Gazelle\Manager\User;
 $search        = new Gazelle\Search\Torrent\Report($_GET['view'] ?? '', $_GET['id'] ?? '', $reportTypeMan, $userMan);
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
@@ -142,87 +143,12 @@ if ($search->canUnclaim($Viewer)) {
                             <span class="file_ext_map"><?= implode(', ', array_map(fn ($ext) => "$ext: {$extMap[$ext]}", array_keys($extMap))) ?></span>
 <?php       } ?>
                         </span>
-<?php       if ($torrent?->description()) { ?>
-                        <br /><div class="report_torrent_info" title="Release description of reported torrent">Release info: <?= Text::full_format($torrent?->description()) ?></div>
-<?php       } ?>
-
-<?php       if ($report->status() != 'Resolved') {
-                $totalGroup = $reportMan->totalReportsGroup($tgroupId);
-                if ($totalGroup > 1) {
-                    --$totalGroup;
-?>
-                        <div style="text-align: right;">
-                            <a href="reportsv2.php?view=group&amp;id=<?= $tgroupId ?>">There <?=
-                                $totalGroup > 1 ? "are $totalGroup other reports" : "is 1 other report"
-                                ?> for torrent(s) in this group</a>
-                        </div>
 <?php
-                }
-                $totalUploaded = $reportMan->totalReportsUploader($uploaderId);
-                if ($totalUploaded > 1) {
-                    --$totalUploaded;
-?>
-                        <div style="text-align: right;">
-                            <a href="reportsv2.php?view=uploader&amp;id=<?= $uploaderId ?>">There <?=
-                                $totalUploaded > 1 ? "are $totalUploaded other reports" : "is 1 other report"
-                                ?> for torrent(s) uploaded by this user</a>
-                        </div>
-<?php           }
-
-                $DB->prepared_query("
-                    SELECT DISTINCT req.ID,
-                        req.FillerID,
-                        um.Username,
-                        req.TimeFilled
-                    FROM requests AS req
-                        LEFT JOIN torrents AS t ON t.ID = req.TorrentID
-                        LEFT JOIN reportsv2 AS rep ON rep.TorrentID = t.ID
-                        JOIN users_main AS um ON um.ID = req.FillerID
-                    WHERE rep.Status != 'Resolved'
-                        AND req.TorrentID = ?
-                    ",  $torrentId
-                );
-                if ($DB->has_results()) {
-                    while ([$RequestID, $FillerID, $FillerName, $FilledTime] = $DB->next_record()) {
-?>
-                        <div style="text-align: right;">
-                            <strong class="important_text"><a href="user.php?id=<?=$FillerID?>"><?=$FillerName?></a> used this torrent to fill <a href="requests.php?action=view&amp;id=<?=$RequestID?>">this request</a> <?=time_diff($FilledTime)?></strong>
-                        </div>
-<?php
-                    }
-                }
-            }
-?>
-                    </td>
-                </tr>
-<?php       if ($report->trackList()) { ?>
-                <tr>
-                    <td class="label">Relevant tracks:</td>
-                    <td>
-                        <?= implode(' ', $report->trackList()) ?>
-                    </td>
-                </tr>
-<?php
-            }
-
-            if ($report->externalLink()) { ?>
-                <tr>
-                    <td class="label">Relevant links:</td>
-                    <td>
-<?php
-                foreach ($report->externalLink() as $link) {
-
-                    if ($local = Text::local_url($link)) {
-                        $link = $local;
-                    }
-?>
-                        <a href="<?= $link ?>"><?= $link ?></a>
-<?php           } ?>
-                    </td>
-                </tr>
-<?php
-            }
-
+            echo $Twig->render('reportsv2/detail.twig', [
+                'manager'      => $reportMan,
+                'report'       => $report,
+                'request_list' => $requestMan->findByTorrentReported($torrent),
+            ]);
             if ($report->otherIdList()) {
 ?>
                 <tr>
