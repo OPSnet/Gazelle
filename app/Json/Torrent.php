@@ -43,9 +43,7 @@ class Torrent extends \Gazelle\Json {
                 'reported'      => $torrent->hasReport($this->user),
                 'time'          => $torrent->created(),
                 'description'   => $torrent->description(),
-                'fileList'      => implode('|||',
-                    array_map(fn ($f) => $this->torMan->apiFilename($f), $torrent->fileList())
-                ),
+                'fileList'      => $torrent->fileListLegacyAPI(),
                 'filePath'      => $torrent->path(),
                 'userId'        => $torrent->uploaderId(),
                 'username'      => $torrent->uploader()->username(),

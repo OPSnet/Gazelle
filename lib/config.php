@@ -729,6 +729,10 @@ defined('SIMILAR_HEIGHT') or define('SIMILAR_HEIGHT', 500);
 // Number of columns in the official tags toolbox
 defined('TAG_OFFICIAL_COLUMNS') or define('TAG_OFFICIAL_COLUMNS', 4);
 
+// The files of a torrent are squished into a single field in the database,
+// delimited by this character
+defined('FILELIST_DELIM') or define('FILELIST_DELIM', "\xC3\xB7");
+
 // ------------------------------------------------------------------------
 // Upload configuration
 

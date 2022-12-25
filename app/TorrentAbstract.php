@@ -160,10 +160,66 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     /**
+     * Parse a meta filename into a more useful array structure
+     *
+     * @return array with the keys 'ext', 'size' and 'name'
+     */
+    protected function filenameParse(string $metaname): array {
+        if (preg_match('/^(\..*?) s(\d+)s (.+) (?:&divide;|' . FILELIST_DELIM . ')$/', $metaname, $match)) {
+            return [
+                'ext'  => $match[1] ?? null,
+                'size' => (int)$match[2] ?? 0,
+                // transform leading blanks into hard blanks so that it shows up in HTML
+                'name' => preg_replace_callback('/^(\s+)/', function ($s) { return str_repeat('&nbsp;', strlen($s[1])); }, $match[3] ?? ''),
+            ];
+        }
+        return [
+            'ext'  => null,
+            'size' => 0,
+            'name' => null,
+        ];
+    }
+
+    /**
      * Get the files of this upload
+     * @return array of ['file', 'ext', 'size'] for each file
      */
     public function fileList(): array {
-        return $this->info()['FileList'];
+        return array_map(fn ($f) => $this->filenameParse($f), $this->info()['FileList']);
+    }
+
+    /**
+     * Aggregate the audio files per audio type
+     *
+     * @return array of array of [ac3, flac, m4a, mp3] => count
+     */
+    public function fileListAudioMap(): array {
+        $map = [];
+        foreach ($this->fileList() as $file) {
+            if (is_null($file['ext'])) {
+                continue;
+            }
+            $ext = substr($file['ext'], 1); // skip over period
+            if (in_array($ext, ['ac3', 'flac', 'm4a', 'mp3'])) {
+                if (!isset($map[$ext])) {
+                    $map[$ext] = 0;
+                }
+                ++$map[$ext];
+            }
+        }
+        return $map;
+    }
+
+    /**
+     * Create a string that contains file info in the old format for the API
+     *
+     * @return string with the format 'NAME{{{SIZE}}}|||NAME{{{SIZE}}}|||...'
+     */
+    public function fileListLegacyAPI(): string {
+        return implode('|||', array_map(
+            fn ($file) => $file['name'] . '{{{' . $file['size'] . '}}}',
+            $this->fileList()
+        ));
     }
 
     /**

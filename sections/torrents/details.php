@@ -610,12 +610,9 @@ if (!$torrentList) {
                                     <strong>Size</strong>
                                 </td>
                             </tr>
-<?php
-        foreach ($torrent->fileList() as $file) {
-            $info = $torMan->splitMetaFilename($file);
-?>
-                            <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?=
-                                Format::get_size($info['size']) ?></td></tr>
+<?php   foreach ($torrent->fileList() as $file) { ?>
+                            <tr><td><?= $file['name'] ?></td><td class="number_column nobr"><?=
+                                Format::get_size($file['size']) ?></td></tr>
 <?php   } ?>
                         </table>
                     </div>

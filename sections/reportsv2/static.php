@@ -125,11 +125,8 @@ if ($search->canUnclaim($Viewer)) {
                                         <strong>Size</strong>
                                     </td>
                                 </tr>
-<?php
-            foreach ($torrent?->fileList() ?? [] as $f) {
-                $info = $torMan->splitMetaFilename($f);
-?>
-                                <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?= Format::get_size($info['size']) ?></td></tr>
+<?php       foreach ($torrent?->fileList() ?? [] as $f) { ?>
+                                <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= Format::get_size($f['size']) ?></td></tr>
 <?php       } ?>
                             </table>
                         </div>
@@ -138,7 +135,7 @@ if ($search->canUnclaim($Viewer)) {
                         <br />Last action: <?= $torrent?->lastActiveDate() ?: 'Never' ?>
                         <br /><span class="report_torrent_file_ext">Audio files present:
 <?php
-            $extMap = $torMan->audioMap($torrent?->fileList() ?? []);
+            $extMap = $torrent?->fileListAudioMap() ?? [];
             if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>
@@ -260,11 +257,8 @@ if ($search->canUnclaim($Viewer)) {
                                     <strong>Size</strong>
                                 </td>
                             </tr>
-<?php
-                        foreach ($extra->fileList() as $f) {
-                            $info = $torMan->splitMetaFilename($f);
-?>
-                            <tr><td><?= $info['name'] ?></td><td class="number_column nobr"><?= Format::get_size($info['size']) ?></td></tr>
+<?php                   foreach ($extra->fileList() as $f) { ?>
+                            <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= Format::get_size($f['size']) ?></td></tr>
 <?php                   } ?>
                         </table>
                         </div>
@@ -274,7 +268,7 @@ if ($search->canUnclaim($Viewer)) {
                         <br />Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>
                         <br /><span>Audio files present:
 <?php
-                        $extMap = $torMan->audioMap($extra->fileList());
+                        $extMap = $extra->fileListAudioMap();
                         if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>

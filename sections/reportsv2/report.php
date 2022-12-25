@@ -123,11 +123,8 @@ $remasterTuple = $torrent->remasterTuple();
                 <strong>Size</strong>
             </td>
         </tr>
-<?php
-foreach ($torrent->fileList() as $file) {
-    $info = $torMan->splitMetaFilename($file);
-?>
-            <tr><td><?= display_str($info['name']) ?></td><td class="number_column"><?= Format::get_size($info['size']) ?></td></tr>
+<?php foreach ($torrent->fileList() as $file) { ?>
+            <tr><td><?= display_str($file['name']) ?></td><td class="number_column"><?= Format::get_size($file['size']) ?></td></tr>
 <?php } ?>
 </table>
 </div>

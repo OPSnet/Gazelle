@@ -10,7 +10,6 @@ class Torrent extends \Gazelle\BaseManager {
     const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     const CACHE_FOLDERNAME         = 'foldername_%s';
     const FOLDER_SALT              = "v1\x01";
-    const FILELIST_DELIM_UTF8 = "\xC3\xB7";
 
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
@@ -153,39 +152,7 @@ class Torrent extends \Gazelle\BaseManager {
         $name = make_utf8(strtr($name, "\n\r\t", '   '));
         $extPos = mb_strrpos($name, '.');
         $ext = $extPos === false ? '' : trim(mb_substr($name, $extPos + 1));
-        return sprintf(".%s s%ds %s %s", $ext, $size, $name, self::FILELIST_DELIM_UTF8);
-    }
-
-    /**
-     * Parse a meta filename into a more useful array structure
-     *
-     * @return array with the keys 'ext', 'size' and 'name'
-     */
-    public function splitMetaFilename(string $metaname): array {
-        if (preg_match('/^(\..*?) s(\d+)s (.+) (?:&divide;|' . self::FILELIST_DELIM_UTF8 . ')$/', $metaname, $match)) {
-            return [
-                'ext'  => $match[1] ?? null,
-                'size' => (int)$match[2] ?? 0,
-                // transform leading blanks into hard blanks so that it shows up in HTML
-                'name' => preg_replace_callback('/^(\s+)/', function ($s) { return str_repeat('&nbsp;', strlen($s[1])); }, $match[3] ?? ''),
-            ];
-        }
-        return [
-            'ext'  => null,
-            'size' => 0,
-            'name' => null,
-        ];
-    }
-
-    /**
-     * Create a string that contains file info in the old format for the API
-     *
-     * @param string $metaname string with the format .EXT sSIZEs NAME DELIMITER
-     * @return string with the format NAME{{{SIZE}}}
-     */
-    public function apiFilename(string $metaname): string {
-        $info = $this->splitMetaFilename($metaname);
-        return $info['name'] . '{{{' . $info['size'] . '}}}';
+        return sprintf(".%s s%ds %s %s", $ext, $size, $name, FILELIST_DELIM);
     }
 
     /**
@@ -243,29 +210,6 @@ class Torrent extends \Gazelle\BaseManager {
             }
         }
         return $torrent->setSource(SOURCE);
-    }
-
-    /**
-     * Aggregate the audio files per audio type
-     *
-     * @return array of array of [ac3, flac, m4a, mp3] => count
-     */
-    function audioMap(array $fileList): array {
-        $map = [];
-        foreach ($fileList as $file) {
-            $info = $this->splitMetaFilename($file);
-            if (is_null($info['ext'])) {
-                continue;
-            }
-            $ext = substr($info['ext'], 1); // skip over period
-            if (in_array($ext, ['ac3', 'flac', 'm4a', 'mp3'])) {
-                if (!isset($map[$ext])) {
-                    $map[$ext] = 0;
-                }
-                ++$map[$ext];
-            }
-        }
-        return $map;
     }
 
     /**
