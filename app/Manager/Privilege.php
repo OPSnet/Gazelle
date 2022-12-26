@@ -32,15 +32,12 @@ class Privilege extends \Gazelle\BaseManager {
     }
 
     public function flush() {
+        self::$cache->delete_value(self::CACHE_KEY);
         $this->info = [];
         return $this;
     }
 
-    public function create(string $name, int $level, bool $secondary, string $forums, array $values, int  $staffGroup, string $badge, bool $displayStaff): \Gazelle\Privilege {
-        $staffGroupId = $displayStaff
-            ? self::$db->scalar("SELECT ID FROM staff_groups WHERE ID = ?", $staffGroup)
-            : 0;
-
+    public function create(string $name, int $level, bool $secondary, string $forums, array $values, int|null $staffGroupId, string $badge, bool $displayStaff): \Gazelle\Privilege {
         self::$db->prepared_query('
             INSERT INTO permissions
                    (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)

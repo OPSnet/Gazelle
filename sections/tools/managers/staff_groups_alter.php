@@ -5,40 +5,29 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 }
 
 authorize();
-
-View::show_header('Staff Group Management');
+$manager = new Gazelle\Manager\StaffGroup;
+$staffGroup = $manager->findById((int)($_POST['id'] ?? 0));
 
 if ($_POST['submit'] == 'Delete') {
-    if (!is_number($_POST['id']) || $_POST['id'] == '') {
+    if (is_null($staffGroup)) {
         error(0);
     }
-
-    $DB->prepared_query("
-        DELETE FROM staff_groups
-        WHERE ID = ?", $_POST['id']);
+    $staffGroup->remove();
 } else {
-    $Val = new Gazelle\Util\Validator;
-    $Val->setFields([
+    $validator = new Gazelle\Util\Validator;
+    $validator->setFields([
         ['sort', '1', 'number', 'Sort must be set'],
         ['name', '1', 'string', 'Name must be set, and has a max length of 50 characters', ['maxlength' => 50]],
     ]);
-    if (!$Val->validate($_POST)) {
-        error($Val->errorMessage());
+    if (!$validator->validate($_POST)) {
+        error($validator->errorMessage());
     }
 
     if ($_POST['submit'] == 'Edit') {
-        $DB->prepared_query("
-            UPDATE staff_groups
-            SET Sort = ?,
-                Name = ?
-            WHERE ID = ?", $_POST['sort'], $_POST['name'], $_POST['id']);
+        $staffGroup->setUpdate('Sort', (int)$_POST['sort'])->setUpdate('Name', trim($_POST['name']))->modify();
     } else {
-        $DB->prepared_query("
-            INSERT INTO staff_groups (Sort, Name)
-            VALUES (?, ?)", $_POST['sort'], $_POST['name']);
+        $manager->create(sequence: (int)$_POST['sort'], name: trim($_POST['name']));
     }
 }
-
-$Cache->delete_value('staff');
 
 header('Location: tools.php?action=staff_groups');

@@ -1,16 +1,19 @@
 {% from 'macro/form.twig' import checked, selected -%}
 {{ header('Manage Permissions', {'js': 'validate'}) }}
 {{ js|raw }}
+<div class="header">
+    <div class="linkbox">
+        <a href="tools.php?action=permissions" class="brackets">Userclass List</a>
+        <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
+        <a href="tools.php?action=staff_groups" class="brackets">Staff Groups</a>
+    </div>
+</div>
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
     <input type="hidden" name="action" value="privilege-alter" />
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
 {% if privilege.id %}
     <input type="hidden" name="id" value="{{ privilege.id }}" />
 {% endif %}
-    <div class="linkbox">
-        <a href="tools.php?action=permissions" class="brackets">Userclass list</a>
-        <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
-    </div>
     <table class="permission_head layout">
         <tr>
             <td class="label">Userclass name</td>
@@ -30,7 +33,7 @@
                 <input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }} />
                 in <select name="staffgroup" id="staffgroup">
 {% for id, name in group_list %}
-                    <option value="{{ id }}"{{ selected(id == privilege.staffGroup) }}>{{ name }}</option>
+                    <option value="{{ id }}"{{ selected(id == privilege.staffGroupId) }}>{{ name }}</option>
 {% endfor %}
                 </select>
             </td>

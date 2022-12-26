@@ -49,7 +49,9 @@ if (isset($_REQUEST['submit'])) {
     $name         = $_REQUEST['name'];
     $forums       = $_REQUEST['forums'];
     $displayStaff = isset($_REQUEST['displaystaff']);
-    $staffGroup   = (int)$_REQUEST['staffgroup'];
+    $staffGroupId = $displayStaff
+        ? (new Gazelle\Manager\StaffGroup)->findById((int)($_REQUEST['staffgroup'] ?? 0))?->id()
+        : null;
     $level        = (int)$_REQUEST['level'];
     $secondary    = (int)isset($_REQUEST['secondary']);
     $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
@@ -61,7 +63,7 @@ if (isset($_REQUEST['submit'])) {
     }
 
     if (!$edit) {
-        $privMan->create($name, $level, $secondary, $forums, $values, $staffGroup, $badge, $displayStaff);
+        $privMan->create($name, $level, $secondary, $forums, $values, $staffGroupId, $badge, $displayStaff);
         header("Location: tools.php?action=permissions");
         exit;
     }
@@ -83,8 +85,8 @@ if (isset($_REQUEST['submit'])) {
     if ($forums != $privilege->permittedForums()) {
         $privilege->setUpdate('PermittedForums', $forums);
     }
-    if ($staffGroup !== $privilege->staffGroup()) {
-        $privilege->setUpdate('StaffGroup', $staffGroup);
+    if ($staffGroupId !== $privilege->staffGroupId()) {
+        $privilege->setUpdate('StaffGroup', $staffGroupId);
     }
     $privilege->setUpdate('`Values`', serialize($values))
         ->modify();

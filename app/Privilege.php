@@ -69,7 +69,7 @@ class Privilege extends BaseObject {
         return explode(',', $this->info()['PermittedForums']) ?? [];
     }
 
-    public function staffGroup(): ?int {
+    public function staffGroupId(): ?int {
         return $this->info()['StaffGroup'];
     }
 
