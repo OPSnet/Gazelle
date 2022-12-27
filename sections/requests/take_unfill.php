@@ -15,6 +15,6 @@ if ($request->fillerId() === 0
     error(403);
 }
 
-$request->unfill($Viewer, trim($_POST['reason']));
+$request->unfill($Viewer, trim($_POST['reason']), new Gazelle\Manager\Torrent);
 
 header('Location: ' . $request->location());

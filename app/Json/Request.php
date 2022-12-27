@@ -48,7 +48,7 @@ class Request extends \Gazelle\Json {
             'musicInfo'       => $request->artistRole()?->roleListByType(),
             'catalogueNumber' => $request->catalogueNumber(),
             'recordLabel'     => $request->recordLabel(),
-            'oclc'            => $request->legacyOclc(),
+            'oclc'            => $request->oclc(),
             'releaseType'     => $request->releaseType(),
             'releaseTypeName' => $request->releaseTypeName(),
             'bitrateList'     => $request->needEncodingList(),

@@ -4,138 +4,108 @@
  * Yeah, that's right, edit and new are the same place.
  * It makes the page uglier to read but ultimately better as the alternative
  * means maintaining 2 copies of almost identical files.
+ *
+ * If a variable appears to have been initialized by magic, remember
+ * that this file could have been require()'ed from take_new_edit.php
+ * which has already initialized things from the submitted form.
  */
 
-$NewRequest = $_GET['action'] === 'new';
-if (!$NewRequest) {
-    $RequestID = (int)$_GET['id'];
-    if (!$RequestID) {
-        error(404);
+$newRequest = $_GET['action'] === 'new';
+if ($newRequest) {
+    if ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->permitted('site_submit_requests')) {
+        error('You have not enough upload to make a request.');
     }
-}
+    $request         = null;
+    $categoryName    = '';
+    $image           = '';
+    $title           = '';
+    $description     = '';
+    $year            = '';
+    $recordLabel     = '';
+    $catalogueNumber = '';
+    $oclc            = '';
 
-if ($NewRequest && ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->permitted('site_submit_requests'))) {
-    error('You have not enough upload to make a request.');
-}
-
-$RequestTaxPercent = REQUEST_TAX * 100;
-
-if (!$NewRequest && !isset($ReturnEdit)) {
-    $request = (new Gazelle\Manager\Request)->findById($RequestID);
+    // We may be able to prepare some things based on whence we came
+    if (isset($_GET['artistid'])) {
+        $ArtistName = $DB->scalar("
+            SELECT Name FROM artists_group WHERE artistid = ?
+            ", (int)$_GET['artistid']
+        );
+        if (!is_null($ArtistName)) {
+            $ArtistForm = [
+                1 => [['name' => trim($ArtistName)]],
+                2 => [],
+                3 => []
+            ];
+        }
+    } elseif (isset($_GET['groupid'])) {
+        $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+        if ($tgroup) {
+            $GroupID     = $tgroup->id();
+            $categoryId  = $tgroup->categoryId();
+            $title       = $tgroup->name();
+            $year        = $tgroup->year();
+            $releaseType = $tgroup->releaseType();
+            $image       = $tgroup->image();
+            $tags        = implode(', ', $tgroup->tagNameList());
+            $ArtistForm  = $tgroup->artistRole()?->idList() ?? [];
+        }
+    }
+} else {
+    $request = (new Gazelle\Manager\Request)->findById((int)($_GET['id'] ?? 0));
     if (is_null($request)) {
         error(404);
     }
-    $Request = Requests::get_request($RequestID);
-
-    // Define these variables to simplify _GET['groupid'] requests later on
-    $CategoryID = $Request['CategoryID'];
-    $Title = $Request['Title'];
-    $Year = $Request['Year'];
-    $Image = $Request['Image'];
-    $ReleaseType = $Request['ReleaseType'];
-    $GroupID = $Request['GroupID'];
-
-    $VoteCount = $request->userVotedTotal();
-    $IsFilled = !empty($Request['TorrentID']);
-    $ownRequest = $Viewer->id() == $Request['UserID'];
-    $CanEdit = (!$IsFilled && $ownRequest && $VoteCount < 2)
-        || $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests');
+    $CanEdit = $request->canEdit($Viewer);
     if (!$CanEdit) {
         error(403);
     }
+    $requestId = $request->id();
 
-    $LogCue = $Request['LogCue'];
-    $NeedCue = str_contains($LogCue, 'Cue');
-    $NeedLog = str_contains($LogCue, 'Log');
-    if ($NeedLog) {
-        if (str_contains($LogCue, '%')) {
-            preg_match('/(\d+)/', $LogCue, $match);
-            $MinLogScore = (int)$match[1];
-        }
-    }
-    $Checksum = $Request['Checksum'] ? 1 : 0;
-
-    $CategoryName = CATEGORY[$CategoryID - 1];
-    if ($CategoryName === 'Music') {
-        $ArtistForm = Requests::get_artists($RequestID);
-
-        $BitrateArray = [];
-        if ($Request['BitrateList'] == 'Any') {
-            $BitrateArray = array_keys(ENCODING);
-        } else {
-            $BitrateArray = array_keys(array_intersect(ENCODING, explode('|', $Request['BitrateList'])));
-        }
-
-        $FormatArray = [];
-        if ($Request['FormatList'] == 'Any') {
-            $FormatArray = array_keys(FORMAT);
-        } else {
-            foreach (FORMAT as $Key => $Val) {
-                if (str_contains($Request['FormatList'], $Val)) {
-                    $FormatArray[] = $Key;
-                }
-            }
+    if (!isset($returnEdit)) {
+        // if we are coming back from an edit, these were already initialized in take_new_edit
+        $categoryId  = $request->categoryId();
+        $title       = $request->title();
+        $description = $request->description();
+        $year        = $request->year();
+        $image       = $request->image();
+        $tags        = implode(', ', $request->tagNameList());
+        $releaseType = $request->releaseType();
+        $GroupID     = $request->tgroupId();
+        $VoteCount   = $request->userVotedTotal();
+        $IsFilled    = $request->isFilled();
+        $ownRequest  = $request->userId() == $Viewer->id();
+        $Checksum    = $request->needLogChecksum();
+        $LogCue      = $request->descriptionLogCue();
+        $NeedCue     = $request->needCue();
+        $NeedLog     = $request->needLog();
+        if ($NeedLog) {
+            $MinLogScore = $request->needLogScore();
         }
 
-        $MediaArray = [];
-        if ($Request['MediaList'] == 'Any') {
-            $MediaArray = array_keys(MEDIA);
-        } else {
-            $MediaTemp = explode('|', $Request['MediaList']);
-            foreach (MEDIA as $Key => $Val) {
-                if (in_array($Val, $MediaTemp)) {
-                    $MediaArray[] = $Key;
-                }
-            }
+        $categoryName = $request->categoryName();
+        if ($categoryName === 'Music') {
+            $ArtistForm    = $request->artistRole()->idList();
+            $EncodingArray = $request->currentEncoding();
+            $FormatArray   = $request->currentFormat();
+            $MediaArray    = $request->currentMedia();
+            $recordLabel   = $request->recordLabel();
         }
-    }
-
-    $Tags = implode(', ', $Request['Tags']);
-}
-
-if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
-    $ArtistName = $DB->scalar("
-        SELECT Name FROM artists_group WHERE artistid = ?
-        ", $_GET['artistid']
-    );
-    $ArtistForm = [
-        1 => [['name' => trim($ArtistName)]],
-        2 => [],
-        3 => []
-    ];
-} elseif ($NewRequest && !empty($_GET['groupid']) && intval($_GET['groupid'])) {
-    $ArtistForm = Artists::get_artist($_GET['groupid']);
-    $DB->prepared_query("
-        SELECT tg.Name,
-            tg.Year,
-            tg.ReleaseType,
-            tg.WikiImage,
-            GROUP_CONCAT(t.Name SEPARATOR ', '),
-            tg.CategoryID
-        FROM torrents_group AS tg
-        INNER JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
-        INNER JOIN tags AS t ON (t.ID = tt.TagID)
-        WHERE tg.ID = ?",
-        $_GET['groupid']
-    );
-    if ([$Title, $Year, $ReleaseType, $Image, $Tags, $CategoryID] = $DB->next_record()) {
-        $GroupID = trim($_REQUEST['groupid']);
     }
 }
 
-$tagMan = new Gazelle\Manager\Tag;
-$GenreTags = $tagMan->genreList();
-$title = $NewRequest ? 'Create a request' : 'Edit a request';
-View::show_header($title, ['js' => 'requests,form_validate']);
+$releaseTypes = (new Gazelle\ReleaseType)->list();
+$GenreTags    = (new Gazelle\Manager\Tag)->genreList();
+$pageTitle    = $newRequest ? 'Create a request' : 'Edit request &rsaquo; ' . $request->selfLink();
+View::show_header($pageTitle, ['js' => 'requests,form_validate']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= $title ?></h2>
+        <h2><?= $pageTitle ?></h2>
     </div>
-
 <?php
-if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_requests')) {
-    $requester = new Gazelle\User($Request['UserID']);
+if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_requests')) {
+    $requester = new Gazelle\User($request->userId());
 ?>
     <div class="box pad">
         <strong class="important_text">Warning! You are editing <?= $requester->link() ?>'s request.
@@ -146,18 +116,22 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
     <div class="box pad">
         <form action="" method="post" id="request_form" onsubmit="Calculate();">
             <div>
-<?php if (!$NewRequest) { ?>
-                <input type="hidden" name="requestid" value="<?=$RequestID?>" />
+<?php if (!$newRequest) { ?>
+                <input type="hidden" name="requestid" value="<?=$requestId?>" />
 <?php } ?>
                 <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-                <input type="hidden" name="action" value="<?=($NewRequest ? 'takenew' : 'takeedit')?>" />
+                <input type="hidden" name="action" value="<?=($newRequest ? 'takenew' : 'takeedit')?>" />
             </div>
 
             <table class="layout">
                 <tr>
-                    <td colspan="2" class="center">Please make sure your request follows <a href="rules.php?p=requests">the request rules</a>!</td>
+                    <td colspan="2" class="center">Please make sure your request follows <a href="rules.php?p=requests">the request rules</a>!
+<?php if (isset($Err)) { ?>
+            <div class="save_message error"><?= $Err ?></div>
+<?php } ?>
+                    </td>
                 </tr>
-<?php if ($NewRequest || $CanEdit) { ?>
+<?php if ($newRequest || $CanEdit) { ?>
                 <tr>
                     <td class="label">
                         Type
@@ -165,8 +139,19 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                     <td>
                         <select id="categories" name="type" onchange="Categories();">
 <?php    foreach (CATEGORY as $Cat) { ?>
-                            <option value="<?=$Cat?>"<?=(!empty($CategoryName) && ($CategoryName === $Cat) ? ' selected="selected"' : '')?>><?=$Cat?></option>
+                            <option value="<?=$Cat?>"<?= $categoryName === $Cat ? ' selected="selected"' : '' ?>><?=$Cat?></option>
 <?php    } ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="releasetypes_tr">
+                    <td class="label">Release type</td>
+                    <td>
+                        <select id="releasetype" name="releasetype">
+                            <option value="0">---</option>
+<?php       foreach ($releaseTypes as $Key => $Val) { ?>
+                            <option value="<?=$Key?>"<?=!empty($releaseType) ? ($Key == $releaseType ? ' selected="selected"' : '') : '' ?>><?=$Val?></option>
+<?php       } ?>
                         </select>
                     </td>
                 </tr>
@@ -184,14 +169,14 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="text" id="artist_<?=$cnt ?>" name="artists[]"<?=
                             $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" value="<?=display_str($Artist['name']) ?>" />
                         <select id="importance" name="importance[]">
-                            <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
-                            <option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
-                            <option value="4"<?=($Importance == '4' ? ' selected="selected"' : '')?>>Composer</option>
-                            <option value="5"<?=($Importance == '5' ? ' selected="selected"' : '')?>>Conductor</option>
-                            <option value="6"<?=($Importance == '6' ? ' selected="selected"' : '')?>>DJ / Compiler</option>
-                            <option value="3"<?=($Importance == '3' ? ' selected="selected"' : '')?>>Remixer</option>
-                            <option value="7"<?=($Importance == '7' ? ' selected="selected"' : '')?>>Producer</option>
-                            <option value="8"<?=($Importance == '8' ? ' selected="selected"' : '')?>>Arranger</option>
+                            <option value="<?= ARTIST_MAIN ?>"<?=($Importance == '<?= ARTIST_MAIN ?>' ? ' selected="selected"' : '')?>>Main</option>
+                            <option value="<?= ARTIST_GUEST ?>"<?=($Importance == '<?= ARTIST_GUEST ?>' ? ' selected="selected"' : '')?>>Guest</option>
+                            <option value="<?= ARTIST_COMPOSER ?>"<?=($Importance == '<?= ARTIST_COMPOSER ?>' ? ' selected="selected"' : '')?>>Composer</option>
+                            <option value="<?= ARTIST_CONDUCTOR ?>"<?=($Importance == '<?= ARTIST_CONDUCTOR ?>' ? ' selected="selected"' : '')?>>Conductor</option>
+                            <option value="<?= ARTIST_DJ ?>"<?=($Importance == '<?= ARTIST_DJ ?>' ? ' selected="selected"' : '')?>>DJ / Compiler</option>
+                            <option value="<?= ARTIST_REMIXER ?>"<?=($Importance == '<?= ARTIST_REMIXER ?>' ? ' selected="selected"' : '')?>>Remixer</option>
+                            <option value="<?= ARTIST_PRODUCER ?>"<?=($Importance == '<?= ARTIST_PRODUCER ?>' ? ' selected="selected"' : '')?>>Producer</option>
+                            <option value="<?= ARTIST_ARRANGER ?>"<?=($Importance == '<?= ARTIST_ARRANGER ?>' ? ' selected="selected"' : '')?>>Arranger</option>
                         </select>
                         <?php if ($First) { ?><a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a><?php } $First = false; ?>
                         <br />
@@ -204,57 +189,55 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="text" id="artist_0" name="artists[]"<?=
                             $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" onblur="CheckVA();" />
                         <select id="importance" name="importance[]">
-                            <option value="1">Main</option>
-                            <option value="2">Guest</option>
-                            <option value="4">Composer</option>
-                            <option value="5">Conductor</option>
-                            <option value="6">DJ / Compiler</option>
-                            <option value="3">Remixer</option>
-                            <option value="7">Producer</option>
-                            <option value="8">Arranger</option>
+                            <option value="<?= ARTIST_MAIN ?>">Main</option>
+                            <option value="<?= ARTIST_GUEST ?>">Guest</option>
+                            <option value="<?= ARTIST_COMPOSER ?>">Composer</option>
+                            <option value="<?= ARTIST_CONDUCTOR ?>">Conductor</option>
+                            <option value="<?= ARTIST_DJ ?>">DJ / Compiler</option>
+                            <option value="<?= ARTIST_REMIXER ?>">Remixer</option>
+                            <option value="<?= ARTIST_PRODUCER ?>">Producer</option>
+                            <option value="<?= ARTIST_ARRANGER ?>">Arranger</option>
                         </select>
                         <a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
-<?php
-        }
-?>
+<?php   } ?>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Title</td>
                     <td>
-                        <input type="text" name="title" size="45" value="<?=(!empty($Title) ? $Title : '')?>" />
+                        <input type="text" name="title" size="45" value="<?= $title ?>" />
                     </td>
                 </tr>
                 <tr id="recordlabel_tr">
                     <td class="label">Record label</td>
                     <td>
-                        <input type="text" name="recordlabel" size="45" value="<?=(!empty($Request['RecordLabel']) ? $Request['RecordLabel'] : '')?>" />
+                        <input type="text" name="recordlabel" size="45" value="<?= $recordLabel ?>" />
                     </td>
                 </tr>
                 <tr id="cataloguenumber_tr">
                     <td class="label">Catalogue number</td>
                     <td>
-                        <input type="text" name="cataloguenumber" size="15" value="<?=(!empty($Request['CatalogueNumber']) ? $Request['CatalogueNumber'] : '')?>" />
+                        <input type="text" name="cataloguenumber" size="15" value="<?= $catalogueNumber ?>" />
                     </td>
                 </tr>
                 <tr id="oclc_tr">
                     <td class="label">WorldCat (OCLC) ID</td>
                     <td>
-                        <input type="text" name="oclc" size="15" value="<?=(!empty($Request['OCLC']) ? $Request['OCLC'] : '')?>" />
+                        <input type="text" name="oclc" size="15" value="<?= $oclc ?>" />
                     </td>
                 </tr>
 <?php } ?>
                 <tr id="year_tr">
                     <td class="label">Year</td>
                     <td>
-                        <input type="text" name="year" size="5" value="<?=(!empty($Year) ? $Year : '')?>" />
+                        <input type="text" name="year" size="5" value="<?= $year ?>" />
                     </td>
                 </tr>
-<?php if ($NewRequest || $CanEdit) { ?>
+<?php if ($newRequest || $CanEdit) { ?>
                 <tr id="image_tr">
                     <td class="label">Image</td>
                     <td>
-                        <input type="text" name="image" size="45" value="<?=(!empty($Image) ? $Image : '')?>" />
+                        <input type="text" name="image" size="45" value="<?= $image ?>" />
 <?php       if (IMAGE_HOST_BANNED) { ?>
                         <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
                             ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
@@ -271,7 +254,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             <option value="<?= display_str($Genre) ?>"><?= display_str($Genre) ?></option>
 <?php   } ?>
                         </select>
-                        <input type="text" id="tags" name="tags" size="45" value="<?= empty($Tags) ? '' : display_str($Tags) ?>"<?=
+                        <input type="text" id="tags" name="tags" size="45" value="<?= display_str($tags) ?>"<?=
                             $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <br />
                         Tags should be comma-separated, and you should use a period (".") to separate words inside a tag&#8202;&mdash;&#8202;e.g. "<strong class="important_text_alt">hip.hop</strong>".
@@ -279,24 +262,11 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         There is a list of official tags to the left of the text box. Please use these tags instead of "unofficial" tags (e.g. use the official "<strong class="important_text_alt">drum.and.bass</strong>" tag, instead of an unofficial "<strong class="important_text">dnb</strong>" tag.).
                     </td>
                 </tr>
-<?php   if ($NewRequest || $CanEdit || $ownRequest) { ?>
-                <tr id="releasetypes_tr">
-                    <td class="label">Release type</td>
-                    <td>
-                        <select id="releasetype" name="releasetype">
-                            <option value="0">---</option>
-<?php
-            $releaseTypes = (new Gazelle\ReleaseType)->list();
-            foreach ($releaseTypes as $Key => $Val) {
-?>                            <option value="<?=$Key?>"<?=!empty($ReleaseType) ? ($Key == $ReleaseType ? ' selected="selected"' : '') : '' ?>><?=$Val?></option>
-<?php       } ?>
-                        </select>
-                    </td>
-                </tr>
+<?php   if ($newRequest || $CanEdit || $ownRequest) { ?>
                 <tr id="formats_tr">
                     <td class="label">Allowed formats</td>
                     <td>
-                        <input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', <?=($NewRequest ? 1 : 0)?>);"<?=!empty($FormatArray) && (count($FormatArray) === count(FORMAT)) ? ' checked="checked"' : ''; ?> /><label for="toggle_formats"> All</label>
+                        <input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', <?=($newRequest ? 1 : 0)?>);"<?=!empty($FormatArray) && (count($FormatArray) === count(FORMAT)) ? ' checked="checked"' : ''; ?> /><label for="toggle_formats"> All</label>
                         <span style="float: right;"><strong>NB: You cannot require a log or cue unless FLAC is an allowed format</strong></span>
 <?php
             foreach (FORMAT as $Key => $Val) {
@@ -312,7 +282,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr id="bitrates_tr">
                     <td class="label">Allowed bitrates</td>
                     <td>
-                        <input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', <?=($NewRequest ? 1 : 0)?>);"<?=(!empty($BitrateArray) && (count($BitrateArray) === count(ENCODING)) ? ' checked="checked"' : '')?> /><label for="toggle_bitrates"> All</label>
+                        <input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', <?=($newRequest ? 1 : 0)?>);"<?=(!empty($EncodingArray) && (count($EncodingArray) === count(ENCODING)) ? ' checked="checked"' : '')?> /><label for="toggle_bitrates"> All</label>
 <?php
             foreach (ENCODING as $Key => $Val) {
                 if ($Key % 8 === 0) {
@@ -320,7 +290,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 }
 ?>
                         <input type="checkbox" name="bitrates[]" value="<?=$Key?>" id="bitrate_<?=$Key?>"
-                            <?=(!empty($BitrateArray) && in_array($Key, $BitrateArray) ? ' checked="checked" ' : '')?>
+                            <?=(!empty($EncodingArray) && in_array($Key, $EncodingArray) ? ' checked="checked" ' : '')?>
                         onchange="if (!this.checked) { $('#toggle_bitrates').raw().checked = false; }" /><label for="bitrate_<?=$Key?>"> <?=$Val?></label>
 <?php       } ?>
                     </td>
@@ -328,7 +298,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr id="media_tr">
                     <td class="label">Allowed media</td>
                     <td>
-                        <input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', <?=($NewRequest ? 1 : 0)?>);"<?=(!empty($MediaArray) && (count($MediaArray) === count(MEDIA)) ? ' checked="checked"' : '')?> /><label for="toggle_media"> All</label>
+                        <input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', <?=($newRequest ? 1 : 0)?>);"<?=(!empty($MediaArray) && (count($MediaArray) === count(MEDIA)) ? ' checked="checked"' : '')?> /><label for="toggle_media"> All</label>
 <?php
             foreach (MEDIA as $Key => $Val) {
                 if ($Key % 8 === 0) {
@@ -356,7 +326,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr>
                     <td class="label">Description</td>
                     <td>
-                        <textarea name="description" cols="70" rows="7"><?=(!empty($Request['Description']) ? $Request['Description'] : '')?></textarea> <br />
+                        <textarea name="description" cols="70" rows="7"><?= $description ?></textarea> <br />
                     </td>
                 </tr>
 <?php    if ($Viewer->permitted('site_moderate_requests')) { ?>
@@ -367,20 +337,20 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         If this request matches a torrent group <span style="font-weight: bold;">already existing</span> on the site, please indicate that here.
                     </td>
                 </tr>
-<?php    } elseif (isset($GroupID) && ($CategoryID == 1)) { ?>
+<?php    } elseif (isset($GroupID) && ($categoryId == CATEGORY_MUSIC)) { ?>
                 <tr>
                     <td class="label">Torrent group</td>
                     <td>
                         <a href="torrents.php?id=<?=$GroupID?>"><?=SITE_URL?>/torrents.php?id=<?=$GroupID?></a><br />
-                        This request <?=($NewRequest ? 'will be' : 'is')?> associated with the above torrent group.
-<?php        if (!$NewRequest) {    ?>
-                        If this is incorrect, please <a href="reports.php?action=report&amp;type=request&amp;id=<?=$RequestID?>">report this request</a> so that staff can fix it.
+                        This request <?=($newRequest ? 'will be' : 'is')?> associated with the above torrent group.
+<?php        if (!$newRequest) {    ?>
+                        If this is incorrect, please <a href="reports.php?action=report&amp;type=request&amp;id=<?=$requestId?>">report this request</a> so that staff can fix it.
 <?php         }    ?>
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                     </td>
                 </tr>
 <?php    }
-    if ($NewRequest) { ?>
+    if ($newRequest) { ?>
                 <tr id="voting">
                     <td class="label">Bounty (MiB)</td>
                     <td>
@@ -389,7 +359,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MiB</option>
                             <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GiB</option>
                         </select>
-                        <?= REQUEST_TAX > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
+                        <?= REQUEST_TAX > 0 ? "<strong><?= REQUEST_TAX * 100 ?>% of this is deducted as tax by the system.</strong>" : '' ?>
                         <p>Bounty must be greater than or equal to <?= REQUEST_MIN ?> MiB.</p>
                     </td>
                 </tr>
@@ -423,7 +393,7 @@ if (!$NewRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
 <?php    } ?>
             </table>
         </form>
-        <script type="text/javascript">ToggleLogCue();<?=$NewRequest ? " Calculate();" : '' ?></script>
+        <script type="text/javascript">ToggleLogCue();<?=$newRequest ? " Calculate();" : '' ?></script>
         <script type="text/javascript">Categories();</script>
     </div>
 </div>

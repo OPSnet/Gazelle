@@ -1,90 +1,72 @@
 <?php
 
-use Gazelle\Util\Irc;
-
 authorize();
 
 if (empty($_POST['type'])) {
     error(0);
 }
-$CategoryName = $_POST['type'];
-$CategoryID = array_search($CategoryName, CATEGORY);
-if ($CategoryID === false) {
-    error(0);
-}
-$CategoryID += 1;
-
 if (!in_array($_POST['action'], ['takenew', 'takeedit'])) {
     error(0);
 }
-$NewRequest = ($_POST['action'] === 'takenew');
+$newRequest = ($_POST['action'] === 'takenew');
 
-$onlyMetadata = false;
-if ($NewRequest) {
+$categoryName = $_POST['type'];
+$categoryId = array_search($categoryName, CATEGORY);
+if ($categoryId === false) {
+    error(0);
+}
+$categoryId += 1;
+
+if ($newRequest) {
     if (!$Viewer->permitted('site_submit_requests') || $Viewer->uploadedSize() < 250 * 1024 * 1024) {
         error(403);
     }
+
+    if (empty($_POST['amount'])) {
+        $Err = 'You forgot to enter any bounty!';
+    } else {
+        $Bounty = (int)$_POST['amount'];
+        if ($Bounty < REQUEST_MIN * 1024 * 1024) {
+            $Err = 'Minimum bounty is ' . REQUEST_MIN . ' MiB.';
+        }
+        $Bytes = $Bounty; //From MiB to B
+    }
+    $onlyMetadata = false;
 } else {
     $request = (new Gazelle\Manager\Request)->findById((int)($_POST['requestid'] ?? 0));
     if (is_null($request)) {
         error(404);
     }
+    $onlyMetadata = $Viewer->id() != $request->userId() && $Viewer->permitted('site_edit_requests');
     $RequestID = $request->id();
-    $Request = Requests::get_request($RequestID);
-    $VoteCount = $request->userVotedTotal();
-    $IsFilled = !empty($Request['TorrentID']);
-
-    $CanEdit = (!$IsFilled && $Viewer->id() == $Request['UserID'] && $VoteCount < 2)
-        || $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests');
-    if (!$CanEdit) {
-        error(403);
-    }
-    $onlyMetadata = $Viewer->id() != $Request['UserID'] && $Viewer->permitted('site_edit_requests');
 }
 
-if ($NewRequest) {
-    if (empty($_POST['amount'])) {
-        $Err = 'You forgot to enter any bounty!';
-    } else {
-        $Bounty = trim($_POST['amount']);
-        if (!intval($Bounty)) {
-            $Err = 'Your entered bounty is not a number';
-        } elseif ($Bounty < REQUEST_MIN * 1024 * 1024) {
-            $Err = 'Minimum bounty is ' . REQUEST_MIN . ' MiB.';
-        }
-        $Bytes = $Bounty; //From MiB to B
-    }
+$description = trim($_POST['description'] ?? '');
+if ($description == '') {
+    $Err = 'You forgot to enter a description.';
 }
 
-if (empty($_POST['title'])) {
+$title = trim($_POST['title'] ?? '');
+if ($title == '') {
     $Err = 'You forgot to enter the title!';
-} else {
-    $Title = trim($_POST['title']);
 }
 
-if (empty($_POST['tags'])) {
+$tags = trim($_POST['tags'] ?? '');
+if ($tags == '') {
     $Err = 'You forgot to enter any tags!';
-} else {
-    $Tags = trim($_POST['tags']);
 }
 
 if (empty($_POST['image'])) {
-    $Image = null;
+    $image = null;
 } else {
-    $Image = $_POST['image'];
-    if (!preg_match(IMAGE_REGEXP, $Image)) {
-        $Err = display_str($Image) . " does not look like a valid image url";
+    $image = $_POST['image'];
+    if (!preg_match(IMAGE_REGEXP, $image)) {
+        $Err = display_str($image) . " does not look like a valid image url";
     }
-    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($Image);
+    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($image);
     if ($banned) {
         $Err = "Please rehost images from $banned elsewhere.";
     }
-}
-
-if (empty($_POST['description'])) {
-    $Err = 'You forgot to enter a description.';
-} else {
-    $Description = trim($_POST['description']);
 }
 
 if (empty($_POST['artists'])) {
@@ -94,22 +76,16 @@ if (empty($_POST['artists'])) {
     $role = $_POST['importance'];
 }
 
-if (empty($_POST['year'])) {
-    $Err = 'You forgot to enter the year!';
-} else {
-    $Year = trim($_POST['year']);
-    if (!intval($Year)) {
-        $Err = 'Your entered year is not a number.';
-    }
+$year = (int)$_POST['year'];
+if (!$year) {
+    $Err = 'The given year is not a number.';
 }
 
 // optional
-$EditionInfo = empty($_POST['editioninfo']) ? '' : trim($_POST['editioninfo']);
-$CatalogueNumber = empty($_POST['cataloguenumber']) ? '' : trim($_POST['cataloguenumber']);
-$RecordLabel = empty($_POST['recordlabel']) ? '' : trim($_POST['recordlabel']);
-
-//Apply OCLC to all types
-$OCLC = empty($_POST['oclc']) ? '' : trim($_POST['oclc']);
+$EditionInfo     = trim($_POST['editioninfo'] ?? '');
+$catalogueNumber = trim($_POST['cataloguenumber'] ?? '');
+$recordLabel     = trim($_POST['recordlabel'] ?? '');
+$OCLC            = trim($_POST['oclc'] ?? '');
 
 $AllEncodings = false;
 $AllFormats   = false;
@@ -120,60 +96,58 @@ $NeedChecksum = false;
 $MinLogScore  = 0;
 
 if (!$onlyMetadata) {
-    if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
+    $releaseType = (int)$_POST['releasetype'];
+    if (!(new Gazelle\ReleaseType)->findNameById($releaseType)) {
         $Err = 'Please pick a release type';
-    }
-    $ReleaseType = (int)$_POST['releasetype'];
-
-    $FormatArray = $_POST['formats'] ?? [];
-    if (empty($_POST['all_formats']) && count($FormatArray) !== count(FORMAT)) {
-        if (empty($FormatArray)) {
-            $Err = 'You must require at least one format';
-        }
-    } else {
-        $AllFormats = true;
     }
 
     $EncodingArray = $_POST['bitrates'] ?? [];
-    if (empty($_POST['all_bitrates']) && count($EncodingArray) !== count(ENCODING)) {
+    if (isset($_POST['all_bitrates']) || count($EncodingArray) === count(ENCODING)) {
+        $AllEncodings = true;
+    } else {
         if (empty($EncodingArray)) {
             $Err = 'You must require at least one bitrate';
         }
-    } else {
-        $AllEncodings = true;
     }
 
     $MediaArray = $_POST['media'] ?? [];
-    if (empty($_POST['all_media']) && count($MediaArray) !== count(MEDIA)) {
+    if (isset($_POST['all_media']) || count($MediaArray) === count(MEDIA)) {
+        $AllMedia = true;
+    } else {
         if (empty($MediaArray)) {
             $Err = 'You must require at least one medium.';
         }
-    } else {
-        $AllMedia = true;
     }
 
-    if (!empty($FormatArray) && in_array(array_search('FLAC', FORMAT), $FormatArray)) {
-        $NeedLog = empty($_POST['needlog']) ? false : true;
-        if ($NeedLog) {
-            if ($_POST['minlogscore']) {
-                $MinLogScore = intval(trim($_POST['minlogscore']));
-            } else {
-                $MinLogScore = 0;
+    $FormatArray = $_POST['formats'] ?? [];
+    if (isset($_POST['all_formats']) || count($FormatArray) === count(FORMAT)) {
+        $AllFormats = true;
+    } else {
+        if (empty($FormatArray)) {
+            $Err = 'You must require at least one format';
+        } elseif (in_array(array_search('FLAC', FORMAT), $FormatArray)) {
+            $NeedChecksum = isset($_POST['needcksum']);
+            $NeedCue      = isset($_POST['needcue']);
+            $NeedLog      = isset($_POST['needlog']);
+            if ($NeedLog) {
+                if ($_POST['minlogscore']) {
+                    $MinLogScore = intval(trim($_POST['minlogscore']));
+                } else {
+                    $MinLogScore = 0;
+                }
+                if ($MinLogScore < 0 || $MinLogScore > 100) {
+                    $Err = 'You have entered a minimum log score that is not between 0 and 100 inclusive.';
+                }
             }
-            if ($MinLogScore < 0 || $MinLogScore > 100) {
-                $Err = 'You have entered a minimum log score that is not between 0 and 100 inclusive.';
+            //FLAC was picked, require either Lossless or 24 bit Lossless
+            if (!$AllEncodings && empty(array_intersect($EncodingArray, [array_search('Lossless', ENCODING), array_search('24bit Lossless', ENCODING)]))) {
+                $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
             }
-        }
-        $NeedCue = empty($_POST['needcue']) ? false : true;
-        $NeedChecksum = empty($_POST['needcksum']) ? false : true;
-        //FLAC was picked, require either Lossless or 24 bit Lossless
-        if (!$AllEncodings && empty(array_intersect($EncodingArray, [array_search('Lossless', ENCODING), array_search('24bit Lossless', ENCODING)]))) {
-            $Err = 'You selected FLAC as a format but no possible bitrate to fill it (Lossless or 24bit Lossless)';
-        }
 
-        if (($NeedCue || $NeedLog || $NeedChecksum)) {
-            if (empty($_POST['all_media']) && !(in_array('0', $MediaArray))) {
-                $Err = 'Only CD is allowed as media for FLAC + log/cue requests.';
+            if ($NeedCue || $NeedLog || $NeedChecksum) {
+                if (empty($_POST['all_media']) && !(in_array('0', $MediaArray))) {
+                    $Err = 'Only CD is allowed as media for FLAC + log/cue requests.';
+                }
             }
         }
     }
@@ -195,24 +169,24 @@ if (!empty($_POST['groupid'])) {
 }
 
 //For refilling on error
-if ($CategoryName === 'Music') {
+if ($categoryName === 'Music') {
     $MainArtistCount = 0;
     $ArtistNames = [];
     $ArtistForm = [
-        1 => [],
-        2 => [],
-        3 => [],
-        4 => [],
-        5 => [],
-        6 => [],
-        7 => [],
-        8 => [],
+        ARTIST_MAIN      => [],
+        ARTIST_GUEST     => [],
+        ARTIST_REMIXER   => [],
+        ARTIST_COMPOSER  => [],
+        ARTIST_CONDUCTOR => [],
+        ARTIST_DJ        => [],
+        ARTIST_PRODUCER  => [],
+        ARTIST_ARRANGER  => [],
     ];
     for ($i = 0, $il = count($Artists); $i < $il; $i++) {
         if (trim($Artists[$i]) !== '') {
             if (!in_array($Artists[$i], $ArtistNames)) {
                 $ArtistForm[$role[$i]][] = ['name' => trim($Artists[$i])];
-                if (in_array($role[$i], [1, 4, 5, 6, 8])) {
+                if (in_array($role[$i], [ARTIST_ARRANGER, ARTIST_COMPOSER, ARTIST_CONDUCTOR, ARTIST_DJ, ARTIST_MAIN])) {
                     $MainArtistCount++;
                 }
                 $ArtistNames[] = trim($Artists[$i]);
@@ -228,9 +202,9 @@ if ($CategoryName === 'Music') {
 }
 
 if (!empty($Err)) {
-    error($Err);
     $Div = $_POST['unit'] === 'mb' ? 1024 * 1024 : 1024 * 1024 * 1024;
     $Bounty /= $Div;
+    $returnEdit = true;
     require_once('new_edit.php');
     exit;
 }
@@ -296,7 +270,7 @@ if ($NeedCue) {
     }
 }
 
-if ($NewRequest) {
+if ($newRequest) {
     $DB->prepared_query('
         INSERT INTO requests (
             TimeAdded, LastVote, Visible, UserID, CategoryID, Title, Year, Image, Description, RecordLabel,
@@ -304,17 +278,18 @@ if ($NewRequest) {
         VALUES (
             now(), now(), 1, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        $Viewer->id(), $CategoryID, $Title, $Year, $Image, $Description, $RecordLabel,
-        $CatalogueNumber, $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC
+        $Viewer->id(), $categoryId, $title, $year, $image, $description, $recordLabel,
+        $catalogueNumber, $releaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC
     );
-    $RequestID = $DB->inserted_id();
+    $request = new Gazelle\Request($DB->inserted_id());
+    $RequestID = $request->id();
 } else {
     if ($onlyMetadata) {
         $DB->prepared_query("
             UPDATE requests SET
                 CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?, GroupID = ?, OCLC = ?
             WHERE ID = ?
-            ", $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel, $GroupID ?? null, $OCLC,
+            ", $categoryId, $title, $year, $image, $description, $catalogueNumber, $recordLabel, $GroupID ?? null, $OCLC,
             $RequestID
         );
     } else {
@@ -323,8 +298,8 @@ if ($NewRequest) {
                 CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?,
                 ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
             WHERE ID = ?',
-            $CategoryID, $Title, $Year, $Image, $Description, $CatalogueNumber, $RecordLabel,
-            $ReleaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC,
+            $categoryId, $title, $year, $image, $description, $catalogueNumber, $recordLabel,
+            $releaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC,
             $RequestID
         );
     }
@@ -396,23 +371,25 @@ foreach ($ArtistForm as $role => $Artists) {
     }
 }
 
-//Tags
-if (!$NewRequest) {
+if (!$newRequest) {
     $DB->prepared_query("
         DELETE FROM requests_tags WHERE RequestID = ?
         ", $RequestID
     );
+    $Cache->delete_value("request_$RequestID");
+    $Cache->delete_value("request_artists_$RequestID");
 }
 
+//Tags
 $tagMan = new Gazelle\Manager\Tag;
-$Tags = array_unique(explode(',', $Tags));
-foreach ($Tags as $Index => $Tag) {
+$tags = array_unique(explode(',', $tags));
+foreach ($tags as $Index => $Tag) {
     $TagID = $tagMan->create($Tag, $Viewer->id());
     $tagMan->createRequestTag($TagID, $RequestID);
-    $Tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
+    $tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
 }
 
-if ($NewRequest) {
+if ($newRequest) {
     //Remove the bounty and create the vote
     $DB->prepared_query("
         INSERT INTO requests_votes
@@ -432,15 +409,12 @@ if ($NewRequest) {
         (new Gazelle\User\Subscription($Viewer))->subscribeComments('requests', $RequestID);
     }
 
-    $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.SITE_URL."/requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);
-    Irc::sendMessage('#requests', $Announce);
-} else {
-    $Cache->delete_value("request_$RequestID");
-    $Cache->delete_value("request_artists_$RequestID");
+    Gazelle\Util\Irc::sendMessage(
+        '#requests',
+        $request->text() . " - " . SITE_URL . "/" . $request->url() . " - " . implode(' ', $tags)
+    );
 }
 
-if (isset($request)) {
-    $request->updateSphinx();
-}
+$request->updateSphinx();
 
-header("Location: requests.php?action=view&id=$RequestID");
+header("Location: " . $request->location());

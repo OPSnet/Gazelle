@@ -20,7 +20,7 @@ $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('
 $userMan = new Gazelle\Manager\User;
 $topVoteList = array_slice($request->userVoteList($userMan), 0, 5);
 $filler = $userMan->findById($request->fillerId());
-$roleList = $request->artistRole()->roleList();
+$roleList = $request->artistRole()?->roleList() ?? [];
 
 View::show_header("View request: {$request->text()}", ['js' => 'comments,requests,bbcode,subscriptions']);
 ?>
@@ -61,11 +61,13 @@ if (!$request->isFilled() && $request->categoryName() === 'Music' && $request->y
 <?php
 }
 
-$encoded_title = urlencode(preg_replace("/\([^\)]+\)/", '', $request->title()));
-$encoded_artist = urlencode(str_replace(['arranged by ', 'performed by '], ['', ''], $request->artistRole()->text()));
+if ($request->categoryName() === 'Music') {
+    $encoded_title = urlencode(preg_replace("/\([^\)]+\)/", '', $request->title()));
+    $encoded_artist = urlencode(str_replace(['arranged by ', 'performed by '], ['', ''], $request->artistRole()->text()));
 ?>
             <a href="<?= "https://www.worldcat.org/search?qt=worldcat_org_all&amp;q=$encoded_artist%20$encoded_title" ?>" class="brackets">Find in library</a>
             <a href="<?= "https://www.discogs.com/search/?q=$encoded_artist+$encoded_title&amp;type=release" ?>" class="brackets">Find on Discogs</a>
+<?php } ?>
         </div>
     </div>
     <div class="sidebar">
@@ -273,7 +275,7 @@ if (!empty($Worldcat)) {
 ?>
             <tr>
                 <td class="label">WorldCat (OCLC) ID</td>
-                <td><?= $request->oclcList() ?></td>
+                <td><?= $request->oclc() ?></td>
             </tr>
 <?php
 }

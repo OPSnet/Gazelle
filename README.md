@@ -116,6 +116,11 @@ And then:
 
 In the same vein, you can use `mysqldump` to perform a backup.
 
+To view the sphinx tables:
+
+`export SPHINXCONT=$(docker ps|awk '$2 ~ /sphinxsearch/ {print $1}')`
+`docker exec -it $SPHINXCONT  mysql -h 127.0.0.1 -P 9306`
+
 #### Boris
 You can run Boris directly:
 

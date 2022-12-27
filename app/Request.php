@@ -71,8 +71,8 @@ class Request extends BaseObject {
     }
 
     public function flush() {
-        if ($this->info()['GroupID']) {
-            self::$cache->delete_value("requests_group_" . $this->info()['GroupID']);
+        if ($this->tgroupId()) {
+            self::$cache->delete_value("requests_group_" . $this->tgroupId());
         }
         self::$cache->deleteMulti([
             sprintf(self::CACHE_REQUEST, $this->id),
@@ -193,6 +193,40 @@ class Request extends BaseObject {
         return $this->info()['TimeAdded'];
     }
 
+    public function currentEncoding(): array {
+        return $this->needEncoding('Any')
+            ? array_keys(ENCODING)
+            : array_keys(array_intersect(ENCODING, $this->needEncodingList()));
+    }
+
+    public function currentFormat(): array {
+        if ($this->needFormat('Any')) {
+            return array_keys(FORMAT);
+        } else {
+            $list = [];
+            foreach (FORMAT as $Key => $Val) {
+                if ($this->needFormat($Val)) {
+                    $list[] = $Key;
+                }
+            }
+            return $list;
+        }
+    }
+
+    public function currentMedia(): array {
+        if ($this->needMedia('Any')) {
+            return array_keys(MEDIA);
+        } else {
+            $list = [];
+            foreach (MEDIA as $Key => $Val) {
+                if ($this->needMedia($Val)) {
+                    $list[] = $Key;
+                }
+            }
+        }
+        return $list;
+    }
+
     public function description(): string {
         return $this->info()['Description'];
     }
@@ -307,7 +341,7 @@ class Request extends BaseObject {
         return $this->info()['need_media'];
     }
 
-    public function oclcList(): ?string {
+    public function oclc(): ?string {
         $oclc = str_replace(' ', '', $this->info()['OCLC']);
         if ($oclc === '') {
             return null;
@@ -555,10 +589,13 @@ class Request extends BaseObject {
         return $updated;
     }
 
-    public function unfill(User $admin, string $reason): int {
+    public function unfill(User $admin, string $reason, Manager\Torrent $torMan): int {
         $bounty = $this->bountyTotal();
         $filler = new User($this->fillerId());
-        $torrent = new Torrent($this->torrentId());
+        $torrent = $torMan->findById($this->torrentId());
+        if (is_null($torrent)) {
+            $torrent = $torMan->findDeletedById($this->torrentId());
+        }
         $name = $torrent->group()->displayNameText();
 
         self::$db->begin_transaction();
@@ -753,7 +790,7 @@ class Request extends BaseObject {
             LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID)
             WHERE r.ID = ?
             GROUP BY r.ID
-            ", $this->tagNameToSphinx(), implode(' ', $this->artistRole()->nameList()), $this->id
+            ", $this->tagNameToSphinx(), implode(' ', $this->artistRole()?->nameList() ?? []), $this->id
         );
         $affected = self::$db->affected_rows();
         $this->flush();
