@@ -16,40 +16,6 @@ class Torrent extends TorrentAbstract {
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
     public function tableName(): string { return 'torrents'; }
 
-    public function fullEditionLink(): string {
-        $link = implode(" \xE2\x80\x93 ",
-            array_filter([
-                $this->group()->artistLink(),
-                sprintf('<a href="%s">%s</a>', $this->group()->url(), display_str($this->group()->name())),
-            ], fn($x) => !empty($x))
-        );
-        $edition = $this->edition();
-        if ($edition) {
-            $link .= " [<a href=\"{$this->url()}\">$edition</a>]";
-        }
-        $label = $this->label();
-        if ($label) {
-            $link .= " [$label]";
-        }
-        return $link;
-    }
-
-    public function name(): string {
-        $tgroup = $this->group();
-        return $tgroup->categoryId() === 1
-            ? $tgroup->artistName() . " \xE2\x80\x93 " . $tgroup->name()
-            : $tgroup->name();
-    }
-
-    public function fullName(): string {
-        $name = $this->name();
-        $edition = $this->edition();
-        if ($edition) {
-            $name .= " [$edition]";
-        }
-        return $name;
-    }
-
     /**
      * Set the viewer context, for snatched indicators etc.
      */

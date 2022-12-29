@@ -70,16 +70,16 @@ if ($search->canUnclaim($Viewer)) {
 <?php
         } else {
             $reportType   = $report->reportType();
-            $torrent      = $report->torrent();
             $torrentId    = $report->torrentId();
+            $torrent      = $report->torrent();
 
-            $tgroupId     = $torrent->groupId();
-            $categoryId   = (int)((new Gazelle\TGroup($tgroupId))?->categoryId());
-            $size         = '(' . number_format($torrent->size() / (1024 * 1024), 2) . ' MiB)';
-            $link         = $torrent?->fullEditionLink() ?? 'deleted torrent';
+            $tgroupId     = (int)$torrent?->groupId();
+            $categoryId   = (int)$torrent?->group()?->categoryId();
+            $size         = '(' . number_format((int)$torrent?->size() / (1024 * 1024), 2) . ' MiB)';
+            $link         = $torrent?->fullEditionLink() ?? "deleted torrent {$report->torrentId()}";
             $RawName      = ($torrent?->fullName() ?? 'delete torrent') . " $size";
-            $uploaderId   = $torrent->uploaderId();
-            $uploaderName = $userMan->findById((int)$uploaderId)?->username() ?? 'System';
+            $uploaderId   = (int)$torrent?->uploaderId();
+            $uploaderName = $userMan->findById($uploaderId)?->username() ?? 'System';
 ?>
     <div id="report<?= $reportId ?>">
         <form class="manage_form" style="80%" name="report" id="reportform_<?= $reportId ?>" action="reports.php" method="post">

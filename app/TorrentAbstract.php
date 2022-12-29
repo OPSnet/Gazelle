@@ -37,6 +37,40 @@ abstract class TorrentAbstract extends BaseObject {
         return $link;
     }
 
+    public function fullEditionLink(): string {
+        $link = implode(" \xE2\x80\x93 ",
+            array_filter([
+                $this->group()->artistLink(),
+                sprintf('<a href="%s">%s</a>', $this->group()->url(), display_str($this->group()->name())),
+            ], fn($x) => !empty($x))
+        );
+        $edition = $this->edition();
+        if ($edition) {
+            $link .= " [<a href=\"{$this->url()}\">$edition</a>]";
+        }
+        $label = $this->label();
+        if ($label) {
+            $link .= " [$label]";
+        }
+        return $link;
+    }
+
+    public function name(): string {
+        $tgroup = $this->group();
+        return $tgroup->categoryId() === 1
+            ? $tgroup->artistName() . " \xE2\x80\x93 " . $tgroup->name()
+            : $tgroup->name();
+    }
+
+    public function fullName(): string {
+        $name = $this->name();
+        $edition = $this->edition();
+        if ($edition) {
+            $name .= " [$edition]";
+        }
+        return $name;
+    }
+
     public function flush() {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->group()->flush();
