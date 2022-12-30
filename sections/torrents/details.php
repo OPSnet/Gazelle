@@ -672,7 +672,7 @@ if (!$Viewer->disableRequests()) {
                 <tr class="requestrows <?=(++$i % 2 ? 'rowa' : 'rowb')?>">
                     <td><a href="requests.php?action=view&amp;id=<?= $request->id() ?>"><?=
                         implode(', ', $request->needFormatList())
-                        . ($request->needLog() || $request->needCue() ? " - {$request->legacyLogCue()}" : '')
+                        . ($request->needLog() || $request->needCue() ? " - {$request->descriptionLogCue()}" : '')
                         ?> / <?= implode(', ', $request->needEncodingList()) ?> / <?= implode(', ', $request->needFormatList()) ?></a></td>
                     <td>
                         <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>

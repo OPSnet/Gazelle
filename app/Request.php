@@ -103,35 +103,37 @@ class Request extends BaseObject {
     public function info(): array {
         if (!isset($this->info)) {
             $info = self::$db->rowAssoc("
-                SELECT r.UserID,
-                    r.FillerID,
-                    r.TimeAdded,
-                    r.TimeFilled,
-                    r.LastVote,
-                    r.CategoryID,
-                    c.name AS category_name,
-                    r.Title,
-                    r.Description,
-                    r.Year,
-                    r.Image,
-                    r.CatalogueNumber,
-                    r.ReleaseType,
-                    coalesce(rel.Name, 'Unknown') AS release_type_name,
-                    r.RecordLabel,
-                    r.GroupID,
-                    r.TorrentID,
-                    r.LogCue,
-                    r.Checksum,
-                    r.BitrateList,
-                    r.FormatList,
-                    r.MediaList,
-                    r.OCLC,
-                    group_concat(t.Name ORDER BY t.Name) as tagList
+                SELECT r.UserID       AS user_id,
+                    r.FillerID        AS filler_id,
+                    r.TimeAdded       AS created,
+                    r.TimeFilled      AS fill_date,
+                    r.LastVote        AS last_vote_date,
+                    r.CategoryID      AS category_id,
+                    c.name            AS category_name,
+                    r.Title           AS title,
+                    r.Description     AS description,
+                    r.Year            AS year,
+                    r.Image           AS image,
+                    r.CatalogueNumber AS catalogue_number,
+                    r.ReleaseType     AS release_type,
+                    coalesce(rel.Name, 'Unknown')
+                                      AS release_type_name,
+                    r.RecordLabel     AS record_label,
+                    r.GroupID         AS tgroup_id,
+                    r.TorrentID       AS torrent_id,
+                    r.LogCue          AS log_cue,
+                    r.Checksum        AS checksum,
+                    r.BitrateList     AS encoding_list,
+                    r.FormatList      AS format_list,
+                    r.MediaList       AS media_list,
+                    r.OCLC            AS oclc,
+                    group_concat(t.Name ORDER BY t.Name)
+                                      AS tagList
                 FROM requests r
-                INNER JOIN requests_tags AS rt ON (rt.RequestID = r.ID)
-                INNER JOIN tags AS t ON (rt.TagID = t.ID)
-                INNER JOIN category c ON (c.category_id = r.CategoryID)
-                LEFT JOIN release_type rel ON (rel.ID = r.ReleaseType)
+                INNER JOIN requests_tags rt ON (rt.RequestID = r.ID)
+                INNER JOIN tags           t ON (t.ID = rt.TagID)
+                INNER JOIN category       c ON (c.category_id = r.CategoryID)
+                LEFT JOIN release_type  rel ON (rel.ID = r.ReleaseType)
                 WHERE r.ID = ?
                 GROUP BY r.ID
                 ", $this->id
@@ -157,12 +159,48 @@ class Request extends BaseObject {
             );
             $info['tag'] = self::$db->collect('Name', false);
 
-            $info['need_encoding'] = explode('|', $info['BitrateList'] ?? 'Unknown');
-            $info['need_format'] = explode('|', $info['FormatList'] ?? 'Unknown');
-            $info['need_media'] = explode('|', $info['MediaList'] ?? 'Unknown');
+            $info['need_encoding'] = explode('|', $info['encoding_list'] ?? 'Unknown');
+            $info['need_format']   = explode('|', $info['format_list']   ?? 'Unknown');
+            $info['need_media']    = explode('|', $info['media_list']    ?? 'Unknown');
             $this->info = $info;
         }
         return $this->info;
+    }
+
+    /**
+     * These fields are shared between the request and requests ajax endpoints
+     */
+    public function ajaxInfo(): array {
+        $info = $this->info();
+        return [
+            'requestId'       => $this->id(),
+            'requestorId'     => $info['user_id'],
+            'timeAdded'       => $info['created'],
+            'voteCount'       => $this->userVotedTotal(),
+            'lastVote'        => $info['last_vote_date'],
+            'totalBounty'     => $this->bountyTotal(),
+            'categoryId'      => $info['category_id'],
+            'categoryName'    => $info['category_name'],
+            'title'           => $info['title'],
+            'year'            => (int)$info['year'],
+            'image'           => (string)$info['image'],
+            'bbDescription'   => $info['description'],
+            'description'     => \Text::full_format($info['description']),
+            'catalogueNumber' => $info['catalogue_number'],
+            'recordLabel'     => $info['record_label'],
+            'oclc'            => $info['oclc'],
+            'releaseType'     => $info['release_type'],
+            'releaseTypeName' => $info['release_type_name'],
+            'bitrateList'     => $this->currentEncoding(),
+            'formatList'      => $this->currentFormat(),
+            'mediaList'       => $this->currentMedia(),
+            'logCue'          => $info['log_cue'],
+            'isFilled'        => $info['torrent_id'] > 0,
+            'fillerId'        => (int)$info['filler_id'],
+            'torrentId'       => $info['torrent_id'],
+            'timeFilled'      => (string)$info['fill_date'],
+            'tags'            => $this->tagNameList(),
+        ];
     }
 
     public function canEditOwn(User $user): bool {
@@ -178,11 +216,11 @@ class Request extends BaseObject {
     }
 
     public function catalogueNumber(): string {
-        return $this->info()['CatalogueNumber'];
+        return $this->info()['catalogue_number'];
     }
 
     public function categoryId(): int {
-        return $this->info()['CategoryID'];
+        return $this->info()['category_id'];
     }
 
     public function categoryName(): string {
@@ -190,45 +228,29 @@ class Request extends BaseObject {
     }
 
     public function created(): string {
-        return $this->info()['TimeAdded'];
+        return $this->info()['created'];
     }
 
     public function currentEncoding(): array {
         return $this->needEncoding('Any')
-            ? array_keys(ENCODING)
-            : array_keys(array_intersect(ENCODING, $this->needEncodingList()));
+            ? ENCODING
+            : array_intersect(ENCODING, $this->needEncodingList());
     }
 
     public function currentFormat(): array {
-        if ($this->needFormat('Any')) {
-            return array_keys(FORMAT);
-        } else {
-            $list = [];
-            foreach (FORMAT as $Key => $Val) {
-                if ($this->needFormat($Val)) {
-                    $list[] = $Key;
-                }
-            }
-            return $list;
-        }
+        return $this->needFormat('Any')
+            ? FORMAT
+            : array_intersect(FORMAT, $this->needFormatList());
     }
 
     public function currentMedia(): array {
-        if ($this->needMedia('Any')) {
-            return array_keys(MEDIA);
-        } else {
-            $list = [];
-            foreach (MEDIA as $Key => $Val) {
-                if ($this->needMedia($Val)) {
-                    $list[] = $Key;
-                }
-            }
-        }
-        return $list;
+        return $this->needMedia('Any')
+            ? MEDIA
+            : array_intersect(MEDIA, $this->needMediaList());
     }
 
     public function description(): string {
-        return $this->info()['Description'];
+        return $this->info()['description'];
     }
 
     public function descriptionEncoding(): ?string {
@@ -242,7 +264,7 @@ class Request extends BaseObject {
     }
 
     public function descriptionLogCue(): ?string {
-        return $this->info()['LogCue'];
+        return $this->info()['log_cue'];
     }
 
     public function descriptionMedia(): ?string {
@@ -251,11 +273,11 @@ class Request extends BaseObject {
     }
 
     public function fillerId(): ?int {
-        return $this->info()['FillerID'];
+        return $this->info()['filler_id'];
     }
 
     public function fillDate(): ?string {
-        return $this->info()['TimeFilled'];
+        return $this->info()['fill_date'];
     }
 
     public function userVote(User $user): ?array {
@@ -264,43 +286,35 @@ class Request extends BaseObject {
     }
 
     public function isFilled(): bool {
-        return (bool)$this->info()['FillerID'];
+        return (bool)$this->info()['filler_id'];
     }
 
     public function image(): ?string {
-        return $this->info()['Image'];
+        return $this->info()['image'];
     }
 
     public function lastVoteDate(): string {
-        return $this->info()['LastVote'];
+        return $this->info()['last_vote_date'];
     }
 
     public function legacyFormatList(): string {
-        return $this->info()['FormatList'];
+        return $this->info()['format_list'];
     }
 
     public function legacyEncodingList(): string {
-        return $this->info()['BitrateList'];
+        return $this->info()['encoding_list'];
     }
 
     public function legacyLogChecksum(): string {
-        return $this->info()['Checksum'];
-    }
-
-    public function legacyLogCue(): string {
-        return $this->info()['LogCue'];
+        return $this->info()['checksum'];
     }
 
     public function legacyMediaList(): string {
-        return $this->info()['MediaList'];
-    }
-
-    public function legacyOCLC(): string {
-        return $this->info()['OCLC'];
+        return $this->info()['media_list'];
     }
 
     public function needCue(): bool {
-        return str_contains($this->info()['LogCue'], 'Cue');
+        return str_contains($this->descriptionLogCue(), 'Cue');
     }
 
     public function needEncoding(string $encoding): bool {
@@ -320,15 +334,15 @@ class Request extends BaseObject {
     }
 
     public function needLog(): bool {
-        return str_contains($this->info()['LogCue'], 'Log');
+        return str_contains($this->descriptionLogCue(), 'Log');
     }
 
     public function needLogChecksum(): bool {
-        return (bool)$this->info()['Checksum'];
+        return (bool)$this->info()['checksum'];
     }
 
     public function needLogScore(): int {
-        return preg_match('/(\d+)%/', $this->info()['LogCue'], $match)
+        return preg_match('/(\d+)%/', $this->descriptionLogCue(), $match)
             ? $match[1]
             : 0;
     }
@@ -342,7 +356,7 @@ class Request extends BaseObject {
     }
 
     public function oclc(): ?string {
-        $oclc = str_replace(' ', '', $this->info()['OCLC']);
+        $oclc = str_replace(' ', '', $this->oclc());
         if ($oclc === '') {
             return null;
         }
@@ -354,7 +368,7 @@ class Request extends BaseObject {
     }
 
     public function recordLabel(): ?string {
-        return $this->info()['RecordLabel'];
+        return $this->info()['record_label'];
     }
 
     public function releaseTypeName(): string {
@@ -362,7 +376,7 @@ class Request extends BaseObject {
     }
 
     public function releaseType(): int {
-        return $this->info()['ReleaseType'];
+        return $this->info()['release_type'];
     }
 
     public function tagNameList(): array {
@@ -374,23 +388,23 @@ class Request extends BaseObject {
     }
 
     public function tgroupId(): ?int {
-        return $this->info()['GroupID'];
+        return $this->info()['tgroup_id'];
     }
 
     public function title(): string {
-        return $this->info()['Title'];
+        return $this->info()['title'];
     }
 
-    public function torrentId(): ?int {
-        return $this->info()['TorrentID'];
+    public function torrentId(): int {
+        return $this->info()['torrent_id'];
     }
 
     public function userId(): int {
-        return $this->info()['UserID'];
+        return $this->info()['user_id'];
     }
 
     public function year(): int {
-        return (int)$this->info()['Year'];
+        return (int)$this->info()['year'];
     }
 
     public function userIdVoteList(): array {

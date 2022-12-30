@@ -9,9 +9,8 @@ if (!isset($_GET['userid'])) {
         error(404);
     }
 }
-$ownProfile = $Viewer->id() === $user->id();
 
-$header = new \Gazelle\Util\SortableTableHeader('created', [
+$header = new Gazelle\Util\SortableTableHeader('created', [
     'year'     => ['dbColumn' => 'year',       'defaultSort' => 'desc', 'text' => 'Year'],
     'votes'    => ['dbColumn' => 'votes',      'defaultSort' => 'desc', 'text' => 'Votes'],
     'bounty'   => ['dbColumn' => 'bounty',     'defaultSort' => 'desc', 'text' => 'Bounty'],
@@ -38,19 +37,19 @@ if (empty($_GET['type'])) {
             $bookmarkView = true;
             break;
         case 'created':
-            if (!$ownProfile && !$user->propertyVisible($Viewer, 'requestsvoted_list')) {
+            if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
                 error(403);
             }
             $search->setCreator($user);
             break;
         case 'voted':
-            if (!$ownProfile && !$user->propertyVisible($Viewer, 'requestsvoted_list')) {
+            if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
                 error(403);
             }
             $search->setVoter($user);
             break;
         case 'filled':
-            if (!$ownProfile && !$user->propertyVisible($Viewer, 'requestsfilled_list')) {
+            if (!$user->propertyVisible($Viewer, 'requestsfilled_list')) {
                 error(403);
             }
             $search->setFiller($user);
@@ -78,7 +77,7 @@ $search->setFormat($_GET['formats'] ?? [], isset($_GET['formats_strict']))
     ->setCategory($_GET['filter_cat'] ?? [])
     ->setReleaseType($_GET['releases'] ?? [], $releaseTypes);
 
-if (!empty($_GET['requestor'])) {
+if (isset($_GET['requestor'])) {
     $requestor = (int)$_GET['requestor'];
     if ($requestor) {
         $search->setRequestor($requestor);

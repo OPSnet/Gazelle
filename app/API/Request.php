@@ -25,7 +25,7 @@ class Request extends AbstractAPI {
             'BitrateList'     => $request->legacyEncodingList(),
             'FormatList'      => $request->legacyFormatList(),
             'MediaList'       => $request->legacyMediaList(),
-            'LogCue'          => $request->legacyLogCue(),
+            'LogCue'          => $request->descriptionLogCue(),
             'Checksum'        => $request->legacyLogChecksum(),
             'FillerID'        => $request->fillerId(),
             'TorrentID'       => $request->torrentId(),
