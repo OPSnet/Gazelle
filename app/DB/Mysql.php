@@ -102,18 +102,16 @@ class Mysql_Exception extends \Exception {}
 class Mysql_DuplicateKeyException extends Mysql_Exception {}
 
 class Mysql {
-    /** @var \mysqli|bool */
-    public $LinkID = false;
-    /** @var \mysqli_result|bool */
-    protected $QueryID = false;
-    protected $Record = [];
-    protected $Row;
+    public \mysqli|false $LinkID = false;
+    protected \mysqli_result|false|null $QueryID = false;
+    protected array|null $Record = [];
+    protected int $Row;
     protected int $Errno = 0;
     protected string $Error = '';
     protected bool $queryLog = true;
 
-    protected $PreparedQuery = null;
-    protected $Statement = null;
+    protected string $PreparedQuery;
+    protected \mysqli_stmt|false $Statement;
 
     public array $Queries = [];
     public float $Time = 0.0;
@@ -127,15 +125,15 @@ class Mysql {
         protected readonly string $Socket,
     ) {}
 
-    public function disableQueryLog() {
+    public function disableQueryLog(): void {
         $this->queryLog = false;
     }
 
-    public function enableQueryLog() {
+    public function enableQueryLog(): void {
         $this->queryLog = true;
     }
 
-    private function halt($Msg) {
+    private function halt(string $Msg): void {
         if ($this->Errno == 1062) {
             throw new Mysql_DuplicateKeyException;
         }
@@ -144,7 +142,7 @@ class Mysql {
         throw new Mysql_Exception($Msg);
     }
 
-    public function connect() {
+    public function connect(): void {
         if (!$this->LinkID) {
             $this->LinkID = mysqli_connect($this->Server, $this->User, $this->Pass, $this->Database, $this->Port, $this->Socket);
             if (!$this->LinkID) {
@@ -155,7 +153,7 @@ class Mysql {
         }
     }
 
-    private function setup_query() {
+    private function setup_query(): void {
         /*
          * If there was a previous query, we store the warnings. We cannot do
          * this immediately after mysqli_query because mysqli_insert_id will
@@ -182,11 +180,8 @@ class Mysql {
      * this separately in the case where you plan to be running
      * this query repeatedly while just changing the bound
      * parameters (such as if doing a bulk update or the like).
-     *
-     * @return \mysqli_stmt|bool Returns a statement object
-     *                          or FALSE if an error occurred.
      */
-    public function prepare($Query) {
+    public function prepare(string $Query): \mysqli_stmt|false {
         $this->setup_query();
         $Query = trim($Query);
         $this->PreparedQuery = $Query;
@@ -207,7 +202,7 @@ class Mysql {
      * type automatically set for how to bind it to the query (either
      * integer (i), double (d), or string (s)).
      *
-     * @param  array $Parameters,... variables for the query
+     * @param  array<mixed> $Parameters,... variables for the query
      * @return \mysqli_result|bool Returns a mysqli_result object
      *                            for successful SELECT queries,
      *                            or TRUE for other successful DML queries
@@ -257,16 +252,15 @@ class Mysql {
      * multiple times with different bound parameters, you'll want to call
      * the two functions separately instead of this function.
      *
-     * @param string $Query
      * @param mixed ...$Parameters
      * @return bool|\mysqli_result
      */
-    public function prepared_query($Query, ...$Parameters) {
+    public function prepared_query(string $Query, ...$Parameters) {
         $this->prepare($Query);
         return $this->execute(...$Parameters);
     }
 
-    private function attempt_query($Query, Callable $Closure) {
+    private function attempt_query(string $Query, Callable $Closure): \mysqli_result|false {
         global $Debug;
         $QueryStartTime = microtime(true);
         // In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
@@ -302,17 +296,18 @@ class Mysql {
         return $this->QueryID;
     }
 
-    public function inserted_id() {
+    public function inserted_id(): ?int {
         if ($this->LinkID) {
             return mysqli_insert_id($this->LinkID);
         }
+        return null;
     }
 
-    public function next_row($type = MYSQLI_NUM) {
+    public function next_row(int $type = MYSQLI_NUM): ?array {
         return $this->LinkID ? mysqli_fetch_array($this->QueryID, $type) : null;
     }
 
-    public function next_record($Type = MYSQLI_BOTH, $Escape = true, $Reverse = false) {
+    public function next_record(int $Type = MYSQLI_BOTH, mixed $Escape = true, bool $Reverse = false): ?array {
         // $Escape can be true, false, or an array of keys to not escape
         // If $Reverse is true, then $Escape is an array of keys to escape
         if ($this->LinkID) {
@@ -339,9 +334,8 @@ class Mysql {
      *
      * @param mixed  $Escape Boolean true/false for escaping entire/none of query
      *                          or can be an array of array keys for what columns to escape
-     * @return array next result set if exists
      */
-    public function fetch_record(...$Escape) {
+    public function fetch_record(...$Escape): ?array {
         if (count($Escape) === 1 && $Escape[0] === true) {
             $Escape = true;
         }
@@ -351,7 +345,7 @@ class Mysql {
         return $this->next_record(MYSQLI_BOTH, $Escape, true);
     }
 
-    public function close() {
+    public function close(): void {
         if ($this->LinkID) {
             if (!mysqli_close($this->LinkID)) {
                 $this->halt('Cannot close connection or connection did not open.');
@@ -364,21 +358,22 @@ class Mysql {
      * returns an integer with the number of rows found
      * returns a string if the number of rows found exceeds MAXINT
      */
-    public function record_count() {
+    public function record_count(): int|string|null {
         if ($this->QueryID) {
             return mysqli_num_rows($this->QueryID);
         }
+        return null;
     }
 
     /*
      * returns true if the query exists and there were records found
      * returns false if the query does not exist or if there were 0 records returned
      */
-    public function has_results() {
+    public function has_results(): bool {
         return ($this->QueryID && $this->record_count() !== 0);
     }
 
-    public function affected_rows() {
+    public function affected_rows(): int {
         if ($this->LinkID) {
             return $this->LinkID->affected_rows;
         }
@@ -389,14 +384,14 @@ class Mysql {
         return 0;
     }
 
-    public function info() {
+    public function info(): string {
         return mysqli_get_host_info($this->LinkID);
     }
 
     // Creates an array from a result set
     // If $Key is set, use the $Key column in the result set as the array key
     // Otherwise, use an integer
-    public function to_array($Key = false, $Type = MYSQLI_BOTH, $Escape = true) {
+    public function to_array(bool|string $Key = false, int $Type = MYSQLI_BOTH, bool|array $Escape = true): array {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
             if ($Escape !== false) {
@@ -413,7 +408,7 @@ class Mysql {
     }
 
     //  Loops through the result set, collecting the $ValField column into an array with $KeyField as keys
-    public function to_pair($KeyField, $ValField, $Escape = true) {
+    public function to_pair(string $KeyField, string $ValField, bool $Escape = true): array {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID)) {
             if ($Escape) {
@@ -430,7 +425,7 @@ class Mysql {
     }
 
     //  Loops through the result set, collecting the $Key column into an array
-    public function collect($Key, $Escape = true) {
+    public function collect(int|string $Key, bool $Escape = true): array {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID)) {
             $Return[] = $Escape ? display_str($Row[$Key]) : $Row[$Key];
@@ -443,12 +438,8 @@ class Mysql {
      * Runs a prepared_query using placeholders and returns the matched row.
      * Stashes the current query id so that this can be used within a block
      * that is looping over an active resultset.
-     *
-     * @param string  $sql The parameterized query to run
-     * @param mixed   $args  The values of the placeholders
-     * @return array  resultset or null
      */
-    public function row($sql, ...$args) {
+    public function row(string $sql, mixed ...$args): ?array {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->next_record(MYSQLI_NUM, false);
@@ -461,11 +452,10 @@ class Mysql {
      * Stashes the current query id so that this can be used within a block
      * that is looping over an active resultset.
      *
-     * @param string  $sql The parameterized query to run
      * @param mixed   $args  The values of the placeholders
      * @return array  key=>value resultset or null
      */
-    public function rowAssoc($sql, ...$args) {
+    public function rowAssoc(string $sql, ...$args): ?array {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->next_record(MYSQLI_ASSOC, false);
@@ -478,12 +468,8 @@ class Mysql {
      * of the first row.
      * Stashes the current query id so that this can be used within a block
      * that is looping over an active resultset.
-     *
-     * @param string  $sql The parameterized query to run
-     * @param mixed   $args  The values of the placeholders
-     * @return mixed  value or null
      */
-    public function scalar($sql, ...$args) {
+    public function scalar(string $sql, mixed ...$args): int|string|bool|null {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->has_results() ? $this->next_record(MYSQLI_NUM, false) : [null];
@@ -506,12 +492,12 @@ class Mysql {
         );
     }
 
-    public function set_query_id(&$ResultSet) {
+    public function set_query_id(\mysqli_result|false &$ResultSet): void {
         $this->QueryID = $ResultSet;
         $this->Row = 0;
     }
 
-    public function get_query_id() {
+    public function get_query_id(): mixed {
         return $this->QueryID;
     }
 
@@ -519,7 +505,7 @@ class Mysql {
      * This function determines whether the last query caused warning messages
      * and stores them in $this->Queries.
      */
-    public function warnings() {
+    public function warnings(): void {
         $Warnings = [];
         if ($this->LinkID !== false && mysqli_warning_count($this->LinkID)) {
             $e = mysqli_get_warnings($this->LinkID);
@@ -534,18 +520,18 @@ class Mysql {
         $this->Queries[count($this->Queries) - 1][2] = $Warnings;
     }
 
-    public function begin_transaction() {
+    public function begin_transaction(): void {
         if (!$this->LinkID) {
             $this->connect();
         }
         mysqli_begin_transaction($this->LinkID);
     }
 
-    public function commit() {
+    public function commit(): void {
         mysqli_commit($this->LinkID);
     }
 
-    public function rollback() {
+    public function rollback(): void {
         mysqli_rollback($this->LinkID);
     }
 
@@ -559,7 +545,7 @@ class Mysql {
      * @param boolean $Reverse reverses $Escape such that then it's an array of keys to escape
      * @return array mutated version of $Array with values escaped.
      */
-    protected function display_array($Array, $Escape = [], $Reverse = false) {
+    protected function display_array(array $Array, mixed $Escape = [], bool $Reverse = false): array {
         foreach ($Array as $Key => $Val) {
             if ((!is_array($Escape) && $Escape == true) || (!$Reverse && !in_array($Key, $Escape)) || ($Reverse && in_array($Key, $Escape))) {
                 $Array[$Key] = display_str($Val);
