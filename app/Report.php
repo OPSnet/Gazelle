@@ -6,16 +6,10 @@ class Report extends BaseObject {
     protected array $info;
     protected Manager\User $userMan;
 
+    public function flush(): Report { return $this; }
+    public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
+    public function location(): string { return "reports.php?id={$this->id}#report{$this->id}"; }
     public function tableName(): string { return 'reports'; }
-    public function flush() {}
-
-    public function location(): string {
-        return "reports.php?id={$this->id}#report{$this->id}";
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id());
-    }
 
     public function setUserManager(Manager\User $userMan) {
         $this->userMan = $userMan;

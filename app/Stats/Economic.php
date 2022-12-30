@@ -8,6 +8,11 @@ class Economic extends \Gazelle\Base {
 
     protected array $info;
 
+    public function flush(): Economic {
+        self::$cache->delete_value(self::CACHE_KEY);
+        return $this;
+    }
+
     public function __construct() {
         $info = self::$cache->get_value(self::CACHE_KEY);
         if ($info === false ) {
@@ -58,10 +63,6 @@ class Economic extends \Gazelle\Base {
             self::$cache->cache_value(self::CACHE_KEY, $info, 3600);
         }
         $this->info = $info;
-    }
-
-    public function flush() {
-        self::$cache->delete_value(self::CACHE_KEY);
     }
 
     public function get($key) {

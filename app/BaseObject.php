@@ -11,7 +11,7 @@ abstract class BaseObject extends Base {
         protected int $id,
     ) {}
 
-    abstract public function flush();
+    abstract public function flush(): BaseObject;
     abstract public function link(): string;
     abstract public function location(): string;
     abstract public function tableName(): string;

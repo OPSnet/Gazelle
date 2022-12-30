@@ -7,8 +7,9 @@ class Blog extends \Gazelle\BaseManager {
     const CACHE_KEY = 'blog';
     const ID_KEY = 'zz_blog_%d';
 
-    public function flush() {
+    public function flush(): Blog {
         self::$cache->deleteMulti(['feed_blog', self::CACHE_KEY]);
+        return $this;
     }
 
     public function findById(int $blogId): ?\Gazelle\Blog {

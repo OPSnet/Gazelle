@@ -61,7 +61,7 @@ class Comment extends \Gazelle\BaseManager {
         if ($user) {
             (new \Gazelle\User\Notification\Quote($user))->create(new User, $body, $postId, $page, $pageId);
         }
-        (new Subscription)->flush($page, $pageId);
+        (new Subscription)->flushPage($page, $pageId);
 
         $className = $this->className($page);
         return new $className($pageId, 0, $postId);

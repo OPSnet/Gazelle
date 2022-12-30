@@ -16,9 +16,10 @@ class PM extends Base {
         return $this->id;
     }
 
-    public function flush() {
+    public function flush(): PM {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id, $this->user->id()));
         $this->info = [];
+        return $this;
     }
 
     public function info(): array {

@@ -36,6 +36,6 @@ $subscription = new Gazelle\User\Subscription($Viewer);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
     $subscription->subscribe($threadId);
 }
-(new Gazelle\Manager\Subscription)->flush('forums', $threadId);
+(new Gazelle\Manager\Subscription)->flushPage('forums', $threadId);
 
 header("Location: {$thread->location()}&postid=$postId#post$postId");

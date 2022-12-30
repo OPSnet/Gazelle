@@ -39,21 +39,10 @@ class Wiki extends BaseObject {
         }
     }
 
-    public function tableName(): string {
-        return 'wiki_articles';
-    }
-
-    public function location(): string {
-        return 'wiki.php?action=article&id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
-    }
-
-    public function flush() {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-    }
+    public function flush(): Wiki { self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id)); return $this; }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
+    public function location(): string { return 'wiki.php?action=article&id=' . $this->id; }
+    public function tableName(): string { return 'wiki_articles'; }
 
     public function revisionBody(int $revision): ?string {
         return $revision === $this->info['revision']

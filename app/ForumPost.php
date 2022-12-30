@@ -7,23 +7,16 @@ class ForumPost extends BaseObject {
 
     protected array $info;
 
-    public function tableName(): string {
-        return 'forums_posts';
-    }
-
-    public function flush() {
+    public function flush(): ForumPost {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->thread()->flush();
         $this->info = [];
+        return $this;
     }
 
-    public function location(): string {
-        return "forums.php?action=viewthread&threadid={$this->threadId()}&postid={$this->id}#post{$this->id}";
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), "Post #{$this->id}");
-    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Post #{$this->id}"); }
+    public function location(): string { return "forums.php?action=viewthread&threadid={$this->threadId()}&postid={$this->id}#post{$this->id}"; }
+    public function tableName(): string { return 'forums_posts'; }
 
     /**
      * Get information about a post
@@ -187,7 +180,7 @@ class ForumPost extends BaseObject {
         self::$db->commit();
 
         $this->thread()->forum()->adjust();
-        (new \Gazelle\Manager\Subscription)->flush('forums', $threadId);
+        (new \Gazelle\Manager\Subscription)->flushPage('forums', $threadId);
 
         $thread->flush();
         $pageOffset = $this->page() - 1;

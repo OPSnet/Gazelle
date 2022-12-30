@@ -5,10 +5,10 @@ namespace Gazelle;
 class ErrorLog extends BaseObject {
     protected array $info;
 
-    public function flush() {}
-    public function link(): string {return '';}
-    public function location(): string {return '';}
-    public function tableName(): string {return 'error_log';}
+    public function flush(): ErrorLog { return $this; }
+    public function link(): string { return ''; }
+    public function location(): string { return ''; }
+    public function tableName(): string { return 'error_log'; }
 
     public function info(): array {
         if (isset($this->info)) {

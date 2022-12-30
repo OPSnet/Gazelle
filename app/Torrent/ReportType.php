@@ -8,26 +8,22 @@ class ReportType extends \Gazelle\BaseObject {
     protected array $info;
     protected array $changeSet;
 
-    public function tableName(): string { return 'torrent_report_configuration'; }
 
-    public function pkName(): string { return "torrent_report_configuration_id"; }
-
-    public function flush() {
+    public function flush(): ReportType {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::ID_KEY, $this->id));
         self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::NAME_KEY, $this->id));
         self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::TYPE_KEY, $this->id));
+        return $this;
     }
-
-    public function location(): string {
-        return "tools.php?action=torrent_report_edit&id=" . $this->id;
-    }
+    public function link(): string { return ''; }
+    public function location(): string { return "tools.php?action=torrent_report_edit&id=" . $this->id; }
+    public function pkName(): string { return "torrent_report_configuration_id"; }
+    public function tableName(): string { return 'torrent_report_configuration'; }
 
     public function url(): string {
         return htmlentities($this->location());
     }
-
-    public function link(): string { return ''; }
 
     public function info(): array {
         $key = sprintf(self::CACHE_KEY, $this->id);

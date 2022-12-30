@@ -5,21 +5,10 @@ namespace Gazelle;
 class Privilege extends BaseObject {
     protected array $info;
 
-    public function tableName(): string {
-        return 'permissions';
-    }
-
-    public function location(): string {
-        return '';
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), $this->url());
-    }
-
-    public function flush() {
-        $this->info = [];
-    }
+    public function flush(): Privilege { $this->info = []; return $this; }
+    public function location(): string { return ''; }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
+    public function tableName(): string { return 'permissions'; }
 
     public function info(): array {
         if (empty($this->info)) {

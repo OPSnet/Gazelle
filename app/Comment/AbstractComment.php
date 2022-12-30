@@ -14,17 +14,13 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     abstract public function page(): string;
     abstract public function pageUrl(): string;
 
-    public function tableName(): string {
-        return 'comments';
+    public function flush(): AbstractComment {
+        // No-op: There is no such thing as an individual comment cache
+        return $this;
     }
-
-    public function location(): string {
-        return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}";
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id);
-    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id); }
+    public function location(): string { return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}"; }
+    public function tableName(): string { return 'comments'; }
 
     public function __construct(
         protected int $pageId,
@@ -77,10 +73,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
     public function total(): int {
         return $this->total;
-    }
-
-    public function flush() {
-        // No-op: There is no such thing as an individual comment cache
     }
 
     public function userId(): int {
@@ -318,7 +310,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
         self::$db->commit();
 
-        (new \Gazelle\Manager\Subscription)->flush($page, $this->pageId);
+        (new \Gazelle\Manager\Subscription)->flushPage($page, $this->pageId);
 
         self::$cache->deleteMulti([
             "edit_{$page}_" . $this->id,

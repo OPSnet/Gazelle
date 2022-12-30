@@ -13,21 +13,13 @@ class TGroup extends \Gazelle\BaseObject {
     // Cache the underlying db calls
     protected array $general = [];
 
-    public function tableName(): string {
-        return 'tgroup_summary';
-    }
-
-    public function location(): string {
-        return 'torrents.php?id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats');
-    }
-
-    public function flush() {
+    public function flush(): TGroup {
         self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
+        return $this;
     }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats'); }
+    public function location(): string { return 'torrents.php?id=' . $this->id; }
+    public function tableName(): string { return 'tgroup_summary'; }
 
     /**
      * @see \Gazelle\Stats\TGroups::refresh()

@@ -17,8 +17,9 @@ class Blog extends BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
     }
 
-    public function flush() {
+    public function flush(): Blog {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        return $this;
     }
 
     public function info(): array {

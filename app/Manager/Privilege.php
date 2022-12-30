@@ -8,6 +8,12 @@ class Privilege extends \Gazelle\BaseManager {
 
     protected array $info = [];
 
+    public function flush(): Privilege {
+        self::$cache->delete_value(self::CACHE_KEY);
+        $this->info = [];
+        return $this;
+    }
+
     public function findById(int $privilegeId): ?\Gazelle\Privilege {
         $key = sprintf(self::ID_KEY, $privilegeId);
         $id = self::$cache->get_value($key);
@@ -29,12 +35,6 @@ class Privilege extends \Gazelle\BaseManager {
             ", $level
         );
         return $id ? new \Gazelle\Privilege($id) : null;
-    }
-
-    public function flush() {
-        self::$cache->delete_value(self::CACHE_KEY);
-        $this->info = [];
-        return $this;
     }
 
     public function create(string $name, int $level, bool $secondary, string $forums, array $values, int|null $staffGroupId, string $badge, bool $displayStaff): \Gazelle\Privilege {

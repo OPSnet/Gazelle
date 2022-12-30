@@ -9,17 +9,21 @@ class Request extends BaseObject {
 
     protected array $info;
 
-    public function tableName(): string {
-        return 'requests';
+    public function flush(): Request {
+        if ($this->tgroupId()) {
+            self::$cache->delete_value("requests_group_" . $this->tgroupId());
+        }
+        self::$cache->deleteMulti([
+            sprintf(self::CACHE_REQUEST, $this->id),
+            sprintf(self::CACHE_ARTIST, $this->id),
+            sprintf(self::CACHE_VOTE, $this->id),
+        ]);
+        $this->info = [];
+        return $this;
     }
-
-    public function location(): string {
-        return 'requests.php?action=view&id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
-    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
+    public function location(): string { return 'requests.php?action=view&id=' . $this->id; }
+    public function tableName(): string { return 'requests'; }
 
     /**
      * Display a title on the request page itself. If there are artists in the name,
@@ -68,18 +72,6 @@ class Request extends BaseObject {
             'Comedy'      => "$title [{$this->year()}]",
             default       => $title,
         };
-    }
-
-    public function flush() {
-        if ($this->tgroupId()) {
-            self::$cache->delete_value("requests_group_" . $this->tgroupId());
-        }
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_REQUEST, $this->id),
-            sprintf(self::CACHE_ARTIST, $this->id),
-            sprintf(self::CACHE_VOTE, $this->id),
-        ]);
-        $this->info = [];
     }
 
     public function artistFlush() {

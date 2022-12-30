@@ -20,12 +20,16 @@ class TGroup extends BaseObject {
     protected User              $viewer;
     protected Stats\TGroup      $stats;
 
-    public function tableName(): string {
-        return 'torrents_group';
-    }
-
-    public function location(): string {
-        return 'torrents.php?id=' . $this->id;
+    public function flush(): TGroup {
+        $this->info = [];
+        self::$cache->deleteMulti([
+            sprintf(self::CACHE_KEY, $this->id),
+            sprintf(self::CACHE_TLIST_KEY, $this->id),
+            sprintf(self::CACHE_COVERART_KEY, $this->id),
+            'torrents_details_' . $this->id,
+            'torrents_group_' . $this->id,
+        ]);
+        return $this;
     }
 
     public function link(): string {
@@ -39,22 +43,14 @@ class TGroup extends BaseObject {
         };
     }
 
+    public function location(): string { return 'torrents.php?id=' . $this->id; }
+    public function tableName(): string { return 'torrents_group'; }
+
     /**
      * Generate the artist name. (Individual artists will be clickable, or VA)
      */
     public function artistLink(): string {
         return $this->artistRole()->link();
-    }
-
-    public function flush() {
-        $this->info = [];
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_KEY, $this->id),
-            sprintf(self::CACHE_TLIST_KEY, $this->id),
-            sprintf(self::CACHE_COVERART_KEY, $this->id),
-            'torrents_details_' . $this->id,
-            'torrents_group_' . $this->id,
-        ]);
     }
 
     public function flushTorrentDownload(): TGroup {

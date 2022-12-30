@@ -9,7 +9,7 @@ class NotificationFilter extends BaseObject {
         'artist', 'recordLabel', 'tag', 'notTag', 'category', 'format', 'encoding', 'media', 'user'
     ];
 
-    public function flush() {}
+    public function flush(): NotificationFilter { return $this; }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
     public function location(): string { return 'user.php?action=notify'; }
     public function tableName(): string { return 'users_notify_filters'; }

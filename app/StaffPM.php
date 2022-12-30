@@ -7,6 +7,11 @@ class StaffPM extends BaseObject {
     protected $author;
     protected $assigned;
 
+    public function flush(): StaffPM { return $this; }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject())); }
+    public function location(): string { return 'staffpm.php?action=viewconv&id=' . $this->id; }
+    public function tableName(): string { return 'staff_pm_conversations'; }
+
     public function __construct(
         protected int $id,
     ) {
@@ -29,22 +34,6 @@ class StaffPM extends BaseObject {
         $userMan = new Manager\User;
         $this->author = $userMan->findById($this->info['user_id'] ?? 0);
         $this->assigned = $userMan->findById($this->info['assigned_user_id'] ?? 0);
-    }
-
-    public function tableName(): string {
-        return 'staff_pm_conversations';
-    }
-
-    public function location(): string {
-        return 'staffpm.php?action=viewconv&id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject()));
-    }
-
-    public function flush() {
-        // no-op
     }
 
     public function assignedUserId(): int {

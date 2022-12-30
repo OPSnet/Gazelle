@@ -3,19 +3,14 @@
 namespace Gazelle;
 
 class StaffGroup extends BaseObject {
-    public function location(): string { return 'tools.php?action=staff_groups'; }
-    public function tableName(): string { return 'staff_groups'; }
-
-    public function link(): string {
-        return sprintf('<a href="%s" class="tooltip" title="%s">%s</a>',
-            $this->url(), 'Staff groups', 'Staff groups'
-        );
-    }
-
-    public function flush() {
+    public function flush(): StaffGroup {
         self::$cache->delete_value('staff');
         (new Manager\Privilege)->flush();
+        return $this;
     }
+    public function link(): string { return sprintf('<a href="%s" class="tooltip" title="%s">%s</a>', $this->url(), 'Staff groups', 'Staff groups'); }
+    public function location(): string { return 'tools.php?action=staff_groups'; }
+    public function tableName(): string { return 'staff_groups'; }
 
     public function remove(): int {
         self::$db->prepared_query("

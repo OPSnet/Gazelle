@@ -33,14 +33,14 @@ class CacheVector extends \Gazelle\Base {
         }
     }
 
-    public function isEmpty(): bool {
-        return $this->empty;
-    }
-
-    public function flush() {
+    public function flush(): CacheVector {
         self::$cache->delete_value($this->key);
         $this->empty = true;
         return $this;
+    }
+
+    public function isEmpty(): bool {
+        return $this->empty;
     }
 
     /**

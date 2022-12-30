@@ -30,17 +30,16 @@ class User extends BaseObject {
 
     protected Stats\User $stats;
 
-    public function tableName(): string {
-        return 'users_main';
+    public function flush(): User {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_value(sprintf(User\Privilege::CACHE_KEY, $this->id));
+        $this->stats()->flush();
+        $this->info = [];
+        return $this;
     }
-
-    public function location(): string {
-        return 'user.php?id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), $this->username());
-    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->username()); }
+    public function location(): string { return 'user.php?id=' . $this->id; }
+    public function tableName(): string { return 'users_main'; }
 
     /**
      * Delegate stats methods to the Stats\User class
@@ -923,13 +922,6 @@ class User extends BaseObject {
 
     public function forceCacheFlush($flush = true) {
         return $this->forceCacheFlush = $flush;
-    }
-
-    public function flush() {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        self::$cache->delete_value(sprintf(User\Privilege::CACHE_KEY, $this->id));
-        $this->stats()->flush();
-        $this->info = [];
     }
 
     public function flushRecentSnatch() {

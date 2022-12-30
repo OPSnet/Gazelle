@@ -7,22 +7,14 @@ class ForumPoll extends BaseObject {
 
     protected array $info;
 
-    public function tableName(): string {
-        return 'forums_polls';
-    }
-
-    public function location(): string {
-        return "forums.php?action=viewthread&threadid={$this->id}";
-    }
-
-    public function link(): string {
-        return $this->thread()->link();
-    }
-
-    public function flush() {
+    public function flush(): ForumPoll {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->info = [];
+        return $this;
     }
+    public function tableName(): string { return 'forums_polls'; }
+    public function link(): string { return $this->thread()->link(); }
+    public function location(): string { return "forums.php?action=viewthread&threadid={$this->id}"; }
 
     public function thread(): ForumThread {
         return new ForumThread($this->id);

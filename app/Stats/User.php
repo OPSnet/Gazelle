@@ -19,24 +19,16 @@ class User extends \Gazelle\BaseObject {
     protected array $commentTotal;
     protected array $general = [];
 
-    public function tableName(): string {
-        return 'user_summary';
-    }
-
-    public function location(): string {
-        return 'user.php?action=stats&userid=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats');
-    }
-
-    public function flush() {
+    public function flush(): User {
         self::$cache->deleteMulti([
             sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
             sprintf(self::CACHE_GENERAL, $this->id),
         ]);
+        return $this;
     }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats'); }
+    public function location(): string { return 'user.php?action=stats&userid=' . $this->id; }
+    public function tableName(): string { return 'user_summary'; }
 
     /**
      * Get the total number of comments made by page type

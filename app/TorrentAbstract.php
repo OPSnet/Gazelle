@@ -9,6 +9,12 @@ abstract class TorrentAbstract extends BaseObject {
     protected TGroup $tgroup;
     protected User   $viewer;
 
+    public function flush(): TorrentAbstract {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        $this->group()->flush();
+        return $this;
+    }
+
     abstract public function addFlag(TorrentFlag $flag, User $user): int;
     abstract public function infoRow(): ?array;
     abstract public function hasToken(int $userId): bool;
@@ -69,11 +75,6 @@ abstract class TorrentAbstract extends BaseObject {
             $name .= " [$edition]";
         }
         return $name;
-    }
-
-    public function flush() {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        $this->group()->flush();
     }
 
     /**

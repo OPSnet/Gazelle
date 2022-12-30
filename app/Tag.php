@@ -18,20 +18,10 @@ class Tag extends BaseObject {
         );
     }
 
-    public function tableName(): string {
-        return 'tags';
-    }
-
-    public function location(): string {
-        return 'torrents.php?taglist=' . $this->name();
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
-    }
-
-    public function flush() {
-    }
+    public function flush(): Tag { return $this; }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
+    public function location(): string { return 'torrents.php?taglist=' . $this->name(); }
+    public function tableName(): string { return 'tags'; }
 
     public function name(): string {
         return $this->info['name'];

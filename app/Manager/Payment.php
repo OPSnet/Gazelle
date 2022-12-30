@@ -10,6 +10,11 @@ class Payment extends \Gazelle\Base {
     const RENT_KEY = 'payment_monthly_rental';
     const DUE_KEY  = 'payment_due';
 
+    public function flush(): Payment {
+        self::$cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
+        return $this;
+    }
+
     public function create(array $val): int {
         self::$db->prepared_query('
             INSERT INTO payment_reminders
@@ -40,11 +45,6 @@ class Payment extends \Gazelle\Base {
         );
         $this->flush();
         return self::$db->affected_rows();
-    }
-
-    public function flush() {
-        self::$cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
-        return $this;
     }
 
     public function list(): array {

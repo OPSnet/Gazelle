@@ -12,7 +12,7 @@ class Subscription extends \Gazelle\Base {
      * @param int $PageID, ID of the above
      * @return int total number of cache expiries
      */
-    public function flush(string $Page, int $PageID): int {
+    public function flushPage(string $Page, int $PageID): int {
         $qid = self::$db->get_query_id();
         if ($Page === 'forums') {
             self::$db->prepared_query('
@@ -149,6 +149,6 @@ class Subscription extends \Gazelle\Base {
                 ', $Page, $OldPageID
             );
         }
-        $this->flush($Page, $OldPageID);
+        $this->flushPage($Page, $OldPageID);
     }
 }

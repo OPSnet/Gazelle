@@ -3,23 +3,21 @@
 namespace Gazelle\User;
 
 class Bonus extends \Gazelle\BaseUser {
-    const CACHE_OPEN_POOL = 'bonus_pool'; // also defined in Manager\Bonus
-    const CACHE_PURCHASE = 'bonus_purchase_%d';
-    const CACHE_SUMMARY = 'bonus_summary_%d';
-    const CACHE_HISTORY = 'bonus_history_%d_%d';
+    const CACHE_OPEN_POOL    = 'bonus_pool'; // also defined in Manager\Bonus
+    const CACHE_PURCHASE     = 'bonus_purchase_%d';
+    const CACHE_SUMMARY      = 'bonus_summary_%d';
+    const CACHE_HISTORY      = 'bonus_history_%d_%d';
     const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
-    public function tableName(): string {
-        return 'bonus_history';
-    }
-
-    public function flush() {
+    public function flush(): Bonus {
         $this->user->flush();
         self::$cache->deleteMulti([
             sprintf(self::CACHE_HISTORY, $this->user->id(), 0),
             sprintf(self::CACHE_POOL_HISTORY, $this->user->id()),
         ]);
+        return $this;
     }
+    public function tableName(): string { return 'bonus_history'; }
 
     public function pointsSpent(): int {
         return (int)self::$db->scalar("

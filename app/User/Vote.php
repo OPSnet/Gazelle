@@ -47,11 +47,12 @@ class Vote extends \Gazelle\BaseUser {
         $this->userVote = $userVote;
     }
 
-    public function flush() {
+    public function flush(): Vote {
         self::$cache->deleteMulti([
             sprintf(self::VOTE_RECENT, $this->user->id()),
             sprintf(self::VOTE_TOTAL, $this->user->id()),
         ]);
+        return $this;
     }
 
     public function setTopLimit(int $limit) {

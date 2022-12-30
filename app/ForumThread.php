@@ -8,16 +8,13 @@ class ForumThread extends BaseObject {
 
     protected array $info;
 
-    public function tableName(): string {
-        return 'forums_topics';
-    }
-
-    public function flush() {
+    public function flush(): ForumThread {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value("edit_forums_{$this->id}");
         (new Manager\Forum)->flushToc();
         $last = $this->lastPage();
         $this->flushCatalog($last, $last);
+        return $this;
     }
 
     public function flushCatalog(int $begin, int $end) {
@@ -29,13 +26,9 @@ class ForumThread extends BaseObject {
         );
     }
 
-    public function location(): string {
-        return "forums.php?action=viewthread&threadid={$this->id}";
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
-    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
+    public function location(): string { return "forums.php?action=viewthread&threadid={$this->id}"; }
+    public function tableName(): string { return 'forums_topics'; }
 
     /**
      * Get information about a thread

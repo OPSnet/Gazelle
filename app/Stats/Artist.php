@@ -7,19 +7,13 @@ class Artist extends \Gazelle\BaseObject {
 
     protected array $info;
 
-    public function tableName(): string { return '/* artist stats */'; }
-
-    public function location(): string {
-        return 'artist.php?id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">artist %d</a>', $this->url(), $this->id());
-    }
-
-    public function flush() {
+    public function flush(): Artist {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        return $this;
     }
+    public function link(): string { return sprintf('<a href="%s">artist %d</a>', $this->url(), $this->id()); }
+    public function location(): string { return 'artist.php?id=' . $this->id; }
+    public function tableName(): string { return '/* artist stats */'; }
 
     public function info(): array {
         if (isset($this->info)) {

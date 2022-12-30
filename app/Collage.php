@@ -42,8 +42,9 @@ class Collage extends BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
     }
 
-    public function flush() {
+    public function flush(): Collage {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        return $this;
     }
 
     public function categoryId() { return $this->info()['category_id']; }

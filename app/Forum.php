@@ -22,12 +22,13 @@ class Forum extends BaseObject {
         );
     }
 
-    public function flush() {
+    public function flush(): Forum {
         (new Manager\Forum)->flushToc();
         self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $this->id),
             sprintf(self::CACHE_TOC_FORUM, $this->id),
         ]);
+        return $this;
     }
 
     // TODO: rewrite to use BaseObject::modify()
