@@ -830,28 +830,24 @@ class Text {
                     $Str .= is_null($pl) ? "[pl]{$Block['Val']}[/pl]" : $pl;
                     break;
                 case 'torrent':
-                    $GroupID = false;
+                    $GroupID = 0;
                     if (preg_match(TGROUP_REGEXP, $Block['Val'], $match)) {
                         if (isset($match['id'])) {
                             $GroupID = $match['id'];
                         }
                     } elseif ((int)$Block['Val']) {
-                        $GroupID = (int)$Block['Val'];
+                        $GroupID = $Block['Val'];
                     }
-                    if ($GroupID) {
-                        $Groups = Torrents::get_groups([$GroupID], true, true, false);
-                        if (isset($Groups[$GroupID])) {
-                            $Group = $Groups[$GroupID];
-                            $tagNames = implode(', ', array_map(fn($x) => '#' . htmlentities($x), explode(' ', $Group['TagList'])));
-                            if (!str_contains($Block['Attr'], 'noartist')) {
-                                $Str .= Artists::display_artists($Group['ExtendedArtists']);
-                            }
-                            $Str .= '<a title="' . $tagNames . '" href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
-                        } else {
-                            $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
-                        }
+                    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$GroupID);
+                    if (is_null($tgroup)) {
+                        $Str .= '[torrent]' . str_replace('[inlineurl]', '', $Block['Val']) . '[/torrent]';
                     } else {
-                        $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
+                        if (str_contains($Block['Attr'], 'noartist')) {
+                            $Str .= "<a href=\"{$tgroup->url()}\" title=\"" . ($tgroup->hashTag() ?: 'View torrent group')
+                                . '" dir="ltr">' . display_str($tgroup->name()) . '</a>';
+                        } else {
+                            $Str .= $tgroup->link();
+                        }
                     }
                     break;
 
