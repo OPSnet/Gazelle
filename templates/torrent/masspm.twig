@@ -1,8 +1,8 @@
 {% set name = torrent.group.text %}
-{{ header('Mass PM Snatchers: ' ~ name, {'js': 'upload'}) }}
+{{ header('Mass PM Snatchers: ' ~ torrent.group.text, {'js': 'upload'}) }}
 <div class="thin">
     <div class="header">
-        <h2>Send PM To all snatchers of "{{ name }}"</h2>
+        <h2>Send PM To all snatchers of "{{ torrent.link|raw }}"</h2>
     </div>
     <form class="send_form" name="mass_message" action="torrents.php" method="post">
         <input type="hidden" name="action" value="takemasspm" />
