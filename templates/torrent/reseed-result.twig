@@ -1,10 +1,10 @@
-{{ header('Reseed ' ~ name ) }}
+{{ header('Reseed ' ~ torrent.group.text ) }}
 <div class="thin">
     <div class="header">
         <h2>Successfully sent re-seed request</h2>
     </div>
     <div class="box pad thin">
-        <p>Successfully sent re-seed request for torrent <a href="torrents.php?id={{ group_id }}&torrentid={{ torrent_id }}#{{ torrent_id }}">{{ name }}</a> to {{ total }} user{{ total|plural }}.</p>
+        <p>Successfully sent re-seed request for {{ torrent.link|raw }} to {{ total }} user{{ total|plural }}.</p>
     </div>
 </div>
 {{ footer() }}

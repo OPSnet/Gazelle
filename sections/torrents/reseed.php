@@ -15,8 +15,6 @@ if (!$Viewer->permitted('users_mod')) {
 }
 
 echo $Twig->render('torrent/reseed-result.twig', [
-    'group_id'   => $torrent->groupId(),
-    'torrent_id' => $torrent->id(),
-    'name'       => $torrent->group()->text(),
-    'total'      => $torrent->issueReseedRequest($Viewer),
+    'torrent' => $torrent,
+    'total'   => $torrent->issueReseedRequest($Viewer),
 ]);
