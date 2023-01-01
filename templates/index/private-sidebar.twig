@@ -135,9 +135,7 @@
         <li>"Perfect" FLACs: {{ torrent_stats.perfectFlacTotal|number_format }}</li>
         <li>Collages: {{ collage_count|number_format }}</li>
         <li>Requests: {{ request_stats.total|number_format }} ({{ request_stats.filledPercent|number_format(2) }}% filled)</li>
-{% if snatch_stats %}
         <li>Snatches: {{ user_stats.snatchTotal|number_format }}</li>
-{% endif %}
         <li>Peers: {{ user_stats.peerTotal|number_format }}</li>
         <li>Seeders: {{ user_stats.seederTotal|number_format }}</li>
         <li>Leechers: {{ user_stats.leecherTotal|number_format }}</li>
