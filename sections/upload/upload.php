@@ -67,54 +67,38 @@ if (empty($Err)) {
     $Err = null;
 }
 
-$DB->prepared_query("
-    SELECT Name,
-        Comment,
-        Time
-    FROM do_not_upload
-    ORDER BY Sequence"
-);
-$DNU = $DB->to_array();
-$Updated = $DB->scalar('SELECT MAX(Time) FROM do_not_upload');
-$NewDNU = $DB->scalar("
-    SELECT IF(MAX(Time) IS NULL OR MAX(Time) < ?, 1, 0)
-    FROM torrents
-    WHERE UserID = ?
-    ", $Updated, $Viewer->id()
-);
-$HideDNU = $Viewer->permitted('torrents_hide_dnu') && !$NewDNU;
+$dnu     = new Gazelle\Manager\DNU;
+$dnuNew  = $dnu->hasNewForUser($Viewer);
+$hideDnu = !$dnuNew && $Viewer->permitted('torrents_hide_dnu');
+
 View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbrainz,bbcode']);
 ?>
 <div class="<?= $Viewer->permitted('torrents_hide_dnu') ? 'box pad' : '' ?>" style="margin: 0px auto; width: 700px;">
     <h3 id="dnu_header">Do Not Upload List</h3>
-    <p><?=$NewDNU ? '<strong class="important_text">' : '' ?>Last updated: <?=time_diff($Updated)?><?=$NewDNU ? '</strong>' : '' ?></p>
+    <p><?= $dnuNew ? '<strong class="important_text">' : '' ?>Last updated: <?= time_diff($dnu->latest()) ?><?= $dnuNew ? '</strong>' : '' ?></p>
     <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the comment.
-<?php    if ($HideDNU) { ?>
+<?php if ($hideDnu) { ?>
     <span id="showdnu"><a href="#" onclick="$('#dnulist').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a></span>
-<?php    } ?>
+<?php } ?>
     </p>
-    <table id="dnulist" class="<?=($HideDNU ? 'hidden' : '')?>">
+    <table id="dnulist" class="<?= $hideDnu ? 'hidden' : '' ?>">
         <tr class="colhead">
-            <td width="50%"><strong>Name</strong></td>
-            <td><strong>Comment</strong></td>
+            <td width="30%"><strong>Name</strong></td>
+            <td><strong>Reason</strong></td>
         </tr>
-<?php     $TimeDiff = strtotime('-1 month', strtotime('now'));
-    foreach ($DNU as $BadUpload) {
-        [$Name, $Comment, $Updated] = $BadUpload;
-?>
+<?php foreach ($dnu->dnuList() as $bad) { ?>
         <tr>
             <td>
-                <?=Text::full_format($Name) . "\n" ?>
-<?php   if ($TimeDiff < strtotime($Updated)) { ?>
+                <?= Text::full_format($bad['name']) ?>
+<?php   if ($bad['is_new']) { ?>
                 <strong class="important_text">(New!)</strong>
 <?php   } ?>
             </td>
-            <td><?=Text::full_format($Comment)?></td>
+            <td><?= Text::full_format($bad['comment']) ?></td>
         </tr>
-<?php
-    } ?>
+<?php } ?>
     </table>
-</div><?=($HideDNU ? '<br />' : '')?>
+</div><?= $dnuHide ? '<br />' : '' ?>
 <?php
 $GenreTags = (new Gazelle\Manager\Tag)->genreList();
 $uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err);
