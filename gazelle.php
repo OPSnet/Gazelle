@@ -117,6 +117,10 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 // 4. We have a viewer (or this is a login or registration attempt)
 
 if ($Viewer) {
+    if ($Viewer->hasAttr('admin-error-reporting')) {
+        error_reporting(E_ALL);
+    }
+
     // Change necessary triggers in external components
     if ($Viewer->permitted('admin_clear_cache')) {
         $Cache->enableCacheClear();

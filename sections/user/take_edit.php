@@ -271,6 +271,7 @@ foreach ($notification as $n) {
 
 $user->toggleAttr('hide-vote-recent', empty($_POST['pattr_hide_vote_recent']));
 $user->toggleAttr('hide-vote-history', empty($_POST['pattr_hide_vote_history']));
+$user->toggleAttr('admin-error-reporting', isset($_POST['error_reporting']));
 
 // Information on how the user likes to download torrents is stored in cache
 if ((bool)$DownloadAlt != $user->downloadAlt() || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {

@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked %}
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="access_settings">
     <tr class="colhead_dark">
         <td colspan="2">
@@ -110,4 +111,20 @@
             <a href="user.php?action=token&amp;user_id={{ user.id }}">Click here to create a new token</a>
         </td>
     </tr>
+
+{% if viewer.permitted('admin_site_debug') %}
+    <tr id="acc_error_display">
+        <td class="label"><strong>Error reporting</strong></td>
+        <td>
+            <div class="field_div">
+                <label><input type="checkbox" name="error_reporting" id="error_reporting"{{ checked(user.hasAttr('admin-error-reporting')) }} />
+                Show PHP errors when rendering pages</label> 
+            </div>
+            <p class="min_padding">Any uncaught exceptions will be emitted in the page output. <strong class="important_text">Note:</strong>
+            Only site admins see (and set) this option, and can set it for any user should circumstances warrant. Remember to deactivate it
+            for other users after the investigation is complete.</p>
+        </td>
+    </tr>
+{% endif %}
+
 </table>
