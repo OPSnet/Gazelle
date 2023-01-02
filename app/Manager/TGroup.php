@@ -262,4 +262,36 @@ class TGroup extends \Gazelle\BaseManager {
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
+
+    /**
+     * Find all the music releases that have a FLAC upload which could be used to
+     * produce V0 and 320 transcodes.
+     */
+    public function refreshBetterTranscode(): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            DELETE FROM better_transcode_music;
+        ");
+        self::$db->prepared_query("
+            INSERT INTO better_transcode_music (tgroup_id, want_v0, want_320, edition)
+            SELECT g.ID,
+                if(mp3__v0.ID is null, 1, 0),
+                if(mp3_320.ID is null, 1, 0),
+                F.edition
+            FROM torrents_group g
+            INNER JOIN (
+                SELECT DISTINCT GroupID,
+                    concat_ws(char(31), Remastered, RemasterYear, RemasterTitle, RemasterCatalogueNumber, RemasterRecordLabel) AS edition
+                FROM torrents
+                WHERE format = 'FLAC'
+            ) F ON (F.GroupID = g.ID)
+            LEFT JOIN torrents mp3__v0 ON (mp3__v0.GroupID = F.GroupID and mp3__v0.Format = 'MP3' AND mp3__v0.Encoding = 'V0 (VBR)')
+            LEFT JOIN torrents mp3_320 ON (mp3_320.GroupID = F.GroupID and mp3_320.Format = 'MP3' AND mp3_320.Encoding = '320')
+            WHERE g.CategoryID = 1
+                AND (mp3__v0.ID IS NULL OR mp3_320.ID IS NULL)
+        ");
+        $affected = self::$db->affected_rows();
+        self::$db->commit();
+        return $affected;
+    }
 }
