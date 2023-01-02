@@ -30,6 +30,7 @@ class ASN extends \Gazelle\Base {
         if (!$ipList) {
             return [];
         }
+        $ipList = array_map(fn ($ip) => $ip === '' ? '0.0.0.0' : $ip, $ipList);
         $result = $this->pg->all("
             SELECT lu.ip,
                 an.network,
