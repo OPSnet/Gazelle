@@ -203,7 +203,7 @@ foreach ($bookmarkList as $bm) {
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
             <td class="td_info" colspan="5">
-                <strong><?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
+                <strong><?= $tgroup->link() ?></strong>
                 <span style="text-align: right;" class="float_right">
  <?php if ($ownProfile) { ?>
         <a href="#group_<?= $tgroupId ?>" class="brackets remove_bookmark"
@@ -279,7 +279,7 @@ foreach ($bookmarkList as $bm) {
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                 ]) ?>
-                <strong><?= $tgroup->displayNameText() ?></strong>
+                <strong><?= $tgroup->text() ?></strong>
                 <div class="tags"><?= implode(', ',
                     array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
                     ) ?></div>

@@ -198,7 +198,7 @@ foreach ($entryList as $tgroupId) {
                     <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
                 </td>
                 <td colspan="5">
-                    <strong><?= $Number ?> – <?= $tgroup->link() ?> <?= $tgroup->suffix() ?></strong>
+                    <strong><?= $Number ?> – <?= $tgroup->link() ?></strong>
                         <span class="float_right">
 <?php
                 echo $Twig->render('bookmark/action.twig', [

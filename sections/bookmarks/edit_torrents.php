@@ -22,7 +22,7 @@ foreach ((new Gazelle\User\Bookmark($user))->tgroupBookmarkList() as $info) {
     }
     $list[] = [
         'created'     => $info['created'],
-        'link_artist' => $tgroup->artistLink(),
+        'link_artist' => $tgroup->artistRole()?->link() ?? '&mdash;',
         'link_tgroup' => sprintf(
             '<a href="%s" title="View torrent group" class="tooltip" dir="ltr">%s</a>',
             $tgroup->url(),

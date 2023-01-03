@@ -323,11 +323,7 @@ if ($sections = $Artist->sections()) {
                     </div>
 <?php   } ?>
                     <div class="group_info clear">
-                        <strong><?= $tgroup->link() ?>
-<?php   if ($tgroup->year()) { ?>
-                        [<?= $tgroup->year() ?>]
-<?php   } ?>
-                        </strong>
+                        <strong><?= $tgroup->link() ?></strong>
                         <span class="float_right">
 <?php
         echo $Twig->render('bookmark/action.twig', [

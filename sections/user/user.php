@@ -477,7 +477,7 @@ foreach ($Collages as $collage) {
 ?>
             <td>
                 <a href="torrents.php?id=<?= $tgroupId ?>">
-                    <img class="tooltip" title="<?= $tgroup->displayNameText() ?>" src="<?= $imgProxy->process($tgroup->cover()) ?>" width="107" />
+                    <img class="tooltip" title="<?= $tgroup->text() ?>" src="<?= $imgProxy->process($tgroup->cover()) ?>" width="107" />
                 </a>
             </td>
 <?php    } ?>

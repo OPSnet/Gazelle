@@ -608,7 +608,9 @@ class Torrent extends \Gazelle\BaseManager {
             ? '' : (' [' . $tgroup->releaseTypeName() . ']');
         $url = '';
         if (!(in_array('noartist', $attr) || in_array('title', $attr))) {
-            $url = $tgroup->artistLink() . " \xE2\x80\x93 ";
+            if ($tgroup->categoryName() === 'Music') {
+                $url = $tgroup->artistRole()->link() . " – ";
+            }
         }
         return $url . sprintf(
             '<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s</a>%s',

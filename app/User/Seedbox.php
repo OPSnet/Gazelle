@@ -138,11 +138,14 @@ class Seedbox extends \Gazelle\BaseUser {
             if (is_null($torrent)) {
                 continue;
             }
+            $tgroup = $torrent->group();
             $list[] = [
                 'id'       => $tid,
                 'folder'   => $torrent->path(),
-                'sortname' => $torrent->group()->name(),
-                'artist'   => $torrent->group()->artistLink(),
+                'sortname' => $tgroup()->name(),
+                'artist'   => $tgroup->categoryName() == 'Music'
+                    ? $tgroup()->artistRole()->link()
+                    : '&mdash;',
                 'name'     => $torrent->fullLink(),
             ];
         }

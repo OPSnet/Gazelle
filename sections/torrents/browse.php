@@ -162,7 +162,7 @@ foreach ($Results as $GroupID) {
             </div>
 <?php    } ?>
             <div class="group_info clear">
-                <?= $tgroup->link() ?> <?= $tgroup->suffix() ?>
+                <?= $tgroup->link() ?>
                 <span style="float: right">
                 <?= $Twig->render('bookmark/action.twig', [
                     'class'         => 'torrent',

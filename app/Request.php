@@ -572,7 +572,7 @@ class Request extends BaseObject {
         self::$db->commit();
 
         $user->addBounty($bounty);
-        $name = $torrent->group()->displayNameText();
+        $name = $torrent->group()->text();
         $message = "One of your requests&nbsp;&mdash;&nbsp;[url=requests.php?action=view&amp;id="
             . $this->id . "]$name" . "[/url]&nbsp;&mdash;&nbsp;has been filled. You can view it here: [pl]"
             . $torrent->id() . "[/pl]";
@@ -602,7 +602,7 @@ class Request extends BaseObject {
         if (is_null($torrent)) {
             $torrent = $torMan->findDeletedById($this->torrentId());
         }
-        $name = $torrent->group()->displayNameText();
+        $name = $torrent->group()->text();
 
         self::$db->begin_transaction();
         self::$db->prepared_query("

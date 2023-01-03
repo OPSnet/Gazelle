@@ -7,7 +7,7 @@
 {% for r in recent %}
     <td>
         <a href="torrents.php?id={{ r.id }}">
-        <img class="tooltip" title="{{ r.displayNameText }}" alt="{{ r.displayNameText }}" src="{{ r.image|image }}" width="107" />
+        <img class="tooltip" title="{{ r.text }}" alt="{{ r.text }}" src="{{ r.image|image }}" width="107" />
         </a>
     </td>
 {% endfor %}

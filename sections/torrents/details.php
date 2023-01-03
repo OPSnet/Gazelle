@@ -34,7 +34,7 @@ $categoryId     = $tgroup->categoryId();
 $musicRelease   = $tgroup->categoryName() == 'Music';
 $tagList        = $tgroup->tagList();
 $year           = $tgroup->year();
-$title          = $tgroup->displayNameText();
+$title          = $tgroup->text();
 $coverArt       = $tgroup->coverArt($userMan);
 $torrentList    = $tgroup->torrentIdList();
 $removed        = $torrentList ? [] : $tgroup->deletedMasteringList();
@@ -80,7 +80,7 @@ View::show_header(display_str($title), ['js' => 'browse,comments,torrent,bbcode,
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= $tgroup->displayNameHtml() ?></h2>
+        <h2><?= $tgroup->link() ?></h2>
         <div class="linkbox">
 <?php if ($Viewer->permitted('site_edit_wiki')) { ?>
             <a href="<?= $tgroup->url() ?>&amp;action=editgroup" class="brackets">Edit description</a>
@@ -149,7 +149,7 @@ $Index = 0;
 if ($tgroup->image() != '') {
     $image = $imgProxy->process($tgroup->image());
 ?>
-            <p align="center"><img width="100%" src="<?= $image ?>" alt="<?= $title ?>" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
+            <p align="center"><img width="100%" src="<?= $image ?>" alt="<?= display_str($title) ?>" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
 <?php } else { ?>
             <p align="center"><img width="100%" src="<?=STATIC_SERVER?>/common/noartwork/<?= $tgroup->categoryIcon() ?>" class="brackets tooltip" title="<?= $tgroup->categoryName() ?>" height="220" border="0" /></p>
 <?php
@@ -495,7 +495,7 @@ if (!$torrentList) {
             'torrent' => $torrent,
             'viewer'  => $Viewer,
             'extra'   => [
-                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . $tgroup->displayNameText()
+                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . display_str($title)
                     . " [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
             ],
         ]);

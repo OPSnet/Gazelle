@@ -54,7 +54,7 @@ foreach ($Results as &$result) {
             if ($tgroup) {
                 $result = $result + [
                     'jump' => $tgroup->url() . $postLink,
-                    'link' => 'Torrent &rsaquo; ' . $tgroup->link() . ' ' . $tgroup->suffix(),
+                    'link' => 'Torrent &rsaquo; ' . $tgroup->link(),
                 ];
             }
             break;

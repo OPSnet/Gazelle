@@ -64,8 +64,7 @@
         <tr>
             <td>
                 <span class="torrent_links_block">
-                    {{ item.torrent.group.artistLink|raw }} – {{ item.torrent.link|raw }}
-                    [{{ item.torrent.edition|raw }}]
+                    {{ item.torrent.link|raw }}
                 </span>
             </td>
             {% if target != '320' %}<td>{{ _self.yes_no(item.mp3_v0) }}</td>{% endif %}

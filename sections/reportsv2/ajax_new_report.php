@@ -30,7 +30,7 @@ $report->claim($Viewer->id());
 $torrent  = $report->torrent();
 $tgroupId = $torrent->groupId();
 $size     = '(' . number_format($torrent->size() / (1024 * 1024), 2) . ' MiB)';
-$linkName = "{$torrent->fullEditionLink()} $size";
+$linkName = "{$torrent->fullLink()} $size";
 $BBName   = "[pl]{$torrentId}[/pl] $size";
 $RawName  = "{$torrent->fullName()} $size";
 $uploader = $torrent->uploader();
@@ -144,7 +144,7 @@ if ($report->otherIdList()) {
         if ($extra) {
 ?>
                 <?= $n++ == 0 ? '' : '<br />' ?>
-                <?= $extra->fullEditionLink() ?> (<?= number_format($extra->size() / (1024 * 1024), 2) ?> MiB)
+                <?= $extra->fullLink() ?> (<?= number_format($extra->size() / (1024 * 1024), 2) ?> MiB)
                 <a href="torrents.php?action=download&amp;id=<?=$extra->id() ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                 uploaded by <?= $extra->uploader()->link() ?> <?=time_diff($extra->created()) ?> <a href="#" onclick="Switch(<?= $reportId ?>, <?= $extra->id() ?>); return false;" class="brackets">Switch</a>
 <?php

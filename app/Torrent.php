@@ -410,7 +410,7 @@ class Torrent extends TorrentAbstract {
 
         $userMan   = new Manager\User;
         $groupId   = $this->groupId();
-        $name      = $this->group()->displayNameText();
+        $name      = $this->group()->text();
         $torrentId = $this->id;
 
         foreach ($notify as $userId => $info) {

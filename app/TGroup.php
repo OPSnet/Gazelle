@@ -33,24 +33,39 @@ class TGroup extends BaseObject {
     }
 
     public function link(): string {
-        $url = "<a href=\"{$this->url()}\" title=\"" . ($this->hashTag() ?: 'View torrent group')
-            . '" dir="ltr">' . display_str($this->name()) . '</a>';
+        $url = "<a href=\"{$this->url()}\" title=\"" . ($this->hashTag() ?: 'View torrent group') . '" dir="ltr">'
+            . display_str($this->name()) . '</a>';
         return match($this->categoryName()) {
-            'Music'       => "{$this->artistLink()} – $url [{$this->year()}]",
+            'Music'  => "{$this->artistRole()->link()} – $url [{$this->year()} {$this->releaseTypeName()}]",
             'Audiobooks',
-            'Comedy'      => "$url [{$this->year()}]",
-            default       => $url,
+            'Comedy' => "$url [{$this->year()}]",
+            default  => $url,
         };
     }
 
-    public function location(): string { return 'torrents.php?id=' . $this->id; }
+    public function location(): string { return "torrents.php?id={$this->id}"; }
     public function tableName(): string { return 'torrents_group'; }
 
-    /**
-     * Generate the artist name. (Individual artists will be clickable, or VA)
-     */
-    public function artistLink(): string {
-        return $this->artistRole()->link();
+    public function torrentLink(int $torrentId): string {
+        $url = '<a href="' . $this->url() . "&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">"
+            . display_str($this->name()) . '</a>';
+        return match($this->categoryName()) {
+            'Music'  => "{$this->artistRole()->link()} – $url [{$this->year()} {$this->releaseTypeName()}]",
+            'Audiobooks',
+            'Comedy' => "$url [{$this->year()}]",
+            default  => $url,
+        };
+    }
+
+    public function text(): string {
+        $name = display_str($this->name());
+        return match($this->categoryName()) {
+            'Music'  => "{$this->artistRole()->text()} – $name [{$this->year()} {$this->releaseTypeName()}]"
+                . ($this->isShowcase() ? '[Showcase]' : ''),
+            'Audiobooks',
+            'Comedy' => "$name [{$this->year()}]",
+            default  => $name,
+        };
     }
 
     public function flushTorrentDownload(): TGroup {
@@ -62,16 +77,6 @@ class TGroup extends BaseObject {
         );
         self::$cache->deleteMulti(self::$db->collect('cacheKey'));
         return $this;
-    }
-
-    /**
-     * Delegate stats methods to the Stats\TGroup class
-     */
-    public function stats(): \Gazelle\Stats\TGroup {
-        if (!isset($this->stats)) {
-            $this->stats = new Stats\TGroup($this->id);
-        }
-        return $this->stats;
     }
 
     /**
@@ -397,6 +402,16 @@ class TGroup extends BaseObject {
         return $this->info()['ReleaseType'] == 0 ? null : $releaseTypes[$this->releaseType()];
     }
 
+    /**
+     * Delegate stats methods to the Stats\TGroup class
+     */
+    public function stats(): \Gazelle\Stats\TGroup {
+        if (!isset($this->stats)) {
+            $this->stats = new Stats\TGroup($this->id);
+        }
+        return $this->stats;
+    }
+
     public function tagList(): array {
         return $this->info()['tags'];
     }
@@ -436,50 +451,6 @@ class TGroup extends BaseObject {
 
     public function torrentIdList(): array {
         return $this->info()['torrent_list'];
-    }
-
-    public function displayTorrentLink(int $torrentId): string {
-        return implode(" \xE2\x80\x93 ",
-            array_filter([
-                $this->artistLink(),
-                sprintf(
-                    '<a href="torrents.php?id=%d&amp;torrentid=%d#torrent%d" dir="ltr">%s</a>',
-                        $this->id, $torrentId, $torrentId, $this->name()
-                ),
-            ], fn($x) => !empty($x))
-        );
-    }
-
-    protected function displayNameSuffix(): array {
-        return array_map(fn($x) => "[$x]",
-            array_filter([
-                $this->isShowcase() ? 'Showcase' : '',
-                $this->categoryId() === 1 ? $this->releaseTypeName() : '',
-            ], fn($x) => !empty($x))
-        );
-    }
-
-    public function suffix(): string {
-        return implode(' ', $this->displayNameSuffix());
-    }
-
-    public function displayNameHtml(): string {
-        return implode(' ', [
-            implode(" \xE2\x80\x93 ",
-                array_filter([
-                    $this->artistLink(),
-                    '<span dir="ltr">' . display_str($this->name()) . '</span>',
-                ], fn($x) => !empty($x))
-            ),
-            ...$this->displayNameSuffix()
-        ]);
-    }
-
-    public function displayNameText(): string {
-        return implode(' ', [
-            implode(" \xE2\x80\x93 ", array_filter([$this->artistName(), $this->name()], fn($x) => !empty($x))),
-            ...$this->displayNameSuffix()
-        ]);
     }
 
     /**

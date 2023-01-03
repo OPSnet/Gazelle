@@ -101,7 +101,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
             </div>
 <?php } ?>
             <div class="group_info clear">
-                <strong><?= $tgroup->artistLink() ?> - <a href="torrents.php?id=<?= $GroupID ?>" class="tooltip" title="View torrent group" dir="ltr"><?= $tgroup->name() ?></a> [<?= $tgroup->year() ?>]<?= $vh ?></strong>
+                <strong><?= $tgroup->link() ?></strong>
                 <div class="tags"><?= implode(', ', $tgroup->torrentTagList()) ?></tags>
             </div>
         </td>

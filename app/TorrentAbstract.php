@@ -20,14 +20,11 @@ abstract class TorrentAbstract extends BaseObject {
     abstract public function hasToken(int $userId): bool;
 
     public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->group()->name()));
+        return $this->group()->torrentLink($this->id);
     }
 
     public function groupLink(): string {
-        return match ($this->group()->categoryName()) {
-            'Music' => $this->group()->artistLink() . ' – ' . $this->link(),
-            default => $this->link(),
-        };
+        return $this->group()->link();
     }
 
     public function fullLink(): string {
@@ -43,33 +40,8 @@ abstract class TorrentAbstract extends BaseObject {
         return $link;
     }
 
-    public function fullEditionLink(): string {
-        $link = implode(" \xE2\x80\x93 ",
-            array_filter([
-                $this->group()->artistLink(),
-                sprintf('<a href="%s">%s</a>', $this->group()->url(), display_str($this->group()->name())),
-            ], fn($x) => !empty($x))
-        );
-        $edition = $this->edition();
-        if ($edition) {
-            $link .= " [<a href=\"{$this->url()}\">$edition</a>]";
-        }
-        $label = $this->label();
-        if ($label) {
-            $link .= " [$label]";
-        }
-        return $link;
-    }
-
-    public function name(): string {
-        $tgroup = $this->group();
-        return $tgroup->categoryId() === 1
-            ? $tgroup->artistName() . " \xE2\x80\x93 " . $tgroup->name()
-            : $tgroup->name();
-    }
-
     public function fullName(): string {
-        $name = $this->name();
+        $name = $this->group()->text();
         $edition = $this->edition();
         if ($edition) {
             $name .= " [$edition]";
@@ -179,8 +151,8 @@ abstract class TorrentAbstract extends BaseObject {
                 'Original Release',
             ];
         }
-        return ($this->isRemastered() ? ($this->remasterYear() ?? $tgroup->year()) : $tgroup->year())
-            . " \xE2\x80\x93 " . implode(' / ', array_filter($edition, fn($e) => !is_null($e)));
+        $edition = implode(' / ', array_filter($edition, fn($e) => !is_null($e)));
+        return $this->isRemastered() ? ($this->remasterYear() . " – " . $edition) : $edition;
     }
 
     /**
