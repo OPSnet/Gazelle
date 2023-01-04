@@ -2,16 +2,16 @@
 Dear {{ username }},
 
 {% if total_entries > 0 %}
-During {{ name }} that ran from {{ date.begin }} to {{ date.end }}, you uploaded {{ total_entries }} {{ entries }}. Each upload turned out to be worth {{ per_entry_bonus|number_format(2) }} bonus points, so your uploading activity earnt you a total of {{ user_bonus|number_format(2) }} points!
+During {{ contest.name }} that ran from {{ contest.dateBegin }} to {{ contest.dateEnd }}, you uploaded {{ total_entries }} {% if entry == 1 %}entry{% else %}entries{% endif %}. Each upload turned out to be worth {{ per_entry_bonus|number_format(2) }} bonus points, so your uploading activity earnt you a total of {{ user_bonus|number_format(2) }} points!
 
-On top of that, just because you participated, you have been awarded a further {{ contest_bonus|number_format(2) }} points. And since you are awesome and are on Orpheus anyway, the cherry on top is an additional {{ enabled_bonus|number_format(2) }} points.
+On top of that, just because you participated, you have been awarded a further {{ contest_bonus|number_format(2) }} points. And since you are awesome and are on {{ constant('SITE_NAME') }} anyway, the cherry on top is an additional {{ enabled_bonus|number_format(2) }} points.
 
 All in all, you have been granted {{ (enabled_bonus + contest_bonus + user_bonus)|number_format(2) }} bonus points. Enjoy!
 {% else %}
-During {{ name }} that ran from {{ date.begin }} to {{ date.end }}, you didn't upload anything. So sad, because you missed out on {{ contest_bonus|number_format(2) }} bonus pointsjust for participating even once, and an additional {{ per_entry_bonus|number_format(2) }} points for each successful upload.
+During {{ contest.name }} that ran from {{ contest.dateBegin }} to {{ contest.dateEnd }}, you didn't upload anything. So sad, because you missed out on {{ contest_bonus|number_format(2) }} bonus pointsjust for participating even once, and an additional {{ per_entry_bonus|number_format(2) }} points for each successful upload.
 
-All is not lost, because thanks to the love and generosity of the Orpheus community, you have been granted {{ enabled_bonus|number_format(2) }} bonus points for having being here during the contest!
+All is not lost, because thanks to the love and generosity of the {{ constant('SITE_NAME') }} community, you have been granted {{ enabled_bonus|number_format(2) }} bonus points for having being here during the contest!
 {% endif %}
 
 <3
-Orpheus Staff
+{{ constant('SITE_NAME') }} Staff

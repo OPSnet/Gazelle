@@ -498,7 +498,7 @@ class Mysql {
     }
 
     public function get_query_id(): mixed {
-        return $this->QueryID;
+        return $this->QueryID ?? false;
     }
 
     /**

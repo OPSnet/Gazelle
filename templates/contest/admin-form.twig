@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked, selected -%}
 <form class="edit_form" name="contest" id="contestform" action="{{ action }}" method="post">
 {% if contest.hasBonusPool %}
 <div class="box pad">
@@ -32,12 +33,13 @@
     </table>
 </div>
 {% endif %}
+    <div class="thin">
     <table>
         <tr>
             <td class="label">Contest name:</td>
             <td>
                 <p>Edit the name of the contest</p>
-                <input type="text" size="80" name="name" value="{{ create ? '' : contest.name }}"/>
+                <input type="text" size="80" name="name" value="{{ contest.name }}"/>
             </td>
         </tr>
 
@@ -47,7 +49,7 @@
                 <p>Edit the type of the contest</p>
                 <select name="type">
 {% for t in type %}
-                    <option value="{{ t.id }}"{{ t.name == contest.contestType ? ' selected' : '' }}>{{ t.name }}</option>
+                    <option value="{{ t.id }}"{{ selected(contest.contestType) }}>{{ t.name }}</option>
 {% endfor %}
                 </select>
             </td>
@@ -57,36 +59,39 @@
             <td class="label">Bonus Point pool:</td>
             <td>
                 <p>Members can contribute their Bonus Points to an award pool</p>
-                <input type="checkbox" name="pool" value="{{ create ? 0 : contest.hasBonusPool }}"{{ contest.hasBonusPool ? ' checked' : '' }}/>
+                <input type="checkbox" name="pool"{{ checked(contest.hasBonusPool) }} />
             </td>
         </tr>
 
-{% if create or has_pool %}
+{% if create or contest.hasBonusPool %}
         <tr>
             <td class="label">Bonus Point distribution:</td>
             <td>
                 <p>The bonus pool is divided into three parts. Adjust the values according to specifiy the proportions. Their sum
-                does not need to add up to anything in particular: they will be scaled to the interval [0, 1] and the sum == 1.</p>
+                does not need to add up to anything in particular: they will be scaled to the interval [0, 1] and the sum == 1.
+                The ratios are shown to the left of the input fields and are recalculated after the page is saved.</p>
 
-                <input type="number" min="0" max="10000" id="pool-user" name="pool-user" value="{{ create ? 5 : contest.bonusPerUserValue }}"
+                <span style="width: 30px; align="right">{{ contest.bonusPerUserRatio|number_format(4) }}</span>
+                <input type="number" min="0" max="10000" id="pool-user" name="pool-user" value="{{ contest.bonusPerUser|default(5) }}"
                 />&nbsp;<label for="pool-user">This proportion of the pool will be shared between all enabled users. The number of users may vary
                 over time; the exact value will be known only at the end of the contest.<br />
 
-                <input type="number" min="0" max="10000" id="pool-contest" name="pool-contest" value="{{ create ? 15 : contest.bonusPerContestValue }}"
+                <span style="width: 30px; align="right">{{ contest.bonusPerContestRatio|number_format(4) }}</span>
+                <input type="number" min="0" max="10000" id="pool-contest" name="pool-contest" value="{{ contest.bonusPerContest|default(15) }}"
                 />&nbsp;<label for="pool-contest">This proportion of the pool will be shared between all users who
                 participate in the contest (i.e. at least one entry).<br />
 
-                <input type="number" min="0" max="10000" id="pool-entry" name="pool-entry" value="{{ create ? 80 : contest.bonusPerEntryValue }}"
+                <span style="width: 30px; align="right">{{ contest.bonusPerEntryRatio|number_format(4) }}</span>
+                <input type="number" min="0" max="10000" id="pool-entry" name="pool-entry" value="{{ contest.bonusPerEntry|default(80) }}"
                 />&nbsp;<label for="pool-entry">This proportion of the pool will be shared between every entry in the contest.
             </td>
         </tr>
 {% endif %}
-
         <tr>
             <td class="label">Begin date:</td>
             <td>
                 <p>Uploaded torrents/completed requests are counted from this date (yyyy/mm/dd hh:mm:ss)</p>
-                <input type="text" size="20" name="date_begin" value="{{ create ? '' : contest.dateBegin }}"/>
+                <input type="text" size="20" name="date_begin" value="{{ contest.dateBegin }}"/>
             </td>
         </tr>
 
@@ -94,7 +99,7 @@
             <td class="label">End date:</td>
             <td>
                 <p>Uploaded torrents/completed requests are counted up until this date (yyyy/mm/dd hh:mm:ss)</p>
-                <input type="text" size="20" name="date_end" value="{{ create ? '' : contest.dateEnd }}"/>
+                <input type="text" size="20" name="date_end" value="{{ contest.dateEnd }}"/>
             </td>
         </tr>
 
@@ -102,7 +107,7 @@
             <td class="label">Displayed:</td>
             <td>
                 <p>This many people will be displayed on the ladderboard</p>
-                <input type="text" size="20" name="display" value="{{ create ? 100 : contest.display }}"/>
+                <input type="text" size="20" name="display" value="{{ contest.display|default(100) }}"/>
             </td>
         </tr>
 
@@ -111,7 +116,7 @@
             <td>
                 <p>This is the image displayed at the top of the page (optional).
                    May be a local asset, or a URL.</p>
-                <input type="text" size="60" name="banner" value="{{ create ? '' : contest.banner }}"/>
+                <input type="text" size="60" name="banner" value="{{ contest.banner }}"/>
             </td>
         </tr>
 
@@ -124,6 +129,7 @@
         </tr>
 
     </table>
+    </div>
     <input type="hidden" name="userid" value="{{ user_id }}"/>
     <input type="hidden" name="auth" value="{{ auth }}"/>
 {% if create %}
@@ -134,4 +140,3 @@
     <input type="submit" id="submit" value="Save contest"/>
 {% endif %}
 </form>
-

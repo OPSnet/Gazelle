@@ -35,8 +35,9 @@ class UploadFlac extends AbstractContest {
     }
 
     public function participationStats(): array {
-        return self::$db->row("
-            SELECT count(*) AS total_entries, count(DISTINCT um.ID) AS total_users
+        return self::$db->rowAssoc("
+            SELECT count(*) AS total_entries,
+                count(DISTINCT um.ID) AS total_users
             FROM contest c,
                 users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
@@ -90,6 +91,6 @@ class UploadFlac extends AbstractContest {
             ", $enabledUserBonus, $contestBonus, $perEntryBonus,
                 $this->id
         );
-        return self::$db->to_array('ID', MYSQLI_ASSOC) ?? [];
+        return self::$db->to_array('ID', MYSQLI_ASSOC, false);
     }
 }

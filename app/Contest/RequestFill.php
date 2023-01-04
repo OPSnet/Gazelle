@@ -45,7 +45,7 @@ class RequestFill extends AbstractContest {
     }
 
     public function participationStats(): array {
-        return self::$db->row("
+        return self::$db->rowAssoc("
             SELECT count(*) AS total_entries,
                 count(DISTINCT um.ID) AS total_users
             FROM contest c,
@@ -82,12 +82,13 @@ class RequestFill extends AbstractContest {
             GROUP BY um.ID
             ", $enabledUserBonus, $contestBonus, $perEntryBonus, $this->id
         );
-        return self::$db->to_array('ID', MYSQLI_ASSOC) ?? [];
+        return self::$db->to_array('ID', MYSQLI_ASSOC, false);
     }
 
     public function requestPairs() {
         $key = "contest_pairs_" . $this->id;
-        if (($pairs = self::$cache->get_value($key)) === false) {
+        $pairs = self::$cache->get_value($key);
+        if ($pairs === false) {
             self::$db->prepared_query("
                 SELECT r.FillerID, r.UserID, count(*) AS nr
                 FROM requests r
@@ -98,7 +99,7 @@ class RequestFill extends AbstractContest {
                 LIMIT 100
                 ", $this->begin, $this->end
             );
-            $pairs = self::$db->to_array(false, MYSQLI_ASSOC);
+            $pairs = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value('contest_pairs_' . $this->id, $pairs, 3600);
         }
         return $pairs;

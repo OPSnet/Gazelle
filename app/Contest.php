@@ -2,28 +2,34 @@
 
 namespace Gazelle;
 
-class Contest extends Base {
-    const CACHE_CONTEST = 'contest_%d';
+class Contest extends BaseObject {
+    const CACHE_CONTEST = 'contestv2_%d';
+    const CACHE_STATS   = 'contest_stats_%d';
     const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
 
-    protected $id;
-    protected $info;
-    protected Contest\AbstractContest $type;
-    protected $stats; /* entries, users */
-    protected $bonusPool;
-    protected $totalEntries;
-    protected $totalUsers;
-    protected $bonusUser;
-    protected $bonusContest;
-    protected $bonusPerEntry;
+    protected array $info;
+    protected array $stats; /* entries, users */
 
-    public function __construct(int $id) {
-        $this->id = $id;
+    public function flush(): Contest {
+        self::$cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
+        $this->info = [];
+        return $this;
+    }
+    public function link(): string { return "<a href=\"{$this->url()}\">{$this->name()}</a>"; }
+    public function location(): string { return "contest.php?id={$this->id}"; }
+    public function pkName(): string { return "contest_id"; }
+    public function tableName(): string { return "contest"; }
+
+    public function info(): array {
+        if (!empty($this->info)) {
+            return $this->info;
+        }
         $key = sprintf(self::CACHE_CONTEST, $this->id);
-        if (($this->info = self::$cache->get_value($key)) === false) {
-            self::$db->prepared_query("
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
                 SELECT t.name AS contest_type, c.name, c.banner, c.description, c.display, c.date_begin, c.date_end,
-                    coalesce(cbp.bonus_pool_id, 0) AS bonus_pool,
+                    cbp.bonus_pool_id AS bonus_pool_id,
                     cbp.status AS bonus_status,
                     cbp.bonus_user,
                     cbp.bonus_contest,
@@ -36,154 +42,181 @@ class Contest extends Base {
                 WHERE c.contest_id = ?
                 ", 'open', $this->id
             );
-            $this->info = self::$db->next_record(MYSQLI_ASSOC);
-            self::$cache->cache_value($key, $this->info, 86400 * 3);
+            self::$cache->cache_value($key, $info, 86400 * 3);
         }
-        if (is_null($this->info)) {
-            throw new Exception\ResourceNotFoundException($id);
-        }
-        try {
-            // upload-flac-no-single => UploadFlacNoSingle
-            $className = '\\Gazelle\\Contest\\' . implode('', array_map('ucfirst', explode('-', $this->info['contest_type'])));
-            $this->type = new $className($this->id, $this->info['date_begin'], $this->info['date_end']);
-        }
-        catch (\Error $e) {
-            throw new Exception\ResourceNotFoundException($e->getMessage() . " [id=$id]");
-        }
-        if ($this->info['bonus_pool']) {
-            $this->bonusPool = $this->info['bonus_pool'] ? new \Gazelle\BonusPool($this->info['bonus_pool']) : null;
+
+        // upload-flac-no-single => UploadFlacNoSingle
+        $className = '\\Gazelle\\Contest\\' . implode('', array_map('ucfirst', explode('-', $info['contest_type'])));
+        $info['type'] = new $className($this->id, $info['date_begin'], $info['date_end']);
+
+        if ($info['bonus_pool_id']) {
+            $info['bonus_pool'] = new BonusPool($info['bonus_pool_id']);
             // calculate the ratios of how the bonus pool is carved up
-            // sum(bonUser + bonusContest + bonusPerEntry) == 1.0
-            $bonusClaimSum       = $this->info['bonus_user'] + $this->info['bonus_contest'] + $this->info['bonus_per_entry'];
-            $this->bonusUser     = $this->info['bonus_user'] / $bonusClaimSum;
-            $this->bonusContest  = $this->info['bonus_contest'] / $bonusClaimSum;
-            $this->bonusPerEntry = 1 - ($this->bonusUser + $this->bonusContest);
+            // sum(bonusUser + bonusContest + bonusPerEntry) == 1.0
+            $bonusClaimSum = $info['bonus_user'] + $info['bonus_contest'] + $info['bonus_per_entry'];
+            $info['bonus_user_ratio']      = $info['bonus_user'] / $bonusClaimSum;
+            $info['bonus_contest_ratio']   = $info['bonus_contest'] / $bonusClaimSum;
+            $info['bonus_per_entry_ratio'] = 1 - ($info['bonus_user_ratio'] + $info['bonus_contest_ratio']);
+        } else {
+            $info['bonus_pool']           = null;
+            $info['bonus_user_ratio']      = 0.0;
+            $info['bonus_contest_ratio']   = 0.0;
+            $info['bonus_per_entry_ratio'] = 0.0;
         }
-    }
-
-    public function save(array $params): int {
-        self::$db->prepared_query("
-            UPDATE contest SET
-                name = ?, display = ?, date_begin = ?, date_end = ?,
-                contest_type_id = ?, banner = ?, description = ?
-            WHERE contest_id = ?
-            ", trim($params['name']), $params['display'], $params['date_begin'], $params['date_end'],
-                $params['type'], trim($params['banner']), trim($params['description']),
-                $this->id
-        );
-        $success = self::$db->affected_rows();
-        if (isset($params['payment'])) {
-            $this->setPaymentReady();
-        }
-        self::$cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
-        return $success;
-    }
-
-    public function id(): int {
-        return $this->id;
+        $this->info = $info;
+        return $this->info;
     }
 
     public function contestType(): string {
-        return $this->info['contest_type'];
+        return $this->info()['contest_type'];
     }
 
     public function banner(): string {
-        return $this->info['banner'];
+        return $this->info()['banner'];
     }
 
     public function dateBegin(): string {
-        return $this->info['date_begin'];
+        return $this->info()['date_begin'];
     }
 
     public function dateEnd(): string {
-        return $this->info['date_end'];
+        return $this->info()['date_end'];
     }
 
     public function display(): int {
-        return $this->info['display'];
+        return $this->info()['display'];
     }
 
     public function leaderboard(int $limit, int $offset): array {
-        return $this->type->leaderboard($limit, $offset); /** @phpstan-ignore-line */
+        return $this->type()->leaderboard($limit, $offset); /** @phpstan-ignore-line */
     }
 
     public function name(): string {
-        return $this->info['name'];
+        return $this->info()['name'];
     }
 
     public function description(): string {
-        return $this->info['description'];
+        return $this->info()['description'];
     }
 
     protected function participationStats(): array {
-        if (($this->stats = self::$cache->get_value('contest_stats_' . $this->id)) === false) {
-            $this->stats = $this->type->participationStats() ?? [0, 0];
-            self::$cache->cache_value('contest_stats_' . $this->id, $this->stats, 900);
+        if (!isset($this->stats)) {
+            $key = sprintf(self::CACHE_STATS, $this->id);
+            $stats = self::$cache->get_value($key);
+            if ($stats === false) {
+                $stats = $this->type()->participationStats();
+                self::$cache->cache_value($key, $stats, 900);
+            }
+            $this->stats = $stats;
         }
         return $this->stats;
     }
 
     public function totalEntries(): int {
-        if (!$this->stats) {
-            $this->stats = $this->participationStats();
-        }
-        return $this->stats[0] ?? 0;
+        return $this->participationStats()['total_entries'];
     }
 
     public function totalUsers(): int {
-        if (!$this->stats) {
-            $this->stats = $this->participationStats();
-        }
-        return $this->stats[1] ?? 0;
+        return $this->participationStats()['total_users'];
+    }
+
+    public function type(): Contest\AbstractContest {
+        return $this->info()['type'];
     }
 
     public function hasBonusPool(): bool {
-        return !is_null($this->bonusPool);
+        return !is_null($this->info()['bonus_pool']);
     }
 
     public function bonusPoolTotal(): float {
-        static $total;
-        if (is_null($total)) {
-            $total = $this->bonusPool ? $this->bonusPool->total() : 0.0;
-        }
-        return $total;
+        return $this->info()['bonus_pool']?->total() ?? 0.0;
     }
 
     public function bonusStatus(): string {
-        return $this->info['bonus_status'];
-    }
-
-    public function bonusPerUserValue(): int {
-        return $this->info['bonus_user'];
-    }
-
-    public function bonusPerContestValue(): int {
-        return $this->info['bonus_contest'];
-    }
-
-    public function bonusPerEntryValue(): int {
-        return $this->info['bonus_per_entry'];
-    }
-
-    public function bonusPerUser(): float {
-        return $this->bonusPoolTotal() * $this->bonusUser / (new Stats\Users())->enabledUserTotal();
+        return $this->info()['bonus_status'];
     }
 
     public function bonusPerContest(): float {
-        return $this->bonusPoolTotal() *  $this->bonusContest / $this->totalUsers();
+        return $this->info()['bonus_contest'];
+    }
+
+    public function bonusPerContestRatio(): float {
+        return $this->info()['bonus_contest_ratio'];
+    }
+
+    public function bonusPerContestValue(): float {
+        $totalUsers = $this->totalUsers();
+        return $totalUsers ? $this->bonusPoolTotal() *  $this->bonusPerContestRatio() / $totalUsers : 0.0;
     }
 
     public function bonusPerEntry(): float {
-        return $this->bonusPoolTotal() * $this->bonusPerEntry / $this->totalEntries();
+        return $this->info()['bonus_per_entry'];
+    }
+
+    public function bonusPerEntryRatio(): float {
+        return $this->info()['bonus_per_entry_ratio'];
+    }
+
+    public function bonusPerEntryValue(): float {
+        $totalEntries = $this->totalEntries();
+        return $totalEntries ? $this->bonusPoolTotal() * $this->bonusPerEntryRatio() / $totalEntries : 0.0;
+    }
+
+    public function bonusPerUser(): float {
+        return $this->info()['bonus_user'];
+    }
+
+    public function bonusPerUserRatio(): float {
+        return $this->info()['bonus_user_ratio'];
+    }
+
+    public function bonusPerUserValue(): float {
+        $totalEnabledUsers = (new Stats\Users())->enabledUserTotal();
+        return $totalEnabledUsers ? $this->bonusPoolTotal() * $this->bonusPerUserRatio() / $totalEnabledUsers : 0.0;
     }
 
     public function isOpen(): bool {
-        return $this->info['is_open'] === 1;
+        return (bool)$this->info()['is_open'];
+    }
+
+    public function modify(): bool {
+        $success = parent::modify();
+        if ($success) {
+            self::$db->prepared_query("
+                UPDATE bonus_pool bp
+                INNER JOIN contest_has_bonus_pool chbp USING (bonus_pool_id)
+                INNER JOIN  contest c USING (contest_id)
+                SET
+                    bp.name       = c.name,
+                    bp.since_date = c.date_begin,
+                    bp.until_date = c.date_end
+                WHERE c.contest_id = ?
+                ", $this->id()
+            );
+            self::$cache->delete_value(Manager\Bonus::CACHE_OPEN_POOL);
+        }
+        return $success;
+    }
+
+    public function modifyBonusPool(int $contest, int $entry, int $user): int {
+        self::$db->prepared_query("
+            UPDATE contest_has_bonus_pool SET
+                bonus_contest = ?,
+                bonus_per_entry = ?,
+                bonus_user = ?
+            WHERE contest_id = ?
+            ", $contest, $entry, $user, $this->id
+        );
+        $affected = self::$db->affected_rows();
+        if ($affected) {
+            $this->flush();
+        }
+        return $affected;
     }
 
     public function calculateLeaderboard(): int {
         /* only called from scheduler, don't need to worry how long this takes */
-        [$subquery, $args] = $this->type->ranker();
+        [$subquery, $args] = $this->type()->ranker();
         self::$db->begin_transaction();
         self::$db->prepared_query('DELETE FROM contest_leaderboard WHERE contest_id = ?', $this->id);
         self::$db->prepared_query("
@@ -210,16 +243,16 @@ class Contest extends Base {
         $pages = range(0, (int)(ceil($n)/CONTEST_ENTRIES_PER_PAGE) - 1);
         foreach ($pages as $p) {
             self::$cache->delete_value(sprintf(self::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, $p));
-            $this->type->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p); /** @phpstan-ignore-line */
+            $this->type()->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p); /** @phpstan-ignore-line */
         }
         return $n;
     }
 
     public function paymentReady(): bool {
-        return $this->info['payout_ready'] === 1;
+        return $this->info()['payout_ready'] === 1;
     }
 
-    public function setPaymentReady() {
+    public function setPaymentReady(): int {
         self::$db->prepared_query('
             UPDATE contest_has_bonus_pool SET
                 status = ?
@@ -230,7 +263,7 @@ class Contest extends Base {
         return self::$db->affected_rows();
     }
 
-    public function setPaymentClosed() {
+    public function setPaymentClosed(): int {
         self::$db->prepared_query('
             UPDATE contest_has_bonus_pool SET
                 status = ?
@@ -241,18 +274,17 @@ class Contest extends Base {
         return self::$db->affected_rows();
     }
 
-    public function doPayout() {
-        $enabledUserBonus = $this->bonusPerUser();
-        $contestBonus     = $this->bonusPerContest();
-        $perEntryBonus    = $this->bonusPerEntry();
+    public function doPayout(Manager\User $userMan): int {
+        $enabledUserBonus = $this->bonusPerUserValue();
+        $contestBonus     = $this->bonusPerContestValue();
+        $perEntryBonus    = $this->bonusPerEntryValue();
 
         $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
         fprintf($report, "# user=%0.2f contest=%0.2f entry=%0.f\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
 
-        $userMan = new Manager\User;
-        $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
+        $participants = $this->type()->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         foreach ($participants as $p) {
-            $user = new \Gazelle\User($p['ID']);
+            $user = new User($p['ID']);
             $totalGain = $enabledUserBonus;
             if ($p['total_entries']) {
                 $totalGain += $contestBonus + ($perEntryBonus * $p['total_entries']);
@@ -270,18 +302,16 @@ class Contest extends Base {
             $userMan->sendPM($p['ID'], 0,
                 "You have received " . number_format($totalGain, 2) . " bonus points!",
                 self::$twig->render('contest/payout-uploader.twig', [
-                    'username'        => $p['Username'],
-                    'date'            => ['begin' => $this->info['date_begin'], 'end' => $this->info['date_end']],
-                    'enabled_bonus'   => $enabledUserBonus,
+                    'contest'         => $this,
                     'contest_bonus'   => $contestBonus,
+                    'enabled_bonus'   => $enabledUserBonus,
                     'per_entry_bonus' => $perEntryBonus,
-                    'name'            => $this->info['name'],
                     'total_entries'   => $p['total_entries'],
-                    'entries'         => $p['total_entries'] == 1 ? 'entry' : 'entries',
+                    'username'        => $p['Username'],
                 ])
             );
             (new User\Bonus($user))->addPoints($totalGain);
-            $user->addStaffNote(number_format($totalGain, 2) . " BP added for {$p['total_entries']} entries in {$this->info['name']}")
+            $user->addStaffNote(number_format($totalGain, 2) . " BP added for {$p['total_entries']} entries in {$this->name()}")
                 ->modify();
         }
         fclose($report);

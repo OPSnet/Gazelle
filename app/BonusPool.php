@@ -22,8 +22,10 @@ class BonusPool extends Base {
             WHERE bonus_pool_id = ?
             ", $value_sent, $this->id
         );
+        $affected = self::$db->affected_rows();
         self::$cache->delete_value(sprintf(self::CACHE_SENT, $this->id));
-        return self::$db->affected_rows();
+        self::$cache->delete(Manager\Bonus::CACHE_OPEN_POOL);
+        return $affected;
     }
 
     public function total(): int {

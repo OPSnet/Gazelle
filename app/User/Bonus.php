@@ -3,7 +3,6 @@
 namespace Gazelle\User;
 
 class Bonus extends \Gazelle\BaseUser {
-    const CACHE_OPEN_POOL    = 'bonus_pool'; // also defined in Manager\Bonus
     const CACHE_PURCHASE     = 'bonus_purchase_%d';
     const CACHE_SUMMARY      = 'bonus_summary_%d';
     const CACHE_HISTORY      = 'bonus_history_%d_%d';
@@ -148,8 +147,6 @@ class Bonus extends \Gazelle\BaseUser {
         }
         $this->user->flush();
         (new \Gazelle\BonusPool($poolId))->contribute($this->user->id(), $value, $taxedValue);
-
-        self::$cache->delete(self::CACHE_OPEN_POOL);
         return true;
     }
 
@@ -411,7 +408,7 @@ class Bonus extends \Gazelle\BaseUser {
         return self::$db->affected_rows();
     }
 
-    public function addPoints(int $points): int {
+    public function addPoints(float $points): int {
         self::$db->prepared_query("
             UPDATE user_bonus SET
                 points = points + ?
@@ -426,7 +423,7 @@ class Bonus extends \Gazelle\BaseUser {
         return $this->removePoints($this->torrentValue($torrent), true);
     }
 
-    public function removePoints(int $points, bool $force = false): bool {
+    public function removePoints(float $points, bool $force = false): bool {
         if ($force) {
             // allow points to go negative
             self::$db->prepared_query('
