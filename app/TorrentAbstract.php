@@ -40,6 +40,13 @@ abstract class TorrentAbstract extends BaseObject {
         return $link;
     }
 
+    public function name(): string {
+        $tgroup = $this->group();
+        return $tgroup->categoryName() === 'Music'
+            ? $tgroup->artistName() . " – " . $tgroup->name()
+            : $tgroup->name();
+    }
+
     public function fullName(): string {
         $name = $this->group()->text();
         $edition = $this->edition();
@@ -47,6 +54,14 @@ abstract class TorrentAbstract extends BaseObject {
             $name .= " [$edition]";
         }
         return $name;
+    }
+
+    /**
+     * Set the viewer context, for snatched indicators etc.
+     */
+    public function setViewer(User $viewer) {
+        $this->viewer = $viewer;
+        return $this;
     }
 
     /**

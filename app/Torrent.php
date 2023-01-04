@@ -16,14 +16,6 @@ class Torrent extends TorrentAbstract {
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
     public function tableName(): string { return 'torrents'; }
 
-    /**
-     * Set the viewer context, for snatched indicators etc.
-     */
-    public function setViewer(User $viewer) {
-        $this->viewer = $viewer;
-        return $this;
-    }
-
     public function infoRow(): ?array {
         return self::$db->rowAssoc("
             SELECT t.GroupID,
