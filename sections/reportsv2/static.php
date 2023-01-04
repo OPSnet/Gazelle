@@ -71,13 +71,11 @@ if ($search->canUnclaim($Viewer)) {
         } else {
             $reportType   = $report->reportType();
             $torrentId    = $report->torrentId();
-            $torrent      = $report->torrent();
+            $torrent      = $report->torrent()->setViewer($Viewer);
 
             $tgroupId     = (int)$torrent?->groupId();
             $categoryId   = (int)$torrent?->group()?->categoryId();
             $size         = '(' . number_format((int)$torrent?->size() / (1024 * 1024), 2) . ' MiB)';
-            $link         = $torrent?->link() ?? "deleted torrent {$report->torrentId()}";
-            $RawName      = ($torrent?->fullName() ?? 'delete torrent') . " $size";
             $uploaderId   = (int)$torrent?->uploaderId();
             $uploaderName = $userMan->findById($uploaderId)?->username() ?? 'System';
 ?>
@@ -96,7 +94,7 @@ if ($search->canUnclaim($Viewer)) {
                 <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploaderId ?>" />
                 <input type="hidden" id="reporterid<?= $reportId ?>" name="reporterid" value="<?= $reporterId ?>" />
                 <input type="hidden" id="report_reason<?= $reportId ?>" name="report_reason" value="<?= $report->reason() ?>" />
-                <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?=$RawName?>" />
+                <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= ($torrent?->fullName() ?? 'delete torrent') . " $size" ?>" />
                 <input type="hidden" id="type<?= $reportId ?>" name="type" value="<?= $reportType->type() ?>" />
                 <input type="hidden" id="categoryid<?= $reportId ?>" name="categoryid" value="<?= $report->reportType()->categoryId() ?>" />
             </div>
@@ -104,7 +102,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label"><a href="reportsv2.php?view=report&amp;id=<?= $reportId ?>">Reported</a> torrent:</td>
                     <td>
-                        <?= $link ?> <?= $torrent?->label() ?> <?= $size ?>
+                        <?= $torrent->group()->link() ?> <?= $torrent?->shortLabelLink() ?> <?= $size ?>
                         <br /><?= $torrent?->edition() ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?=( $torrentId )?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
@@ -237,7 +235,7 @@ if ($search->canUnclaim($Viewer)) {
                     if ($extra) {
 ?>
                         <?= $n++ == 0 ? '' : '<br />' ?>
-                        <?= $extra->link() ?> <?= $extra->label() ?> (<?= number_format($extra->size() / (1024 * 1024), 2) ?> MiB)
+                        <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= number_format($extra->size() / (1024 * 1024), 2) ?> MiB)
                         <br /><?= $extra->edition() ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?= $extraId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $extraId ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
