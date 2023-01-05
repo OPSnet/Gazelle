@@ -265,7 +265,9 @@ class TGroup extends \Gazelle\BaseManager {
 
     /**
      * Find all the music releases that have a FLAC upload which could be used to
-     * produce V0 and 320 transcodes.
+     * produce V0 and 320 transcodes. If there is more than one FLAC in an
+     * edition it does not really matter which one is chosen. Any will be of
+     * sufficient quality to generate a lossy transcode.
      */
     public function refreshBetterTranscode(): int {
         self::$db->begin_transaction();
@@ -273,7 +275,7 @@ class TGroup extends \Gazelle\BaseManager {
             DELETE FROM better_transcode_music;
         ");
         self::$db->prepared_query("
-            INSERT INTO better_transcode_music (tgroup_id, want_v0, want_320, edition)
+            INSERT IGNORE INTO better_transcode_music (tgroup_id, want_v0, want_320, edition)
             SELECT g.ID,
                 if(mp3__v0.ID is null, 1, 0),
                 if(mp3_320.ID is null, 1, 0),
@@ -281,7 +283,7 @@ class TGroup extends \Gazelle\BaseManager {
             FROM torrents_group g
             INNER JOIN (
                 SELECT DISTINCT GroupID,
-                    concat_ws(char(31), Remastered, RemasterYear, RemasterTitle, RemasterCatalogueNumber, RemasterRecordLabel) AS edition
+                    concat_ws(char(31), Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber) AS edition
                 FROM torrents
                 WHERE format = 'FLAC'
             ) F ON (F.GroupID = g.ID)

@@ -1,9 +1,9 @@
 {%- from 'macro/form.twig' import selected -%}
 {%- macro yes_no(value) -%}
     {%- if value -%}
-        <strong class="important_text_alt">YES</strong>
-    {%- else -%}
         <strong class="important_text">NO</strong>
+    {%- else -%}
+        <strong class="important_text_alt">YES</strong>
     {%- endif -%}
 {%- endmacro -%}
 {{ header('Transcode Search') }}
@@ -20,6 +20,7 @@
                         <option value="snatched"{{ selected(filter == 'snatched') }}>Snatched only</option>
                         <option value="seeding"{{ selected(filter == 'seeding') }}>Seeding only</option>
                         <option value="uploaded"{{ selected(filter == 'uploaded') }}>Uploaded only</option>
+                        <option value="all"{{ selected(filter == 'all') }}>All</option>
                     </select>
                     <select name="target">
                         <option value="v0"{{ selected(target == 'v0') }}>V0 missing</option>
@@ -40,11 +41,12 @@
     <h3>About</h3>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <p>
-            This page lists {{ constant('TORRENTS_PER_PAGE') }} random transcodable perfect FLACs matching the options you selected above, but there can be more or less matches on this page. The following numbers tell you something about the torrents currently listed below and can change if you reload.<br /><br />
+            This page lists {{ list|length }} random transcodable perfect FLACs matching the options you selected above. The following numbers tell you something about the torrents currently listed below and can change if you reload.<br /><br />
 
-            Number of perfect FLACs you can transcode: {{ total.source|number_format }}<br />
-            Number of missing transcodes: {{ (total.mp3_v0 + total.mp3_320)|number_format }}<br />
-            Number of missing V0 / 320 transcodes: {{ total.mp3_v0|number_format }} / {{ total.mp3_320|number_format }}<br />
+            Number of perfect FLACs you can transcode: {{ total.all|number_format }}<br />
+            Number of missing V0 transcodes: {{ total.total_v0|number_format }}<br />
+            Number of missing 320 transcodes: {{ total.total_320|number_format }}<br />
+            Total missing transcodes: {{ (total.total_v0 + total.total_320)|number_format }}<br />
 {% if viewer.permitted('zip_downloader') and source|length > 0 %}
             <br />
             <br />
@@ -67,8 +69,8 @@
                     {{ item.torrent.link|raw }}
                 </span>
             </td>
-            {% if target != '320' %}<td>{{ _self.yes_no(item.mp3_v0) }}</td>{% endif %}
-            {% if target != 'v0' %}<td>{{ _self.yes_no(item.mp3_320) }}</td>{% endif %}
+            {% if target != '320' %}<td>{{ _self.yes_no(item.want_v0) }}</td>{% endif %}
+            {% if target != 'v0' %}<td>{{ _self.yes_no(item.want_320) }}</td>{% endif %}
         </tr>
     {% endif %}
 {% else %}

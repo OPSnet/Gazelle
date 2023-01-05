@@ -21,10 +21,10 @@ if (!isset($_GET['userid'])) {
     }
 }
 
-$filter = $_GET['filter'] ?? null;
-$target = $_GET['target'] ?? null;
+$filter = $_GET['filter'] ?? 'uploaded';
 $search = $_GET['search'] ?? null;
-$better = new Gazelle\Search\Transcode($user);
+$target = $_GET['target'] ?? null;
+$better = new Gazelle\Search\Transcode($user, new Gazelle\Manager\Torrent);
 
 switch($filter) {
     case 'seeding':
@@ -33,32 +33,29 @@ switch($filter) {
     case 'snatched':
         $better->setModeSnatched();
         break;
-    default:
+    case 'uploaded':
         $better->setModeUploaded();
+        break;
+    default:
         break;
 }
 switch ($target) {
     case 'v0':
-        $better->want320(false);
+        $better->want320();
         break;
     case '320':
-        $better->wantV0(false);
+        $better->wantV0();
         break;
     default:
-        // both are wanted by default
-        $target = 'all';
+        $better->want320();
+        $better->wantV0();
         break;
 }
 if ($search) {
     $better->setSearch($search);
 }
 
-$list = $better->list();
-$total = [
-    'source'  => count($list),
-    'mp3_v0'  => count(array_filter($list, fn($b) => is_null($b['mp3_v0'] ?? null))),
-    'mp3_320' => count(array_filter($list, fn($b) => is_null($b['mp3_320'] ?? null))),
-];
+$list = $better->list(200, 0);
 shuffle($list);
 $list = array_slice($list, 0, TORRENTS_PER_PAGE);
 
@@ -68,6 +65,6 @@ echo $Twig->render('better/search.twig', [
     'search' => $search,
     'source' => array_map(fn ($b) => $b['source'], $list),
     'target' => $target,
-    'total'  => $total,
+    'total'  => $better->total(),
     'viewer' => $Viewer,
 ]);
