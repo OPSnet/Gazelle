@@ -1,21 +1,49 @@
 describe('page loads as admin', () => {
-    /*beforeEach(() => {
-        cy.loginAdmin();
-    })*/
     let date = new Date();
 
     [
         "/",
-        "/user.php",
-        "/forums.php",
-        "/upload.php",
+        "/artist.php",
+        "/better.php",
+        "/blog.php",
+        "/bonus.php",
+        "/bookmarks.php",
+        "/comments.php",
+        "/contest.php",
         "/collages.php",
-        "/top10.php",
-        "/rules.php",
-        "/wiki.php",
-        "/staff.php",
+        "/donate.php",
+        "/forums.php",
+        "/friends.php",
+        "/inbox.php",
+        "/index.php",
+        "/locked.php",
+        "/log.php",
+        "/logchecker.php",
+        "/reports.php",
+        "/reportsv2.php",
         "/requests.php",
-        "/torrents.php"
+        "/requests.php",
+        "/rules.php",
+        "/staff.php",
+        "/staffblog.php",
+        "/staffpm.php",
+        "/stats.php",
+        "/tools.php",
+        "/tools.php?action=analysis_list",
+        "/top10.php",
+        "/torrents.php",
+        "/torrents.php?action=advanced&artistname=doesnotexist",
+        "/upload.php",
+        "/user.php",
+        "/user.php?id=1",
+        "/user.php?action=edit&id=1",
+        "/user.php?action=invite",
+        "/user.php?action=notify",
+        "/user.php?action=search&search=aaa",
+        "/userhistory.php?action=subscriptions",
+        "/userhistory.php?action=posts",
+        "/view.php",
+        "/wiki.php",
     ].forEach((url) => {
         beforeEach(() => {
             cy.loginAdmin();
