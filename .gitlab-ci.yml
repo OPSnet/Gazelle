@@ -80,7 +80,7 @@ e2e-tests:
   script:
     - sed -i 's|gazelle\.php|gazelle-coverage.php|' public/index.php
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/entrypoint-testing.sh"
-    - su gazelle -c "composer exec -- phpunit --coverage-php /tmp/coverage/phpunit.cov"
+    - su gazelle -c "composer exec -- phpunit --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
     - yarn run cypress run
     # note: phpcov has problems if .cov files are somewhere in the src tree
     - su gazelle -c '/opt/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'

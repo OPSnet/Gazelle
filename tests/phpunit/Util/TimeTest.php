@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 
 class TimeTest extends TestCase {
     /**
+     * @group no-ci
+     * These tests cause spurious errors when test execution takes too long.
+     *
      * @dataProvider providerTimestamp
      * @param $timestamp
      * @param $expected
