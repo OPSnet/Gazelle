@@ -46,6 +46,7 @@ class UserTest extends TestCase {
         $this->assertEquals($user->downloadedSize(), 0, 'uattr-starting-download');
         $this->assertEquals($user->postsPerPage(), POSTS_PER_PAGE, 'uattr-ppp');
         $this->assertEquals($user->uploadedSize(), STARTING_UPLOAD, 'uattr-starting-upload');
+        $this->assertEquals($user->userclassName(), 'User', 'uattr-userclass-name');
 
         $this->assertFalse($user->disableAvatar(), 'uattr-disableAvatar');
         $this->assertFalse($user->disableBonusPoints(), 'uattr-disableBonusPoints');

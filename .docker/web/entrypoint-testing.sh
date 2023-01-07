@@ -2,23 +2,30 @@
 
 set -euo pipefail
 
+# Set the following to 1 in order to dump the mysql schema after all the migrations have run.
+# This can help in debugging migrations.
+DUMP_MYSQL_SCHEMA=0
+
 run_service()
 {
     service "$1" start || exit 1
 }
 
 cd "${CI_PROJECT_DIR}"
-export YARN_CACHE_FOLDER="${CI_PROJECT_DIR}/.yarn-cache"
-export COMPOSER_HOME="${CI_PROJECT_DIR}/.composer"
-export POSTGRES_USER_PASSWORD="$(dd if=/dev/urandom count=1 bs=12 status=none | base64)"
+YARN_CACHE_FOLDER="${CI_PROJECT_DIR}/.yarn-cache"
+COMPOSER_HOME="${CI_PROJECT_DIR}/.composer"
+POSTGRES_USER_PASSWORD="$(dd if=/dev/urandom count=1 bs=12 status=none | base64)"
+export YARN_CACHE_FOLDER
+export COMPOSER_HOME
+export POSTGRES_USER_PASSWORD
 
 [ -f "${CI_PROJECT_DIR}/lib/override.config.php" ] || bash "${CI_PROJECT_DIR}/.docker/web/generate-config-testing.sh"
 
-if [ ! -f /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini ]; then
+if [ ! -f "/etc/php/${PHP_VER}/cli/conf.d/99-boris.ini" ]; then
     echo "Initialize Boris..."
-    grep '^disable_functions' /etc/php/${PHP_VER}/cli/php.ini \
+    grep '^disable_functions' "/etc/php/${PHP_VER}/cli/php.ini" \
         | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
-        > /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini
+        > "/etc/php/${PHP_VER}/cli/conf.d/99-boris.ini"
 fi
 
 cat > ~/.my.cnf <<EOF
@@ -69,12 +76,16 @@ if ! ( FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 "${CI_PROJECT_DIR}/vendor/bin/phinx
     exit 1
 fi
 
-if [ ! -z "${MYSQL_INIT_DB-}" ]; then
+if [ -n "${MYSQL_INIT_DB-}" ]; then
     echo "Run seed:run..."
     if ! "${CI_PROJECT_DIR}/vendor/bin/phinx" seed:run; then
         echo "PHINX FAILED TO SEED"
         exit 1
     fi
+fi
+
+if [ "${DUMP_MYSQL_SCHEMA}" = 1 ]; then
+    mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" -f --single-transaction --no-data --databases "$MYSQL_DATABASE"
 fi
 
 if [ ! -d /var/lib/gazelle/torrent ]; then
@@ -103,4 +114,4 @@ echo "Start services..."
 
 run_service sphinxsearch
 run_service nginx
-run_service php${PHP_VER}-fpm
+run_service "php${PHP_VER}-fpm"
