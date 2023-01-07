@@ -492,7 +492,7 @@ class Mysql {
         );
     }
 
-    public function set_query_id(\mysqli_result|false &$ResultSet): void {
+    public function set_query_id(mixed &$ResultSet): void {
         $this->QueryID = $ResultSet;
         $this->Row = 0;
     }
