@@ -11,13 +11,14 @@ class UploadFlac extends AbstractContest {
     public function ranker(): array {
         return [
             "SELECT um.ID AS userid,
-                count(*) AS nr,
+                count(DISTINCT t.ID) AS nr,
                 max(t.ID) AS last_torrent
             FROM users_main um
             INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
             INNER JOIN torrents t ON (t.Userid = um.ID)
+            INNER JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
             WHERE um.Enabled = '1'
-                AND ula.last_access >= ?
+                AND xfu.remaining = 0
                 AND t.Format = 'FLAC'
                 AND (t.Media IN ('SACD', 'Vinyl', 'WEB')
                     OR (t.Media = 'CD'
@@ -27,6 +28,7 @@ class UploadFlac extends AbstractContest {
                         AND t.LogChecksum = '1'
                     )
                 )
+                AND ula.last_access >= ?
                 AND t.Time BETWEEN ? AND ?
             GROUP By um.ID
             ",
@@ -36,14 +38,16 @@ class UploadFlac extends AbstractContest {
 
     public function participationStats(): array {
         return self::$db->rowAssoc("
-            SELECT count(*) AS total_entries,
-                count(DISTINCT um.ID) AS total_users
+            SELECT count(DISTINCT t.ID) AS total_entries,
+                count(um.ID) AS total_users
             FROM contest c,
                 users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN torrents t ON (t.Userid = um.ID)
+            INNER JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
             WHERE um.Enabled = '1'
                 AND ui.JoinDate <= c.date_end
+                AND xfu.remaining = 0
                 AND t.Time BETWEEN c.date_begin AND c.date_end
                 AND t.Format = 'FLAC'
                 AND (t.Media IN ('SACD', 'Vinyl', 'WEB')
@@ -62,18 +66,21 @@ class UploadFlac extends AbstractContest {
     public function userPayout(float $enabledUserBonus, float $contestBonus, float $perEntryBonus): array {
         self::$db->prepared_query("
             SELECT um.ID,
-                count(t.ID) AS total_entries,
+                count(DISTINCT t.ID) AS total_entries,
                 ? AS enabled_bonus,
-                CASE WHEN count(t.ID) > 0 THEN ? ELSE 0 END AS contest_bonus,
-                count(t.ID) * ? AS entries_bonus
+                CASE WHEN count(DISTINCT t.ID) > 0 THEN ? ELSE 0 END AS contest_bonus,
+                count(DISTINCT t.ID) * ? AS entries_bonus
             FROM contest c,
                 users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
             LEFT JOIN torrents t ON (t.UserID = um.ID)
+            LEFT JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
             WHERE um.Enabled = '1'
                 AND ui.JoinDate <= c.date_end
                 AND (t.ID IS NULL
-                    OR (t.Format = 'FLAC'
+                    OR (
+                            xfu.remaining = 0
+                        AND t.Format = 'FLAC'
                         AND t.Time BETWEEN c.date_begin AND c.date_end
                         AND (
                             t.Media IN ('Vinyl', 'WEB', 'SACD')
