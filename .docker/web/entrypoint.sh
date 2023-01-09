@@ -9,6 +9,12 @@ run_service()
     service "$1" start || exit 1
 }
 
+if [ "$ENV" == "prod" ]; then
+    su -c 'composer --version && composer install --no-progress --no-dev --optimize-autoloader --no-suggest; yarn --prod; npx browserslist@latest --update-db; yarn prod' gazelle
+else
+    su -c 'composer --version && composer install --no-progress; yarn; npx browserslist@latest --update-db; yarn dev' gazelle
+fi
+
 [ -f /var/www/lib/override.config.php ] || bash /var/www/.docker/web/generate-config.sh
 
 if [ ! -f /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini ]; then
@@ -46,12 +52,6 @@ if [ ! -d /var/lib/gazelle/torrent ]; then
     perl /var/www/scripts/generate-storage-dirs /var/lib/gazelle/riplog 2 100
     perl /var/www/scripts/generate-storage-dirs /var/lib/gazelle/riploghtml 2 100
     chown -R gazelle /var/lib/gazelle
-fi
-
-if [ "$ENV" == "prod" ]; then
-    su -c 'composer --version && composer install --no-progress --no-dev --optimize-autoloader --no-suggest; yarn --prod; npx browserslist@latest --update-db; yarn prod' gazelle
-else
-    su -c 'composer --version && composer install --no-progress; yarn; npx browserslist@latest --update-db; yarn dev' gazelle
 fi
 
 echo "Start services..."
