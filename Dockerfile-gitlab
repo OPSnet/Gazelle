@@ -3,6 +3,7 @@ FROM debian:bullseye-slim
 WORKDIR /var/www
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV PHP_VER=8.2
 
 # Software package layer
 # Nodesource setup comes after yarnpkg because it runs `apt-get update`
@@ -20,21 +21,20 @@ RUN apt-get update \
         make \
         nginx \
         netcat \
-        php8.1 \
-        php8.1-cli \
-        php8.1-curl \
-        php8.1-fpm \
-        php8.1-gd \
-        php8.1-mbstring \
-        php8.1-memcached \
-        php8.1-mysql \
-        php8.1-pgsql \
-        php8.1-xml \
-        php8.1-zip \
-        php-apcu \
-        php-dev \
-        php-bcmath \
-        php-xdebug \
+        php${PHP_VER}-cli \
+        php${PHP_VER}-curl \
+        php${PHP_VER}-fpm \
+        php${PHP_VER}-gd \
+        php${PHP_VER}-mbstring \
+        php${PHP_VER}-memcached \
+        php${PHP_VER}-mysql \
+        php${PHP_VER}-pgsql \
+        php${PHP_VER}-xml \
+        php${PHP_VER}-zip \
+        php${PHP_VER}-apcu \
+        php${PHP_VER}-dev \
+        php${PHP_VER}-bcmath \
+        php${PHP_VER}-xdebug \
         python3 \
         python3-pip \
         python3-setuptools \
@@ -52,7 +52,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2.1 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.5.1 /usr/bin/composer /usr/local/bin/composer
 
 # Python tools layer
 RUN pip3 install chardet eac-logchecker xld-logchecker
@@ -155,11 +155,11 @@ COPY .docker /var/www/.docker
 RUN useradd -ms /bin/bash gazelle \
     && touch /var/log/php_error.log /var/log/xdebug.log \
     && chown -R gazelle:gazelle /var/www /var/log/php_error.log /var/log/xdebug.log \
-    && cp /var/www/.docker/web/php.ini /etc/php/8.1/cli/php.ini \
-    && cp /var/www/.docker/web/php.ini /etc/php/8.1/fpm/php.ini \
-    && cp /var/www/.docker/web/xdebug.ini /etc/php/8.1/mods-available/xdebug.ini \
-    && sed -i 's|xdebug.mode=debug|\0,coverage|' /etc/php/8.1/mods-available/xdebug.ini \
-    && cp /var/www/.docker/web/www.conf /etc/php/8.1/fpm/pool.d/www.conf \
+    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/cli/php.ini \
+    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
+    && cp /var/www/.docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
+    && sed -i 's|xdebug.mode=debug|\0,coverage|' /etc/php/${PHP_VER}/mods-available/xdebug.ini \
+    && cp /var/www/.docker/web/www.conf /etc/php/${PHP_VER}/fpm/pool.d/www.conf \
     && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default \

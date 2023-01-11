@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-PHP_VER=8.1
-
 run_service()
 {
     service "$1" start || exit 1
