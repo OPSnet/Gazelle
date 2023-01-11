@@ -139,7 +139,7 @@ class Mysql {
         }
         global $Debug;
         $Debug->saveCase("MySQL: error({$this->Errno}) {$this->Error} query=[$this->PreparedQuery]");
-        throw new Mysql_Exception($Msg);
+        throw new Mysql_Exception("$Msg  -- {$this->Error}");
     }
 
     public function connect(): void {

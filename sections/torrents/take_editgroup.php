@@ -73,13 +73,12 @@ if (($_GET['action'] ?? '') == 'revert') {
     if ($_POST['summary']) {
         $logInfo[] = "summary: " . trim($_POST['summary']);
     }
-    $RevisionID = $tgroup->createRevision($Viewer->id(), $Image, $Body, $_POST['summary']);
+    $RevisionID = $tgroup->createRevision($Body, $Image, $_POST['summary'], $Viewer);
 }
 
 $imageFlush = ($Image != $tgroup->showFallbackImage(false)->image());
 
-$tgroup->setUpdate('RevisionID', $RevisionID)
-    ->setUpdate('WikiBody', $Body)
+$tgroup->setUpdate('WikiBody', $Body)
     ->setUpdate('WikiImage', $Image)
     ->modify();
 

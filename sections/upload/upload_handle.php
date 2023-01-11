@@ -56,7 +56,6 @@ if (isset($_POST['tags'])) {
 }
 $Properties['Image'] = trim($_POST['image'] ?? '');
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
-$Properties['VanityHouse'] = (int)($_POST['vanity_house'] ?? null && $Viewer->permitted('torrents_edit_vanityhouse'));
 $Properties['TorrentDescription'] = trim($_POST['release_desc'] ?? '');
 if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
@@ -320,7 +319,7 @@ if ($Err) { // Show the upload form, with the data the user entered
 //--------------- Generate torrent file ----------------------------------------//
 
 $torMan = new Gazelle\Manager\Torrent;
-$tgroupMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup;
 $torrentFiler = new Gazelle\File\Torrent;
 $bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
 $bencoder->decodeFile($TorrentName);
@@ -491,78 +490,40 @@ if ($HasLog == '1' && isset($_FILES['logfiles'])) {
 }
 $LogInDB = count($logfileSummary->all()) ? '1' : '0';
 
+$tgroup = null;
 $NoRevision = false;
 if ($isMusicUpload) {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
-        [$GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $TagList] = $DB->row("
-            SELECT tg.ID,
-                tg.WikiImage,
-                tg.WikiBody,
-                tg.RevisionID,
-                tg.Name,
-                tg.Year,
-                tg.ReleaseType,
-                group_concat(t.Name SEPARATOR ' ') AS TagList
-            FROM torrents_group tg
-            INNER JOIN torrents_tags tt ON (tt.GroupID = tg.ID)
-            INNER JOIN tags t ON (t.ID = tt.TagID)
-            WHERE tg.ID = ?
-            GROUP BY tg.ID, tg.WikiImage, tg.WikiBody, tg.RevisionID, tg.Name, tg.Year, tg.ReleaseType
-            ", $Properties['GroupID']
-        );
-        if ($GroupID) {
-            $Properties['TagList'] = explode(',', str_replace([' ', '.', '_'], '.', $TagList));
-            if (!$Properties['Image'] && $WikiImage) {
-                $Properties['Image'] = $WikiImage;
-            }
-            if (strlen($WikiBody) > strlen($Properties['GroupDescription'])) {
-                $Properties['GroupDescription'] = $WikiBody;
-                if (!$Properties['Image'] || $Properties['Image'] == $WikiImage) {
-                    $NoRevision = true;
-                }
+        $tgroup = $tgMan->findById($Properties['GroupID']);
+    }
+    if (is_null($tgroup)) {
+        foreach ($ArtistForm[ARTIST_MAIN] as $Artist) {
+            $tgroup = $tgMan->findByArtistReleaseYear($Artist['name'], $Properties['Title'], $Properties['ReleaseType'], $Properties['Year']);
+            if ($tgroup) {
+                break;
             }
         }
     }
-    if (!isset($GroupID)) {
-        foreach ($ArtistForm[ARTIST_MAIN] as $Artist) {
-            [$GroupID, $WikiImage, $WikiBody, $RevisionID] = $DB->row("
-                SELECT tg.id,
-                    tg.WikiImage,
-                    tg.WikiBody,
-                    tg.RevisionID
-                FROM torrents_group AS tg
-                LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
-                LEFT JOIN artists_group AS ag ON (ta.ArtistID = ag.ArtistID)
-                WHERE ag.Name = ?
-                    AND tg.Name = ?
-                    AND tg.ReleaseType = ?
-                    AND tg.Year = ?
-                ", $Artist['name'], $Properties['Title'], $Properties['ReleaseType'], $Properties['Year']
-            );
-
-            // Does this torrent belongs in a group
-            if ($GroupID) {
-                if (!$Properties['Image'] && $WikiImage) {
-                    $Properties['Image'] = $WikiImage;
-                }
-                if (strlen($WikiBody) > strlen($Properties['GroupDescription'])) {
-                    $Properties['GroupDescription'] = $WikiBody;
-                    if (!$Properties['Image'] || $Properties['Image'] == $WikiImage) {
-                        $NoRevision = true;
-                    }
-                }
-                break;
+    if ($tgroup) {
+        $Properties['TagList'] = $tgroup->tagNameList();
+        if (!$Properties['Image'] && $tgroup->image()) {
+            $Properties['Image'] = $tgroup->image();
+        }
+        if ($Properties['GroupDescription'] != $tgroup->description()) {
+            $Properties['GroupDescription'] = $tgroup->description();
+            if (!$Properties['Image'] || $Properties['Image'] == $tgroup->image()) {
+                $NoRevision = true;
             }
         }
     }
 }
 
+//For notifications--take note now whether it's a new group
+$IsNewGroup = is_null($tgroup);
+
 //Needs to be here as it isn't set for add format until now
 $LogName .= $Properties['Title'];
-
-//For notifications--take note now whether it's a new group
-$IsNewGroup = !isset($GroupID);
 
 //----- Start inserts
 
@@ -574,44 +535,32 @@ if (!$IsNewGroup) {
         UPDATE torrents_group SET
             Time = now()
         WHERE ID = ?
-        ', $GroupID
+        ', $Properties['GroupID']
     );
+    $tgroup = $tgMan->findById($Properties['GroupID']);
 } else {
-    // Create torrent group
-    $DB->prepared_query('
-        INSERT INTO torrents_group
-               (CategoryID, Name, Year, RecordLabel, CatalogueNumber, WikiBody, WikiImage, ReleaseType, VanityHouse)
-        VALUES (?,          ?,    ?,    ?,           ?,               ?,        ?,         ?,           ?)
-        ', $categoryId, $Properties['Title'], $Properties['Year'], $Properties['RecordLabel'], $Properties['CatalogueNumber'],
-            $Properties['GroupDescription'], $Properties['Image'], $Properties['ReleaseType'], $Properties['VanityHouse']
+    $tgroup = $tgMan->create(
+        categoryId:      $categoryId,
+        name:            $Properties['Title'],
+        year:            $Properties['Year'],
+        recordLabel:     $Properties['RecordLabel'],
+        catalogueNumber: $Properties['CatalogueNumber'],
+        description:     $Properties['GroupDescription'],
+        image:           $Properties['Image'],
+        releaseType:     $Properties['ReleaseType'],
+        showcase:        (bool)($Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house'])),
     );
-    $GroupID = $DB->inserted_id();
     if ($isMusicUpload) {
-        $tgroupMan->findById($GroupID)->addArtists($Viewer, $ArtistRoleList, $ArtistNameList);
+        $tgroup->addArtists($Viewer, $ArtistRoleList, $ArtistNameList);
         $Cache->increment_value('stats_album_count', count($ArtistNameList));
     }
-    $Cache->increment_value('stats_group_count');
     $Viewer->stats()->increment('unique_group_total');
 }
-$tgroup = $tgroupMan->findById($GroupID);
+$GroupID = $tgroup->id();
 
 // Description
 if ($NoRevision) {
-    $DB->prepared_query('
-        INSERT INTO wiki_torrents
-               (PageID, Body, UserID, Image, Summary)
-        VALUES (?,      ?,    ?,      ?,     ?)
-        ', $GroupID, $Properties['GroupDescription'], $Viewer->id(), $Properties['Image'], 'Uploaded new torrent'
-    );
-    $RevisionID = $DB->inserted_id();
-
-    // Revision ID
-    $DB->prepared_query('
-        UPDATE torrents_group SET
-            RevisionID = ?
-        WHERE ID = ?
-        ', $RevisionID, $GroupID
-    );
+    $tgroup->createRevision($Properties['GroupDescription'], $Properties['Image'], 'Uploaded new torrent', $Viewer);
 }
 
 // Tags
@@ -751,7 +700,7 @@ if (!$Viewer->disableBonusPoints()) {
     $bonus->addPoints($bonusTotal);
 }
 
-$tgroupMan->findById($GroupID)->refresh();
+$tgroup->refresh();
 $torMan->flushFoldernameCache($DirName);
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
     $torMan->flushLatestUploads(5);
@@ -869,7 +818,7 @@ if (defined('AJAX')) {
         ->addEncodings($Properties['Encoding'])
         ->addMedia($Properties['Media'])
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
-        ->addArtists($tgroupMan->findById($GroupID)->artistRole()->roleList())
+        ->addArtists($tgroup->artistRole()->roleList())
         ->addTags($tagList)
         ->addCategory($categoryName)
         ->addUser($Viewer)
@@ -987,7 +936,7 @@ if (!in_array('notifications', $Viewer->paranoia())) {
         ->addEncodings($Properties['Encoding'])
         ->addMedia($Properties['Media'])
         ->addYear($Properties['Year'], $Properties['RemasterYear'])
-        ->addArtists($tgroupMan->findById($GroupID)->artistRole()->roleList())
+        ->addArtists($tgroup->artistRole()->roleList())
         ->addTags($tagList)
         ->addCategory($categoryName)
         ->addUser($Viewer)

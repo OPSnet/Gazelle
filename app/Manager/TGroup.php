@@ -51,7 +51,22 @@ class TGroup extends \Gazelle\BaseManager {
             SELECT GroupID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );
-        return $id ? new \Gazelle\TGroup($id) : null;
+        return $this->findById($id);
+    }
+
+    public function findByArtistReleaseYear(string $artistName, string $name, int $releaseType, int $year): ?\Gazelle\TGroup {
+        $id = (int)self::$db->scalar("
+            SELECT tg.id
+            FROM torrents_group AS tg
+            INNER JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+            INNER JOIN artists_group AS ag ON (ta.ArtistID = ag.ArtistID)
+            WHERE ag.Name          = ?
+                AND tg.Name        = ?
+                AND tg.ReleaseType = ?
+                AND tg.Year        = ?
+            ", $artistName, $name, $releaseType, $year
+        );
+        return $this->findById($id);
     }
 
     public function findRandom(): ?\Gazelle\TGroup {
@@ -67,6 +82,28 @@ class TGroup extends \Gazelle\BaseManager {
                 ", RANDOM_TORRENT_MIN_SEEDS
             )
         );
+    }
+
+    public function create(
+        int $categoryId,
+        int $releaseType,
+        string $name,
+        string $description,
+        int $year,
+        string $recordLabel,
+        string $catalogueNumber,
+        ?string $image,
+        bool $showcase,
+    ): \Gazelle\TGroup {
+        self::$db->prepared_query("
+            INSERT INTO torrents_group
+                   (CategoryID, Name, WikiBody, Year, RecordLabel, CatalogueNumber, WikiImage, ReleaseType, VanityHouse)
+            VALUES (?,          ?,    ?,    ?,           ?,               ?,        ?,         ?,           ?)
+            ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
+        );
+        $id = self::$db->inserted_id();
+        self::$cache->increment_value('stats_group_count');
+        return $this->findById($id);
     }
 
     public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user, \Gazelle\Log $log): bool {

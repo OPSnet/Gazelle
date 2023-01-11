@@ -27,6 +27,7 @@ class TGroup extends BaseObject {
             sprintf(self::CACHE_COVERART_KEY, $this->id),
             'torrents_details_' . $this->id,
             'torrents_group_' . $this->id,
+            "groups_artists_{$this->id}",
         ]);
         return $this;
     }
@@ -473,12 +474,12 @@ class TGroup extends BaseObject {
             VALUES (?,       ?,     ?,       ?)
             ", $this->id, $image, $summary, $userId
         );
-        $n = self::$db->affected_rows();
-        if ($n) {
+        $id = self::$db->inserted_id();
+        if ($id) {
             $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" added to group");
             self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
         }
-        return $n;
+        return $id;
     }
 
     public function removeCoverArt(int $coverId, int $userId, \Gazelle\Log $logger): int {
@@ -488,16 +489,19 @@ class TGroup extends BaseObject {
             WHERE ID = ?
             ", $coverId
         );
+        if (is_null($image)) {
+            return 0;
+        }
         self::$db->prepared_query("
             DELETE FROM cover_art WHERE ID = ?
             ", $coverId
         );
-        $n = self::$db->affected_rows();
-        if ($n) {
+        $affected = self::$db->affected_rows();
+        if ($affected) {
             $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" removed from group");
             self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
         }
-        return $n;
+        return $affected;
     }
 
     public function coverArt(Manager\User $userMan): array {
@@ -590,6 +594,7 @@ class TGroup extends BaseObject {
             $logger->group($this->id, $user->id(), "Added artist $artistLabel")
                 ->general("Artist $artistLabel was added to the group " . $this->id . " (" . $this->name() . ") by user $userLabel");
         }
+        self::$cache->increment_value('stats_album_count', count($names));
         return count($add);
     }
 
@@ -795,12 +800,7 @@ class TGroup extends BaseObject {
         );
         self::$db->commit();
 
-        self::$cache->deleteMulti([
-            sprintf(self::CACHE_KEY, $this->id()),
-            sprintf(self::CACHE_TLIST_KEY, $this->id()),
-            "torrents_details_{$this->id()}", "torrent_group_{$this->id()}",
-            "groups_artists_{$this->id()}", "torrent_group_light_{$this->id()}"
-        ]);
+        $this->flush();
         foreach ($this->artistRole()->idList() as $role) {
             foreach ($role as $artist) {
                 self::$cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
@@ -843,10 +843,10 @@ class TGroup extends BaseObject {
             VALUES (?,       ?,     ?,      ?)
             ", $this->id, $tagId, $userId, $way
         );
-        $n = self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
         self::$db->commit();
         $this->flush();
-        return $n;
+        return $affected;
     }
 
     public function removeTag(\Gazelle\Tag $tag): bool {
@@ -860,6 +860,9 @@ class TGroup extends BaseObject {
             DELETE FROM torrents_tags WHERE GroupID = ? AND TagID = ?
             ", $this->id, $tagId
         );
+        if (!self::$db->affected_rows()) {
+            return false;
+        }
 
         // Was this the last occurrence?
         $inUse = self::$db->scalar("
@@ -884,14 +887,25 @@ class TGroup extends BaseObject {
         return true;
     }
 
-    public function createRevision(int $userId, string $image, string $body, string $summary): int {
+    /**
+     * Insert a new revision (description or image has changed).
+     *
+     * return int revision id
+     */
+    public function createRevision(string $description, ?string $image, string $summary, User $user): int {
         self::$db->prepared_query("
             INSERT INTO wiki_torrents
                    (PageID, Body, Image, UserID, Summary)
             VALUES (?,      ?,    ?,     ?,      ?)
-            ", $this->id, $body, $image, $userId, mb_substr(trim($summary), 0, 100)
+            ", $this->id, $description, $image, $user->id(), mb_substr(trim($summary), 0, 100)
         );
         $revisionId = self::$db->inserted_id();
+        self::$db->prepared_query("
+            UPDATE torrents_group SET
+                RevisionID = ?
+            WHERE ID = ?
+            ", $revisionId, $this->id
+        );
         $this->refresh();
         return $revisionId;
     }
