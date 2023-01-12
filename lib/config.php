@@ -400,6 +400,10 @@ defined('USER_TORRENT_DELETE_HOURS') or define('USER_TORRENT_DELETE_HOURS', 24);
 // Hint: check the crond service
 defined('SCHEDULER_DELAY') or define('SCHEDULER_DELAY', 450);
 
+// How long before a stale announce is drained and a user is not longer considered
+// to be seeding a torrent
+defined('UNSEEDED_DRAIN_INTERVAL') or define('UNSEEDED_DRAIN_INTERVAL', 3600 * 6);
+
 // Which image hosts are acceptable and which aren't?
 defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', ['badhost.example.com']);
 defined('IMAGE_HOST_RECOMMENDED') or define('IMAGE_HOST_RECOMMENDED', ['goodhost.example.com']);

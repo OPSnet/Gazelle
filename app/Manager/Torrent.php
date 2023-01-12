@@ -379,8 +379,9 @@ class Torrent extends \Gazelle\BaseManager {
         self::$cache->disableLocalCache();
         self::$db->prepared_query("
             DELETE FROM xbt_files_users
-            WHERE mtime < unix_timestamp(NOW() - INTERVAL 6 HOUR)
-        ");
+            WHERE mtime < unix_timestamp(NOW() - INTERVAL ? SECOND)
+            ", UNSEEDED_DRAIN_INTERVAL
+        );
         $purged = self::$db->affected_rows();
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_torrents_peerlists (
@@ -389,7 +390,7 @@ class Torrent extends \Gazelle\BaseManager {
                 Seeders   int,
                 Leechers  int,
                 Snatches  int
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ");
         self::$db->prepared_query("
             INSERT INTO tmp_torrents_peerlists
