@@ -28,18 +28,18 @@ class ForumPoll extends \Gazelle\BaseManager {
      * Find the poll featured on the front page.
      */
     public function findByFeaturedPoll(): ?\Gazelle\ForumPoll {
-        $pollId = self::$cache->get_value('polls_featured');
-        if ($pollId === false) {
-            $pollId = self::$db->scalar("
+        $threadId = self::$cache->get_value('polls_featured');
+        if ($threadId === false) {
+            $threadId = self::$db->scalar("
                 SELECT TopicID
                 FROM forums_polls
                 WHERE Featured IS NOT NULL
                 ORDER BY Featured DESC
                 LIMIT 1
             ");
-            self::$cache->cache_value('polls_featured', $pollId, 86400 * 7);
+            self::$cache->cache_value('polls_featured', $threadId, 86400 * 7);
         }
-        return $this->findById((int)$pollId);
+        return $this->findById((int)$threadId);
     }
 
     /**
@@ -52,6 +52,6 @@ class ForumPoll extends \Gazelle\BaseManager {
             Values (?,       ?,        ?)
             ", $threadId, $question, serialize($answerList)
         );
-        return new \Gazelle\ForumPoll(self::$db->inserted_id());
+        return $this->findById($threadId);
     }
 }

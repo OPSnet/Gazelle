@@ -30,6 +30,7 @@ class Forum extends BaseObject {
     }
 
     public function flush(): Forum {
+        $this->info = [];
         (new Manager\Forum)->flushToc();
         self::$cache->deleteMulti([
             sprintf(self::CACHE_FORUM, $this->id),
@@ -116,8 +117,8 @@ class Forum extends BaseObject {
         return $this->info;
     }
 
-    public function autoLock(): int {
-        return $this->info()['auto_lock'];
+    public function autoLock(): bool {
+        return $this->info()['auto_lock'] == '1';
     }
 
     public function autoLockWeeks(): int {

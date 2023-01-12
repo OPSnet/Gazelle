@@ -4,11 +4,9 @@ if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
 
-$forumMan = new Gazelle\Manager\Forum;
-
 echo $Twig->render('admin/forum-management.twig', [
     'auth'       => $Viewer->auth(),
-    'category'   => $forumMan->categoryList(),
+    'category'   => (new Gazelle\Manager\ForumCategory)->forumCategoryList(),
     'class_list' => (new Gazelle\Manager\User)->classList(),
-    'toc'        => $forumMan->tableOfContents($Viewer),
+    'toc'        => (new Gazelle\Manager\Forum)->tableOfContents($Viewer),
 ]);

@@ -117,11 +117,13 @@ class ForumPoll extends BaseObject {
         self::$cache->delete_value("polls_{$this->id}");
         self::$db->prepared_query("
             UPDATE forums_polls SET
-                Closed = '0'
+                Closed = '1'
             WHERE TopicID = ?
             ", $this->id
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     protected function answerList(): array {

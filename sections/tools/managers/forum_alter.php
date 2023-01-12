@@ -7,14 +7,17 @@ if (!$Viewer->permitted('admin_manage_forums')) {
 authorize();
 
 $forumMan = new Gazelle\Manager\Forum;
-$forum = $forumMan->findById((int)$_POST['id']);
-if (is_null($forum) and in_array($_POST['submit'], ['Edit', 'Delete'])) {
+$forum = $forumMan->findById((int)($_POST['id'] ?? 0));
+if (is_null($forum) && in_array($_POST['submit'], ['Edit', 'Delete'])) {
     error(0);
 }
 if ($_POST['submit'] == 'Delete') {
     $forum->remove();
 } else { //Edit & Create, Shared Validation
-    if ($_POST['minclassread'] > $Viewer->classLevel() || $_POST['minclasswrite'] > $Viewer->classLevel() || $_POST['minclasscreate'] > $Viewer->classLevel()) {
+    $minRead   = (int)$_POST['minclassread'];
+    $minWrite  = (int)$_POST['minclasswrite'];
+    $minCreate = (int)$_POST['minclasscreate'];
+    if ($Viewer->classLevel() < min($minRead, $minWrite, $minCreate)) {
         error(403);
     }
 
@@ -33,15 +36,24 @@ if ($_POST['submit'] == 'Delete') {
     }
 
     if ($_POST['submit'] == 'Create') {
-        $forumMan->create($_POST);
+        $forumMan->create(
+            sequence:      (int)$_POST['sort'],
+            categoryId:    (int)$_POST['categoryid'],
+            name:          $_POST['name'],
+            description:   $_POST['description'],
+            minRead:       $minRead,
+            minWrite:      $minWrite,
+            minCreate:     $minCreate,
+            autoLock:      isset($_POST['autolock']),
+            autoLockWeeks: (int)$_POST['autolockweeks'],
+        );
     } elseif ($_POST['submit'] == 'Edit') {
         $minClassRead = $forum->minClassRead();
         if (!$minClassRead || $minClassRead > $Viewer->classLevel()) {
             error(403);
         }
         $forum->modifyForum($_POST);
-    }
-    else {
+    } else {
         error(403);
     }
 }

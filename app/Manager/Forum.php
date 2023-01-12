@@ -13,19 +13,27 @@ class Forum extends \Gazelle\BaseManager {
 
     /**
      * Create a forum
-     * @param array $args hash of values (keyed on lowercase column names)
      */
-    public function create(array $args) {
+    public function create(
+        int $sequence,
+        int $categoryId,
+        string $name,
+        string $description,
+        int $minRead,
+        int $minWrite,
+        int $minCreate,
+        bool $autoLock,
+        int $autoLockWeeks,
+    ): \Gazelle\Forum {
         self::$db->prepared_query("
             INSERT INTO forums
                    (Sort, CategoryID, Name, Description, MinClassRead, MinClassWrite, MinClassCreate, AutoLock, AutoLockWeeks)
             VALUES (?,    ?,          ?,    ?,           ?,            ?,             ?,              ?,        ?)
-            ", (int)$args['sort'], (int)$args['categoryid'], trim($args['name']), trim($args['description']),
-               (int)$args['minclassread'], (int)$args['minclasswrite'], (int)$args['minclasscreate'],
-               isset($args['autolock']) ? '1' : '0', (int)$args['autolockweeks']
+            ", $sequence, $categoryId, trim($name), trim($description), $minRead, $minWrite, $minCreate, $autoLock ? '1' : '0', $autoLockWeeks
         );
+        $id = self::$db->inserted_id();
         $this->flushToc();
-        return new \Gazelle\Forum(self::$db->inserted_id());
+        return new \Gazelle\Forum($id);
     }
 
     /**
@@ -49,59 +57,23 @@ class Forum extends \Gazelle\BaseManager {
     /**
      * Get list of forum names
      */
-    public function nameList() {
+    public function nameList(): array {
         self::$db->prepared_query("
-            SELECT ID, Name FROM forums ORDER BY Sort
-        ");
-        return self::$db->to_array();
-    }
-
-    /**
-     * Get list of forums categories
-     */
-    public function categoryList() {
-        $categories = self::$cache->get_value('forums_categories');
-        if ($categories === false) {
-            self::$db->prepared_query("
-                SELECT fc.ID,
-                    fc.Name
-                FROM forums_categories fc
-                ORDER BY fc.Sort,
-                    fc.Name
-            ");
-            $categories = self::$db->to_pair('ID', 'Name');
-            self::$cache->cache_value('forums_categories', $categories, 0);
-        }
-        return $categories;
-    }
-
-    /**
-     * Get list of forums categories by usage
-     */
-    public function categoryUsageList(): array {
-        self::$db->prepared_query("
-            SELECT fc.ID AS id,
-                fc.Name  AS name,
-                fc.Sort  AS sequence,
-                IFNULL(f.total, 0) as total
-            FROM forums_categories as fc
-            LEFT JOIN (
-                SELECT f.CategoryID, count(*) AS total FROM forums f GROUP BY f.CategoryID
-            ) AS f ON (f.CategoryID = fc.ID)
-            ORDER BY fc.Sort
+            SELECT ID AS id, Name FROM forums ORDER BY Sort
         ");
         return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
     public function forumList(): array {
-        if (($list = self::$cache->get_value(self::CACHE_LIST)) === false) {
+        $list = self::$cache->get_value(self::CACHE_LIST);
+        if ($list === false) {
             self::$db->prepared_query("
                 SELECT f.ID
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
                 ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
-            $list = self::$db->collect('ID');
+            $list = self::$db->collect('ID', false);
             self::$cache->cache_value(self::CACHE_LIST, $list, 86400);
         }
         return $list;
@@ -277,7 +249,7 @@ class Forum extends \Gazelle\BaseManager {
                        permission_class, permissions, user_ids
                 FROM forums_transitions
             ");
-            $items = self::$db->to_array('id', MYSQLI_ASSOC);
+            $items = self::$db->to_array('id', MYSQLI_ASSOC, false);
             self::$db->set_query_id($queryId);
             foreach ($items as &$i) {
                 // permission_class == primary class

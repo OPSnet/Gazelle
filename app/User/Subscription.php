@@ -3,29 +3,40 @@
 namespace Gazelle\User;
 
 class Subscription extends \Gazelle\BaseUser {
+    protected const CACHE_KEY = "subscriptions_user_%d";
+    protected const NEW_KEY = "subscriptions_user_new_%d";
+    protected array $threadList;
 
+    public function flush(): Subscription {
+        $this->threadList = [];
+        self::$cache->deleteMulti([
+            sprintf(self::CACHE_KEY, $this->user->id()),
+            sprintf(self::NEW_KEY, $this->user->id()),
+        ]);
+        return $this;
+    }
     /**
      * (Un)subscribe from a forum thread.
-     * @param int $TopicID
      */
-    public function subscribe(int $TopicID) {
-        $qid = self::$db->get_query_id();
-        if ($this->isSubscribed($TopicID) !== false) {
+    public function subscribe(int $threadId): int {
+        if ($this->isSubscribed($threadId) !== false) {
             self::$db->prepared_query('
                 DELETE FROM users_subscriptions
                 WHERE UserID = ?
                     AND TopicID = ?
-                ', $this->user->id(), $TopicID
+                ', $this->user->id(), $threadId
             );
+            $affected = self::$db->affected_rows();
         } else {
             self::$db->prepared_query('
                 INSERT IGNORE INTO users_subscriptions (UserID, TopicID)
                 VALUES (?, ?)
-                ', $this->user->id(), $TopicID
+                ', $this->user->id(), $threadId
             );
+            $affected = self::$db->affected_rows();
         }
-        self::$cache->deleteMulti(["subscriptions_user_" . $this->user->id(), "subscriptions_user_new_" . $this->user->id()]);
-        self::$db->set_query_id($qid);
+        $this->flush();
+        return $affected;
     }
 
     /**
@@ -71,18 +82,20 @@ class Subscription extends \Gazelle\BaseUser {
      * @return array Array of TopicIDs
      */
     public function subscriptionList(): array {
-        $qid = self::$db->get_query_id();
-        $UserSubscriptions = self::$cache->get_value("subscriptions_user_" . $this->user->id());
-        if ($UserSubscriptions === false) {
+        if (isset($this->threadList) && !empty($this->threadList)) {
+            return $this->threadList;
+        }
+        $list = self::$cache->get_value("subscriptions_user_" . $this->user->id());
+        if ($list === false) {
             self::$db->prepared_query('
                 SELECT TopicID FROM users_subscriptions WHERE UserID = ?
                 ', $this->user->id()
             );
-            $UserSubscriptions = self::$db->collect(0);
-            self::$cache->cache_value("subscriptions_user_" . $this->user->id(), $UserSubscriptions, 0);
+            $list = self::$db->collect(0, false);
+            self::$cache->cache_value("subscriptions_user_" . $this->user->id(), $list, 0);
         }
-        self::$db->set_query_id($qid);
-        return $UserSubscriptions;
+        $this->threadList = $list;
+        return $this->threadList;
     }
 
     /**
@@ -99,7 +112,7 @@ class Subscription extends \Gazelle\BaseUser {
                 WHERE UserID = ?
                 ', $this->user->id()
             );
-            $list = self::$db->to_array(false, MYSQLI_NUM);
+            $list = self::$db->to_array(false, MYSQLI_NUM, false);
             self::$cache->cache_value("subscriptions_comments_user_" . $this->user->id(), $list, 0);
         }
         self::$db->set_query_id($qid);
@@ -153,8 +166,8 @@ class Subscription extends \Gazelle\BaseUser {
         );
     }
 
-    public function isSubscribed(int $TopicID): bool {
-        return array_search($TopicID, $this->subscriptionList()) !== false;
+    public function isSubscribed(int $threadId): bool {
+        return array_search($threadId, $this->subscriptionList()) !== false;
     }
 
     /**

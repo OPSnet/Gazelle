@@ -6,5 +6,5 @@ if (!$Viewer->permitted('admin_manage_forums')) {
 
 echo $Twig->render('admin/forum-category.twig', [
     'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\Forum)->categoryUsageList(),
+    'list' => (new Gazelle\Manager\ForumCategory)->usageList(),
 ]);

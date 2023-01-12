@@ -60,14 +60,14 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted
 }
 
 $thread = (new Gazelle\Manager\ForumThread)->create(
-    forumId: $forum->id(),
-    userId:  $Viewer->id(),
-    title:   $title,
-    body:    $body,
+    forum:  $forum,
+    userId: $Viewer->id(),
+    title:  $title,
+    body:   $body,
 );
 $threadId = $thread->id();
 if ($needPoll) {
-    (new Gazelle\Manager\ForumPoll)->create($thread->id(), $question, $answerList);
+    (new Gazelle\Manager\ForumPoll)->create($threadId, $question, $answerList);
     if ($forum->id() == STAFF_FORUM_ID) {
         Irc::sendMessage(MOD_CHAN, "Poll created by {$Viewer->username()}: \"$question\" " . SITE_URL . "/forums.php?action=viewthread&threadid=$threadId");
     }
