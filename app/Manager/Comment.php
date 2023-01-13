@@ -57,9 +57,10 @@ class Comment extends \Gazelle\BaseManager {
         if ($page == 'collages') {
             self::$cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
-        $user = (new \Gazelle\Manager\User)->findById($userId);
+        $userMan = new \Gazelle\Manager\User;
+        $user = $userMan->findById($userId);
         if ($user) {
-            (new \Gazelle\User\Notification\Quote($user))->create(new User, $body, $postId, $page, $pageId);
+            (new \Gazelle\User\Notification\Quote($user))->create($userMan, $body, $postId, $page, $pageId);
         }
         (new Subscription)->flushPage($page, $pageId);
 
