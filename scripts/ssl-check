@@ -1,8 +1,0 @@
-#! /bin/bash
-
-set -euo pipefail
-
-HOST=$1
-PORT=$2
-
-openssl s_client -connect $HOST:$PORT -servername $HOST < /dev/null 2> /dev/null | openssl x509 -noout -dates

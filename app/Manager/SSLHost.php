@@ -5,36 +5,34 @@ namespace Gazelle\Manager;
 class SSLHost extends \Gazelle\Base {
     public function __construct(
         protected \Gazelle\DB\Pg $pg = new \Gazelle\DB\Pg(GZPG_DSN)
-    ) { }
+    ) {}
 
     public function lookup(string $hostname, int $port): array {
-        if (!preg_match('/^(?:[\w-]+)(?:\.[\w-]+)+$/', $hostname)) {
+        if ($port <= 0 || !preg_match('/^(?:[\w-]+)(?:\.[\w-]+)+$/', $hostname)) {
             return [];
         }
-        if ($port <= 0) {
+        $context = [
+            "ssl"  => ["capture_peer_cert" => TRUE],
+        ];
+        $proxy = httpProxy();
+        if ($proxy) {
+            $context["curl"] = ["proxy" => $proxy];
+        }
+        $cert = stream_context_get_params(
+            stream_socket_client(
+                "ssl://$hostname:$port",
+                $errno, $errstr, 30, STREAM_CLIENT_CONNECT,
+                stream_context_create($context)
+            )
+        );
+        if (!$cert) {
             return [];
         }
-        $notBefore = null;
-        $notAfter = null;
-        $output = explode("\n", trim(shell_exec(SERVER_ROOT . "/scripts/ssl-check $hostname $port")));
-        if (count($output) != 2) {
-            return [];
-        }
-        foreach ($output as $line) {
-            [$event, $date] = explode('=', $line);
-            $date = date('Y-m-d H:m:s', strtotime($date));
-            switch ($event) {
-                case 'notAfter':
-                    $notAfter = $date;
-                    break;
-                case 'notBefore':
-                    $notBefore = $date;
-                    break;
-                default:
-                    break;
-            }
-        }
-        return [$notBefore, $notAfter];
+        $certinfo = openssl_x509_parse($cert["options"]["ssl"]["peer_certificate"]);
+        return [
+            date("Y-m-d H:i:s", $certinfo["validFrom_time_t"]),
+            date("Y-m-d H:i:s", $certinfo["validTo_time_t"]),
+        ];
     }
 
     public function add(string $hostname, int $port): int {
@@ -42,8 +40,7 @@ class SSLHost extends \Gazelle\Base {
         if (is_null($notBefore) || is_null($notAfter)) {
             return 0;
         }
-
-        return $this->pg->prepared_query("
+        return $this->pg->insert("
             INSERT INTO ssl_host
                    (hostname, port, not_before, not_after)
             VALUES (?,        ?,    ?,          ?)

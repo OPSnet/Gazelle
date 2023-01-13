@@ -1,7 +1,7 @@
 stages:
   - test
 
-# in gitlab you should define these variables:
+# in gitlab you must define these variables:
 #   MYSQL_DATABASE - database name prefix
 #   MYSQL_PASSWORD - mysql user password
 #   MYSQL_USER - mysql username
@@ -11,8 +11,9 @@ stages:
 #   PG_USER - postgres username
 #
 # optional variables that can be set:
-#   WAIT_ON_FINISH - sleep for 1h after successful execution, useful for debugging
 #   MYSQL_INIT_DB - create fresh DB with phinx, don't restore sql dump
+#   TEST_SSL_HOST - The name of hostname you control having a valid SSL certificate
+#   WAIT_ON_FINISH - sleep for 1h after successful execution, useful for debugging
 
 variables:
   POSTGRES_DATABASE: ${PG_DATABASE}_${CI_COMMIT_SHORT_SHA}
@@ -51,6 +52,7 @@ e2e-tests:
     POSTGRES_DB_USER: gazelle
     PGUSER: $POSTGRES_DB_USER
     PGDATABASE: $POSTGRES_DATABASE
+    TEST_SSL_HOST: $TEST_SSL_HOST
     #ELECTRON_RUN_AS_NODE: 1
   cache:
     - key:

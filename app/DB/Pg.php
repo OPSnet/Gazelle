@@ -26,6 +26,11 @@ class Pg {
         }
     }
 
+    public function insert(string $query, ...$args): int {
+        $st = $this->prepare($query);
+        return $st->execute([...$args]) ? $this->pdo->lastInsertId() : 0;
+    }
+
     protected function fetchRow(string $query, int $mode, ...$args): array {
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {

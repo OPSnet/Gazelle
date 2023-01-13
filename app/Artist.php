@@ -542,10 +542,11 @@ class Artist extends Base {
             CURLOPT_TIMEOUT        => 10,
             CURLOPT_USERAGENT      => FAKE_USERAGENT,
         ]);
-        if (HTTP_PROXY) {
+        $proxy = httpProxy();
+        if ($proxy) {
             curl_setopt_array($curl, [
                 CURLOPT_HTTPPROXYTUNNEL => true,
-                CURLOPT_PROXY => HTTP_PROXY,
+                CURLOPT_PROXY           => $proxy,
             ]);
         }
 

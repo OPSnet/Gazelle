@@ -67,10 +67,11 @@ class Curl {
                 CurlMethod::PUT  => CURLOPT_PUT,
             } => true,
         ]);
-        if (HTTP_PROXY && $this->useProxy) {
+        $proxy = httpProxy();
+        if ($proxy && $this->useProxy) {
             curl_setopt_array($this->curl, [
                 CURLOPT_HTTPPROXYTUNNEL => true,
-                CURLOPT_PROXY           => HTTP_PROXY,
+                CURLOPT_PROXY           => $proxy,
             ]);
         }
         if (!empty($this->postData)) {
