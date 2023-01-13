@@ -15,7 +15,6 @@ class TGroup extends BaseObject {
 
     protected int   $revisionId = 0;
     protected bool  $showFallbackImage = true;
-    protected array $info;
     protected ArtistRole\TGroup $artistRole;
     protected User              $viewer;
     protected Stats\TGroup      $stats;
@@ -148,7 +147,7 @@ class TGroup extends BaseObject {
      * @return array of many things
      */
     public function info(int $revisionId = 0): ?array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);

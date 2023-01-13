@@ -3,11 +3,8 @@
 namespace Gazelle;
 
 class Tag extends BaseObject {
-    protected $info;
-
-    public function __construct(int $id) {
-        parent::__construct($id);
-        $this->info = self::$db->rowAssoc("
+    public function info(): array {
+        return $this->info ??= self::$db->rowAssoc("
             SELECT t.Name AS name,
                 t.TagType AS type,
                 t.Uses AS uses,
@@ -24,7 +21,7 @@ class Tag extends BaseObject {
     public function tableName(): string { return 'tags'; }
 
     public function name(): string {
-        return $this->info['name'];
+        return $this->info()['name'];
     }
 
     /**
@@ -32,20 +29,20 @@ class Tag extends BaseObject {
      * @return string one of 'genre' or 'other' ('genre' designates an official tag).
      */
     public function type(): string {
-        return $this->info['type'];
+        return $this->info()['type'];
     }
 
     /**
      * Number of uses of the tag.
      */
     public function uses(): int {
-        return $this->info['uses'];
+        return $this->info()['uses'];
     }
 
     /**
      * Who created the tag.
      */
     public function userId(): int {
-        return $this->info['user_id'];
+        return $this->info()['user_id'];
     }
 }

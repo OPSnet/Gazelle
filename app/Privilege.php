@@ -3,34 +3,34 @@
 namespace Gazelle;
 
 class Privilege extends BaseObject {
-    protected array $info;
-
     public function flush(): Privilege { $this->info = []; return $this; }
     public function location(): string { return ''; }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
     public function tableName(): string { return 'permissions'; }
 
     public function info(): array {
-        if (empty($this->info)) {
-            $this->info = self::$db->rowAssoc("
-                SELECT p.Name,
-                    p.Level,
-                    p.Secondary,
-                    p.PermittedForums,
-                    p.Values,
-                    p.DisplayStaff,
-                    p.StaffGroup,
-                    p.badge,
-                    count(u.ID) + count(DISTINCT l.UserID) AS total
-                FROM permissions AS p
-                LEFT JOIN users_main AS u ON (u.PermissionID = p.ID)
-                LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID)
-                WHERE p.ID = ?
-                GROUP BY p.ID
-                ", $this->id
-            );
-            $this->info['Values'] = unserialize($this->info['Values']);
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
         }
+        $info = self::$db->rowAssoc("
+            SELECT p.Name,
+                p.Level,
+                p.Secondary,
+                p.PermittedForums,
+                p.Values,
+                p.DisplayStaff,
+                p.StaffGroup,
+                p.badge,
+                count(u.ID) + count(DISTINCT l.UserID) AS total
+            FROM permissions AS p
+            LEFT JOIN users_main AS u ON (u.PermissionID = p.ID)
+            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID)
+            WHERE p.ID = ?
+            GROUP BY p.ID
+            ", $this->id
+        );
+        $info['Values'] = unserialize($info['Values']);
+        $this->info = $info;
         return $this->info;
     }
 

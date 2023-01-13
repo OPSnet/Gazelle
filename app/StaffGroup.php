@@ -12,6 +12,10 @@ class StaffGroup extends BaseObject {
     public function location(): string { return 'tools.php?action=staff_groups'; }
     public function tableName(): string { return 'staff_groups'; }
 
+    public function info(): array {
+        return [];
+    }
+
     public function remove(): int {
         self::$db->prepared_query("
             DELETE FROM staff_groups WHERE ID = ?

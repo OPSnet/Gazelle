@@ -5,8 +5,6 @@ namespace Gazelle;
 class Blog extends BaseObject {
     const CACHE_KEY = 'blog_%d';
 
-    protected array $info;
-
     public function tableName(): string { return 'blog'; }
 
     public function location(): string {
@@ -23,25 +21,26 @@ class Blog extends BaseObject {
     }
 
     public function info(): array {
-        if (!isset($this->info)) {
-            $key = sprintf(self::CACHE_KEY, $this->id);
-            $info = self::$cache->get_value($key);
-            if ($info === false) {
-                $info = self::$db->rowAssoc("
-                    SELECT Title  AS title,
-                        Body      AS body,
-                        ThreadID  AS thread_id,
-                        Time      AS created,
-                        UserID    AS user_id,
-                        Important AS important
-                    FROM blog
-                    WHERE ID = ?
-                    ", $this->id
-                );
-                self::$cache->cache_value($key, $info, 7200);
-            }
-            $this->info = $info;
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
         }
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT Title  AS title,
+                    Body      AS body,
+                    ThreadID  AS thread_id,
+                    Time      AS created,
+                    UserID    AS user_id,
+                    Important AS important
+                FROM blog
+                WHERE ID = ?
+                ", $this->id
+            );
+            self::$cache->cache_value($key, $info, 7200);
+        }
+        $this->info = $info;
         return $this->info;
     }
 

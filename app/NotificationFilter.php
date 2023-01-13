@@ -3,8 +3,6 @@
 namespace Gazelle;
 
 class NotificationFilter extends BaseObject {
-    protected array $info;
-
     protected const DIMENSION = [
         'artist', 'recordLabel', 'tag', 'notTag', 'category', 'format', 'encoding', 'media', 'user'
     ];
@@ -14,9 +12,11 @@ class NotificationFilter extends BaseObject {
     public function location(): string { return 'user.php?action=notify'; }
     public function tableName(): string { return 'users_notify_filters'; }
 
-    public function __construct(int $id) {
-        parent::__construct($id);
-        self::$db->prepared_query("
+    public function info(): array {
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
+        }
+        $info = self::$db->rowAssoc("
             SELECT UserID AS user_id,
                 Label        AS label,
                 Artists      AS artist,
@@ -36,25 +36,22 @@ class NotificationFilter extends BaseObject {
             WHERE ID = ?
             ", $this->id
         );
-        $this->info = self::$db->next_row(MYSQLI_ASSOC);
         foreach (self::DIMENSION as $dimension) {
-            $this->info[$dimension] = $this->expand($this->info[$dimension]);
+            $info[$dimension] = $this->expand($info[$dimension]);
         }
+        $this->info = $info;
+        return $this->info;
     }
 
-    protected function expand($info): array {
-        if (is_null($info) || $info === '') {
+    protected function expand($dimension): array {
+        if (is_null($dimension) || $dimension === '') {
             return [];
         };
         // FIXME: stop leaving '||' in database when a trigger field is emptied
-        if ($info === '||') {
+        if ($dimension === '||') {
             return [];
         }
-        return explode('|', substr($info, 1, strlen($info) - 2));
-    }
-
-    public function info(): array {
-        return $this->info;
+        return explode('|', trim($dimension, '|'));
     }
 
     public function artistList(): array {

@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Report extends BaseObject {
-    protected array $info;
     protected Manager\User $userMan;
 
     public function flush(): Report { return $this; }

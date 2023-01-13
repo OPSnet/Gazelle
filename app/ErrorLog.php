@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class ErrorLog extends BaseObject {
-    protected array $info;
 
     public function flush(): ErrorLog { return $this; }
     public function link(): string { return ''; }
@@ -11,7 +10,7 @@ class ErrorLog extends BaseObject {
     public function tableName(): string { return 'error_log'; }
 
     public function info(): array {
-        if (isset($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $info = self::$db->rowAssoc("
@@ -39,7 +38,7 @@ class ErrorLog extends BaseObject {
         return $this->info;
     }
 
-    public function remove(): bool {
+    public function remove(): int {
         self::$db->prepared_query("
             DELETE FROM error_log WHERE error_log_id = ?
             ", $this->id

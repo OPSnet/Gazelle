@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class StaffPM extends BaseObject {
-    protected array $info;
     protected $author;
     protected $assigned;
 

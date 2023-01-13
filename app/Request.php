@@ -7,8 +7,6 @@ class Request extends BaseObject {
     protected const CACHE_ARTIST  = "request_artists_%d";
     protected const CACHE_VOTE    = "request_votes_%d";
 
-    protected array $info;
-
     public function flush(): Request {
         if ($this->tgroupId()) {
             self::$cache->delete_value("requests_group_" . $this->tgroupId());
@@ -93,69 +91,70 @@ class Request extends BaseObject {
     }
 
     public function info(): array {
-        if (!isset($this->info)) {
-            $info = self::$db->rowAssoc("
-                SELECT r.UserID       AS user_id,
-                    r.FillerID        AS filler_id,
-                    r.TimeAdded       AS created,
-                    r.TimeFilled      AS fill_date,
-                    r.LastVote        AS last_vote_date,
-                    r.CategoryID      AS category_id,
-                    c.name            AS category_name,
-                    r.Title           AS title,
-                    r.Description     AS description,
-                    r.Year            AS year,
-                    r.Image           AS image,
-                    r.CatalogueNumber AS catalogue_number,
-                    r.ReleaseType     AS release_type,
-                    coalesce(rel.Name, 'Unknown')
-                                      AS release_type_name,
-                    r.RecordLabel     AS record_label,
-                    r.GroupID         AS tgroup_id,
-                    r.TorrentID       AS torrent_id,
-                    r.LogCue          AS log_cue,
-                    r.Checksum        AS checksum,
-                    r.BitrateList     AS encoding_list,
-                    r.FormatList      AS format_list,
-                    r.MediaList       AS media_list,
-                    r.OCLC            AS oclc,
-                    group_concat(t.Name ORDER BY t.Name)
-                                      AS tagList
-                FROM requests r
-                INNER JOIN requests_tags rt ON (rt.RequestID = r.ID)
-                INNER JOIN tags           t ON (t.ID = rt.TagID)
-                INNER JOIN category       c ON (c.category_id = r.CategoryID)
-                LEFT JOIN release_type  rel ON (rel.ID = r.ReleaseType)
-                WHERE r.ID = ?
-                GROUP BY r.ID
-                ", $this->id
-            );
-
-            self::$db->prepared_query("
-                SELECT rv.UserID AS user_id,
-                    rv.Bounty    AS bounty
-                FROM requests_votes AS rv
-                WHERE rv.RequestID = ?
-                ORDER BY rv.Bounty DESC
-                ", $this->id
-            );
-            $info['user_vote_list'] = self::$db->to_array(false, MYSQLI_ASSOC, false);
-
-            self::$db->prepared_query("
-                SELECT t.Name
-                FROM requests_tags AS rt
-                INNER JOIN tags AS t ON (t.ID = rt.TagID)
-                WHERE rt.RequestID = ?
-                ORDER BY rt.TagID ASC
-                ", $this->id
-            );
-            $info['tag'] = self::$db->collect('Name', false);
-
-            $info['need_encoding'] = explode('|', $info['encoding_list'] ?? 'Unknown');
-            $info['need_format']   = explode('|', $info['format_list']   ?? 'Unknown');
-            $info['need_media']    = explode('|', $info['media_list']    ?? 'Unknown');
-            $this->info = $info;
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
         }
+        $info = self::$db->rowAssoc("
+            SELECT r.UserID       AS user_id,
+                r.FillerID        AS filler_id,
+                r.TimeAdded       AS created,
+                r.TimeFilled      AS fill_date,
+                r.LastVote        AS last_vote_date,
+                r.CategoryID      AS category_id,
+                c.name            AS category_name,
+                r.Title           AS title,
+                r.Description     AS description,
+                r.Year            AS year,
+                r.Image           AS image,
+                r.CatalogueNumber AS catalogue_number,
+                r.ReleaseType     AS release_type,
+                coalesce(rel.Name, 'Unknown')
+                                  AS release_type_name,
+                r.RecordLabel     AS record_label,
+                r.GroupID         AS tgroup_id,
+                r.TorrentID       AS torrent_id,
+                r.LogCue          AS log_cue,
+                r.Checksum        AS checksum,
+                r.BitrateList     AS encoding_list,
+                r.FormatList      AS format_list,
+                r.MediaList       AS media_list,
+                r.OCLC            AS oclc,
+                group_concat(t.Name ORDER BY t.Name)
+                                  AS tagList
+            FROM requests r
+            INNER JOIN requests_tags rt ON (rt.RequestID = r.ID)
+            INNER JOIN tags           t ON (t.ID = rt.TagID)
+            INNER JOIN category       c ON (c.category_id = r.CategoryID)
+            LEFT JOIN release_type  rel ON (rel.ID = r.ReleaseType)
+            WHERE r.ID = ?
+            GROUP BY r.ID
+            ", $this->id
+        );
+
+        self::$db->prepared_query("
+            SELECT rv.UserID AS user_id,
+                rv.Bounty    AS bounty
+            FROM requests_votes AS rv
+            WHERE rv.RequestID = ?
+            ORDER BY rv.Bounty DESC
+            ", $this->id
+        );
+        $info['user_vote_list'] = self::$db->to_array(false, MYSQLI_ASSOC, false);
+
+        self::$db->prepared_query("
+            SELECT t.Name
+            FROM requests_tags AS rt
+            INNER JOIN tags AS t ON (t.ID = rt.TagID)
+            WHERE rt.RequestID = ?
+            ORDER BY rt.TagID ASC
+            ", $this->id
+        );
+        $info['tag'] = self::$db->collect('Name', false);
+
+        $info['need_encoding'] = explode('|', $info['encoding_list'] ?? 'Unknown');
+        $info['need_format']   = explode('|', $info['format_list']   ?? 'Unknown');
+        $info['need_media']    = explode('|', $info['media_list']    ?? 'Unknown');
+        $this->info = $info;
         return $this->info;
     }
 

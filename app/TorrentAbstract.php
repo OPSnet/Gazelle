@@ -5,7 +5,6 @@ namespace Gazelle;
 abstract class TorrentAbstract extends BaseObject {
     const CACHE_KEY = 't_%d';
 
-    protected array  $info;
     protected TGroup $tgroup;
     protected User   $viewer;
 
@@ -70,7 +69,7 @@ abstract class TorrentAbstract extends BaseObject {
      * @return array of many things
      */
     public function info(): array {
-        if (isset($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);

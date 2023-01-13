@@ -7,7 +7,6 @@ class Contest extends BaseObject {
     const CACHE_STATS   = 'contest_stats_%d';
     const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
 
-    protected array $info;
     protected array $stats; /* entries, users */
 
     public function flush(): Contest {
@@ -21,7 +20,7 @@ class Contest extends BaseObject {
     public function tableName(): string { return "contest"; }
 
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_CONTEST, $this->id);

@@ -15,7 +15,6 @@ class Collage extends BaseObject {
     const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
     protected bool  $lockedForUser = false;
-    protected array $info;
     protected array $userSubscriptions;
     protected User  $viewer;
 
@@ -75,36 +74,37 @@ class Collage extends BaseObject {
     public function sequence(int $entryId) { return $this->collage->sequence($entryId); } /** @phpstan-ignore-line */
 
     public function info(): array {
-        if (!isset($this->info)) {
-            $key = sprintf(self::CACHE_KEY, $this->id);
-            $info = self::$cache->get_value($key);
-            if ($info === false) {
-                $info = self::$db->rowAssoc("
-                    SELECT c.Deleted       AS is_deleted,
-                        c.TagList          AS tag_string,
-                        c.UserID           AS user_id,
-                        c.CategoryID       AS category_id,
-                        c.Updated          AS updated,
-                        c.Subscribers      AS subscriber_total,
-                        c.NumTorrents      AS torrent_total,
-                        c.MaxGroups        AS group_max,
-                        c.MaxGroupsPerUser AS group_max_per_user,
-                        c.Locked           AS is_locked,
-                        c.Name             AS name,
-                        c.Description      AS description,
-                        c.Featured         AS is_featured,
-                        CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
-                    FROM collages c
-                    LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
-                    LEFT JOIN collage_attr ca ON (ca.ID = cha.CollageAttrID and ca.Name = ?)
-                    WHERE c.ID = ?
-                    ", 'sort-newest', $this->id
-                );
-                $info['tag_list'] = explode(' ', $info['tag_string']);
-                self::$cache->cache_value($key, $info, 7200);
-            }
-            $this->info = $info;
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
         }
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT c.Deleted       AS is_deleted,
+                    c.TagList          AS tag_string,
+                    c.UserID           AS user_id,
+                    c.CategoryID       AS category_id,
+                    c.Updated          AS updated,
+                    c.Subscribers      AS subscriber_total,
+                    c.NumTorrents      AS torrent_total,
+                    c.MaxGroups        AS group_max,
+                    c.MaxGroupsPerUser AS group_max_per_user,
+                    c.Locked           AS is_locked,
+                    c.Name             AS name,
+                    c.Description      AS description,
+                    c.Featured         AS is_featured,
+                    CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
+                FROM collages c
+                LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
+                LEFT JOIN collage_attr ca ON (ca.ID = cha.CollageAttrID and ca.Name = ?)
+                WHERE c.ID = ?
+                ", 'sort-newest', $this->id
+            );
+            $info['tag_list'] = explode(' ', $info['tag_string']);
+            self::$cache->cache_value($key, $info, 7200);
+        }
+        $this->info = $info;
         return $this->info;
     }
 

@@ -3,12 +3,11 @@
 namespace Gazelle;
 
 class TorrentLog extends BaseObject {
-    protected Torrent $torrent;
-    protected array $info;
-
-    public function __construct(Torrent $torrent, int $id) {
+    public function __construct(
+        protected Torrent $torrent,
+        protected int $id,
+    ) {
         parent::__construct($id);
-        $this->torrent = $torrent;
     }
 
     public function flush(): TorrentLog { $this->torrent->flush(); return $this; }
@@ -26,27 +25,28 @@ class TorrentLog extends BaseObject {
      * @return array of many things
      */
     public function info(): array {
-        if (empty($this->info)) {
-            $info = self::$db->rowAssoc("
-                SELECT FileName,
-                    Details,
-                    Adjusted         = '1' AS is_adjusted,
-                    Score,
-                    AdjustedScore,
-                    Checksum         = '1' AS checksum_ok,
-                    AdjustedChecksum = '1' AS adjusted_checksum_ok,
-                    AdjustedBy,
-                    AdjustmentReason,
-                    AdjustmentDetails
-                FROM torrents_logs
-                WHERE TorrentID = ?
-                    AND LogID = ?
-                ", $this->torrent->id(), $this->id
-            ) ?? [];
-            $info['detail_list'] = explode("\r\n", $info['Details'] ?? "\r\n");
-            $info['adjustment_list'] = $info['AdjustmentDetails'] ? unserialize($info['AdjustmentDetails']) : [];
-            $this->info = $info;
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
         }
+        $info = self::$db->rowAssoc("
+            SELECT FileName,
+                Details,
+                Adjusted         = '1' AS is_adjusted,
+                Score,
+                AdjustedScore,
+                Checksum         = '1' AS checksum_ok,
+                AdjustedChecksum = '1' AS adjusted_checksum_ok,
+                AdjustedBy,
+                AdjustmentReason,
+                AdjustmentDetails
+            FROM torrents_logs
+            WHERE TorrentID = ?
+                AND LogID = ?
+            ", $this->torrent->id(), $this->id
+        );
+        $info['detail_list'] = explode("\r\n", $info['Details'] ?? "\r\n");
+        $info['adjustment_list'] = $info['AdjustmentDetails'] ? unserialize($info['AdjustmentDetails']) : [];
+        $this->info = $info;
         return $this->info;
     }
 

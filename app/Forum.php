@@ -72,6 +72,9 @@ class Forum extends BaseObject {
      *      min_class_read, min_class_write, min_class_create, sequence, auto_lock, auto_lock_weeks]
      */
     public function info(): array {
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
+        }
         $key = sprintf(self::CACHE_FORUM, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
@@ -102,7 +105,8 @@ class Forum extends BaseObject {
             );
             self::$cache->cache_value($key, $info, 86400);
         }
-        return $info;
+        $this->info = $info;
+        return $this->info;
     }
 
     public function autoLock(): int {

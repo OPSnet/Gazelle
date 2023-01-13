@@ -6,8 +6,6 @@ class ForumThread extends BaseObject {
     const CACHE_KEY     = 'fthread_%d';
     const CACHE_CATALOG = 'fthread_cat_%d_%d';
 
-    protected array $info;
-
     public function flush(): ForumThread {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value("edit_forums_{$this->id}");
@@ -35,7 +33,7 @@ class ForumThread extends BaseObject {
      * TODO: check if ever NumPosts != Posts
      */
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);

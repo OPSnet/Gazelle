@@ -5,8 +5,6 @@ namespace Gazelle;
 class ForumPost extends BaseObject {
     const CACHE_KEY     = 'fpost_%d';
 
-    protected array $info;
-
     public function flush(): ForumPost {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->thread()->flush();
@@ -22,7 +20,7 @@ class ForumPost extends BaseObject {
      * Get information about a post
      */
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);

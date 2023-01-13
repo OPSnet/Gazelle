@@ -3,16 +3,16 @@
 namespace Gazelle;
 
 class Wiki extends BaseObject {
-    protected $info;
-
     protected const CACHE_KEY = 'wiki_%d';
 
-    public function __construct(int $id) {
-        parent::__construct($id);
+    public function info(): array {
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
+        }
         $key = sprintf(self::CACHE_KEY, $this->id);
-        $this->info = self::$cache->get_value($key);
-        if ($this->info === false) {
-            $this->info = self::$db->rowAssoc("
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
                 SELECT w.Title      AS title,
                     w.Body          AS body,
                     w.Date          AS date,
@@ -28,15 +28,17 @@ class Wiki extends BaseObject {
                 GROUP BY w.ID
                 ", $this->id
             );
-            $this->info['alias'] = array_combine(
-                explode(',', $this->info['aliases']),
-                array_map('intval', explode(',', $this->info['users']))
+            $info['alias'] = array_combine(
+                explode(',', $info['aliases']),
+                array_map('intval', explode(',', $info['users']))
             );
             \Text::$TOC = true;
-            \Text::full_format($this->info['body'], false);
-            $this->info['toc'] = \Text::parse_toc(0);
-            self::$cache->cache_value($key, $this->info, 0);
+            \Text::full_format($info['body'], false);
+            $info['toc'] = \Text::parse_toc(0);
+            self::$cache->cache_value($key, $info, 0);
         }
+        $this->info = $info;
+        return $info;
     }
 
     public function flush(): Wiki { self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id)); return $this; }
@@ -45,8 +47,8 @@ class Wiki extends BaseObject {
     public function tableName(): string { return 'wiki_articles'; }
 
     public function revisionBody(int $revision): ?string {
-        return $revision === $this->info['revision']
-            ? $this->info['body']
+        return $revision === $this->revision()
+            ? $this->body()
             : self::$db->scalar("
                 SELECT Body FROM wiki_revisions WHERE ID = ? AND Revision = ?
                 ", $this->id, $revision
@@ -63,7 +65,7 @@ class Wiki extends BaseObject {
     }
 
     public function alias(): array {
-        return $this->info['alias'];
+        return $this->info()['alias'];
     }
 
     public function shortName(string $name): string {
@@ -71,35 +73,35 @@ class Wiki extends BaseObject {
     }
 
     public function authorId(): int {
-        return $this->info['author_id'];
+        return $this->info()['author_id'];
     }
 
     public function body(): string {
-        return $this->info['body'];
+        return $this->info()['body'];
     }
 
     public function date(): string {
-        return $this->info['date'];
+        return $this->info()['date'];
     }
 
     public function minClassEdit(): int {
-        return $this->info['min_class_edit'];
+        return $this->info()['min_class_edit'];
     }
 
     public function minClassRead(): int {
-        return $this->info['min_class_read'];
+        return $this->info()['min_class_read'];
     }
 
     public function revision(): int {
-        return $this->info['revision'];
+        return $this->info()['revision'];
     }
 
     public function title(): string {
-        return $this->info['title'];
+        return $this->info()['title'];
     }
 
     public function ToC(): string {
-        return $this->info['toc'] ?? '';
+        return $this->info()['toc'] ?? '';
     }
 
     public function editable(User $user): bool {
@@ -189,7 +191,7 @@ class Wiki extends BaseObject {
      * @param string $alias the alias to remove
      */
     public function removeAlias(string $alias): int {
-        if (!isset($this->info['alias'][$alias])) {
+        if (!isset($this->alias[$alias])) {
             return 0;
         }
         self::$db->prepared_query("

@@ -5,8 +5,6 @@ namespace Gazelle;
 class ForumPoll extends BaseObject {
     const CACHE_KEY = 'forum_poll_%d';
 
-    protected array $info;
-
     public function flush(): ForumPoll {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->info = [];
@@ -21,7 +19,7 @@ class ForumPoll extends BaseObject {
     }
 
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);

@@ -6,6 +6,8 @@ abstract class BaseObject extends Base {
     /* used for handling updates */
     protected array $updateField;
 
+    protected array $info;
+
     // FIXME: StaffPM breaks readonly-ness due to inheritance
     public function __construct(
         protected int $id,

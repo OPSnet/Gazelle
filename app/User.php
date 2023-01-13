@@ -23,7 +23,6 @@ class User extends BaseObject {
     protected array $lastRead;
     protected array $forumWarning = [];
     protected array $staffNote = [];
-    protected array $info = [];
 
     protected bool $donorVisible;
     protected string $donorHeart;
@@ -77,8 +76,8 @@ class User extends BaseObject {
         $this->logout();
     }
 
-    public function info(): ?array {
-        if (!empty($this->info)) {
+    public function info(): array {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
