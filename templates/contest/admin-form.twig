@@ -10,21 +10,21 @@
         </tr>
         <tr>
             <td>Enabled user bonus</td>
-            <td>{{ contest.bonusPerUser|number_format(2) }}</td>
+            <td>{{ contest.bonusPerUserValue|number_format }}</td>
         </tr>
         <tr>
             <td>Contest participation</td>
-            <td>{{ contest.bonusPerContest|number_format(2) }}</td>
+            <td>{{ contest.bonusPerContestValue|number_format }}</td>
         </tr>
         <tr>
             <td>Per entry added</td>
-            <td>{{ contest.bonusPerEntry|number_format(2) }}</td>
+            <td>{{ contest.bonusPerEntryValue|number_format }}</td>
         </tr>
         <tr>
             <td>Status of payout</td>
             <td>{{ contest.bonusStatus }}</td>
         </tr>
-    {% if contest.paymentRead %}
+    {% if contest.paymentReady %}
         <tr>
             <td>Payout is ready</td>
             <td><input type="submit" name="payment" value="Initiate payment"/></td>
@@ -49,7 +49,7 @@
                 <p>Edit the type of the contest</p>
                 <select name="type">
 {% for t in type %}
-                    <option value="{{ t.id }}"{{ selected(contest.contestType) }}>{{ t.name }}</option>
+                    <option value="{{ t.id }}"{{ selected(t.id == contest.contestType) }}>{{ t.name }}</option>
 {% endfor %}
                 </select>
             </td>
@@ -71,17 +71,17 @@
                 does not need to add up to anything in particular: they will be scaled to the interval [0, 1] and the sum == 1.
                 The ratios are shown to the left of the input fields and are recalculated after the page is saved.</p>
 
-                <span style="width: 30px; align="right">{{ contest.bonusPerUserRatio|number_format(4) }}</span>
+                <span style="width: 30px; align="right">{{ contest.bonusPerUserRatio|number_format(4) }} </span>
                 <input type="number" min="0" max="10000" id="pool-user" name="pool-user" value="{{ contest.bonusPerUser|default(5) }}"
                 />&nbsp;<label for="pool-user">This proportion of the pool will be shared between all enabled users. The number of users may vary
                 over time; the exact value will be known only at the end of the contest.<br />
 
-                <span style="width: 30px; align="right">{{ contest.bonusPerContestRatio|number_format(4) }}</span>
+                <span style="width: 30px; align="right">{{ contest.bonusPerContestRatio|number_format(4) }} </span>
                 <input type="number" min="0" max="10000" id="pool-contest" name="pool-contest" value="{{ contest.bonusPerContest|default(15) }}"
                 />&nbsp;<label for="pool-contest">This proportion of the pool will be shared between all users who
                 participate in the contest (i.e. at least one entry).<br />
 
-                <span style="width: 30px; align="right">{{ contest.bonusPerEntryRatio|number_format(4) }}</span>
+                <span style="width: 30px; align="right">{{ contest.bonusPerEntryRatio|number_format(4) }} </span>
                 <input type="number" min="0" max="10000" id="pool-entry" name="pool-entry" value="{{ contest.bonusPerEntry|default(80) }}"
                 />&nbsp;<label for="pool-entry">This proportion of the pool will be shared between every entry in the contest.
             </td>

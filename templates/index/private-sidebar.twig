@@ -68,9 +68,24 @@
     <table>
     {% for entry in leaderboard %}
         <tr>
-            <td><a href="user.php?id={{ entry.user_id }}">{{ entry.username }}</a></td>
+            <td>{{ loop.index }}</td>
+            <td>{{ entry.user_id|user_url }}</td>
             <td>{{ entry.entry_count|number_format }}</td>
         </tr>
+        {% if loop.last and contest_rank %}
+            {% if contest_rank.position > 4 %}
+        <tr>
+            <td colspan="3"><hr /></td>
+        </tr>
+            {% endif %}
+            {% if contest_rank.position > 3 %}
+        <tr>
+            <td>{{ contest_rank.position|number_format }}</td>
+            <td>{{ viewer.id|user_url }}</td>
+            <td>{{ contest_rank.total|number_format }}</td>
+        </tr>
+            {% endif %}
+        {% endif %}
     {% endfor %}
     </table>
     <div class="center pad">

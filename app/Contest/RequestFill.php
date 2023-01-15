@@ -60,7 +60,7 @@ class RequestFill extends AbstractContest {
         );
     }
 
-    public function userPayout(float $enabledUserBonus, float $contestBonus, float $perEntryBonus): array {
+    public function userPayout(int $enabledUserBonus, int $contestBonus, int $perEntryBonus): array {
         self::$db->prepared_query("
             SELECT um.ID,
                 count(r.ID) AS total_entries,

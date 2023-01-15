@@ -83,6 +83,10 @@ class Contest extends BaseObject {
         return $this->info()['date_end'];
     }
 
+    public function description(): string {
+        return $this->info()['description'];
+    }
+
     public function display(): int {
         return $this->info()['display'];
     }
@@ -95,8 +99,27 @@ class Contest extends BaseObject {
         return $this->info()['name'];
     }
 
-    public function description(): string {
-        return $this->info()['description'];
+    public function rank(\Gazelle\User $user): ?array {
+        $page   = 0;
+        $userId = $user->id();
+        while (true) {
+            $leaderboard = $this->type()->leaderboard(CONTEST_ENTRIES_PER_PAGE, $page * CONTEST_ENTRIES_PER_PAGE);  /** @phpstan-ignore-line */
+            if (!$leaderboard) {
+                break;
+            }
+            for ($i = 0, $max = count($leaderboard); $i < $max; $i++) {
+                if ($userId == $leaderboard[$i]['user_id']) {
+                    return [
+                        'position' => 1 + $i + $page * CONTEST_ENTRIES_PER_PAGE,
+                        'total'    => $leaderboard[$i]['entry_count'],
+                    ];
+                }
+            }
+            if (++$page > 1000) {
+                break; // sanity check
+            }
+        }
+        return null;
     }
 
     protected function participationStats(): array {
@@ -144,9 +167,9 @@ class Contest extends BaseObject {
         return $this->info()['bonus_contest_ratio'];
     }
 
-    public function bonusPerContestValue(): float {
+    public function bonusPerContestValue(): int {
         $totalUsers = $this->totalUsers();
-        return $totalUsers ? $this->bonusPoolTotal() *  $this->bonusPerContestRatio() / $totalUsers : 0.0;
+        return $totalUsers ? floor($this->bonusPoolTotal() *  $this->bonusPerContestRatio() / $totalUsers) : 0;
     }
 
     public function bonusPerEntry(): float {
@@ -157,9 +180,9 @@ class Contest extends BaseObject {
         return $this->info()['bonus_per_entry_ratio'];
     }
 
-    public function bonusPerEntryValue(): float {
+    public function bonusPerEntryValue(): int {
         $totalEntries = $this->totalEntries();
-        return $totalEntries ? $this->bonusPoolTotal() * $this->bonusPerEntryRatio() / $totalEntries : 0.0;
+        return $totalEntries ? floor($this->bonusPoolTotal() * $this->bonusPerEntryRatio() / $totalEntries) : 0;
     }
 
     public function bonusPerUser(): float {
@@ -170,9 +193,9 @@ class Contest extends BaseObject {
         return $this->info()['bonus_user_ratio'];
     }
 
-    public function bonusPerUserValue(): float {
+    public function bonusPerUserValue(): int {
         $totalEnabledUsers = (new Stats\Users())->enabledUserTotal();
-        return $totalEnabledUsers ? $this->bonusPoolTotal() * $this->bonusPerUserRatio() / $totalEnabledUsers : 0.0;
+        return $totalEnabledUsers ? floor($this->bonusPoolTotal() * $this->bonusPerUserRatio() / $totalEnabledUsers) : 0;
     }
 
     public function isOpen(): bool {
@@ -280,7 +303,7 @@ class Contest extends BaseObject {
         $perEntryBonus    = $this->bonusPerEntryValue();
 
         $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
-        fprintf($report, "# user=%0.2f contest=%0.2f entry=%0.f\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
+        fprintf($report, "# user=%d contest=%d entry=%d\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
 
         $participants = $this->type()->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         foreach ($participants as $p) {
@@ -289,13 +312,12 @@ class Contest extends BaseObject {
             if ($p['total_entries']) {
                 $totalGain += $contestBonus + ($perEntryBonus * $p['total_entries']);
             }
-            $log = date('Y-m-d H:i:s') ." {$user->username()} ({$user->id()}) n={$p['total_entries']} t={$totalGain}";
+            $log = date('Y-m-d H:i:s') ." {$user->label()} n={$p['total_entries']} t={$totalGain}";
             if ($user->hasAttr('no-fl-gifts') || $user->hasAttr('disable-bonus-points')) {
                 fwrite($report, "$log DECLINED\n");
                 continue;
             }
             fwrite($report, "$log DISTRIBUTED\n");
-            fflush($report);
             if (DEBUG_CONTEST_PAYOUT) {
                 continue;
             }
@@ -307,11 +329,11 @@ class Contest extends BaseObject {
                     'enabled_bonus'   => $enabledUserBonus,
                     'per_entry_bonus' => $perEntryBonus,
                     'total_entries'   => $p['total_entries'],
-                    'username'        => $p['Username'],
+                    'username'        => $user->username(),
                 ])
             );
             (new User\Bonus($user))->addPoints($totalGain);
-            $user->addStaffNote(number_format($totalGain, 2) . " BP added for {$p['total_entries']} entries in {$this->name()}")
+            $user->addStaffNote(number_format($totalGain) . " BP added for {$p['total_entries']} entries in {$this->name()}")
                 ->modify();
         }
         fclose($report);

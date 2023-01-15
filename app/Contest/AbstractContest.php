@@ -10,9 +10,8 @@ trait TorrentLeaderboard {
         $leaderboard = self::$cache->get_value($key);
         if ($leaderboard === false) {
             self::$db->prepared_query("
-                SELECT
+                SELECT DISTINCT
                     l.user_id,
-                    um.Username as username,
                     l.entry_count,
                     l.last_entry_id,
                     t.Time as last_upload,
@@ -20,7 +19,10 @@ trait TorrentLeaderboard {
                 FROM contest_leaderboard l
                 INNER JOIN torrents t ON (t.ID = l.last_entry_id)
                 INNER JOIN users_main um ON (um.ID = l.user_id)
-                WHERE l.contest_id = ?
+                INNER JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
+                WHERE um.Enabled = '1'
+                    AND xfu.remaining = 0
+                    AND  l.contest_id = ?
                 ORDER BY l.entry_count DESC, t.Time ASC, l.user_id ASC
                 LIMIT ? OFFSET ?
                 ", $this->id, $limit, $offset
@@ -48,5 +50,5 @@ abstract class AbstractContest extends \Gazelle\Base {
 
     abstract public function ranker(): array;
     abstract public function participationStats(): array;
-    abstract public function userPayout(float $enabledUserBonus, float $contestBonus, float $perEntryBonus): array;
+    abstract public function userPayout(int $enabledUserBonus, int $contestBonus, int $perEntryBonus): array;
 }

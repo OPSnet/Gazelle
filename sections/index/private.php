@@ -10,7 +10,8 @@ if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMa
     $newsReader->witness($Viewer->id());
 }
 
-$contest = $contestMan->currentContest();
+$contest     = $contestMan->currentContest();
+$contestRank = null;
 if (!$contest) {
     $leaderboard = [];
 } else {
@@ -26,6 +27,7 @@ if (!$contest) {
                 $entry['username'] = $userMan->findById($entry['user_id'])->username();
             }
             unset($entry);
+            $contestRank = $contest->rank($Viewer);
         }
     }
 }
@@ -33,6 +35,7 @@ if (!$contest) {
 echo $Twig->render('index/private-sidebar.twig', [
     'blog'              => new Gazelle\Manager\Blog,
     'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
+    'contest_rank'      => $contestRank,
     'leaderboard'       => $leaderboard,
     'featured_aotm'     => $tgMan->featuredAlbumAotm(),
     'featured_showcase' => $tgMan->featuredAlbumShowcase(),
