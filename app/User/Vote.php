@@ -12,7 +12,6 @@ class Vote extends \Gazelle\BaseUser {
 
     protected const VOTE_USER_KEY = 'vote_user_%d';
     protected const VOTE_PAIR_KEY = 'vote_pair_%d';
-    protected const VOTE_SIMILAR  = 'vote_similar_albums_%d';
     protected const VOTE_RECENT   = 'u_vote_%d';
     protected const VOTE_TOTAL    = 'u_vote_T_%d';
     protected const VOTED_USER    = 'user_voted_%d';
@@ -238,33 +237,6 @@ class Vote extends \Gazelle\BaseUser {
             self::$cache->cache_value($key, $topVotes, 3600);
         }
         return $topVotes;
-    }
-
-    public function similarVote(int $tgroupId): array {
-        $key = sprintf(self::VOTE_SIMILAR, $tgroupId);
-        $similar = self::$cache->get_value($key);
-        if ($similar === false || !isset($similar[$tgroupId])) {
-            self::$db->prepared_query("
-                SELECT v.GroupID
-                FROM (
-                    SELECT UserID
-                    FROM users_votes
-                    WHERE Type='Up' AND GroupID = ?
-                ) AS a
-                INNER JOIN users_votes AS v USING (UserID)
-                WHERE v.GroupID != ?
-                GROUP BY v.GroupID
-                HAVING sum(if(v.Type='Up', 1, 0)) > 0
-                    AND binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)) > 0.3
-                ORDER BY binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)),
-                    count(*) DESC
-                LIMIT 10
-                ", $tgroupId, $tgroupId
-            );
-            $similar = self::$db->collect(0);
-            self::$cache->cache_value($key, $similar, 3600);
-        }
-        return $similar;
     }
 
     public function links(int $tgroupId): string {

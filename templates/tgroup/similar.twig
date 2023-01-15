@@ -1,0 +1,14 @@
+{% for tgroup in similar %}
+    {% if loop.first %}
+<table class="vote_matches_table" id="vote_matches">
+    <tr class="colhead">
+        <td><a href="#">&uarr;</a>&nbsp;People who like this album also like... <a href="#" onclick="$('.votes_rows').gtoggle(); return false;">(Show)</a></td>
+    </tr>
+    {% endif %}
+    <tr class="votes_rows hidden row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td><span class="like_ranks">{{ loop.index }}.</span> {{ tgroup.link|raw }}</td>
+    </tr>
+    {% if loop.last %}
+</table>
+    {% endif %}
+{% endfor %}

@@ -1,7 +1,8 @@
 <?php
 header('Access-Control-Allow-Origin: *');
 
-$tgroup = (new Gazelle\Manager\TGroup)->setViewer($Viewer)->findById((int)($_GET['id'] ?? 0));
+$tgMan  = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$tgroup = $tgMan->findById((int)($_GET['id'] ?? 0));
 if (is_null($tgroup)) {
     error(404);
 }
@@ -689,32 +690,9 @@ if (!$Viewer->disableRequests()) {
     }
 }
 
-// Matched Votes
-$similar = $vote->similarVote($tgroupId);
-if (!empty($similar)) {
-?>
-        <table class="vote_matches_table" id="vote_matches">
-            <tr class="colhead">
-                <td><a href="#">&uarr;</a>&nbsp;People who like this album also liked... <a href="#" onclick="$('.votes_rows').gtoggle(); return false;">(Show)</a></td>
-            </tr>
-<?php
-    $Groups = Torrents::get_groups($similar, true, true, false);
-    $i = 0;
-    foreach ($similar as $MatchGroupID) {
-        if (!isset($Groups[$MatchGroupID])) {
-            continue;
-        }
-        $MatchGroup = $Groups[$MatchGroupID];
-        $i++;
-        $Str = Artists::display_artists($MatchGroup['ExtendedArtists']).'<a href="torrents.php?id='.$MatchGroupID.'">'.$MatchGroup['Name'].'</a>';
-?>
-            <tr class="votes_rows hidden <?=($i & 1) ? 'rowb' : 'rowa'?>">
-                <td><span class="like_ranks"><?=$i?>.</span> <?=$Str?></td>
-            </tr>
-<?php } ?>
-        </table>
-<?php
-}
+echo $Twig->render('tgroup/similar.twig', [
+    'similar' => $tgMan->similarVote($tgroupId),
+]);
 
 ?>
         <div class="box torrent_description">

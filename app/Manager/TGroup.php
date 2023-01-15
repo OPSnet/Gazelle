@@ -3,9 +3,9 @@
 namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\BaseManager {
-    protected const ID_KEY = 'zz_tg_%d';
-
-    const CACHE_KEY_FEATURED = 'featured_%d';
+    protected const ID_KEY             = 'zz_tg_%d';
+    protected const CACHE_KEY_FEATURED = 'featured_%d';
+    protected const VOTE_SIMILAR       = 'vote_similar_albums_%d';
 
     const FEATURED_AOTM     = 0;
     const FEATURED_SHOWCASE = 1;
@@ -295,5 +295,39 @@ class TGroup extends \Gazelle\BaseManager {
         $affected = self::$db->affected_rows();
         self::$db->commit();
         return $affected;
+    }
+
+    public function similarVote(int $tgroupId): array {
+        $key = sprintf(self::VOTE_SIMILAR, $tgroupId);
+        $similar = self::$cache->get_value($key);
+        if ($similar === false || !isset($similar[$tgroupId])) {
+            self::$db->prepared_query("
+                SELECT v.GroupID
+                FROM (
+                    SELECT UserID
+                    FROM users_votes
+                    WHERE Type = 'Up' AND GroupID = ?
+                ) AS a
+                INNER JOIN users_votes AS v USING (UserID)
+                WHERE v.GroupID != ?
+                GROUP BY v.GroupID
+                HAVING sum(if(v.Type = 'Up', 1, 0)) > 0
+                    AND binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)) > 0.3
+                ORDER BY binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)),
+                    count(*) DESC
+                LIMIT 10
+                ", $tgroupId, $tgroupId
+            );
+            $similar = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $similar, 3600);
+        }
+        $list = [];
+        foreach ($similar as $s) {
+            $tgroup = $this->findById($s);
+            if ($tgroup) {
+                $list[] = $tgroup;
+            }
+        }
+        return $list;
     }
 }
