@@ -141,34 +141,22 @@ class Torrent extends TorrentAbstract {
     /**
      * Combine torrent media into a standardized file name
      */
-    public function torrentFilename(bool $asText, int $MaxLength): string {
-        $MaxLength -= strlen($this->id) + 1 + ($asText ? 4 : 8);
-        $info = $this->info();
-        $group = $this->group();
-        $artist = safeFilename($group->artistName());
-        if ($info['Year'] ?? 0 > 0) {
-            $artist .= ".{$info['Year']}";
-        }
-        $meta = [];
-        if ($info['Media'] != '') {
-            $meta[] = $info['Media'];
-        }
-        if ($info['Format'] != '') {
-            $meta[] = $info['Format'];
-        }
-        if ($info['Encoding'] != '') {
-            $meta[] = $info['Encoding'];
-        }
-        $label = empty($meta) ? '' : ('.(' . safeFilename(implode('-', $meta)) . ')');
-
-        $filename = safeFilename($group->name());
-        if (!$filename) {
-            $filename = 'Unnamed';
-        } elseif (mb_strlen("$artist.$filename$label", 'UTF-8') <= $MaxLength) {
-            $filename = "$artist.$filename";
-        }
-
-        $filename = shortenString($filename . $label, $MaxLength, true, false) . "-" . $this->id;
+    public function torrentFilename(bool $asText, int $maxLength): string {
+        $tgroup = $this->group();
+        $filename = implode('.',
+            match($tgroup->categoryName()) {
+                'Music'  => [
+                    $tgroup->artistRole()->text(), $tgroup->year(), $tgroup->name(),
+                    '(' . implode('-', [$this->media(), $this->format(), $this->encoding()]) . ')'
+                ],
+                'Audiobooks',
+                'Comedy' => [$tgroup->year(), $tgroup->name()],
+                default  => [$tgroup->name()],
+            }
+        );
+        $maxLength -= strlen($this->id) + 1 + ($asText ? 4 : 8);
+        $filename = shortenString($filename, $maxLength, true, false)
+            . "-" . $this->id;
         return $asText ? "$filename.txt" : "$filename.torrent";
     }
 
