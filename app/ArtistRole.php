@@ -87,21 +87,21 @@ abstract class ArtistRole extends \Gazelle\Base {
             $chunk[] = match($djCount) {
                 1 => $this->artistLink($mode, $roleList['dj'][0]),
                 2 => $this->artistLink($mode, $roleList['dj'][0]) . $and . $this->artistLink($mode, $roleList['dj'][1]),
-                default => 'Various DJs',
+                default => $this->various('DJs', $roleList['dj'], $mode),
             };
         } else {
             if ($composerCount > 0) {
                 $chunk[] = match($composerCount) {
                     1 => $this->artistLink($mode, $roleList['composer'][0]),
                     2 => $this->artistLink($mode, $roleList['composer'][0]) . $and . $this->artistLink($mode, $roleList['composer'][1]),
-                    default => 'Various Composers',
+                    default => $this->various('Composers', $roleList['composer'], $mode),
                 };
                 if ($arrangerCount > 0) {
                     $chunk[] = 'arranged by';
                     $chunk[] = match($arrangerCount) {
                         1 => $this->artistLink($mode, $roleList['arranger'][0]),
                         2 => $this->artistLink($mode, $roleList['arranger'][0]) . $and . $this->artistLink($mode, $roleList['arranger'][1]),
-                        default => 'Various Arrangers',
+                        default => $this->various('Arrangers', $roleList['arranger'], $mode),
                     };
                 }
                 if ($mainCount + $conductorCount > 0) {
@@ -119,7 +119,7 @@ abstract class ArtistRole extends \Gazelle\Base {
                     $chunk[] = match($mainCount) {
                         1 => $this->artistLink($mode, $roleList['main'][0]),
                         2 => $this->artistLink($mode, $roleList['main'][0]) . $and . $this->artistLink($mode, $roleList['main'][1]),
-                        default => 'Various Artists',
+                        default => $this->various('Artists', $roleList['main'], $mode),
                     };
                 }
 
@@ -130,12 +130,19 @@ abstract class ArtistRole extends \Gazelle\Base {
                     $chunk[] = match($conductorCount) {
                         1 => $this->artistLink($mode, $roleList['conductor'][0]),
                         2 => $this->artistLink($mode, $roleList['conductor'][0]) . $and . $this->artistLink($mode, $roleList['conductor'][1]),
-                        default => 'Various Conductors',
+                        default => $this->various('Conductors', $roleList['conductor'], $mode),
                     };
                 }
             }
         }
         return $link = implode(' ', $chunk);
+    }
+
+    protected function various(string $role, array $artistList, int $mode): string {
+        return match ($mode) {
+            self::RENDER_HTML => '<span class="tooltip" title="' . implode(' ⁝ ', array_map(fn ($a) => $a['name'], $artistList)) . "\">Various $role</span>",
+            default           => "Various $role",
+        };
     }
 
     /**
