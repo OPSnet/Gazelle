@@ -19,4 +19,5 @@ echo $Twig->render('admin/bonus-stats.twig', [
     'day'   => $day,
     'week'  => $week,
     'month' => $month,
+    'fl'    => (new Gazelle\Stats\Users)->stockpileTokenList(10),
 ]);

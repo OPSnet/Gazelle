@@ -303,6 +303,18 @@ class Users extends \Gazelle\Base {
         return $this->activityStat()['active_month'];
     }
 
+    public function stockpileTokenList(int $limit): array {
+        self::$db->prepared_query("
+            SELECT user_id,
+                tokens AS total
+            FROM user_flt
+            ORDER BY tokens DESC
+            LIMIT ?
+            ", $limit
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function refresh(): int {
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE user_summary_new LIKE user_summary

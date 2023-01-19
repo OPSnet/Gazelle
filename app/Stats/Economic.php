@@ -59,6 +59,34 @@ class Economic extends \Gazelle\Base {
                     AND active = 1
             ");
 
+            [$info['totalTokens'], $info['totalTokensStranded']] = self::$db->row("
+                SELECT
+                    sum(uf.tokens),
+                    sum(if(um.Enabled = '1', 0, uf.tokens))
+                FROM user_flt uf
+                INNER JOIN users_main um ON (um.ID = uf.user_id)
+            ");
+
+            [$info['totalBonus'], $info['totalBonusStranded']] = self::$db->row("
+                SELECT
+                    sum(ub.points),
+                    sum(if(um.Enabled = '1', 0, ub.points))
+                FROM user_bonus ub
+                INNER JOIN users_main um ON (um.ID = ub.user_id)
+            ");
+
+            [$info['totalUsers'], $info['totalUsersDisabled']] = self::$db->row("
+                SELECT
+                    count(*),
+                    sum(if(um.Enabled = '1', 1, 0))
+                FROM users_main um
+            ");
+
+            $info['2FA'] = self::$db->scalar("
+                SELECT count(*)
+                FROM users_main
+                WHERE 2FA_Key IS NOT NULL AND 2FA_Key != ''
+            ");
             $info = array_map('intval', $info); // some db results are stringified
             self::$cache->cache_value(self::CACHE_KEY, $info, 3600);
         }

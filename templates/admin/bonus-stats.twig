@@ -95,6 +95,7 @@
             <td style="text-align: center;" colspan="2">Spenders</td>
             <td style="text-align: center;" colspan="2">Pool Contributors</td>
             <td style="text-align: center;" colspan="2">Overall Spenders</td>
+            <td style="text-align: center;" colspan="2">FL Token Hoarders</td>
             <td>&nbsp;</td>
         </tr>
         <tr class="colhead">
@@ -106,6 +107,8 @@
             <td style="text-align: right;">Points</td>
             <td>User</td>
             <td style="text-align: right;">Points</td>
+            <td>User</td>
+            <td style="text-align: right;">Tokens</td>
             <td>User</td>
             <td>&nbsp;</td>
         </tr>
@@ -128,6 +131,10 @@
 
             <td style="text-align: right">{{ _self.total(overall, i) }}</td>
             <td>{{ _self.user(overall, i) }}</td>
+
+            <td style="text-align: right">{{ _self.total(fl, i) }}</td>
+            <td>{{ _self.user(fl, i) }}</td>
+
             <td style="text-align: right">{{ i + 1 }}</td>
         </tr>
 {% endfor %}
