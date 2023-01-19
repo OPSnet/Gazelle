@@ -6,6 +6,7 @@ if ($Viewer->disableForums()) {
 
 $Router->addGet('', __DIR__ . '/main.php');
 
+$Router->addPost('autosub',          __DIR__ . '/autosub.php');
 $Router->addPost('add_poll_option',  __DIR__ . '/add_poll_option.php');
 $Router->addPost('mod_thread',       __DIR__ . '/mod_thread.php');
 $Router->addPost('new',              __DIR__ . '/take_new_thread.php');

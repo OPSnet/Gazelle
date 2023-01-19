@@ -19,6 +19,8 @@ if ($privilege) {
 
 $edit = isset($_REQUEST['id']) && $_REQUEST['id'] !== 'new';
 
+$usersAffected = null;
+
 if (isset($_REQUEST['submit'])) {
     authorize();
     $validator = new Gazelle\Util\Validator;
@@ -67,29 +69,17 @@ if (isset($_REQUEST['submit'])) {
         header("Location: tools.php?action=permissions");
         exit;
     }
-    if ($badge != $privilege->badge()) {
-        $privilege->setUpdate('Badge', $badge);
-    }
-    if ($displayStaff != $privilege->displayStaff()) {
-        $privilege->setUpdate('DisplayStaff', $displayStaff ? '1' : '0');
-    }
-    if ($level != $privilege->level()) {
-        $privilege->setUpdate('Level', $level);
-    }
-    if ($name != $privilege->name()) {
-        $privilege->setUpdate('Name', $name);
-    }
-    if ((bool)$secondary != $privilege->isSecondary()) {
-        $privilege->setUpdate('Secondary', $secondary);
-    }
-    if ($forums != $privilege->permittedForums()) {
-        $privilege->setUpdate('PermittedForums', $forums);
-    }
-    if ($staffGroupId !== $privilege->staffGroupId()) {
-        $privilege->setUpdate('StaffGroup', $staffGroupId);
-    }
-    $privilege->setUpdate('`Values`', serialize($values))
+    $privilege->setUpdate('Badge', $badge)
+        ->setUpdate('DisplayStaff', $displayStaff ? '1' : '0')
+        ->setUpdate('Level', $level)
+        ->setUpdate('Name', $name)
+        ->setUpdate('Secondary', $secondary)
+        ->setUpdate('PermittedForums', $forums)
+        ->setUpdate('StaffGroup', $staffGroupId)
+        ->setUpdate('`Values`', serialize($values))
         ->modify();
+
+    $usersAffected = (new Gazelle\Manager\User)->flushUserclass($level);
 }
 
 require_once('permissions_edit.php');

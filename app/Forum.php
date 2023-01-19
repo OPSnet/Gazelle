@@ -8,6 +8,13 @@ class Forum extends BaseObject {
     const CACHE_THREAD_INFO = 'thread_%d_info';
     const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
 
+    protected \Gazelle\DB\Pg $pg;
+
+    public function __construct(int $id) {
+        parent::__construct($id);
+        $this->pg = new \Gazelle\DB\Pg(GZPG_DSN);
+    }
+
     public function tableName(): string {
         return 'forums';
     }
@@ -361,5 +368,56 @@ class Forum extends BaseObject {
             ", $perPage, $this->id, $userId
         );
         return self::$db->to_array('TopicID', MYSQLI_ASSOC, false);
+    }
+
+    public function isAutoSubscribe(int $userId): bool {
+        return (bool)$this->pg->scalar("
+            SELECT 1
+            FROM forum_autosub
+            WHERE id_forum = ?
+                AND id_user = ?
+            ", $this->id, $userId
+        );
+    }
+
+    public function autoSubscribeUserIdList(): array {
+        return $this->pg->column("
+            SELECT id_user FROM forum_autosub WHERE id_forum = ?
+            ", $this->id
+        );
+    }
+
+    public function autoSubscribeForUserList(User $user): array {
+        if (!$user->permitted('site_forum_autosub')) {
+            return [];
+        }
+        return $this->pg->column("
+            SELECT id_forum FROM forum_autosub WHERE id_user = ?
+            ", $user->id()
+        );
+    }
+
+    /**
+     * Toggle the state of auto subscriptions on this forum
+     *
+     * return @int 1 if the state actually changed, otherwise 0
+     */
+    public function toggleAutoSubscribe(int $userId, bool $active): int {
+        if ($active) {
+            return $this->pg->prepared_query("
+                INSERT INTO forum_autosub
+                       (id_forum, id_user)
+                VALUES (?,        ?)
+                ON CONFLICT (id_forum, id_user) DO NOTHING
+                ", $this->id, $userId
+            );
+        } else {
+            return $this->pg->prepared_query("
+                DELETE FROM forum_autosub
+                WHERE id_forum = ?
+                    AND id_user = ?
+                ", $this->id, $userId
+            );
+        }
     }
 }

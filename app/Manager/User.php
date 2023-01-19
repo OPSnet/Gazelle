@@ -435,6 +435,26 @@ class User extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
+    public function flushUserclass(int $level): int {
+        self::$db->prepared_query("
+            SELECT um.ID
+            FROM users_main um
+            INNER JOIN permissions p ON (p.ID = um.PermissionID)
+            WHERE um.Enabled = '1'
+                AND p.Level = ?
+            ", $level
+        );
+        $affected = 0;
+        foreach (self::$db->collect(0, false) as $id) {
+            $user = $this->findById($id);
+            if ($user) {
+                $user->flush();
+                ++$affected;
+            }
+        }
+        return $affected;
+    }
+
     /**
      * Flush the cached count of enabled users.
      */

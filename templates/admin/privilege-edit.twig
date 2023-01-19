@@ -8,6 +8,10 @@
         <a href="tools.php?action=staff_groups" class="brackets">Staff Groups</a>
     </div>
 </div>
+<div class="pad">
+{% if edited %}
+    <div class="box thin"><div class="pad"><b>{{ edit_total }} user{{ edit_total|plural }} affected.</b></div></div>
+{% endif %}
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
     <input type="hidden" name="action" value="privilege-alter" />
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
@@ -57,4 +61,5 @@
     </table>
 {% include 'admin/privilege-list.twig' with {'default': null, 'user': privilege.values} only %}
 </form>
+</div>
 {{ footer() }}

@@ -38,3 +38,16 @@ function Collapse() {
         collapseLink.innerHTML = 'Hide post bodies';
     }
 }
+
+function autosub(forumid) {
+    var post = new Array();
+    post['auth']   = authkey;
+    post['id']     = forumid;
+    post['active'] = document.getElementById("autosub").text.charAt(0) == 'A' ? 1 : 0;
+    ajax.post("forums.php?id=" + forumid + "&action=autosub&auth=" + authkey, post, function(response) {
+        var result = JSON.parse(response);
+        if (result['status'] == 'success') {
+            document.getElementById("autosub").innerHTML = result['response']['autosub'] ? "Cancel autosubscribe" : "Auto subscribe";
+        }
+    });
+}

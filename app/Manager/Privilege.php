@@ -171,6 +171,7 @@ class Privilege extends \Gazelle\BaseManager {
             'site_delete_artist' => 'Delete artists (needs site_moderate_requests + torrents_delete)',
             'site_moderate_forums' => 'Moderate forums',
             'site_forum_post_delete' => 'Hard delete forum posts',
+            'site_forum_autosub' => 'Be subscribed automatically to new threads',
             'site_admin_forums' => 'Administrate forums',
             'site_view_flow' => 'View stats and data pools',
             'site_view_full_log' => 'View old log entries',

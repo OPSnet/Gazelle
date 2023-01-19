@@ -19,6 +19,8 @@ if (isset($_REQUEST['id'])) {
 }
 
 echo $Twig->render('admin/privilege-edit.twig', [
+    'edited'     => isset($usersAffected),
+    'edit_total' => $usersAffected,
     'js'         => (new Gazelle\Util\Validator)->generateJS('permissionsform'),
     'group_list' => $privMan->staffGroupList(),
     'privilege'  => $privilege,

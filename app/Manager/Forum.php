@@ -168,10 +168,11 @@ class Forum extends \Gazelle\BaseManager {
         foreach ($toc as $category => $forumList) {
             $seen = 0;
             foreach ($forumList as $f) {
-                $forum = new \Gazelle\Forum($f['ID']);
+                $forum = $this->findById($f['ID']);
                 if (!$user->readAccess($forum)) {
                     continue;
                 }
+                $autosubList = $forum->autoSubscribeForUserList($user);
                 $userLastRead = $forum->userLastRead($user->id(), $user->postsPerPage());
                 if (isset($userLastRead[$f['LastPostTopicID']])) {
                     $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
@@ -190,6 +191,7 @@ class Forum extends \Gazelle\BaseManager {
                     $userToc[$category] = [];
                 }
                 $userToc[$category][] = [
+                    'autosub'          => in_array($f['ID'], $autosubList),
                     'creator'          => $f['MinClassCreate'] <= $user->classLevel(),
                     'category'         => $category,
                     'category_id'      => $f['categoryId'],

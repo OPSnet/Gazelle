@@ -57,4 +57,12 @@ class Pg {
         }
         return $st->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function column(string $query, ...$args): array {
+        $st = $this->pdo->prepare($query);
+        if (!$st->execute([...$args])) {
+            return [];
+        }
+        return $st->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }

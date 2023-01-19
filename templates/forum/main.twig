@@ -19,6 +19,7 @@
     <td class="td_forum">
         <h4 class="min_padding">
             <a class="{{ f.tooltip }}" href="forums.php?action=viewforum&amp;forumid={{ f.forum_id }}" title="{{ f.description }}">{{ f.name }}</a>
+            {%- if f.autosub %} <span class="tooltip" title="You are subscribed to new threads in this forum">&#x1F514;</span>{% endif -%}
         </h4>
     </td>
         {% if not f.threads %}
