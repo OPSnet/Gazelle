@@ -336,7 +336,7 @@ class Text {
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
-                    return (new \Gazelle\Manager\Torrent)->findById($args['torrentid'])?->groupLink();
+                    return (new \Gazelle\Manager\Torrent)->findById($args['torrentid'])?->link();
                 } elseif (isset($args['id'])) {
                     return (new \Gazelle\Manager\TGroup)->findById($args['id'])?->link();
                 }
