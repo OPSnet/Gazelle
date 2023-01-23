@@ -443,14 +443,18 @@ Results ordered <select name="order">
             <td title="Downloads">DLs</td>
             <td><img src="{{ url_stem }}snatched.png" class="tooltip" title="Snatched" /></td>
             <td><img src="{{ url_stem }}seeders.png" class="tooltip" title="Seeding" /></td>
-            <td>Invites</td>
+            <td>Invited by</td>
 {% if show_invited %}
             <td>Invited</td>
 {% endif %}
         </tr>
 {% for u in page %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>{{ u.user.link|raw }} {{ u.user_id|user_status(viewer)|raw }}</td>
+            <td>{{ u.user.link|raw }} {{ u.user_id|user_status(viewer)|raw }}
+    {%- if u.user.disableInvites -%}
+        <span title="Invites are disabled">&nbsp;&nbsp;&#x1F6AB;</span>
+    {%- endif -%}
+            </td>
             <td>{{ u.user.userclassName }}
     {% for badge, title in u.user|badge_list %}
         {% if loop.first %}
@@ -468,8 +472,8 @@ Results ordered <select name="order">
             <td>{{ u.user.stats.downloadUnique|number_format }}</td>
             <td>{{ u.user.stats.snatchUnique|number_format }}</td>
             <td>{{ u.user.stats.seedingTotal|number_format }}</td>
-            <td>{{ u.invites|number_format }}
-    {%- if u.user.disableInvites -%}
+            <td>{{ u.user.inviterId|user_full }}
+    {%- if u.user.inviter.disableInvites -%}
         <span title="Invites are disabled">&nbsp;&nbsp;&#x1F6AB;</span>
     {%- endif -%}
         </td>
@@ -478,7 +482,7 @@ Results ordered <select name="order">
         {%- if u.user.invitedTotal > 0 -%}
             <a href="user.php?action=invitetree&userid={{ u.user_id }}">
         {%- endif -%}
-            {{ u.user.invitedTotal }}
+            {{ u.user.invitedTotal|number_format }}
         {%- if u.user.invitedTotal > 0 -%}
             </a>
         {%- endif -%}

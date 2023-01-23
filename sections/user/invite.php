@@ -1,9 +1,9 @@
 <?php
 
-if (!isset($_REQUEST['userid'])) {
+if (!isset($_REQUEST['id'])) {
     $user = $Viewer;
 } else {
-    $user = (new Gazelle\Manager\User)->findById((int)$_REQUEST['userid']);
+    $user = (new Gazelle\Manager\User)->findById((int)$_REQUEST['id']);
     if (is_null($user)) {
         error(404);
     }

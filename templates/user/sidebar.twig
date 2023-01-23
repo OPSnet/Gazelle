@@ -1,0 +1,57 @@
+{% set own_profile = user.id == viewer.id %}
+
+    <li>Paranoia level: {{ user.paranoiaLabel }}</li>
+
+{% if own_profile or viewer.permitted('users_view_email') %}
+    <li>Email: <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+    {% if viewer.permitted('users_view_email') %}
+    <a href="user.php?action=search&amp;email_history=on&amp;email={{ user.email }}" title="Search" class="brackets tooltip">S</a>
+    {%- endif -%}
+    </li>
+{% endif %}
+
+{% if viewer.permitted('users_view_ips') %}
+    {% include 'user/ip.twig' with {'user': user} %}
+{% endif %}
+
+{% if own_profile or viewer.permitted('users_view_keys') %}
+    {{- dom.click("#passkey", "togglePassKey('" ~ user.announceKey ~ "'); return false;") -}}
+    <li>Passkey: <a href="#" id="passkey" class="brackets">View</a></li>
+{% endif %}
+
+{% if viewer.permitted('users_view_invites') %}
+    <li>Invited by:
+    {%- if not user.inviterId %}
+        <i>Nobody</i>
+    {%- else %}
+        {%- set inviter = user.inviter %}
+        {{ inviter.id|user_url -}}
+        {%- if viewer.permitted('admin_manage_invite_source') -%}
+            {%- if not invite_source and (inviter.isInterviewer or inviter.isRecruiter) %} <i>unconfirmed</i>{% endif -%}
+            {%- if invite_source %} from {{ invite_source }}{% endif -%}
+        {% endif -%}
+    {% endif -%}
+    </li>
+{% endif %}
+
+{% if viewer.permitted('users_view_invites') or (own_profile and user.canPurchaseInvite) %}
+    <li>Invites: {% if user.disableInvites %}<span title="Invites are disabled">X</span>{% else %}{{ user.unusedInviteTotal|number_format }}{% endif %}
+    ({{ user.pendingInviteCount|number_format }} in use)</li>
+    {% set total = user.stats.invitedTotal %}
+    <li>Invited: {{ total|number_format }}
+    {% if total %} <a class="brackets" href="user.php?id={{ user.id }}&amp;action=invite">View</a>{% endif %}
+    </li>
+{% endif %}
+
+{% if own_profile or viewer.permitted('users_override_paranoia') %}
+    <li>IRC Key: {{ user.IRCKey ? 'Yes' : 'Not set' }}</li>
+{% endif %}
+
+{% if applicant.userIsApplicant(user.id) and (own_profile or viewer.permitted('admin_manage_applicants')) %}
+    <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
+{% endif %}
+
+{% if own_profile or viewer.permitted('users_mod') or viewer.isFLS %}
+    <li{% if not own_profile %} class="paranoia_override"{% endif %}>Torrent clients: {{ user.clients|join('; ') }}</li>
+    <li{% if not own_profile %} class="paranoia_override"{% endif %}>Password age: {{ user.passwordAge|raw }}</li>
+{% endif %}

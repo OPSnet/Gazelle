@@ -1,5 +1,7 @@
 <?php
 
+$userMan = new Gazelle\Manager\User;
+
 if (isset($_GET['search'])) {
     $_GET['search'] = trim($_GET['search']);
 }
@@ -11,7 +13,7 @@ if (!empty($_GET['search'])) {
         $_GET['email'] = $_GET['search'];
     } elseif (preg_match(USERNAME_REGEXP, $_GET['search'], $match)) {
         $username = $match['username'];
-        $found = (new Gazelle\Manager\User)->findByUsername($username);
+        $found = $userMan->findByUsername($username);
         if ($found) {
             header('Location: ' . $found->location());
             exit;
@@ -152,7 +154,7 @@ if (!empty($_GET)) {
     $DateRegexp = ['regexp' => '/\d{4}-\d{2}-\d{2}/'];
     $ClassIDs = [];
     $SecClassIDs = [];
-    $Classes = (new Gazelle\Manager\User)->classList();
+    $Classes = $userMan->classList();
     foreach ($Classes as $id => $value) {
         if ($value['Secondary']) {
             $SecClassIDs[] = $id;
@@ -499,7 +501,6 @@ if (!empty($_GET)) {
 
     $DB->prepared_query($SQL, ...array_merge($Args, $HavingArgs, [$paginator->limit(), $paginator->offset()]));
     $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
-    $userman = new Gazelle\Manager\User;
     foreach ($Results as &$r) {
         $r['user'] = $userMan->findById($r['user_id']);
     }
@@ -507,7 +508,7 @@ if (!empty($_GET)) {
 }
 
 // Neither level nor ID is particularly useful when searching secondary classes, so sort them alphabetically.
-$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
+$ClassLevels = $userMan->classLevelList();
 $Secondaries = array_filter($ClassLevels, fn ($c) => $c['Secondary'] == '1');
 usort($Secondaries, fn($c1, $c2) => $c1['Name'] <=> $c2['Name']);
 

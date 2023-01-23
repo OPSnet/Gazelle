@@ -1616,7 +1616,11 @@ class User extends BaseObject {
     }
 
     public function inviter(): ?User {
-        return $this->info()['Inviter'] ? new User($this->info()['Inviter']) : null;
+        return new User($this->inviterId());
+    }
+
+    public function inviterId(): int {
+        return (int)$this->info()['Inviter'];
     }
 
     public function unusedInviteTotal(): int {

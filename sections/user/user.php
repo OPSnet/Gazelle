@@ -281,63 +281,16 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
 <?php } ?>
                     </ul>
                 </li>
-<?php } ?>
-                <li>Paranoia level: <span class="tooltip" title="<?= $User->paranoiaLevel() ?>"><?= $User->paranoiaLabel() ?></span></li>
-<?php if ($Viewer->permitted('users_view_email') || $OwnProfile) { ?>
-                <li>Email: <a href="mailto:<?=display_str($User->email())?>"><?=display_str($User->email())?></a>
-<?php   if ($Viewer->permitted('users_view_email')) { ?>
-                    <a href="user.php?action=search&amp;email_history=on&amp;email=<?=display_str($User->email())?>" title="Search" class="brackets tooltip">S</a>
-<?php   } ?>
-                </li>
 <?php
 }
-
-if ($Viewer->permitted('users_view_ips')) {
-    echo $Twig->render('user/ip.twig', ['user' => $User]);
-}
-
-if ($Viewer->permitted('users_view_keys') || $OwnProfile) {
+echo $Twig->render('user/sidebar.twig', [
+    'applicant'     => new Gazelle\Manager\Applicant,
+    'invite_source' => $Viewer->permitted('admin_manage_invite_source')
+        ? (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID) : null,
+    'user'          => $User,
+    'viewer'        => $Viewer,
+]);
 ?>
-                <li>Passkey: <a href="#" id="passkey" onclick="togglePassKey('<?= display_str($User->announceKey()) ?>'); return false;" class="brackets">View</a></li>
-<?php
-}
-if ($Viewer->permitted('users_view_invites')) {
-    if (is_null($User->inviter())) {
-        $Invited = '<span style="font-style: italic;">Nobody</span>';
-    } else {
-        $inviter = $userMan->findById($User->inviter()->id());
-        $Invited = $inviter->link();
-        if ($Viewer->permitted('admin_manage_invite_source')) {
-            $source = (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID);
-            if (is_null($source) && ($inviter->isInterviewer() || $inviter->isRecruiter())) {
-                $source = "<i>unconfirmed</i>";
-            }
-            if (!is_null($source)) {
-                $Invited .= " from $source";
-            }
-        }
-    }
-?>
-                <li>Invited by: <?= $Invited ?></li>
-                <li>Invites: <?= $User->disableInvites() ? 'X' : number_format($User->unusedInviteTotal()) ?>
-                    <?= '(' . $User->pendingInviteCount() . ' in use)' ?></li>
-<?php
-}
-$appMan = new Gazelle\Manager\Applicant;
-if ($appMan->userIsApplicant($UserID) && ($Viewer->permitted('admin_manage_applicants') || $OwnProfile)) {
-?>
-                <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
-<?php
-}
-if ($OwnProfile || $Viewer->permitted('users_mod') || $Viewer->isFLS()) {
-?>
-                <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
-                    implode('; ', $User->clients()) ?></li>
-                <li<?= !$OwnProfile ? ' class="paranoia_override"' : '' ?>>Password age: <?= $User->passwordAge() ?></li>
-<?php }
-if ($OwnProfile || $Viewer->permitted('users_override_paranoia')) { ?>
-    <li>IRC Key: <?=strlen($User->IRCKey() ?? '') ? 'Yes' : 'No' ?></li>
-<?php } ?>
             </ul>
         </div>
 <?php
@@ -350,11 +303,9 @@ if (check_paranoia_here('snatched')) {
 
 echo $Twig->render('user/sidebar-stats.twig', [
     'prl'            => $PRL,
-    'stats'          => $stats,
-    'user_id'        => $UserID,
-    'viewer'         => $Viewer,
     'upload_total'   => $Uploads,
     'user'           => $User,
+    'viewer'         => $Viewer,
     'visible'        => [
         'collages+'             => check_paranoia_here('collages+'),
         'collages'              => check_paranoia_here('collages'),
