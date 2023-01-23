@@ -411,7 +411,7 @@ if ($newRequest) {
 
     Gazelle\Util\Irc::sendMessage(
         '#requests',
-        $request->text() . " - " . SITE_URL . "/" . $request->url() . " - " . implode(' ', $tags)
+        $request->text() . " - " . SITE_URL . "/" . $request->location() . " - " . implode(' ', $tags)
     );
 }
 

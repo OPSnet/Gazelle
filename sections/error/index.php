@@ -6,7 +6,7 @@ function notify ($Viewer, $Channel, $Message) {
     Irc::sendMessage($Channel,
         $Message . " error by "
         . ($Viewer
-            ? SITE_URL . "/" . $Viewer->url() . " (" . $Viewer->username() . ")"
+            ? SITE_URL . "/" . $Viewer->location() . " (" . $Viewer->username() . ")"
             : $_SERVER['REMOTE_ADDR']
         )
         . " (" . geoip($_SERVER['REMOTE_ADDR']) . ")"

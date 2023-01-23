@@ -14,7 +14,7 @@ if (!isset($_REQUEST['id'])) {
     $ownProfile = ($user->id() == $Viewer->id());
     if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
         Gazelle\Util\Irc::sendMessage(ADMIN_CHAN, 'User ' . $Viewer->label()
-            . ' tried to edit ' . SITE_URL . $user->url()
+            . ' tried to edit ' . SITE_URL . "/" . $user->location()
         );
         error(403);
     }
