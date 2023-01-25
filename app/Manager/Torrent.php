@@ -604,9 +604,10 @@ class Torrent extends \Gazelle\BaseManager {
             }
             $isDeleted = true;
         }
-        $year = in_array('noyear', $attr) || in_array('title', $attr) ? '' : " [{$tgroup->year()}]";
+        $year = in_array('noyear', $attr) || in_array('title', $attr) ? '' : $tgroup->year();
         $releaseType = ($tgroup->categoryName() !== 'Music' || in_array('noreleasetype', $attr) || in_array('title', $attr))
-            ? '' : (' [' . $tgroup->releaseTypeName() . ']');
+            ? '' : $tgroup->releaseTypeName();
+        $label = ($year || $releaseType) ? (' [' . trim(implode(' ', [$year, $releaseType])) . ']') : '';
         $url = '';
         if (!(in_array('noartist', $attr) || in_array('title', $attr))) {
             if ($tgroup->categoryName() === 'Music') {
@@ -614,8 +615,8 @@ class Torrent extends \Gazelle\BaseManager {
             }
         }
         return $url . sprintf(
-            '<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s</a>%s',
-            $tgroup->hashTag(), $tgroup->id(), $id, $id, $tgroup->name(), $year, $releaseType,
+            '<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s</a>%s',
+            $tgroup->hashTag(), $tgroup->id(), $id, $id, display_str($tgroup->name()), $label,
             $meta . ($isDeleted ? ' <i>deleted</i>' : '')
         );
     }
