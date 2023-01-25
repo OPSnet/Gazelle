@@ -6,16 +6,26 @@ class StaffPM extends BaseObject {
     protected $author;
     protected $assigned;
 
-    public function flush(): StaffPM { return $this; }
+    public function flush(): StaffPM {
+        $this->info = [];
+        return $this;
+    }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject())); }
     public function location(): string { return 'staffpm.php?action=viewconv&id=' . $this->id; }
     public function tableName(): string { return 'staff_pm_conversations'; }
 
-    public function __construct(
-        protected int $id,
-    ) {
-        parent::__construct($id);
-        $this->info = self::$db->rowAssoc("
+    public function flushUser(User $user) {
+        self::$cache->deleteMulti([
+            "num_staff_pms_" . $user->id(),
+            "staff_pm_new_" . $user->id(),
+        ]);
+    }
+
+    public function info(): array {
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
+        }
+        $info = self::$db->rowAssoc("
             SELECT spm.Subject     AS subject,
                 spm.UserID         AS user_id,
                 spm.Level          AS class_level,
@@ -30,77 +40,93 @@ class StaffPM extends BaseObject {
             WHERE spm.ID = ?
             ", $this->id
         );
-        $userMan = new Manager\User;
-        $this->author = $userMan->findById($this->info['user_id'] ?? 0);
-        $this->assigned = $userMan->findById($this->info['assigned_user_id'] ?? 0);
+        $this->info = $info;
+        return $this->info;
     }
 
     public function assignedUserId(): int {
-        return (int)$this->info['assigned_user_id'];
-    }
-
-    public function assigned(): ?User {
-        return $this->assigned;
-    }
-
-    public function author(): User {
-        return $this->author;
+        return (int)$this->info()['assigned_user_id'];
     }
 
     public function classLevel(): int {
-        return $this->info['class_level'];
+        return $this->info()['class_level'];
     }
 
     public function date(): string {
-        return $this->info['date'];
+        return $this->info()['date'];
     }
 
     public function inProgress(): bool {
-        return $this->info['status'] !== 'Resolved';
-    }
-
-    public function isReadable(User $user): bool {
-        return (!$user->isStaffPMReader() && !in_array($user->id(), [$this->userId(), $this->assignedUserId()]))
-            || ($user->isFLS() && !in_array($this->assignedUserId(), [0, $user->id()]))
-            || ($user->isStaff() && $this->classLevel() > $user->effectiveClass());
+        return $this->info()['status'] !== 'Resolved';
     }
 
     public function isResolved(): bool {
-        return $this->info['status'] === 'Resolved';
+        return $this->info()['status'] === 'Resolved';
     }
 
     public function isUnread(): bool {
-        return (bool)$this->info['unread'];
+        return (bool)$this->info()['unread'];
     }
 
     public function subject(): string {
-        return $this->info['subject'];
+        return $this->info()['subject'];
     }
 
     public function unassigned(): bool {
-        return is_null($this->assigned);
+        return $this->assignedUserId() > 0;
     }
 
     public function userId(): int {
-        return (int)$this->info['user_id'];
+        return (int)$this->info()['user_id'];
     }
 
     public function userclassName(): string {
-        return $this->info['userclass_name'];
+        return $this->info()['userclass_name'];
     }
 
     /**
-     * Can the person logged in view this message?
-     * - They created it
-     * - They are FLS and it has not yet been assigned, or assigned to them
+     * Can the viewer view this message?
+     * - They created it or it is assigned to them
+     * - They are FLS and it has not yet been assigned
      * - They are Staff and the conversation is viewable at their class level
      *
      * @return bool Can they see it?
      */
     public function visible(User $viewer): bool {
-        return $viewer->id() === $this->author->id()
-            || ($viewer->isFLS() && (is_null($this->assigned) || $this->assigned->id() === $viewer->id()))
-            || ($viewer->isStaff() && $this->info['class_level'] <= $viewer->effectiveClass());
+        return in_array($viewer->id(), [$this->userId(), $this->assignedUserId()])
+            || ($viewer->isFLS() && $this->classLevel() == 0)
+            || ($viewer->isStaff() && $this->classLevel() <= $viewer->effectiveClass());
+    }
+
+    public function assign(User $to, User $by): int {
+        self::$db->prepared_query("
+            UPDATE staff_pm_conversations SET
+                Status = 'Unanswered',
+                AssignedToUser = ?,
+                Level = ?
+            WHERE ID = ?
+            ", $to->id(), $to->effectiveClass(), $this->id,
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        $this->flushUser($to);
+        $this->flushUser($by);
+        return $affected;
+    }
+
+    public function assignClass(int $level, User $viewer): int {
+        self::$db->prepared_query("
+            UPDATE staff_pm_conversations
+            SET Status = 'Unanswered',
+                Level = ?,
+                AssignedToUser = NULL
+            WHERE ID = ?"
+            , $level, $this->id
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        $this->flushUser($viewer);
+        return $affected;
     }
 
     public function markAsRead(User $viewer): int {
@@ -110,27 +136,64 @@ class StaffPM extends BaseObject {
             WHERE ID = ?
             ", $this->id
         );
-        self::$cache->delete_value("staff_pm_new_" . $viewer->id());
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        $this->flushUser($viewer);
+        return $affected;
     }
 
-    public function unresolve(): int {
+    public function reply(User $user, string $message): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            INSERT INTO staff_pm_messages
+                   (UserID, Message, ConvID)
+            VALUES (?,      ?,       ?)
+            ", $user->id(), $message, $this->id
+        );
+        $affected = self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE staff_pm_conversations SET
                 Date = now(),
-                Status = 'Unanswered'
+                Unread = true,
+                Status = ?
             WHERE ID = ?
-            ", $this->id
+            ", $user->isStaffPMReader() ? 'Open' : 'Unanswered', $this->id
         );
-        return self::$db->affected_rows();
+        self::$db->commit();
+        $this->flush();
+        $this->flushUser($user);
+        self::$cache->delete_value("staff_pm_new_{$this->userId()}");
+        return $affected;
+    }
+
+    protected function modifyStatus(User $user, string $status): int {
+        self::$db->prepared_query("
+            UPDATE staff_pm_conversations SET
+                Date   = now(),
+                Status = ?
+            WHERE ID = ?
+            ", $status, $this->id
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        $this->flushUser($user);
+        return $affected;
+    }
+
+    public function resolve(User $user): int {
+        return $this->modifyStatus($user, 'Resolved');
+    }
+
+    public function unresolve(User $user): int {
+        return $this->modifyStatus($user, 'Unanswered');
     }
 
     public function thread(): array {
         self::$db->prepared_query("
-            SELECT ID     AS id,
-                UserID    AS user_id,
-                SentDate  AS sent_date,
-                Message   AS body
+            SELECT ID    AS id,
+                UserID   AS user_id,
+                SentDate AS sent_date,
+                Message  AS body
             FROM staff_pm_messages
             WHERE ConvID = ?
             ORDER BY SentDate

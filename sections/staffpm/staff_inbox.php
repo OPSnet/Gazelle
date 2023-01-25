@@ -42,8 +42,13 @@ if (!isset($viewMap[$View])) {
 }
 $viewingResolved = $viewMap[$View]['title'] === 'Resolved';
 
-$cond = ['(spc.Level <= ? OR spc.AssignedToUser = ?) AND spc.Status IN (' . placeholders($viewMap[$View]['status']) . ')'];
-$args = array_merge([$Viewer->effectiveClass(), $Viewer->id()], $viewMap[$View]['status']);
+if (isset($_GET['id'])) {
+    $cond = ['spc.Level <= ? AND spc.UserID = ? AND spc.status = ?'];
+    $args = array_merge([$Viewer->effectiveClass(), (int)$_GET['id'], 'Resolved']);
+} else {
+    $cond = ['(spc.Level <= ? OR spc.AssignedToUser = ?) AND spc.Status IN (' . placeholders($viewMap[$View]['status']) . ')'];
+    $args = array_merge([$Viewer->effectiveClass(), $Viewer->id()], $viewMap[$View]['status']);
+}
 
 $Classes = (new Gazelle\Manager\User)->classList();
 if ($viewMap[$View]['title'] === 'Your Unanswered') {

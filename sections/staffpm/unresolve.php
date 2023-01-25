@@ -5,11 +5,10 @@ if (is_null($spm)) {
     header('Location: staffpm.php');
     exit;
 }
-if ($spm->isReadable($Viewer)) {
+if (!$spm->visible($Viewer)) {
     error(403);
 }
 
-$spm->unresolve();
-$Cache->delete_value("num_staff_pms_" . $Viewer->id());
+$spm->unresolve($Viewer);
 
 header('Location: staffpm.php');

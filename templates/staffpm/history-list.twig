@@ -9,7 +9,7 @@
     </tr>
     {% endif %}
     <tr>
-        <td><a href="/reportsv2.php?view=resolver&amp;id={{ r.user_id }}">{{ r.user.username }}</a></td>
+        <td><a href="staffpm.php?view=resolved&amp;id={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.total|number_format }}</td>
         <td>{{ r.total2|number_format }}</td>
     </tr>

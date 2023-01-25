@@ -29,7 +29,7 @@
             <a class="postid" href="staffpm.php?action=viewconv&amp;id={{ pm.id }}#post{{ message.id }}" style="font-weight: normal;">#{{ message.id }}</a>
             <strong>{{ message.user_id|user_full|raw }}</strong> {{ message.sent_date|time_diff }}
     {% if pm.inProgress %}
-            {{- dom.click('#quote-action', "Quote('" ~ message.id ~ "', '" ~ pm.author.username ~ "');") -}}
+            {{- dom.click('#quote-action', "Quote('" ~ message.id ~ "', '" ~ author.username ~ "');") -}}
             - <a id="quote-action" href="#quickpost" class="brackets">Quote</a>
     {% endif %}
         </div>
@@ -46,8 +46,8 @@
                 {{ textarea.field|raw }}
                 <br />
 {% if viewer.isFLS %}
-                {{- dom.click('#to-staff', "location.href='staffpm.php?action=assign&amp;to=staff&amp;convid=" ~ pm.id ~ "';") -}}
-                {{- dom.click('#to-fmod', "location.href='staffpm.php?action=assign&amp;to=forum&amp;convid=" ~ pm.id ~ "';") -}}
+                {{- dom.click('#to-staff', "location.href='staffpm.php?action=assign&to=staff&convid=" ~ pm.id ~ "';") -}}
+                {{- dom.click('#to-fmod', "location.href='staffpm.php?action=assign&to=forum&convid=" ~ pm.id ~ "';") -}}
                 <input type="button" id="to-staff" value="Assign to staff" />
                 <input type="button" id="to-fmod" value="Assign to forum staff" />
 {% elseif viewer.isStaff %}
@@ -55,17 +55,17 @@
                     <optgroup label="User classes">
                         <option value="class_0"{{ selected(pm.unassigned and pm.classLevel == 0) }}>First Line Support</option>
     {% for class in staff_level %}
-                        <option value="class_{{ class.level }}"{{ selected(class.level == pm.class_level) }}>{{ class.Name }}</option>
+                        <option value="class_{{ class.Level }}"{{ selected(class.Level == pm.class_level) }}>{{ class.Name }}</option>
     {% endfor %}
                     </optgroup>
                     <optgroup label="Staff">
     {% for u in staff %}
-                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assigned.id == u.id) }}>{{ u.username }}</option>
+                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assignedUserId == u.id) }}>{{ u.username }}</option>
     {% endfor %}
                     </optgroup>
                     <optgroup label="First Line Support">
     {% for u in fls %}
-                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assigned.id == u.id) }}>{{ u.username }}</option>
+                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assignedUserId == u.id) }}>{{ u.username }}</option>
     {% endfor %}
                     </optgroup>
                 </select>
@@ -74,10 +74,10 @@
 {% endif %}
 
 {% if not pm.inProgress %}
-                {{- dom.click('#unresolve', "location.href='staffpm.php?action=unresolve&amp;id=" ~ pm.id ~ "';") -}}
+                {{- dom.click('#unresolve', "location.href='staffpm.php?action=unresolve&id=" ~ pm.id ~ "';") -}}
                 <input type="button" id="unresolve" value="Unresolve" />
 {% else %}
-                {{- dom.click('#resolve', "location.href='staffpm.php?action=resolve&amp;id=" ~ pm.id ~ "';") -}}
+                {{- dom.click('#resolve', "location.href='staffpm.php?action=resolve&id=" ~ pm.id ~ "';") -}}
                 <input type="button" id="resolve" value="Resolve" />&nbsp;
     {% if viewer.isStaffPMReader %}
                 {{- dom.click('#common', "$('#common_answers').gtoggle();") -}}
@@ -106,7 +106,7 @@
             {{- dom.click('#common-set', "SetMessage()") -}}
             <input type="button" id="common-set" title="Use this message as the basis for your reply" value="Use this draft" onclick="SetMessage();" />
             <input type="button" title="Use this message as the basis for your reply" value="Use this draft" />
-            {{- dom.click('#common-edit', "location.href='staffpm.php?action=responses&amp;convid=" ~ pm.id ~ "';") -}}
+            {{- dom.click('#common-edit', "location.href='staffpm.php?action=responses&convid=" ~ pm.id ~ "';") -}}
             <input id="common-edit" type="button" value="Create new/Edit Common Response" />
         </div>
         <br />
