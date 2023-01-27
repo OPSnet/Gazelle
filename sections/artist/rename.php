@@ -42,7 +42,7 @@ if (!($oldAliasId = $artist->getAlias($oldName))) {
     error('Could not find existing alias ID');
 }
 
-list($TargetAliasID, $TargetArtistID) = $DB->row("
+[$TargetAliasID, $TargetArtistID] = $DB->row("
     SELECT AliasID, ArtistID
     FROM artists_alias
     WHERE name = ?

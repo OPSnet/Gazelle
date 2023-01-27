@@ -52,7 +52,7 @@ if (!isset($_POST['transition']) && $newTitle === '') {
 
 // Variables for database input
 $page      = (int)$_POST['page'];
-$locked    = (bool)isset($_POST['locked']);
+$locked    = isset($_POST['locked']);
 $newPinned = isset($_POST['sticky']) ? 1 : 0;
 $newRank   = (int)($_POST['ranking'] ?? 0);
 

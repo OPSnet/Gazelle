@@ -1,73 +1,32 @@
 <?php
 
 if (!empty($_POST['action'])) {
-    switch ($_POST['action']) {
-        case 'add_similar':
-            require_once('add_similar.php');
-            break;
-        case 'add_alias':
-            require_once('add_alias.php');
-            break;
-        case 'change_artistid':
-            require_once('change_artistid.php');
-            break;
-        case 'download':
-            require_once('download.php');
-            break;
-        case 'rename':
-            require_once('rename.php');
-            break;
-        case 'edit':
-            require_once('takeedit.php');
-            break;
-        case 'takeeditrequest':
-            require_once('takeeditrequest.php');
-            break;
-        default:
-            error(0);
-    }
+    match ($_POST['action']) {
+        'add_similar'     => require_once('add_similar.php'),
+        'add_alias'       => require_once('add_alias.php'),
+        'change_artistid' => require_once('change_artistid.php'),
+        'download'        => require_once('download.php'),
+        'rename'          => require_once('rename.php'),
+        'edit'            => require_once('takeedit.php'),
+        'takeeditrequest' => require_once('takeeditrequest.php'),
+        default           => error(0),
+    };
 } elseif (!empty($_GET['action'])) {
-    switch ($_GET['action']) {
-        case 'autocomplete':
-            require_once('autocomplete.php');
-            break;
-        case 'change_artistid':
-            require_once('change_artistid.php');
-            break;
-        case 'delete':
-            require_once('delete.php');
-            break;
-        case 'delete_alias':
-            require_once('delete_alias.php');
-            break;
-        case 'delete_similar':
-            require_once('delete_similar.php');
-            break;
-        case 'edit':
-            require_once('edit.php');
-            break;
-        case 'editrequest':
-            require_once('editrequest.php');
-            break;
-        case 'history':
-            require_once('history.php');
-            break;
-        case 'notify':
-            require_once('notify.php');
-            break;
-        case 'notifyremove':
-            require_once('notifyremove.php');
-            break;
-        case 'revert':
-            require_once('takeedit.php');
-            break;
-        case 'vote_similar':
-            require_once('vote_similar.php');
-            break;
-        default:
-            error(0);
-            break;
-    }
+    match ($_GET['action']) {
+        'autocomplete'    => require_once('autocomplete.php'),
+        'change_artistid' => require_once('change_artistid.php'),
+        'delete'          => require_once('delete.php'),
+        'delete_alias'    => require_once('delete_alias.php'),
+        'delete_similar'  => require_once('delete_similar.php'),
+        'edit'            => require_once('edit.php'),
+        'editrequest'     => require_once('editrequest.php'),
+        'history'         => require_once('history.php'),
+        'notify'          => require_once('notify.php'),
+        'notifyremove'    => require_once('notifyremove.php'),
+        'revert'          => require_once('takeedit.php'),
+        'vote_similar'    => require_once('vote_similar.php'),
+        default           => error(0),
+    };
 } else {
     if (!empty($_GET['id'])) {
         require_once('artist.php');

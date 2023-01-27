@@ -57,9 +57,7 @@ $FA_Key = null;
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->title()))
     ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-        function ($m) use ($imgProxy) {
-            return 'src=' . $m[1] . $imgProxy->process($m[2]) . $m[3];
-        }, $User->title())
+        fn ($m) => 'src=' . $m[1] . $imgProxy->process($m[2]) . $m[3], $User->title())
     : $User->title();
 
 $Paranoia = ($Preview == 1) ? explode(',', $_GET['paranoia']) : $User->paranoia();
@@ -382,7 +380,7 @@ for ($i = 1; $i <= 4; $i++) {
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
-        'recent' => array_map(fn($id) => $tgMan->findById($id), $User->recentSnatchList()),
+        'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->recentSnatchList()),
         'title'  => 'Snatches',
         'type'   => 'snatched',
     ]);
@@ -391,7 +389,7 @@ if (check_paranoia_here('snatched')) {
 if (check_paranoia_here('uploads')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
-        'recent' => array_map(fn($id) => $tgMan->findById($id), $User->recentUploadList()),
+        'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->recentUploadList()),
         'title'  => 'Uploads',
         'type'   => 'uploaded',
     ]);

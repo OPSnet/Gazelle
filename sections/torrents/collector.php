@@ -11,7 +11,7 @@ $title = trim($_GET['title']);
 
 switch ($title) {
     case 'better':
-        $ids = array_filter(explode(',', $_GET['ids'] ?? '0'), function ($id) {return (int)$id > 0;});
+        $ids = array_filter(explode(',', $_GET['ids'] ?? '0'), fn($id) => (int)$id > 0);
         break;
     case 'seedbox':
         authorize();

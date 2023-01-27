@@ -10,7 +10,7 @@ $editId = 0;
 $saved   = '';
 if (isset($_POST['auth'])) {
     authorize();
-    $edit = array_filter($_POST, function ($x) { return preg_match('/^edit-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+    $edit = array_filter($_POST, fn ($x) => preg_match('/^edit-\d+$/', $x), ARRAY_FILTER_USE_KEY);
     if (is_array($edit) && count($edit) == 1) {
         $editId = trim(array_keys($edit)[0], 'edit-');
         $appRole = new Gazelle\ApplicantRole($editId);

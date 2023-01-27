@@ -113,17 +113,15 @@ if (!isset($_POST['p_donor_heart'])) {
 $user->updateReward(
     array_map('trim',
         array_filter($_POST,
-        function ($key) {
-            return in_array($key, [
-                'second_avatar', 'avatar_mouse_over_text',
-                'donor_icon_mouse_over_text', 'donor_icon_link', 'donor_icon_custom_url',
-                'donor_title_prefix', 'donor_title_suffix', 'donor_title_comma',
-                'profile_title_1', 'profile_info_1',
-                'profile_title_2', 'profile_info_2',
-                'profile_title_3', 'profile_info_3',
-                'profile_title_4', 'profile_info_4',
-            ]);
-        }, ARRAY_FILTER_USE_KEY)
+        fn($key) => in_array($key, [
+            'second_avatar', 'avatar_mouse_over_text',
+            'donor_icon_mouse_over_text', 'donor_icon_link', 'donor_icon_custom_url',
+            'donor_title_prefix', 'donor_title_suffix', 'donor_title_comma',
+            'profile_title_1', 'profile_info_1',
+            'profile_title_2', 'profile_info_2',
+            'profile_title_3', 'profile_info_3',
+            'profile_title_4', 'profile_info_4',
+        ]), ARRAY_FILTER_USE_KEY)
     )
 );
 

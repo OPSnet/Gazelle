@@ -42,7 +42,7 @@ if (!empty($_REQUEST['key'])) {
             continue;
         }
         $definitions = CACHE_NAMESPACE[$namespace];
-        $shape = array_map(function ($s) use ($definitions) { return $definitions[$s];},
+        $shape = array_map(fn($s) => $definitions[$s],
             array_intersect(array_keys($_REQUEST), array_keys($definitions))
         );
         if (isset($_REQUEST["$namespace-free"]) && str_contains($_REQUEST["$namespace-free"], '*')) {

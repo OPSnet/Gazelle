@@ -8,7 +8,7 @@ $userMan = new Gazelle\Manager\User;
 $spmMan  = new Gazelle\Manager\StaffPM;
 
 $isStaffView  = ($_REQUEST['view'] ?? 'staff') === 'staff';
-$SupportStaff = array_merge(array_keys($userMan->flsList()), array_keys($userMan->staffList()));
+$SupportStaff = [...array_keys($userMan->flsList()), ...array_keys($userMan->staffList())];
 
 echo $Twig->render('staffpm/history.twig', [
     'left' => [

@@ -56,7 +56,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 <?php
             }
         } else {
-            foreach ($vote as $i => $choice) {
+            foreach ($vote as $choice) {
 ?>
                     <li><?=display_str($choice['answer'])?> (<?=number_format($choice['percent'], 2)?>%)</li>
                     <li class="graph">

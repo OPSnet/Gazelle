@@ -4,10 +4,11 @@ if (!function_exists('imagettftext')) {
 }
 
 function get_font() {
-    return __DIR__ . '/../../fonts/' . CAPTCHA_FONT[mt_rand(0, count(CAPTCHA_FONT) - 1)];
+    return __DIR__ . '/../../fonts/' . CAPTCHA_FONT[random_int(0, count(CAPTCHA_FONT) - 1)];
 }
 
 function make_captcha_img() {
+    $FontDisplay = [];
     $Length = 6;
     $ImageHeight = 75;
     $ImageWidth = 300;
@@ -16,18 +17,18 @@ function make_captcha_img() {
     $CaptchaString = '';
 
     for ($i = 0; $i < $Length; $i++) {
-        $CaptchaString .= $Chars[mt_rand(0,strlen($Chars) - 1)];
+        $CaptchaString .= $Chars[random_int(0,strlen($Chars) - 1)];
     }
 
     for ($x = 0; $x < $Length; $x++) {
-        $FontDisplay[$x]['size'] = mt_rand(24, 32);
-        $FontDisplay[$x]['top'] = mt_rand($FontDisplay[$x]['size'] + 5, $ImageHeight - ($FontDisplay[$x]['size'] / 2));
-        $FontDisplay[$x]['angle'] = mt_rand(-30, 30);
+        $FontDisplay[$x]['size'] = random_int(24, 32);
+        $FontDisplay[$x]['top'] = random_int($FontDisplay[$x]['size'] + 5, $ImageHeight - ($FontDisplay[$x]['size'] / 2));
+        $FontDisplay[$x]['angle'] = random_int(-30, 30);
         $FontDisplay[$x]['font'] = get_font();
     }
 
     $Img = imagecreatetruecolor($ImageWidth, $ImageHeight);
-    $BGImg = imagecreatefrompng(__DIR__.'/../../captcha/' . CAPTCHA_BG[mt_rand(0, count(CAPTCHA_BG) - 1)]);
+    $BGImg = imagecreatefrompng(__DIR__.'/../../captcha/' . CAPTCHA_BG[random_int(0, count(CAPTCHA_BG) - 1)]);
     imagecopymerge($Img, $BGImg, 0, 0, 0, 0, 300, 75, 50);
 
     $ForeColor = imagecolorallocatealpha($Img, 255, 255, 255, 65);

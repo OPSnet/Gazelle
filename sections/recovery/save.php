@@ -38,7 +38,7 @@ else {
         $info['ipaddr']   = $ipaddr;
         $info['password_ok'] = $recovery->checkPassword($info['username'], $_POST['password']);
 
-        list($ok, $filename) = $recovery->saveScreenshot($_FILES);
+        [$ok, $filename] = $recovery->saveScreenshot($_FILES);
         if (!$ok) {
             $msg = $filename; // the reason we were unable to save the screenshot info
         }
@@ -47,7 +47,7 @@ else {
 
             $token = '';
             for ($i = 0; $i < 16; ++$i) {
-                $token .= chr(mt_rand(97, 97+25));
+                $token .= chr(random_int(97, 97+25));
                 if (($i+1) % 4 == 0 && $i < 15) {
                     $token .= '-';
                 }

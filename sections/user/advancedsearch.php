@@ -31,70 +31,45 @@ foreach (['ip', 'email', 'username', 'comment'] as $field) {
 }
 
 class SQLMatcher {
-    protected $key;
-
-    public function __construct($key) {
-        $this->key = $key;
-    }
+    public function __construct(
+        protected string $key,
+    ) {}
 
     public function matchField($field) {
-        switch ($this->key) {
-            case 'regexp':
-                return "$field REGEXP ?";
-            case 'strict':
-                return "$field = ?";
-            case 'fuzzy':
-            default:
-                return "$field LIKE concat('%', ?, '%')";
-        }
+        return match ($this->key) {
+            'regexp' => "$field REGEXP ?",
+            'strict' => "$field = ?",
+            default  => "$field LIKE concat('%', ?, '%')",
+        };
     }
 
     public function left_match($field) {
-        switch ($this->key) {
-            case 'regexp':
-                return "$field REGEXP ?";
-            case 'strict':
-                return "$field = ?";
-            case 'fuzzy':
-            default:
-                return "$field LIKE concat(?, '%')";
-        }
+        return match ($this->key) {
+            'regexp' => "$field REGEXP ?",
+            'strict' => "$field = ?",
+            default  => "$field LIKE concat(?, '%')",
+        };
     }
 
     public function op($field, $compare) {
-        switch ($compare) {
-            case 'above':
-                return "$field > ?";
-            case 'below':
-                return "$field < ?";
-            case 'isnull':
-                return "$field IS NULL";
-            case 'isnotnull':
-                return "$field IS NOT NULL";
-            case 'no':
-            case 'not_equal':
-                return "$field != ?";
-            case 'between':
-                return "$field BETWEEN ? AND ?";
-            case 'yes':
-            case 'equal':
-            default:
-                return "$field = ?";
-        }
+        return match ($compare) {
+            'above'           => "$field > ?",
+            'below'           => "$field < ?",
+            'between'         => "$field BETWEEN ? AND ?",
+            'isnotnull'       => "$field IS NOT NULL",
+            'isnull'          => "$field IS NULL",
+            'no', 'not_equal' => "$field != ?",
+            default           => "$field = ?",
+        };
     }
 
     public function date($field, $compare) {
-        switch ($compare) {
-            case 'before':
-                return "$field < ?";
-            case 'after':
-                return "$field > ? + INTERVAL 1 DAY";
-            case 'between':
-                return "$field BETWEEN ? AND ? + INTERVAL 1 DAY";
-            case 'on':
-            default:
-                return "$field >= ? AND $field < ? + INTERVAL 1 DAY";
-        }
+        return match ($compare) {
+            'after'   => "$field > ? + INTERVAL 1 DAY",
+            'before'  => "$field < ?",
+            'between' => "$field BETWEEN ? AND ? + INTERVAL 1 DAY",
+            default   => "$field >= ? AND $field < ? + INTERVAL 1 DAY",
+        };
     }
 }
 
@@ -470,9 +445,7 @@ if (!empty($_GET)) {
         $Args[] = $_GET['stylesheet'];
     }
 
-    if ($OrderTable[$_GET['order'] ?? 'Joined'] && $WayTable[$_GET['way'] ?? 'Descending']) {
-        $Order = 'ORDER BY ' . $OrderTable[$_GET['order'] ?? 'Joined'] . ' ' . $WayTable[$_GET['way'] ?? 'Descending'];
-    }
+    $Order = 'ORDER BY ' . $OrderTable[$_GET['order'] ?? 'Joined'] . ' ' . $WayTable[$_GET['way'] ?? 'Descending'];
 
     //---------- Build the query
     $SQL = "SELECT count(*) $from " . implode("\n", $Join);

@@ -212,7 +212,7 @@ foreach ($entryList as $tgroupId) {
 <?php           } ?>
                         </span>
                     <div class="tags"><?= implode(', ', array_map(
-                        fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
+                        fn ($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
                         )) ?></div>
                 </td>
             </tr>
@@ -263,7 +263,7 @@ foreach ($entryList as $tgroupId) {
                     <?= $vote->links($tgroupId) ?>
 <?php       } ?>
                     <div class="tags">
-                        <?= implode(', ', array_map( fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList())) ?>
+                        <?= implode(', ', array_map(fn ($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList())) ?>
                     </div>
     <?php } ?>
                 </td>

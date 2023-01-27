@@ -59,7 +59,7 @@ if (isset($_REQUEST['submit'])) {
     $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
     $values       = [];
     foreach ($_REQUEST as $key => $perm) {
-        if (substr($key, 0, 5) == 'perm_') {
+        if (str_starts_with($key, 'perm_')) {
             $values[substr($key, 5)] = (int)$perm;
         }
     }

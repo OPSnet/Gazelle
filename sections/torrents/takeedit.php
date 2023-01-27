@@ -113,7 +113,7 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
             ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
             ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
             ['media', '1', 'inarray', 'Not a valid media.', ['inarray' => MEDIA]],
-            ['release_desc', '0', 'string', 'Invalid release description.', ['range' => [0, 1000000]]],
+            ['release_desc', '0', 'string', 'Invalid release description.', ['range' => [0, 1_000_000]]],
             ['remaster_title', '0', 'string', 'Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ['remaster_record_label', '0', 'string', 'Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ['remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
@@ -140,7 +140,7 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
             ['year', '1', 'number', 'The year of the release must be entered.'],
             ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
             ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
-            ['release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1000000]]],
+            ['release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1_000_000]]],
         ]);
         // Handle 'other' bitrates
         if ($Properties['Encoding'] !== 'Other') {
@@ -211,7 +211,7 @@ if (isset($_FILES['logfiles'])) {
     $logfileSummary = new Gazelle\LogfileSummary;
     $logfiles = [];
     if (count($_FILES['logfiles']['name']) > 0) {
-        ini_set('upload_max_filesize', 1000000);
+        ini_set('upload_max_filesize', 1_000_000);
         $ripFiler = new Gazelle\File\RipLog;
         $htmlFiler = new Gazelle\File\RipLogHTML;
         foreach ($_FILES['logfiles']['name'] as $Pos => $File) {

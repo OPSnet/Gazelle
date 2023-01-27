@@ -158,7 +158,7 @@ View::show_header('Vanity House');
                             <option value="<?=$Key?>" <?=$FLType == 'Staff Pick' ? 'selected' : ''?>><?=$FLType?></option>
 <?php   } ?>
             </select><br /><br />
-            <input type="checkbox" name="NLOver" />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
+            <input type="checkbox" name="NLOver" />&nbsp;NL Torrents over <input type="text" name="size" value="<?= $_POST['size'] ?? 1 ?>" size=1 />
             <select name="scale">
                 <option value="k">KiB</option>
                 <option value="m">MiB</option>

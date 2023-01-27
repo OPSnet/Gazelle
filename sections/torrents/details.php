@@ -135,7 +135,7 @@ if ($Viewer->permitted('site_submit_requests')) {
 <?php   } elseif ($Index == 0 && count($coverArt) > 0) { ?>
                         <span class="brackets prev_cover">Prev</span>
                         <a class="brackets show_all_covers" href="#">Show all</a>
-                        <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
+                        <a class="brackets next_cover" data-gazelle-next-cover="1" href="#">Next</a>
 <?php   } ?>
                 </span>
 <?php
@@ -515,7 +515,7 @@ if (!$torrentList) {
         $delta = time() - $lastActive;
         // If the last time this was seeded was 50 years ago, most likely it has never been seeded, so don't bother
         // displaying "Last active: 2000+ years" as that's dumb
-        if ($delta > 1576800000) {
+        if ($delta > 1_576_800_000) {
 ?>
                             <br />Last active: Never
 <?php   } elseif ($delta >= 86400 * 14) { ?>

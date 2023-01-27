@@ -6,7 +6,7 @@ if (!$Viewer->permitted('site_analysis')) {
 
 $remove = array_map(
     fn ($key) => (int)(explode('-', $key)[1]),
-    array_keys(array_filter($_POST, function ($x) { return preg_match('/^clear-\d+$/', $x);}, ARRAY_FILTER_USE_KEY))
+    array_keys(array_filter($_POST, fn($x) => preg_match('/^clear-\d+$/', $x), ARRAY_FILTER_USE_KEY))
 );
 
 $errMan = new Gazelle\Manager\ErrorLog;

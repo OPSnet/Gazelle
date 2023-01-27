@@ -2,7 +2,7 @@
 
 use OrpheusNET\Logchecker\Logchecker;
 
-ini_set('upload_max_filesize', 1000000);
+ini_set('upload_max_filesize', 1_000_000);
 
 $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
 if (is_null($torrent)) {
@@ -16,7 +16,7 @@ if ($torrent->uploaderId() != $Viewer->id() && !$Viewer->permitted('admin_add_lo
 }
 
 // Some browsers will report an empty file when you submit, prune those out
-$_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], function($Name) { return !empty($Name); });
+$_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], fn($Name) => !empty($Name));
 if (count($_FILES['logfiles']['name']) == 0) {
     error("No logfiles uploaded.\n");
 }

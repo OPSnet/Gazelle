@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Gazelle\User\Bonus $viewerBonus */
-
 if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST['BBCode'])) {
     echo $_REQUEST['BBCode'] === 'true'
         ? Text::full_format($_REQUEST['title'])

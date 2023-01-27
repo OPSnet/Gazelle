@@ -271,7 +271,7 @@ if ($having) {
 }
 
 $cond[] = "$userField = ?";
-$args = array_merge($args, [$userId], $havingArgs);
+$args = [...$args, ...[$userId], ...$havingArgs];
 
 $whereCondition = implode("\nAND ", $cond);
 if (empty($groupBy)) {

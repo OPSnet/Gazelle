@@ -4,7 +4,7 @@ use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 
 ini_set('max_file_uploads', 100);
-ini_set('upload_max_filesize', 1000000);
+ini_set('upload_max_filesize', 1_000_000);
 
 define('MAX_FILENAME_LENGTH', 255);
 if (!defined('AJAX')) {
@@ -83,7 +83,7 @@ $isMusicUpload = ($categoryName === 'Music');
 $Validate = new Gazelle\Util\Validator;
 $Validate->setFields([
     ['type', '1', 'inarray', 'Please select a valid category.', ['inarray' => array_keys(CATEGORY)]],
-    ['release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1000000]],
+    ['release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1_000_000]],
     ['rules', '1','require','Your torrent must abide by the rules.'],
 ]);
 
@@ -96,9 +96,9 @@ if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
 }
 
 if (isset($_POST['album_desc'])) {
-    $Validate->setField('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
+    $Validate->setField('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['range' => [10, 1_000_000]]);
 } elseif (isset($_POST['desc'])) {
-    $Validate->setField('desc', '1','string','The description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
+    $Validate->setField('desc', '1','string','The description has a minimum length of 10 characters.', ['range' => [10, 1_000_000]]);
 }
 
 // audio types
@@ -525,7 +525,7 @@ if ($isMusicUpload) {
         }
     }
     if (!isset($GroupID)) {
-        foreach ($ArtistForm[ARTIST_MAIN] as $Num => $Artist) {
+        foreach ($ArtistForm[ARTIST_MAIN] as $Artist) {
             [$GroupID, $WikiImage, $WikiBody, $RevisionID] = $DB->row("
                 SELECT tg.id,
                     tg.WikiImage,

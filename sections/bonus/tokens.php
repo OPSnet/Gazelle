@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Gazelle\User\Bonus $viewerBonus */
-
 authorize();
 
 if (!preg_match('/^token-[1-4]$/', $Label, $match)) {

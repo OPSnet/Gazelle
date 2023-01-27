@@ -4,17 +4,9 @@ if ($Viewer->disableForums()) {
     print json_die('failure');
 }
 
-switch ($_GET['type'] ?? 'main') {
-    case 'main':
-        require('main.php');
-        break;
-    case 'viewforum':
-        require('forum.php');
-        break;
-    case 'viewthread':
-        require('thread.php');
-        break;
-    default:
-        print json_error('type');
-        break;
-}
+match ($_GET['type'] ?? 'main') {
+    'main'       => require_once('main.php'),
+    'viewforum'  => require_once('forum.php'),
+    'viewthread' => require_once('thread.php'),
+    default      => json_error('type'),
+};

@@ -10,7 +10,7 @@ if (!isset($_GET['userid'])) {
     $main = [];
     foreach ($MainStats as $Key => $Value) {
         if (is_numeric($Value)) {
-            if (substr($Key, 0, 6) === "bytes ") {
+            if (str_starts_with($Key, "bytes ")) {
                 $Value = Format::get_size($Value);
                 $Key = substr($Key, 6);
             } else {

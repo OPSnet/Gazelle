@@ -8,7 +8,7 @@ $PRL = new Gazelle\Manager\PermissionRateLimit;
 if ($_POST) {
     authorize();
     if (isset($_POST['task'])) {
-        $remove = array_filter($_POST, function ($x) { return preg_match('/^remove-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+        $remove = array_filter($_POST, fn($x) => preg_match('/^remove-\d+$/', $x), ARRAY_FILTER_USE_KEY);
         if (is_array($remove) && count($remove) == 1) {
             $PRL->remove(trim(array_keys($remove)[0], 'remove-'));
         } elseif ($_POST['task'] === 'add') {

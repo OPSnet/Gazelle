@@ -2,49 +2,43 @@
 
 switch ($_REQUEST['action'] ?? 'view') {
     case 'add':
-        require('add.php');
+        require_once('add.php');
         break;
 
     case 'remove':
-        require('remove.php');
+        require_once('remove.php');
         break;
 
     case 'mass_edit':
-        require('mass_edit.php');
+        require_once('mass_edit.php');
         break;
 
     case 'remove_snatched':
-        require('remove_snatched.php');
+        require_once('remove_snatched.php');
         break;
 
     case 'edit':
-        if (empty($_REQUEST['type'])) {
-            $_REQUEST['type'] = false;
-        }
-        switch ($_REQUEST['type']) {
-            case 'torrents':
-                require('edit_torrents.php');
-                break;
-            default:
-                error(404);
-        }
+        match ($_REQUEST['type'] ?? '') {
+            'torrents' => require_once('edit_torrents.php'),
+            default    => error(404),
+        };
         break;
 
     case 'view':
         switch ($_REQUEST['type'] ?? 'torrents') {
             case 'torrents':
-                require('torrents.php');
+                require_once('torrents.php');
                 break;
             case 'artists':
-                require('artists.php');
+                require_once('artists.php');
                 break;
             case 'collages':
                 $_GET['bookmarks'] = '1';
-                require(__DIR__ . '/../collages/browse.php');
+                require_once(__DIR__ . '/../collages/browse.php');
                 break;
             case 'requests':
                 $_GET['type'] = 'bookmarks';
-                require(__DIR__ . '/../requests/requests.php');
+                require_once(__DIR__ . '/../requests/requests.php');
                 break;
             default:
                 error(404);

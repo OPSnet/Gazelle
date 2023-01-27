@@ -617,6 +617,9 @@ defined('VIP') or define('VIP',                  6);
 // The secret Donor forum.
 defined('DONOR_FORUM') or define('DONOR_FORUM', 70);
 
+// Where Announcements are sent.
+defined('ANNOUNCEMENT_FORUM_ID') or define('ANNOUNCEMENT_FORUM_ID', 12);
+
 // Where Edit Requests are sent.
 defined('EDITING_FORUM_ID') or define('EDITING_FORUM_ID', 34);
 

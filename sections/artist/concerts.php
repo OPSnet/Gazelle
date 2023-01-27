@@ -111,14 +111,12 @@ $Website
 
 function get_date_title($Str) {
     $Exploded = explode(' ', $Str);
-    $Date = $Exploded[2] . ' ' . $Exploded[1] . ', ' . $Exploded[3];
-    return $Date;
+    return $Exploded[2] . ' ' . $Exploded[1] . ', ' . $Exploded[3];
 }
 
 function get_date_post($Str) {
     $Exploded = explode(' ', $Str);
-    $Date = $Exploded[2] . ' ' . $Exploded[1] . ', ' . $Exploded[3] . ' (' . rtrim($Exploded[0], ',') . ')';
-    return $Date;
+    return $Exploded[2] . ' ' . $Exploded[1] . ', ' . $Exploded[3] . ' (' . rtrim($Exploded[0], ',') . ')';
 }
 
 ?>

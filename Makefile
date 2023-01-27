@@ -64,6 +64,14 @@ ocelot-reload-conf:
 ocelot-reload-db:
 	pkill -USR1 ocelot
 
+.PHONY: rector
+rector:
+	vendor/bin/rector process --config lib/rector.php
+
+.PHONY: rector-dry-run
+rector-dry-run:
+	vendor/bin/rector process --dry-run --config lib/rector.php
+
 .PHONY: test
 test: lint-css lint-php
 	composer test

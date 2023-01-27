@@ -40,7 +40,7 @@ $Deductions = [
     ['combined_log',      0, 'Combined log']
 ];
 
-foreach ($Deductions as list($tag, $deduction, $label)) {
+foreach ($Deductions as [$tag, $deduction, $label]) {
     if (isset($_POST[$tag])) {
         $AdjustedScore -= $deduction;
         if ($deduction > 0) {
@@ -56,7 +56,7 @@ $TrackDeductions = [
     ['timing_problems',      20, 'Timing problems']
 ];
 
-foreach ($TrackDeductions as list($tag, $deduction, $label)) {
+foreach ($TrackDeductions as [$tag, $deduction, $label]) {
     $n = (int)($_POST[$tag] ?? 0);
     if ($n > 0) {
         $score = $n * $deduction;

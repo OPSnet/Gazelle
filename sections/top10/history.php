@@ -110,9 +110,7 @@ if (!empty($_GET['date'])) {
     </tr>
 <?php
     foreach ($Details as $Detail) {
-        list($Rank, $TitleString, $TagString, $TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags,
-            $Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
-            $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Detail;
+        [$Rank, $TitleString, $TagString, $TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags, $Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear, $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data] = $Detail;
 
         $tgroup = $tgMan->findById($GroupID);
         $Highlight = ($Rank % 2 ? 'a' : 'b');

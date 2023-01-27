@@ -23,7 +23,7 @@ echo $Twig->render('user/bonus-history.twig', [
     'item'         => $bonus->purchaseHistory(),
     'summary'      => $summary,
     'pool_summary' => $poolSummary,
-    'pool_total'   => array_reduce($poolSummary, function ($sum = 0, array $s = []) { return $sum + $s['total']; }),
+    'pool_total'   => array_reduce($poolSummary, fn ($sum = 0, array $s = []) => $sum + $s['total']),
     'paginator'    => $paginator,
     'user'         => $user,
     'viewer'       => $Viewer,

@@ -29,9 +29,7 @@ if ($execute) {
     try {
         $DB->prepared_query($query);
         $result = $DB->to_array(false, MYSQLI_ASSOC, false);
-    } catch (\Exception $e) {
-        $error = $e->getMessage();
-    } catch (\Error $e) {
+    } catch (\Exception|\Error $e) {
         $error = $e->getMessage();
     }
 }

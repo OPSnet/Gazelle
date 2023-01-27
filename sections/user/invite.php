@@ -14,7 +14,7 @@ if (!($Viewer->permitted('users_view_invites') || ($ownProfile && $Viewer->canPu
     error(403);
 }
 
-$userSourceRaw = array_filter($_POST, function ($x) { return preg_match('/^user-\d+$/', $x); }, ARRAY_FILTER_USE_KEY);
+$userSourceRaw = array_filter($_POST, fn($x) => preg_match('/^user-\d+$/', $x), ARRAY_FILTER_USE_KEY);
 $userSource = [];
 foreach ($userSourceRaw as $fieldName => $fieldValue) {
     if (preg_match('/^user-(\d+)$/', $fieldName, $userMatch) && preg_match('/^s-(\d+)$/', $fieldValue, $sourceMatch)) {

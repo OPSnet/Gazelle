@@ -24,7 +24,7 @@ function forumList(array $list, $selected = 0) {
 function classList($Selected = 0) {
     $Return = '';
     $Classes = (new Gazelle\Manager\User)->classList();
-    foreach ($Classes as $ID => $Class) {
+    foreach ($Classes as $Class) {
         if ($Class['Secondary']) {
             continue;
         }

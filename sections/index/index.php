@@ -6,12 +6,9 @@ if (!isset($Viewer)) {
     if (!isset($_REQUEST['action'])) {
         require('private.php');
     } else {
-        switch ($_REQUEST['action']) {
-            case 'poll':
-                require(__DIR__ . '/../forums/poll_vote.php');
-                break;
-            default:
-                error(0);
-        }
+        match ($_REQUEST['action']) {
+            'poll' => require(__DIR__ . '/../forums/poll_vote.php'),
+            default => error(0),
+        };
     }
 }

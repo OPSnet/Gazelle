@@ -19,7 +19,6 @@ switch ($_REQUEST['action']) {
         $notification->push($notification->pushableUsers($Viewer->id()), $_POST['title'], $_POST['body'], SITE_URL . '/index.php', Notification::NEWS);
         header('Location: index.php');
         exit;
-        break;
 
     case 'takeeditnews':
         authorize();
@@ -30,7 +29,6 @@ switch ($_REQUEST['action']) {
         $newsMan->modify($id, $_POST['title'], $_POST['body']);
         header('Location: index.php');
         exit;
-        break;
 
     case 'editnews':
         $id = (int)$_REQUEST['id'];
@@ -48,7 +46,6 @@ switch ($_REQUEST['action']) {
         $newsMan->remove($id);
         header('Location: index.php');
         exit;
-        break;
 
     case 'news':
         $create = true;

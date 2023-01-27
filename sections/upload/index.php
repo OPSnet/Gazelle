@@ -8,22 +8,15 @@ if ($Viewer->disableUpload()) {
 }
 
 if (!empty($_GET['action'])) {
-    switch($_GET['action']) {
-        // This is only used for GazelleSync. This should be moved into an endpoint
-        // under ajax.php that is "public facing".
-        case 'parse_html':
-            require('parse_html.php');
-            break;
-        case 'parse_json':
-            require('parse_json.php');
-            break;
-        default:
-            error(404);
-    }
+    match ($_GET['action']) {
+        'parse_html' => require_once('parse_html.php'),
+        'parse_json' => require_once('parse_json.php'),
+        default      => error(404),
+    };
 }
 elseif (!empty($_POST['submit'])) {
-    require('upload_handle.php');
+    require_once('upload_handle.php');
 }
 else {
-    require('upload.php');
+    require_once('upload.php');
 }

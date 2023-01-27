@@ -75,7 +75,6 @@ if (isset($_REQUEST['confirm'])) {
                     case 'invitation':
                         echo $Twig->render('register/no-invite.twig');
                         exit;
-                        break;
                     case 'password':
                         $error = 'No password given';
                         break;

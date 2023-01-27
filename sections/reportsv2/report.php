@@ -77,7 +77,7 @@ $remasterTuple = $torrent->remasterTuple();
 <?php
     if (!$torrent->seederTotal()) {
         $LastActive = $torrent->lastActiveDate();
-        if (!is_null($LastActive) && time() - strtotime($LastActive) >= 1209600) {
+        if (!is_null($LastActive) && time() - strtotime($LastActive) >= 1_209_600) {
 ?>
                                 <br /><strong>Last active: <?=time_diff($LastActive);?></strong>
 <?php   } else { ?>

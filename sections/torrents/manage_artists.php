@@ -19,7 +19,7 @@ $CleanArtists = [];
 $ArtistIDs = [];
 $ArtistsString = '0';
 
-foreach ($Artists as $i => $Artist) {
+foreach ($Artists as $Artist) {
     [$Importance, $ArtistID] = explode(';', $Artist);
     if ($ArtistID && $Importance) {
         $CleanArtists[] = [(int)$Importance, (int)$ArtistID];
@@ -68,7 +68,7 @@ if (count($CleanArtists) > 0) {
             SELECT ArtistID
                 FROM torrents_artists
                 WHERE ArtistID IN ($placeholders)
-            ", ...array_merge($ArtistIDs, $ArtistIDs)
+            ", ...[...$ArtistIDs, ...$ArtistIDs]
         );
         $Items = $DB->collect('ArtistID');
         $EmptyArtists = array_diff($ArtistIDs, $Items);

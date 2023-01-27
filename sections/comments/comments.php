@@ -226,14 +226,14 @@ if ($Action == 'requests') {
 
 $Links = implode(' ',
     // show links to the other types of pages having comments
-    array_map(fn($a) => "<a href=\"comments.php?action=$a$linkId\" class=\"brackets\">" . ucfirst(rtrim($a, 's')) . ' comments</a>',
-        array_filter(['artist', 'collages', 'requests', 'torrents'], fn($a) => $a != $Action)
+    array_map(fn ($a) => "<a href=\"comments.php?action=$a$linkId\" class=\"brackets\">" . ucfirst(rtrim($a, 's')) . ' comments</a>',
+        array_filter(['artist', 'collages', 'requests', 'torrents'], fn ($a) => $a != $Action)
     )
 );
 if ($TypeLinks) {
     // and any extra links for this page type
     $Links .= ' <br />' . implode(' ', array_map(
-        fn($link) => sprintf('<a href="%s" class="brackets">%s</a>', $link[0], $link[1]), $TypeLinks
+        fn ($link) => sprintf('<a href="%s" class="brackets">%s</a>', $link[0], $link[1]), $TypeLinks
     ));
 }
 

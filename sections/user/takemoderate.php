@@ -6,27 +6,20 @@ use Gazelle\Util\Time;
 authorize();
 
 function translateUserStatus($status) {
-    switch ($status) {
-        case 0:
-            return 'Unconfirmed';
-        case 1:
-            return 'Enabled';
-        case 2:
-            return 'Disabled';
-        default:
-            return $status;
-    }
+    return match ($status) {
+        0 => 'Unconfirmed',
+        1 => 'Enabled',
+        2 => 'Disabled',
+        default => $status,
+    };
 }
 
 function enabledStatus($status) {
-    switch ($status) {
-        case 0:
-            return 'Disabled';
-        case 1:
-            return 'Enabled';
-        default:
-            return $status;
-    }
+    return match ($status) {
+        0 => 'Disabled',
+        1 => 'Enabled',
+        default => $status,
+    };
 }
 
 function revoked(bool $state) {
@@ -657,7 +650,7 @@ if (count($set) || count($leechSet)) {
 }
 
 if (isset($_POST['invite_source_update'])) {
-    $source = array_keys(array_filter($_POST, function ($x) { return preg_match('/^source-\d+$/', $x);}, ARRAY_FILTER_USE_KEY));
+    $source = array_keys(array_filter($_POST, fn($x) => preg_match('/^source-\d+$/', $x), ARRAY_FILTER_USE_KEY));
     if ($source) {
         $ids = [];
         foreach ($source as $s) {

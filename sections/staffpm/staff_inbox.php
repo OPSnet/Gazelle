@@ -159,7 +159,7 @@ if ($Viewer->isFLS()) { ?>
     // List messages
     $ClassLevels = $userMan->classLevelList();
     $Row = 'a';
-    foreach ($list as list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID, $LastUserID)) {
+    foreach ($list as [$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID, $LastUserID]) {
         $Row = $Row === 'a' ? 'b' : 'a';
 
         // Get assigned

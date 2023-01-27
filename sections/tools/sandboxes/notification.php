@@ -43,14 +43,12 @@ if (isset($_POST['torrentid'])) {
             $notified = (new Gazelle\Manager\User)->find(trim($_POST['notifiedid']));
             if ($notified) {
                 $notifiedId = $notified->id();
-                $result = array_filter($result, function ($r) use ($notifiedId) {return $r['user_id'] === $notifiedId;});
+                $result = array_filter($result, fn($r) => $r['user_id'] === $notifiedId);
             }
         }
 
-        if (!empty($result)) {
-            foreach ($result as &$r) {
-                $r['filter'] = new Gazelle\NotificationFilter($r['filter_id']);
-            }
+        foreach ($result as &$r) {
+            $r['filter'] = new Gazelle\NotificationFilter($r['filter_id']);
         }
         unset($r);
         $sql = $notification->sql();

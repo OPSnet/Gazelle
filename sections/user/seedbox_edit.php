@@ -23,11 +23,11 @@ $seedbox = new Gazelle\User\Seedbox($user);
 if (isset($_POST['mode'])) {
     switch ($_POST['mode']) {
         case 'update':
-            $id   = array_filter($_POST, function ($x) { return preg_match('/^id-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
-            $ip   = array_filter($_POST, function ($x) { return preg_match('/^ip-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
-            $name = array_filter($_POST, function ($x) { return preg_match('/^name-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
-            $sig  = array_filter($_POST, function ($x) { return preg_match('/^sig-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
-            $ua   = array_filter($_POST, function ($x) { return preg_match('/^ua-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+            $id   = array_filter($_POST, fn($x) => preg_match('/^id-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+            $ip   = array_filter($_POST, fn($x) => preg_match('/^ip-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+            $name = array_filter($_POST, fn($x) => preg_match('/^name-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+            $sig  = array_filter($_POST, fn($x) => preg_match('/^sig-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+            $ua   = array_filter($_POST, fn($x) => preg_match('/^ua-\d+$/', $x), ARRAY_FILTER_USE_KEY);
             if (count($id) != count($ip)) {
                 error("id/ip mismatch");
             } elseif (count($id) != count($name)) {
@@ -53,12 +53,12 @@ if (isset($_POST['mode'])) {
             break;
         case 'remove':
             $rm = array_map(
-                function($x) {return explode('-', $x)[1];},
+                fn($x) => explode('-', $x)[1],
                 array_keys(
-                    array_filter($_POST, function ($x) {return preg_match('/^rm-\d+$/', $x);}, ARRAY_FILTER_USE_KEY)
+                    array_filter($_POST, fn($x) => preg_match('/^rm-\d+$/', $x), ARRAY_FILTER_USE_KEY)
                 )
             );
-            $rmid = array_filter($_POST, function ($x) {return preg_match('/^rmid-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+            $rmid = array_filter($_POST, fn($x) => preg_match('/^rmid-\d+$/', $x), ARRAY_FILTER_USE_KEY);
             $remove = [];
             foreach ($rm as $id) {
                 if (isset($rmid["rmid-$id"])) {

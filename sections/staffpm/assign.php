@@ -19,17 +19,11 @@ if (isset($_GET['convid'])) {
         error(404);
     }
     $classList = (new Gazelle\Manager\User)->classList();
-    switch ($_GET['to']) {
-        case 'forum':
-            $staffPm->assignClass($classList[FORUM_MOD]['Level'], $Viewer);
-            break;
-        case 'staff':
-            $staffPm->assignClass($classList[MOD]['Level'], $Viewer);
-            break;
-        default:
-            error(404);
-            break;
-    }
+    match ($_GET['to']) {
+        'forum' => $staffPm->assignClass($classList[FORUM_MOD]['Level'], $Viewer),
+        'staff' => $staffPm->assignClass($classList[MOD]['Level'], $Viewer),
+        default => error(404),
+    };
     header('Location: staffpm.php');
     exit;
 }

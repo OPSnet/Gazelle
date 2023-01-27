@@ -1,5 +1,8 @@
 <?php
+
 $IS_STAFF = $Viewer->permitted('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
+$Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
+
 if (isset($_POST['id']) && is_number($_POST['id'])) {
     authorize();
     $ID = (int)$_POST['id'];
@@ -7,13 +10,12 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
     if (!$IS_STAFF && $app->userId() != $Viewer->id()) {
         error(403);
     }
-    $remove = array_filter($_POST, function ($x) { return preg_match('/^note-delete-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+    $remove = array_filter($_POST, fn ($x) => preg_match('/^note-delete-\d+$/', $x), ARRAY_FILTER_USE_KEY);
     if (is_array($remove) && count($remove) == 1) {
             $app->removeNote(
                 trim(array_keys($remove)[0], 'note-delete-')
             );
-    }
-    elseif (isset($_POST['resolve'])) {
+    } elseif (isset($_POST['resolve'])) {
         if ($_POST['resolve'] === 'Resolve') {
             $app->resolve(true);
             header('Location: /apply.php?action=view');
@@ -22,8 +24,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
         elseif ($_POST['resolve'] === 'Reopen') {
             $app->resolve(false);
         }
-    }
-    elseif (isset($_POST['note_reply'])) {
+    } elseif (isset($_POST['note_reply'])) {
         $app->saveNote(
             $Viewer,
             $_POST['note_reply'],
@@ -37,7 +38,7 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
         error(403);
     }
 }
-$Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
+
 echo $Twig->render('applicant/view.twig', [
     'app'      => $app ?? null,
     'auth'     => $Viewer->auth(),

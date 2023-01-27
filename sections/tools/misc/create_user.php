@@ -30,14 +30,10 @@ if (isset($_POST['Username'])) {
             ->create();
     }
     catch (Gazelle\Exception\UserCreatorException $e) {
-        switch ($e->getMessage()) {
-            case 'username-invalid':
-                error('Specified username is forbidden');
-                break;
-            default:
-                error('Unable to create user');
-                break;
-        }
+        error(match ($e->getMessage()) {
+            'username-invalid' => 'Specified username is forbidden',
+            default            => 'Unable to create user',
+        });
     }
     header ("Location: " . $user->location());
     exit;

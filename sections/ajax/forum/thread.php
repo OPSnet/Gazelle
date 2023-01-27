@@ -117,7 +117,7 @@ if ($thread->pinnedPostId()) {
 
 $userCache = [];
 $JsonPosts = [];
-foreach ($slice as $Key => $Post) {
+foreach ($slice as $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
     if (!isset($userCache[$AuthorID])) {
         $userCache[$AuthorID] = $userMan->findById((int)$AuthorID);

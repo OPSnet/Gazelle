@@ -25,7 +25,7 @@ $ArtistList = $DB->to_array();
 
 $JsonArtists = [];
 foreach ($ArtistList as $Artist) {
-    list($ArtistID, $Name) = $Artist;
+    [$ArtistID, $Name] = $Artist;
     $JsonArtists[] = [
         'artistId' => (int)$ArtistID,
         'artistName' => $Name

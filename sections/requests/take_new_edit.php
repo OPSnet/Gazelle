@@ -364,7 +364,7 @@ foreach ($ArtistForm as $role => $Artists) {
 //3. Create a row in the requests_artists table for each artist, based on the ID.
 $artistMan->setGroupID($RequestID);
 foreach ($ArtistForm as $role => $Artists) {
-    foreach ($Artists as $Num => $Artist) {
+    foreach ($Artists as $Artist) {
         $artistMan->addToRequest($Artist['id'], $Artist['aliasid'], $role);
         $Cache->increment('stats_album_count');
         $Cache->delete_value('artists_requests_'.$Artist['id']);

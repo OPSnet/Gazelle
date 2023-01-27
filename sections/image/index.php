@@ -59,9 +59,6 @@ if ($imageData !== false) {
         $usage  = $_GET['type'];
         switch($usage) {
             case 'avatar':
-                $maxHeight = 400; // pixels
-                $maxSizeKb = 256;
-                break;
             case 'avatar2':
                 $maxHeight = 400;
                 $maxSizeKb = 256;

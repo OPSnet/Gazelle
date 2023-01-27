@@ -27,7 +27,7 @@ if ($_POST['submit'] == 'Delete') {
         error($Val->errorMessage());
     }
 
-    if (substr($_POST['url'], -1) !== '/') {
+    if (!str_ends_with($_POST['url'], '/')) {
         $_POST['url'] .= '/';
     }
 

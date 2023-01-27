@@ -57,11 +57,11 @@ if (isset($Aliases[$Action])) {
     $_GET['action'] = $Action = $Aliases[$action];
 }
 if (!$Action || !isset($Viewer)) {
-    json_die("failure");
+    json_error("failure");
 }
 $UserID = $Viewer->id();
 
-if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) === 'application/json') {
+if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
     $_POST = json_decode(file_get_contents('php://input'), true);
 }
 
@@ -75,13 +75,13 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     } else {
         $Cache->increment_value('ajax_requests_'.$UserID);
         if ($UserRequests > $rate) {
-            json_die("failure", "Rate limit exceeded");
+            json_error("failure", "Rate limit exceeded");
         }
     }
 }
 
 if (AJAX && !defined('AUTHED_BY_TOKEN') && in_array($Action, $RequireTokenPages)) {
-    json_die("failure", "This page requires an api token");
+    json_error("failure", "This page requires an api token");
 }
 
 switch ($Action) {
@@ -183,14 +183,10 @@ switch ($Action) {
         require_once('similar_artists.php');
         break;
     case 'userhistory':
-        switch ($_GET['type'] ?? '') {
-            case 'posts':
-                require_once('userhistory/post_history.php');
-                break;
-            default:
-                json_die('bad type');
-                break;
-        }
+        match ($_GET['type'] ?? '') {
+            'posts' => require_once('userhistory/post_history.php'),
+            default => json_error('bad type'),
+        };
         break;
     case 'votefavorite':
         require_once('takevote.php');
@@ -255,5 +251,5 @@ switch ($Action) {
         break;
     default:
         // If they're screwing around with the query string
-        json_die("failure");
+        json_error("failure");
 }

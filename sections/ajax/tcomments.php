@@ -11,7 +11,7 @@ $userCache = [];
 $userMan = new Gazelle\Manager\User;
 
 $JsonComments = [];
-foreach ($thread as $Key => $Post) {
+foreach ($thread as $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername] = array_values($Post);
     if (!isset($userCache[$AuthorID])) {
         $userCache[$AuthorID] = $userMan->findById((int)$AuthorID);

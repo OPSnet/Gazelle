@@ -8,7 +8,7 @@ $error = null;
 $token = null;
 $tokenName = '';
 
-$_GET['do'] = $_GET['do'] ?? '';
+$_GET['do'] ??= '';
 
 if (!empty($_GET['do']) && $userId !== $Viewer->id() && !$Viewer->permitted('users_mod')) {
     error(403);

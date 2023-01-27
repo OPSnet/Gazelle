@@ -9,7 +9,7 @@ if ($_POST) {
     if ($Viewer->permitted('admin_manage_ipbans')) {
         $ban = [];
         $clear = [];
-        $admin = array_filter($_POST, function ($x) { return preg_match('/^admin-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+        $admin = array_filter($_POST, fn($x) => preg_match('/^admin-\d+$/', $x), ARRAY_FILTER_USE_KEY);
         foreach ($admin as $admin_id => $op) {
             $id = (int)explode('-', $admin_id)[1];
             if ($op == 'ban') {
@@ -20,7 +20,7 @@ if ($_POST) {
         }
     } elseif ($Viewer->permitted('admin_login_watch')) {
         $clear = [];
-        $admin = array_filter($_POST, function ($x) { return preg_match('/^clear-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+        $admin = array_filter($_POST, fn($x) => preg_match('/^clear-\d+$/', $x), ARRAY_FILTER_USE_KEY);
         foreach ($admin as $admin_id => $op) {
             $id = (int)explode('-', $admin_id)[1];
             $clear[] = $id;

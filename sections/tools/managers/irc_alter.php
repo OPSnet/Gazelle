@@ -6,18 +6,15 @@ if (!$Viewer->permitted('admin_manage_forums')) {
 
 authorize();
 
-$_POST['submit'] = $_POST['submit'] ?? $_POST['create'] ?? '';
+$_POST['submit'] ??= $_POST['create'] ?? '';
 $manager = new Gazelle\Manager\IRC;
 
 if ($_POST['submit'] == 'Delete') { //Delete
-dump($_POST);
-exit;
     $ID = intval($_POST['id'] ?? 0);
     if ($ID === 0) {
         error(0);
     }
     $DB->prepared_query('DELETE FROM irc_channels WHERE ID = ?', $ID);
-
 } else {
     // Edit & Create have shared validation
     // we have a 'submit-234' key, so we want to pull out that 234

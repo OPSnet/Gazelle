@@ -1,10 +1,6 @@
 <?php
 
-switch ($_GET['type'] ?? 'inbox') {
-    case 'viewconv':
-        require('viewconv.php');
-        break;
-    default:
-        require('inbox.php');
-        break;
-}
+require_once(match ($_GET['type'] ?? 'inbox') {
+    'viewconv' => 'viewconv.php',
+    default    => 'inbox.php',
+});
