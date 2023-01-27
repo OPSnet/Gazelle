@@ -20,7 +20,7 @@ if ($_POST['submit'] === 'Delete') {
         ['permissions', false, 'string', 'The permissions have a max length of 50 characters', ['maxlength' => 50]],
     ]);
 
-    $P = Gazelle\Util\Arrays::trim($_POST);
+    $P = array_map('trim', $_POST);
     if (!$validator->validate($P)) {
         error($validator->errorMessage());
     }

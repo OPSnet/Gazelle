@@ -8,7 +8,7 @@ if (!$Viewer->permitted('admin_manage_navigation')) {
 
 authorize();
 
-$P = Arrays::trim($_POST);
+$P = array_map('trim', $_POST);
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
