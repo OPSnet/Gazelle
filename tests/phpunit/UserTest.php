@@ -1,17 +1,14 @@
 <?php
 
-namespace Gazelle;
-
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class UserTest extends TestCase {
-
-    protected Manager\User $userMan;
+    protected \Gazelle\Manager\User $userMan;
 
     public function setUp(): void {
-        $this->userMan = new Manager\User;
+        $this->userMan = new \Gazelle\Manager\User;
     }
 
     public function tearDown(): void {

@@ -1,0 +1,33 @@
+{% for r in list %}
+    {% if loop.first %}
+<div class="box">
+    <div class="head">
+        <span style="font-weight: bold;">Requests ({{ list|length|number_format }})</span>
+        {{- dom.click("#request-toggle", "$('#requests').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;") -}}
+        <a href="#" id="request-toggle" style="float: right;" class="brackets">Show</a>
+    </div>
+    <table id="requests" class="request_table hidden">
+        <tr class="colhead">
+            <td>Format / Bitrate / Media</td>
+            <td>Votes</td>
+            <td>Bounty</td>
+        </tr>
+    {% endif %}
+        <tr class="requestrows row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td><a href="{{ r.url }}">{{ r.needFormatList|join(', ') -}}
+    {%- if r.needLog or r.needCue %} - {{ r.descriptionLogCue }} {% else %} {% endif -%}
+    / {{- r.needEncodingList|join(', ') }} / {{ r.needFormatList|join(', ') -}}
+            </a></td>
+            <td>
+                <span id="vote_count_{{ r.id }}">{{ r.userVotedTotal|number_format }}</span>
+    {%- if viewer.permitted('site_album_votes') -%}
+                &nbsp;&nbsp; <a href="javascript:Vote(0, {{ r.id }}) ?>)" class="brackets">+</a>
+    {%- endif -%}
+            </td>
+            <td>{{ r.bountyTotal|octet_size }}</td>
+        </tr>
+    {% if loop.last %}
+    </table>
+</div>
+    {% endif %}
+{% endfor %}

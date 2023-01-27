@@ -1,18 +1,15 @@
 <?php
 
-namespace Gazelle;
-
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class UserCreateTest extends TestCase {
-
-    protected UserCreator $userCreator;
+    protected \Gazelle\UserCreator $userCreator;
 
     public function setUp(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        $this->userCreator          = new UserCreator;
+        $this->userCreator          = new \Gazelle\UserCreator;
     }
 
     public function tearDown(): void {}

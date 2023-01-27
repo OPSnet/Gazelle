@@ -1,17 +1,14 @@
 <?php
 
-namespace Gazelle;
-
 use \PHPUnit\Framework\TestCase;
 
 class ForumTest extends TestCase {
-
-    protected Manager\Forum         $forumMan;
-    protected Manager\ForumCategory $fcatMan;
-    protected Manager\ForumPoll     $pollMan;
-    protected Manager\ForumPost     $postMan;
-    protected Manager\ForumThread   $threadMan;
-    protected Manager\User          $userMan;
+    protected \Gazelle\Manager\Forum         $forumMan;
+    protected \Gazelle\Manager\ForumCategory $fcatMan;
+    protected \Gazelle\Manager\ForumPoll     $pollMan;
+    protected \Gazelle\Manager\ForumPost     $postMan;
+    protected \Gazelle\Manager\ForumThread   $threadMan;
+    protected \Gazelle\Manager\User          $userMan;
 
     public function setUp(): void {
         $this->forumMan  = new \Gazelle\Manager\Forum;
@@ -51,7 +48,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testCategory
      */
-    public function testForum(ForumCategory $category) {
+    public function testForum(\Gazelle\ForumCategory $category) {
         $initial      = count($this->forumMan->nameList());
         $tocTotal     = count($this->forumMan->tableOfContentsMain());
         $user         = $this->userMan->find('@user');
@@ -124,7 +121,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testForum
      */
-    public function testThread(Forum $forum) {
+    public function testThread(\Gazelle\Forum $forum) {
         $admin = $this->userMan->find('@admin');
 
         $thread = $this->threadMan->create($forum, $admin->id(), 'thread title', 'this is a new thread');
@@ -152,7 +149,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testThread
      */
-    public function testNote(ForumThread $thread) {
+    public function testNote(\Gazelle\ForumThread $thread) {
         $admin  = $this->userMan->find('@admin');
 
         $threadNote = 'this is a note';
@@ -167,7 +164,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testForum
      */
-    public function testAccess(Forum $forum) {
+    public function testAccess(\Gazelle\Forum $forum) {
         $secretLevel  = $this->userMan->find('@admin')->effectiveClass();
         $secret = $this->forumMan->create(
             sequence:      200,
@@ -202,7 +199,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testThread
      */
-    public function testPost(ForumThread $thread) {
+    public function testPost(\Gazelle\ForumThread $thread) {
         $forum  = $thread->forum();
 
         $user = $this->userMan->find('@user');
@@ -267,7 +264,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testThread
      */
-    public function testPoll(ForumThread $thread) {
+    public function testPoll(\Gazelle\ForumThread $thread) {
         $answer = ['apple', 'banana', 'carrot'];
         $poll = $this->pollMan->create($thread->id(), 'Best food', $answer);
         $this->assertInstanceOf('\\Gazelle\\ForumPoll', $poll, 'forum-poll-is-forum-poll');

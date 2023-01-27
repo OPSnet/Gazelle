@@ -630,40 +630,10 @@ if (!$torrentList) {
 }
 
 if (!$Viewer->disableRequests()) {
-    $requestList = $requestMan->findByTGroup($tgroup);
-    if ($requestList) {
-        $i = 0;
-?>
-        <div class="box">
-            <div class="head">
-                <span style="font-weight: bold;">Requests (<?=number_format(count($requestList))?>)</span>
-                <a href="#" style="float: right;" onclick="$('#requests').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a>
-            </div>
-            <table id="requests" class="request_table hidden">
-                <tr class="colhead">
-                    <td>Format / Bitrate / Media</td>
-                    <td>Votes</td>
-                    <td>Bounty</td>
-                </tr>
-<?php foreach ($requestList as $request) { ?>
-                <tr class="requestrows <?=(++$i % 2 ? 'rowa' : 'rowb')?>">
-                    <td><a href="requests.php?action=view&amp;id=<?= $request->id() ?>"><?=
-                        implode(', ', $request->needFormatList())
-                        . ($request->needLog() || $request->needCue() ? " - {$request->descriptionLogCue()}" : '')
-                        ?> / <?= implode(', ', $request->needEncodingList()) ?> / <?= implode(', ', $request->needFormatList()) ?></a></td>
-                    <td>
-                        <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>
-<?php       if ($Viewer->permitted('site_album_votes')) { ?>
-                        &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $request->id() ?>)" class="brackets">+</a>
-<?php       } ?>
-                    </td>
-                    <td><?= Format::get_size($request->bountyTotal()) ?></td>
-                </tr>
-<?php } ?>
-            </table>
-        </div>
-<?php
-    }
+    echo $Twig->render('torrent/request.twig', [
+        'list' => $requestMan->findByTGroup($tgroup),
+    ]);
+
 }
 
 echo $Twig->render('tgroup/similar.twig', [

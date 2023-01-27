@@ -1,24 +1,21 @@
 <?php
 
-namespace Gazelle;
-
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class StaffPMTest extends TestCase {
+    protected \Gazelle\Manager\StaffPM $spMan;
 
-    protected Manager\StaffPM $spMan;
-
-    protected User $fls;
-    protected User $mod;
-    protected User $sysop;
-    protected User $user;
+    protected \Gazelle\User $fls;
+    protected \Gazelle\User $mod;
+    protected \Gazelle\User $sysop;
+    protected \Gazelle\User $user;
 
     public function setUp(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
 
-        $this->fls = (new UserCreator)->setUsername('spm_fls_' . randomString(10))
+        $this->fls = (new \Gazelle\UserCreator)->setUsername('spm_fls_' . randomString(10))
             ->setEmail('spm-fls@example.com')
             ->setPassword('secret123456')
             ->setIpaddr('127.0.0.1')
@@ -26,7 +23,7 @@ class StaffPMTest extends TestCase {
             ->create();
         $this->fls->addClasses([FLS_TEAM]);
 
-        $this->mod = (new UserCreator)->setUsername('spm_mod_' . randomString(10))
+        $this->mod = (new \Gazelle\UserCreator)->setUsername('spm_mod_' . randomString(10))
             ->setEmail('spm-mod@example.com')
             ->setPassword('secret123456')
             ->setIpaddr('127.0.0.1')
@@ -34,7 +31,7 @@ class StaffPMTest extends TestCase {
             ->create();
         $this->mod->setUpdate('PermissionID', MOD)->modify();
 
-        $this->sysop = (new UserCreator)->setUsername('spm_sysop_' . randomString(10))
+        $this->sysop = (new \Gazelle\UserCreator)->setUsername('spm_sysop_' . randomString(10))
             ->setEmail('spm-sysop@example.com')
             ->setPassword('secret123456')
             ->setIpaddr('127.0.0.1')
@@ -42,14 +39,14 @@ class StaffPMTest extends TestCase {
             ->create();
         $this->sysop->setUpdate('PermissionID', SYSOP)->modify();
 
-        $this->user = (new UserCreator)->setUsername('spm_user_' . randomString(10))
+        $this->user = (new \Gazelle\UserCreator)->setUsername('spm_user_' . randomString(10))
             ->setEmail('spm-user@example.com')
             ->setPassword('secret123456')
             ->setIpaddr('127.0.0.1')
             ->setAdminComment('StaffPMTest')
             ->create();
 
-        $this->spMan = new Manager\StaffPM;
+        $this->spMan = new \Gazelle\Manager\StaffPM;
     }
 
     public function tearDown(): void {}
