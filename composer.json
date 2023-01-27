@@ -24,26 +24,27 @@
     "sort-packages": true
   },
   "require": {
-    "php": "^8.1",
+    "php": "^8.2",
     "ext-curl": "*",
     "ext-json": "*",
     "ext-mysqli": "*",
     "d11wtq/boris": "^1.0",
     "endroid/qr-code": "^4.2",
     "hashids/hashids": "^4.1",
-    "maennchen/zipstream-php": "^2.1",
+    "maennchen/zipstream-php": "^2.4",
     "orpheusnet/bencode-torrent": "^1.2.0",
     "orpheusnet/logchecker": "^0.11.0",
-    "robmorgan/phinx": "^0.12.4",
+    "robmorgan/phinx": "^0.12.13",
     "robthree/twofactorauth": "^1.7",
-    "twig/twig": "^2.12",
+    "twig/twig": "^2.15.4",
     "whichbrowser/parser": "^2.0"
   },
   "require-dev": {
     "phpstan/phpstan": "^1.8.6",
     "phpunit/php-code-coverage": "^9.2",
     "phpunit/phpunit": "^9.5",
-    "squizlabs/php_codesniffer": "^3.6"
+    "rector/rector": "^0.15.10",
+    "squizlabs/php_codesniffer": "^3.7"
   },
   "scripts": {
     "test": "phpunit",

@@ -5,8 +5,8 @@ use Gazelle\Util\Time;
 
 // 1. Basic sanity checks and initialization
 
-if (PHP_VERSION_ID < 80104) {
-    die("Gazelle (Orpheus fork) requires at least PHP version 8.1.4");
+if (PHP_VERSION_ID < 80201) {
+    die("Gazelle (Orpheus fork) requires at least PHP version 8.2.1");
 }
 foreach (['memcached', 'mysqli'] as $e) {
     if (!extension_loaded($e)) {

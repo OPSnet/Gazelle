@@ -19,6 +19,7 @@ RUN apt-get update \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         make \
+        mktorrent \
         nginx \
         netcat \
         php${PHP_VER}-cli \
