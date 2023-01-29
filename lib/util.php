@@ -7,27 +7,9 @@ use Gazelle\Util\{Type, Time, Irc};
 /**
  * Return true if the given string is an integer. The original Gazelle developers
  * must have thought the only numbers out there were integers when naming this function.
- *
- * @param mixed $Str
- * @return bool
  */
-if (PHP_INT_SIZE === 4) {
-    function is_number($Str) {
-        if ($Str === null || $Str === '') {
-            return false;
-        }
-        if (is_int($Str)) {
-            return true;
-        }
-        if ($Str[0] == '-' || $Str[0] == '+') { // Leading plus/minus signs are ok
-            $Str[0] = 0;
-        }
-        return ltrim($Str, "0..9") === '';
-    }
-} else {
-    function is_number($Str) {
-        return Type::isInteger($Str);
-    }
+function is_number(mixed $integer): bool {
+    return filter_var($integer, FILTER_VALIDATE_INT) !== false;
 }
 
 /**
@@ -54,7 +36,6 @@ function article(int $n, $article = 'a') {
 
 /**
  * HTML-escape a string for output.
- * This is preferable to htmlspecialchars because it doesn't screw up upon a double escape.
  *
  * @param string $Str
  * @return string escaped string.
@@ -65,11 +46,11 @@ function display_str($Str) {
     }
     if ($Str != '' && !is_number($Str)) {
         $Str = make_utf8($Str);
-        $Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
+        $Str = htmlspecialchars($Str, ENT_NOQUOTES|ENT_SUBSTITUTE, 'UTF-8', false);
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
 
         $Replace = [
-            "'",'"',"<",">",
+            "<",">",
             '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
             '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
             '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
@@ -77,7 +58,7 @@ function display_str($Str) {
         ];
 
         $With = [
-            '&#39;','&quot;','&lt;','&gt;',
+            '&lt;','&gt;',
             '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
             '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
             '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
@@ -112,15 +93,13 @@ function reverse_display_str($Str) {
 
         $With = [
             "'",'"',"<",">",
-            '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
+            ' ','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
             '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
             '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
-            '&#156;','&#158;','&#159;'
+            '&#156;','&#158;','Ÿ'
         ];
         $Str = str_replace($Replace, $With, $Str);
-
         $Str = str_replace("&amp;", "&", $Str);
-        $Str = mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
     }
     return $Str;
 }
@@ -164,8 +143,8 @@ function authorize($Ajax = false): bool {
     return false;
 }
 
-function parse_user_agent(): array {
-    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+function parse_user_agent(string $useragent): array {
+    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $useragent, $Matches) === 1) {
         $OS = explode(" ", $Matches[2]);
         $browserUserAgent = [
             'Browser' => 'Lidarr',
@@ -173,22 +152,22 @@ function parse_user_agent(): array {
             'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
             'OperatingSystemVersion' => $OS[1] ?? null
         ];
-    } elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+    } elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $useragent, $Matches) === 1) {
         $browserUserAgent = [
             'Browser' => 'VarroaMusica',
             'BrowserVersion' => str_replace('dev', '', $Matches[1]),
             'OperatingSystem' => null,
             'OperatingSystemVersion' => null
         ];
-    } elseif (in_array($_SERVER['HTTP_USER_AGENT'], ['Headphones/None', 'whatapi [isaaczafuta]'])) {
+    } elseif (in_array($useragent, ['Headphones/None', 'whatapi [isaaczafuta]'])) {
         $browserUserAgent = [
-            'Browser' => $_SERVER['HTTP_USER_AGENT'],
+            'Browser' => $useragent,
             'BrowserVersion' => null,
             'OperatingSystem' => null,
             'OperatingSystemVersion' => null
         ];
     } else {
-        $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
+        $Result = new WhichBrowser\Parser($useragent);
         $Browser = $Result->browser;
         if (empty($Browser->getName()) && !empty($Browser->using)) {
             $Browser = $Browser->using;

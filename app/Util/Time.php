@@ -34,7 +34,7 @@ class Time {
     public static function diff($timestamp, $levels = 2, $span = true, $starttime = false, $hideAgo = false) {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
 
-        if (!Type::isInteger($timestamp)) { // Assume that $timestamp is SQL timestamp
+        if (!is_number($timestamp)) { // Assume that $timestamp is SQL timestamp
             if ($timestamp == '' || is_null($timestamp)) {
                 return 'Never';
             }

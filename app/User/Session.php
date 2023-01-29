@@ -54,7 +54,7 @@ class Session extends \Gazelle\BaseUser {
             ", $this->user->id()
         );
 
-        $userAgent = parse_user_agent();
+        $userAgent = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
         self::$db->prepared_query("
             UPDATE users_sessions SET
                 LastUpdate = now(),
