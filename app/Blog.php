@@ -16,7 +16,10 @@ class Blog extends BaseObject {
     }
 
     public function flush(): Blog {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->deleteMulti([
+            Manager\Blog::CACHE_KEY,
+            sprintf(self::CACHE_KEY, $this->id),
+        ]);
         return $this;
     }
 

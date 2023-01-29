@@ -81,7 +81,7 @@ class News extends \Gazelle\Base {
      *
      * @return array [string title, string body] or null if no such article
      */
-    public function fetch(int $id): array {
+    public function fetch(int $id): ?array {
         return self::$db->row("
             SELECT Title, Body
             FROM news
