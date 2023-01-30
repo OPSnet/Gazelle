@@ -77,6 +77,8 @@ class UserTest extends TestCase {
         $this->assertTrue($user->validatePassword($password), 'utest-password-validate-new');
         $this->assertCount(1, $user->passwordHistory(), 'utest-password-history');
         $this->assertEquals($user->passwordCount(), 1, 'utest-password-count');
+        // cleanup: restore original password
+        $user->updatePassword('password', '0.0.0.0');
     }
 
     public function testUser() {

@@ -38,3 +38,7 @@ Cypress.Commands.add('login', (username, password) => {
 Cypress.Commands.add('loginAdmin', () => {
     cy.login('admin', 'password');
 })
+
+Cypress.Commands.add('loginUser', () => {
+    cy.login('user', 'password');
+})
