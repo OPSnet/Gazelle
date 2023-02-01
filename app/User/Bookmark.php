@@ -226,7 +226,7 @@ class Bookmark extends \Gazelle\BaseUser {
                         (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
                     )", $id, $this->user->id(), $this->user->id()
                 );
-                self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
+                self::$cache->delete_multi(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
 
                 $torMan = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
                 $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
@@ -285,7 +285,7 @@ class Bookmark extends \Gazelle\BaseUser {
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
             ", $this->user->id(), $id
         );
-        self::$cache->deleteMulti(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
+        self::$cache->delete_multi(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
 
         if ($type === 'torrent' && self::$db->affected_rows()) {
             self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());

@@ -71,7 +71,7 @@ class Privilege extends BaseObject {
     }
 
     protected function userFlush(array $ids): int {
-        self::$cache->deleteMulti(array_merge(
+        self::$cache->delete_multi(array_merge(
             ["perm_" . $this->id],
             array_map(fn($id) => "u_$id", $ids),
         ));
@@ -89,7 +89,7 @@ class Privilege extends BaseObject {
             );
             $this->userFlush(self::$db->collect(0, false));
         }
-        self::$cache->deleteMulti(['user_class', 'staff_class']);
+        self::$cache->delete_multi(['user_class', 'staff_class']);
         return $modified;
     }
 

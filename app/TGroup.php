@@ -21,7 +21,7 @@ class TGroup extends BaseObject {
 
     public function flush(): TGroup {
         $this->info = [];
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),
             sprintf(self::CACHE_COVERART_KEY, $this->id),
@@ -75,7 +75,7 @@ class TGroup extends BaseObject {
             WHERE GroupID = ?
             ", $this->id
         );
-        self::$cache->deleteMulti(self::$db->collect('cacheKey'));
+        self::$cache->delete_multi(self::$db->collect('cacheKey'));
         return $this;
     }
 
@@ -88,7 +88,7 @@ class TGroup extends BaseObject {
             ", $this->id
         );
         if (self::$db->has_results()) {
-            self::$cache->deleteMulti(array_map(fn ($id) => "collagev2_$id", self::$db->collect(0, false)));
+            self::$cache->delete_multi(array_map(fn ($id) => "collagev2_$id", self::$db->collect(0, false)));
         }
 
         self::$db->prepared_query("
@@ -99,7 +99,7 @@ class TGroup extends BaseObject {
             ", $this->id
         );
         if (self::$db->has_results()) {
-            self::$cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), self::$db->collect(0, false)));
+            self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), self::$db->collect(0, false)));
         }
 
         self::$db->prepared_query("
@@ -110,7 +110,7 @@ class TGroup extends BaseObject {
             ", $this->id
         );
         if (self::$db->has_results()) {
-            self::$cache->deleteMulti(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), self::$db->collect(0, false)));
+            self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), self::$db->collect(0, false)));
         }
         return $this;
     }
@@ -1030,7 +1030,7 @@ class TGroup extends BaseObject {
             return false;
         }
 
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             "torrents_details_" . $this->id,
             "torrent_group_" . $this->id,
             sprintf(\Gazelle\TGroup::CACHE_KEY, " . $this->id),

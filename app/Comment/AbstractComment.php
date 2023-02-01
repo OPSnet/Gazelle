@@ -264,7 +264,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
 
         // Update the cache
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             "edit_{$page}_" . $this->id,
             "{$page}_comments_" . $this->pageId,
             sprintf(\Gazelle\Manager\Comment::CATALOG, $page, $this->pageId,
@@ -312,7 +312,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
 
         (new \Gazelle\Manager\Subscription)->flushPage($page, $this->pageId);
 
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             "edit_{$page}_" . $this->id,
             "{$page}_comments_" . $this->pageId,
         ]);

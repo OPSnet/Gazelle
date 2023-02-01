@@ -158,7 +158,7 @@ class StaffBlog extends \Gazelle\Base {
             );
             $this->blogId = self::$db->inserted_id();
         }
-        self::$cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
+        self::$cache->delete_multi(['staff_feed_blog', self::CACHE_KEY]);
         return self::$db->affected_rows() === 1;
     }
 
@@ -172,7 +172,7 @@ class StaffBlog extends \Gazelle\Base {
             DELETE FROM staff_blog WHERE ID = ?
             ", $blogId
         );
-        self::$cache->deleteMulti(['staff_feed_blog', self::CACHE_KEY]);
+        self::$cache->delete_multi(['staff_feed_blog', self::CACHE_KEY]);
         return self::$db->affected_rows() === 1;
     }
 }

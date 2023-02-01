@@ -11,7 +11,7 @@ class Request extends BaseObject {
         if ($this->tgroupId()) {
             self::$cache->delete_value("requests_group_" . $this->tgroupId());
         }
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_REQUEST, $this->id),
             sprintf(self::CACHE_ARTIST, $this->id),
             sprintf(self::CACHE_VOTE, $this->id),
@@ -78,7 +78,7 @@ class Request extends BaseObject {
             SELECT ArtistID FROM requests_artists WHERE RequestID = ?
             ", $this->id
         );
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             ...array_map(fn ($id) => "artists_requests_$id", self::$db->collect(0, false)),
         ]);
     }

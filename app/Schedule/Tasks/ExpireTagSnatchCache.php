@@ -11,6 +11,6 @@ class ExpireTagSnatchCache extends \Gazelle\Schedule\Task
             FROM xbt_snatched
             WHERE tstamp > unix_timestamp(now() - INTERVAL 90 MINUTE)
         ");
-        return count(self::$cache->deleteMulti(self::$db->collect('uid', false)));
+        return count(self::$cache->delete_multi(self::$db->collect('uid', false)));
     }
 }

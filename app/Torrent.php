@@ -108,7 +108,7 @@ class Torrent extends TorrentAbstract {
     }
 
     public function unlockUpload(): void {
-        self::$cache->deleteMulti(sprintf(self::CACHE_LOCK, $this->id));
+        self::$cache->delete_value(sprintf(self::CACHE_LOCK, $this->id));
     }
 
     /**
@@ -531,7 +531,7 @@ class Torrent extends TorrentAbstract {
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id),
             "torrent_download_" . $this->id, "torrent_group_" . $groupId, "torrents_details_" . $groupId
         );
-        self::$cache->deleteMulti($deleteKeys);
+        self::$cache->delete_multi($deleteKeys);
         $this->group()->refresh();
 
         $sizeMB = number_format($this->info()['Size'] / (1024 * 1024), 2) . ' MiB';

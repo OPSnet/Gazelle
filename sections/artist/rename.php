@@ -187,7 +187,7 @@ $DB->prepared_query("
     WHERE ArtistID = ?
     ", $ArtistID
 );
-$Cache->deleteMulti(array_merge($DB->collect('GroupID'), ["artists_requests_$TargetArtistID", "artists_requests_$ArtistID"]));
+$Cache->delete_multi(array_merge($DB->collect('GroupID'), ["artists_requests_$TargetArtistID", "artists_requests_$ArtistID"]));
 
 $artist->flushCache();
 $artist = new Gazelle\Artist($TargetArtistID);

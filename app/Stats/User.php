@@ -20,7 +20,7 @@ class User extends \Gazelle\BaseObject {
     protected array $general = [];
 
     public function flush(): User {
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
             sprintf(self::CACHE_GENERAL, $this->id),
         ]);

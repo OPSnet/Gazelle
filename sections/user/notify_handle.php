@@ -47,5 +47,5 @@ if ($filterId) {
     $filter->create($Viewer->id());
 }
 
-$Cache->deleteMulti(["u_notify_" . $Viewer->id(), "notify_artists_" . $Viewer->id()]);
+$Cache->delete_multi(["u_notify_" . $Viewer->id(), "notify_artists_" . $Viewer->id()]);
 header('Location: user.php?action=notify');

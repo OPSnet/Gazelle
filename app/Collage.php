@@ -185,7 +185,7 @@ class Collage extends BaseObject {
                 WHERE ID = ?
                 ", $delta, $this->id
             );
-            self::$cache->deleteMulti([
+            self::$cache->delete_multi([
                 sprintf(self::SUBS_KEY, $userId),
                 sprintf(self::SUBS_NEW_KEY, $userId),
             ]);

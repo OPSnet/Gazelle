@@ -121,11 +121,6 @@ if ($Viewer) {
         error_reporting(E_ALL);
     }
 
-    // Change necessary triggers in external components
-    if ($Viewer->permitted('admin_clear_cache')) {
-        $Cache->enableCacheClear();
-    }
-
     // Because we <3 our staff
     if ($Viewer->permitted('site_disable_ip_history')) {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';

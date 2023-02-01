@@ -1,6 +1,5 @@
 <?php
 class View {
-
     protected static $footerSeen = false;
 
     /**
@@ -227,7 +226,7 @@ class View {
 
         global $Cache, $DB, $Debug, $SessionID;
         return $Twig->render('index/private-footer.twig', [
-            'cache_time'   => $Cache->Time,
+            'cache'        => $Cache,
             'db_time'      => $DB->Time,
             'debug'        => $Debug,
             'disclaimer'   => isset($Options['disclaimer']),

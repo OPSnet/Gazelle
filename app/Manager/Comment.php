@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Comment extends \Gazelle\BaseManager {
-
     const CATALOG = '%s_comments_%d_cat_%d';
 
     protected function className(string $page): string {
@@ -50,7 +49,7 @@ class Comment extends \Gazelle\BaseManager {
             WHERE Page = ? AND PageID = ?
             ", TORRENT_COMMENTS_PER_PAGE, TORRENT_COMMENTS_PER_PAGE, THREAD_CATALOGUE, $page, $pageId
         );
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CATALOG, $page, $pageId, $catalogueId),
             "{$page}_comments_{$pageId}"
         ]);

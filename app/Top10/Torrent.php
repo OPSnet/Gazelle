@@ -15,9 +15,10 @@ class Torrent extends \Gazelle\Base {
         if ($topTorrents !== false) {
             return $topTorrents;
         }
-        if (!self::$cache->get_query_lock($cacheKey)) {
+        if (self::$cache->get_value("{$cacheKey}_lock")) {
             return false;
         }
+        self::$cache->cache_value("{$cacheKey}_lock", true, 3600);
 
         $where = [];
         $anyTags = isset($getParameters['anyall']) && $getParameters['anyall'] == 'any';
@@ -74,7 +75,7 @@ class Torrent extends \Gazelle\Base {
         $topTorrents = self::$db->to_array();
 
         self::$cache->cache_value($cacheKey, $topTorrents, 3600 * 6);
-        self::$cache->clear_query_lock($cacheKey);
+        self::$cache->delete_value("{$cacheKey}_lock");
         return $topTorrents;
     }
 

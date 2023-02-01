@@ -112,10 +112,7 @@ class Artist extends Base {
             WHERE ArtistID = ?
             ", $this->id
         );
-        $cacheKeys = self::$db->collect(0, false);
-        self::$cache->deleteMulti($cacheKeys);
-        self::$cache->delete_value($this->cacheKey());
-        return count($cacheKeys);
+        return count(self::$cache->delete_multi([$this->cacheKey(), ...self::$db->collect(0, false)]));
     }
 
     protected function loadAttr(): array {
@@ -709,7 +706,7 @@ class Artist extends Base {
 
         $this->flushCache();
         $similar->flushCache();
-        self::$cache->deleteMulti(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+        self::$cache->delete_multi(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
     }
 
     public function removeSimilar(int $similarId, Manager\Artist $artMan, Manager\Request $reqMan): bool {
@@ -991,7 +988,7 @@ class Artist extends Base {
         $similarArtist = new Artist($similarArtistId, 0);
         $this->flushCache();
         $similarArtist->flushCache();
-        self::$cache->deleteMulti(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
+        self::$cache->delete_multi(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
         return true;
     }
 

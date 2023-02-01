@@ -71,8 +71,8 @@ class Bonus extends \Gazelle\Base {
             WHERE user_id in (" . placeholders($ids) . ")
             ", $points, ...$ids
         );
-        self::$cache->deleteMulti(array_map(fn($k) => "user_stats_$k", $ids));
-        self::$cache->deleteMulti(array_map(fn($k) => "u_$k", $ids));
+        self::$cache->delete_multi(array_map(fn($k) => "user_stats_$k", $ids));
+        self::$cache->delete_multi(array_map(fn($k) => "u_$k", $ids));
         return self::$db->affected_rows();
     }
 
@@ -198,7 +198,7 @@ class Bonus extends \Gazelle\Base {
             SELECT concat('u_', bu.user_id) FROM bonus_update bu
         ");
         if (self::$db->has_results()) {
-            self::$cache->deleteMulti(self::$db->collect(0, false));
+            self::$cache->delete_multi(self::$db->collect(0, false));
         }
 
         return $processed;

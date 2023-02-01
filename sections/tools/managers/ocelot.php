@@ -32,7 +32,7 @@ if (isset($_GET['tokens'])) {
             WHERE "
             . implode(" OR ", $cond), ...$args
         );
-        $Cache->deleteMulti($ck);
+        $Cache->delete_multi($ck);
     }
 } else {
     $TorrentID = (int)$_REQUEST['torrentid'];

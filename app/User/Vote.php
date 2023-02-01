@@ -47,7 +47,7 @@ class Vote extends \Gazelle\BaseUser {
     }
 
     public function flush(): Vote {
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::VOTE_RECENT, $this->user->id()),
             sprintf(self::VOTE_TOTAL, $this->user->id()),
         ]);

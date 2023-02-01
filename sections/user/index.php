@@ -84,7 +84,7 @@ switch ($_REQUEST['action'] ?? '') {
             error(403);
         }
         $UserID = $_REQUEST['id'];
-        $Cache->deleteMulti([
+        $Cache->delete_multi([
             'u_'                      . $UserID,
             'collage_subs_user_new_'  . $UserID,
             'donor_info_'             . $UserID,

@@ -70,19 +70,11 @@ class Debug {
 
         self::$db->warnings(); // see comment in MYSQL::query
 
-        $CacheStatus = self::$cache->server_status();
-        if (in_array(0, $CacheStatus) && !self::$cache->get_value('cache_fail_reported')) {
-            // Limit to max one report every 15 minutes to avoid massive debug spam
-            self::$cache->cache_value('cache_fail_reported', true, 900);
-            $Reason[] = "Cache server error";
-        }
-
         if (isset($_REQUEST['profile'])) {
             $Reason[] = 'Requested by ' . $user->username();
         }
 
         if (isset($Reason[0])) {
-            $this->log_var($CacheStatus, 'Cache server status');
             $this->analysis(implode(', ', $Reason));
             return true;
         }
@@ -113,7 +105,7 @@ class Debug {
            duration:  $duration,
            memory:    memory_get_usage(true),
            nrQuery:   count($this->get_queries()),
-           nrCache:   count($this->get_cache_keys()),
+           nrCache:   self::$cache->hitListTotal(),
            digest:    md5($message, true),
            trace:     $message,
            request:   json_encode($_REQUEST),
@@ -136,8 +128,8 @@ class Debug {
                 'searches_time' => class_exists('Sphinxql') ? \Sphinxql::$Time : 0.0,
                 'queries'       => $this->get_queries(),
                 'queries_time'  => self::$db->Time,
-                'cache'         => $this->get_cache_keys(),
-                'cache_time'    => self::$cache->Time,
+                'cache'         => self::$cache->hitList(),
+                'cache_time'    => self::$cache->elapsed(),
             ],
             86400 * 2
         );
@@ -271,27 +263,18 @@ class Debug {
             }
         }
 
-        //Shorten the path & we're done
-        $File = str_replace(SERVER_ROOT . '/', '', $File);
-        $Error = str_replace(SERVER_ROOT . '/', '', $Error);
-
         if (DEBUG_WARNINGS) {
-            self::$Errors[] = [$Error, $File.':'.$Line, $Call, $Args];
+            self::$Errors[] = [
+                str_replace(SERVER_ROOT . '/', '', $Error),
+                str_replace(SERVER_ROOT . '/', '', $File) . ":$Line",
+                $Call,
+                $Args
+            ];
         }
         return true;
     }
 
     /* Data wrappers */
-
-    public function get_cache_keys() {
-        $list = [];
-        $keys = array_keys(self::$cache->hits());
-        foreach ($keys as $key) {
-            $list[$key] = print_r(self::$cache->get_value($key, true), true);
-        }
-        ksort($list, SORT_NATURAL);
-        return $list;
-    }
 
     public function get_classes() {
         $Classes = [];

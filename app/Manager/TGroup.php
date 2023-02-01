@@ -115,7 +115,7 @@ class TGroup extends \Gazelle\BaseManager {
             WHERE GroupID = ?
             ", $old->id()
         );
-        self::$cache->deleteMulti(self::$db->collect(0, false));
+        self::$cache->delete_multi(self::$db->collect(0, false));
 
         self::$db->begin_transaction();
 
@@ -167,7 +167,7 @@ class TGroup extends \Gazelle\BaseManager {
                 AND (v2.GroupId NOT IN (?, ?))
             ", $old->id(), $new->id(), $old->id(), $new->id()
         );
-        self::$cache->deleteMulti(self::$db->collect(0, false));
+        self::$cache->delete_multi(self::$db->collect(0, false));
 
         // GroupIDs
         self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id());
@@ -176,7 +176,7 @@ class TGroup extends \Gazelle\BaseManager {
             $cacheKeys[] = 'torrent_download_' . $TorrentID;
             $cacheKeys[] = 'tid_to_group_' . $TorrentID;
         }
-        self::$cache->deleteMulti($cacheKeys);
+        self::$cache->delete_multi($cacheKeys);
         unset($cacheKeys);
 
         self::$db->prepared_query("
@@ -211,7 +211,7 @@ class TGroup extends \Gazelle\BaseManager {
             DELETE FROM collages_torrents WHERE GroupID = ?
                 ", $old->id()
         );
-        self::$cache->deleteMulti(array_map(
+        self::$cache->delete_multi(array_map(
             fn ($id) => sprintf(\Gazelle\Collage::CACHE_KEY, $id), $collageList
         ));
 
@@ -220,7 +220,7 @@ class TGroup extends \Gazelle\BaseManager {
             SELECT concat('request_', ID) FROM requests WHERE GroupID = ?
             ", $old->id()
         );
-        self::$cache->deleteMulti(self::$db->collect(0, false));
+        self::$cache->delete_multi(self::$db->collect(0, false));
         self::$db->prepared_query("
             UPDATE requests SET
                 GroupID = ?
@@ -240,7 +240,7 @@ class TGroup extends \Gazelle\BaseManager {
 
         $new->refresh();
 
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             "requests_group_" . $new->id(),
             "torrent_collages_" . $new->id(),
             "torrent_collages_personal_" . $new->id(),

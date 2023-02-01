@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Subscription extends \Gazelle\Base {
-
     /**
      * For all subscribers of a forum thread or artist/collage/request/torrent comments, clear
      *   - subscription cache
@@ -26,7 +25,7 @@ class Subscription extends \Gazelle\Base {
             );
         }
 
-        $affected = count(self::$cache->deleteMulti(array_map(
+        $affected = count(self::$cache->delete_multi(array_map(
             fn ($id) => "subscriptions_user_new_$id",
             self::$db->collect('UserID', false)
         )));

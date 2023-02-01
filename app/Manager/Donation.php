@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Donation extends \Gazelle\Base {
-
     public function moderatorAdjust(\Gazelle\User $user, int $Rank, int $TotalRank, string $Reason, int $who) {
         $this->donate($user, [
             "Source" => "Modify Values",
@@ -94,7 +93,7 @@ class Donation extends \Gazelle\Base {
         // They have been undonored
         if ($xbtAmount == 0.0 && $Rank == 0 && $TotalRank == 0) {
             $this->removeDonorStatus($UserID);
-            self::$cache->deleteMulti(["u_$UserID", "donor_info_$UserID"]);
+            self::$cache->delete_multi(["u_$UserID", "donor_info_$UserID"]);
             return;
         }
 
@@ -152,7 +151,7 @@ class Donation extends \Gazelle\Base {
         );
 
         // Clear their user cache keys because the users_info values has been modified
-        self::$cache->deleteMulti(["u_$UserID", "donor_info_$UserID",
+        self::$cache->delete_multi(["u_$UserID", "donor_info_$UserID",
             'donations_month_3', 'donations_month_12']);
         self::$db->set_query_id($QueryID);
     }
@@ -293,7 +292,7 @@ class Donation extends \Gazelle\Base {
         "); // 2 hours less than 32 days to account for schedule run times
         $userIds = [];
         while ([$id] = self::$db->next_record()) {
-            self::$cache->deleteMulti(["donor_info_$id", "donor_title_$id", "donor_profile_rewards_$id"]);
+            self::$cache->delete_multi(["donor_info_$id", "donor_title_$id", "donor_profile_rewards_$id"]);
             $userIds[] = $id;
         }
         if ($userIds) {

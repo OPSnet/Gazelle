@@ -47,7 +47,7 @@ class Applicant extends Base {
     }
 
     protected function flushApplicantList() {
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             'user_applicant_' . $this->userId,
             self::CACHE_KEY_NEW_COUNT,
             self::CACHE_KEY_NEW_REPLY,
@@ -113,7 +113,7 @@ class Applicant extends Base {
         $data = self::$cache->get_value($key);
         if ($data !== false) {
             $data['Resolved'] = $this->resolved;
-            self::$cache->replace_value($key, $data, 86400);
+            self::$cache->cache_value($key, $data, 86400);
         }
         self::$cache->delete_value('user_applicant_' . $this->userId);
         return $this->flushApplicantList();

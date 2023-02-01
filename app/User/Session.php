@@ -104,7 +104,7 @@ class Session extends \Gazelle\BaseUser {
                 AND SessionID = ?
             ', $this->user->id(), $sessionId
         );
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->user->id()),
             'session_' . $sessionId,
         ]);
@@ -118,7 +118,7 @@ class Session extends \Gazelle\BaseUser {
             WHERE UserID = ?
             ", $this->user->id()
         );
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->user->id()),
             ...self::$db->collect('ck', false)
         ]);

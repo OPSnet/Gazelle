@@ -719,9 +719,9 @@ $Cache->increment_value('stats_torrent_count', $totalNew);
 if ($Properties['Image'] != '') {
     $Cache->delete_value('user_recent_up_' . $Viewer->id());
 }
-$Cache->deleteMulti(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
+$Cache->delete_multi(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
 if (!$IsNewGroup) {
-    $Cache->deleteMulti([
+    $Cache->delete_multi([
         "torrent_group_$GroupID",
         "detail_files_$GroupID",
         sprintf(\Gazelle\TGroup::CACHE_KEY, $GroupID),

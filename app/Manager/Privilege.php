@@ -44,7 +44,7 @@ class Privilege extends \Gazelle\BaseManager {
             VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
             ', $name, $level, (int)$secondary, $forums, serialize($values), $staffGroupId, $badge, $displayStaff ? '1' : '0'
         );
-        self::$cache->deleteMulti(['user_class', 'staff_class']);
+        self::$cache->delete_multi(['user_class', 'staff_class']);
         return new \Gazelle\Privilege(self::$db->inserted_id());
     }
 

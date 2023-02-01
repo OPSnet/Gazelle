@@ -52,6 +52,6 @@ while ($id < $max) {
         break;
     }
     $ids = explode(',', $list);
-    $Cache->deleteMulti($ids);
+    $Cache->delete_multi($ids);
     $id = end($ids);
 }

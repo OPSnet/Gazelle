@@ -100,7 +100,7 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
             ", $userId, $torrentId, $tokenCount, $tokenCount
         );
         $DB->commit();
-        $Cache->deleteMulti(["u_$userId", "users_tokens_$userId"]);
+        $Cache->delete_multi(["u_$userId", "users_tokens_$userId"]);
     }
 }
 

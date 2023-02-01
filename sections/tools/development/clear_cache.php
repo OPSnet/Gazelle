@@ -21,7 +21,7 @@ if (!empty($_REQUEST['key'])) {
         if (!$Viewer->permitted('admin_clear_cache')) {
             error(403);
         }
-        $delete = $Cache->deleteMulti($Keys);
+        $delete = $Cache->delete_multi($Keys);
         foreach ($delete as $key => $response) {
             $result[$key] = CACHE_RESPONSE[$response] ?? "retcode:$response";
         }

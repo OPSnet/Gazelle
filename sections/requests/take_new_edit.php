@@ -309,7 +309,7 @@ if ($newRequest) {
         SELECT concat('artists_requests_', ArtistID) FROM requests_artists WHERE RequestID = ?
         ", $RequestID
     );
-    $Cache->deleteMulti([
+    $Cache->delete_multi([
         "request_artists_$RequestID",
         ...$DB->collect(0, false)
     ]);

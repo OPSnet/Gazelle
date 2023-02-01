@@ -9,7 +9,7 @@ class Subscription extends \Gazelle\BaseUser {
 
     public function flush(): Subscription {
         $this->threadList = [];
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->user->id()),
             sprintf(self::NEW_KEY, $this->user->id()),
         ]);
@@ -73,7 +73,7 @@ class Subscription extends \Gazelle\BaseUser {
             );
             array_push($subscriptions, [$page, $pageID]);
         }
-        self::$cache->replace_value("subscriptions_comments_user_" . $this->user->id(), $subscriptions, 0);
+        self::$cache->cache_value("subscriptions_comments_user_" . $this->user->id(), $subscriptions, 0);
         self::$db->set_query_id($qid);
     }
 

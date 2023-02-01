@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class News extends \Gazelle\Base {
-
     const CACHE_KEY = 'news';
 
     /**
@@ -16,7 +15,7 @@ class News extends \Gazelle\Base {
             VALUES (?,      ?,     ?)
             ", $userId, trim($title), trim($body)
         );
-        self::$cache->deleteMulti(['feed_news', self::CACHE_KEY]);
+        self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
         return self::$db->inserted_id();
     }
 
@@ -31,7 +30,7 @@ class News extends \Gazelle\Base {
             WHERE ID = ?
             ", trim($title), trim($body), $id
         );
-        self::$cache->deleteMulti(['feed_news', self::CACHE_KEY]);
+        self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
         return self::$db->affected_rows();
     }
 
@@ -43,7 +42,7 @@ class News extends \Gazelle\Base {
             DELETE FROM news WHERE ID = ?
             ", $id
         );
-        self::$cache->deleteMulti(['feed_news', self::CACHE_KEY]);
+        self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
         return self::$db->affected_rows();
     }
 

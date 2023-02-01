@@ -16,7 +16,7 @@ class ForumThread extends BaseObject {
     }
 
     public function flushCatalog(int $begin, int $end) {
-        self::$cache->deleteMulti(
+        self::$cache->delete_multi(
             array_map(
                 fn($c) => sprintf(self::CACHE_CATALOG, $this->id, (int)floor((POSTS_PER_PAGE * $c) / THREAD_CATALOGUE)),
                 range($begin, $end)

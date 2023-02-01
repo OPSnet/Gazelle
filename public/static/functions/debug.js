@@ -1,5 +1,6 @@
 $(document).ready(function () {
     $("#debug-view-cache").click(function() { $(this).parents('.layout').next('#debug_cache').gtoggle(); return false;});
+    $("#debug-view-del-cache").click(function() { $(this).parents('.layout').next('#debug_cache').gtoggle(); return false;});
     $("#debug-view-class").click(function() { $(this).parents('.layout').next('#debug_class').gtoggle(); return false;});
     $("#debug-view-error").click(function() { $(this).parents('.layout').next('#debug_error').gtoggle(); return false;});
     $("#debug-view-extension").click(function() { $(this).parents('.layout').next('#debug_extension').gtoggle(); return false;});

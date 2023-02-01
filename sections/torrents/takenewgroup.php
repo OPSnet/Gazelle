@@ -78,7 +78,7 @@ if ($DB->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $oldId)) {
 $new->flush();
 $new->refresh();
 $torrent->flush();
-$Cache->deleteMulti([
+$Cache->delete_multi([
     "torrents_details_" . $oldId,
     "torrent_download_" . $torrent->id(),
 ]);

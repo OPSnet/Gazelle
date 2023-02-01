@@ -32,7 +32,7 @@ class Forum extends BaseObject {
     public function flush(): Forum {
         $this->info = [];
         (new Manager\Forum)->flushToc();
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_FORUM, $this->id),
             sprintf(self::CACHE_TOC_FORUM, $this->id),
         ]);

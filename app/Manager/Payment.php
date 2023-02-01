@@ -5,13 +5,12 @@ namespace Gazelle\Manager;
 use \Gazelle\Exception\PaymentFetchForexException;
 
 class Payment extends \Gazelle\Base {
-
     const LIST_KEY = 'payment_list';
     const RENT_KEY = 'payment_monthly_rental';
     const DUE_KEY  = 'payment_due';
 
     public function flush(): Payment {
-        self::$cache->deleteMulti([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
+        self::$cache->delete_multi([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
         return $this;
     }
 

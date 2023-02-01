@@ -3,7 +3,6 @@
 namespace Gazelle\Collage;
 
 class TGroup extends AbstractCollage {
-
     protected array $groupIds = [];
     protected array $sequence = [];
     protected array $torrentTags = [];
@@ -105,7 +104,7 @@ class TGroup extends AbstractCollage {
             SELECT GroupID FROM collages_torrents WHERE CollageID = ?
             ", $this->id
         );
-        self::$cache->deleteMulti(array_merge(...array_map(
+        self::$cache->delete_multi(array_merge(...array_map(
             fn ($id) => ["torrents_details_$id", "torrent_collages_$id", "torrent_collages_personal_$id"],
             self::$db->collect(0, false)
         )));

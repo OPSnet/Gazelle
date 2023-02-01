@@ -52,7 +52,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
         }
     }
     if ($report->moderatorResolve($Viewer->id(), $comment)) {
-        $Cache->deleteMulti(['num_torrent_reportsv2', "reports_torrent_$torrentId"]);
+        $Cache->delete_multi(['num_torrent_reportsv2', "reports_torrent_$torrentId"]);
     } else {
         echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
     }

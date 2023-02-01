@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Inbox extends BaseUser {
-
     protected bool $unreadFirst;
     protected string $filter;
     protected string $folder = 'inbox';
@@ -170,7 +169,7 @@ class Inbox extends BaseUser {
 
     protected function massFlush(array $ids): void {
         $userId = $this->user->id();
-        self::$cache->deleteMulti(["inbox_new_$userId", ...array_map(fn ($id) => "pm_{$id}_{$userId}", $ids)]);
+        self::$cache->delete_multi(["inbox_new_$userId", ...array_map(fn ($id) => "pm_{$id}_{$userId}", $ids)]);
     }
 
     public function massRemove(array $ids): int {

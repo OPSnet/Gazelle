@@ -76,7 +76,7 @@ class AddLog extends \Gazelle\Json {
         );
 
         $groupId = $this->torrent->groupId();
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             "torrent_group_{$groupId}",
             "torrents_details_{$groupId}",
             sprintf(\Gazelle\TGroup::CACHE_KEY, $groupId),

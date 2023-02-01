@@ -9,7 +9,7 @@
         {%- include 'debug/sphinxql.twig' with {'list': sphinxql.list, 'time': sphinxql.time} only %}
     {%- endif %}
     {%- include 'debug/query.twig' with {'list': debug.get_queries_br, 'time': db_time} only %}
-    {%- include 'debug/cache.twig' with {'list': debug.get_cache_keys, 'time': cache_time} only %}
+    {%- include 'debug/cache.twig' with {'cache': cache} only %}
     {%- include 'debug/var.twig' with {'list': debug.get_logged_vars} only %}
     {%- include 'debug/ocelot.twig' with {'list': debug.requestList} only %}
     </div>

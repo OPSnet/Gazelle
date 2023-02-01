@@ -3,7 +3,6 @@
 namespace Gazelle\Collage;
 
 abstract class AbstractCollage extends \Gazelle\Base {
-
     protected \Gazelle\Collage $holder;
 
     protected int   $id; // hold a local copy of our ID to save time
@@ -63,7 +62,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         if (self::$db->has_results()) {
             array_push($keys, ...self::$db->collect(0, false));
         }
-        self::$cache->deleteMulti($keys);
+        self::$cache->delete_multi($keys);
         $this->holder->flush();
         return $this;
     }

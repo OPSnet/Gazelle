@@ -84,7 +84,7 @@ class ApplicantRole extends Base {
             $this->id);
         self::$cache->delete_value(self::CACHE_KEY_ALL);
         self::$cache->delete_value(self::CACHE_KEY_PUBLISHED);
-        self::$cache->replace_value(sprintf(self::CACHE_KEY, $this->id),
+        self::$cache->cache_value(sprintf(self::CACHE_KEY, $this->id),
             [
                 'Title'       => $this->title,
                 'Published'   => $this->published,

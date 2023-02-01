@@ -626,7 +626,7 @@ class User extends \Gazelle\BaseManager {
                 ", $toId
             )
         );
-        self::$cache->deleteMulti(["pm_{$convId}_{$fromId}", "pm_{$convId}_{$toId}"]);
+        self::$cache->delete_multi(["pm_{$convId}_{$fromId}", "pm_{$convId}_{$toId}"]);
         $senderName = self::$db->scalar("
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId
@@ -781,7 +781,7 @@ class User extends \Gazelle\BaseManager {
                 AND UserID IN (" . placeholders($userIds) . ")
             ", ...$userIds
         );
-        self::$cache->deleteMulti(self::$db->collect('cacheKey'));
+        self::$cache->delete_multi(self::$db->collect('cacheKey'));
         self::$db->prepared_query("
             DELETE FROM users_sessions WHERE UserID IN (" . placeholders($userIds) . ")
             ", ...$userIds
@@ -1269,7 +1269,7 @@ class User extends \Gazelle\BaseManager {
         );
         self::$db->commit();
 
-        self::$cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
+        self::$cache->delete_multi(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
     }
 
@@ -1302,7 +1302,7 @@ class User extends \Gazelle\BaseManager {
         );
         self::$db->commit();
 
-        self::$cache->deleteMulti(array_map(fn($id) => "u_$id", $ids));
+        self::$cache->delete_multi(array_map(fn($id) => "u_$id", $ids));
         return count($ids);
     }
 
@@ -1335,7 +1335,7 @@ class User extends \Gazelle\BaseManager {
                 ", $token['TorrentID'], $token['UserID']
             );
         }
-        self::$cache->deleteMulti(array_keys($clear));
+        self::$cache->delete_multi(array_keys($clear));
         return $processed;
     }
 

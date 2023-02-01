@@ -1340,7 +1340,7 @@ class User extends BaseObject {
         );
         $removed = self::$db->affected_rows();
         if ($removed) {
-            self::$cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $removed;
     }
@@ -1397,7 +1397,7 @@ class User extends BaseObject {
             $change = self::$db->affected_rows();
         }
         if ($change) {
-            self::$cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
     }
@@ -1444,7 +1444,7 @@ class User extends BaseObject {
             $change = self::$db->affected_rows();
         }
         if ($change) {
-            self::$cache->deleteMulti(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
     }
@@ -2636,6 +2636,6 @@ class User extends BaseObject {
             );
         }
         self::$db->set_query_id($QueryID);
-        self::$cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
+        self::$cache->delete_multi(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
     }
 }

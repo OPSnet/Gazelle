@@ -15,7 +15,7 @@ class StaffPM extends BaseObject {
     public function tableName(): string { return 'staff_pm_conversations'; }
 
     public function flushUser(User $user) {
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             "num_staff_pms_" . $user->id(),
             "staff_pm_new_" . $user->id(),
         ]);

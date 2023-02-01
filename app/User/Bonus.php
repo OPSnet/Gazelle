@@ -10,7 +10,7 @@ class Bonus extends \Gazelle\BaseUser {
 
     public function flush(): Bonus {
         $this->user->flush();
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_HISTORY, $this->user->id(), 0),
             sprintf(self::CACHE_POOL_HISTORY, $this->user->id()),
         ]);
@@ -383,7 +383,7 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     private function addPurchaseHistory(int $itemId, int $price, $otherUserId = null): int {
-        self::$cache->deleteMulti([
+        self::$cache->delete_multi([
             sprintf(self::CACHE_PURCHASE, $this->user->id()),
             sprintf(self::CACHE_SUMMARY, $this->user->id()),
             sprintf(self::CACHE_HISTORY, $this->user->id(), 0)
