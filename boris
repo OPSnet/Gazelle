@@ -43,6 +43,7 @@ $preload = [
     'torMan'      => $torMan,
     'repMan'      => new Gazelle\Manager\Torrent\Report($torMan),
     'repTypeMan'  => new Gazelle\Manager\Torrent\ReportType,
+    'reqMan'      => new Gazelle\Manager\Request,
     'userMan'     => new Gazelle\Manager\User,
 ];
 

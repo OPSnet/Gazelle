@@ -14,43 +14,43 @@ ini_set('max_file_uploads', '100');
 if (!isset($Properties)) {
     $requestId = (int)($_GET['requestid'] ?? 0);
     if ((int)($_GET['groupid'] ?? 0)) {
-        $addTgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
-        if (is_null($addTgroup)) {
+        $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+        if (is_null($tgroup)) {
             unset($_GET['groupid']);
         } else {
-            $categoryId = $addTgroup->categoryId();
+            $categoryId = $tgroup->categoryId();
             $Properties = [
-                'GroupID'          => $addTgroup->id(),
-                'ReleaseType'      => $addTgroup->releaseType(),
-                'Title'            => $addTgroup->name(),
-                'Year'             => $addTgroup->year(),
-                'Image'            => $addTgroup->image(),
-                'GroupDescription' => $addTgroup->description(),
-                'RecordLabel'      => $addTgroup->recordLabel(),
-                'CatalogueNumber'  => $addTgroup->catalogueNumber(),
-                'VanityHouse'      => $addTgroup->isShowcase(),
-                'Artists'          => Artists::get_artist($addTgroup->id()),
-                'TagList'          => implode(', ', $addTgroup->tagNameList()),
+                'GroupID'          => $tgroup->id(),
+                'ReleaseType'      => $tgroup->releaseType(),
+                'Title'            => $tgroup->name(),
+                'Year'             => $tgroup->year(),
+                'Image'            => $tgroup->image(),
+                'GroupDescription' => $tgroup->description(),
+                'RecordLabel'      => $tgroup->recordLabel(),
+                'CatalogueNumber'  => $tgroup->catalogueNumber(),
+                'VanityHouse'      => $tgroup->isShowcase(),
+                'Artists'          => $tgroup->artistRole()?->idList() ?? [],
+                'TagList'          => implode(', ', $tgroup->tagNameList()),
             ];
             if ($requestId) {
                 $Properties['RequestID'] = $requestId;
             }
         }
     } elseif ($requestId) {
-        $addRequest = (new Gazelle\Manager\Request)->findById($requestId);
-        if ($addRequest) {
-            $categoryId = $addRequest->categoryId();
+        $request = (new Gazelle\Manager\Request)->findById($requestId);
+        if ($request) {
+            $categoryId = $request->categoryId();
             $Properties = [
                 'RequestID'        => $requestId,
-                'ReleaseType'      => $addRequest->releaseType(),
-                'Title'            => $addRequest->title(),
-                'Year'             => $addRequest->year(),
-                'Image'            => $addRequest->image(),
-                'GroupDescription' => $addRequest->description(),
-                'RecordLabel'      => $addRequest->recordLabel(),
-                'CatalogueNumber'  => $addRequest->catalogueNumber(),
-                'Artists'          => Artists::get_artist($addRequest->id()),
-                'TagList'          => implode(', ', $addRequest->tagNameList()),
+                'ReleaseType'      => $request->releaseType(),
+                'Title'            => $request->title(),
+                'Year'             => $request->year(),
+                'Image'            => $request->image(),
+                'GroupDescription' => $request->description(),
+                'RecordLabel'      => $request->recordLabel(),
+                'CatalogueNumber'  => $request->catalogueNumber(),
+                'Artists'          => $request->artistRole()?->idList() ?? [],
+                'TagList'          => implode(', ', $request->tagNameList()),
             ];
         }
     }
