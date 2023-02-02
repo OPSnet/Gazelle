@@ -52,6 +52,10 @@ lint-php:
 	yarn lint:php:phpcs || exit 0
 	composer phpstan
 
+.PHONY: lint-twig
+lint-twig:
+	scripts/twig-parse $(find templates -type f)
+
 .PHONY: mysqldump
 mysqldump:
 	mysqldump -h 127.0.0.1 -P 36000 -u gazelle --password=password -d gazelle --skip-add-drop-table --skip-add-locks --single-transaction | sed 's/ AUTO_INCREMENT=[0-9]*//g' > db/data/gazelle.sql
@@ -73,7 +77,7 @@ rector-dry-run:
 	vendor/bin/rector process --dry-run --config lib/rector.php
 
 .PHONY: test
-test: lint-css lint-php
+test: lint-css lint-php lint-twig
 	composer test
 
 .PHONY: twig-flush

@@ -1,0 +1,23 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$twig = Gazelle\Util\Twig::factory();
+
+// there is no dump() in production
+$twig->addFunction(new \Twig\TwigFunction('dump', function ($value) { return ''; }));
+
+$exitcode = 0;
+
+array_shift($argv);
+foreach ($argv as $arg) {
+    try {
+        $twig->parse($twig->tokenize(new \Twig\Source(file_get_contents($arg), $arg)));
+    } catch (\Twig\Error\SyntaxError $e) {
+        echo "$arg: {$e->getMessage()}\n";
+        $exitcode = 1;
+    }
+}
+
+exit($exitcode);
