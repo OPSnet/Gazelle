@@ -283,7 +283,7 @@ class UserCreator extends Base {
      * Set the password. Will be hashed before being stored.
      * @param string $password
      */
-    public function setPassword(string $password) {
+    public function setPassword(#[\SensitiveParameter] string $password) {
         $this->passHash = self::hashPassword($password);
         return $this;
     }
@@ -304,7 +304,7 @@ class UserCreator extends Base {
     /**
      * Create a password hash of a plaintext password.
      */
-    static public function hashPassword(string $plaintext): string {
+    static public function hashPassword(#[\SensitiveParameter] string $plaintext): string {
         return password_hash(hash('sha256', $plaintext), PASSWORD_DEFAULT);
     }
 }

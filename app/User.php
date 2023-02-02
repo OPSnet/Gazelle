@@ -1184,7 +1184,7 @@ class User extends BaseObject {
      * @param string $plaintext password
      * @return bool  true on correct password
      */
-    public function validatePassword(string $plaintext): bool {
+    public function validatePassword(#[\SensitiveParameter] string $plaintext): bool {
         $hash = $this->info()['PassHash'];
         $success = password_verify(hash('sha256', $plaintext), $hash);
         if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
@@ -1198,7 +1198,7 @@ class User extends BaseObject {
         return $success;
     }
 
-    public function updatePassword(string $pw, string $ipaddr): bool {
+    public function updatePassword(#[\SensitiveParameter] string $pw, string $ipaddr): bool {
         self::$db->begin_transaction();
         self::$db->prepared_query('
             UPDATE users_main SET
