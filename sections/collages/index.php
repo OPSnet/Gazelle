@@ -9,6 +9,9 @@ switch ($_REQUEST['action'] ?? '') {
     case 'add_artist_batch':
         require('add_artist.php');
         break;
+    case 'ajax_add':
+        require('ajax_add.php');
+        break;
     case 'autocomplete':
         require('autocomplete.php');
         break;

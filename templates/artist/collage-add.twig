@@ -1,0 +1,30 @@
+<div class="box box_info box_addcollage_artist">
+    <div class="head"><strong>Add to artist collage</strong></div>
+        <div class="pad">
+            <form id="add-to-collage" action="collages.php" method="post">
+{% for collage in collage_list %}
+    {% if loop.first %}
+            <select style="max-width: 100%" name="collage_combo" id="collage-select">
+                <option value="0">Choose recent...</option>
+    {% endif %}
+                <option value="{{ collage.id }}">{{ collage.name }}</option>
+    {% if loop.last %}
+            </select>
+            <div>or search for collage name or URL:</div>
+    {% endif %}
+{% else %}
+            <div>Search for a collage name or URL:</div>
+{% endfor %}
+            <input type="text" name="collage_ref" size="25" />
+            <input type="hidden" name="action" value="add_artist" />
+            <input type="hidden" name="entryid" value="{{ artist_id }}" />
+            <input type="hidden" name="userid" value="{{ viewer.id }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <br />
+            <input type="submit" value="Add &amp; Go" />
+            {{- dom.click('#collage-add', "add_to_collage()") -}}
+            &nbsp;<input type="button" id="collage-add" value="Add" />
+            <div id="add-result"></div>
+            </form>
+    </div>
+</div>

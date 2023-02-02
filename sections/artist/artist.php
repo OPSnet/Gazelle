@@ -7,18 +7,18 @@ if (is_null($Artist)) {
     error(404);
 }
 $Artist->loadArtistRole();
-$ArtistID = $Artist->id();
+$artistId = $Artist->id();
 
 $bookmark   = new Gazelle\User\Bookmark($Viewer);
 $collageMan = new Gazelle\Manager\Collage;
 $tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$stats      = new Gazelle\Stats\Artist($ArtistID);
+$stats      = new Gazelle\Stats\Artist($artistId);
 $vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
-$isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $ArtistID);
-$name         = $Artist->name() ?? 'artist:' . $ArtistID;
+$isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $artistId);
+$name         = $Artist->name() ?? 'artist:' . $artistId;
 $requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request)->findByArtist($Artist);
 
 View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscriptions']);
@@ -28,16 +28,16 @@ View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscr
         <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
         <div class="linkbox">
 <?php if ($Viewer->permitted('torrents_edit')) { ?>
-            <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
+            <a href="artist.php?action=edit&amp;artistid=<?= $artistId ?>" class="brackets">Edit</a>
 <?php } ?>
-            <a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
+            <a href="artist.php?action=editrequest&amp;artistid=<?=$artistId?>" class="brackets">Request an Edit</a>
 <?php if ($Viewer->permitted('site_submit_requests')) { ?>
-            <a href="requests.php?action=new&amp;artistid=<?=$ArtistID?>" class="brackets">Add request</a>
+            <a href="requests.php?action=new&amp;artistid=<?=$artistId?>" class="brackets">Add request</a>
 <?php
 }
 
 if ($Viewer->permitted('site_torrents_notify')) {
-    $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $authKey);
+    $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $artistId, $authKey);
     if ($Viewer->hasArtistNotification($name)) {
 ?>
             <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
@@ -48,24 +48,24 @@ if ($Viewer->permitted('site_torrents_notify')) {
 }
 echo $Twig->render('bookmark/action.twig', [
     'class'         => 'artist',
-    'id'            => $ArtistID,
-    'is_bookmarked' => $bookmark->isArtistBookmarked($ArtistID),
+    'id'            => $artistId,
+    'is_bookmarked' => $bookmark->isArtistBookmarked($artistId),
 ]);
 ?>
-            <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?=
-                $ArtistID ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
+            <a href="#" id="subscribelink_artist<?= $artistId ?>" class="brackets" onclick="SubscribeComments('artist', <?=
+                $artistId ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 
 <?php if ($RevisionID && $Viewer->permitted('site_edit_wiki')) { ?>
-            <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
+            <a href="artist.php?action=revert&amp;artistid=<?=$artistId?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
 <?php } ?>
-            <a href="artist.php?id=<?=$ArtistID?>#info" class="brackets">Info</a>
+            <a href="artist.php?id=<?=$artistId?>#info" class="brackets">Info</a>
 <?php if (LASTFM_API_KEY) { ?>
-            <a href="artist.php?id=<?=$ArtistID?>#concerts" class="brackets">Concerts</a>
+            <a href="artist.php?id=<?=$artistId?>#concerts" class="brackets">Concerts</a>
 <?php } ?>
-            <a href="artist.php?id=<?=$ArtistID?>#artistcomments" class="brackets">Comments</a>
-            <a href="artist.php?action=history&amp;artistid=<?= $ArtistID ?>" class="brackets">View history</a>
+            <a href="artist.php?id=<?=$artistId?>#artistcomments" class="brackets">Comments</a>
+            <a href="artist.php?action=history&amp;artistid=<?= $artistId ?>" class="brackets">View history</a>
 <?php if ($Viewer->permitted('site_delete_artist') && $Viewer->permitted('torrents_delete')) { ?>
-            &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid=<?=$ArtistID?>&amp;auth=<?= $authKey ?>" class="brackets">Delete</a>
+            &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid=<?=$artistId?>&amp;auth=<?= $authKey ?>" class="brackets">Delete</a>
 <?php } ?>
         </div>
     </div>
@@ -145,26 +145,15 @@ foreach ($sections as $sectionId => $groupList) {
                 <li>Number of leechers: <?= number_format($stats->leecherTotal()) ?></li>
             </ul>
         </div>
-        <div class="box box_info box_addcollage_artist">
-            <div class="head"><strong>Add to artist collage</strong></div>
-                <div class="pad">
-                    <form action="collages.php" method="post">
-                    <select name="collage_combo">
-                        <option value="0">Choose recent...</option>
-<?php foreach($collageMan->addToArtistCollageDefault($Viewer->id(), $ArtistID) as $id => $collageName) { ?>
-                        <option value="<?= $id ?>"><?= display_str($collageName) ?></option>
-<?php } ?>
-                    </select>
-                    <div> or enter Collage ID or URL</div>
-                    <input type="text" name="collage_ref" size="25" />
-                    <input type="hidden" name="action" value="add_artist" />
-                    <input type="hidden" name="artistid" value="<?= $ArtistID ?>" />
-                    <input type="hidden" name="userid" value="<?= $Viewer->id() ?>" />
-                    <input type="hidden" name="auth" value="<?= $authKey  ?>" />
-                    <br /><br /><input type="submit" value="Add" />
-                    </form>
-            </div>
-        </div>
+<?php
+if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollages()) {
+    echo $Twig->render('artist/collage-add.twig', [
+        'collage_list' => $collageMan->addToArtistCollageDefault($Viewer->id(), $artistId),
+        'artist_id'    => $artistId,
+        'viewer'       => $Viewer,
+    ]);
+}
+?>
         <div class="box box_info box_metadata_artist">
             <div class="head"><strong>Metadata</strong></div>
             <ul class="stats nobullet">
@@ -180,7 +169,7 @@ foreach ($sections as $sectionId => $groupList) {
 <?php
 echo $Twig->render('artist/similar.twig', [
     'admin'        => $Viewer->permitted('site_delete_tag'),
-    'artist_id'    => $ArtistID,
+    'artist_id'    => $artistId,
     'auth'         => $authKey,
     'autocomplete' => $Viewer->hasAutocomplete('other'),
     'similar'      => $Artist->similarArtists(),
@@ -201,7 +190,7 @@ if ($Viewer->permitted('zip_downloader')) {
                 <form class="download_form" name="zip" action="artist.php" method="post">
                     <input type="hidden" name="action" value="download" />
                     <input type="hidden" name="auth" value="<?=$authKey?>" />
-                    <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
+                    <input type="hidden" name="artistid" value="<?=$artistId?>" />
                     <ul id="list" class="nobullet">
 <?php foreach ($ZIPList as $ListItem) { ?>
                         <li id="list<?=$ListItem?>">
@@ -251,7 +240,7 @@ foreach (ZIP_OPTION as $Option) {
 <?= $Twig->render('collage/summary.twig', [
     'class'   => 'collage_rows',
     'object'  => 'artist',
-    'summary' => $collageMan->artistSummary($ArtistID),
+    'summary' => $collageMan->artistSummary($artistId),
 ]); ?>
 <div id="discog_table">
     <div class="box center">
@@ -560,7 +549,7 @@ if (LASTFM_API_KEY) {
 ?>
     <div id="artistcomments">
 <?php
-$commentPage = new Gazelle\Comment\Artist($ArtistID, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));
+$commentPage = new Gazelle\Comment\Artist($artistId, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));
 $commentPage->load()->handleSubscription($Viewer);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
@@ -568,7 +557,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 
 echo $Twig->render('comment/thread.twig', [
     'action'    => 'take_post',
-    'id'        => $ArtistID,
+    'id'        => $artistId,
     'name'      => 'pageid',
     'comment'   => $commentPage,
     'paginator' => $paginator,

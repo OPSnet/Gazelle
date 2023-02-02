@@ -1,12 +1,12 @@
 {% set dom_id = "bookmarklink_" ~ class ~ "_" ~ id -%}
 {%- if is_bookmarked -%}
     <span class="remove_bookmark">
-        {{- dom.click('#' ~ dom_id, "console.log('u');Unbookmark('" ~ class ~ "', " ~ id ~ ", 'Bookmark'); return false;") -}}
+        {{- dom.click('#' ~ dom_id, "Unbookmark('" ~ class ~ "', " ~ id ~ ", 'Bookmark'); return false;") -}}
         <a {% if float %}style="float: right;"{% endif %} href="#" id="{{ dom_id }}" class="brackets">Remove bookmark</a>
     </span>
 {%- else -%}
     <span class="add_bookmark">
-        {{- dom.click('#' ~ dom_id, "console.log('b');Bookmark('" ~ class ~ "', " ~ id ~ ", 'Remove Bookmark'); return false;") -}}
+        {{- dom.click('#' ~ dom_id, "Bookmark('" ~ class ~ "', " ~ id ~ ", 'Remove Bookmark'); return false;") -}}
         <a {% if float %}style="float: right;"{% endif %} href="#" id="{{ dom_id }}" class="brackets">Bookmark</a>
     </span>
 {%- endif -%}

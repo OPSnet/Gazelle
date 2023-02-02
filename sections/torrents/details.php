@@ -275,36 +275,12 @@ if ($musicRelease) {
 }
 
 if ($musicRelease) {
-    if ($Viewer->permitted('site_collages_create')) {
-?>
-        <div class="box box_info box_addcollage_torrent">
-            <div class="head"><strong>Add to collage</strong></div>
-                <div class="box pad">
-                    <form action="collages.php" method="post">
-<?php
-        $collageList = $collageMan->addToCollageDefault($Viewer->id(), $tgroupId);
-        if (empty($collageList)) {
-?>
-                    <div>Search for a collage name:</div>
-<?php   } else { ?>
-                    <select style="max-width: 100%" name="collage_combo">
-                        <option value="0">Choose recent...</option>
-<?php       foreach ($collageList as $id => $collageName) { ?>
-                        <option value="<?= $id ?>"><?= display_str($collageName) ?></option>
-<?php       } ?>
-                    </select>
-                    <div>or search for collage name:</div>
-<?php   } ?>
-                    <input type="text" id="collage_ref" name="collage_ref" data-gazelle-autocomplete="true" size="25" />
-                    <input type="hidden" name="action" value="add_torrent" />
-                    <input type="hidden" name="groupid" value="<?= $tgroupId ?>" />
-                    <input type="hidden" name="userid" value="<?= $Viewer->id() ?>" />
-                    <input type="hidden" name="auth" value="<?= $Viewer->auth()  ?>" />
-                    <br /><br /><input type="submit" value="Add" />
-                    </form>
-            </div>
-        </div>
-<?php
+    if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollages()) {
+        echo $Twig->render('torrent/collage-add.twig', [
+            'collage_list' => $collageMan->addToCollageDefault($Viewer->id(), $tgroupId),
+            'tgroup_id'    => $tgroupId,
+            'viewer'       => $Viewer,
+        ]);
     }
 
     $li = [];
@@ -693,7 +669,6 @@ if (!$Viewer->disableRequests()) {
 echo $Twig->render('tgroup/similar.twig', [
     'similar' => $tgMan->similarVote($tgroupId),
 ]);
-
 ?>
         <div class="box torrent_description">
             <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?= $tgroup->releaseTypeName() ? $tgroup->releaseTypeName() . ' info' : 'Info' ?></strong></div>

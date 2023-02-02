@@ -384,3 +384,20 @@ function ToggleEditionRows() {
     $('#edition_label').gtoggle();
     $('#edition_catalogue').gtoggle();
 }
+
+function add_to_collage() {
+    var post = new Array();
+    post['auth']       = authkey;
+    post['collage_id'] = Number(document.getElementById("collage-select").value);
+    post['entry_id']   = Number(document.getElementsByName("entryid")[0].value);
+    if (post['collage_id'] == 0) {
+        post['name'] = document.getElementsByName("collage_ref")[0].value 
+    }
+    $('#add-result').raw().innerHTML = '...';
+    ajax.post('collages.php?action=ajax_add', post, function (response) {
+        var result = JSON.parse(response);
+        $('#add-result').raw().innerHTML = (result['status'] == 'success')
+            ? 'Added to <b>' + result['response']['link'] + '</b>'
+            : 'Failed to add! (' + result['error'] + ')';
+    });
+}

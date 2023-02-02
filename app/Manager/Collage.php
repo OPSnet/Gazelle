@@ -4,8 +4,8 @@ namespace Gazelle\Manager;
 
 class Collage extends \Gazelle\BaseManager {
 
-    protected const CACHE_DEFAULT_ARTIST = 'collage_default_artist_%d';
-    protected const CACHE_DEFAULT_GROUP  = 'collage_default_group_%d';
+    protected const CACHE_DEFAULT_ARTIST = 'collage_def_artist_%d';
+    protected const CACHE_DEFAULT_GROUP  = 'collage_def_tgroup_%d';
     protected const TGROUP_GENERAL_KEY   = 'torrent_collages_%d';
     protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
     protected const ARTIST_KEY           = 'artists_collages_%d';
@@ -188,11 +188,7 @@ class Collage extends \Gazelle\BaseManager {
                 LIMIT 5
                 ", $userId, COLLAGE_ARTISTS_ID, $artistId
             );
-            $list = self::$db->collect(0, false);
-            if (empty($list)) {
-                // Prevent empty IN operator: WHERE ID IN ()
-                $list = [0];
-            }
+            $default = self::$db->collect(0, false);
 
             // Ensure that some of the other collages the user has worked on are present
             self::$db->prepared_query("
@@ -203,18 +199,31 @@ class Collage extends \Gazelle\BaseManager {
                     AND c.Deleted = '0'
                     AND c.UserID != ?
                     AND c.CategoryID = ?
+                    AND (
+                        c.MaxGroupsPerUser = 0
+                        OR (c.MaxGroupsPerUser < (
+                            SELECT count(*) FROM collages_torrents ct WHERE CollageID = c.ID AND ct.UserID = ?
+                        ))
+                    )
                     AND NOT EXISTS (
                         SELECT 1 FROM collages_artists WHERE CollageID = c.ID AND ArtistID = ?
                     )
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $userId, $userId, COLLAGE_ARTISTS_ID, $artistId
+                ", $userId, $userId, COLLAGE_ARTISTS_ID, $userId, $artistId
             );
-            $default = $this->idsToNames(array_merge($list, self::$db->collect(0)));
+            $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);
         }
-        return $default;
+        $list = [];
+        foreach($default as $id) {
+            $collage = $this->findById($id);
+            if ($collage) {
+                $list[] = $collage;
+            }
+        }
+        return $list;
     }
 
     public function addToCollageDefault(int $userId, int $groupId): array {
@@ -235,7 +244,7 @@ class Collage extends \Gazelle\BaseManager {
                 ORDER BY c.Updated DESC
                 ", $userId, COLLAGE_PERSONAL_ID, $groupId
             );
-            $list = self::$db->collect(0, false) ?: [0];
+            $default = self::$db->collect(0, false);
 
             // Ensure that some (theirs and by others) of the other collages the user has worked on are present
             self::$db->prepared_query("
@@ -245,19 +254,31 @@ class Collage extends \Gazelle\BaseManager {
                 WHERE c.Locked = '0'
                     AND c.Deleted = '0'
                     AND c.CategoryID != ?
+                    AND (
+                        c.MaxGroupsPerUser = 0
+                        OR (c.MaxGroupsPerUser < (
+                            SELECT count(*) FROM collages_torrents ct WHERE CollageID = c.ID AND ct.UserID = ?
+                        ))
+                    )
                     AND NOT EXISTS (
                         SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
                     )
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $userId, COLLAGE_PERSONAL_ID, $groupId
+                ", $userId, COLLAGE_PERSONAL_ID, $userId, $groupId
             );
-            unset($list[0]);
-            $default = $this->idsToNames(array_merge($list, self::$db->collect(0)));
+            $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);
         }
-        return $default;
+        $list = [];
+        foreach($default as $id) {
+            $collage = $this->findById($id);
+            if ($collage) {
+                $list[] = $collage;
+            }
+        }
+        return $list;
     }
 
     public function flushDefaultArtist(int $userId) {
