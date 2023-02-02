@@ -1,0 +1,8 @@
+<div class="box">
+    <div class="head">Ratio watch</div>
+    <div class="pad">This user is currently on ratio watch and must upload {{
+        (user.downloadedSize * user.requiredRatio - user.uploadedSize)|octet_size }} in the next {{
+        user.ratioWatchExpiry|time_diff }}, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: {{
+        (user.downloadedSize - user.downloadedOnRatioWatch)|octet_size
+    }}</div>
+</div>

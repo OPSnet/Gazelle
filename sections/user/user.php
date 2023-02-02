@@ -70,8 +70,6 @@ function check_paranoia_here($Setting) {
     }
 }
 
-[$ClassRatio, $Buffer] = $User->buffer();
-
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
     'badge_list' => (new Gazelle\User\Privilege($User))->badgeList(),
@@ -345,12 +343,13 @@ if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
 ?>
     </div>
     <div class="main_column">
-<?php if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) { ?>
-        <div class="box">
-            <div class="head">Ratio watch</div>
-            <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($User->downloadedSize() * $User->requiredRatio()) - $User->uploadedSize())?> in the next <?=time_diff($User->ratioWatchExpiry()) ?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($User->downloadedSize() - $User->downloadedOnRatioWatch())?></div>
-        </div>
-<?php } ?>
+<?php
+if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) {
+    echo $Twig->render('user/ratio-watch.twig', [
+        'user' => $User,
+    ]);
+}
+?>
         <div class="box">
             <div class="head">
                 <?= display_str($User->infoTitle()) ?>
