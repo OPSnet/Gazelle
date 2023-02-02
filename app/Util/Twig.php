@@ -47,7 +47,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'checked',
             function ($isChecked) {
-                return $isChecked ? ' checked="checked"' : '';
+                return new \Twig\Markup($isChecked ? ' checked="checked"' : '', 'UTF-8');
             }
         ));
 
@@ -86,13 +86,6 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'truth',
-            function (bool $truth) {
-                return $truth ? "\xe2\x9c\x85" : "\xe2\x9d\x8c";
-            }
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
             'plural',
             function ($number, $plural = 's') {
                 return plural($number, $plural);
@@ -109,7 +102,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'shorten',
             function (string $text, int $length) {
-                return shortenString($text, $length);
+                return new \Twig\Markup(shortenString($text, $length), 'UTF-8');
             }
         ));
 
@@ -135,16 +128,25 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'truth',
+            function (bool $truth) {
+                return $truth ? "\xe2\x9c\x85" : "\xe2\x9d\x8c";
+            }
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'ucfirst',
             function ($text) {
-                return ucfirst($text);
+                return new \Twig\Markup(ucfirst($text), 'UTF-8');
             }
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirstall',
             function ($text) {
-                return implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)));
+                return new \Twig\Markup(ucfirst(
+                    implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)))
+                ), 'UTF-8');
             }
         ));
 
@@ -289,13 +291,6 @@ class Twig {
                     }
                     return $cache[$ip];
                 })($addr),
-                'UTF-8'
-            );
-        }));
-
-        $twig->addFunction(new \Twig\TwigFunction('shorten', function ($text, $length) {
-            return new \Twig\Markup(
-                shortenString($text, $length),
                 'UTF-8'
             );
         }));
