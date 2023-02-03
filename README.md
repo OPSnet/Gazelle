@@ -46,7 +46,7 @@ $ docker build . -t ocelot
 ### Gazelle
 In the root folder of the Gazelle repository, run the following command:
 
-`docker-compose up`
+`docker compose up`
 
 This will pull and build the needed images to run Gazelle on Debian
 Bullseye. A volume is mounted from the base of the git repository at
@@ -117,7 +117,7 @@ You can run Boris directly:
 In order to have Docker run the container using the production mode commands
 for both Composer and NPM, run this when powering it up:
 
-`ENV=prod docker-compose up`
+`ENV=prod docker compose up`
 
 #### Gitlab CI testrunner
 `Dockerfile-gitlab` can be used to create a Docker container suitable for

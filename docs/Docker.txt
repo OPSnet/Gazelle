@@ -18,7 +18,7 @@ PASSWORD=$(grep MYSQL_ROOT_PASSWORD docker-compose.yml|cut -d= -f2)
 docker exec $MYSQL_CONTAINER sh -c "exec mysqldump --all-databases -uroot -p'$PASSWORD'" > all-databases.sql
 
 # do the upgrade
-docker-compose up -d
+docker compose up -d
 
 # restore the dump
 docker exec -i $MYSQL_CONTAINER sh -c "exec mysql -uroot -p'$PASSWORD'" < all-databases.sql

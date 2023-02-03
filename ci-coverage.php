@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+require_once(__DIR__ . '/vendor/autoload.php');
 
 use SebastianBergmann\CodeCoverage\Filter;
 use SebastianBergmann\CodeCoverage\Driver\Selector;
@@ -41,4 +41,4 @@ class CoverageHelper {
 }
 
 $coverage_helper = new CoverageHelper();
-require(__DIR__ . '/gazelle.php');
+require_once(__DIR__ . '/gazelle.php');

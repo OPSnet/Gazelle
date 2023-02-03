@@ -6,20 +6,14 @@ set -euo pipefail
 # This can help in debugging migrations.
 DUMP_MYSQL_SCHEMA=0
 
-run_service()
-{
-    service "$1" start || exit 1
-}
-
 cd "${CI_PROJECT_DIR}"
-YARN_CACHE_FOLDER="${CI_PROJECT_DIR}/.yarn-cache"
 COMPOSER_HOME="${CI_PROJECT_DIR}/.composer"
 POSTGRES_USER_PASSWORD="$(dd if=/dev/urandom count=1 bs=12 status=none | base64)"
-export YARN_CACHE_FOLDER
 export COMPOSER_HOME
 export POSTGRES_USER_PASSWORD
 
 [ -f "${CI_PROJECT_DIR}/lib/override.config.php" ] || bash "${CI_PROJECT_DIR}/.docker/web/generate-config-testing.sh"
+sed -i 's|gazelle\.php|ci-coverage.php|' "${CI_PROJECT_DIR}/public/index.php"
 
 if [ ! -f "/etc/php/${PHP_VER}/cli/conf.d/99-boris.ini" ]; then
     echo "Initialize Boris..."
@@ -43,7 +37,7 @@ do
     sleep 1
 done
 
-composer --version && composer install --no-progress; yarn; npx browserslist@latest --update-db; yarn dev gazelle
+composer --version && composer install --no-progress
 
 echo "Create postgres database..."
 #hostname:port:database:username:password
@@ -96,22 +90,5 @@ if [ ! -d /var/lib/gazelle/torrent ]; then
     chown -R gazelle /var/lib/gazelle
 fi
 
-# initialize sphinx
-cp "${CI_PROJECT_DIR}/.docker/sphinxsearch/sphinx.conf" /etc/sphinxsearch/sphinx.conf
-sed -i "s|\(sql_user = \).*|\1${MYSQL_USER}|g" /etc/sphinxsearch/sphinx.conf
-sed -i "s|\(sql_pass = \).*|\1${MYSQL_PASSWORD}|g" /etc/sphinxsearch/sphinx.conf
-sed -i "s|\(sql_db = \).*|\1${MYSQL_DATABASE}|g" /etc/sphinxsearch/sphinx.conf
-sed -i "s|/var/lib/sphinxsearch/data/|${CI_PROJECT_DIR}/.sphinxsearch/|g" /etc/sphinxsearch/sphinx.conf
-sed -i "s|listen = |\0127.0.0.1:|g" /etc/sphinxsearch/sphinx.conf
-mkdir -p "${CI_PROJECT_DIR}/.sphinxsearch"
-chown sphinxsearch:sphinxsearch "${CI_PROJECT_DIR}/.sphinxsearch"
-setpriv --reuid sphinxsearch -- /usr/bin/indexer --all
-
 # configure nginx
 sed -i "s|/var/www|${CI_PROJECT_DIR}|g" /etc/nginx/sites-available/gazelle.conf
-
-echo "Start services..."
-
-run_service sphinxsearch
-run_service nginx
-run_service "php${PHP_VER}-fpm"
