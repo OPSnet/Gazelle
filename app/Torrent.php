@@ -164,7 +164,7 @@ class Torrent extends TorrentAbstract {
             }
         );
         $maxLength -= strlen($this->id) + 1 + ($asText ? 4 : 8);
-        $filename = shortenString($filename, $maxLength, true, false)
+        $filename = safeFilename(shortenString($filename, $maxLength, true, false))
             . "-" . $this->id;
         return $asText ? "$filename.txt" : "$filename.torrent";
     }
