@@ -3,7 +3,6 @@
 namespace Gazelle\User;
 
 class Stylesheet extends \Gazelle\BaseUser {
-
     protected const CACHE_KEY = 'u_ss2_%d';
     protected array $info;
 
@@ -80,7 +79,7 @@ class Stylesheet extends \Gazelle\BaseUser {
                 . base_convert(filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $this->cssName())), 10, 36);
         }
         $info = parse_url($url);
-        if (substr($info['path'], -4) === '.css'
+        if (str_ends_with($info['path'], '.css')
                 && (($info['query'] ?? '') . ($info['fragment'] ?? '')) === ''
                 && $info['host'] === SITE_HOST
                 && file_exists(SERVER_ROOT . $info['path'])) {

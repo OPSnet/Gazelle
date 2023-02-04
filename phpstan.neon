@@ -15,6 +15,7 @@ parameters:
         - classes
         - db
         - scripts
+        - tests
     excludePaths:
         - sections
     parallel:

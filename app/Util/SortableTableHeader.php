@@ -7,17 +7,11 @@ use Format;
 class SortableTableHeader {
     private const SORT_DIRS = ['asc' => 'desc', 'desc' => 'asc', '' => ''];
 
-    /** @var array */
-    private $labelMap;
-
     /** @var string */
     private $currentSortKey;
 
     /** @var string */
     private $currentSortDir;
-
-    /** @var array */
-    private $arrowMap;
 
     /**
      * SortableTableHeader constructor.
@@ -36,23 +30,18 @@ class SortableTableHeader {
      * ]
      * Items missing a 'text' value cannot be output.
      *
-     * @param string $defaultSortKey
-     * @param array $labelMap
      * @param array $arrowMap sort direction => symbol to output
-     * @param array $request
      */
     public function __construct(
         string $defaultSortKey,
-        array $labelMap,
-        array $arrowMap = ['asc' => '&darr;', 'desc' => '&uarr;', '' => ''],
+        private readonly array $labelMap,
+        private readonly array $arrowMap = ['asc' => '&darr;', 'desc' => '&uarr;', '' => ''],
         array $request = []
     ) {
         if ($request === []) {
             // Since we can't have expressions as default values in the param list...
             $request = $_GET;
         }
-
-        $this->labelMap       = $labelMap;
         $this->currentSortKey = (!empty($request['order']) && isset($labelMap[$request['order']]))
             ? $request['order']
             : $defaultSortKey;
@@ -60,7 +49,6 @@ class SortableTableHeader {
             (empty($request['sort']) || $request['sort'] === $this->current()['defaultSort'])
             ? $this->current()['defaultSort']
             : self::SORT_DIRS[$this->current()['defaultSort']];
-        $this->arrowMap       = $arrowMap;
     }
 
     public function emit($outputKey) {

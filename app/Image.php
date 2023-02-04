@@ -26,26 +26,27 @@ class Image {
     }
 
     function display() {
-        switch($this->type) {
-            case IMAGETYPE_BMP:  return imagebmp($this->image);
-            case IMAGETYPE_GIF:  return imagegif($this->image);
-            case IMAGETYPE_JPEG:  return imagejpeg($this->image, null, 90);
-            case IMAGETYPE_PNG:  return imagepng($this->image);
-            case IMAGETYPE_WEBP: return imagewebp($this->image);
-            case IMAGETYPE_XBM:  return imagexbm($this->image, null);
-        }
+        return match ($this->type) {
+            IMAGETYPE_BMP  => imagebmp($this->image),
+            IMAGETYPE_GIF  => imagegif($this->image),
+            IMAGETYPE_JPEG => imagejpeg($this->image, null, 90),
+            IMAGETYPE_PNG  => imagepng($this->image),
+            IMAGETYPE_WEBP => imagewebp($this->image),
+            IMAGETYPE_XBM  => imagexbm($this->image, null),
+            default        => null,
+        };
     }
 
     function type(): string {
-        switch($this->type) {
-            case IMAGETYPE_BMP:  return 'bmp';
-            case IMAGETYPE_GIF:  return 'gif';
-            case IMAGETYPE_JPEG:  return 'jpg';
-            case IMAGETYPE_PNG:  return 'png';
-            case IMAGETYPE_WEBP: return 'webp';
-            case IMAGETYPE_XBM:  return 'xpm';
-            default:       return 'error';
-        }
+        return match ($this->type) {
+            IMAGETYPE_BMP  => 'bmp',
+            IMAGETYPE_GIF  => 'gif',
+            IMAGETYPE_JPEG => 'jpg',
+            IMAGETYPE_PNG  => 'png',
+            IMAGETYPE_WEBP => 'webp',
+            IMAGETYPE_XBM  => 'xpm',
+            default        => 'error',
+        };
     }
 
     public function error(): bool {

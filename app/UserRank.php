@@ -48,12 +48,10 @@ namespace Gazelle;
  */
 
 class UserRank extends Base {
-
-    protected \Gazelle\UserRank\Configuration $config;
     protected array $rank;
     protected float $score = 0.0;
 
-    const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
+    final const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 
     public function score(): ?int {
         return is_nan($this->score) ? null : (int)round($this->score, 0);
@@ -63,8 +61,7 @@ class UserRank extends Base {
         return $this->rank[$dimension];
     }
 
-    public function __construct(\Gazelle\UserRank\Configuration $config, array $dimension) {
-        $this->config = $config;
+    public function __construct(protected \Gazelle\UserRank\Configuration $config, array $dimension) {
         $definition = $this->config->definition();
 
         $dimension['uploaded'] -= STARTING_UPLOAD;

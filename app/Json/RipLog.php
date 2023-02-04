@@ -12,7 +12,7 @@ class RipLog extends \Gazelle\Json {
         try {
             $logFile = (new \Gazelle\File\RipLog)->get([$this->torrentId, $this->logId]);
             $ripLog = new \Gazelle\RipLog($this->torrentId, $this->logId);
-        } catch (\Gazelle\Exception\ResourceNotFoundException $e) {
+        } catch (\Gazelle\Exception\ResourceNotFoundException) {
             return [];
         }
 

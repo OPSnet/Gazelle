@@ -11,9 +11,9 @@ class ApplicantRole extends Base {
     protected $created;
     protected $modified;
 
-    const CACHE_KEY           = 'approle_%d';
-    const CACHE_KEY_ALL       = 'approle_list_all';
-    const CACHE_KEY_PUBLISHED = 'approle_list_published';
+    final const CACHE_KEY           = 'approle_%d';
+    final const CACHE_KEY_ALL       = 'approle_list_all';
+    final const CACHE_KEY_PUBLISHED = 'approle_list_published';
 
     public function __construct(int $id) {
         $key = sprintf(self::CACHE_KEY, $id);

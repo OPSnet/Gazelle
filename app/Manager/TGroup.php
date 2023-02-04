@@ -7,8 +7,8 @@ class TGroup extends \Gazelle\BaseManager {
     protected const CACHE_KEY_FEATURED = 'featured_%d';
     protected const VOTE_SIMILAR       = 'vote_similar_albums_%d';
 
-    const FEATURED_AOTM     = 0;
-    const FEATURED_SHOWCASE = 1;
+    final const FEATURED_AOTM     = 0;
+    final const FEATURED_SHOWCASE = 1;
 
     protected \Gazelle\User $viewer;
 
@@ -86,7 +86,7 @@ class TGroup extends \Gazelle\BaseManager {
 
     public function create(
         int $categoryId,
-        int $releaseType,
+        ?int $releaseType,
         string $name,
         string $description,
         int $year,
@@ -98,7 +98,7 @@ class TGroup extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             INSERT INTO torrents_group
                    (CategoryID, Name, WikiBody, Year, RecordLabel, CatalogueNumber, WikiImage, ReleaseType, VanityHouse)
-            VALUES (?,          ?,    ?,    ?,           ?,               ?,        ?,         ?,           ?)
+            VALUES (?,          ?,    ?,        ?,    ?,           ?,               ?,         ?,           ?)
             ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
         );
         $id = self::$db->inserted_id();

@@ -10,7 +10,7 @@ class GlobalNotification extends AbstractNotification {
     protected string $className;
 
     public function className(): string {
-        return isset($this->className) ? $this->className : 'error';
+        return $this->className ?? 'error';
     }
 
     public function clear(): int {

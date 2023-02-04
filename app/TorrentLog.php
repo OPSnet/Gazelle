@@ -59,7 +59,7 @@ class TorrentLog extends BaseObject {
     }
 
     public function adjustment(string $key): string {
-        return isset($this->info()['adjustment_list'][$key]) ? $this->info()['adjustment_list'][$key] : '';
+        return $this->info()['adjustment_list'][$key] ?? '';
     }
 
     public function adjustmentTrack(string $key): int {

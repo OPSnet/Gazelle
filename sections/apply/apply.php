@@ -10,7 +10,7 @@ if (isset($_POST['auth'])) {
         $error = "You need to explain things a bit more.";
     } else {
         header('Location: /apply.php?action=view&id='
-            . $appMan->createApplicant($Viewer->id(), $roleId, $body)->id());
+            . $appMan->create($Viewer->id(), $roleId, $body)->id());
         exit;
     }
 }

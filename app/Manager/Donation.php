@@ -5,34 +5,34 @@ namespace Gazelle\Manager;
 class Donation extends \Gazelle\Base {
     public function moderatorAdjust(\Gazelle\User $user, int $Rank, int $TotalRank, string $Reason, int $who) {
         $this->donate($user, [
-            "Source" => "Modify Values",
-            "Rank" => (int)$Rank,
-            "TotalRank" => (int)$TotalRank,
-            "SendPM" => false,
-            "Reason" => $Reason,
-            "Who"    => $who,
+            "Source"    => "Modify Values",
+            "Rank"      => $Rank,
+            "TotalRank" => $TotalRank,
+            "SendPM"    => false,
+            "Reason"    => $Reason,
+            "Who"       => $who,
         ]);
     }
 
     public function moderatorDonate(\Gazelle\User $user, string $amount, string $Currency, string $Reason, int $who) {
         $this->donate($user, [
-            "Source" => 'Add Points',
-            "Amount" => $amount,
+            "Source"   => 'Add Points',
+            "Amount"   => $amount,
             "Currency" => $Currency,
-            "SendPM" => true,
-            "Reason" => $Reason,
-            "Who"    => $who,
+            "SendPM"   => true,
+            "Reason"   => $Reason,
+            "Who"      => $who,
         ]);
     }
 
     public function regularDonate(\Gazelle\User $user, string $DonationAmount, string $Source, string $Reason, $Currency = "EUR") {
         $this->donate($user, [
-            "Source" => $Source,
-            "Amount" => $DonationAmount,
+            "Source"   => $Source,
+            "Amount"   => $DonationAmount,
             "Currency" => $Currency,
-            "SendPM" => true,
-            "Reason" => $Reason,
-            "Who"    => $user->id(),
+            "SendPM"   => true,
+            "Reason"   => $Reason,
+            "Who"      => $user->id(),
         ]);
     }
 

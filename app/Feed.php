@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Feed extends Base {
-
     function header(): string {
         header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
         header('Pragma:');
@@ -48,7 +47,7 @@ class Feed extends Base {
     }
 
     function populate(string $key, string $item): int {
-        $list = self::$cache->get_value($key, true);
+        $list = self::$cache->get_value($key);
         if ($list === false) {
             $list = [];
         }

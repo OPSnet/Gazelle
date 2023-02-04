@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class Category extends \Gazelle\Base {
-    const NAME_KEY   = 'cat_name';
-    const REPORT_KEY = 'cat_report';
+    final const NAME_KEY   = 'cat_name';
+    final const REPORT_KEY = 'cat_report';
 
     protected array $info = [];
 

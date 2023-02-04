@@ -3,13 +3,13 @@
 namespace Gazelle\Manager;
 
 class Applicant extends \Gazelle\Base {
-    const ID_KEY              = 'zz_appl_%d';
-    const CACHE_KEY           = 'applicant_%d';
-    const CACHE_KEY_OPEN      = 'applicant_list_open_%d';
-    const CACHE_KEY_RESOLVED  = 'applicant_list_resolved_%d';
-    const CACHE_KEY_NEW_COUNT = 'applicant_new_count';
-    const CACHE_KEY_NEW_REPLY = 'applicant_new_reply';
-    const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
+    final const ID_KEY              = 'zz_appl_%d';
+    final const CACHE_KEY           = 'applicant_%d';
+    final const CACHE_KEY_OPEN      = 'applicant_list_open_%d';
+    final const CACHE_KEY_RESOLVED  = 'applicant_list_resolved_%d';
+    final const CACHE_KEY_NEW_COUNT = 'applicant_new_count';
+    final const CACHE_KEY_NEW_REPLY = 'applicant_new_reply';
+    final const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
 
     public function findById(int $applicantId): ?\Gazelle\Applicant {
         $key = sprintf(self::ID_KEY, $applicantId);
@@ -26,7 +26,7 @@ class Applicant extends \Gazelle\Base {
         return $id ? new \Gazelle\Applicant($id) : null;
     }
 
-    public function createApplicant(int $userId, int $roleId, string $body) {
+    public function create(int $userId, int $roleId, string $body) {
         self::$db->prepared_query("
             INSERT INTO applicant
                    (RoleID, UserID, Body, ThreadID)
@@ -35,7 +35,7 @@ class Applicant extends \Gazelle\Base {
                 (new Thread())->createThread('staff-role')->id()
         );
         self::$cache->delete_value(self::CACHE_KEY_NEW_COUNT);
-        return new \Gazelle\Applicant(self::$db->inserted_id());
+        return $this->findById(self::$db->inserted_id());
     }
 
     /**

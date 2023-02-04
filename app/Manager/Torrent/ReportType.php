@@ -3,9 +3,9 @@
 namespace Gazelle\Manager\Torrent;
 
 class ReportType extends \Gazelle\Base {
-    const ID_KEY   = 'zz_trt_%d';
-    const NAME_KEY = 'zz_trtn_%s';
-    const TYPE_KEY = 'zz_trtt_%s';
+    final const ID_KEY   = 'zz_trt_%d';
+    final const NAME_KEY = 'zz_trtn_%s';
+    final const TYPE_KEY = 'zz_trtt_%s';
 
     public function findById(int $reportTypeId): ?\Gazelle\Torrent\ReportType {
         $key = sprintf(self::ID_KEY, $reportTypeId);

@@ -3,9 +3,9 @@
 namespace Gazelle\Manager;
 
 class ApplicantRole extends \Gazelle\Base {
-    const ID_KEY              = 'zz_applr_%d';
-    const CACHE_KEY_ALL       = 'approle_list_all';
-    const CACHE_KEY_PUBLISHED = 'approle_list_published';
+    final const ID_KEY              = 'zz_applr_%d';
+    final const CACHE_KEY_ALL       = 'approle_list_all';
+    final const CACHE_KEY_PUBLISHED = 'approle_list_published';
 
     public function findById(int $roleId): ?\Gazelle\ApplicantRole {
         $key = sprintf(self::ID_KEY, $roleId);
@@ -29,6 +29,7 @@ class ApplicantRole extends \Gazelle\Base {
             VALUES (?,     ?,           ?,         ?)
             ", $title, $description, $published ? 1 : 0, $userId
         );
+        self::$cache->deleteMulti([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
         return $this->findById(self::$db->inserted_id());
     }
 
@@ -56,7 +57,7 @@ class ApplicantRole extends \Gazelle\Base {
     }
 
     public function title(int $roleId): ?string {
-        $role = array_filter($this->list(true), function ($r) use ($roleId) { return $r['role_id'] == $roleId;});
+        $role = array_filter($this->list(true), fn ($r) => $r['role_id'] == $roleId);
         return current($role)['title'] ?? null;
     }
 }

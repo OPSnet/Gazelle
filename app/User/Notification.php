@@ -5,12 +5,12 @@ namespace Gazelle\User;
 class Notification extends \Gazelle\BaseUser {
     protected const CACHE_KEY = 'u_notif_%d';
 
-    const DISPLAY_DISABLED = 0;
-    const DISPLAY_POPUP = 1;
-    const DISPLAY_TRADITIONAL = 2;
-    const DISPLAY_PUSH = 3;
-    const DISPLAY_POPUP_PUSH = 4;
-    const DISPLAY_TRADITIONAL_PUSH = 5;
+    final const DISPLAY_DISABLED = 0;
+    final const DISPLAY_POPUP = 1;
+    final const DISPLAY_TRADITIONAL = 2;
+    final const DISPLAY_PUSH = 3;
+    final const DISPLAY_POPUP_PUSH = 4;
+    final const DISPLAY_TRADITIONAL_PUSH = 5;
 
     protected array  $alert;
     protected array  $config;
@@ -42,9 +42,8 @@ class Notification extends \Gazelle\BaseUser {
         }
         $key = sprintf(self::CACHE_KEY, $this->user->id());
         $config = self::$cache->get_value($key);
-        $config = false; // TODO allow caching
-        if ($config == false) {
-            $config = self::$db->rowAssoc("
+        // TODO allow caching
+        $config = self::$db->rowAssoc("
                 SELECT Blog       AS Blog,
                     Collages      AS Collage,
                     Inbox         AS Inbox,
@@ -56,18 +55,16 @@ class Notification extends \Gazelle\BaseUser {
                 FROM users_notifications_settings AS n
                 WHERE n.UserID = ?
                 ", $this->user->id()
-            ) ?? [
-                'Blog'          => 0,
-                'Collages'      => 0,
-                'Inbox'         => 0,
-                'News'          => 0,
-                'Quotes'        => 0,
-                'StaffPM'       => 0,
-                'Subscriptions' => 0,
-                'Torrents'      => 0,
-            ];
-            self::$cache->cache_value($key, $config, 0);
-        }
+        ) ?? [
+            'Blog'          => 0,
+            'Collages'      => 0,
+            'Inbox'         => 0,
+            'News'          => 0,
+            'Quotes'        => 0,
+            'StaffPM'       => 0,
+            'Subscriptions' => 0,
+            'Torrents'      => 0,
+        ]; self::$cache->cache_value($key, $config, 0);
         $this->config = $config;
         return $this->config;
     }

@@ -3,7 +3,7 @@
 namespace Gazelle\Torrent;
 
 class ReportType extends \Gazelle\BaseObject {
-    const CACHE_KEY = 'trepcfg_%d';
+    final const CACHE_KEY = 'trepcfg_%d';
 
     protected array $info;
     protected array $changeSet;

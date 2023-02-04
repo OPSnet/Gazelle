@@ -3,13 +3,13 @@
 namespace Gazelle\API;
 
 class User extends AbstractAPI {
-    private $id = null;
-    private $username = null;
-    private $clear_tokens = false;
+    private int $id;
+    private string $username;
+    private bool $clear_tokens;
 
     public function run() {
         if (isset($_GET['user_id'])) {
-            $this->id = intval($_GET['user_id']);
+            $this->id = (int)$_GET['user_id'];
         }
         else if (isset($_GET['username'])) {
             $this->username = $_GET['username'];
@@ -18,22 +18,13 @@ class User extends AbstractAPI {
             json_error("Need to supply either user_id or username");
         }
 
-        if (isset($_GET['clear_tokens'])) {
-            $this->clear_tokens = true;
-        }
+        $this->clear_tokens = isset($_GET['clear_tokens']);
 
-        switch ($_GET['req']) {
-            case 'enable':
-                return $this->enableUser();
-                break;
-            case 'disable':
-                return $this->disableUser();
-                break;
-            default:
-            case 'stats':
-                return $this->getUser();
-                break;
-        }
+        return match ($_GET['req']) {
+            'enable'  => $this->enableUser(),
+            'disable' => $this->disableUser(),
+            default   => $this->getUser(),
+        };
     }
 
     private function getUser() {
@@ -59,7 +50,7 @@ class User extends AbstractAPI {
             LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
             LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
             WHERE
-                {$where}", ($this->id !== null) ? $this->id : $this->username);
+                {$where}", $this->id ?? $this->username);
 
         $user = self::$db->next_record(MYSQLI_ASSOC, ['IRCKey', 'Paranoia']);
         if (empty($user['Username'])) {
@@ -121,7 +112,7 @@ class User extends AbstractAPI {
             INNER JOIN users_info        AS ui  ON (ui.UserID = um.ID)
             INNER JOIN user_flt          AS uf  ON (uf.user_id = um.ID)
             WHERE
-                {$where}", ($this->id !== null) ? $this->id : $this->username);
+                {$where}", $this->id ?? $this->username);
 
         // TODO: merge this and the version in takemoderate.php
         $UpdateSet = [];

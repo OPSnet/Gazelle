@@ -25,7 +25,7 @@ class StaffPM extends BaseObject {
         if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
-        $info = self::$db->rowAssoc("
+        $this->info = self::$db->rowAssoc("
             SELECT spm.Subject     AS subject,
                 spm.UserID         AS user_id,
                 spm.Level          AS class_level,
@@ -40,7 +40,6 @@ class StaffPM extends BaseObject {
             WHERE spm.ID = ?
             ", $this->id
         );
-        $this->info = $info;
         return $this->info;
     }
 
@@ -166,13 +165,14 @@ class StaffPM extends BaseObject {
         return $affected;
     }
 
-    protected function modifyStatus(User $user, string $status): int {
+    protected function modifyStatus(User $user, string $status, ?int $resolver): int {
         self::$db->prepared_query("
             UPDATE staff_pm_conversations SET
                 Date   = now(),
-                Status = ?
+                Status = ?,
+                ResolverID = ?
             WHERE ID = ?
-            ", $status, $this->id
+            ", $status, $resolver, $this->id
         );
         $affected = self::$db->affected_rows();
         $this->flush();
@@ -181,11 +181,11 @@ class StaffPM extends BaseObject {
     }
 
     public function resolve(User $user): int {
-        return $this->modifyStatus($user, 'Resolved');
+        return $this->modifyStatus($user, 'Resolved', $user->id());
     }
 
     public function unresolve(User $user): int {
-        return $this->modifyStatus($user, 'Unanswered');
+        return $this->modifyStatus($user, 'Unanswered', null);
     }
 
     public function thread(): array {

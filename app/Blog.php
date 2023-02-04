@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Blog extends BaseObject {
-    const CACHE_KEY = 'blog_%d';
+    final const CACHE_KEY = 'blog_%d';
 
     public function tableName(): string { return 'blog'; }
 

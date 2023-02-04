@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class TorrentDeleted extends TorrentAbstract {
-    const CACHE_KEY = 'tdel_%d';
+    final const CACHE_KEY = 'tdel_%d';
 
     public function location(): string { return "log.php?search=Torrent+" . $this->id; }
     public function tableName(): string { return 'deleted_torrents'; }

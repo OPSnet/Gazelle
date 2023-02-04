@@ -15,7 +15,7 @@ class Request extends \Gazelle\Base {
                     sum(if(FillerID > 0, 1, 0)) AS filled
                 FROM requests
             ");
-            self::$cache->cache_value(self::CACHE_KEY, $info, 3600 * 3 + rand(0, 1800)); // three hours plus fuzz
+            self::$cache->cache_value(self::CACHE_KEY, $info, 3600 * 3 + random_int(0, 1800)); // three hours plus fuzz
             $this->info = $info;
         }
         return $info;

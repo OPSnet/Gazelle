@@ -21,7 +21,7 @@ class User extends \Gazelle\Json {
         $stats           = $user->stats();
         $forumPosts      = $stats->forumPostTotal();
         $releaseVotes    = (new Vote($user))->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
-        $uploaded        = $this->valueOrNull($user->downloadedSize(),          'uploaded');
+        $uploaded        = $this->valueOrNull($user->uploadedSize(),            'uploaded');
         $downloaded      = $this->valueOrNull($user->downloadedSize(),          'downloaded');
         $uploads         = $this->valueOrNull($stats->uploadTotal(),            'uploads+');
         $artistsAdded    = $this->valueOrNull($stats->artistAddedTotal(),       'artistsadded');
@@ -77,7 +77,7 @@ class User extends \Gazelle\Json {
                     is_null($uploaded) || is_null($downloaded)
                                  => null,
                     !$downloaded => 0.0,
-                    default      => (float)round($uploaded / $downloaded, 2, PHP_ROUND_HALF_DOWN),
+                    default      => round($uploaded / $downloaded, 2, PHP_ROUND_HALF_DOWN),
                 },
             ],
             'ranks' => [

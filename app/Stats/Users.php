@@ -174,7 +174,7 @@ class Users extends \Gazelle\Base {
             }
 
             for ($i = $CountryMin; $i <= $CountryMax; $i++) {
-                $LogIncrements[] = \Format::human_format(pow(2, $i));
+                $LogIncrements[] = \Format::human_format(2 ** $i);
             }
             self::$cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 86400 * 3);
         }
@@ -197,7 +197,7 @@ class Users extends \Gazelle\Base {
                         WHERE active = 1
                     ") ?? ['seeder_total' => 0, 'leecher_total' => 0]
                 );
-                self::$cache->cache_value('stat_xbt_fu', $stat, 3600 + rand(0, 120));
+                self::$cache->cache_value('stat_xbt_fu', $stat, 3600 + random_int(0, 120));
             }
             $this->info['xbt_files_users'] = $stat;
         }
@@ -224,7 +224,7 @@ class Users extends \Gazelle\Base {
             $total = self::$cache->get_value('stats_snatch');
             if ($total === false) {
                 $total = (int)self::$db->scalar("SELECT count(*) FROM xbt_snatched");
-                self::$cache->cache_value('stats_snatch', $total, 3600 + rand(0, 12));
+                self::$cache->cache_value('stats_snatch', $total, 3600 + random_int(0, 12));
             }
             $this->info['snatch'] = $total;
         }
@@ -284,7 +284,7 @@ class Users extends \Gazelle\Base {
                             AND ula.last_access > now() - INTERVAL 1 MONTH
                     ") ?? ['active_day' => 0, 'active_week' => 0, 'active_month' => 0]
                 );
-                self::$cache->cache_value('stats_user_active', $active, 7200 + rand(0, 300));
+                self::$cache->cache_value('stats_user_active', $active, 7200 + random_int(0, 300));
             }
             $this->info['active'] = $active;
         }

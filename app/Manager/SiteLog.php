@@ -131,7 +131,6 @@ class SiteLog extends \Gazelle\Base {
                     break;
                 case 'by':
                     $userId = 0;
-                    $user = '';
                     $URL = '';
                     if ($messageParts[$i + 1] == 'user') {
                         $i++;
@@ -141,7 +140,7 @@ class SiteLog extends \Gazelle\Base {
                         $URL = "user $userId (<a href=\"user.php?id=$userId\">".substr($messageParts[++$i], 1, -1).'</a>)';
                     } elseif (in_array($messageParts[$i - 1], ['deleted', 'uploaded', 'edited', 'created', 'recovered'])) {
                         $username = $messageParts[++$i];
-                        if (substr($username, -1) == ':') {
+                        if (str_ends_with($username, ':')) {
                             $username = substr($username, 0, -1);
                             $colon = true;
                         }

@@ -3,12 +3,11 @@
 namespace Gazelle\Manager;
 
 class AutoEnable extends \Gazelle\BaseManager {
-
     // Outcomes
-    const PENDING   = 0;
-    const APPROVED  = 1;
-    const DENIED    = 2;
-    const DISCARDED = 3;
+    final const PENDING   = 0;
+    final const APPROVED  = 1;
+    final const DENIED    = 2;
+    final const DISCARDED = 3;
 
     // search for the admin toolbox
     protected array $where = [];
@@ -17,7 +16,7 @@ class AutoEnable extends \Gazelle\BaseManager {
     protected array $args = [];
 
     // Cache key to store the number of enable requests
-    const CACHE_TOTAL_OPEN = 'num_enable_requests';
+    final const CACHE_TOTAL_OPEN = 'num_enable_requests';
 
     public function findById(int $enableId): ?\Gazelle\User\AutoEnable {
         [$id, $userId] = self::$db->row("

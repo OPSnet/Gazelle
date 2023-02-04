@@ -3,21 +3,16 @@
 namespace Gazelle\Manager;
 
 class Comment extends \Gazelle\BaseManager {
-    const CATALOG = '%s_comments_%d_cat_%d';
+    final const CATALOG = '%s_comments_%d_cat_%d';
 
     protected function className(string $page): string {
-        switch ($page) {
-            case 'artist':
-                return '\\Gazelle\\Comment\\Artist';
-            case 'collages':
-                return '\\Gazelle\\Comment\\Collage';
-            case 'requests':
-                return '\\Gazelle\\Comment\\Request';
-            case 'torrents':
-                return '\\Gazelle\\Comment\\Torrent';
-            default:
-                throw new \Gazelle\Exception\InvalidCommentPageException($page);
-        }
+        return match ($page) {
+            'artist'   => \Gazelle\Comment\Artist::class,
+            'collages' => \Gazelle\Comment\Collage::class,
+            'requests' => \Gazelle\Comment\Request::class,
+            'torrents' => \Gazelle\Comment\Torrent::class,
+            default    => error("no comments for " . display_str($page)),
+        };
     }
 
     public function findById(int $postId): ?\Gazelle\Comment\AbstractComment {
@@ -103,8 +98,6 @@ class Comment extends \Gazelle\BaseManager {
 
     /**
      * Remove all comments on $page/$pageId (handle quote notifications and subscriptions as well)
-     * @param string $page
-     * @param int $pageId
      * @return boolean removal successful (or there was nothing to remove)
      */
     public function remove(string $page, int $pageId) {

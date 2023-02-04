@@ -20,7 +20,6 @@ class Dominator extends \Gazelle\Base {
         foreach (self::$click as $id => $code) {
             $js .= "\$('$id').click(function () {" . "$code});\n";
         }
-        $js .= '})</script>';
-        return $js;
+        return $js . '})</script>';
     }
 }

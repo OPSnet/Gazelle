@@ -27,7 +27,7 @@ class Cache extends \Memcached {
     /**
      * Torrent Group cache version
      */
-    const GROUP_VERSION = 6;
+    final const GROUP_VERSION = 6;
 
     protected array $hit;
     protected array $delete;
@@ -60,7 +60,7 @@ class Cache extends \Memcached {
                 $ServerCheck = $ServerCheck || isset($ServerList["{$Server['host']}:11211"]);
             }
             if (!$ServerCheck) {
-                $Weight = (isset($Server['weight'])) ? $Server['weight'] : 0;
+                $Weight = $Server['weight'] ?? 0;
                 $this->addServer($Server['host'], $Server['port'], $Weight);
             }
         }
@@ -70,15 +70,17 @@ class Cache extends \Memcached {
     //---------- Caching functions ----------//
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 30 days
-    public function cache_value($Key, $value, $Duration = 2592000) {
+    public function cache_value($key, $value, $Duration = 2_592_000): bool {
         $begin = microtime(true);
-        if (empty($Key)) {
+        if (empty($key)) {
             trigger_error("Cache insert failed for empty key");
         }
-        if (!$this->set($Key, $value, $Duration)) {
-            trigger_error("Cache insert failed for key $Key:" . $this->getResultMessage());
+        $result = $this->set($key, $value, $Duration);
+        if ($result === false) {
+            trigger_error("Cache insert failed for key $key:" . $this->getResultMessage());
         }
         $this->elapsed += (microtime(true) - $begin) * 1000;
+        return $result;
     }
 
     public function get_value(string $key) {

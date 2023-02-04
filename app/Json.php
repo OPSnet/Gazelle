@@ -64,7 +64,7 @@ abstract class Json extends Base {
                 ),
                 $this->mode
             );
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             $this->failure("JSON encoding failed, look for malformed UTF-8 encoding");
         }
     }

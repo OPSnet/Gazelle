@@ -26,7 +26,7 @@ class Debug {
     public function __construct(\Gazelle\Cache $cache, DB\Mysql $db) {
         if (self::$cpuTime === false) {
             $r = getrusage();
-            self::$cpuTime = $r['ru_utime.tv_sec'] * 1000000 + $r['ru_utime.tv_usec'];
+            self::$cpuTime = $r['ru_utime.tv_sec'] * 1_000_000 + $r['ru_utime.tv_usec'];
         }
         self::$cache =& $cache;
         self::$db    =& $db;
@@ -34,7 +34,7 @@ class Debug {
 
     public function handle_errors() {
         error_reporting(E_WARNING | E_ERROR | E_PARSE);
-        set_error_handler([$this, 'php_error_handler']);
+        set_error_handler($this->php_error_handler(...));
         return $this;
     }
 
@@ -166,7 +166,7 @@ class Debug {
     public function get_cpu_time() {
         if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
             $RUsage = getrusage();
-            self::$cpuTime = $RUsage['ru_utime.tv_sec'] * 1000000 + $RUsage['ru_utime.tv_usec'] - self::$cpuTime;
+            self::$cpuTime = $RUsage['ru_utime.tv_sec'] * 1_000_000 + $RUsage['ru_utime.tv_usec'] - self::$cpuTime;
             return self::$cpuTime;
         }
         return false;
@@ -205,7 +205,7 @@ class Debug {
             } elseif (is_string($Val)) {
                 $Return[$Key] .= "'$Val'";
             } elseif (is_object($Val)) {
-                $Return[$Key] .= get_class($Val);
+                $Return[$Key] .= $Val::class;
             } elseif (is_array($Val)) {
                 $Return[$Key] .= '['.$this->format_args($Val).']';
             }
@@ -214,7 +214,7 @@ class Debug {
         return implode(', ', $Return);
     }
 
-    public function php_error_handler($Level, $Error, $File, $Line) {
+    public function php_error_handler($Level, string $Error, $File, $Line) {
         //Who added this, it's still something to pay attention to...
         if (stripos('Undefined index', $Error) !== false) {
             //return true;
@@ -333,7 +333,7 @@ class Debug {
                 'Page process time' => number_format($PageTime, 3).' s',
             ];
             if ($CPUTime) {
-                $Perf['CPU time'] = number_format($CPUTime / 1000000, 3).' s';
+                $Perf['CPU time'] = number_format($CPUTime / 1_000_000, 3).' s';
             }
             $Perf['Script start'] = Time::sqlTime(self::$startTime);
             $Perf['Script end'] = Time::sqlTime(microtime(true));

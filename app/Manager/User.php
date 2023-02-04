@@ -9,16 +9,16 @@ class User extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_u_%d';
     protected const USERNAME_KEY = 'zz_unam_%s';
 
-    public const DISABLE_MANUAL     = 1;
-    public const DISABLE_TOR        = 2;
-    public const DISABLE_INACTIVITY = 3;
-    public const DISABLE_TREEBAN    = 4;
+    final public const DISABLE_MANUAL     = 1;
+    final public const DISABLE_TOR        = 2;
+    final public const DISABLE_INACTIVITY = 3;
+    final public const DISABLE_TREEBAN    = 4;
 
     /**
      * Get a User object based on a magic field (id or @name)
      */
     public function find($name): ?\Gazelle\User {
-        if (substr($name, 0, 1) === '@') {
+        if (str_starts_with($name, '@')) {
             return $this->findByUsername(substr($name, 1));
         } elseif ((int)$name > 0) {
             return $this->findById((int)$name);
@@ -318,7 +318,7 @@ class User extends \Gazelle\BaseManager {
             }
             self::$cache->cache_value('idstaff', $staff, 3600);
         }
-        $userMan = new \Gazelle\Manager\User;
+        new \Gazelle\Manager\User;
         foreach ($staff as &$group) {
             $group = array_map(fn ($userId) => $this->findById($userId), $group);
         }
@@ -1248,8 +1248,7 @@ class User extends \Gazelle\BaseManager {
             WHERE um.RequiredRatio != 0.00
                 AND uls.Downloaded < 5 * 1024 * 1024 * 1024
         ");
-        $affected += self::$db->affected_rows();
-        return $affected;
+        return $affected + self::$db->affected_rows();
     }
 
     public function addMassTokens(int $amount, bool $allowLeechDisabled): int {
@@ -1340,7 +1339,7 @@ class User extends \Gazelle\BaseManager {
     }
 
     public function triggerRatioWatch(\Gazelle\Tracker $tracker, \Gazelle\Schedule\Task $task = null): int {
-        $userQuery = self::$db->prepared_query("
+        self::$db->prepared_query("
             SELECT um.ID, um.torrent_pass
             FROM users_info AS ui
             INNER JOIN users_main AS um ON (um.ID = ui.UserID)

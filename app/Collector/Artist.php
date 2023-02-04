@@ -3,7 +3,6 @@
 namespace Gazelle\Collector;
 
 class Artist extends \Gazelle\Collector {
-
     protected $artist;
     protected $roleList = [];
 
@@ -37,7 +36,6 @@ class Artist extends \Gazelle\Collector {
     }
 
     public function fill() {
-        $filer = new \Gazelle\File\Torrent;
         $releaseMan = new \Gazelle\ReleaseType;
         while ([$Downloads, $GroupIDs] = $this->process('GroupID')) {
             if (is_null($Downloads)) {
@@ -56,35 +54,17 @@ class Artist extends \Gazelle\Collector {
                 $GroupID = $GroupIDs[$TorrentID];
                 $info =& $Downloads[$GroupID];
                 $info['Artist'] = \Artists::display_artists($Artists[$GroupID], false, false, false);
-                switch ($this->roleList[$GroupID]) {
-                    case ARTIST_MAIN:
-                        $ReleaseTypeName = $releaseMan->findNameById($info['ReleaseType']);
-                        break;
-                    case ARTIST_GUEST:
-                        $ReleaseTypeName = 'Guest Appearance';
-                        break;
-                    case ARTIST_REMIXER:
-                        $ReleaseTypeName = 'Remixed By';
-                        break;
-                    case ARTIST_COMPOSER:
-                        $ReleaseTypeName = 'Composition';
-                        break;
-                    case ARTIST_CONDUCTOR:
-                        $ReleaseTypeName = 'Conducted By';
-                        break;
-                    case ARTIST_DJ:
-                        $ReleaseTypeName = 'DJ Mix';
-                        break;
-                    case ARTIST_PRODUCER:
-                        $ReleaseTypeName = 'Produced By';
-                        break;
-                    case ARTIST_ARRANGER:
-                        $ReleaseTypeName = 'Arranged By';
-                        break;
-                    default:
-                        $ReleaseTypeName = 'Other-' . $this->roleList[$GroupID];
-                        break;
-                }
+                $ReleaseTypeName = match ($this->roleList[$GroupID]) {
+                    ARTIST_MAIN      => $releaseMan->findNameById($info['ReleaseType']),
+                    ARTIST_GUEST     => 'Guest Appearance',
+                    ARTIST_REMIXER   => 'Remixed By',
+                    ARTIST_COMPOSER  => 'Composition',
+                    ARTIST_CONDUCTOR => 'Conducted By',
+                    ARTIST_DJ        => 'DJ Mix',
+                    ARTIST_PRODUCER  => 'Produced By',
+                    ARTIST_ARRANGER  => 'Arranged By',
+                    default          => 'Other-' . $this->roleList[$GroupID],
+                };
                 $this->add($info, $ReleaseTypeName);
             }
         }

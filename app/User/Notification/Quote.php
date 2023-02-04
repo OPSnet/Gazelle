@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class Quote extends AbstractNotification {
-
     public function className(): string {
         return 'confirmation';
     }
@@ -25,10 +24,6 @@ class Quote extends AbstractNotification {
     /**
      * Parse a post/comment body for quotes and notify all quoted users that have quote notifications enabled.
      *
-     * @param string $body
-     * @param int $postId
-     * @param string $page
-     * @param int $pageId
      * @return int Number of users notified
      */
     public function create(\Gazelle\Manager\User $userMan, string $body, int $postId, string $page, int $pageId): int {

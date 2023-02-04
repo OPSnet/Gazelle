@@ -5,7 +5,7 @@ namespace Gazelle\Schedule;
 use \Gazelle\Util\Irc;
 
 class Scheduler extends \Gazelle\Base {
-    const CACHE_TASKS = 'scheduled_tasks';
+    final const CACHE_TASKS = 'scheduled_tasks';
 
     public function getTask(int $id) {
         $tasks = $this->getTasks();
@@ -28,9 +28,7 @@ class Scheduler extends \Gazelle\Base {
 
     public function getInsaneTasks() {
         return count(array_filter($this->getTasks(),
-            function($v) {
-                return !$v['is_sane'];
-            }
+            fn($v) => !$v['is_sane']
         ));
     }
 
@@ -198,9 +196,7 @@ class Scheduler extends \Gazelle\Base {
             $result[] = [
                 'name' => $name,
                 'data' => array_map(
-                    function ($v) use ($id, $key, $time) {
-                        return [$time ? strtotime($v[$key]) * 1000 : $v[$key], (int)$v[$id]];
-                    },
+                    fn($v) => [$time ? strtotime($v[$key]) * 1000 : $v[$key], (int)$v[$id]],
                     $data
                 )
             ];
@@ -306,7 +302,7 @@ class Scheduler extends \Gazelle\Base {
         $phinxScript = realpath(__DIR__ . '/../../phinx.php');
         $pendingMigrations = array_filter(json_decode(shell_exec($phinxBinary . ' status -c '
             . $phinxScript . ' --format=json | tail -n 1'), true)['migrations'],
-                function($value) { return count($value) > 0 && $value['migration_status'] === 'down'; });
+                fn($value) => count($value) > 0 && $value['migration_status'] === 'down');
 
         if (count($pendingMigrations)) {
             Irc::sendMessage(LAB_CHAN, 'Pending migrations found, scheduler cannot continue');

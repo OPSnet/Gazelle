@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class ForumPost extends BaseObject {
-    const CACHE_KEY     = 'fpost_%d';
+    final const CACHE_KEY     = 'fpost_%d';
 
     public function flush(): ForumPost {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));

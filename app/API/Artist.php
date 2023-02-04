@@ -19,7 +19,6 @@ class Artist extends AbstractAPI {
         if (!self::$db->has_results()) {
             json_error('Artist not found');
         }
-        $artist = self::$db->next_record(MYSQLI_ASSOC, false);
-        return $artist;
+        return self::$db->next_record(MYSQLI_ASSOC, false);
     }
 }

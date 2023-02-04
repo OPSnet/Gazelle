@@ -3,12 +3,12 @@
 namespace Gazelle\Manager;
 
 class XBT extends \Gazelle\Base {
-    const CACHE_KEY = 'xbt_rate_%s';
+    final const CACHE_KEY = 'xbt_rate_%s';
 
     /* Coinbase quotes have a 1% fee, but we lose more in tumbling, so whatever.
      * Coinbase never realised that BTC collides with Bhutan, XBT is the ISO-4217 code.
      */
-    const FX_QUOTE_URL = 'https://api.coinbase.com/v2/prices/BTC-%s/buy';
+    final const FX_QUOTE_URL = 'https://api.coinbase.com/v2/prices/BTC-%s/buy';
 
     /* Fetch the current XBT rate for a given currency code (ISO 4217)
      *

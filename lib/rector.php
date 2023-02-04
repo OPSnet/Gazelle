@@ -13,8 +13,8 @@ use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
-        // __DIR__ . '/../app',
-        __DIR__ . '/../classes',
+        __DIR__ . '/../app',
+        // __DIR__ . '/../classes',
         // __DIR__ . '/../lib',
         // __DIR__ . '/../sections',
     ]);

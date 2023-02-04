@@ -18,44 +18,32 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'article',
-            function ($word) {
-                return preg_match('/^[aeiou]/i', $word) ? 'an' : 'a';
-            }
+            fn($word) => preg_match('/^[aeiou]/i', $word) ? 'an' : 'a'
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'b64',
-            function (string $binary) {
-                return base64_encode($binary);
-            }
+            fn(string $binary) => base64_encode($binary)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'badge_list',
-            function (\Gazelle\User $user) {
-                return (new \Gazelle\User\Privilege($user))->badgeList();
-            }
+            fn(\Gazelle\User $user) => (new \Gazelle\User\Privilege($user))->badgeList()
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
-            function ($text, $outputToc = true) {
-                return new \Twig\Markup(\Text::full_format($text, $outputToc), 'UTF-8');
-            }
+            fn($text, $outputToc = true) => new \Twig\Markup(\Text::full_format($text, $outputToc), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'checked',
-            function ($isChecked) {
-                return new \Twig\Markup($isChecked ? ' checked="checked"' : '', 'UTF-8');
-            }
+            fn($isChecked) => new \Twig\Markup($isChecked ? ' checked="checked"' : '', 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'column',
-            function (\Gazelle\Util\SortableTableHeader $header, string $name) {
-                return new \Twig\Markup($header->emit($name), 'UTF-8');
-            }
+            fn(\Gazelle\Util\SortableTableHeader $header, string $name) => new \Twig\Markup($header->emit($name), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -79,89 +67,65 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'octet_size',
-            function ($size, array $option = []) {
-                return \Format::get_size($size, empty($option) ? 2 : $option[0]);
-            },
+            fn($size, array $option = []) => \Format::get_size($size, empty($option) ? 2 : $option[0]),
             ['is_variadic' => true]
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'plural',
-            function ($number, $plural = 's') {
-                return plural($number, $plural);
-            }
+            fn($number, $plural = 's') => plural($number, $plural)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'repeat',
-            function ($text, $number) {
-                return str_repeat($text, $number);
-            }
+            fn($text, $number) => str_repeat($text, $number)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'shorten',
-            function (string $text, int $length) {
-                return new \Twig\Markup(shortenString($text, $length), 'UTF-8');
-            }
+            fn(string $text, int $length) => new \Twig\Markup(shortenString($text, $length), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'time_diff',
-            function ($time, $levels = 2) {
-                return new \Twig\Markup(time_diff($time, $levels), 'UTF-8');
-            }
+            fn($time, $levels = 2) => new \Twig\Markup(time_diff($time, $levels), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'time_interval',
-            function (int $seconds) {
-                return new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8');
-            }
+            fn(int $seconds) => new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'token_count',
-            function ($size) {
-                return (int)ceil((int)$size / BYTES_PER_FREELEECH_TOKEN);
-            }
+            fn($size) => (int)ceil((int)$size / BYTES_PER_FREELEECH_TOKEN)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'truth',
-            function (bool $truth) {
-                return $truth ? "\xe2\x9c\x85" : "\xe2\x9d\x8c";
-            }
+            fn(bool $truth) => $truth ? "\xe2\x9c\x85" : "\xe2\x9d\x8c"
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirst',
-            function ($text) {
-                return new \Twig\Markup(ucfirst($text), 'UTF-8');
-            }
+            fn($text) => new \Twig\Markup(ucfirst($text), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirstall',
-            function ($text) {
-                return new \Twig\Markup(ucfirst(
-                    implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)))
-                ), 'UTF-8');
-            }
+            fn($text) => new \Twig\Markup(ucfirst(
+                implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)))
+            ), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_url',
-            function ($userId) {
-                return new \Twig\Markup(\Users::format_username($userId, false, false, false), 'UTF-8');
-            }
+            fn($userId) => new \Twig\Markup(\Users::format_username($userId, false, false, false), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_full',
-            function ($userId) {
-                return new \Twig\Markup(\Users::format_username($userId, true, true, true, true), 'UTF-8');
-            }
+            fn($userId) => new \Twig\Markup(\Users::format_username($userId, true, true, true, true), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -186,19 +150,15 @@ class Twig {
             }
         ));
 
-        $twig->addFunction(new \Twig\TwigFunction('header', function ($title, $options = '') {
-            return new \Twig\Markup(
-                \View::show_header($title, $options),
-                'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('header', fn($title, $options = '') => new \Twig\Markup(
+            \View::show_header($title, $options),
+            'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('footer', function ($options = []) {
-            return new \Twig\Markup(
-                \View::show_footer($options),
-                'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('footer', fn($options = []) => new \Twig\Markup(
+            \View::show_footer($options),
+            'UTF-8'
+        )));
 
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
             global $Viewer;
@@ -208,104 +168,89 @@ class Twig {
             );
         }));
 
-        $twig->addFunction(new \Twig\TwigFunction('ipaddr', function (string $ipaddr) {
-            return new \Twig\Markup(
-                "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip="
-                    . $ipaddr . '" title="Search" class="brackets tooltip">S</a>'
-                , 'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn(string $ipaddr) => new \Twig\Markup(
+            "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip="
+                . $ipaddr . '" title="Search" class="brackets tooltip">S</a>'
+            , 'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('mtime', function($filename) {
-            return new \Twig\Markup(
-                base_convert(filemtime(SERVER_ROOT . '/public/static/' . $filename), 10, 36),
-                'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('mtime', fn($filename) => new \Twig\Markup(
+            base_convert(filemtime(SERVER_ROOT . '/public/static/' . $filename), 10, 36),
+            'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('mtime_css', function($filename) {
-            return new \Twig\Markup(
-                base_convert(filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)), 10, 36),
-                'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('mtime_css', fn($filename) => new \Twig\Markup(
+            base_convert(filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)), 10, 36),
+            'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
-            return new \Twig\Markup(
-                ($default
-                    ? sprintf(
-                        '<input id="%s" type="checkbox" disabled="disabled"%s />&nbsp;',
-                        "default_$key", (isset($default[$key]) && $default[$key] ? ' checked="checked"' : '')
-                    )
-                    : ''
+        $twig->addFunction(new \Twig\TwigFunction('privilege', fn($default, $config, $key) => new \Twig\Markup(
+            ($default
+                ? sprintf(
+                    '<input id="%s" type="checkbox" disabled="disabled"%s />&nbsp;',
+                    "default_$key", (isset($default[$key]) && $default[$key] ? ' checked="checked"' : '')
                 )
-                . sprintf(
-                    '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s">%s</label><br />',
-                    "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key, $key,
-                    \Gazelle\Manager\Privilege::privilegeList()[$key] ?? "!unknown($key)!"
-                ),
-                'UTF-8'
-            );
-        }));
+                : ''
+            )
+            . sprintf(
+                '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s">%s</label><br />',
+                "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key, $key,
+                \Gazelle\Manager\Privilege::privilegeList()[$key] ?? "!unknown($key)!"
+            ),
+            'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('ratio', function ($up, $down) {
-            return new \Twig\Markup(
-                \Format::get_ratio_html($up, $down),
-                'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('ratio', fn($up, $down) => new \Twig\Markup(
+            \Format::get_ratio_html($up, $down),
+            'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('resolveCountryIpv4', function ($addr) {
-            return new \Twig\Markup(
-                (function ($ip) {
-                    static $cache = [];
-                    if (!isset($cache[$ip])) {
-                        $Class = strtr($ip, '.', '-');
-                        $cache[$ip] = '<span class="cc_'.$Class.'">Resolving CC...'
-                            . '<script type="text/javascript">'
-                                . '$(document).ready(function() {'
-                                    . '$.get(\'tools.php?action=get_cc&ip='.$ip.'\', function(cc) {'
-                                        . '$(\'.cc_'.$Class.'\').html(cc);'
-                                    . '});'
+        $twig->addFunction(new \Twig\TwigFunction('resolveCountryIpv4', fn($addr) => new \Twig\Markup(
+            (function ($ip) {
+                static $cache = [];
+                if (!isset($cache[$ip])) {
+                    $Class = strtr($ip, '.', '-');
+                    $cache[$ip] = '<span class="cc_'.$Class.'">Resolving CC...'
+                        . '<script type="text/javascript">'
+                            . '$(document).ready(function() {'
+                                . '$.get(\'tools.php?action=get_cc&ip='.$ip.'\', function(cc) {'
+                                    . '$(\'.cc_'.$Class.'\').html(cc);'
                                 . '});'
-                            . '</script></span>';
-                    }
-                    return $cache[$ip];
-                })($addr),
-                'UTF-8'
-            );
-        }));
+                            . '});'
+                        . '</script></span>';
+                }
+                return $cache[$ip];
+            })($addr),
+            'UTF-8'
+        )));
 
-        $twig->addFunction(new \Twig\TwigFunction('resolveIpv4', function ($addr) {
-            return new \Twig\Markup(
-                (function ($ip) {
-                    if (!$ip) {
-                        $ip = '127.0.0.1';
-                    }
-                    static $cache = [];
-                    if (!isset($cache[$ip])) {
-                        $class = strtr($ip, '.', '-');
-                        $cache[$ip] = '<span class="host_' . $class
-                            . '">Resolving host' . "\xE2\x80\xA6" . '<script type="text/javascript">$(document).ready(function() {'
-                            .  "\$.get('tools.php?action=get_host&ip=$ip', function(host) {\$('.host_$class').html(host)})})</script></span>";
-                    }
-                    return $cache[$ip];
-                })($addr),
-                'UTF-8'
-            );
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('resolveIpv4', fn($addr) => new \Twig\Markup(
+            (function ($ip) {
+                if (!$ip) {
+                    $ip = '127.0.0.1';
+                }
+                static $cache = [];
+                if (!isset($cache[$ip])) {
+                    $class = strtr($ip, '.', '-');
+                    $cache[$ip] = '<span class="host_' . $class
+                        . '">Resolving host' . "\xE2\x80\xA6" . '<script type="text/javascript">$(document).ready(function() {'
+                        .  "\$.get('tools.php?action=get_host&ip=$ip', function(host) {\$('.host_$class').html(host)})})</script></span>";
+                }
+                return $cache[$ip];
+            })($addr),
+            'UTF-8'
+        )));
 
-        $twig->addTest(new \Twig\TwigTest('donor', function ($user) {
-            return get_class($user) === 'Gazelle\\User' && (new \Gazelle\User\Privilege($user))->isDonor();
-        }));
+        $twig->addFunction(new \Twig\TwigFunction('shorten', fn($text, $length) => new \Twig\Markup(
+            shortenString($text, $length),
+            'UTF-8'
+        )));
 
-        $twig->addTest(new \Twig\TwigTest('nan', function ($value) {
-            return is_nan($value);
-        }));
+        $twig->addTest(new \Twig\TwigTest('donor', fn($user) => $user::class === \Gazelle\User::class && (new \Gazelle\User\Privilege($user))->isDonor()));
 
-        $twig->addTest(new \Twig\TwigTest('request_fill', function ($contest) {
-            return $contest instanceof \Gazelle\Contest\RequestFill;
-        }));
+        $twig->addTest(new \Twig\TwigTest('nan', fn($value) => is_nan($value)));
+
+        $twig->addTest(new \Twig\TwigTest('request_fill', fn($contest) => $contest instanceof \Gazelle\Contest\RequestFill));
 
         $twig->addGlobal('dom', new \Gazelle\Util\Dominator);
 

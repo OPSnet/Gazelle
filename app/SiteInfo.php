@@ -5,7 +5,6 @@ namespace Gazelle;
 use Gazelle\Util\Time;
 
 class SiteInfo extends Base {
-
     public function gitBranch() {
         return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
     }
@@ -55,7 +54,7 @@ class SiteInfo extends Base {
                     shell_exec("$phinxBinary status -c $phinxScript --format=json|tail -n 1"),
                     true
                 )['migrations'],
-                function($v) { return count($v) > 0; }
+                fn($v) => count($v) > 0
             )
         ];
     }
@@ -89,7 +88,7 @@ class SiteInfo extends Base {
         }
 
         $info = json_decode(shell_exec("composer info -d $root --format=json 2>/dev/null"), true);
-        foreach ($info['installed'] as $name => $p) {
+        foreach ($info['installed'] as $p) {
             if (!isset($packages[$p['name']])) {
                 $packages[$p['name']] = [
                     'name'      => $p['name'],

@@ -3,13 +3,12 @@
 namespace Gazelle\User;
 
 class Privilege extends \Gazelle\BaseUser {
-
-    const CACHE_KEY = 'u_priv_%d';
+    final const CACHE_KEY = 'u_priv_%d';
 
     protected array $info;
 
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $id = $this->user->id();

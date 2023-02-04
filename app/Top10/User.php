@@ -3,18 +3,17 @@
 namespace Gazelle\Top10;
 
 class User extends \Gazelle\Base {
-
-    public const UPLOADERS = 'uploaders';
-    public const DOWNLOADERS = 'downloaders';
-    public const UPLOADS = 'uploads';
-    public const REQUEST_VOTES = 'request_votes';
-    public const REQUEST_FILLS = 'request_fills';
-    public const UPLOAD_SPEED = 'upload_speed';
-    public const DOWNLOAD_SPEED = 'download_speed';
+    final public const UPLOADERS = 'uploaders';
+    final public const DOWNLOADERS = 'downloaders';
+    final public const UPLOADS = 'uploads';
+    final public const REQUEST_VOTES = 'request_votes';
+    final public const REQUEST_FILLS = 'request_fills';
+    final public const UPLOAD_SPEED = 'upload_speed';
+    final public const DOWNLOAD_SPEED = 'download_speed';
 
     private const CACHE_KEY = 'topusers_%s_%d';
 
-    private $sortMap = [
+    private array $sortMap = [
         self::UPLOADERS => 'uploaded',
         self::DOWNLOADERS => 'downloaded',
         self::UPLOADS => 'num_uploads',

@@ -5,17 +5,17 @@ namespace Gazelle\Manager;
 class Torrent extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_t_%d';
 
-    const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_%d';
-    const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
-    const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
-    const CACHE_FOLDERNAME         = 'foldername_%s';
-    const FOLDER_SALT              = "v1\x01";
+    final const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_%d';
+    final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
+    final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
+    final const CACHE_FOLDERNAME         = 'foldername_%s';
+    final const FOLDER_SALT              = "v1\x01";
 
-    const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
-    const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
+    final const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
+    final const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
-    const ARTIST_DISPLAY_TEXT = 1;
-    const ARTIST_DISPLAY_HTML = 2;
+    final const ARTIST_DISPLAY_TEXT = 1;
+    final const ARTIST_DISPLAY_HTML = 2;
 
     protected \Gazelle\User $viewer;
 
@@ -412,7 +412,7 @@ class Torrent extends \Gazelle\BaseManager {
 
         $groupLog = new \Gazelle\Log;
         $tracker = new \Gazelle\Tracker;
-        foreach ($Torrents as list($TorrentID, $GroupID, $InfoHash)) {
+        foreach ($Torrents as [$TorrentID, $GroupID, $InfoHash]) {
             $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $leechLevel]);
             self::$cache->delete_value("torrent_download_$TorrentID");
             $groupLog->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $reason")
@@ -423,7 +423,6 @@ class Torrent extends \Gazelle\BaseManager {
     }
 
     public function updatePeerlists(): array {
-        self::$cache->disableLocalCache();
         self::$db->prepared_query("
             DELETE FROM xbt_files_users
             WHERE mtime < unix_timestamp(NOW() - INTERVAL ? SECOND)

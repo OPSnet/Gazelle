@@ -208,7 +208,7 @@ class Mysql {
      *                            or TRUE for other successful DML queries
      *                            or FALSE on failure.
      */
-    public function execute(...$Parameters) {
+    public function execute(...$Parameters): \mysqli_result|bool {
         /** @var \mysqli_stmt $Statement */
         $Statement = &$this->Statement;
 
@@ -232,7 +232,7 @@ class Mysql {
             try {
                 $Statement->execute();
                 return $Statement->get_result();
-            } catch (\mysqli_sql_exception $e) {
+            } catch (\mysqli_sql_exception) {
                 if (mysqli_error($this->LinkID) == 1062) {
                     throw new Mysql_DuplicateKeyException;
                 }
@@ -253,9 +253,8 @@ class Mysql {
      * the two functions separately instead of this function.
      *
      * @param mixed ...$Parameters
-     * @return bool|\mysqli_result
      */
-    public function prepared_query(string $Query, ...$Parameters) {
+    public function prepared_query(string $Query, mixed ...$Parameters): bool|\mysqli_result {
         $this->prepare($Query);
         return $this->execute(...$Parameters);
     }
@@ -272,7 +271,7 @@ class Mysql {
             $Debug->analysis('Non-Fatal Deadlock:', $Query, 3600 * 24);
             trigger_error("Database deadlock, attempt $i");
 
-            sleep($i * rand(2, 5)); // Wait longer as attempts increase
+            sleep($i * random_int(2, 5)); // Wait longer as attempts increase
         }
         $QueryEndTime = microtime(true);
         // Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
@@ -335,7 +334,7 @@ class Mysql {
      * @param mixed  $Escape Boolean true/false for escaping entire/none of query
      *                          or can be an array of array keys for what columns to escape
      */
-    public function fetch_record(...$Escape): ?array {
+    public function fetch_record(mixed ...$Escape): ?array {
         if (count($Escape) === 1 && $Escape[0] === true) {
             $Escape = true;
         }
@@ -455,7 +454,7 @@ class Mysql {
      * @param mixed   $args  The values of the placeholders
      * @return array  key=>value resultset or null
      */
-    public function rowAssoc(string $sql, ...$args): ?array {
+    public function rowAssoc(string $sql, mixed ...$args): ?array {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->next_record(MYSQLI_ASSOC, false);
@@ -469,7 +468,7 @@ class Mysql {
      * Stashes the current query id so that this can be used within a block
      * that is looping over an active resultset.
      */
-    public function scalar(string $sql, mixed ...$args): int|string|bool|null {
+    public function scalar(string $sql, mixed ...$args): int|float|string|bool|null {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->has_results() ? $this->next_record(MYSQLI_NUM, false) : [null];
@@ -545,7 +544,7 @@ class Mysql {
      * @param boolean $Reverse reverses $Escape such that then it's an array of keys to escape
      * @return array mutated version of $Array with values escaped.
      */
-    protected function display_array(array $Array, mixed $Escape = [], bool $Reverse = false): array {
+    protected function display_array(array $Array, bool|array $Escape = [], bool $Reverse = false): array {
         foreach ($Array as $Key => $Val) {
             if ((!is_array($Escape) && $Escape == true) || (!$Reverse && !in_array($Key, $Escape)) || ($Reverse && in_array($Key, $Escape))) {
                 $Array[$Key] = display_str($Val);

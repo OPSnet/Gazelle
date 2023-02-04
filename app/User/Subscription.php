@@ -176,7 +176,7 @@ class Subscription extends \Gazelle\BaseUser {
      */
     public function isSubscribedComments(string $page, int $pageId): bool {
         return !empty(array_filter($this->commentSubscriptions(),
-            function ($s) use ($page, $pageId) { return $s[0] === $page && $s[1] == $pageId; })
+            fn($s) => $s[0] === $page && $s[1] == $pageId)
         );
     }
 

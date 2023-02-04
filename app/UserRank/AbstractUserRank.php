@@ -10,7 +10,6 @@ namespace Gazelle\UserRank;
  */
 
 abstract class AbstractUserRank extends \Gazelle\Base {
-
     abstract public function cacheKey(): string;
     abstract public function selector(): string;
 
@@ -116,7 +115,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         $table = array_reverse($table, true);
 
         // add some fuzz to the expiry time, so all the tables don't expire at once
-        self::$cache->cache_value($this->cacheKey(), $table, 86400 + rand(0, 3600));
+        self::$cache->cache_value($this->cacheKey(), $table, 86400 + random_int(0, 3600));
         return $table;
     }
 

@@ -132,7 +132,6 @@ class Privilege extends \Gazelle\BaseManager {
      * The list of defined privileges. The `can` field
      * in the returned array acts as a sparse matrix.
      *
-     * @return array
      *      - name (Short name of privilege)
      *      - description (Longer description of privilege)
      *      - orphan (Is this a privileges that no longer exists)

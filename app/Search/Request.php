@@ -106,6 +106,7 @@ class Request extends \Gazelle\Base {
     }
 
     public function setMedia(array $mediaList, bool $strict): Request {
+        $format = [];
         if (in_array(count($mediaList), [0, count(MEDIA)])) {
             return $this;
         }
@@ -198,7 +199,7 @@ class Request extends \Gazelle\Base {
 
         $queryTerm = $include;
         if (isset($this->negate) && $exclude) {
-            $queryTerm = array_merge($queryTerm, $exclude);
+            $queryTerm = [...$queryTerm, ...$exclude];
         }
         if ($queryTerm) {
             $this->sphinxq->where_match(implode(' ', $queryTerm), '*', false);
@@ -288,11 +289,11 @@ class Request extends \Gazelle\Base {
     }
 
     public function list(): array {
-        return isset($this->list) ? $this->list : [];
+        return $this->list ?? [];
     }
 
     public function total(): int {
-        return isset($this->total) ? $this->total : 0;
+        return $this->total ?? 0;
     }
 
     public function encodingList(): array {
@@ -308,18 +309,18 @@ class Request extends \Gazelle\Base {
     }
 
     public function releaseTypeList(): array {
-        return isset($this->releaseTypeList) ? $this->releaseTypeList : [];
+        return $this->releaseTypeList ?? [];
     }
 
     public function tagList(): string {
-        return isset($this->tagList) ? $this->tagList : '';
+        return $this->tagList ?? '';
     }
 
     public function text(): string {
-        return isset($this->text) ? $this->text : 'Requests';
+        return $this->text ?? 'Requests';
     }
 
     public function title(): string {
-        return isset($this->title) ? $this->title : 'Requests';
+        return $this->title ?? 'Requests';
     }
 }

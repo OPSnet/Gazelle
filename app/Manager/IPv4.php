@@ -3,8 +3,7 @@
 namespace Gazelle\Manager;
 
 class IPv4 extends \Gazelle\Base {
-
-    const CACHE_KEY = 'ipv4_bans_';
+    final const CACHE_KEY = 'ipv4_bans_';
 
     protected string $filterNotes;
     protected string $filterIpaddr;

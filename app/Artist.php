@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Artist extends Base {
-    const CACHE_REQUEST_ARTIST      = 'artists_requests_%d';
+    final const CACHE_REQUEST_ARTIST      = 'artists_requests_%d';
 
     protected const CACHE_PREFIX    = 'artist_%d';
     protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
@@ -194,25 +194,15 @@ class Artist extends Base {
         ];
 
         while ([$groupId, $role, $releaseTypeId] = self::$db->next_record(MYSQLI_NUM, false)) {
-            switch($role) {
-                case ARTIST_ARRANGER:
-                    $sectionId = ARTIST_SECTION_ARRANGER;
-                    break;
-                case ARTIST_PRODUCER:
-                    $sectionId = ARTIST_SECTION_PRODUCER;
-                    break;
-                case ARTIST_COMPOSER:
-                    $sectionId = ARTIST_SECTION_COMPOSER;
-                    break;
-                case ARTIST_REMIXER:
-                    $sectionId = ARTIST_SECTION_REMIXER;
-                    break;
-                case ARTIST_GUEST:
-                    $sectionId = ARTIST_SECTION_GUEST;
-                    break;
-                default:
-                    $sectionId = $releaseTypeId;
-            }
+            $role = (int)$role;
+            $sectionId = match ($role) {
+                ARTIST_ARRANGER => ARTIST_SECTION_ARRANGER,
+                ARTIST_PRODUCER => ARTIST_SECTION_PRODUCER,
+                ARTIST_COMPOSER => ARTIST_SECTION_COMPOSER,
+                ARTIST_REMIXER => ARTIST_SECTION_REMIXER,
+                ARTIST_GUEST => ARTIST_SECTION_GUEST,
+                default => $releaseTypeId,
+            };
             if (!isset($this->section[$sectionId])) {
                 $this->section[$sectionId] = [];
             }
@@ -359,9 +349,6 @@ class Artist extends Base {
     }
 
     /**
-     * @param  int  $userId
-     * @param  string  $name
-     * @param  int  $redirect
      * @return int|void
      */
     public function addAlias(int $userId, string $name, int $redirect) {
@@ -634,13 +621,9 @@ class Artist extends Base {
     }
 
     /* STATIC METHODS - for when you do not yet have an ID, e.g. during creation */
-
     /**
      * Collapse whitespace and directional markers, because people copypaste carelessly.
      * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
-     *
-     * @param  string  $name
-     * @return string|null
      */
     public static function sanitize(string $name): ?string {
         // \u200e is &lrm;
@@ -857,15 +840,14 @@ class Artist extends Base {
 
         // Now sort the artists by most relations first
         uksort($similar, fn ($a, $b)
-            => $similar[$b]['nrRelated'] <=> $similar[$a]['nrRelated']
-            ?: $similar[$b]['score']     <=> $similar[$a]['score']
+            => ($similar[$b]['nrRelated'] <=> $similar[$a]['nrRelated'] ?: $similar[$b]['score']     <=> $similar[$a]['score'])
             ?: $similar[$b]['artist_id'] <=> $similar[$a]['artist_id']
         );
 
         // Place the artists with the most relations first, and place
         // their relations near them, alternating on each side.
-        $xOrigin = (int)$width / 2;
-        $yOrigin = (int)$height / 2;
+        $xOrigin = $width / 2;
+        $yOrigin = $height / 2;
         $range = ($max === $min) ? $max : $max - $min;
         $placed = array_fill_keys(array_keys($similar), false);
         $seen = 0;
@@ -886,7 +868,7 @@ class Artist extends Base {
                 // Rotate the layout angles to fit this artist in, so that we can
                 // pick the first and last angles off the layout list below.
                 $move = (int)ceil(($relatedToPlace + 1) / 2);
-                $layout = array_merge(array_slice($layout, $move, NULL, true), array_slice($layout, 0, $move, true));
+                $layout = [...array_slice($layout, $move, NULL, true), ...array_slice($layout, 0, $move, true)];
             }
             if (!($relatedTotal > 0 && $seen > 1)) {
                 $angle = array_shift($layout);
@@ -927,7 +909,7 @@ class Artist extends Base {
             $distance = 0.9 - (($s['score'] - $min) * 0.4 / $range);
             $s['x'] = (int)(cos($angle) * $distance * $xOrigin) + $xOrigin;
             $s['y'] = (int)(sin($angle) * $distance * $yOrigin) + $yOrigin;
-            $s['proportion'] = pow($s['score'] / ($totalScore + 1), 1.0);
+            $s['proportion'] = ($s['score'] / ($totalScore + 1)) ** 1.0;
 
             // Place their related close by, first anti-clockwise (angle
             // increasing: array_shift(), next clockwise (angle decreasing:
@@ -946,7 +928,7 @@ class Artist extends Base {
                 $distance = 0.9 - (($similar[$r]['score'] - $min) * 0.45 / $range);
                 $similar[$r]['x'] = (int)(cos($angle) * $distance * $xOrigin) + $xOrigin;
                 $similar[$r]['y'] = (int)(sin($angle) * $distance * $yOrigin) + $yOrigin;
-                $similar[$r]['proportion'] = pow($similar[$r]['score'] / ($totalScore + 1), 1.0);
+                $similar[$r]['proportion'] = ($similar[$r]['score'] / ($totalScore + 1)) ** 1.0;
             }
 
         }

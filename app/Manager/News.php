@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class News extends \Gazelle\Base {
-    const CACHE_KEY = 'news';
+    final const CACHE_KEY = 'news';
 
     /**
      * Create a news article
@@ -108,7 +108,6 @@ class News extends \Gazelle\Base {
      */
     public function latestId(): int {
         return $this->latest()['id'];
-        return $newsId;
     }
 
     /**

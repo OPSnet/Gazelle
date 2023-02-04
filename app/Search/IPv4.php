@@ -3,13 +3,13 @@
 namespace Gazelle\Search;
 
 class IPv4 extends \Gazelle\Base {
-    public const ASC = 0;
-    public const DESC = 1;
+    final public const ASC = 0;
+    final public const DESC = 1;
 
-    public const START = 0;
-    public const END   = 1;
-    public const IP    = 2;
-    public const TOTAL = 3;
+    final public const START = 0;
+    final public const END   = 1;
+    final public const IP    = 2;
+    final public const TOTAL = 3;
 
     /**
      * Take a freeform slab of text and search for dotted quads.

@@ -24,7 +24,7 @@ class Freeleech extends \Gazelle\Schedule\Task
                 AND Time < now() - INTERVAL 7 HOUR");
 
         self::$db->set_query_id($qId);
-        while (list($groupID) = self::$db->next_record()) {
+        while ([$groupID] = self::$db->next_record()) {
             self::$cache->delete_value("torrents_details_$groupID");
             self::$cache->delete_value("torrent_group_$groupID");
         }

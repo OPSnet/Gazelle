@@ -12,12 +12,12 @@ class Applicant extends Base {
     protected $created;
     protected $modified;
 
-    const CACHE_KEY           = 'applicant_%d';
-    const CACHE_KEY_OPEN      = 'applicant_list_open_%d';
-    const CACHE_KEY_RESOLVED  = 'applicant_list_resolved_%d';
-    const CACHE_KEY_NEW_COUNT = 'applicant_new_count';
-    const CACHE_KEY_NEW_REPLY = 'applicant_new_reply';
-    const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
+    final const CACHE_KEY           = 'applicant_%d';
+    final const CACHE_KEY_OPEN      = 'applicant_list_open_%d';
+    final const CACHE_KEY_RESOLVED  = 'applicant_list_resolved_%d';
+    final const CACHE_KEY_NEW_COUNT = 'applicant_new_count';
+    final const CACHE_KEY_NEW_REPLY = 'applicant_new_reply';
+    final const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
 
     public function __construct(int $id) {
         $key = sprintf(self::CACHE_KEY, $id);
@@ -42,7 +42,7 @@ class Applicant extends Base {
         $this->created  = $data['Created'];
         $this->modified = $data['Modified'];
         $this->thread   = new Thread($data['ThreadID']);
-        // If we are coming from createApplicant() we need to wipe the applicant list
+        // If we are coming from Manager\Applicatant::create() we need to wipe the applicant list
         $this->flushApplicantList();
     }
 

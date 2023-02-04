@@ -28,7 +28,7 @@ class CacheMultiFlush extends \Gazelle\Base {
             $list = self::$db->collect(0);
             $flush = [];
             foreach ($shape as $s) {
-                $flush = array_merge($flush, array_map(function ($id) use ($s) {return sprintf($s, $id);}, $list));
+                $flush = array_merge($flush, array_map(fn($id) => sprintf($s, $id), $list));
             }
             self::$cache->delete_multi($flush);
             $flushed += count($flush);

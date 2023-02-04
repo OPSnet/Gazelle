@@ -17,8 +17,8 @@ use Gazelle\Exception\RouterException;
  * GET request will not.
  */
 class Router {
-    private $authorize = ['GET' => false, 'POST' => true];
-    private $routes = ['GET' => [], 'POST' => []];
+    private array $authorize = ['GET' => false, 'POST' => true];
+    private array $routes = ['GET' => [], 'POST' => []];
 
     /**
      * Router constructor.
@@ -28,13 +28,7 @@ class Router {
         protected readonly string $auth_key = ''
     ) {}
 
-    /**
-     * @param string|array $methods
-     * @param string $action
-     * @param string $path
-     * @param bool $authorize
-     */
-    public function addRoute($methods, string $action, string $path, bool $authorize = false) {
+    public function addRoute(string|array $methods, string $action, string $path, bool $authorize = false) {
         if (is_array($methods)) {
             foreach ($methods as $method) {
                 $this->addRoute($method, $action, $path, $authorize);
@@ -75,7 +69,6 @@ class Router {
     }
 
     /**
-     * @param string $action
      * @return string path to file to load
      * @throws RouterException
      */

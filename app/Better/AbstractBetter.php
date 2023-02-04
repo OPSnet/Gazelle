@@ -3,8 +3,7 @@
 namespace Gazelle\Better;
 
 abstract class AbstractBetter extends \Gazelle\Base {
-
-    const CACHE_TOTAL = 'better_%s_total';
+    final const CACHE_TOTAL = 'better_%s_total';
 
     protected string $baseQuery;
     protected string $countBy;
@@ -48,7 +47,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
     }
 
     public function search(): ?string {
-        return isset($this->search) ? $this->search : null;
+        return $this->search ?? null;
     }
 
     public function addArtistUserSnatchJoin(): AbstractBetter {
@@ -125,7 +124,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
     }
 
     protected function totalCacheKey(): string {
-        $class = explode('\\', get_class($this));
+        $class = explode('\\', static::class);
         return sprintf(self::CACHE_TOTAL, strtolower(array_pop($class)));
     }
 

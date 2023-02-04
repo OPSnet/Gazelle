@@ -30,7 +30,7 @@ class NotifyNonseedingUploaders extends \Gazelle\Schedule\Task
         $inactivityExceptionsMade = [];
 
         foreach ($torrentIDs as $torrentID) {
-            list($id, $groupID, $name, $format, $encoding, $userID) = $torrentID;
+            [$id, $groupID, $name, $format, $encoding, $userID] = $torrentID;
 
             if (array_key_exists($userID, $inactivityExceptionsMade) && (time() < $inactivityExceptionsMade[$userID])) {
                 // don't notify exceptions

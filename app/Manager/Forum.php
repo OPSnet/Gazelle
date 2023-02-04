@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Forum extends \Gazelle\BaseManager {
-
     protected const CACHE_TOC_MAIN   = 'forum_toc_main';
     protected const CACHE_LIST       = 'forum_list';
     protected const CACHE_TRANSITION = 'forum_transition';
@@ -82,7 +81,6 @@ class Forum extends \Gazelle\BaseManager {
     /**
      * The forum table of contents (the main /forums.php view)
      *
-     * @return array
      *  - string category name "Community"
      *  containing an array of (one per forum):
      *    - int 'ID' Forum id
@@ -155,7 +153,7 @@ class Forum extends \Gazelle\BaseManager {
                 } else {
                     $lastReadPage = null;
                     $lastReadPost = null;
-                    $catchup = $f['LastPostTime'] ? $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']) : false;
+                    $catchup = $f['LastPostTime'] && $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
                     $isRead = false;
                 }
 
@@ -169,7 +167,7 @@ class Forum extends \Gazelle\BaseManager {
                     'category_id'      => $f['categoryId'],
                     'cut_title'        => shortenString($f['Title'] ?? '', 50, true),
                     'description'      => $f['ID'] == DONOR_FORUM
-                        ? DONOR_FORUM_DESCRIPTION[rand(0, count(DONOR_FORUM_DESCRIPTION) - 1)]
+                        ? DONOR_FORUM_DESCRIPTION[random_int(0, count(DONOR_FORUM_DESCRIPTION) - 1)]
                         : $f['Description'],
                     'forum'            => $forum,
                     'forum_id'         => $f['ID'],
@@ -241,6 +239,7 @@ class Forum extends \Gazelle\BaseManager {
     }
 
     public function forumTransitionList(\Gazelle\User $user) {
+        $info = [];
         $items = self::$cache->get_value(self::CACHE_TRANSITION);
         if (!$items) {
             $queryId = self::$db->get_query_id();
@@ -267,8 +266,8 @@ class Forum extends \Gazelle\BaseManager {
         $info['EffectiveClass']  = $user->effectiveClass();
         $info['ExtraClasses']    = array_keys((new \Gazelle\User\Privilege($user))->secondaryClassList());
         $info['Permissions']     = array_keys($user->info()['Permission']);
-        $info['ExtraClassesOff'] = array_flip(array_map(fn($i) => -$i, $info['ExtraClasses']));
-        $info['PermissionsOff']  = array_flip(array_map(fn($i) => "-$i", array_keys($user->info()['Permission'])));
+        $info['ExtraClassesOff'] = array_flip(array_map(fn ($i) => -$i, $info['ExtraClasses']));
+        $info['PermissionsOff']  = array_flip(array_map(fn ($i) => "-$i", array_keys($user->info()['Permission'])));
 
         return array_filter($items, function ($item) use ($info, $userId) {
             if (count(array_intersect_key($item['permission_levels'], $info['ExtraClassesOff'])) > 0) {
@@ -305,7 +304,7 @@ class Forum extends \Gazelle\BaseManager {
 
     public function threadTransitionList(\Gazelle\User $user, int $forumId): array {
         return array_filter($this->forumTransitionList($user),
-            function ($t) use ($forumId) {return $t['source'] === $forumId;}
+            fn ($t) => $t['source'] === $forumId
         );
     }
 

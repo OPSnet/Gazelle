@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class Blog extends \Gazelle\BaseManager {
-    const CACHE_KEY = 'blog';
-    const ID_KEY = 'zz_blog_%d';
+    final const CACHE_KEY = 'blog';
+    final const ID_KEY    = 'zz_blog_%d';
 
     public function flush(): Blog {
         self::$cache->delete_multi(['feed_blog', self::CACHE_KEY]);

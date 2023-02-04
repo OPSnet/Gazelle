@@ -3,12 +3,11 @@
 namespace Gazelle;
 
 class Login extends Base {
-
-    public const NO_ERROR = 0;
-    public const ERR_USERNAME    = 1;
-    public const ERR_PASSWORD    = 2;
-    public const ERR_CREDENTIALS = 3;
-    public const ERR_UNCONFIRMED = 4;
+    final public const NO_ERROR = 0;
+    final public const ERR_USERNAME    = 1;
+    final public const ERR_PASSWORD    = 2;
+    final public const ERR_CREDENTIALS = 3;
+    final public const ERR_UNCONFIRMED = 4;
 
     protected int $error = self::NO_ERROR;
     protected bool $persistent = false;

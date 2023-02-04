@@ -17,11 +17,10 @@ class ImageProxy {
     /**
      * Checks if a link's host is (not) good, otherwise displays an error.
      * @param string $url Link to an image
-     * @return string|null
      */
     public function badHost(string $url): ?string {
         foreach (IMAGE_HOST_BANNED as $host) {
-            if (stripos($url, $host) !== false) {
+            if (stripos($url, (string) $host) !== false) {
                 return $host;
             }
         }
@@ -35,7 +34,7 @@ class ImageProxy {
      * @param bool|number $UserID - user ID for avatars and donor icons
      * @return string
      */
-    public function process($url, $check = false, $UserID = false) {
+    public function process($url, bool|string $check = false, $UserID = false) {
         if (empty($url) || !$this->viewer->permitted('site_proxy_images')) {
             return $url;
         }

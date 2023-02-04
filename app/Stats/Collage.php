@@ -8,7 +8,7 @@ class Collage extends \Gazelle\Base {
             $count = self::$db->scalar("
                 SELECT count(*) FROM collages WHERE Deleted = '0'
             ");
-            self::$cache->cache_value('stats_collages', $count, 43200 + rand(0, 300));
+            self::$cache->cache_value('stats_collages', $count, 43200 + random_int(0, 300));
         }
         return $count;
     }

@@ -29,7 +29,7 @@ abstract class Task extends \Gazelle\Base {
 
     public function end(bool $sane): int {
         $elapsed = (microtime(true) - $this->startTime) * 1000;
-        $errorCount = count(array_filter($this->events, function ($event) { return $event->severity === 'error'; }));
+        $errorCount = count(array_filter($this->events, fn($event) => $event->severity === 'error'));
         self::$db->prepared_query('
             UPDATE periodic_task_history
             SET status = ?,

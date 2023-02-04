@@ -7,11 +7,9 @@ class Torrent extends AbstractAPI {
         switch ($_GET['req']) {
             case 'group':
                 return $this->tgroup((int)($_GET['group_id'] ?? 0));
-                break;
             default:
             case 'torrent':
                 return $this->torrent((int)($_GET['torrent_id'] ?? 0));
-                break;
         }
     }
 

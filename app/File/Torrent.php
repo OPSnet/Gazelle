@@ -3,7 +3,7 @@
 namespace Gazelle\File;
 
 class Torrent extends \Gazelle\File {
-    const STORAGE = STORAGE_PATH_TORRENT;
+    final const STORAGE = STORAGE_PATH_TORRENT;
 
     /**
      * Path of a torrent file

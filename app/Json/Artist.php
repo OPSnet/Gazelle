@@ -34,7 +34,7 @@ class Artist extends \Gazelle\Json {
                 continue;
             }
             $artists = $tgroup->artistRole()->legacyList();
-            $artists = isset($artists[1]) ? $artists[1] : null;
+            $artists = $artists[1] ?? null;
             $Found = $this->search_array($artists, 'id', $artistId);
             if ($this->releasesOnly && empty($Found)) {
                 continue;

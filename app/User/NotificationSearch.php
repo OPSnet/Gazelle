@@ -44,7 +44,7 @@ class NotificationSearch extends \Gazelle\BaseUser {
     }
 
     public function filterId(): ?int {
-        return isset($this->filterId) ? $this->filterId : null;
+        return $this->filterId ?? null;
     }
 
     public function pageSql(): string {

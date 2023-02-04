@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class ForumCategory extends BaseObject {
-    const CACHE_KEY = 'forum_cat_%d';
+    final const CACHE_KEY = 'forum_cat_%d';
 
     protected array $info;
 

@@ -3,10 +3,10 @@
 namespace Gazelle\User;
 
 class Bonus extends \Gazelle\BaseUser {
-    const CACHE_PURCHASE     = 'bonus_purchase_%d';
-    const CACHE_SUMMARY      = 'bonus_summary_%d';
-    const CACHE_HISTORY      = 'bonus_history_%d_%d';
-    const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
+    final const CACHE_PURCHASE     = 'bonus_purchase_%d';
+    final const CACHE_SUMMARY      = 'bonus_summary_%d';
+    final const CACHE_HISTORY      = 'bonus_history_%d_%d';
+    final const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
     public function flush(): Bonus {
         $this->user->flush();
@@ -68,7 +68,7 @@ class Bonus extends \Gazelle\BaseUser {
     public function getEffectivePrice(string $label): int {
         $item = $this->items()[$label];
         if (preg_match('/^collage-\d$/', $label)) {
-            return $item['Price'] * pow(2, $this->user->paidPersonalCollages());
+            return $item['Price'] * 2 ** $this->user->paidPersonalCollages();
         }
         return $this->user->effectiveClass() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
@@ -284,7 +284,7 @@ class Bonus extends \Gazelle\BaseUser {
                 VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
                 ", $this->user->id(), 'feature-seedbox'
             );
-        } catch (\Gazelle\DB\Mysql_DuplicateKeyException $e) {
+        } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
             // no point in buying a second time
             self::$db->rollback();
             return false;

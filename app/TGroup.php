@@ -3,15 +3,15 @@
 namespace Gazelle;
 
 class TGroup extends BaseObject {
-    const CACHE_KEY            = 'tg_%d';
-    const CACHE_TLIST_KEY      = 'tlist_%d';
-    const CACHE_COVERART_KEY   = 'tg_cover_%d';
-    const USER_RECENT_SNATCH   = 'u_recent_snatch_%d';
-    const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
-    const CACHE_REQUEST_TGROUP = 'req_tg_%d';
+    final const CACHE_KEY            = 'tg_%d';
+    final const CACHE_TLIST_KEY      = 'tlist_%d';
+    final const CACHE_COVERART_KEY   = 'tg_cover_%d';
+    final const USER_RECENT_SNATCH   = 'u_recent_snatch_%d';
+    final const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
+    final const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
-    const ARTIST_DISPLAY_TEXT = 1;
-    const ARTIST_DISPLAY_HTML = 2;
+    final const ARTIST_DISPLAY_TEXT = 1;
+    final const ARTIST_DISPLAY_HTML = 2;
 
     protected int   $revisionId = 0;
     protected bool  $showFallbackImage = true;
@@ -112,6 +112,16 @@ class TGroup extends BaseObject {
         if (self::$db->has_results()) {
             self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), self::$db->collect(0, false)));
         }
+        return $this;
+    }
+
+    public function touch(): TGroup {
+        self::$db->prepared_query('
+            UPDATE torrents_group SET
+                Time = now()
+            WHERE ID = ?
+            ', $this->id
+        );
         return $this;
     }
 

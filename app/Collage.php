@@ -10,9 +10,9 @@ class Collage extends BaseObject {
      * (artists or torrent groups).
      */
 
-    const CACHE_KEY    = 'collagev2_%d';
-    const SUBS_KEY     = 'collage_subs_user_%d';
-    const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
+    final const CACHE_KEY    = 'collagev2_%d';
+    final const SUBS_KEY     = 'collage_subs_user_%d';
+    final const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
     protected bool  $lockedForUser = false;
     protected array $userSubscriptions;
@@ -153,8 +153,7 @@ class Collage extends BaseObject {
     }
 
     public function toggleSubscription(int $userId) {
-        $qid = self::$db->get_query_id();
-        $delta = 0;
+        self::$db->get_query_id();
         if (self::$db->scalar("
             SELECT 1
             FROM users_collage_subs
@@ -178,18 +177,16 @@ class Collage extends BaseObject {
             );
             $delta = 1;
         }
-        if ($delta !== 0) {
-            self::$db->prepared_query("
-                UPDATE collages SET
-                    Subscribers = greatest(0, Subscribers + ?)
-                WHERE ID = ?
-                ", $delta, $this->id
-            );
-            self::$cache->delete_multi([
-                sprintf(self::SUBS_KEY, $userId),
-                sprintf(self::SUBS_NEW_KEY, $userId),
-            ]);
-        }
+        self::$db->prepared_query("
+            UPDATE collages SET
+                Subscribers = greatest(0, Subscribers + ?)
+            WHERE ID = ?
+            ", $delta, $this->id
+        );
+        self::$cache->delete_multi([
+            sprintf(self::SUBS_KEY, $userId),
+            sprintf(self::SUBS_NEW_KEY, $userId),
+        ]);
         $qid = self::$db->get_query_id();
         return $this;
     }

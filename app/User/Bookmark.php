@@ -90,8 +90,7 @@ class Bookmark extends \Gazelle\BaseUser {
         $key = "bookmarks_group_ids_" . $this->user->id();
         $bookmarkList = self::$cache->get_value($key);
         $bookmarkList = false;
-        if ($bookmarkList === false) {
-            self::$db->prepared_query("
+        self::$db->prepared_query("
                 SELECT GroupID AS tgroup_id,
                     Sort       AS sequence,
                     `Time`     AS created
@@ -99,10 +98,9 @@ class Bookmark extends \Gazelle\BaseUser {
                 WHERE UserID = ?
                 ORDER BY Sort, `Time`
                 ", $this->user->id()
-            );
-            $bookmarkList = self::$db->to_array(false, MYSQLI_ASSOC, false);
-            self::$cache->cache_value($key, $bookmarkList, 3600);
-        }
+        );
+        $bookmarkList = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        self::$cache->cache_value($key, $bookmarkList, 3600);
         return $bookmarkList;
     }
 

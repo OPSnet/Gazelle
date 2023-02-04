@@ -15,14 +15,13 @@ use \Gazelle\Util\CacheVector;
  */
 
 class Snatch extends \Gazelle\BaseUser {
-
     // A power-of-2 size, to be balanced against how many rows a query on xbt_snatched could return
-    const RANGE     = 17;
-    const RANGE_BIT = 2 ** self::RANGE;
+    final const RANGE     = 17;
+    final const RANGE_BIT = 2 ** self::RANGE;
 
     // base the cache name of the size strategy
-    const CACHE_KEY    = 'u_snatch_' . self::RANGE . '_%d_%d';
-    const CACHE_EXPIRY = 2700;
+    final const CACHE_KEY    = 'u_snatch_' . self::RANGE . '_%d_%d';
+    final const CACHE_EXPIRY = 2700;
 
     protected array $snatchVec = [];
 
@@ -37,7 +36,6 @@ class Snatch extends \Gazelle\BaseUser {
         $offset = (int)floor($torrentId / self::RANGE_BIT);
         if (!isset($this->snatchVec[$offset])) {
             $vector = new CacheVector(sprintf(self::CACHE_KEY, $this->user->id(), $offset), self::RANGE_BIT / 8, self::CACHE_EXPIRY);
-            $total = -1;
             if ($vector->isEmpty()) {
                 // the vector contents might have been cached, but if not, only we know how to initialize it
                 $this->load($offset, $vector);

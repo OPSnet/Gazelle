@@ -3,10 +3,10 @@
 namespace Gazelle\Search;
 
 class Torrent {
-    const TAGS_ANY = 0;
-    const TAGS_ALL = 1;
-    const SPH_BOOL_AND = ' ';
-    const SPH_BOOL_OR = ' | ';
+    final const TAGS_ANY = 0;
+    final const TAGS_ALL = 1;
+    final const SPH_BOOL_AND = ' ';
+    final const SPH_BOOL_OR = ' | ';
 
     /**
      * Map of sort mode => attribute name for ungrouped torrent page
@@ -23,7 +23,7 @@ class Torrent {
     /**
      * Map of sort mode => attribute name for grouped torrent page
      */
-    private static $SortOrdersGrouped = [
+    private static array $SortOrdersGrouped = [
         'year' => 'year',
         'time' => 'id',
         'size' => 'maxsize',
@@ -35,7 +35,7 @@ class Torrent {
     /**
      * Map of sort mode => aggregate expression required for some grouped sort orders
      */
-    private static $AggregateExp = [
+    private static array $AggregateExp = [
         'size' => 'MAX(size) AS maxsize',
         'seeders' => 'SUM(seeders) AS sumseeders',
         'leechers' => 'SUM(leechers) AS sumleechers',
@@ -44,7 +44,7 @@ class Torrent {
     /**
      * Map of attribute name => global variable name with list of values that can be used for filtering
      */
-    private static $Attributes = [
+    private static array $Attributes = [
         'filter_cat' => false,
         'releasetype' => 'ReleaseTypes',
         'freetorrent' => false,
@@ -57,7 +57,7 @@ class Torrent {
     /**
      * List of fields that can be used for fulltext searches
      */
-    private static $Fields = [
+    private static array $Fields = [
         'artistname' => 1,
         'cataloguenumber' => 1,
         'description' => 1,
@@ -77,7 +77,7 @@ class Torrent {
     /**
      * List of torrent-specific fields that can be used for filtering
      */
-    private static $TorrentFields = [
+    private static array $TorrentFields = [
         'description' => 1,
         'encoding' => 1,
         'filelist' => 1,
@@ -91,13 +91,13 @@ class Torrent {
     /**
      * Some form field names don't match the ones in the index
      */
-    private static $FormsToFields = [
+    private static array $FormsToFields = [
         'searchstr' => '(groupname,artistname,yearfulltext)'];
 
     /**
      * Specify the operator type to use for fields. Empty key sets the default
      */
-    private static $FieldOperators = [
+    private static array $FieldOperators = [
         '' => self::SPH_BOOL_AND,
         'encoding' => self::SPH_BOOL_OR,
         'format' => self::SPH_BOOL_OR,
@@ -106,7 +106,7 @@ class Torrent {
     /**
      * Specify the separator character to use for fields. Empty key sets the default
      */
-    private static $FieldSeparators = [
+    private static array $FieldSeparators = [
         '' => ' ',
         'encoding' => '|',
         'format' => '|',
@@ -116,20 +116,20 @@ class Torrent {
     /**
      * Primary SphinxqlQuery object used to get group IDs or torrent IDs for ungrouped searches
      */
-    private $SphQL;
+    private readonly \SphinxqlQuery $SphQL;
 
     /**
      * Second SphinxqlQuery object used to get torrent IDs if torrent-specific fulltext filters are used
      */
-    private $SphQLTor;
+    private ?\SphinxqlQuery $SphQLTor = null;
 
     /**
      * Ordered result array or false if query resulted in an error
      */
-    private $SphResults;
+    private bool|array|null $SphResults = null;
 
     private int $Page;
-    private int $PageSize;
+    private readonly int $PageSize;
     private int $NumResults = 0;
     private array $Groups = [];
 
@@ -175,7 +175,7 @@ class Torrent {
      */
     private array $UsedTorrentFields = [];
 
-    private bool $GroupResults;
+    private readonly bool $GroupResults;
 
     /**
      * Initialize and configure a Search\Torrent object
@@ -352,7 +352,7 @@ class Torrent {
      * @param string $Attribute Name of the attribute to filter against
      * @param mixed $Value The filter's condition for a match
      */
-    private function process_attribute($Attribute, $Value) {
+    private function process_attribute($Attribute, mixed $Value) {
         if ($Value === '') {
             return;
         }
@@ -413,8 +413,8 @@ class Torrent {
                 break;
 
             case 'releasetype':
-                $id = (new \Gazelle\ReleaseType)->findIdByName($Value);
-                if ($id !== false) {
+                $id = (int)$Value;
+                if (!is_null((new \Gazelle\ReleaseType)->findNameById($id))) {
                     $this->SphQL->where('ReleaseType', $id);
                 }
                 break;
@@ -424,8 +424,8 @@ class Torrent {
                     // Check if the submitted value can be converted to a valid one
                     $ValidValuesVarname = self::$Attributes[$Attribute];
                     // This code is incomprehensible, I would like to kill the original dev
-                    global $$ValidValuesVarname;
-                    $ValidValues = array_map('strtolower', $$ValidValuesVarname);
+                    global ${$ValidValuesVarname};
+                    $ValidValues = array_map('strtolower', ${$ValidValuesVarname});
                     if (($Value = array_search(strtolower($Value), $ValidValues)) === false) {
                         // Force the query to return 0 results if value is still invalid
                         $Value = max(array_keys($ValidValues)) + 1;
@@ -596,7 +596,7 @@ class Torrent {
         if ($Word === '' || $Word === '-') {
             return;
         }
-        if ($Word[0] === '!' && strlen($Word) >= 2 && strpos($Word, '!', 1) === false) {
+        if ($Word[0] === '!' && strlen($Word) >= 2 && !str_contains(substr($Word, 1), '!')) {
             $this->Terms[$Field]['exclude'][] = $Word;
         } else {
             $this->Terms[$Field]['include'][] = $Word;
@@ -616,7 +616,7 @@ class Torrent {
      * @return string Unprocessed search terms
      */
     public function get_terms($Type) {
-        return isset($this->RawTerms[$Type]) ? $this->RawTerms[$Type] : '';
+        return $this->RawTerms[$Type] ?? '';
     }
 
     /**

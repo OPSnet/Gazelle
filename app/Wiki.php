@@ -57,8 +57,6 @@ class Wiki extends BaseObject {
 
     /**
      * Normalize an alias
-     * @param string $alias
-     * @return string
      */
     static public function normalizeAlias(string $alias): string {
         return trim(substr(preg_replace('/[^a-z0-9]/', '', strtolower(htmlentities(trim($alias)))), 0, 50));

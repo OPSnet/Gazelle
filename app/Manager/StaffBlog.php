@@ -79,7 +79,7 @@ class StaffBlog extends \Gazelle\Base {
                 ORDER BY Time DESC
             ");
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-            self::$cache->cache_value(self::CACHE_KEY, $list, 1209600);
+            self::$cache->cache_value(self::CACHE_KEY, $list, 1_209_600);
         }
         return $list;
     }

@@ -437,7 +437,7 @@ class Request extends BaseObject {
         );
         $raw = self::$db->to_array();
         $list = [];
-        foreach ($raw as list($artistId, $artistName, $role)) {
+        foreach ($raw as [$artistId, $artistName, $role]) {
             $list[$role][] = ['id' => $artistId, 'name' => $artistName];
         }
         self::$cache->cache_value($key, $list, 0);

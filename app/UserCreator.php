@@ -227,7 +227,6 @@ class UserCreator extends Base {
 
     /**
      * Set the initial admin comment. Not mandatory for creation
-     * @param string $adminComment
      */
     public function setAdminComment(string $adminComment) {
         $this->adminComment[] = trim($adminComment);
@@ -240,8 +239,6 @@ class UserCreator extends Base {
      * the email will be taken from the invitation. (Corollary: if an
      * invitation was used, calling this method afterwards will override
      * the invitation email).
-     *
-     * @param string $email
      */
     public function setEmail(string $email) {
         $this->email[] = trim($email);
@@ -263,7 +260,6 @@ class UserCreator extends Base {
 
     /**
      * Set the invite key (only required if this is a creation via an invitation)
-     * @param string $inviteKey
      */
     public function setInviteKey(string $inviteKey) {
         $this->inviteKey = trim($inviteKey);
@@ -272,7 +268,6 @@ class UserCreator extends Base {
 
     /**
      * Set the user IPv4 address.
-     * @param string $ipaddr
      */
     public function setIpaddr(string $ipaddr) {
         $this->ipaddr = trim($ipaddr);
@@ -281,7 +276,6 @@ class UserCreator extends Base {
 
     /**
      * Set the password. Will be hashed before being stored.
-     * @param string $password
      */
     public function setPassword(#[\SensitiveParameter] string $password) {
         $this->passHash = self::hashPassword($password);
@@ -290,7 +284,6 @@ class UserCreator extends Base {
 
     /**
      * Set the username.
-     * @param string $username
      */
     public function setUsername(string $username) {
         if (preg_match('/^' . str_replace('/', '', USERNAME_REGEXP) . '$/', trim($username), $match)) {

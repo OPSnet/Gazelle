@@ -3,8 +3,7 @@
 namespace Gazelle\Stats;
 
 class Economic extends \Gazelle\Base {
-
-    const CACHE_KEY = 'stats_economic';
+    final const CACHE_KEY = 'stats_economic';
 
     protected array $info;
 

@@ -3,9 +3,6 @@
 namespace Gazelle\API;
 
 class Forum extends AbstractAPI {
-    private $fid = null;
-    private $tid = null;
-
     public function run() {
         if (!isset($_GET['topic_id'])) {
             json_error('Missing topic id');
@@ -27,7 +24,6 @@ class Forum extends AbstractAPI {
         if (!self::$db->has_results()) {
             json_error('Topic not found');
         }
-        $thread = self::$db->next_record(MYSQLI_ASSOC, false);
-        return $thread;
+        return self::$db->next_record(MYSQLI_ASSOC, false);
     }
 }

@@ -126,7 +126,6 @@ if ($tagLeaderboard) {
 <?php
 if (count($Artist->groupIds()) > 1000) {
     // prevent OOMs
-    $Cache->disableLocalCache();
     $DB->disableQueryLog();
 }
 $artistReleaseType = [];

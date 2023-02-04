@@ -39,7 +39,7 @@ class Inbox extends BaseUser {
     }
 
     public function searchTerm(): ?string {
-        return isset($this->searchTerm) ? $this->searchTerm : null;
+        return $this->searchTerm ?? null;
     }
 
     public function showUnreadFirst(): bool {
@@ -92,34 +92,24 @@ class Inbox extends BaseUser {
             $cond[] = "cu.InInbox = '1'";
         }
         if (isset($this->searchField) && isset($this->searchTerm) && !empty($this->searchTerm)) {
-            switch($this->searchField) {
-                case 'subject':
-                    $cond[] = "c.Subject LIKE concat('%', ?, '%')";
-                    break;
-                case 'user':
-                    $cond[] = 'um.Username = ?';
-                    break;
-                case 'message':
-                    $cond[] = "pm.Body LIKE concat('%', ?, '%')";
-                    break;
-                default:
-                    throw new \UnexpectedValueException($this->searchField);
-                    break;
-            }
+            $cond[] = match ($this->searchField) {
+                'subject' => "c.Subject LIKE concat('%', ?, '%')",
+                'user'    => 'um.Username = ?',
+                'message' => "pm.Body LIKE concat('%', ?, '%')",
+                default   => '1 = 0',
+            };
             $args[] = $this->searchTerm;
         }
         if (isset($this->filter)) {
             switch($this->filter) {
-                case 'all':
-                    break;
                 case 'system':
                     $cond[] = "cu2.UserID IS NULL";
                     break;
                 case 'user':
                     $cond[] = "cu2.UserID IS NOT NULL";
                     break;
+                case 'all':
                 default:
-                    throw new \UnexpectedValueException($this->filter);
                     break;
             }
         }

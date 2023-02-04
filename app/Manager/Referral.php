@@ -8,16 +8,16 @@ use Gazelle\Util\Proxy;
 
 class Referral extends \Gazelle\Base {
     private $accounts;
-    private $proxy;
+    private readonly \Gazelle\Util\Proxy $proxy;
 
     public $readOnly;
 
-    const CACHE_ACCOUNTS = 'referral_accounts';
-    const CACHE_BOUNCER = 'bouncer_status';
+    final const CACHE_ACCOUNTS = 'referral_accounts';
+    final const CACHE_BOUNCER = 'bouncer_status';
     // Do not change the ordering in this array after launch.
-    const ACCOUNT_TYPES = ['Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP'];
+    final const ACCOUNT_TYPES = ['Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP'];
     // Accounts which use the user ID instead of username.
-    const ID_TYPES = [3, 4, 5];
+    final const ID_TYPES = [3, 4, 5];
 
     public function __construct() {
         $this->accounts = self::$cache->get_value(self::CACHE_ACCOUNTS);
@@ -77,7 +77,7 @@ class Referral extends \Gazelle\Base {
 
     public function getActiveAccounts() {
         return array_filter($this->accounts,
-            function ($i) { return $i['Active'] == '1' && !$this->readOnly; });
+            fn($i) => $i['Active'] == '1' && !$this->readOnly);
     }
 
     public function getAccount($id) {
@@ -278,24 +278,15 @@ class Referral extends \Gazelle\Base {
         );
     }
 
-    public function validateCookie($acc) {
-        switch ($acc["Type"]) {
-            case 0:
-                return $this->validateGazelleCookie($acc);
-                break;
-            case 1:
-                return true;
-                break;
-            case 2:
-                return $this->validateTentacleCookie($acc);
-                break;
-            case 3:
-            case 4:
-            case 5:
-                return $this->validateLuminanceCookie($acc);
-                break;
-        }
-        return false;
+    public function validateCookie($acc)
+    {
+        return match ($acc["Type"]) {
+            0 => $this->validateGazelleCookie($acc),
+            1 => true,
+            2 => $this->validateTentacleCookie($acc),
+            3, 4, 5 => $this->validateLuminanceCookie($acc),
+            default => false,
+        };
     }
 
     private function validateGazelleCookie($acc) {
@@ -317,28 +308,17 @@ class Referral extends \Gazelle\Base {
         return str_contains($result["response"], "authkey");
     }
 
-    public function loginAccount(&$acc) {
-        switch ($acc["Type"]) {
-            case 0:
-                return $this->loginGazelleAccount($acc);
-                break;
-            case 1:
-                return true;
-                break;
-            case 2:
-                return $this->loginTentacleAccount($acc);
-                break;
-            case 3:
-                return $this->loginLuminanceAccount($acc);
-                break;
-            case 4:
-                return $this->loginGazelleHTMLAccount($acc);
-                break;
-            case 5:
-                return $this->loginPTPAccount($acc);
-                break;
-        }
-        return false;
+    public function loginAccount(&$acc)
+    {
+        return match ($acc["Type"]) {
+            0 => $this->loginGazelleAccount($acc),
+            1 => true,
+            2 => $this->loginTentacleAccount($acc),
+            3 => $this->loginLuminanceAccount($acc),
+            4 => $this->loginGazelleHTMLAccount($acc),
+            5 => $this->loginPTPAccount($acc),
+            default => false,
+        };
     }
 
     private function loginGazelleAccount(&$acc) {
@@ -440,28 +420,17 @@ class Referral extends \Gazelle\Base {
         return $result["status"] == 200;
     }
 
-    public function verifyAccount($acc, $user, $key) {
-        switch ($acc["Type"]) {
-            case 0:
-                return $this->verifyGazelleAccount($acc, $user, $key);
-                break;
-            case 1:
-                return $this->verifyGGNAccount($acc, $user, $key);
-                break;
-            case 2:
-                return $this->verifyTentacleAccount($acc, $user, $key);
-                break;
-            case 3:
-                return $this->verifyLuminanceAccount($acc, $user, $key);
-                break;
-            case 4:
-                return $this->verifyGazelleHTMLAccount($acc, $user, $key);
-                break;
-            case 5:
-                return $this->verifyPTPAccount($acc, $user, $key);
-                break;
-        }
-        return "Unrecognised account type";
+    public function verifyAccount($acc, $user, $key)
+    {
+        return match ($acc["Type"]) {
+            0 => $this->verifyGazelleAccount($acc, $user, $key),
+            1 => $this->verifyGGNAccount($acc, $user, $key),
+            2 => $this->verifyTentacleAccount($acc, $user, $key),
+            3 => $this->verifyLuminanceAccount($acc, $user, $key),
+            4 => $this->verifyGazelleHTMLAccount($acc, $user, $key),
+            5 => $this->verifyPTPAccount($acc, $user, $key),
+            default => "Unrecognised account type",
+        };
     }
 
     private function verifyGazelleAccount($acc, $user, $key) {

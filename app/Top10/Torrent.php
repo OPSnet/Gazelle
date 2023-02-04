@@ -34,13 +34,9 @@ class Torrent extends \Gazelle\Base {
 
         $where[] = ["parameters" => null, "where" => "tls.Seeders > 0"];
 
-        $whereFilter = function($value) {
-            return $value["where"] ?? null;
-        };
+        $whereFilter = fn($value) => $value["where"] ?? null;
 
-        $parameterFilter = function($value) {
-            return $value["parameters"] ?? null;
-        };
+        $parameterFilter = fn($value) => $value["parameters"] ?? null;
 
         $filteredWhere = array_filter(array_map($whereFilter, $where));
         $parameters = $this->flatten(array_filter(array_map($parameterFilter, $where)));
@@ -62,7 +58,7 @@ class Torrent extends \Gazelle\Base {
 
         $innerQuery .= " WHERE " . implode(" AND ", $filteredWhere);
         $innerQuery = $innerQuery . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
-        $orderBy = 'ORDER BY ' . $this->orderBy($details) . ' DESC';
+        $orderBy = $this->orderBy($details);
 
         $query = sprintf($this->baseQuery,
             $innerQuery,
@@ -87,47 +83,29 @@ class Torrent extends \Gazelle\Base {
     }
 
     private function orderBy($details) {
-        switch($details) {
-            case 'snatched':
-                return 'tls.Snatched';
-                break;
-            case 'seeded':
-                return 'tls.Seeders';
-                break;
-            case 'data':
-                return 'Data';
-                break;
-            default:
-                return '(tls.Seeders + tls.Leechers)';
-                break;
-        }
+        return match ($details) {
+            'snatched' => 'tls.Snatched',
+            'seeded' => 'tls.Seeders',
+            'data' => 'Data',
+            default => '(tls.Seeders + tls.Leechers)',
+        };
     }
 
     private function detailsWhere($detailsParameters) {
-        switch($detailsParameters) {
-            case 'day':
-                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 DAY"];
-                break;
-            case 'week':
-                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 WEEK"];
-                break;
-            case 'month':
-                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 MONTH"];
-                break;
-            case 'year':
-                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 YEAR"];
-                break;
-            default:
-                return [];
-                break;
-        }
+        return match ($detailsParameters) {
+            'day' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 DAY"],
+            'week' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 WEEK"],
+            'month' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 MONTH"],
+            'year' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 YEAR"],
+            default => [],
+        };
     }
 
     private function excludedArtistClause($artistParameter) {
         if (!empty($artistParameter)) {
             $artists = preg_split('/\r\n|\r|\n/', trim($artistParameter));
 
-            $artistPrepare = function($artist) { return trim($artist); };
+            $artistPrepare = fn($artist) => trim($artist);
             $artists = array_map($artistPrepare, $artists);
 
             $sql = "
@@ -167,7 +145,7 @@ class Torrent extends \Gazelle\Base {
     private function tagWhere($getParameters, $any = false) {
         if (!empty($getParameters)) {
             $tags = explode(',', trim($getParameters));
-            $replace = function($tag) { return preg_replace('/[^a-z0-9.]/', '', $tag); };
+            $replace = fn($tag) => preg_replace('/[^a-z0-9.]/', '', $tag);
             $tags = array_map($replace, $tags);
             $tags = array_filter($tags);
 
@@ -196,7 +174,7 @@ class Torrent extends \Gazelle\Base {
         return $return;
     }
 
-    private $baseQuery = "
+    private string $baseQuery = "
         SELECT
             t.ID,
             g.ID,

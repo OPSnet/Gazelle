@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class ClientWhitelist extends \Gazelle\Base {
-    const CACHE_KEY = 'whitelisted_clients';
+    final const CACHE_KEY = 'whitelisted_clients';
 
     /**
      * Get the peer ID of client

@@ -3,8 +3,8 @@
 namespace Gazelle\File;
 
 class RipLog extends \Gazelle\File {
-    const STORAGE = STORAGE_PATH_RIPLOG;
-    const STORAGE_LEGACY = SERVER_ROOT_LIVE . '/logs';
+    final const STORAGE = STORAGE_PATH_RIPLOG;
+    final const STORAGE_LEGACY = SERVER_ROOT_LIVE . '/logs';
 
     /**
      * Move an existing rip log to the file storage location.

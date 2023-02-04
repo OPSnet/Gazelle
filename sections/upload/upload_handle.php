@@ -530,14 +530,8 @@ $LogName .= $Properties['Title'];
 $Debug->set_flag('upload: database begin transaction');
 $DB->begin_transaction();
 
-if (!$IsNewGroup) {
-    $DB->prepared_query('
-        UPDATE torrents_group SET
-            Time = now()
-        WHERE ID = ?
-        ', $Properties['GroupID']
-    );
-    $tgroup = $tgMan->findById($Properties['GroupID']);
+if ($tgroup) {
+    $tgroup->touch();
 } else {
     $tgroup = $tgMan->create(
         categoryId:      $categoryId,
@@ -824,7 +818,7 @@ if (defined('AJAX')) {
         ->addUser($Viewer)
         ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
 
-    if (isset($releaseTypes[$Properties['ReleaseType']])) {
+    if ($isMusicUpload) {
         $notification->addReleaseType($releaseTypes[$Properties['ReleaseType']]);
     }
 

@@ -3,14 +3,14 @@
 namespace Gazelle\Search;
 
 class Email extends \Gazelle\Base {
-    public const ASC = 0;
-    public const DESC = 1;
+    final public const ASC = 0;
+    final public const DESC = 1;
 
-    public const EMAIL   = 0;
-    public const USER    = 1;
-    public const JOINED  = 2;
-    public const CHANGED = 3;
-    public const IP      = 4;
+    final public const EMAIL   = 0;
+    final public const USER    = 1;
+    final public const JOINED  = 2;
+    final public const CHANGED = 3;
+    final public const IP      = 4;
 
     protected string $name;
     protected int $column = 0;

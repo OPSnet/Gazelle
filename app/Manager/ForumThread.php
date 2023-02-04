@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class ForumThread extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_ft_%d';
 
     /**
@@ -48,7 +47,7 @@ class ForumThread extends \Gazelle\BaseManager {
             ", $forum->id(), $title, $userId, $userId
         );
         $thread = $this->findById(self::$db->inserted_id());
-        $postId = $thread->addPost($userId, $body);
+        $thread->addPost($userId, $body);
         $db->relaxConstraints(false);
         (new \Gazelle\Stats\User($userId))->increment('forum_thread_total');
         $forum->flush();

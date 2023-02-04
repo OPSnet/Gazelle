@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class ForumPoll extends BaseObject {
-    const CACHE_KEY = 'forum_poll_%d';
+    final const CACHE_KEY = 'forum_poll_%d';
 
     public function flush(): ForumPoll {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
@@ -226,10 +226,6 @@ class ForumPoll extends BaseObject {
                 ", $this->id
             );
             $affected += self::$db->affected_rows();
-            $Featured = self::$db->scalar("
-                SELECT Featured FROM forums_polls WHERE TopicID = ?
-                ", $this->id
-            );
             self::$cache->cache_value('polls_featured', $this->id, 0);
         }
 

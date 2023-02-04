@@ -3,8 +3,7 @@
 namespace Gazelle\Manager;
 
 class SiteOption extends \Gazelle\Base {
-
-    const CACHE_KEY = 'site_option_%s';
+    final const CACHE_KEY = 'site_option_%s';
 
     public function findValueByName(string $name): string {
         $key = sprintf(self::CACHE_KEY, $name);
@@ -48,7 +47,7 @@ class SiteOption extends \Gazelle\Base {
                 VALUES (?,    ?,     ?)
                 ', $name, $value, $comment
             );
-        } catch (\Gazelle\DB\Mysql_DuplicateKeyException $e) {
+        } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
             return null;
         }
         self::$cache->cache_value(sprintf(self::CACHE_KEY, $name), $value);

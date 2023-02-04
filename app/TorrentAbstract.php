@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 abstract class TorrentAbstract extends BaseObject {
-    const CACHE_KEY = 't_%d';
+    public const CACHE_KEY = 't_%d';
 
     protected TGroup $tgroup;
     protected User   $viewer;
@@ -151,8 +151,8 @@ abstract class TorrentAbstract extends BaseObject {
         }
         if ($this->isRemastered()) {
             $edition = [
-                $this->remasterRecordLabel() ?? $tgroup->recordLabel(),
-                $this->remasterCatalogueNumber() ?? $tgroup->catalogueNumber(),
+                $this->remasterRecordLabel(),
+                $this->remasterCatalogueNumber(),
                 $this->remasterTitle(),
             ];
         } elseif ($tgroup->recordLabel() || $tgroup->catalogueNumber()) {
@@ -191,7 +191,7 @@ abstract class TorrentAbstract extends BaseObject {
                 'ext'  => $match[1] ?? null,
                 'size' => (int)$match[2] ?? 0,
                 // transform leading blanks into hard blanks so that it shows up in HTML
-                'name' => preg_replace_callback('/^(\s+)/', function ($s) { return str_repeat('&nbsp;', strlen($s[1])); }, $match[3] ?? ''),
+                'name' => preg_replace_callback('/^(\s+)/', fn($s) => str_repeat('&nbsp;', strlen($s[1])), $match[3] ?? ''),
             ];
         }
         return [

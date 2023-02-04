@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 abstract class AbstractNotification extends \Gazelle\BaseUser {
-
     protected int    $context; // id of a table row
     protected string $display;
     protected string $title;
@@ -14,7 +13,7 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
     abstract public function load(): bool;
 
     public function context(): int {
-        return isset($this->context) ? $this->context : 0;
+        return $this->context ?? 0;
     }
 
     public function setDisplay(string $display): AbstractNotification {
@@ -31,7 +30,7 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
     }
 
     public function type(): string {
-        $path = explode('\\', get_class($this));
+        $path = explode('\\', static::class);
         return end($path); // silence "Only variables should be passed by reference"
     }
 

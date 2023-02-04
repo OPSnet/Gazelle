@@ -47,8 +47,8 @@ class Upload extends \Gazelle\Base {
             if (!empty($guestName)) {
                 $this->cond[] = "unf.ExcludeVA = '0'";
             }
-            $all = array_merge($mainName, $guestName);
-            $this->cond[] = "(" . implode(' OR ', array_merge(["unf.Artists = ''"], array_fill(0, count($all), "unf.Artists LIKE concat('%|', ?, '|%')"))) . ")";
+            $all = [...$mainName, ...$guestName];
+            $this->cond[] = "(" . implode(' OR ', [...["unf.Artists = ''"], ...array_fill(0, count($all), "unf.Artists LIKE concat('%|', ?, '|%')")]) . ")";
             $this->args = array_merge($this->args, $all);
         }
         return $this;

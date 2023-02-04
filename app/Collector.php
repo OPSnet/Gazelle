@@ -41,8 +41,8 @@ ORDER BY t.GroupID ASC, sequence DESC, tls.Seeders ASC
 */
 
 abstract class Collector extends Base  {
-    const CHUNK_SIZE = 100;
-    const ORDER_BY = ['t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC'];
+    final const CHUNK_SIZE = 100;
+    final const ORDER_BY = ['t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC'];
 
     protected $sql  = '';
     protected $args = [];
@@ -69,7 +69,6 @@ abstract class Collector extends Base  {
         protected readonly string $title,
         protected readonly int $orderBy,
     ) {
-        self::$cache->disableLocalCache(); // The internal cache is almost completely useless for this
         $this->startTime = microtime(true);
 
         $options = new \ZipStream\Option\Archive;
@@ -99,40 +98,40 @@ abstract class Collector extends Base  {
                     continue;
                 }
                 $sql .= 'WHEN ';
-                switch ($Selection) {
-                    case '00': $sql .= "t.Format = 'MP3'  AND t.Encoding = 'V0 (VBR)'"; break;
-                    case '01': $sql .= "t.Format = 'MP3'  AND t.Encoding = 'APX (VBR)'"; break;
-                    case '02': $sql .= "t.Format = 'MP3'  AND t.Encoding = '256 (VBR)'"; break;
-                    case '03': $sql .= "t.Format = 'MP3'  AND t.Encoding = 'V1 (VBR)'"; break;
-                    case '10': $sql .= "t.Format = 'MP3'  AND t.Encoding = '224 (VBR)'"; break;
-                    case '11': $sql .= "t.Format = 'MP3'  AND t.Encoding = 'V2 (VBR)'"; break;
-                    case '12': $sql .= "t.Format = 'MP3'  AND t.Encoding = 'APS (VBR)'"; break;
-                    case '13': $sql .= "t.Format = 'MP3'  AND t.Encoding = '192 (VBR)'"; break;
-                    case '20': $sql .= "t.Format = 'MP3'  AND t.Encoding = '320'"; break;
-                    case '21': $sql .= "t.Format = 'MP3'  AND t.Encoding = '256'"; break;
-                    case '22': $sql .= "t.Format = 'MP3'  AND t.Encoding = '224'"; break;
-                    case '23': $sql .= "t.Format = 'MP3'  AND t.Encoding = '192'"; break;
-                    case '24': $sql .= "t.Format = 'MP3'  AND t.Encoding = '160'"; break;
-                    case '25': $sql .= "t.Format = 'MP3'  AND t.Encoding = '128'"; break;
-                    case '26': $sql .= "t.Format = 'MP3'  AND t.Encoding = '96'"; break;
-                    case '27': $sql .= "t.Format = 'MP3'  AND t.Encoding = '64'"; break;
-                    case '30': $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'Vinyl'"; break;
-                    case '31': $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'DVD'"; break;
-                    case '32': $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'SACD'"; break;
-                    case '33': $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'WEB'"; break;
-                    case '34': $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1' AND LogScore = '100' AND HasCue = '1'"; break;
-                    case '35': $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1' AND LogScore = '100'"; break;
-                    case '36': $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1'"; break;
-                    case '37': $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND t.Media = 'WEB'"; break;
-                    case '38': $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless'"; break;
-                    case '40': $sql .= "t.Format = 'DTS'"; break;
-                    case '42': $sql .= "t.Format = 'AAC'  AND t.Encoding = '320'"; break;
-                    case '43': $sql .= "t.Format = 'AAC'  AND t.Encoding = '256'"; break;
-                    case '44': $sql .= "t.Format = 'AAC'  AND t.Encoding = 'q5.5'"; break;
-                    case '45': $sql .= "t.Format = 'AAC'  AND t.Encoding = 'q5'"; break;
-                    case '46': $sql .= "t.Format = 'AAC'  AND t.Encoding = '192'"; break;
-                    default: error(0);
-                }
+                match ($Selection) {
+                    '00' => $sql .= "t.Format = 'MP3'  AND t.Encoding = 'V0 (VBR)'",
+                    '01' => $sql .= "t.Format = 'MP3'  AND t.Encoding = 'APX (VBR)'",
+                    '02' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '256 (VBR)'",
+                    '03' => $sql .= "t.Format = 'MP3'  AND t.Encoding = 'V1 (VBR)'",
+                    '10' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '224 (VBR)'",
+                    '11' => $sql .= "t.Format = 'MP3'  AND t.Encoding = 'V2 (VBR)'",
+                    '12' => $sql .= "t.Format = 'MP3'  AND t.Encoding = 'APS (VBR)'",
+                    '13' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '192 (VBR)'",
+                    '20' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '320'",
+                    '21' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '256'",
+                    '22' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '224'",
+                    '23' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '192'",
+                    '24' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '160'",
+                    '25' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '128'",
+                    '26' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '96'",
+                    '27' => $sql .= "t.Format = 'MP3'  AND t.Encoding = '64'",
+                    '30' => $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'Vinyl'",
+                    '31' => $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'DVD'",
+                    '32' => $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'SACD'",
+                    '33' => $sql .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'WEB'",
+                    '34' => $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1' AND LogScore = '100' AND HasCue = '1'",
+                    '35' => $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1' AND LogScore = '100'",
+                    '36' => $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND HasLog = '1'",
+                    '37' => $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless' AND t.Media = 'WEB'",
+                    '38' => $sql .= "t.Format = 'FLAC' AND t.Encoding = 'Lossless'",
+                    '40' => $sql .= "t.Format = 'DTS'",
+                    '42' => $sql .= "t.Format = 'AAC'  AND t.Encoding = '320'",
+                    '43' => $sql .= "t.Format = 'AAC'  AND t.Encoding = '256'",
+                    '44' => $sql .= "t.Format = 'AAC'  AND t.Encoding = 'q5.5'",
+                    '45' => $sql .= "t.Format = 'AAC'  AND t.Encoding = 'q5'",
+                    '46' => $sql .= "t.Format = 'AAC'  AND t.Encoding = '192'",
+                    default => error(0),
+                };
                 $sql .= "THEN $Priority ";
             }
             $sql .= "ELSE 100 END AS sequence, ";
@@ -245,7 +244,6 @@ abstract class Collector extends Base  {
      */
     public function emit() {
         $this->fill();
-        $folder = safeFilename($this->title);
         $this->zip->addFile("README.txt", $this->summary());
         if ($this->error) {
             $this->zip->addFile("ERRORS.txt", $this->errors());

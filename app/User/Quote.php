@@ -3,8 +3,7 @@
 namespace Gazelle\User;
 
 class Quote extends \Gazelle\BaseUser {
-
-    const UNREAD_QUOTE_KEY = 'u_unread_%d';
+    final const UNREAD_QUOTE_KEY = 'u_unread_%d';
 
     protected bool $showAll = false;
 
@@ -173,9 +172,9 @@ class Quote extends \Gazelle\BaseUser {
         $quoteList = self::$db->to_array(false, MYSQLI_ASSOC, false);
 
         $page = [];
-        $forumMan    = new \Gazelle\Manager\Forum;
+        new \Gazelle\Manager\Forum;
         $postMan     = new \Gazelle\Manager\ForumPost;
-        $releaseType = new \Gazelle\ReleaseType;
+        new \Gazelle\ReleaseType;
         $reqMan      = new \Gazelle\Manager\Request;
         $tgMan       = new \Gazelle\Manager\TGroup;
 

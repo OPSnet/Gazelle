@@ -6,11 +6,8 @@ use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 
 class AutoEnable extends \Gazelle\BaseUser {
-
     // Cache key to store the number of enable requests
-    const CACHE_TOTAL_OPEN = 'num_enable_requests';
-
-    protected int $id;
+    final const CACHE_TOTAL_OPEN = 'num_enable_requests';
     protected array $info;
 
     /**
@@ -20,9 +17,8 @@ class AutoEnable extends \Gazelle\BaseUser {
      * via the Gazelle\Manager\AutoEnable::find*() methods will take
      * care of this for you.
      */
-    public function __construct(int $id, \Gazelle\User $user) {
+    public function __construct(protected int $id, \Gazelle\User $user) {
         parent::__construct($user);
-        $this->id = $id;
     }
 
     public function id(): int {

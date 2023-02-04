@@ -49,20 +49,13 @@ class ReleaseType extends Base {
 
     public function sectionTitle(int $id): string {
         $title = $this->extendedList()[$id];
-        switch ($title) {
-            case 'Anthology':
-                return 'Anthologies';
-            case 'DJ Mix':
-                return 'DJ Mixes';
-            case 'Remix':
-                return 'Remixes';
-            case 'Compositions':
-            case 'Guest Appearances':
-            case 'Produced By':
-            case 'Remixed By':
-                return $title;
-            default:
-                return "{$title}s";
-        }
+        return match ($title) {
+            'Anthology' => 'Anthologies',
+            'DJ Mix'    => 'DJ Mixes',
+            'Remix'     => 'Remixes',
+            'Compositions', 'Guest Appearances', 'Produced By', 'Remixed By'
+                        => $title,
+            default     => "{$title}s",
+        };
     }
 }

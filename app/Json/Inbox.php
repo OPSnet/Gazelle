@@ -111,9 +111,9 @@ class Inbox extends \Gazelle\Json {
                 'senderId'      => $senderId,
                 'username'      => $senderId ? $user[$senderId]->username() : 'System',
                 'avatar'        => $senderId ? $user[$senderId]->avatar() : null,
-                'warned'        => $senderId ? $user[$senderId]->isWarned() : false,
-                'enabled'       => $senderId ? $user[$senderId]->isEnabled() : false,
-                'donor'         => $senderId ? (new \Gazelle\User\Privilege($user[$senderId]))->isDonor() : false,
+                'warned'        => $senderId && $user[$senderId]->isWarned(),
+                'enabled'       => $senderId && $user[$senderId]->isEnabled(),
+                'donor'         => $senderId && (new \Gazelle\User\Privilege($user[$senderId]))->isDonor(),
                 'date'          => $actionDate,
             ];
             self::$db->set_query_id($qid);

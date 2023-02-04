@@ -21,8 +21,6 @@ class Log extends Base {
     /**
      * Write a group entry
      *
-     * @param int $groupId
-     * @param int $userId
      * @param string $message
      */
     public function group(int $groupId, int $userId, $message) {
@@ -40,9 +38,6 @@ class Log extends Base {
     /**
      * Write a torrent entry
      *
-     * @param int $groupId
-     * @param int $torrentId
-     * @param int $userId
      * @param string $message
      */
     public function torrent(int $groupId, int $torrentId, int $userId, $message) {

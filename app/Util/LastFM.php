@@ -3,7 +3,6 @@
 namespace Gazelle\Util;
 
 class LastFM extends \Gazelle\Base {
-
     protected const LASTFM_API_URL = 'http://ws.audioscrobbler.com/2.0/?method=';
 
     public function artistEventList($ArtistID, $Artist, $Limit = 15) {
@@ -23,6 +22,7 @@ class LastFM extends \Gazelle\Base {
     }
 
     public function userInfo(\Gazelle\User $user): ?array {
+        $Reponse = [];
         $lastfmName = $this->username($user->id());
         if (is_null($lastfmName)) {
             return null;
@@ -145,6 +145,7 @@ class LastFM extends \Gazelle\Base {
     }
 
     protected function fetch(string $Method, array $Args) {
+        $curl = null;
         if (!LASTFM_API_KEY) {
             return false;
         }
@@ -155,18 +156,16 @@ class LastFM extends \Gazelle\Base {
             return false;
         }
         $Url = self::LASTFM_API_URL . $Method;
-        if (is_array($Args)) {
-            foreach ($Args as $Key => $Value) {
-                $Url .= "&$Key=" . urlencode($Value);
-            }
-            $Url .= "&format=json&api_key=" . LASTFM_API_KEY;
-            $curl = new Curl;
-            if ($curl->fetch($Url)) {
-                return json_decode($curl->result(), true);
-            } else {
-                self::$cache->cache_value($RecentFailsKey, $RecentFails + 1, 1800);
-                return false;
-            }
+        foreach ($Args as $Key => $Value) {
+            $Url .= "&$Key=" . urlencode($Value);
+        }
+        $Url .= "&format=json&api_key=" . LASTFM_API_KEY;
+        $curl = new Curl;
+        if ($curl->fetch($Url)) {
+            return json_decode($curl->result(), true);
+        } else {
+            self::$cache->cache_value($RecentFailsKey, $RecentFails + 1, 1800);
+            return false;
         }
     }
 }

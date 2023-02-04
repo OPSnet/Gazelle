@@ -5,7 +5,6 @@ namespace Gazelle\Manager;
 use Gazelle\Util\Mail;
 
 class Recovery extends \Gazelle\Base {
-
     public function findById(int $id): array {
         self::$db->prepared_query($this->candidateSql() . "
             WHERE m.ID = ? GROUP BY m.ID
@@ -44,7 +43,7 @@ class Recovery extends \Gazelle\Base {
         if (count($parts) != 2) {
             return null;
         }
-        list($lhs, $rhs) = $parts;
+        [$lhs, $rhs] = $parts;
         if ($rhs == 'gmail.com') {
             $lhs = str_replace('.', '', $lhs);
         }
@@ -98,7 +97,7 @@ class Recovery extends \Gazelle\Base {
         if ($file['size'] > 10 * 1024 * 1024) {
             return [false, "File was too large, please make sure it is less than 10MB in size."];
         }
-        $filename = sha1(RECOVERY_SALT . mt_rand(0, 10000000). sha1_file($file['tmp_name']));
+        $filename = sha1(RECOVERY_SALT . random_int(0, 10_000_000). sha1_file($file['tmp_name']));
         $destination = sprintf('%s/%s/%s/%s/%s',
             RECOVERY_PATH, substr($filename, 0, 1), substr($filename, 1, 1), substr($filename, 2, 1), $filename
         );
@@ -134,48 +133,36 @@ class Recovery extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    public function total(string $state, int $admin_id): int {
-        switch (strtoupper($state)) {
-            case 'CLAIMED':
-                return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id);
-                break;
-            case 'PENDING':
-                return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and (admin_user_id is null or admin_user_id != ?)", $state, $admin_id);
-                break;
-            default:
-                return self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ?", strtoupper($state));
-                break;
-        }
-        return 0;
+    public function total(string $state, int $admin_id): int
+    {
+        return match (strtoupper($state)) {
+            'CLAIMED' => self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id),
+            'PENDING' => self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and (admin_user_id is null or admin_user_id != ?)", $state, $admin_id),
+            default => self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ?", strtoupper($state)),
+        };
     }
 
     public function page(int $limit, int $offset, string $state, int $admin_id): array {
         $sql_header = 'SELECT recovery_id, username, token, email, announce, created_dt, updated_dt, state FROM recovery';
         $sql_footer = 'ORDER BY updated_dt DESC LIMIT ? OFFSET ?';
-        switch (strtoupper($state)) {
-            case 'CLAIMED':
-                self::$db->prepared_query("$sql_header
+        match (strtoupper($state)) {
+            'CLAIMED' => self::$db->prepared_query("$sql_header
                     WHERE admin_user_id = ?
                     $sql_footer
                     ", $admin_id, $limit, $offset
-                );
-                break;
-            case 'PENDING':
-                self::$db->prepared_query("$sql_header
+            ),
+            'PENDING' => self::$db->prepared_query("$sql_header
                     WHERE admin_user_id IS NULL
                         AND state = ?
                     $sql_footer
                     ", $state, $limit, $offset
-                );
-                break;
-            default:
-                self::$db->prepared_query("$sql_header
+            ),
+            default => self::$db->prepared_query("$sql_header
                     WHERE state = ?
                     $sql_footer
                     ", $state, $limit, $offset
-                );
-                break;
-        }
+            ),
+        };
         return self::$db->to_array();
     }
 
@@ -481,16 +468,16 @@ class Recovery extends \Gazelle\Base {
         self::$db->prepared_query($sql, RECOVERY_BUFFER_REASSIGN_LIMIT);
 
         $rescale = [
-            'member'        =>  10.0 * pow(1024, 3),
-            'poweruser'     =>  25.0 * pow(1024, 3),
-            'elite'         => 100.0 * pow(1024, 3),
-            'torrentmaster' => 500.0 * pow(1024, 3),
-            'powertm'       => 500.0 * pow(1024, 3),
-            'elitetm'       => 500.0 * pow(1024, 3)
+            'member'        =>  10.0 * 1024 ** 3,
+            'poweruser'     =>  25.0 * 1024 ** 3,
+            'elite'         => 100.0 * 1024 ** 3,
+            'torrentmaster' => 500.0 * 1024 ** 3,
+            'powertm'       => 500.0 * 1024 ** 3,
+            'elitetm'       => 500.0 * 1024 ** 3
         ];
 
         $results = self::$db->to_array();
-        foreach ($results as list($username, $siteUserId, $prevUserId, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass, $final)) {
+        foreach ($results as [$username, $siteUserId, $prevUserId, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass, $final]) {
             /* close the gate */
             self::$db->prepared_query(sprintf("
                 UPDATE %s.user_recovery_mapping

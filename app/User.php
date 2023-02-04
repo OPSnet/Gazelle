@@ -6,15 +6,15 @@ use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
 
 class User extends BaseObject {
-    const CACHE_KEY          = 'u2_%d';
-    const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
-    const CACHE_NOTIFY       = 'u_notify_%d';
-    const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
-    const USER_RECENT_UPLOAD = 'u_recent_up_%d';
+    final const CACHE_KEY          = 'u2_%d';
+    final const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
+    final const CACHE_NOTIFY       = 'u_notify_%d';
+    final const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
+    final const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
-    const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
+    final const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
-    const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
+    final const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
@@ -789,7 +789,6 @@ class User extends BaseObject {
      * Checks whether user has autocomplete enabled
      *
      * @param string $Type Where the is the input requested (search, other)
-     * @return boolean
      */
     public function hasAutocomplete($Type): bool {
         $autoComplete = $this->option('AutoComplete');
@@ -837,8 +836,6 @@ class User extends BaseObject {
     /**
      * Checks whether user has any overrides to a forum
      *
-     * @param int $forumId
-     * @param int $forumMinClassLevel
      * @return bool has access
      */
     public function forumAccess(int $forumId, int $forumMinClassLevel): bool {
@@ -849,7 +846,6 @@ class User extends BaseObject {
     /**
      * Checks whether user has the permission to create a forum.
      *
-     * @param \Gazelle\Forum $forum
      * @return boolean true if user has permission
      */
     public function createAccess(Forum $forum): bool {
@@ -859,7 +855,6 @@ class User extends BaseObject {
     /**
      * Checks whether user has the permission to read a forum.
      *
-     * @param \Gazelle\Forum $forum
      * @return boolean true if user has permission
      */
     public function readAccess(Forum $forum): bool {
@@ -869,7 +864,6 @@ class User extends BaseObject {
     /**
      * Checks whether user has the permission to write to a forum.
      *
-     * @param \Gazelle\Forum $forum
      * @return boolean true if user has permission
      */
     public function writeAccess(Forum $forum): bool {
@@ -879,7 +873,6 @@ class User extends BaseObject {
     /**
      * Checks whether the user is up to date on the forum
      *
-     * @param \Gazelle\Forum $forum
      * @return bool the user is up to date
      */
     public function hasReadLastPost(Forum $forum): bool {
@@ -890,8 +883,6 @@ class User extends BaseObject {
 
     /**
      * What is the last post this user has read in a thread?
-     *
-     * @param int $threadId
      */
     public function lastReadInThread(int $threadId): int {
         if (!isset($this->lastRead)) {
@@ -1327,7 +1318,7 @@ class User extends BaseObject {
                 ', $this->id
             );
             $filters = self::$db->to_pair('ID', 'Label', false);
-            self::$cache->cache_value($key, $filters, 2592000);
+            self::$cache->cache_value($key, $filters, 2_592_000);
         }
         return $filters;
     }
@@ -1426,7 +1417,6 @@ class User extends BaseObject {
                 $info['Artists'] = str_ireplace("|$alias|", '|', $info['Artists']);
             }
         }
-        $change = 0;
         if ($info['Artists'] === '||') {
             self::$db->prepared_query("
                 DELETE FROM users_notify_filters
@@ -1829,7 +1819,6 @@ class User extends BaseObject {
 
     /**
      * Generates a check list of release types, ordered by the user or default
-     * @param array $releaseType
      */
     public function releaseOrder(array $releaseType) {
         if (empty($this->option('SortHide'))) {
@@ -1971,9 +1960,7 @@ class User extends BaseObject {
 
     public function buffer(): array {
         $class = $this->primaryClass();
-        $demotion = array_filter((new Manager\User)->demotionCriteria(), function ($v) use ($class) {
-            return in_array($class, $v['From']);
-        });
+        $demotion = array_filter((new Manager\User)->demotionCriteria(), fn($v) => in_array($class, $v['From']));
         $criteria = end($demotion);
 
         $effectiveUpload = $this->uploadedSize() + $this->stats()->requestBountySize();
@@ -2553,8 +2540,6 @@ class User extends BaseObject {
 
     /**
      * Update donor rewards
-     *
-     * @param array $field
      */
     public function updateReward(array $field) {
         $Rank = $this->donorRank();
@@ -2632,7 +2617,7 @@ class User extends BaseObject {
                 VALUES (?, " . placeholders($insert) . ")
                 ON DUPLICATE KEY UPDATE
                 " . implode(', ', array_map(fn($c) => "$c = ?", $insert)),
-                $UserID, ...array_merge($args, $args)
+                $UserID, ...[...$args, ...$args]
             );
         }
         self::$db->set_query_id($QueryID);

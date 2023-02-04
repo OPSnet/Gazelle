@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Tag extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_tag_%d';
 
     public function findById(int $tagId): ?\Gazelle\Tag {
@@ -89,7 +88,6 @@ class Tag extends \Gazelle\BaseManager {
     /**
      * Create a tag. If the tag already exists its usage is incremented.
      *
-     * @param string $name
      * @param int $userId The id of the user creating the tag.
      */
     public function create(string $name, int $userId): int {
@@ -120,7 +118,6 @@ class Tag extends \Gazelle\BaseManager {
     /**
      * Make a tag official
      *
-     * @param string $name
      * @param int $userId Who is doing the officializing/
      * @return int $tagId id of the officialized tag.
      */

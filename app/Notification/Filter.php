@@ -94,7 +94,6 @@ class Filter extends \Gazelle\Base {
             case 'media':
                 $arg = '|' . implode('|', $this->field[$field]) . '|';
                 return $arg === '||' ? '' : $arg;
-                break;
         }
         return null;
     }

@@ -3,7 +3,7 @@
 namespace Gazelle\File;
 
 class RipLogHTML extends \Gazelle\File {
-    const STORAGE = STORAGE_PATH_RIPLOGHTML;
+    final const STORAGE = STORAGE_PATH_RIPLOGHTML;
 
     /**
      * Remove one or more HTML-ized rip logs of a torrent

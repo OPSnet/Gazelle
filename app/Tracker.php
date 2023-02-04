@@ -19,8 +19,8 @@ namespace Gazelle;
 use Gazelle\Util\Irc;
 
 class Tracker {
-    const STATS_MAIN = 0;
-    const STATS_USER = 1;
+    final const STATS_MAIN = 0;
+    final const STATS_USER = 1;
 
     protected static $Requests = [];
 
@@ -66,7 +66,7 @@ class Tracker {
      *
      * @return array|false (0 => $Leeching, 1 => $Seeding) or false if request failed
      */
-    public function global_peer_count() {
+    public function global_peer_count(): array|false {
         $Stats = $this->get_stats(self::STATS_MAIN);
         if (isset($Stats['leechers tracked']) && isset($Stats['seeders tracked'])) {
             $Leechers = $Stats['leechers tracked'];
@@ -83,7 +83,7 @@ class Tracker {
      * @param string $TorrentPass The user's pass key
      * @return false|array (0 => $Leeching, 1 => $Seeding) or false if the request failed
      */
-    public function user_peer_count(string $TorrentPass) {
+    public function user_peer_count(string $TorrentPass): false|array {
         $Stats = $this->get_stats(self::STATS_USER, ['key' => $TorrentPass]);
         if ($Stats === false) {
             return false;
@@ -114,7 +114,7 @@ class Tracker {
      * @param false|array $Params Parameters required by stats type
      * @return array with stats in named keys or empty if the request failed
      */
-    private function get_stats($Type, $Params = false): array {
+    private function get_stats($Type, false|array $Params = false): array {
         if (DISABLE_TRACKER) {
             return [];
         }
@@ -132,7 +132,7 @@ class Tracker {
         }
         $Stats = [];
         foreach (explode("\n", $Response) as $Stat) {
-            list($Val, $Key) = explode(" ", $Stat, 2);
+            [$Val, $Key] = explode(" ", $Stat, 2);
             $Stats[$Key] = $Val;
         }
         return $Stats;
@@ -146,7 +146,7 @@ class Tracker {
      * @param bool $Err Variable to use as storage for the error string if the request fails
      * @return false|string tracker response message or false if the request failed
      */
-    private function send_request($Get, $MaxAttempts = 1, &$Err = false) {
+    private function send_request($Get, $MaxAttempts = 1, &$Err = false): false|string {
         if (DISABLE_TRACKER) {
             return false;
         }

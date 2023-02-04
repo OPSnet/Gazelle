@@ -3,7 +3,6 @@
 namespace Gazelle\Search;
 
 class Forum extends \Gazelle\BaseUser {
-
     protected array $permittedForums = [];
     protected array $forbiddenForums = [];
     protected array $selectedForums = [];
@@ -219,7 +218,7 @@ class Forum extends \Gazelle\BaseUser {
     protected function configure(): array {
         $cond = array_merge($this->forumCond, $this->threadCond, $this->isBodySearch() ? $this->postCond : []);
         $args = array_merge($this->forumArgs, $this->threadArgs, $this->isBodySearch() ? $this->postArgs : []);
-        $userContext = isset($this->viewer) ? $this->viewer : $this->user;
+        $userContext = $this->viewer ?? $this->user;
         if (!($this->permittedForums || $this->selectedForums)) {
             // any forum they have access to due to their class
             $cond[] = 'f.MinClassRead <= ?';

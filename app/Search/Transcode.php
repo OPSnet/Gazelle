@@ -135,6 +135,8 @@ class Transcode extends \Gazelle\Base {
     }
 
     public function list(int $limit, int $offset): array {
+        $sql = null;
+        $args = null;
         $key = sprintf(self::CACHE_KEY,
             match ($this->mode ?? self::MODE_ANY) {
                 self::MODE_SEEDING  => 'seed',
@@ -148,13 +150,11 @@ class Transcode extends \Gazelle\Base {
         );
         $list = self::$cache->get_value($key);
         $list = false;
-        if (isset($this->search) || $list === false) {
-            [$sql, $args] = $this->queryList($limit, $offset);
-            self::$db->prepared_query($sql, ...$args);
-            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-            if (!isset($this->search)) {
-                self::$cache->cache_value($key, $list, 3600);
-            }
+        [$sql, $args] = $this->queryList($limit, $offset);
+        self::$db->prepared_query($sql, ...$args);
+        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+        if (!isset($this->search)) {
+            self::$cache->cache_value($key, $list, 3600);
         }
         foreach ($list as &$row) {
             $row['torrent'] = $this->torMan->findById($row['source']);
@@ -173,6 +173,8 @@ class Transcode extends \Gazelle\Base {
     }
 
     public function total(): array {
+        $sql = null;
+        $args = null;
         $key = sprintf(self::CACHE_KEY,
             match ($this->mode ?? self::MODE_ANY) {
                 self::MODE_SEEDING  => 'total_seed',
@@ -186,12 +188,10 @@ class Transcode extends \Gazelle\Base {
         );
         $total = self::$cache->get_value($key);
         $total = false;
-        if (isset($this->search) || $total === false) {
-            [$sql, $args] = $this->queryTotal();
-            $total = self::$db->rowAssoc($sql, ...$args);
-            if (!isset($this->search)) {
-                self::$cache->cache_value($key, $total, 3600);
-            }
+        [$sql, $args] = $this->queryTotal();
+        $total = self::$db->rowAssoc($sql, ...$args);
+        if (!isset($this->search)) {
+            self::$cache->cache_value($key, $total, 3600);
         }
         return $total;
     }

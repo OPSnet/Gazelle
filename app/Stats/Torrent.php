@@ -5,10 +5,10 @@ namespace Gazelle\Stats;
 class Torrent extends \Gazelle\Base {
     protected array $info;
 
-    const CACHE_KEY      = 'stat_global_torrent';
-    const PEER_KEY       = 'stat_global_peer';
-    const TORRENT_FLOW   = 'stat_tflow';
-    const CATEGORY_TOTAL = 'stat_tcat';
+    final const CACHE_KEY      = 'stat_global_torrent';
+    final const PEER_KEY       = 'stat_global_peer';
+    final const TORRENT_FLOW   = 'stat_tflow';
+    final const CATEGORY_TOTAL = 'stat_tcat';
 
     public function torrentTotal()           { return $this->info()['torrent-total']; }
     public function totalFiles()             { return $this->info()['total-files']; }
@@ -188,7 +188,7 @@ class Torrent extends \Gazelle\Base {
             $total = self::$db->scalar("
                 SELECT count(*) FROM torrents_group WHERE CategoryID = 1
             ");
-            self::$cache->cache_value('stats_album_count', $total, 7200 + rand(0, 300));
+            self::$cache->cache_value('stats_album_count', $total, 7200 + random_int(0, 300));
         }
         return $total;
     }
@@ -202,7 +202,7 @@ class Torrent extends \Gazelle\Base {
             $total = self::$db->scalar("
                 SELECT count(*) FROM artists_group
             ");
-            self::$cache->cache_value('stats_artist_count', $total, 7200 + rand(0, 300));
+            self::$cache->cache_value('stats_artist_count', $total, 7200 + random_int(0, 300));
         }
         return $total;
     }
@@ -223,7 +223,7 @@ class Torrent extends \Gazelle\Base {
                         (Media in ('BD', 'DVD', 'Soundboard', 'WEB', 'Vinyl'))
                     )
             ");
-            self::$cache->cache_value('stats_perfect_total', $total, 7200 + rand(0, 300));
+            self::$cache->cache_value('stats_perfect_total', $total, 7200 + random_int(0, 300));
         }
         return $total;
     }

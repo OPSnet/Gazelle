@@ -3,10 +3,10 @@
 namespace Gazelle;
 
 class Forum extends BaseObject {
-    const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
-    const CACHE_FORUM       = 'forum_%d';
-    const CACHE_THREAD_INFO = 'thread_%d_info';
-    const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
+    final const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
+    final const CACHE_FORUM       = 'forum_%d';
+    final const CACHE_THREAD_INFO = 'thread_%d_info';
+    final const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
 
     protected \Gazelle\DB\Pg $pg;
 
@@ -41,7 +41,6 @@ class Forum extends BaseObject {
 
     // TODO: rewrite to use BaseObject::modify()
     public function modifyForum(array $args): bool {
-        $autolock = isset($_POST['autolock']) ? '1' : '0';
         self::$db->prepared_query("
             UPDATE forums SET
                 Sort           = ?,
@@ -255,7 +254,6 @@ class Forum extends BaseObject {
      * The table of contents of a forum. Only the first page is cached,
      * the subsequent pages are regenerated on each pageview.
      *
-     * @return array
      *    - int 'ID' Forum id
      *    - string 'Title' Thread name "We will snatch your unsnatched FLACs"
      *    - int 'AuthorID' User id of author
@@ -325,8 +323,7 @@ class Forum extends BaseObject {
             ORDER BY f.Sort
             ", $user->id(), $user->id(), $this->id, ...$args
         );
-        $departmentList = self::$db->to_array('forum_id', MYSQLI_ASSOC, false);
-        return $departmentList;
+        return self::$db->to_array('forum_id', MYSQLI_ASSOC, false);
     }
 
     public function userCatchup(int $userId) {
@@ -345,7 +342,6 @@ class Forum extends BaseObject {
     /**
      * Return a list of which page the user has read up to
      *
-     * @return array
      *  - int 'TopicID' The thread id
      *  - int 'PostID'  The post id
      *  - int 'Page'    The page number

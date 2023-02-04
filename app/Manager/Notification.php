@@ -4,16 +4,16 @@ namespace Gazelle\Manager;
 
 class Notification extends \Gazelle\Base {
     // Option types
-    const OPT_PUSH = 3;
-    const OPT_POPUP_PUSH = 4;
-    const OPT_TRADITIONAL_PUSH = 5;
+    final const OPT_PUSH = 3;
+    final const OPT_POPUP_PUSH = 4;
+    final const OPT_TRADITIONAL_PUSH = 5;
 
     // Types. These names must correspond to column names in users_notifications_settings
-    const NEWS = 'News';
-    const BLOG = 'Blog';
-    const INBOX = 'Inbox';
-    const QUOTES = 'Quotes';
-    const GLOBALNOTICE = 'Global';
+    final const NEWS = 'News';
+    final const BLOG = 'Blog';
+    final const INBOX = 'Inbox';
+    final const QUOTES = 'Quotes';
+    final const GLOBALNOTICE = 'Global';
 
     /**
      * Send a push notification to a user

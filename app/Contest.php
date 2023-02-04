@@ -3,9 +3,9 @@
 namespace Gazelle;
 
 class Contest extends BaseObject {
-    const CACHE_CONTEST = 'contestv2_%d';
-    const CACHE_STATS   = 'contest_stats_%d';
-    const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
+    final const CACHE_CONTEST = 'contestv2_%d';
+    final const CACHE_STATS   = 'contest_stats_%d';
+    final const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
 
     protected array $stats; /* entries, users */
 

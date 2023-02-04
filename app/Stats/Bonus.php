@@ -3,7 +3,6 @@
 namespace Gazelle\Stats;
 
 class Bonus extends \Gazelle\Base {
-
     /**
      * Get the total purchases of all items
      *
@@ -64,20 +63,11 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [title, total] aggregated over interval range
      */
     public function accrualRange(string $interval, int $offset, int $length): array {
-        switch ($interval) {
-            case 'SECOND':
-            case 'MINUTE':
-            case 'HOUR':
-                $table = 'users_stats_daily';
-                break;
-            case 'DAY':
-            case 'WEEK':
-                $table = 'users_stats_monthly';
-                break;
-            default:
-                $table = 'users_stats_yearly';
-                break;
-        }
+        $table = match ($interval) {
+            'SECOND', 'MINUTE', 'HOUR' => 'users_stats_daily',
+            'DAY', 'WEEK' => 'users_stats_monthly',
+            default => 'users_stats_yearly',
+        };
         return self::$db->rowAssoc("
             SELECT us.Time AS `date`,
                 sum(us.BonusPoints) AS total

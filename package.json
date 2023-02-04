@@ -43,7 +43,7 @@
   "lint-staged": {
     "*.php": [
       ".bin/phpcbf",
-      "vendor/bin/phpstan analyse --memory-limit 256M",
+      "vendor/bin/phpstan analyse --memory-limit 512M",
       ".bin/phpcs"
     ]
   },

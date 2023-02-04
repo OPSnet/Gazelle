@@ -3,8 +3,6 @@
 namespace Gazelle\Collage;
 
 abstract class AbstractCollage extends \Gazelle\Base {
-    protected \Gazelle\Collage $holder;
-
     protected int   $id; // hold a local copy of our ID to save time
     protected array $artists      = [];
     protected array $contributors = [];
@@ -15,9 +13,8 @@ abstract class AbstractCollage extends \Gazelle\Base {
     abstract public function load(): int;
     abstract protected function flushTarget(int $targetId): void;
 
-    public function __construct(\Gazelle\Collage $holder) {
-        $this->holder = $holder;
-        $this->id     = $holder->id();
+    public function __construct(protected \Gazelle\Collage $holder) {
+        $this->id = $holder->id();
     }
 
     public function artistList(): array {
@@ -151,9 +148,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         );
         $userMap = self::$db->to_pair('cID', 'UserID');
         $id = $this->id;
-        $args = array_merge(...array_map(function ($sort, $entryId) use ($id, $userMap) {
-            return [(int)$entryId, ($sort + 1) * 10, $id, $userMap[$entryId]];
-        }, array_keys($series), $series));
+        $args = array_merge(...array_map(fn($sort, $entryId) => [(int)$entryId, ($sort + 1) * 10, $id, $userMap[$entryId]], array_keys($series), $series));
         self::$db->prepared_query("
             INSERT INTO {$this->entryTable()} ({$this->entryColumn()}, Sort, CollageID, UserID)
             VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?, ?)')) . "

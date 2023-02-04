@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class DB extends Base {
-
     /**
      * Skip foreign key checks
      * @param bool $relax true if foreign key checks should be skipped
@@ -92,7 +91,7 @@ class DB extends Base {
             if (self::$db->affected_rows() == 0) {
                 return [false, "condition selected 0 rows"];
             }
-        } catch (DB\Mysql_DuplicateKeyException $e) {
+        } catch (DB\Mysql_DuplicateKeyException) {
             // do nothing, for some reason it was already deleted
         }
 

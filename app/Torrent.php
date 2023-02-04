@@ -3,13 +3,13 @@
 namespace Gazelle;
 
 class Torrent extends TorrentAbstract {
-    const CACHE_LOCK               = 'torrent_lock_%d';
-    const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
-    const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
-    const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
-    const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
+    final const CACHE_LOCK               = 'torrent_lock_%d';
+    final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
+    final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
+    final const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
+    final const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
 
-    const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
+    final const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
 
     protected $tokenCache;
     protected $updateTime;
@@ -447,7 +447,7 @@ class Torrent extends TorrentAbstract {
      */
     public function remove(int $userId, string $reason, int $trackerReason = -1): array {
         $qid = self::$db->get_query_id();
-        $info = $this->info();
+        $this->info();
         if ($this->id > MAX_PREV_TORRENT_ID) {
             (new \Gazelle\User\Bonus($this->uploader()))->removePointsForUpload($this);
         }
@@ -459,9 +459,6 @@ class Torrent extends TorrentAbstract {
             return [false, $message];
         }
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents', [['ID', $this->id]]);
-        if (!$ok) {
-            return [false, $message];
-        }
         $infohash = $this->infohash();
         $manager->relaxConstraints(false);
         (new \Gazelle\Tracker)->update_tracker('delete_torrent', [

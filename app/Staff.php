@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Staff extends BaseUser {
-
     public function id() {
         return $this->user->id();
     }
@@ -16,7 +15,7 @@ class Staff extends BaseUser {
                 WHERE UserID = ?
                 ', $this->user->id()
             ) ?? 0;
-            self::$cache->cache_value('staff_blog_read_' . $this->user->id(), $readTime, 1209600);
+            self::$cache->cache_value('staff_blog_read_' . $this->user->id(), $readTime, 1_209_600);
         }
         if (($blogTime = self::$cache->get_value('staff_blog_latest_time')) === false) {
             $blogTime = self::$db->scalar('
@@ -24,7 +23,7 @@ class Staff extends BaseUser {
                 FROM staff_blog
                 '
             ) ?? 0;
-            self::$cache->cache_value('staff_blog_latest_time', $blogTime, 1209600);
+            self::$cache->cache_value('staff_blog_latest_time', $blogTime, 1_209_600);
         }
         return $readTime < $blogTime;
     }

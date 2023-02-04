@@ -3,12 +3,12 @@
 namespace Gazelle\User;
 
 class Vote extends \Gazelle\BaseUser {
-    const Z_VAL    = 1.281728756502709;  // original
-    const Z_VAL_90 = 1.6448536251336989; // p-value .90
-    const Z_VAL_95 = 1.959963986120195;  //         .95
+    final const Z_VAL    = 1.281728756502709;  // original
+    final const Z_VAL_90 = 1.6448536251336989; // p-value .90
+    final const Z_VAL_95 = 1.959963986120195;  //         .95
 
-    public const UPVOTE = 1;
-    public const DOWNVOTE = 2;
+    final public const UPVOTE = 1;
+    final public const DOWNVOTE = 2;
 
     protected const VOTE_USER_KEY = 'vote_user_%d';
     protected const VOTE_PAIR_KEY = 'vote_pair_%d';
@@ -405,7 +405,6 @@ class Vote extends \Gazelle\BaseUser {
         if (!isset($this->userVote[$tgroupId])) {
             return [false, 'not-voted'];
         }
-        $up = $this->userVote[$tgroupId] === 1 ? 1 : 0;
 
         self::$db->begin_transaction();
         self::$db->prepared_query("

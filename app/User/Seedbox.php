@@ -3,11 +3,10 @@
 namespace Gazelle\User;
 
 class Seedbox extends \Gazelle\BaseUser {
-
     protected const SUMMARY_KEY = 'seedbox_summary_';
 
-    public const VIEW_BY_NAME = 0;
-    public const VIEW_BY_PATH = 1;
+    final public const VIEW_BY_NAME = 0;
+    final public const VIEW_BY_PATH = 1;
 
     protected \Hashids\Hashids $hashid;
     protected array $host = [];
@@ -174,7 +173,7 @@ class Seedbox extends \Gazelle\BaseUser {
      */
     public function updateNames(array $update): int {
         $n = 0;
-        $hostlist = $this->hostList();
+        $this->hostList();
         foreach ($update as $seedbox) {
             $name = $seedbox['name'];
             if ($name == '') {
@@ -194,7 +193,7 @@ class Seedbox extends \Gazelle\BaseUser {
                             AND user_seedbox_id = ?
                         ", mb_substr($name, 0, 100), $this->user->id(), $this->hashid->decode($seedbox['id'])[0]
                     );
-                } catch (\Gazelle\DB\Mysql_DuplicateKeyException $e) {
+                } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
                     // do nothing
                 } finally {
                     $n += self::$db->affected_rows();
@@ -221,7 +220,7 @@ class Seedbox extends \Gazelle\BaseUser {
             DELETE FROM user_seedbox
             WHERE user_id = ?
                 AND user_seedbox_id in (" . placeholders($remove) . ")
-            ", $this->user->id(), ...array_map(function ($id) use ($h) {return $h->decode($id)[0];}, $remove)
+            ", $this->user->id(), ...array_map(fn($id) => $h->decode($id)[0], $remove)
         );
         $affected = self::$db->affected_rows();
         $this->flush()->build();
