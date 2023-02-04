@@ -6,7 +6,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(404);
 }
 
-$tgMan = Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup;
 
 View::show_header('Top 10 Torrents history!');
 ?>

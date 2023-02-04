@@ -15,7 +15,7 @@ $id      = false;
 switch ($_REQUEST['action']) {
     case 'takenewnews':
         $newsMan->create($Viewer->id(), $_POST['title'], $_POST['body']);
-        $notification = new Notification($Viewer->id());
+        $notification = new Notification();
         $notification->push($notification->pushableUsers($Viewer->id()), $_POST['title'], $_POST['body'], SITE_URL . '/index.php', Notification::NEWS);
         header('Location: index.php');
         exit;
@@ -53,7 +53,6 @@ switch ($_REQUEST['action']) {
 
     default:
         error(0);
-        break;
 }
 echo $Twig->render('admin/news.twig', [
     'auth'    => $Viewer->auth(),

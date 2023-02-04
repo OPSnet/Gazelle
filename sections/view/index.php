@@ -18,5 +18,4 @@ switch($_GET['type']) {
         break;
     default:
         error(404);
-        break;
 }

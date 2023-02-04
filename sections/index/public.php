@@ -1,5 +1,5 @@
 <?php
-if (!SHOW_PUBLIC_INDEX) {
+if (!SHOW_PUBLIC_INDEX) { /** @phpstan-ignore-line */
     header('Location: login.php');
     exit;
 }

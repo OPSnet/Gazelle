@@ -227,10 +227,8 @@ class Torrent {
     /**
      * Process search terms and run the main query
      *
-     * @param array $Terms Array containing all search terms (e.g. $_GET)
-     * @return array List of matching group IDs with torrent ID as key for ungrouped results
      */
-    public function query($Terms = []) {
+    public function query(array $Terms = []): false|array {
         $this->process_search_terms($Terms);
         $this->build_query();
         $this->run_query();
@@ -241,7 +239,7 @@ class Torrent {
     /**
      * Internal function that runs the queries needed to get the desired results
      */
-    private function run_query() {
+    private function run_query(): void {
         $SphQLResult = $this->SphQL->sphinxquery();
         if ($SphQLResult->Errno > 0) {
             $this->SphResults = false;
@@ -281,7 +279,7 @@ class Torrent {
      * Process search terms and store the parts in appropriate arrays until we know if
      * the NOT operator can be used
      */
-    private function build_query() {
+    private function build_query(): void {
         foreach ($this->Terms as $Field => $Words) {
             $SearchString = '';
             if (isset(self::$FormsToFields[$Field])) {

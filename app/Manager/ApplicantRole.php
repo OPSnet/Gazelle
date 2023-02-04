@@ -3,9 +3,24 @@
 namespace Gazelle\Manager;
 
 class ApplicantRole extends \Gazelle\Base {
-
+    const ID_KEY              = 'zz_applr_%d';
     const CACHE_KEY_ALL       = 'approle_list_all';
     const CACHE_KEY_PUBLISHED = 'approle_list_published';
+
+    public function findById(int $roleId): ?\Gazelle\ApplicantRole {
+        $key = sprintf(self::ID_KEY, $roleId);
+        $id = self::$cache->get_value($key);
+        if ($id === false) {
+            $id = self::$db->scalar("
+                SELECT ID FROM applicant_role WHERE ID = ?
+                ", $roleId
+            );
+            if (!is_null($id)) {
+                self::$cache->cache_value($key, $id, 7200);
+            }
+        }
+        return $id ? new \Gazelle\ApplicantRole($id) : null;
+    }
 
     public function create(string $title, string $description, bool $published, int $userId) {
         self::$db->prepared_query("
@@ -14,7 +29,7 @@ class ApplicantRole extends \Gazelle\Base {
             VALUES (?,     ?,           ?,         ?)
             ", $title, $description, $published ? 1 : 0, $userId
         );
-        return new \Gazelle\ApplicantRole(self::$db->inserted_id());
+        return $this->findById(self::$db->inserted_id());
     }
 
     public function list($all = false) {

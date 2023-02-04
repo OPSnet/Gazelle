@@ -28,13 +28,17 @@ if ($_POST['submit'] == 'Delete') {
         error($validator->errorMessage());
     }
 
-    if ($_POST['submit'] == 'Edit') {
+    if ($_POST['submit'] == 'Create') {
+        $manager->create($_POST['name'], (int)$_POST['sort']);
+    } else {
+        $forumCategory = $manager->findById((int)($_POST['id'] ?? 0));
+        if (is_null($forumCategory)) {
+            error(404);
+        }
         $forumCategory
             ->setUpdate('Sort', (int)$_POST['sort'])
             ->setUpdate('Name', trim($_POST['name']))
             ->modify();
-    } else {
-        $manager->create($_POST['name'], (int)$_POST['sort']);
     }
 }
 

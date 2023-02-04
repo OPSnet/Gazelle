@@ -26,5 +26,4 @@ switch($_GET['do'] ?? '') {
 
     default:
         error(404);
-        break;
 }

@@ -77,6 +77,8 @@ switch ($type) {
         }
         $report = (new Gazelle\Report\Comment($id, $comment))->setContext($reportType['title']);
         break;
+    default:
+        error(0);
 }
 
 echo $Twig->render('report/create.twig', [

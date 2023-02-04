@@ -54,13 +54,13 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
     $replacement = array_unique($replacement);
     foreach ($replacement as $r) {
         if ($tagMan->lookupBad($r)) {
-            $failure[] = "Cannot merge tag <b><?= $current ?></b> with <b><?= $r ?></b>, this is an alias for <b><?= $tagMan->resolve($r) ?></b>";
+            $failure[] = "Cannot merge tag <b>{$current}</b> with <b>{$r}</b>, this is an alias for <b>{$tagMan->resolve($r)}</b>";
         }
     }
 
     // trying to merge tag with itself would create big problems
     if (in_array($current, $replacement)) {
-        $failure[] = "Cannot merge tag <?= $current ?> to itself";
+        $failure[] = "Cannot merge tag {$current} to itself";
     }
 
     if ($_GET['alias'] && count($replacement) > 1) {

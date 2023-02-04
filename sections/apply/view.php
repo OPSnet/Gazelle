@@ -3,10 +3,21 @@
 $IS_STAFF = $Viewer->permitted('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
 $Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
 
-if (isset($_POST['id']) && is_number($_POST['id'])) {
+$appMan = new Gazelle\Manager\Applicant;
+if (isset($_GET['id'])) {
+    $app = $appMan->findById((int)$_POST['id']);
+    if (is_null($app)) {
+        error(404);
+    }
+    if (!$IS_STAFF && $app->userId() != $Viewer->id()) {
+        error(403);
+    }
+} elseif (isset($_POST['id'])) {
     authorize();
-    $ID = (int)$_POST['id'];
-    $app = new Gazelle\Applicant($ID);
+    $app = $appMan->findById((int)$_POST['id']);
+    if (is_null($app)) {
+        error(404);
+    }
     if (!$IS_STAFF && $app->userId() != $Viewer->id()) {
         error(403);
     }
@@ -30,12 +41,6 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
             $_POST['note_reply'],
             $IS_STAFF && $_POST['visibility'] == 'staff' ? 'staff' : 'public'
         );
-    }
-} elseif (isset($_GET['id']) && is_number($_GET['id'])) {
-    $ID = (int)$_GET['id'];
-    $app = new Gazelle\Applicant($ID);
-    if (!$IS_STAFF && $app->userId() != $Viewer->id()) {
-        error(403);
     }
 }
 

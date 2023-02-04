@@ -105,10 +105,10 @@ if (isset($_POST['GroupID'])) {
             // create forum and add album of the month
             $forum = new Gazelle\Forum(AOTM_FORUM_ID);
             $thread = (new Gazelle\Manager\ForumThread)->create(
-                forumId: $forum->id(),
-                userId:  $Viewer->id(),
-                title:   $title,
-                body:    $body,
+                forum:  $forum,
+                userId: $Viewer->id(),
+                title:  $title,
+                body:   $body,
             );
             $DB->prepared_query("
                 INSERT INTO featured_albums

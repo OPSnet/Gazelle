@@ -16,6 +16,7 @@ $collageMan = new Gazelle\Manager\Collage;
 $tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $stats      = new Gazelle\Stats\Artist($artistId);
+$userMan    = new Gazelle\Manager\User;
 $vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
@@ -61,7 +62,7 @@ echo $Twig->render('bookmark/action.twig', [
             <a href="artist.php?action=revert&amp;artistid=<?=$artistId?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
 <?php } ?>
             <a href="artist.php?id=<?=$artistId?>#info" class="brackets">Info</a>
-<?php if (LASTFM_API_KEY) { ?>
+<?php if (LASTFM_API_KEY) { /** @phpstan-ignore-line */ ?>
             <a href="artist.php?id=<?=$artistId?>#concerts" class="brackets">Concerts</a>
 <?php } ?>
             <a href="artist.php?id=<?=$artistId?>#artistcomments" class="brackets">Comments</a>
@@ -409,8 +410,9 @@ if ($requestList) {
 <?php
     $Row = 'b';
     foreach ($requestList as $request) {
+        $Row = $Row === 'b' ? 'a' : 'b';
 ?>
-        <tr class="row<?=($Row === 'b' ? 'a' : 'b')?>">
+        <tr class="row<?= $Row ?>">
             <td>
                 <?= $request->smartLink() ?>
                 <div class="tags"><?= implode(' ', $request->tagNameList()) ?></div>
@@ -545,7 +547,7 @@ function require(file, callback) {
             <div id="body" class="body"><?=Text::full_format($Artist->body())?></div>
         </div>
 <?php
-if (LASTFM_API_KEY) {
+if (LASTFM_API_KEY) { /** @phpstan-ignore-line */
     require_once('concerts.php');
 }
 ?>

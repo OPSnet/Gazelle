@@ -1,2 +1,7 @@
 parameters:
-	ignoreErrors:
+  ignoreErrors:
+    -
+      message: '/^Variable \$(?:Cache|DB|Debug|SessionID|Twig|Viewer) might not be defined\.$/'
+      paths:
+        - scripts/*
+        - sections/*

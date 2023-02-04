@@ -1,6 +1,10 @@
 <?php
 
-if (!FEATURE_EMAIL_REENABLE || !isset($_GET['token'])) {
+if (!FEATURE_EMAIL_REENABLE) { /** @phpstan-ignore-line */
+    header("Location: index.php");
+    exit;
+}
+if (!isset($_GET['token'])) {
     header("Location: index.php");
     exit;
 }
@@ -11,5 +15,5 @@ if (is_null($enabler)) {
 }
 
 echo $Twig->render('enable/processed.twig', [
-    'success' => $enabler->processToken($_GET['token']),
+    'success' => $enabler->processToken(),
 ]);

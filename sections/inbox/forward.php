@@ -6,8 +6,8 @@ $pm = (new Gazelle\Manager\PM($Viewer))->findById((int)$_GET['id']);
 if (is_null($pm)) {
     error(404);
 }
-$receiver = (new Gazelle\Manager\User)->findById((int)$_POST['receiverid']);
-if (is_null($receiver)) {
+$recipient = (new Gazelle\Manager\User)->findById((int)$_POST['receiverid']);
+if (is_null($recipient)) {
     error(404);
 }
 if (!$Viewer->permitted('users_mod') && !$recipient->isStaffPMReader()) {
@@ -16,8 +16,6 @@ if (!$Viewer->permitted('users_mod') && !$recipient->isStaffPMReader()) {
 
 if (in_array($recipient->id(), $pm->recipientList())) {
     error($recipient->username() . " already has this conversation in their inbox.");
-    header("Location: inbox.php?action=viewconv&id=" . $pm->id());
-    exit;
 }
 
 $pm->setForwardedTo($recipient->id());

@@ -101,6 +101,8 @@ if ($imageData !== false) {
                     );
                     $Cache->delete_value("donor_info_$userId");
                     break;
+                default:
+                    error(0);
             }
 
             $sizeKb = number_format($sizeKb);

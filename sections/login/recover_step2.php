@@ -20,6 +20,7 @@ $validator->setFields([
     ],
 ]);
 
+$error   = false;
 $success = false;
 if (!empty($_REQUEST['password'])) {
     if (!$validator->validate($_REQUEST)) {

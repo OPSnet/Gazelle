@@ -9,7 +9,7 @@ if (isset($_REQUEST['confirm'])) {
         echo $Twig->render('register/complete.twig');
     }
 
-} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite'])) {
+} elseif (OPEN_REGISTRATION /** @phpstan-ignore-line */ || isset($_REQUEST['invite'])) {
     if ($_REQUEST['invite']) {
         if (!(new Gazelle\Manager\Invite)->inviteExists($_GET['invite'])) {
             echo $Twig->render('register/no-invite.twig');
@@ -98,7 +98,7 @@ if (isset($_REQUEST['confirm'])) {
         'invite'    => $_REQUEST['invite'] ?? null,
         'is_new'    => $newInstall ?? false,
         'username'  => $_REQUEST['username'] ?? '',
-        'email'     => $_REQUEST['email'] ?? $InviteEmail,
+        'email'     => $_REQUEST['email'] ?? '',
         'readrules' => $_REQUEST['readrules'] ?? false,
         'readwiki'  => $_REQUEST['readwiki'] ?? false,
         'agereq'    => $_REQUEST['agereq'] ?? false,

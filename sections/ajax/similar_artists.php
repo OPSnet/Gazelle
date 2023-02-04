@@ -23,6 +23,7 @@ $DB->prepared_query("
     ", $artistId, $limit
 );
 
+$results = [];
 while ([$ArtistID, $Name, $Score] = $DB->next_record(MYSQLI_NUM, false)) {
     $results[] = [
         'id'    => (int)$ArtistID,

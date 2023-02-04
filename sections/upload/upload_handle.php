@@ -86,7 +86,7 @@ $Validate->setFields([
     ['rules', '1','require','Your torrent must abide by the rules.'],
 ]);
 
-if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
+if (!$isMusicUpload || !$Properties['GroupID']) {
     $Validate->setFields([
         ['image', '0','link','The image URL you entered was invalid.', ['range' => [255, 12]]],
         ['tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['range' => [2, 200]]],
@@ -283,7 +283,7 @@ if (!$Err && $isMusicUpload) {
         ];
         $ArtistRoleList = [];
         $ArtistNameList = [];
-        if (is_array($Artists)) {
+        if (isset($Artists) && is_array($Artists)) {
             for ($i = 0, $end = count($Artists); $i < $end; $i++) {
                 $name = Gazelle\Artist::sanitize($Artists[$i]);
                 if ($name === '') {

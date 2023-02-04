@@ -61,7 +61,7 @@ if ($DB->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) 
     (new Gazelle\Manager\Comment)->merge('torrents', $oldId, $new->id());
     $log->merge($oldId, $new->id());
 
-    $old->remove($Viewer, $log);
+    $old->remove($Viewer);
 }
 
 $new->flush();

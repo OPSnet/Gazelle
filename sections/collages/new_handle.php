@@ -37,7 +37,7 @@ if (!$Err) {
             $Err = 'That collage already exists but needs to be recovered; please <a href="staffpm.php">contact</a> the staff team!';
         } else {
             $checkId = $check->id();
-            $Err = "That collage already exists: <?= $check->link() ?>.";
+            $Err = "That collage already exists: {$check->link()}.";
         }
     }
 }

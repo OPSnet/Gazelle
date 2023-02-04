@@ -58,7 +58,7 @@ $user->addForumWarning($adminComment)->addStaffNote($adminComment)->modify();
 $userMan->sendPM($user->id(), $Viewer->id(), $subject, $message);
 
 if ($post->isPinned()) {
-    $thread->flush();
+    $post->thread()->flush();
 }
 
 header("Location: {$post->location()}");

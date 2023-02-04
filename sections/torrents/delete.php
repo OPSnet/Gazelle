@@ -108,7 +108,7 @@ if ($Viewer->permitted('admin_reports')) {
     if ($UploaderOthers > 0) {
 ?>
                         <div style="text-align: right;">
-                            <a href="reportsv2.php?view=uploader&amp;id=<?=$UploaderID?>">There <?= $UploaderOthers > 1 ? "are $UploaderOthers reports" : "is 1 other report" ?> for torrent(s) uploaded by this user</a>
+                            <a href="reportsv2.php?view=uploader&amp;id=<?= $torrent->uploaderId() ?>">There <?= $UploaderOthers > 1 ? "are $UploaderOthers reports" : "is 1 other report" ?> for torrent(s) uploaded by this user</a>
                         </div>
 <?php
     }

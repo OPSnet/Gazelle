@@ -19,7 +19,7 @@ $collageId = $collage->id();
 $name = $collage->name();
 $collage->remove();
 
-(new Gazelle\Manager\User\Subscription)->flushPage('collages', $collageId);
+(new Gazelle\Manager\Subscription)->flushPage('collages', $collageId);
 (new Gazelle\Log)->general(sprintf("Collage %d (%s) was deleted by %s: %s",
     $collageId, $name, $Viewer->username(), $reason
 ));

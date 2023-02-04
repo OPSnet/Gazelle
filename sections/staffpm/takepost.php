@@ -28,7 +28,7 @@ if (isset($_POST['quickpost'])) {
         header('Location: staffpm.php');
         exit;
     }
-    if (is_null($staffPM) || !$staffPM->visible($Viewer)) {
+    if (!isset($staffPM) || is_null($staffPM) || !$staffPM->visible($Viewer)) {
         error(403);
     }
     $staffPM->reply($Viewer, $message);

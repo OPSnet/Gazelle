@@ -20,15 +20,16 @@ if (is_null($blog)) {
     error(404);
 }
 
+$manager = new Gazelle\Manager\ForumThread;
 $thread = match((int)($_POST['thread'] ?? -1)) {
     -1 => null,
-     0 => (new Gazelle\Manager\ForumThread)->create(
-        forumId: ANNOUNCEMENT_FORUM_ID,
-        userId:  $Viewer->id(),
-        title:   $title,
-        body:    $body,
+     0 => $manager->create(
+        forum:  new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
+        userId: $Viewer->id(),
+        title:  $title,
+        body:   $body,
     ),
-    default => (new Gazelle\Manager\ForumThread)->findById((int)$_POST['thread']),
+    default => $manager->findById((int)$_POST['thread']),
 };
 
 if ($thread) {

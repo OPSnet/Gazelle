@@ -1,24 +1,33 @@
 <?php
 
-use Gazelle\Util\Textarea;
-
 if (!$Viewer->permitted('admin_manage_applicants')) {
     error(403);
 }
 
-$editId = 0;
-$saved   = '';
-if (isset($_POST['auth'])) {
+$appRoleMan = new Gazelle\Manager\ApplicantRole;
+$editId     = 0;
+$saved      = '';
+
+if (!isset($_POST['auth'])) {
+    $appRole = null;
+} else {
     authorize();
-    $edit = array_filter($_POST, fn ($x) => preg_match('/^edit-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+
+    $edit  = array_filter($_POST, fn ($x) => preg_match('/^edit-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+
     if (is_array($edit) && count($edit) == 1) {
         $editId = trim(array_keys($edit)[0], 'edit-');
-        $appRole = new Gazelle\ApplicantRole($editId);
-    }
-    elseif (isset($_POST['edit']) && is_numeric($_POST['edit'])) {
-        $editId = intval($_POST['edit']);
-        $appRole = new Gazelle\ApplicantRole($editId);
-        if (isset($_POST['user_id']) && is_numeric($_POST['user_id'])) {
+        $appRole = $appRoleMan->findById($editId);
+        if (is_null($appRole)) {
+            error(0);
+        }
+    } elseif (isset($_POST['edit'])) {
+        $editId = (int)$_POST['edit'];
+        $appRole = $appRoleMan->findById($editId);
+        if (is_null($appRole)) {
+            error(0);
+        }
+        if (isset($_POST['user_id'])) {
             $userId = (int)$_POST['user_id'];
             if ($userId == $Viewer->id()) {
                 $appRole->modify(
@@ -30,9 +39,7 @@ if (isset($_POST['auth'])) {
             $editId = 0; /* return to list */
             $saved = 'updated';
         }
-    }
-    else {
-        $appRoleMan = new Gazelle\Manager\ApplicantRole;
+    } else {
         $appRole = $appRoleMan->create(
             $_POST['title'],
             $_POST['description'],
@@ -46,9 +53,9 @@ if (isset($_POST['auth'])) {
 echo $Twig->render('applicant/admin.twig', [
     'auth'     => $Viewer->auth(),
     'edit_id'  => $editId,
-    'list'     => (new Gazelle\Manager\ApplicantRole)->list(true),
-    'role'     => $appRole ?? null,
+    'list'     => $appRoleMan->list(true),
+    'role'     => $appRole,
     'saved'    => $saved,
-    'text'     => new Textarea('description', $editId ? $appRole->description() : ''),
+    'text'     => new Gazelle\Util\Textarea('description', $appRole?->description() ?? ''),
     'user_id'  => $Viewer->id(),
 ]);

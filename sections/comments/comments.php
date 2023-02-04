@@ -176,12 +176,14 @@ switch ($Action) {
                 break;
         }
         break;
+    default:
+        error(0);
 }
 
 $Join[] = "INNER JOIN comments C ON (C.Page = ? AND C.PageID = $idField)";
 $joinArgs[] = $Action;
 $Join = implode("\n", $Join);
-$cond = $condition ? 'WHERE ' . implode(" AND ", $condition) : '';
+$cond = count($condition) ? 'WHERE ' . implode(" AND ", $condition) : '';
 
 // Posts per page limit stuff
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
@@ -269,7 +271,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
                 'artist'   => "<a href=\"artist.php?id=$PageID\">$Name</a>",
                 'collages' => "<a href=\"collages.php?id=$PageID\">$Name</a>",
                 'requests' => $requestList[$PageID]->smartLink(),
-                'torrents' => $tgroupList[$PageID]->link(),
+                default    => $tgroupList[$PageID]->link(),
             },
             'page'        => $Action,
             'url'         => $commentMan->findById($PostID)->url(),

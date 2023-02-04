@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class StaffPM extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_spm_%d';
 
     public function findById(int $pmId): ?\Gazelle\StaffPM {
@@ -88,8 +87,8 @@ class StaffPM extends \Gazelle\BaseManager {
         return self::$db->affected_rows();
     }
 
-    public function commonAnswer(int $id): string {
-        return (string)self::$db->scalar("
+    public function commonAnswer(int $id): ?string {
+        return self::$db->scalar("
             SELECT Message FROM staff_pm_responses WHERE ID = ?
             ", $id
         );

@@ -100,13 +100,9 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
     case 'Music':
         if ($Properties['Remastered'] && !$Properties['UnknownRelease'] && $Properties['RemasterYear'] < 1982 && $Properties['Media'] == 'CD') {
             error('You have selected a year for an album that predates the medium you say it was created on.');
-            header("Location: torrents.php?action=edit&id=$TorrentID");
-            exit;
         }
         if ($Properties['RemasterTitle'] == 'Original Release') {
             error('"Original Release" is not a valid remaster title.');
-            header("Location: torrents.php?action=edit&id=$TorrentID");
-            exit;
         }
 
         $Validate->setFields([

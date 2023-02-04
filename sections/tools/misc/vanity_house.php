@@ -110,10 +110,10 @@ if (isset($_POST['GroupID'])) {
             // create forum and add Showcase album
             $forum = new Gazelle\Forum(VANITY_HOUSE_FORUM_ID);
             $thread = (new Gazelle\Manager\ForumThread)->create(
-                forumId: $forum->id(),
-                userId:  $Viewer->id(),
-                title:   $title,
-                body:    $body,
+                forum:  $forum,
+                userId: $Viewer->id(),
+                title:  $title,
+                body:   $body,
             );
             $DB->prepared_query("
                 INSERT INTO featured_albums

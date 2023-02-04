@@ -19,11 +19,11 @@ if (isset($_POST['username'])) {
 
     if ($user) {
         if ($user->isDisabled()) {
-            if (FEATURE_EMAIL_REENABLE) {
+            if (FEATURE_EMAIL_REENABLE) { /** @phpstan-ignore-line */
                 setcookie('username', urlencode($user->username()), [
                     'expires'  => time() + 60 * 60,
                     'path'     => '/',
-                    'secure'   => !DEBUG_MODE,
+                    'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
                     'httponly' => DEBUG_MODE,
                     'samesite' => 'Lax',
                 ]);
@@ -45,7 +45,7 @@ if (isset($_POST['username'])) {
             setcookie('session', $session->cookie($current['SessionID']), [
                 'expires'  => (int)$login->persistent() * (time() + 60 * 60 * 24 * 90),
                 'path'     => '/',
-                'secure'   => !DEBUG_MODE,
+                'secure'   => !DEBUG_MODE,  /** @phpstan-ignore-line */
                 'httponly' => DEBUG_MODE,
                 'samesite' => 'Lax',
             ]);
@@ -59,6 +59,6 @@ echo $Twig->render('login/login.twig', [
     'delta'    => $watch->bannedEpoch() - time(),
     'error'    => $login->error(),
     'ip_addr'  => $_SERVER['REMOTE_ADDR'],
-    'tor_node' => BLOCK_TOR && (new Gazelle\Manager\Tor)->isExitNode($_SERVER['REMOTE_ADDR']),
+    'tor_node' => BLOCK_TOR /** @phpstan-ignore-line */ && (new Gazelle\Manager\Tor)->isExitNode($_SERVER['REMOTE_ADDR']),
     'watch'    => $watch,
 ]);

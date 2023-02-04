@@ -74,6 +74,7 @@ class ForumPoll extends BaseObject {
         $info = [
             'is_closed'   => $poll['Closed'] != '0',
             'is_featured' => (bool)$poll['Featured'],
+            'max'         => $max,
             'question'    => $poll['Question'],
             'total'       => $total,
             'vote'        => $tally,
@@ -89,6 +90,10 @@ class ForumPoll extends BaseObject {
 
     public function isFeatured(): bool {
         return $this->info()['is_featured'];
+    }
+
+    public function max(): int {
+        return $this->info()['max'];
     }
 
     public function question(): string {

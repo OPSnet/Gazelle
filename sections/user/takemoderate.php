@@ -33,7 +33,7 @@ if (!$Viewer->permitted('users_mod')) {
 $userMan = new Gazelle\Manager\User;
 $user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
-    header("Location: log.php?search=User+$userId");
+    header("Location: log.php?search=User+" . (int)$_POST['userid']);
     exit;
 }
 $userId = $user->id();

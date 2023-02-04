@@ -4,7 +4,7 @@ use Gazelle\Util\Time;
 
 $search = new Gazelle\Search\Forum($Viewer);
 $search->setSearchType($_GET['type'] ?? 'title')
-    ->setSearchText(trim($_GET['search']) ?? '');
+    ->setSearchText(trim($_GET['search'] ?? ''));
 
 // Searching for posts in a specific thread
 $ThreadID = (int)($_GET['threadid'] ?? 0);

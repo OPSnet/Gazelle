@@ -25,24 +25,23 @@ class Subscription extends \Gazelle\Base {
             );
         }
 
-        $affected = count(self::$cache->delete_multi(array_map(
-            fn ($id) => "subscriptions_user_new_$id",
-            self::$db->collect('UserID', false)
-        )));
+        $list = self::$db->collect('UserID', false);
+        $affected = count($list);
+        self::$cache->delete_multi(array_map(fn($id) => "subscriptions_user_new_$id", $list));
 
         self::$db->prepared_query('
             SELECT UserID FROM users_notify_quoted WHERE Page = ?  AND PageID = ?
             ', $Page, $PageID
         );
         $list = self::$db->collect('UserID', false);
-        self::$db->set_query_id($qid);
 
         $userMan = new User;
         foreach ($list as $userId) {
             (new \Gazelle\User\Quote(new \Gazelle\User($userId)))->flush();
         }
 
-        return $affected;
+        self::$db->set_query_id($qid);
+        return $affected + count($list);
     }
 
     /**

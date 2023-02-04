@@ -140,11 +140,18 @@ if ($CollageCovers !== 0) { ?>
             <span id="firstpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.page(0); return false;">&laquo; First</a> | </span>
             <span id="prevpage" class="invisible"><a href="#" id="prevpage" class="pageslink" onclick="collageShow.prevPage(); return false;">&lsaquo; Prev</a> | </span>
 <?php   for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
-            <span id="pagelink<?=$i?>" class="<?=(($i > 4) ? 'hidden' : '')?><?=(($i === 0) ? ' selected' : '')?>"><a href="#" class="pageslink" onclick="collageShow.page(<?=$i?>, this); return false;"><?=($CollageCovers * $i + 1)?>-<?=min($NumGroups, $CollageCovers * ($i + 1))?></a><?=(($i !== ceil($NumGroups / $CollageCovers) - 1) ? ' | ' : '')?></span>
+            <span id="pagelink<?=
+                $i?>" class="<?=
+                ($i > 4) ? 'hidden' : '' ?><?=
+                ($i === 0) ? ' selected' : '' ?>"><a href="#" class="pageslink" onclick="collageShow.page(<?=
+                $i ?>, this); return false;"><?=
+                $CollageCovers * $i + 1 ?>-<?=
+                min($NumGroups, $CollageCovers * ($i + 1)) ?></a><?=
+                ($i !== (int)ceil($NumGroups / $CollageCovers) - 1) ? ' | ' : '' ?></span>
 <?php   } ?>
             <!--<span id="nextbar" class="<?=(($NumGroups / $CollageCovers > 5) ? 'hidden' : '')?>"> | </span>-->
             <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;">Next &rsaquo;</a></span>
-            <span id="lastpage" class="<?=(ceil($NumGroups / $CollageCovers) === 2 ? 'invisible' : '')?>"> | <a href="#" id="lastpage" class="pageslink" onclick="collageShow.page(<?=(ceil($NumGroups / $CollageCovers) - 1)?>); return false;">Last &raquo;</a></span>
+            <span id="lastpage" class="<?=((int)ceil($NumGroups / $CollageCovers) === 2 ? 'invisible' : '')?>"> | <a href="#" id="lastpage" class="pageslink" onclick="collageShow.page(<?=(ceil($NumGroups / $CollageCovers) - 1)?>); return false;">Last &raquo;</a></span>
         </div>
         <script type="text/javascript">
 <?php

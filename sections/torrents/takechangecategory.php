@@ -78,6 +78,8 @@ switch (CATEGORY[$NewCategoryID - 1]) {
         );
         $new = $tgMan->findById($DB->inserted_id());
         break;
+    default:
+        error(0);
 }
 
 $DB->prepared_query('
@@ -102,7 +104,7 @@ if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
     (new \Gazelle\Manager\Comment)->merge('torrents', $oldId, $new->id());
     $log->merge($oldId, $new->id());
 
-    $old->remove($Viewer, $log);
+    $old->remove($Viewer);
 }
 
 $new->flush();

@@ -127,7 +127,7 @@ if ($thread->hasPoll()) {
                     </li>
 <?php
             }
-            if (isset($answerList[0]) and $anwerList[0]['total'] > 0) {
+            if (isset($answerList[0]) and $answerList[0]['total'] > 0) {
 ?>
                 <li><?=($response == '0' ? '&raquo; ' : '')?>(Blank) (<?=number_format($answerList[0]['total'], 2)?>%)</li>
                 <li class="graph">
@@ -158,7 +158,7 @@ if ($thread->hasPoll()) {
                 }
             }
             if (count($vote['missing']['who'])) {
-                $totalStaff += count($info['who']);
+                $totalStaff += count($vote['missing']['who']);
 ?>
                 <li>Missing: <?= implode(', ', array_map(fn($u) => $u->link(), $vote['missing']['who'])) ?></li>
 <?php       } ?>
@@ -393,7 +393,7 @@ if (count($transitions)) {
 <?php
 }
 if ($Viewer->permitted('site_moderate_forums')) {
-    $Notes = $thread->threadNotes($threadId);
+    $Notes = $thread->threadNotes();
 ?>
     <br />
     <h3 id="thread_notes">Thread notes</h3> <a href="#" onclick="$('#thread_notes_table').gtoggle(); return false;" class="brackets">Toggle</a>
@@ -494,4 +494,4 @@ if ($Viewer->permitted('site_moderate_forums')) {
 <?php } // $Viewer->permitted('site_moderate_forums') ?>
 </div>
 <?php
-view::show_footer();
+View::show_footer();

@@ -18,10 +18,10 @@ if (empty($title)) {
 $thread = match((int)($_POST['thread'] ?? -1)) {
     -1 => null,
      0 => (new Gazelle\Manager\ForumThread)->create(
-        forumId: ANNOUNCEMENT_FORUM_ID,
-        userId:  $Viewer->id(),
-        title:   $title,
-        body:    $body,
+        forum:  new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
+        userId: $Viewer->id(),
+        title:  $title,
+        body:   $body,
     ),
     default => (new Gazelle\Manager\ForumThread)->findById((int)$_POST['thread']),
 };
@@ -37,7 +37,7 @@ $blog = (new Gazelle\Manager\Blog)->create([
 if ($thread && isset($_POST['subscribe'])) {
     (new Gazelle\User\Subscription($Viewer))->subscribe($thread->id());
 }
-$notification = new Gazelle\Manager\Notification($Viewer->id());
+$notification = new Gazelle\Manager\Notification();
 $notification->push($notification->pushableUsers($Viewer->id()), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);
 
 Gazelle\Util\Irc::sendMessage(BOT_CHAN, "New blog article: " . $blog->title());

@@ -54,7 +54,7 @@ $Aliases = [
 
 $Action = $_GET['action'] ?? $_POST['action'] ?? '';
 if (isset($Aliases[$Action])) {
-    $_GET['action'] = $Action = $Aliases[$action];
+    $_GET['action'] = $Action = $Aliases[$Action];
 }
 if (!$Action || !isset($Viewer)) {
     json_error("failure");
@@ -75,13 +75,13 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     } else {
         $Cache->increment_value('ajax_requests_'.$UserID);
         if ($UserRequests > $rate) {
-            json_error("failure", "Rate limit exceeded");
+            json_error("Rate limit exceeded");
         }
     }
 }
 
 if (AJAX && !defined('AUTHED_BY_TOKEN') && in_array($Action, $RequireTokenPages)) {
-    json_error("failure", "This page requires an api token");
+    json_error("This page requires an api token");
 }
 
 switch ($Action) {

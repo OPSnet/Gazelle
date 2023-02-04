@@ -24,7 +24,7 @@ if ($needImage !== 'none') {
     <tr>
         <td class="label">
             Link(s) to <?= $needImage == 'proof' ? 'proof ' : '' ?>images<?=
-    match($needSitelink) {
+    match($needImage) {
         'proof',
         'required' => ' <strong class="important_text">(Required)</strong>',
         'optional' => ' (Optional)',

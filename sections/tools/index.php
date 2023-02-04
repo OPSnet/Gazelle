@@ -85,7 +85,7 @@ switch ($_REQUEST['action']) {
         require_once('managers/enable_requests.php');
         break;
     case 'ajax_take_enable_request':
-        if (FEATURE_EMAIL_REENABLE) {
+        if (FEATURE_EMAIL_REENABLE) { /** @phpstan-ignore-line */
             require_once('managers/ajax_take_enable_request.php');
         } else {
             // Prevent post requests to the ajax page

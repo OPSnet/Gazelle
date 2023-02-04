@@ -9,11 +9,14 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$torMan    = new Gazelle\Manager\Torrent;
-$reportMan = new Gazelle\Manager\Torrent\Report($torMan);
-$userMan   = new Gazelle\Manager\User;
+$imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
+$torMan        = new Gazelle\Manager\Torrent;
+$reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$userMan       = new Gazelle\Manager\User;
 
 $report    = $reportMan->findNewest();
+$reportId  = $report->id();
 $torrentId = $report->torrentId();
 if (is_null($report->torrent())) {
 ?>
@@ -45,11 +48,11 @@ $reporter = $userMan->findById($report->reporterId());
     <input type="hidden" id="reportid<?= $reportId ?>" name="reportid" value="<?= $reportId ?>" />
     <input type="hidden" id="torrentid<?= $reportId ?>" name="torrentid" value="<?= $torrentId ?>" />
     <input type="hidden" id="uploader<?= $reportId ?>" name="uploader" value="<?= $uploader()->username() ?>" />
-    <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploader->id() ?? 0 ?>" />
+    <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploader->id() ?>" />
     <input type="hidden" id="reporterid<?= $reportId ?>" name="reporterid" value="<?= $reporter->id() ?>" />
     <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= $RawName ?>" />
-    <input type="hidden" id="type<?= $reportId ?>" name="type" value="<?= $report->reportType->type() ?>" />
-    <input type="hidden" id="categoryid<?= $reportId ?>" name="categoryid" value="<?= $report->categoryId() ?>" />
+    <input type="hidden" id="type<?= $reportId ?>" name="type" value="<?= $report->reportType()->type() ?>" />
+    <input type="hidden" id="categoryid<?= $reportId ?>" name="categoryid" value="<?= $report->reportType()->categoryId() ?>" />
 </div>
 <table class="box layout" cellpadding="5">
     <tr>
@@ -59,7 +62,7 @@ $reporter = $userMan->findById($report->reporterId());
             <a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
             uploaded by <?= $uploader->link() ?></a> <?=time_diff($torrent->created()) ?>
             <br />
-            <div style="text-align: right;">was reported by <?= $reporter->link() ?> <?=time_diff($report->created())?> for the reason: <strong><?= $report->reportType->name() ?></strong></div>
+            <div style="text-align: right;">was reported by <?= $reporter->link() ?> <?=time_diff($report->created())?> for the reason: <strong><?= $report->reportType()->name() ?></strong></div>
 <?php
     $totalGroup = $reportMan->totalReportsGroup($tgroupId);
     if ($totalGroup > 1) {
@@ -189,7 +192,7 @@ if ($report->image()) {
         </td>
         <td colspan="3">
             <select name="resolve_type" id="resolve_type<?= $reportId ?>" onchange="ChangeResolve(<?= $reportId ?>);">
-<?php foreach ($reportTypeMan->categoryList($report->categoryId()) as $rt) { ?>
+<?php foreach ($reportTypeMan->categoryList($report->reportType()->categoryId()) as $rt) { ?>
                 <option value="<?= $rt->type() ?>"><?= $rt->name() ?></option>
 <?php } ?>
             </select>

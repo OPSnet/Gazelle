@@ -11,6 +11,7 @@ if (isset($_POST['confirm'])) {
     } elseif ($user->id() == $Viewer->id()) {
         error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
+    $viewerBonus = new \Gazelle\User\Bonus($Viewer);
     if (!$viewerBonus->purchaseTokenOther($user->id(), $Label, $_POST['message'] ?? '')) {
         error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
     }

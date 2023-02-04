@@ -46,7 +46,6 @@ switch($_POST['pm_type']) {
         break;
     default:
         json_error("no recipient target");
-        break;
 }
 
 if (!(isset($ToID) && $ToID)) {

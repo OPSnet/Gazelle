@@ -25,7 +25,7 @@ if (isset($_POST['name'])) {
         if ($check->isDeleted()) {
             $Err = 'A collage with that name already exists but needs to be recovered, please <a href="staffpm.php">contact</a> the staff team!';
         } else {
-            $Err = "A collage with that name already exists: <?= $check->link() ?>.";
+            $Err = "A collage with that name already exists: {$check->link()}.";
         }
         $ErrNoEscape = true;
         require('edit.php');

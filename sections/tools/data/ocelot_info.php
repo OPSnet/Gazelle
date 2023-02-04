@@ -33,7 +33,7 @@ if (!isset($_GET['userid'])) {
 
 echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
-    'announce_key' => $TorrentPass,
+    'announce_key' => $TorrentPass ?? 'none',
     'main_stats'   => $MainStats ?? null,
     'peer_stats'   => $UserPeerStats ?? null,
     'user_id'      => $_GET['userid'] ?? null,

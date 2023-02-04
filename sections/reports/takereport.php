@@ -22,8 +22,6 @@ if ($Short !== 'request_update') {
     $Year = trim($_POST['year']);
     if (empty($Year) || !is_number($Year)) {
         error('Year must be specified.');
-        header("Location: reports.php?action=report&type=request_update&id=$ID");
-        exit;
     }
     $Reason = '[b]Year[/b]: '.$Year.".\n\n";
     // If the release type is somehow invalid, return "Not given"; otherwise, return the release type.

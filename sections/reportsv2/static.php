@@ -119,7 +119,7 @@ if ($search->canUnclaim($Viewer)) {
                                 <tr class="colhead_dark">
                                     <td>
                                         <div class="filelist_title" style="float: left;">File Names</div>
-                                        <div class="filelist_path" style="float: right;"><?= $torrent?->path() ? "/{$torrent?->path()}/" : '.' ?></div>
+                                        <div class="filelist_path" style="float: right;"><?= $torrent?->path() ? "/{$torrent->path()}/" : '.' ?></div>
                                     </td>
                                     <td class="nobr" style="text-align: right">
                                         <strong>Size</strong>

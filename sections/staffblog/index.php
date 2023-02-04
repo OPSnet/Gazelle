@@ -69,7 +69,6 @@ if ($Viewer->permitted('admin_manage_blog')) {
 
            default:
                 error(403);
-                break;
         }
     }
     echo $Twig->render('staffblog/edit.twig', [

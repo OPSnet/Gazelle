@@ -11,7 +11,6 @@ if ($Viewer->disablePm() && !$recipient->isStaff()) {
 }
 if (!isset($Return) && $recipient->id() == $Viewer->id()) {
     error('You cannot start a conversation with yourself!');
-    header('Location: inbox.php');
 }
 
 echo $Twig->render('inbox/compose.twig', [

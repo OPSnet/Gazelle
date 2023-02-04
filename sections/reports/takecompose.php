@@ -41,17 +41,13 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
         $Err = "You can't send a message without a subject.";
     }
 }
-$Body = trim($_POST['body']);
-if ($Body === '' || $Body === false) {
+$Body = trim($_POST['body'] ?? '');
+if ($Body === '') {
     $Err = "You can't send a message without a body!";
 }
 
 if (!empty($Err)) {
     error($Err);
-    $ToID = $_POST['toid'];
-    $Return = true;
-    require_once(__DIR__ . '/../inbox/compose.php');
-    die();
 }
 
 if ($ConvID) {

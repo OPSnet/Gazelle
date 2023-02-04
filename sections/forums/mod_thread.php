@@ -90,17 +90,19 @@ if ($locked && $Viewer->permitted('site_moderate_forums')) {
     $thread->clearUserLastRead();
 }
 
-$thread->editThread($newForum ? $newForum->id() : $forum->id(), $newPinned, $newRank, $locked, $newTitle);
+$thread->editThread(isset($newForum) ? $newForum->id() : $forum->id(), $newPinned, $newRank, $locked, $newTitle);
 
 // topic notes and notifications
 $notes = [];
 $oldUrl = "[url=" . $forum->url() . "]" . $forum->name() . "[/url]";
-if ($newForum) {
+if (isset($newForum)) {
     $newUrl = "[url=" . $newForum->url() . "]" . $newForum->name() . "[/url]";
 }
 switch ($action ?? null) {
     case 'transitioning':
-        $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";
+        if (isset($_POST['transition']) && isset($newUrl)) {
+            $notes[] = "Moved from $oldUrl to $newUrl ({$transition['label']}) transition)";
+        }
         break;
     default:
         if ($thread->title() != $newTitle) {

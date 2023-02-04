@@ -7,9 +7,9 @@ if (is_null($artist)) {
 authorize();
 
 $thread = (new Gazelle\Manager\ForumThread)->create(
-    forumId: EDITING_FORUM_ID,
+    forum:   new Gazelle\Forum(EDITING_FORUM_ID),
     userId:  SYSTEM_USER_ID,
-    title:   "Editing request \xE2\x80\x93 Artist: " . $artist->name(),
+    title:   "Editing request – Artist: " . $artist->name(),
     body:    $Twig->render('forum/edit-request-body.twig', [
         'link'    => '[artist]' . $artist->name() . '[/artist]',
         'details' => trim($_POST['edit_details']),

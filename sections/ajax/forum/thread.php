@@ -21,23 +21,23 @@ if (!isset($_GET['threadid']) && isset($_GET['topicid'])) {
 if (isset($_GET['postid'])) {
     $post = (new Gazelle\Manager\ForumPost)->findById((int)$_GET['postid']);
     if (is_null($post)) {
-        print json_die('failure', 'bad post id');
+        json_error('bad post id');
     }
     $thread = $post->thread();
 } elseif (isset($_GET['threadid'])) {
     $post = false;
     $thread = (new Gazelle\Manager\ForumThread)->findById((int)$_GET['threadid']);
     if (is_null($thread)) {
-        print json_die('failure', 'bad thread id');
+        json_error('bad thread id');
     }
 } else {
-    print json_die('failure', 'no post or thread id');
+    json_error('no post or thread id');
 }
 $forum = $thread->forum();
 
 // Make sure they're allowed to look at the page
 if (!$Viewer->readAccess($forum)) {
-    print json_die('failure', 'access denied');
+    json_error('access denied');
 }
 
 $forumId = $forum->id();
@@ -87,9 +87,9 @@ $JsonPoll = null;
 if ($thread->hasPoll()) {
     $poll = new Gazelle\ForumPoll($thread->id());
 
-    $response = $thread->response($Viewer->id());
+    $response = $poll->response($Viewer->id());
     $answerList = $poll->vote();
-    if ($response > 0 || (!is_null($response) && $RevealVoters)) {
+    if ($response > 0 || (!is_null($response) && $poll->hasRevealVotes())) {
         $answerList[$response]['asnswer'] = '&raquo; ' . $answerList[$response]['asnswer'];
     }
 

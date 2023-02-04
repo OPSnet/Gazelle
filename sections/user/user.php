@@ -122,6 +122,8 @@ if ($OwnProfile || $Viewer->permitted('users_mod')) {
                 $current = Format::get_size($current);
                 $goal = Format::get_size($goal);
                 break;
+            default:
+                continue 2;
             }
 
             $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
@@ -172,60 +174,58 @@ $rank = new Gazelle\UserRank(
         'comment-t'  => $torrentComments,
     ]
 );
-function display_rank(Gazelle\UserRank $r, string $dimension) {
-    return $r->rank($dimension) === false ? 'Server busy' : $r->rank($dimension);
-}
 ?>
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
 <?php if (($Override = check_paranoia_here('uploaded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->uploadedSize())?> uploaded">Data uploaded: <?= display_rank($rank, 'uploaded') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->uploadedSize())?> uploaded">Data uploaded: <?= $rank->rank('uploaded') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('downloaded'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->downloadedSize())?> downloaded">Data downloaded: <?= display_rank($rank, 'downloaded') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->downloadedSize())?> downloaded">Data downloaded: <?= $rank->rank('downloaded') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('uploads+'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?> uploads">Torrents uploaded: <?= display_rank($rank, 'uploads') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?> uploads">Torrents uploaded: <?= $rank->rank('uploads') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('requestsfilled_count'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($stats->requestBountyTotal())?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($stats->requestBountyTotal())?> filled">Requests filled: <?= $rank->rank('requests') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats->requestBountySize())?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats->requestBountySize())?> spent">Request votes: <?= $rank->rank('bounty') ?></li>
 <?php } ?>
-                <li class="tooltip" title="<?=number_format($stats->forumPostTotal())?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
+                <li class="tooltip" title="<?=number_format($stats->forumPostTotal())?> posts">Forum posts made: <?= $rank->rank('posts') ?></li>
 <?php
 if (($Override = check_paranoia_here('torrentcomments++'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent comments: <?= display_rank($rank, 'comment-t') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent comments: <?= $rank->rank('comment-t') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('collagecontribs+'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($collageAdditions)?> contributions">Collage contributions: <?= display_rank($rank, 'collage') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($collageAdditions)?> contributions">Collage contributions: <?= $rank->rank('collage') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('artistsadded'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?> added">Artists added: <?= display_rank($rank, 'artists') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?> added">Artists added: <?= $rank->rank('artists') ?></li>
 <?php } ?>
-                <li class="tooltip" title="<?=number_format($releaseVotes)?> votes">Release votes cast: <?= display_rank($rank, 'votes') ?></li>
+                <li class="tooltip" title="<?=number_format($releaseVotes)?> votes">Release votes cast: <?= $rank->rank('votes') ?></li>
 <?php if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
-                <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= display_rank($rank, 'bonus') ?></li>
+                <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
 <?php
 }
 if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
 ?>
-                <li<?= $User->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= $rank->score() === false ? 'Server busy'
+                <li<?= $User->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
+                    ? 'Server busy'
                     : ($User->classLevel() >= 900 ? '&nbsp;&infin;' : number_format($rank->score() * $User->rankFactor())) ?></strong></li>
 <?php } ?>
             </ul>
@@ -241,7 +241,7 @@ if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requ
     if ($Viewer->permitted('users_view_ips')) {
 ?>
                 <li>IPs: <?=number_format($User->siteIPCount())?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
-<?php   if ($Viewer->permitted('users_view_ips') && $Viewer->permitted('users_mod')) { ?>
+<?php   if ($Viewer->permitted('users_mod')) { ?>
                 <li>Tracker IPs: <?=number_format($User->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
         }
@@ -307,7 +307,7 @@ echo $Twig->render('user/sidebar-stats.twig', [
         'collages'              => check_paranoia_here('collages'),
         'collagescontrib+'      => check_paranoia_here('collagecontribs+'),
         'collagecontribs'       => check_paranoia_here('collagecontribs'),
-        'downloaded'            => check_paranoia_here('downloaded'),
+        'downloaded'            => $OwnProfile || $Viewer->permitted('site_view_torrent_snatchlist'),
         'invitedcount'          => check_paranoia_here('invitedcount'),
         'leeching+'             => check_paranoia_here('leeching+'),
         'leeching'              => check_paranoia_here('leeching'),
@@ -505,10 +505,11 @@ if (!$Viewer->disableRequests() && check_paranoia_here('requestsvoted_list')) {
                         </td>
                     </tr>
 <?php
-        $Row = 'a';
+        $Row = 'b';
         foreach ($requestList as $request) {
+            $Row = $Row === 'a' ?  'b' : 'a';
 ?>
-                    <tr class="row<?=$Row === 'b' ? 'a' : 'b'?>">
+                    <tr class="row<?= $Row ?>">
                         <td>
                             <?= $request->smartLink() ?>
                             <div class="tags">

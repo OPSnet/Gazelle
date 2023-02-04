@@ -74,7 +74,7 @@ if ($reportType->needImage() !== 'none') {
         if ($reportType->needImage() === 'required') {
             error("You must supply one or more images in your report");
         }
-    } elseif ($image != '') {
+    } else {
         if (!preg_match_all(IMAGE_REGEXP, $image, $match)) {
             error("The extra image links you provided weren't links to images...");
         }

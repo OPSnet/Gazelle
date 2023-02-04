@@ -16,7 +16,7 @@ if (!empty($_SESSION['private_key'])) {
     $secret = $_SESSION['private_key'];
     if (isset($_POST['2fa'])) {
         if ($auth->verifyCode($secret, trim($_POST['2fa']), 2)) {
-            header('Location: user.php?action=2fa&do=complete&userid=' . $userId);
+            header('Location: user.php?action=2fa&do=complete&userid=' . $Viewer->id());
             exit;
         }
         $valid = false;

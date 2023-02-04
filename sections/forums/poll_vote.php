@@ -44,7 +44,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             foreach ($staffVote as $response => $info) {
                 if ($response !== 'missing') {
 ?>
-                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?= $response ?>"><?=empty($info['answer']) ? 'Abstain' : display_str($info['answer'])?></a> <?=
+                <li><a href="forums.php?action=change_vote&amp;threadid=<?= $poll->id() ?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?= $response ?>"><?=empty($info['answer']) ? 'Abstain' : display_str($info['answer'])?></a> <?=
                     count ($info['who']) ? (" \xE2\x80\x93 " . implode(', ', array_map(fn($u) => $u->link(), $info['who']))) : "<i>none</i>"
                 ?></li>
 <?php

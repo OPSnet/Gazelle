@@ -37,7 +37,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     </div>
 <?php
 } else {
-    $ShowGroups = 0;
+    $showGroups = (bool)$Viewer->option('TorrentGrouping');
     foreach ($groupSubs as $s) {
         $GroupIDs = $s['groupIds'];
         $new = $viewAll ? 0 : count($GroupIDs);
@@ -90,7 +90,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
     <tr class="group groupid_<?= $s['collageId'] . $GroupID?>_header discog<?=$SnatchedGroupClass?>" id="group_<?= $s['collageId'] . $GroupID?>">
         <td class="center">
-            <div id="showimg_<?= $s['collageId'] . $GroupID?>" class="<?=($ShowGroups ? 'hide' : 'show')?>_torrents">
+            <div id="showimg_<?= $s['collageId'] . $GroupID?>" class="<?=($showGroups ? 'hide' : 'show')?>_torrents">
                 <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $s['collageId'] . $GroupID?>, this, event);" title="Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups on this page."></a>
             </div>
         </td>

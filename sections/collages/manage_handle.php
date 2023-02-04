@@ -6,7 +6,7 @@ $groupId = (int)$_POST['groupid'];
 if (!$groupId) {
     error(404);
 }
-$collage = new Gazelle\Collage((int)($_POST['collageid']));
+$collage = (new Gazelle\Manager\Collage)->findById((int)($_POST['collageid']));
 if (is_null($collage)) {
     error(404);
 }

@@ -69,7 +69,6 @@ foreach ($Results as &$result) {
             break;
         default:
             error(0);
-            break;
     }
     if (!empty($result['LastReadBody'])) {
         $result['avatar'] = $userMan->avatarMarkup($Viewer, new Gazelle\User($result['LastReadUserID']));

@@ -37,7 +37,7 @@ if ($Viewer->effectiveClass() < $staffPm->classLevel() && $Viewer->id() != $staf
     if ($assignTo == 'class') {
         $staffPm->assignClass($NewLevel, $Viewer);
     } else {
-        $assignee = new Gazelle\User($NewLevel);
+        $assignee = (new Gazelle\Manager\User)->findById($NewLevel);
         if (is_null($assignee)) {
             error(404, true);
         }

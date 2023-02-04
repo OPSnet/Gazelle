@@ -1,6 +1,6 @@
 <?php
 
-$collage = new Gazelle\Collage((int)($_GET['collageid'] ?? $_GET['id'] ?? 0));
+$collage = (new Gazelle\Manager\Collage)->findById((int)($_GET['collageid'] ?? $_GET['id'] ?? 0));
 if (is_null($collage) || $collage->isArtist()) {
     error(404);
 }

@@ -121,7 +121,9 @@ $searchDisabledUploads = (isset($_GET['disabled_uploads']) && $_GET['disabled_up
 $searchLockedAccount = (($_GET['lockedaccount'] ?? '') == 'locked');
 $showInvited = (($_GET['invited'] ?? 'off') !== 'off');
 
-if (!empty($_GET)) {
+if (empty($_GET)) {
+    $Results = [];
+} else {
     $emailHistoryChecked = !empty($_GET['email_history']);
     $disabledIpChecked = !empty($_GET['disabled_ip']);
     $ipHistoryChecked = !empty($_GET['ip_history']);
@@ -246,7 +248,7 @@ if (!empty($_GET)) {
     }
 
     if ($searchLockedAccount) {
-        $Join['la'] .= 'INNER JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
+        $Join['la'] = 'INNER JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
     }
     elseif (isset($_GET['lockedaccount']) && $_GET['lockedaccount'] == 'unlocked') {
         $Join['la'] = 'LEFT JOIN locked_accounts AS la ON (la.UserID = um1.ID)';

@@ -128,7 +128,6 @@ if (!empty($_REQUEST['action'])) {
                 exit;
             }
             error(403);
-            break;
         case 'add_cover_art':
             require_once('add_cover_art.php');
             break;

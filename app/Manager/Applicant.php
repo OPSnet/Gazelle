@@ -3,13 +3,28 @@
 namespace Gazelle\Manager;
 
 class Applicant extends \Gazelle\Base {
-
+    const ID_KEY              = 'zz_appl_%d';
     const CACHE_KEY           = 'applicant_%d';
     const CACHE_KEY_OPEN      = 'applicant_list_open_%d';
     const CACHE_KEY_RESOLVED  = 'applicant_list_resolved_%d';
     const CACHE_KEY_NEW_COUNT = 'applicant_new_count';
     const CACHE_KEY_NEW_REPLY = 'applicant_new_reply';
     const ENTRIES_PER_PAGE    = 1000; // TODO: change to 50 and implement pagination
+
+    public function findById(int $applicantId): ?\Gazelle\Applicant {
+        $key = sprintf(self::ID_KEY, $applicantId);
+        $id = self::$cache->get_value($key);
+        if ($id === false) {
+            $id = self::$db->scalar("
+                SELECT ID FROM applicant WHERE ID = ?
+                ", $applicantId
+            );
+            if (!is_null($id)) {
+                self::$cache->cache_value($key, $id, 7200);
+            }
+        }
+        return $id ? new \Gazelle\Applicant($id) : null;
+    }
 
     public function createApplicant(int $userId, int $roleId, string $body) {
         self::$db->prepared_query("

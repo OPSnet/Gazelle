@@ -13,7 +13,6 @@ $tgroup = $infohash
 
 if (is_null($tgroup)) {
     json_error('bad parameters');
-    exit;
 }
 
 (new Gazelle\Json\TGroup($tgroup, $Viewer, (new \Gazelle\Manager\Torrent)->setViewer($Viewer)))

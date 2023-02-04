@@ -39,16 +39,18 @@ if ($_POST['id']) {
         } else {
             if ($doComment) {
                 $message = "Commented on";
-                $comment = "comment";
+                $comment = " comment";
             } elseif ($doDisable) {
                 $message = "Banned";
-                $comment = "disable";
+                $comment = " disable";
             } elseif ($doInvites) {
                 $message = "Removed invite privileges from";
-                $comment = "invites removed";
+                $comment = " invites removed";
+            } else {
+                $comment = " ";
             }
             $message .= " entire tree ({$inviteeCount} user" . plural($inviteeCount) . ')';
-            $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree $comment on $username by " . $Viewer->username();
+            $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree$comment on $username by " . $Viewer->username();
             foreach ($inviteeList as $inviteeId) {
                 $invitee = $userMan->findById($inviteeId);
                 if (is_null($invitee)) {

@@ -22,7 +22,6 @@ if (isset($_GET['task'])) {
                 break;
             default:
                 error(403);
-                break;
         }
     }
 } else {

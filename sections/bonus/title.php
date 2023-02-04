@@ -27,6 +27,7 @@ if (isset($_POST['confirm'])) {
     if (!isset($_POST['title'])) {
         error(403);
     }
+    $viewerBonus = new \Gazelle\User\Bonus($Viewer);
     if (!$viewerBonus->purchaseTitle($Label, $_POST['title'])) {
         error('This title is too long, you must reduce the length (or you do not have enough bonus points).');
     }

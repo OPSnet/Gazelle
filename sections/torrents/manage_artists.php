@@ -74,7 +74,7 @@ if (count($CleanArtists) > 0) {
         $EmptyArtists = array_diff($ArtistIDs, $Items);
         $logger = new Gazelle\Log;
         foreach ($EmptyArtists as $ArtistID) {
-            (new Artist($ArtistID))->remove($Viewer, $logger);
+            (new Gazelle\Artist($ArtistID))->remove($Viewer, $logger);
         }
     }
     else {

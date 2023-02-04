@@ -23,8 +23,9 @@ if ($_REQUEST['do'] == 'unvote') {
             break;
         default:
             json_error('bad vote');
-            break;
     }
+} else {
+    error(0);
 }
 
 if (!$ok) {

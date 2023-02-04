@@ -64,7 +64,7 @@ if (defined('AJAX')) {
         'torrentId'  => $torrent->id(),
         'fillerId'   => $filler->id(),
         'fillerName' => $filler->username(),
-        'bounty'     => $requeset->bounty(),
+        'bounty'     => $request->bounty(),
     ];
     if ($_REQUEST['action'] === 'request_fill') {
         json_print('success', $data);

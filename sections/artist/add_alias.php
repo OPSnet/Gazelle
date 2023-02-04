@@ -60,11 +60,9 @@ if (!$CloneAliasID) {
             switch ($e->getMessage()) {
             case 'Artist:not-redirected':
                 error('Redirection must target an alias for the current artist.');
-                break;
             default:
             case 'Artist:not-found':
                 error('Cannot redirect to a nonexistent artist alias.');
-                break;
             }
         }
 

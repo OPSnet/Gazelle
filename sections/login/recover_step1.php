@@ -3,7 +3,8 @@
 $validator = new Gazelle\Util\Validator;
 $validator->setField('email', '1', 'email', 'You entered an invalid email address.');
 
-$sent = false;
+$error = false;
+$sent  = false;
 if (isset($_REQUEST['expired'])) {
     $error = 'The link you followed has expired.';
 } elseif (!empty($_REQUEST['email'])) {
