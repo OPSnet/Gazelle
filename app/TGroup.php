@@ -331,10 +331,6 @@ class TGroup extends BaseObject {
         return isset(CATEGORY_GROUPED[$this->categoryId() - 1]);
     }
 
-    public function categoryIcon(): bool {
-        return isset(CATEGORY_ICON[$this->categoryId() - 1]);
-    }
-
     public function categoryName(): string {
         return CATEGORY[$this->categoryId() - 1];
     }

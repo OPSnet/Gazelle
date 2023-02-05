@@ -147,14 +147,10 @@ $Index = 0;
 <div id="covers">
 <div id="cover_div_<?=$Index?>" class="pad">
 <?php
-if ($tgroup->image() != '') {
-    $image = $imgProxy->process($tgroup->image());
+$image = $imgProxy->process($tgroup->cover());
 ?>
-            <p align="center"><img width="100%" src="<?= $image ?>" alt="<?= display_str($title) ?>" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
-<?php } else { ?>
-            <p align="center"><img width="100%" src="<?=STATIC_SERVER?>/common/noartwork/<?= $tgroup->categoryIcon() ?>" class="brackets tooltip" title="<?= $tgroup->categoryName() ?>" height="220" border="0" /></p>
+            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
 <?php
-}
 $Index++;
 ?>
 </div>
