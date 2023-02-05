@@ -110,7 +110,7 @@ if ($Viewer->permitted('zip_downloader')) {
             echo $collMan->coverRow($tgroup);
             ++$Idx;
         }
-        if ($Idx > $limit) {
+        if ($Idx >= $limit) {
             break;
         }
     }
