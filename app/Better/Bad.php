@@ -3,7 +3,6 @@
 namespace Gazelle\Better;
 
 class Bad extends AbstractBetter {
-
     protected \Gazelle\TorrentFlag $torrentFlag;
 
     public function mode(): string {

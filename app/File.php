@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 abstract class File extends Base {
-
     /**
      * Store a file on disk at the specified path.
      *

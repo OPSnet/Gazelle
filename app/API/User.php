@@ -21,13 +21,12 @@ class User extends AbstractAPI {
         return match ($_GET['req']) {
             'enable'  => $this->enableUser(),
             'disable' => $this->disableUser(),
-            'stats'   => $this->getUser(),
-            default   => json_error('bad req'),
+            default   => $this->getUser(),
         };
     }
 
     private function getUser() {
-        if ($this->id > 0) {
+        if (isset($this->id)) {
             $cond = "um.ID = ?";
             $arg = $this->id;
         } else {
@@ -87,7 +86,7 @@ class User extends AbstractAPI {
 
     private function disableUser() {
         $userMan = new \Gazelle\Manager\User;
-        if ($this->id === null) {
+        if (!isset($this->id)) {
             $user = $userMan->findByUsername($this->username);
             if (is_null($user)) {
                 json_error("No user found with username {$this->username}");
@@ -99,7 +98,7 @@ class User extends AbstractAPI {
     }
 
     private function enableUser() {
-        if ($this->id > 0) {
+        if (isset($this->id)) {
             $cond = "um.ID = ?";
             $arg = $this->id;
         } else {

@@ -1,6 +1,5 @@
 <?php
 class Format {
-
     /**
      * Gets the CSS class corresponding to a ratio
      *

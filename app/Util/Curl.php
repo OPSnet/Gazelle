@@ -10,7 +10,6 @@ enum CurlMethod {
 }
 
 class Curl {
-
     protected $curl;
     protected $result;
     protected bool $useProxy = true;

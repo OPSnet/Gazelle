@@ -3,7 +3,6 @@
 namespace Gazelle\User;
 
 class Activity extends \Gazelle\BaseUser {
-
     protected bool $showStaffInbox = false;
     protected array $action = [];
     protected array $alert = [];
