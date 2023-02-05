@@ -10,11 +10,9 @@ class User extends AbstractAPI {
     public function run() {
         if (isset($_GET['user_id'])) {
             $this->id = (int)$_GET['user_id'];
-        }
-        else if (isset($_GET['username'])) {
+        } else if (isset($_GET['username'])) {
             $this->username = $_GET['username'];
-        }
-        else {
+        } else {
             json_error("Need to supply either user_id or username");
         }
 
@@ -23,12 +21,19 @@ class User extends AbstractAPI {
         return match ($_GET['req']) {
             'enable'  => $this->enableUser(),
             'disable' => $this->disableUser(),
-            default   => $this->getUser(),
+            'stats'   => $this->getUser(),
+            default   => json_error('bad req'),
         };
     }
 
     private function getUser() {
-        $where = ($this->id !== null) ? "um.ID = ?" : "um.Username = ?";
+        if ($this->id > 0) {
+            $cond = "um.ID = ?";
+            $arg = $this->id;
+        } else {
+            $cond =  "um.Username = ?";
+            $arg = $this->username;
+        }
         self::$db->prepared_query("
             SELECT
                 um.ID,
@@ -49,8 +54,9 @@ class User extends AbstractAPI {
             INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
             LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
             LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
-            WHERE
-                {$where}", $this->id ?? $this->username);
+            WHERE $cond
+            ", $arg
+        );
 
         $user = self::$db->next_record(MYSQLI_ASSOC, ['IRCKey', 'Paranoia']);
         if (empty($user['Username'])) {
@@ -93,7 +99,13 @@ class User extends AbstractAPI {
     }
 
     private function enableUser() {
-        $where = ($this->id !== null) ? "um.ID = ?" : "um.Username = ?";
+        if ($this->id > 0) {
+            $cond = "um.ID = ?";
+            $arg = $this->id;
+        } else {
+            $cond =  "um.Username = ?";
+            $arg = $this->username;
+        }
         self::$db->prepared_query("
             SELECT
                 um.ID,
@@ -111,8 +123,9 @@ class User extends AbstractAPI {
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             INNER JOIN users_info        AS ui  ON (ui.UserID = um.ID)
             INNER JOIN user_flt          AS uf  ON (uf.user_id = um.ID)
-            WHERE
-                {$where}", $this->id ?? $this->username);
+            WHERE $cond
+            ", $arg
+        );
 
         // TODO: merge this and the version in takemoderate.php
         $UpdateSet = [];
