@@ -37,6 +37,7 @@ __MACOSX/
 !/public/static/styles/opendyslexic/style.css
 !/public/static/styles/tooltipster/custom.css
 !/public/static/styles/tooltipster/reset.css
+!/public/static/styles/katex/*
 
 /public/static/stylespreview/
 !/public/static/stylespreview/.gitkeep

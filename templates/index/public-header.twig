@@ -1,4 +1,4 @@
-{%- from 'macro/header.twig' import css, script -%}
+{%- from 'macro/header.twig' import scss, css, script -%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <title>{{ page_title }}</title>
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-{{ css('public/style.css') }}
+{{ scss('public/style.css') }}
 {% for js in script %}
 {{ script(js) }}
 {% endfor %}

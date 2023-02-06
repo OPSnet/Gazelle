@@ -179,8 +179,13 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('mtime_css', fn($filename) => new \Twig\Markup(
+        $twig->addFunction(new \Twig\TwigFunction('mtime_scss', fn($filename) => new \Twig\Markup(
             base_convert(filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)), 10, 36),
+            'UTF-8'
+        )));
+
+        $twig->addFunction(new \Twig\TwigFunction('mtime_css', fn($filename) => new \Twig\Markup(
+            base_convert(filemtime(SERVER_ROOT . '/public/static/styles/' . $filename), 10, 36),
             'UTF-8'
         )));
 

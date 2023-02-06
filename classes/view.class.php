@@ -38,19 +38,24 @@ class View {
             return;
         }
         array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min');
-        $Style = [
+        $Style = [];
+        $ScssStyle = [
             'global.css',
         ];
         if (!empty($option['css'])) {
-            array_push($Style, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
+            array_push($ScssStyle, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
         }
         if ($Viewer->option('Tooltipster') ?? 1) {
             array_push($js, 'tooltipster', 'tooltipster_settings');
-            $Style[] = 'tooltipster/style.css';
+            $ScssStyle[] = 'tooltipster/style.css';
         }
         if ($Viewer->option('UseOpenDyslexic')) {
-            $Style[] = 'opendyslexic/style.css';
+            $ScssStyle[] = 'opendyslexic/style.css';
         }
+
+        // add KaTeX renderer for bbcode [tex] elements
+        $Style[] = 'katex/katex-0.16.4.min.css';
+        $js[] = 'katex-0.16.4.min';
 
         $activity = new Gazelle\User\Activity($Viewer);
         $activity->configure()
@@ -139,7 +144,8 @@ class View {
             'page_title'  => html_entity_decode($pageTitle),
             'script'      => array_map(fn($s) => "$s.js", $js),
             'style'       => new Gazelle\User\Stylesheet($Viewer),
-            'style_extra' => $Style,
+            'scss_style'  => $ScssStyle,
+            'css_style'   => $Style,
             'viewer'      => $Viewer,
         ]);
         echo $Twig->render('index/page-header.twig', [

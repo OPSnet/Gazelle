@@ -178,6 +178,7 @@ function Preview_Edit(postid) {
     ajax.post("ajax.php?action=preview","form" + postid, function(response) {
         $('#preview' + postid).raw().innerHTML = response;
         $('#editbox' + postid).ghide();
+        BBCode.run_renderer($('#preview' + postid));
     });
 }
 
@@ -196,6 +197,7 @@ function Save_Edit(postid) {
             $('#editbox' + postid).ghide();
             $('#pmbox' + postid).ghide();
             $('#postcontrol-' + postid).gshow();
+            BBCode.run_renderer($('#content' + postid));
         });
     } else {
         ajax.post("comments.php?action=take_edit","form" + postid, function (response) {
@@ -204,6 +206,7 @@ function Save_Edit(postid) {
             $('#editbox' + postid).ghide();
             $('#pmbox' + postid).ghide();
             $('#postcontrol-' + postid).gshow();
+            BBCode.run_renderer($('#content' + postid));
         });
     }
 }

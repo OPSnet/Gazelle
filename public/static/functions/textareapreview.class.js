@@ -78,6 +78,7 @@ $(document).ready(function () {
         },
         html : function (data) {
             this.el.preview.html(data);
+            BBCode.run_renderer(this.el.preview);
         }
     };
 });

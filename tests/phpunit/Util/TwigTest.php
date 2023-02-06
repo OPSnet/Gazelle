@@ -150,7 +150,7 @@ END;
         );
 
         $this->assertIsString(self::twig('{{ mtime(asset) }}')->render(['asset' => 'blank.gif']), 'twig-function-mtime-file');
-        $this->assertIsString(self::twig('{{ mtime_css(asset) }}')->render(['asset' => 'global.scss']), 'twig-function-mtime-css');
+        $this->assertIsString(self::twig('{{ mtime_scss(asset) }}')->render(['asset' => 'global.scss']), 'twig-function-mtime-scss');
 
         $this->assertEquals(
             '<span class="tooltip r20" title="2.00000">2.00</span>',

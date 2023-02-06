@@ -1,4 +1,4 @@
-{%- from 'macro/header.twig' import css, script -%}
+{%- from 'macro/header.twig' import scss, css, script -%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,7 +39,10 @@
 {% endif %}
 
 <link rel="stylesheet" type="text/css" media="screen" href="{{ style.url }}" title="{{ style.name }}" />
-{% for sheet in style_extra %}
+{% for sheet in scss_style %}
+{{ scss(sheet) }}
+{% endfor %}
+{% for sheet in css_style %}
 {{ css(sheet) }}
 {% endfor %}
 

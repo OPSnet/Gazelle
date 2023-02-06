@@ -1,3 +1,7 @@
+{%- macro scss(filename) -%}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_scss(filename) }}" />
+{%- endmacro -%}
+
 {%- macro css(filename) -%}
 <link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_css(filename) }}" />
 {%- endmacro -%}

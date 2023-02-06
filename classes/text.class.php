@@ -577,7 +577,6 @@ class Text {
                     break;
                 case 'collage':
                 case 'forum':
-                case 'tex':
                 case 'thread':
                     if ((int)$Block or preg_match('/\s*\d+:\d+/', $Block)) {
                         $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block, 'Attr'=>$Attrib];
@@ -588,6 +587,7 @@ class Text {
                     }
                     break;
                 case 'artist':
+                case 'tex':
                 case 'rule':
                 case 'user':
                     $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
@@ -855,7 +855,7 @@ class Text {
                     $Str .= '<a href="wiki.php?action=article&amp;name='.urlencode($Block['Val']).'">'.$Block['Val'].'</a>';
                     break;
                 case 'tex':
-                    $Str .= '<img style="vertical-align: middle;" src="'.STATIC_SERVER.'/blank.gif" onload="if (this.src.substr(this.src.length - 9, this.src.length) == \'blank.gif\') { this.src = \'https://chart.googleapis.com/chart?cht=tx&amp;chf=bg,s,FFFFFF00&amp;chl='.urlencode(mb_convert_encoding($Block['Val'], 'UTF-8', 'HTML-ENTITIES')).'&amp;chco=\' + hexify(getComputedStyle(this.parentNode, null).color); }" alt="'.$Block['Val'].'" />';
+                    $Str .= '<katex>' . $Block['Val'] . '</katex>';
                     break;
                 case 'plain':
                     $Str .= $Block['Val'];
