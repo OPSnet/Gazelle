@@ -263,7 +263,7 @@ class Request extends BaseObject {
         return empty($need) ? null : implode(', ', $need);
     }
 
-    public function fillerId(): ?int {
+    public function fillerId(): int {
         return $this->info()['filler_id'];
     }
 
@@ -417,31 +417,6 @@ class Request extends BaseObject {
 
     public function userVotedTotal(): int {
         return count($this->userIdVoteList());
-    }
-
-    public function artistList(): array {
-        $key = sprintf(self::CACHE_ARTIST, $this->id);
-        $list = self::$cache->get_value($key);
-        if ($list !== false) {
-            return $list;
-        }
-        self::$db->prepared_query("
-            SELECT ra.ArtistID,
-                aa.Name,
-                ra.Importance
-            FROM requests_artists AS ra
-            INNER JOIN artists_alias AS aa USING (AliasID)
-            WHERE ra.RequestID = ?
-            ORDER BY ra.Importance, aa.Name
-            ", $this->id
-        );
-        $raw = self::$db->to_array();
-        $list = [];
-        foreach ($raw as [$artistId, $artistName, $role]) {
-            $list[$role][] = ['id' => $artistId, 'name' => $artistName];
-        }
-        self::$cache->cache_value($key, $list, 0);
-        return $list;
     }
 
     public function validate(Torrent $torrent): array {
@@ -616,6 +591,7 @@ class Request extends BaseObject {
         $updated = self::$db->affected_rows();
         $this->updateSphinx();
         $filler->addBounty(-$bounty);
+        $filler->flush();
         self::$db->commit();
 
         (new \SphinxqlQuery())->raw_query("
@@ -647,6 +623,7 @@ class Request extends BaseObject {
 
     /**
      * Get the bounty of request, by user
+     * TODO: redundant, given userIdVoteList()
      *
      * @return array keyed by user ID
      */
@@ -665,12 +642,8 @@ class Request extends BaseObject {
      * Get the total bounty that a user has added to a request
      */
     public function userBounty(int $userId): int {
-        return (int)self::$db->scalar("
-            SELECT Bounty
-            FROM requests_votes
-            WHERE RequestID = ? AND UserID = ?
-            ", $this->id, $userId
-        );
+        $vote = array_filter($this->userIdVoteList(), fn($r) => $r['user_id'] == $userId);
+        return count($vote) ? $vote[0]['bounty'] : 0;
     }
 
     /**

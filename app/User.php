@@ -1953,6 +1953,7 @@ class User extends BaseObject {
             }
         }
         $nr = self::$db->affected_rows();
+        $this->flush();
         $this->stats()->increment('request_bounty_total', $bounty > 0 ? 1 : -1);
         $this->stats()->increment('request_bounty_size', $bounty);
         return $nr;

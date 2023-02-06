@@ -8,10 +8,10 @@ if (empty($_POST['type'])) {
 if (!in_array($_POST['action'], ['takenew', 'takeedit'])) {
     error(0);
 }
-$newRequest = ($_POST['action'] === 'takenew');
-
+$newRequest   = ($_POST['action'] === 'takenew');
+$requestMan   = new Gazelle\Manager\Request;
 $categoryName = $_POST['type'];
-$categoryId = array_search($categoryName, CATEGORY);
+$categoryId   = array_search($categoryName, CATEGORY);
 if ($categoryId === false) {
     error(0);
 }
@@ -33,7 +33,7 @@ if ($newRequest) {
     }
     $onlyMetadata = false;
 } else {
-    $request = (new Gazelle\Manager\Request)->findById((int)($_POST['requestid'] ?? 0));
+    $request = $requestMan->findById((int)($_POST['requestid'] ?? 0));
     if (is_null($request)) {
         error(404);
     }
@@ -202,7 +202,7 @@ if ($categoryName === 'Music') {
 }
 
 if (!empty($Err)) {
-    $Div = $_POST['unit'] === 'mb' ? 1024 * 1024 : 1024 * 1024 * 1024;
+    $Div = $_POST['unit'] === 'mb' ? 1024 ** 2 : 1024 ** 3;
     $Bounty /= $Div;
     $returnEdit = true;
     require_once('new_edit.php');
@@ -270,53 +270,49 @@ if ($NeedCue) {
     }
 }
 
-if ($newRequest) {
-    $DB->prepared_query('
-        INSERT INTO requests (
-            TimeAdded, LastVote, Visible, UserID, CategoryID, Title, Year, Image, Description, RecordLabel,
-            CatalogueNumber, ReleaseType, BitrateList, FormatList, MediaList, LogCue, Checksum, GroupID, OCLC)
-        VALUES (
-            now(), now(), 1, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        $Viewer->id(), $categoryId, $title, $year, $image, $description, $recordLabel,
-        $catalogueNumber, $releaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC
+if (is_null($request)) {
+    $request = $requestMan->create(
+        userId:          $Viewer->id(),
+        categoryId:      $categoryId,
+        year:            $year,
+        title:           $title,
+        image:           $image,
+        description:     $description,
+        recordLabel:     $recordLabel,
+        catalogueNumber: $catalogueNumber,
+        releaseType:     $releaseType,
+        encodingList:    $EncodingList,
+        formatList:      $FormatList,
+        mediaList:       $MediaList,
+        logCue:          $LogCue,
+        checksum:        $NeedChecksum ? 1 : 0,
+        oclc:            $OCLC,
+        groupId:         $GroupID ?? null,
     );
-    $request = new Gazelle\Request($DB->inserted_id());
     $RequestID = $request->id();
 } else {
-    if ($onlyMetadata) {
-        $DB->prepared_query("
-            UPDATE requests SET
-                CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?, GroupID = ?, OCLC = ?
-            WHERE ID = ?
-            ", $categoryId, $title, $year, $image, $description, $catalogueNumber, $recordLabel, $GroupID ?? null, $OCLC,
-            $RequestID
-        );
-    } else {
-        $DB->prepared_query('
-            UPDATE requests SET
-                CategoryID = ?, Title = ?, Year = ?, Image = ?, Description = ?, CatalogueNumber = ?, RecordLabel = ?,
-                ReleaseType = ?, BitrateList = ?, FormatList = ?, MediaList = ?, LogCue = ?, Checksum = ?, GroupID = ?, OCLC = ?
-            WHERE ID = ?',
-            $categoryId, $title, $year, $image, $description, $catalogueNumber, $recordLabel,
-            $releaseType, $EncodingList, $FormatList, $MediaList, $LogCue, $NeedChecksum ? 1 : 0, $GroupID ?? null, $OCLC,
-            $RequestID
-        );
-    }
+    $request->setUpdate('CategoryID', $categoryId)
+        ->setUpdate('Title', $title)
+        ->setUpdate('Year', $year)
+        ->setUpdate('Image', $image)
+        ->setUpdate('Description', $description)
+        ->setUpdate('CatalogueNumber', $catalogueNumber)
+        ->setUpdate('RecordLabel', $recordLabel)
+        ->setUpdate('OCLC', $OCLC);
 
-    // We need to be able to delete artists / tags
-    $DB->prepared_query("
-        SELECT concat('artists_requests_', ArtistID) FROM requests_artists WHERE RequestID = ?
-        ", $RequestID
-    );
-    $Cache->delete_multi([
-        "request_artists_$RequestID",
-        ...$DB->collect(0, false)
-    ]);
-    $DB->prepared_query("
-        DELETE FROM requests_artists WHERE RequestID = ?
-        ", $RequestID
-    );
+    if ($GroupID) {
+        $request->setUpdate('GroupID', $GroupID);
+    }
+    if (!$onlyMetadata) {
+        $request->setUpdate('ReleaseType', $releaseType)
+            ->setUpdate('BitrateList', $EncodingList)
+            ->setUpdate('FormatList', $FormatList)
+            ->setUpdate('MediaList', $MediaList)
+            ->setUpdate('LogCue', $LogCue)
+            ->setUpdate('Checksum', $NeedChecksum ? 1 : 0);
+    }
+    $request->modify();
+
 }
 
 if (isset($GroupID)) {
@@ -334,7 +330,7 @@ if (isset($GroupID)) {
 $artistMan = new Gazelle\Manager\Artist;
 foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Num => $Artist) {
-        //1. See if each artist given already exists and if it does, grab the ID.
+        // 1. See if each artist given already exists and if it does, grab the ID.
         $DB->prepared_query('
             SELECT
                 ArtistID,
@@ -354,11 +350,27 @@ foreach ($ArtistForm as $role => $Artists) {
             }
         }
         if (!$ArtistID) {
-            //2. For each artist that didn't exist, create an artist.
+            // 2. For each artist that didn't exist, create an artist.
             [$ArtistID, $AliasID] = $artistMan->create($Artist['name']);
             $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
         }
     }
+}
+
+if (!$newRequest) {
+    // We need to be able to delete artists / tags
+    $DB->prepared_query("
+        SELECT concat('artists_requests_', ArtistID) FROM requests_artists WHERE RequestID = ?
+        ", $RequestID
+    );
+    $Cache->delete_multi([
+        "request_artists_$RequestID",
+        ...$DB->collect(0, false)
+    ]);
+    $DB->prepared_query("
+        DELETE FROM requests_artists WHERE RequestID = ?
+        ", $RequestID
+    );
 }
 
 //3. Create a row in the requests_artists table for each artist, based on the ID.
@@ -389,22 +401,10 @@ foreach ($tags as $Index => $Tag) {
     $tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
 }
 
-if ($newRequest) {
-    //Remove the bounty and create the vote
-    $DB->prepared_query("
-        INSERT INTO requests_votes
-               (RequestID, UserID, Bounty)
-        VALUES (?,         ?,      ?)
-        ", $RequestID, $Viewer->id(), $Bytes * (1 - REQUEST_TAX)
-    );
-
-    $DB->prepared_query('
-        UPDATE users_leech_stats
-        SET Uploaded = (Uploaded - ?)
-        WHERE UserID = ?',
-        $Bytes, $Viewer->id());
-    $Cache->delete_value('user_stats_'.$Viewer->id());
-
+if (!$newRequest) {
+    $request->updateSphinx();
+} else {
+    $request->vote($Viewer, $Bytes);
     if ($Viewer->option('AutoSubscribe')) {
         (new Gazelle\User\Subscription($Viewer))->subscribeComments('requests', $RequestID);
     }
@@ -414,7 +414,5 @@ if ($newRequest) {
         $request->text() . " - " . SITE_URL . "/" . $request->location() . " - " . implode(' ', $tags)
     );
 }
-
-$request->updateSphinx();
 
 header("Location: " . $request->location());

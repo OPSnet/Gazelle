@@ -317,6 +317,9 @@ class Users extends \Gazelle\Base {
 
     public function refresh(): int {
         self::$db->prepared_query("
+            DROP TEMPORARY TABLE IF EXISTS user_summary_new
+        ");
+        self::$db->prepared_query("
             CREATE TEMPORARY TABLE user_summary_new LIKE user_summary
         ");
 
@@ -542,6 +545,8 @@ class Users extends \Gazelle\Base {
         self::$db->prepared_query("
             DELETE FROM user_summary
         ");
+
+
         self::$db->prepared_query("
             INSERT INTO user_summary
             SELECT * FROM user_summary_new

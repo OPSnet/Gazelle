@@ -3,8 +3,38 @@
 namespace Gazelle\Manager;
 
 class Request extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_r_%d';
+
+    public function create(
+        int $userId,
+        int $categoryId,
+        int $year,
+        string $title,
+        ?string $image,
+        string $description,
+        string $recordLabel,
+        string $catalogueNumber,
+        string $releaseType,
+        string $encodingList,
+        string $formatList,
+        string $mediaList,
+        string $logCue,
+        bool $checksum,
+        string $oclc,
+        int $groupId = null,
+    ): \Gazelle\Request {
+        self::$db->prepared_query('
+            INSERT INTO requests (
+                LastVote, Visible, UserID, CategoryID, Title, Year, Image, Description, RecordLabel,
+                CatalogueNumber, ReleaseType, BitrateList, FormatList, MediaList, LogCue, Checksum, OCLC, GroupID)
+            VALUES (
+                now(), 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            $userId, $categoryId, $title, $year, $image, $description, $recordLabel,
+            $catalogueNumber, $releaseType, $encodingList, $formatList, $mediaList, $logCue,
+            (int)$checksum ? 1 : 0, $oclc, $groupId
+        );
+        return $this->findById(self::$db->inserted_id());
+    }
 
     public function findById(int $requestId): ?\Gazelle\Request {
         $key = sprintf(self::ID_KEY, $requestId);

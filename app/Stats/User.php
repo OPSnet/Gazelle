@@ -13,13 +13,14 @@ class User extends \Gazelle\BaseObject {
      */
 
     protected const CACHE_COMMENT_TOTAL = 'user_nrcomment_%d';
-    protected const CACHE_GENERAL = 'user_statx_%d';
+    protected const CACHE_GENERAL       = 'user_statx_%d';
 
     // Cache the underlying db calls
     protected array $commentTotal;
-    protected array $general = [];
+    protected array $general;
 
     public function flush(): User {
+        $this->general = [];
         self::$cache->delete_multi([
             sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
             sprintf(self::CACHE_GENERAL, $this->id),
@@ -60,66 +61,67 @@ class User extends \Gazelle\BaseObject {
      * @see \Gazelle\Stats\Users::refresh()
      */
     public function general(): array {
-        if (empty($this->general)) {
-            $key = sprintf(self::CACHE_GENERAL, $this->id);
-            $general = self::$cache->get_value($key);
-            if ($general === false) {
-                $general = self::$db->rowAssoc("
-                    SELECT artist_added_total,
-                        collage_total,
-                        collage_contrib,
-                        download_total,
-                        download_unique,
-                        fl_token_total,
-                        forum_post_total,
-                        forum_thread_total,
-                        invited_total,
-                        leech_total,
-                        perfect_flac_total,
-                        perfecter_flac_total,
-                        request_bounty_total,
-                        request_bounty_size,
-                        request_created_total,
-                        request_created_size,
-                        request_vote_total,
-                        request_vote_size,
-                        seeding_total,
-                        snatch_total,
-                        snatch_unique,
-                        unique_group_total,
-                        upload_total
-                    FROM user_summary
-                    WHERE user_id = ?
-                    ", $this->id
-                ) ?? [
-                    'artist_added_total'    => 0,
-                    'collage_total'         => 0,
-                    'collage_contrib'       => 0,
-                    'download_total'        => 0,
-                    'download_unique'       => 0,
-                    'fl_token_total'        => 0,
-                    'forum_post_total'      => 0,
-                    'forum_thread_total'    => 0,
-                    'invited_total'         => 0,
-                    'leech_total'           => 0,
-                    'perfect_flac_total'    => 0,
-                    'perfecter_flac_total'  => 0,
-                    'request_bounty_total'  => 0,
-                    'request_bounty_size'   => 0,
-                    'request_created_total' => 0,
-                    'request_created_size'  => 0,
-                    'request_vote_total'    => 0,
-                    'request_vote_size'     => 0,
-                    'seeding_total'         => 0,
-                    'snatch_total'          => 0,
-                    'snatch_unique'         => 0,
-                    'unique_group_total'    => 0,
-                    'upload_total'          => 0,
-                ];
-                self::$cache->cache_value($key, $general, 300);
-            }
-            $this->general = $general;
+        if (isset($this->general) && !empty($this->general)) {
+            return $this->general;
         }
+        $key = sprintf(self::CACHE_GENERAL, $this->id);
+        $general = self::$cache->get_value($key);
+        if ($general === false) {
+            $general = self::$db->rowAssoc("
+                SELECT artist_added_total,
+                    collage_total,
+                    collage_contrib,
+                    download_total,
+                    download_unique,
+                    fl_token_total,
+                    forum_post_total,
+                    forum_thread_total,
+                    invited_total,
+                    leech_total,
+                    perfect_flac_total,
+                    perfecter_flac_total,
+                    request_bounty_total,
+                    request_bounty_size,
+                    request_created_total,
+                    request_created_size,
+                    request_vote_total,
+                    request_vote_size,
+                    seeding_total,
+                    snatch_total,
+                    snatch_unique,
+                    unique_group_total,
+                    upload_total
+                FROM user_summary
+                WHERE user_id = ?
+                ", $this->id
+            ) ?? [
+                'artist_added_total'    => 0,
+                'collage_total'         => 0,
+                'collage_contrib'       => 0,
+                'download_total'        => 0,
+                'download_unique'       => 0,
+                'fl_token_total'        => 0,
+                'forum_post_total'      => 0,
+                'forum_thread_total'    => 0,
+                'invited_total'         => 0,
+                'leech_total'           => 0,
+                'perfect_flac_total'    => 0,
+                'perfecter_flac_total'  => 0,
+                'request_bounty_total'  => 0,
+                'request_bounty_size'   => 0,
+                'request_created_total' => 0,
+                'request_created_size'  => 0,
+                'request_vote_total'    => 0,
+                'request_vote_size'     => 0,
+                'seeding_total'         => 0,
+                'snatch_total'          => 0,
+                'snatch_unique'         => 0,
+                'unique_group_total'    => 0,
+                'upload_total'          => 0,
+            ];
+            self::$cache->cache_value($key, $general, 300);
+        }
+        $this->general = $general;
         return $this->general;
     }
 
