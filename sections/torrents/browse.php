@@ -60,7 +60,11 @@ $Search = new Gazelle\Search\Torrent(
     TORRENTS_PER_PAGE,
     $Viewer->permitted('site_search_many')
 );
-$Results = array_unique($Search->query($_GET));
+$Results = $Search->query($_GET);
+if ($GroupResults) {
+    // FIXME: is this even needed?
+    $Results = array_unique($Results);
+}
 $RealNumResults = $NumResults = $Search->record_count();
 if (!$Viewer->permitted('site_search_many')) {
     $NumResults = min($NumResults, SPHINX_MAX_MATCHES);
@@ -135,14 +139,18 @@ echo $paginator->linkbox();
 $snatcher = new Gazelle\User\Snatch($Viewer);
 
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
-foreach ($Results as $GroupID) {
+foreach ($Results as $Key => $GroupID) {
     $tgroup = $tgMan->findById($GroupID);
     if (is_null($tgroup)) {
         continue;
     }
-    $torrentList = $tgroup->torrentIdList();
-    if (empty($torrentList)) {
-        continue;
+    if ($GroupResults) {
+        $torrentList = $tgroup->torrentIdList();
+        if (empty($torrentList)) {
+            continue;
+        }
+    } else {
+        $torrentList = [$Key];
     }
 
     $SnatchedGroupClass = $tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '';

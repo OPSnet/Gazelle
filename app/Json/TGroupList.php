@@ -17,7 +17,7 @@ class TGroupList extends \Gazelle\Json {
 
     public function payload(): array {
         $list = [];
-        foreach ($this->result as $tgroupId) {
+        foreach ($this->result as $Key => $tgroupId) {
             $tgroup = $this->tgMan->findById($tgroupId);
             if (is_null($tgroup)) {
                 continue;
@@ -96,7 +96,12 @@ class TGroupList extends \Gazelle\Json {
                 ];
             } else {
                 // Viewing a type that does not require grouping
-                $torrent = $this->torMan->findById(current($torrentIdList));
+                if ($this->groupResults) {
+                    $torrent = $this->torMan->findById(current($torrentIdList));
+                } else {
+                    // $Key is the torrentID in this case
+                    $torrent = $this->torMan->findById($Key);
+                }
                 if (is_null($torrent)) {
                     continue;
                 }

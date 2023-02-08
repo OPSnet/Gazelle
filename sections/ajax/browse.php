@@ -40,7 +40,7 @@ if ($resultTotal == 0) {
     new Gazelle\Manager\Artist,
     (new Gazelle\Manager\TGroup)->setViewer($Viewer),
     (new Gazelle\Manager\Torrent)->setViewer($Viewer),
-    array_values($Results),
+    $Results,
     $GroupResults,
     $resultTotal,
     $Page
