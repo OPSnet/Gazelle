@@ -26,14 +26,14 @@
     Please read <a href="wiki.php?action=article&amp;id={{ wiki_article }}">this article</a> for more information.</strong>
 </div>
 
-{% elseif not invites_open %}
+{% elseif not invites_open and not user.permitted('site_can_invite_always') %}
 <div class="box pad notice">
     <p>The user limit has been reached: you are unable to send invites at this time.
     Please wait until the enabled user count falls below {{ constant('USER_LIMIT') }}.</p>
 </div>
 
 {% elseif own_profile and user.canInvite %}
-    {% if user.unusedInviteTotal == 0 and not user.permitted('site_can_invite_always') %}
+    {% if user.unusedInviteTotal < 1 and not user.permitted('site_send_unlimited_invites') %}
 <div class="box pad notice">
     <p>To invite someone, you first need to buy an invite in the <a href="bonus.php">bonus shop</a>.
 </div>
