@@ -261,7 +261,7 @@
         <input type="submit" name="cleardefault" value="Clear default" />
 {% endif %}
         &nbsp;&nbsp;<input type="submit" value="Filter torrents" />
-        <input type="hidden" name="action" id="ft_type" value="{{ search_mode }}" />
+        <input type="hidden" name="action" id="ft_action" value="{{ search_mode }}" />
         <input type="hidden" name="searchsubmit" value="1" />
         <input type="button" value="Reset" onclick="location.href = 'torrents.php{% if input.action == 'action' %}?action=advanced{% endif %}'" />
         &nbsp;&nbsp;

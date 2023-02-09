@@ -97,6 +97,7 @@ echo $Twig->render('torrent/browse-header.twig', [
     'release_type'  => (new Gazelle\ReleaseType)->list(),
     'results_total' => $RealNumResults,
     'results_shown' => $NumResults,
+    'search_mode'   => $searchMode,
     'search_plus'   => $AdvancedSearch,
     'search_toggle' => $toggleSearchMode,
     'show_search'   => $Viewer->option('ShowTorFilter') ?? true,
