@@ -25,15 +25,17 @@ class Invite extends \Gazelle\Base {
 
     public function create(\Gazelle\User $user, string $email, string $reason, string $source): ?\Gazelle\Invite {
         self::$db->begin_transaction();
+        if (!$user->decrementInviteCount()) {
+            return null;
+        }
         $inviteKey = randomString();
         self::$db->prepared_query("
             INSERT INTO invites
                    (InviterID, InviteKey, Email, Reason, Expires)
             VALUES (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)
-            ", $user->id(), $inviteKey, $email, trim($_POST['reason'] ?? '')
+            ", $user->id(), $inviteKey, $email, $reason
         );
         $invite = new \Gazelle\Invite($inviteKey);
-        $user->decrementInviteCount();
         if (preg_match('/^s-(\d+)$/', $source, $match)) {
             (new \Gazelle\Manager\InviteSource)->createPendingInviteSource($match[1], $inviteKey);
         }

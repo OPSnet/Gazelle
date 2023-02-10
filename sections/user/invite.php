@@ -10,7 +10,7 @@ if (!isset($_REQUEST['id'])) {
 }
 $userId = $user->id();
 $ownProfile = $user->id() == $Viewer->id();
-if (!($Viewer->permitted('users_view_invites') || ($ownProfile && $Viewer->canPurchaseInvite()))) {
+if (!($Viewer->permitted('users_view_invites') || $ownProfile)) {
     error(403);
 }
 
@@ -40,14 +40,15 @@ $heading = new \Gazelle\Util\SortableTableHeader('joined', [
 ]);
 
 echo $Twig->render('user/invited.twig', [
-    'edit_source'    => ($_GET['edit'] ?? '') === 'source',
-    'heading'        => $heading,
-    'invited'        => $user->inviteList($heading->getOrderBy(), $heading->getOrderDir()),
-    'inviter_config' => $invSourceMan->inviterConfigurationActive($userId),
-    'invites_open'   => (new Gazelle\Stats\Users)->newUsersAllowed($user),
-    'invite_source'  => $invSourceMan->userSource($userId),
-    'own_profile'    => $ownProfile,
-    'user'           => $user,
-    'user_source'    => $invSourceMan->userSource($userId),
-    'wiki_article'   => 116,
+    'edit_source'       => ($_GET['edit'] ?? '') === 'source',
+    'heading'           => $heading,
+    'invited'           => $user->inviteList($heading->getOrderBy(), $heading->getOrderDir()),
+    'inviter_config'    => $invSourceMan->inviterConfigurationActive($userId),
+    'invites_open'      => (new Gazelle\Stats\Users)->newUsersAllowed($user),
+    'invite_source'     => $invSourceMan->userSource($userId),
+    'own_profile'       => $ownProfile,
+    'user'              => $user,
+    'user_source'       => $invSourceMan->userSource($userId),
+    'wiki_user_classes' => 4,
+    'wiki_ratio_watch'  => 503,
 ]);

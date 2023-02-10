@@ -16,14 +16,19 @@
 
 {% if user.disableInvites %}
 <div class="box pad" style="text-align: center;">
-    <strong class="important_text">Your invites have been disabled.
-    Please read <a href="wiki.php?action=article&amp;id={{ wiki_article }}">this article</a> for more information.</strong>
+    <strong class="important_text">Your invites have been disabled.</strong>
 </div>
 
 {% elseif user.onRatioWatch or not user.canLeech %}
 <div class="box pad" style="text-align: center;">
     <strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled.
-    Please read <a href="wiki.php?action=article&amp;id={{ wiki_article }}">this article</a> for more information.</strong>
+    Please read <a href="wiki.php?action=article&amp;id={{ wiki_ratio_watch }}">this article</a> for more information.</strong>
+</div>
+
+{% elseif not user.canPurchaseInvite %}
+<div class="box pad" style="text-align: center;">
+    <strong class="important_text">Your user class is not allowed to send invites.
+        Please read <a href="wiki.php?action=article&amp;id={{ wiki_user_classes }}">this article</a> for more information.</strong>
 </div>
 
 {% elseif not invites_open and not user.permitted('site_can_invite_always') %}

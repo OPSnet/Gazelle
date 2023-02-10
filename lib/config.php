@@ -596,20 +596,20 @@ defined('USER') or define('USER',                      2);
 defined('MEMBER') or define('MEMBER',                  3);
 defined('POWER') or define('POWER',                    4);
 defined('ELITE') or define('ELITE',                    5);
-defined('TORRENT_MASTER') or define('TORRENT_MASTER',  7);
-defined('POWER_TM') or define('POWER_TM',             22);
-defined('ELITE_TM') or define('ELITE_TM',             23);
+defined('TORRENT_MASTER') or define('TORRENT_MASTER', 25);
+defined('POWER_TM') or define('POWER_TM',             29);
+defined('ELITE_TM') or define('ELITE_TM',             28);
 defined('ULTIMATE_TM') or define('ULTIMATE_TM',       48);
-defined('FORUM_MOD') or define('FORUM_MOD',           28);
+defined('FORUM_MOD') or define('FORUM_MOD',           21);
 defined('MOD') or define('MOD',                       11);
 defined('SYSOP') or define('SYSOP',                   15);
 
 // Permission ID of secondary class.
-defined('DONOR') or define('DONOR',             20);
+defined('DONOR') or define('DONOR',             42);
 defined('FLS_TEAM') or define('FLS_TEAM',       23);
 defined('INTERVIEWER') or define('INTERVIEWER', 30);
 defined('RECRUITER') or define('RECRUITER',     41);
-defined('VIP') or define('VIP',                  6);
+defined('VIP') or define('VIP',                 26);
 
 // ------------------------------------------------------------------------
 // Well-known forum settings

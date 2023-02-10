@@ -30,8 +30,12 @@ class User extends BaseObject {
     protected Stats\User $stats;
 
     public function flush(): User {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        self::$cache->delete_value(sprintf(User\Privilege::CACHE_KEY, $this->id));
+        self::$cache->delete_multi([
+            sprintf(self::CACHE_KEY, $this->id),
+            sprintf(User\Privilege::CACHE_KEY, $this->id),
+            sprintf('user_inv_pending_%d', $this->id),
+            sprintf('user_invited_%d', $this->id),
+        ]);
         $this->stats()->flush();
         $this->info = [];
         return $this;
@@ -741,7 +745,7 @@ class User extends BaseObject {
                 ", $this->id
             );
         }
-        return null;
+        return null; /** @phpstan-ignore-line */
     }
 
     public function requiredRatio(): float {
@@ -963,12 +967,20 @@ class User extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function remove() {
+    public function remove(): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            DELETE FROM bonus_history WHERE UserID = ?
+            ", $this->id
+        );
         self::$db->prepared_query("
             DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
+        $affected = self::$db->affected_rows();
+        self::$db->commit();
         $this->flush();
+        return $affected;
     }
 
     /**
@@ -1207,10 +1219,6 @@ class User extends BaseObject {
             VALUES (?,      ?,         ?)
             ', $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
-        if (self::$db->affected_rows() !== 1) {
-            self::$db->rollback();
-            return false;
-        }
         self::$db->commit();
         $this->flush();
         return true;
@@ -1617,9 +1625,9 @@ class User extends BaseObject {
         return $this->disableInvites() ? 0 : $this->info()['Invites'];
     }
 
-    public function decrementInviteCount(): int {
+    public function decrementInviteCount(): bool {
         if ($this->permitted('site_send_unlimited_invites')) {
-            return 0;
+            return true;
         }
         self::$db->prepared_query("
             UPDATE users_main SET
@@ -1629,7 +1637,7 @@ class User extends BaseObject {
         );
         $affected = self::$db->affected_rows();
         $this->flush();
-        return $affected;
+        return $affected > 0;
     }
 
     public function pendingInviteCount(): int {
