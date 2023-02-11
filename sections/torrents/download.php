@@ -36,8 +36,8 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
             ON DUPLICATE KEY UPDATE logged = now()
             ', $userId, $torrentId
         );
-        if ($Cache->get_value('user_flood_' . $userId)) {
-            $Cache->increment('user_flood_' . $userId);
+        if ($Cache->get_value('user_429_flood_' . $userId)) {
+            $Cache->increment('user_429_flood_' . $userId);
         } else {
             Irc::sendMessage(
                 STATUS_CHAN,
