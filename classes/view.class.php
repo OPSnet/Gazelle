@@ -30,7 +30,7 @@ class View {
         }
 
         if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
-            array_push($js, 'cookie.class', 'storage.class');
+            $js[] = 'storage.class';
             echo $Twig->render('index/public-header.twig', [
                 'page_title' => html_entity_decode($pageTitle),
                 'script'     => array_map(fn($s) => "$s.js", $js),
