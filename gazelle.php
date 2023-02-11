@@ -77,8 +77,8 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
             setcookie('session', '', [
                 'expires'  => time() - 60 * 60 * 24 * 90,
                 'path'     => '/',
-                'secure'   => !DEBUG_MODE,
-                'httponly' => DEBUG_MODE,
+                'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
+                'httponly' => true,
                 'samesite' => 'Lax',
             ]);
             header('Location: login.php');
@@ -95,7 +95,15 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
             header('Location: login.php');
             exit;
         }
-        $session->refresh($SessionID);
+        $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
+        if ($Viewer->permitted('site_disable_ip_history')) {
+            $ipaddr = '127.0.0.1';
+            $browser['BrowserVersion'] = null;
+            $browser['OperatingSystemVersion'] = null;
+        } else {
+            $ipaddr = $_SERVER['REMOTE_ADDR'];
+        }
+        $session->refresh($SessionID, $ipaddr, $browser);
     }
 } elseif ($Document === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
     $Viewer = $userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
@@ -123,8 +131,10 @@ if ($Viewer) {
 
     // Because we <3 our staff
     if ($Viewer->permitted('site_disable_ip_history')) {
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-        $_SERVER['HTTP_USER_AGENT'] = 'staff-browser';
+        $_SERVER['REMOTE_ADDR']          = '127.0.0.1';
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.1';
+        $_SERVER['HTTP_X_REAL_IP']       = '127.0.0.1';
+        $_SERVER['HTTP_USER_AGENT']      = 'staff-browser';
     }
     if ($Viewer->ipaddr() != $_SERVER['REMOTE_ADDR'] && !$Viewer->permitted('site_disable_ip_history')) {
         if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
@@ -142,7 +152,7 @@ if ($Viewer) {
 }
 
 $Debug->set_flag('load page');
-if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
+if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) { /** @phpstan-ignore-line */
     $Twig->addExtension(new Twig\Extension\DebugExtension());
 }
 
@@ -180,9 +190,8 @@ if (!file_exists($file)) {
 } else {
     try {
         require_once($file);
-    }
-    catch (Gazelle\DB\Mysql_Exception $e) {
-        if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
+    } catch (Gazelle\DB\Mysql_Exception $e) {
+        if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) { /** @phpstan-ignore-line */
             echo $Twig->render('error-db.twig', [
                 'message' => $e->getMessage(),
                 'trace'   => str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString()),

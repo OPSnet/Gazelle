@@ -10,7 +10,7 @@ if (isset($_POST['username'])) {
                 'expires'  => time() + 60 * 60,
                 'path'     => '/',
                 'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
-                'httponly' => DEBUG_MODE,
+                'httponly' => true,
                 'samesite' => 'Lax',
             ]);
         }

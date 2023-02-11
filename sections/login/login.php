@@ -24,7 +24,7 @@ if (isset($_POST['username'])) {
                     'expires'  => time() + 60 * 60,
                     'path'     => '/',
                     'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
-                    'httponly' => DEBUG_MODE,
+                    'httponly' => true,
                     'samesite' => 'Lax',
                 ]);
             }
@@ -34,19 +34,27 @@ if (isset($_POST['username'])) {
 
         if ($user->isEnabled()) {
             $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
+            if ($user->permitted('site_disable_ip_history')) {
+                $ipaddr = '127.0.0.1';
+                $browser['BrowserVersion'] = null;
+                $browser['OperatingSystemVersion'] = null;
+                $full_ua = 'staff-browser';
+            } else {
+                $ipaddr = $_SERVER['REMOTE_ADDR'];
+                $full_ua = $_SERVER['HTTP_USER_AGENT'];
+            }
             $session = new Gazelle\User\Session($user);
             $current = $session->create([
                 'keep-logged' => $login->persistent() ? '1' : '0',
-                'browser'     => $browser['Browser'],
-                'os'          => $browser['OperatingSystem'],
-                'ipaddr'      => $user->permitted('site_disable_ip_history') ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
-                'useragent'   => $user->permitted('site_disable_ip_history') ? FAKE_USERAGENT : $_SERVER['HTTP_USER_AGENT'],
+                'browser'     => $browser,
+                'ipaddr'      => $ipaddr,
+                'useragent'   => $full_ua,
             ]);
             setcookie('session', $session->cookie($current['SessionID']), [
                 'expires'  => (int)$login->persistent() * (time() + 60 * 60 * 24 * 90),
                 'path'     => '/',
                 'secure'   => !DEBUG_MODE,  /** @phpstan-ignore-line */
-                'httponly' => DEBUG_MODE,
+                'httponly' => true,
                 'samesite' => 'Lax',
             ]);
             header("Location: index.php");
@@ -59,6 +67,6 @@ echo $Twig->render('login/login.twig', [
     'delta'    => $watch->bannedEpoch() - time(),
     'error'    => $login->error(),
     'ip_addr'  => $_SERVER['REMOTE_ADDR'],
-    'tor_node' => BLOCK_TOR /** @phpstan-ignore-line */ && (new Gazelle\Manager\Tor)->isExitNode($_SERVER['REMOTE_ADDR']),
+    'tor_node' => (new Gazelle\Manager\Tor)->isExitNode($_SERVER['REMOTE_ADDR']),
     'watch'    => $watch,
 ]);

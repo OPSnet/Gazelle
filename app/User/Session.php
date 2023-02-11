@@ -39,7 +39,7 @@ class Session extends \Gazelle\BaseUser {
         return isset($this->info()[$sessionId]);
     }
 
-    public function refresh(string $sessionId): bool {
+    public function refresh(string $sessionId, string $ipaddr, array $browser): bool {
         if (strtotime($this->info()[$sessionId]['LastUpdate']) > time() - 600) {
             // Update every 10 minutes
             return false;
@@ -54,7 +54,6 @@ class Session extends \Gazelle\BaseUser {
             ", $this->user->id()
         );
 
-        $userAgent = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
         self::$db->prepared_query("
             UPDATE users_sessions SET
                 LastUpdate = now(),
@@ -64,9 +63,9 @@ class Session extends \Gazelle\BaseUser {
                 OperatingSystem = ?,
                 OperatingSystemVersion = ?
             WHERE UserID = ? AND SessionID = ?
-            ", $_SERVER['REMOTE_ADDR'], $userAgent['Browser'], $userAgent['BrowserVersion'],
-                $userAgent['OperatingSystem'], $userAgent['OperatingSystemVersion'],
-                $this->user->id(), $sessionId
+            ", $ipaddr, $browser['Browser'], $browser['BrowserVersion'],
+               $browser['OperatingSystem'], $browser['OperatingSystemVersion'],
+               $this->user->id(), $sessionId
         );
         self::$cache->delete_value('users_sessions_' . $this->user->id());
         $this->info = [];
@@ -77,9 +76,12 @@ class Session extends \Gazelle\BaseUser {
         $sessionId = randomString();
         self::$db->prepared_query('
             INSERT INTO users_sessions
-                   (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
-            VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
-            ', $this->user->id(), $sessionId, $info['keep-logged'], $info['browser'], $info['os'], $info['ipaddr'], $info['useragent']
+                   (UserID, SessionID, KeepLogged, Browser, BrowserVersion, OperatingSystem, OperatingSystemVersion, IP, FullUA, LastUpdate)
+            VALUES (?,      ?,         ?,          ?,       ?,              ?,               ?,                      ?,  ?,      now())
+            ', $this->user->id(), $sessionId, $info['keep-logged'],
+               $info['browser']['Browser'], $info['browser']['BrowserVersion'],
+               $info['browser']['OperatingSystem'], $info['browser']['OperatingSystemVersion'],
+               $info['ipaddr'], $info['useragent']
         );
 
         self::$db->prepared_query('

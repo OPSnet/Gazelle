@@ -1,6 +1,14 @@
 parameters:
   ignoreErrors:
     -
+      message: '/^Negated boolean expression is always true\.$/'
+      paths:
+        -  app/Manager/Tor.php
+    -
+      message: '/^Unreachable statement - code above always terminates\.$/'
+      paths:
+        -  app/Manager/Tor.php
+    -
       message: '/^Variable \$(?:Cache|DB|Debug|SessionID|Twig|Viewer) might not be defined\.$/'
       paths:
         - scripts/*

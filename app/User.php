@@ -61,8 +61,8 @@ class User extends BaseObject {
         setcookie('session', '', [
             'expires'  => time() - 60 * 60 * 24 * 90,
             'path'     => '/',
-            'secure'   => !DEBUG_MODE,
-            'httponly' => DEBUG_MODE,
+            'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
+            'httponly' => true,
             'samesite' => 'Lax',
         ]);
         if ($sessionId) {
