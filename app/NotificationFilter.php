@@ -54,11 +54,11 @@ class NotificationFilter extends BaseObject {
         return explode('|', trim($dimension, '|'));
     }
 
-    public function artistList(): array {
+    public function artistList(): ?array {
         return $this->info()['artist'];
     }
 
-    public function label(): string {
+    public function label(): ?string {
         return $this->info()['label'];
     }
 }
