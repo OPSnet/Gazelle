@@ -3,11 +3,11 @@
 
 <div class="linkbox">
     <a href="/apply.php" class="brackets">Apply</a>
-{% if id and not is_staff %}
+{% if app.id and not is_staff %}
     <a href="/apply.php?action=view" class="brackets">View your applications</a>
 {% endif %}
 {% if is_staff %}
-    {% if resolved or (id and not resolved) %}
+    {% if resolved or (app.id and not resolved) %}
     <a href="/apply.php?action=view" class="brackets">Current applications</a>
     {% endif %}
     {% if not resolved %}
@@ -17,15 +17,15 @@
 {% endif %}
 </div>
 
-{% if id %}
+{% if app %}
 <div class="box">
     <div class="head"{% if app.isResolved %} style="font-style: italic;"{% endif %}>{{ app.roleTitle }}
     {% if is_staff %}
         <div style="float: right;">
-            <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id={{ id }}">
+            <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id={{ app.id }}">
                 <input type="submit" name="resolve" value="{% if app.isResolved %}Reopen{% else %}Resolve{% endif %}" />
-                <input type="hidden" name="id" value="{{ id }}"/>
-                <input type="hidden" name="auth" value="{{ auth }}"/>
+                <input type="hidden" name="id" value="{{ app.id }}"/>
+                <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
             </form>
         </div>
         <br />Application received from {{ app.userId|user_full }} received {{ app.created|time_diff }}.
@@ -35,7 +35,7 @@
     <div class="pad">
         <p>{{ app.body|bb_format }}</p>
     {% if not app.isResolved %}
-        <form id="thread_note_reply" name="thread_note_replay" method="POST" action="/apply.php?action=view&amp;id={{ id }}">
+        <form id="thread_note_reply" name="thread_note_replay" method="POST" action="/apply.php?action=view&amp;id={{ app.id }}">
     {% endif %}
         <table class="forum_post wrap_overflow box vertical_margin">
     {% for note in app.story(is_staff) %}
@@ -89,8 +89,8 @@
             <tr>
                 <td colspan="2">
                     <div style="text-align: center;">
-                        <input type="hidden" name="id" value="{{ id }}"/>
-                        <input type="hidden" name="auth" value="{{ auth }}"/>
+                        <input type="hidden" name="id" value="{{ app.id }}"/>
+                        <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
                         {{ note.button|raw }}
                         <input type="submit" id="submit" value="Save" />
                     </div>
