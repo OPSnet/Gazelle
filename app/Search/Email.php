@@ -20,6 +20,12 @@ class Email extends \Gazelle\Base {
         protected ASN $asn,
     ) {}
 
+    public function __destruct() {
+        if (isset($this->name)) {
+            self::$db->dropTemporaryTable($this->name);
+        }
+    }
+
     public function setColumn(int $column) {
         $this->column = $column;
         return $this;
@@ -32,6 +38,7 @@ class Email extends \Gazelle\Base {
 
     public function create(string $name) {
         $this->name = $name;
+        self::$db->dropTemporaryTable($this->name);
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE {$this->name} (
                 email varchar(255) NOT NULL PRIMARY KEY

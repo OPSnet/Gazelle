@@ -5,14 +5,17 @@ namespace Gazelle\Manager;
 class SiteOption extends \Gazelle\Base {
     final const CACHE_KEY = 'site_option_%s';
 
-    public function findValueByName(string $name): string {
+    public function findValueByName(string $name): ?string {
         $key = sprintf(self::CACHE_KEY, $name);
-        if (($value = self::$cache->get_value($key)) === false) {
+        $value = self::$cache->get_value($key);
+        if ($value === false) {
             $value = self::$db->scalar(
                 "SELECT Value FROM site_options WHERE Name = ?",
                 $name
             );
-            self::$cache->cache_value($key, $value, 86400 * 30);
+            if (!is_null($value)) {
+                self::$cache->cache_value($key, $value, 86400 * 30);
+            }
         }
         return $value;
     }

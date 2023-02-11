@@ -3,6 +3,7 @@
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
+self::$db->dropTemporaryTable("torrents_votes_new");
 $DB->prepared_query("
     CREATE TEMPORARY TABLE torrents_votes_new LIKE torrents_votes
 ");
@@ -33,6 +34,7 @@ $DB->prepared_query("
     SELECT * FROM torrents_votes_new
 ");
 $DB->commit();
+self::$db->dropTemporaryTable("torrents_votes_new");
 
 $max = $DB->scalar("SELECT max(ID) FROM torrents_group");
 $id = 0;

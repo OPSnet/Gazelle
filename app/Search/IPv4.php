@@ -25,6 +25,12 @@ class IPv4 extends \Gazelle\Base {
         protected ASN $asn,
     ) {}
 
+    public function __destruct() {
+        if (isset($this->name)) {
+            self::$db->dropTemporaryTable($this->name);
+        }
+    }
+
     public function setColumn(int $column) {
         $this->column = $column;
         return $this;
@@ -37,6 +43,7 @@ class IPv4 extends \Gazelle\Base {
 
     public function create(string $name) {
         $this->name = $name;
+        self::$db->dropTemporaryTable($this->name);
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE {$this->name} (
                 addr_n integer unsigned NOT NULL PRIMARY KEY,

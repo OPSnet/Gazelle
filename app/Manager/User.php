@@ -1108,6 +1108,7 @@ class User extends \Gazelle\BaseManager {
         ");
 
         // Store total seeded time for each user in a temp table
+        self::$db->dropTemporaryTable("tmp_history_time");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_history_time (
                 UserID int NOT NULL PRIMARY KEY,
@@ -1130,6 +1131,7 @@ class User extends \Gazelle\BaseManager {
             FROM tmp_history_time
             WHERE SumTime < 259200
         ");
+        self::$db->dropTemporaryTable("tmp_history_time");
 
         // Set <Weight> to the time seeding <NumTorrents> torrents
         self::$db->prepared_query("
@@ -1140,6 +1142,7 @@ class User extends \Gazelle\BaseManager {
 
         // Calculate average time spent seeding each of the currently active torrents.
         // This rounds the results to the nearest integer because SeedingAvg is an int column.
+        self::$db->dropTemporaryTable("tmp_history_weight_time");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_history_weight_time (
                 UserID int NOT NULL PRIMARY KEY,
@@ -1160,6 +1163,7 @@ class User extends \Gazelle\BaseManager {
         ");
 
         // Get each user's amount of snatches of existing torrents
+        self::$db->dropTemporaryTable("tmp_snatch");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_snatch (
                 UserID int PRIMARY KEY,
@@ -1176,6 +1180,7 @@ class User extends \Gazelle\BaseManager {
 
         // Get the fraction of snatched torrents seeded for at least 72 hours this week
         // Essentially take the total number of hours seeded this week and divide that by 72 hours * <NumSnatches>
+        self::$db->dropTemporaryTable("tmp_snatch_weight");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_snatch_weight (
                 UserID int PRIMARY KEY,
@@ -1188,6 +1193,8 @@ class User extends \Gazelle\BaseManager {
             FROM tmp_history_weight_time AS t
             INNER JOIN tmp_snatch AS s USING (UserID)
         ");
+        self::$db->dropTemporaryTable("tmp_history_weight_time");
+        self::$db->dropTemporaryTable("tmp_snatch");
 
         $ratioRequirements = [
             [80 * 1024 * 1024 * 1024, 0.60, 0.50],
@@ -1240,6 +1247,7 @@ class User extends \Gazelle\BaseManager {
 
             $downloadBarrier = $download;
         }
+        self::$db->dropTemporaryTable("tmp_snatch_weight");
 
         self::$db->prepared_query("
             UPDATE users_main AS um

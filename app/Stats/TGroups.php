@@ -4,6 +4,7 @@ namespace Gazelle\Stats;
 
 class TGroups extends \Gazelle\Base {
     public function refresh(): int {
+        self::$db->dropTemporaryTable("tgroup_summary_new");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tgroup_summary_new LIKE tgroup_summary
         ");
@@ -65,6 +66,7 @@ class TGroups extends \Gazelle\Base {
         ");
         $processed = self::$db->affected_rows();
         self::$db->commit();
+        self::$db->dropTemporaryTable("tgroup_summary_new");
         return $processed;
     }
 }

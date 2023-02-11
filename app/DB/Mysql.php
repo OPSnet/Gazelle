@@ -534,6 +534,12 @@ class Mysql {
         mysqli_rollback($this->LinkID);
     }
 
+    public function dropTemporaryTable(string $tableName): void {
+        $this->prepared_query("
+            DROP TEMPORARY TABLE IF EXISTS $tableName
+        ");
+    }
+
     /**
      * HTML escape an entire array for output.
      * @param array $Array, what we want to escape

@@ -42,6 +42,9 @@ class Tor extends \Gazelle\Base {
                 SELECT ipv4 FROM tor_node_new
         ");
         $changed += $st->rowCount();
+        $this->pg->pdo()->query("
+            DROP TEMPORARY TABLE tor_node_new
+        ");
         $this->pg->pdo()->commit();
 
         return $changed;

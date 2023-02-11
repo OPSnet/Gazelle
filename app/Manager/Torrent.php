@@ -263,6 +263,7 @@ class Torrent extends \Gazelle\BaseManager {
      * Record who's seeding how much, used for ratio watch
      */
     public function updateSeedingHistory(): array {
+        self::$db->dropTemporaryTable("tmp_users_torrent_history");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_users_torrent_history (
                 UserID int NOT NULL PRIMARY KEY,
@@ -312,7 +313,7 @@ class Torrent extends \Gazelle\BaseManager {
                 LastTime = UNIX_TIMESTAMP(now())
         ");
         $info['history'] = self::$db->affected_rows();
-
+        self::$db->dropTemporaryTable("tmp_users_torrent_history");
         return $info;
     }
 
@@ -429,6 +430,7 @@ class Torrent extends \Gazelle\BaseManager {
             ", UNSEEDED_DRAIN_INTERVAL
         );
         $purged = self::$db->affected_rows();
+        self::$db->dropTemporaryTable("tmp_torrents_peerlists");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tmp_torrents_peerlists (
                 TorrentID int NOT NULL PRIMARY KEY,
@@ -436,7 +438,7 @@ class Torrent extends \Gazelle\BaseManager {
                 Seeders   int,
                 Leechers  int,
                 Snatches  int
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            )
         ");
         self::$db->prepared_query("
             INSERT INTO tmp_torrents_peerlists
@@ -445,6 +447,7 @@ class Torrent extends \Gazelle\BaseManager {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
         ");
 
+        self::$db->dropTemporaryTable("tpc_temp");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE tpc_temp (
                 TorrentID int,
@@ -521,6 +524,7 @@ class Torrent extends \Gazelle\BaseManager {
                 $Changed = false;
             }
         }
+        self::$db->dropTemporaryTable("tpc_temp");
 
         self::$db->begin_transaction();
         self::$db->prepared_query("DELETE FROM torrents_peerlists");
@@ -530,6 +534,7 @@ class Torrent extends \Gazelle\BaseManager {
             FROM tmp_torrents_peerlists
         ");
         self::$db->commit();
+        self::$db->dropTemporaryTable("tmp_torrents_peerlists");
         return [$UpdatedKeys + $purged, $UncachedGroups];
     }
 

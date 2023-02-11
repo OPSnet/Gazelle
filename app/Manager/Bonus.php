@@ -148,6 +148,7 @@ class Bonus extends \Gazelle\Base {
         // Seedtime (convert from hours to days) is in xbt_files_history
         // Seeders is in torrents_leech_stats
 
+        self::$db->dropTemporaryTable("bonus_update");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE bonus_update (
                 user_id int NOT NULL PRIMARY KEY,
@@ -200,6 +201,7 @@ class Bonus extends \Gazelle\Base {
         if (self::$db->has_results()) {
             self::$cache->delete_multi(self::$db->collect(0, false));
         }
+        self::$db->dropTemporaryTable("bonus_update");
 
         return $processed;
     }

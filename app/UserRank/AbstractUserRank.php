@@ -25,10 +25,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
      * slow.
      */
     public function build(): array {
-        self::$db->prepared_query("
-            DROP TEMPORARY TABLE IF EXISTS temp_stats
-        ");
-
+        self::$db->dropTemporaryTable("temp_stats");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE temp_stats (
                 id integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -47,9 +44,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
          *  FROM temp_stats
          *  GROUP BY ceil(id / (SELECT count(*)/100 FROM temp_stats))
          */
-        self::$db->prepared_query("
-            DROP TEMPORARY TABLE IF EXISTS temp_stats_dup
-        ");
+        self::$db->dropTemporaryTable("temp_stats_dup");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE temp_stats_dup LIKE temp_stats
         ");
@@ -65,6 +60,8 @@ abstract class AbstractUserRank extends \Gazelle\Base {
             ORDER BY 1
         ");
         $raw = self::$db->collect('bucket');
+        self::$db->dropTemporaryTable("temp_stats");
+        self::$db->dropTemporaryTable("temp_stats_dup");
         if (empty($raw)) {
             // This occurs only a fresh installation
             $raw = [0];

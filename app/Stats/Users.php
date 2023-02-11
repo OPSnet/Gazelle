@@ -255,11 +255,10 @@ class Users extends \Gazelle\Base {
 
     /**
      * Can new members be invited at this time?
-     * @return bool Yes we can
      */
     public function newUsersAllowed(\Gazelle\User $user): bool {
         return (
-               USER_LIMIT === 0
+               USER_LIMIT == 0 /** @phpstan-ignore-line */
             || $this->enabledUserTotal() < USER_LIMIT
             || $user->permitted('site_can_invite_always')
         );
@@ -316,9 +315,7 @@ class Users extends \Gazelle\Base {
     }
 
     public function refresh(): int {
-        self::$db->prepared_query("
-            DROP TEMPORARY TABLE IF EXISTS user_summary_new
-        ");
+        self::$db->dropTemporaryTable("user_summary_new");
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE user_summary_new LIKE user_summary
         ");
@@ -553,6 +550,7 @@ class Users extends \Gazelle\Base {
         ");
         $processed = self::$db->affected_rows();
         self::$db->commit();
+        self::$db->dropTemporaryTable("user_summary_new");
         return $processed;
     }
 
