@@ -46,7 +46,11 @@ through the staff tools on their profile page.</p>
     {% endif %}
     </tr>
 {% endfor %}
+</table>
+</form>
 {% if is_admin %}
+<form class="manage_form" name="accounts" action="/tools.php?action=rate_limit" method="post">
+<table>
     <tr class="colhead">
         <td>Create</td>
         <td>Factor</td>

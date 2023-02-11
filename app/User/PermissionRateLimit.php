@@ -61,6 +61,7 @@ class PermissionRateLimit extends \Gazelle\BaseUser {
             FROM users_downloads ud
             INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
             WHERE ud.Time > now() - INTERVAL 1 DAY
+                AND t.UserID != ud.UserID
                 AND ud.UserID = ?
             ", $this->user->id()
         );
