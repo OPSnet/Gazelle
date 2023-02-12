@@ -424,7 +424,7 @@ if ($requestList) {
 <?php       } ?>
             </td>
             <td class="nobr">
-                <span id="bounty_<?= $request->id() ?>"><?= Format::get_size($request->bountyTotal()) ?></span>
+                <span id="bounty_<?= $request->id() ?>"><?= byte_format($request->bountyTotal()) ?></span>
             </td>
             <td>
                 <?= time_diff($request->created()) ?>

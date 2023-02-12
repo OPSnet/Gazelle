@@ -562,7 +562,7 @@ class Request extends BaseObject {
 
         (new Log)->general("Request " . $this->id . " ($name) was filled by " . $user->label()
             . " with the torrent " . $torrent->id() . " for a "
-            . \Format::get_size($bounty) . ' bounty.'
+            . byte_format($bounty) . ' bounty.'
         );
 
         $this->artistFlush();
@@ -613,7 +613,7 @@ class Request extends BaseObject {
         }
 
         (new Log)->general("Request " . $this->id . " ($name), with a "
-            . \Format::get_size($bounty) . " bounty, was unfilled by "
+            . byte_format($bounty) . " bounty, was unfilled by "
             . $admin->label() . " for the reason: $reason"
         );
 
@@ -661,7 +661,7 @@ class Request extends BaseObject {
         if ($affected) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("Refund of %s bounty (%s b) on %s by %s\n\n",
-                \Format::get_size($bounty), $bounty, $this->url(), $staffName
+                byte_format($bounty), $bounty, $this->url(), $staffName
             );
             self::$db->prepared_query("
                 UPDATE users_info ui
@@ -693,7 +693,7 @@ class Request extends BaseObject {
         if ($affected) {
             $this->informRequestFillerReduction($bounty, $staffName);
             $message = sprintf("Removal of %s bounty (%s b) on %s by %s\n\n",
-                \Format::get_size($bounty), $bounty, $this->url(), $staffName
+                byte_format($bounty), $bounty, $this->url(), $staffName
             );
             self::$db->prepared_query("
                 UPDATE users_info ui SET
@@ -721,7 +721,7 @@ class Request extends BaseObject {
             return 0;
         }
         $message = sprintf("Reduction of %s bounty (%s b) on filled request %s by %s\n\n",
-            \Format::get_size($bounty), $bounty, $this->url(), $staffName
+            byte_format($bounty), $bounty, $this->url(), $staffName
         );
         self::$db->prepared_query("
             UPDATE users_info ui

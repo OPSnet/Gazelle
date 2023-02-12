@@ -536,7 +536,7 @@ if (!$torrentList) {
     }
 ?>
                             <br /><br />If you download this, your ratio will become <?=
-                                Format::get_ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize() + $torrent->size());
+                                ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize() + $torrent->size());
                             ?>.
                         </blockquote>
                     </div>
@@ -584,8 +584,7 @@ if (!$torrentList) {
                                 </td>
                             </tr>
 <?php   foreach ($torrent->fileList() as $file) { ?>
-                            <tr><td><?= $file['name'] ?></td><td class="number_column nobr"><?=
-                                Format::get_size($file['size']) ?></td></tr>
+                            <tr><td><?= $file['name'] ?></td><td class="number_column nobr"><?= byte_format($file['size']) ?></td></tr>
 <?php   } ?>
                         </table>
                     </div>

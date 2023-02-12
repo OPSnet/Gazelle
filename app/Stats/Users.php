@@ -174,7 +174,7 @@ class Users extends \Gazelle\Base {
             }
 
             for ($i = $CountryMin; $i <= $CountryMax; $i++) {
-                $LogIncrements[] = \Format::human_format(2 ** $i);
+                $LogIncrements[] = human_format(2 ** $i);
             }
             self::$cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 86400 * 3);
         }

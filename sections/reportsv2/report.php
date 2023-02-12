@@ -124,7 +124,7 @@ $remasterTuple = $torrent->remasterTuple();
             </td>
         </tr>
 <?php foreach ($torrent->fileList() as $file) { ?>
-            <tr><td><?= display_str($file['name']) ?></td><td class="number_column"><?= Format::get_size($file['size']) ?></td></tr>
+            <tr><td><?= display_str($file['name']) ?></td><td class="number_column"><?= byte_format($file['size']) ?></td></tr>
 <?php } ?>
 </table>
 </div>

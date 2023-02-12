@@ -65,7 +65,7 @@ class Debug {
         }
         $Ram = memory_get_usage(true);
         if ($Ram > self::MAX_MEMORY && !in_array($document, IGNORE_PAGE_MAX_MEMORY)) {
-            $Reason[] = \Format::get_size($Ram).' RAM used';
+            $Reason[] = byte_format($Ram).' RAM used';
         }
 
         self::$db->warnings(); // see comment in MYSQL::query
@@ -226,7 +226,7 @@ class Debug {
         $Tracer = debug_backtrace();
 
         //This is in case something in this function goes wrong and we get stuck with an infinite loop
-        if (isset($Tracer[$Steps]['function'], $Tracer[$Steps]['class']) && $Tracer[$Steps]['function'] == 'php_error_handler' && $Tracer[$Steps]['class'] == 'DEBUG') {
+        if (isset($Tracer[$Steps]['function'], $Tracer[$Steps]['class']) && $Tracer[$Steps]['function'] == 'php_error_handler' && $Tracer[$Steps]['class'] == 'DEBUG') { /** @phpstan-ignore-line */
             return true;
         }
 
@@ -329,7 +329,7 @@ class Debug {
             $CPUTime = $this->get_cpu_time();
             $Perf = [
                 'URI' => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
-                'Memory usage' => \Format::get_size(memory_get_usage(true)),
+                'Memory usage' => byte_format(memory_get_usage(true)),
                 'Page process time' => number_format($PageTime, 3).' s',
             ];
             if ($CPUTime) {

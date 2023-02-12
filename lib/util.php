@@ -36,12 +36,9 @@ function article(int $n, $article = 'a') {
 
 /**
  * HTML-escape a string for output.
- *
- * @param string $Str
- * @return string escaped string.
  */
-function display_str($Str) {
-    if ($Str === null || $Str === false || is_array($Str)) {
+function display_str(mixed $Str): string {
+    if (is_null($Str) || is_array($Str)) {
         return '';
     }
     if ($Str != '' && !is_number($Str)) {
@@ -71,17 +68,143 @@ function display_str($Str) {
 }
 
 /**
+ * Returns ratio
+ */
+function ratio(int $uploaded, $downloaded, $digits = 2): bool|string {
+    return match(true) {
+        $downloaded == 0 && $uploaded == 0 => false,
+        $downloaded == 0 => '∞',
+        default => number_format(max($uploaded / $downloaded - (0.5 / 10 ** $digits), 0), $digits),
+    };
+}
+
+/**
+ * Gets the CSS class corresponding to a ratio
+ */
+function ratio_css(float $ratio): string {
+    if ($ratio < 0.1) { return 'r00'; }
+    if ($ratio < 0.2) { return 'r01'; }
+    if ($ratio < 0.3) { return 'r02'; }
+    if ($ratio < 0.4) { return 'r03'; }
+    if ($ratio < 0.5) { return 'r04'; }
+    if ($ratio < 0.6) { return 'r05'; }
+    if ($ratio < 0.7) { return 'r06'; }
+    if ($ratio < 0.8) { return 'r07'; }
+    if ($ratio < 0.9) { return 'r08'; }
+    if ($ratio < 1.0) { return 'r09'; }
+    if ($ratio < 2.0) { return 'r10'; }
+    if ($ratio < 5.0) { return 'r20'; }
+    return 'r50';
+}
+
+/**
+ * Calculates and formats a ratio.
+ */
+function ratio_html(int $uploaded, int $downloaded, $wantColor = true) {
+    $ratio = ratio($uploaded, $downloaded);
+    if ($ratio === false) {
+        return '--';
+    }
+    if ($ratio === '∞') {
+        return $wantColor ? '<span class="tooltip r99" title="Infinite">∞</span>' : '∞';
+    }
+    if ($wantColor) {
+        $ratio = sprintf('<span class="tooltip %s" title="%s">%s</span>',
+            ratio_css((float)$ratio),
+            ratio($uploaded, $downloaded, 5),
+            $ratio
+        );
+    }
+    return $ratio;
+}
+
+/**
+ * Gets the query string of the current page, minus the parameters in $Exclude,
+ * plus the parameters in $NewParams
+ *
+ * @param array $NewParams New query items to insert into the URL
+ */
+function get_url(array $Exclude = [], bool $Escape = true, bool $Sort = false, array $NewParams = []): string {
+    $QueryItems = NULL;
+    parse_str($_SERVER['QUERY_STRING'], $QueryItems);
+
+    foreach ($Exclude as $Key) {
+        unset($QueryItems[$Key]);
+    }
+    if ($Sort) {
+        ksort($QueryItems);
+    }
+    $NewQuery = http_build_query(array_merge($QueryItems, $NewParams), '');
+    return $Escape ? display_str($NewQuery) : $NewQuery;
+}
+
+/**
+ * Format a size in bytes as a human readable string in KiB/MiB/...
+ *        Note: KiB, MiB, etc. are the IEC units, which are in base 2.
+ *            KB, MB are the SI units, which are in base 10.
+ *
+ * @param int $levels Number of decimal places. Defaults to 2, unless the size >= 1TB, in which case it defaults to 4.
+ *                    or 0 in the case of bytes.
+ */
+function byte_format(float|int|null $size, int $levels = 2): string {
+    $units = [' B', ' KiB', ' MiB', ' GiB', ' TiB', ' PiB', ' EiB', ' ZiB', ' YiB'];
+    $size = (float)$size;
+    for ($steps = 0; abs($size) >= 1024; $steps++) {
+        $size /= 1024;
+    }
+    if (func_num_args() == 1 && $steps >= 4) {
+        $levels++;
+    }
+    if ($steps == 0) {
+        $levels = 0;
+    }
+    return number_format($size, $levels) . $units[$steps];
+}
+
+/**
+ * Format a number as a multiple of its highest power of 1000 (e.g. 10035 -> '10.04k')
+ */
+function human_format(float|int $number): string {
+    $steps = 0;
+    while ($number >= 1000) {
+        $steps++;
+        $number = $number / 1000;
+    }
+    return match ($steps) {
+        0 => (string)round($number),
+        1 => round($number, 2) . 'k',
+        2 => round($number, 2) . 'M',
+        3 => round($number, 2) . 'G',
+        4 => round($number, 2) . 'T',
+        5 => round($number, 2) . 'P',
+        default => round($number, 2) . 'E + ' . $steps * 3,
+    };
+}
+
+/**
+ * Given a formatted string of a size, get the number of bytes it represents.
+ */
+function get_bytes(string $size): int {
+    [$value, $unit] = sscanf($size, "%f%s");
+    $unit = ltrim($unit);
+    if (empty($unit)) {
+        return $value ? (int)round($value) : 0;
+    }
+    return match (strtolower($unit[0])) {
+        'k' => round($value *              1024),
+        'm' => round($value *         1_048_576),
+        'g' => round($value *     1_073_741_824),
+        't' => round($value * 1_099_511_627_776),
+        default => 0,
+    };
+}
+
+/**
  * Un-HTML-escape a string for output.
  *
  * It's like the above function, but in reverse.
- *
- * @param string $Str
- * @return string unescaped string
  */
-function reverse_display_str($Str) {
-    if ($Str === null || $Str === false || is_array($Str)) {
-        return '';
-    }
+function reverse_display_str(string $Str): string {
     if ($Str != '' && !is_number($Str)) {
         $Replace = [
             '&#39;','&quot;','&lt;','&gt;',
@@ -127,20 +250,16 @@ function redirectUrl(string $fallback): string {
 /**
  * Make sure $_GET['auth'] is the same as the user's authorization key
  * Should be used for any user action that relies solely on GET.
- *
- * @param bool $Ajax Are we using ajax?
- * @return bool authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
  */
-function authorize($Ajax = false): bool {
+function authorize(bool $Ajax = false): void {
     global $Viewer;
     if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
-        return true;
+        return;
     }
     Irc::sendMessage(STATUS_CHAN,
         $Viewer->username() . " just failed authorize on "
         . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
     error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
-    return false;
 }
 
 function parse_user_agent(string $useragent): array {
@@ -169,7 +288,7 @@ function parse_user_agent(string $useragent): array {
     } else {
         $Result = new WhichBrowser\Parser($useragent);
         $Browser = $Result->browser;
-        if (empty($Browser->getName()) && !empty($Browser->using)) {
+        if (empty($Browser->getName())) {
             $Browser = $Browser->using;
         }
         $browserUserAgent = [
@@ -315,11 +434,8 @@ function is_utf8(string $s): bool {
 
 /**
  * Detect the encoding of a string and transform it to UTF-8.
- *
- * @param string $str
- * @return string UTF-8 encoded version of $str
  */
-function make_utf8($str) {
+function make_utf8(?string $str): string {
     if (is_null($str) || $str === '' || is_utf8($str)) {
         return $str;
     }
@@ -457,11 +573,6 @@ function time_diff($TimeStamp, $Levels = 2, $Span = true, $StartTime = false) {
  */
 
 function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
-    if (is_null($Paranoia)) {
-        debug_print_backtrace();
-        exit;
-    }
-
     if ($Property == false) {
         return false;
     }

@@ -33,14 +33,14 @@ if (isset($_GET['freeleech'])) {
     }
 }
 
-$freeleechToggleQuery = Format::get_url(['freeleech', 'groups']);
+$freeleechToggleQuery = get_url(['freeleech', 'groups']);
 if (!empty($freeleechToggleQuery)) {
     $freeleechToggleQuery .= '&amp;';
 }
 $freeleechToggleName = $top10->showFreeleechTorrents($hideFreeleechTorrentTop10) ? 'show' : 'hide';
 $freeleechToggleQuery .= 'freeleech=' . $freeleechToggleName;
 
-$groupByToggleQuery = Format::get_url(['freeleech', 'groups']);
+$groupByToggleQuery = get_url(['freeleech', 'groups']);
 if (!empty($groupByToggleQuery)) {
   $groupByToggleQuery .= '&amp;';
 }
@@ -249,7 +249,7 @@ foreach ($context as $c) {
             </div>
         </td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
-        <td class="td_data number_column nobr"><?=Format::get_size($data)?></td>
+        <td class="td_data number_column nobr"><?= byte_format($data) ?></td>
     </tr>
 <?php } ?>
     </table><br />

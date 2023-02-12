@@ -119,15 +119,15 @@ if ($OwnProfile || $Viewer->permitted('users_mod')) {
                 break;
             case 'bytes':
                 $percent = $current / $goal;
-                $current = Format::get_size($current);
-                $goal = Format::get_size($goal);
+                $current = byte_format($current);
+                $goal = byte_format($goal);
                 break;
             default:
                 continue 2;
             }
 
             $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
-                Format::get_ratio_color($percent),
+                ratio_css($percent),
                 round($percent * 100, 2) . '%',
                 round(min(1.0, $percent) * 100, 0) . '%'
             );
@@ -179,12 +179,12 @@ $rank = new Gazelle\UserRank(
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
 <?php if (($Override = check_paranoia_here('uploaded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->uploadedSize())?> uploaded">Data uploaded: <?= $rank->rank('uploaded') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= byte_format($User->uploadedSize()) ?> uploaded">Data uploaded: <?= $rank->rank('uploaded') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('downloaded'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($User->downloadedSize())?> downloaded">Data downloaded: <?= $rank->rank('downloaded') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= byte_format($User->downloadedSize()) ?> downloaded">Data downloaded: <?= $rank->rank('downloaded') ?></li>
 <?php
 }
 if (($Override = check_paranoia_here('uploads+'))) {
@@ -199,7 +199,7 @@ if (($Override = check_paranoia_here('requestsfilled_count'))) {
 }
 if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($stats->requestBountySize())?> spent">Request votes: <?= $rank->rank('bounty') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= byte_format($stats->requestBountySize()) ?> spent">Request votes: <?= $rank->rank('bounty') ?></li>
 <?php } ?>
                 <li class="tooltip" title="<?=number_format($stats->forumPostTotal())?> posts">Forum posts made: <?= $rank->rank('posts') ?></li>
 <?php
@@ -526,7 +526,7 @@ if (!$Viewer->disableRequests() && check_paranoia_here('requestsvoted_list')) {
 <?php            } ?>
                         </td>
                         <td>
-                            <span id="bounty_<?= $request->id() ?>"><?= Format::get_size($request->bountyTotal()) ?></span>
+                            <span id="bounty_<?= $request->id() ?>"><?= byte_format($request->bountyTotal()) ?></span>
                         </td>
                         <td>
                             <?= time_diff($request->created()) ?>

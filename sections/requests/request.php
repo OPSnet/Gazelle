@@ -194,7 +194,7 @@ foreach ($topVoteList as $vote) {
                         <a href="user.php?id=<?= $vote['user_id'] ?>"><?= ($bold ? '<strong>' : '') . display_str($vote['user']->username()) . ($bold ? '</strong>' : '')?></a>
                     </td>
                     <td class="number_column">
-                        <?=($bold ? '<strong>' : '') . Format::get_size($vote['bounty']) . ($bold ? "</strong>\n" : "\n")?>
+                        <?=($bold ? '<strong>' : '') . byte_format($vote['bounty']) . ($bold ? "</strong>\n" : "\n")?>
                     </td>
                 </tr>
 <?php
@@ -208,7 +208,7 @@ if (!$seen) {
                         <a href="user.php?id=<?= $Viewer->id() ?>"><strong><?= display_str($Viewer->username()) ?></strong></a>
                     </td>
                     <td class="number_column">
-                        <strong><?=Format::get_size($bounty)?></strong>
+                        <strong><?= byte_format($bounty) ?></strong>
                     </td>
                 </tr>
 <?php
@@ -335,8 +335,8 @@ if ($request->canVote($Viewer)) {
                             : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty">0.00 MiB</span></strong> of bounty, your new stats will be: <br />
-                        Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
-                        Ratio: <span id="new_ratio"><?=Format::get_ratio_html($Viewer->uploadedSize(),$Viewer->downloadedSize())?></span>
+                        Uploaded: <span id="new_uploaded"><?= byte_format($Viewer->uploadedSize()) ?></span><br />
+                        Ratio: <span id="new_ratio"><?= ratio_html($Viewer->uploadedSize(),$Viewer->downloadedSize()) ?></span>
                         <input type="button" id="button" value="Vote!" disabled="disabled" onclick="Vote();" />
                     </form>
                 </td>
@@ -344,7 +344,7 @@ if ($request->canVote($Viewer)) {
 <?php } ?>
             <tr id="bounty">
                 <td class="label">Bounty</td>
-                <td id="formatted_bounty"><?=Format::get_size($request->bountyTotal())?></td>
+                <td id="formatted_bounty"><?= byte_format($request->bountyTotal()) ?></td>
             </tr>
 <?php if ($request->isFilled()) { ?>
             <tr>

@@ -75,7 +75,7 @@ if (isset($_POST['GroupID'])) {
                             FROM torrents
                             WHERE Size > ?
                                 AND ID IN (" . placeholders($TorrentIDs) . ")
-                            ", Format::get_bytes($Size . $Units), ...$TorrentIDs
+                            ", get_bytes($Size . $Units), ...$TorrentIDs
                         );
                         $LargeTorrents = $DB->collect('ID');
                         $TorrentIDs = array_diff($TorrentIDs, $LargeTorrents);

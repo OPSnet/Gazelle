@@ -512,10 +512,10 @@ class Recovery extends \Gazelle\Base {
                 $reclaimMsg = "Number of torrents found in the backup: $reclaimed. You will now receive bonus points for these torrents if you begin to seed them again.";
             }
 
-            $uploaded_fmt   = \Format::get_size($uploaded);
-            $downloaded_fmt = \Format::get_size($downloaded);
-            $bounty_fmt     = \Format::get_size($bounty);
-            $final_fmt      = \Format::get_size($final);
+            $uploaded_fmt   = byte_format($uploaded);
+            $downloaded_fmt = byte_format($downloaded);
+            $bounty_fmt     = byte_format($bounty);
+            $final_fmt      = byte_format($final);
 
             $admin_comment = sprintf("%s - Upload stats recovery raw: Up=%d Down=%d Bounty=%d Torrents=%d IRC=%s"
                 . "\nformatted: U=%s D=%s B=%s Final=%s (%d) APL_ID=%d RESCALE=%s reclaim=$reclaimed\n\n",

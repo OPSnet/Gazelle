@@ -11,7 +11,7 @@ if (!isset($_GET['userid'])) {
     foreach ($MainStats as $Key => $Value) {
         if (is_numeric($Value)) {
             if (str_starts_with($Key, "bytes ")) {
-                $Value = Format::get_size($Value);
+                $Value = byte_format($Value);
                 $Key = substr($Key, 6);
             } else {
                 $Value = number_format($Value);

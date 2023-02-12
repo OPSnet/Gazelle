@@ -27,7 +27,7 @@
         <td class="number_column">{{ u.uploaded|octet_size }}</td>
         <td class="number_column">{{ u.downloaded|octet_size }}</td>
         <td class="number_column">{{ ratio(u.uploaded, u.downloaded)|raw }}</td>
-        <td class="number_column">{{ u.required_ration|number_format(2) }}</td>
+        <td class="number_column">{{ u.required_ratio|number_format(2) }}</td>
         <td class="number_column">
             {%- if u.downloaded * u.required_ratio > u.uploaded -%}
             {{ (u.downloaded * u.required_ratio - u.uploaded)|octet_size }}

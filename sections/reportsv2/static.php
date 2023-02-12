@@ -126,7 +126,7 @@ if ($search->canUnclaim($Viewer)) {
                                     </td>
                                 </tr>
 <?php       foreach ($torrent?->fileList() ?? [] as $f) { ?>
-                                <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= Format::get_size($f['size']) ?></td></tr>
+                                <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= byte_format($f['size']) ?></td></tr>
 <?php       } ?>
                             </table>
                         </div>
@@ -184,7 +184,7 @@ if ($search->canUnclaim($Viewer)) {
                                 </td>
                             </tr>
 <?php                   foreach ($extra->fileList() as $f) { ?>
-                            <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= Format::get_size($f['size']) ?></td></tr>
+                            <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= byte_format($f['size']) ?></td></tr>
 <?php                   } ?>
                         </table>
                         </div>

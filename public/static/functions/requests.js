@@ -31,7 +31,7 @@ function Vote(amount, requestid) {
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
         if (response == 'bankrupt') {
-            error_message("You do not have sufficient upload credit to add " + get_size(amount) + " to this request");
+            error_message("You do not have sufficient upload credit to add " + byte_format(amount) + " to this request");
             return;
         } else if (response == 'missing') {
             error_message("Cannot find this request");
@@ -51,15 +51,15 @@ function Vote(amount, requestid) {
             totalBounty += (amount * (1 - $('#request_tax').raw().value));
             var requestTax = $('#request_tax').raw().value;
             $('#total_bounty').raw().value = totalBounty;
-            $('#formatted_bounty').raw().innerHTML = get_size(totalBounty);
+            $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);
             if (requestTax > 0) {
-                save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
+                save_message("Your vote of " + byte_format(amount) + ", adding a " + byte_format(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
             } else {
-                save_message("Your vote of " + get_size(amount) + " has been added");
+                save_message("Your vote of " + byte_format(amount) + " has been added");
             }
             $('#button').raw().disabled = true;
         } else {
-            save_message("Your vote of " + get_size(amount) + " has been added");
+            save_message("Your vote of " + byte_format(amount) + " has been added");
         }
     });
 }
@@ -75,17 +75,17 @@ function Calculate() {
     } else if (isNaN($('#amount_box').raw().value)
             || (window.location.search.indexOf('action=new') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)
             || (window.location.search.indexOf('action=view') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)) {
-        $('#new_uploaded').raw().innerHTML = get_size(($('#current_uploaded').raw().value));
+        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value));
         $('#new_bounty').raw().innerHTML = "0.00 MiB";
         $('#bounty_after_tax').raw().innerHTML = "0.00 MiB";
         $('#button').raw().disabled = true;
     } else {
         $('#button').raw().disabled = false;
         $('#amount').raw().value = amt;
-        $('#new_uploaded').raw().innerHTML = get_size(($('#current_uploaded').raw().value) - amt);
+        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value) - amt);
         $('#new_ratio').raw().innerHTML = ratio($('#current_uploaded').raw().value - amt, $('#current_downloaded').raw().value);
-        $('#new_bounty').raw().innerHTML = get_size(mul * $('#amount_box').raw().value);
-        $('#bounty_after_tax').raw().innerHTML = get_size(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value);
+        $('#new_bounty').raw().innerHTML = byte_format(mul * $('#amount_box').raw().value);
+        $('#bounty_after_tax').raw().innerHTML = byte_format(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value);
     }
 }
 

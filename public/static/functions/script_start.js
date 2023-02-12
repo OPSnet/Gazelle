@@ -82,7 +82,7 @@ function html_entity_decode(str) {
     return ret;
 }
 
-function get_size(size) {
+function byte_format(size) {
     var steps = 0;
     while (steps < 8 && size >= 1024) {
         steps++;
@@ -112,7 +112,7 @@ function get_size(size) {
     return (size.toFixed(2) + ext);
 }
 
-function get_ratio_color(ratio) {
+function ratio_css(ratio) {
     if (ratio < 0.1) { return 'r00'; }
     if (ratio < 0.2) { return 'r01'; }
     if (ratio < 0.3) { return 'r02'; }
@@ -141,7 +141,7 @@ function ratio(dividend, divisor, color) {
     }
     var rat = ((dividend / divisor) - 0.005).toFixed(2); //Subtract .005 to floor to 2 decimals
     if (color) {
-        var col = get_ratio_color(rat);
+        var col = ratio_css(rat);
         if (col) {
             rat = '<span class="' + col + '">' + rat + '</span>';
         }

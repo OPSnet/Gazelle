@@ -68,10 +68,10 @@ class User extends AbstractAPI {
         }
         $user['Paranoia'] = unserialize_array($user['Paranoia']);
 
-        $user['Ratio'] = \Format::get_ratio($user['Uploaded'], $user['Downloaded']);
+        $user['Ratio'] = ratio($user['Uploaded'], $user['Downloaded']);
         $user['DisplayStats'] = [
-            'Downloaded' => \Format::get_size($user['Downloaded']),
-            'Uploaded' => \Format::get_size($user['Uploaded']),
+            'Downloaded' => byte_format($user['Downloaded']),
+            'Uploaded' => byte_format($user['Uploaded']),
             'Ratio' => $user['Ratio']
         ];
         foreach (['Downloaded', 'Uploaded', 'Ratio'] as $key) {
@@ -151,7 +151,7 @@ class User extends AbstractAPI {
             if (!is_null($Cur['RatioWatchEnds'])) {
                 $UpdateSet[] = "ui.RatioWatchEnds = NOW()";
                 $UpdateSet[] = "ui.RatioWatchDownload = " . $Cur['Downloaded'];
-                $Comment .= ' (Ratio: '.\Format::get_ratio_html($Cur['Uploaded'],
+                $Comment .= ' (Ratio: ' . ratio_html($Cur['Uploaded'],
                     $Cur['Downloaded'], false).', RR: '.number_format($Cur['RequiredRatio'], 2).')';
             }
             $tracker->update_tracker('update_user', ['passkey' => $Cur['torrent_pass'],

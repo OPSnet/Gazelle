@@ -69,7 +69,7 @@ class SortableTableHeader {
 
         return sprintf(
             '<a href="?%s">%s</a> %s',
-            Format::get_url(['page'], true, false, ['order' => $outputKey, 'sort' => $outputSortDir]),
+            get_url(['page'], true, false, ['order' => $outputKey, 'sort' => $outputSortDir]),
             $outputData['text'],
             $outputArrow
         );

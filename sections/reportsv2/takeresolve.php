@@ -85,7 +85,7 @@ elseif ($_POST['resolve_type'] === 'lossyapproval') {
 
 $adminMessage   = trim($_POST['admin_message']);
 $logMessage     = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
-$name           = $torrent->fullName() . ' (' . Format::get_size($torrent->size()) . ')';
+$name           = $torrent->fullName() . ' (' . byte_format($torrent->size()) . ')';
 $reportTypeName = $report->reportType()->name();
 $uploader       = $torrent->uploader();
 

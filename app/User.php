@@ -1093,7 +1093,7 @@ class User extends BaseObject {
                 ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
             WHERE uls.UserID = ?
             ", sprintf("leech stats (up: %s, down: %s, ratio: %s) transferred to %s (%s) by %s\n\n",
-                    \Format::get_size($up), \Format::get_size($down), \Format::get_ratio($up, $down),
+                    byte_format($up), byte_format($down), ratio($up, $down),
                     $this->url(), $this->username(), $staffname
             ),
             $mergeId

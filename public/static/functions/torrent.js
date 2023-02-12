@@ -237,7 +237,7 @@ function Vote(amount, requestid) {
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
             if (response == 'bankrupt') {
-                error_message("You do not have sufficient upload credit to add " + get_size(amount) + " to this request");
+                error_message("You do not have sufficient upload credit to add " + byte_format(amount) + " to this request");
                 return;
             } else if (response == 'missing') {
                 error_message("Cannot find this request");
@@ -256,12 +256,12 @@ function Vote(amount, requestid) {
                 totalBounty = parseInt($('#total_bounty').raw().value);
                 totalBounty += (amount * (1 - $('#request_tax').raw().value));
                 $('#total_bounty').raw().value = totalBounty;
-                $('#formatted_bounty').raw().innerHTML = get_size(totalBounty);
+                $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);
 
-                save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
+                save_message("Your vote of " + byte_format(amount) + ", adding a " + byte_format(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
                 $('#button').raw().disabled = true;
             } else {
-                save_message("Your vote of " + get_size(amount) + " has been added");
+                save_message("Your vote of " + byte_format(amount) + " has been added");
             }
         }
     );

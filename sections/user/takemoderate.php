@@ -58,11 +58,11 @@ $uploaded = $downloaded = $bonusPoints = null;
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
     $uploaded = ($_POST['Uploaded'] === '' ? 0 : $_POST['Uploaded']);
     if ($arithmetic = strpbrk($uploaded, '+-')) {
-        $uploaded += max(-$uploaded, Format::get_bytes($arithmetic));
+        $uploaded += max(-$uploaded, get_bytes($arithmetic));
     }
     $downloaded = ($_POST['Downloaded'] === '' ? 0 : $_POST['Downloaded']);
     if ($arithmetic = strpbrk($downloaded, '+-')) {
-        $downloaded += max(-$downloaded, Format::get_bytes($arithmetic));
+        $downloaded += max(-$downloaded, get_bytes($arithmetic));
     }
     if (!is_number($uploaded) || !is_number($downloaded)) {
         error(0);
@@ -224,16 +224,16 @@ if ($editRatio) {
     if ($uploaded != $cur['Uploaded'] && $uploaded != $_POST['OldUploaded']) {
         $leechSet[] = 'Uploaded = ?';
         $leechArgs[] = $uploaded;
-        $editSummary[] = "uploaded changed from " . Format::get_size($cur['Uploaded'])
-            . ' to ' . Format::get_size($uploaded)
-            . " (delta " . Format::get_size($uploaded - $cur['Uploaded']) . ")";
+        $editSummary[] = "uploaded changed from " . byte_format($cur['Uploaded'])
+            . ' to ' . byte_format($uploaded)
+            . " (delta " . byte_format($uploaded - $cur['Uploaded']) . ")";
     }
     if ($downloaded != $cur['Downloaded'] && $downloaded != $_POST['OldDownloaded']) {
         $leechSet[] = 'Downloaded = ?';
         $leechArgs[] = $downloaded;
-        $editSummary[] = "downloaded changed from " . Format::get_size($cur['Downloaded'])
-            . ' to ' . Format::get_size($downloaded)
-            . " (delta " . Format::get_size($downloaded - $cur['Downloaded']) . ")";
+        $editSummary[] = "downloaded changed from " . byte_format($cur['Downloaded'])
+            . ' to ' . byte_format($downloaded)
+            . " (delta " . byte_format($downloaded - $cur['Downloaded']) . ")";
     }
 }
 
@@ -517,7 +517,7 @@ if ($enableUser != $cur['Enabled'] && $Viewer->permitted('users_disable_users'))
             $set[] = "i.RatioWatchDownload = ?";
             $args[] = '0';
         } else {
-            $enableStr .= ' (Ratio: '.Format::get_ratio_html($cur['Uploaded'], $cur['Downloaded'], false).', RR: '.number_format($cur['RequiredRatio'],2).')';
+            $enableStr .= ' (Ratio: ' . ratio_html($cur['Uploaded'], $cur['Downloaded'], false) . ', RR: '.number_format($cur['RequiredRatio'],2).')';
             if ($cur['RatioWatchEnds']) {
                 $set[] = "i.RatioWatchEnds = now()";
                 $set[] = "i.RatioWatchDownload = ?";
@@ -570,10 +570,9 @@ if ($mergeStatsFrom && $Viewer->permitted('users_edit_ratio')) {
         $leechSet[] = "Downloaded = Downloaded + ?";
         $leechArgs[] = $stats['down'];
         $editSummary[] = sprintf('leech stats (up: %s, down: %s, ratio: %s) merged from %s (%s) prior(up: %s, down: %s, ratio: %s)',
-            Format::get_size($stats['up']), Format::get_size($stats['down']), Format::get_ratio($stats['up'], $stats['down']),
+            byte_format($stats['up']), byte_format($stats['down']), ratio($stats['up'], $stats['down']),
             $merge->url(), $mergeStatsFrom,
-            Format::get_size($cur['Uploaded']), Format::get_size($cur['Downloaded']),
-            Format::get_ratio($cur['Uploaded'], $cur['Downloaded'])
+            byte_format($cur['Uploaded']), byte_format($cur['Downloaded']), ratio($cur['Uploaded'], $cur['Downloaded'])
         );
     }
 }

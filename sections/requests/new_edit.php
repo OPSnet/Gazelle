@@ -375,8 +375,8 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>
                         If you add the entered <strong><span id="new_bounty"><?= REQUEST_MIN ?>.00 MiB</span></strong> of bounty, your new stats will be: <br />
-                        Uploaded: <span id="new_uploaded"><?=Format::get_size($Viewer->uploadedSize())?></span><br />
-                        Ratio: <span id="new_ratio"><?=Format::get_ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize())?></span>
+                        Uploaded: <span id="new_uploaded"><?= byte_format($Viewer->uploadedSize()) ?></span><br />
+                        Ratio: <span id="new_ratio"><?= ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize()) ?></span>
                     </td>
                 </tr>
                 <tr>
