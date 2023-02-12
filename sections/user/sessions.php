@@ -1,12 +1,13 @@
 <?php
 
-if (!isset($_GET['userid'])) {
+if (!isset($_GET['id'])) {
     $user = $Viewer;
 } else {
-    if (!$Viewer->permitted('users_view_ips') || !$Viewer->permitted('users_logout')) {
+    $userId = (int)$_GET['id'];
+    if ($userId !== $Viewer->id() && !$Viewer->permittedAny('users_logout', 'users_view_ips')) {
         error(403);
     }
-    $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+    $user = (new Gazelle\Manager\User)->findById($userId);
     if (is_null($user)) {
         error(404);
     }

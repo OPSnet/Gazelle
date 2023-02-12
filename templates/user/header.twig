@@ -35,7 +35,7 @@
 {% if own_profile or viewer.permitted('users_edit_profiles') %}
         <a href="user.php?action=edit&amp;id={{ user_id }}" class="brackets">Settings</a>
 {% endif %}
-{% if viewer.id == user_id %}
+{% if own_profile %}
         <a href="friends.php" class="brackets">Friends</a>
 {% endif %}
 {% if viewer.permitted('admin_reports') %}
@@ -50,9 +50,11 @@
 {% if user.hasAttr('feature-seedbox') and (own_profile or viewer.permitted('users_view_ips')) %}
         <a href="user.php?action=seedbox{% if viewer.permitted('users_view_ips') %}&amp;userid={{ user_id }}{% endif %}" class="brackets">Seedboxes</a>
 {% endif %}
-{% if viewer.permitted('users_view_ips') %}
-        <a href="user.php?action=sessions&amp;userid={{ user_id }}" class="brackets">Sessions</a>
+{% if own_profile or viewer.permittedAny('users_logout', 'users_view_ips') %}
+        <a href="user.php?id={{ user_id }}&amp;action=sessions" class="brackets">Sessions</a>
+    {% if viewer.permittedAny('users_logout', 'users_view_ips') %}
         <a href="tools.php?action=user_info&amp;userid={{ user_id }}" class="brackets">Email/IP info</a>
+    {% endif %}
 {% endif %}
 {% if viewer.permitted('admin_clear_cache') and viewer.permitted('users_override_paranoia') %}
         <a href="user.php?action=clearcache&amp;id={{ user_id }}" class="brackets">Clear cache</a>
