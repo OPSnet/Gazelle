@@ -7,46 +7,22 @@ if (!$Viewer->permitted('users_mod')) {
 }
 
 $blogMan = new Gazelle\Manager\StaffBlog;
-$blogMan->visit($Viewer->id());
-
-View::show_header('Staff Blog', ['js' => 'bbcode']);
+$blogMan->catchup($Viewer);
 
 if ($Viewer->permitted('admin_manage_blog')) {
+    $blog = $blogMan->findById((int)($_REQUEST['id'] ?? 0));
     if (!empty($_REQUEST['action'])) {
         switch ($_REQUEST['action']) {
+            case 'deleteblog':
+                $blog->remove();
+                header('Location: staffblog.php');
+                exit;
+
             case 'editblog':
-                if ((int)$_GET['id']) {
-                    $blogMan->load((int)$_GET['id']);
-                }
+                // we have a blog to edit
                 break;
 
             case 'takeeditblog':
-                authorize();
-                $title = trim($_POST['title'] ?? '');
-                if (empty($title)) {
-                    error("Please enter a title.");
-                }
-                $body = trim($_POST['body'] ?? '');
-                if (empty($body)) {
-                    error("Please enter a body.");
-                }
-                if ((int)$_POST['blogid']) {
-                    $blogMan->setId((int)$_POST['blogid'])
-                        ->setTitle(trim($_POST['title']))
-                        ->setBody(trim($_POST['body']))
-                        ->modify();
-                }
-                header('Location: staffblog.php');
-                exit;
-
-            case 'deleteblog':
-                if ((int)$_GET['id']) {
-                    authorize();
-                    $blogMan->remove((int)$_GET['id']);
-                }
-                header('Location: staffblog.php');
-                exit;
-
             case 'takenewblog':
                 authorize();
                 $title = trim($_POST['title'] ?? '');
@@ -57,13 +33,16 @@ if ($Viewer->permitted('admin_manage_blog')) {
                 if (empty($body)) {
                     error("Please enter a body.");
                 }
-                $blogMan->setTitle($title)
-                    ->setBody($body)
-                    ->setAuthorId($Viewer->id())
-                    ->modify();
-                Irc::sendMessage(MOD_CHAN, "New staff blog: " . $blogMan->title()
-                    . " - " . SITE_URL . "/staffblog.php#blog" . $blogMan->blogId()
-                );
+                if ($_REQUEST['action'] == 'takenewblog') {
+                    $blog = $blogMan->create($Viewer, $title, $body);
+                    Irc::sendMessage(MOD_CHAN, "New staff blog: " . $blog->title()
+                        . " - " . SITE_URL . '/' . $blog->location()
+                    );
+                } else {
+                    $blog->setUpdate('Title', $title)
+                        ->setUpdate('Body', $body)
+                        ->modify();
+                }
                 header('Location: staffblog.php');
                 exit;
 
@@ -71,16 +50,20 @@ if ($Viewer->permitted('admin_manage_blog')) {
                 error(403);
         }
     }
+}
+
+View::show_header('Staff Blog', ['js' => 'bbcode']);
+
+if (in_array($_REQUEST['action'] ?? '', ['', 'editblog'])) {
     echo $Twig->render('staffblog/edit.twig', [
-        'auth' => $Viewer->auth(),
-        'blog' => $blogMan,
-        'verb' => empty($_GET['action']) ? 'create' : 'edit',
-        'show_form' => !isset($_REQUEST['action']) || $_REQUEST['action'] != 'editblog',
+        'action'    => empty($_REQUEST['action']) ? 'create' : 'edit',
+        'auth'      => $Viewer->auth(),
+        'blog'      => $blog,
+        'show_form' => !isset($_REQUEST['action']) || $_REQUEST['action'] !== 'editblog',
     ]);
 }
 
 echo $Twig->render('staffblog/list.twig', [
-    'auth'   => $Viewer->auth(),
-    'editor' => $Viewer->permitted('admin_manage_blog'),
     'list'   => $blogMan->blogList(),
+    'viewer' => $Viewer,
 ]);

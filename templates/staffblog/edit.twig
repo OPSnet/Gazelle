@@ -1,17 +1,17 @@
 <div class="box box2 thin">
     <div class="head">
-        {{ verb|ucfirst }} a staff blog post
+        {{ action|ucfirst }} a staff blog post
         <span style="float: right;">
             <a href="#" onclick="$('#postform').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">{{
                 show_form ? 'Show' : 'Hide' }}</a>
         </span>
     </div>
-    <form class="{{ verb }}_form" name="blog_post" action="staffblog.php" method="post">
+    <form class="{{ action }}_form" name="blog_post" action="staffblog.php" method="post">
         <div id="postform" class="pad{{ show_form ? ' hidden' : '' }}">
-            <input type="hidden" name="action" value="{{ verb == 'create' ? 'takenewblog' : 'takeeditblog' }}" />
+            <input type="hidden" name="action" value="{{ action == 'create' ? 'takenewblog' : 'takeeditblog' }}" />
             <input type="hidden" name="auth" value="{{ auth }}" />
-{% if verb == 'edit' %}
-            <input type="hidden" name="blogid" value="{{ blog.blogId }}" />
+{% if action == 'edit' %}
+            <input type="hidden" name="id" value="{{ blog.id }}" />
 {% endif %}
             <div class="field_div">
                 <h3>Title</h3>
@@ -22,7 +22,7 @@
                 <textarea name="body" cols="95" rows="15">{{ blog.body }}</textarea> <br />
             </div>
             <div class="submit_div center">
-                <input type="submit" value="{{ verb|ucfirst }} blog post" />
+                <input type="submit" value="{{ action|ucfirst }} blog post" />
             </div>
         </div>
     </form>
