@@ -148,7 +148,6 @@ if (empty($_GET)) {
         ['comment', '0', 'string', 'Comment is too long.', ['maxlength' => 512]],
         ['disabled_invites', '0', 'inarray', 'Invalid disabled_invites field', $YesNo],
         ['disabled_uploads', '0', 'inarray', 'Invalid disabled_uploads field', $YesNo],
-        ['donor', '0', 'inarray', 'Invalid donor field', $YesNo],
         ['downloaded', '0', 'inarray', 'Invalid downloaded field', $NumberChoices],
         ['enabled', '0', 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]],
         ['join1', '0', 'regexp', 'Invalid join1 field', $DateRegexp],
@@ -409,11 +408,6 @@ if (empty($_GET)) {
         $Join['ul'] = 'INNER JOIN users_levels AS ul ON (um1.ID = ul.UserID)';
         $Where[] = 'ul.PermissionID = ?';
         $Args[] = $_GET['secclass'];
-    }
-
-    if (isset($_GET['donor']) && !empty($_GET['donor'])) {
-        $Where[] = 'ui1.Donor = ?';
-        $Args[] = $_GET['donor'] === 'yes' ? '1' : '0';
     }
 
     if (isset($_GET['warned']) && !empty($_GET['warned'])) {
