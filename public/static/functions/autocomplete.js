@@ -13,6 +13,14 @@ $(document).ready(function() {
         serviceUrl : ARTIST_AUTOCOMPLETE_URL,
     });
 
+    $('#collagesearch' + SELECTOR).autocomplete({
+        deferRequestBy: 300,
+        onSelect : function(suggestion) {
+            window.location = 'collages.php?id=' + suggestion['data'];
+        },
+        serviceUrl : COLLAGE_AUTOCOMPLETE_URL,
+    });
+
     if (url.path == 'torrents' || url.path == 'upload' || url.path == 'artist' || (url.path == 'requests' && url.query['action'] == 'new') || url.path == 'collages') {
         $("#artist_0" + SELECTOR).autocomplete({
             deferRequestBy: 300,

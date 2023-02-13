@@ -128,14 +128,16 @@
     <span class="hidden">Artist: </span>
     <form class="search_form" name="artists" action="artist.php" method="get">
         <input id="artistsearch"
-            {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% else %} {% endif -%}
+            {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% endif -%}
             value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a" />
     </form>
 </li>
 <li id="searchbar_collages">
     <span class="hidden">Collage: </span>
     <form class="search_form" name="collages" action="collages.php" method="get">
-        <input id="collagesearch" value="Collages" placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c" />
+        <input id="collagesearch"
+            {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% endif -%}
+            value="Collages" placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c" />
     </form>
 </li>
 <li id="searchbar_requests">
