@@ -285,8 +285,10 @@ class UploadForm extends \Gazelle\Base {
 <?php    } ?>
                         <br /><br />
 <?php    if (!empty($GroupRemasters)) { ?>
-                        <input type="hidden" id="json_remasters" value="<?=display_str(json_encode($GroupRemasters))?>" />
-                        <select id="groupremasters" name="groupremasters" onchange="GroupRemaster()"<?php if ($UnknownRelease) { echo ' disabled="disabled"'; } ?>>
+                        <input type="hidden" id="json_remasters" value="<?=
+                            str_replace('"', "&quot;", display_str(json_encode($GroupRemasters)))?>" />
+                        <select id="groupremasters" name="groupremasters" onchange="GroupRemaster()"<?php
+                                if ($UnknownRelease) { echo ' disabled="disabled"'; } ?>>
                             <option value="">-------</option>
 <?php
             $LastLine = '';
