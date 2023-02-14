@@ -28,7 +28,6 @@ switch ($Error) {
     case '429':
         $Title = "Error 429";
         $Description = "You tried to do something too frequently.";
-        notify($Viewer, STATUS_CHAN, 429);
         break;
     case '0':
         $Title = "Invalid Input";
