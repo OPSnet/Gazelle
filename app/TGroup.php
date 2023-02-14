@@ -807,7 +807,7 @@ class TGroup extends BaseObject {
         self::$db->commit();
 
         $this->flush();
-        foreach ($this->artistRole()->idList() as $role) {
+        foreach (($this->artistRole()?->idList() ?? []) as $role) {
             foreach ($role as $artist) {
                 self::$cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
             }

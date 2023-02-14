@@ -89,9 +89,9 @@ class TGroup extends \Gazelle\BaseManager {
         ?int $releaseType,
         string $name,
         string $description,
-        int $year,
-        string $recordLabel,
-        string $catalogueNumber,
+        ?int $year,
+        ?string $recordLabel,
+        ?string $catalogueNumber,
         ?string $image,
         bool $showcase,
     ): \Gazelle\TGroup {

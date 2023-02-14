@@ -38,7 +38,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
     $Properties['RemasterRecordLabel'] = '';
     $Properties['RemasterCatalogueNumber'] = '';
 }
-$Properties['Year'] = isset($_POST['year']) ? trim($_POST['year']) : null;
+$Properties['Year'] = isset($_POST['year']) ? (int)$_POST['year'] : null;
 $_POST['year'] = $Properties['Year'];
 $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
@@ -506,6 +506,8 @@ if ($isMusicUpload) {
         }
     }
     if ($tgroup) {
+        $Properties['ReleaseType'] = $tgroup->releaseType();
+        $Properties['Year'] = $tgroup->year();
         $Properties['TagList'] = $tgroup->tagNameList();
         if (!$Properties['Image'] && $tgroup->image()) {
             $Properties['Image'] = $tgroup->image();
