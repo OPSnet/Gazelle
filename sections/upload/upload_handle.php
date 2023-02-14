@@ -715,12 +715,7 @@ if ($Properties['Image'] != '') {
 }
 $Cache->delete_multi(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
 if (!$IsNewGroup) {
-    $Cache->delete_multi([
-        "torrent_group_$GroupID",
-        "detail_files_$GroupID",
-        sprintf(\Gazelle\TGroup::CACHE_KEY, $GroupID),
-        sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $GroupID),
-    ]);
+    $tgroup->flush();
 }
 
 //******************************************************************************//

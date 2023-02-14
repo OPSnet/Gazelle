@@ -175,6 +175,7 @@ class TGroup extends \Gazelle\BaseManager {
         while ([$TorrentID] = self::$db->next_row()) {
             $cacheKeys[] = 'torrent_download_' . $TorrentID;
             $cacheKeys[] = 'tid_to_group_' . $TorrentID;
+            $cacheKeys[] = sprintf(\Gazelle\Torrent::CACHE_KEY, $TorrentID);
         }
         self::$cache->delete_multi($cacheKeys);
         unset($cacheKeys);
