@@ -171,7 +171,6 @@ class Text {
 
     /**
      * Array of headlines for Table Of Contents (TOC)
-     * @var array $HeadLines
      */
     private static array $Headlines = [];
 
@@ -217,7 +216,7 @@ class Text {
         $Str = preg_replace('/'.$URLPrefix.'\s+/i', '$1', $Str);
         $Str = preg_replace('/(?<!'.$URLPrefix.')http(s)?:\/\//i', '$1[inlineurl]http$2://', $Str);
         // For anonym.to and archive.org links, remove any [inlineurl] in the middle of the link
-        $callback = function($m) {return str_replace('[inlineurl]', '', $m[0]);};
+        $callback = fn($m) => str_replace('[inlineurl]', '', $m[0]);
         $Str = preg_replace_callback('/(?<=\[inlineurl\]|'.$URLPrefix.')(\S*\[inlineurl\]\S*)/m', $callback, $Str);
 
         if (self::$TOC) {
@@ -307,7 +306,6 @@ class Text {
             return null;
         }
         parse_str($info['query'] ?? '', $args);
-        $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
         global $Cache, $DB;
         switch ($info['path'] ?? '') {
             case '/artist.php':
@@ -324,15 +322,13 @@ class Text {
                 if (!isset($args['action'])) {
                     return null;
                 }
-                switch ($args['action']) {
-                    case 'viewforum':
-                        return self::bbcodeForumUrl($args['forumid']) ?? null;
-                    case 'viewthread':
-                        return !isset($args['threadid']) && isset($args['postid'])
-                            ?  self::bbcodePostUrl((int)$args['postid'])
-                            :  self::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null);
-                }
-                return null;
+                return match ($args['action']) {
+                    'viewforum' => self::bbcodeForumUrl($args['forumid']) ?? null,
+                    'viewthread' => !isset($args['threadid']) && isset($args['postid'])
+                        ?  self::bbcodePostUrl((int)$args['postid'])
+                        :  self::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null),
+                    default => null,
+                };
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
@@ -473,7 +469,7 @@ class Text {
                     $CloseTag -= strlen($Match[0]);
                 }
                 $URL = substr($Str, $i, $CloseTag);
-                if (substr($URL, -1) == ')' && substr_count($URL, '(') < substr_count($URL, ')')) {
+                if (str_ends_with($URL, ')') && substr_count($URL, '(') < substr_count($URL, ')')) {
                     $CloseTag--;
                     $URL = substr($URL, 0, -1);
                 }
@@ -540,40 +536,41 @@ class Text {
 
             // 6) Depending on what type of tag we're dealing with, create an array with the attribute and block.
             switch ($TagName) {
-                case 'inlineurl':
-                    $Array[$ArrayPos] = ['Type'=>'inlineurl', 'Attr'=>$Block, 'Val'=>''];
-                    break;
-                case 'url':
-                    $Array[$ArrayPos] = ['Type'=>'img', 'Attr'=>$Attrib, 'Val'=>$Block];
-                    if (empty($Attrib)) { // [url]http://...[/url] - always set URL to attribute
-                        $Array[$ArrayPos] = ['Type'=>'url', 'Attr'=>$Block, 'Val'=>''];
-                    } else {
-                        $Array[$ArrayPos] = ['Type'=>'url', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
-                    }
-                    break;
-                case 'quote':
-                    $Array[$ArrayPos] = ['Type'=>'quote', 'Attr'=>self::parse($Attrib), 'Val'=>self::parse($Block)];
-                    break;
-                case 'box':
-                    $Array[$ArrayPos] = ['Type'=>'box', 'Val'=>self::parse($Block)];
-                    break;
-                case 'pad':
-                    $Array[$ArrayPos] = ['Type'=>'pad', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
-                    break;
-                case 'img':
-                case 'image':
-                    if (empty($Block)) {
-                        $Block = $Attrib;
-                    }
-                    $Array[$ArrayPos] = ['Type'=>'img', 'Val'=>$Block];
+                case 'artist':
+                case 'rule':
+                case 'tex':
+                case 'user':
+                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
                     break;
                 case 'aud':
-                case 'mp3':
                 case 'audio':
+                case 'mp3':
                     if (empty($Block)) {
                         $Block = $Attrib;
                     }
                     $Array[$ArrayPos] = ['Type'=>'aud', 'Val'=>$Block];
+                    break;
+                case 'box':
+                    $Array[$ArrayPos] = ['Type'=>'box', 'Val'=>self::parse($Block)];
+                    break;
+                case 'code':
+                case 'plain':
+                case 'pre':
+                    $Block = strtr($Block, ['[inlineurl]' => '']);
+                    $Callback = function ($matches) {
+                        $n = $matches[2];
+                        $text = '';
+                        if ($n < 5 && $n > 0) {
+                            $e = str_repeat('=', $matches[2] + 1);
+                            $text = $e . $matches[3] . $e;
+                        }
+                        return $text;
+                    };
+                    $Block = preg_replace_callback('/\[(headline)\=(\d)\](.*?)\[\/\1\]/i', $Callback, $Block);
+                    $Block = preg_replace('/\[inlinesize\=3\](.*?)\[\/inlinesize\]/i', '====$1====', $Block);
+                    $Block = preg_replace('/\[inlinesize\=5\](.*?)\[\/inlinesize\]/i', '===$1===', $Block);
+                    $Block = preg_replace('/\[inlinesize\=7\](.*?)\[\/inlinesize\]/i', '==$1==', $Block);
+                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
                     break;
                 case 'collage':
                 case 'forum':
@@ -586,11 +583,21 @@ class Text {
                         ++$ArrayPos;
                     }
                     break;
-                case 'artist':
-                case 'tex':
-                case 'rule':
-                case 'user':
-                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
+                case 'image':
+                case 'img':
+                    if (empty($Block)) {
+                        $Block = $Attrib;
+                    }
+                    $Array[$ArrayPos] = ['Type'=>'img', 'Val'=>$Block];
+                    break;
+                case 'inlineurl':
+                    $Array[$ArrayPos] = ['Type'=>'inlineurl', 'Attr'=>$Block, 'Val'=>''];
+                    break;
+                case 'n':
+                    $ArrayPos--;
+                    break; // n serves only to disrupt bbcode (backwards compatibility - use [pre])
+                case 'pad':
+                    $Array[$ArrayPos] = ['Type'=>'pad', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
                     break;
                 case 'pl':
                 case 'torrent':
@@ -602,31 +609,21 @@ class Text {
                         ++$ArrayPos;
                     }
                     break;
-                case 'pre':
-                case 'code':
-                case 'plain':
-                    $Block = strtr($Block, ['[inlineurl]' => '']);
-
-                    $Callback = function ($matches) {
-                        $n = $matches[2];
-                        $text = '';
-                        if ($n < 5 && $n > 0) {
-                            $e = str_repeat('=', $matches[2] + 1);
-                            $text = $e . $matches[3] . $e;
-                        }
-                        return $text;
-                    };
-                    $Block = preg_replace_callback('/\[(headline)\=(\d)\](.*?)\[\/\1\]/i', $Callback, $Block);
-
-                    $Block = preg_replace('/\[inlinesize\=3\](.*?)\[\/inlinesize\]/i', '====$1====', $Block);
-                    $Block = preg_replace('/\[inlinesize\=5\](.*?)\[\/inlinesize\]/i', '===$1===', $Block);
-                    $Block = preg_replace('/\[inlinesize\=7\](.*?)\[\/inlinesize\]/i', '==$1==', $Block);
-                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
-                    break;
                 case 'hide':
                 case 'mature':
                 case 'spoiler':
                     $Array[$ArrayPos] = ['Type'=>$TagName, 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
+                    break;
+                case 'quote':
+                    $Array[$ArrayPos] = ['Type'=>'quote', 'Attr'=>self::parse($Attrib), 'Val'=>self::parse($Block)];
+                    break;
+                case 'url':
+                    $Array[$ArrayPos] = ['Type'=>'img', 'Attr'=>$Attrib, 'Val'=>$Block];
+                    if (empty($Attrib)) { // [url]http://...[/url] - always set URL to attribute
+                        $Array[$ArrayPos] = ['Type'=>'url', 'Attr'=>$Block, 'Val'=>''];
+                    } else {
+                        $Array[$ArrayPos] = ['Type'=>'url', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
+                    }
                     break;
                 case '#':
                 case '*':
@@ -650,23 +647,17 @@ class Text {
                         }
                         $ListId++;
                     break;
-                case 'n':
-                    $ArrayPos--;
-                    break; // n serves only to disrupt bbcode (backwards compatibility - use [pre])
                 default:
                     if ($WikiLink == true) {
                         $Array[$ArrayPos] = ['Type'=>'wiki','Val'=>$TagName];
                     } else {
-
                         // Basic tags, like [b] or [size=5]
-
                         $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>self::parse($Block)];
                         if (!empty($Attrib) && $MaxAttribs > 0) {
                             $Array[$ArrayPos]['Attr'] = strtolower($Attrib);
                         }
                     }
             }
-
             $ArrayPos++; // 7) Increment array pointer, start again (past the end of the [/close] tag)
         }
         return $Array;
@@ -676,34 +667,33 @@ class Text {
      * Generates a navigation list for TOC
      * @param int $Min Minimum number of headlines required for a TOC list
      */
-    public static function parse_toc ($Min = 3, $RulesTOC = false) {
-        if (count(self::$Headlines) > $Min) {
-            $tag = $RulesTOC ? 'ul' : 'ol';
-            if ($RulesTOC) {
-                $list = "<$tag>";
-            } else {
-                $list = "<$tag class=\"navigation_list\">";
-            }
-            $i = 0;
-            $level = 0;
-            $off = 0;
-
-            foreach (self::$Headlines as $t) {
-                $n = (int)$t[0];
-                if ($i === 0 && $n > 1) {
-                    $off = $n - $level;
-                }
-                self::headline_level($n, $level, $list, $i, $off, $tag);
-                $list .= sprintf('<li><a href="#%2$s">%1$s</a>', $t[1], $t[2]);
-                $level = $t[0];
-                $off = 0;
-                $i++;
-            }
-
-            $list .= str_repeat("</li></$tag>", $level);
-            $list .= "\n\n";
-            return $list;
+    public static function parse_toc(int $Min = 3, bool $RulesTOC = false): string {
+        if (count(self::$Headlines) < $Min) {
+            return '';
         }
+        $tag = $RulesTOC ? 'ul' : 'ol';
+        if ($RulesTOC) {
+            $list = "<$tag>";
+        } else {
+            $list = "<$tag class=\"navigation_list\">";
+        }
+        $i = 0;
+        $level = 0;
+        $off = 0;
+
+        foreach (self::$Headlines as $t) {
+            $n = (int)$t[0];
+            if ($i === 0 && $n > 1) {
+                $off = $n - $level;
+            }
+            self::headline_level($n, $level, $list, $i, $off, $tag);
+            $list .= sprintf('<li><a href="#%2$s">%1$s</a>', $t[1], $t[2]);
+            $level = $t[0];
+            $off = 0;
+            $i++;
+        }
+
+        return $list . str_repeat("</li></$tag>", $level);
     }
 
     /**
@@ -808,8 +798,8 @@ class Text {
                     break;
                 case 'rule':
                     $Rule = trim(strtolower($Block['Val']));
-                if ($Rule[0] != 'r' && $Rule[0] != 'h') {
-                        $Rule = 'r'.$Rule;
+                    if (!preg_match('/^[hr]/', $Rule)) {
+                        $Rule = "r$Rule";
                     }
                     $Str .= '<a href="rules.php?p=upload#'.urlencode(self::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
                     break;
@@ -943,19 +933,17 @@ class Text {
                     $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules).'</div>';
                     break;
                 case 'pad':
-                    $Attr = array_filter(explode('|',$Block['Attr'] ?? ''), function($x) {
-                        return is_numeric($x) && (float)$x >= 0;
-                    });
+                    $Attr = array_filter(explode('|',$Block['Attr'] ?? ''), fn($x) => is_numeric($x) && (float)$x >= 0);
                     if (count($Attr) === 0) {
                         $Str .= self::to_html($Block['Val'], $Rules);
                     } else {
                         $Padding = implode(' ', array_map(fn($x) => "{$x}px", $Attr));
-                        $Str .= "<span style='display: inline-block; padding: {$Padding}'>" . self::to_html($Block['Val'], $Rules).'</span>';
+                        $Str .= "<span style=\"display: inline-block; padding: {$Padding}\">" . self::to_html($Block['Val'], $Rules).'</span>';
                     }
                     break;
-                case 'spoiler':
                 case 'hide':
-                    $Str .= '<strong>'.(($Block['Attr']) ? $Block['Attr'] : 'Hidden text').'</strong>: <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
+                case 'spoiler':
+                    $Str .= '<strong>'.($Block['Attr'] ?: 'Hidden text').'</strong>: <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
                     $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
                     break;
                 case 'mature':
@@ -1169,8 +1157,7 @@ class Text {
             }
             reset(self::$ProcessedSmileys);
         }
-        $Str = strtr($Str, self::$ProcessedSmileys);
-        return $Str;
+        return strtr($Str, self::$ProcessedSmileys);
     }
 
     /**
@@ -1309,12 +1296,12 @@ class Text {
                         }
                     }
                 }
-                elseif (substr($Element->getAttribute('href'), 0, 22) === 'artist.php?artistname=') {
+                elseif (str_starts_with($Element->getAttribute('href'), 'artist.php?artistname=')) {
                     $NewElement = $Document->createElement('artist');
                     $CopyNode($Element, $NewElement);
                     $Element->parentNode->replaceChild($NewElement, $Element);
                 }
-                elseif (substr($Element->getAttribute('href'), 0, 30) === 'user.php?action=search&search=') {
+                elseif (str_starts_with($Element->getAttribute('href'), 'user.php?action=search&search=')) {
                     $NewElement = $Document->createElement('user');
                     $CopyNode($Element, $NewElement);
                     $Element->parentNode->replaceChild($NewElement, $Element);
@@ -1364,29 +1351,25 @@ class Text {
     /**
      * Reverse the effects of display_str - un-sanitize HTML.
      * Use sparingly.
-     *
-     * @param string $Str the string to unsanitize
-     * @return string unsanitized string
      */
-    protected static function undisplay_str($Str) {
+    protected static function undisplay_str(string $Str): string {
         return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
     }
 
-    public static function bbcodeCollageUrl($id, $url = null) {
+    public static function bbcodeCollageUrl($id, $url = null): string {
         $cacheKey = 'bbcode_collage_' . $id;
         global $Cache, $DB;
-        if (($name = $Cache->get_value($cacheKey)) === false) {
+        $name = $Cache->get_value($cacheKey);
+        if ($name === false) {
             $name = $DB->scalar('SELECT Name FROM collages WHERE id = ?', $id);
-            $Cache->cache_value($cacheKey, $name, 86400 + rand(1, 3600));
+            $Cache->cache_value($cacheKey, $name, 86400 + random_int(1, 3600));
         }
         return $name
-            ? ($url
-                ? sprintf('<a href="%s">%s</a>', $url, $name)
-                : sprintf('<a href="collages.php?id=%d">%s</a>', $id, $name))
+            ? ($url ? "<a href=\"$url\">$name</a>" : "<a href=\"collages.php?id=$id\">$name</a>")
             : "[collage]{$id}[/collage]";
     }
 
-    protected static function bbcodeForumUrl($val) {
+    protected static function bbcodeForumUrl($val): string {
         $cacheKey = 'bbcode_forum_' . $val;
         global $Cache, $DB;
         [$id, $name] = $Cache->get_value($cacheKey);
@@ -1394,17 +1377,17 @@ class Text {
             [$id, $name] = (int)$val > 0
                 ? $DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
                 : $DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
-            $Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
+            $Cache->cache_value($cacheKey, [$id, $name], 86400 + random_int(1, 3600));
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($id))) {
             $name = 'restricted';
         }
         return $name
             ? sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $id, $name)
-            : '[forum]' . $val . '[/forum]';
+            : "[forum]{$val}[/forum]";
     }
 
-    protected static function bbcodePostUrl(int $postId) {
+    protected static function bbcodePostUrl(int $postId): ?string {
         $post = (new \Gazelle\Manager\ForumPost)->findById($postId);
         if (is_null($post)) {
             return null;
@@ -1412,7 +1395,7 @@ class Text {
         return self::bbcodeThreadUrl($post->threadId(), $post->id());
     }
 
-    protected static function bbcodeThreadUrl($thread, $postId = null) {
+    protected static function bbcodeThreadUrl($thread, $postId = null): string {
         if (str_contains($thread, ':')) {
             [$threadId, $postId] = array_map('intval', explode(':', $thread));
         } else {
@@ -1424,11 +1407,7 @@ class Text {
 
         $thread = (new \Gazelle\Manager\ForumThread)->findById($threadId);
         if (is_null($thread)) {
-            if ($postId) {
-                return '[thread]' .  $threadId . ':' . $postId . '[/thread]';
-            } else {
-                return '[thread]' .  $threadId . '[/thread]';
-            }
+            return $postId ? "[thread]{$threadId}:{$postId}[/thread]" : "[thread]{$threadId}[/thread]";
         }
         if (!self::$viewer->readAccess($thread->forum())) {
             return sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $thread->forum()->id(), 'restricted');
