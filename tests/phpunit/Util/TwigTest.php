@@ -139,8 +139,21 @@ END;
         $Document = 'index';
         $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
 
+        global $Viewer;
+        $Viewer  = (new Gazelle\Manager\User)->find('@admin');
+        $current = (new Gazelle\User\Session($Viewer))->create([
+            'keep-logged' => '0',
+            'browser'     => [
+               'Browser'                => 'phpunit',
+               'BrowserVersion'         => '1.0',
+               'OperatingSystem'        => 'phpunit/OS',
+               'OperatingSystemVersion' => '1.0',
+           ],
+            'ipaddr'      => '127.0.0.1',
+            'useragent'   => 'phpunit',
+        ]);
         global $SessionID;
-        $SessionID = 'abcdef';
+        $SessionID = $current['SessionID'];
         $this->assertStringEndsWith("</body>\n</html>\n", self::twig('{{ footer() }}')->render(), 'twig-function-footer');
 
         $this->assertEquals(

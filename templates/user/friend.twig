@@ -15,6 +15,7 @@
         <tr class="colhead">
             <td colspan="{{ allspan }}">
                 <span style="float: left;">{{ friend.id|user_full }}
+        {% if friend.mutual %} <span title="The feeling is mutual (awwww!)">💕</span>{% endif %}
         {% if friend.user.propertyVisible(viewer, 'ratio') %}
                 &nbsp;Ratio: <strong>{{ ratio(uploaded, downloaded)|raw }}</strong>
         {% endif %}

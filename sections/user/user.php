@@ -77,6 +77,7 @@ echo $Twig->render('user/header.twig', [
         'item'  => $FL_Items,
         'other' => $FL_OTHER_tokens ?? null,
     ],
+    'friend'       => new Gazelle\User\Friend($Viewer),
     'hourly_rate'  => $userBonus->hourlyRate(),
     'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer,
     'user'         => $User,

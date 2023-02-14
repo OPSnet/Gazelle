@@ -19,6 +19,9 @@
         {% for badge, name in badge_list %}
             <span class="tooltip secondary_class" title="{{ name }}">{{ badge }}</span>
         {% endfor %}
+        {% if friend.isMutual(user.id) %}<span title="The feeling is mutual (awww!)">💕</span>
+        {%- elseif friend.isFriend(user.id) %}<span title="You like them (aww!)">💖</span>
+        {%- endif %}
         {% if user.title -%}
             <span class="user_title">{{ user.title|raw }}</span></h2>
         {%- endif %}

@@ -14,13 +14,12 @@ class RenderUserTest extends TestCase {
     public function tearDown(): void {}
 
     public function testProfile() {
-        global $Twig;
         global $Viewer;
         $Viewer = $this->userMan->find('@admin');
         $user   = $this->userMan->find('@user');
         $PRL    = new \Gazelle\User\PermissionRateLimit($user);
 
-        $sidebar = $Twig->render('user/sidebar.twig', [
+        $sidebar = Gazelle\Util\Twig::factory()->render('user/sidebar.twig', [
             'applicant'     => new \Gazelle\Manager\Applicant,
             'invite_source' => 'invsrc',
             'user'          => $user,
@@ -32,7 +31,7 @@ class RenderUserTest extends TestCase {
             'user-sidebar-general'
         );
 
-        $header = $Twig->render('user/header.twig', [
+        $header = Gazelle\Util\Twig::factory()->render('user/header.twig', [
             'badge_list' => (new \Gazelle\User\Privilege($Viewer))->badgeList(),
             'freeleech' => [
                 'item'  => [],
@@ -48,7 +47,7 @@ class RenderUserTest extends TestCase {
         $this->assertStringContainsString('<div class="linkbox">', $header, 'user-header-div-linkbox');
         $this->assertStringContainsString('<div class="sidebar">', $header, 'user-header-div-sidebar');
 
-        $tag = $Twig->render('user/tag-snatch.twig', [
+        $tag = Gazelle\Util\Twig::factory()->render('user/tag-snatch.twig', [
             'id' => $Viewer->id(),
             'list' => [
                 ['name' => 'jazz', 'n' => 20],
@@ -59,7 +58,7 @@ class RenderUserTest extends TestCase {
         $this->assertStringContainsString('Snatched tags', $tag, 'user-header-div-tag-heading');
         $this->assertEquals(3, substr_count($tag, '<li>'), 'user-header-div-tag-total');
 
-        $stats = $Twig->render('user/sidebar-stats.twig', [
+        $stats = Gazelle\Util\Twig::factory()->render('user/sidebar-stats.twig', [
             'prl'          => $PRL,
             'upload_total' => [],
             'user'         => $user,
