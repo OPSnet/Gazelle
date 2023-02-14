@@ -1,6 +1,10 @@
 <?php
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+$torMan = new Gazelle\Manager\Torrent;
+$torrent = $torMan->findById((int)$_GET['torrentid']);
+if (is_null($torrent)) {
+    $torrent = $torMan->findDeletedById((int)$_GET['torrentid']);
+}
 if (is_null($torrent)) {
     error(404);
 }
@@ -8,6 +12,6 @@ if (is_null($torrent)) {
 echo $Twig->render('torrent/riplog.twig', [
     'id'        => $torrent->id(),
     'list'      => $torrent->logfileList(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML),
-    'log_score' => (int)($_GET['logscore'] ?? 0),
+    'log_score' => $torrent->logScore(),
     'viewer'    => $Viewer,
 ]);

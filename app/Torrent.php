@@ -225,38 +225,6 @@ class Torrent extends TorrentAbstract {
         return 0;
     }
 
-    public function logfileList(\Gazelle\File\RipLog $ripFiler, \Gazelle\File\RipLogHTML $htmlFiler): array {
-        self::$db->prepared_query("
-            SELECT LogID AS id,
-                Score,
-                `Checksum`,
-                Adjusted,
-                AdjustedBy,
-                AdjustedScore,
-                AdjustedChecksum,
-                AdjustmentReason,
-                coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
-                Details
-            FROM torrents_logs
-            WHERE TorrentID = ?
-            ", $this->id
-        );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        foreach ($list as &$log) {
-            $log['has_riplog'] = $ripFiler->exists([$this->id, $log['id']]);
-            $log['html_log'] = $htmlFiler->get([$this->id, $log['id']]);
-            $log['adjustment_details'] = unserialize($log['AdjustmentDetails']);
-            $log['adjusted'] = ($log['Adjusted'] === '1');
-            $log['adjusted_checksum'] = ($log['AdjustedChecksum'] === '1');
-            $log['checksum'] = ($log['Checksum'] === '1');
-            $log['details'] = empty($log['Details']) ? [] : explode("\r\n", trim($log['Details']));
-            if ($log['adjusted'] && $log['checksum'] !== $log['adjusted_checksum']) {
-                $log['details'][] = 'Bad/No Checksum(s)';
-            }
-        }
-        return $list;
-    }
-
     public function modifyLogscore(): int {
         $count = self::$db->scalar("
             SELECT count(*) FROM torrents_logs WHERE TorrentID = ?
