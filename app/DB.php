@@ -7,7 +7,7 @@ class DB extends Base {
      * Skip foreign key checks
      * @param bool $relax true if foreign key checks should be skipped
      */
-    public function relaxConstraints(bool $relax) {
+    public function relaxConstraints(bool $relax): DB {
         if ($relax) {
             self::$db->prepared_query("SET foreign_key_checks = 0");
         } else {
@@ -39,6 +39,51 @@ class DB extends Base {
     }
 
     /**
+     * Check that the structures of two tables are identical (to ensure we can
+     * select a row from one table and copy it to the other.
+     * They must have the same number of columns, and each column must have
+     * identical datatypes. Primary and foreign keys are not considered (and do
+     * not have to be identical).
+     *
+     * @return array [bool, string]
+     *
+     * if the returned bool is false, the string contains a readable explanation of why they differ
+     * if true, the string contains a comma-separated list of column names
+     * (for copying the row from one table to another)
+     */
+    public function checkStructureMatch(string $schema, string $source, string $destination): array {
+        $sql = 'SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER BY 1';
+        self::$db->prepared_query($sql, $schema, $source);
+        $t1 = self::$db->to_array();
+        $n1 = count($t1);
+
+        self::$db->prepared_query($sql, $schema, $destination);
+        $t2 = self::$db->to_array();
+        $n2 = count($t2);
+
+        if (!$n1) {
+            return [false, "No such source table $source"];
+        }
+        elseif (!$n2) {
+            return [false, "No such destination table $destination"];
+        }
+        elseif ($n1 != $n2) {
+            // tables do not have the same number of columns
+            return [false, "$source and $destination column count mismatch ($n1 != $n2)"];
+        }
+
+        $column = [];
+        for ($i = 0; $i < $n1; ++$i) {
+            // a column does not have the same name or datatype
+            if (strtolower($t1[$i][0]) != strtolower($t2[$i][0]) || $t1[$i][1] != $t2[$i][1]) {
+                return [false, "{$source}: column {$t1[$i][0]} name or datatype mismatch {$t1[$i][0]}:{$t2[$i][0]} {$t1[$i][1]}:{$t2[$i][1]}"];
+            }
+            $column[] = $t1[$i][0];
+        }
+        return [true, implode(', ', $column)];
+    }
+
+    /**
      * Soft delete a row from a table <t> by inserting it into deleted_<t> and then delete from <t>
      * @param string $schema the schema name
      * @param string $table the table name
@@ -47,37 +92,14 @@ class DB extends Base {
      * @param boolean $delete whether to delete the matched rows
      * @return array 2 elements, true/false and message if false
      */
-    public function softDelete($schema, $table, array $condition, $delete = true) {
-        $sql = 'SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER BY 1';
-        self::$db->prepared_query($sql, $schema, $table);
-        $t1 = self::$db->to_array();
-        $n1 = count($t1);
+    public function softDelete(string $schema, string $table, array $condition, bool $delete = true) {
+        $softDeleteTable = "deleted_$table";
+        [$ok, $message] = $this->checkStructureMatch($schema, $table, $softDeleteTable);
+        if (!$ok) {
+            return [$ok, $message];
+        }
+        $columnList = $message;
 
-        $softDeleteTable = 'deleted_' . $table;
-        self::$db->prepared_query($sql, $schema, $softDeleteTable);
-        $t2 = self::$db->to_array();
-        $n2 = count($t2);
-
-        if (!$n1) {
-            return [false, "No such table $table"];
-        }
-        elseif (!$n2) {
-            return [false, "No such table $softDeleteTable"];
-        }
-        elseif ($n1 != $n2) {
-            // tables do not have the same number of columns
-            return [false, "$table and $softDeleteTable column count mismatch ($n1 != $n2)"];
-        }
-
-        $column = [];
-        for ($i = 0; $i < $n1; ++$i) {
-            // a column does not have the same name or datatype
-            if (strtolower($t1[$i][0]) != strtolower($t2[$i][0]) || $t1[$i][1] != $t2[$i][1]) {
-                return [false, "{$table}: column {$t1[$i][0]} name or datatype mismatch {$t1[$i][0]}:{$t2[$i][0]} {$t1[$i][1]}:{$t2[$i][1]}"];
-            }
-            $column[] = $t1[$i][0];
-        }
-        $columnList = implode(', ', $column);
         $conditionList = implode(' AND ', array_map(fn($c) => "{$c[0]} = ?", $condition));
         $argList = array_map(fn($c) => $c[1], $condition);
 
