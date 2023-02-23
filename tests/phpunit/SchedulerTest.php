@@ -20,12 +20,12 @@ class SchedulerTest extends TestCase {
 
     public function testRunWithMissingImplementation() {
         $name = "RunUnimplemented";
-        global $DB;
-        $DB->prepared_query("
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
         );
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO periodic_task
                    (classname, name, description, period)
             VALUES (?,         ?,    ?,           86400)
@@ -35,7 +35,7 @@ class SchedulerTest extends TestCase {
 
         $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
         $this->scheduler->run();
-        $DB->prepared_query("
+        $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
         );
@@ -47,12 +47,12 @@ class SchedulerTest extends TestCase {
 
     public function testMissingImplementation(): void {
         $name = "Unimplemented";
-        global $DB;
-        $DB->prepared_query("
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
         );
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO periodic_task
                    (classname, name, description, period)
             VALUES (?,         ?,    ?,           86400)
@@ -60,7 +60,7 @@ class SchedulerTest extends TestCase {
             $name, "phpunit task", "A task with no PHP implementation"
         );
         $this->assertEquals(-1, $this->scheduler->runClass($name, "sched-task-unimplemented"));
-        $DB->prepared_query("
+        $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
         );

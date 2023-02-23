@@ -25,11 +25,12 @@ if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERV
  * high, and they have already downloaded too many files recently, then
  * stop them. Exception: always allowed if they are using FL tokens.
  */
+$db = Gazelle\DB::DB();
 $userId = $Viewer->id();
 if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
     $PRL = new \Gazelle\User\PermissionRateLimit($Viewer);
     if (!$PRL->safeFactor() && !$PRL->safeOvershoot()) {
-        $DB->prepared_query('
+        $db->prepared_query('
             INSERT INTO ratelimit_torrent
                    (user_id, torrent_id)
             VALUES (?,       ?)
@@ -71,15 +72,15 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
         if (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1) { /** @phpstan-ignore-line */
             json_or_error('This torrent is too large. Please use the regular DL link.');
         }
-        $DB->begin_transaction();
-        $DB->prepared_query('
+        $db->begin_transaction();
+        $db->prepared_query('
             UPDATE user_flt SET
                 tokens = tokens - ?
             WHERE tokens >= ? AND user_id = ?
             ', $tokenCount, $tokenCount, $userId
         );
-        if ($DB->affected_rows() == 0) {
-            $DB->rollback();
+        if ($db->affected_rows() == 0) {
+            $db->rollback();
             json_or_error('You do not have enough freeleech tokens. Please use the regular DL link.');
         }
 
@@ -87,10 +88,10 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
         if (!(new Gazelle\Tracker)->update_tracker('add_token', [
             'info_hash' => rawurlencode($torrent->infohashBinary()), 'userid' => $userId
         ])) {
-            $DB->rollback();
+            $db->rollback();
             json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
         }
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
             VALUES (?, ?, ?, now())
             ON DUPLICATE KEY UPDATE
@@ -99,7 +100,7 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
                 Uses = Uses + ?
             ", $userId, $torrentId, $tokenCount, $tokenCount
         );
-        $DB->commit();
+        $db->commit();
         $Cache->delete_multi(["u_$userId", "users_tokens_$userId"]);
     }
 }

@@ -74,13 +74,14 @@ class Tags {
      * @return array
      */
     protected static function get_aliases() {
-        global $Cache, $DB;
+        global $Cache;
         $TagAliases = $Cache->get_value('tag_aliases_search');
         if ($TagAliases === false) {
-            $DB->prepared_query("
+            $db = Gazelle\DB::DB();
+            $db->prepared_query("
                 SELECT ID, BadTag, AliasTag FROM tag_aliases ORDER BY BadTag
             ");
-            $TagAliases = $DB->to_array(false, MYSQLI_ASSOC, false);
+            $TagAliases = $db->to_array(false, MYSQLI_ASSOC, false);
             // Unify tag aliases to be in_this_format as tags not in.this.format
             array_walk_recursive($TagAliases, function(&$val, $key) {
                 $val = strtr($val, '.', '_');

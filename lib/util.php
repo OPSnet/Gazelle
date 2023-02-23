@@ -630,7 +630,7 @@ function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
 }
 
 function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
-    global $Cache, $DB;
+    global $Cache;
     $TorrentCache = null;
     if (!$RevisionID) {
         $TorrentCache = $Cache->get_value("torrents_details_$GroupID");
@@ -682,8 +682,9 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
             GROUP BY g.ID';
         $args[] = $GroupID;
 
-        $DB->prepared_query($SQL, ...$args);
-        $TorrentDetails = $DB->next_record(MYSQLI_ASSOC);
+        $db = Gazelle\DB::DB();
+        $db->prepared_query($SQL, ...$args);
+        $TorrentDetails = $db->next_record(MYSQLI_ASSOC);
 
         // Fetch the individual torrents
         $columns = "
@@ -727,7 +728,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 group_concat(tl.LogID) as ripLogIds
         ";
 
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT $columns, 0 as is_deleted
             FROM torrents AS t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
@@ -766,7 +767,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 Encoding,
                 ID", $GroupID, $GroupID);
 
-        $TorrentList = $DB->to_array('ID', MYSQLI_ASSOC);
+        $TorrentList = $db->to_array('ID', MYSQLI_ASSOC);
         if (empty($TorrentDetails) || empty($TorrentList)) {
             if ($ApiCall === false) {
                 header('Location: log.php?search='.(empty($_GET['torrentid']) ? "Group+$GroupID" : "Torrent+{$_GET['torrentid']}"));
@@ -776,7 +777,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 return null;
             }
         }
-        if (in_array(0, $DB->collect('Seeders'))) {
+        if (in_array(0, $db->collect('Seeders'))) {
             $CacheTime = 600;
         } else {
             $CacheTime = 3600;

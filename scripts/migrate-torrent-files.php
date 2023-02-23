@@ -6,6 +6,7 @@ ini_set('max_execution_time', -1);
 
 define('CHUNK', 100);
 
+$db        = Gazelle\DB::DB();
 $offset    = 0;
 $processed = 0;
 $new       = 0;
@@ -13,7 +14,7 @@ $new       = 0;
 $filer = new Gazelle\File\Torrent;
 
 while (true) {
-    $DB->prepared_query('
+    $db->prepared_query('
         SELECT TorrentID, File
         FROM torrents_files
         WHERE TorrentID > ?
@@ -21,12 +22,12 @@ while (true) {
         LIMIT ?
         ', $offset, CHUNK
     );
-    if (!$DB->has_results()) {
+    if (!$db->has_results()) {
         break;
     }
 
     $last = $offset;
-    $list = $DB->to_array(false, MYSQLI_NUM, false);
+    $list = $db->to_array(false, MYSQLI_NUM, false);
     foreach ($list as $torrent) {
         list($id, $file) = $torrent;
         $last = $id;

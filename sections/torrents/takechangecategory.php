@@ -32,6 +32,7 @@ if (!$NewCategoryID) {
     error("Cannot change category to same category ({$old->categoryName()})");
 }
 
+$db = Gazelle\DB::DB();
 switch (CATEGORY[$NewCategoryID - 1]) {
     case 'Music':
         $ArtistName = trim($_POST['artist']);
@@ -41,13 +42,13 @@ switch (CATEGORY[$NewCategoryID - 1]) {
             error(0);
         }
 
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO torrents_group
                    (Name, Year, ReleaseType, CategoryID, WikiBody, WikiImage)
             VALUES (?,    ?,    ?,           1,          '',       '')
             ", $Title, $Year, $ReleaseType
         );
-        $new = $tgMan->findById($DB->inserted_id());
+        $new = $tgMan->findById($db->inserted_id());
         $new->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
         break;
 
@@ -57,32 +58,32 @@ switch (CATEGORY[$NewCategoryID - 1]) {
         if (!$Year) {
             error(0);
         }
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO torrents_group
                    (Name, Year, CategoryID, WikiBody, WikiImage)
             VALUES (?,    ?,    ?,          '',       '')
             ", $Title, $Year, $NewCategoryID
         );
-        $new = $tgMan->findById($DB->inserted_id());
+        $new = $tgMan->findById($db->inserted_id());
         break;
 
     case 'Applications':
     case 'Comics':
     case 'E-Books':
     case 'E-Learning Videos':
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO torrents_group
                    (Name, CategoryID, WikiBody, WikiImage)
             VALUES (?,    ?,          '',       '')
             ", $Title, $NewCategoryID
         );
-        $new = $tgMan->findById($DB->inserted_id());
+        $new = $tgMan->findById($db->inserted_id());
         break;
     default:
         error(0);
 }
 
-$DB->prepared_query('
+$db->prepared_query('
     UPDATE torrents SET
         GroupID = ?
     WHERE ID = ?
@@ -94,7 +95,7 @@ $oldId = $old->id();
 $oldCategoryId = $old->categoryId();
 
 // Delete old group if needed
-if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
+if ($db->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
     $old->flush();
     $old->refresh();
 } else {

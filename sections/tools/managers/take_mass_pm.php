@@ -14,7 +14,8 @@ set_time_limit(0);
 
 $permissionId = $_POST['class_id'];
 $fromId = empty($_POST['from_system']) ? $Viewer->id() : 0;
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     (SELECT ID AS UserID FROM users_main WHERE PermissionID = ? AND ID != ?)
     UNION DISTINCT
     (SELECT UserID FROM users_levels WHERE PermissionID = ? AND UserID != ?)
@@ -24,7 +25,7 @@ $DB->prepared_query("
 $userMan = new Gazelle\Manager\User;
 $subject = trim($_POST['subject']);
 $body = trim($_POST['body']);
-while([$userId] = $DB->next_record()) {
+while([$userId] = $db->next_record()) {
    $userMan->sendPM($userId, $fromId, $subject, $body);
 }
 

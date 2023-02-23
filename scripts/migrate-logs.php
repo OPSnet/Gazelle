@@ -20,11 +20,12 @@ $errLog    = 0;
 $newHtml   = 0;
 $errHtml   = 0;
 
-$logFiler = new Gazelle\File\RipLog;
+$db        = Gazelle\DB::DB();
+$logFiler  = new Gazelle\File\RipLog;
 $htmlFiler = new Gazelle\File\RipLogHTML;
 
 while (true) {
-    $DB->prepared_query('
+    $db->prepared_query('
         SELECT LogID, TorrentID, Log
         FROM torrents_logs
         WHERE LogID > ?
@@ -32,11 +33,11 @@ while (true) {
         LIMIT ?
         ', $offset, CHUNK
     );
-    if (!$DB->has_results()) {
+    if (!$db->has_results()) {
         break;
     }
 
-    while (list($logId, $torrentId, $log) = $DB->next_record(MYSQLI_NUM, false)) {
+    while (list($logId, $torrentId, $log) = $db->next_record(MYSQLI_NUM, false)) {
         $last = $logId;
         ++$processed;
         if (file_exists($logFiler->pathLegacy([$torrentId, $logId])) && !file_exists($logFiler->path([$torrentId, $logId]))) {

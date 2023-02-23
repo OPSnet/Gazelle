@@ -1,23 +1,23 @@
 <?php
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
-global $DB;
+$db = Gazelle\DB::DB();
 
-$DB->prepared_query("
+$db->prepared_query("
     DELETE FROM invite_tree
 ");
-$invite = $DB->prepared_query('
+$invite = $db->prepared_query('
 	SELECT UserID, Inviter
     FROM users_info
     WHERE Inviter IS NOT NULL
     ORDER BY UserID
 ');
 $inv = [];
-while ([$invitee, $inviter] = $DB->next_record()) {
-    $save = $DB->get_query_id();
+while ([$invitee, $inviter] = $db->next_record()) {
+    $save = $db->get_query_id();
     if (!isset($inv[$inviter])) {
         $inv[$inviter] = new Gazelle\User\InviteTree(new Gazelle\User($inviter));
     }
     $inv[$inviter]->add($invitee);
-    $DB->set_query_id($save);
+    $db->set_query_id($save);
 }

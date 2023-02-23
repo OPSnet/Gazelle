@@ -24,15 +24,16 @@ if (is_null($aliasName) || empty($aliasName)) {
  * 3. For foo, there's two, same ArtistID, diff names, no redirect
  */
 
+$db = Gazelle\DB::DB();
 $CloneAliasID = false;
-$DB->prepared_query("
+$db->prepared_query("
     SELECT AliasID, ArtistID, Name, Redirect
     FROM artists_alias
     WHERE Name = ?
     ", $aliasName
 );
-if ($DB->has_results()) {
-    while ([$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect] = $DB->next_record(MYSQLI_NUM, false)) {
+if ($db->has_results()) {
+    while ([$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect] = $db->next_record(MYSQLI_NUM, false)) {
         if (!strcasecmp($CloneAliasName, $aliasName)) {
             break;
         }

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('site_moderate_forums') || empty($_POST['id']) || empty(
     json_error('bad parameters');
 }
 
-$DB->prepared_query("
+Gazelle\DB::DB()->prepared_query("
     UPDATE reports SET ClaimerID = 0 WHERE ID = ?
     ", (int)$_POST['id']
 );

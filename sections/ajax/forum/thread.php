@@ -54,6 +54,7 @@ $paginator = new Gazelle\Util\Paginator($perPage, (int)($_GET['page'] ?? ceil($P
 $paginator->setTotal($thread->postTotal());
 
 $slice = $thread->slice(page: $paginator->page(), perPage: $perPage);
+$db    = Gazelle\DB::DB();
 
 if ($_GET['updatelastread'] !== '0') {
     $LastPost = end($slice);
@@ -64,7 +65,7 @@ if ($_GET['updatelastread'] !== '0') {
     }
     //Handle last read
     if (!$thread->isLocked() || $thread->isPinned()) {
-        $LastRead = $DB->scalar("
+        $LastRead = $db->scalar("
             SELECT PostID
             FROM forums_last_read_topics
             WHERE UserID = ?
@@ -72,7 +73,7 @@ if ($_GET['updatelastread'] !== '0') {
             ", $Viewer->id(), $thread->id()
         );
         if ($LastRead < $LastPost) {
-            $DB->prepared_query("
+            $db->prepared_query("
                 INSERT INTO forums_last_read_topics
                        (UserID, TopicID, PostID)
                 VALUES (?,      ?,       ?)

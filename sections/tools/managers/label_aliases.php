@@ -4,10 +4,9 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-View::show_header('Label Aliases');
-
+$db = Gazelle\DB::DB();
 if (isset($_POST['newalias'])) {
-    $DB->prepared_query("
+    $db->prepared_query("
         INSERT INTO label_aliases
                (BadLabel, AliasLabel)
         VALUES (?,        ?)
@@ -16,7 +15,7 @@ if (isset($_POST['newalias'])) {
 } elseif (isset($_POST['changealias']) && isset($_POST['aliasid']) && (int)$_POST['aliasid'] > 0) {
     $aliasId = (int)$_POST['aliasid'];
     if (isset($_POST['save'])) {
-        $DB->prepared_query("
+        $db->prepared_query("
             UPDATE label_aliases SET
                 BadLabel = ?,
                 AliasLabel = ?
@@ -24,7 +23,7 @@ if (isset($_POST['newalias'])) {
             ", $badLabel, $aliasLabel, $aliasId
         );
     } elseif (isset($_POST['delete'])) {
-        $DB->prepared_query("
+        $db->prepared_query("
             DELETE FROM label_aliases
             WHERE ID = ?
             ", $aliasId
@@ -33,11 +32,13 @@ if (isset($_POST['newalias'])) {
 }
 
 $orderBy = ($_GET['order'] ?? 'AliasLabel') === 'good' ? 3 : 2;
-$DB->prepared_query("
+$db->prepared_query("
     SELECT ID, BadLabel, AliasLabel
     FROM label_aliases
     ORDER BY $orderBy
 ");
+
+View::show_header('Label Aliases');
 ?>
 <div class="header">
     <h2>Label Aliases</h2>
@@ -67,7 +68,7 @@ $DB->prepared_query("
             </td>
         </form>
     </tr>
-<?php while ([$id, $badLabel, $aliasLabel] = $DB->next_record()) { ?>
+<?php while ([$id, $badLabel, $aliasLabel] = $db->next_record()) { ?>
     <tr>
         <form method="post" action="">
             <input type="hidden" name="changealias" value="1" />

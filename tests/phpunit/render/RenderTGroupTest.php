@@ -6,8 +6,7 @@ require_once(__DIR__ . '/../../../lib/bootstrap.php');
 
 class RenderTGroupTest extends TestCase {
     public function testRequest() {
-        global $DB;
-        $tgroupId = $DB->scalar('SELECT ID from torrents_group');
+        $tgroupId = Gazelle\DB::DB()->scalar('SELECT ID from torrents_group');
         if (!$tgroupId) {
             $this->assertTrue(true, 'skipped (no tgroup with open requests)');
             return;

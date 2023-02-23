@@ -7,7 +7,7 @@ if (!$postId) {
 }
 
 // Message is selected providing the user quoting is one of the two people in the thread
-$body = $DB->scalar("
+$body = Gazelle\DB::DB()->scalar("
     SELECT m.Body
     FROM pm_messages AS m
     INNER JOIN pm_conversations_users AS u USING (ConvID)

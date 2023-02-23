@@ -27,7 +27,7 @@ if ($newRequest) {
 
     // We may be able to prepare some things based on whence we came
     if (isset($_GET['artistid'])) {
-        $ArtistName = $DB->scalar("
+        $ArtistName = Gazelle\DB::DB()->scalar("
             SELECT Name FROM artists_group WHERE artistid = ?
             ", (int)$_GET['artistid']
         );

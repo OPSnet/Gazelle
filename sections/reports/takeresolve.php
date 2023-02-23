@@ -10,7 +10,8 @@ if (!$Viewer->permitted('admin_reports') && !$Viewer->permitted('site_moderate_f
 
 $ReportID = (int) $_POST['reportid'];
 
-$Type = $DB->scalar("
+$db = Gazelle\DB::DB();
+$Type = $db->scalar("
     SELECT Type
     FROM reports
     WHERE ID = ?
@@ -24,7 +25,7 @@ if (!$Viewer->permitted('admin_reports')) {
     }
 }
 
-$DB->prepared_query("
+$db->prepared_query("
     UPDATE reports SET
         Status = 'Resolved',
         ResolvedTime = now(),
@@ -45,7 +46,7 @@ if (in_array($Type, ['comment', 'post', 'thread'])) {
     $Cache->decrement('num_forum_reports');
 }
 
-$Remaining = $DB->scalar("
+$Remaining = $db->scalar("
     SELECT count(*)
     FROM reports
     WHERE Status = 'New'

@@ -15,6 +15,7 @@ if (is_null($artist)) {
 }
 $artistId = $artist->id();
 $summary  = [];
+$db       = Gazelle\DB::DB();
 
 if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous revision
     authorize();
@@ -23,7 +24,7 @@ if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous 
         error(0);
     }
 
-    $DB->prepared_query("
+    $db->prepared_query("
         INSERT INTO wiki_artists
               (PageID, Body, Image, UserID, Summary)
         SELECT ?,      Body, Image, ?,      ?
@@ -63,13 +64,13 @@ if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous 
         $summary[] = "Discogs relation cleared";
     }
 
-    $DB->prepared_query("
+    $db->prepared_query("
         INSERT INTO wiki_artists
                (PageID, Body, Image, UserID, Summary)
         VALUES (?,      ?,    ?,     ?,      ?)
         ", $artistId, $body, $image, $Viewer->id(), implode(', ', $summary)
     );
-    $revisionId = $DB->inserted_id();
+    $revisionId = $db->inserted_id();
 }
 
 // Update artists table (technically, we don't need the revisionId column, but we can use it for a join which is nice and fast)
@@ -82,7 +83,7 @@ if ($Viewer->permitted('artist_edit_vanityhouse')) {
 
 $columns = implode(', ', $column);
 $args[] = $artistId;
-$DB->prepared_query($sql = "
+$db->prepared_query($sql = "
     UPDATE artists_group SET
         $columns
     WHERE ArtistID = ?

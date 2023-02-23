@@ -57,6 +57,7 @@ if ($find === false) {
     die("Could not popen(" . $config['PIPE'] . ")\n");
 }
 
+$db        = Gazelle\DB::DB();
 $begin     = microtime(true);
 $processed = 0;
 $orphan    = 0;
@@ -73,7 +74,7 @@ while (($file = fgets($find)) !== false) {
         continue;
     }
 
-    if (!$DB->scalar($config['CHECK'], ...array_slice($match, 1))) {
+    if (!$db->scalar($config['CHECK'], ...array_slice($match, 1))) {
         ++$orphan;
         echo "$file is orphan\n";
         continue;
@@ -82,7 +83,7 @@ while (($file = fgets($find)) !== false) {
     if (is_null($config['MD5'])) {
         continue;
     }
-    $db_digest = md5($DB->scalar($config['MD5'], ...array_slice($match, 1)) . ($config['NEWLN'] ? "\n" : ''));
+    $db_digest = md5($db->scalar($config['MD5'], ...array_slice($match, 1)) . ($config['NEWLN'] ? "\n" : ''));
     $file_digest = md5(file_get_contents($file));
     if ($db_digest != $file_digest) {
         echo "$file contents $file_digest does not match db $db_digest\n";

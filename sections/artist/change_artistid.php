@@ -45,67 +45,68 @@ if ($ArtistID == $NewArtistID) {
     error('You cannot merge an artist with itself.');
 }
 if (isset($_POST['confirm'])) {
+    $db = Gazelle\DB::DB();
     // Get the information for the cache update
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT DISTINCT GroupID
         FROM torrents_artists
         WHERE ArtistID = ?
         ", $ArtistID
     );
-    $Groups = $DB->collect('GroupID');
-    $DB->prepared_query("
+    $Groups = $db->collect('GroupID');
+    $db->prepared_query("
         SELECT DISTINCT RequestID
         FROM requests_artists
         WHERE ArtistID = ?
         ", $ArtistID
     );
-    $Requests = $DB->collect('RequestID');
-    $DB->prepared_query("
+    $Requests = $db->collect('RequestID');
+    $db->prepared_query("
         SELECT DISTINCT UserID
         FROM bookmarks_artists
         WHERE ArtistID = ?
         ", $ArtistID
     );
-    $BookmarkUsers = $DB->collect('UserID');
-    $DB->prepared_query("
+    $BookmarkUsers = $db->collect('UserID');
+    $db->prepared_query("
         SELECT DISTINCT ct.CollageID
         FROM collages_torrents AS ct
         INNER JOIN torrents_artists AS ta USING (GroupID)
         WHERE ta.ArtistID = ?
         ", $ArtistID
     );
-    $Collages = $DB->collect('CollageID');
+    $Collages = $db->collect('CollageID');
 
     // And the info to avoid double-listing an artist if it and the target are on the same group
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT DISTINCT GroupID
         FROM torrents_artists
         WHERE ArtistID = ?
         ", $NewArtistID
     );
-    $NewArtistGroups = $DB->collect('GroupID');
+    $NewArtistGroups = $db->collect('GroupID');
     $NewArtistGroups[] = 0;
 
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT DISTINCT RequestID
         FROM requests_artists
         WHERE ArtistID = ?
         ", $NewArtistID
     );
-    $NewArtistRequests = $DB->collect('RequestID');
+    $NewArtistRequests = $db->collect('RequestID');
     $NewArtistRequests[] = 0;
 
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT DISTINCT UserID
         FROM bookmarks_artists
         WHERE ArtistID = ?
         ", $NewArtistID
     );
-    $NewArtistBookmarks = $DB->collect('UserID');
+    $NewArtistBookmarks = $db->collect('UserID');
     $NewArtistBookmarks[] = 0;
 
     // Merge all of this artist's aliases onto the new artist
-    $DB->prepared_query("
+    $db->prepared_query("
         UPDATE artists_alias SET
             ArtistID = ?
         WHERE ArtistID = ?
@@ -113,36 +114,36 @@ if (isset($_POST['confirm'])) {
     );
 
     // Update the torrent groups, requests, and bookmarks
-    $DB->prepared_query("
+    $db->prepared_query("
         UPDATE IGNORE torrents_artists SET
             ArtistID = ?
         WHERE ArtistID = ?
             AND GroupID NOT IN (" . placeholders($NewArtistGroups) . ")
         ", $NewArtistID, $ArtistID, ...$NewArtistGroups
     );
-    $DB->prepared_query("
+    $db->prepared_query("
         DELETE FROM torrents_artists WHERE ArtistID = ?
         ", $ArtistID
     );
-    $DB->prepared_query("
+    $db->prepared_query("
         UPDATE IGNORE requests_artists SET
             ArtistID = ?
         WHERE ArtistID = ?
             AND RequestID NOT IN (" . placeholders($NewArtistRequests) . ")
         ", $NewArtistID, $ArtistID, ...$NewArtistRequests
     );
-    $DB->prepared_query("
+    $db->prepared_query("
         DELETE FROM requests_artists WHERE ArtistID = ?
         ", $ArtistID
     );
-    $DB->prepared_query("
+    $db->prepared_query("
         UPDATE IGNORE bookmarks_artists SET
             ArtistID = ?
         WHERE ArtistID = ?
             AND UserID NOT IN (" . placeholders($NewArtistBookmarks) . ")
         ", $NewArtistID, $ArtistID, ...$NewArtistBookmarks
     );
-    $DB->prepared_query("
+    $db->prepared_query("
         DELETE FROM bookmarks_artists WHERE ArtistID = ?
         ", $ArtistID
     );
@@ -177,7 +178,7 @@ if (isset($_POST['confirm'])) {
     $Cache->delete_value("artist_groups_$NewArtistID");
 
     // Delete the old artist
-    $DB->prepared_query("
+    $db->prepared_query("
         DELETE FROM artists_group
         WHERE ArtistID = ?
         ", $ArtistID

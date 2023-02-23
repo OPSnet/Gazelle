@@ -16,8 +16,9 @@ turned off by setting $Escape to false in next_record or to_array.
 //--------- Basic usage -------------------------------------------------------------
 
 * Making a query
+$db = Gazelle\DB::DB();
 
-$DB->prepare_query("
+$db->prepare_query("
     SELECT *
     FROM table...");
 
@@ -27,7 +28,7 @@ $DB->prepare_query("
 
 * Getting data from a query
 
-$array = $DB->next_record();
+$array = $db->next_record();
     Is functionally equivalent to using mysqli_fetch_array($ResultSet)
     You do not need to specify a result set - it uses $this-QueryID
 
@@ -35,12 +36,12 @@ $array = $DB->next_record();
 
 * The conventional way of retrieving a row from a result set is as follows:
 
-[$All, $Columns, $That, $You, $Select[ = $DB->next_record();
+[$All, $Columns, $That, $You, $Select[ = $db->next_record();
 -----
 
 * This is how you loop over the result set:
 
-while ([$All, $Columns, $That, $You, $Select] = $DB->next_record()) {
+while ([$All, $Columns, $That, $You, $Select] = $db->next_record()) {
     echo "Do stuff with $All of the ".$Columns.$That.$You.$Select;
 }
 -----
@@ -79,19 +80,19 @@ set_query_id($ResultSet)
     This class can only hold one result set at a time. Using set_query_id allows
     you to set the result set that the class is using to the result set in
     $ResultSet. This result set should have been obtained earlier by using
-    $DB->prepared_query().
+    $db->prepared_query().
 
     Example:
 
-    $FoodRS = $DB->prepared_query("
+    $FoodRS = $db->prepared_query("
             SELECT *
             FROM food");
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT *
         FROM drink");
-    $Drinks = $DB->next_record();
-    $DB->set_query_id($FoodRS);
-    $Food = $DB->next_record();
+    $Drinks = $db->next_record();
+    $db->set_query_id($FoodRS);
+    $Food = $db->next_record();
 
     Of course, this example is contrived, but you get the point.
 

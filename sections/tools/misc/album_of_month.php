@@ -3,6 +3,7 @@
 if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
+$DB = Gazelle\DB::DB(); // FIXME
 
 //Make sure the form was sent
 if (isset($_POST['GroupID'])) {

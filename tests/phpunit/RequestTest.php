@@ -17,8 +17,7 @@ class RequestTest extends TestCase {
             $this->request->remove();
         }
         // TODO: Make it easier to reset user upload/download
-        global $DB;
-        $DB->prepared_query("
+        Gazelle\DB::DB()->prepared_query("
             UPDATE users_leech_stats SET Uploaded = ? WHERE UserID = ?
             ", STARTING_UPLOAD, (new Gazelle\Manager\User)->find('@user')->id()
         );
@@ -165,8 +164,7 @@ class RequestTest extends TestCase {
             'bounty-size'  => $user->stats()->requestBountySize(),
             'bounty-total' => $user->stats()->requestBountyTotal(),
         ];
-        global $DB;
-        $torrentId = $DB->scalar("SELECT min(ID) FROM torrents");
+        $torrentId = Gazelle\DB::DB()->scalar("SELECT min(ID) FROM torrents");
         $torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
         $this->assertInstanceOf(Gazelle\Torrent::class, $torrent, 'request-torrent-filler');
         $this->assertEquals(1, $request->fill($user, $torrent), 'request-fill');

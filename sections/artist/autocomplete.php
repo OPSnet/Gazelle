@@ -15,10 +15,11 @@ if (strtolower(substr($fullName, 0, 4)) == 'the ') {
 $keySize = min($maxKeySize, max(1, strlen($fullName)));
 $letters = mb_strtolower(mb_substr($fullName, 0, $keySize));
 
-$key = 'autocomplete_artist_' . $keySize . '_' . str_replace(' ', '%20', $letters);
+$key         = 'autocomplete_artist_' . $keySize . '_' . str_replace(' ', '%20', $letters);
 $autoSuggest = $Cache->get($key);
 if ($autoSuggest === false) {
-    $DB->prepared_query("
+    $db = Gazelle\DB::DB();
+    $db->prepared_query("
         SELECT a.ArtistID,
             a.Name
         FROM artists_group AS a
@@ -31,7 +32,7 @@ if ($autoSuggest === false) {
         LIMIT ?",
         str_replace('\\','\\\\',$letters) . '%', $keySize === $maxKeySize ? 250 : 10
     );
-    $autoSuggest = $DB->to_array(false, MYSQLI_NUM, false);
+    $autoSuggest = $db->to_array(false, MYSQLI_NUM, false);
     $Cache->cache_value($key, $autoSuggest, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
 }
 

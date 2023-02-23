@@ -20,14 +20,15 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
             $Err = 'A recipient does not exist.';
         }
     }
-    $DB->prepared_query("
+    $db = Gazelle\DB::DB();
+    $db->prepared_query("
         SELECT UserID
         FROM pm_conversations_users
         WHERE UserID = ?
             AND ConvID = ?
         ", $Viewer->id(), $ConvID
     );
-    if (!$DB->has_results()) {
+    if (!$db->has_results()) {
         error(403);
     }
 } else {

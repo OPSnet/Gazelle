@@ -50,7 +50,7 @@ class Torrents {
         }
         $Found = $NotFound = array_fill_keys($GroupIDs, false);
         $Key = $Torrents ? 'torrent_group_' : 'torrent_group_light_';
-        global $Cache, $DB;
+        global $Cache;
 
         foreach ($GroupIDs as $i => $GroupID) {
             if (!is_number($GroupID)) {
@@ -79,8 +79,9 @@ class Torrents {
             $placeholders = placeholders($NotFound);
             $ids = array_keys($NotFound);
             $NotFound = [];
-            $QueryID = $DB->get_query_id();
-            $DB->prepared_query("
+            $db = Gazelle\DB::DB();
+            $QueryID = $db->get_query_id();
+            $db->prepared_query("
                 SELECT
                     tg.ID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber, tg.ReleaseType,
                     tg.VanityHouse, tg.WikiImage, tg.CategoryID,
@@ -93,16 +94,16 @@ class Torrents {
                 ", ...$ids
             );
 
-            while ($Group = $DB->next_record(MYSQLI_ASSOC, true)) {
+            while ($Group = $db->next_record(MYSQLI_ASSOC, true)) {
                 $NotFound[$Group['ID']] = $Group;
                 $NotFound[$Group['ID']]['Torrents'] = [];
                 $NotFound[$Group['ID']]['Artists'] = [];
             }
-            $DB->set_query_id($QueryID);
+            $db->set_query_id($QueryID);
 
             if ($Torrents) {
-                $QueryID = $DB->get_query_id();
-                $DB->prepared_query("
+                $QueryID = $db->get_query_id();
+                $db->prepared_query("
                     SELECT
                         t.ID,
                         t.GroupID,
@@ -150,10 +151,10 @@ class Torrents {
                     ", ...$ids
                 )
 ;
-                while ($Torrent = $DB->next_record(MYSQLI_ASSOC, true)) {
+                while ($Torrent = $db->next_record(MYSQLI_ASSOC, true)) {
                     $NotFound[$Torrent['GroupID']]['Torrents'][$Torrent['ID']] = $Torrent;
                 }
-                $DB->set_query_id($QueryID);
+                $db->set_query_id($QueryID);
             }
 
             foreach ($NotFound as $GroupID => $GroupInfo) {

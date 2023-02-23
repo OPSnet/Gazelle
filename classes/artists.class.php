@@ -21,7 +21,7 @@ class Artists {
      * 8 => Arranger
      */
     public static function get_artists($GroupIDs) {
-        global $Cache, $DB;
+        global $Cache;
         $Results = [];
         $DBs = [];
         foreach ($GroupIDs as $GroupID) {
@@ -37,8 +37,9 @@ class Artists {
         }
         if (count($DBs) > 0) {
             $IDs = implode(',', $DBs);
-            $QueryID = $DB->get_query_id();
-            $DB->prepared_query("
+            $db = Gazelle\DB::DB();
+            $QueryID = $db->get_query_id();
+            $db->prepared_query("
                 SELECT ta.GroupID,
                     ta.ArtistID,
                     aa.Name,
@@ -51,11 +52,11 @@ class Artists {
                     ta.Importance,
                     aa.Name
             ");
-            while (list($GroupID, $ArtistID, $ArtistName, $ArtistImportance, $AliasID) = $DB->next_record(MYSQLI_BOTH, false)) {
+            while (list($GroupID, $ArtistID, $ArtistName, $ArtistImportance, $AliasID) = $db->next_record(MYSQLI_BOTH, false)) {
                 $Results[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
                 $New[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
             }
-            $DB->set_query_id($QueryID);
+            $db->set_query_id($QueryID);
             foreach ($DBs as $GroupID) {
                 if (isset($New[$GroupID])) {
                     $Cache->cache_value('groups_artists_'.$GroupID, $New[$GroupID]);

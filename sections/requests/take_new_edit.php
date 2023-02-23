@@ -327,11 +327,12 @@ if (isset($GroupID)) {
  * 3. Create a row in the requests_artists table for each artist, based on the ID.
  */
 
+$db = Gazelle\DB::DB();
 $artistMan = new Gazelle\Manager\Artist;
 foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Num => $Artist) {
         // 1. See if each artist given already exists and if it does, grab the ID.
-        $DB->prepared_query('
+        $db->prepared_query('
             SELECT
                 ArtistID,
                 AliasID,
@@ -340,7 +341,7 @@ foreach ($ArtistForm as $role => $Artists) {
             FROM artists_alias
             WHERE Name = ?', $Artist['name']);
 
-        while ([$ArtistID, $AliasID, $AliasName, $Redirect] = $DB->next_record(MYSQLI_NUM, false)) {
+        while ([$ArtistID, $AliasID, $AliasName, $Redirect] = $db->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($Artist['name'], $AliasName)) {
                 if ($Redirect) {
                     $AliasID = $Redirect;
@@ -359,15 +360,15 @@ foreach ($ArtistForm as $role => $Artists) {
 
 if (!$newRequest) {
     // We need to be able to delete artists / tags
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT concat('artists_requests_', ArtistID) FROM requests_artists WHERE RequestID = ?
         ", $RequestID
     );
     $Cache->delete_multi([
         "request_artists_$RequestID",
-        ...$DB->collect(0, false)
+        ...$db->collect(0, false)
     ]);
-    $DB->prepared_query("
+    $db->prepared_query("
         DELETE FROM requests_artists WHERE RequestID = ?
         ", $RequestID
     );
@@ -384,7 +385,7 @@ foreach ($ArtistForm as $role => $Artists) {
 }
 
 if (!$newRequest) {
-    $DB->prepared_query("
+    $db->prepared_query("
         DELETE FROM requests_tags WHERE RequestID = ?
         ", $RequestID
     );

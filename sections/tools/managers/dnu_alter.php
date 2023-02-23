@@ -5,10 +5,11 @@ if (!$Viewer->permitted('admin_dnu')) {
 }
 
 authorize();
+$db = Gazelle\DB::DB();
 
 if ($_POST['submit'] == 'Reorder') { // Reorder
     foreach ($_POST['item'] as $Position => $Item) {
-        $DB->prepared_query("
+        $db->prepared_query("
             UPDATE do_not_upload SET
                 Sequence = ?
             WHERE id = ?
@@ -20,7 +21,7 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
         error(0);
     }
-    $DB->prepared_query('
+    $db->prepared_query('
         DELETE FROM do_not_upload
         WHERE ID = ?
         ', $_POST['id']
@@ -38,7 +39,7 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
         if (!is_number($_POST['id']) || $_POST['id'] == '') {
             error(0);
         }
-        $DB->prepared_query("
+        $db->prepared_query("
             UPDATE do_not_upload SET
                 Name = ?,
                 Comment = ?,
@@ -47,7 +48,7 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
             ", trim($_POST['name']), trim($_POST['comment']), $Viewer->id(), $_POST['id']
         );
     } else { //Create
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO do_not_upload
                    (Name, Comment, UserID, Sequence)
             VALUES (?,    ?,       ?,      9999)

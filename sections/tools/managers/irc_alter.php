@@ -14,7 +14,7 @@ if ($_POST['submit'] == 'Delete') { //Delete
     if ($ID === 0) {
         error(0);
     }
-    $DB->prepared_query('DELETE FROM irc_channels WHERE ID = ?', $ID);
+    Gazelle\DB::DB()->prepared_query('DELETE FROM irc_channels WHERE ID = ?', $ID);
 } else {
     // Edit & Create have shared validation
     // we have a 'submit-234' key, so we want to pull out that 234

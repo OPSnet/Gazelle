@@ -530,7 +530,8 @@ $LogName .= $Properties['Title'];
 //----- Start inserts
 
 $Debug->set_flag('upload: database begin transaction');
-$DB->begin_transaction();
+$db = Gazelle\DB::DB();
+$db->begin_transaction();
 
 if ($tgroup) {
     $tgroup->touch();
@@ -574,7 +575,7 @@ if (!$Properties['GroupID']) {
 }
 
 // Torrent
-$DB->prepared_query("
+$db->prepared_query("
     INSERT INTO torrents
         (GroupID, UserID, Media, Format, Encoding,
         Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
@@ -593,8 +594,8 @@ $DB->prepared_query("
        $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
-$TorrentID = $DB->inserted_id();
-$DB->prepared_query('
+$TorrentID = $db->inserted_id();
+$db->prepared_query('
     INSERT INTO torrents_leech_stats (TorrentID)
     VALUES (?)
     ', $TorrentID
@@ -612,7 +613,7 @@ $extraFile = [];
 $trackerUpdate = [];
 
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-    $DB->prepared_query("
+    $db->prepared_query("
         INSERT INTO torrents
             (GroupID, UserID, Media, Format, Encoding,
             Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
@@ -628,8 +629,8 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
         $ExtraTorrent['InfoHash'], $ExtraTorrent['NumFiles'], $ExtraTorrent['FileString'],
         $ExtraTorrent['FilePath'], $ExtraTorrent['TotalSize'], $ExtraTorrent['TorrentDescription']
     );
-    $ExtraTorrentID = $DB->inserted_id();
-    $DB->prepared_query('
+    $ExtraTorrentID = $db->inserted_id();
+    $db->prepared_query('
         INSERT INTO torrents_leech_stats (TorrentID)
         VALUES (?)
         ', $ExtraTorrentID
@@ -653,7 +654,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 $ripFiler = new Gazelle\File\RipLog;
 $htmlFiler = new Gazelle\File\RipLogHTML;
 foreach($logfileSummary->all() as $logfile) {
-    $DB->prepared_query('
+    $db->prepared_query('
         INSERT INTO torrents_logs
                (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
         VALUES (?,         ?,      ?,         ?,        ?,      ?,             ?,          ?,             ?,                 ?)
@@ -661,7 +662,7 @@ foreach($logfileSummary->all() as $logfile) {
             $logfile->ripper(), $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
             Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
     );
-    $LogID = $DB->inserted_id();
+    $LogID = $db->inserted_id();
     $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
     $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 }
@@ -677,7 +678,7 @@ foreach ($extraFile as $id => $info) {
         ->general("Torrent $ExtraTorrentID ($LogName) ({$info['size']}  MiB) was uploaded by " . $Viewer->username());
 }
 
-$DB->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
+$db->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
 $Debug->set_flag('upload: database committed');
 
 //******************************************************************************//
@@ -819,14 +820,14 @@ if (defined('AJAX')) {
     $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
 
     // RSS for bookmarks
-    $DB->prepared_query('
+    $db->prepared_query('
         SELECT u.torrent_pass
         FROM users_main AS u
         INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
         WHERE b.GroupID = ?
         ', $GroupID
     );
-    while ([$Passkey] = $DB->next_record()) {
+    while ([$Passkey] = $db->next_record()) {
         $feedType[] = "torrents_bookmarks_t_$Passkey";
     }
     foreach ($feedType as $subFeed) {
@@ -937,14 +938,14 @@ if (!in_array('notifications', $Viewer->paranoia())) {
     $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
 
     // RSS for bookmarks
-    $DB->prepared_query('
+    $db->prepared_query('
         SELECT u.torrent_pass
         FROM users_main AS u
         INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
         WHERE b.GroupID = ?
         ', $GroupID
     );
-    while ([$Passkey] = $DB->next_record()) {
+    while ([$Passkey] = $db->next_record()) {
         $feedType[] = "torrents_bookmarks_t_$Passkey";
     }
     foreach ($feedType as $subFeed) {

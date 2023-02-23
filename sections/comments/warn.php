@@ -8,7 +8,7 @@ if (!$postId) {
     error(404);
 }
 
-[$body, $userId] = $DB->row("
+[$body, $userId] = Gazelle\DB::DB()->row("
     SELECT Body, AuthorID FROM comments WHERE ID = ?
     ", $postId
 );

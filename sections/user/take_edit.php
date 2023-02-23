@@ -19,6 +19,7 @@ if (!isset($_REQUEST['id'])) {
         error(403);
     }
 }
+$db     = Gazelle\DB::DB();
 $userId = $user->id();
 
 $validator = new Gazelle\Util\Validator;
@@ -222,14 +223,14 @@ $UserNavItems = implode(',', $UserNavItems);
 $LastFMUsername = trim($_POST['lastfm_username'] ?? '');
 $OldFMUsername = (new Gazelle\Util\LastFM)->username($userId);
 if (is_null($OldFMUsername) && $LastFMUsername !== '') {
-    $DB->prepared_query('
+    $db->prepared_query('
         INSERT INTO lastfm_users (ID, Username)
         VALUES (?, ?)
         ', $userId, $LastFMUsername
     );
     $Cache->delete_value("lastfm_username_$userId");
 } elseif (!is_null($OldFMUsername) && $LastFMUsername !== '') {
-    $DB->prepared_query('
+    $db->prepared_query('
         UPDATE lastfm_users SET
             Username = ?
         WHERE ID = ?
@@ -237,7 +238,7 @@ if (is_null($OldFMUsername) && $LastFMUsername !== '') {
     );
     $Cache->delete_value("lastfm_username_$userId");
 } elseif (!is_null($OldFMUsername) && $LastFMUsername === '') {
-    $DB->prepared_query('
+    $db->prepared_query('
         DELETE FROM lastfm_users WHERE ID = ?
         ', $userId
     );
@@ -327,7 +328,7 @@ if (isset($_POST['resetpasskey'])) {
     $ChangerIP = $Viewer->ipaddr();
     $SQL .= ',m.torrent_pass = ?';
     $Params[] = $NewPassKey;
-    $DB->prepared_query('
+    $db->prepared_query('
         INSERT INTO users_history_passkeys
                (UserID, OldPassKey, NewPassKey, ChangerIP)
         VALUES (?,      ?,          ?,          ?)
@@ -341,7 +342,7 @@ if (isset($_POST['resetpasskey'])) {
 $SQL .= ' WHERE m.ID = ?';
 $Params[] = $userId;
 
-$DB->prepared_query($SQL, ...$Params);
+$db->prepared_query($SQL, ...$Params);
 
 $user->flush();
 

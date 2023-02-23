@@ -40,6 +40,7 @@ View::show_header('Top 10 Torrents history!');
         </form>
     </div>
 <?php
+$db = Gazelle\DB::DB();
 if (!empty($_GET['date'])) {
     $Date = $_GET['date'];
     $SQLTime = $Date.' 00:00:00';
@@ -62,7 +63,7 @@ if (!empty($_GET['date'])) {
 
     $Details = $Cache->get_value("top10_history_$SQLTime");
     if ($Details === false) {
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT
                 tht.sequence,
                 tht.TitleString,
@@ -93,7 +94,7 @@ if (!empty($_GET['date'])) {
             $Where
             ORDER BY tht.sequence ASC
         ");
-        $Details = $DB->to_array();
+        $Details = $db->to_array();
 
         $Cache->cache_value("top10_history_$SQLTime", $Details, 3600 * 24);
     }

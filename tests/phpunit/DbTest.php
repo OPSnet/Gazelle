@@ -6,8 +6,8 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class DbTest extends TestCase {
     public function testTableCoherency() {
-        global $DB;
-        $DB->prepared_query($sql = "
+        $db = Gazelle\DB::DB();
+        $db->prepared_query($sql = "
              SELECT replace(table_name, 'deleted_', '') as table_name
              FROM information_schema.tables
              WHERE table_schema = ?
@@ -15,9 +15,9 @@ class DbTest extends TestCase {
             ", SQLDB
         );
 
-        $db = new Gazelle\DB;
-        foreach ($DB->collect(0, false) as $tableName) {
-            [$ok, $message] = $db->checkStructureMatch(SQLDB, $tableName, "deleted_$tableName");
+        $dbMan = new Gazelle\DB;
+        foreach ($db->collect(0, false) as $tableName) {
+            [$ok, $message] = $dbMan->checkStructureMatch(SQLDB, $tableName, "deleted_$tableName");
             $this->assertTrue($ok, "mismatch -- $message");
         }
     }

@@ -33,14 +33,15 @@ if (!empty($_POST['action'])) {
     } elseif (empty($_GET['artistname'])) {
         header('Location: torrents.php');
     } else {
+        $db = Gazelle\DB::DB();
         $NameSearch = str_replace('\\', '\\\\', trim($_GET['artistname']));
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT ArtistID, Name
             FROM artists_alias
             WHERE Name = ?
             ", $NameSearch
         );
-        [$FirstID, $Name] = $DB->next_record(MYSQLI_NUM, false);
+        [$FirstID, $Name] = $db->next_record(MYSQLI_NUM, false);
         if (is_null($FirstID)) {
             if ($Viewer->permitted('site_advanced_search') && $Viewer->option('SearchType')) {
                 header('Location: torrents.php?action=advanced&artistname=' . urlencode($_GET['artistname']));
@@ -49,11 +50,11 @@ if (!empty($_POST['action'])) {
             }
             exit;
         }
-        if ($DB->record_count() === 1 || !strcasecmp($Name, $NameSearch)) {
+        if ($db->record_count() === 1 || !strcasecmp($Name, $NameSearch)) {
             header("Location: artist.php?id=$FirstID");
             exit;
         }
-        while ([$ID, $Name] = $DB->next_record(MYSQLI_NUM, false)) {
+        while ([$ID, $Name] = $db->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($Name, $NameSearch)) {
                 header("Location: artist.php?id=$ID");
                 exit;

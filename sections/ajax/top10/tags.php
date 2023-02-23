@@ -1,6 +1,5 @@
 <?php
 
-
 // error out on invalid requests (before caching)
 if (isset($_GET['details'])) {
     if (in_array($_GET['details'],['ut','ur','v'])) {
@@ -18,9 +17,11 @@ $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $Limit = in_array($Limit, [10, 100, 250]) ? $Limit : 10;
 $OuterResults = [];
 
+$db = Gazelle\DB::DB();
+
 if ($Details == 'all' || $Details == 'ut') {
     if (!$TopUsedTags = $Cache->get_value("topusedtag_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT
                 t.ID,
                 t.Name,
@@ -34,7 +35,7 @@ if ($Details == 'all' || $Details == 'ut') {
             LIMIT ?
             ", $Limit
         );
-        $TopUsedTags = $DB->to_array();
+        $TopUsedTags = $db->to_array();
         $Cache->cache_value("topusedtag_$Limit", $TopUsedTags, 3600 * 12);
     }
     $OuterResults[] = generate_tag_json('Most Used Torrent Tags', 'ut', $TopUsedTags, $Limit);
@@ -42,7 +43,7 @@ if ($Details == 'all' || $Details == 'ut') {
 
 if ($Details == 'all' || $Details == 'ur') {
     if (!$TopRequestTags = $Cache->get_value("toprequesttag_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT
                 t.ID,
                 t.Name,
@@ -55,7 +56,7 @@ if ($Details == 'all' || $Details == 'ur') {
             LIMIT ?
             ", $Limit
         );
-        $TopRequestTags = $DB->to_array();
+        $TopRequestTags = $db->to_array();
         $Cache->cache_value("toprequesttag_$Limit", $TopRequestTags, 3600 * 12);
     }
     $OuterResults[] = generate_tag_json('Most Used Request Tags', 'ur', $TopRequestTags, $Limit);
@@ -63,7 +64,7 @@ if ($Details == 'all' || $Details == 'ur') {
 
 if ($Details == 'all' || $Details == 'v') {
     if (!$TopVotedTags = $Cache->get_value("topvotedtag_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT
                 t.ID,
                 t.Name,
@@ -77,7 +78,7 @@ if ($Details == 'all' || $Details == 'v') {
             LIMIT ?
             ", $Limit
         );
-        $TopVotedTags = $DB->to_array();
+        $TopVotedTags = $db->to_array();
         $Cache->cache_value("topvotedtag_$Limit", $TopVotedTags, 3600 * 12);
     }
     $OuterResults[] = generate_tag_json('Most Highly Voted Tags', 'v', $TopVotedTags, $Limit);

@@ -62,14 +62,15 @@ if ($viewMap[$View]['title'] === 'Your Unanswered') {
 }
 $where = implode(' AND ', $cond);
 
+$db = Gazelle\DB::DB();
 $paginator = new Gazelle\Util\Paginator(MESSAGES_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($DB->scalar("
+$paginator->setTotal($db->scalar("
     SELECT count(*) FROM staff_pm_conversations AS spc WHERE $where
     ", ...$args
 ));
 
 array_push($args, $Viewer->id(), $paginator->limit(), $paginator->offset());
-$StaffPMs = $DB->prepared_query("
+$StaffPMs = $db->prepared_query("
     SELECT spc.ID,
         spc.Subject,
         spc.UserID,
@@ -92,7 +93,7 @@ $StaffPMs = $DB->prepared_query("
     LIMIT ? OFFSET ?
     ", ...$args
 );
-$list = $DB->to_array(false, MYSQLI_NUM, false);
+$list = $db->to_array(false, MYSQLI_NUM, false);
 
 View::show_header('Staff Inbox');
 ?>
@@ -128,7 +129,7 @@ if ($Viewer->isFLS()) { ?>
     <br />
     <?= $paginator->linkbox() ?>
     <div class="box pad" id="inbox">
-<?php if (!$DB->has_results()) { ?>
+<?php if (!$db->has_results()) { ?>
         <h2>No messages</h2>
 <?php
 } else {
@@ -188,7 +189,7 @@ if ($Viewer->isFLS()) { ?>
 <?php        } ?>
                 </tr>
 <?php
-        $DB->set_query_id($StaffPMs);
+        $db->set_query_id($StaffPMs);
     } //while
 ?>
             </table>
@@ -199,7 +200,7 @@ if ($Viewer->isFLS()) { ?>
         </form>
 <?php
     }
-} // $DB->has_results()
+} // $db->has_results()
 ?>
     </div>
     <?= $paginator->linkbox() ?>

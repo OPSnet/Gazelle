@@ -278,7 +278,8 @@ if (empty($groupBy)) {
     $groupBy = 't.ID';
 }
 
-$torrentCount = $DB->scalar("
+$db = Gazelle\DB::DB();
+$torrentCount = $db->scalar("
     SELECT count(*) FROM (
         SELECT t.ID $havingColumns
         FROM torrents AS t
@@ -296,7 +297,7 @@ $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?
 $paginator->setTotal($torrentCount);
 array_push($args, $paginator->limit(), $paginator->offset());
 
-$DB->prepared_query("
+$db->prepared_query("
     SELECT
         t.GroupID,
         t.ID AS TorrentID,
@@ -314,8 +315,8 @@ $DB->prepared_query("
     ", ...$args
 );
 
-$groupIDs     = $DB->collect('GroupID');
-$torrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
+$groupIDs     = $db->collect('GroupID');
+$torrentsInfo = $db->to_array('TorrentID', MYSQLI_ASSOC);
 $action       = display_str($_GET['type']);
 $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 

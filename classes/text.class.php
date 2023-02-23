@@ -306,10 +306,10 @@ class Text {
             return null;
         }
         parse_str($info['query'] ?? '', $args);
-        global $Cache, $DB;
+        global $Cache;
         switch ($info['path'] ?? '') {
             case '/artist.php':
-                $name = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
+                $name = Gazelle\DB::DB()->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
                     $args['id'] ?? 0);
                 return $name
                     ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name)
@@ -1358,10 +1358,10 @@ class Text {
 
     public static function bbcodeCollageUrl($id, $url = null): string {
         $cacheKey = 'bbcode_collage_' . $id;
-        global $Cache, $DB;
+        global $Cache;
         $name = $Cache->get_value($cacheKey);
         if ($name === false) {
-            $name = $DB->scalar('SELECT Name FROM collages WHERE id = ?', $id);
+            $name = Gazelle\DB::DB()->scalar('SELECT Name FROM collages WHERE id = ?', $id);
             $Cache->cache_value($cacheKey, $name, 86400 + random_int(1, 3600));
         }
         return $name
@@ -1371,12 +1371,12 @@ class Text {
 
     protected static function bbcodeForumUrl($val): string {
         $cacheKey = 'bbcode_forum_' . $val;
-        global $Cache, $DB;
+        global $Cache;
         [$id, $name] = $Cache->get_value($cacheKey);
         if (is_null($id)) {
             [$id, $name] = (int)$val > 0
-                ? $DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
-                : $DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
+                ? Gazelle\DB::DB()->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
+                : Gazelle\DB::DB()->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
             $Cache->cache_value($cacheKey, [$id, $name], 86400 + random_int(1, 3600));
         }
         if (!self::$viewer->readAccess(new Gazelle\Forum($id))) {

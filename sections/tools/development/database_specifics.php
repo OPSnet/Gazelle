@@ -5,6 +5,7 @@ if (!$Viewer->permitted('site_database_specifics')) {
 }
 
 // View table definition
+$db = Gazelle\DB::DB();
 if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) {
     $tableName = $match[1];
     $siteInfo = new Gazelle\SiteInfo;
@@ -12,7 +13,7 @@ if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) 
         error("No such table");
     }
     echo $Twig->render('admin/db-table.twig', [
-        'definition' => $DB->row('SHOW CREATE TABLE ' . $tableName)[1],
+        'definition' => $db->row('SHOW CREATE TABLE ' . $tableName)[1],
         'table_name' => $tableName,
         'table_read' => $siteInfo->tableRowsRead($tableName),
         'index_read' => $siteInfo->indexRowsRead($tableName),
@@ -50,7 +51,7 @@ switch($mode) {
         break;
 }
 
-$DB->prepared_query("
+$db->prepared_query("
     SELECT $tableColumn AS table_name,
         engine AS engine,
         sum(table_rows) AS table_rows,
@@ -65,7 +66,7 @@ $DB->prepared_query("
     ORDER by $orderBy $orderDir
     ", SQLDB
 );
-$Tables = $DB->to_array('table_name', MYSQLI_ASSOC, false);
+$Tables = $db->to_array('table_name', MYSQLI_ASSOC, false);
 
 $data = [];
 foreach ($Tables as $name => $info) {

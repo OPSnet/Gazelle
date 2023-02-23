@@ -14,14 +14,15 @@ if (empty($_GET['userid'])) {
     }
 }
 
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     SELECT ag.ArtistID, ag.Name
     FROM bookmarks_artists AS ba
     INNER JOIN artists_group AS ag USING (ArtistID)
     WHERE ba.UserID = ?
     ", $UserID
 );
-$ArtistList = $DB->to_array();
+$ArtistList = $db->to_array();
 
 $JsonArtists = [];
 foreach ($ArtistList as $Artist) {

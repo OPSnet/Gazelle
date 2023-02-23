@@ -454,7 +454,8 @@ if (empty($_GET)) {
     if (count($Having)) {
         $SQL .= "\nHAVING " . implode(' AND ', $Having);
     }
-    $paginator->setTotal($DB->scalar($SQL, ...array_merge($Args, $HavingArgs)) ?? 0);
+    $db = Gazelle\DB::DB();
+    $paginator->setTotal($db->scalar($SQL, ...array_merge($Args, $HavingArgs)) ?? 0);
 
     $SQL = "SELECT $columns $from " . implode("\n", $Join);
     if (count($Where)) {
@@ -468,8 +469,8 @@ if (empty($_GET)) {
     }
     $SQL .= "\n$Order LIMIT ? OFFSET ?";
 
-    $DB->prepared_query($SQL, ...array_merge($Args, $HavingArgs, [$paginator->limit(), $paginator->offset()]));
-    $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
+    $db->prepared_query($SQL, ...array_merge($Args, $HavingArgs, [$paginator->limit(), $paginator->offset()]));
+    $Results = $db->to_array(false, MYSQLI_ASSOC, false);
     foreach ($Results as &$r) {
         $r['user'] = $userMan->findById($r['user_id']);
     }

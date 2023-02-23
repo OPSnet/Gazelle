@@ -13,6 +13,7 @@ if (isset($_GET['details'])) {
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $Limit = in_array($Limit, [10,100,250]) ? $Limit : 10;
+$db    = Gazelle\DB::DB();
 
 $BaseQuery = "
     SELECT
@@ -38,13 +39,13 @@ $args = [STARTING_UPLOAD, $Limit];
 $OuterResults = [];
 if ($Details == 'all' || $Details == 'ul') {
     if (!$TopUserUploads = $Cache->get_value("topuser_ul_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             $BaseQuery
             ORDER BY uls.Uploaded DESC
             LIMIT ?
             ", ...$args
         );
-        $TopUserUploads = $DB->to_array();
+        $TopUserUploads = $db->to_array();
         $Cache->cache_value("topuser_ul_$Limit", $TopUserUploads, 3600 * 12);
     }
     $OuterResults[] = generate_user_json('Uploaders', 'ul', $TopUserUploads, $Limit);
@@ -52,13 +53,13 @@ if ($Details == 'all' || $Details == 'ul') {
 
 if ($Details == 'all' || $Details == 'dl') {
     if (!$TopUserDownloads = $Cache->get_value("topuser_dl_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             $BaseQuery
             ORDER BY uls.Downloaded DESC
             LIMIT ?
             ", ...$args
         );
-        $TopUserDownloads = $DB->to_array();
+        $TopUserDownloads = $db->to_array();
         $Cache->cache_value("topuser_dl_$Limit", $TopUserDownloads, 3600 * 12);
     }
     $OuterResults[] = generate_user_json('Downloaders', 'dl', $TopUserDownloads, $Limit);
@@ -66,13 +67,13 @@ if ($Details == 'all' || $Details == 'dl') {
 
 if ($Details == 'all' || $Details == 'numul') {
     if (!$TopUserNumUploads = $Cache->get_value("topuser_numul_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             $BaseQuery
             ORDER BY NumUploads DESC
             LIMIT ?
             ", ...$args
         );
-        $TopUserNumUploads = $DB->to_array();
+        $TopUserNumUploads = $db->to_array();
         $Cache->cache_value("topuser_numul_$Limit", $TopUserNumUploads, 3600 * 12);
     }
     $OuterResults[] = generate_user_json('Torrents Uploaded', 'numul', $TopUserNumUploads, $Limit);
@@ -80,13 +81,13 @@ if ($Details == 'all' || $Details == 'numul') {
 
 if ($Details == 'all' || $Details == 'uls') {
     if (!$TopUserUploadSpeed = $Cache->get_value("topuser_ulspeed_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             $BaseQuery
             ORDER BY UpSpeed DESC
             LIMIT ?
             ", ...$args
         );
-        $TopUserUploadSpeed = $DB->to_array();
+        $TopUserUploadSpeed = $db->to_array();
         $Cache->cache_value("topuser_ulspeed_$Limit", $TopUserUploadSpeed, 3600 * 12);
     }
     $OuterResults[] = generate_user_json('Fastest Uploaders', 'uls', $TopUserUploadSpeed, $Limit);
@@ -94,13 +95,13 @@ if ($Details == 'all' || $Details == 'uls') {
 
 if ($Details == 'all' || $Details == 'dls') {
     if (!$TopUserDownloadSpeed = $Cache->get_value("topuser_dlspeed_$Limit")) {
-        $DB->prepared_query("
+        $db->prepared_query("
             $BaseQuery
             ORDER BY DownSpeed DESC
             LIMIT ?
             ", ...$args
         );
-        $TopUserDownloadSpeed = $DB->to_array();
+        $TopUserDownloadSpeed = $db->to_array();
         $Cache->cache_value("topuser_dlspeed_$Limit", $TopUserDownloadSpeed, 3600 * 12);
     }
     $OuterResults[] = generate_user_json('Fastest Downloaders', 'dls', $TopUserDownloadSpeed, $Limit);

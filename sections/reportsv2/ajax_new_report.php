@@ -84,7 +84,8 @@ $reporter = $userMan->findById($report->reporterId());
             </div>
 <?php
     }
-    $DB->prepared_query("
+    $db = Gazelle\DB::DB();
+    $db->prepared_query("
         SELECT DISTINCT req.ID,
             req.FillerID,
             um.Username,
@@ -97,8 +98,8 @@ $reporter = $userMan->findById($report->reporterId());
             AND req.TorrentID = ?
         ",  $torrentId
     );
-    if ($DB->has_results() > 0) {
-        while ([$RequestID, $FillerID, $FillerName, $FilledTime] = $DB->next_record()) {
+    if ($db->has_results() > 0) {
+        while ([$RequestID, $FillerID, $FillerName, $FilledTime] = $db->next_record()) {
 ?>
                 <div style="text-align: right;">
                     <strong class="important_text"><a href="user.php?id=<?=$FillerID?>"><?=$FillerName?></a> used this torrent to fill <a href="requests.php?action=view&amp;id=<?=$RequestID?>">this request</a> <?=time_diff($FilledTime)?></strong>

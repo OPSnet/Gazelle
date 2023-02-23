@@ -126,7 +126,7 @@ if ($tagLeaderboard) {
 <?php
 if (count($Artist->groupIds()) > 1000) {
     // prevent OOMs
-    $DB->disableQueryLog();
+    Gazelle\DB::DB()->disableQueryLog();
 }
 $artistReleaseType = [];
 $sections = $Artist->sections();

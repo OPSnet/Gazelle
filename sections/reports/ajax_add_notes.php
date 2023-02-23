@@ -5,7 +5,7 @@ if (!($postId && $Viewer->permitted('site_moderate_forums'))) {
     json_error('no post id');
 }
 
-$DB->prepared_query("
+Gazelle\DB::DB()->prepared_query("
     UPDATE reports SET
         Notes = ?
     WHERE ID = ?

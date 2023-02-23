@@ -20,7 +20,7 @@ if (!$PostID) {
 
 // Message is selected providing the user quoting is the guy who opened the PM or has
 // the right level
-[$Message, $Level, $UserID] = $DB->row("
+[$Message, $Level, $UserID] = Gazelle\DB::DB()->row("
     SELECT m.Message, c.Level, c.UserID
     FROM staff_pm_messages AS m
     INNER JOIN staff_pm_conversations AS c ON (m.ConvID = c.ID)

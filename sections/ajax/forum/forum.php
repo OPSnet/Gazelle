@@ -41,8 +41,9 @@ if (!count($threadList)) {
 }
 
 // forums_last_read_topics is a record of the last post a user read in a topic, and what page that was on
+$db   = Gazelle\DB::DB();
 $args = array_keys($threadList);
-$DB->prepared_query("
+$db->prepared_query("
     SELECT l.TopicID,
         l.PostID,
         ceil((SELECT count(*) FROM forums_posts AS p WHERE p.TopicID = l.TopicID AND p.ID <= l.PostID) / ?) AS Page
@@ -51,7 +52,7 @@ $DB->prepared_query("
         AND l.TopicID IN (" . placeholders($args) . ")
     ", $PerPage, $Viewer->id(), ...$args
 );
-$LastRead = $DB->to_array('TopicID');
+$LastRead = $db->to_array('TopicID');
 
 $JsonTopics = [];
 $userCache = [];

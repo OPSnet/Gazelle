@@ -5,7 +5,7 @@ if (!$postId) {
     error(404);
 }
 
-echo $DB->scalar("
+echo Gazelle\DB::DB()->scalar("
     SELECT Body FROM comments WHERE ID = ?
     ", $postId
 );

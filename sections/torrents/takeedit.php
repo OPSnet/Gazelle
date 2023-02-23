@@ -176,7 +176,8 @@ if ($Err) { // Show the upload form, with the data the user entered
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
-$current = $DB->rowAssoc("
+$db = Gazelle\DB::DB();
+$current = $db->rowAssoc("
     SELECT GroupID, Media, Format, Encoding, Scene, Description AS TorrentDescription,
         RemasterYear, Remastered, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber
     FROM torrents
@@ -198,7 +199,7 @@ foreach ($current as $key => $value) {
     }
 }
 
-$DB->begin_transaction(); // It's all or nothing
+$db->begin_transaction(); // It's all or nothing
 
 // Some browsers will report an empty file when you submit, prune those out
 if (isset($_FILES['logfiles'])) {
@@ -220,7 +221,7 @@ if (isset($_FILES['logfiles'])) {
             );
             $logfileSummary->add($logfile);
 
-            $DB->prepared_query('
+            $db->prepared_query('
                 INSERT INTO torrents_logs
                        (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
                 VALUES (?,         ?,      ?,         ?,        ?,      ?,              ?,         ?,             ?,                 ?)
@@ -228,7 +229,7 @@ if (isset($_FILES['logfiles'])) {
                     $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
                     Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
             );
-            $LogID = $DB->inserted_id();
+            $LogID = $db->inserted_id();
             $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
             $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
         }
@@ -282,14 +283,14 @@ if ($Viewer->permitted('users_mod')) {
 }
 
 $args[] = $TorrentID;
-$DB->prepared_query("
+$db->prepared_query("
     UPDATE torrents SET
     " . implode(', ', $set) . "
     WHERE ID = ?
     ", ...$args
 );
 
-$DB->commit();
+$db->commit();
 
 if ($Viewer->permitted('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
     $torMan->setFreeleech($Viewer, [$TorrentID], $Properties['FreeLeech'], $Properties['FreeLeechType'], true, false);

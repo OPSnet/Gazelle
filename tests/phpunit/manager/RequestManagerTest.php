@@ -14,8 +14,7 @@ class RequestManagerTest extends TestCase {
     public function tearDown(): void {}
 
     public function testManager() {
-        global $DB;
-        $requestId = $DB->scalar('SELECT ID from requests');
+        $requestId = Gazelle\DB::DB()->scalar('SELECT ID from requests');
         if ($requestId) {
             $this->assertInstanceOf('\\Gazelle\\Request', $this->manager->findById($requestId), 'req-man-find-id');
         } else {

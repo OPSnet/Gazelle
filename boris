@@ -28,7 +28,7 @@ $b->setInspector(new Boris\ExportInspector);
 $torMan = new Gazelle\Manager\Torrent;
 $preload = [
     'cache'       => $Cache,
-    'db'          => $DB,
+    'db'          => Gazelle\DB::DB(),
     'debug'       => $Debug,
     'Twig'        => $Twig,
     'bonus'       => new Gazelle\Manager\Bonus,

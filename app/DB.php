@@ -3,6 +3,13 @@
 namespace Gazelle;
 
 class DB extends Base {
+    static public function DB(): DB\Mysql {
+        // This is pretty damn fucking horrible, but at least
+        // it is abstracted away into one solitary method.
+        global $DB;
+        return $DB;
+    }
+
     /**
      * Skip foreign key checks
      * @param bool $relax true if foreign key checks should be skipped

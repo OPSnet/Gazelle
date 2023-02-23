@@ -20,8 +20,7 @@ class TGroupTest extends TestCase {
     public function tearDown(): void {}
 
     public function testRequest() {
-        global $DB;
-        $tgroupId = $DB->scalar('SELECT ID from torrents_group');
+        $tgroupId = Gazelle\DB::DB()->scalar('SELECT ID from torrents_group');
         if ($tgroupId) {
             $tgroup = $this->manager->findById($tgroupId);
             $this->assertInstanceOf('\Gazelle\TGroup', $tgroup, 'tgroup-find-by-id');

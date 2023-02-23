@@ -28,30 +28,31 @@ foreach ($Artists as $Artist) {
 }
 
 if (count($CleanArtists) > 0) {
-    $GroupName = $DB->scalar('
+    $db = Gazelle\DB::DB();
+    $GroupName = $db->scalar('
         SELECT Name FROM torrents_group WHERE ID = ?
         ', $GroupID
     );
     $placeholders = placeholders($ArtistIDs);
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT ArtistID, Name
         FROM artists_group
         WHERE ArtistID IN ($placeholders)
         ", ...$ArtistIDs
     );
-    $ArtistNames = $DB->to_array('ArtistID', MYSQLI_ASSOC, false);
+    $ArtistNames = $db->to_array('ArtistID', MYSQLI_ASSOC, false);
     if ($_POST['manager_action'] == 'delete') {
         $logger = new Gazelle\Log;
         foreach ($CleanArtists as $Artist) {
             [$Importance, $ArtistID] = $Artist;
-            $DB->prepared_query("
+            $db->prepared_query("
                 DELETE FROM torrents_artists
                 WHERE GroupID = ?
                     AND ArtistID = ?
                     AND Importance = ?
                 ", $GroupID, $ArtistID, $Importance
             );
-            if ($DB->affected_rows()) {
+            if ($db->affected_rows()) {
                 $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) removed as " . ARTIST_TYPE[$Importance];
                 $logger->group($GroupID, $Viewer->id(), $change)
                     ->general("$change in group {$GroupID} ({$GroupName}) by user "
@@ -60,7 +61,7 @@ if (count($CleanArtists) > 0) {
                 $Cache->delete_value("artist_groups_$ArtistID");
             }
         }
-        $DB->prepared_query("
+        $db->prepared_query("
             SELECT ArtistID
                 FROM requests_artists
                 WHERE ArtistID IN ($placeholders)
@@ -70,7 +71,7 @@ if (count($CleanArtists) > 0) {
                 WHERE ArtistID IN ($placeholders)
             ", ...[...$ArtistIDs, ...$ArtistIDs]
         );
-        $Items = $DB->collect('ArtistID');
+        $Items = $db->collect('ArtistID');
         $EmptyArtists = array_diff($ArtistIDs, $Items);
         $logger = new Gazelle\Log;
         foreach ($EmptyArtists as $ArtistID) {
@@ -82,7 +83,7 @@ if (count($CleanArtists) > 0) {
         if ($NewImportance === 0 || !isset(ARTIST_TYPE[$NewImportance])) {
             error(0);
         }
-        $DB->prepared_query("
+        $db->prepared_query("
             UPDATE IGNORE torrents_artists SET
                 Importance = ?
             WHERE GroupID = ?

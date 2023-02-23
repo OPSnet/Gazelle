@@ -41,14 +41,15 @@ switch ($_GET['type']) {
 
 $collector = new Gazelle\Collector\TList($Viewer, $user->username() . "-$label", 0);
 
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     SELECT DISTINCT t.ID
     FROM torrents AS t
     INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
     $SQL
     ", $user->id()
 );
-$collector->setList($DB->collect(0));
+$collector->setList($db->collect(0));
 $collector->prepare([]);
 
 header('X-Accel-Buffering: no');

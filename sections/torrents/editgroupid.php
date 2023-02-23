@@ -41,7 +41,8 @@ if (empty($_POST['confirm'])) {
 
 authorize();
 
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     UPDATE torrents SET
         GroupID = ?
     WHERE ID = ?
@@ -51,7 +52,7 @@ $DB->prepared_query("
 $log = new Gazelle\Log;
 $oldId = $old->id();
 
-if ($DB->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) {
+if ($db->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) {
     $old->flush();
     $old->refresh();
 } else {

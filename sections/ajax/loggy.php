@@ -16,6 +16,7 @@ else {
 }
 
 $where = implode(' AND ', $where);
-$DB->prepared_query("SELECT t.ID FROM torrents t INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) WHERE {$where}");
+$db = Gazelle\DB::DB();
+$db->prepared_query("SELECT t.ID FROM torrents t INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) WHERE {$where}");
 
-json_print('success', ['IDs' => $DB->collect('ID', false)]);
+json_print('success', ['IDs' => $db->collect('ID', false)]);

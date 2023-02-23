@@ -601,7 +601,7 @@ if (count($editSummary)) {
 
 if (!empty($set)) {
     $args[] = $userId;
-    $DB->prepared_query("
+    Gazelle\DB::DB()->prepared_query("
         UPDATE users_main AS m
         INNER JOIN users_info AS i ON (m.ID = i.UserID)
         SET " .  implode(', ', $set) . "
@@ -612,7 +612,7 @@ if (!empty($set)) {
 
 if ($leechSet) {
     $leechArgs[] = $userId;
-    $DB->prepared_query("
+    Gazelle\DB::DB()->prepared_query("
         UPDATE users_leech_stats
         SET " . implode(', ', $leechSet) . "
         WHERE UserID = ?

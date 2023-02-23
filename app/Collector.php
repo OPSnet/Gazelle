@@ -10,7 +10,7 @@ There is a central problem to this page, it's impossible to order before
 grouping in SQL, and it's slow to run sub queries, so we had to get creative for
 this one.
 
-The solution I settled on abuses the way $DB->to_array() works. What we've done,
+The solution I settled on abuses the way to_array() works. What we've done,
 is backwards ordering. The results returned by the query have the best one for
 each GroupID last, and while to_array traverses the results, it overwrites the
 keys and leaves us with only the desired result. This does mean however, that

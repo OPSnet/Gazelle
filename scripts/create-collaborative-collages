@@ -9,7 +9,8 @@ $creator    = (new Gazelle\Manager\User)->findById($argv[1]);
 $min        = (int)($argv[2] ?? 1000);
 $wikiId     = (int)($argv[3] ?? 706);
 
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     SELECT t.Name AS name FROM tags t
     WHERE t.TagType = 'genre'
         AND NOT t.Name REGEXP '[12][0-9][0-9][0-9]s'
@@ -17,7 +18,7 @@ $DB->prepared_query("
     ORDER BY t.Uses DESC
     ", $min
 );
-$nameList = $DB->collect(0, false);
+$nameList = $db->collect(0, false);
 
 foreach ($nameList as $name) {
     try {

@@ -134,8 +134,7 @@ class TextTest extends TestCase {
     }
 
     public function testForumThread() {
-        global $DB;
-        $postId = $DB->scalar("
+        $postId = Gazelle\DB::DB()->scalar("
             SELECT min(fp.ID)
             FROM forums_posts fp
             INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
@@ -274,8 +273,7 @@ END_HTML;
     }
 
     public function testTorrent() {
-        global $DB;
-        $id = $DB->scalar("
+        $id = Gazelle\DB::DB()->scalar("
             SELECT min(t.ID)
             FROM torrents t
             INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)

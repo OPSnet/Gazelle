@@ -19,6 +19,7 @@ while (isset($_POST['torrents'])) {
         break;
     }
 
+    $db = Gazelle\DB::DB();
     $tgMan = new Gazelle\Manager\TGroup;
     $GroupIDs = [];
     $Elements = explode("\r\n", $_POST['torrents']);
@@ -31,11 +32,11 @@ while (isset($_POST['torrents'])) {
         } elseif (preg_match('/\/collages\.php\?.*?\bid=(?P<id>\d+)$/', $Element, $match)) {
             $collage = (new Gazelle\Manager\Collage)->findById((int)$match['id']);
             if ($collage) {
-                $DB->prepared_query("
+                $db->prepared_query("
                     SELECT GroupID FROM collages_torrents WHERE CollageID = ?
                     ", $collage->id()
                 );
-                array_push($GroupIDs, ...$DB->collect('GroupID', false));
+                array_push($GroupIDs, ...$db->collect('GroupID', false));
             }
         }
     }
@@ -44,11 +45,11 @@ while (isset($_POST['torrents'])) {
         break;
     }
 
-    $DB->prepared_query("
+    $db->prepared_query("
         SELECT DISTINCT ID FROM torrents WHERE GroupID IN (" . placeholders($GroupIDs) . ")",
         ...$GroupIDs
     );
-    $torrentIds = $DB->collect(0, false);
+    $torrentIds = $db->collect(0, false);
     if (empty($torrentIds)) {
         $message = "There were no torrents in the groups found in the provided links";
         break;

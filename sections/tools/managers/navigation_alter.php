@@ -9,13 +9,14 @@ if (!$Viewer->permitted('admin_manage_navigation')) {
 authorize();
 
 $P = array_map('trim', $_POST);
+$db = Gazelle\DB::DB();
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
         error(0);
     }
 
-    $DB->prepared_query("DELETE FROM nav_items WHERE id = ?", $P['id']);
+    $db->prepared_query("DELETE FROM nav_items WHERE id = ?", $P['id']);
 } else {
     $Val = new Gazelle\Util\Validator;
     $Val->setFields([
@@ -32,7 +33,7 @@ if ($_POST['submit'] == 'Delete') {
     }
 
     if ($_POST['submit'] == 'Create') {
-        $DB->prepared_query("
+        $db->prepared_query("
             INSERT INTO nav_items (tag, title, target, tests, test_user, mandatory, initial)
             VALUES                (?,   ?,     ?,      ?,     ?,         ?,         ?)",
             $P['tag'], $P['title'], $P['target'], $P['tests'],
@@ -44,7 +45,7 @@ if ($_POST['submit'] == 'Delete') {
             error(0);
         }
 
-        $DB->prepared_query("
+        $db->prepared_query("
             UPDATE nav_items
                 SET tag = ?,
                     title = ?,

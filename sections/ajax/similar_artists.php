@@ -7,7 +7,8 @@ if (empty($_GET['id']) || !is_number($_GET['id']) || empty($_GET['limit']) || !i
 $artistId = $_GET["id"];
 $limit = $_GET["limit"];
 
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     SELECT
         s2.ArtistID,
         ag.Name,
@@ -24,7 +25,7 @@ $DB->prepared_query("
 );
 
 $results = [];
-while ([$ArtistID, $Name, $Score] = $DB->next_record(MYSQLI_NUM, false)) {
+while ([$ArtistID, $Name, $Score] = $db->next_record(MYSQLI_NUM, false)) {
     $results[] = [
         'id'    => (int)$ArtistID,
         'name'  => $Name,

@@ -30,6 +30,7 @@ if ($Short !== 'request_update') {
     $Reason .= '[b]Additional comments[/b]: '.$_POST['comment'];
 }
 
+$db = Gazelle\DB::DB();
 switch ($Short) {
     case 'request':
     case 'request_update':
@@ -45,7 +46,7 @@ switch ($Short) {
         $Link = "forums.php?action=viewthread&threadid=$ID";
         break;
     case 'post':
-        [$PostID, $TopicID, $PostNum] = $DB->row("
+        [$PostID, $TopicID, $PostNum] = $db->row("
             SELECT p.ID,
                 p.TopicID,
                 (
@@ -65,13 +66,13 @@ switch ($Short) {
         break;
 }
 
-$DB->prepared_query('
+$db->prepared_query('
     INSERT INTO reports
            (UserID, ThingID, Type, Reason)
     VALUES (?,      ?,       ?,    ?)
     ', $Viewer->id(), $ID, $Short, $Reason
 );
-$ReportID = $DB->inserted_id();
+$ReportID = $db->inserted_id();
 
 $Channels = [];
 

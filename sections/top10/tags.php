@@ -41,7 +41,7 @@ echo '</div>';
 View::show_footer();
 exit;
 
-// generate a table based on data from most recent query to $DB
+// generate a table based on data from most recent query
 function generate_tag_table($caption, $tag, $details, $limit, $showVotes = true, $requestTable = false) {
     if ($requestTable) {
         $URLString = 'requests.php?tags=';

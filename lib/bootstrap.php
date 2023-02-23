@@ -12,10 +12,10 @@ if (!defined('SITE_NAME')) {
 
 $Cache = new Gazelle\Cache;
 $DB    = new Gazelle\DB\Mysql(SQLDB, SQLLOGIN, SQLPASS, SQLHOST, SQLPORT, SQLSOCK);
+$Twig  = Gazelle\Util\Twig::factory();
+Gazelle\Base::initialize($Cache, $DB, $Twig);
+
 $Debug = new Gazelle\Debug($Cache, $DB);
 $Debug->setStartTime($now)
     ->handle_errors()
     ->set_flag('init');
-
-$Twig = Gazelle\Util\Twig::factory();
-Gazelle\Base::initialize($Cache, $DB, $Twig);

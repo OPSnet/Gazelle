@@ -155,7 +155,7 @@ if (!empty($_REQUEST['action'])) {
         require_once('details.php');
     } elseif (isset($_GET['torrentid'])) {
         $torrentId = (int)$_GET['torrentid'];
-        $GroupID = $DB->scalar("
+        $GroupID = Gazelle\DB::DB()->scalar("
             SELECT GroupID FROM torrents WHERE ID = ?
             UNION
             SELECT GroupID FROM deleted_torrents WHERE ID = ?
@@ -169,11 +169,12 @@ if (!empty($_REQUEST['action'])) {
     } elseif (!empty($_GET['type'])) {
         require_once('user.php');
     } elseif (!empty($_GET['groupname'])) {
-        $DB->prepared_query("
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
             SELECT ID FROM torrents_group WHERE Name = ? LIMIT 2
             ", trim($_GET['groupname'])
         );
-        $list = $DB->collect(0);
+        $list = $db->collect(0);
         if (count($list) == 1) {
             header("Location: torrents.php?id=$list[0]");
         } else {

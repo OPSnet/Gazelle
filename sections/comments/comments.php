@@ -185,15 +185,17 @@ $joinArgs[] = $Action;
 $Join = implode("\n", $Join);
 $cond = count($condition) ? 'WHERE ' . implode(" AND ", $condition) : '';
 
+$db = Gazelle\DB::DB();
+
 // Posts per page limit stuff
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal(
-    $DB->scalar("
+    $db->scalar("
         SELECT count(DISTINCT(C.ID)) FROM $table $Join $cond", ...array_merge($joinArgs, $condArgs)
     )
 );
 
-$Comments = $DB->prepared_query("
+$Comments = $db->prepared_query("
     SELECT C.AuthorID,
         C.Page,
         C.PageID,
@@ -216,12 +218,12 @@ $requestList = [];
 $tgroupList = [];
 if ($Action == 'requests') {
     $requestMan = new Gazelle\Manager\Request;
-    foreach (array_flip(array_flip($DB->collect('PageID'))) as $id) {
+    foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
         $requestList[$id] = $requestMan->findById($id);
     }
 } elseif ($Action == 'torrents') {
     $tgMan = new Gazelle\Manager\TGroup;
-    foreach (array_flip(array_flip($DB->collect('PageID'))) as $id) {
+    foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
         $tgroupList[$id] = $tgMan->findById($id);
     }
 }
@@ -256,8 +258,8 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
 } else {
     echo $paginator->linkbox();
     $commentMan = new Gazelle\Manager\Comment;
-    $DB->set_query_id($Comments);
-    while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
+    $db->set_query_id($Comments);
+    while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $db->next_record()) {
         $author = new Gazelle\User($AuthorID);
         echo $Twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,
@@ -277,7 +279,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
             'url'         => $commentMan->findById($PostID)->url(),
             'viewer'      => $Viewer,
         ]);
-        $DB->set_query_id($Comments);
+        $db->set_query_id($Comments);
     }
     echo $paginator->linkbox();
 }

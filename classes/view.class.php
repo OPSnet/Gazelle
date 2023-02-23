@@ -230,10 +230,10 @@ class View {
             }
         }
 
-        global $Cache, $DB, $Debug, $SessionID;
+        global $Cache, $Debug, $SessionID;
         return $Twig->render('index/private-footer.twig', [
             'cache'        => $Cache,
-            'db_time'      => $DB->Time,
+            'db_time'      => Gazelle\DB::DB()->Time,
             'debug'        => $Debug,
             'disclaimer'   => isset($Options['disclaimer']),
             'last_active'  => (new Gazelle\User\Session($Viewer))->lastActive($SessionID),

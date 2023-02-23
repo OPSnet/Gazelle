@@ -27,8 +27,9 @@ $error  = false;
 $result = [];
 if ($execute) {
     try {
-        $DB->prepared_query($query);
-        $result = $DB->to_array(false, MYSQLI_ASSOC, false);
+        $db = Gazelle\DB::DB();
+        $db->prepared_query($query);
+        $result = $db->to_array(false, MYSQLI_ASSOC, false);
     } catch (\Exception|\Error $e) {
         $error = $e->getMessage();
     }

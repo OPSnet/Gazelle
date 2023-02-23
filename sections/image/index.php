@@ -76,11 +76,12 @@ if ($imageData !== false) {
 
         $sizeKb = strlen($imageData) / 1024;
         if ($sizeKb > $maxSizeKb || $image->height() > $maxHeight) {
+            $db = Gazelle\DB::DB();
             switch($usage) {
                 case 'avatar':
                     $imageType = 'avatar';
                     $subject   = 'Your avatar has been automatically reset';
-                    $DB->prepared_query("
+                    $db->prepared_query("
                         UPDATE users_info SET Avatar = '' WHERE UserID = ?  ", $userId
                     );
                     $Cache->delete_value("u_$userId");
@@ -88,7 +89,7 @@ if ($imageData !== false) {
                 case 'avatar2':
                     $imageType = 'second avatar';
                     $subject   = 'Your second avatar has been automatically reset';
-                    $DB->prepared_query("
+                    $db->prepared_query("
                         UPDATE donor_rewards SET SecondAvatar = '' WHERE UserID = ?  ", $userId
                     );
                     $Cache->delete_value("donor_info_$userId");
@@ -96,7 +97,7 @@ if ($imageData !== false) {
                 case 'donoricon':
                     $imageType = 'donor icon';
                     $subject   = 'Your donor icon has been automatically reset';
-                    $DB->prepared_query("
+                    $db->prepared_query("
                         UPDATE donor_rewards SET CustomIcon = '' WHERE UserID = ?  ", $userId
                     );
                     $Cache->delete_value("donor_info_$userId");

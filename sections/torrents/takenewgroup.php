@@ -41,17 +41,18 @@ if (empty($_POST['confirm'])) {
     exit;
 }
 
-$DB->prepared_query("
+$db = Gazelle\DB::DB();
+$db->prepared_query("
     INSERT INTO torrents_group
            (Name, Year, CategoryID, WikiBody, WikiImage)
     VALUES (?,    ?,    1,          '',       '')
     ", $Title, $Year
 );
-$new = $tgMan->findById($DB->inserted_id());
+$new = $tgMan->findById($db->inserted_id());
 
 $new->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
 
-$DB->prepared_query('
+$db->prepared_query('
     UPDATE torrents SET
         GroupID = ?
     WHERE ID = ?
@@ -62,7 +63,7 @@ $log = new Gazelle\Log;
 $oldId = $old->id();
 
 // Update or remove previous group, depending on whether there is anything left
-if ($DB->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $oldId)) {
+if ($db->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $oldId)) {
     $old->flush();
     $old->refresh();
 } else {

@@ -8,6 +8,7 @@ if (
     error(403);
 }
 
+$db = Gazelle\DB::DB();
 if (isset($_GET['tokens'])) {
     $Tokens = explode(',', $_GET['tokens']);
     if (empty($Tokens)) {
@@ -26,7 +27,7 @@ if (isset($_GET['tokens'])) {
         $ck[] = "users_tokens_$UserID";
     }
     if ($cond) {
-        $DB->prepared_query("
+        $db->prepared_query("
             UPDATE users_freeleeches SET
                 Expired = TRUE
             WHERE "
@@ -40,7 +41,7 @@ if (isset($_GET['tokens'])) {
     if (!$TorrentID || !$UserID) {
         error(403);
     }
-    $DB->prepared_query("
+    $db->prepared_query("
         UPDATE users_freeleeches SET
             Expired = TRUE
         WHERE UserID = ? AND TorrentID = ?
