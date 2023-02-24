@@ -4,6 +4,7 @@ namespace Gazelle;
 
 abstract class TorrentAbstract extends BaseObject {
     public const CACHE_KEY = 't_%d';
+    final const CACHE_LOCK = 'torrent_lock_%d';
 
     protected TGroup $tgroup;
     protected User   $viewer;
@@ -568,6 +569,18 @@ abstract class TorrentAbstract extends BaseObject {
 
     public function hasMissingLineage(): bool {
         return $this->info()['MissingLineage'];
+    }
+
+    public function hasUploadLock(): bool {
+        return (bool)self::$cache->get_value("torrent_{$this->id}_lock");
+    }
+
+    public function lockUpload(): void {
+        self::$cache->cache_value(sprintf(self::CACHE_LOCK, $this->id), true, 120);
+    }
+
+    public function unlockUpload(): void {
+        self::$cache->delete_value(sprintf(self::CACHE_LOCK, $this->id));
     }
 
     /**** LABEL METHODS (e.g. [WEB / FLAC / Lossless]) ****/

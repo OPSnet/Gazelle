@@ -27,7 +27,7 @@ if (is_null($torrent)) {
     json_die("failure", "torrent already deleted?");
 }
 $torrentId = $torrent->id();
-if (isset($_POST['delete']) && $torrent->isUploadLocked()) {
+if (isset($_POST['delete']) && $torrent->hasUploadLock()) {
     json_die("You requested to delete the torrent $torrentId, but this is currently not possible because the upload process is still running. Please try again later.");
 }
 

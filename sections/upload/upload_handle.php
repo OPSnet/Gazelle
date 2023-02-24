@@ -600,12 +600,10 @@ $DB->prepared_query('
     ', $TorrentID
 );
 $torrent = $torMan->findById($TorrentID);
+$torrent->lockUpload();
 
 $bonus = new Gazelle\User\Bonus($Viewer);
 $bonusTotal = $bonus->torrentValue($torrent);
-
-// Prevent deletion of this torrent until the rest of the upload process is done
-$Cache->cache_value("torrent_{$TorrentID}_lock", true, 120);
 
 //******************************************************************************//
 //--------------- Upload Extra torrents ----------------------------------------//
@@ -636,12 +634,12 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
         VALUES (?)
         ', $ExtraTorrentID
     );
-    $torrent = new Gazelle\Torrent($ExtraTorrentID);
+    $torrentExtra = new Gazelle\Torrent($ExtraTorrentID);
 
     $torMan->flushFoldernameCache($ExtraTorrent['FilePath']);
     $folderCheck[] = $ExtraTorrent['FilePath'];
     $trackerUpdate[$ExtraTorrentID] = rawurlencode($ExtraTorrent['InfoHash']);
-    $bonusTotal += $bonus->torrentValue($torrent);
+    $bonusTotal += $bonus->torrentValue($torrentExtra);
 
     $extraFile[$ExtraTorrentID] = [
         'payload' => $ExtraTorrent['TorEnc'],
@@ -715,10 +713,9 @@ $Cache->increment_value('stats_torrent_count', $totalNew);
 if ($Properties['Image'] != '') {
     $Cache->delete_value('user_recent_up_' . $Viewer->id());
 }
-$Cache->delete_multi(["torrents_details_$GroupID", "torrent_{$TorrentID}_lock"]);
-if (!$IsNewGroup) {
-    $tgroup->flush();
-}
+
+$torrent->flush();
+$torrent->unlockUpload();
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//

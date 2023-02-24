@@ -14,7 +14,7 @@ if (is_null($torrent)) {
 $torrentId  = $torrent->id();
 $uploaderId = $torrent->uploaderId();
 
-if ($torrent->isUploadLocked()) {
+if ($torrent->hasUploadLock()) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 

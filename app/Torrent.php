@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 class Torrent extends TorrentAbstract {
-    final const CACHE_LOCK               = 'torrent_lock_%d';
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
@@ -97,18 +96,6 @@ class Torrent extends TorrentAbstract {
             }
         }
         return isset($this->tokenCache[$this->id]);
-    }
-
-    public function isUploadLocked(): bool {
-        return (bool)self::$cache->get_value(sprintf(self::CACHE_LOCK, $this->id));
-    }
-
-    public function lockUpload(): void {
-        self::$cache->cache_value(sprintf(self::CACHE_LOCK, $this->id), true, 120);
-    }
-
-    public function unlockUpload(): void {
-        self::$cache->delete_value(sprintf(self::CACHE_LOCK, $this->id));
     }
 
     /**
