@@ -26,16 +26,22 @@ class CacheVector extends \Gazelle\Base {
         $bitvec = self::$cache->get_value($this->key);
         if ($bitvec === false) {
             $this->bitvec = str_repeat(chr(0), $this->length);
-            $this->empty = true;
+            $this->empty  = true;
         } else {
             $this->bitvec = $bitvec;
-            $this->empty = false;
+            $this->empty  = false;
         }
     }
 
     public function flush(): CacheVector {
         self::$cache->delete_value($this->key);
-        $this->empty = true;
+        $this->bitvec = str_repeat(chr(0), $this->length);
+        $this->empty  = true;
+        return $this;
+    }
+
+    public function persist(): CacheVector {
+        self::$cache->cache_value($this->key, $this->bitvec, $this->expiry);
         return $this;
     }
 
@@ -60,7 +66,7 @@ class CacheVector extends \Gazelle\Base {
         }
         if ($total) {
             $this->empty = false;
-            self::$cache->cache_value($this->key, $this->bitvec, $this->expiry);
+            $this->persist();
         }
         return $total;
     }
@@ -72,11 +78,11 @@ class CacheVector extends \Gazelle\Base {
      */
     public function set(int $value): bool {
         $offset = (int)floor($value / 8);
-        if ($offset < 1 || $offset > $this->length - 1)  {
+        if ($offset < 0 || $offset > $this->length - 1)  {
             return false;
         }
         $source = ord(substr($this->bitvec, $offset, 1));
-        $mask   = 1 << (($value-1) % 8);
+        $mask   = 1 << ($value % 8);
         $this->bitvec = substr_replace($this->bitvec, chr($source | $mask), $offset, 1);
         return true;
     }
@@ -88,10 +94,10 @@ class CacheVector extends \Gazelle\Base {
      */
     public function get(int $value): bool {
         $offset = (int)floor($value / 8);
-        if ($offset < 1 || $offset > $this->length - 1)  {
+        if ($offset < 0 || $offset > $this->length - 1)  {
             return false;
         }
-        $mask = 1 << (($value-1) % 8);
+        $mask   = 1 << ($value % 8);
         return (bool)(ord(substr($this->bitvec, $offset, 1)) & $mask);
     }
 }
