@@ -28,7 +28,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     public function fullLink(): string {
-        $link = $this->groupLink();
+        $link = $this->link();
         $edition = $this->edition();
         if ($edition) {
             $link .= " [$edition]";

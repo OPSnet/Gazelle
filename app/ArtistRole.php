@@ -140,7 +140,7 @@ abstract class ArtistRole extends \Gazelle\Base {
 
     protected function various(string $role, array $artistList, int $mode): string {
         return match ($mode) {
-            self::RENDER_HTML => '<span class="tooltip" title="' . implode(' ⁝ ', array_map(fn ($a) => $a['name'], $artistList)) . "\">Various $role</span>",
+            self::RENDER_HTML => '<span class="tooltip" style="float: none"  title="' . implode(' ⁝ ', array_map(fn ($a) => $a['name'], $artistList)) . "\">Various $role</span>",
             default           => "Various $role",
         };
     }
