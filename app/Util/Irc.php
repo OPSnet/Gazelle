@@ -2,9 +2,15 @@
 
 namespace Gazelle\Util;
 
-class Irc
-{
-    public static function sendMessage(string $target, string $message) {
+class Irc {
+    public static function render(mixed ...$list): string {
+        return implode('', array_map(
+            fn($s) => is_a($s, \Gazelle\Util\IrcText::class) ? $s->value : $s,
+            $list)
+        );
+    }
+
+    public static function sendMessage(string $target, string $message): bool {
         if (DISABLE_IRC) {
             return true;
         }
@@ -13,7 +19,6 @@ class Irc
             ->setMethod(CurlMethod::POST)
             ->setOption(CURLOPT_POSTFIELDS, $message)
             ->setOption(CURLOPT_HTTPHEADER, ['Content-Type: plain/text']);
-        $url = IRC_HTTP_SOCKET_ADDRESS . 'irc_msg/' . urlencode($target);
-        return $curl->fetch($url);
+        return $curl->fetch(IRC_HTTP_SOCKET_ADDRESS . 'irc_msg/' . urlencode($target));
     }
 }
