@@ -220,9 +220,9 @@ class Torrent extends TorrentAbstract {
         if (!$count) {
             self::$db->prepared_query("
                 UPDATE torrents SET
-                    HasLogDB = '0',
-                    LogChecksum = '1',
-                    LogScore = 0
+                    HasLogDB    = '0',
+                    LogChecksum = '0',
+                    LogScore    = 0
                 WHERE ID = ?
                 ", $this->id
             );
@@ -231,21 +231,23 @@ class Torrent extends TorrentAbstract {
                 UPDATE torrents AS t
                 LEFT JOIN (
                     SELECT TorrentID,
-                        min(CASE WHEN Adjusted = '1' OR AdjustedScore != Score THEN AdjustedScore ELSE Score END) AS Score,
-                        min(CASE WHEN Adjusted = '1' OR AdjustedChecksum != Checksum THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+                        min(CASE WHEN Adjusted = '1' AND AdjustedScore    != Score    THEN AdjustedScore    ELSE Score    END) AS Score,
+                        min(CASE WHEN Adjusted = '1' AND AdjustedChecksum != Checksum THEN AdjustedChecksum ELSE Checksum END) AS Checksum
                     FROM torrents_logs
                     WHERE TorrentID = ?
                     GROUP BY TorrentID
                 ) AS tl ON (t.ID = tl.TorrentID)
                 SET
+                    t.HasLogDB    = '1',
                     t.LogScore    = tl.Score,
                     t.LogChecksum = tl.Checksum
                 WHERE t.ID = ?
                 ", $this->id, $this->id
             );
         }
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function rescoreLog(int $logId, \Gazelle\Logfile $logfile, string $version): int {
@@ -263,21 +265,6 @@ class Torrent extends TorrentAbstract {
             return $this->modifyLogscore();
         }
         return 0;
-    }
-
-    public function updateLogScore(LogfileSummary $summary): int {
-        self::$db->prepared_query("
-            UPDATE torrents SET
-                HasLogDB = '1',
-                LogScore = ?,
-                LogChecksum = ?
-            WHERE ID = ?
-            ", $summary->overallScore(), $summary->checksumStatus(),
-                $this->id
-        );
-        $this->flush();
-        self::$cache->delete_value(sprintf(TGroup::CACHE_TLIST_KEY, $this->groupId()));
-        return self::$db->affected_rows();
     }
 
     /**

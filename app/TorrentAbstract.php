@@ -10,7 +10,10 @@ abstract class TorrentAbstract extends BaseObject {
     protected User   $viewer;
 
     public function flush(): TorrentAbstract {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_multi([
+            sprintf(self::CACHE_KEY, $this->id),
+            "torrent_download_{$this->id}",
+        ]);
         $this->group()->flush();
         return $this;
     }

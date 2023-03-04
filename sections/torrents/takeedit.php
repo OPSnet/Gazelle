@@ -47,16 +47,16 @@ if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc']);
 }
 if ($Properties['Remastered']) {
-    $Properties['UnknownRelease'] = isset($_POST['unknown']);
-    $Properties['RemasterYear'] = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
-    $Properties['RemasterTitle'] = trim($_POST['remaster_title'] ?? '');
-    $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label'] ?? '');
+    $Properties['UnknownRelease']          = isset($_POST['unknown']);
+    $Properties['RemasterYear']            = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
+    $Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
+    $Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
     $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
 } else {
-    $Properties['UnknownRelease'] = false;
-    $Properties['RemasterYear'] = null;
-    $Properties['RemasterTitle'] = '';
-    $Properties['RemasterRecordLabel'] = '';
+    $Properties['UnknownRelease']          = false;
+    $Properties['RemasterYear']            = null;
+    $Properties['RemasterTitle']           = '';
+    $Properties['RemasterRecordLabel']     = '';
     $Properties['RemasterCatalogueNumber'] = '';
 }
 
@@ -199,42 +199,20 @@ foreach ($current as $key => $value) {
     }
 }
 
+$logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
+
+//******************************************************************************//
+//--------------- Start database stuff -----------------------------------------//
+
 $db->begin_transaction(); // It's all or nothing
 
-// Some browsers will report an empty file when you submit, prune those out
-if (isset($_FILES['logfiles'])) {
-    $_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], fn($name) => !empty($name));
-
-    $logfileSummary = new Gazelle\LogfileSummary;
-    $logfiles = [];
-    if (count($_FILES['logfiles']['name']) > 0) {
-        ini_set('upload_max_filesize', 1_000_000);
-        $ripFiler = new Gazelle\File\RipLog;
-        $htmlFiler = new Gazelle\File\RipLogHTML;
-        foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-            if (!$_FILES['logfiles']['size'][$Pos]) {
-                continue;
-            }
-            $logfile = new Gazelle\Logfile(
-                $_FILES['logfiles']['tmp_name'][$Pos],
-                $_FILES['logfiles']['name'][$Pos]
-            );
-            $logfileSummary->add($logfile);
-
-            $db->prepared_query('
-                INSERT INTO torrents_logs
-                       (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
-                VALUES (?,         ?,      ?,         ?,        ?,      ?,              ?,         ?,             ?,                 ?)
-                ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
-                    $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-                    Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
-            );
-            $LogID = $db->inserted_id();
-            $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
-            $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
-        }
-        $torrent->updateLogScore($logfileSummary);
+if ($logfileSummary->total()) {
+    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
+    $checkerVersion = Logchecker::getLogcheckerVersion();
+    foreach($logfileSummary->all() as $logfile) {
+        $torrentLogManager->create($torrent, $logfile, $checkerVersion);
     }
+    $torrent->modifyLogscore();
 }
 
 // Update info for the torrent
@@ -303,5 +281,4 @@ $changeLog = implode(', ', $change);
         . $Viewer->username() . " ($changeLog)");
 
 $torrent->flush();
-$Cache->delete_value("torrent_download_$TorrentID");
 header("Location: " . $torrent->location());

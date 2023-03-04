@@ -13,11 +13,13 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
+require('cypress-terminal-report/src/installLogsCollector')({
+    xhr: {
+        printHeaderData: true,
+        printRequestData: true
+    }
+});
 import './commands'
-
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
 
 Cypress.on('fail', (err, runnable) => {
     /**

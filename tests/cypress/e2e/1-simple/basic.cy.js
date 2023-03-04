@@ -31,7 +31,6 @@ describe('page loads as admin', () => {
         "/top10.php",
         "/torrents.php",
         "/torrents.php?action=advanced&artistname=doesnotexist",
-        "/upload.php",
         "/user.php",
         "/user.php?id=1",
         "/user.php?action=edit&id=1",
@@ -48,7 +47,7 @@ describe('page loads as admin', () => {
         })
         it(`should have a footer: ${url}`, () => {
             cy.visit(url);
-            cy.contains(`Site and design © ${date.getFullYear()} Gazelle`);
+            cy.ensureFooter();
         })
     })
 })

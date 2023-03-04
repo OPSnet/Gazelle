@@ -24,6 +24,9 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+const date = new Date();
+const footer = `Site and design © ${date.getFullYear()} Gazelle`;
+
 Cypress.Commands.add('login', (username, password) => {
     // https://www.cypress.io/blog/2021/08/04/authenticate-faster-in-tests-cy-session-command/
     cy.session([username, password], () => {
@@ -41,4 +44,16 @@ Cypress.Commands.add('loginAdmin', () => {
 
 Cypress.Commands.add('loginUser', () => {
     cy.login('user', 'password');
+})
+
+Cypress.Commands.add('ensureFooter', () => {
+    cy.contains(footer);
+})
+
+Cypress.Commands.add('logCli', (msg) => {
+    // somehow cypress-terminal-report doesn't pick up cy.log()
+    Cypress.log({
+        name: "logCli",
+        message: msg
+    });
 })

@@ -22,13 +22,13 @@ class Logfile {
         $checker = new Logchecker();
         $checker->newFile($this->filepath);
         $checker->parse();
-        $this->score = max(0, $checker->getScore());
-        $this->details = $checker->getDetails();
+        $this->score         = max(0, $checker->getScore());
+        $this->details       = $checker->getDetails();
         $this->checksumState = $checker->getChecksumState();
-        $this->text = $checker->getLog();
-        $this->ripper = $checker->getRipper() ?? '';
+        $this->text          = $checker->getLog();
+        $this->ripper        = $checker->getRipper() ?? '';
         $this->ripperVersion = $checker->getRipperVersion() ?? '';
-        $this->language = $checker->getLanguage();
+        $this->language      = $checker->getLanguage();
     }
 
     public function checksum()        { return $this->checksumState === Checksum::CHECKSUM_OK; }

@@ -1,5 +1,6 @@
 <?php
 
+authorize();
 if (!$Viewer->permitted('users_mod')) {
     error(403);
 }

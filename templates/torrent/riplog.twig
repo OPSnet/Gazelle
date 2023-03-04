@@ -16,7 +16,7 @@
     {% if viewer.permitted('users_mod') %}
         <div style="padding: 10px; float: right"><a class="brackets" href="torrents.php?action=editlog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Edit Log</a>
         <a class="brackets" onclick="return confirm('Are you sure you want to deleted this log? There is NO undo!');"
-            href="torrents.php?action=deletelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Delete Log</a>
+            href="torrents.php?action=deletelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}&amp;auth={{ viewer.auth }}">Delete Log</a>
 
         </div>
     {% endif %}
@@ -71,6 +71,6 @@
 {% else %}
     No logs found!
     {% if viewer.permitted('torrents_delete') %}
-&nbsp;<a class="brackets" href="torrents.php?action=removelogs&amp;torrentid={{ id }}">Repair DB</a>
+&nbsp;<a class="brackets" href="torrents.php?action=removelogs&amp;torrentid={{ id }}&amp;auth={{ viewer.auth }}">Repair DB</a>
     {% endif %}
 {% endfor %}

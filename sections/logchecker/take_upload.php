@@ -15,37 +15,26 @@ if ($torrent->uploaderId() != $Viewer->id() && !$Viewer->permitted('admin_add_lo
     error('Not your upload.');
 }
 
-// Some browsers will report an empty file when you submit, prune those out
-$_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], fn($Name) => !empty($Name));
-if (count($_FILES['logfiles']['name']) == 0) {
-    error("No logfiles uploaded.\n");
-}
 $action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
+$logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
 
-$ripFiler = new Gazelle\File\RipLog;
-$ripFiler->remove([$torrent->id(), null]);
+if (!$logfileSummary->total()) {
+    error("No logfiles uploaded.");
+} else {
+    $ripFiler = new Gazelle\File\RipLog;
+    $htmlFiler = new Gazelle\File\RipLogHTML;
 
-$htmlFiler = new Gazelle\File\RipLogHTML;
-$htmlFiler->remove([$torrent->id(), null]);
+    $torrent->removeLogDb();
+    $ripFiler->remove([$torrent->id(), null]);
+    $htmlFiler->remove([$torrent->id(), null]);
+    $torrentLogManager = new Gazelle\Manager\TorrentLog($ripFiler, $htmlFiler);
 
-$torrent->removeLogDb();
-
-$logfileSummary = new Gazelle\LogfileSummary;
-foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-    if (!$_FILES['logfiles']['size'][$Pos]) {
-        break;
+    $checkerVersion = Logchecker::getLogcheckerVersion();
+    foreach($logfileSummary->all() as $logfile) {
+        $torrentLogManager->create($torrent, $logfile, $checkerVersion);
     }
-    $logfile = new Gazelle\Logfile(
-        $_FILES['logfiles']['tmp_name'][$Pos],
-        $_FILES['logfiles']['name'][$Pos]
-    );
-    $logfileSummary->add($logfile);
-    $logId = $torrent->addLogDb($logfile, Logchecker::getLogcheckerVersion());
-
-    $ripFiler->put($logfile->filepath(), [$torrent->id(), $logId]);
-    $htmlFiler->put($logfile->text(), [$torrent->id(), $logId]);
+    $torrent->modifyLogscore();
 }
-$torrent->updateLogScore($logfileSummary);
 
 echo $Twig->render('logchecker/result.twig', [
     'summary' => $logfileSummary->all(),

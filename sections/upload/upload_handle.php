@@ -24,18 +24,18 @@ $Properties['Title'] = isset($_POST['title']) ? trim($_POST['title']) : null;
 // Remastered is an Enum in the DB
 $Properties['Remastered'] = !empty($_POST['remaster']) ? '1' : '0';
 if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
-    $Properties['UnknownRelease'] = !empty($_POST['unknown']) ? 1 : 0;
-    $Properties['RemasterYear'] = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
-    $_POST['remaster_year'] = $Properties['RemasterYear'];
-    $Properties['RemasterTitle'] = trim($_POST['remaster_title'] ?? '');
-    $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label'] ?? '');
+    $Properties['UnknownRelease']          = !empty($_POST['unknown']) ? 1 : 0;
+    $Properties['RemasterYear']            = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
+    $_POST['remaster_year']                = $Properties['RemasterYear'];
+    $Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
+    $Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
     $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
 }
 if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
-    $Properties['UnknownRelease'] = 1;
-    $Properties['RemasterYear'] = null;
-    $Properties['RemasterTitle'] = '';
-    $Properties['RemasterRecordLabel'] = '';
+    $Properties['UnknownRelease']          = 1;
+    $Properties['RemasterYear']            = null;
+    $Properties['RemasterTitle']           = '';
+    $Properties['RemasterRecordLabel']     = '';
     $Properties['RemasterCatalogueNumber'] = '';
 }
 $Properties['Year'] = isset($_POST['year']) ? (int)$_POST['year'] : null;
@@ -472,24 +472,6 @@ if ($Err) {
     }
 }
 
-//******************************************************************************//
-//--------------- Start database stuff -----------------------------------------//
-
-$logfileSummary = new Gazelle\LogfileSummary;
-if ($HasLog == '1' && isset($_FILES['logfiles'])) {
-    foreach (array_keys($_FILES['logfiles']['error']) as $n) {
-        if ($_FILES['logfiles']['error'][$n] == UPLOAD_ERR_OK) {
-            $logfileSummary->add(
-                new Gazelle\Logfile(
-                    $_FILES['logfiles']['tmp_name'][$n],
-                    $_FILES['logfiles']['name'][$n]
-                )
-            );
-        }
-    }
-}
-$LogInDB = count($logfileSummary->all()) ? '1' : '0';
-
 $tgroup = null;
 $NoRevision = false;
 if ($isMusicUpload) {
@@ -527,7 +509,11 @@ $IsNewGroup = is_null($tgroup);
 //Needs to be here as it isn't set for add format until now
 $LogName .= $Properties['Title'];
 
-//----- Start inserts
+$logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
+$LogInDB = $logfileSummary->total() ? '1' : '0';
+
+//******************************************************************************//
+//--------------- Start database stuff -----------------------------------------//
 
 $Debug->set_flag('upload: database begin transaction');
 $db = Gazelle\DB::DB();
@@ -613,58 +599,45 @@ $extraFile = [];
 $trackerUpdate = [];
 
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-    $db->prepared_query("
-        INSERT INTO torrents
-            (GroupID, UserID, Media, Format, Encoding,
-            Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-            info_hash, FileCount, FileList, FilePath, Size, Description,
-            Time, LogScore, HasLog, HasCue, FreeTorrent, FreeLeechType)
-        VALUES
-            (?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?,
-            now(), 0, '0', '0', '0', '0')
-        ", $GroupID, $Viewer->id(), $Properties['Media'], $ExtraTorrent['Format'], $ExtraTorrent['Encoding'],
-        $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
-        $ExtraTorrent['InfoHash'], $ExtraTorrent['NumFiles'], $ExtraTorrent['FileString'],
-        $ExtraTorrent['FilePath'], $ExtraTorrent['TotalSize'], $ExtraTorrent['TorrentDescription']
+    $torrentExtra = $torMan->create(
+        tgroupId:                $GroupID,
+        userId:                  $Viewer->id(),
+        description:             $ExtraTorrent['TorrentDescription'],
+        media:                   $Properties['Media'],
+        format:                  $ExtraTorrent['Format'],
+        encoding:                $ExtraTorrent['Encoding'],
+        infohash:                $ExtraTorrent['InfoHash'],
+        filePath:                $ExtraTorrent['FilePath'],
+        fileList:                $ExtraTorrent['FileString'],
+        size:                    $ExtraTorrent['TotalSize'],
+        isScene:                 $Properties['Scene'],
+        isRemaster:              $Properties['Remastered'],
+        remasterYear:            $Properties['RemasterYear'],
+        remasterTitle:           $Properties['RemasterTitle'],
+        remasterRecordLabel:     $Properties['RemasterRecordLabel'],
+        remasterCatalogueNumber: $Properties['RemasterCatalogueNumber'],
     );
-    $ExtraTorrentID = $db->inserted_id();
-    $db->prepared_query('
-        INSERT INTO torrents_leech_stats (TorrentID)
-        VALUES (?)
-        ', $ExtraTorrentID
-    );
-    $torrentExtra = new Gazelle\Torrent($ExtraTorrentID);
 
-    $torMan->flushFoldernameCache($ExtraTorrent['FilePath']);
-    $folderCheck[] = $ExtraTorrent['FilePath'];
-    $trackerUpdate[$ExtraTorrentID] = rawurlencode($ExtraTorrent['InfoHash']);
+    $torMan->flushFoldernameCache($torrentExtra->path());
+    $folderCheck[] = $torrentExtra->path();
+    $trackerUpdate[$torrentExtra->id()] = rawurlencode($torrentExtra->infohash());
     $bonusTotal += $bonus->torrentValue($torrentExtra);
 
-    $extraFile[$ExtraTorrentID] = [
+    $extraFile[$torrentExtra->id()] = [
         'payload' => $ExtraTorrent['TorEnc'],
-        'size' => number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2)
+        'size'    => number_format($torrentExtra->size() / (1024 * 1024), 2)
     ];
 }
 
 //******************************************************************************//
 //--------------- Write Files To Disk ------------------------------------------//
 
-$ripFiler = new Gazelle\File\RipLog;
-$htmlFiler = new Gazelle\File\RipLogHTML;
-foreach($logfileSummary->all() as $logfile) {
-    $db->prepared_query('
-        INSERT INTO torrents_logs
-               (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
-        VALUES (?,         ?,      ?,         ?,        ?,      ?,             ?,          ?,             ?,                 ?)
-        ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(),
-            $logfile->ripper(), $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-            Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
-    );
-    $LogID = $db->inserted_id();
-    $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
-    $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
+if ($logfileSummary->total()) {
+    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
+    $checkerVersion = Logchecker::getLogcheckerVersion();
+    foreach($logfileSummary->all() as $logfile) {
+        $torrentLogManager->create($torrent, $logfile, $checkerVersion);
+    }
 }
 
 $log = new Gazelle\Log;
@@ -675,7 +648,7 @@ $log->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($T
 foreach ($extraFile as $id => $info) {
     $torrentFiler->put($info['payload'], $id);
     $log->torrent($GroupID, $id, $Viewer->id(), "uploaded ({$info['size']} MiB)")
-        ->general("Torrent $ExtraTorrentID ($LogName) ({$info['size']}  MiB) was uploaded by " . $Viewer->username());
+        ->general("Torrent $id ($LogName) ({$info['size']}  MiB) was uploaded by " . $Viewer->username());
 }
 
 $db->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
