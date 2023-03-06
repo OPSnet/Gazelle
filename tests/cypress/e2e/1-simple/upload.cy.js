@@ -93,7 +93,6 @@ describe('uploading torrent', () => {
         cy.get(`#torrent_${torrent_id}`).contains('View log').click();
         cy.get(`a[href*="view.php?type=riplog&id=${torrent_id}."]`).first()
             .invoke('attr', 'href').then((log_url) => {
-
         let log_id = log_url.match(/&id=[0-9]+\.([0-9]+)/)[1];
 
         // delete existing log
@@ -101,20 +100,61 @@ describe('uploading torrent', () => {
         cy.visit('/');
         cy.window()
             .then((window) => {
-                cy.window().should('have.property', 'authkey')
-                cy.visit('/torrents.php', {qs: {
+                cy.window().should('have.property', 'authkey');
+                cy.visit('/torrents.php', {
+                    qs: {
+                        action: 'deletelog',
+                        torrentid: torrent_id,
+                        logid: log_id,
+                        auth: window.authkey
+                    }
+                });
+            });
+
+        // add log via torrent edit page
+        cy.loginUser();
+        // verify log was correctly removed
+        cy.visit(torrent_url);
+        cy.ensureFooter();
+        cy.contains('Log (100%)').should('not.exist');
+        cy.visit(`/torrents.php?action=edit&id=${torrent_id}`);
+        cy.ensureFooter();
+        cy.get('#logfile_1').selectFile('tests/cypress/files/valid_log_eac.log');
+        cy.get('input[value="Edit torrent"]').click();
+
+        // verify
+        cy.visit(torrent_url);
+        cy.ensureFooter();
+        cy.contains('Log (100%)');
+        }); // end log_url
+
+        cy.visit(torrent_url);
+        cy.ensureFooter();
+        cy.get(`#torrent_${torrent_id}`).contains('View log').click();
+        cy.get(`a[href*="view.php?type=riplog&id=${torrent_id}."]`).first()
+            .invoke('attr', 'href').then((log_url) => {
+        let log_id = log_url.match(/&id=[0-9]+\.([0-9]+)/)[1];
+
+        // delete existing log
+        cy.loginAdmin();
+        cy.visit('/');
+        cy.window()
+            .then((window) => {
+            cy.window().should('have.property', 'authkey');
+            cy.visit('/torrents.php', {qs: {
                     action: 'deletelog',
                     torrentid: torrent_id,
                     logid: log_id,
                     auth: window.authkey
-            }})
+            }});
         });
 
+        // add log via ajax.php?action=add_log
         cy.loginUser();
         // verify log was correctly removed
         cy.visit(torrent_url);
-        cy.contains('Log (100%)').should('not.exist');
         cy.ensureFooter();
+        cy.contains('Log (100%)').should('not.exist');
         // set up api token
         cy.visit('/user.php?action=token&do=generate',
             {method: 'POST', body: {token_name: 'test_reattach_log'}});

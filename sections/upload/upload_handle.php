@@ -24,8 +24,7 @@ $ArtistRoleList = [];
 $categoryId = (int)$_POST['type'] + 1;
 $categoryName = CATEGORY[$categoryId - 1];
 $Properties['Title'] = isset($_POST['title']) ? trim($_POST['title']) : null;
-// Remastered is an Enum in the DB
-$Properties['Remastered'] = !empty($_POST['remaster']) ? '1' : '0';
+$Properties['Remastered'] = isset($_POST['remaster']);
 if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
     $Properties['UnknownRelease']          = !empty($_POST['unknown']) ? 1 : 0;
     $Properties['RemasterYear']            = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
@@ -46,20 +45,19 @@ $_POST['year'] = $Properties['Year'];
 $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
 $Properties['ReleaseType'] = $_POST['releasetype'] ?? null;
-$Properties['Scene'] = !empty($_POST['scene']) ? '1' : '0';
+$Properties['Scene'] = isset($_POST['scene']);
 $Properties['Format'] = isset($_POST['format']) ? trim($_POST['format']) : null;
 $Properties['Media'] = trim($_POST['media'] ?? '');
 $Properties['Encoding'] = trim($_POST['bitrate'] ?? '');
 if ($Properties['Encoding'] === 'Other') {
     $_POST['other_bitrate'] = trim($_POST['other_bitrate'] ?? '');
 }
-$Properties['MultiDisc'] = $_POST['multi_disc'] ?? null;
-if (isset($_POST['tags'])) {
-    $Properties['TagList'] = array_unique(array_map('trim', explode(',', $_POST['tags']))); // Musicbranes loves to send duplicates
-}
+$Properties['TagList'] = !empty($_POST['tags'])
+    ? array_unique(array_map('trim', explode(',', $_POST['tags']))) // Musicbranes loves to send duplicates
+    : [];
 $Properties['Image'] = trim($_POST['image'] ?? '');
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
-$Properties['TorrentDescription'] = trim($_POST['release_desc'] ?? '');
+$Properties['Description'] = trim($_POST['release_desc'] ?? '');
 if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
 } elseif (isset($_POST['desc'])) {
@@ -179,7 +177,7 @@ switch ($categoryName) {
         $feedType[] = 'torrents_apps';
         break;
     case 'Audiobooks':
-        $Validate->setField('year', '1','number','The year of the release must be entered.');
+        $Validate->setField('year', true,'number','The year of the release must be entered.');
         $feedType[] = 'torrents_abooks';
         break;
     case 'Comedy':
@@ -222,46 +220,111 @@ if ($Properties['Image']) {
     }
 }
 
-$ExtraTorrents = [];
+$upload = [
+    'file'    => [], // details of logfiles in $_FILES
+    'input'   => [], // details of the extra encodings
+    'insert'  => [], // the extra Gazelle\Torrent objects
+    'tracker' => [], // details to send to the tracker
+];
+$checker      = new Gazelle\Util\FileChecker;
+$torMan       = new Gazelle\Manager\Torrent;
+$torrentFiler = new Gazelle\File\Torrent;
+
 if (!$Err && $isMusicUpload) {
     // additional torrent files
-    $DupeNames = [$_FILES['file_input']['name']];
-    if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate'])) {
+    $dupeName = [$_FILES['file_input']['name'] => true];
+    if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate']) && !defined('AJAX')) {
         for ($i = 1; $i <= 5; $i++) {
-            if (!empty($_FILES["extra_file_$i"])) {
-                $ExtraFile = $_FILES["extra_file_$i"];
-                $ExtraTorrentName = $ExtraFile['tmp_name'];
-                if (!is_uploaded_file($ExtraTorrentName) || !filesize($ExtraTorrentName)) {
-                    $Err = 'No extra torrent file uploaded, or file is empty.';
-                } elseif (substr(strtolower($ExtraFile['name']), strlen($ExtraFile['name']) - strlen('.torrent')) !== '.torrent') {
-                    $Err = 'You seem to have put something other than an extra torrent file into the upload field. (' . $ExtraFile['name'] . ').';
-                } elseif (in_array($ExtraFile['name'], $DupeNames)) {
-                    $Err = 'One or more torrents has been entered into the form twice.';
+            if (empty($_FILES["extra_file_$i"])) {
+                continue;
+            }
+            $filename    = $_FILES["extra_file_$i"];
+            $fileTmpName = (string)$filename['tmp_name'];
+            $input = [
+                'Name'        => $fileTmpName,
+                'Description' => trim($_POST['extra_release_desc'][$i - 1]),
+            ];
+            if (!is_uploaded_file($fileTmpName) || !filesize($fileTmpName)) {
+                $Err = 'No extra torrent file uploaded, or file is empty.';
+                break;
+            } elseif (substr(strtolower($filename['name']), strlen($filename['name']) - strlen('.torrent')) !== '.torrent') {
+                $Err = 'You seem to have put something other than an extra torrent file into the upload field. (' . $filename['name'] . ').';
+                break;
+            } elseif (isset($DupeName[$filename['name']])) {
+                $Err = 'One or more torrents has been entered into the form twice.';
+                break;
+            }
+            $dupeName[$filename['name']] = true;
+
+            $format = trim($_POST['extra_format'][$i - 1]);
+            if (empty($format)) {
+                $Err = 'Missing format for extra torrent.';
+                break;
+            }
+            $input['Format'] = $format;
+            $encoding = trim($_POST['extra_bitrate'][$i - 1]);
+            if (empty($encoding)) {
+                $Err = 'Missing encoding/bitrate for extra torrent.';
+                break;
+            }
+            $input['Encoding'] = $encoding;
+
+            $xbencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
+            $xbencoder->decodeFile($fileTmpName);
+            $ExtraTorData = $xbencoder->getData();
+            if (isset($ExtraTorData['encrypted_files'])) {
+                $Err = 'At least one of the torrents contain an encrypted file list which is not supported here';
+                break;
+            }
+
+            $input['InfoHash'] = $xbencoder->getHexInfoHash();
+            $torrent = $torMan->findByInfohash(bin2hex($input['InfoHash']));
+            if ($torrent) {
+                $torrentId = $torrent->id();
+                if ($torrentFiler->exists($torrentId)) {
+                    $Err = defined('AJAX') /** @phpstan-ignore-line */
+                       ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
+                       : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
                 } else {
-                    $j = $i - 1;
-                    $ExtraTorrents[$ExtraTorrentName]['Name'] = $ExtraTorrentName;
-                    $ExtraFormat = trim($_POST['extra_format'][$j]);
-                    if (empty($ExtraFormat)) {
-                        $Err = 'Missing format for extra torrent.';
-                        break;
-                    } else {
-                        $ExtraTorrents[$ExtraTorrentName]['Format'] = $ExtraFormat;
-                    }
-                    $ExtraBitrate = trim($_POST['extra_bitrate'][$j]);
-                    if (empty($ExtraBitrate)) {
-                        $Err = 'Missing bitrate for extra torrent.';
-                        break;
-                    } else {
-                        $ExtraTorrents[$ExtraTorrentName]['Encoding'] = $ExtraBitrate;
-                    }
-                    $ExtraReleaseDescription = trim($_POST['extra_release_desc'][$j]);
-                    $ExtraTorrents[$ExtraTorrentName]['TorrentDescription'] = $ExtraReleaseDescription;
-                    $DupeNames[] = $ExtraFile['name'];
+                    $torrentFiler->put($ExtraTorData['TorEnc'], $torrentId);
+                    $Err = defined('AJAX') /** @phpstan-ignore-line */
+                        ? "Thank you for fixing this torrent (torrentid=$torrentId)"
+                        : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>";
                 }
             }
+            if (!$xbencoder->isPrivate()) {
+                $xbencoder->makePrivate(); // The torrent is now private.
+                $PublicTorrent = true;
+            }
+            if ($torMan->setSourceFlag($xbencoder)) {
+                $UnsourcedTorrent = true;
+            }
+            $input['TorEnc'] = $xbencoder->getEncode();
+
+            // File list and size
+            ['total_size' => $input['TotalSize'], 'files' => $ExtraFileList] = $xbencoder->getFileList();
+            $input['FilePath'] = isset($ExtraTorData['info']['files']) ? make_utf8($xbencoder->getName()) : '';
+            $input['FileList'] = [];
+            foreach ($ExtraFileList as $ExtraFile) {
+                ['path' => $ExtraName, 'size' => $ExtraSize] = $ExtraFile;
+                if (!$Err) {
+                    $Err = $checker->checkFile($categoryName, $ExtraName);
+                }
+                if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($input['FilePath'], 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
+                    $fullpath = "{$input['FilePath']}/$ExtraName";
+                    $Err = defined('AJAX') /** @phpstan-ignore-line */
+                        ? "The torrent contained one or more files with too long a name: $fullpath"
+                        : "The torrent contained one or more files with too long a name: <br />$fullpath";
+                }
+                if ($Err) {
+                    break;
+                }
+                $input['FileList'][] = $torMan->metaFilename($ExtraName, $ExtraSize);
+            }
+            $upload['input'][] = $input;
         }
     }
-    unset($DupeNames);
+    unset($dupeName);
 
     // Multiple artists
     if (!$Err && empty($Properties['GroupID'])) {
@@ -322,17 +385,16 @@ if ($Err) { // Show the upload form, with the data the user entered
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
-$torMan = new Gazelle\Manager\Torrent;
-$tgMan = new Gazelle\Manager\TGroup;
-$torrentFiler = new Gazelle\File\Torrent;
+$tgMan    = new Gazelle\Manager\TGroup;
 $bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
-$bencoder->decodeFile($TorrentName);
-$PublicTorrent = $bencoder->makePrivate(); // The torrent is now private.
-$UnsourcedTorrent = $torMan->setSourceFlag($bencoder);
-$InfoHash = $bencoder->getHexInfoHash();
-$TorData = $bencoder->getData();
 
-$torrent = $torMan->findByInfohash(bin2hex($InfoHash));
+$bencoder->decodeFile($TorrentName);
+$PublicTorrent    = $bencoder->makePrivate(); // The torrent is now private.
+$UnsourcedTorrent = $torMan->setSourceFlag($bencoder);
+$infohash         = $bencoder->getHexInfoHash();
+$TorData          = $bencoder->getData();
+
+$torrent = $torMan->findByInfohash(bin2hex($infohash));
 if ($torrent) {
     $torrentId = $torrent->id();
     if ($torrentFiler->exists($torrentId)) {
@@ -348,20 +410,18 @@ if ($torrent) {
     }
 }
 
-if (isset($TorData['encrypted_files'])) {
+if (!$Err && isset($TorData['encrypted_files'])) {
     $Err = 'This torrent contains an encrypted file list which is not supported here.';
 }
 
-if (isset($TorData['info']['meta version'])) {
+if (!$Err && isset($TorData['info']['meta version'])) {
     $Err = 'This torrent is not a V1 torrent. V2 and Hybrid torrents are not supported here.';
 }
 
-$checker = new Gazelle\Util\FileChecker;
-
 // File list and size
 ['total_size' => $TotalSize, 'files' => $FileList] = $bencoder->getFileList();
-$HasLog = '0';
-$HasCue = '0';
+$hasLog = false;
+$hasCue = false;
 $TmpFileList = [];
 $TooLongPaths = [];
 $DirName = (isset($TorData['info']['files']) ? make_utf8($bencoder->getName()) : '');
@@ -375,11 +435,11 @@ foreach ($FileList as $FileInfo) {
     ['path' => $Name, 'size' => $Size] = $FileInfo;
     // add +log to encoding
     if ($Properties['Media'] == 'CD' && $Properties['Encoding'] == "Lossless" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
-        $HasLog = '1';
+        $hasLog = true;
     }
     // add +cue to encoding
     if ($Properties['Encoding'] == "Lossless" && preg_match('/\.cue$/i', $Name)) {
-        $HasCue = '1';
+        $hasCue = true;
     }
     // Check file name and extension against blacklist/whitelist
     if (!$Err) {
@@ -398,73 +458,6 @@ if (count($TooLongPaths) > 0) {
         : ('The torrent contained one or more files with too long a name: <ul>' . implode('', $TooLongPaths) . '</ul><br />');
 }
 $Debug->set_flag('upload: torrent decoded');
-
-$ExtraTorrentsInsert = [];
-// disable extra torrents when using ajax, just have them re-submit multiple times
-if ($isMusicUpload) {
-    foreach ($ExtraTorrents as $ExtraTorrent) {
-        $Name = $ExtraTorrent['Name'];
-        $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
-        $ThisInsert =& $ExtraTorrentsInsert[$Name];
-        $xbencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
-        $xbencoder->decodeFile($Name);
-        $ExtraTorData = $xbencoder->getData();
-        if (isset($ExtraTorData['encrypted_files'])) {
-            $Err = 'At least one of the torrents contain an encrypted file list which is not supported here';
-            break;
-        }
-        if (!$xbencoder->isPrivate()) {
-            $xbencoder->makePrivate(); // The torrent is now private.
-            $PublicTorrent = true;
-        }
-        if ($torMan->setSourceFlag($xbencoder)) {
-            $UnsourcedTorrent = true;
-        }
-
-        // File list and size
-        ['total_size' => $ExtraTotalSize, 'files' => $ExtraFileList] = $xbencoder->getFileList();
-        $ExtraDirName = isset($ExtraTorData['info']['files']) ? make_utf8($xbencoder->getName()) : '';
-        $ExtraTmpFileList = [];
-        foreach ($ExtraFileList as $ExtraFile) {
-            ['path' => $ExtraName, 'size' => $ExtraSize] = $ExtraFile;
-            if (!$Err) {
-                $Err = $checker->checkFile($categoryName, $ExtraName);
-            }
-            if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($ExtraDirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
-                $Err = defined('AJAX')
-                    ? "The torrent contained one or more files with too long a name: $ExtraDirName/$ExtraName"
-                    : "The torrent contained one or more files with too long a name: <br />$ExtraDirName/$ExtraName";
-                break;
-            }
-            $ExtraTmpFileList[] = $torMan->metaFilename($ExtraName, $ExtraSize);
-        }
-
-        // To be stored in the database
-        $ThisInsert['FilePath'] = $ExtraDirName;
-        $ThisInsert['FileString'] = implode("\n", $ExtraTmpFileList);
-        $ThisInsert['InfoHash'] = $xbencoder->getHexInfoHash();
-        $ThisInsert['NumFiles'] = count($ExtraFileList);
-        $ThisInsert['TorEnc'] = $xbencoder->getEncode();
-        $ThisInsert['TotalSize'] = $ExtraTotalSize;
-
-        $Debug->set_flag('upload: torrent decoded');
-        $torrent = $torMan->findByInfohash(bin2hex($ThisInsert['InfoHash']));
-        if ($torrent) {
-            $torrentId = $torrent->id();
-            if ($torrentFiler->exists($torrentId)) {
-                $Err = defined('AJAX')
-                   ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
-                   : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>";
-            } else {
-                $torrentFiler->put($ThisInsert['TorEnc'], $torrentId);
-                $Err = defined('AJAX')
-                    ? "Thank you for fixing this torrent (torrentid=$torrentId)"
-                    : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>";
-            }
-        }
-    }
-    unset($ThisInsert);
-}
 
 if ($Err) {
     if (defined('AJAX')) {
@@ -513,8 +506,10 @@ $IsNewGroup = is_null($tgroup);
 //Needs to be here as it isn't set for add format until now
 $LogName .= $Properties['Title'];
 
-$logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
-$LogInDB = $logfileSummary->total() ? '1' : '0';
+$logfileSummary = ($hasLog && isset($_FILES['logfiles']))
+    ? new Gazelle\LogfileSummary($_FILES['logfiles'])
+    : null;
+$hasLogInDB = $logfileSummary?->total() > 0;
 
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
@@ -565,33 +560,30 @@ if (!$Properties['GroupID']) {
 }
 
 // Torrent
-$db->prepared_query("
-    INSERT INTO torrents
-        (GroupID, UserID, Media, Format, Encoding,
-        Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-        Scene, HasLog, HasCue, HasLogDB, LogScore,
-        LogChecksum, info_hash, FileCount, FileList, FilePath,
-        Size, Description, Time, FreeTorrent, FreeLeechType)
-    VALUES
-        (?, ?, ?, ?, ?,
-         ?, ?, ?, ?, ?,
-         ?, ?, ?, ?, ?,
-         ?, ?, ?, ?, ?,
-         ?, ?, now(), '0', '0')
-    ", $GroupID, $Viewer->id(), $Properties['Media'], $Properties['Format'], $Properties['Encoding'],
-       $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
-       $Properties['Scene'], $HasLog, $HasCue, $LogInDB, $logfileSummary->overallScore(),
-       $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
-       $TotalSize, $Properties['TorrentDescription']
+$torrent = $torMan->create(
+    tgroupId:                $GroupID,
+    userId:                  $Viewer->id(),
+    description:             $Properties['Description'],
+    media:                   $Properties['Media'],
+    format:                  $Properties['Format'],
+    encoding:                $Properties['Encoding'],
+    logScore:                $logfileSummary?->overallScore() ?? 0,
+    infohash:                $infohash,
+    filePath:                $DirName,
+    fileList:                $TmpFileList,
+    size:                    $TotalSize,
+    isScene:                 $Properties['Scene'],
+    isRemaster:              $Properties['Remastered'],
+    remasterYear:            $Properties['RemasterYear'],
+    remasterTitle:           $Properties['RemasterTitle'],
+    remasterRecordLabel:     $Properties['RemasterRecordLabel'],
+    remasterCatalogueNumber: $Properties['RemasterCatalogueNumber'],
+    hasChecksum:             $logfileSummary?->checksum() ?? false,
+    hasCue:                  $hasCue,
+    hasLog:                  $hasLog,
+    hasLogInDB:              $hasLogInDB,
 );
-$TorrentID = $db->inserted_id();
-$db->prepared_query('
-    INSERT INTO torrents_leech_stats (TorrentID)
-    VALUES (?)
-    ', $TorrentID
-);
-$torrent = $torMan->findById($TorrentID);
-$torrent->lockUpload();
+$TorrentID = $torrent->id();
 
 $bonus = new Gazelle\User\Bonus($Viewer);
 $bonusTotal = $bonus->torrentValue($torrent);
@@ -599,36 +591,34 @@ $bonusTotal = $bonus->torrentValue($torrent);
 //******************************************************************************//
 //--------------- Upload Extra torrents ----------------------------------------//
 
-$extraFile = [];
-$trackerUpdate = [];
-
-foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
+foreach ($upload['input'] as $info) {
     $torrentExtra = $torMan->create(
         tgroupId:                $GroupID,
         userId:                  $Viewer->id(),
-        description:             $ExtraTorrent['TorrentDescription'],
         media:                   $Properties['Media'],
-        format:                  $ExtraTorrent['Format'],
-        encoding:                $ExtraTorrent['Encoding'],
-        infohash:                $ExtraTorrent['InfoHash'], /** @phpstan-ignore-line */
-        filePath:                $ExtraTorrent['FilePath'], /** @phpstan-ignore-line */
-        fileList:                $ExtraTorrent['FileString'], /** @phpstan-ignore-line */
-        size:                    $ExtraTorrent['TotalSize'], /** @phpstan-ignore-line */
         isScene:                 $Properties['Scene'],
         isRemaster:              $Properties['Remastered'],
         remasterYear:            $Properties['RemasterYear'],
         remasterTitle:           $Properties['RemasterTitle'],
         remasterRecordLabel:     $Properties['RemasterRecordLabel'],
         remasterCatalogueNumber: $Properties['RemasterCatalogueNumber'],
+        description:             $info['Description'],
+        format:                  $info['Format'],
+        encoding:                $info['Encoding'],
+        infohash:                $info['InfoHash'],
+        filePath:                $info['FilePath'],
+        fileList:                $info['FileList'],
+        size:                    $info['TotalSize'],
     );
 
     $torMan->flushFoldernameCache($torrentExtra->path());
     $folderCheck[] = $torrentExtra->path();
-    $trackerUpdate[$torrentExtra->id()] = rawurlencode($torrentExtra->infohash());
+    $upload['tracker'][$torrentExtra->id()] = rawurlencode($torrentExtra->infohash());
     $bonusTotal += $bonus->torrentValue($torrentExtra);
 
-    $extraFile[$torrentExtra->id()] = [
-        'payload' => $ExtraTorrent['TorEnc'], /** @phpstan-ignore-line */
+    $upload['insert'][] = $torrentExtra;
+    $upload['file'][$torrentExtra->id()] = [
+        'payload' => $info['TorEnc'],
         'size'    => number_format($torrentExtra->size() / (1024 * 1024), 2)
     ];
 }
@@ -636,7 +626,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //******************************************************************************//
 //--------------- Write Files To Disk ------------------------------------------//
 
-if ($logfileSummary->total()) {
+if ($logfileSummary?->total()) {
     $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
     $checkerVersion = Logchecker::getLogcheckerVersion();
     foreach($logfileSummary->all() as $logfile) {
@@ -649,7 +639,7 @@ $torrentFiler->put($bencoder->getEncode(), $TorrentID);
 $log->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
 
-foreach ($extraFile as $id => $info) {
+foreach ($upload['file'] as $id => $info) {
     $torrentFiler->put($info['payload'], $id);
     $log->torrent($GroupID, $id, $Viewer->id(), "uploaded ({$info['size']} MiB)")
         ->general("Torrent $id ($LogName) ({$info['size']}  MiB) was uploaded by " . $Viewer->username());
@@ -661,9 +651,9 @@ $Debug->set_flag('upload: database committed');
 //******************************************************************************//
 //--------------- Finalize -----------------------------------------------------//
 
-$tracker = new \Gazelle\Tracker;
-$trackerUpdate[$TorrentID] = rawurlencode($InfoHash);
-foreach ($trackerUpdate as $id => $hash) {
+$tracker = new Gazelle\Tracker;
+$upload['tracker'][$TorrentID] = rawurlencode($infohash); // (this is cheating a bit)
+foreach ($upload['tracker'] as $id => $hash) {
     $tracker->update_tracker('add_torrent', ['id' => $id, 'info_hash' => $hash, 'freetorrent' => 0]);
 }
 $Debug->set_flag('upload: ocelot updated');
@@ -678,7 +668,7 @@ if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
     $torMan->flushLatestUploads(5);
 }
 
-$totalNew = 1 + count($ExtraTorrentsInsert);
+$totalNew = 1 + count($upload['insert']);
 $Viewer->stats()->increment('upload_total', $totalNew);
 if ($torrent->isPerfectFlac()) {
     $Viewer->stats()->increment('perfect_flac_total');
@@ -694,6 +684,9 @@ if ($Properties['Image'] != '') {
 
 $torrent->flush();
 $torrent->unlockUpload();
+foreach ($upload['insert'] as $t) {
+    $t->unlockUpload();
+}
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//
@@ -710,14 +703,15 @@ if ($isMusicUpload) {
         $Announce .= ' [' . $releaseTypes[$Properties['ReleaseType']] . ']';
     }
     $Details .= $Properties['Format'].' / '.$Properties['Encoding'];
-    if ($HasLog == 1) {
-        $Details .= ' / Log'.($LogInDB ? " ({$logfileSummary->overallScore()}%)" : "");
+    if ($hasLog) {
+        $score = $logfileSummary?->overallScore() ?? 0;
+        $Details .= ' / Log'.($hasLogInDB ? " ({$score}%)" : "");
     }
-    if ($HasCue == 1) {
+    if ($hasCue) {
         $Details .= ' / Cue';
     }
     $Details .= ' / '.$Properties['Media'];
-    if ($Properties['Scene'] == '1') {
+    if ($Properties['Scene']) {
         $Details .= ' / Scene';
     }
 }

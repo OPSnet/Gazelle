@@ -21,6 +21,7 @@ parameters:
     parallel:
         maximumNumberOfProcesses: 1
     dynamicConstantNames:
+        - AJAX
         - BLOCK_TOR
         - DISABLE_IRC
         - DISABLE_TRACKER

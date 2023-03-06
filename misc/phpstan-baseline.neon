@@ -7071,26 +7071,6 @@ parameters:
 			path: ../sections/torrents/takeedit.php
 
 		-
-			message: "#^Offset 'TagList' does not exist on array\\{Title\\: string\\|null, Remastered\\: '0'\\|'1', UnknownRelease\\: 0\\|1, RemasterYear\\: int\\|null, RemasterTitle\\: string, RemasterRecordLabel\\: string, RemasterCatalogueNumber\\: string, Year\\: int\\|null, \\.\\.\\.\\}\\.$#"
-			count: 1
-			path: ../sections/upload/upload_handle.php
-
-		-
-			message: "#^Parameter \\#2 \\$Required of method Gazelle\\\\Util\\\\Validator\\:\\:setField\\(\\) expects bool, string given\\.$#"
-			count: 1
-			path: ../sections/upload/upload_handle.php
-
-		-
-			message: "#^Parameter \\$isRemaster of method Gazelle\\\\Manager\\\\Torrent\\:\\:create\\(\\) expects bool, string given\\.$#"
-			count: 1
-			path: ../sections/upload/upload_handle.php
-
-		-
-			message: "#^Parameter \\$isScene of method Gazelle\\\\Manager\\\\Torrent\\:\\:create\\(\\) expects bool, string given\\.$#"
-			count: 1
-			path: ../sections/upload/upload_handle.php
-
-		-
 			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\|false given\\.$#"
 			count: 1
 			path: ../sections/user/take_edit.php

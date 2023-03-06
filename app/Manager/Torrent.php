@@ -28,6 +28,53 @@ class Torrent extends \Gazelle\BaseManager {
         return $this;
     }
 
+    public function create(
+        int     $tgroupId,
+        int     $userId,
+        string  $description,
+        string  $media,
+        ?string $format,
+        ?string $encoding,
+        string  $infohash,
+        string  $filePath,
+        array   $fileList,
+        int     $size,
+        bool    $isScene,
+        bool    $isRemaster,
+        ?int    $remasterYear,
+        string  $remasterTitle,
+        string  $remasterRecordLabel,
+        string  $remasterCatalogueNumber,
+        int     $logScore     = 0,
+        bool    $hasChecksum = false,
+        bool    $hasCue      = false,
+        bool    $hasLog      = false,
+        bool    $hasLogInDB  = false,
+    ): \Gazelle\Torrent {
+        self::$db->prepared_query("
+            INSERT INTO torrents (
+                GroupID, UserID, Media, Format, Encoding, Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
+                info_hash, Scene, LogScore, LogChecksum, HasLog, HasCue, HasLogDB, FilePath, FileCount, FileList,
+                Size, Description
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?
+            )", $tgroupId, $userId, $media, $format, $encoding,
+                $isRemaster ? '1' : '0', $remasterYear, $remasterTitle, $remasterRecordLabel, $remasterCatalogueNumber,
+                $infohash, $isScene ? '1': '0', $logScore, $hasChecksum ? '1' : '0', $hasLog ? '1' : '0',
+                $hasCue ? '1' : '0', $hasLogInDB ? '1' : '0', $filePath, count($fileList), implode("\n", $fileList),
+                $size, $description,
+        );
+        $torrent = $this->findById(self::$db->inserted_id());
+        self::$db->prepared_query('
+            INSERT INTO torrents_leech_stats (TorrentID) VALUES (?)
+            ', $torrent->id()
+        );
+        $torrent->lockUpload();
+        return $torrent;
+    }
+
     public function findById(int $torrentId): ?\Gazelle\Torrent {
         $key = sprintf(self::ID_KEY, $torrentId);
         $id = self::$cache->get_value($key);
@@ -96,53 +143,6 @@ class Torrent extends \Gazelle\BaseManager {
             }
         }
         return $all;
-    }
-
-    public function create(
-        int     $tgroupId,
-        int     $userId,
-        string  $description,
-        string  $media,
-        ?string $format,
-        ?string $encoding,
-        string  $infohash,
-        string  $filePath,
-        array   $fileList,
-        int     $size,
-        bool    $isScene,
-        bool    $isRemaster,
-        ?int    $remasterYear,
-        string  $remasterTitle,
-        string  $remasterRecordLabel,
-        string  $remasterCatalogueNumber,
-        int     $logScore     = 0,
-        bool    $hasChecksum = false,
-        bool    $hasCue      = false,
-        bool    $hasLog      = false,
-        bool    $hasLogInDB  = false,
-    ): \Gazelle\Torrent {
-        self::$db->prepared_query("
-            INSERT INTO torrents (
-                GroupID, UserID, Media, Format, Encoding, Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-                info_hash, Scene, LogScore, LogChecksum, HasLog, HasCue, HasLogDB, FilePath, FileCount, FileList,
-                Size, Description
-            ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?
-            )", $tgroupId, $userId, $media, $format, $encoding,
-                $isRemaster, $remasterYear, $remasterTitle, $remasterRecordLabel, $remasterCatalogueNumber,
-                $infohash, $isScene ? '1': '0', $logScore, $hasChecksum ? '1' : '0', $hasLog ? '1' : '0',
-                $hasCue ? '1' : '0', $hasLogInDB ? '1' : '0', $filePath, count($fileList), implode("\n", $fileList),
-                $size, $description,
-        );
-        $torrent = $this->findById(self::$db->inserted_id());
-        self::$db->prepared_query('
-            INSERT INTO torrents_leech_stats (TorrentID) VALUES (?)
-            ', $torrent->id()
-        );
-        $torrent->lockUpload();
-        return $torrent;
     }
 
     public function flushFoldernameCache(string $folder) {
