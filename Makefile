@@ -70,11 +70,11 @@ ocelot-reload-db:
 
 .PHONY: rector
 rector:
-	vendor/bin/rector process --config lib/rector.php
+	vendor/bin/rector process --config misc/rector.php
 
 .PHONY: rector-dry-run
 rector-dry-run:
-	vendor/bin/rector process --dry-run --config lib/rector.php
+	vendor/bin/rector process --dry-run --config misc/rector.php
 
 .PHONY: test
 test: lint-css lint-php lint-twig
