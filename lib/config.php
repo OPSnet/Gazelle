@@ -677,7 +677,6 @@ defined('VALID_PAGE') or define('VALID_PAGE', [
     'blog',
     'bonus',
     'bookmarks',
-    'captcha',
     'chat',
     'collages',
     'comments',
@@ -1061,33 +1060,6 @@ defined('ZIP_OPTION') or define('ZIP_OPTION', [
     '44' => [4, 4, 'AAC - q5.5'],
     '45' => [4, 5, 'AAC - q5'],
     '46' => [4, 6, 'AAC - 192'],
-]);
-
-// ------------------------------------------------------------------------
-// Captcha settings
-
-defined('CAPTCHA_FONT') or define('CAPTCHA_FONT', [
-    'ARIBLK.TTF',
-    'IMPACT.TTF',
-    'TREBUC.TTF',
-    'TREBUCBD.TTF',
-    'TREBUCBI.TTF',
-    'TREBUCIT.TTF',
-    'VERDANA.TTF',
-    'VERDANAB.TTF',
-    'VERDANAI.TTF',
-    'VERDANAZ.TTF',
-]);
-defined('CAPTCHA_BG') or define('CAPTCHA_BG', [
-    'captcha1.png',
-    'captcha2.png',
-    'captcha3.png',
-    'captcha4.png',
-    'captcha5.png',
-    'captcha6.png',
-    'captcha7.png',
-    'captcha8.png',
-    'captcha9.png',
 ]);
 
 // ------------------------------------------------------------------------

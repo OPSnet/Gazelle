@@ -13271,56 +13271,6 @@ parameters:
 			path: ../sections/bookmarks/torrents.php
 
 		-
-			message: "#^Function get_font\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Function make_captcha_img\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#1 \\$dst_image of function imagecopymerge expects GdImage, GdImage\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#1 \\$image of function imagecolorallocatealpha expects GdImage, GdImage\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#1 \\$image of function imagedestroy expects GdImage, GdImage\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#1 \\$image of function imagepng expects GdImage, GdImage\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#1 \\$image of function imagettftext expects GdImage, GdImage\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#2 \\$src_image of function imagecopymerge expects GdImage, GdImage\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#4 \\$x of function imagettftext expects int, float given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
-			message: "#^Parameter \\#6 \\$color of function imagettftext expects int, int\\|false given\\.$#"
-			count: 1
-			path: ../sections/captcha/index.php
-
-		-
 			message: "#^Variable \\$Twig might not be defined\\.$#"
 			count: 1
 			path: ../sections/chat/index.php
