@@ -14,7 +14,7 @@ parameters:
     paths:
         - ../app
         - ../classes
-        - ../db
+        - ../misc/phinx
         - ../scripts
         - ../tests
         - ../sections
@@ -48,6 +48,7 @@ parameters:
       message: '/^Method [^:]+::\w+\(\) return type has no value type specified in iterable type array\.$/'
       paths:
         -  ../app/*
+        -  ../misc/phinx/migrations/*
         -  ../tests/phpunit/*
     -
       message: '/^Property [^:]+::\$\w+ type has no value type specified in iterable type array\.$/'

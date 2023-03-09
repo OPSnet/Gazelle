@@ -2,11 +2,10 @@
 
 require_once(__DIR__ . '/lib/config.php');
 
-return
-[
+return [
     'paths' => [
-        'migrations' => '%%PHINX_CONFIG_DIR%%/db/migrations',
-        'seeds' => '%%PHINX_CONFIG_DIR%%/db/seeds'
+        'migrations' => '%%PHINX_CONFIG_DIR%%/misc/phinx/migrations',
+        'seeds' => '%%PHINX_CONFIG_DIR%%/misc/phinx/seeds'
     ],
     'environments' => [
         'default_migration_table' => 'phinxlog',

@@ -27,8 +27,8 @@ docker exec -i $MYSQL_CONTAINER sh -c "exec mysql -uroot -p'$PASSWORD'" < all-da
 docker exec -it $MYSQL_CONTAINER mysql_upgrade -u root -p$PASSWORD
 
 # Some custom functions may need to be recreated (the site will error on load)
-git grep CREATE FUNCTION db/migrations
-db/migrations/20200320183228_bonus_accrual_function.php
+git grep CREATE FUNCTION misc/phinx/db/migrations
+misc/phinx/db/migrations/20200320183228_bonus_accrual_function.php
 
 Execute in the mysql client:
     CREATE FUNCTION bonus_accrual(Size bigint, Seedtime float, Seeders integer)

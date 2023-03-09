@@ -34,14 +34,14 @@ if ! FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; th
     exit 1
 fi
 
-if [ ! -f /var/www/db/seeded.txt ]; then
+if [ ! -f /var/www/misc/phinx/seeded.txt ]; then
     echo "Run seed:run..."
     if ! /var/www/vendor/bin/phinx seed:run; then
         echo "PHINX FAILED TO SEED"
         exit 1
     fi
-    echo "Seeds have been run, delete to rerun" > /var/www/db/seeded.txt
-    chmod 400 /var/www/db/seeded.txt
+    echo "Seeds have been run, delete to rerun" > /var/www/misc/phinx/seeded.txt
+    chmod 400 /var/www/misc/phinx/seeded.txt
 fi
 
 if [ ! -d /var/lib/gazelle/torrent ]; then

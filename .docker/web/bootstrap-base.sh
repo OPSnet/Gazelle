@@ -47,7 +47,7 @@ chmod 600 ~/.pgpass
 psql -U "$POSTGRES_USER" postgres -c "create role ${POSTGRES_DB_USER} with password '${POSTGRES_USER_PASSWORD}' login;"
 psql -U "$POSTGRES_USER" postgres -c "create database ${POSTGRES_DATABASE} with owner ${POSTGRES_DB_USER};"
 
-for sql in "${CI_PROJECT_DIR}"/db/pg/*.sql ; do
+for sql in "${CI_PROJECT_DIR}"/misc/pg-migrations/*.sql ; do
     psql -f "$sql"
 done
 

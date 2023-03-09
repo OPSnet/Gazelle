@@ -15,7 +15,7 @@ help:
 	echo '  dump-riploghtml    - create a tarball of the HTMLified rip logs'
 	echo '  dump-torrent       - create a tarball of the rip logs'
 	echo '  lint-css           - lint (style check) the CSS'
-	echo '  mysqldump          - dump mysql database from docker to db/data/gazelle.sql'
+	echo '  mysqldump          - dump mysql database from docker to misc/gazelle.sql'
 	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db   - signal Ocelot to reload from database'
 	echo '  phpstan-analyse    - run phpstan over the code
@@ -60,7 +60,7 @@ lint-twig:
 
 .PHONY: mysqldump
 mysqldump:
-	mysqldump -h 127.0.0.1 -P 36000 -u gazelle --password=password -d gazelle --skip-add-drop-table --skip-add-locks --single-transaction | sed 's/ AUTO_INCREMENT=[0-9]*//g' > db/data/gazelle.sql
+	mysqldump -h 127.0.0.1 -P 36000 -u gazelle --password=password -d gazelle --skip-add-drop-table --skip-add-locks --single-transaction | sed 's/ AUTO_INCREMENT=[0-9]*//g' > misc/gazelle.sql
 
 .PHONY: phpstan-analyse
 phpstan-analyse:

@@ -19,7 +19,7 @@
 __MACOSX/
 
 /cache
-/db/seeded.txt
+/misc/phinx/seeded.txt
 /node_modules
 /public/static/font/
 /public/static/local/

@@ -59,7 +59,7 @@ The first account is 'admin' and has the highest level of  access
 to the site installation. The second account is 'user' and has
 standard user access. The passwords for both accounts are literally
 'password' (without the quotes). If you want to change these before
-building, edit db/seeds/InitialUserSeeder.php first.
+building, edit misc/phinx/seeds/InitialUserSeeder.php first.
 
 The 'admin' account might not have all the permissions that have
 been added recently. Navigate to the /tools.php?action=permissions
