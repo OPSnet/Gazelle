@@ -1,0 +1,83 @@
+From: Spine
+To: Operators
+Date: 2022-11-20
+Subject: Orpheus Development Papers #9 - Unseeded Purges
+Version: 1
+
+For various reasons, some uploads will end up in an unseeded state, either
+because the uploader forgets to load it into their client so no-one else can
+snatch it, or eventually people lose interest and stop seeding, hard disks
+fail, and the upload becomes unavailable.
+
+There is a tension to be resolved between a site which appears to have a
+large catalogue but full of tombstones, and a site with a smaller catalogue
+with pretty much everything is available. Different sites resolve the issue
+using different policies. The design described below can handle most use
+cases.
+
+The original Gazelle design removed tombstones but allowed little margin for
+error. There was an initial alert sent for uploads that had been unseeded
+for a specified amount of time, which was run as an hourly scheduled task
+that caught all the uploads that had been unseeded for between N and N+1
+hours. If the scheduler did not make the run in that hour, no notification
+alerts were sent and the upload was removed afterwards with no prior
+warning.
+
+This became a massive problem if the reaper has to be stopped for an
+extended period of time for whatever reason (hardware crash, server move,
+DDoS or other instabilities). When things return to normal, starting up the
+reaper would immediately nuke a large number of uploads that might otherwise
+have been saved if people received an advance warning to do something about
+it.
+
+To get around this problem. the approach to handling unseeded uploads on
+Orpheus is to use a table to register where an upload is in its unseeded
+state. A row is inserted into the `torrent_unseeded` table when it is deemed
+to have been unseeded for too long. From there, the row will either be
+removed when the upload is seeded once more, or removed along with the purge
+of the upload. Unseeded and "never seeded" uploads are managed using
+different schedules.
+
+The Orpheus reaper sends out an initial alert well in advance, to give
+people time to even notice the message and do something about it. A second
+alert is sent just before the upload is removed.
+
+To leave tombstones in the catalogue, simply disable the scheduled reaper
+task.
+
+An unseeded upload is identified by the `torrents_leech_stats.last_action`
+column. If it is `NULL`, the upload was never seeded. Once the grace period
+since creation (based on `torrents.Time`) has passed, a "never seeded" row
+is inserted. If there is a value for `last_action` and the grace period for
+unseeded uploads has passed, then an "unseeded" row is inserted.
+
+The current timestamp is recorded when the row is inserted. The subsequent
+actions (second alert, ultimate removal) are based on this. If a member
+pleads for extra time to get their act together, this can be done by
+updating the `unseeded_date` to a time in the future (e.g. `now() + INTERVAL
+2 WEEK`. There is no point deleting the row: it will be inserted again
+during the next scheduler run.
+
+Snatchers are also pinged to see if they can reseed the upload. The first
+person to do so can "claim" the reseed and receive a reward of bonus points.
+This is to obviate the risk of a snatcher letting the upload be removed and
+then reuploaded under their own name. To prevent abuse, a given upload may
+only be claimed once by the same person. The `torrent_unseeded_claim` table
+can be reviewed to see if an individual is making excessive use of the
+feature.
+
+Unseeded uploads are removed after `REMOVE_UNSEEDED_HOUR` hours (28 days by
+default). "Never seeded" uploads are removed after
+`REMOVE_NEVER_SEEDED_HOUR` hours (3 days by default). The final alert timer
+is most easily defined by calculating an interval prior to the removal
+deadline.
+
+To spread the load following a long pause, no more than 100 uploads per
+user, and no more than 1000 users are considered in a single run. This helps
+produce a breadth-first search, rather than depth first. There is also a
+maximum cap of total uploads to process per run.
+
+Remember: the `torrent_unseeded` represents the current state of unseeded
+notifications. No real harm will happen if the table is truncated: all this
+will do is reinitialize the process. The current stats can be viewed in the
+Torrent Stats toolbox.

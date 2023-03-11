@@ -381,8 +381,12 @@ function add_json_info($Json) {
     return $Json;
 }
 
-function dump($thing) {
+function dump($thing): void {
     echo "<pre>" . json_encode($thing, JSON_PRETTY_PRINT) . "</pre>";
+}
+
+function show(mixed $data): void {
+    echo json_encode($data, JSON_PRETTY_PRINT) . "\n";
 }
 
 /**

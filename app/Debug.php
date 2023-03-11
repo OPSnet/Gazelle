@@ -246,7 +246,7 @@ class Debug {
         }
 
         //Lets not be repetitive
-        if (($Tracer[$Steps]['function'] == 'include' || $Tracer[$Steps]['function'] == 'require' ) && isset($Tracer[$Steps]['args'][0]) && $Tracer[$Steps]['args'][0] == $File) {
+        if (isset($Tracer[$Steps]) && ($Tracer[$Steps]['function'] == 'include' || $Tracer[$Steps]['function'] == 'require' ) && isset($Tracer[$Steps]['args'][0]) && $Tracer[$Steps]['args'][0] == $File) {
             unset($Tracer[$Steps]['args']);
         }
 

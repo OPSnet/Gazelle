@@ -1,0 +1,177 @@
+<div class="thin">
+
+<div class="box"><div class="head">Overall Stats</div>
+<div class="pad">
+    <table>
+    <tr>
+        <td>Total torrents:</td><td class="number_column">{{ stats.torrentCount|number_format }}</td>
+        <td style="padding-left:30px">Mean torrents per user:</td><td class="number_column">{{
+            (stats.torrentCount / stats.totalUsers)|number_format }}</td>
+        <td style="padding-left:30px">Mean files per torrent:</td><td class="number_column">{{
+            (stats.totalFiles / stats.torrentCount)|number_format }}</td>
+    </tr>
+    <tr>
+        <td>Total size:</td><td style="vertical-align: top" class="number_column">{{ stats.totalSize()|octet_size }}</td>
+        <td style="padding-left:30px">Mean torrent size:</td><td style="vertical-align: top" class="number_column">{{
+            (stats.totalSize / stats.torrentCount)|octet_size }}</td>
+        <td style="padding-left:30px">Mean filesize:</td><td style="vertical-align: top" class="number_column">{{
+            (stats.totalSize / stats.totalFiles)|octet_size }}</td>
+    </tr>
+    <tr>
+        <td>Total files:</td><td class="number_column">{{ stats.totalFiles|number_format }}</td>
+        <td colspan="4">&nbsp;</td>
+    </tr>
+    </table>
+</div>
+</div>
+
+<div class="box"><div class="head">Timeline of Unseeded Uploads Removal</div>
+<div class="pad">
+    <table>
+    <tr>
+        <td style="width: 25%">Initial unseeded:</td><td style="width: 25%" class="number_column">{{ unseeded.unseeded_initial|number_format }}</td>
+        <td style="width: 25%; padding-left:30px">Final unseeded:</td><td style="width: 25%" class="number_column">{{ unseeded.unseeded_final|number_format }}</td>
+    </tr>
+    <tr>
+        <td>Initial never seeded:</td><td class="number_column">{{ unseeded.never_seeded_initial|number_format }}</td>
+        <td style="padding-left:30px">Final never seeded:</td><td class="number_column">{{ unseeded.never_seeded_final|number_format }}</td>
+    </tr>
+{% for day, total in timeline %}
+    {% if loop.first %}
+        <td style="width: 25%">Open claims:</td><td style="width: 25%" class="number_column">{{ claim.open|number_format }}</td>
+    {% else %}
+        <td style="width: 50%" colspan="2">&nbsp;</td>
+    {% endif %}
+    {% if loop.first %}
+        <td style="width: 50%" colspan="2">Upcoming removals by date</td>
+    </tr>
+    <tr>
+        <td>Validated claims:</td><td class="number_column">{{ claim.claimed|number_format }}</td>
+    {% endif %}
+        <td style="width: 25%; padding-left:30px">{{ day }}</td>
+        <td style="width: 25%; padding-left:30px" class="number_column">{{ total|number_format }}</td>
+    </tr>
+{% endfor %}
+{% if timeline|length == 0 %}
+    <tr>
+        <td style="width: 25%;">Open claims:</td><td style="width: 25%;" class="number_column">{{ claim.open|number_format }}</td>
+        <td style="width: 50%; padding-left:30px" colspan="2">Upcoming removals by date</td>
+    </tr>
+    <tr>
+        <td>Validated claims:</td><td class="number_column">{{ claim.claimed|number_format }}</td>
+        <td style="width: 50%" colspan="2">&nbsp;</td>
+    </tr>
+{% endif %}
+    </table>
+</div>
+</div>
+
+<div class="box"><div class="head">Upload Frequency</div>
+<div class="pad">
+    <table>
+        <tr>
+        <th></th>
+        <th>Today</th>
+        <th>This week</th>
+        <th>Per day this week</th>
+        <th>This month</th>
+        <th>Per day this month</th>
+        <th>This quarter</th>
+        <th>Per day this quarter</th>
+        </tr>
+
+        <tr>
+        <th>Torrents</th>
+        <td class="number_column">{{ stats.amount('day')|number_format }}</td>
+        <td class="number_column">{{ stats.amount('week')|number_format }}</td>
+        <td class="number_column">{{ (stats.amount('week') / 7)|number_format }}</td>
+        <td class="number_column">{{ stats.amount('month')|number_format }}</td>
+        <td class="number_column">{{ (stats.amount('month') / 30)|number_format }}</td>
+        <td class="number_column">{{ stats.amount('quarter')|number_format }}</td>
+        <td class="number_column">{{ (stats.amount('quarter') / 120)|number_format }}</td>
+        </tr>
+
+        <tr>
+        <th>Size</th>
+        <td class="number_column">{{ stats.size('day')|octet_size }}</td>
+        <td class="number_column">{{ stats.size('week')|octet_size }}</td>
+        <td class="number_column">{{ (stats.size('week') / 7)|octet_size }}</td>
+        <td class="number_column">{{ stats.size('month')|octet_size }}</td>
+        <td class="number_column">{{ (stats.size('month') / 30)|octet_size }}</td>
+        <td class="number_column">{{ stats.size('quarter')|octet_size }}</td>
+        <td class="number_column">{{ (stats.size('quarter') / 120)|octet_size }}</td>
+        </tr>
+
+        <tr>
+        <th>Files</th>
+        <td class="number_column">{{ stats.files('day')|number_format }}</td>
+        <td class="number_column">{{ stats.files('week')|number_format }}</td>
+        <td class="number_column">{{ (stats.files('week') / 7)|number_format }}</td>
+        <td class="number_column">{{ stats.files('month')|number_format }}</td>
+        <td class="number_column">{{ (stats.files('month') / 30)|number_format }}</td>
+        <td class="number_column">{{ stats.files('quarter')|number_format }}</td>
+        <td class="number_column">{{ (stats.files('quarter') / 120)|number_format }}</td>
+        </tr>
+    </table>
+</div>
+</div>
+
+<div class="box"><div class="head">Content Analysis</div>
+<div class="pad">
+    <table>
+        <tr>
+        <th width="33%">Formats</th>
+        <th width="33%">Media</th>
+        <th width="34%">Categories</th>
+        </tr>
+        <tr>
+
+        <td style="vertical-align: top;"><table>
+{% for f in stats.format %}
+            <tr><td>{{ f.0|default('<i>Grand</i>')|raw }}</td>
+            <td>{{ f.1|default('<i>Total</i>')|raw }}</td>
+            <td class="number_column">{{ f.2|number_format }}</td>
+            </tr>
+{% endfor %}
+        </table></td>
+
+        <td style="vertical-align: top;"><table>
+{% for m in stats.media %}
+            <tr><td>{{ m.0|default('<i>Total</i>')|raw }}</td>
+            <td class="number_column">{{ m.1|number_format }}</td>
+            </tr>
+{% endfor %}
+        </table></td>
+
+        <td style="vertical-align: top;"><table>
+{% for c in stats.category %}
+            <tr><td>{{ constant('CATEGORY')[c.0 - 1] }}</td>
+            <td class="number_column">{{ c.1|number_format }}</td>
+            </tr>
+{% endfor %}
+        </table></td>
+
+        </tr>
+        <tr>
+        <th width="33%">Added in last month</th>
+        <th width="33%">&nbsp;</th>
+        <th width="34%">&nbsp;</th>
+        </tr>
+        <tr>
+
+        <td style="vertical-align: top;"><table>
+{% for f in stats.formatMonth %}
+            <tr><td>{{ f.0|default('<i>Grand</i>')|raw }}</td>
+            <td>{{ f.1|default('<i>Total</i>')|raw }}</td>
+            <td class="number_column">{{ f.2|number_format }}</td>
+            </tr>
+{% endfor %}
+        </table></td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        </tr>
+    </table>
+</div>
+</div>
+
+</div>

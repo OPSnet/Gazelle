@@ -175,7 +175,6 @@ $Options['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);
 $Options['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
 $Options['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
 $Options['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
-$Options['AcceptFL']            = (!empty($_POST['acceptfltoken']) ? 1 : 0);
 $Options['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
 $Options['CoverArt']            = (int)!empty($_POST['coverart']);
 $Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
@@ -206,7 +205,6 @@ if ($Viewer->permitted('site_advanced_search')) {
 
 // These are all enums of '0' or '1'
 $DownloadAlt = isset($_POST['downloadalt']) ? '1' : '0';
-$UnseededAlerts = isset($_POST['unseededalerts']) ? '1' : '0';
 $NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? '1' : '0');
 $NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? '1' : '0');
 $NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : '0');
@@ -245,8 +243,6 @@ if (is_null($OldFMUsername) && $LastFMUsername !== '') {
     $Cache->delete_value("lastfm_username_$userId");
 }
 
-$user->toggleAcceptFL($Options['AcceptFL']);
-
 /* transform
  *   'notifications_News_popup'
  *   'notifications_Blog_popup'
@@ -270,6 +266,9 @@ foreach ($notification as $n) {
 }
 (new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
+$user->toggleAcceptFL(!empty($_POST['acceptfltoken']));
+$user->toggleAttr('no-pm-unseeded-snatch', empty($_POST['notifyonunseededsnatch']));
+$user->toggleAttr('no-pm-unseeded-upload', empty($_POST['notifyonunseededupload']));
 $user->toggleAttr('hide-vote-recent', empty($_POST['pattr_hide_vote_recent']));
 $user->toggleAttr('hide-vote-history', empty($_POST['pattr_hide_vote_history']));
 $user->toggleAttr('admin-error-reporting', isset($_POST['error_reporting']));
@@ -286,7 +285,6 @@ INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
     i.Info = ?,
     i.InfoTitle = ?,
     i.DownloadAlt = ?,
-    i.UnseededAlerts = ?,
     i.NotifyOnDeleteSeeding = ?,
     i.NotifyOnDeleteSnatched = ?,
     i.NotifyOnDeleteDownloaded = ?,
@@ -301,7 +299,6 @@ $Params = [
     $_POST['info'],
     $_POST['profile_title'],
     $DownloadAlt,
-    $UnseededAlerts,
     $NotifyOnDeleteSeeding,
     $NotifyOnDeleteSnatched,
     $NotifyOnDeleteDownloaded,

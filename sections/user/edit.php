@@ -2,7 +2,7 @@
 
 $userMan = new Gazelle\Manager\User;
 
-$user = $userMan->findById((int)($_REQUEST['id'] ?? 0));
+$user = $userMan->findById(($_REQUEST['id'] ?? '') === 'me' ? $Viewer->id() : (int)($_REQUEST['id'] ?? 0));
 if (is_null($user)) {
     error(404);
 }

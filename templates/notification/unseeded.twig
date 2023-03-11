@@ -1,0 +1,33 @@
+{%- set total = list|length -%}
+{%- set many = total > 1 -%}
+Dear {{ user.username }},
+
+You have {% if many %}{{ total }} uploads{% else %}an upload{% endif %} that
+{%- if never -%}
+    {%- if many %} were{% else %} was{% endif %} uploaded {% if final %}a couple of days ago{% else %}several hours ago{% endif %}, but {%
+    if many %}have{% else %}has{% endif %} yet to be announced to the tracker.
+{%- else -%}
+    {%- if many %} are{% else %} is{% endif %} {% if final %}still {% endif %}not currently seeding by you (or anyone else).
+{%- endif %} You are encouraged to check your client to see that it is working correctly.
+
+{%- if final %}
+If {% if many %}these uploads are{% else %}this upload is{% endif %} not seeded within the next {%
+    if never %}day{% else %}few days{% endif %}, {% if many %}they{% else %}it{% endif %} will be removed.
+{%- else %}
+ We would be grateful if you could get {%
+    if many %}these uploads{% else %}this upload{% endif %} seeding within the next {%
+    if never %}two days{% else %}week{% endif %} to avoid {% if many %}their{% else %}its{% endif %} removal.
+{%- endif %} Remember, seeding uploads earn bonus points on {{ constant('SITE_NAME') }}.
+
+The exact details vary from client to client, but you will need to initiate a check and see that the torrent{%
+    if many %}s are{% else %} is{% endif %} seeding at 100%. If you still have the files but have lost the torrent file, {#
+    #}you may obtain a new copy by saving it from the [[n]DL] link. To check the state of an upload, click {%
+    if many %}one of the links{% else %}the link{% endif %} below and look at the "Last active" time. {#
+    #}For more information, please read [url=wiki.php?action=article&amp;id=77]this article[/url].
+{% for t in list %}
+[*] [pl]{{ t }}[/pl]
+{% endfor -%}
+
+If you no longer wish to receive these notifications, you may turn them off in [url=/user.php?action=edit&amp;userid=me#notification]your profile settings[/url]. At any time, you may view your [url=/torrents.php?userid=me&amp;type=uploaded-unseeded]unseeded uploads[/url] and your [url=/torrents.php?userid=me&amp;type=snatched-unseeded]unseeded snatches[/url].
+
+<3

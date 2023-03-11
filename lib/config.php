@@ -459,15 +459,42 @@ defined('IGNORE_PAGE_MAX_TIME') or define('IGNORE_PAGE_MAX_TIME', ['top10']);
 // It is easier to specify the first and second unseeded notifications
 // in terms of the interval remaining until reaping.
 
-define('MAX_NEVER_SEEDED_PER_RUN', 1000);
-define('REMOVE_NEVER_SEEDED_HOUR',   72);
-define('NOTIFY_NEVER_SEEDED_INITIAL_HOUR', 8); // 8 hours after upload
-define('NOTIFY_NEVER_SEEDED_FINAL_HOUR', REMOVE_NEVER_SEEDED_HOUR - 24);
+defined('MAX_NEVER_SEEDED_PER_RUN')         or define('MAX_NEVER_SEEDED_PER_RUN', 4000);
+defined('REMOVE_NEVER_SEEDED_HOUR')         or define('REMOVE_NEVER_SEEDED_HOUR',   72);
+defined('NOTIFY_NEVER_SEEDED_INITIAL_HOUR') or define('NOTIFY_NEVER_SEEDED_INITIAL_HOUR', 8); // 8 hours after upload
+defined('NOTIFY_NEVER_SEEDED_FINAL_HOUR')   or define('NOTIFY_NEVER_SEEDED_FINAL_HOUR', REMOVE_NEVER_SEEDED_HOUR - 24);
 
-define('MAX_UNSEEDED_PER_RUN', 1000);
-define('REMOVE_UNSEEDED_HOUR', 24 * 28); // 28 days
-define('NOTIFY_UNSEEDED_INITIAL_HOUR', REMOVE_UNSEEDED_HOUR - (24 * 10));
-define('NOTIFY_UNSEEDED_FINAL_HOUR',   REMOVE_UNSEEDED_HOUR - (24 *  3));
+defined('MAX_UNSEEDED_PER_RUN')         or define('MAX_UNSEEDED_PER_RUN', 4000);
+defined('REMOVE_UNSEEDED_HOUR')         or define('REMOVE_UNSEEDED_HOUR', 24 * 30); // 30 days
+defined('NOTIFY_UNSEEDED_INITIAL_HOUR') or define('NOTIFY_UNSEEDED_INITIAL_HOUR', REMOVE_UNSEEDED_HOUR - (24 * 10)); // 10 days before
+defined('NOTIFY_UNSEEDED_FINAL_HOUR')   or define('NOTIFY_UNSEEDED_FINAL_HOUR',   REMOVE_UNSEEDED_HOUR - (24 *  3)); // 3 days before
+
+// There is a single task that handles the various phases of reaping.
+// In normal operations you want to perform all of the phases, but in certain
+// circumstances you might wish to suspend one phase or another.
+// If you think you need to suspend all the phases, disable the task in the
+// scheduler instead.
+
+// Award winners who have begun to seed unseeded uploads
+defined('REAPER_TASK_CLAIM') or define('REAPER_TASK_CLAIM', true);
+
+// Look for new never seeded or unseeded uploads to process
+defined('REAPER_TASK_NOTIFY') or define('REAPER_TASK_NOTIFY', true);
+
+// Reap any expired unseeded torrents
+defined('REAPER_TASK_REMOVE_UNSEEDED') or define('REAPER_TASK_REMOVE_UNSEEDED', true);
+
+// Reap any expired never seeded torrents
+defined('REAPER_TASK_REMOVE_NEVER_SEEDED') or define('REAPER_TASK_REMOVE_NEVER_SEEDED', true);
+
+// How many notifications can a user receive in a single message
+defined('NOTIFY_REAPER_MAX_PER_USER') or define('NOTIFY_REAPER_MAX_PER_USER', 200);
+
+// How many users will be notified in a single run?
+defined('NOTIFY_REAPER_MAX_NOTIFICATION') or define('NOTIFY_REAPER_MAX_NOTIFICATION', 2500);
+
+// How much is the BP reward scaled up for a reseed?
+defined('REAPER_RESEED_REWARD_FACTOR') or define('REAPER_RESEED_REWARD_FACTOR', 1.25);
 
 // ------------------------------------------------------------------------
 // Source flag settings

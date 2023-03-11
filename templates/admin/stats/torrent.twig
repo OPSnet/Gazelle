@@ -138,6 +138,64 @@
             </table>
         </div>
     </div>
+</div>
 
+<div class="thin">
+    <div class="box">
+        <div class="head">Reaper information</div>
+        <div class="pad">
+            <h5>Claim statistics</h5>
+            <table>
+                <tr>
+                <th width="50%">Open</th>
+                <th width="50%">Claimed</th>
+                </tr>
+                <tr>
+                {% set stats = reaper.claimStats %}
+                <td>{{ stats.open|number_format }}</td>
+                <td>{{ stats.claimed|number_format }}</td>
+                </tr>
+            </table>
+
+            <br />
+            <h5>Unseeded statistics</h5>
+            <table>
+                <tr>
+                <th width="25%">Never seeded initial</th>
+                <th width="25%">Never seeded final</th>
+                <th width="25%">Unseeded initial</th>
+                <th width="25%">Unseeded final</th>
+                </tr>
+                <tr>
+                {% set stats = reaper.stats %}
+                <td>{{ stats.never_seeded_initial|number_format }}</td>
+                <td>{{ stats.never_seeded_final|number_format }}</td>
+                <td>{{ stats.unseeded_initial|number_format }}</td>
+                <td>{{ stats.unseeded_final|number_format }}</td>
+                </tr>
+            </table>
+
+            <br />
+            <h5>Timeline</h5>
+            <table>
+                <tr>
+                <th width="50%">Date</th>
+                <th width="50%">Total</th>
+                </tr>
+{% for date, total in reaper.timeline %}
+                <tr>
+                <td>{{ date }}</td>
+                <td>{{ total|number_format }}</td>
+                </tr>
+{% else %}
+                <tr>
+                <td colspan="2">There are no uploads in the reaper pipeline at this time.</td>
+                </tr>
+{% endfor %}
+            </table>
+
+        </div>
+        </div>
+    </div>
 </div>
 {{ footer() }}

@@ -24,11 +24,11 @@
         ]) }} /> Traditional
     </label>
 {% endmacro %}
-
+<div id="notification">
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="notification_settings">
     <tr class="colhead_dark">
         <td colspan="2">
-            <strong>Notification Settings</strong>
+            <a href="#notification"><strong>Notification Settings</strong></a>
         </td>
     </tr>
     <tr id="notif_autosubscribe_tr">
@@ -40,8 +40,26 @@
             <label for="autosubscribe">Enable automatic thread subscriptions</label>
         </td>
     </tr>
+    <tr id="notif_notifyunseededsnatch_tr">
+        <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you have snatched is no longer being seeded. You can reseed it to earn BP.">
+            <strong>Unseeded snatches alerts</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="notifyonunseededsnatch" id="notifyonunseededsnatch"{{ checked(not user.hasAttr('no-pm-unseeded-snatch')) }} />
+            <label for="notifyonunseededsnatch">Receive PM alerts when a snatched upload is not being seeded and faces imminent removal</label>
+        </td>
+    </tr>
+    <tr id="notif_notifyunseededupload_tr">
+        <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you have uploaded is no longer being seeded. You can reseed it to earn BP.">
+            <strong>Unseeded uploads alerts</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="notifyonunseededupload" id="notifyonunseededupload"{{ checked(not user.hasAttr('no-pm-unseeded-upload')) }} />
+            <label for="notifyonunseededupload">Receive PM alerts when one of your uploads is not being seeded and faces imminent removal</label>
+        </td>
+    </tr>
     <tr id="notif_notifyondeleteseeding_tr">
-        <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you're seeding is deleted.">
+        <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you are seeding is deleted.">
             <strong>Deleted seeding torrent alerts</strong>
         </td>
         <td>
@@ -65,15 +83,6 @@
         <td>
             <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ checked(user.notifyDeleteDownload) }} />
             <label for="notifyondeletedownloaded">Enable PM notification for deleted downloaded torrents</label>
-        </td>
-    </tr>
-    <tr id="notif_unseeded_tr">
-        <td class="label tooltip" title="Enabling this will send you a PM alert before your uploads are deleted for being unseeded.">
-            <strong>Unseeded torrent alerts</strong>
-        </td>
-        <td>
-            <input type="checkbox" name="unseededalerts" id="unseededalerts"{{ checked(user.notifyUnseeded) }} />
-            <label for="unseededalerts">Enable unseeded torrent alerts</label>
         </td>
     </tr>
 
@@ -176,3 +185,4 @@
         </td>
     </tr>
 </table>
+</div>

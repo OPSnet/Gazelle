@@ -111,10 +111,6 @@ class PM extends Base {
         return $this->info()['subject'];
     }
 
-    public function body(): string {
-        return $this->info()['body'];
-    }
-
     public function isReadable(): bool {
         return in_array($this->user->id(), $this->info()['sender_list'])
             || in_array($this->user->id(), $this->recipientList());

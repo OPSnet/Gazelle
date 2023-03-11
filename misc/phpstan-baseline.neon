@@ -3541,11 +3541,6 @@ parameters:
 			path: ../app/Torrent.php
 
 		-
-			message: "#^Method Gazelle\\\\Torrent\\\\Reaper\\:\\:deleteDeadTorrents\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Torrent/Reaper.php
-
-		-
 			message: "#^Cannot call method addFlag\\(\\) on bool\\|Gazelle\\\\TorrentAbstract\\.$#"
 			count: 1
 			path: ../app/Torrent/Report.php

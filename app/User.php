@@ -126,7 +126,6 @@ class User extends BaseObject {
                 ui.RestrictedForums,
                 ui.SiteOptions,
                 ui.SupportFor,
-                ui.UnseededAlerts,
                 ui.Warned,
                 uls.Uploaded,
                 uls.Downloaded,
@@ -978,6 +977,10 @@ class User extends BaseObject {
             ", $this->id
         );
         self::$db->prepared_query("
+            DELETE FROM user_has_attr WHERE UserID = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
             DELETE FROM users_leech_stats WHERE UserID = ?
             ", $this->id
         );
@@ -1407,10 +1410,6 @@ class User extends BaseObject {
             self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
-    }
-
-    public function notifyUnseeded(): bool {
-        return $this->info()['UnseededAlerts'] == '1';
     }
 
     public function notifyDeleteSeeding(): bool {

@@ -1,0 +1,14 @@
+{%- set total = notes|length -%}
+{%- set many = total > 1 -%}
+Dear {{ user.username }},
+
+{% if many %}{{ total|number_format }}{% else %}One%{% endif %} of your uploads {% if many %}have{% else %}has{%
+    endif %} been removed for inactivity (nobody has been seeding them). Assuming {% if many %}they{% else %}it{%
+    endif %} didn't break any rules (we hope), please feel free to re-upload {% if many %}them{% else %}it{% endif %}.
+
+The following upload{{ total|plural }} {% if many %}were{% else %}was{% endif %} removed:
+{% for n in notes %}
+[*] [url=torrents.php?id={{ n.tgroup.id }}]{{ n.name }}[/url]
+{% endfor %}
+
+Remember, seeding your uploads earns bonus points on {{ constant('SITE_NAME') }}.

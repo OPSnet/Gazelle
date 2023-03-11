@@ -420,6 +420,16 @@ class Torrent extends TorrentAbstract {
         $manager->softDelete(SQLDB, 'torrents_missing_lineage',        [['TorrentID', $this->id]]);
 
         self::$db->prepared_query("
+            DELETE FROM torrent_unseeded WHERE torrent_id = ?
+            ", $this->id
+        );
+
+        self::$db->prepared_query("
+            DELETE FROM torrent_unseeded_claim WHERE torrent_id = ?
+            ", $this->id
+        );
+
+        self::$db->prepared_query("
             INSERT INTO user_torrent_remove
                    (user_id, torrent_id)
             VALUES (?,       ?)

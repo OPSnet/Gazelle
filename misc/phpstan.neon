@@ -31,6 +31,10 @@ parameters:
         - FEATURE_EMAIL_REENABLE
         - LASTFM_API_KEY
         - OPEN_REGISTRATION
+        - REAPER_TASK_CLAIM
+        - REAPER_TASK_NOTIFY
+        - REAPER_TASK_REMOVE_NEVER_SEEDED
+        - REAPER_TASK_REMOVE_UNSEEDED
         - RECOVERY
         - RECOVERY_AUTOVALIDATE
         - RECOVERY_DB
@@ -54,6 +58,7 @@ parameters:
       message: '/^Property [^:]+::\$\w+ type has no value type specified in iterable type array\.$/'
       paths:
         -  ../app/*
+        -  ../tests/phpunit/*
     -
       message: '/^Variable \$(?:Cache|DB|Debug|SessionID|Twig|Viewer) might not be defined\.$/'
       paths:

@@ -1,0 +1,16 @@
+{%- set total = notes|length -%}
+{%- set many = total > 1 -%}
+Dear {{ user.username }},
+
+The following {% if many %}uploads were{% else %}upload was{% endif %} removed {#
+-#} because nobody was seeding {% if many %}them{% else %}it{% endif %}. If you still {#
+-#} have the files (and assuming it didn't break any rules), please feel free to {#
+-#} re-upload it. Keep in mind, though, if you had reseeded it, you would have {#
+-#} earned more bonus points than if you upload a fresh version.
+
+The following upload{{ total|plural }} {% if many %}were{% else %}was{% endif %} removed:
+{% for tgroup in list %}
+[*] [url=torrents.php?id={{ tgroup.id }}]{{ tgroup.name }}[/url]
+{% endfor %}
+
+Remember, seeding uploads earns bonus points on {{ constant('SITE_NAME') }}.

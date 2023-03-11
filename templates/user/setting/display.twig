@@ -1,8 +1,9 @@
 {% from 'macro/form.twig' import checked, selected %}
+<div id="torrent">
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="torrent_settings">
     <tr class="colhead_dark">
         <td colspan="2">
-            <strong>Torrent Settings</strong>
+            <a href="#torrent"><strong>Torrent Settings</strong></a>
         </td>
     </tr>
 
@@ -163,6 +164,7 @@
         </td>
     </tr>
 </table>
+</div>
 <script type="text/javascript" id="sortable_default">
     //<![CDATA[
     var sortable_list_default = '{{ release }}';
