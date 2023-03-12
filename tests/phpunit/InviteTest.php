@@ -9,9 +9,7 @@ class InviteTest extends TestCase {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
     }
 
-    public function tearDown(): void {}
-
-    public function testInvite() {
+    public function testInvite(): void {
         $creator = new Gazelle\UserCreator;
         $user = $creator
             ->setUsername('invite.' . randomString(6))
@@ -77,7 +75,7 @@ class InviteTest extends TestCase {
         $this->assertEquals(1, $invitee->remove(), 'invitee-removed');
     }
 
-    public function testEtm() {
+    public function testEtm(): void {
         $etm = (new Gazelle\UserCreator)
             ->setUsername('etm.' . randomString(6))
             ->setEmail(randomString(6) . "@etm.example.com")

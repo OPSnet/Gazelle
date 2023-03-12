@@ -17,11 +17,11 @@ if ($_POST['submit'] == 'Delete') {
 } else {
     $Val = new Gazelle\Util\Validator;
     $Val->setFields([
-        ['site', '1', 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]],
-        ['url', '1', 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]],
-        ['user', '1', 'string', 'The username must be set, and has a max length of 20 characters', ['maxlength' => 20]],
-        ['password', '0', 'string', 'The password must be set, and has a max length of 128 characters', ['maxlength' => 128]],
-        ['active', '1', 'checkbox', ''],
+        ['site', true, 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]],
+        ['url', true, 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]],
+        ['user', true, 'string', 'The username must be set, and has a max length of 20 characters', ['maxlength' => 20]],
+        ['password', false, 'string', 'The password must be set, and has a max length of 128 characters', ['maxlength' => 128]],
+        ['active', true, 'checkbox', ''],
     ]);
     if (!$Val->validate($_POST)) {
         error($Val->errorMessage());

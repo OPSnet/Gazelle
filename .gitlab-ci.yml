@@ -44,7 +44,7 @@ phpstan:
         - .composer
   script:
     - composer install --no-progress
-    - phpstan analyse --configuration misc/phpstan.neon
+    - phpstan analyse --no-progress --configuration misc/phpstan.neon
 
 e2e-tests:
   stage: test

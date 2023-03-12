@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task {
+    public function run(): void {
         self::$db->prepared_query("
             SELECT ID, torrent_pass
             FROM users_info AS i

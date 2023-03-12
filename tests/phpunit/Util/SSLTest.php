@@ -5,17 +5,13 @@ namespace Gazelle;
 use \PHPUnit\Framework\TestCase;
 
 class SSLTest extends TestCase {
-
     protected Manager\SSLHost $manager;
 
     public function setUp(): void {
         $this->manager = new Manager\SSLHost;
     }
 
-    public function tearDown(): void {
-    }
-
-    public function testAll() {
+    public function testAll(): void {
         $host = getenv('TEST_SSL_HOST');
         if ($host !== false) {
             $result = $this->manager->lookup($host, 443);

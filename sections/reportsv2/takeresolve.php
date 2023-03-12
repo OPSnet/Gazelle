@@ -1,4 +1,4 @@
-<?php
+    <?php
 /*
  * This is the backend of the AJAXy reports resolve (When you press the shiny submit button).
  * This page shouldn't output anything except in error. If you do want output, it will be put
@@ -14,6 +14,7 @@ authorize();
 
 $fromReportPage = !isset($_POST['from_delete']);
 $reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
+$userMan        = new Gazelle\Manager\User;
 
 $report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
 if (is_null($report)) {
@@ -44,12 +45,10 @@ if (!in_array($weeksWarned, range(0, 8))) {
 if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) {
     if ($_POST['comment']) {
         $comment = $_POST['comment'];
+    } elseif ($_POST['resolve_type'] === 'manual') {
+        $comment = 'Report was resolved manually.';
     } else {
-        if ($_POST['resolve_type'] === 'manual') {
-            $comment = 'Report was resolved manually.';
-        } elseif ($_POST['resolve_type'] === 'dismiss') {
-            $comment = 'Report was dismissed as invalid.';
-        }
+        $comment = 'Report was dismissed as invalid.';
     }
     if ($report->moderatorResolve($Viewer->id(), $comment)) {
         $Cache->delete_multi(['num_torrent_reportsv2', "reports_torrent_$torrentId"]);
@@ -64,6 +63,7 @@ if ($fromReportPage && !$report->moderatorResolve($Viewer->id(), $_POST['comment
     exit;
 }
 
+$SendPM = false;
 if ($_POST['resolve_type'] === 'tags_lots') {
     $report->addTorrentFlag(Gazelle\TorrentFlag::badTag, $Viewer);
     $SendPM = true;
@@ -94,7 +94,7 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
     $torrent->flush();
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
 } else {
-    [$ok, $message] = $torrent->remove(
+    [$ok, $message] = $torrent->remove( /** @phpstan-ignore-line */
         $Viewer->id(),
         sprintf('%s (%s)', $reportTypeName, $logMessage ?? 'none'),
         $report->reportType()->trackerReason()

@@ -27,7 +27,7 @@ if ($_POST['submit'] == 'Delete') { //Delete
                     ARRAY_FILTER_USE_KEY
                 )
             )
-        ) ?? 'a-0' // fallback to $id = 0, which will evaluate to false
+        )
     )[1];
     // The post fields will be either 'name' or 'name-234' (which is a bit of a hassle), so rename back to 'name' for the validator
     if ($id) {
@@ -37,9 +37,9 @@ if ($_POST['submit'] == 'Delete') { //Delete
     }
     $Val = new Gazelle\Util\Validator;
     $Val->setFields([
-        ['name', '1', 'regex', "The name must be set and has a max length of 50 characters", ['regex' => '/^[\w-]{2,50}$/i']],
-        ['sort', '1', 'number', 'Sort must be set'],
-        ['min_level', '1', 'number', 'MinLevel must be set'],
+        ['name', true, 'regex', "The name must be set and has a max length of 50 characters", ['regex' => '/^[\w-]{2,50}$/i']],
+        ['sort', true, 'number', 'Sort must be set'],
+        ['min_level', true, 'number', 'MinLevel must be set'],
     ]);
     if (!$Val->validate($_POST)) {
         error($Val->errorMessage());

@@ -29,8 +29,8 @@ Finish the GenerateJS stuff
 namespace Gazelle\Util;
 
 class Validator {
-    protected $Fields = [];
-    protected $errorMessage;
+    protected array $Fields = [];
+    protected string $errorMessage;
 
     /**
      * Add a new field to be validated (or used for JS form generation) from the associated array to be validated.
@@ -65,14 +65,8 @@ class Validator {
      *      - InArray (required), what value to check for within the value of the field/key in the validation array
      * - regex
      *      - Regex (required), regular expression string to use within preg_match
-     *
-     * @param string $FieldName
-     * @param bool   $Required
-     * @param string $FieldType
-     * @param string $ErrorMessage
-     * @param array  $Options
      */
-    public function setField($FieldName, $Required, $FieldType, $ErrorMessage, $Options = []) {
+    public function setField(string $FieldName, bool $Required, string $FieldType, string $ErrorMessage, array $Options = []): Validator {
         $this->Fields[$FieldName] = [
             'Type' => strtolower($FieldType),
             'Required' => $Required,
@@ -86,7 +80,7 @@ class Validator {
         return $this;
     }
 
-    public function setFields(array $fields) {
+    public function setFields(array $fields): Validator {
         foreach ($fields as $f) {
             [$name, $required, $type, $message] = $f;
             $options = count($f) === 5 ? $f[4] : [];
@@ -120,13 +114,9 @@ class Validator {
      * - regex: performs a preg_match of the value of Regex option and the field
      *
      * TODO: date fields are not actually validated, need to figure out what the proper validation syntax should be.
-     *
-     * @param array $ValidateArray
-     * @return bool true if validated, false if error (fetch with errorMessage method)
      */
-    function validate($ValidateArray) {
+    function validate(array $ValidateArray): bool {
         reset($this->Fields);
-        $this->errorMessage = null;
         foreach ($this->Fields as $FieldKey => $Field) {
             $ValidateVar = $ValidateArray[$FieldKey] ?? null;
 
@@ -243,14 +233,14 @@ class Validator {
                 }
             }
         }
-        return is_null($this->errorMessage);
+        return !isset($this->errorMessage);
     }
 
-    public function errorMessage() {
-        return $this->errorMessage;
+    public function errorMessage(): ?string {
+        return $this->errorMessage ?? null;
     }
 
-    public function generateJS($FormID) {
+    public function generateJS(string $FormID): string {
         $ReturnJS = "<script type=\"text/javascript\" language=\"javascript\">\r\n"
             . "//<![CDATA[\r\nfunction formVal() {\r\n    clearErrors('$FormID');\r\n";
 

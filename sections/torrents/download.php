@@ -69,7 +69,7 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
     // First make sure this isn't already FL, and if it is, do nothing
     if (!$torrent->hasToken($userId)) {
         $tokenCount = $torrent->tokenCount();
-        if (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1) { /** @phpstan-ignore-line */
+        if (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1) {
             json_or_error('This torrent is too large. Please use the regular DL link.');
         }
         $db->begin_transaction();

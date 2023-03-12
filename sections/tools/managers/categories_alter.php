@@ -21,8 +21,8 @@ if ($_POST['submit'] == 'Delete') {
     // Edit & Create
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
-        ['name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['range' => [1, 40]]],
-        ['sort', '1', 'number', 'Sequence must be set'],
+        ['name', true, 'string', 'The name must be set, and has a max length of 40 characters', ['range' => [1, 40]]],
+        ['sort', true, 'number', 'Sequence must be set'],
     ]);
     if (!$validator->validate($_POST)) {
         error($validator->errorMessage());

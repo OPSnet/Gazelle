@@ -11,7 +11,7 @@ if (!$Viewer->permitted('admin_reports') && !$Viewer->permitted('site_moderate_f
 $ReportID = (int) $_POST['reportid'];
 
 $db = Gazelle\DB::DB();
-$Type = $db->scalar("
+$Type = (string)$db->scalar("
     SELECT Type
     FROM reports
     WHERE ID = ?

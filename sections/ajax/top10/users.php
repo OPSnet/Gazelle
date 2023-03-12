@@ -112,7 +112,7 @@ print json_encode([
     'response' => $OuterResults
 ]);
 
-function generate_user_json($Caption, $Tag, $Details, $Limit) {
+function generate_user_json(string $Caption, string $Tag, array $Details, int $Limit): array {
     $results = [];
     foreach ($Details as $Detail) {
         $results[] = [
@@ -129,7 +129,7 @@ function generate_user_json($Caption, $Tag, $Details, $Limit) {
     return [
         'caption' => $Caption,
         'tag' => $Tag,
-        'limit' => (int)$Limit,
+        'limit' => $Limit,
         'results' => $results
     ];
 }

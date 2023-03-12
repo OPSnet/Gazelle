@@ -2,16 +2,11 @@
 
 namespace Gazelle\Util;
 
-use Format;
-
 class SortableTableHeader {
     private const SORT_DIRS = ['asc' => 'desc', 'desc' => 'asc', '' => ''];
 
-    /** @var string */
-    private $currentSortKey;
-
-    /** @var string */
-    private $currentSortDir;
+    private string $currentSortKey;
+    private string $currentSortDir;
 
     /**
      * SortableTableHeader constructor.
@@ -51,7 +46,7 @@ class SortableTableHeader {
             : self::SORT_DIRS[$this->current()['defaultSort']];
     }
 
-    public function emit($outputKey) {
+    public function emit(string $outputKey): string {
         $outputData = $this->getData($outputKey);
         // Fail silently if we have nothing to output
         if (!isset($outputData) || empty($outputData['text'])) {
@@ -79,7 +74,7 @@ class SortableTableHeader {
         return $this->getData($this->currentSortKey);
     }
 
-    public function getData($sortKey): ?array {
+    public function getData(string $sortKey): ?array {
         return $this->labelMap[$sortKey] ?? null;
     }
 

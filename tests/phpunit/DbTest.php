@@ -5,7 +5,7 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class DbTest extends TestCase {
-    public function testTableCoherency() {
+    public function testTableCoherency(): void {
         $db = Gazelle\DB::DB();
         $db->prepared_query($sql = "
              SELECT replace(table_name, 'deleted_', '') as table_name
@@ -22,19 +22,19 @@ class DbTest extends TestCase {
         }
     }
 
-    public function testGlobalStatus() {
+    public function testGlobalStatus(): void {
         $status = (new Gazelle\DB)->globalStatus();
         $this->assertGreaterThan(500, count($status), 'db-global-status');
         $this->assertEquals('server-cert.pem', $status['Current_tls_cert']['Value'], 'db-current-tls-cert');
     }
 
-    public function testGlobalVariables() {
+    public function testGlobalVariables(): void {
         $list = (new Gazelle\DB)->globalVariables();
         $this->assertGreaterThan(500, count($list), 'db-global-variables');
         $this->assertEquals('ON', $list['foreign_key_checks']['Value'], 'db-foreign-key-checks-on');
     }
 
-    public function testLongRunning() {
+    public function testLongRunning(): void {
         $this->assertEquals(0, (new Gazelle\DB)->longRunning(), 'db-long-running');
     }
 }

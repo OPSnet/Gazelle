@@ -129,7 +129,7 @@ class Bookmark extends \Gazelle\BaseUser {
     }
 
     public function torrentArtistTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) AS total
             FROM bookmarks_torrents b
             INNER JOIN torrents_artists ta USING (GroupID)
@@ -155,7 +155,7 @@ class Bookmark extends \Gazelle\BaseUser {
     }
 
     public function torrentTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM bookmarks_torrents b
             INNER JOIN torrents t USING (GroupID)
@@ -208,7 +208,7 @@ class Bookmark extends \Gazelle\BaseUser {
      */
     public function create(string $type, int $id): bool {
         [$table, $column] = $this->schema($type);
-        if (self::$db->scalar("
+        if ((bool)self::$db->scalar("
             SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
             ", $this->user->id(), $id
         )) {

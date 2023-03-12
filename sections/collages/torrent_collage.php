@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @var \Gazelle\Collage $Collage
+ * @var int              $CollageCovers
+ * @var int              $CollageID
+ * @var array            $CollagePages
+ * @var int              $NumGroups
+ */
+
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $bookmark = new Gazelle\User\Bookmark($Viewer);
@@ -71,7 +79,7 @@ if ($Viewer->permitted('zip_downloader')) {
         [$GroupID, $OptionID, $OptName] = $Option;
         if ($GroupID != $LastGroupID) {
             $LastGroupID = $GroupID;
-            if ($OpenGroup) {
+            if ($OpenGroup) { /** @phpstan-ignore-line */
 ?>
                     </optgroup>
 <?php        } ?>

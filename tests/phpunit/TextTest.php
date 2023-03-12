@@ -9,11 +9,11 @@ class TextTest extends TestCase {
     /**
      * @dataProvider dataTeX
      */
-    public function testTeX(string $name, string $bbcode, string $expected) {
+    public function testTeX(string $name, string $bbcode, string $expected): void {
         $this->assertEquals($expected, Text::full_format($bbcode), $name);
     }
 
-    public function dataTeX() {
+    public function dataTeX(): array {
         return [
             ['text-tex-basic',  '[tex]some formula[/tex]',                '<katex>some formula</katex>'],
             ['text-tex-outer',  '[size=4][tex]some formula[/tex][/size]', '<span class="size4"><katex>some formula</katex></span>'],
@@ -92,7 +92,7 @@ class TextTest extends TestCase {
         ];
     }
 
-    public function testCollage() {
+    public function testCollage(): void {
         $admin   = (new Gazelle\Manager\User)->find('@admin');
         $name    = 'collage ' . randomString(6);
         $collage = (new Gazelle\Manager\Collage)->create($admin, 1, $name, 'phpunit collage', 'jazz,disco', new Gazelle\Log);
@@ -110,7 +110,7 @@ class TextTest extends TestCase {
         $this->assertEquals(1, $collage->remove(), 'text-remove-collage');
     }
 
-    public function testForum() {
+    public function testForum(): void {
         Text::setViewer((new Gazelle\Manager\User)->find('@admin'));
         $name  = 'forum ' . randomString(6);
         $forum = (new Gazelle\Manager\Forum)->create(
@@ -133,8 +133,8 @@ class TextTest extends TestCase {
         $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
     }
 
-    public function testForumThread() {
-        $postId = Gazelle\DB::DB()->scalar("
+    public function testForumThread(): void {
+        $postId = (int)Gazelle\DB::DB()->scalar("
             SELECT min(fp.ID)
             FROM forums_posts fp
             INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
@@ -156,7 +156,7 @@ class TextTest extends TestCase {
         );
     }
 
-    public function dataList() {
+    public function dataList(): array {
         return [
             ['text-list-a', <<<END_BB
 [*] one
@@ -224,7 +224,7 @@ END_HTML],
         $this->assertEquals($expected, Text::full_format($bbcode), $name);
     }
 
-    public function testStrip() {
+    public function testStrip(): void {
         $url = 'https://www.example.com';
         $this->assertEquals(
             'https://www.example.com/a.png https://www.example.com/b.png https://www.example.com here',
@@ -233,7 +233,7 @@ END_HTML],
         );
     }
 
-    public function testTOC() {
+    public function testTOC(): void {
         Text::$TOC = true;
         $html = Text::full_format(<<<END_BB
 ==== BIG ====
@@ -272,8 +272,8 @@ END_HTML;
         Text::$TOC = false;
     }
 
-    public function testTorrent() {
-        $id = Gazelle\DB::DB()->scalar("
+    public function testTorrent(): void {
+        $id = (int)Gazelle\DB::DB()->scalar("
             SELECT min(t.ID)
             FROM torrents t
             INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)

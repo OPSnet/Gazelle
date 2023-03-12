@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class LowerLoginAttempts extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class LowerLoginAttempts extends \Gazelle\Schedule\Task {
+    public function run(): void {
         self::$db->prepared_query('
             UPDATE login_attempts
             SET Attempts = Attempts - 1

@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class RemoveExpiredWarnings extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class RemoveExpiredWarnings extends \Gazelle\Schedule\Task {
+    public function run(): void {
         $queryId = self::$db->prepared_query("
             SELECT UserID
             FROM users_info

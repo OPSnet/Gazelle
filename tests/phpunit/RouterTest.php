@@ -14,7 +14,7 @@ class RouterTest extends TestCase {
         unset($_REQUEST['auth']);
     }
 
-    public function testBasic() {
+    public function testBasic(): void {
         $router = new Router('auth');
         $this->assertFalse($router->hasRoutes());
         $router->addGet('action1', 'path');
@@ -28,7 +28,7 @@ class RouterTest extends TestCase {
         $this->assertTrue($router->hasRoutes());
     }
 
-    public function testAddRoutes() {
+    public function testAddRoutes(): void {
         $router = new Router();
         $router->authorizePost(false);
         $router->addRoute(['GET', 'POST'], 'action', 'path');
@@ -38,28 +38,28 @@ class RouterTest extends TestCase {
         $this->assertEquals('path', $router->getRoute('action'));
     }
 
-    public function testAuthorizeGet() {
+    public function testAuthorizeGet(): void {
         $router = new Router('auth23');
         $router->addGet('action', 'path', true);
         $_REQUEST['auth'] = 'auth23';
         $this->assertEquals('path', $router->getRoute('action'));
     }
 
-    public function testHasGets() {
+    public function testHasGets(): void {
         $router = new Router();
         $this->assertFalse($router->hasRoutes());
         $router->addGet('action', '');
         $this->assertTrue($router->hasRoutes());
     }
 
-    public function testHasPosts() {
+    public function testHasPosts(): void {
         $router = new Router();
         $this->assertFalse($router->hasRoutes());
         $router->addPost('action', '');
         $this->assertTrue($router->hasRoutes());
     }
 
-    public function testInvalidRoute() {
+    public function testInvalidRoute(): void {
         $router = new Router();
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $this->expectException(\Gazelle\Exception\RouterException::class);
@@ -67,7 +67,7 @@ class RouterTest extends TestCase {
         $router->getRoute('invalid');
     }
 
-    public function testNoAuthGet() {
+    public function testNoAuthGet(): void {
         $router = new Router();
         $router->authorizeGet();
         $router->addGet('action', 'path');
@@ -76,7 +76,7 @@ class RouterTest extends TestCase {
         $router->getRoute('action');
     }
 
-    public function testNoAuthPost() {
+    public function testNoAuthPost(): void {
         $router = new Router();
         $router->addPost('action', 'test2');
         $_SERVER['REQUEST_METHOD'] = 'POST';
@@ -85,7 +85,7 @@ class RouterTest extends TestCase {
         $router->getRoute('action');
     }
 
-    public function testInvalidAuth() {
+    public function testInvalidAuth(): void {
         $router = new Router('auth');
         $router->addPost('action', 'test_path');
         $_SERVER['REQUEST_METHOD'] = 'POST';

@@ -348,10 +348,7 @@ class Artist extends Base {
         return $foundRedirectId > 0 ? (int)$foundRedirectId : $redirectId;
     }
 
-    /**
-     * @return int|void
-     */
-    public function addAlias(int $userId, string $name, int $redirect) {
+    public function addAlias(int $userId, string $name, int $redirect): int {
         self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, Redirect, UserID)

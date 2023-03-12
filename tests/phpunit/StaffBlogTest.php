@@ -5,7 +5,7 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class StaffBlogTest extends TestCase {
-    public function testStaffBlog() {
+    public function testStaffBlog(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $mod = (new Gazelle\UserCreator)
             ->setUsername('mod.' . randomString(6))

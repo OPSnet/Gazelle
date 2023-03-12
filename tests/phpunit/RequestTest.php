@@ -23,7 +23,7 @@ class RequestTest extends TestCase {
         );
     }
 
-    public function testCreate() {
+    public function testCreate(): void {
         $userMan  = new Gazelle\Manager\User;
         $admin    = $userMan->find('@admin');
         $user     = $userMan->find('@user');
@@ -164,7 +164,7 @@ class RequestTest extends TestCase {
             'bounty-size'  => $user->stats()->requestBountySize(),
             'bounty-total' => $user->stats()->requestBountyTotal(),
         ];
-        $torrentId = Gazelle\DB::DB()->scalar("SELECT min(ID) FROM torrents");
+        $torrentId = (int)Gazelle\DB::DB()->scalar("SELECT min(ID) FROM torrents");
         $torrent = (new Gazelle\Manager\Torrent)->findById($torrentId);
         $this->assertInstanceOf(Gazelle\Torrent::class, $torrent, 'request-torrent-filler');
         $this->assertEquals(1, $request->fill($user, $torrent), 'request-fill');

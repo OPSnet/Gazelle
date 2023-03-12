@@ -56,11 +56,11 @@ class Cache extends \Memcached {
         }
         foreach ($Servers as $Server) {
             $ServerCheck = isset($ServerList["{$Server['host']}:{$Server['port']}"]);
-            if ($Server['port'] == 0) {
+            if ($Server['port'] == 0) { /** @phpstan-ignore-line */
                 $ServerCheck = $ServerCheck || isset($ServerList["{$Server['host']}:11211"]);
             }
             if (!$ServerCheck) {
-                $Weight = $Server['weight'] ?? 0;
+                $Weight = $Server['weight'] ?? 0; /** @phpstan-ignore-line */
                 $this->addServer($Server['host'], $Server['port'], $Weight);
             }
         }
@@ -83,7 +83,7 @@ class Cache extends \Memcached {
         return $result;
     }
 
-    public function get_value(string $key) {
+    public function get_value(string $key): mixed {
         $begin = microtime(true);
         if (empty($key)) {
             $value = false;
@@ -99,7 +99,7 @@ class Cache extends \Memcached {
     }
 
     // Wrapper for Memcache::delete. For a reason, see above.
-    public function delete_value(string $key) {
+    public function delete_value(string $key): bool {
         $begin = microtime(true);
         if (empty($key)) {
             $ret = false;
@@ -113,7 +113,7 @@ class Cache extends \Memcached {
         $this->elapsed += (microtime(true) - $begin) * 1000;
         return $ret;
     }
-    public function delete_multi(array $list) {
+    public function delete_multi(array $list): array|false {
         $begin = microtime(true);
         if (empty($list)) {
             $ret = false;
@@ -129,7 +129,7 @@ class Cache extends \Memcached {
         return $ret;
     }
 
-    public function increment_value(string $key, int $delta = 1): int {
+    public function increment_value(string $key, int $delta = 1): int|false {
         $begin = microtime(true);
         $new = $this->increment($key, $delta);
         if (!isset($this->hit[$key])) {
@@ -140,7 +140,7 @@ class Cache extends \Memcached {
         return $new;
     }
 
-    public function decrement_value($key, $delta = 1): int {
+    public function decrement_value($key, $delta = 1): int|false {
         $begin = microtime(true);
         $new = $this->decrement($key, $delta);
         if (!isset($this->hit[$key])) {

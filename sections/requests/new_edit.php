@@ -359,7 +359,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MiB</option>
                             <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GiB</option>
                         </select>
-                        <?= REQUEST_TAX > 0 ? "<strong><?= REQUEST_TAX * 100 ?>% of this is deducted as tax by the system.</strong>" : '' ?>
+                        <?= REQUEST_TAX > 0.0 ? "<strong><?= REQUEST_TAX * 100 ?>% of this is deducted as tax by the system.</strong>" : '' ?>
                         <p>Bounty must be greater than or equal to <?= REQUEST_MIN ?> MiB.</p>
                     </td>
                 </tr>
@@ -370,7 +370,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         <input type="hidden" id="current_uploaded" value="<?=$Viewer->uploadedSize()?>" />
                         <input type="hidden" id="current_downloaded" value="<?=$Viewer->downloadedSize()?>" />
                         <input type='hidden' id='request_tax' value="<?=REQUEST_TAX?>" />
-                        <?= REQUEST_TAX > 0
+                        <?= REQUEST_TAX > 0.0
                             ? 'Bounty after tax: <strong><span id="bounty_after_tax">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span></strong><br />'
                             : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>

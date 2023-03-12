@@ -18,10 +18,10 @@ if ($p['submit'] == 'Delete') {
 } else {
     $Val = new Gazelle\Util\Validator;
     $Val->setFields([
-        ['name', '1', 'string', 'The name must be set, and has a max length of 64 characters', ['maxlength' => 64]],
-        ['classname', '1', 'string', 'The class name must be set, and has a max length of 32 characters', ['maxlength' => 32]],
-        ['description', '1', 'string', 'The description must be set, and has a max length of 255 characters', ['maxlength' => 255]],
-        ['interval', '1', 'number', 'The interval must be a number'],
+        ['name', true, 'string', 'The name must be set, and has a max length of 64 characters', ['maxlength' => 64]],
+        ['classname', true, 'string', 'The class name must be set, and has a max length of 32 characters', ['maxlength' => 32]],
+        ['description', true, 'string', 'The description must be set, and has a max length of 255 characters', ['maxlength' => 255]],
+        ['interval', true, 'number', 'The interval must be a number'],
     ]);
     $err = $Val->validate($p) ? false : $Val->errorMessage();
 

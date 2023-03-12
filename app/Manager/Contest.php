@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Contest extends \Gazelle\Base {
-
     public function findById(int $contestId): ?\Gazelle\Contest {
         $id = self::$db->scalar("
             SELECT contest_id FROM contest WHERE contest_id = ?
@@ -56,10 +55,8 @@ class Contest extends \Gazelle\Base {
 
     /**
      * Get the current contest
-     *
-     * @return \Gazelle\Contest (or null if no contest is running)
      */
-    public function currentContest() {
+    public function currentContest(): ?\Gazelle\Contest {
         return $this->findById(
             (int)self::$db->scalar("
                 SELECT contest_id

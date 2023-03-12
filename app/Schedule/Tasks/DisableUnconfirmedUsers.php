@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task {
+    public function run(): void {
         // get a list of user IDs for clearing cache keys
         self::$db->prepared_query("
             SELECT UserID

@@ -14,12 +14,12 @@ $collageMan = new Gazelle\Manager\Collage;
 
 $Val = new Gazelle\Util\Validator;
 if ($categoryId != COLLAGE_PERSONAL_ID || $Viewer->permitted('site_collages_renamepersonal')) {
-    $Val->setField('name', '1', 'string', 'The name must be between 3 and 100 characters', ['range' => [3, 100]]);
+    $Val->setField('name', true, 'string', 'The name must be between 3 and 100 characters', ['range' => [3, 100]]);
     $name = trim($_POST['name']);
 } else {
     $name = $collageMan->personalCollageName($Viewer->username());
 }
-$Val->setField('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['range' => [10, 65535]]);
+$Val->setField('description', true, 'string', 'The description must be between 10 and 65535 characters', ['range' => [10, 65535]]);
 $Err = $Val->validate($_POST) ? false : $Val->errorMessage();
 
 if (!$Err && $categoryId === COLLAGE_PERSONAL_ID) {

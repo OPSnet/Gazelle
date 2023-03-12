@@ -19,9 +19,7 @@ class ForumTest extends TestCase {
         $this->userMan   = new \Gazelle\Manager\User;
     }
 
-    public function tearDown(): void {}
-
-    public function testCategory() {
+    public function testCategory(): \Gazelle\ForumCategory {
         $initial = count($this->fcatMan->forumCategoryList()); // from phinx seeds
 
         $category = $this->fcatMan->create('Main', 10);
@@ -48,7 +46,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testCategory
      */
-    public function testForum(\Gazelle\ForumCategory $category) {
+    public function testForum(\Gazelle\ForumCategory $category): \Gazelle\Forum {
         $initial      = count($this->forumMan->nameList());
         $tocTotal     = count($this->forumMan->tableOfContentsMain());
         $user         = $this->userMan->find('@user');
@@ -121,7 +119,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testForum
      */
-    public function testThread(\Gazelle\Forum $forum) {
+    public function testThread(\Gazelle\Forum $forum): \Gazelle\ForumThread {
         $admin = $this->userMan->find('@admin');
 
         $thread = $this->threadMan->create($forum, $admin->id(), 'thread title', 'this is a new thread');
@@ -149,7 +147,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testThread
      */
-    public function testNote(\Gazelle\ForumThread $thread) {
+    public function testNote(\Gazelle\ForumThread $thread): void {
         $admin  = $this->userMan->find('@admin');
 
         $threadNote = 'this is a note';
@@ -164,7 +162,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testForum
      */
-    public function testAccess(\Gazelle\Forum $forum) {
+    public function testAccess(\Gazelle\Forum $forum): void {
         $secretLevel  = $this->userMan->find('@admin')->effectiveClass();
         $secret = $this->forumMan->create(
             sequence:      200,
@@ -199,7 +197,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testThread
      */
-    public function testPost(\Gazelle\ForumThread $thread) {
+    public function testPost(\Gazelle\ForumThread $thread): void {
         $forum  = $thread->forum();
 
         $user = $this->userMan->find('@user');
@@ -264,7 +262,7 @@ class ForumTest extends TestCase {
     /**
      * @depends testThread
      */
-    public function testPoll(\Gazelle\ForumThread $thread) {
+    public function testPoll(\Gazelle\ForumThread $thread): void {
         $answer = ['apple', 'banana', 'carrot'];
         $poll = $this->pollMan->create($thread->id(), 'Best food', $answer);
         $this->assertInstanceOf('\\Gazelle\\ForumPoll', $poll, 'forum-poll-is-forum-poll');

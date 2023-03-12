@@ -8,16 +8,16 @@ if (!($_REQUEST['action'] == 'add_artist' || $_REQUEST['action'] == 'add_artist_
 
 if (isset($_POST['collage_combo']) && (int)$_POST['collage_combo']) {
     // From artist page
-    $collageId = (int)$_POST['collage_combo'];
+    $collageId = $_POST['collage_combo'];
 } elseif (isset($_POST['collage_ref']) && preg_match('@' . SITE_URL . '.*?(?:id=)?(\d+)(?:&|\s*$)?@', $_POST['collage_ref'], $match)) {
     // From artist page
     $collageId = $match[1];
 } else {
     // From collage page
-    $collageId = (int)$_POST['collageid'];
+    $collageId = $_POST['collageid'];
 }
 $collageMan = new Gazelle\Manager\Collage;
-$collage = $collageMan->findById($collageId);
+$collage = $collageMan->findById((int)$collageId);
 if (is_null($collage)) {
     error(404);
 }

@@ -11,6 +11,7 @@ if (is_null($User)) {
 
 $UserID      = $User->id();
 $Username    = $User->username();
+$Class       = $User->primaryClass();
 
 $userBonus   = new Gazelle\User\Bonus($User);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
@@ -61,7 +62,7 @@ $DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->
     : $User->title();
 
 $Paranoia = ($Preview == 1) ? explode(',', $_GET['paranoia']) : $User->paranoia();
-function check_paranoia_here($Setting) {
+function check_paranoia_here(string $Setting): int|false {
     global $Paranoia, $Class, $UserID, $Preview;
     if ($Preview == 1) {
         return check_paranoia($Setting, $Paranoia ?? [], $Class);
@@ -223,7 +224,8 @@ if (($Override = check_paranoia_here('artistsadded'))) {
                 <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
 <?php
 }
-if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
+$previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
+if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
 ?>
                 <li<?= $User->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
                     ? 'Server busy'

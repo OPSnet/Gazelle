@@ -58,7 +58,7 @@ if (in_array($_REQUEST['action'] ?? '', ['', 'editblog'])) {
     echo $Twig->render('staffblog/edit.twig', [
         'action'    => empty($_REQUEST['action']) ? 'create' : 'edit',
         'auth'      => $Viewer->auth(),
-        'blog'      => $blog,
+        'blog'      => $blog ?? null,
         'show_form' => !isset($_REQUEST['action']) || $_REQUEST['action'] !== 'editblog',
     ]);
 }

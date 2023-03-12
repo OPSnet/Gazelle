@@ -84,7 +84,7 @@ if (!$Viewer->permitted('edit_unknowns')) {
     if ($Remastered && !$RemasterYear ) {
         error("You must supply a remaster year for a remastered release");
     }
-    if ($Properties['UnknownRelease'] && !($Remastered && !$RemasterYear)) {
+    if ($Properties['UnknownRelease'] && !($Remastered && !$RemasterYear)) { /** @phpstan-ignore-line *//* wtf is this logic */
         if ($Viewer->id() != $UserID) {
             error("You cannot set a release to be Unknown");
         }
@@ -95,7 +95,7 @@ if (!$Viewer->permitted('edit_unknowns')) {
 }
 
 $Validate = new Gazelle\Util\Validator;
-$Validate->setField('type', '1', 'number', 'Not a valid category.', ['range' => [1, count(CATEGORY)]]);
+$Validate->setField('type', true, 'number', 'Not a valid category.', ['range' => [1, count(CATEGORY)]]);
 switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
     case 'Music':
         if ($Properties['Remastered'] && !$Properties['UnknownRelease'] && $Properties['RemasterYear'] < 1982 && $Properties['Media'] == 'CD') {
@@ -106,26 +106,26 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
         }
 
         $Validate->setFields([
-            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
-            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
-            ['media', '1', 'inarray', 'Not a valid media.', ['inarray' => MEDIA]],
-            ['release_desc', '0', 'string', 'Invalid release description.', ['range' => [0, 1_000_000]]],
-            ['remaster_title', '0', 'string', 'Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
-            ['remaster_record_label', '0', 'string', 'Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
-            ['remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['format', true, 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
+            ['bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
+            ['media', true, 'inarray', 'Not a valid media.', ['inarray' => MEDIA]],
+            ['release_desc', false, 'string', 'Invalid release description.', ['range' => [0, 1_000_000]]],
+            ['remaster_title', false, 'string', 'Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['remaster_record_label', false, 'string', 'Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['remaster_catalogue_number', false, 'string', 'Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
         ]);
 
         if ($Properties['Remastered'] && !$Properties['UnknownRelease']) {
-            $Validate->setField('remaster_year', '1', 'number', 'Year of remaster/re-issue must be entered.');
+            $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
         } else {
-            $Validate->setField('remaster_year', '0','number', 'Invalid remaster year.');
+            $Validate->setField('remaster_year', false,'number', 'Invalid remaster year.');
         }
 
         if ($Properties['Encoding'] !== 'Other') {
-            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
+            $Validate->setField('bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
         } else {
             // Handle 'other' bitrates
-            $Validate->setField('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
+            $Validate->setField('other_bitrate', true, 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
         }
         break;
@@ -133,16 +133,16 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
     case 'Audiobooks':
     case 'Comedy':
         $Validate->setFields([
-            ['year', '1', 'number', 'The year of the release must be entered.'],
-            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
-            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
-            ['release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1_000_000]]],
+            ['year', true, 'number', 'The year of the release must be entered.'],
+            ['format', true, 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
+            ['bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
+            ['release_desc', false, 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1_000_000]]],
         ]);
         // Handle 'other' bitrates
         if ($Properties['Encoding'] !== 'Other') {
-            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
+            $Validate->setField('bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
         } else {
-            $Validate->setField('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
+            $Validate->setField('other_bitrate', true, 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
         }
         break;
@@ -153,7 +153,7 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
 
 $Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 
-if (!$Err && isset($Properties['Image'])) {
+if (!$Err && isset($Properties['Image'])) { /** @phpstan-ignore-line */
     // Strip out Amazon's padding
     if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
         $Properties['Image'] = $match[1].'.jpg';

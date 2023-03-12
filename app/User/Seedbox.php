@@ -22,32 +22,32 @@ class Seedbox extends \Gazelle\BaseUser {
         $this->build();
     }
 
-    protected function flush() {
+    protected function flush(): Seedbox {
         self::$cache->delete_value(self::SUMMARY_KEY . $this->user->id());
         return $this;
     }
 
-    public function setUnion(bool $isUnion) {
+    public function setUnion(bool $isUnion): Seedbox {
         $this->isUnion = $isUnion;
         return $this;
     }
 
-    public function setSource(string $source) {
+    public function setSource(string $source): Seedbox {
         $this->source = $this->hashid->decode($source)[0];
         return $this;
     }
 
-    public function setTarget(string $target) {
+    public function setTarget(string $target): Seedbox {
         $this->target = $this->hashid->decode($target)[0];
         return $this;
     }
 
-    public function setViewByName() {
+    public function setViewByName(): Seedbox {
         $this->viewBy = self::VIEW_BY_NAME;
         return $this;
     }
 
-    public function setViewByPath() {
+    public function setViewByPath(): Seedbox {
         $this->viewBy = self::VIEW_BY_PATH;
         return $this;
     }
@@ -56,8 +56,8 @@ class Seedbox extends \Gazelle\BaseUser {
     public function hostList(): array { return $this->host; }
     public function freeList(): array { return $this->free; }
 
-    public function name(string $id): ?string {
-        return self::$db->scalar("
+    public function name(string $id): string {
+        return (string)self::$db->scalar("
             SELECT name
             FROM user_seedbox
             WHERE user_id = ?
@@ -107,7 +107,7 @@ class Seedbox extends \Gazelle\BaseUser {
     public function total(): int {
         return !(isset($this->source) && isset($this->target))
             ? 0
-            : self::$db->scalar("
+            : (int)self::$db->scalar("
                 SELECT count(*) " . $this->buildFrom(),
                 $this->user->id(), $this->source, $this->user->id(), $this->target
             );
@@ -141,9 +141,9 @@ class Seedbox extends \Gazelle\BaseUser {
             $list[] = [
                 'id'       => $tid,
                 'folder'   => $torrent->path(),
-                'sortname' => $tgroup()->name(),
+                'sortname' => $tgroup->name(),
                 'artist'   => $tgroup->categoryName() == 'Music'
-                    ? $tgroup()->artistRole()->link()
+                    ? $tgroup->artistRole()->link()
                     : '&mdash;',
                 'name'     => $torrent->fullLink(),
             ];

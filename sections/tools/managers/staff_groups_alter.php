@@ -16,8 +16,8 @@ if ($_POST['submit'] == 'Delete') {
 } else {
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
-        ['sort', '1', 'number', 'Sort must be set'],
-        ['name', '1', 'string', 'Name must be set, and has a max length of 50 characters', ['maxlength' => 50]],
+        ['sort', true, 'number', 'Sort must be set'],
+        ['name', true, 'string', 'Name must be set, and has a max length of 50 characters', ['maxlength' => 50]],
     ]);
     if (!$validator->validate($_POST)) {
         error($validator->errorMessage());

@@ -61,7 +61,7 @@ class User extends BaseObject {
         setcookie('session', '', [
             'expires'  => time() - 60 * 60 * 24 * 90,
             'path'     => '/',
-            'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
+            'secure'   => !DEBUG_MODE,
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
@@ -185,19 +185,19 @@ class User extends BaseObject {
         }
 
         $forumAccess = $privilege->allowedForumList(); // grants from secondary classes
-        $allowed = array_map('intval', explode(',', $this->info['PermittedForums']) ?: []);
+        $allowed = array_map('intval', explode(',', $this->info['PermittedForums']));
         foreach ($allowed as $forumId) {
             if ($forumId) {
                 $forumAccess[$forumId] = true;
             }
         }
-        $allowed = array_map('intval', explode(',', $this->info['primaryForum']) ?: []);
+        $allowed = array_map('intval', explode(',', $this->info['primaryForum']));
         foreach ($allowed as $forumId) {
             if ($forumId) {
                 $forumAccess[$forumId] = true;
             }
         }
-        $forbidden = array_map('intval', explode(',', $this->info['RestrictedForums']) ?: []);
+        $forbidden = array_map('intval', explode(',', $this->info['RestrictedForums']));
         foreach ($forbidden as $forumId) {
             // forbidden may override permitted
             if ($forumId) {
@@ -704,7 +704,7 @@ class User extends BaseObject {
             if ($result === PARANOIA_HIDE) {
                 return PARANOIA_HIDE;
             }
-            if ($final === PARANOIA_OVERRIDDEN && $result = PARANOIA_ALLOWED) {
+            if ($final === PARANOIA_OVERRIDDEN && $result === PARANOIA_ALLOWED) {
                 continue;
             }
             $final = $result;
@@ -813,8 +813,6 @@ class User extends BaseObject {
     /**
      * Return the list for forum IDs to which the user has been banned.
      * (Note that banning takes precedence of permitting).
-     *
-     * @return array of forum ids
      */
     public function forbiddenForums(): array {
         return array_keys(array_filter($this->info()['forum_access'], fn ($v) => $v === false));
@@ -822,8 +820,6 @@ class User extends BaseObject {
 
     /**
      * Return the list for forum IDs to which the user has been granted special access.
-     *
-     * @return array of forum ids
      */
     public function permittedForums(): array {
         return array_keys(array_filter($this->info()['forum_access'], fn ($v) => $v === true));
@@ -974,6 +970,18 @@ class User extends BaseObject {
             ", $this->id
         );
         self::$db->prepared_query("
+            DELETE FROM user_bonus WHERE user_id = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
+            DELETE FROM user_flt WHERE user_id = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
+            DELETE FROM users_leech_stats WHERE UserID = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
             DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
@@ -1053,7 +1061,7 @@ class User extends BaseObject {
                     Comment = concat(Comment, '\n', now(), ' - ', ?)
                 ", $this->id, $warning, $warning
             );
-            $changed = $changed || self::$db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
+            $changed = self::$db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
             $this->forumWarning = [];
         }
         if (!empty($this->staffNote)) {

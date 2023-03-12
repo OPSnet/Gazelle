@@ -258,7 +258,7 @@ class Users extends \Gazelle\Base {
      */
     public function newUsersAllowed(\Gazelle\User $user): bool {
         return (
-               USER_LIMIT == 0 /** @phpstan-ignore-line */
+               USER_LIMIT == 0
             || $this->enabledUserTotal() < USER_LIMIT
             || $user->permitted('site_can_invite_always')
         );

@@ -51,7 +51,7 @@ class StaffPMTest extends TestCase {
 
     public function tearDown(): void {}
 
-    public function testCreate() {
+    public function testCreate(): void {
         $spm = $this->spMan->create($this->user, 0, 'for FLS', 'message handled by FLS');
         $this->assertNotNull($spm, 'spm-fls-create');
         $this->assertEquals(0, $spm->assignedUserId(), 'spm-fls-no-assignedUser');
@@ -114,7 +114,7 @@ class StaffPMTest extends TestCase {
         $spm->resolve($this->sysop);
     }
 
-    public function testSysop() {
+    public function testSysop(): void {
         $spm = $this->spMan->create($this->fls, 1000, 'for sysop', 'message handled by SYSOP');
         $this->assertEquals(1000, $spm->classLevel(), 'spm-sysop-classlevel-sysop');
         $this->assertEquals('Sysop', $spm->userclassName(), 'spm-sysop-userclass');
@@ -125,7 +125,7 @@ class StaffPMTest extends TestCase {
         $this->assertEquals(1, $this->spMan->countAtLevel($this->sysop, ['Unanswered']), 'spm-sysop-unanswered');
     }
 
-    public function testMany() {
+    public function testMany(): void {
         $list = [
             $this->spMan->create($this->user, 0, 'for fls', 'message handled by fls'),
             $this->spMan->create($this->user, 0, 'for fls', 'message handled by fls'),
@@ -145,7 +145,7 @@ class StaffPMTest extends TestCase {
         $this->assertEquals($total - 1, $this->spMan->countByStatus($this->fls, ['Unanswered']), 'spm-many-fls-less');
     }
 
-    public function testCommonAnswer() {
+    public function testCommonAnswer(): void {
         $this->assertCount(0, $this->spMan->commonAnswerList(), 'spm-common-0');
         $answer = 'because we can';
         $first = $this->spMan->createCommonAnswer('why', $answer);

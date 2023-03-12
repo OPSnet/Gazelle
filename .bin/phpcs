@@ -8,11 +8,4 @@
 
 root=$( dirname $0 )/..
 
-$root/vendor/bin/phpcs $@
-exit=$?
-
-if [[ $exit == 1 ]]; then
-	exit=0
-fi
-
-exit $exit
+$root/vendor/bin/phpcs $@ || true

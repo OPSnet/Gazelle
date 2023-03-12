@@ -17,11 +17,7 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
 {% if error or delta > 0 or watch.nrAttempts > 0 %}
     <div class="warning-login">
     {% if error %}
-        {% if error == constant('\\Gazelle\\Login::ERR_USERNAME') %}
-        You must supply a valid username.
-        {% elseif error == constant('\\Gazelle\\Login::ERR_PASSWORD') %}
-        You must supply a valid password.
-        {% elseif error == constant('\\Gazelle\\Login::ERR_CREDENTIALS') %}
+        {% if error == constant('\\Gazelle\\Login::ERR_CREDENTIALS') %}
         Your login credentials were not recognized.<br />
         Please double check your username and password.<br />
         If previously enabled, you must supply a valid two-factor authentication code.<br />

@@ -6,7 +6,7 @@ use Gazelle\Util\Mail;
 
 class DisableInactiveUsers extends \Gazelle\Schedule\Task
 {
-    protected function userQuery($minDays, $maxDays) {
+    protected function userQuery($minDays, $maxDays): void {
         self::$db->prepared_query("
             SELECT um.Username, um.Email, um.ID
             FROM users_main AS um
@@ -29,7 +29,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         );
     }
 
-    public function run() {
+    public function run(): void {
         // Send email
         $this->userQuery(110, 111);
         $mail = new Mail;

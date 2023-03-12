@@ -18,6 +18,8 @@ help:
 	echo '  mysqldump          - dump mysql database from docker to db/data/gazelle.sql'
 	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db   - signal Ocelot to reload from database'
+	echo '  phpstan-analyse    - run phpstan over the code
+	echo '  phpstan-baseline   - generate a new phpstan baseline
 	echo '  test               - run all linters and unit test suite'
 	echo '  twig-flush         - purge the Twig cache'
 	echo '  update             - pull from git and run production composer install'
@@ -59,6 +61,14 @@ lint-twig:
 .PHONY: mysqldump
 mysqldump:
 	mysqldump -h 127.0.0.1 -P 36000 -u gazelle --password=password -d gazelle --skip-add-drop-table --skip-add-locks --single-transaction | sed 's/ AUTO_INCREMENT=[0-9]*//g' > db/data/gazelle.sql
+
+.PHONY: phpstan-analyse
+phpstan-analyse:
+	vendor/bin/phpstan analyse --memory-limit=512M --configuration=misc/phpstan.neon
+
+.PHONY: phpstan-baseline
+phpstan-baseline:
+	vendor/bin/phpstan analyse --memory-limit=512M --configuration=misc/phpstan.neon --generate-baseline misc/phpstan-baseline.neon
 
 .PHONY: ocelot-reload-conf
 ocelot-reload-conf:

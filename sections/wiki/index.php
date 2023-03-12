@@ -1,6 +1,6 @@
 <?php
 
-function class_list($Selected = 0) {
+function class_list(int $Selected = 0): string {
     global $Viewer;
     $Return = '';
     $Classes = (new Gazelle\Manager\User)->classList();

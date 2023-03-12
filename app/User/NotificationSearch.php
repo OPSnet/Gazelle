@@ -74,7 +74,7 @@ class NotificationSearch extends \Gazelle\BaseUser {
     }
 
     public function total(): int {
-        return self::$db->scalar($this->totalSql(), ...$this->args);
+        return (int)self::$db->scalar($this->totalSql(), ...$this->args);
     }
 
     public function clearUnread(array $torrentIdList): int {

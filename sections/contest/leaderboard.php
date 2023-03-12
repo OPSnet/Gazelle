@@ -1,5 +1,7 @@
 <?php
 
+/** @var Gazelle\Manager\Contest $contestMan */
+
 $prior = $contestMan->priorContests();
 if (!empty($_POST['leaderboard'])) {
     $contest = new Gazelle\Contest((int)$_POST['leaderboard']);

@@ -14,9 +14,9 @@ if ($_POST) {
         } elseif ($_POST['task'] === 'add') {
             $val = new Gazelle\Util\Validator;
             $val->setFields([
-                ['class', '1', 'number', 'class must be set'],
-                ['factor', '1', 'number', 'factor must be set (usually, a number larger than 1.0)', ['minlength' => 1, 'allowperiod' => true]],
-                ['overshoot', '1', 'number', 'overshoot must be set', ['minlength' => 1]],
+                ['class', true, 'number', 'class must be set'],
+                ['factor', true, 'number', 'factor must be set (usually, a number larger than 1.0)', ['minlength' => 1, 'allowperiod' => true]],
+                ['overshoot', true, 'number', 'overshoot must be set', ['minlength' => 1]],
             ]);
             if (!$val->validate($_POST)) {
                 error($val->errorMessage());

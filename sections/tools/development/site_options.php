@@ -18,9 +18,9 @@ if ($Viewer->permitted('admin_manage_permissions') && isset($_POST['submit'])) {
     } else {
         $Val = new Gazelle\Util\Validator;
         $Val->setFields([
-            ['name', '1', 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', ['regex' => '/^[a-z][-_a-z0-9]{0,63}$/i']],
-            ['value', '1', 'string', 'You must specify a value for the option.'],
-            ['comment', '1', 'string', 'You must specify a comment for the option.'],
+            ['name', true, 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', ['regex' => '/^[a-z][-_a-z0-9]{0,63}$/i']],
+            ['value', true, 'string', 'You must specify a value for the option.'],
+            ['comment', true, 'string', 'You must specify a comment for the option.'],
         ]);
         if (!$Val->validate($_POST)) {
             error($Val->errorMessage());

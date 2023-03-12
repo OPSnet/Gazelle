@@ -35,7 +35,7 @@ class SQLMatcher {
         protected string $key,
     ) {}
 
-    public function matchField($field) {
+    public function matchField(string $field): string {
         return match ($this->key) {
             'regexp' => "$field REGEXP ?",
             'strict' => "$field = ?",
@@ -43,7 +43,7 @@ class SQLMatcher {
         };
     }
 
-    public function left_match($field) {
+    public function left_match(string $field): string {
         return match ($this->key) {
             'regexp' => "$field REGEXP ?",
             'strict' => "$field = ?",
@@ -51,7 +51,7 @@ class SQLMatcher {
         };
     }
 
-    public function op($field, $compare) {
+    public function op(string $field, string $compare): string {
         return match ($compare) {
             'above'           => "$field > ?",
             'below'           => "$field < ?",
@@ -63,7 +63,7 @@ class SQLMatcher {
         };
     }
 
-    public function date($field, $compare) {
+    public function date(string $field, string $compare): string {
         return match ($compare) {
             'after'   => "$field > ? + INTERVAL 1 DAY",
             'before'  => "$field < ?",
@@ -73,7 +73,7 @@ class SQLMatcher {
     }
 }
 
-function option($field, $value, $label) {
+function option(string $field, string $value, string $label): string {
     return sprintf('<option value="%s"%s>%s</option>',
         $value,
         ($_GET[$field] ?? '') === $value ? ' selected="selected"' : '',
@@ -142,32 +142,32 @@ if (empty($_GET)) {
 
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
-        ['avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]],
-        ['bounty', '0', 'inarray', "Invalid bounty field", $OffNumberChoices],
-        ['cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]],
-        ['comment', '0', 'string', 'Comment is too long.', ['maxlength' => 512]],
-        ['disabled_invites', '0', 'inarray', 'Invalid disabled_invites field', $YesNo],
-        ['disabled_uploads', '0', 'inarray', 'Invalid disabled_uploads field', $YesNo],
-        ['downloaded', '0', 'inarray', 'Invalid downloaded field', $NumberChoices],
-        ['enabled', '0', 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]],
-        ['join1', '0', 'regexp', 'Invalid join1 field', $DateRegexp],
-        ['join2', '0', 'regexp', 'Invalid join2 field', $DateRegexp],
-        ['joined', '0', 'inarray', 'Invalid joined field', $DateChoices],
-        ['lastactive', '0', 'inarray', 'Invalid lastactive field', $DateChoices],
-        ['lastactive1', '0', 'regexp', 'Invalid lastactive1 field', $DateRegexp],
-        ['lastactive2', '0', 'regexp', 'Invalid lastactive2 field', $DateRegexp],
-        ['lockedaccount', '0', 'inarray', 'Invalid locked account field', ['inarray' => ['any', 'locked', 'unlocked']]],
-        ['matchtype', '0', 'inarray', 'Invalid matchtype field', ['inarray' => ['strict', 'fuzzy', 'regexp']]],
-        ['order', '0', 'inarray', 'Invalid ordering', $OrderVals],
-        ['passkey', '0', 'string', 'Invalid passkey', ['maxlength' => 32]],
-        ['ratio', '0', 'inarray', 'Invalid ratio field', $NumberChoices],
-        ['secclass', '0', 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]],
-        ['seeding', '0', 'inarray', "Invalid seeding field", $OffNumberChoices],
-        ['snatched', '0', 'inarray', "Invalid snatched field", $OffNumberChoices],
-        ['stylesheet', '0', 'inarray', 'Invalid stylesheet', ['inarray' => array_keys($Stylesheets)]],
-        ['uploaded', '0', 'inarray', 'Invalid uploaded field', $NumberChoices],
-        ['warned', '0', 'inarray', 'Invalid warned field', $Nullable],
-        ['way', '0', 'inarray', 'Invalid way', $WayVals],
+        ['avatar', false, 'string', 'Avatar URL too long', ['maxlength' => 512]],
+        ['bounty', false, 'inarray', "Invalid bounty field", $OffNumberChoices],
+        ['cc', false, 'inarray', 'Invalid Country Code', ['maxlength' => 2]],
+        ['comment', false, 'string', 'Comment is too long.', ['maxlength' => 512]],
+        ['disabled_invites', false, 'inarray', 'Invalid disabled_invites field', $YesNo],
+        ['disabled_uploads', false, 'inarray', 'Invalid disabled_uploads field', $YesNo],
+        ['downloaded', false, 'inarray', 'Invalid downloaded field', $NumberChoices],
+        ['enabled', false, 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]],
+        ['join1', false, 'regexp', 'Invalid join1 field', $DateRegexp],
+        ['join2', false, 'regexp', 'Invalid join2 field', $DateRegexp],
+        ['joined', false, 'inarray', 'Invalid joined field', $DateChoices],
+        ['lastactive', false, 'inarray', 'Invalid lastactive field', $DateChoices],
+        ['lastactive1', false, 'regexp', 'Invalid lastactive1 field', $DateRegexp],
+        ['lastactive2', false, 'regexp', 'Invalid lastactive2 field', $DateRegexp],
+        ['lockedaccount', false, 'inarray', 'Invalid locked account field', ['inarray' => ['any', 'locked', 'unlocked']]],
+        ['matchtype', false, 'inarray', 'Invalid matchtype field', ['inarray' => ['strict', 'fuzzy', 'regexp']]],
+        ['order', false, 'inarray', 'Invalid ordering', $OrderVals],
+        ['passkey', false, 'string', 'Invalid passkey', ['maxlength' => 32]],
+        ['ratio', false, 'inarray', 'Invalid ratio field', $NumberChoices],
+        ['secclass', false, 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]],
+        ['seeding', false, 'inarray', "Invalid seeding field", $OffNumberChoices],
+        ['snatched', false, 'inarray', "Invalid snatched field", $OffNumberChoices],
+        ['stylesheet', false, 'inarray', 'Invalid stylesheet', ['inarray' => array_keys($Stylesheets)]],
+        ['uploaded', false, 'inarray', 'Invalid uploaded field', $NumberChoices],
+        ['warned', false, 'inarray', 'Invalid warned field', $Nullable],
+        ['way', false, 'inarray', 'Invalid way', $WayVals],
     ]);
     if (!$validator->validate($_GET)) {
         error($validator->errorMessage());
@@ -176,8 +176,6 @@ if (empty($_GET)) {
     $m = new SQLMatcher($matchMode);
     $Where = [];
     $Args = [];
-    $Having = [];
-    $HavingArgs = [];
     $Join = [];
     $Distinct = false;
     $Order = '';
@@ -329,7 +327,8 @@ if (empty($_GET)) {
     }
 
     if (isset($_GET['ratio']) && !empty($_GET['ratio']) && isset($_GET['ratio1']) && strlen($_GET['ratio1'])) {
-        $Decimals = strlen(array_pop(explode('.', $_GET['ratio1'])));
+        $frac = explode('.', $_GET['ratio1']);
+        $Decimals = strlen(end($frac));
         if (!$Decimals) {
             $Decimals = 0;
         }
@@ -451,11 +450,8 @@ if (empty($_GET)) {
     if ($Distinct) {
         $SQL .= "\nGROUP BY um1.ID";
     }
-    if (count($Having)) {
-        $SQL .= "\nHAVING " . implode(' AND ', $Having);
-    }
     $db = Gazelle\DB::DB();
-    $paginator->setTotal($db->scalar($SQL, ...array_merge($Args, $HavingArgs)) ?? 0);
+    $paginator->setTotal((int)$db->scalar($SQL, ...$Args));
 
     $SQL = "SELECT $columns $from " . implode("\n", $Join);
     if (count($Where)) {
@@ -464,12 +460,9 @@ if (empty($_GET)) {
     if ($Distinct) {
         $SQL .= "\nGROUP BY um1.ID";
     }
-    if (count($Having)) {
-        $SQL .= "\nHAVING " . implode(' AND ', $Having);
-    }
     $SQL .= "\n$Order LIMIT ? OFFSET ?";
 
-    $db->prepared_query($SQL, ...array_merge($Args, $HavingArgs, [$paginator->limit(), $paginator->offset()]));
+    $db->prepared_query($SQL, ...array_merge($Args, [$paginator->limit(), $paginator->offset()]));
     $Results = $db->to_array(false, MYSQLI_ASSOC, false);
     foreach ($Results as &$r) {
         $r['user'] = $userMan->findById($r['user_id']);

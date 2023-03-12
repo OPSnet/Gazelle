@@ -4,11 +4,11 @@ if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
 
-function uid ($id) {
+function uid (int $id): string {
     return sprintf("%s(%d)", posix_getpwuid($id)['name'], $id);
 }
 
-function gid ($id) {
+function gid (int $id): string {
     return sprintf("%s(%d)", posix_getgrgid($id)['name'], $id);
 }
 

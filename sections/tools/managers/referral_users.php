@@ -21,14 +21,14 @@ $Username  = $_GET['username'];
 $Invite    = $_GET['invite'];
 
 if (!empty($StartDate)) {
-    [$Y, $M, $D] = explode('-', $StartDate);
+    [$Y, $M, $D] = array_map('intval', explode('-', $StartDate));
     if (!checkdate($M, $D, $Y)) {
         $StartDate = null;
     }
 }
 
 if (!empty($EndDate)) {
-    [$Y, $M, $D] = explode('-', $EndDate);
+    [$Y, $M, $D] = array_map('intval', explode('-', $EndDate));
     if (!checkdate($M, $D, $Y)) {
         $EndDate = null;
     }

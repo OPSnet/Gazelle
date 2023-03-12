@@ -12,6 +12,7 @@ if (!$reportId || !$id || is_null($type)) {
 }
 
 require_once('array.php');
+/** @var array $Types */
 $reportType = $Types[$type];
 
 $user = null;
@@ -22,7 +23,6 @@ if (!isset($Return)) {
     }
     if ($user->id() === $Viewer->id()) {
         error("You cannot start a conversation with yourself!");
-        header('Location: inbox.php');
     }
 }
 
@@ -84,7 +84,6 @@ switch ($type) {
 
     default:
         error('Incorrect type');
-        break;
 }
 
 echo $Twig->render('report/compose-reply.twig', [

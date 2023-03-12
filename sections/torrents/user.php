@@ -279,7 +279,7 @@ if (empty($groupBy)) {
 }
 
 $db = Gazelle\DB::DB();
-$torrentCount = $db->scalar("
+$torrentCount = (int)$db->scalar("
     SELECT count(*) FROM (
         SELECT t.ID $havingColumns
         FROM torrents AS t

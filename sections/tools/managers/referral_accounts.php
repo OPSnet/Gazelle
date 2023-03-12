@@ -1,6 +1,6 @@
 <?php
 
-function type_list($Types, $Selected = 0) {
+function type_list(array $Types, int $Selected = 0): string {
     $Ret = '';
     foreach ($Types as $id => $name) {
         $Ret .= "<option value=\"$id\"";

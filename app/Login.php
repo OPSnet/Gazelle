@@ -4,10 +4,8 @@ namespace Gazelle;
 
 class Login extends Base {
     final public const NO_ERROR = 0;
-    final public const ERR_USERNAME    = 1;
-    final public const ERR_PASSWORD    = 2;
-    final public const ERR_CREDENTIALS = 3;
-    final public const ERR_UNCONFIRMED = 4;
+    final public const ERR_CREDENTIALS = 1;
+    final public const ERR_UNCONFIRMED = 2;
 
     protected int $error = self::NO_ERROR;
     protected bool $persistent = false;
@@ -79,7 +77,7 @@ class Login extends Base {
                 );
             }
         }
-        usleep(600000 - (microtime(true) - $begin));
+        usleep((int)(600000 - (microtime(true) - $begin)));
         return $user;
     }
 
@@ -90,26 +88,6 @@ class Login extends Base {
      * @return \Gazelle\User|null a User object if the credentials are successfully authenticated
      */
     protected function attemptLogin(): ?User {
-        if (is_null($this->username)) {
-            $this->error = self::ERR_USERNAME;
-            return null;
-        } elseif (is_null($this->password)) {
-            $this->error = self::ERR_PASSWORD;
-            return null;
-        }
-        $validator = new Util\Validator;
-        $validator->setFields([
-            ['username', true, 'regex', self::ERR_USERNAME, ['regex' => USERNAME_REGEXP]],
-            ['password', '1', 'string', self::ERR_PASSWORD, ['minlength' => 6]],
-        ]);
-        if (!$validator->validate([
-            'password' => $this->password,
-            'username' => $this->username,
-        ])) {
-            $this->error = $validator->errorMessage();
-            return null;
-        }
-
         // we have all we need to go forward
         $userMan = new Manager\User;
         $user = $userMan->findByUsername($this->username);

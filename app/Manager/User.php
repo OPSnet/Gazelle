@@ -296,7 +296,7 @@ class User extends \Gazelle\BaseManager {
         return $staffClassList;
     }
 
-    public function staffListGrouped() {
+    public function staffListGrouped(): array {
         if (($staff = self::$cache->get_value('idstaff')) === false) {
             self::$db->prepared_query("
                 SELECT sg.Name as staffGroup,
@@ -368,17 +368,15 @@ class User extends \Gazelle\BaseManager {
 
     /**
      * Get total number of userflow changes (for pagination)
-     *
-     * @return int number of results
      */
     public function userflowTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM (
                 SELECT 1
                 FROM users_info
                 GROUP BY DATE_FORMAT(coalesce(BanDate, JoinDate), '%Y-%m-%d')
             ) D
-        ") ?? 0;
+        ");
     }
 
     /**
@@ -458,7 +456,7 @@ class User extends \Gazelle\BaseManager {
     /**
      * Flush the cached count of enabled users.
      */
-    public function flushEnabledUsersCount() {
+    public function flushEnabledUsersCount(): User {
         self::$cache->delete_value('stats_user_count');
         return $this;
     }
@@ -498,7 +496,7 @@ class User extends \Gazelle\BaseManager {
      * return int number of users
      */
     public function totalRatioWatchUsers(): int {
-        return self::$db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
+        return (int)self::$db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
     }
 
     /**
@@ -529,7 +527,7 @@ class User extends \Gazelle\BaseManager {
      * @return int number of users
      */
     public function totalBannedForRatio(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM users_info WHERE BanDate IS NOT NULL AND BanReason = '2'
         ");
     }
@@ -593,7 +591,7 @@ class User extends \Gazelle\BaseManager {
         return $convId;
     }
 
-    protected function deliverPM(int $toId, int $fromId, string $subject, string $body, int $convId) {
+    protected function deliverPM(int $toId, int $fromId, string $subject, string $body, int $convId): void {
         self::$db->prepared_query("
             UPDATE pm_conversations_users SET
                 InInbox = '1',
@@ -631,7 +629,7 @@ class User extends \Gazelle\BaseManager {
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId
         );
-        (new Notification)->push($toId,
+        (new Notification)->push([$toId],
             "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', Notification::INBOX
         );
     }
@@ -722,11 +720,11 @@ class User extends \Gazelle\BaseManager {
      * @return int 1 if user was warned
      */
     public function warn(int $userId, int $duration, string $reason, string $staffName): int {
-        $current = self::$db->scalar("
+        $current = (string)self::$db->scalar("
             SELECT Warned FROM users_info WHERE UserID = ?
             ", $userId
         );
-        if (is_null($current)) {
+        if (!$current) {
             // User was not already warned
             self::$cache->delete_value("u_$userId");
             $warnTime = Time::offset($duration);
@@ -836,8 +834,8 @@ class User extends \Gazelle\BaseManager {
         return $this->setDonorVisibility($user, true);
     }
 
-    public function donorRewardTotal() {
-        return self::$db->scalar("
+    public function donorRewardTotal(): int {
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_main AS um
             INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)

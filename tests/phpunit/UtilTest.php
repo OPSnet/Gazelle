@@ -5,11 +5,7 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class UtilTest extends TestCase {
-    public function setUp(): void {}
-
-    public function tearDown(): void {}
-
-    public function testUtil() {
+    public function testUtil(): void {
         $this->assertEquals(2,    article(2),       'article-2-a');
         $this->assertEquals(3,    article(3, 'an'), 'article-3-an');
         $this->assertEquals('a',  article(1),       'article-1-a');
@@ -63,7 +59,7 @@ class UtilTest extends TestCase {
         $this->assertEquals('abcdefghij…', shortenString('abcdefghijklm', 10, false), 'shorten-string-13-shorten-ellipsis');
     }
 
-    public function testFormat() {
+    public function testFormat(): void {
         $this->assertFalse(ratio(0, 0),                  'format-ratio-0-0-x');
         $this->assertFalse(ratio(0, 0, 4),               'format-ratio-0-0-4');
         $this->assertEquals('∞',       ratio(1, 0),      'format-ratio-1-0-4');

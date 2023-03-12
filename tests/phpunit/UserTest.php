@@ -11,10 +11,7 @@ class UserTest extends TestCase {
         $this->userMan = new \Gazelle\Manager\User;
     }
 
-    public function tearDown(): void {
-    }
-
-    public function testAdmin() {
+    public function testAdmin(): void {
         $admin = $this->userMan->find('@admin');
         $this->assertTrue($admin->isStaff(), 'admin-is-admin');
         $this->assertTrue($admin->permitted('site_upload'), 'admin-permitted-site_upload');
@@ -25,7 +22,7 @@ class UserTest extends TestCase {
     /**
      * @depends testUser
      */
-    public function testAttr() {
+    public function testAttr(): void {
         $user = $this->userMan->findById(2);
 
         $this->assertFalse($user->hasUnlimitedDownload(), 'uattr-hasUnlimitedDownload');
@@ -68,7 +65,7 @@ class UserTest extends TestCase {
     /**
      * @depends testUser
      */
-    public function testPassword() {
+    public function testPassword(): void {
         $user = $this->userMan->findById(2);
         $this->assertTrue($user->validatePassword('password'), 'utest-password-validate');
         $password = randomString(30);
@@ -81,7 +78,7 @@ class UserTest extends TestCase {
         $user->updatePassword('password', '0.0.0.0');
     }
 
-    public function testUser() {
+    public function testUser(): void {
         $user = $this->userMan->findById(2);
         $this->assertEquals($user->username(), 'user', 'utest-username');
         $this->assertEquals($user->username(), $user->flush()->username(), 'utest-flush-username');

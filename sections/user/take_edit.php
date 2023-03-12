@@ -24,18 +24,18 @@ $userId = $user->id();
 
 $validator = new Gazelle\Util\Validator;
 $validator->setFields([
-    ['stylesheet', 1, "number", "You forgot to select a stylesheet."],
-    ['styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => CSS_REGEXP]],
-    ['postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
-    ['collagecovers', 1, "number", "You forgot to select your collage option."],
-    ['avatar', 0, "regex", "You did not enter a valid avatar URL.", ['regex' => IMAGE_REGEXP]],
-    ['email', 1, "email", "You did not enter a valid email address."],
-    ['irckey', 0, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['range' => [6, 32]]],
-    ['new_pass_1', 0, "regex",
+    ['stylesheet', true, "number", "You forgot to select a stylesheet."],
+    ['styleurl', false, "regex", "You did not enter a valid stylesheet URL.", ['regex' => CSS_REGEXP]],
+    ['postsperpage', true, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
+    ['collagecovers', true, "number", "You forgot to select your collage option."],
+    ['avatar', false, "regex", "You did not enter a valid avatar URL.", ['regex' => IMAGE_REGEXP]],
+    ['email', true, "email", "You did not enter a valid email address."],
+    ['irckey', false, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['range' => [6, 32]]],
+    ['new_pass_1', false, "regex",
         "You did not enter a valid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol.",
         ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']
     ],
-    ['new_pass_2', 1, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']],
+    ['new_pass_2', true, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']],
 ]);
 if (!$validator->validate($_POST)) {
     error($validator->errorMessage());

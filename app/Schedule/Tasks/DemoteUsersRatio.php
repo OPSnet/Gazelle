@@ -2,17 +2,15 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class DemoteUsersRatio extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class DemoteUsersRatio extends \Gazelle\Schedule\Task {
+    public function run(): void {
         $userMan = new \Gazelle\Manager\User;
         foreach ($userMan->demotionCriteria() as $criteria) {
             $this->demote($criteria['To'], $criteria['Ratio'], $criteria['Upload'], $criteria['From'], $userMan);
         }
     }
 
-    private function demote(int $newClass, float $ratio, int $upload, array $demoteClasses, \Gazelle\Manager\User $userMan) {
+    private function demote(int $newClass, float $ratio, int $upload, array $demoteClasses, \Gazelle\Manager\User $userMan): void {
         $classString = $userMan->userclassName($newClass);
         $placeholders = placeholders($demoteClasses);
         $query = self::$db->prepared_query("

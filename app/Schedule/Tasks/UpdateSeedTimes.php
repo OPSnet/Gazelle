@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class UpdateSeedTimes extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class UpdateSeedTimes extends \Gazelle\Schedule\Task {
+    public function run(): void {
         self::$db->prepared_query('
             INSERT INTO xbt_files_history (uid, fid, seedtime)
                 SELECT DISTINCT uid, fid, 1

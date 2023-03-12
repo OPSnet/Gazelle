@@ -1,6 +1,6 @@
 <?php
 
-if (!FEATURE_EMAIL_REENABLE) { /** @phpstan-ignore-line */
+if (!FEATURE_EMAIL_REENABLE) {
     header("Location: index.php");
     exit;
 }

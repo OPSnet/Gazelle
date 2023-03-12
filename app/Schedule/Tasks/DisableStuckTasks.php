@@ -5,10 +5,8 @@ namespace Gazelle\Schedule\Tasks;
 use Gazelle\Util\Irc;
 use Gazelle\Util\Time;
 
-class DisableStuckTasks extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class DisableStuckTasks extends \Gazelle\Schedule\Task {
+    public function run(): void {
         // If a task fails with a fatal error it will be stuck in a `running` state forever
         self::$db->prepared_query("
             SELECT pth.periodic_task_id, pth.periodic_task_history_id, pth.launch_time, pt.name

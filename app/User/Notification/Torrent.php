@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class Torrent extends AbstractNotification {
-
     public function className(): string {
         return 'confirmation';
     }
@@ -33,7 +32,7 @@ class Torrent extends AbstractNotification {
     }
 
     public function total(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM users_notify_torrents WHERE UserID = ?
             ", $this->user->id()
         );
@@ -42,7 +41,7 @@ class Torrent extends AbstractNotification {
     public function unread(): int {
         $total = self::$cache->get_value('user_notify_upload_' . $this->user->id());
         if ($total === false) {
-            $total = self::$db->scalar("
+            $total = (int)self::$db->scalar("
                 SELECT count(*)
                 FROM users_notify_torrents
                 WHERE UnRead = 1

@@ -19,11 +19,11 @@ if (isset($_POST['username'])) {
 
     if ($user) {
         if ($user->isDisabled()) {
-            if (FEATURE_EMAIL_REENABLE) { /** @phpstan-ignore-line */
+            if (FEATURE_EMAIL_REENABLE) {
                 setcookie('username', urlencode($user->username()), [
                     'expires'  => time() + 60 * 60,
                     'path'     => '/',
-                    'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
+                    'secure'   => !DEBUG_MODE,
                     'httponly' => true,
                     'samesite' => 'Lax',
                 ]);
@@ -53,7 +53,7 @@ if (isset($_POST['username'])) {
             setcookie('session', $session->cookie($current['SessionID']), [
                 'expires'  => (int)$login->persistent() * (time() + 60 * 60 * 24 * 90),
                 'path'     => '/',
-                'secure'   => !DEBUG_MODE,  /** @phpstan-ignore-line */
+                'secure'   => !DEBUG_MODE,
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);

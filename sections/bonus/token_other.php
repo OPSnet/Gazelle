@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @var array  $Item
+ * @var string $Label
+ * @var int    $Price
+ */
+
 if (isset($_POST['confirm'])) {
     authorize();
     if (empty($_POST['user'])) {

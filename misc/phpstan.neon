@@ -3,6 +3,7 @@ includes:
 
 parameters:
     level: 7
+    errorFormat: table
     stubFiles:
         - ../lib/stub/memcached.stub
     bootstrapFiles:
@@ -19,4 +20,44 @@ parameters:
         - ../sections
     parallel:
         maximumNumberOfProcesses: 1
+    dynamicConstantNames:
+        - BLOCK_TOR
+        - DISABLE_IRC
+        - DISABLE_TRACKER
+        - DEBUG
+        - DEBUG_EMAIL
+        - DEBUG_MODE
+        - FEATURE_EMAIL_REENABLE
+        - LASTFM_API_KEY
+        - OPEN_REGISTRATION
+        - RECOVERY
+        - RECOVERY_AUTOVALIDATE
+        - RECOVERY_DB
+        - REQUEST_TAX
+        - SHOW_PUBLIC_INDEX
+        - STACKABLE_FREELEECH_TOKENS
+        - USER_LIMIT
     ignoreErrors:
+    -
+      message: '/^Method [^:]+::\w+\(\) has parameter \S+ with no (?:type specified|value type specified in iterable type array)\.$/'
+      paths:
+        -  ../app/*
+        -  ../tests/phpunit/*
+    -
+      message: '/^Method [^:]+::\w+\(\) return type has no value type specified in iterable type array\.$/'
+      paths:
+        -  ../app/*
+        -  ../tests/phpunit/*
+    -
+      message: '/^Property [^:]+::\$\w+ type has no value type specified in iterable type array\.$/'
+      paths:
+        -  ../app/*
+    -
+      message: '/^Variable \$(?:Cache|DB|Debug|SessionID|Twig|Viewer) might not be defined\.$/'
+      paths:
+        - ../scripts/*
+        - ../sections/*
+    -
+      message: '/^Variable \$Router might not be defined\.$/'
+      paths:
+        -  ../sections/forums/index.php

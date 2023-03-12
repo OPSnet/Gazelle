@@ -47,7 +47,7 @@ $reporter = $userMan->findById($report->reporterId());
     <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
     <input type="hidden" id="reportid<?= $reportId ?>" name="reportid" value="<?= $reportId ?>" />
     <input type="hidden" id="torrentid<?= $reportId ?>" name="torrentid" value="<?= $torrentId ?>" />
-    <input type="hidden" id="uploader<?= $reportId ?>" name="uploader" value="<?= $uploader()->username() ?>" />
+    <input type="hidden" id="uploader<?= $reportId ?>" name="uploader" value="<?= $uploader->username() ?>" />
     <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploader->id() ?>" />
     <input type="hidden" id="reporterid<?= $reportId ?>" name="reporterid" value="<?= $reporter->id() ?>" />
     <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= $RawName ?>" />

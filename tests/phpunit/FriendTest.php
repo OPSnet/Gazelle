@@ -5,7 +5,7 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class FriendTest extends TestCase {
-    public function testFriend() {
+    public function testFriend(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $manager = new Gazelle\Manager\User;
         $creator = new Gazelle\UserCreator;

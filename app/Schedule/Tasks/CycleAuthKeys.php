@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class CycleAuthKeys extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class CycleAuthKeys extends \Gazelle\Schedule\Task {
+    public function run(): void {
         self::$db->prepared_query("
                 UPDATE users_info
                 SET AuthKey =
@@ -24,8 +22,7 @@ class CycleAuthKeys extends \Gazelle\Schedule\Task
         self::$db->prepared_query("
             SELECT ID FROM users_main
         ");
-        $keys = self::$db->collect(0, false);
-        foreach ($keys as $key) {
+        foreach (self::$db->collect(0, false) as $key) {
             self::$cache->delete_value("u_$key");
         }
     }

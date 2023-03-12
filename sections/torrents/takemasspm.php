@@ -15,8 +15,8 @@ $message = trim($_POST['message']);
 
 $validator = new Gazelle\Util\Validator;
 $validator->setFields([
-    ['subject', '0', 'string', 'Invalid subject.', ['maxlength' => 1000]],
-    ['message', '0', 'string', 'Invalid message.', ['maxlength' => 10000]],
+    ['subject', false, 'string', 'Invalid subject.', ['maxlength' => 1000]],
+    ['message', false, 'string', 'Invalid message.', ['maxlength' => 10000]],
 ]);
 if (!$validator->validate($_POST)) {
     error($validator->errorMessage());

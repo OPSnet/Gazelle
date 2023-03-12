@@ -212,11 +212,13 @@ foreach (ZIP_OPTION as $Option) {
 
     if ($GroupID != $LastGroupID) {
         $LastGroupID = $GroupID;
-        if ($OpenGroup) { ?>
+        if ($OpenGroup) { /** @phpstan-ignore-line */
+?>
                         </optgroup>
 <?php   } ?>
                         <optgroup label="<?=ZIP_GROUP[$GroupID]?>">
-<?php      $OpenGroup = true;
+<?php
+        $OpenGroup = true;
     }
 ?>
                             <option id="opt<?=$GroupID.$OptionID?>" value="<?=$GroupID.$OptionID?>"<?php if (in_array($GroupID.$OptionID, $ZIPList)) { echo ' disabled="disabled"'; } ?>><?=$OptName?></option>
@@ -298,6 +300,7 @@ if ($sections = $Artist->sections()) {
                 </tr>
 <?php
     foreach(array_keys($groupList) as $groupId) {
+        $groupId = (int)$groupId;
         $tgroup = $tgMan->findById($groupId);
         if (is_null($tgroup)) {
             continue;

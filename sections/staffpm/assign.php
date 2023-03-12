@@ -34,6 +34,7 @@ if ($Viewer->effectiveClass() < $staffPm->classLevel() && $Viewer->id() != $staf
 } else {
     // Staff member is allowed to assign conversation
     [$assignTo, $NewLevel] = explode('_', $_POST['assign']);
+    $NewLevel = (int)$NewLevel;
     if ($assignTo == 'class') {
         $staffPm->assignClass($NewLevel, $Viewer);
     } else {

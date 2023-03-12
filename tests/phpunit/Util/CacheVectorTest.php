@@ -9,7 +9,7 @@ define('TEST_LENGTH', 4); // bits 0..31
 define('TEST_EXPIRY', 3600);
 
 class CacheVectorTest extends TestCase {
-    public function testCacheVector() {
+    public function testCacheVector(): void {
         $bitvec = new Gazelle\Util\CacheVector(TEST_NAME, TEST_LENGTH, TEST_EXPIRY);
         $this->assertInstanceOf(Gazelle\Util\CacheVector::class, $bitvec, 'bitvec-ctor');
         $this->assertTrue($bitvec->isEmpty(), 'bitvec-new-empty');

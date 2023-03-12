@@ -14,7 +14,7 @@ class Request extends \Gazelle\BaseManager {
         string $description,
         string $recordLabel,
         string $catalogueNumber,
-        string $releaseType,
+        int $releaseType,
         string $encodingList,
         string $formatList,
         string $mediaList,

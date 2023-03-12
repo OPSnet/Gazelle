@@ -34,6 +34,8 @@ $db->prepared_query("
 );
 if ($db->has_results()) {
     while ([$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect] = $db->next_record(MYSQLI_NUM, false)) {
+        $CloneAliasID = (int)$CloneAliasID;
+        $CloneArtistID = (int)$CloneArtistID;
         if (!strcasecmp($CloneAliasName, $aliasName)) {
             break;
         }

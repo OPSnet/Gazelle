@@ -1,6 +1,6 @@
 <?php
 
-function forumList(array $list, $selected = 0) {
+function forumList(array $list, int $selected = 0): string {
     $return = '';
     $cat = '';
     foreach ($list as $forum) {
@@ -21,7 +21,7 @@ function forumList(array $list, $selected = 0) {
     return $return;
 }
 
-function classList($Selected = 0) {
+function classList(int $Selected = 0): string {
     $Return = '';
     $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $Class) {

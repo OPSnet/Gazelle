@@ -13,8 +13,8 @@ if ($user->resetPasswordExpired()) {
 
 $validator = new Gazelle\Util\Validator;
 $validator->setFields([
-    ['verifypassword', '1', 'compare', 'Your passwords did not match.', ['comparefield' => 'password']],
-    ['password', '1', 'regex',
+    ['verifypassword', true, 'compare', 'Your passwords did not match.', ['comparefield' => 'password']],
+    ['password', true, 'regex',
         'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer',
         ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']
     ],

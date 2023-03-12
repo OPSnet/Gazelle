@@ -23,13 +23,13 @@ if ($_POST['submit'] == 'Delete') {
 
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
-        ['name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40]],
-        ['description', '0', 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]],
-        ['sort', '1', 'number', 'Sort must be set'],
-        ['categoryid', '1', 'number', 'Category must be set'],
-        ['minclassread', '1', 'number', 'MinClassRead must be set'],
-        ['minclasswrite', '1', 'number', 'MinClassWrite must be set'],
-        ['minclasscreate', '1', 'number', 'MinClassCreate must be set'],
+        ['name', true, 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40]],
+        ['description', false, 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]],
+        ['sort', true, 'number', 'Sort must be set'],
+        ['categoryid', true, 'number', 'Category must be set'],
+        ['minclassread', true, 'number', 'MinClassRead must be set'],
+        ['minclasswrite', true, 'number', 'MinClassWrite must be set'],
+        ['minclasscreate', true, 'number', 'MinClassCreate must be set'],
     ]);
     if (!$validator->validate($_POST)) {
         error($validator->errorMessage());

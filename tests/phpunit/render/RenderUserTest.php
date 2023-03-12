@@ -11,9 +11,7 @@ class RenderUserTest extends TestCase {
         $this->userMan = new \Gazelle\Manager\User;
     }
 
-    public function tearDown(): void {}
-
-    public function testProfile() {
+    public function testProfile(): void {
         global $Viewer;
         $Viewer = $this->userMan->find('@admin');
         $user   = $this->userMan->find('@user');

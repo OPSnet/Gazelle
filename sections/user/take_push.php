@@ -9,7 +9,7 @@ if (!$Viewer->permitted('users_mod') && $user->id() != $Viewer->id()) {
 }
 authorize();
 
-(new Gazelle\Manager\Notification)->push($user->id(),
+(new Gazelle\Manager\Notification)->push([$user->id()],
     'Push!', 'You have been pushed by ' . $Viewer->username());
 
 header('Location: ' . $user->location() . '&action=edit');

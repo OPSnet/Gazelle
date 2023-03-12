@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class ResolveStaffPms extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class ResolveStaffPms extends \Gazelle\Schedule\Task {
+    public function run(): void {
         self::$db->prepared_query("
             UPDATE staff_pm_conversations
             SET Status = 'Resolved', ResolverID = '0'

@@ -9,7 +9,7 @@ if (isset($_REQUEST['confirm'])) {
         echo $Twig->render('register/complete.twig');
     }
 
-} elseif (OPEN_REGISTRATION /** @phpstan-ignore-line */ || isset($_REQUEST['invite'])) {
+} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite'])) {
     if ($_REQUEST['invite']) {
         if (!(new Gazelle\Manager\Invite)->inviteExists($_GET['invite'])) {
             echo $Twig->render('register/no-invite.twig');

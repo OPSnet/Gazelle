@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class Freeleech extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class Freeleech extends \Gazelle\Schedule\Task {
+    public function run(): void {
         //We use this to control 6 hour freeleeches.
         // They're actually 7 hours, but don't tell anyone.
         $qId = self::$db->prepared_query("

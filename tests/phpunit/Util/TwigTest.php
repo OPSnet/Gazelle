@@ -9,11 +9,11 @@ class TwigTest extends TestCase {
         Gazelle\Util\Twig::setUserMan(new Gazelle\Manager\User);
     }
 
-    protected static function twig(string $template) {
+    protected static function twig(string $template): \Twig\TemplateWrapper {
         return Gazelle\Util\Twig::factory()->createTemplate($template);
     }
 
-    public function testDominator() {
+    public function testDominator(): void {
         $twig = Gazelle\Util\Twig::factory();
         $twig->createTemplate("{{ dom.click('#id', \"$('#id').frob(); return false;\") }}")->render();
         $expected = <<<END
@@ -24,7 +24,7 @@ END;
         $this->assertEquals($expected, $twig->createTemplate('{{ dom.emit|raw }}')->render(), 'twig-dominator');
     }
 
-    public function testFilter() {
+    public function testFilter(): void {
         $article = self::twig('{{ word|article }}');
         $this->assertEquals('a', $article->render(['word' => 'consonant']), 'twig-article-a');
         $this->assertEquals('an', $article->render(['word' => 'anticonsonant']), 'twig-article-an');
@@ -134,7 +134,7 @@ END;
         $this->assertIsString($status->render(['user_id' => 1, 'viewer' => $Viewer]), 'twig-user-status');
     }
 
-    public function testFunction() {
+    public function testFunction(): void {
         global $Document;
         $Document = 'index';
         $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
@@ -192,7 +192,7 @@ END;
         );
     }
 
-    public function testTest() {
+    public function testTest(): void {
         $admin = (new Gazelle\Manager\User)->find('@admin');
         $this->assertEquals('yes', self::twig('{% if user is donor %}yes{% endif %}')->render(['user' => $admin]), 'twig-test-donor');
 

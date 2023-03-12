@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class RatioWatch extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class RatioWatch extends \Gazelle\Schedule\Task {
+    public function run(): void {
         $userMan = new \Gazelle\Manager\User;
 
         // Take users off ratio watch and enable leeching

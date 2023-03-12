@@ -22,7 +22,7 @@ class Tracker {
     final const STATS_MAIN = 0;
     final const STATS_USER = 1;
 
-    protected static $Requests = [];
+    protected static array $Requests = [];
 
     public function requestList(): array {
         return self::$Requests;
@@ -37,7 +37,7 @@ class Tracker {
      * @param array $Updates An associative array of key->value pairs to send to the tracker
      * @param boolean $ToIRC Sends a message to the channel #tracker with the GET URL.
      */
-    public function update_tracker($Action, $Updates, $ToIRC = false) {
+    public function update_tracker($Action, $Updates, $ToIRC = false): bool {
         if (DISABLE_TRACKER) {
             return true;
         }
@@ -194,7 +194,7 @@ class Tracker {
             }
         }
         $Request = [
-            'path' => substr($Get, strpos($Get, '/')),
+            'path' => substr($Get, strpos($Get, '/')), /** @phpstan-ignore-line */ /* FIXME: Understand hat is wanted here */
             'response' => ($Success ? $Data : $Response),
             'status' => ($Success ? 'ok' : 'failed'),
             'time' => 1000 * (microtime(true) - $StartTime)

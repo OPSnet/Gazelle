@@ -9,7 +9,7 @@ if (isset($_POST['username'])) {
             setcookie('username', '', [
                 'expires'  => time() + 60 * 60,
                 'path'     => '/',
-                'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
+                'secure'   => !DEBUG_MODE,
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
@@ -19,6 +19,6 @@ if (isset($_POST['username'])) {
 
 echo $Twig->render('login/disabled.twig', [
     'username' => $_COOKIE['username'] ?? $_POST['username'] ?? '',
-    'auto'     => (FEATURE_EMAIL_REENABLE /** @phpstan-ignore-line */ && ($_POST['email'] ?? '') != ''),
+    'auto'     => (FEATURE_EMAIL_REENABLE && ($_POST['email'] ?? '') != ''),
     'enabler'  => $enabler,
 ]);

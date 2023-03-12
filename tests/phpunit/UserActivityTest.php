@@ -11,9 +11,7 @@ class UserActivityTest extends TestCase {
         $this->userMan = new Gazelle\Manager\User;
     }
 
-    public function tearDown(): void {}
-
-    public function testActivity() {
+    public function testActivity(): void {
         $admin = $this->userMan->find('@admin');
         $activity = new Gazelle\User\Activity($admin);
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity, 'user-activity-instance');
@@ -34,7 +32,7 @@ class UserActivityTest extends TestCase {
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM), 'user-activity-staffpm');
     }
 
-    public function testBlog() {
+    public function testBlog(): void {
         $manager = new Gazelle\Manager\Blog;
         $title   = 'Unit test blog';
         $body    = 'Blogging about unit tests';
@@ -70,7 +68,7 @@ class UserActivityTest extends TestCase {
         $this->assertEquals(1, $blog->remove(), 'blog-remove');
     }
 
-    public function testGlobal() {
+    public function testGlobal(): void {
         $global = new Gazelle\Notification\GlobalNotification;
         $global->remove(); // just in case
 
@@ -92,7 +90,7 @@ class UserActivityTest extends TestCase {
         $global->remove();
     }
 
-    public function testInbox() {
+    public function testInbox(): void {
         $admin = $this->userMan->find('@admin');
         $user  = $this->userMan->find('@user');
 
@@ -125,7 +123,7 @@ class UserActivityTest extends TestCase {
         $this->assertEquals(1, $pm->markRead(), 'alert-pm-read');
     }
 
-    public function testNews() {
+    public function testNews(): void {
         $admin = $this->userMan->find('@admin');
         $user  = $this->userMan->find('@user');
         $title = "This is the 6 o'clock news";

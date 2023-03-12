@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @var \Gazelle\Collage $Collage
+ * @var int              $CollageCovers
+ * @var int              $CollageID
+ * @var array            $CollagePages
+ * @var int              $NumGroups
+ */
+
 $Artists = $Collage->artistList();
 
 $NumGroups = $Collage->numArtists();

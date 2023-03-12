@@ -10,7 +10,7 @@ class Quote extends \Gazelle\BaseUser {
     /**
      * Toggle whether only unread quotes should be listed
      */
-    public function setShowAll(bool $showAll) {
+    public function setShowAll(bool $showAll): Quote {
         $this->showAll = $showAll;
         return $this;
     }
@@ -118,7 +118,7 @@ class Quote extends \Gazelle\BaseUser {
      */
     public function total(): int {
         [$cond, $args] = $this->configure();
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_notify_quoted AS q
             LEFT JOIN forums_topics  AS t ON (t.ID = q.PageID)

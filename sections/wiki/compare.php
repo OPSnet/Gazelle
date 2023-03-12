@@ -1,6 +1,6 @@
 <?php
 //Diff function by Leto of StC.
-function diff($OldText, $NewText) {
+function diff(string $OldText, string $NewText): array {
     $LineArrayOld = explode("\n", $OldText);
     $LineArrayNew = explode("\n", $NewText);
     $LineOffset = 0;

@@ -3,10 +3,10 @@
 namespace Gazelle\WitnessTable;
 
 abstract class AbstractWitnessTable extends \Gazelle\Base {
-    abstract protected function reference();
-    abstract protected function tableName();
-    abstract protected function idColumn();
-    abstract protected function valueColumn();
+    abstract protected function reference(): string;
+    abstract protected function tableName(): string;
+    abstract protected function idColumn(): string;
+    abstract protected function valueColumn(): string;
     abstract public function witness(int $id): bool;
 
     protected function latestValue(): ?int {

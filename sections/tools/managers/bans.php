@@ -17,9 +17,9 @@ if (isset($_POST['submit'])) {
     } else { //Edit & Create, Shared Validation
         $validator = new Gazelle\Util\Validator;
         $validator->setFields([
-            ['start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']],
-            ['end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']],
-            ['notes', '1','string','You must include the reason for the ban.'],
+            ['start', true,'regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']],
+            ['end', true,'regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']],
+            ['notes', true,'string','You must include the reason for the ban.'],
         ]);
         if (!$validator->validate($_POST)) {
             error($validator->errorMessage());

@@ -26,7 +26,7 @@ class Friend extends \Gazelle\BaseUser {
 
 
     public function add(int $friendId): int {
-        if (!self::$db->scalar("SELECT 1 FROM users_main WHERE ID = ?", $friendId)) {
+        if (!(bool)self::$db->scalar("SELECT 1 FROM users_main WHERE ID = ?", $friendId)) {
             return 0;
         }
         self::$db->prepared_query("
@@ -60,7 +60,7 @@ class Friend extends \Gazelle\BaseUser {
     }
 
     public function total(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM friends WHERE UserID = ?
             ", $this->user->id()
         );

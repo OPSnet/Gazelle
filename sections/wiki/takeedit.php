@@ -8,7 +8,7 @@ if (is_null($article)) {
 }
 
 $validator = new Gazelle\Util\Validator;
-$validator->setField('title', '1', 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
+$validator->setField('title', true, 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
 if (!$validator->validate($_POST)) {
     error($validator->errorMessage());
 }

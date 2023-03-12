@@ -13,9 +13,7 @@ class applicantTest extends TestCase {
         $this->manager     = new \Gazelle\Manager\Applicant;
     }
 
-    public function tearDown(): void {}
-
-    public function testApplicant() {
+    public function testApplicant(): void {
         $this->assertIsArray($this->roleManager->list(), 'role-manager-list-published-is-array');
         $new = $this->manager->newApplicantCount();
         $admin = (new Gazelle\Manager\User)->find('@admin');

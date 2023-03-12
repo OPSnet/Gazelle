@@ -1,7 +1,7 @@
 <?php
 
 $validator = new Gazelle\Util\Validator;
-$validator->setField('email', '1', 'email', 'You entered an invalid email address.');
+$validator->setField('email', true, 'email', 'You entered an invalid email address.');
 
 $error = false;
 $sent  = false;

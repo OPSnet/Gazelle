@@ -19,8 +19,8 @@ class TGroupTest extends TestCase {
 
     public function tearDown(): void {}
 
-    public function testRequest() {
-        $tgroupId = Gazelle\DB::DB()->scalar('SELECT ID from torrents_group');
+    public function testRequest(): void {
+        $tgroupId = (int)Gazelle\DB::DB()->scalar('SELECT ID from torrents_group');
         if ($tgroupId) {
             $tgroup = $this->manager->findById($tgroupId);
             $this->assertInstanceOf('\Gazelle\TGroup', $tgroup, 'tgroup-find-by-id');
@@ -29,9 +29,9 @@ class TGroupTest extends TestCase {
         }
     }
 
-    public function testCreate() {
+    public function testCreate(): \Gazelle\TGroup {
         $name        = 'Live in ' . randomString(6);
-        $year        = Date('Y');
+        $year        = (int)Date('Y');
         $releaseType = new Gazelle\ReleaseType();
         $tgroup      = $this->manager->create(
             categoryId:      1,
@@ -72,7 +72,7 @@ class TGroupTest extends TestCase {
     /**
      * @depends testCreate
      */
-    public function testArtist(Gazelle\TGroup $tgroup) {
+    public function testArtist(Gazelle\TGroup $tgroup): void {
         $artistName = 'The ' . randomString(6) . ' Band';
         $this->assertEquals(1, $tgroup->addArtists(new Gazelle\User(1), [ARTIST_MAIN], [$artistName]), 'tgroup-artist-add');
         $this->assertEquals("$artistName – {$tgroup->name()} [{$tgroup->year()} Live album]" , $tgroup->text(), 'tgroup-artist-text');
@@ -95,7 +95,7 @@ class TGroupTest extends TestCase {
     /**
      * @depends testCreate
      */
-    public function testFind(Gazelle\TGroup $tgroup) {
+    public function testFind(Gazelle\TGroup $tgroup): void {
         $foundByArtist = $this->manager->findByArtistReleaseYear(
             $tgroup->artistRole()->text(),
             $tgroup->name(),
@@ -108,7 +108,7 @@ class TGroupTest extends TestCase {
     /**
      * @depends testCreate
      */
-    public function testCoverArt(Gazelle\TGroup $tgroup) {
+    public function testCoverArt(Gazelle\TGroup $tgroup): void {
         $coverId = $tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', 1, new Gazelle\Log);
         $this->assertGreaterThan(0, $coverId, 'tgroup-cover-art-add');
         $this->assertEquals(1, $tgroup->removeCoverArt($coverId, 1, new Gazelle\Log), 'tgroup-cover-art-del-ok');
@@ -118,7 +118,7 @@ class TGroupTest extends TestCase {
     /**
      * @depends testCreate
      */
-    public function testRevision(Gazelle\TGroup $tgroup) {
+    public function testRevision(Gazelle\TGroup $tgroup): void {
         $revisionId = $tgroup->createRevision(
             $tgroup->description() . "\nmore text",
             'https://www.example.com/image.jpg',
@@ -131,7 +131,7 @@ class TGroupTest extends TestCase {
     /**
      * @depends testCreate
      */
-    public function testTag(Gazelle\TGroup $tgroup) {
+    public function testTag(Gazelle\TGroup $tgroup): void {
         $user = $this->userMan->find('@admin');
 
         $tagMan = new Gazelle\Manager\Tag;

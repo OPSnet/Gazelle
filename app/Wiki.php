@@ -46,10 +46,10 @@ class Wiki extends BaseObject {
     public function location(): string { return 'wiki.php?action=article&id=' . $this->id; }
     public function tableName(): string { return 'wiki_articles'; }
 
-    public function revisionBody(int $revision): ?string {
+    public function revisionBody(int $revision): string {
         return $revision === $this->revision()
             ? $this->body()
-            : self::$db->scalar("
+            : (string)self::$db->scalar("
                 SELECT Body FROM wiki_revisions WHERE ID = ? AND Revision = ?
                 ", $this->id, $revision
             );

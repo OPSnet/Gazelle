@@ -5,24 +5,24 @@ use Gazelle\Util\Time;
 
 authorize();
 
-function translateUserStatus($status) {
+function translateUserStatus(string $status): string {
     return match ($status) {
-        0 => 'Unconfirmed',
-        1 => 'Enabled',
-        2 => 'Disabled',
+        '0' => 'Unconfirmed',
+        '1' => 'Enabled',
+        '2' => 'Disabled',
         default => $status,
     };
 }
 
-function enabledStatus($status) {
+function enabledStatus(string $status): string {
     return match ($status) {
-        0 => 'Disabled',
-        1 => 'Enabled',
+        '0' => 'Disabled',
+        '1' => 'Enabled',
         default => $status,
     };
 }
 
-function revoked(bool $state) {
+function revoked(bool $state): string {
     return $state ? 'revoked' : 'restored';
 }
 
@@ -114,11 +114,6 @@ if ($_POST['comment_hash'] != $cur['CommentHash']) {
     error("Somebody else has moderated this user since you loaded it. Please go back and refresh the page.");
 }
 
-// NOW that we know the class of the current user, we can see if one staff member is trying to hax0r us.
-if (!$Viewer->permitted('users_mod')) {
-    error(403);
-}
-
 if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['Uploaded'])) {
     // Too make make-work code to deal with this unlikely eventuality
     error("Do not transfer buffer and edit upload/download in the same operation.");
@@ -164,7 +159,7 @@ if (!$lockType || $lockAccount == 0) {
     }
 }
 
-if ($_POST['ResetRatioWatch'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
+if (isset($_POST['ResetRatioWatch']) && $Viewer->permitted('users_edit_reset_keys')) {
     (new Gazelle\User\History($user))->resetRatioWatch();
     $editSummary[] = 'RatioWatch history reset';
 }
@@ -174,17 +169,17 @@ if ($resetIPHistory && $Viewer->permitted('users_edit_reset_keys')) {
     $editSummary[] = 'IP history cleared';
 }
 
-if ($_POST['ResetEmailHistory'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
+if (isset($_POST['ResetEmailHistory']) && $Viewer->permitted('users_edit_reset_keys')) {
     (new Gazelle\User\History($user))->resetEmail($cur['Username'] . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
     $editSummary[] = 'email history cleared';
 }
 
-if ($_POST['ResetSnatchList'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
+if (isset($_POST['ResetSnatchList']) && $Viewer->permitted('users_edit_reset_keys')) {
     (new Gazelle\User\History($user))->resetSnatched();
     $editSummary[] = 'snatch list cleared';
 }
 
-if ($_POST['ResetDownloadList'] ?? 0 && $Viewer->permitted('users_edit_reset_keys')) {
+if (isset($_POST['ResetDownloadList']) && $Viewer->permitted('users_edit_reset_keys')) {
     (new Gazelle\User\History($user))->resetDownloaded();
     $editSummary[] = 'download list cleared';
 }
@@ -353,43 +348,41 @@ if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promo
     }
 }
 
-if ($Viewer->permitted('users_mod')) {
-    $fMan = new Gazelle\Manager\Forum;
-    $restricted = array_map('intval', array_unique(explode(',', trim($_POST['RestrictedForums']))));
-    sort($restricted);
-    $restrictedIds = [];
-    $restrictedNames = [];
-    foreach ($restricted as $forumId) {
-        $forum = $fMan->findById($forumId);
-        if (!is_null($forum)) {
-            $restrictedIds[] = $forumId;
-            $restrictedNames[] = $forum->name() . "($forumId)";
-        }
+$fMan = new Gazelle\Manager\Forum;
+$restricted = array_map('intval', array_unique(explode(',', trim($_POST['RestrictedForums']))));
+sort($restricted);
+$restrictedIds = [];
+$restrictedNames = [];
+foreach ($restricted as $forumId) {
+    $forum = $fMan->findById($forumId);
+    if (!is_null($forum)) {
+        $restrictedIds[] = $forumId;
+        $restrictedNames[] = $forum->name() . "($forumId)";
     }
-    $restrictedForums = implode(',', $restrictedIds);
-    if ($restrictedForums != $cur['RestrictedForums']) {
-        $set[] = "RestrictedForums = ?";
-        $args[] = $restrictedForums;
-        $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
-    }
+}
+$restrictedForums = implode(',', $restrictedIds);
+if ($restrictedForums != $cur['RestrictedForums']) {
+    $set[] = "RestrictedForums = ?";
+    $args[] = $restrictedForums;
+    $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
+}
 
-    $permitted = array_map('intval', array_unique(explode(',', trim($_POST['PermittedForums']))));
-    sort($permitted);
-    $permittedIds = [];
-    $permittedNames = [];
-    foreach ($permitted as $forumId) {
-        $forum = $fMan->findById($forumId);
-        if (!is_null($forum)) {
-            $permittedIds[] = $forumId;
-            $permittedNames[] = $forum->name() . "($forumId)";
-        }
+$permitted = array_map('intval', array_unique(explode(',', trim($_POST['PermittedForums']))));
+sort($permitted);
+$permittedIds = [];
+$permittedNames = [];
+foreach ($permitted as $forumId) {
+    $forum = $fMan->findById($forumId);
+    if (!is_null($forum)) {
+        $permittedIds[] = $forumId;
+        $permittedNames[] = $forum->name() . "($forumId)";
     }
-    $permittedForums = implode(',', $permittedIds);
-    if ($permittedForums != $cur['PermittedForums']) {
-        $set[] = "PermittedForums = ?";
-        $args[] = $permittedForums;
-        $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
-    }
+}
+$permittedForums = implode(',', $permittedIds);
+if ($permittedForums != $cur['PermittedForums']) {
+    $set[] = "PermittedForums = ?";
+    $args[] = $permittedForums;
+    $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
 }
 
 if ($visible != $cur['Visible'] && $Viewer->permitted('users_make_invisible')) {
@@ -405,7 +398,7 @@ if ($invites != $cur['Invites'] && $Viewer->permitted('users_edit_invites')) {
     $editSummary[] = "number of invites changed from {$cur['Invites']} to $invites";
 }
 
-if ($supportFor != $cur['SupportFor'] && ($Viewer->permitted('admin_manage_fls') || ($Viewer->permitted('users_mod') && $ownProfile))) {
+if ($supportFor != $cur['SupportFor'] && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
     $set[] = "SupportFor = ?";
     $args[] = $supportFor;
     $editSummary[] = "First-Line Support status changed to \"$supportFor\"";

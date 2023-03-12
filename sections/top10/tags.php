@@ -39,10 +39,9 @@ if ($details == 'all' || $details == 'top_voted') {
 
 echo '</div>';
 View::show_footer();
-exit;
 
 // generate a table based on data from most recent query
-function generate_tag_table($caption, $tag, $details, $limit, $showVotes = true, $requestTable = false) {
+function generate_tag_table(string $caption, string $tag, array $details, int $limit, bool $showVotes = true, bool $requestTable = false): void {
     if ($requestTable) {
         $URLString = 'requests.php?tags=';
     } else {

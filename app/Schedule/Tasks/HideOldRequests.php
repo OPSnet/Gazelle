@@ -2,10 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-class HideOldRequests extends \Gazelle\Schedule\Task
-{
-    public function run()
-    {
+class HideOldRequests extends \Gazelle\Schedule\Task {
+    public function run(): void {
         self::$db->prepared_query("
             UPDATE requests SET
                 Visible = 0

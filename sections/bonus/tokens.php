@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @var string $Label
+ */
+
 authorize();
 
 if (!preg_match('/^token-[1-4]$/', $Label, $match)) {

@@ -43,7 +43,7 @@ if (isset($_REQUEST['submit'])) {
         }
 
         $check = $privMan->findByLevel($_REQUEST['level']);
-        if ($privilege && $check && $privilege->id() != $check->id()) {
+        if ($check && $privilege->id() != $check->id()) {
             error('There is already a permission class with that level.');
         }
     }
@@ -55,7 +55,7 @@ if (isset($_REQUEST['submit'])) {
         ? (new Gazelle\Manager\StaffGroup)->findById((int)($_REQUEST['staffgroup'] ?? 0))?->id()
         : null;
     $level        = (int)$_REQUEST['level'];
-    $secondary    = (int)isset($_REQUEST['secondary']);
+    $secondary    = (bool)isset($_REQUEST['secondary']);
     $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
     $values       = [];
     foreach ($_REQUEST as $key => $perm) {

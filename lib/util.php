@@ -309,13 +309,13 @@ function parse_user_agent(string $useragent): array {
 /**
  * Display a critical error and kills the page.
  *
- * @param string $Error Error type. Automatically supported:
+ * $Error Error type. Automatically supported:
  *    403, 404, 0 (invalid input), -1 (invalid request)
  *    If you use your own string for Error, it becomes the error description.
- * @param boolean $NoHTML If true, the header/footer won't be shown, just the description.
- * @param boolean $Log If true, the user is given a link to search $Log in the site log.
+ * $NoHTML If true, the header/footer won't be shown, just the description.
+ * $Log If true, the user is given a link to search $Log in the site log.
  */
-function error($Error, $NoHTML = false, $Log = false): never {
+function error(int|string $Error, bool $NoHTML = false, bool $Log = false): never {
     global $Debug, $Document, $Viewer, $Twig;
     require_once(__DIR__ . '/../sections/error/index.php');
     if (isset($Viewer)) {
@@ -563,70 +563,59 @@ function time_diff($TimeStamp, $Levels = 2, $Span = true, $StartTime = false) {
  * Return whether currently logged in user can see $Property on a user with $Paranoia, $UserClass and (optionally) $UserID
  * If $Property is an array of properties, returns whether currently logged in user can see *all* $Property ...
  *
- * @param mixed $Property The property to check, or an array of properties.
- * @param string|array $Paranoia The paranoia level to check against.
- * @param int $UserClass The user class to check against (Staff can see through paranoia of lower classed staff)
- * @param int|false $UserID Optional. The user ID of the person being viewed
- * @return mixed   1 representing the user has normal access
- *                 2 representing that the paranoia was overridden,
- *                 false representing access denied.
+ * $Property The property to check, or an array of properties.
+ * $Paranoia The paranoia level to check against.
+ * $UserClass The user class to check against (Staff can see through paranoia of lower classed staff)
+ * $UserID Optional. The user ID of the person being viewed
+ * return mixed   1 representing the user has normal access
+ *                2 representing that the paranoia was overridden,
+ *                false representing access denied.
  */
 
-function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
-    if ($Property == false) {
-        return false;
-    }
+function check_paranoia(string $Property, string|array $Paranoia, int $UserClass, int|false $UserID = false): int|false {
     if (!is_array($Paranoia)) {
         $Paranoia = unserialize($Paranoia);
     }
     if (!is_array($Paranoia)) {
         $Paranoia = [];
     }
-    if (is_array($Property)) {
-        $all = true;
-        foreach ($Property as $P) {
-            $all = $all && check_paranoia($P, $Paranoia, $UserClass, $UserID);
-        }
-        return $all;
-    } else {
-        global $Viewer;
-        if (($UserID !== false) && ($Viewer->id() == $UserID)) {
-            return PARANOIA_ALLOWED;
-        }
-
-        $May = !in_array($Property, $Paranoia) && !in_array($Property . '+', $Paranoia);
-        if ($May)
-            return PARANOIA_ALLOWED;
-
-        if ($Viewer->permitted('users_override_paranoia', $UserClass)) {
-            return PARANOIA_OVERRIDDEN;
-        }
-        $Override=false;
-        switch ($Property) {
-            case 'downloaded':
-            case 'ratio':
-            case 'uploaded':
-            case 'lastseen':
-                if ($Viewer->permitted('users_mod', $UserClass))
-                    return PARANOIA_OVERRIDDEN;
-                break;
-            case 'snatched': case 'snatched+':
-                if ($Viewer->permitted('users_view_torrents_snatchlist', $UserClass))
-                    return PARANOIA_OVERRIDDEN;
-                break;
-            case 'uploads': case 'uploads+':
-            case 'seeding': case 'seeding+':
-            case 'leeching': case 'leeching+':
-                if ($Viewer->permitted('users_view_seedleech', $UserClass))
-                    return PARANOIA_OVERRIDDEN;
-                break;
-            case 'invitedcount':
-                if ($Viewer->permitted('users_view_invites', $UserClass))
-                    return PARANOIA_OVERRIDDEN;
-                break;
-        }
-        return false;
+    global $Viewer;
+    if (($UserID !== false) && ($Viewer->id() == $UserID)) {
+        return PARANOIA_ALLOWED;
     }
+
+    $May = !in_array($Property, $Paranoia) && !in_array($Property . '+', $Paranoia);
+    if ($May)
+        return PARANOIA_ALLOWED;
+
+    if ($Viewer->permitted('users_override_paranoia', $UserClass)) {
+        return PARANOIA_OVERRIDDEN;
+    }
+    $Override=false;
+    switch ($Property) {
+        case 'downloaded':
+        case 'ratio':
+        case 'uploaded':
+        case 'lastseen':
+            if ($Viewer->permitted('users_mod', $UserClass))
+                return PARANOIA_OVERRIDDEN;
+            break;
+        case 'snatched': case 'snatched+':
+            if ($Viewer->permitted('users_view_torrents_snatchlist', $UserClass))
+                return PARANOIA_OVERRIDDEN;
+            break;
+        case 'uploads': case 'uploads+':
+        case 'seeding': case 'seeding+':
+        case 'leeching': case 'leeching+':
+            if ($Viewer->permitted('users_view_seedleech', $UserClass))
+                return PARANOIA_OVERRIDDEN;
+            break;
+        case 'invitedcount':
+            if ($Viewer->permitted('users_view_invites', $UserClass))
+                return PARANOIA_OVERRIDDEN;
+            break;
+    }
+    return false;
 }
 
 function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
@@ -808,7 +797,7 @@ function httpProxy(): ?string {
     $proxy = getenv('HTTP_PROXY');
     if ($proxy !== false) {
         return (string)$proxy;
-    } elseif (HTTP_PROXY !== false) {
+    } elseif (HTTP_PROXY !== false) { /** @phpstan-ignore-line */
         return (string)HTTP_PROXY;
     }
     return null;

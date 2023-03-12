@@ -64,7 +64,7 @@ $where = implode(' AND ', $cond);
 
 $db = Gazelle\DB::DB();
 $paginator = new Gazelle\Util\Paginator(MESSAGES_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($db->scalar("
+$paginator->setTotal((int)$db->scalar("
     SELECT count(*) FROM staff_pm_conversations AS spc WHERE $where
     ", ...$args
 ));

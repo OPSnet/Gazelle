@@ -13,12 +13,12 @@ class SchedulerTest extends TestCase {
         $this->scheduler = new Gazelle\Schedule\Scheduler;
     }
 
-    public function testRun() {
+    public function testRun(): void {
         $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
         $this->scheduler->run();
     }
 
-    public function testRunWithMissingImplementation() {
+    public function testRunWithMissingImplementation(): void {
         $name = "RunUnimplemented";
         $db = Gazelle\DB::DB();
         $db->prepared_query("
@@ -42,7 +42,7 @@ class SchedulerTest extends TestCase {
     }
 
     public function testMissingTaskEntry(): void {
-        $this->assertEquals(-1, $this->scheduler->runClass("NoSuchClassname", "sched-task-no-such-class"));
+        $this->assertEquals(-1, $this->scheduler->runClass("NoSuchClassname"), "sched-task-no-such-class");
     }
 
     public function testMissingImplementation(): void {
@@ -59,7 +59,7 @@ class SchedulerTest extends TestCase {
             ",
             $name, "phpunit task", "A task with no PHP implementation"
         );
-        $this->assertEquals(-1, $this->scheduler->runClass($name, "sched-task-unimplemented"));
+        $this->assertEquals(-1, $this->scheduler->runClass($name), "sched-task-unimplemented");
         $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
@@ -71,7 +71,7 @@ class SchedulerTest extends TestCase {
      * @dataProvider taskProvider
      */
     public function testTask(string $taskName): void {
-        $this->assertIsInt($this->scheduler->runClass($taskName, "sched-task-$taskName"));
+        $this->assertIsInt($this->scheduler->runClass($taskName), "sched-task-$taskName");
     }
 
     public static function taskProvider(): array {

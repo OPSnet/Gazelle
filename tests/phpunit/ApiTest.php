@@ -5,7 +5,7 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class ApiTest extends TestCase {
-    public function testUserId() {
+    public function testUserId(): void {
         $api = new Gazelle\API\User([]);
 
         $_GET['user_id'] = 1;
@@ -13,7 +13,7 @@ class ApiTest extends TestCase {
         $this->assertArrayHasKey('Username', $api->run());
     }
 
-    public function testUsername() {
+    public function testUsername(): void {
         $api = new Gazelle\API\User([]);
 
         $_GET['username'] = 'admin';

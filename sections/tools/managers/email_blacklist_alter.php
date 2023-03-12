@@ -13,8 +13,8 @@ if ($_POST['submit'] === 'Delete') { // Delete
     }
 } else { // Edit & Create, Shared Validation
     $validator = new Gazelle\Util\Validator;
-    $validator->setField('email', '1', 'string', 'The email must be set', ['minlength'=>6]);
-    $validator->setField('comment', '0', 'string', 'The description has a max length of 255 characters', ['maxlength'=>255]);
+    $validator->setField('email', true, 'string', 'The email must be set', ['minlength'=>6]);
+    $validator->setField('comment', false, 'string', 'The description has a max length of 255 characters', ['maxlength'=>255]);
     if (!$validator->validate($_POST)) {
         error($validator->errorMessage());
     }
