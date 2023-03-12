@@ -412,7 +412,7 @@ if (!$newRequest) {
 
     Gazelle\Util\Irc::sendMessage(
         '#requests',
-        $request->text() . " - " . SITE_URL . "/" . $request->location() . " - " . implode(' ', $tags)
+        $request->text() . " - " . $request->publicLocation() . " - " . implode(' ', $tags)
     );
 }
 

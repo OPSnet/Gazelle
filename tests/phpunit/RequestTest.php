@@ -84,6 +84,11 @@ class RequestTest extends TestCase {
         $this->assertEquals("$artistName – $title [2018]", $this->request->text(), 'request-text');
 
         $this->assertEquals(1, $this->request->releaseType(), 'request-release-type-id');
+        $location = 'requests.php?action=view&id=' . $this->request->id();
+        $this->assertEquals($location, $this->request->location(), 'request-location');
+        $this->assertEquals(SITE_URL . "/$location", $this->request->publicLocation(), 'request-public-location');
+        $this->assertEquals(htmlentities($location), $this->request->url(), 'request-url');
+        $this->assertEquals(SITE_URL . '/' . htmlentities($location), $this->request->publicUrl(), 'request-public-url');
         $this->assertEquals('Album', $this->request->releaseTypeName(), 'request-release-type-name');
         $this->assertEquals(0, $this->request->fillerId(), 'request-unfilled-filler-id');
         $this->assertEquals(0, $this->request->torrentId(), 'request-unfilled-torrent-id');

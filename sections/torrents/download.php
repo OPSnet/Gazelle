@@ -42,7 +42,7 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
         } else {
             Irc::sendMessage(
                 STATUS_CHAN,
-                SITE_URL . "/" . $Viewer->location()
+                $Viewer->publicLocation()
                 . " (" . $Viewer->username() . ")"
                 . " (" . geoip($_SERVER['REMOTE_ADDR']) . ")"
                 . " accessing "

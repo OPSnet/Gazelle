@@ -22,7 +22,7 @@ $comment->setBody($body)->setEditedUserID($Viewer->id())->modify();
 if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($Viewer->id())) {
     // Send a PM to the user to notify them of the edit
     $id = $comment->id();
-    $url = SITE_URL . "/comments.php?action=jump&postid=$id";
+    $url = $comment->publicUrl('action=jump');
     $moderator = "[url=" . $Viewer->url() . "]" . $Viewer->username() . "[/url]";
     (new Gazelle\Manager\User)-> sendPM($comment->userId(), 0,
         "Your comment #$id has been edited",

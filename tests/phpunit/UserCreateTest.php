@@ -33,6 +33,12 @@ class UserCreateTest extends TestCase {
         $this->assertStringContainsString($adminComment, $this->user->staffNotes(), 'user-create-staff-notes');
         $this->assertTrue($this->user->isUnconfirmed(), 'user-create-unconfirmed');
 
+        $location = "user.php?id={$this->user->id()}";
+        $this->assertEquals($location, $this->user->location(), 'user-location');
+        $this->assertEquals(SITE_URL . "/$location", $this->user->publicLocation(), 'user-public-location');
+        $this->assertEquals($location, $this->user->url(), 'user-url');
+        $this->assertEquals(SITE_URL . "/$location", $this->user->publicUrl(), 'user-public-url');
+
         $login = new Gazelle\Login;
         $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
         $watch->clearAttempts();

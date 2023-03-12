@@ -21,7 +21,7 @@ class ReportType extends \Gazelle\BaseObject {
     public function pkName(): string { return "torrent_report_configuration_id"; }
     public function tableName(): string { return 'torrent_report_configuration'; }
 
-    public function url(): string {
+    public function url(string|null $param = null): string {
         return htmlentities($this->location());
     }
 

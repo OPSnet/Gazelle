@@ -36,7 +36,7 @@ if ($Viewer->permitted('admin_manage_blog')) {
                 if ($_REQUEST['action'] == 'takenewblog') {
                     $blog = $blogMan->create($Viewer, $title, $body);
                     Irc::sendMessage(MOD_CHAN, "New staff blog: " . $blog->title()
-                        . " - " . SITE_URL . '/' . $blog->location()
+                        . " - " . $blog->publicLocation()
                     );
                 } else {
                     $blog->setUpdate('Title', $title)

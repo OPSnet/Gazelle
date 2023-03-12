@@ -104,7 +104,7 @@ class TextTest extends TestCase {
         );
         $this->assertEquals(
             "<a href=\"" . SITE_URL . "/collages.php?id={$collage->id()}\">{$collage->name()}</a>",
-            Text::full_format(SITE_URL . '/' . $collage->url()),
+            Text::full_format($collage->publicUrl()),
             'text-collage-url'
         );
         $this->assertEquals(1, $collage->remove(), 'text-remove-collage');

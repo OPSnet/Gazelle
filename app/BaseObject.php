@@ -22,8 +22,21 @@ abstract class BaseObject extends Base {
         return $this->id;
     }
 
-    public function url(): string {
-        return htmlentities($this->location());
+    public function publicLocation(): string {
+        return SITE_URL . '/' . $this->location();
+    }
+
+    public function publicUrl(string|null $param = null): string {
+        return SITE_URL . '/' . $this->url($param);
+    }
+
+    public function url(string|null $param = null): string {
+        $location = $this->location();
+        if (isset($param)) {
+            $location = preg_replace('/#.*$/', '', $location);
+            $location .= str_contains($location, '?') ? "&$param" : "?$param";
+        }
+        return htmlentities($location);
     }
 
     public function pkName(): string {

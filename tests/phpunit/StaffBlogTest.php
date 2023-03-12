@@ -24,6 +24,12 @@ class StaffBlogTest extends TestCase {
         $this->assertIsString($blog->created(), 'staff-blog-created');
         $this->assertIsInt($blog->epoch(), 'staff-blog-epoch');
 
+        $location = 'staffblog.php#blog' . $blog->id();
+        $this->assertEquals($location, $blog->location(), 'staff-blog-location');
+        $this->assertEquals(SITE_URL . "/$location", $blog->publicLocation(), 'staff-blog-public-location');
+        $this->assertEquals($location, $blog->url(), 'staff-blog-url');
+        $this->assertEquals(SITE_URL . "/$location", $blog->publicUrl(), 'staff-blog-public-url');
+
         $this->assertEquals(0, $manager->readBy($mod), 'staff-blog-not-read-by-mod');
         $this->assertGreaterThan(0, $manager->catchup($mod), 'staff-blog-viewed-by-mod');
         $this->assertGreaterThan(0, $manager->readBy($mod), 'staff-blog-now-read-by-mod');

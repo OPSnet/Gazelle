@@ -21,14 +21,14 @@ if (is_null($user) || $user->classLevel() > $Viewer->classLevel()) {
     error(403);
 }
 
-$url = SITE_URL . '/' . $comment->url();
+$url = $comment->publicUrl();
 $comment->setBody(trim($_POST['body']))->modify();
 
 $Length = trim($_POST['length']);
 $Reason = trim($_POST['reason']);
 $PrivateMessage = trim($_POST['privatemessage']);
 if ($Length !== 'verbal') {
-    $Time = (int)$Length * (7 * 24 * 60 * 60);
+    $Time = (int)$Length * (7 * 86_400);
     $WarnTime = Time::offset($Time);
     $userMan->warn($user->id(), $Time, "$url - $Reason", $Viewer->username());
     $subject = 'You have received a warning';
