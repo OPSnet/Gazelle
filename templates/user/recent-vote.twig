@@ -31,7 +31,7 @@
 {% for r in recent -%}
     <td>
         <a href="torrents.php?id={{ r.group_id }}">
-        <img class="tooltip" title="{{ r.tgroup.artistName }} - {{ r.tgroup.name }}" alt="{{ r.tgroup.artistName }} - {{ r.tgroup.name }}" src="{{ r.tgroup.cover|image }}" width="107" />
+        <img class="tooltip" title="{{ r.tgroup.text }}" alt="{{ r.tgroup.text }}" src="{{ r.tgroup.cover|image }}" width="107" />
         </a>
     </td>
 {%- endfor %}
