@@ -28,7 +28,7 @@ abstract class File extends Base {
      * Store a file on disk at the specified path.
      */
     public function put(string $source, mixed $id): bool {
-        return file_put_contents($this->path($id), $source);
+        return file_put_contents($this->path($id), $source) !== false;
     }
 
     /**

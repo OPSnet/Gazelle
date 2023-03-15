@@ -104,7 +104,7 @@ if (isset($_REQUEST['confirm'])) {
         'agereq'    => $_REQUEST['agereq'] ?? false,
     ]);
 
-} elseif (!OPEN_REGISTRATION) {
+} else {
     echo $Twig->render(isset($_GET['welcome'])
         ? 'register/code.twig'
         : 'register/closed.twig'

@@ -8,9 +8,8 @@ class RipLog extends \Gazelle\File {
      * NOTE: This is a change in behaviour from the parent class,
      *      which is expecting the file contents.
      *
-     * @param string $source Path to the file, usually the result
-     *      of a POST operation.
-     * @param array $id The unique identifier [torrentId, logId] of the object
+     * $source Path to the file, usually the result of a POST operation.
+     * $id The unique identifier [torrentId, logId] of the object
      */
     public function put(string $source, mixed $id): bool {
         return false !== move_uploaded_file($source, $this->path($id));
@@ -19,8 +18,8 @@ class RipLog extends \Gazelle\File {
     /**
      * Remove one or more rip logs of a torrent
      *
-     * @param mixed $id The unique identifier [torrentId, logId] of the object
-     *                  If logId is null, all logs are taken into consideration
+     * $id The unique identifier [torrentId, logId] of the object
+     *     If logId is null, all logs are taken into consideration
      */
     public function remove(mixed $id): bool {
         [$torrentId, $logId] = $id;

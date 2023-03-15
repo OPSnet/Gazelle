@@ -375,7 +375,7 @@ if (!$newRequest) {
 }
 
 //3. Create a row in the requests_artists table for each artist, based on the ID.
-$artistMan->setGroupID($RequestID);
+$artistMan->setGroupId($RequestID);
 foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Artist) {
         $artistMan->addToRequest($Artist['id'], $Artist['aliasid'], $role);

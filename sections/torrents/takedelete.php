@@ -29,7 +29,7 @@ if (!$success) {
     error($message);
 }
 
-(new Gazelle\Manager\User)->sendRemovalPM(
+(new Gazelle\Manager\User)->sendRemovalPm(
     $torrentId, $uploaderId, $fullName,
     "Torrent $torrentId $fullName (" . number_format($size / (1024 * 1024), 2) . ' MiB '
         . strtoupper($infohash) . ") was deleted by " . $Viewer->username() . ": $reason",

@@ -94,13 +94,13 @@ $disableLeech    = isset($_POST['DisableLeech']) ? 0 : 1;
 $lockAccount     = isset($_POST['LockAccount']);
 $lockType        = (int)$_POST['LockType'];
 
-$enableUser = (int)$_POST['UserStatus'];
+$enableUser      = $_POST['UserStatus'];
 $resetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
-$resetIPHistory = $_POST['ResetIPHistory'] ?? 0;
-$resetPasskey = isset($_POST['ResetPasskey']) ? 1 : 0;
-$resetAuthkey = isset($_POST['ResetAuthkey']) ? 1 : 0;
-$logoutSession = isset($_POST['Logout']) ? 1 : 0;
-$sendHackedMail = isset($_POST['SendHackedMail']) ? 1 : 0;
+$resetIPHistory  = $_POST['ResetIPHistory'] ?? 0;
+$resetPasskey    = isset($_POST['ResetPasskey']) ? 1 : 0;
+$resetAuthkey    = isset($_POST['ResetAuthkey']) ? 1 : 0;
+$logoutSession   = isset($_POST['Logout']) ? 1 : 0;
+$sendHackedMail  = isset($_POST['SendHackedMail']) ? 1 : 0;
 if ($sendHackedMail && !empty(trim($_POST['HackedEmail']))) {
     $hackedEmail = trim($_POST['HackedEmail']);
 } else {
@@ -121,7 +121,7 @@ if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['
 
 $donorMan = new Gazelle\Manager\Donation;
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
-    $donorMan->moderatorDonate($user, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $Viewer->id());
+    $donorMan->moderatorDonate($user, (float)$_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $Viewer->id());
 } elseif (!empty($_POST['donor_values_submit'])) {
     $donorMan->moderatorAdjust($user, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $Viewer->id());
 }
@@ -148,7 +148,7 @@ if (!$lockType || $lockAccount == 0) {
         $Cache->delete_value('user_' . $cur['torrent_pass']);
         $editSummary[] = 'account unlocked';
     }
-} elseif ($lockType) {
+} else {
     if ($cur['locked_account'] !== $lockType) {
         if ($user->lock($lockType)) {
             $Cache->delete_value('user_' . $cur['torrent_pass']);
@@ -194,7 +194,7 @@ if ($flTokens != $cur['FLTokens'] && ($editRatio || $Viewer->permitted('admin_ma
 }
 
 $newBonusPoints = false;
-if (!in_array((int)$bonusPoints, [(int)$cur['BonusPoints'], (int)($_POST['OldBonusPoints'])])
+if (!in_array($bonusPoints, [(float)$cur['BonusPoints'], (float)($_POST['OldBonusPoints'])])
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))) {
     $newBonusPoints = $bonusPoints;
     $editSummary[] = "bonus points changed from {$cur['BonusPoints']} to {$bonusPoints}";
@@ -209,7 +209,7 @@ if ($Collages != $cur['collages'] && $Collages != (int)$_POST['OldCollages']
 
 if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('admin_rate_limit_manage')) {
     if ($user->toggleUnlimitedDownload($unlimitedDownload)) {
-        $editSummary[] = "unlimited download " . strtolower(enabledStatus($unlimitedDownload));
+        $editSummary[] = "unlimited download " . strtolower(enabledStatus($unlimitedDownload ? '1' : '0'));
     }
 }
 
@@ -308,7 +308,7 @@ if ($Viewer->permitted('users_warn')) {
             ];
         } else {
             $weeksChange = ($extendWarning != '---') ? $extendWarning : -$reduceWarning;
-            $nrWeeks = abs($weeksChange);
+            $nrWeeks = (int)abs($weeksChange);
             $duration = 'week' . plural($nrWeeks);
             $action = $weeksChange > 0 ? 'extended' : 'reduced';
             $message = [
@@ -408,12 +408,12 @@ $privChange = [];
 
 if ($Viewer->permitted('users_disable_any')) {
     if ($disableLeech != $cur['can_leech']) {
-        $privChange[] = 'Your leeching privileges have been ' . revoked($disableLeech);
+        $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
         $set[] = "can_leech = ?";
         $args[] = $disableLeech ? '1' : '0';
         $trackerUserUpdates['can_leech'] = $disableLeech;
         $editSummary[] = "leeching status changed ("
-            . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech).")";
+            . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech ? '1' : '0').")";
         $user->toggleAttr('disable-leech', !$disableLeech);
     }
     if ($disableInvites !== $user->disableInvites()) {

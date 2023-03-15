@@ -152,7 +152,7 @@ class Forum extends BaseObject {
         return $this->info()['last_post_id'];
     }
 
-    public function lastAuthorID(): ?int {
+    public function lastAuthorId(): ?int {
         return $this->info()['last_author_id'];
     }
 
@@ -326,7 +326,7 @@ class Forum extends BaseObject {
         return self::$db->to_array('forum_id', MYSQLI_ASSOC, false);
     }
 
-    public function userCatchup(int $userId) {
+    public function userCatchup(int $userId): int {
         self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
                    (UserID, TopicID, PostID)

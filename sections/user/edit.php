@@ -11,7 +11,7 @@ if ($UserID != $Viewer->id() && !$Viewer->permitted('users_edit_profiles')) {
     error(403);
 }
 
-$navItems  = $userMan->forumnavItemList();
+$navItems  = $userMan->forumNavItemList();
 
 $profile = [
     0 => [

@@ -15,7 +15,7 @@ if (!isset($_POST['auth'])) {
 
     $edit  = array_filter($_POST, fn ($x) => preg_match('/^edit-\d+$/', $x), ARRAY_FILTER_USE_KEY);
 
-    if (is_array($edit) && count($edit) == 1) {
+    if (count($edit) == 1) {
         $editId = (int)trim(array_keys($edit)[0], 'edit-');
         $appRole = $appRoleMan->findById($editId);
         if (is_null($appRole)) {

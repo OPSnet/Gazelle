@@ -1172,7 +1172,7 @@ class Text {
      */
     public static function parse_html($Html) {
         $Document = new DOMDocument();
-        $Document->loadHtml(stripslashes($Html));
+        $Document->loadHTML(stripslashes($Html));
 
         // For any manipulation that we do on the DOM tree, always go in reverse order or
         // else you end up with broken array pointers and missed elements

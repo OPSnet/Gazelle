@@ -165,7 +165,7 @@ if ($Viewer->isFLS()) { ?>
 
         // Get assigned
         if ($AssignedToUser != '') {
-            $Assigned = $userMan->findByid($AssignedToUser)?->link() ?? 'System';
+            $Assigned = $userMan->findById($AssignedToUser)?->link() ?? 'System';
         } else {
             // Assigned to class
             $Assigned = $Level ? $ClassLevels[$Level]['Name'] : 'First Line Support';
@@ -179,13 +179,13 @@ if ($Viewer->isFLS()) { ?>
                     <td class="center"><input type="checkbox" name="id[]" value="<?=$ID?>" /></td>
 <?php         } ?>
                     <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
-                    <td><?= $userMan->findByid($UserID)?->link() ?? 'System' ?></td>
+                    <td><?= $userMan->findById($UserID)?->link() ?? 'System' ?></td>
                     <td><?= time_diff($Date, 2, true) ?></td>
                     <td><?= $Assigned ?></td>
                     <td><?= max(0, $NumReplies - 1) ?></td>
-                    <td><?= $userMan->findByid($LastUserID)?->link() ?></td>
+                    <td><?= $userMan->findById($LastUserID)?->link() ?></td>
 <?php        if ($viewingResolved) { ?>
-                    <td><?= $userMan->findByid($ResolverID)?->link() ?></td>
+                    <td><?= $userMan->findById($ResolverID)?->link() ?></td>
 <?php        } ?>
                 </tr>
 <?php

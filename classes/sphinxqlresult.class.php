@@ -46,12 +46,8 @@ class SphinxqlResult {
 
     /**
      * Collect and return all available data for the matches optionally indexed by a specified key
-     *
-     * @param string $Key key to use as indexing value
-     * @param int $ResultType method to use when fetching data from the mysqli_result object. Default is MYSQLI_ASSOC
-     * @return array with all available data for the matches
      */
-    public function to_array($Key, $ResultType = MYSQLI_ASSOC) {
+    public function to_array(string|false $Key, int $ResultType = MYSQLI_ASSOC): array {
         $Return = [];
         while ($Row = $this->Result->fetch_array($ResultType)) {
             if ($Key !== false) {

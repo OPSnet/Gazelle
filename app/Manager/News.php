@@ -97,7 +97,7 @@ class News extends \Gazelle\Base {
      */
     public function latest(): array {
         $headlines = $this->headlines();
-        return $headlines[0] ?? ["id" => -1, "title" => null, "body" => null, "created" => null];
+        return $headlines[0] ?? ["id" => -1, "title" => null, "body" => null, "created" => '2001-01-01 00:00:00'];
     }
 
     /**

@@ -64,7 +64,7 @@ class RequestTest extends TestCase {
         [$artistId, $aliasId] = $artistMan->create($artistName);
         $this->assertGreaterThan(0, $artistId, 'request-create-artist');
         // FIXME: nuke this horrible legacy code
-        $artistMan->setGroupID($request->id());
+        $artistMan->setGroupId($request->id());
         $artistMan->addToRequest($artistId, $aliasId, ARTIST_MAIN);
 
         $tagMan = new Gazelle\Manager\Tag;

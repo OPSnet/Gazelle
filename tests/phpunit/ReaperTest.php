@@ -126,7 +126,7 @@ class ReaperTest extends TestCase {
             UPDATE torrent_unseeded SET
                 unseeded_date = ?
             WHERE torrent_id = ?
-            ", Date('Y-m-d H:i:s', (int)strtotime("-{$hour} hours")), $torrent->id()
+            ", date('Y-m-d H:i:s', (int)strtotime("-{$hour} hours")), $torrent->id()
         );
     }
 
@@ -214,7 +214,7 @@ class ReaperTest extends TestCase {
 
         // reset the time of the never seeded alert back in time to hit the initial timeout
         $hour = NOTIFY_NEVER_SEEDED_INITIAL_HOUR + 1;
-        $neverSeededInitialDate = Date('Y-m-d H:i:s', strtotime("-{$hour} hours"));
+        $neverSeededInitialDate = date('Y-m-d H:i:s', strtotime("-{$hour} hours"));
         $this->torrentList[0]->setUpdate('Time', $neverSeededInitialDate)->modify();
 
         // look for never seeded
@@ -282,7 +282,7 @@ class ReaperTest extends TestCase {
 
         // reseed one of the torrents by the uploader
         $this->generateReseed($this->torrentList[0], $this->torrentList[0]->uploader());
-        $this->torrentList[1]->setUpdate('Time', Date('Y-m-d H:i:s'))->modify();
+        $this->torrentList[1]->setUpdate('Time', date('Y-m-d H:i:s'))->modify();
 
         // reset the time of the remaing never seeded alert back in time to hit
         // the final timeout.
@@ -352,7 +352,7 @@ class ReaperTest extends TestCase {
         // reset the last action and time of the unseeded alert back in time to hit the initial timeout
         foreach ($this->torrentList as $torrent) {
             $hour = NOTIFY_UNSEEDED_INITIAL_HOUR + 1;
-            $torrent->setUpdate('Time', Date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
+            $torrent->setUpdate('Time', date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
             $this->modifyLastAction($torrent, NOTIFY_UNSEEDED_INITIAL_HOUR + 2);
             // pretend they were snatched
             foreach ($this->userList as $user) {
@@ -516,7 +516,7 @@ class ReaperTest extends TestCase {
         // reset the last action and time of the unseeded alert back in time to hit the initial timeout
         foreach ($this->torrentList as $torrent) {
             $hour = NOTIFY_NEVER_SEEDED_INITIAL_HOUR + 1;
-            $torrent->setUpdate('Time', Date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
+            $torrent->setUpdate('Time', date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
             $this->modifyLastAction($torrent, NOTIFY_NEVER_SEEDED_INITIAL_HOUR + 2);
         }
 
@@ -543,7 +543,7 @@ class ReaperTest extends TestCase {
         // reset the last action and time of the unseeded alert back in time to hit the initial timeout
         foreach ($this->torrentList as $torrent) {
             $hour = NOTIFY_UNSEEDED_INITIAL_HOUR + 1;
-            $torrent->setUpdate('Time', Date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
+            $torrent->setUpdate('Time', date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
             $this->modifyLastAction($torrent, NOTIFY_UNSEEDED_INITIAL_HOUR + 2);
             $this->generateSnatch($torrent, $this->userList[1]);
         }
@@ -563,7 +563,7 @@ class ReaperTest extends TestCase {
         $this->assertEquals([2], array_values($timeline), 'reaper-two-today');
         $today = current(array_keys($timeline));
         // take into account the chance of running a few seconds before midnight
-        $this->assertContains($today, [Date('Y-m-d'), Date('Y-m-d', strtotime('1 hour ago'))], 'reaper-timeline');
+        $this->assertContains($today, [date('Y-m-d'), date('Y-m-d', strtotime('1 hour ago'))], 'reaper-timeline');
     }
 
 }

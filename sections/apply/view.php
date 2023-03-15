@@ -14,7 +14,7 @@ if (isset($_REQUEST['id'])) {
     }
 
     $remove = array_filter($_POST, fn ($x) => preg_match('/^note-delete-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-    if (is_array($remove) && count($remove) == 1) {
+    if (count($remove) == 1) {
         authorize();
         $app->removeNote(
             trim(array_keys($remove)[0], 'note-delete-')

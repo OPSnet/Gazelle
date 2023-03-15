@@ -12,10 +12,9 @@ $showUnread = (bool)($_GET['showunread'] ?? true);
 
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal(
-    match($showUnread) {
-        true  => $forumMan->unreadSubscribedForumTotal($Viewer) + $subscriber->unreadCommentTotal(),
-        false => $forumMan->subscribedForumTotal($Viewer) + $subscriber->commentTotal(),
-    }
+    $showUnread
+        ? $forumMan->unreadSubscribedForumTotal($Viewer) + $subscriber->unreadCommentTotal()
+        : $forumMan->subscribedForumTotal($Viewer) + $subscriber->commentTotal()
 );
 
 $Results = (new Gazelle\User\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
@@ -59,7 +58,7 @@ foreach ($Results as &$result) {
             }
             break;
         case 'forums':
-            $thread = $threadMan->findbyId($result['PageID']);
+            $thread = $threadMan->findById($result['PageID']);
             if ($thread) {
                 $result = $result + [
                     'jump' => $thread->url() . $postLink,

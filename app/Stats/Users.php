@@ -147,7 +147,7 @@ class Users extends \Gazelle\Base {
                 SELECT Code, Users FROM users_geodistribution
             ");
             $Data = self::$db->to_array();
-            $Count = self::$db->record_count() - 1;
+            $Count = (int)self::$db->record_count() - 1;
 
             if ($Count < 30) {
                 $CountryMinThreshold = $Count;
@@ -155,8 +155,8 @@ class Users extends \Gazelle\Base {
                 $CountryMinThreshold = 30;
             }
 
-            $CountryMax = ceil(log(Max(1, $Data[0][1])) / log(2)) + 1;
-            $CountryMin = floor(log(Max(1, $Data[$CountryMinThreshold][1])) / log(2));
+            $CountryMax = ceil(log(max(1, $Data[0][1])) / log(2)) + 1;
+            $CountryMin = floor(log(max(1, $Data[$CountryMinThreshold][1])) / log(2));
 
             $CountryRegions = ['RS' => ['RS-KM']]; // Count Kosovo as Serbia as it doesn't have a TLD
             foreach ($Data as $Key => $Item) {
@@ -243,7 +243,7 @@ class Users extends \Gazelle\Base {
         if (!isset($this->info['enabled'])) {
             $total = self::$cache->get_value('stats_user_count');
             if ($total === false) {
-                $total = self::$db->scalar("
+                $total = (int)self::$db->scalar("
                     SELECT count(*) FROM users_main WHERE Enabled = '1'
                 ");
                 self::$cache->cache_value('stats_user_count', $total, 7200);

@@ -43,7 +43,7 @@ class Torrent extends \Gazelle\Json {
             'logCount'        => count($torrent->ripLogIdList()),
             'ripLogIds'       => $torrent->ripLogIdList(),
             'freeTorrent'     => $torrent->isFreeleech(),
-            'isNeutralLeech'  => $torrent->isFreeleech(),
+            'isNeutralLeech'  => $torrent->isNeutralleech(),
             'reported'        => $torrent->hasReport($this->notifier->user()),
             'time'            => $torrent->created(),
             'description'     => $torrent->description(),
@@ -51,7 +51,7 @@ class Torrent extends \Gazelle\Json {
         ];
     }
 
-    public function payload(): ?array {
+    public function payload(): array {
         $this->paginator->setTotal($this->notifier->total());
         return [
             'currentPage' => $this->paginator->page(),

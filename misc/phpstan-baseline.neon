@@ -1016,11 +1016,6 @@ parameters:
 			path: ../app/Feed.php
 
 		-
-			message: "#^Method Gazelle\\\\File\\:\\:put\\(\\) should return bool but returns int\\<0, max\\>\\|false\\.$#"
-			count: 1
-			path: ../app/File.php
-
-		-
 			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: ../app/File/RipLog.php
@@ -1029,11 +1024,6 @@ parameters:
 			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: ../app/File/RipLogHTML.php
-
-		-
-			message: "#^Method Gazelle\\\\Forum\\:\\:userCatchup\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Forum.php
 
 		-
 			message: "#^Method Gazelle\\\\ForumPoll\\:\\:response\\(\\) should return int\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
@@ -1199,11 +1189,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$property of method Gazelle\\\\User\\:\\:propertyVisible\\(\\) expects string, bool given\\.$#"
 			count: 1
 			path: ../app/Json/User.php
-
-		-
-			message: "#^Method Gazelle\\\\Json\\\\UserRecent\\:\\:setLimit\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Json/UserRecent.php
 
 		-
 			message: "#^Method Gazelle\\\\Log\\:\\:general\\(\\) has no return type specified\\.$#"
@@ -1526,51 +1511,6 @@ parameters:
 			path: ../app/Manager/Contest.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:calculateSpecialRank\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:donate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:hasForumAccess\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:leaderboardRank\\(\\) should return int but returns bool\\|float\\|int\\|string\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:messageBody\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:moderatorAdjust\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:moderatorDonate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Donation\\:\\:regularDonate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
-			message: "#^Parameter \\#1 \\$num of function number_format expects float, string given\\.$#"
-			count: 1
-			path: ../app/Manager/Donation.php
-
-		-
 			message: "#^Method Gazelle\\\\Manager\\\\DuplicateIP\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Manager/DuplicateIP.php
@@ -1754,36 +1694,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\Privilege constructor expects int, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
 			count: 1
 			path: ../app/Manager/Privilege.php
-
-		-
-			message: "#^If condition is always false\\.$#"
-			count: 2
-			path: ../app/Manager/Recovery.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Recovery\\:\\:boostUpload\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Recovery.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Recovery\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Recovery.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Recovery\\:\\:validatePending\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Recovery.php
-
-		-
-			message: "#^Parameter \\#2 \\$hash of function password_verify expects string, bool\\|float\\|int\\|string given\\.$#"
-			count: 1
-			path: ../app/Manager/Recovery.php
-
-		-
-			message: "#^Ternary operator condition is always false\\.$#"
-			count: 1
-			path: ../app/Manager/Recovery.php
 
 		-
 			message: "#^If condition is always false\\.$#"
@@ -3301,16 +3211,6 @@ parameters:
 			path: ../app/Stats/Torrent.php
 
 		-
-			message: "#^Method Gazelle\\\\Stats\\\\User\\:\\:unresolvedReportsTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Stats/User.php
-
-		-
-			message: "#^Binary operation \"\\-\" between int\\|string\\|null and 1 results in an error\\.$#"
-			count: 1
-			path: ../app/Stats/Users.php
-
-		-
 			message: "#^Binary operation \"\\+\" between bool\\|float\\|int\\|string\\|null and bool\\|float\\|int\\|string\\|null results in an error\\.$#"
 			count: 1
 			path: ../app/TGroup.php
@@ -3531,214 +3431,14 @@ parameters:
 			path: ../app/TorrentAbstract.php
 
 		-
+			message: '/Match arm comparison between \$this\(Gazelle\\TorrentFlag\)&Gazelle\\TorrentFlag::noLineage and Gazelle\\TorrentFlag::noLineage is always true\.$/'
+			count: 1
+			path: ../app/TorrentFlag.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between array and false will always evaluate to false\\.$#"
 			count: 1
 			path: ../app/Tracker.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:IRCKey\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:TFAKey\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:activePersonalCollages\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:addForumWarning\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:addStaffNote\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:created\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:donorInfo\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:duplicateIPv4Count\\(\\) should return int but returns float\\|int\\<0, max\\>\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:endWarningDate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:flushRecentSnatch\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:flushRecentUpload\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:forceCacheFlush\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:forumWarning\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:getSingleValue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:hasTokenByName\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:lastAccessRealtime\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:logout\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:logoutEverywhere\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:mergeLeechStats\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:modifyOption\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:nextClass\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:option\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:passwordAge\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:propertyVisibleMulti\\(\\) should return int but returns int\\<min, \\-1\\>\\|int\\<1, max\\>\\|false\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:recentUploadList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:recoveryFinalSize\\(\\) should return float\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:releaseOrder\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:remove2FA\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:removeTitle\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:resetPassword\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:setTitle\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:staffNotes\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:supportCount\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:supportFor\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:tagSnatchCounts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:title\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:torrentDownloadCount\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:updateIP\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\:\\:updateReward\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Parameter \\#1 \\$data of function unserialize expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
-			count: 1
-			path: ../app/User.php
-
-		-
-			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, int\\<0, max\\>\\|false given\\.$#"
-			count: 1
-			path: ../app/User.php
 
 		-
 			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:configure\\(\\) has no return type specified\\.$#"
@@ -4074,6 +3774,11 @@ parameters:
 			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, int\\|false given\\.$#"
 			count: 1
 			path: ../app/Util/Crypto.php
+
+		-
+			message: '/Match arm comparison between Gazelle\\Util\\CurlMethod::PUT and Gazelle\\Util\\CurlMethod::PUT is always true\.$/'
+			count: 1
+			path: ../app/Util/Curl.php
 
 		-
 			message: "#^Property Gazelle\\\\Util\\\\Curl\\:\\:\\$curl has no type specified\\.$#"
@@ -4501,11 +4206,6 @@ parameters:
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: "#^Method SphinxqlQuery\\:\\:where_match\\(\\) has parameter \\$Escape with no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxqlquery.class.php
-
-		-
 			message: "#^Parameter \\#1 \\$Result of class SphinxqlResult constructor expects mysqli_result, null given\\.$#"
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
@@ -4579,11 +4279,6 @@ parameters:
 			message: "#^Property SphinxqlQuery\\:\\:\\$Sphinxql has no type specified\\.$#"
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
-
-		-
-			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
-			count: 1
-			path: ../classes/sphinxqlresult.class.php
 
 		-
 			message: "#^Method SphinxqlResult\\:\\:__construct\\(\\) has parameter \\$Meta with no value type specified in iterable type array\\.$#"
@@ -5361,11 +5056,6 @@ parameters:
 			path: ../sections/reportsv2/takereport.php
 
 		-
-			message: "#^Parameter \\#5 \\$trumpId of method Gazelle\\\\Manager\\\\User\\:\\:sendRemovalPM\\(\\) expects int, int\\|string given\\.$#"
-			count: 1
-			path: ../sections/reportsv2/takeresolve.php
-
-		-
 			message: "#^If condition is always true\\.$#"
 			count: 1
 			path: ../sections/requests/new_edit.php
@@ -5709,41 +5399,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\|false given\\.$#"
 			count: 1
 			path: ../sections/user/take_edit.php
-
-		-
-			message: "#^Parameter \\#1 \\$n of function plural expects int, float\\|int\\<0, max\\> given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
-
-		-
-			message: "#^Parameter \\#1 \\$points of method Gazelle\\\\User\\\\Bonus\\:\\:setPoints\\(\\) expects int, float\\|null given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
-
-		-
-			message: "#^Parameter \\#1 \\$state of function revoked expects bool, int given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
-
-		-
-			message: "#^Parameter \\#1 \\$status of function enabledStatus expects string, bool given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
-
-		-
-			message: "#^Parameter \\#1 \\$status of function enabledStatus expects string, int given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
-
-		-
-			message: "#^Parameter \\#1 \\$status of function translateUserStatus expects string, int given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
-
-		-
-			message: "#^Parameter \\#2 \\$amount of method Gazelle\\\\Manager\\\\Donation\\:\\:moderatorDonate\\(\\) expects string, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string given\\.$#"
-			count: 1
-			path: ../sections/user/takemoderate.php
 
 		-
 			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<void\\> given\\.$#"

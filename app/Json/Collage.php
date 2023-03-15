@@ -18,7 +18,7 @@ class Collage extends \Gazelle\Json {
         $entryList = $this->collage->entryList();
         $payload = [];
         foreach ($entryList as $tgroupId) {
-            $tgroup = $this->tgMan->findByid($tgroupId);
+            $tgroup = $this->tgMan->findById($tgroupId);
             if (is_null($tgroup)) {
                 continue;
             }
@@ -71,14 +71,14 @@ class Collage extends \Gazelle\Json {
         return $payload;
     }
 
-    public function payload(): ?array {
+    public function payload(): array {
         return array_merge(
             [
                 'id'                  => $this->collage->id(),
                 'name'                => $this->collage->name(),
                 'description'         => \Text::full_format($this->collage->description()),
                 'description_raw'     => $this->collage->description(),
-                'creatorID'           => $this->collage->ownerid(),
+                'creatorID'           => $this->collage->ownerId(),
                 'deleted'             => $this->collage->isDeleted(),
                 'collageCategoryID'   => $this->collage->categoryId(),
                 'collageCategoryName' => COLLAGE[$this->collage->categoryId()],

@@ -4,7 +4,7 @@ $statsUser = new Gazelle\Stats\Users;
 $flow      = $statsUser->flow();
 
 [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements]
-    = $statsUser->geoDistribution();
+    = $statsUser->geodistribution();
 
 echo $Twig->render('stats/user.twig', [
     'distribution' => [

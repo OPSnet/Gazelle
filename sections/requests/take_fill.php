@@ -12,7 +12,7 @@ if (!defined('AJAX')) {
     authorize();
 }
 
-$request = (new Gazelle\Manager\Request)->findByid((int)$_REQUEST['requestid']);
+$request = (new Gazelle\Manager\Request)->findById((int)$_REQUEST['requestid']);
 if (is_null($request)) {
     error(404);
 }

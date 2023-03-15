@@ -3,6 +3,15 @@ includes:
 
 parameters:
     level: 7
+    checkAlwaysTrueCheckTypeFunctionCall: true
+    checkAlwaysTrueInstanceof: true
+    checkAlwaysTrueStrictComparison: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    reportAlwaysTrueInLastCondition: true
+    reportMaybesInMethodSignatures: true
+    reportStaticMethodSignatures: true
     errorFormat: table
     stubFiles:
         - ../lib/stub/memcached.stub
@@ -29,6 +38,7 @@ parameters:
         - DEBUG_EMAIL
         - DEBUG_MODE
         - FEATURE_EMAIL_REENABLE
+        - HTTP_PROXY
         - LASTFM_API_KEY
         - OPEN_REGISTRATION
         - REAPER_TASK_CLAIM
@@ -37,6 +47,7 @@ parameters:
         - REAPER_TASK_REMOVE_UNSEEDED
         - RECOVERY
         - RECOVERY_AUTOVALIDATE
+        - RECOVERY_BUFFER
         - RECOVERY_DB
         - REQUEST_TAX
         - SHOW_PUBLIC_INDEX

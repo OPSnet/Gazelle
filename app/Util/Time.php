@@ -302,7 +302,7 @@ class Time {
             return false;
         }
         [$year, $month, $day] = $split_date;
-        return checkDate($month, $day, $year);
+        return checkdate($month, $day, $year);
     }
 
     public static function isValidDate($date) {

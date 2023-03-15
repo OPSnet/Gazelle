@@ -11,7 +11,7 @@ class UserRecent extends \Gazelle\Json {
         protected \Gazelle\Manager\TGroup $tgMan,
     ) {}
 
-    public function setLimit(int $limit) {
+    public function setLimit(int $limit): UserRecent {
         $this->limit = $limit;
         return $this;
     }
@@ -32,7 +32,7 @@ class UserRecent extends \Gazelle\Json {
         return $detail;
     }
 
-    public function payload(): ?array {
+    public function payload(): array {
         return [
             'snatches' => $this->user->propertyVisible($this->viewer, 'snatched')
                 ? $this->detail($this->user->recentSnatchList($this->limit, true))

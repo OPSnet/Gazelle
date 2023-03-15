@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Donation extends \Gazelle\Base {
-    public function moderatorAdjust(\Gazelle\User $user, int $Rank, int $TotalRank, string $Reason, int $who) {
+    public function moderatorAdjust(\Gazelle\User $user, int $Rank, int $TotalRank, string $Reason, int $who): void {
         $this->donate($user, [
             "Source"    => "Modify Values",
             "Rank"      => $Rank,
@@ -14,7 +14,7 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function moderatorDonate(\Gazelle\User $user, string $amount, string $Currency, string $Reason, int $who) {
+    public function moderatorDonate(\Gazelle\User $user, float $amount, string $Currency, string $Reason, int $who): void {
         $this->donate($user, [
             "Source"   => 'Add Points',
             "Amount"   => $amount,
@@ -25,10 +25,10 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function regularDonate(\Gazelle\User $user, string $DonationAmount, string $Source, string $Reason, $Currency = "EUR") {
+    public function regularDonate(\Gazelle\User $user, float $amount, string $Source, string $Reason, $Currency = "EUR"): void {
         $this->donate($user, [
             "Source"   => $Source,
-            "Amount"   => $DonationAmount,
+            "Amount"   => $amount,
             "Currency" => $Currency,
             "SendPM"   => true,
             "Reason"   => $Reason,
@@ -36,7 +36,7 @@ class Donation extends \Gazelle\Base {
         ]);
     }
 
-    public function donate(\Gazelle\User $user, array $Args) {
+    public function donate(\Gazelle\User $user, array $Args): void {
         $QueryID = self::$db->get_query_id();
         if (!isset($Args['Amount'])) {
             $xbtAmount = 0.0;
@@ -156,7 +156,7 @@ class Donation extends \Gazelle\Base {
         self::$db->set_query_id($QueryID);
     }
 
-    protected function calculateSpecialRank(\Gazelle\User $user, int $TotalRank) {
+    protected function calculateSpecialRank(\Gazelle\User $user, int $TotalRank): int {
         $SpecialRank = $user->specialDonorRank();
         $UserID = $user->id();
         if ($TotalRank < 10) {
@@ -229,13 +229,13 @@ class Donation extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    public function hasForumAccess(\Gazelle\User $user) {
+    public function hasForumAccess(\Gazelle\User $user): bool {
         return $user->donorRank() >= DONOR_FORUM_RANK || $user->specialDonorRank() >= MAX_SPECIAL_RANK;
     }
 
     public function leaderboardRank(\Gazelle\User $user): int {
         self::$db->prepared_query("SET @RowNum := 0");
-        $Position = self::$db->scalar("
+        $Position = (int)self::$db->scalar("
             SELECT Position
             FROM (
                 SELECT d.UserID, @RowNum := @RowNum + 1 AS Position
@@ -245,10 +245,10 @@ class Donation extends \Gazelle\Base {
             WHERE UserID = ?
             ", $user->id()
         );
-        return $Position ?? 0;
+        return $Position;
     }
 
-    protected function messageBody(string $Source, string $Currency, string $amount, int $ReceivedRank, int $CurrentRank) {
+    protected function messageBody(string $Source, string $Currency, float $amount, int $ReceivedRank, int $CurrentRank): string {
         if ($Currency != 'XBT') {
             $amount = number_format($amount, 2);
         }

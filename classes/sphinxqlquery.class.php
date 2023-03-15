@@ -142,12 +142,8 @@ class SphinxqlQuery {
     /**
      * Add fulltext query expression. Calling multiple filter functions results in boolean AND between each condition.
      * Query expression is escaped automatically
-     *
-     * @param string $Expr query expression
-     * @param string $Field field to match $Expr against. Default is *, which means all available fields
-     * @return $this current SphinxqlQuery object
      */
-    public function where_match($Expr, $Field = '*', $Escape = true) {
+    public function where_match(string $Expr, string|false $Field = '*', bool $Escape = true): SphinxqlQuery {
         if (empty($Expr)) {
             return $this;
         }

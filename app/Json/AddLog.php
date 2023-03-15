@@ -12,10 +12,10 @@ class AddLog extends \Gazelle\Json {
         protected \Gazelle\LogfileSummary     $logfileSummary,
     ) {}
 
-    public function payload(): ?array {
+    public function payload(): array {
         if ($this->user->id() !== $this->torrent->uploaderId() && !$this->user->permitted('admin_add_log')) {
             $this->failure('Not the torrent owner or moderator');
-            return null;
+            return [];
         }
 
         $logSummaries = [];

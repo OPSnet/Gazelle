@@ -13,7 +13,8 @@ if (is_null($collage)) {
     if (preg_match(COLLAGE_REGEXP, $_POST['name'], $match)) {
         // Looks like a URL
         $collage = $collageMan->findById((int)$match['id']);
-    } elseif (is_null($collage)) {
+    }
+    if (is_null($collage)) {
         // Must be a name of a collage
         $collage = $collageMan->findByName($_POST['name'] ?? '');
     }

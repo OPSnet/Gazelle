@@ -17,6 +17,6 @@ echo $Twig->render('admin/user-info.twig', [
     'column'    => $column,
     'direction' => $direction,
     'hist'      => new Gazelle\User\History($user, $column, $direction),
-    'now'       => Date('Y-m-d H:i:s'),
+    'now'       => date('Y-m-d H:i:s'),
     'user'      => $user,
 ]);

@@ -397,7 +397,7 @@ class Bonus extends \Gazelle\BaseUser {
         return self::$db->affected_rows();
     }
 
-    public function setPoints(int $points): int {
+    public function setPoints(float $points): int {
         self::$db->prepared_query("
             UPDATE user_bonus SET
                 points = ?

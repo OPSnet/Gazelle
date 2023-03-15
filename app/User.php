@@ -57,7 +57,7 @@ class User extends BaseObject {
     /**
      * Log out the current session
      */
-    public function logout($sessionId = false) {
+    public function logout($sessionId = false): void {
         setcookie('session', '', [
             'expires'  => time() - 60 * 60 * 24 * 90,
             'path'     => '/',
@@ -74,7 +74,7 @@ class User extends BaseObject {
     /**
      * Logout all sessions
      */
-    public function logoutEverywhere() {
+    public function logoutEverywhere(): void {
         $session = new User\Session($this);
         $session->dropAll();
         $this->logout();
@@ -370,7 +370,7 @@ class User extends BaseObject {
         return !$this->hasAttr('no-fl-gifts');
     }
 
-    public function option(string $option) {
+    public function option(string $option): array|int|string|null {
         return $this->info()['SiteOptions'][$option] ?? null;
     }
 
@@ -468,7 +468,7 @@ class User extends BaseObject {
     }
 
     public function avatarMode(): int {
-        return $this->option('DisableAvatars') ?? 0;
+        return (int)$this->option('DisableAvatars');
     }
 
     public function showAvatars(): bool {
@@ -551,15 +551,15 @@ class User extends BaseObject {
         return $this->info()['IP'];
     }
 
-    public function IRCKey() {
+    public function IRCKey(): ?string {
         return $this->info()['IRCKey'];
     }
 
-    public function created() {
+    public function created(): string {
         return $this->info()['JoinDate'];
     }
 
-    public function TFAKey() {
+    public function TFAKey(): ?string {
         return $this->info()['2FA_Key'];
     }
 
@@ -586,7 +586,7 @@ class User extends BaseObject {
     }
 
     public function list2FA(): array {
-        return unserialize(self::$db->scalar("
+        return unserialize((string)self::$db->scalar("
             SELECT Recovery FROM users_main WHERE ID = ?
             ", $this->id
         )) ?: [];
@@ -615,7 +615,7 @@ class User extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function remove2FA() {
+    public function remove2FA(): User {
         return $this->setUpdate('2FA_Key', null)
             ->setUpdate('Recovery', null);
     }
@@ -692,31 +692,20 @@ class User extends BaseObject {
     /**
      * What right does the viewer have to see a list of properties of this user?
      *
-     * @param \Gazelle\User $viewer Who is looking?
-     * @param array $property What properties are they looking for?
-     * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
+     * returns PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
-    public function propertyVisibleMulti(User $viewer, array $property): int {
-        $final = false;
-        foreach ($property as $p) {
-            $result = $this->propertyVisible($viewer, $p);
-            if ($result === PARANOIA_HIDE) {
-                return PARANOIA_HIDE;
-            }
-            if ($final === PARANOIA_OVERRIDDEN && $result === PARANOIA_ALLOWED) {
-                continue;
-            }
-            $final = $result;
+    public function propertyVisibleMulti(User $viewer, array $propertyList): int {
+        $paranoia = array_map(fn($p) => $this->propertyVisible($viewer, $p), $propertyList);
+        if (in_array(PARANOIA_HIDE, $paranoia)) {
+            return PARANOIA_HIDE;
         }
-        return $final;
+        return in_array(PARANOIA_OVERRIDDEN, $paranoia) ? PARANOIA_OVERRIDDEN : PARANOIA_ALLOWED;
     }
 
     /**
      * What right does the viewer have to see a property of this user?
      *
-     * @param \Gazelle\User $viewer Who is looking?
-     * @param string $property What property are they looking for?
-     * @return int PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
+     * returns PARANOIA_HIDE, PARANOIA_OVERRIDDEN, PARANOIA_ALLOWED
      */
     public function propertyVisible(User $viewer, string $property): int {
         if ($this->id === $viewer->id()) {
@@ -739,7 +728,7 @@ class User extends BaseObject {
 
     public function recoveryFinalSize(): ?float {
         if (RECOVERY_DB) {
-            return self::$db->scalar("
+            return (float)self::$db->scalar("
                 SELECT final FROM recovery_buffer WHERE user_id = ?
                 ", $this->id
             );
@@ -751,15 +740,15 @@ class User extends BaseObject {
         return $this->info()['RequiredRatio'];
     }
 
-    public function staffNotes() {
+    public function staffNotes(): string {
         return $this->info()['AdminComment'];
     }
 
-    public function supportFor() {
+    public function supportFor(): string {
         return $this->info()['SupportFor'];
     }
 
-    public function title() {
+    public function title(): ?string {
         return $this->info()['Title'];
     }
 
@@ -909,16 +898,16 @@ class User extends BaseObject {
         return $this->lastReadForum;
     }
 
-    public function forceCacheFlush($flush = true) {
+    public function forceCacheFlush($flush = true): bool {
         return $this->forceCacheFlush = $flush;
     }
 
-    public function flushRecentSnatch() {
-        self::$cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->id));
+    public function flushRecentSnatch(): bool {
+        return self::$cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->id));
     }
 
-    public function flushRecentUpload() {
-        self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
+    public function flushRecentUpload(): bool {
+        return self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
     }
 
     public function recordEmailChange(string $newEmail, string $ipaddr): int {
@@ -933,7 +922,7 @@ class User extends BaseObject {
             self::$twig->render('email/email-address-change.twig', [
                 'ipaddr'     => $ipaddr,
                 'new_email'  => $newEmail,
-                'now'        => Date('Y-m-d H:i:s'),
+                'now'        => date('Y-m-d H:i:s'),
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'],
                 'username'   => $this->username(),
             ])
@@ -953,7 +942,7 @@ class User extends BaseObject {
         (new Mail)->send($this->email(), 'Password changed information for ' . SITE_NAME,
             self::$twig->render('email/password-change.twig', [
                 'ipaddr'     => $ipaddr,
-                'now'        => Date('Y-m-d H:i:s'),
+                'now'        => date('Y-m-d H:i:s'),
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'],
                 'username'   => $this->username(),
             ])
@@ -976,20 +965,16 @@ class User extends BaseObject {
 
     /**
      * Record a forum warning for this user
-     *
-     * @param string $reason reason for the warning.
      */
-    public function addForumWarning(string $reason) {
+    public function addForumWarning(string $reason): User {
         $this->forumWarning[] = $reason;
         return $this;
     }
 
     /**
      * Record a staff not for this user
-     *
-     * @param string $note staff note
      */
-    public function addStaffNote(string $note) {
+    public function addStaffNote(string $note): User {
         $this->staffNote[] = $note;
         return $this;
     }
@@ -999,7 +984,7 @@ class User extends BaseObject {
      *
      * @param string $title The text of the title (may contain BBcode)
      */
-    public function setTitle(string $title) {
+    public function setTitle(string $title): bool {
         $title = trim($title);
         $length = mb_strlen($title);
         if ($length > USER_TITLE_LENGTH) {
@@ -1011,11 +996,11 @@ class User extends BaseObject {
     /**
      * Remove the custom title of a user
      */
-    public function removeTitle() {
+    public function removeTitle(): bool {
         return $this->setUpdate('Title', null);
     }
 
-    public function modifyOption(string $name, $value) {
+    public function modifyOption(string $name, $value): User {
         $options = $this->info()['SiteOptions'];
         if (is_null($value)) {
             unset($options[$name]);
@@ -1064,7 +1049,7 @@ class User extends BaseObject {
         return false;
     }
 
-    public function mergeLeechStats(string $username, string $staffname) {
+    public function mergeLeechStats(string $username, string $staffname): ?array {
         [$mergeId, $up, $down] = self::$db->row("
             SELECT um.ID, uls.Uploaded, uls.Downloaded
             FROM users_main um
@@ -1125,7 +1110,7 @@ class User extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function updateIP($oldIP, $newIP) {
+    public function updateIP($oldIP, $newIP): int {
         self::$db->prepared_query('
             UPDATE users_history_ips SET
                 EndTime = now()
@@ -1145,7 +1130,9 @@ class User extends BaseObject {
             WHERE ID = ?
             ', $newIP, geoip($newIP), $this->id
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
+        return $affected;
     }
 
     public function registerDownload(int $torrentId): int {
@@ -1275,7 +1262,7 @@ class User extends BaseObject {
     }
 
     public function supportCount(int $newClassId, int $levelClassId): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(DISTINCT DisplayStaff)
             FROM permissions
             WHERE ID IN (?, ?)
@@ -1452,8 +1439,8 @@ class User extends BaseObject {
         return $this->info()['Warned'];
     }
 
-    public function endWarningDate(int $weeks) {
-        return self::$db->scalar("
+    public function endWarningDate(int $weeks): string {
+        return (string)self::$db->scalar("
             SELECT coalesce(Warned, now()) + INTERVAL ? WEEK
             FROM users_info
             WHERE UserID = ?
@@ -1485,7 +1472,7 @@ class User extends BaseObject {
      * @return int number of active collages
      */
     public function activePersonalCollages(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM collages
             WHERE CategoryID = 0
@@ -1533,10 +1520,10 @@ class User extends BaseObject {
         return self::$db->collect(0) ?: ['None'];
     }
 
-    protected function getSingleValue($cacheKey, $query) {
+    protected function getSingleValue($cacheKey, $query): string {
         $cacheKey .= '_' . $this->id;
         if ($this->forceCacheFlush || ($value = self::$cache->get_value($cacheKey)) === false) {
-            $value = self::$db->scalar($query, $this->id);
+            $value = (string)self::$db->scalar($query, $this->id);
             self::$cache->cache_value($cacheKey, $value, 3600);
         }
         return $value;
@@ -1544,24 +1531,26 @@ class User extends BaseObject {
 
     public function duplicateIPv4Count(): int {
         $cacheKey = "ipv4_dup_" . str_replace('-', '_', $this->info()['IP']);
-        if (($value = self::$cache->get_value($cacheKey)) === false) {
+        $value = self::$cache->get_value($cacheKey);
+        if ($value === false) {
             $value = self::$db->scalar("
                 SELECT count(*) FROM users_history_ips WHERE IP = ?
                 ", $this->info()['IP']
             );
             self::$cache->cache_value($cacheKey, $value, 3600);
         }
-        return max(0, $value - 1);
+        return max(0, (int)$value - 1);
     }
 
     public function lastAccess(): ?string {
-        return $this->getSingleValue('user_last_access', '
+        $lastAccess = $this->getSingleValue('user_last_access', "
             SELECT ula.last_access FROM user_last_access ula WHERE user_id = ?
-        ');
+        ");
+        return $lastAccess ? (string)$lastAccess : null;
     }
 
     public function lastAccessRealtime(): ?string {
-        return self::$db->scalar("
+        $lastAccess = self::$db->scalar("
             SELECT coalesce(max(ulad.last_access), ula.last_access)
             FROM user_last_access ula
             LEFT JOIN user_last_access_delta ulad USING (user_id)
@@ -1569,34 +1558,35 @@ class User extends BaseObject {
             GROUP BY ula.user_id
             ", $this->id
         );
+        return $lastAccess ? (string)$lastAccess : null;
     }
 
     public function passwordCount(): int {
-        return $this->getSingleValue('user_pw_count', '
+        return (int)$this->getSingleValue('user_pw_count', '
             SELECT count(*) FROM users_history_passwords WHERE UserID = ?
         ');
     }
 
     public function announceKeyCount(): int {
-        return $this->getSingleValue('user_passkey_count', '
+        return (int)$this->getSingleValue('user_passkey_count', '
             SELECT count(*) FROM users_history_passkeys WHERE UserID = ?
         ');
     }
 
     public function siteIPCount(): int {
-        return $this->getSingleValue('user_siteip_count', '
+        return (int)$this->getSingleValue('user_siteip_count', '
             SELECT count(DISTINCT IP) FROM users_history_ips WHERE UserID = ?
         ');
     }
 
     public function trackerIPCount(): int {
-        return $this->getSingleValue('user_trackip_count', "
+        return (int)$this->getSingleValue('user_trackip_count', "
             SELECT count(DISTINCT IP) FROM xbt_snatched WHERE uid = ? AND IP != ''
         ");
     }
 
     public function emailCount(): int {
-        return $this->getSingleValue('user_email_count', '
+        return (int)$this->getSingleValue('user_email_count', '
             SELECT count(*) FROM users_history_emails WHERE UserID = ?
         ');
     }
@@ -1629,7 +1619,7 @@ class User extends BaseObject {
     }
 
     public function pendingInviteCount(): int {
-        return $this->getSingleValue('user_inv_pending', '
+        return (int)$this->getSingleValue('user_inv_pending', '
             SELECT count(*)
             FROM invites
             WHERE InviterID = ?
@@ -1670,14 +1660,12 @@ class User extends BaseObject {
     }
 
     public function invitedTotal(): int {
-        return $this->getSingleValue('user_invited', '
-            SELECT count(*)
-            FROM users_info
-            WHERE Inviter = ?
+        return (int)$this->getSingleValue('user_invited', '
+            SELECT count(*) FROM users_info WHERE Inviter = ?
         ');
     }
 
-    public function passwordAge() {
+    public function passwordAge(): string {
         $age = time_diff(
             $this->getSingleValue('user_pw_age', '
                 SELECT coalesce(max(uhp.ChangeTime), ui.JoinDate)
@@ -1686,17 +1674,18 @@ class User extends BaseObject {
                 WHERE ui.UserID = ?
             ')
         );
-        return substr($age, 0, strpos($age, " ago"));
+        return substr($age, 0, (int)strpos($age, " ago"));
     }
 
-    public function forumWarning() {
-        return $this->getSingleValue('user_forum_warn', '
+    public function forumWarning(): ?string {
+        $warning = $this->getSingleValue('user_forum_warn', "
             SELECT Comment FROM users_warnings_forums WHERE UserID = ?
-        ');
+        ");
+        return $warning ? (string)$warning : null;
     }
 
     public function collagesCreated(): int {
-        return $this->getSingleValue('user_collage_create', "
+        return (int)$this->getSingleValue('user_collage_create', "
             SELECT count(*) FROM collages WHERE Deleted = '0' AND UserID = ?
         ");
     }
@@ -1735,8 +1724,9 @@ class User extends BaseObject {
         return $recent;
     }
 
-    public function tagSnatchCounts(int $limit = 8) {
-        if (($list = self::$cache->get_value('user_tag_snatch_' . $this->id)) === false) {
+    public function tagSnatchCounts(int $limit = 8): array {
+        $list = self::$cache->get_value('user_tag_snatch_' . $this->id);
+        if ($list === false) {
             self::$db->prepared_query("
                 SELECT tg.Name AS name,
                     tg.ID AS id,
@@ -1765,7 +1755,7 @@ class User extends BaseObject {
      * Default list 5 will be cached. When fetching a different amount,
      * set $forceNoCache to true to avoid caching a list with an unexpected length
      */
-    public function recentUploadList(int $limit = 5, bool $forceNoCache = false) {
+    public function recentUploadList(int $limit = 5, bool $forceNoCache = false): array {
         $key = sprintf(self::USER_RECENT_UPLOAD, $this->id);
         $recent = self::$cache->get_value($key);
         if ($forceNoCache) {
@@ -1792,7 +1782,7 @@ class User extends BaseObject {
         return $recent;
     }
 
-    public function torrentDownloadCount($torrentId) {
+    public function torrentDownloadCount(int $torrentId): int {
         return (int)self::$db->scalar('
             SELECT count(*)
             FROM users_downloads ud
@@ -1816,12 +1806,12 @@ class User extends BaseObject {
     /**
      * Generates a check list of release types, ordered by the user or default
      */
-    public function releaseOrder(array $releaseType) {
+    public function releaseOrder(array $releaseType): array {
         if (empty($this->option('SortHide'))) {
             $sort = $releaseType;
             $defaults = !empty($this->option('HideTypes'));
         } else {
-            $sort = $this->option('SortHide');
+            $sort = (array)$this->option('SortHide');
             $missingTypes = array_diff_key($releaseType, $sort);
             foreach (array_keys($missingTypes) as $missing) {
                 $sort[$missing] = 0;
@@ -1970,7 +1960,7 @@ class User extends BaseObject {
         return [$ratio, $ratio == 0 ? $effectiveUpload : $effectiveUpload / $ratio - $this->downloadedSize()];
     }
 
-    public function nextClass() {
+    public function nextClass(): ?array {
         $criteria = (new Manager\User)->promotionCriteria()[$this->info()['PermissionID']] ?? null;
         if (!$criteria) {
             return null;
@@ -2012,7 +2002,7 @@ class User extends BaseObject {
     }
 
     public function seedingSize(): int {
-        return $this->getSingleValue('seeding_size', '
+        return (int)$this->getSingleValue('seeding_size', '
             SELECT coalesce(sum(t.Size), 0)
             FROM
             (
@@ -2059,15 +2049,15 @@ class User extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function hasTokenByName(string $name) {
-        return self::$db->scalar("
+    public function hasTokenByName(string $name): bool {
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM api_tokens
             WHERE revoked = 0
                 AND user_id = ?
                 AND name = ?
             ", $this->id, $name
-        ) === 1;
+        );
     }
 
     public function hasApiToken(string $token): bool {
@@ -2140,11 +2130,8 @@ class User extends BaseObject {
 
     /**
      * Remove an active invitation
-     *
-     * @param string $key invite key
-     * @return bool success
      */
-    public function removeInvite(string $key) {
+    public function removeInvite(string $key): bool {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM invites WHERE InviteKey = ?
@@ -2173,7 +2160,7 @@ class User extends BaseObject {
     /**
      * Initiate a password reset
      */
-    public function resetPassword() {
+    public function resetPassword(): void {
         $resetKey = randomString();
         self::$db->prepared_query("
             UPDATE users_info SET
@@ -2194,8 +2181,6 @@ class User extends BaseObject {
 
     /*
      * Has a password reset expired?
-     *
-     * @return true if it has expired (or none exists)
      */
     public function resetPasswordExpired(): bool {
         return (bool)self::$db->scalar("
@@ -2245,7 +2230,7 @@ class User extends BaseObject {
     /**
      * Put all the common donor info in the same cache key to save some cache calls
      */
-    protected function donorInfo() {
+    protected function donorInfo(): array {
         // Our cache class should prevent identical memcached requests
         $UserID = $this->id;
         $DonorInfo = self::$cache->get_value("donor_info_$UserID");
@@ -2538,7 +2523,7 @@ class User extends BaseObject {
     /**
      * Update donor rewards
      */
-    public function updateReward(array $field) {
+    public function updateReward(array $field): void {
         $Rank = $this->donorRank();
         $SpecialRank = $this->specialDonorRank();
         $HasAll = ($SpecialRank === 3);

@@ -108,11 +108,11 @@ class Recovery extends \Gazelle\Base {
     }
 
     public function checkPassword(string $username, string $pw): bool {
-        $prevhash = self::$db->scalar("
+        $prevhash = (string)self::$db->scalar("
             SELECT PassHash FROM ' . RECOVERY_DB . '.users_main WHERE Username = ?
             ", $username
         );
-        return password_verify($pw, $prevhash ?? chr(0));
+        return password_verify($pw, $prevhash);
     }
 
     public function persist(array $info): int {
@@ -133,12 +133,11 @@ class Recovery extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    public function total(string $state, int $admin_id): int
-    {
+    public function total(string $state, int $admin_id): int {
         return match (strtoupper($state)) {
-            'CLAIMED' => self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id),
-            'PENDING' => self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and (admin_user_id is null or admin_user_id != ?)", $state, $admin_id),
-            default => self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ?", strtoupper($state)),
+            'CLAIMED' => (int)self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and admin_user_id = ?", $state, $admin_id),
+            'PENDING' => (int)self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ? and (admin_user_id is null or admin_user_id != ?)", $state, $admin_id),
+            default => (int)self::$db->scalar("SELECT count(*) FROM recovery WHERE state = ?", strtoupper($state)),
         };
     }
 
@@ -166,7 +165,7 @@ class Recovery extends \Gazelle\Base {
         return self::$db->to_array();
     }
 
-    public function validatePending() {
+    public function validatePending(): void {
         self::$db->prepared_query("SELECT recovery_id
             FROM recovery r
             INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.torrent_pass = r.announce)
@@ -199,7 +198,7 @@ class Recovery extends \Gazelle\Base {
             WHERE recovery_id = ?
                 AND (admin_user_id IS NULL OR admin_user_id != ?)
             ", $admin_id,
-                ("\r\n" . Date('Y-m-d H:i') . " claimed by $admin_username"),
+                ("\r\n" . date('Y-m-d H:i') . " claimed by $admin_username"),
                 $id, $admin_id
         );
         return self::$db->affected_rows();
@@ -213,7 +212,7 @@ class Recovery extends \Gazelle\Base {
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
-            ", ("\r\n" . Date('Y-m-d H:i') . " unclaimed by $admin_username"),
+            ", ("\r\n" . date('Y-m-d H:i') . " unclaimed by $admin_username"),
                 $id
         );
         return self::$db->affected_rows();
@@ -226,7 +225,7 @@ class Recovery extends \Gazelle\Base {
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
-            ", ("\r\n" . Date('Y-m-d H:i') . " recovery denied by $admin_username"),
+            ", ("\r\n" . date('Y-m-d H:i') . " recovery denied by $admin_username"),
                 $id
         );
         return self::$db->affected_rows();
@@ -239,7 +238,7 @@ class Recovery extends \Gazelle\Base {
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
-            ", ("\r\n" . Date('Y-m-d H:i') . " recovery failed: $reason"),
+            ", ("\r\n" . date('Y-m-d H:i') . " recovery failed: $reason"),
                 $id
         );
         return self::$db->affected_rows();
@@ -288,7 +287,7 @@ class Recovery extends \Gazelle\Base {
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
             ", ($admin_id == RECOVERY_ADMIN_ID ? 'VALIDATED' : 'ACCEPTED'),
-                ("\r\n" . Date('Y-m-d H:i') . " recovery accepted by $admin_username invite=$key"),
+                ("\r\n" . date('Y-m-d H:i') . " recovery accepted by $admin_username invite=$key"),
                 $id
         );
         return true;
@@ -419,7 +418,7 @@ class Recovery extends \Gazelle\Base {
         return true;
     }
 
-    public function boostUpload() {
+    public function boostUpload(): void {
         $userMan = new User;
         $sql = sprintf("
             SELECT HIST.Username, HIST.mapped_id, HIST.UserID, HIST.Uploaded, HIST.Downloaded, HIST.Bounty, HIST.nr_torrents, HIST.userclass,

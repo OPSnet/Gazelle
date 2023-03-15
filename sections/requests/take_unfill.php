@@ -2,7 +2,7 @@
 
 authorize();
 
-$request = (new Gazelle\Manager\Request)->findByid((int)$_REQUEST['id']);
+$request = (new Gazelle\Manager\Request)->findById((int)$_REQUEST['id']);
 if (is_null($request)) {
     error(404);
 }

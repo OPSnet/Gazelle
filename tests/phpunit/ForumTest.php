@@ -74,7 +74,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(0, $forum->lastPostTime(), 'forum-last-post-time');
         $this->assertEquals(0, $forum->numPosts(), 'forum-post-total');
         $this->assertEquals(0, $forum->numThreads(), 'forum-thread-total');
-        $this->assertEquals(0, $forum->lastAuthorID(), 'forum-last-author-id');
+        $this->assertEquals(0, $forum->lastAuthorId(), 'forum-last-author-id');
         $this->assertEquals(42, $forum->autoLockWeeks(), 'forum-autolock-weeks');
         $this->assertEquals(150, $forum->sequence(), 'forum-sequence');
         $this->assertEquals(100, $forum->minClassRead(), 'forum-min-class-read');

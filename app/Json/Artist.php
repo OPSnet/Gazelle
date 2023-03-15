@@ -19,7 +19,7 @@ class Artist extends \Gazelle\Json {
         return $this;
     }
 
-    public function payload(): ?array {
+    public function payload(): array {
         $artist   = $this->artist;
         $artistId = $artist->id();
         $artist->loadArtistRole();

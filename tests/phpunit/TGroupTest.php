@@ -31,7 +31,7 @@ class TGroupTest extends TestCase {
 
     public function testCreate(): \Gazelle\TGroup {
         $name        = 'Live in ' . randomString(6);
-        $year        = (int)Date('Y');
+        $year        = (int)date('Y');
         $releaseType = new Gazelle\ReleaseType();
         $tgroup      = $this->manager->create(
             categoryId:      1,
@@ -145,7 +145,7 @@ class TGroupTest extends TestCase {
         $this->assertCount(2, $tgroup->tagNameList(), 'tgroup-tag-name-list');
         $this->assertContains('synthetic.disco.punk', $tgroup->tagNameList(), 'tgroup-tag-name-find-one');
         $this->assertNotContains('norwegian.black.metal', $tgroup->tagNameList(), 'tgroup-tag-name-find-not');
-        $this->assertEquals('#synthetic.disco.punk #acoustic.norwegian.black.metal', $tgroup->hashtag(), 'tgroup-tag-name-list');
+        $this->assertEquals('#synthetic.disco.punk #acoustic.norwegian.black.metal', $tgroup->hashTag(), 'tgroup-tag-name-list');
 
         $this->assertEquals(1, $tgroup->addTagVote(2, $tagId, 'up'), 'tgroup-tag-upvote');
         $this->assertEquals(1, $tgroup->addTagVote(2, $tag2, 'down'), 'tgroup-tag-downvote');

@@ -17,17 +17,8 @@ class Notification extends \Gazelle\Base {
 
     /**
      * Send a push notification to a user
-     *
-     * @param array $UserIDs integer or array of integers of UserIDs to push
-     * @param string $Title the title to be displayed in the push
-     * @param string $Body the body of the push
-     * @param string $URL url for the push notification to contain
-     * @param string $Type what sort of push is it? PM, Quote, Announcement, etc
      */
-    public function push($UserIDs, $Title, $Body, $URL = '', $Type = self::GLOBALNOTICE) {
-        if (!is_array($UserIDs)) {
-            $UserIDs = [$UserIDs];
-        }
+    public function push(array $UserIDs, string $Title, string $Body, string $URL = '', string $Type = self::GLOBALNOTICE) {
         foreach($UserIDs as $UserID) {
             $UserID = (int) $UserID;
             $QueryID = self::$db->get_query_id();

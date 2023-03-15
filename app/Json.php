@@ -8,10 +8,8 @@ abstract class Json extends Base {
 
     /**
      * The payload of a valid JSON response, implemented in the child class.
-     * @return array Payload to be passed to json_encode()
-     *         null if the payload cannot be produced (permissions, id not found, ...).
      */
-    abstract public function payload(): ?array;
+    abstract public function payload(): array;
 
     /**
      * Configure JSON printing (any of the json_encode  JSON_* constants)

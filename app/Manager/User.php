@@ -215,7 +215,7 @@ class User extends \Gazelle\BaseManager {
      * @return string class name
      */
     public function userclassName(int $id): ?string {
-        return $this->classlist()[$id]['Name'];
+        return $this->classList()[$id]['Name'];
     }
 
     /**
@@ -634,7 +634,7 @@ class User extends \Gazelle\BaseManager {
         );
     }
 
-    public function sendSnatchPM(\Gazelle\User $viewer, \Gazelle\Torrent  $torrent, string $subject, string $body): int {
+    public function sendSnatchPm(\Gazelle\User $viewer, \Gazelle\Torrent  $torrent, string $subject, string $body): int {
         self::$db->prepared_query('
             SELECT uid FROM xbt_snatched WHERE fid = ?
             ', $torrent->id()
@@ -651,7 +651,7 @@ class User extends \Gazelle\BaseManager {
         return $total;
     }
 
-    public function sendRemovalPM(int $torrentId, int $uploaderId, string $name, string $log, int $trumpId, bool $pmUploader): int {
+    public function sendRemovalPm(int $torrentId, int $uploaderId, string $name, string $log, int $trumpId, bool $pmUploader): int {
         $subject = 'Torrent deleted: ' . $name;
         $message = 'A torrent %s '
             . (!$trumpId

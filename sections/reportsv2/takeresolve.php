@@ -1,4 +1,4 @@
-    <?php
+<?php
 /*
  * This is the backend of the AJAXy reports resolve (When you press the shiny submit button).
  * This page shouldn't output anything except in error. If you do want output, it will be put
@@ -111,10 +111,10 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
 
     $TrumpID = 0;
     if ($_POST['resolve_type'] === 'trump' && preg_match('/torrentid=([0-9]+)/', $logMessage, $match) === 1) {
-        $TrumpID = $match[1];
+        $TrumpID = (int)$match[1];
     }
     $pmUploader = $weeksWarned > 0 || isset($_POST['delete']) || $SendPM;
-    $userMan->sendRemovalPM($torrentId, $uploader->id(), $name, $Log, $TrumpID, $pmUploader);
+    $userMan->sendRemovalPm($torrentId, $uploader->id(), $name, $Log, $TrumpID, $pmUploader);
 }
 
 $revokeUpload = isset($_POST['upload']);

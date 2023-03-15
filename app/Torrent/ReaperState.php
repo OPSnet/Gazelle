@@ -9,7 +9,7 @@ enum ReaperState: string {
     public function notifyAttr(): string {
         return match($this) {
             ReaperState::NEVER    => 'no-pm-unseeded-upload',
-            ReaperState::UNSEEDED => 'no-pm-unseeded-snatch',
+            ReaperState::UNSEEDED => 'no-pm-unseeded-snatch', /** @phpstan-ignore-line */
         };
     }
 }
