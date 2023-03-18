@@ -1,35 +1,35 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\User;
 
-class Inbox extends BaseUser {
+class Inbox extends \Gazelle\BaseUser {
     protected bool $unreadFirst;
     protected string $filter;
     protected string $folder = 'inbox';
     protected string $searchField = 'user';
     protected string $searchTerm;
 
-    public function setFilter(string $filter) {
+    public function setFilter(string $filter): Inbox {
         $this->filter = $filter;
         return $this;
     }
 
-    public function setFolder(string $folder) {
+    public function setFolder(string $folder): Inbox {
         $this->folder = $folder;
         return $this;
     }
 
-    public function setSearchField(string $searchField) {
+    public function setSearchField(string $searchField): Inbox {
         $this->searchField = $searchField;
         return $this;
     }
 
-    public function setSearchTerm(string $searchTerm) {
+    public function setSearchTerm(string $searchTerm): Inbox {
         $this->searchTerm = $searchTerm;
         return $this;
     }
 
-    public function setUnreadFirst(bool $unreadFirst) {
+    public function setUnreadFirst(bool $unreadFirst): Inbox {
         $this->unreadFirst = $unreadFirst;
         return $this;
     }
@@ -67,8 +67,7 @@ class Inbox extends BaseUser {
             $param['search'] = $this->searchTerm;
             $param['searchtype'] = $this->searchField;
         }
-        $params = http_build_query($param);
-        return 'inbox.php' . $params ? "?{$params}" : '';
+        return 'inbox.php?' . http_build_query($param);
     }
 
     public function folderTitle($folder): string {
@@ -119,7 +118,7 @@ class Inbox extends BaseUser {
     public function messageTotal(): int {
         [$cond, $args] = $this->configure();
         $where = $cond ? ("WHERE " . implode(' AND ', $cond)) : '/* all */';
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(DISTINCT cu.ConvID)
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
@@ -131,7 +130,7 @@ class Inbox extends BaseUser {
         );
     }
 
-    public function messageList(int $limit, int $offset): array {
+    public function messageList(\Gazelle\Manager\PM $pmMan, int $limit, int $offset): array {
         [$cond, $args] = $this->configure();
         $unreadFirst = $this->showUnreadFirst() ? "cu.Unread," : '';
         array_push($args, $limit, $offset);
@@ -144,17 +143,11 @@ class Inbox extends BaseUser {
             LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
             WHERE " . implode(' AND ', $cond) . "
             GROUP BY c.ID
-            ORDER BY $unreadFirst cu.Sticky, cu.SentDate DESC
+            ORDER BY $unreadFirst cu.Sticky, cu.SentDate DESC, max(pm.ID)
             LIMIT ? OFFSET ?
             ", $this->user->id(), $this->user->id(), ...$args
         );
-        $list = self::$db->collect(0, false);
-        $pmMan = new Manager\PM($this->user);
-        $result = [];
-        foreach ($list as $id) {
-            $result[] = $pmMan->findById($id);
-        }
-        return $result;
+        return array_map(fn($id) => $pmMan->findById($id), self::$db->collect(0, false));
     }
 
     protected function massFlush(array $ids): void {

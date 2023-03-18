@@ -17,7 +17,7 @@ class Inbox extends \Gazelle\Json {
         protected \Gazelle\Manager\User $userMan,
     ) {}
 
-    public function setSearch(string $searchType, string $search) {
+    public function setSearch(string $searchType, string $search): Inbox {
         $search = trim($search);
         switch($searchType) {
             case 'subject':
@@ -40,23 +40,21 @@ class Inbox extends \Gazelle\Json {
                 $this->failure('bad search type');
                 break;
         }
+        return $this;
     }
 
-    public function payload(): ?array {
+    public function payload(): array {
         switch ($this->folder) {
-            case 'inbox':
-                $this->dateColumn = 'cu.ReceivedDate';
-                $this->cond[] = "cu.InInbox = '1'";
-                break;
             case 'sentbox':
                 $this->dateColumn = 'cu.SentDate';
                 $this->cond[] = "cu.InSentbox = '1'";
                 break;
             default:
-                $this->failure('bad folder');
+                $this->dateColumn = 'cu.ReceivedDate';
+                $this->cond[] = "cu.InInbox = '1'";
                 break;
         }
-        $total = self::$db->scalar("
+        $total = (int)self::$db->scalar("
             SELECT count(DISTINCT c.ID)
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)

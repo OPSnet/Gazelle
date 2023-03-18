@@ -15,7 +15,7 @@ if (empty($messageIds)) {
     error("You forgot to select any messages to $action.");
 }
 
-$inbox = new Gazelle\Inbox($Viewer);
+$inbox = new Gazelle\User\Inbox($Viewer);
 $inbox->setFolder($_POST['section'] ?? 'inbox');
 
 if (isset($_POST['delete'])) {

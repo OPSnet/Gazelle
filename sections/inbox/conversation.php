@@ -11,7 +11,7 @@ $paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? c
 $paginator->setTotal($postTotal);
 
 echo $Twig->render('inbox/conversation.twig', [
-    'inbox'      => (new Gazelle\Inbox($Viewer))->setFolder($_GET['section'] ?? 'inbox'),
+    'inbox'      => (new Gazelle\User\Inbox($Viewer))->setFolder($_GET['section'] ?? 'inbox'),
     'paginator'  => $paginator,
     'pm'         => $pm,
     'post_list'  => $pm->postList($paginator->limit(), $paginator->offset()),

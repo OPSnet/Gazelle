@@ -1,6 +1,6 @@
 <?php
 
-$inbox = new Gazelle\Inbox($Viewer);
+$inbox = new Gazelle\User\Inbox($Viewer);
 $inbox->setFolder($_GET['section'] ?? $_GET['action'] ?? 'inbox');
 if (isset($_GET['searchtype'])) {
     $inbox->setSearchField($_GET['searchtype']);
@@ -22,7 +22,7 @@ $paginator->setTotal($inbox->messageTotal());
 echo $Twig->render('inbox/inbox.twig', [
     'filter'      => $filter,
     'inbox'       => $inbox,
-    'messageList' => $inbox->messageList($paginator->limit(), $paginator->offset()),
+    'messageList' => $inbox->messageList(new \Gazelle\Manager\PM($Viewer), $paginator->limit(), $paginator->offset()),
     'paginator'   => $paginator,
     'viewer'      => $Viewer,
 ]);

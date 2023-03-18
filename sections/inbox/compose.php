@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Inbox;
-
 $recipient = (new Gazelle\Manager\User)->findById((int)$_GET['toid']);
 if (is_null($recipient)) {
     error(404);

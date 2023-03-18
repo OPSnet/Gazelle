@@ -1279,8 +1279,9 @@ class User extends BaseObject {
     }
 
     public function inboxUnreadCount(): int {
-        if (($unread = self::$cache->get_value('inbox_new_' . $this->id)) === false) {
-            $unread = self::$db->scalar("
+        $unread = self::$cache->get_value('inbox_new_' . $this->id);
+        if ($unread === false) {
+            $unread = (int)self::$db->scalar("
                 SELECT count(*)
                 FROM pm_conversations_users
                 WHERE UnRead    = '1'

@@ -1186,41 +1186,6 @@ parameters:
 			path: ../app/Image.php
 
 		-
-			message: "#^Method Gazelle\\\\Inbox\\:\\:messageTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
-			message: "#^Method Gazelle\\\\Inbox\\:\\:setFilter\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
-			message: "#^Method Gazelle\\\\Inbox\\:\\:setFolder\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
-			message: "#^Method Gazelle\\\\Inbox\\:\\:setSearchField\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
-			message: "#^Method Gazelle\\\\Inbox\\:\\:setSearchTerm\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
-			message: "#^Method Gazelle\\\\Inbox\\:\\:setUnreadFirst\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
-			message: "#^Ternary operator condition is always true\\.$#"
-			count: 1
-			path: ../app/Inbox.php
-
-		-
 			message: "#^Method Gazelle\\\\Json\\:\\:emit\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Json.php
@@ -1244,21 +1209,6 @@ parameters:
 			message: "#^Method Gazelle\\\\Json\\\\Artist\\:\\:setReleasesOnly\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Json/Artist.php
-
-		-
-			message: "#^Binary operation \"/\" between bool\\|float\\|int\\|string\\|null and int results in an error\\.$#"
-			count: 1
-			path: ../app/Json/Inbox.php
-
-		-
-			message: "#^Method Gazelle\\\\Json\\\\Inbox\\:\\:setSearch\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Json/Inbox.php
-
-		-
-			message: "#^Parameter \\#1 \\$total of method Gazelle\\\\Util\\\\Paginator\\:\\:setTotal\\(\\) expects int, bool\\|float\\|int\\|string\\|null given\\.$#"
-			count: 1
-			path: ../app/Json/Inbox.php
 
 		-
 			message: "#^Parameter \\#2 \\$property of method Gazelle\\\\Json\\\\User\\:\\:valueOrNull\\(\\) expects bool, string given\\.$#"
@@ -5329,11 +5279,6 @@ parameters:
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../sections/forums/thread.php
-
-		-
-			message: "#^Parameter \\#1 \\$UserIDs of method Gazelle\\\\Manager\\\\Notification\\:\\:push\\(\\) expects array, int given\\.$#"
-			count: 1
-			path: ../sections/inbox/takecompose.php
 
 		-
 			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
