@@ -22,6 +22,7 @@ use \PHPUnit\Framework\TestCase;
  */
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class ReaperTest extends TestCase {
     protected string $tgroupName;
@@ -30,22 +31,9 @@ class ReaperTest extends TestCase {
 
     public function setUp(): void {
         // we need two users, one who uploads and one who snatches
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        $creator = new Gazelle\UserCreator;
         $this->userList = [
-            $creator->setUsername('reaper.' . randomString(10))
-                ->setEmail(randomString(10) . '@reaper.example.com')
-                ->setPassword(randomString())
-                ->setIpaddr('127.0.0.1')
-                ->setAdminComment('created by phpunit ReaperTest')
-                ->create(),
-            $creator->setUsername('reaper.' . randomString(10))
-                ->setUsername('reaper-' . randomString(10))
-                ->setEmail(randomString(10) . '@reaper.example.com')
-                ->setPassword(randomString())
-                ->setIpaddr('127.0.0.1')
-                ->setAdminComment('created by phpunit ReaperTest')
-                ->create(),
+            Helper::makeUser('reaper.' . randomString(10), 'reaper'),
+            Helper::makeUser('reaper.' . randomString(10), 'reaper'),
         ];
         // enable them and wipe their inboxes (there is only one message)
         foreach ($this->userList as $user) {
@@ -58,50 +46,22 @@ class ReaperTest extends TestCase {
 
         // create a torrent group
         $this->tgroupName = 'phpunit reaper ' . randomString(6);
-        $tgroup = (new Gazelle\Manager\TGroup)->create(
-            categoryId:      1,
-            releaseType:     1,
-            name:            $this->tgroupName,
-            description:     'phpunit reaper description',
-            image:           '',
-            year:            2022,
-            recordLabel:     'Unitest Artists Corporation',
-            catalogueNumber: 'UA-808',
-            showcase:        false,
+        $tgroup = Helper::makeTGroupMusic(
+            name:       $this->tgroupName,
+            artistName: [[ARTIST_MAIN], ['Reaper Girl ' . randomString(12)]],
+            tagName:    ['electronic'],
+            user:       $this->userList[0],
         );
-        $tgroup->addArtists($this->userList[0], [ARTIST_MAIN], ['Reaper Girl ' . randomString(12)]);
-
-        $tagMan = new Gazelle\Manager\Tag;
-        $tagId  = $tagMan->create('electronic', $this->userList[0]->id());
-        $tagMan->createTorrentTag($tagId, $tgroup->id(), $this->userList[0]->id(), 10);
-        $tgroup->refresh();
 
         // and add some torrents to the group
-        $this->torrentList = array_map(fn($info) => (new \Gazelle\Manager\Torrent)->create(
-            tgroupId:                $tgroup->id(),
-            userId:                  $this->userList[0]->id(),
-            description:             'reaper release description',
-            media:                   'WEB',
-            format:                  'FLAC',
-            encoding:                'Lossless',
-            infohash:                'infohash-' . randomString(10),
-            filePath:                'unit-test',
-            fileList:                [],
-            size:                    $info['size'],
-            isScene:                 false,
-            isRemaster:              true,
-            remasterYear:            2023,
-            remasterTitle:           $info['title'],
-            remasterRecordLabel:     'Unitest Artists',
-            remasterCatalogueNumber: 'UA-REAP-1',
+        $this->torrentList = array_map(fn($info) =>
+            Helper::makeTorrentMusic(
+                tgroupId:    $tgroup->id(),
+                user:        $this->userList[0],
+                title:       $info['title'],
             ), [
-                [
-                    'title' => 'Deluxe Edition',
-                    'size'  => 20_000_000,
-                ], [
-                    'title' => 'Limited Edition',
-                    'size'  => 15_000_000,
-                ]
+                ['title' => 'Deluxe Edition'],
+                ['title' => 'Limited Edition'],
             ]
         );
     }
@@ -387,7 +347,7 @@ class ReaperTest extends TestCase {
 
         $initialUnseededStats = $reaper->stats();
         $unseededInitial = $reaper->initialUnseededList();
-        $this->assertCount(0, $unseededInitial, 'nseeded-initial-0-count');
+        $this->assertCount(0, $unseededInitial, 'unseeded-initial-0-count');
 
         // reset the last action and time of the unseeded alert back in time to hit the initial timeout
         foreach ($this->torrentList as $torrent) {

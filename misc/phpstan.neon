@@ -47,7 +47,7 @@ parameters:
       message: '/^Method [^:]+::\w+\(\) has parameter \S+ with no (?:type specified|value type specified in iterable type array)\.$/'
       paths:
         -  ../app/*
-        -  ../tests/phpunit/*
+        -  ../tests/*
     -
       message: '/^Method [^:]+::\w+\(\) return type has no value type specified in iterable type array\.$/'
       paths:

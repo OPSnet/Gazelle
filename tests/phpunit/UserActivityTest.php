@@ -3,6 +3,7 @@
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class UserActivityTest extends TestCase {
     protected Gazelle\Manager\User $userMan;
@@ -12,7 +13,9 @@ class UserActivityTest extends TestCase {
     }
 
     public function testActivity(): void {
-        $admin = $this->userMan->find('@admin');
+        $admin = Helper::makeUser('admin.' . randomString(10), 'activity');
+        $admin->setUpdate('PermissionID', SYSOP)->modify();
+
         $activity = new Gazelle\User\Activity($admin);
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity, 'user-activity-instance');
 
@@ -30,6 +33,8 @@ class UserActivityTest extends TestCase {
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setScheduler(new Gazelle\Schedule\Scheduler), 'user-activity-scheduler');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaff(new Gazelle\Staff($admin)), 'user-activity-staff-set');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM), 'user-activity-staffpm');
+
+        $admin->remove();
     }
 
     public function testBlog(): void {

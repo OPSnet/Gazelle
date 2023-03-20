@@ -3,17 +3,12 @@
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class StaffBlogTest extends TestCase {
     public function testStaffBlog(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        $mod = (new Gazelle\UserCreator)
-            ->setUsername('mod.' . randomString(6))
-            ->setEmail(randomString(6) . "@mod.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/StaffBlogTest.php')
-            ->create()
+        $mod = Helper::makeUser('mod.' . randomString(6), 'mod')
             ->setUpdate('PermissionID', MOD);
         $mod->modify();
         $this->assertEquals('Moderator', $mod->userclassName(), 'mod-userclass-check');

@@ -3,6 +3,7 @@
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class InboxTest extends TestCase {
     protected array $userList;
@@ -13,24 +14,19 @@ class InboxTest extends TestCase {
         }
     }
     public function testInbox(): void {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        $creator = new Gazelle\UserCreator;
         $this->userList = [
-            'sender' => $creator->setUsername('inbox.send.' . randomString(6))
-                ->setEmail(randomString(6) . "@inbox.example.com")
-                ->setPassword(randomString())
-                ->setIpaddr('127.0.0.1')
-                ->setAdminComment('Created by tests/phpunit/InviteTest.php')
-                ->create(),
-            'receiver' => $creator->setUsername('inbox.recv.' . randomString(6))
-                ->setEmail(randomString(6) . "@inbox.example.com")
-                ->setPassword(randomString())
-                ->setIpaddr('127.0.0.1')
-                ->setAdminComment('Created by tests/phpunit/InviteTest.php')
-                ->create(),
+            'sender'   => Helper::makeUser('inbox.send', 'inbox'),
+            'receiver' => Helper::makeUser('inbox.recv', 'inbox'),
         ];
         $senderId = $this->userList['sender']->id();
         $receiverId = $this->userList['receiver']->id();
+        // wipe their inboxes (there is only one message)
+        foreach ($this->userList as $user) {
+            $pmMan = new Gazelle\Manager\PM($user);
+            foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
+                $pm->remove();
+            }
+        }
 
         $sender = new Gazelle\User\Inbox($this->userList['sender']);
         $this->assertEquals('inbox.php?sort=latest', $sender->folderLink('inbox', false), 'inbox-folder-latest');

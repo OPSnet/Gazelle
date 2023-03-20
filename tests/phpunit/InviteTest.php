@@ -3,21 +3,11 @@
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class InviteTest extends TestCase {
-    public function setUp(): void {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-    }
-
     public function testInvite(): void {
-        $creator = new Gazelle\UserCreator;
-        $user = $creator
-            ->setUsername('invite.' . randomString(6))
-            ->setEmail(randomString(6) . "@invite.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/InviteTest.php')
-            ->create();
+        $user = Helper::makeUser('invite.' . randomString(6), 'invite');
 
         $this->assertFalse($user->disableInvites(), 'invite-not-disabled');
         $this->assertFalse($user->permitted('users_view_invites'),          'invite-users-view-invites');
@@ -55,12 +45,7 @@ class InviteTest extends TestCase {
 
         // respond to invite
         $this->assertTrue($manager->inviteExists($invite->key()), 'invite-key-found');
-        $invitee = $creator->setUsername('invitee.' . randomString(6))
-            ->setEmail($email)
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setInviteKey($invite->key())
-            ->create();
+        $invitee = Helper::makeUserByInvite('invitee.' . randomString(6), $invite->key());
         $this->assertInstanceOf(Gazelle\User::class, $invitee, 'invitee-class');
         $this->assertEquals($user->id(), $invitee->inviter()->id(), 'invitee-invited-by');
         $this->assertEquals(1, $user->invitedTotal(), 'invite-total-1');
@@ -76,13 +61,7 @@ class InviteTest extends TestCase {
     }
 
     public function testEtm(): void {
-        $etm = (new Gazelle\UserCreator)
-            ->setUsername('etm.' . randomString(6))
-            ->setEmail(randomString(6) . "@etm.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/InviteTest.php')
-            ->create()
+        $etm = Helper::makeUser('etm.' . randomString(6), 'etm')
             ->setUpdate('PermissionID', ELITE_TM);
         $etm->modify();
 

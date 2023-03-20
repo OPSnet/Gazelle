@@ -3,6 +3,7 @@
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class StaffPMTest extends TestCase {
     protected \Gazelle\Manager\StaffPM $spMan;
@@ -13,43 +14,23 @@ class StaffPMTest extends TestCase {
     protected \Gazelle\User $user;
 
     public function setUp(): void {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-
-        $this->fls = (new \Gazelle\UserCreator)->setUsername('spm_fls_' . randomString(10))
-            ->setEmail('spm-fls@example.com')
-            ->setPassword('secret123456')
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('StaffPMTest')
-            ->create();
-        $this->fls->addClasses([FLS_TEAM]);
-
-        $this->mod = (new \Gazelle\UserCreator)->setUsername('spm_mod_' . randomString(10))
-            ->setEmail('spm-mod@example.com')
-            ->setPassword('secret123456')
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('StaffPMTest')
-            ->create();
-        $this->mod->setUpdate('PermissionID', MOD)->modify();
-
-        $this->sysop = (new \Gazelle\UserCreator)->setUsername('spm_sysop_' . randomString(10))
-            ->setEmail('spm-sysop@example.com')
-            ->setPassword('secret123456')
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('StaffPMTest')
-            ->create();
-        $this->sysop->setUpdate('PermissionID', SYSOP)->modify();
-
-        $this->user = (new \Gazelle\UserCreator)->setUsername('spm_user_' . randomString(10))
-            ->setEmail('spm-user@example.com')
-            ->setPassword('secret123456')
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('StaffPMTest')
-            ->create();
-
         $this->spMan = new \Gazelle\Manager\StaffPM;
+        $this->fls   = Helper::makeUser('spm_fls_' . randomString(10), 'staffpm');
+        $this->mod   = Helper::makeUser('spm_mod_' . randomString(10), 'staffpm');
+        $this->sysop = Helper::makeUser('spm_sysop_' . randomString(10), 'staffpm');
+        $this->user  = Helper::makeUser('spm_user_' . randomString(10), 'staffpm');
+
+        $this->fls->addClasses([FLS_TEAM]);
+        $this->mod->setUpdate('PermissionID', MOD)->modify();
+        $this->sysop->setUpdate('PermissionID', SYSOP)->modify();
     }
 
-    public function tearDown(): void {}
+    public function tearDown(): void {
+        $this->fls->remove();
+        $this->mod->remove();
+        $this->sysop->remove();
+        $this->user->remove();
+    }
 
     public function testCreate(): void {
         $spm = $this->spMan->create($this->user, 0, 'for FLS', 'message handled by FLS');

@@ -963,33 +963,13 @@ class User extends BaseObject {
     }
 
     public function remove(): int {
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM bonus_history WHERE UserID = ?
-            ", $this->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM user_bonus WHERE user_id = ?
-            ", $this->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM user_flt WHERE user_id = ?
-            ", $this->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM user_has_attr WHERE UserID = ?
-            ", $this->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM users_leech_stats WHERE UserID = ?
-            ", $this->id
-        );
+        // Many, but not all, of the associated user tables will drop their entries via foreign key cascades.
+        // But some won't. If this call fails, you will need to decide what to do about the tables in question.
         self::$db->prepared_query("
             DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
         $affected = self::$db->affected_rows();
-        self::$db->commit();
         $this->flush();
         return $affected;
     }

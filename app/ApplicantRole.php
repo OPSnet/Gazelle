@@ -81,9 +81,9 @@ class ApplicantRole extends Base {
                 Modified = ?
             WHERE ID = ?
         ", $this->title, $this->published, $this->description, $this->modified,
-            $this->id);
-        self::$cache->delete_value(self::CACHE_KEY_ALL);
-        self::$cache->delete_value(self::CACHE_KEY_PUBLISHED);
+            $this->id
+        );
+        self::$cache->delete_multi([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
         self::$cache->cache_value(sprintf(self::CACHE_KEY, $this->id),
             [
                 'Title'       => $this->title,
@@ -95,5 +95,15 @@ class ApplicantRole extends Base {
             ]
         );
         return $this;
+    }
+
+    public function remove(): int {
+        self::$db->prepared_query("
+            DELETE FROM applicant_role WHERE ID = ?
+            ", $this->id
+        );
+        $affected = self::$db->affected_rows();
+        self::$cache->delete_multi([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
+        return $affected;
     }
 }
