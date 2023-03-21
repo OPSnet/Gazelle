@@ -138,7 +138,7 @@ class DB extends Base {
      * @param int $pageSize records per page
      * @param int $page current page or a falsey value to fetch from $_REQUEST
      */
-    public static function pageLimit(int $pageSize, int $page = 0) {
+    public static function pageLimit(int $pageSize, int $page = 0): array {
         if (!$page) {
             $page = max(1, (int)($_REQUEST['page'] ?? 0));
         }
@@ -150,7 +150,7 @@ class DB extends Base {
      * How many queries have been runnning for more than 20 minutes?
      */
     public function longRunning(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM information_schema.processlist
             WHERE COMMAND NOT IN ('Sleep')

@@ -746,16 +746,6 @@ parameters:
 			path: ../app/Contest/RequestFill.php
 
 		-
-			message: "#^Method Gazelle\\\\DB\\:\\:longRunning\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/DB.php
-
-		-
-			message: "#^Method Gazelle\\\\DB\\:\\:pageLimit\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/DB.php
-
-		-
 			message: "#^Call to function is_double\\(\\) with array will always evaluate to false\\.$#"
 			count: 1
 			path: ../app/DB/Mysql.php
@@ -874,16 +864,6 @@ parameters:
 			message: "#^Property Gazelle\\\\DB\\\\Mysql\\:\\:\\$Record \\(array\\|null\\) does not accept array\\|false\\|null\\.$#"
 			count: 1
 			path: ../app/DB/Mysql.php
-
-		-
-			message: "#^Method Gazelle\\\\DB\\\\Pg\\:\\:insert\\(\\) should return int but returns int\\|string\\|false\\.$#"
-			count: 1
-			path: ../app/DB/Pg.php
-
-		-
-			message: "#^Method Gazelle\\\\DB\\\\Pg\\:\\:scalar\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/DB/Pg.php
 
 		-
 			message: "#^Cannot access offset 'ru_utime\\.tv_sec' on array\\|false\\.$#"

@@ -28,7 +28,7 @@ class Pg {
 
     public function insert(string $query, ...$args): int {
         $st = $this->prepare($query);
-        return $st->execute([...$args]) ? $this->pdo->lastInsertId() : 0;
+        return $st->execute([...$args]) ? (int)$this->pdo->lastInsertId() : 0;
     }
 
     protected function fetchRow(string $query, int $mode, ...$args): array {
@@ -42,7 +42,7 @@ class Pg {
         return [];
     }
 
-    public function scalar(string $query, ...$args) {
+    public function scalar(string $query, ...$args): mixed {
         $row = $this->fetchRow($query, \PDO::FETCH_NUM, ...$args);
         return empty($row) ? null : $row[0];
     }
