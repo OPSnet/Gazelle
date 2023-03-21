@@ -150,7 +150,7 @@ class Tracker {
         if (DISABLE_TRACKER) {
             return false;
         }
-        $Header = "GET /$Get HTTP/1.1\r\nConnection: Close\r\n\r\n";
+        $Header = "GET /$Get HTTP/1.1\r\nHost: " . TRACKER_NAME . "\r\nConnection: Close\r\n\r\n";
         $Attempts = 0;
         $Sleep = 0;
         $Success = false;
