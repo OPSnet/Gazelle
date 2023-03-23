@@ -32,27 +32,21 @@ if (!empty($_POST)) {
     if (!preg_match('/^fl-(other-[1-4])$/', $_POST['fltype'], $match)) {
         error(403);
     }
-    $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($UserID, $match[1], $_POST['message'] ?? '');
+    $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($User, $match[1], $_POST['message'] ?? '');
     if (!$FL_OTHER_tokens) {
         error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
     }
 }
 
 if ($UserID == $Viewer->id()) {
-    $OwnProfile = true;
+    $Preview = (bool)($_GET['preview'] ?? false);
+    $OwnProfile = !$Preview;
     $User->forceCacheFlush(true);
-    $Preview = (int)($_GET['preview'] ?? 0);
-    if ($Preview == 1) {
-        $OwnProfile = false;
-    }
-    $FL_Items = [];
 } else {
     $OwnProfile = false;
-    //Don't allow any kind of previewing on others' profiles
-    $Preview = 0;
-    $FL_Items = $viewerBonus->getListOther($Viewer->bonusPointsTotal());
+    // Don't allow any kind of previewing on other profiles
+    $Preview = false;
 }
-$FA_Key = null;
 
 // Image proxy CTs
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
@@ -61,10 +55,10 @@ $DisplayCustomTitle = ($Viewer->permitted('site_proxy_images') && !empty($User->
         fn ($m) => 'src=' . $m[1] . $imgProxy->process($m[2]) . $m[3], $User->title())
     : $User->title();
 
-$Paranoia = ($Preview == 1) ? explode(',', $_GET['paranoia']) : $User->paranoia();
+$Paranoia = $Preview ? explode(',', $_GET['paranoia']) : $User->paranoia();
 function check_paranoia_here(string $Setting): int|false {
     global $Paranoia, $Class, $UserID, $Preview;
-    if ($Preview == 1) {
+    if ($Preview) {
         return check_paranoia($Setting, $Paranoia ?? [], $Class);
     } else {
         return check_paranoia($Setting, $Paranoia ?? [], $Class, $UserID);
@@ -74,12 +68,13 @@ function check_paranoia_here(string $Setting): int|false {
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
     'badge_list' => (new Gazelle\User\Privilege($User))->badgeList(),
+    'bonus'      => $userBonus,
     'freeleech' => [
-        'item'  => $FL_Items,
-        'other' => $FL_OTHER_tokens ?? null,
+        'item'   => $OwnProfile ? [] : $viewerBonus->otherList(),
+        'other'  => $FL_OTHER_tokens ?? null,
+        'latest' => $viewerBonus->otherLatest($User),
     ],
     'friend'       => new Gazelle\User\Friend($Viewer),
-    'hourly_rate'  => $userBonus->hourlyRate(),
     'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer,
     'user'         => $User,
     'userMan'      => $userMan,

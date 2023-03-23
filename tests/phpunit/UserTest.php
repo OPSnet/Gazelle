@@ -19,9 +19,6 @@ class UserTest extends TestCase {
         $this->assertTrue($admin->permittedAny('site_analysis', 'site_debug'), 'admin-permitted-any-site_analysis-site_debug');
     }
 
-    /**
-     * @depends testUser
-     */
     public function testAttr(): void {
         $user = $this->userMan->findById(2);
 
@@ -62,11 +59,8 @@ class UserTest extends TestCase {
         $this->assertContainsOnly('null', $user->donorAvatar());
     }
 
-    /**
-     * @depends testUser
-     */
     public function testPassword(): void {
-        $user = $this->userMan->findById(2);
+        $user = $this->userMan->find('@user');
         $this->assertTrue($user->validatePassword('password'), 'utest-password-validate');
         $password = randomString(30);
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';

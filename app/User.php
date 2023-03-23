@@ -980,23 +980,21 @@ class User extends BaseObject {
     }
 
     /**
-     * Set the user custom title
-     *
-     * @param string $title The text of the title (may contain BBcode)
+     * Set the user custom title (may contain BBcode)
      */
     public function setTitle(string $title): bool {
         $title = trim($title);
-        $length = mb_strlen($title);
-        if ($length > USER_TITLE_LENGTH) {
+        if (mb_strlen($title) > USER_TITLE_LENGTH) {
             return false;
         }
-        return $this->setUpdate('Title', $title);
+        $this->setUpdate('Title', $title);
+        return true;
     }
 
     /**
      * Remove the custom title of a user
      */
-    public function removeTitle(): bool {
+    public function removeTitle(): User {
         return $this->setUpdate('Title', null);
     }
 

@@ -29,7 +29,7 @@ class Bonus extends \Gazelle\BaseUser {
         return (new \Gazelle\Manager\Bonus)->itemList();
     }
 
-    public function getListForUser(): array {
+    public function itemList(): array {
         $items = $this->items();
         $allowed = [];
         foreach ($items as $item) {
@@ -41,13 +41,13 @@ class Bonus extends \Gazelle\BaseUser {
             ) {
                 continue;
             }
-            $item['Price'] = $this->getEffectivePrice($item['Label']);
+            $item['Price'] = $this->effectivePrice($item['Label']);
             $allowed[] = $item;
         }
         return $allowed;
     }
 
-    public function getItem(string $label): ?array {
+    public function item(string $label): ?array {
         $items = $this->items();
         return $items[$label] ?? null;
     }
@@ -65,7 +65,7 @@ class Bonus extends \Gazelle\BaseUser {
         return BONUS_AWARD_OTHER;
     }
 
-    public function getEffectivePrice(string $label): int {
+    public function effectivePrice(string $label): int {
         $item = $this->items()[$label];
         if (preg_match('/^collage-\d$/', $label)) {
             return $item['Price'] * 2 ** $this->user->paidPersonalCollages();
@@ -73,10 +73,10 @@ class Bonus extends \Gazelle\BaseUser {
         return $this->user->effectiveClass() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
 
-    public function getListOther($balance): array {
-        $items = $this->items();
-        $other = [];
-        foreach ($items as $label => $item) {
+    public function otherList(): array {
+        $balance = $this->user->bonusPointsTotal();
+        $other   = [];
+        foreach ($this->items() as $label => $item) {
             if (preg_match('/^other-\d$/', $label) && $balance >= $item['Price']) {
                 $other[] = [
                     'Label' => $item['Label'],
@@ -89,7 +89,21 @@ class Bonus extends \Gazelle\BaseUser {
         return $other;
     }
 
-    public function summary() {
+    public function otherLatest(\Gazelle\User $other): array {
+        return self::$db->rowAssoc("
+            SELECT bi.Title     AS title,
+                bh.PurchaseDate AS purchase_date
+            FROM bonus_history bh
+            INNER JOIN bonus_item bi ON (bi.ID = bh.ItemID)
+            WHERE bh.UserID = ?
+                AND bh.OtherUserID = ?
+            ORDER BY bh.PurchaseDate DESC
+            LIMIT 1
+            ", $this->user->id(), $other->id()
+        ) ?? [];
+    }
+
+    public function summary(): array {
         $key = sprintf(self::CACHE_SUMMARY, $this->user->id());
         $summary = self::$cache->get_value($key);
         if ($summary === false) {
@@ -127,7 +141,7 @@ class Bonus extends \Gazelle\BaseUser {
         return $history;
     }
 
-    public function donate(int $poolId, int $value) {
+    public function donate(int $poolId, int $value): bool {
         $effectiveClass = $this->user->effectiveClass();
         if ($effectiveClass < 250) {
             $taxedValue = $value * BONUS_POOL_TAX_STD;
@@ -228,7 +242,7 @@ class Bonus extends \Gazelle\BaseUser {
         }
 
         /* if the price is 0, nothing changes so avoid hitting the db */
-        $price = $this->getEffectivePrice($label);
+        $price = $this->effectivePrice($label);
         if ($price > 0) {
             if (!$this->removePoints($price)) {
                 return false;
@@ -243,7 +257,7 @@ class Bonus extends \Gazelle\BaseUser {
 
     public function purchaseCollage(string $label): bool {
         $item  = $this->items()[$label];
-        $price = $this->getEffectivePrice($label);
+        $price = $this->effectivePrice($label);
         self::$db->prepared_query('
             UPDATE user_bonus ub
             INNER JOIN users_info ui ON (ui.UserID = ub.user_id) SET
@@ -264,7 +278,7 @@ class Bonus extends \Gazelle\BaseUser {
 
     public function unlockSeedbox(): bool {
         $item  = $this->items()['seedbox'];
-        $price = $this->getEffectivePrice('seedbox');
+        $price = $this->effectivePrice('seedbox');
         self::$db->begin_transaction();
         self::$db->prepared_query('
             UPDATE user_bonus ub SET
@@ -323,8 +337,8 @@ class Bonus extends \Gazelle\BaseUser {
      * This method does not return a boolean success, but rather the number of
      * tokens purchased (for use in a response to the receiver).
      */
-    public function purchaseTokenOther(int $toID, string $label, string $message): int {
-        if ($this->user->id() === $toID) {
+    public function purchaseTokenOther(\Gazelle\User $receiver, string $label, string $message): int {
+        if ($this->user->id() === $receiver->id()) {
             return 0;
         }
         $item = $this->items()[$label];
@@ -354,14 +368,12 @@ class Bonus extends \Gazelle\BaseUser {
                 AND other.ID = ?
                 AND self.ID = ?
                 AND ub.points >= ?
-            ", $price, $amount, $toID, $this->user->id(), $price
+            ", $price, $amount, $receiver->id(), $this->user->id(), $price
         );
         if (self::$db->affected_rows() != 2) {
             return 0;
         }
-        $this->addPurchaseHistory($item['ID'], $price, $toID);
-
-        $receiver = new \Gazelle\User($toID);
+        $this->addPurchaseHistory($item['ID'], $price, $receiver->id());
         $this->sendPmToOther($receiver, $amount, $message);
         $this->flush();
         $receiver->flush();
@@ -369,8 +381,8 @@ class Bonus extends \Gazelle\BaseUser {
         return $amount;
     }
 
-    public function sendPmToOther(\Gazelle\User $receiver, int $amount, string $message) {
-        (new \Gazelle\Manager\User)->sendPM($receiver->id(), 0,
+    public function sendPmToOther(\Gazelle\User $receiver, int $amount, string $message): int {
+        return (new \Gazelle\Manager\User)->sendPM($receiver->id(), 0,
             "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
             self::$twig->render('bonus/token-other-message.twig', [
                 'to'       => $receiver->username(),
@@ -445,7 +457,7 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     public function hourlyRate(): float {
-        return self::$db->scalar("
+        return (float)self::$db->scalar("
             SELECT sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders))
             FROM (
                 SELECT DISTINCT uid,fid
@@ -458,31 +470,40 @@ class Bonus extends \Gazelle\BaseUser {
             WHERE xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ", $this->user->id(), $this->user->id()
-        ) ?? 0.0;
+        );
     }
 
     public function userTotals(): array {
-        return self::$db->rowAssoc("
-            SELECT count(xfu.uid) AS total_torrents,
-                sum(t.Size)       AS total_size,
+        $stats = self::$db->rowAssoc("
+            SELECT count(*) AS total_torrents,
+                coalesce(sum(t.Size), 0)   AS total_size,
                 coalesce(sum(bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)), 0)                           AS hourly_points,
                 coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders)), 0) * (24 * 1)                AS daily_points,
                 coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders)), 0) * (24 * 7)                AS weekly_points,
                 coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders)), 0) * (24 * 365.256363004/12) AS monthly_points,
                 coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)    AS yearly_points,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)
-                    / (coalesce(sum(t.Size), 1) / (1024*1024*1024)) AS points_per_gb
+                if (coalesce(sum(t.Size), 0) = 0,
+                    0,
+                    sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)) * (24 * 365.256363004)
+                    / sum(t.Size) / (1024*1024*1024)
+                ) AS points_per_gb
             FROM (
-                SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+                SELECT DISTINCT uid, fid
+                FROM xbt_files_users
+                WHERE active = 1
+                    AND remaining = 0
+                    AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
+                    AND uid = ?
             ) AS xfu
             INNER JOIN xbt_files_history AS xfh USING (uid, fid)
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            WHERE
-                xfu.uid = ?
+            WHERE xfu.uid = ?
                 AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ", $this->user->id(), $this->user->id()
         );
+        $stats['total_size'] = (int)$stats['total_size'];
+        return $stats;
     }
 
     public function seedList(string $orderBy, string $orderWay, int $limit, int $offset): array {

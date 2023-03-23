@@ -14,7 +14,7 @@ class Bonus extends \Gazelle\Base {
      * @return int Discount rate (0: normal price, 100: everything is free :)
      */
     public function discount(): int {
-        return (int)(new \Gazelle\Manager\SiteOption)->findValueByName('bonus-discount') ?? 0;
+        return (int)(new \Gazelle\Manager\SiteOption)->findValueByName('bonus-discount');
     }
 
     public function itemList(): array {
@@ -40,7 +40,7 @@ class Bonus extends \Gazelle\Base {
         return $this->items;
     }
 
-    public function flushPriceCache() {
+    public function flushPriceCache(): void {
         $this->items = [];
         self::$cache->delete_value(self::CACHE_ITEM);
     }
@@ -140,7 +140,7 @@ class Bonus extends \Gazelle\Base {
         return $this->addMultiPoints($points, self::$db->collect('ID', false));
     }
 
-    public function givePoints(\Gazelle\Schedule\Task $task = null) {
+    public function givePoints(\Gazelle\Schedule\Task $task = null): int {
         //------------------------ Update Bonus Points -------------------------//
         // calculation:
         // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))

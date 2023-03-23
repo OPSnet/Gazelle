@@ -18,7 +18,7 @@ View::show_header('Bonus Points Shop', ['js' => 'bonus']);
 
 <?php if (isset($_GET['complete'])) { ?>
 <div class="alertbar blend">
-    <?= $bonus->getItem($_GET['complete'])['Title'] ?> purchased!
+    <?= $bonus->item($_GET['complete'])['Title'] ?> purchased!
 </div>
 <?php
 }
@@ -59,7 +59,7 @@ echo $Twig->render('bonus/store.twig', [
     'auth'     => $auth,
     'class'    => $Viewer->classLevel(),
     'discount' => $bonusMan->discount(),
-    'list'     => $bonus->getListForUser(),
+    'list'     => $bonus->itemList(),
     'points'   => $points,
     'user_id'  => $Viewer->id(),
 ]);

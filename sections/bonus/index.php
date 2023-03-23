@@ -12,12 +12,12 @@ switch ($_GET['action'] ?? '') {
         if (preg_match('/^[a-z]{1,15}(-\w{1,15}){0,4}/', $_REQUEST['label'] ?? '')) {
             $viewerBonus = new \Gazelle\User\Bonus($Viewer);
             $Label = $_REQUEST['label'];
-            $Item = $viewerBonus->getItem($Label);
+            $Item = $viewerBonus->item($Label);
             if (!$Item) {
                 require_once(DEFAULT_PAGE);
                 break;
             }
-            $Price = $viewerBonus->getEffectivePrice($Label);
+            $Price = $viewerBonus->effectivePrice($Label);
             if ($Price > $Viewer->bonusPointsTotal()) {
                 error('You cannot afford this item.');
             }

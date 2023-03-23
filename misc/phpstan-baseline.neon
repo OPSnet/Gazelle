@@ -1421,21 +1421,6 @@ parameters:
 			path: ../app/Manager/Blog.php
 
 		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: ../app/Manager/Bonus.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Bonus\\:\\:flushPriceCache\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Bonus.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Bonus\\:\\:givePoints\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Bonus.php
-
-		-
 			message: "#^Method Gazelle\\\\Manager\\\\Changelog\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Manager/Changelog.php
@@ -3499,26 +3484,6 @@ parameters:
 			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setStaffPM\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Bonus\\:\\:donate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Bonus.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Bonus\\:\\:hourlyRate\\(\\) should return float but returns bool\\|float\\|int\\|string\\.$#"
-			count: 1
-			path: ../app/User/Bonus.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Bonus\\:\\:sendPmToOther\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Bonus.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Bonus\\:\\:summary\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Bonus.php
 
 		-
 			message: "#^Method Gazelle\\\\User\\\\Bookmark\\:\\:remove\\(\\) has no return type specified\\.$#"
