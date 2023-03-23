@@ -71,7 +71,9 @@ class SchedulerTest extends TestCase {
      * @dataProvider taskProvider
      */
     public function testTask(string $taskName): void {
+        ob_start();
         $this->assertIsInt($this->scheduler->runClass($taskName), "sched-task-$taskName");
+        ob_end_clean();
     }
 
     public static function taskProvider(): array {
