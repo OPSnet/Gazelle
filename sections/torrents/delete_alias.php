@@ -21,12 +21,13 @@ if (is_null($artist)) {
 $artistId = $artist->id();
 $artistName = $artist->name();
 
-if ($tgroup->setViewer($Viewer)->removeArtist($artist, $role)) {
+$logger = new Gazelle\Log;
+if ($tgroup->removeArtist($artist, $role, $Viewer, $logger)) {
     $tgroup->refresh();
 }
 
 $label = "$artistId ($artistName) [" . ARTIST_TYPE[$role] . "]";
-(new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), "removed artist $label")
+$logger->group($tgroup->id(), $Viewer->id(), "removed artist $label")
     ->general("Artist $label removed from group " . $tgroup->label() . " by user " . $Viewer->label());
 
 header('Location: ' . redirectUrl($tgroup->location()));

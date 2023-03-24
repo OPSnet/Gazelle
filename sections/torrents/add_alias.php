@@ -7,8 +7,6 @@ if (is_null($tgroup)) {
     error(404);
 }
 
-if ($tgroup->addArtists($Viewer, $_POST['importance'], $_POST['aliasname'])) {
-    $tgroup->refresh();
-}
+$tgroup->addArtists($_POST['importance'], $_POST['aliasname'], $Viewer, new Gazelle\Manager\Artist, new Gazelle\Log);
 
 header('Location: ' . redirectUrl($tgroup->location()));

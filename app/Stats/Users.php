@@ -329,6 +329,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, artist_added_total)
                 SELECT ta.UserID, count(*)
                 FROM torrents_artists ta
+                INNER JOIN users_main um ON (um.ID = ta.UserID)
                 GROUP BY ta.UserID
             ON DUPLICATE KEY UPDATE
                 artist_added_total = VALUES(artist_added_total)
@@ -338,6 +339,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, collage_total)
                 SELECT c.UserID, count(*)
                 FROM collages c
+                INNER JOIN users_main um ON (um.ID = c.UserID)
                 WHERE c.Deleted = '0'
                 GROUP BY c.UserID
             ON DUPLICATE KEY UPDATE
@@ -349,6 +351,7 @@ class Users extends \Gazelle\Base {
                 SELECT ct.UserID, count(*)
                 FROM collages c
                 INNER JOIN collages_torrents ct ON (ct.CollageID = c.ID)
+                INNER JOIN users_main um ON (um.ID = ct.UserID)
                 WHERE c.Deleted = '0'
                 GROUP BY ct.UserID
             ON DUPLICATE KEY UPDATE
@@ -360,6 +363,7 @@ class Users extends \Gazelle\Base {
                 SELECT ca.UserID, count(*)
                 FROM collages c
                 INNER JOIN collages_artists ca ON (ca.CollageID = c.ID)
+                INNER JOIN users_main um ON (um.ID = ca.UserID)
                 WHERE c.Deleted = '0'
                 GROUP BY ca.UserID
             ON DUPLICATE KEY UPDATE
@@ -373,6 +377,7 @@ class Users extends \Gazelle\Base {
                    count(DISTINCT ud.TorrentID) AS 'unique'
                FROM users_downloads AS ud
                INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
+               INNER JOIN users_main um ON (um.ID = ud.UserID)
                GROUP BY ud.UserID
             ON DUPLICATE KEY UPDATE
                 download_total = VALUES(download_total),
@@ -383,6 +388,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, fl_token_total)
                 SELECT uf.UserID, count(*) AS fl_token_total
                 FROM users_freeleeches uf
+                INNER JOIN users_main um ON (um.ID = uf.UserID)
                 GROUP BY uf.UserID
             ON DUPLICATE KEY UPDATE
                 fl_token_total = VALUES(fl_token_total)
@@ -392,6 +398,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, forum_post_total)
                 SELECT fp.AuthorID, count(*) AS forum_post_total
                 FROM forums_posts fp
+                INNER JOIN users_main um ON (um.ID = fp.AuthorID)
                 GROUP BY fp.AuthorID
             ON DUPLICATE KEY UPDATE
                 forum_post_total = VALUES(forum_post_total)
@@ -401,6 +408,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, forum_thread_total)
                 SELECT ft.AuthorID, count(*) AS forum_thread_total
                 FROM forums_topics ft
+                INNER JOIN users_main um ON (um.ID = ft.AuthorID)
                 GROUP BY ft.AuthorID
             ON DUPLICATE KEY UPDATE
                 forum_thread_total = VALUES(forum_thread_total)
@@ -422,6 +430,7 @@ class Users extends \Gazelle\Base {
                     count(DISTINCT GroupID) AS unique_group_total,
                     count(*) AS upload_total
                 FROM torrents t
+                INNER JOIN users_main um ON (um.ID = t.UserID)
                 GROUP BY t.UserID
             ON DUPLICATE KEY UPDATE
                 unique_group_total = VALUES(unique_group_total),
@@ -432,6 +441,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, perfect_flac_total)
                 SELECT t.UserID, count(DISTINCT t.GroupID) AS perfect_flac_total
                 FROM torrents t
+                INNER JOIN users_main um ON (um.ID = t.UserID)
                 WHERE t.Format = 'FLAC'
                     AND (
                         (t.Media = 'CD' AND t.LogScore = 100)
@@ -446,6 +456,7 @@ class Users extends \Gazelle\Base {
             INSERT INTO user_summary_new (user_id, perfecter_flac_total)
                 SELECT t.UserID, count(DISTINCT t.GroupID) AS perfecter_flac_total
                 FROM torrents t
+                INNER JOIN users_main um ON (um.ID = t.UserID)
                 WHERE t.Format = 'FLAC'
                     AND (
                         (t.Media = 'CD' AND t.LogScore = 100)
@@ -462,6 +473,7 @@ class Users extends \Gazelle\Base {
                     coalesce(sum(rv.Bounty), 0) AS size,
                     count(DISTINCT r.ID) AS total
                 FROM requests AS r
+                INNER JOIN users_main um ON (um.ID = r.FillerID)
                 LEFT JOIN requests_votes AS rv ON (r.ID = rv.RequestID)
                 WHERE r.FillerID != 0
                 GROUP BY r.FillerID
@@ -476,6 +488,7 @@ class Users extends \Gazelle\Base {
                     coalesce(sum(rv.Bounty), 0) AS size,
                     count(*) AS total
                 FROM requests AS r
+                INNER JOIN users_main um ON (um.ID = r.UserID)
                 LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
                 GROUP BY r.UserID
             ON DUPLICATE KEY UPDATE
@@ -494,6 +507,7 @@ class Users extends \Gazelle\Base {
                     count(*) AS total
                 FROM requests_votes rv
                 INNER JOIN requests r ON (r.ID = rv.RequestID)
+                INNER JOIN users_main um ON (um.ID = rv.UserID)
                 WHERE r.UserID != r.FillerID
                 GROUP BY rv.UserID
             ON DUPLICATE KEY UPDATE
@@ -507,6 +521,7 @@ class Users extends \Gazelle\Base {
                     count(DISTINCT xfu.fid)
                 FROM xbt_files_users AS xfu
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                INNER JOIN users_main um ON (um.ID = xfu.uid)
                 WHERE xfu.remaining > 0
                 GROUP BY xfu.uid
             ON DUPLICATE KEY UPDATE
@@ -519,6 +534,7 @@ class Users extends \Gazelle\Base {
                     count(DISTINCT xfu.fid)
                 FROM xbt_files_users AS xfu
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                INNER JOIN users_main um ON (um.ID = xfu.uid)
                 WHERE xfu.remaining = 0
                 GROUP BY xfu.uid
             ON DUPLICATE KEY UPDATE
@@ -532,6 +548,7 @@ class Users extends \Gazelle\Base {
                    count(DISTINCT xs.fid) AS 'unique'
                FROM xbt_snatched AS xs
                INNER JOIN torrents AS t ON (t.ID = xs.fid)
+               INNER JOIN users_main um ON (um.ID = xs.uid)
                GROUP BY xs.uid
             ON DUPLICATE KEY UPDATE
                 snatch_total = VALUES(snatch_total),

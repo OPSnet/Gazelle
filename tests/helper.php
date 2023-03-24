@@ -1,6 +1,22 @@
 <?php
 
 class Helper {
+    public static function makeTGroupEBook(
+        string        $name,
+        \Gazelle\User $user,
+    ): \Gazelle\TGroup {
+        return (new \Gazelle\Manager\TGroup)->create(
+            categoryId:      (new \Gazelle\Manager\Category)->findIdByName('E-Books'),
+            name:            $name,
+            description:     'phpunit ebook description',
+            image:           '',
+            recordLabel:     '',
+            catalogueNumber: '',
+            releaseType:     null,
+            year:            null,
+        );
+    }
+
     public static function makeTGroupMusic(
         \Gazelle\User $user,
         string $name,
@@ -9,23 +25,47 @@ class Helper {
         int $releaseType = 1
     ): \Gazelle\TGroup {
         $tgroup = (new \Gazelle\Manager\TGroup)->create(
-            categoryId:      1,
+            categoryId:      (new \Gazelle\Manager\Category)->findIdByName('Music'),
             releaseType:     $releaseType,
             name:            $name,
-            description:     'phpunit description',
+            description:     'phpunit music description',
             image:           '',
             year:            (int)date('Y') - 1,
             recordLabel:     'Unitest Artists Corporation',
             catalogueNumber: 'UA-' . random_int(10000, 99999),
-            showcase:        false,
         );
-        $tgroup->addArtists($user, $artistName[0], $artistName[1]);
+        $tgroup->addArtists($artistName[0], $artistName[1], $user, new Gazelle\Manager\Artist, new Gazelle\Log);
         $tagMan = new \Gazelle\Manager\Tag;
         foreach ($tagName as $tag) {
             $tagMan->createTorrentTag($tagMan->create($tag, $user->id()), $tgroup->id(), $user->id(), 10);
         }
         $tgroup->refresh();
         return $tgroup;
+    }
+
+    public static function makeTorrentEBook(
+        int           $tgroupId,
+        string        $description,
+        \Gazelle\User $user,
+    ): \Gazelle\Torrent {
+        return (new \Gazelle\Manager\Torrent)->create(
+            tgroupId:                $tgroupId,
+            userId:                  $user->id(),
+            description:             $description,
+            media:                   'CD',
+            format:                  null,
+            encoding:                null,
+            infohash:                'infohash-' . randomString(10),
+            filePath:                'unit-test',
+            fileList:                [],
+            size:                    random_int(10_000_000, 99_999_999),
+            isScene:                 false,
+            isRemaster:              false,
+            remasterYear:            null,
+            remasterTitle:           '',
+            remasterRecordLabel:     '',
+            remasterCatalogueNumber: '',
+        );
     }
 
     public static function makeTorrentMusic(

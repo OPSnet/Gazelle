@@ -1,7 +1,4 @@
 <?php
-/***************************************************************
-* Temp handler for changing the category for a single torrent.
-****************************************************************/
 
 if (!$Viewer->permitted('users_mod')) {
     error(403);
@@ -20,102 +17,33 @@ if (is_null($old)) {
     error('The source torrent group does not exist!');
 }
 
-$Title = trim($_POST['title'] ?? '');
-if ($Title === '') {
+$title = trim($_POST['title'] ?? '');
+if ($title === '') {
     error('Title cannot be blank');
 }
 
-$NewCategoryID = (int)($_POST['newcategoryid'] ?? 0);
-if (!$NewCategoryID) {
+$newCategoryId = (int)($_POST['newcategoryid'] ?? 0);
+$newName = (new Gazelle\Manager\Category)->findNameById($newCategoryId);
+if (!$newName) {
     error('Bad category');
-} elseif ($NewCategoryID === $old->categoryId()) {
-    error("Cannot change category to same category ({$old->categoryName()})");
+} elseif ($newName === $old->categoryName()) {
+    error("Cannot change category to same category ({$newName})");
 }
 
-$db = Gazelle\DB::DB();
-switch (CATEGORY[$NewCategoryID - 1]) {
-    case 'Music':
-        $ArtistName = trim($_POST['artist']);
-        $Year = (int)$_POST['year'];
-        $ReleaseType = (int)$_POST['releasetype'];
-        if (empty($ArtistName) || !$Year || !$ReleaseType) {
-            error(0);
-        }
-
-        $db->prepared_query("
-            INSERT INTO torrents_group
-                   (Name, Year, ReleaseType, CategoryID, WikiBody, WikiImage)
-            VALUES (?,    ?,    ?,           1,          '',       '')
-            ", $Title, $Year, $ReleaseType
-        );
-        $new = $tgMan->findById($db->inserted_id());
-        $new->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
-        break;
-
-    case 'Audiobooks':
-    case 'Comedy':
-        $Year = (int)$_POST['year'];
-        if (!$Year) {
-            error(0);
-        }
-        $db->prepared_query("
-            INSERT INTO torrents_group
-                   (Name, Year, CategoryID, WikiBody, WikiImage)
-            VALUES (?,    ?,    ?,          '',       '')
-            ", $Title, $Year, $NewCategoryID
-        );
-        $new = $tgMan->findById($db->inserted_id());
-        break;
-
-    case 'Applications':
-    case 'Comics':
-    case 'E-Books':
-    case 'E-Learning Videos':
-        $db->prepared_query("
-            INSERT INTO torrents_group
-                   (Name, CategoryID, WikiBody, WikiImage)
-            VALUES (?,    ?,          '',       '')
-            ", $Title, $NewCategoryID
-        );
-        $new = $tgMan->findById($db->inserted_id());
-        break;
-    default:
-        error(0);
-}
-
-$db->prepared_query('
-    UPDATE torrents SET
-        GroupID = ?
-    WHERE ID = ?
-    ', $new->id(), $torrent->id()
+$new = $tgMan->changeCategory(
+    old:         $old,
+    torrent:     $torrent,
+    categoryId:  $newCategoryId,
+    artistName:  trim($_POST['artist'] ?? ''),
+    name:        $title,
+    releaseType: (int)($_POST['releasetype'] ?? 0),
+    year:        (int)($_POST['year'] ?? 0),
+    artistMan:   new Gazelle\Manager\Artist,
+    logger:      new Gazelle\Log,
+    user:        $Viewer,
 );
 
-$log = new Gazelle\Log;
-$oldId = $old->id();
-$oldCategoryId = $old->categoryId();
-
-// Delete old group if needed
-if ($db->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $oldId)) {
-    $old->flush();
-    $old->refresh();
-} else {
-    // TODO: votes etc.
-
-    (new Gazelle\Manager\Bookmark)->merge($oldId, $new->id());
-    (new \Gazelle\Manager\Comment)->merge('torrents', $oldId, $new->id());
-    $log->merge($oldId, $new->id());
-
-    $old->remove($Viewer);
+if (is_null($new)) {
+    error(0);
 }
-
-$new->flush();
-$new->refresh();
-$Cache->delete_multi([
-    "torrents_details_" . $oldId,
-    "torrent_download_" . $torrent->id(),
-]);
-
-$log->group($new->id(), $Viewer->id(), "category changed from $oldCategoryId to " . $new->categoryId() . ", merged from group $oldId")
-    ->general("Torrent " . $torrent->id() . " was changed to category " . $new->categoryId() . " by " . $Viewer->label());
-
 header('Location: ' . $new->location());

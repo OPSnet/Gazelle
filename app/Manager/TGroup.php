@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\BaseManager {
-    protected const ID_KEY             = 'zz_tg_%d';
+    final const ID_KEY                 = 'zz_tg_%d';
     protected const CACHE_KEY_FEATURED = 'featured_%d';
     protected const VOTE_SIMILAR       = 'vote_similar_albums_%d';
 
@@ -12,13 +12,26 @@ class TGroup extends \Gazelle\BaseManager {
 
     protected \Gazelle\User $viewer;
 
-    /**
-     * Set the viewer context, for snatched indicators etc.
-     * If this is set, and Torrent object created will have it set
-     */
-    public function setViewer(\Gazelle\User $viewer) {
-        $this->viewer = $viewer;
-        return $this;
+    public function create(
+        int $categoryId,
+        string $name,
+        string $description,
+        ?int $year,
+        ?int $releaseType,
+        ?string $recordLabel,
+        ?string $catalogueNumber,
+        ?string $image,
+        bool $showcase = false,
+    ): \Gazelle\TGroup {
+        self::$db->prepared_query("
+            INSERT INTO torrents_group
+                   (CategoryID, Name, WikiBody, Year, RecordLabel, CatalogueNumber, WikiImage, ReleaseType, VanityHouse)
+            VALUES (?,          ?,    ?,        ?,    ?,           ?,               ?,         ?,           ?)
+            ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
+        );
+        $id = self::$db->inserted_id();
+        self::$cache->increment_value('stats_group_count');
+        return $this->findById($id);
     }
 
     public function findById(int $tgroupId): ?\Gazelle\TGroup {
@@ -41,6 +54,15 @@ class TGroup extends \Gazelle\BaseManager {
             $tgroup->setViewer($this->viewer);
         }
         return $tgroup;
+    }
+
+    /**
+     * Set the viewer context, for snatched indicators etc.
+     * If this is set, and Torrent object created will have it set
+     */
+    public function setViewer(\Gazelle\User $viewer) {
+        $this->viewer = $viewer;
+        return $this;
     }
 
     /**
@@ -82,28 +104,6 @@ class TGroup extends \Gazelle\BaseManager {
                 ", RANDOM_TORRENT_MIN_SEEDS
             )
         );
-    }
-
-    public function create(
-        int $categoryId,
-        ?int $releaseType,
-        string $name,
-        string $description,
-        ?int $year,
-        ?string $recordLabel,
-        ?string $catalogueNumber,
-        ?string $image,
-        bool $showcase,
-    ): \Gazelle\TGroup {
-        self::$db->prepared_query("
-            INSERT INTO torrents_group
-                   (CategoryID, Name, WikiBody, Year, RecordLabel, CatalogueNumber, WikiImage, ReleaseType, VanityHouse)
-            VALUES (?,          ?,    ?,        ?,    ?,           ?,               ?,         ?,           ?)
-            ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
-        );
-        $id = self::$db->inserted_id();
-        self::$cache->increment_value('stats_group_count');
-        return $this->findById($id);
     }
 
     public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user, \Gazelle\Log $log): bool {
@@ -367,5 +367,85 @@ class TGroup extends \Gazelle\BaseManager {
             }
         }
         return $list;
+    }
+
+    /**
+     * Break out one torrent in the group to a new category.
+     * If there are no torrents left, remove the current group.
+     */
+    public function changeCategory(
+        int                     $categoryId,
+        string                  $name,
+        int                     $year,
+        ?string                 $artistName,
+        ?int                    $releaseType,
+        \Gazelle\TGroup         $old,
+        \Gazelle\Torrent        $torrent,
+        \Gazelle\Manager\Artist $artistMan,
+        \Gazelle\User           $user,
+        \Gazelle\Log            $logger,
+    ): ?\Gazelle\TGroup {
+        if ($old->categoryId() === $categoryId) {
+            return null;
+        }
+        switch ((new Category)->findNameById($categoryId)) {
+            case 'Music':
+                if (empty($artistName) || !$year || !$releaseType) {
+                    return null;
+                }
+                break;
+
+            case 'Audiobooks':
+            case 'Comedy':
+                $releaseType = null;
+                if (!$year) {
+                    return null;
+                }
+                break;
+
+            case 'Applications':
+            case 'Comics':
+            case 'E-Books':
+            case 'E-Learning Videos':
+                $releaseType = null;
+                $year        = null;
+                break;
+
+            default:
+                return null;
+        }
+
+        $new = $this->create(
+            categoryId:      $categoryId,
+            description:     $old->description(),
+            image:           $old->image(),
+            name:            $name,
+            year:            $year,
+            releaseType:     $releaseType,
+            recordLabel:     null,
+            catalogueNumber: null,
+        );
+        if ($new->categoryName() === 'Music') {
+            $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan, $logger);
+        }
+        $torrent->setUpdate('GroupID', $new->id())->modify();
+
+        // Refresh the old group, otherwise remove it if there is nothing left
+        if (self::$db->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $old->id())) {
+            $old->flush()->refresh();
+        } else {
+            // TODO: votes etc.
+            (new \Gazelle\Manager\Bookmark)->merge($old->id(), $new->id());
+            (new \Gazelle\Manager\Comment)->merge('torrents', $old->id(), $new->id());
+            $logger->merge($old->id(), $new->id());
+            $old->remove($user);
+        }
+        $new->refresh();
+
+        $logger->group($new->id(), $user->id(),
+            "category changed from {$old->categoryId()} to {$new->categoryId()}, merged from group {$old->id()}"
+            )
+            ->general("Torrent {$torrent->id()} was changed to category {$new->categoryId()} by {$user->label()}");
+        return $new;
     }
 }

@@ -8,6 +8,20 @@ class Category extends \Gazelle\Base {
 
     protected array $info = [];
 
+    public function findNameById(int $id): ?string {
+        $list = $this->nameList();
+        return !isset($list[$id]) ? null : $list[$id]['name'];
+    }
+
+    public function findIdByName(string $name): ?int {
+        $list = $this->nameList();
+        $found = current(array_filter(
+            $this->nameList(),
+            fn($n) => $n['name'] == $name
+        ));
+        return $found === false ? null : $found['id'];
+    }
+
     public function nameList(): array {
         if (!isset($this->info['name'])) {
             $list = self::$cache->get_value(self::NAME_KEY);

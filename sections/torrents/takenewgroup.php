@@ -49,8 +49,7 @@ $db->prepared_query("
     ", $Title, $Year
 );
 $new = $tgMan->findById($db->inserted_id());
-
-$new->addArtists($Viewer, [ARTIST_MAIN], [$ArtistName]);
+$new->addArtists([ARTIST_MAIN], [$ArtistName], $Viewer, new Gazelle\Manager\Artist, new Gazelle\Log);
 
 $db->prepared_query('
     UPDATE torrents SET

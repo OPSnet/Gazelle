@@ -514,6 +514,7 @@ $hasLogInDB = $logfileSummary?->total() > 0;
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
+$log = new Gazelle\Log;
 $Debug->set_flag('upload: database begin transaction');
 $db = Gazelle\DB::DB();
 $db->begin_transaction();
@@ -533,7 +534,7 @@ if ($tgroup) {
         showcase:        (bool)($Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house'])),
     );
     if ($isMusicUpload) {
-        $tgroup->addArtists($Viewer, $ArtistRoleList, $ArtistNameList);
+        $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist, $log);
         $Cache->increment_value('stats_album_count', count($ArtistNameList));
     }
     $Viewer->stats()->increment('unique_group_total');
@@ -634,7 +635,6 @@ if ($logfileSummary?->total()) {
     }
 }
 
-$log = new Gazelle\Log;
 $torrentFiler->put($bencoder->getEncode(), $TorrentID);
 $log->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());

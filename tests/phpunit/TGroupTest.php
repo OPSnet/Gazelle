@@ -74,7 +74,7 @@ class TGroupTest extends TestCase {
      */
     public function testArtist(Gazelle\TGroup $tgroup): void {
         $artistName = 'The ' . randomString(6) . ' Band';
-        $this->assertEquals(1, $tgroup->addArtists(new Gazelle\User(1), [ARTIST_MAIN], [$artistName]), 'tgroup-artist-add');
+        $this->assertEquals(1, $tgroup->addArtists([ARTIST_MAIN], [$artistName], new Gazelle\User(1), new Gazelle\Manager\Artist, new Gazelle\Log), 'tgroup-artist-add');
         $this->assertEquals("$artistName – {$tgroup->name()} [{$tgroup->year()} Live album]" , $tgroup->text(), 'tgroup-artist-text');
 
         $this->assertNotNull($tgroup->primaryArtist(), 'tgroup-artist-primary');

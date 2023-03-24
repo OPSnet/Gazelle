@@ -564,9 +564,8 @@ class TGroup extends BaseObject {
      * Add artists to a group. The role and name arrays must be the same length, and
      * are walked down in step, to match the artist with their role in the group
      */
-    public function addArtists(\Gazelle\User $user, array $roles, array $names): int {
+    public function addArtists(array $roles, array $names, User $user, Manager\Artist $artistMan, Log $logger): int {
         $userId = $user->id();
-        $artistMan = new \Gazelle\Manager\Artist;
         $add = [];
         $args = [];
         $seen = [];
@@ -594,21 +593,16 @@ class TGroup extends BaseObject {
             , ...$args
         );
 
-        $logger = new \Gazelle\Log;
-        $userLabel = "$userId (" .  $user->username() . ")";
         foreach ($add as $artistLabel) {
             $logger->group($this->id, $user->id(), "Added artist $artistLabel")
-                ->general("Artist $artistLabel was added to the group " . $this->id . " (" . $this->name() . ") by user $userLabel");
+                ->general("Artist $artistLabel was added to the group {$this->label()} by user {$user->label()}");
         }
         self::$cache->increment_value('stats_album_count', count($names));
+        $this->refresh();
         return count($add);
     }
 
-    public function removeArtist(Artist $artist, int $role): bool {
-        if (!isset($this->viewer)) {
-            // we don't know who you are
-            return false;
-        }
+    public function removeArtist(Artist $artist, int $role, User $user, Log $logger): bool {
         self::$db->prepared_query('
             DELETE FROM torrents_artists
             WHERE GroupID = ?
@@ -620,7 +614,7 @@ class TGroup extends BaseObject {
             return false;
         }
         if ($artist->usageTotal() === 0) {
-            $artist->remove($this->viewer, new Log);
+            $artist->remove($user, $logger);
         }
         $this->flush();
         return true;
@@ -1037,11 +1031,12 @@ class TGroup extends BaseObject {
         }
 
         self::$cache->delete_multi([
-            "torrents_details_" . $this->id,
-            "torrent_group_" . $this->id,
-            sprintf(\Gazelle\TGroup::CACHE_KEY, " . $this->id),
-            sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, " . $this->id),
-            "groups_artists_" . $this->id,
+            "groups_artists_{$this->id}",
+            "torrents_details_{$this->id}",
+            "torrent_group_{$this->id}",
+            sprintf(\Gazelle\TGroup::CACHE_KEY, $this->id),
+            sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $this->id),
+            sprintf(\Gazelle\Manager\TGroup::ID_KEY, $this->id),
         ]);
         return true;
     }
