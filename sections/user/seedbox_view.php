@@ -66,20 +66,18 @@ if ($source && $target) {
         'auth'      => $Viewer->auth(),
         'mode'      => $union ? 'union' : 'exclude',
         'paginator' => $paginator,
+        'seedbox'   => $seedbox,
         'source_id' => $source,
         'target_id' => $target,
-        'source'    => $seedbox->name($source),
-        'target'    => $seedbox->name($target),
-        'user_id'   => $user->id(),
+        'user_id'   => $userId,
     ]);
 }
 
 echo $Twig->render('seedbox/view.twig', [
     'auth'    => $Viewer->auth(),
-    'host'    => $seedbox->hostList(),
     'mode'    => $union ? 'union' : 'exclude',
+    'seedbox' => $seedbox,
     'source'  => $source,
     'target'  => $target,
     'user_id' => $userId,
-    'viewby'  => $seedbox->viewBy(),
 ]);

@@ -8,7 +8,7 @@
     should look at your <a href="https://orpheus.network/torrents.php?type=seeding&amp;userid={{
         user_id }}">seeding torrents</a>.</p>
 
-{% if host is empty %}
+{% if seedbox.hostList is empty %}
     No seed locations are reporting. Are your clients seeding and connected?
 {% else %}
     <form class="manage_form" name="seedbox" action="user.php?action=seedbox-view&amp;userid={{ user_id }}" method="post">
@@ -17,7 +17,7 @@
         <input type="hidden" name="userid" value="{{ user_id }}" />
 
 <div>View seeds on&nbsp;
-{%- for h in host -%}
+{%- for h in seedbox.hostList -%}
     {%- if loop.first -%}
 <select name="source">
     {% endif %}
@@ -32,7 +32,7 @@
     <option value="exclude" {{ selected(mode == 'exclude') }}>not</option>
  </select>&nbsp;seeding on
 
-{%- for h in host -%}
+{%- for h in seedbox.hostList -%}
     {%- if loop.first -%}
 &nbsp;<select name="target">
     {% endif %}
@@ -44,9 +44,9 @@
 <br /><br />
 Sort by <select name="viewby">
     <option value="{{ constant('\\Gazelle\\User\\Seedbox::VIEW_BY_NAME') }}"{{
-        viewby == constant('\\Gazelle\\User\\Seedbox::VIEW_BY_NAME') ? ' selected="selected"' : '' }}>release name</option>
+        selected(seedbox.viewBy == constant('\\Gazelle\\User\\Seedbox::VIEW_BY_NAME')) }}>release name</option>
     <option value="{{ constant('\\Gazelle\\User\\Seedbox::VIEW_BY_PATH') }}"{{
-        viewby == constant('\\Gazelle\\User\\Seedbox::VIEW_BY_PATH') ? ' selected="selected"' : '' }}>folder name</option>
+        selected(seedbox.viewBy == constant('\\Gazelle\\User\\Seedbox::VIEW_BY_PATH')) }}>folder name</option>
 </select>
 </div>
 <br />

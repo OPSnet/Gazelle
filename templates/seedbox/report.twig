@@ -2,7 +2,7 @@
 <div class="box pad">
 {% for t in list %}
     {% if loop.first %}
-    <h3>Seeds on {{ source }} that are {{ mode == 'union' ? 'also' : 'not' }} on {{ target }} <small>({{
+    <h3>Seeds on {{ seedbox.name(source_id) }} that are {{ mode == 'union' ? 'also' : 'not' }} on {{ seedbox.name(target_id) }} <small>({{
         paginator.total }} seed{{ paginator.total|plural }})</small></h3>
     <div class="pad">
         <a class="brackets" href="torrents.php?action=collector&amp;title=seedbox&amp;userid={{ user_id
