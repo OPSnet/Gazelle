@@ -177,5 +177,13 @@ class InboxTest extends TestCase {
             'inbox-mass-remove'
         );
         $this->assertEquals(3, $receiver->messageTotal(), 'inbox-after-remove');
+
+        $json = new Gazelle\Json\Inbox($receiver->user(), 'inbox', 1, true, $userMan);
+        $payload = $json->payload();
+        $this->assertCount(3, $payload, 'inbox-json-payload');
+        $this->assertEquals(1, $payload['currentPage'], 'inbox-json-current-page');
+        $this->assertEquals(1, $payload['pages'], 'inbox-json-pages');
+        $this->assertCount(3, $payload['messages'], 'inbox-json-message-list');
+        $this->assertEquals($convList[1], $payload['messages'][0]['convId'], 'inbox-json-first-message-id');
     }
 }
