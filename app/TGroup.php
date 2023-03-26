@@ -796,7 +796,7 @@ class TGroup extends BaseObject {
             LEFT JOIN tags t2 ON (t2.ID = tt.TagID)
             WHERE g.ID = ?
             GROUP BY t.ID
-            ", $voteScore, $artistName, $this->id
+            ", $voteScore, shortenString($artistName, 2048, false, false), $this->id
         );
         self::$db->commit();
 
