@@ -160,6 +160,11 @@ class UserCreator extends Base {
         );
 
         self::$db->prepared_query("
+            INSERT INTO user_summary (user_id) VALUES (?)
+            ", $this->id
+        );
+
+        self::$db->prepared_query("
             INSERT INTO users_history_ips (UserID, IP) VALUES (?, ?)
             ", $this->id, $this->ipaddr
         );

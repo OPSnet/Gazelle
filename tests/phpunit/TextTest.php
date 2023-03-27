@@ -111,16 +111,18 @@ class TextTest extends TestCase {
     }
 
     public function testForum(): void {
-        Text::setViewer((new Gazelle\Manager\User)->find('@admin'));
+        $user = (new Gazelle\Manager\User)->find('@admin');
+        Text::setViewer($user);
         $name  = 'forum ' . randomString(6);
         $forum = (new Gazelle\Manager\Forum)->create(
+            user: $user,
             sequence: 999,
             categoryId: 1,
             name: $name,
             description: 'phpunit forum test',
-            minRead: 100,
-            minWrite: 100,
-            minCreate: 100,
+            minClassRead: 100,
+            minClassWrite: 100,
+            minClassCreate: 100,
             autoLock: false,
             autoLockWeeks: 52,
         );
@@ -130,10 +132,11 @@ class TextTest extends TestCase {
             Text::full_format("[forum]{$forum->id()}[/forum]"),
             'text-forum'
         );
-        $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
-    }
 
-    public function testForumThread(): void {
+        $thread = (new Gazelle\Manager\ForumThread)->create(
+            $forum, $user->id(), "phpunit thread title", "phpunit thread body"
+        );
+
         $postId = (int)Gazelle\DB::DB()->scalar("
             SELECT min(fp.ID)
             FROM forums_posts fp
@@ -154,6 +157,8 @@ class TextTest extends TestCase {
             Text::full_format("[thread]{$threadId}:{$postId}[/thread]"),
             'text-forum-post'
         );
+
+        $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
     }
 
     public function dataList(): array {

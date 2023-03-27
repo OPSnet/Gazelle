@@ -122,12 +122,14 @@ class ForumPoll extends BaseObject {
         self::$cache->delete_value("polls_{$this->id}");
         self::$db->prepared_query("
             UPDATE forums_polls SET
-                Closed = '1'
+                Closed   = '1',
+                Featured = null
             WHERE TopicID = ?
             ", $this->id
         );
         $affected = self::$db->affected_rows();
         $this->flush();
+        self::$cache->delete_value(Manager\ForumPoll::CACHE_FEATURED_POLL);
         return $affected;
     }
 
@@ -204,7 +206,7 @@ class ForumPoll extends BaseObject {
     }
 
     public function response(int $userId): ?int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT Vote
             FROM forums_polls_votes
             WHERE UserID = ?
@@ -216,7 +218,7 @@ class ForumPoll extends BaseObject {
     /**
      * TODO: feature and unfeature a poll.
      */
-    public function moderate(int $toFeature, int $toClose): int {
+    public function moderate(bool $toFeature, bool $toClose): int {
         $affected = 0;
         if ($toFeature && !$this->isFeatured()) {
             self::$db->prepared_query("
@@ -226,17 +228,11 @@ class ForumPoll extends BaseObject {
                 ", $this->id
             );
             $affected += self::$db->affected_rows();
-            self::$cache->cache_value('polls_featured', $this->id, 0);
+            self::$cache->cache_value(Manager\ForumPoll::CACHE_FEATURED_POLL, $this->id, 0);
         }
 
         if ($toClose) {
-            self::$db->prepared_query("
-                UPDATE forums_polls SET
-                    Closed = ?
-                WHERE TopicID = ?
-                ", $toClose ? '1' : '0', $this->id
-            );
-            $affected += self::$db->affected_rows();
+            $affected += $this->close();
         }
         $this->flush();
         return $affected;

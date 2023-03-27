@@ -14,21 +14,23 @@ class Forum extends \Gazelle\BaseManager {
      * Create a forum
      */
     public function create(
+        \Gazelle\User $user,
         int $sequence,
         int $categoryId,
         string $name,
         string $description,
-        int $minRead,
-        int $minWrite,
-        int $minCreate,
+        int $minClassRead,
+        int $minClassWrite,
+        int $minClassCreate,
         bool $autoLock,
         int $autoLockWeeks,
     ): \Gazelle\Forum {
         self::$db->prepared_query("
             INSERT INTO forums
-                   (Sort, CategoryID, Name, Description, MinClassRead, MinClassWrite, MinClassCreate, AutoLock, AutoLockWeeks)
-            VALUES (?,    ?,          ?,    ?,           ?,            ?,             ?,              ?,        ?)
-            ", $sequence, $categoryId, trim($name), trim($description), $minRead, $minWrite, $minCreate, $autoLock ? '1' : '0', $autoLockWeeks
+                   (Sort, CategoryID, Name, Description, MinClassRead, MinClassWrite, MinClassCreate, AutoLock, AutoLockWeeks, LastPostAuthorID)
+            VALUES (?,    ?,          ?,    ?,           ?,            ?,             ?,              ?,        ?,             ?)
+            ", $sequence, $categoryId, trim($name), trim($description), $minClassRead, $minClassWrite, $minClassCreate,
+                $autoLock ? '1' : '0', $autoLockWeeks, $user->id()
         );
         $id = self::$db->inserted_id();
         $this->flushToc();
@@ -142,19 +144,19 @@ class Forum extends \Gazelle\BaseManager {
                 if (!$user->readAccess($forum)) {
                     continue;
                 }
-                $autosubList = $forum->autoSubscribeForUserList($user);
+                $autosubList  = $forum->autoSubscribeForUserList($user);
                 $userLastRead = $forum->userLastRead($user->id(), $user->postsPerPage());
                 if (isset($userLastRead[$f['LastPostTopicID']])) {
+                    $isRead       = true;
                     $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
                     $lastReadPost = $userLastRead[$f['LastPostTopicID']]['PostID'];
-                    $catchup = $userLastRead[$f['LastPostTopicID']]['PostID'] >= $f['LastPostID']
+                    $catchup      = $userLastRead[$f['LastPostTopicID']]['PostID'] >= $f['LastPostID']
                         || $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
-                    $isRead = true;
                 } else {
+                    $isRead       = false;
                     $lastReadPage = null;
                     $lastReadPost = null;
-                    $catchup = $f['LastPostTime'] && $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
-                    $isRead = false;
+                    $catchup      = $f['LastPostTime'] && $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
                 }
 
                 if (!isset($toc[$category])) {
@@ -309,7 +311,10 @@ class Forum extends \Gazelle\BaseManager {
     }
 
     public function flushToc() {
-        self::$cache->delete_value(self::CACHE_TOC_MAIN);
+        self::$cache->delete_multi([
+            self::CACHE_TOC_MAIN,
+            self::CACHE_LIST,
+        ]);
         return $this;
     }
 

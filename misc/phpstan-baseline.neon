@@ -1026,16 +1026,6 @@ parameters:
 			path: ../app/File/RipLogHTML.php
 
 		-
-			message: "#^Method Gazelle\\\\ForumPoll\\:\\:response\\(\\) should return int\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/ForumPoll.php
-
-		-
-			message: "#^Ternary operator condition is always true\\.$#"
-			count: 1
-			path: ../app/ForumPoll.php
-
-		-
 			message: "#^Method Gazelle\\\\ForumPost\\:\\:priorPostTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/ForumPost.php
@@ -4839,16 +4829,6 @@ parameters:
 			message: "#^Variable \\$transition might not be defined\\.$#"
 			count: 1
 			path: ../sections/forums/mod_thread.php
-
-		-
-			message: "#^Parameter \\#1 \\$toFeature of method Gazelle\\\\ForumPoll\\:\\:moderate\\(\\) expects int, bool given\\.$#"
-			count: 1
-			path: ../sections/forums/poll_mod.php
-
-		-
-			message: "#^Parameter \\#2 \\$toClose of method Gazelle\\\\ForumPoll\\:\\:moderate\\(\\) expects int, bool given\\.$#"
-			count: 1
-			path: ../sections/forums/poll_mod.php
 
 		-
 			message: "#^If condition is always false\\.$#"

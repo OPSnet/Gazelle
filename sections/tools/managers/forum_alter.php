@@ -37,15 +37,16 @@ if ($_POST['submit'] == 'Delete') {
 
     if ($_POST['submit'] == 'Create') {
         $forumMan->create(
-            sequence:      (int)$_POST['sort'],
-            categoryId:    (int)$_POST['categoryid'],
-            name:          $_POST['name'],
-            description:   $_POST['description'],
-            minRead:       $minRead,
-            minWrite:      $minWrite,
-            minCreate:     $minCreate,
-            autoLock:      isset($_POST['autolock']),
-            autoLockWeeks: (int)$_POST['autolockweeks'],
+            user:           $Viewer,
+            sequence:       (int)$_POST['sort'],
+            categoryId:     (int)$_POST['categoryid'],
+            name:           $_POST['name'],
+            description:    $_POST['description'],
+            minClassRead:   (int)$_POST['minclassread'],
+            minClassWrite:  (int)$_POST['minclasswrite'],
+            minClassCreate: (int)$_POST['minclasscreate'],
+            autoLock:       isset($_POST['autolock']),
+            autoLockWeeks:  (int)$_POST['autolockweeks'],
         );
     } elseif ($_POST['submit'] == 'Edit') {
         $minClassRead = $forum->minClassRead();

@@ -27,7 +27,7 @@ class User extends BaseObject {
     protected bool $donorVisible;
     protected string $donorHeart;
 
-    protected Stats\User $stats;
+    protected Stats\User|null $stats;
 
     public function flush(): User {
         self::$cache->delete_multi([
@@ -37,6 +37,7 @@ class User extends BaseObject {
             sprintf('user_invited_%d', $this->id),
         ]);
         $this->stats()->flush();
+        $this->stats = null;
         $this->info = [];
         return $this;
     }

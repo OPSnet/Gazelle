@@ -6,21 +6,6 @@ class ForumCategory extends \Gazelle\BaseManager {
     final const LIST_KEY = 'forum_cat';
     protected const ID_KEY = 'zz_fc_%d';
 
-    public function findById(int $fcatId): ?\Gazelle\ForumCategory {
-        $key = sprintf(self::ID_KEY, $fcatId);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT ID FROM forums_categories WHERE ID = ?
-                ", $fcatId
-            );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 7200);
-            }
-        }
-        return $id ? new \Gazelle\ForumCategory($id) : null;
-    }
-
     /**
      * Create a forum category
      */
@@ -34,6 +19,21 @@ class ForumCategory extends \Gazelle\BaseManager {
         $id = self::$db->inserted_id();
         self::$cache->delete_value(self::LIST_KEY);
         return $this->findById($id);
+    }
+
+    public function findById(int $fcatId): ?\Gazelle\ForumCategory {
+        $key = sprintf(self::ID_KEY, $fcatId);
+        $id = self::$cache->get_value($key);
+        if ($id === false) {
+            $id = self::$db->scalar("
+                SELECT ID FROM forums_categories WHERE ID = ?
+                ", $fcatId
+            );
+            if (!is_null($id)) {
+                self::$cache->cache_value($key, $id, 7200);
+            }
+        }
+        return $id ? new \Gazelle\ForumCategory($id) : null;
     }
 
     /**
