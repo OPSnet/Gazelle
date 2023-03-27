@@ -14,15 +14,26 @@ class Privilege extends \Gazelle\BaseManager {
         return $this;
     }
 
+    public function create(string $name, int $level, int $secondary, string $forums, array $values, int|null $staffGroupId, string $badge, bool $displayStaff): \Gazelle\Privilege {
+        self::$db->prepared_query('
+            INSERT INTO permissions
+                   (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
+            VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
+            ', $name, $level, $secondary, $forums, serialize($values), $staffGroupId, $badge, $displayStaff ? '1' : '0'
+        );
+        self::$cache->delete_multi(['user_class', 'staff_class']);
+        return $this->findById(self::$db->inserted_id());
+    }
+
     public function findById(int $privilegeId): ?\Gazelle\Privilege {
         $key = sprintf(self::ID_KEY, $privilegeId);
         $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = self::$db->scalar("
+            $id = (int)self::$db->scalar("
                 SELECT ID FROM permissions WHERE ID = ?
                 ", $privilegeId
             );
-            if (!is_null($id)) {
+            if ($id) {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }
@@ -30,25 +41,14 @@ class Privilege extends \Gazelle\BaseManager {
     }
 
     public function findByLevel(int $level): ?\Gazelle\Privilege {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT ID FROM permissions WHERE Level = ?
             ", $level
         );
         return $id ? new \Gazelle\Privilege($id) : null;
     }
 
-    public function create(string $name, int $level, bool $secondary, string $forums, array $values, int|null $staffGroupId, string $badge, bool $displayStaff): \Gazelle\Privilege {
-        self::$db->prepared_query('
-            INSERT INTO permissions
-                   (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
-            VALUES (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
-            ', $name, $level, (int)$secondary, $forums, serialize($values), $staffGroupId, $badge, $displayStaff ? '1' : '0'
-        );
-        self::$cache->delete_multi(['user_class', 'staff_class']);
-        return new \Gazelle\Privilege(self::$db->inserted_id());
-    }
-
-    protected function info() {
+    protected function info(): array {
         if (empty($this->info)) {
             $info = self::$cache->get_value(self::CACHE_KEY);
             if ($info !== false) {

@@ -55,7 +55,8 @@ class Privilege extends BaseObject {
     }
 
     public function permittedForums(): array {
-        return explode(',', $this->info()['PermittedForums']) ?? [];
+        $list = $this->info()['PermittedForums'];
+        return !empty($list) ? explode(',', $list) : [];
     }
 
     public function staffGroupId(): ?int {
@@ -110,7 +111,8 @@ class Privilege extends BaseObject {
             DELETE FROM permissions WHERE ID = ?
             ", $this->id
         );
+        $affected = self::$db->affected_rows();
         self::$cache->delete_value('classes');
-        return self::$db->affected_rows();
+        return $affected;
     }
 }

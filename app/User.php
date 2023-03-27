@@ -305,8 +305,7 @@ class User extends BaseObject {
      */
     public function secondaryClassesList(): array {
         self::$db->prepared_query('
-            SELECT
-                p.ID                   AS permId,
+            SELECT p.ID                AS permId,
                 p.Name                 AS permName,
                 (l.UserID IS NOT NULL) AS isSet
             FROM permissions AS p

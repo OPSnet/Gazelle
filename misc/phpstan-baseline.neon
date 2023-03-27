@@ -1661,16 +1661,6 @@ parameters:
 			path: ../app/Manager/Notification.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\Privilege\\:\\:info\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Privilege.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\Privilege constructor expects int, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
-			count: 1
-			path: ../app/Manager/Privilege.php
-
-		-
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../app/Manager/Referral.php
@@ -2314,11 +2304,6 @@ parameters:
 			message: "#^Method Gazelle\\\\PM\\:\\:postTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/PM.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: ../app/Privilege.php
 
 		-
 			message: "#^Method Gazelle\\\\ReleaseType\\:\\:findExtendedNameById\\(\\) has no return type specified\\.$#"

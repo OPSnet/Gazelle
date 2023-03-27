@@ -55,7 +55,7 @@ if (isset($_REQUEST['submit'])) {
         ? (new Gazelle\Manager\StaffGroup)->findById((int)($_REQUEST['staffgroup'] ?? 0))?->id()
         : null;
     $level        = (int)$_REQUEST['level'];
-    $secondary    = (bool)isset($_REQUEST['secondary']);
+    $secondary    = (int)isset($_REQUEST['secondary']);
     $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
     $values       = [];
     foreach ($_REQUEST as $key => $perm) {
