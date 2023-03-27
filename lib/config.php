@@ -261,6 +261,10 @@ defined('DEBUG_EMAIL') or define('DEBUG_EMAIL', false);
 defined('DISABLE_IRC')             or define('DISABLE_IRC', false);
 defined('IRC_HTTP_SOCKET_ADDRESS') or define('IRC_HTTP_SOCKET_ADDRESS', 'http://localhost:51011/');
 
+defined('IRC_CHAN_REPORT_REQUEST ') or define('IRC_CHAN_REPORT_REQUEST', '#requestedits');
+defined('IRC_CHAN_REPORT_FORUM')    or define('IRC_CHAN_REPORT_FORUM',   '#forumreports');
+defined('IRC_CHAN_REQUEST ')        or define('IRC_CHAN_REQUEST',        '#requests');
+
 defined('BOT_NICK')          or define('BOT_NICK', 'Rippy');
 defined('BOT_SERVER')        or define('BOT_SERVER', 'localhost');
 defined('BOT_PORT')          or define('BOT_PORT', 7000);

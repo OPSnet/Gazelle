@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Request extends \Gazelle\BaseManager {
-    protected const ID_KEY = 'zz_r_%d';
+    final const ID_KEY = 'zz_r_%d';
 
     public function create(
         int $userId,
@@ -40,11 +40,11 @@ class Request extends \Gazelle\BaseManager {
         $key = sprintf(self::ID_KEY, $requestId);
         $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = self::$db->scalar("
+            $id = (int)self::$db->scalar("
                 SELECT ID FROM requests WHERE ID = ?
                 ", $requestId
             );
-            if (!is_null($id)) {
+            if ($id) {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }

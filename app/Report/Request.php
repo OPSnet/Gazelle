@@ -8,7 +8,7 @@ class Request extends AbstractReport {
     public function __construct(
         protected readonly int $reportId,
         protected readonly \Gazelle\Request $subject,
-    ) { }
+    ) {}
 
     public function template(): string {
         return $this->isUpdate ? 'report/request-update.twig' : 'report/request.twig';
@@ -22,7 +22,7 @@ class Request extends AbstractReport {
         return 'Request Report: ' . display_str($this->subject->title());
     }
 
-    public function isUpdate(bool $isUpdate) {
+    public function isUpdate(bool $isUpdate): Request {
         $this->isUpdate = $isUpdate;
         return $this;
     }

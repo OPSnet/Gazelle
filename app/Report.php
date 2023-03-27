@@ -5,18 +5,24 @@ namespace Gazelle;
 class Report extends BaseObject {
     protected Manager\User $userMan;
 
-    public function flush(): Report { return $this; }
+    public function flush(): Report {
+        $this->info = [];
+        return $this;
+    }
     public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
     public function location(): string { return "reports.php?id={$this->id}#report{$this->id}"; }
     public function tableName(): string { return 'reports'; }
 
-    public function setUserManager(Manager\User $userMan) {
+    public function setUserManager(Manager\User $userMan): Report {
         $this->userMan = $userMan;
         return $this;
     }
 
     public function info(): array {
-        return $this->info ??= self::$db->rowAssoc("
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
+        }
+        $this->info = self::$db->rowAssoc("
             SELECT r.UserID    AS reporter_user_id,
                 r.ThingID      AS subject_id,
                 r.Type         AS subject_type,
@@ -31,6 +37,7 @@ class Report extends BaseObject {
             WHERE r.ID = ?
             ", $this->id
         );
+        return $this->info;
     }
 
     public function created(): string {
@@ -45,7 +52,7 @@ class Report extends BaseObject {
         return $this->info()['reason'];
     }
 
-    public function resolved(): string {
+    public function resolved(): ?string {
         return $this->info()['resolved_time'];
     }
 
@@ -77,13 +84,48 @@ class Report extends BaseObject {
         return $this->userMan->findById((int)$this->info()['resolver_user_id']);
     }
 
-    public function claim(int $userId): int {
+    /**
+     * Claim a report. (Pass null to unclaim a currently claimed report)
+     */
+    public function claim(?User $user): int {
+        return (int)$this
+            ->setUpdate('ClaimerID', (int)$user?->id())
+            ->setUpdate('Status', 'InProgress')
+            ->modify();
+    }
+
+    public function addNote(string $note): Report {
+        $this->setUpdate('Notes', str_replace("<br />", "\n", trim($note)))->modify();
+        return $this;
+    }
+
+    public function resolve(User $user, Manager\Report $manager): int {
+        // can't use setUpdate() because there is no elegant way to say `ResolvedTime = now()`
         self::$db->prepared_query("
             UPDATE reports SET
-                ClaimerID = ?
+                Status = 'Resolved',
+                ResolvedTime = now(),
+                ResolverID = ?
             WHERE ID = ?
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        self::$cache->delete_value('num_other_reports');
+
+        $channelList = [];
+        if ($this->subjectType() == 'request_update') {
+            $channelList[] = IRC_CHAN_REPORT_REQUEST;
+            self::$cache->decrement('num_update_reports');
+        } elseif (in_array($this->subjectType(), ['comment', 'post', 'thread'])) {
+            $channelList[] = IRC_CHAN_REPORT_FORUM;
+            self::$cache->decrement('num_forum_reports');
+        }
+        $message = "Report {$this->id()} resolved by {$user->username()} ({$manager->remainingTotal()} remaining).";
+        foreach ($channelList as $channel) {
+            Util\Irc::sendMessage($channel, $message);
+        }
+
+        return $affected;
     }
 }

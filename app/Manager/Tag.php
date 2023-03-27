@@ -401,16 +401,6 @@ class Tag extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function createRequestTag(int $tagId, int $requestId): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO requests_tags
-                   (TagID, RequestID)
-            VALUES (?,     ?)
-            ", $tagId, $requestId
-        );
-        return self::$db->affected_rows();
-    }
-
     public function createTorrentTag(int $tagId, int $groupId, int $userId, int $weight): int {
         self::$db->prepared_query("
             INSERT INTO torrents_tags

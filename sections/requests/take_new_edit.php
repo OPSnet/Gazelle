@@ -398,7 +398,7 @@ $tagMan = new Gazelle\Manager\Tag;
 $tags = array_unique(explode(',', $tags));
 foreach ($tags as $Index => $Tag) {
     $TagID = $tagMan->create($Tag, $Viewer->id());
-    $tagMan->createRequestTag($TagID, $RequestID);
+    $request->addTag($TagID);
     $tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
 }
 
@@ -411,7 +411,7 @@ if (!$newRequest) {
     }
 
     Gazelle\Util\Irc::sendMessage(
-        '#requests',
+        IRC_CHAN_REQUEST,
         $request->text() . " - " . $request->publicLocation() . " - " . implode(' ', $tags)
     );
 }

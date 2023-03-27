@@ -31,7 +31,11 @@ class RequestTest extends TestCase {
     }
 
     public function testCreate(): void {
-        $userMan  = new Gazelle\Manager\User;
+        $admin   = $this->userList['admin'];
+        $user    = $this->userList['user'];
+        $title   = 'The ' . randomString(6). ' Test Sessions';
+        $userMan = new Gazelle\Manager\User;
+
         $statsMan = new Gazelle\Stats\Users;
         $statsMan->refresh();
         $before = [
@@ -45,7 +49,7 @@ class RequestTest extends TestCase {
         $title = 'The ' . randomString(6). ' Test Sessions';
         $this->request = $this->requestMan->create(
             userId:          $this->userList['admin']->id(),
-            categoryId:      1,
+            categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
             year:            2018,
             title:           $title,
             image:           '',
@@ -70,10 +74,11 @@ class RequestTest extends TestCase {
         $artistMan->setGroupId($this->request->id());
         $artistMan->addToRequest($artistId, $aliasId, ARTIST_MAIN);
 
+        $this->assertCount(0, $this->request->tagNameList());
         $tagMan = new Gazelle\Manager\Tag;
         $tagId  = $tagMan->create('jazz', $this->userList['admin']->id());
         $this->assertGreaterThan(0, $tagId, 'request-create-tag');
-        $this->assertEquals(1, $tagMan->createRequestTag($tagId, $this->request->id()), 'request-add-tag');
+        $this->assertEquals(1, $this->request->addTag($tagId), 'request-add-tag');
 
         // FIXME: cannot be asserted earlier: this should not depend on a request having tags
         $this->assertInstanceOf(Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
@@ -184,16 +189,18 @@ class RequestTest extends TestCase {
         $this->assertEquals($fillBefore['uploaded'], $this->userList['user']->flush()->uploadedSize(), 'request-fill-unfill-user');
         $this->assertEquals($fillBefore['bounty-total'], $this->userList['user']->stats()->requestBountyTotal(), 'request-fill-unfill-total');
 
+        $requestId = $this->request->id();
         $this->assertTrue($this->request->remove(), 'request-remove');
         unset($this->request); // success, no need to tidy up
+        $this->assertNull($this->requestMan->findById($requestId), 'request-gone');
     }
 
     public function testJson(): void {
         $this->request = $this->requestMan->create(
-            userId:          1, // $this->userList['admin']->id(),
-            categoryId:      1,
+            userId:          $this->userList['admin']->id(),
+            categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
             year:            (int)date('Y'),
-            title:           'phpunit request',
+            title:           'phpunit request json',
             image:           '',
             description:     'This is a unit test description',
             recordLabel:     'Unitest Artists',
@@ -212,8 +219,7 @@ class RequestTest extends TestCase {
         $artistMan->setGroupId($this->request->id());
         $artistMan->addToRequest($artistId, $aliasId, ARTIST_MAIN);
 
-        $tagMan = new Gazelle\Manager\Tag;
-        $tagMan->createRequestTag($tagMan->create('jazz', $this->userList['admin']->id()), $this->request->id());
+        $this->request->addTag((new Gazelle\Manager\Tag)->create('jazz', $this->userList['admin']->id()));
         $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-json-create');
 
         $json = new Gazelle\Json\Request(
@@ -230,5 +236,100 @@ class RequestTest extends TestCase {
         $this->assertEquals($payload['timeAdded'], $payload['lastVote'], 'req-json-date');
         $this->assertEquals('', $payload['fillerName'], 'req-json-can-vote');
         $this->assertEquals('UA-7890', $payload['catalogueNumber'], 'req-json-catno');
+    }
+
+    public function testReport(): void {
+        $this->request = $this->requestMan->create(
+            userId:          $this->userList['user']->id(),
+            categoryId:      (new Gazelle\Manager\Category)->findIdByName('Comics'),
+            year:            (int)date('Y'),
+            title:           'phpunit request report',
+            image:           '',
+            description:     'This is a unit test description',
+            recordLabel:     'Unitest Artists',
+            catalogueNumber: 'UA-7890',
+            releaseType:     1,
+            encodingList:    'Lossless',
+            formatList:      'FLAC',
+            mediaList:       'WEB',
+            checksum:        false,
+            logCue:          '',
+            oclc:            '',
+        );
+
+        $manager = new Gazelle\Manager\Report;
+        $initial = $manager->remainingTotal();
+
+        $report = $manager->create($this->userList['user'], $this->request->id(), 'request', 'phpunit report');
+        $report->setUserManager(new Gazelle\Manager\User);
+
+        $this->assertEquals($initial + 1, $manager->remainingTotal(), 'request-report-one-more');
+        $this->assertEquals('New', $report->status(), 'request-report-status-new');
+        $this->assertEquals('phpunit report', $report->reason(), 'request-report-reason');
+        $this->assertEquals($this->userList['user']->id(), $report->reporter()?->id(), 'request-report-reporter-id');
+        $this->assertEquals('request', $report->subjectType(), 'request-report-subject-type');
+        $this->assertEquals($this->request->id(), $report->subjectId(), 'request-report-subject-id');
+        $this->assertEquals(
+            "<a href=\"reports.php?id={$report->id()}#report{$report->id()}\">Report #{$report->id()}</a>",
+            $report->link(),
+            'request-report-link'
+        );
+        $this->assertNull($report->notes(), 'request-no-notes-yet');
+        $this->assertNull($report->claimer(), 'request-report-no-claimer');
+        $this->assertNull($report->resolver(), 'request-report-no-resolver');
+        $this->assertNull($report->resolved(), 'request-report-not-resolved-date');
+        $this->assertFalse($report->isClaimed(), 'request-report-not-yet-claimed');
+
+        // report specifics
+        $reqReport = new Gazelle\Report\Request($report->id(), $this->request);
+        $this->assertTrue($reqReport->needReason(), 'request-report-not-an-update');
+        $this->assertEquals(
+            'Request Report: ' . display_str($this->request->title()),
+            $reqReport->title(),
+            'request-report-not-an-update'
+        );
+
+        // note
+        $note = "abc<br />def<br />ghi";
+        $report->addNote($note);
+        $this->assertEquals("abc\ndef\nghi", $report->notes(), 'request-report-notes');
+
+        // claim
+        $this->assertEquals(1, $report->claim($this->userList['admin']), 'request-report-claim');
+        $this->assertTrue($report->isClaimed(), 'request-report-is-claimed');
+        $this->assertEquals('InProgress', $report->flush()->status(), 'request-report-in-progress');
+        $this->assertEquals($this->userList['admin']->id(), $report->claimer()?->id(), 'request-report-claimer-id');
+        $this->assertEquals(1, $report->claim(null), 'request-report-unclaim');
+        $this->assertFalse($report->isClaimed(), 'request-report-is-unclaimed');
+
+        // search
+        $this->assertCount(
+            1,
+            (new Gazelle\Search\Report)->setId($report->id())->page(2, 0),
+            'request-report-search-id'
+        );
+        $this->assertEquals(
+            1,
+            (new Gazelle\Search\Report)->setStatus('InProgress')->total(),
+            'request-report-search-in-progress-total'
+        );
+        $this->assertEquals(
+            0,
+            (new Gazelle\Search\Report)->setStatus('InProgress')->restrictForumMod()->total(),
+            'request-report-search-fmod-in-progress-total'
+        );
+
+        $search = new Gazelle\Search\Report;
+        $total  = $search->setStatus('InProgress')->total();
+        $page   = $search->page($total, 0);
+        $this->assertEquals($total, count($page), 'request-report-page-list');
+        $this->assertEquals($report->id(), $page[0], 'request-report-page-id');
+
+        // resolve
+        $this->assertEquals(1, $report->resolve($this->userList['admin'], $manager), 'request-report-claim');
+        $this->assertNotNull($report->resolved(), 'request-report-resolved-date');
+        $this->assertEquals('Resolved', $report->status(), 'request-report-resolved-status');
+        $this->assertEquals($this->userList['admin']->id(), $report->resolver()?->id(), 'request-report-resolver-id');
+        $this->assertEquals($initial, $manager->remainingTotal(), 'request-report-initial-total');
     }
 }

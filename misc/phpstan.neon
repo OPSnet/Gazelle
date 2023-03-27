@@ -66,6 +66,10 @@ parameters:
         -  ../misc/phinx/migrations/*
         -  ../tests/phpunit/*
     -
+      message: '/^PHPDoc tag @var for variable \$\w+ has no value type specified in iterable type array\./'
+      paths:
+        -  ../sections/*
+    -
       message: '/^Property [^:]+::\$\w+ type has no value type specified in iterable type array\.$/'
       paths:
         -  ../app/*

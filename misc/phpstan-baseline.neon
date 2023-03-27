@@ -2346,34 +2346,9 @@ parameters:
 			path: ../app/ReleaseType.php
 
 		-
-			message: "#^Method Gazelle\\\\Report\\:\\:setUserManager\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Report.php
-
-		-
 			message: "#^Method Gazelle\\\\Report\\\\Comment\\:\\:setContext\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Report/Comment.php
-
-		-
-			message: "#^Method Gazelle\\\\Report\\\\Request\\:\\:isUpdate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Report/Request.php
-
-		-
-			message: "#^Method Gazelle\\\\Request\\:\\:artistFlush\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Request.php
-
-		-
-			message: "#^Method Gazelle\\\\Request\\:\\:bountyTotal\\(\\) should return int but returns float\\|int\\.$#"
-			count: 1
-			path: ../app/Request.php
-
-		-
-			message: "#^Method Gazelle\\\\Request\\:\\:updateBookmarkStats\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Request.php
 
 		-
 			message: "#^Method Gazelle\\\\Router\\:\\:addGet\\(\\) has no return type specified\\.$#"
@@ -2764,26 +2739,6 @@ parameters:
 			message: "#^Method Gazelle\\\\Search\\\\IPv4\\:\\:trackerTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Search/IPv4.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Report\\:\\:restrictForumMod\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Report.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Report\\:\\:setId\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Report.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Report\\:\\:setStatus\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Report.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Report\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Search/Report.php
 
 		-
 			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
@@ -4801,29 +4756,9 @@ parameters:
 			path: ../sections/better/better.php
 
 		-
-			message: "#^PHPDoc tag @var for variable \\$Item has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/bonus/title.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$Item has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/bonus/token_other.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$CollagePages has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/collages/artist_collage.php
-
-		-
 			message: "#^Parameter \\#2 \\$count of function array_fill expects int, float given\\.$#"
 			count: 1
 			path: ../sections/collages/artist_collage.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$CollagePages has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/collages/torrent_collage.php
 
 		-
 			message: "#^Parameter \\#1 \\$requestId of method Gazelle\\\\Manager\\\\Request\\:\\:findById\\(\\) expects int, int\\|string given\\.$#"
@@ -4961,11 +4896,6 @@ parameters:
 			path: ../sections/referral/index.php
 
 		-
-			message: "#^PHPDoc tag @var for variable \\$Types has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/reports/compose.php
-
-		-
 			message: "#^Variable \\$Types might not be defined\\.$#"
 			count: 1
 			path: ../sections/reports/report.php
@@ -4991,18 +4921,8 @@ parameters:
 			path: ../sections/reports/takecompose.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between mixed and '0' will always evaluate to false\\.$#"
+			message: "#^Strict comparison using === between mixed and '0' will always evaluate to false\\.$#"
 			count: 1
-			path: ../sections/reports/takereport.php
-
-		-
-			message: "#^Variable \\$Link might not be defined\\.$#"
-			count: 2
-			path: ../sections/reports/takereport.php
-
-		-
-			message: "#^Variable \\$Types might not be defined\\.$#"
-			count: 2
 			path: ../sections/reports/takereport.php
 
 		-
@@ -5162,7 +5082,7 @@ parameters:
 
 		-
 			message: "#^Variable \\$RequestID might not be defined\\.$#"
-			count: 9
+			count: 8
 			path: ../sections/requests/take_new_edit.php
 
 		-

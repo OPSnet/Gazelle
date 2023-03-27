@@ -14,7 +14,7 @@ if ($report->isClaimed()) {
         'status' => 'dupe'
     ]);
 } else {
-    $report->claim($Viewer->id());
+    $report->claim($Viewer);
     print json_encode([
         'status' => 'success',
         'username' => $Viewer->username()

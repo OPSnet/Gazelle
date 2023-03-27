@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Report extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_r_%d';
 
     protected User $userMan;
@@ -11,6 +10,21 @@ class Report extends \Gazelle\BaseManager {
     public function setUserManager(User $userMan): \Gazelle\Manager\Report {
         $this->userMan = $userMan;
         return $this;
+    }
+
+    public function create(\Gazelle\User $user, int $id, string $type, string $reason): \Gazelle\Report {
+        self::$db->prepared_query("
+            INSERT INTO reports
+                   (UserID, ThingID, Type, Reason)
+            VALUES (?,      ?,       ?,    ?)
+            ", $user->id(), $id, $type, $reason
+        );
+        $id = self::$db->inserted_id();
+        if ($type == 'request_update') {
+            self::$cache->decrement('num_update_reports');
+        }
+        self::$cache->delete_value('num_other_reports');
+        return $this->findById($id);
     }
 
     public function findById(int $reportId): ?\Gazelle\Report {
@@ -33,5 +47,11 @@ class Report extends \Gazelle\BaseManager {
             $report->setUserManager($this->userMan);
         }
         return $report;
+    }
+
+    public function remainingTotal(): int {
+        return (int)self::$db->scalar("
+            SELECT count(*) FROM reports WHERE Status = 'New'
+        ");
     }
 }

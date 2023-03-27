@@ -1,13 +1,14 @@
 <?php
 
-if (!$Viewer->permitted('site_moderate_forums') || empty($_POST['id']) || empty($_POST['remove'])) {
+if (!$Viewer->permitted('site_moderate_forums') || empty($_POST['remove'])) {
     json_error('bad parameters');
 }
 
-Gazelle\DB::DB()->prepared_query("
-    UPDATE reports SET ClaimerID = 0 WHERE ID = ?
-    ", (int)$_POST['id']
-);
+$report = (new Gazelle\Manager\Report)->findById((int)($_POST['id'] ?? 0));
+if (is_null($report)) {
+    json_error('no report id');
+}
+$report->claim(null);
 
 print json_encode([
     'status' => 'success',

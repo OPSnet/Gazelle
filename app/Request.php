@@ -72,7 +72,7 @@ class Request extends BaseObject {
         };
     }
 
-    public function artistFlush() {
+    public function artistFlush(): void {
         $this->flush();
         self::$db->prepared_query("
             SELECT ArtistID FROM requests_artists WHERE RequestID = ?
@@ -118,14 +118,10 @@ class Request extends BaseObject {
                 r.BitrateList     AS encoding_list,
                 r.FormatList      AS format_list,
                 r.MediaList       AS media_list,
-                r.OCLC            AS oclc,
-                group_concat(t.Name ORDER BY t.Name)
-                                  AS tagList
-            FROM requests r
-            INNER JOIN requests_tags rt ON (rt.RequestID = r.ID)
-            INNER JOIN tags           t ON (t.ID = rt.TagID)
-            INNER JOIN category       c ON (c.category_id = r.CategoryID)
-            LEFT JOIN release_type  rel ON (rel.ID = r.ReleaseType)
+                r.OCLC            AS oclc
+            FROM requests            r
+            INNER JOIN category      c ON (c.category_id = r.CategoryID)
+            LEFT JOIN release_type rel ON (rel.ID = r.ReleaseType)
             WHERE r.ID = ?
             GROUP BY r.ID
             ", $this->id
@@ -412,7 +408,7 @@ class Request extends BaseObject {
     }
 
     public function bountyTotal(): int {
-        return array_sum(array_column($this->userIdVoteList(), 'bounty'));
+        return (int)array_sum(array_column($this->userIdVoteList(), 'bounty'));
     }
 
     public function userVotedTotal(): int {
@@ -461,6 +457,18 @@ class Request extends BaseObject {
         }
 
         return $error;
+    }
+
+    public function addTag(int $tagId): int {
+        self::$db->prepared_query("
+            INSERT IGNORE INTO requests_tags
+                   (TagID, RequestID)
+            VALUES (?,     ?)
+            ", $tagId, $this->id
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     /**
@@ -775,7 +783,7 @@ class Request extends BaseObject {
         return $affected;
     }
 
-    public function updateBookmarkStats() {
+    public function updateBookmarkStats(): void {
         self::$db->prepared_query("
             SELECT UserID FROM bookmarks_requests WHERE RequestID = ?
             ", $this->id
@@ -803,7 +811,7 @@ class Request extends BaseObject {
             SELECT ArtistID FROM requests_artists WHERE RequestID = ?
             ", $this->id
         );
-        $artisIds = self::$db->collect(0);
+        $artisIds = self::$db->collect(0, false);
         self::$db->prepared_query('
             DELETE FROM requests_artists WHERE RequestID = ?', $this->id
         );
@@ -817,6 +825,7 @@ class Request extends BaseObject {
         foreach ($artisIds as $artistId) {
             self::$cache->delete_value("artists_requests_$artistId");
         }
+        self::$cache->delete_value(sprintf(Manager\Request::ID_KEY, $this->id));
         $this->flush();
         return $affected != 0;
     }
