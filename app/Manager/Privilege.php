@@ -209,6 +209,7 @@ class Privilege extends \Gazelle\BaseManager {
             'users_view_keys' => 'View passkeys',
             'users_view_ips' => 'View IP addresses',
             'users_view_email' => 'View email addresses',
+            'view_last_seen' => 'View when user was last seen',
             'users_override_paranoia' => 'Override paranoia',
             'users_logout' => 'Log users out',
             'users_make_invisible' => 'Hide username in seeder lists',

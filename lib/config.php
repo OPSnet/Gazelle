@@ -855,7 +855,7 @@ defined('PARANOIA_OVERRIDDEN') or define('PARANOIA_OVERRIDDEN', 2);
 defined('PARANOIA_OVERRIDE') or define('PARANOIA_OVERRIDE', [
     'downloaded'       => 'users_mod',
     'uploaded'         => 'users_mod',
-    'lastseen'         => 'users_mod',
+    'lastseen'         => 'view_last_seen',
     'ratio'            => 'users_mod',
     'requiredratio'    => 'users_mod',
     'hide_donor_heart' => 'users_mod',

@@ -124,6 +124,9 @@
             {%- endif -%}
         </li>
 {% set visible = user.propertyVisible(preview_user, 'lastseen') %}
+{% if visible == constant('PARANOIA_HIDE') and not user.isStaff and viewer.permitted('view_last_seen') %}
+    {%- set visible = constant('PARANOIA_OVERRIDE') %}
+{% endif %}
 {% if visible %}
         <li{{ class_override(visible) }}>Last seen: {% if viewer.id == user.id or viewer.isStaff -%}
     {{- user.lastAccessRealtime|time_diff -}}
