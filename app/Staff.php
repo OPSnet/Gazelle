@@ -3,11 +3,16 @@
 namespace Gazelle;
 
 class Staff extends BaseUser {
-    public function id() {
+    public function flush(): Staff  { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'staff_blog_visits'; }
+
+    public function id(): int {
         return $this->user->id();
     }
 
-    public function blogAlert() {
+    public function blogAlert(): bool {
         if (($readTime = self::$cache->get_value('staff_blog_read_'. $this->user->id())) === false) {
             $readTime = self::$db->scalar('
                 SELECT unix_timestamp(Time)
@@ -28,7 +33,7 @@ class Staff extends BaseUser {
         return $readTime < $blogTime;
     }
 
-    public function pmCount() {
+    public function pmCount(): int {
         $cond = [
             "Status = 'Unanswered'",
             '(AssignedToUser = ? OR LEAST((SELECT max(Level) FROM permissions), Level) <= ?)',
@@ -44,7 +49,7 @@ class Staff extends BaseUser {
             $args[] = $classes[FORUM_MOD]['Level'];
         }
 
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM staff_pm_conversations
             WHERE " . implode(' AND ', $cond), ...$args);

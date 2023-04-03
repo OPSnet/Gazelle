@@ -8,6 +8,11 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
     protected string $title;
     protected string $url;
 
+    public function flush(): AbstractNotification { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return ''; }
+
     abstract public function className(): string;
     abstract public function clear(): int;
     abstract public function load(): bool;
@@ -34,7 +39,7 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
         return end($path); // silence "Only variables should be passed by reference"
     }
 
-    public function url(): string {
+    public function notificationUrl(): string {
         return $this->url;
     }
 }

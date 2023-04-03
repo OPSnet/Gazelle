@@ -5,6 +5,11 @@ namespace Gazelle\User;
 class Bookmark extends \Gazelle\BaseUser {
     protected array $all;
 
+    public function flush(): Bookmark { $this->user()->flush(); return $this; }
+    public function link(): string   { return $this->user()->link(); }
+    public function location(): string   { return $this->user()->location(); }
+    public function tableName(): string   { return 'pm_conversations_users'; }
+
     /**
      * Get the bookmark schema.
      * Recommended usage:
@@ -274,7 +279,7 @@ class Bookmark extends \Gazelle\BaseUser {
      * @param string $type (on of artist, collage, request, torrent)
      * @param int $id The ID of the object
      */
-    public function remove(string $type, int $id) {
+    public function remove(string $type, int $id): int {
         [$table, $column] = $this->schema($type);
         if (!$id) {
             throw new \Gazelle\Exception\BookmarkIdentifierException($id);
@@ -283,12 +288,14 @@ class Bookmark extends \Gazelle\BaseUser {
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
             ", $this->user->id(), $id
         );
+        $affected = self::$db->affected_rows();
         self::$cache->delete_multi(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id()]);
 
         if ($type === 'torrent' && self::$db->affected_rows()) {
             self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
             (new \Gazelle\TGroup($id))->stats()->increment('bookmark_total', -1);
         }
+        return $affected;
     }
 
     public function removeSnatched(): int {

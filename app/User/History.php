@@ -3,6 +3,10 @@
 namespace Gazelle\User;
 
 class History extends \Gazelle\BaseUser {
+    public function flush(): History { $this->user()->flush(); return $this; }
+    public function link(): string  { return $this->user()->link(); }
+    public function location(): string  { return $this->user()->location(); }
+    public function tableName(): string  { return 'pm_conversations_users'; }
 
     public function __construct(
         \Gazelle\User $user,

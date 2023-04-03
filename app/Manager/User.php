@@ -281,7 +281,8 @@ class User extends \Gazelle\BaseManager {
      * @return array $classes
      */
     public function staffClassList(): array {
-        if (($staffClassList = self::$cache->get_value('staff_class')) === false) {
+        $staffClassList = self::$cache->get_value('staff_class');
+        if ($staffClassList === false) {
             self::$db->prepared_query("
                 SELECT ID, Name, Level
                 FROM permissions
@@ -297,7 +298,8 @@ class User extends \Gazelle\BaseManager {
     }
 
     public function staffListGrouped(): array {
-        if (($staff = self::$cache->get_value('idstaff')) === false) {
+        $staff = self::$cache->get_value('idstaff');
+        if ($staff === false) {
             self::$db->prepared_query("
                 SELECT sg.Name as staffGroup,
                     um.ID
@@ -318,9 +320,8 @@ class User extends \Gazelle\BaseManager {
             }
             self::$cache->cache_value('idstaff', $staff, 3600);
         }
-        new \Gazelle\Manager\User;
         foreach ($staff as &$group) {
-            $group = array_map(fn ($userId) => $this->findById($userId), $group);
+            $group = array_map(fn($userId) => $this->findById($userId), $group);
         }
         return $staff;
     }

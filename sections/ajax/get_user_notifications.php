@@ -9,7 +9,7 @@ foreach ($alertList as $alert) {
             'id'         => $alert->context(),
             'importance' => $alert->className(),
             'message'    => $alert->title(),
-            'url'        => $alert->url(),
+            'url'        => $alert->notificationUrl(),
         ];
     }
 }

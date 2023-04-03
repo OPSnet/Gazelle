@@ -28,6 +28,11 @@ class Forum extends \Gazelle\BaseUser {
 
     protected \Gazelle\User $viewer;
 
+    public function flush(): Forum  { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return ''; }
+
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
         $this->permittedForums = $this->user->permittedForums();

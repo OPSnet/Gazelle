@@ -28,7 +28,7 @@ switch ($_REQUEST['dupeaction'] ?? '') {
             } elseif ($source->id() === $target->id()) {
                 error("Cannot link a user to themselves");
             }
-            $userLink->link($target, $Viewer->username(), $updateNote);
+            $userLink->dupe($target, $Viewer->username(), $updateNote);
         }
 
         if ($_REQUEST['dupecomments']) {

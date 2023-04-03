@@ -32,6 +32,11 @@ class UserCreateTest extends TestCase {
         $this->assertEquals($email, $this->user->email(), 'user-create-email');
         $this->assertStringContainsString($adminComment, $this->user->staffNotes(), 'user-create-staff-notes');
         $this->assertTrue($this->user->isUnconfirmed(), 'user-create-unconfirmed');
+        $this->assertStringStartsWith(
+            'static/styles/apollostage/style.css?v=',
+            (new Gazelle\User\Stylesheet($this->user))->cssUrl(),
+            'user-create-stylesheet'
+        );
 
         $location = "user.php?id={$this->user->id()}";
         $this->assertEquals($location, $this->user->location(), 'user-location');

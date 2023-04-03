@@ -7,6 +7,25 @@ class Quote extends \Gazelle\BaseUser {
 
     protected bool $showAll = false;
 
+    public function flush(): Quote {
+        self::$cache->delete_value(sprintf(self::UNREAD_QUOTE_KEY, $this->user->id()));
+        return $this;
+    }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_notify_quoted'; }
+
+    public function create(int $quoterId, string $page, int $pageId, int $postId): int {
+        self::$db->prepared_query('
+            INSERT IGNORE INTO users_notify_quoted
+                   (UserID, QuoterID, Page, PageID, PostID)
+            VALUES (?,      ?,        ?,    ?,      ?)
+            ', $this->user->id(), $quoterId, $page, $pageId, $postId
+        );
+        $this->flush();
+        return self::$db->affected_rows();
+    }
+
     /**
      * Toggle whether only unread quotes should be listed
      */
@@ -20,22 +39,6 @@ class Quote extends \Gazelle\BaseUser {
      */
     public function showAll(): bool {
         return $this->showAll;
-    }
-
-    public function flush(): Quote {
-        self::$cache->delete_value(sprintf(self::UNREAD_QUOTE_KEY, $this->user->id()));
-        return $this;
-    }
-
-    public function create(int $quoterId, string $page, int $pageId, int $postId): int {
-        self::$db->prepared_query('
-            INSERT IGNORE INTO users_notify_quoted
-                   (UserID, QuoterID, Page, PageID, PostID)
-            VALUES (?,      ?,        ?,    ?,      ?)
-            ', $this->user->id(), $quoterId, $page, $pageId, $postId
-        );
-        $this->flush();
-        return self::$db->affected_rows();
     }
 
     public function clearAll(): int {

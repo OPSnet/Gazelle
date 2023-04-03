@@ -16,6 +16,8 @@ class Bonus extends \Gazelle\BaseUser {
         ]);
         return $this;
     }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
     public function tableName(): string { return 'bonus_history'; }
 
     public function pointsSpent(): int {

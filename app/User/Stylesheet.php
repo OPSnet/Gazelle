@@ -10,6 +10,9 @@ class Stylesheet extends \Gazelle\BaseUser {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));
         return $this;
     }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return ''; }
 
     public function info(): array {
         if (isset($this->info)) {
@@ -57,23 +60,19 @@ class Stylesheet extends \Gazelle\BaseUser {
     }
 
     public function name(): string {
-        return $this->styleUrl() ? 'External CSS' :  $this->info()['name'];
+        return $this->info()['style_url'] ? 'External CSS' :  $this->info()['name'];
     }
 
     public function styleId(): int {
         return $this->info()['style_id'];
     }
 
-    public function styleUrl(): ?string {
-        return $this->info()['style_url'];
-    }
-
     public function theme(): string {
         return $this->info()['theme'];
     }
 
-    public function url(): string {
-        $url = $this->styleUrl();
+    public function cssUrl(): string {
+        $url = $this->info()['style_url'];
         if (empty($url)) {
             return STATIC_SERVER . '/styles/' . $this->cssName() . '/style.css?v='
                 . base_convert(filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $this->cssName())), 10, 36);

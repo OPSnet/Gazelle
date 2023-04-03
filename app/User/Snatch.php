@@ -31,6 +31,9 @@ class Snatch extends \Gazelle\BaseUser {
         }
         return $this;
     }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'xbt_snatched'; }
 
     public function isSnatched(int $torrentId): bool {
         $offset = (int)floor($torrentId / self::RANGE_BIT);

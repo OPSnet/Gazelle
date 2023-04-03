@@ -65,7 +65,7 @@ class View {
         $alertList = $notifier->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
         foreach($alertList as $alert) {
             if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_TRADITIONAL, Gazelle\User\Notification::DISPLAY_TRADITIONAL_PUSH])) {
-                $activity->setAlert(sprintf('<a href="%s">%s</a>', $alert->url(), $alert->title()));
+                $activity->setAlert(sprintf('<a href="%s">%s</a>', $alert->notificationUrl(), $alert->title()));
             }
         }
         if ($notifier->useNoty()) {

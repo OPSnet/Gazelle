@@ -9,22 +9,27 @@ class Seedbox extends \Gazelle\BaseUser {
     final public const VIEW_BY_PATH = 1;
 
     protected \Hashids\Hashids $hashid;
-    protected array $host = [];
-    protected array $free = [];
+    protected array $host;
+    protected array $free;
     protected bool $isUnion = false;
     protected int $source;
     protected int $target;
     protected int $viewBy = self::VIEW_BY_NAME;
 
+    public function flush(): Seedbox {
+        self::$cache->delete_value(self::SUMMARY_KEY . $this->user->id());
+        unset($this->host);
+        unset($this->free);
+        return $this;
+    }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'user_seedbox'; }
+
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
         $this->hashid = new \Hashids\Hashids(SEEDBOX_SALT);
         $this->build();
-    }
-
-    protected function flush(): Seedbox {
-        self::$cache->delete_value(self::SUMMARY_KEY . $this->user->id());
-        return $this;
     }
 
     public function setUnion(bool $isUnion): Seedbox {
@@ -52,9 +57,19 @@ class Seedbox extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function viewBy(): int { return $this->viewBy; }
-    public function hostList(): array { return $this->host; }
-    public function freeList(): array { return $this->free; }
+    public function freeList(): array {
+        if (!isset($this->free)) {
+            $this->build();
+        }
+        return $this->free;
+    }
+
+    public function hostList(): array {
+        if (!isset($this->host)) {
+            $this->build();
+        }
+        return $this->host;
+    }
 
     public function name(string $id): string {
         return (string)self::$db->scalar("
@@ -65,6 +80,8 @@ class Seedbox extends \Gazelle\BaseUser {
             ", $this->user->id(), $this->hashid->decode($id)[0]
         );
     }
+
+    public function viewBy(): int { return $this->viewBy; }
 
     /**
      * Generate a signature of the useragent and IP address.
@@ -173,7 +190,6 @@ class Seedbox extends \Gazelle\BaseUser {
      */
     public function updateNames(array $update): int {
         $n = 0;
-        $this->hostList();
         foreach ($update as $seedbox) {
             $name = $seedbox['name'];
             if ($name == '') {
@@ -264,6 +280,7 @@ class Seedbox extends \Gazelle\BaseUser {
 
         // go through all the peers and use a name if we have one,
         // otherwise fallback to ip/useragent as a name.
+        $this->host = [];
         foreach ($client as $clientId => $seedbox) {
             $seedbox['sig'] = $this->signature($seedbox['ipv4addr'], $seedbox['useragent']);
             if (isset($nameList[$clientId])) {

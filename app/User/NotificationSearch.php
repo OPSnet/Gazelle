@@ -9,6 +9,11 @@ class NotificationSearch extends \Gazelle\BaseUser {
     protected array $cond = [];
     protected array $args = [];
 
+    public function flush(): NotificationSearch { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_notify_torrents'; }
+
     public function __construct(
         \Gazelle\User $user,
         protected string $orderBy,

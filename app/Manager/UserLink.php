@@ -3,6 +3,10 @@
 namespace Gazelle\Manager;
 
 class UserLink extends \Gazelle\BaseUser {
+    public function flush(): UserLink { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_dupes'; }
 
     public function groupId(\Gazelle\User $user): ?int {
         return self::$db->scalar("
@@ -13,7 +17,7 @@ class UserLink extends \Gazelle\BaseUser {
         );
     }
 
-    public function link(\Gazelle\User $target, string $adminUsername, bool $updateNote): bool {
+    public function dupe(\Gazelle\User $target, string $adminUsername, bool $updateNote): bool {
         $sourceId = $this->user->id();
         [$sourceGroupId, $comments] = self::$db->row("
             SELECT u.GroupID, d.Comments

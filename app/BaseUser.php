@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-abstract class BaseUser extends Base {
+abstract class BaseUser extends BaseObject {
     public function __construct(
         protected User $user,
     ) {}

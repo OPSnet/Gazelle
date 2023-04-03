@@ -3,6 +3,10 @@
 namespace Gazelle\User;
 
 class PermissionRateLimit extends \Gazelle\BaseUser {
+    public function flush(): PermissionRateLimit { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'permission_rate_limit'; }
 
     public function metrics(): ?array {
          return self::$db->rowAssoc("
@@ -55,7 +59,7 @@ class PermissionRateLimit extends \Gazelle\BaseUser {
         return $activity ? $stats->downloadUnique() / $activity : NAN;
     }
 
-    public function recentDownloadCount() {
+    public function recentDownloadCount(): int {
         return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_downloads ud

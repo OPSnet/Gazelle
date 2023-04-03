@@ -15,6 +15,10 @@ class Subscription extends \Gazelle\BaseUser {
         ]);
         return $this;
     }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_subscriptions'; }
+
     /**
      * (Un)subscribe from a forum thread.
      */
@@ -44,7 +48,7 @@ class Subscription extends \Gazelle\BaseUser {
      * @param string $page 'artist', 'collages', 'requests' or 'torrents'
      * @param int $pageID ArtistID, CollageID, RequestID or GroupID
      */
-    public function subscribeComments(string $page, int $pageID) {
+    public function subscribeComments(string $page, int $pageID): bool {
         $qid = self::$db->get_query_id();
         $subscriptions = $this->commentSubscriptions();
         $key = -1;
@@ -54,6 +58,7 @@ class Subscription extends \Gazelle\BaseUser {
                 break;
             }
         }
+        $success = false;
         if ($key !== -1) {
             self::$db->prepared_query('
                 DELETE FROM users_subscriptions_comments
@@ -62,6 +67,7 @@ class Subscription extends \Gazelle\BaseUser {
                     AND PageID = ?
                 ', $this->user->id(), $page, $pageID
             );
+            $success = self::$db->affected_rows() == 1;
             unset($subscriptions[$key]);
         } else {
             self::$db->prepared_query('
@@ -71,10 +77,12 @@ class Subscription extends \Gazelle\BaseUser {
                     (?,      ?,    ?)
                 ', $this->user->id(), $page, $pageID
             );
+            $success = true;
             array_push($subscriptions, [$page, $pageID]);
         }
         self::$cache->cache_value("subscriptions_comments_user_" . $this->user->id(), $subscriptions, 0);
         self::$db->set_query_id($qid);
+        return $success;
     }
 
     /**
@@ -137,7 +145,7 @@ class Subscription extends \Gazelle\BaseUser {
      * have new comments on them?
      */
     public function unreadCommentTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions_comments AS s
             LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
@@ -154,7 +162,7 @@ class Subscription extends \Gazelle\BaseUser {
      * How many total subscribed entities (artists, collages, requests, torrents)
      */
     public function commentTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions_comments AS s
             LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)

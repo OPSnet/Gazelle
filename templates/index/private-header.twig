@@ -38,7 +38,7 @@
 {%     endfor %}
 {% endif %}
 
-<link rel="stylesheet" type="text/css" media="screen" href="{{ style.url }}" title="{{ style.name }}" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{ style.cssUrl }}" title="{{ style.name }}" />
 {% for sheet in scss_style %}
 {{ scss(sheet) }}
 {% endfor %}

@@ -17,6 +17,7 @@ class Vote extends \Gazelle\BaseUser {
     protected const VOTED_USER    = 'user_voted_%d';
     protected const VOTED_GROUP   = 'group_voted_%d';
 
+    protected int   $limit;
     protected array $tgroupInfo;
     protected array $topConfig = [];
     protected array $topJoin   = [];
@@ -24,6 +25,17 @@ class Vote extends \Gazelle\BaseUser {
     protected array $topArgs   = [];
     protected array $userVote;
     protected array $voteSummary;
+
+    public function flush(): Vote {
+        self::$cache->delete_multi([
+            sprintf(self::VOTE_RECENT, $this->user->id()),
+            sprintf(self::VOTE_TOTAL, $this->user->id()),
+        ]);
+        return $this;
+    }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_votes'; }
 
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
@@ -46,26 +58,18 @@ class Vote extends \Gazelle\BaseUser {
         $this->userVote = $userVote;
     }
 
-    public function flush(): Vote {
-        self::$cache->delete_multi([
-            sprintf(self::VOTE_RECENT, $this->user->id()),
-            sprintf(self::VOTE_TOTAL, $this->user->id()),
-        ]);
+    public function setTopLimit(int $limit): Vote {
+        $this->topConfig['limit'] = $limit;
         return $this;
     }
 
-    public function setTopLimit(int $limit) {
-        $this->topConfig['limit'] = in_array($limit, [100, 250]) ? $limit : 25;
-        return $this;
-    }
-
-    public function setTopTagList(array $tagList, bool $all) {
+    public function setTopTagList(array $tagList, bool $all): Vote {
         $this->topConfig['tagList'] = $tagList;
         $this->topConfig['tagAll']  = $all;
         return $this;
     }
 
-    public function setTopYearInterval(int $lower, int $higher) {
+    public function setTopYearInterval(int $lower, int $higher): Vote {
         if ($lower > 0) {
             if ($higher > 0) {
                 $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';
@@ -107,9 +111,8 @@ class Vote extends \Gazelle\BaseUser {
 
     /**
      * Gets where this album ranks overall.
-     * @return int Rank
      */
-    public function rankOverall(int $tgroupId) {
+    public function rankOverall(int $tgroupId): int|false {
         $key = "voting_ranks_overall";
         $ranks = self::$cache->get_value($key);
         if ($ranks === false) {
@@ -120,7 +123,7 @@ class Vote extends \Gazelle\BaseUser {
                 ORDER BY Score DESC
                 LIMIT 100
             ");
-            $ranks = $this->voteRanks(self::$db->to_pair(0, 1, false));
+            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score', false));
             self::$cache->cache_value($key, $ranks, 259200); // 3 days
         }
         return $ranks[$tgroupId] ?? false;
@@ -133,7 +136,7 @@ class Vote extends \Gazelle\BaseUser {
      */
     public function rankYear(int $tgroupId, int $year) {
         $key = "voting_ranks_year_$year";
-        $ranks = self::$cache->get_value($year);
+        $ranks = self::$cache->get_value($key);
         if ($ranks == false) {
             self::$db->prepared_query("
                 SELECT v.GroupID,
@@ -145,7 +148,7 @@ class Vote extends \Gazelle\BaseUser {
                 LIMIT 100
                 ", $year
             );
-            $ranks = $this->voteRanks(self::$db->to_pair(0, 1, false));
+            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score', false));
             self::$cache->cache_value($key, $ranks, 259200);
         }
         return $ranks[$tgroupId] ?? false;
@@ -172,7 +175,7 @@ class Vote extends \Gazelle\BaseUser {
                 LIMIT 100
                 ", $year, $year
             );
-            $ranks = $this->voteRanks(self::$db->to_pair(0, 1, false));
+            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score', false));
             self::$cache->cache_value($key, $ranks, 259200); // 3 days
         }
 

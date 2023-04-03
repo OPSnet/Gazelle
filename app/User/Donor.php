@@ -3,7 +3,12 @@
 namespace Gazelle\User;
 
 class Donor extends \Gazelle\BaseUser {
-    public function link(\Gazelle\User $viewer): string {
+    public function flush(): Donor  { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_donor_rewards'; }
+
+    public function heartLink(\Gazelle\User $viewer): string {
         if (!(new Privilege($this->user))->isDonor()) {
             return '';
         }

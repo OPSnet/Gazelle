@@ -49,7 +49,7 @@ actions of it.</div>
 
 {% for alert in notification -%}
 <span class="noty-notification" style="display: none;" data-noty-type="{{ alert.type }}" data-noty-id="noty-{{
-    loop.index }}" data-noty-importance="{{ alert.className }}" data-noty-url="{{ alert.url }}">{{ alert.title }}</span>
+    loop.index }}" data-noty-importance="{{ alert.className }}" data-noty-url="{{ alert.notificationUrl }}">{{ alert.title }}</span>
 {% endfor %}
 <!-- Extra divs, for stylesheet developers to add imagery -->
 <div id="extra1"><span></span></div>

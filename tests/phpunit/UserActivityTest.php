@@ -68,7 +68,7 @@ class UserActivityTest extends TestCase {
         $this->assertEquals('Blog', $alertBlog->type(), 'alert-blog-type');
         $this->assertEquals("Blog: $title", $alertBlog->title(), 'alert-blog-title');
         $this->assertEquals($blog->id(), $alertBlog->context(), 'alert-blog-context-is-blog');
-        $this->assertEquals($blog->url(), $alertBlog->url(), 'alert-blog-url-is-blog');
+        $this->assertEquals($blog->url(), $alertBlog->notificationUrl(), 'alert-blog-url-is-blog');
 
         $this->assertEquals(1, $blog->remove(), 'blog-remove');
     }

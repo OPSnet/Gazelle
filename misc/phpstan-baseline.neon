@@ -3021,21 +3021,6 @@ parameters:
 			path: ../app/SnatchInfo.php
 
 		-
-			message: "#^Method Gazelle\\\\Staff\\:\\:blogAlert\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Staff.php
-
-		-
-			message: "#^Method Gazelle\\\\Staff\\:\\:id\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Staff.php
-
-		-
-			message: "#^Method Gazelle\\\\Staff\\:\\:pmCount\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Staff.php
-
-		-
 			message: "#^Method Gazelle\\\\StaffPM\\:\\:flushUser\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/StaffPM.php
@@ -3341,71 +3326,6 @@ parameters:
 			path: ../app/Tracker.php
 
 		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:configure\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setAction\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setAlert\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setApplicant\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setDb\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setPayment\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setReferral\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setReport\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setSSLHost\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setScheduler\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setStaff\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Activity\\:\\:setStaffPM\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Activity.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Bookmark\\:\\:remove\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Bookmark.php
-
-		-
 			message: "#^Parameter \\#1 \\$message of class Gazelle\\\\Exception\\\\BookmarkIdentifierException constructor expects string, int given\\.$#"
 			count: 1
 			path: ../app/User/Bookmark.php
@@ -3451,11 +3371,6 @@ parameters:
 			path: ../app/User/Notification/News.php
 
 		-
-			message: "#^Method Gazelle\\\\User\\\\PermissionRateLimit\\:\\:recentDownloadCount\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/PermissionRateLimit.php
-
-		-
 			message: "#^Cannot access offset 'path' on array\\{scheme\\?\\: string, host\\?\\: string, port\\?\\: int\\<0, 65535\\>, user\\?\\: string, pass\\?\\: string, path\\?\\: string, query\\?\\: string, fragment\\?\\: string\\}\\|false\\.$#"
 			count: 1
 			path: ../app/User/Stylesheet.php
@@ -3469,51 +3384,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$num of function base_convert expects string, int\\|false given\\.$#"
 			count: 1
 			path: ../app/User/Stylesheet.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Subscription\\:\\:commentTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/User/Subscription.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Subscription\\:\\:subscribeComments\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Subscription.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Subscription\\:\\:unreadCommentTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/User/Subscription.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Vote\\:\\:setTopLimit\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Vote.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Vote\\:\\:setTopTagList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Vote.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Vote\\:\\:setTopYearInterval\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Vote.php
-
-		-
-			message: "#^Parameter \\#1 \\$KeyField of method Gazelle\\\\DB\\\\Mysql\\:\\:to_pair\\(\\) expects string, int given\\.$#"
-			count: 3
-			path: ../app/User/Vote.php
-
-		-
-			message: "#^Parameter \\#1 \\$key of method Gazelle\\\\Cache\\:\\:get_value\\(\\) expects string, int given\\.$#"
-			count: 1
-			path: ../app/User/Vote.php
-
-		-
-			message: "#^Parameter \\#2 \\$ValField of method Gazelle\\\\DB\\\\Mysql\\:\\:to_pair\\(\\) expects string, int given\\.$#"
-			count: 3
-			path: ../app/User/Vote.php
 
 		-
 			message: "#^Method Gazelle\\\\UserCreator\\:\\:create\\(\\) has no return type specified\\.$#"

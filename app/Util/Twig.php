@@ -135,7 +135,7 @@ class Twig {
                 if (is_null($user)) {
                     return '';
                 }
-                $icon = [(new \Gazelle\User\Donor($user))->link($viewer)];
+                $icon = [(new \Gazelle\User\Donor($user))->heartLink($viewer)];
                 if ($user->isWarned()) {
                     $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
                         . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'

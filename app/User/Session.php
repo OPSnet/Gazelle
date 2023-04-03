@@ -9,6 +9,11 @@ class Session extends \Gazelle\BaseUser {
 
     protected array $info = [];
 
+    public function flush(): Session { $this->user()->flush(); return $this; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
+    public function tableName(): string { return 'users_sessions'; }
+
     public function info(): array {
         if (!empty($this->info)) {
             return $this->info;

@@ -1275,11 +1275,12 @@ class User extends BaseObject {
     public function addClasses(array $classes): int {
         self::$db->prepared_query("
             INSERT IGNORE INTO users_levels (UserID, PermissionID)
-            VALUES " . implode(', ', array_fill(0, count($classes), '(' . $this->id . ', ?)')),
+            VALUES " . implode(', ', array_fill(0, count($classes), "({$this->id}, ?)")),
             ...$classes
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function removeClasses(array $classes): int {
@@ -1289,8 +1290,9 @@ class User extends BaseObject {
                 AND PermissionID IN (" . placeholders($classes) . ")",
             $this->id, ...$classes
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function notifyFilters(): array {

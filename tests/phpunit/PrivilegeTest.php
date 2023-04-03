@@ -76,4 +76,24 @@ class PrivilegeTest extends TestCase {
 
         $this->assertEquals(1, $privilege->remove(), 'privilege-remove');
     }
+
+    public static function privilegeProvider(): array {
+        return [
+            // privId     method           label
+            [FLS_TEAM,    'isFls',         'fls'],
+            [INTERVIEWER, 'isInterviewer', 'interviewer'],
+            [RECRUITER,   'isRecruiter',   'recruiter'],
+        ];
+    }
+
+    /**
+     * @dataProvider privilegeProvider
+     */
+    public function testPrivilegeFls(int $privilegeId, string $method, string $label): void {
+        $user = $this->userList['user'];
+        $this->assertFalse($user->$method(), "privilege-user-not-$label");
+        $this->assertEquals(1, $user->addClasses([$privilegeId]), "privilege-add-$label");
+        $this->assertTrue($user->$method(), "privilege-user-now-$label");
+        $this->assertEquals(1, $user->removeClasses([$privilegeId]), "privilege-remove-$label");
+    }
 }
