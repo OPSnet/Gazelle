@@ -41,14 +41,15 @@ if ($newRequest) {
     } elseif (isset($_GET['groupid'])) {
         $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
         if ($tgroup) {
-            $GroupID     = $tgroup->id();
-            $categoryId  = $tgroup->categoryId();
-            $title       = $tgroup->name();
-            $year        = $tgroup->year();
-            $releaseType = $tgroup->releaseType();
-            $image       = $tgroup->image();
-            $tags        = implode(', ', $tgroup->tagNameList());
-            $ArtistForm  = $tgroup->artistRole()?->idList() ?? [];
+            $GroupID      = $tgroup->id();
+            $categoryId   = $tgroup->categoryId();
+            $categoryName = $tgroup->categoryName();
+            $title        = $tgroup->name();
+            $year         = $tgroup->year();
+            $releaseType  = $tgroup->releaseType();
+            $image        = $tgroup->image();
+            $tags         = implode(', ', $tgroup->tagNameList());
+            $ArtistForm   = $tgroup->artistRole()?->idList() ?? [];
         }
     }
 } else {
@@ -337,7 +338,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         If this request matches a torrent group <span style="font-weight: bold;">already existing</span> on the site, please indicate that here.
                     </td>
                 </tr>
-<?php    } elseif (isset($GroupID) && ($categoryId == CATEGORY_MUSIC)) { ?>
+<?php    } elseif (isset($GroupID) && $categoryName == 'Music') { ?>
                 <tr>
                     <td class="label">Torrent group</td>
                     <td>

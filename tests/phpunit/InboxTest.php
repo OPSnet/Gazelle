@@ -114,8 +114,7 @@ class InboxTest extends TestCase {
         $this->assertEquals(4, $receiver->user()->inboxUnreadCount(), 'inbox-more-count');
         $this->assertEquals(5, $receiver->messageTotal(), 'inbox-more-message-count');
         $rlist = $receiver->messageList($pmReceiverManager, 6, 0);
-        // FIXME
-        // $this->assertFalse($rlist[0]->isUnread(), 'inbox-first-is-read');
+        $this->assertFalse($rlist[0]->isUnread(), 'inbox-first-is-read');
         $this->assertTrue($rlist[1]->isUnread(), 'inbox-second-is-unread');
 
         // unread first
