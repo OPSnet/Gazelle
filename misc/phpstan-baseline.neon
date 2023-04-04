@@ -1866,21 +1866,6 @@ parameters:
 			path: ../app/Manager/Registration.php
 
 		-
-			message: "#^Cannot access offset 'validFrom_time_t' on array\\|false\\.$#"
-			count: 1
-			path: ../app/Manager/SSLHost.php
-
-		-
-			message: "#^Cannot access offset 'validTo_time_t' on array\\|false\\.$#"
-			count: 1
-			path: ../app/Manager/SSLHost.php
-
-		-
-			message: "#^Parameter \\#1 \\$context of function stream_context_get_params expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: ../app/Manager/SSLHost.php
-
-		-
 			message: "#^Binary operation \"\\+\\=\" between int\\|string\\|null and int results in an error\\.$#"
 			count: 1
 			path: ../app/Manager/SiteLog.php
