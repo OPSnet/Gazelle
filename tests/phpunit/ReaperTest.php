@@ -75,7 +75,7 @@ class ReaperTest extends TestCase {
             if (is_null($torrent)) {
                 continue;
             }
-            [$ok, $message] = $torrent->remove($this->userList[0]->id(), 'reaper unit test');
+            [$ok, $message] = $torrent->remove($this->userList[0], 'reaper unit test');
             if (!$ok) {
                 print "error $message [{$this->userList[0]->id()}]\n";
             }

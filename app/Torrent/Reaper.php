@@ -352,7 +352,7 @@ class Reaper extends \Gazelle\Base {
                     'name'     => $torrent->name(),
                     'tgroup'   => $torrent->group(),
                 ];
-                [$success, $message] = $torrent->remove($userId, $reason, -1);
+                [$success, $message] = $torrent->remove(null, $reason, -1);
                 if ($success) {
                     $removed++;
                     $notes[]   = $note;
@@ -360,11 +360,6 @@ class Reaper extends \Gazelle\Base {
             }
 
             if ($notes) {
-                self::$db->prepared_query("
-                    INSERT INTO log (Message) VALUES " . placeholders($notes, '(?)'),
-                    ...array_map(fn($t) => "Torrent {$t['id']} ({$t['name']}) ({$t['infohash']}) was deleted for $reason", $notes
-                    )
-                );
                 $total = count($notes);
                 $user = $this->userMan->findById($userId);
                 if ($user?->isEnabled()) {

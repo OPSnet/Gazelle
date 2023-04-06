@@ -41,7 +41,7 @@ class UserSeedboxTest extends TestCase {
         $torMan = new Gazelle\Manager\Torrent;
         foreach ($this->torrentList as $torrent) {
             $torrent = $torMan->findById($torrent->id());
-            [$ok, $message] = $torrent->remove($this->user->id(), 'reaper unit test');
+            [$ok, $message] = $torrent->remove($this->user, 'reaper unit test');
         }
         $tgroup->remove($this->user);
         Gazelle\DB::DB()->prepared_query("

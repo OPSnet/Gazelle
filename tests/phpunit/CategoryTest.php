@@ -105,7 +105,7 @@ class CategoryTest extends TestCase {
 
         // clean up
         foreach ($torrentList as $torrent) {
-            $torrent->remove($user->id(), 'phpunit');
+            $torrent->remove($user, 'phpunit');
         }
         $tgroup->remove($user);
         $this->assertEquals(0, (int)Gazelle\DB::DB()->scalar("

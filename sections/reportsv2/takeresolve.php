@@ -95,7 +95,7 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
 } else {
     [$ok, $message] = $torrent->remove( /** @phpstan-ignore-line */
-        $Viewer->id(),
+        $Viewer,
         sprintf('%s (%s)', $reportTypeName, $logMessage ?? 'none'),
         $report->reportType()->trackerReason()
     );

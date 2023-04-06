@@ -32,7 +32,7 @@ foreach ($argv as $torrentId) {
     $bonus = new Gazelle\User\Bonus($uploader);
     $points = 2 * $bonus->torrentValue($torrent);
 
-    [$success, $message] = $torrent->remove($janitor->id(), "Broken upload - backend");
+    [$success, $message] = $torrent->remove($janitor, "Broken upload - backend");
     if (!$success) {
         echo "Did not remove $torrentId: $message\n";
         continue;

@@ -1181,21 +1181,6 @@ parameters:
 			path: ../app/Json/User.php
 
 		-
-			message: "#^Method Gazelle\\\\Log\\:\\:general\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Log.php
-
-		-
-			message: "#^Method Gazelle\\\\Log\\:\\:group\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Log.php
-
-		-
-			message: "#^Method Gazelle\\\\Log\\:\\:torrent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Log.php
-
-		-
 			message: "#^Method Gazelle\\\\Logfile\\:\\:checksum\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Logfile.php

@@ -74,6 +74,6 @@ $Cache->delete_multi([
 ]);
 
 $log->group($new->id(), $Viewer->id(), "merged group $oldId")
-    ->general("Torrent " . $torrent->id() , " was edited by " . $Viewer->label());
+    ->general("Torrent " . $torrent->id() . " was edited by " . $Viewer->label());
 
 header('Location: ' . $new->location());

@@ -387,7 +387,7 @@ class Torrent extends TorrentAbstract {
     /**
      * Remove a torrent.
      */
-    public function remove(int $userId, string $reason, int $trackerReason = -1): array {
+    public function remove(?User $user, string $reason, int $trackerReason = -1): array {
         $qid = self::$db->get_query_id();
         $this->info();
         if ($this->id > MAX_PREV_TORRENT_ID) {
@@ -429,13 +429,6 @@ class Torrent extends TorrentAbstract {
             ", $this->id
         );
 
-        self::$db->prepared_query("
-            INSERT INTO user_torrent_remove
-                   (user_id, torrent_id)
-            VALUES (?,       ?)
-            ", $userId, $this->id
-        );
-
         // Tells Sphinx that the group is removed
         self::$db->prepared_query("
             REPLACE INTO sphinx_delta
@@ -469,12 +462,19 @@ class Torrent extends TorrentAbstract {
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $this->id]]);
 
         $groupId = $this->group()->id();
-        if ($userId !== 0) {
-            $key = sprintf(self::USER_RECENT_UPLOAD, $userId);
+        if (!is_null($user)) {
+            $key = sprintf(self::USER_RECENT_UPLOAD, $user->id());
             $recent = self::$cache->get_value($key);
             if (is_array($recent) && in_array($groupId, $recent)) {
                 $deleteKeys[] = $key;
             }
+
+            self::$db->prepared_query("
+                INSERT INTO user_torrent_remove
+                       (user_id, torrent_id)
+                VALUES (?,       ?)
+                ", $user->id(), $this->id
+            );
         }
 
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id),
@@ -484,14 +484,14 @@ class Torrent extends TorrentAbstract {
         $this->group()->refresh();
 
         $sizeMB = number_format($this->info()['Size'] / (1024 * 1024), 2) . ' MiB';
-        $username = $userId ? (new Manager\User)->findById($userId)->username() : 'system';
+        $userInfo = $user ? " by " . $user->username() : '';
         (new Log)->general(
             "Torrent "
                 . $this->id . " (" . $this->name() . ") [" . $this->edition() .
-                "] ($sizeMB $infohash) was deleted by $username for reason: $reason"
+                "] ($sizeMB $infohash) was deleted" . $userInfo . " for reason: $reason"
             )
             ->torrent(
-                $groupId, $this->id, $userId,
+                $groupId, $this->id, $user?->id(),
                 "deleted torrent ($sizeMB $infohash) for reason: $reason"
             );
 

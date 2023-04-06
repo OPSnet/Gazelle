@@ -8,7 +8,7 @@ class Log extends Base {
      *
      * @param string $message the message to write.
      */
-    public function general(string $message) {
+    public function general(string $message): Log {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO log (Message) VALUES (?)
@@ -23,7 +23,7 @@ class Log extends Base {
      *
      * @param string $message
      */
-    public function group(int $groupId, int $userId, $message) {
+    public function group(int $groupId, int $userId, $message): Log {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log
@@ -40,7 +40,7 @@ class Log extends Base {
      *
      * @param string $message
      */
-    public function torrent(int $groupId, int $torrentId, int $userId, $message) {
+    public function torrent(int $groupId, int $torrentId, ?int $userId, $message): Log {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log
