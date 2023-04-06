@@ -3321,11 +3321,6 @@ parameters:
 			path: ../app/TorrentFlag.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between array and false will always evaluate to false\\.$#"
-			count: 1
-			path: ../app/Tracker.php
-
-		-
 			message: "#^Parameter \\#1 \\$message of class Gazelle\\\\Exception\\\\BookmarkIdentifierException constructor expects string, int given\\.$#"
 			count: 1
 			path: ../app/User/Bookmark.php

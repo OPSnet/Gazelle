@@ -3,7 +3,7 @@
 // change_passkey
 // add_token
 // remove_token
-// add_torrent
+// add_torrent DONE
 // delete_torrent
 // update_torrent
 // add_user
@@ -26,6 +26,14 @@ class Tracker {
 
     public function requestList(): array {
         return self::$Requests;
+    }
+
+    public function addTorrent(Torrent $torrent): bool {
+        return $this->update_tracker('add_torrent', [
+            'id'          => $torrent->id(),
+            'info_hash'   => rawurlencode($torrent->flush()->infohashBinary()),
+            'freetorrent' => 0,
+        ]);
     }
 
     /**
@@ -80,13 +88,12 @@ class Tracker {
     /**
      * Get peer stats for a user from the tracker
      *
-     * @param string $TorrentPass The user's pass key
-     * @return false|array (0 => $Leeching, 1 => $Seeding) or false if the request failed
+     * @return array (0 => $Leeching, 1 => $Seeding)
      */
-    public function user_peer_count(string $TorrentPass): false|array {
+    public function user_peer_count(string $TorrentPass): array {
         $Stats = $this->get_stats(self::STATS_USER, ['key' => $TorrentPass]);
-        if ($Stats === false) {
-            return false;
+        if (empty($Stats)) {
+            return [0, 0];
         }
         if (isset($Stats['leeching']) && isset($Stats['seeding'])) {
             $Leeching = $Stats['leeching'];
@@ -193,8 +200,9 @@ class Tracker {
                 $Success = true;
             }
         }
+        $path_array = explode("/", $Get, 2);
         $Request = [
-            'path' => substr($Get, strpos($Get, '/')), /** @phpstan-ignore-line */ /* FIXME: Understand hat is wanted here */
+            'path' => array_pop($path_array), // strip authkey from path
             'response' => ($Success ? $Data : $Response),
             'status' => ($Success ? 'ok' : 'failed'),
             'time' => 1000 * (microtime(true) - $StartTime)

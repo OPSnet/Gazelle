@@ -839,6 +839,9 @@ defined('MEDIA') or define('MEDIA', [
     'Cassette',
 ]);
 
+// For audio uploads, files with these names will not be decoded
+defined('IGNORE_AUDIO_LOGFILE') or define('IGNORE_AUDIO_LOGFILE', ['audiochecker.log', 'sox.log']);
+
 // ------------------------------------------------------------------------
 // Paranoia
 
