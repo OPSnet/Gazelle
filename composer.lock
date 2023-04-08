@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "75510ff7e66b7501fad07fcbb91cee04",
+    "content-hash": "7b3f8eb75913b33a1df74a74c0b3ca30",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -605,6 +605,72 @@
                 }
             ],
             "time": "2022-12-08T12:29:14+00:00"
+        },
+        {
+            "name": "monero-integrations/monerophp",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/monero-integrations/monerophp.git",
+                "reference": "bc4a552b9334d9610eb6c60532ad6666e3aeba95"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/monero-integrations/monerophp/zipball/bc4a552b9334d9610eb6c60532ad6666e3aeba95",
+                "reference": "bc4a552b9334d9610eb6c60532ad6666e3aeba95",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=7.2.0"
+            },
+            "suggest": {
+                "ext-gmp": "Used to have a multiple math precision for generating address"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MoneroIntegrations\\MoneroPhp\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "SerHack",
+                    "email": "support@monerointegrations.com"
+                },
+                {
+                    "name": "cryptochangements34",
+                    "email": "bW9uZXJv@gmail.com"
+                },
+                {
+                    "name": "sneurlax",
+                    "email": "sneurlax@gmail.com"
+                }
+            ],
+            "description": "A Monero library written in PHP by the Monero-Integrations team.",
+            "homepage": "https://github.com/monero-integrations/monerophp",
+            "keywords": [
+                "Monero",
+                "XMR",
+                "cryptocurrency",
+                "cryptonote",
+                "json-rpc",
+                "jsonrpc",
+                "monero-wallet-rpc",
+                "monerod"
+            ],
+            "support": {
+                "issues": "https://github.com/monero-integrations/monerophp/issues",
+                "source": "https://github.com/monero-integrations/monerophp/tree/master"
+            },
+            "time": "2022-08-26T14:52:37+00:00"
         },
         {
             "name": "myclabs/php-enum",
@@ -4428,15 +4494,18 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "monero-integrations/monerophp": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2",
         "ext-curl": "*",
         "ext-json": "*",
-        "ext-mysqli": "*"
+        "ext-mysqli": "*",
+        "ext-openssl": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.1.0"
 }

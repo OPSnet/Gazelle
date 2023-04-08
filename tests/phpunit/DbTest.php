@@ -43,7 +43,10 @@ class DbTest extends TestCase {
     public function testPg(): void {
         $this->assertInstanceOf(\PDO::class, $this->pg()->pdo(), 'db-pg-pdo');
         $num = random_int(100, 999);
-        $this->assertEquals($num, (int)$this->pg()->scalar("select ?", $num), 'db-pg-scalar');
+        $this->assertEquals($num, $this->pg()->scalar("select ?", $num), 'db-pg-scalar-int');
+        $this->assertEquals(true, $this->pg()->scalar("select ?", true), 'db-pg-scalar-true');
+        $this->assertEquals("test", $this->pg()->scalar("select ?", "test"), 'db-pg-scalar-string');
+        $this->assertEquals("test", $this->pg()->scalar("select '\\x74657374'::bytea"), 'db-pg-scalar-bytea');
 
         $st = $this->pg()->prepare("
             create temporary table t (

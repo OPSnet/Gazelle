@@ -42,6 +42,7 @@ parameters:
         - HTTP_PROXY
         - IMAGE_CACHE_ENABLED
         - LASTFM_API_KEY
+        - MONERO_DONATION_ADDRESS
         - OPEN_REGISTRATION
         - PUSH_SOCKET_LISTEN_ADDRESS
         - REAPER_TASK_CLAIM

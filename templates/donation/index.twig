@@ -25,10 +25,33 @@
     </div>
 
     <h3>Donating</h3>
+{% if monero_address %}
+    <h2>Monero (XMR)</h2>
     <div class="pad donation_info">
-        If you wish to donate, please contact <a href='https://orpheus.network/user.php?action=search&search=Spine'>Spine</a>, and they will handle your donation.
+        You can send your monero donation to <span class="donation_address">{{ monero_address }}</span>
         <br /><br />
-        The minimum amount required for donating is 10 Euros, and must be paid in Bitcoin.
+        The minimum amount required for donating is 10 Euros.
+        <br /><br />
+        Monero donations are credited semi-automatically. If your donation is not credited within seven days please
+        {% if constant('DONATION_MANAGER_USER_ID') %}
+            contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}.
+        {% else %}
+            send a <a href="/staffpm.php">StaffPM</a>.
+        {% endif %}
+        <br /><br />
+        If you are sending your donation directly from an exchange, you should use Bitcoin (see below) for privacy reasons.
+    </div>
+{% endif %}
+    <h2>Bitcoin (BTC)</h2>
+    <div class="pad donation_info">
+        If you wish to donate using Bitcoin, please
+        {% if constant('DONATION_MANAGER_USER_ID') %}
+            contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}, and they will handle your donation.
+        {% else %}
+            send a <a href="/staffpm.php">StaffPM</a>.
+        {% endif %}
+        <br /><br />
+        The minimum amount required for donating is 10 Euros.
     </div>
 
     <h3>What you will receive for donating</h3>

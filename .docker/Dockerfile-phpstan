@@ -1,2 +1,2 @@
 FROM ghcr.io/phpstan/phpstan:1.10.3-php8.2
-RUN docker-php-ext-install mysqli pcntl
+RUN docker-php-ext-install mysqli pcntl bcmath

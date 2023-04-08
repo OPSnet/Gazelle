@@ -48,20 +48,20 @@ psql -U "$POSTGRES_USER" postgres -c "create role ${POSTGRES_DB_USER} with passw
 psql -U "$POSTGRES_USER" postgres -c "create database ${POSTGRES_DATABASE} with owner ${POSTGRES_DB_USER};"
 
 for sql in "${CI_PROJECT_DIR}"/misc/pg-migrations/*.sql ; do
-    psql -f "$sql"
+    psql -f "$sql" || exit 1
 done
 
 if [ -z "${MYSQL_INIT_DB-}" ]; then
     echo "Restore mysql dump..."
-    time mysql < /opt/gazelle/mysql_schema.sql
-    time mysql < /opt/gazelle/mysql_data.sql
+    time mysql < /opt/gazelle/mysql_schema.sql || exit 1
+    time mysql < /opt/gazelle/mysql_data.sql || exit 1
     echo 'CREATE FUNCTION bonus_accrual(Size bigint, Seedtime float, Seeders integer)
   RETURNS float DETERMINISTIC NO SQL
   RETURN Size / pow(1024, 3) * (0.0433 + (0.07 * ln(1 + Seedtime/24)) / pow(greatest(Seeders, 1), 0.35));
 CREATE FUNCTION `binomial_ci`(p int, n int)
   RETURNS float DETERMINISTIC
   RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));' \
-  | mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"
+  | mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" || exit 1
 fi
 
 echo "Run mysql migrations..."

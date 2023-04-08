@@ -96,6 +96,15 @@ defined('PARANOIA_PREVIEW_USER') or define('PARANOIA_PREVIEW_USER', SYSTEM_USER_
 defined('ALT_SITE_HOST') or define('ALT_SITE_HOST', SITE_HOST);
 defined('ALT_SITE_URL') or define('ALT_SITE_URL', SITE_URL);
 
+// User to name on donate.php to direct donation inquiries to
+defined('DONATION_MANAGER_USER_ID') or define('DONATION_MANAGER_USER_ID', 0);
+
+// Monero donation address, must be a primary account address starting with 4...
+// Also set MONERO_ENCRYPTION_KEY if you set this!
+// The user will receive a payment id-bound address based on this address containing
+// an encrypted user id for automatic processing.
+defined('MONERO_DONATION_ADDRESS') or define ('MONERO_DONATION_ADDRESS', '');
+
 // ------------------------------------------------------------------------
 // Secrets
 // ALL OF THESE MUST BE OVERRIDDEN
