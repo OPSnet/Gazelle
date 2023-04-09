@@ -218,7 +218,6 @@ if (isset($TorData['info']['meta version'])) {
 
 $checker     = new Gazelle\Util\FileChecker;
 $DirName     = (isset($TorData['info']['files']) ? make_utf8($bencoder->getName()) : '');
-$folderCheck = [$DirName];
 $checkName   = $checker->checkName($DirName); // check the folder name against the blacklist
 if ($checkName) {
     reportError($checkName);
@@ -251,7 +250,6 @@ if ($torrent) {
     }
 }
 
-$LogName = '';
 if ($isMusicUpload) {
     // additional torrent files
     $dupeName = [$_FILES['file_input']['name'] => true];
@@ -385,8 +383,6 @@ if ($isMusicUpload) {
         }
         if (empty($ArtistNameByRole[ARTIST_MAIN])) {
             reportError('Please enter at least one main artist');
-        } else {
-            $LogName .= Artists::display_artists($ArtistForm, false, true, false);
         }
     }
 }
@@ -471,9 +467,6 @@ if ($isMusicUpload) {
 //For notifications--take note now whether it's a new group
 $IsNewGroup = is_null($tgroup);
 
-//Needs to be here as it isn't set for add format until now
-$LogName .= $Properties['Title'];
-
 $logfileSummary = ($hasLog && isset($_FILES['logfiles']))
     ? new Gazelle\LogfileSummary($_FILES['logfiles'])
     : null;
@@ -508,6 +501,7 @@ if ($tgroup) {
     $Viewer->stats()->increment('unique_group_total');
 }
 $GroupID = $tgroup->id();
+$logName = html_entity_decode($tgroup->text());
 
 // Description
 if ($NoRevision) {
@@ -515,15 +509,13 @@ if ($NoRevision) {
 }
 
 // Tags
-$tagMan  = new Gazelle\Manager\Tag;
-$tagList = [];
+$tagMan = new Gazelle\Manager\Tag;
 if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $tag) {
         $tag = $tagMan->resolve($tagMan->sanitize($tag));
         if (!empty($tag)) {
             $tagMan->createTorrentTag($tagMan->create($tag, $Viewer->id()), $GroupID, $Viewer->id(), 10);
         }
-        $tagList[] = $tag;
     }
 }
 
@@ -551,8 +543,7 @@ $torrent = $torMan->create(
     hasLog:                  $hasLog,
     hasLogInDB:              $hasLogInDB,
 );
-$TorrentID = $torrent->id();
-
+$TorrentID       = $torrent->id();
 $upload['new'][] = $torrent;
 
 //******************************************************************************//
@@ -579,12 +570,11 @@ foreach ($upload['extra'] as $info) {
     );
 
     $torMan->flushFoldernameCache($extra->path());
-    $folderCheck[] = $extra->path();
+    $size            = number_format($extra->size() / (1024 * 1024), 2);
     $upload['new'][] = $extra;
-    $upload['file'][$extra->id()] = [
-        'payload' => $info['TorEnc'],
-        'size'    => number_format($extra->size() / (1024 * 1024), 2)
-    ];
+    $torrentFiler->put($info['TorEnc'], $extra->id());
+    $log->torrent($GroupID, $extra->id(), $Viewer->id(), "uploaded ($size MiB)")
+        ->general("Torrent {$extra->id()} ($logName) ($size MiB) was uploaded by " . $Viewer->username());
 }
 
 //******************************************************************************//
@@ -598,29 +588,28 @@ if ($logfileSummary?->total()) {
     }
 }
 
-$torrentFiler->put($bencoder->getEncode(), $TorrentID);
-$log->torrent($GroupID, $TorrentID, $Viewer->id(), 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
-    ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $Viewer->username());
+$size = number_format($TotalSize / (1024 * 1024), 2);
+$log->torrent($GroupID, $TorrentID, $Viewer->id(), "uploaded ($size MiB)")
+    ->general("Torrent $TorrentID ($logName) ($size MiB) was uploaded by " . $Viewer->username());
 
-foreach ($upload['file'] as $id => $info) {
-    $torrentFiler->put($info['payload'], $id);
-    $log->torrent($GroupID, $id, $Viewer->id(), "uploaded ({$info['size']} MiB)")
-        ->general("Torrent $id ($LogName) ({$info['size']}  MiB) was uploaded by " . $Viewer->username());
+if (!$torrentFiler->put($bencoder->getEncode(), $TorrentID)) {
+    reportError("Internal error saving torrent file. Please report this in the bugs forum.");
 }
-
 $db->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
 $Debug->set_flag('upload: database committed');
 
 //******************************************************************************//
 //--------------- Finalize -----------------------------------------------------//
 
-$bonus      = new Gazelle\User\Bonus($Viewer);
-$bonusTotal = 0;
-$tracker    = new Gazelle\Tracker;
+$bonusTotal  = 0;
+$bonus       = new Gazelle\User\Bonus($Viewer);
+$tracker     = new Gazelle\Tracker;
+$folderCheck = [];
 foreach ($upload['new'] as $t) {
     $t->flush()->unlockUpload();
     $bonusTotal += $bonus->torrentValue($t);
     $tracker->addTorrent($t);
+    $folderCheck[] = $t->path();
 }
 (new Gazelle\Manager\NotificationTicket)->create($torrent);
 
