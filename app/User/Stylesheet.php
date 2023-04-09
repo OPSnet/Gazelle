@@ -4,7 +4,6 @@ namespace Gazelle\User;
 
 class Stylesheet extends \Gazelle\BaseUser {
     protected const CACHE_KEY = 'u_ss2_%d';
-    protected array $info;
 
     public function flush(): Stylesheet {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));

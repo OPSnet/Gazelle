@@ -3,7 +3,6 @@
 namespace Gazelle\Torrent;
 
 class Report extends \Gazelle\BaseObject {
-    protected array $info;
     protected \Gazelle\TorrentAbstract|null|bool $torrent = false;
 
     public function __construct(

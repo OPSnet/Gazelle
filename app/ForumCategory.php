@@ -5,8 +5,6 @@ namespace Gazelle;
 class ForumCategory extends BaseObject {
     final const CACHE_KEY = 'forum_cat_%d';
 
-    protected array $info;
-
     public function flush(): ForumCategory {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value(Manager\ForumCategory::LIST_KEY);

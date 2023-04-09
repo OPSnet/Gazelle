@@ -6,7 +6,7 @@ abstract class BaseObject extends Base {
     /* used for handling updates */
     protected array $updateField;
 
-    protected array $info;
+    protected array|null $info;
 
     // FIXME: StaffPM breaks readonly-ness due to inheritance
     public function __construct(
@@ -47,12 +47,12 @@ abstract class BaseObject extends Base {
         return !empty($this->updateField);
     }
 
-    public function setUpdate(string $field, $value) {
+    public function setUpdate(string $field, bool|int|float|string|null $value): mixed {
         $this->updateField[$field] = $value;
         return $this;
     }
 
-    public function field(string $field) {
+    public function field(string $field): bool|int|float|string|null {
         return $this->updateField[$field] ?? null;
     }
 

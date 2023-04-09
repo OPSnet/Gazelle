@@ -5,9 +5,7 @@ namespace Gazelle\Torrent;
 class ReportType extends \Gazelle\BaseObject {
     final const CACHE_KEY = 'trepcfg_%d';
 
-    protected array $info;
     protected array $changeSet;
-
 
     public function flush(): ReportType {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));

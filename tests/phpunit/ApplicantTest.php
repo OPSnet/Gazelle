@@ -5,7 +5,7 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
-class applicantTest extends TestCase {
+class ApplicantTest extends TestCase {
     public function testApplicant(): void {
         $roleManager = new \Gazelle\Manager\ApplicantRole;
         $manager     = new \Gazelle\Manager\Applicant;

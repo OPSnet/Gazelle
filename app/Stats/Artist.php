@@ -5,8 +5,6 @@ namespace Gazelle\Stats;
 class Artist extends \Gazelle\BaseObject {
     protected const CACHE_KEY = 'a_stats_%d';
 
-    protected array $info;
-
     public function flush(): Artist {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         return $this;

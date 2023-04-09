@@ -371,16 +371,6 @@ parameters:
 			path: ../app/Base.php
 
 		-
-			message: "#^Method Gazelle\\\\BaseObject\\:\\:field\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/BaseObject.php
-
-		-
-			message: "#^Method Gazelle\\\\BaseObject\\:\\:setUpdate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/BaseObject.php
-
-		-
 			message: "#^Match expression does not handle remaining value\\: string$#"
 			count: 1
 			path: ../app/Better/Bad.php

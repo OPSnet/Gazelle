@@ -7,15 +7,13 @@ use \Gazelle\Util\Crypto;
 class Session extends \Gazelle\BaseUser {
     protected const CACHE_KEY = 'u_sess_%d';
 
-    protected array $info = [];
-
     public function flush(): Session { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
     public function tableName(): string { return 'users_sessions'; }
 
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->user->id());
@@ -137,8 +135,9 @@ class Session extends \Gazelle\BaseUser {
     }
 
     public function lastActive(string $sessionId): ?array {
-        if (count($this->info) > 1) {
-            foreach ($this->info as $id => $session) {
+        $info = $this->info();
+        if (count($info) > 1) {
+            foreach ($info as $id => $session) {
                 if ($id != $sessionId) {
                     return $session;
                 }
