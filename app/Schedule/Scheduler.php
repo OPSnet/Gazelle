@@ -315,7 +315,9 @@ class Scheduler extends \Gazelle\Base {
          * runs over the TTL, it will be noted as in progress, so the next
          * invocation of the scheduler will ignore it. When the task finally
          * returns, this invocation will exit.
+         * If a task fails, do not try to run again in this slice.
          */
+        $fail = [0];
 
         $TTL = microtime(true) + 58;
         while (microtime(true) < $TTL) {
@@ -341,12 +343,17 @@ class Scheduler extends \Gazelle\Base {
                         WHERE r.status = 'running'
                             AND r.periodic_task_id = pt.periodic_task_id
                     )
+                    AND pt.periodic_task_id NOT IN (" . placeholders($fail) . ")
                 LIMIT 1
-            ");
+                ", ...$fail
+            );
             if (is_null($taskId)) {
                 break;
             }
-            $this->runTask($taskId);
+            $result = $this->runTask($taskId);
+            if ($result == -1) {
+                $fail[] = $taskId;
+            }
         }
     }
 
