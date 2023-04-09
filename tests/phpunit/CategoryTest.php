@@ -23,6 +23,7 @@ class CategoryTest extends TestCase {
 
     public function testChangeCategory(): void {
         $tgMan  = new Gazelle\Manager\TGroup;
+        $torMan = new Gazelle\Manager\Torrent;
         $user   = Helper::makeUser('tgcat.' . randomString(10), 'tgroup-cat');
         $tgroup = Helper::makeTGroupEBook(
             name: 'phpunit category change ' . randomString(6),
@@ -38,6 +39,7 @@ class CategoryTest extends TestCase {
                 ['description' => 'Abridged version'],
             ]
         );
+        $idList = array_map(fn($t) => $t->id(), $torrentList);
 
         // move one torrent to new category
         $artistName = 'new artist ' . randomString(6);
@@ -67,11 +69,14 @@ class CategoryTest extends TestCase {
         );
 
         $tgroup->flush();
-        $torrentList[1]->flush();
+
+        // rebuild the torrent object caches
+        $torrentList = array_map(fn($id) => $torMan->findById($id), $idList);
+
         $this->assertEquals([$torrentList[0]->id()], $tgroup->torrentIdList(), 'cat-old-tidlist');
         $this->assertEquals($torrentList[1]->groupId(), $new->id(), 'cat-new-groupid');
 
-        // move last torrent to same category
+        // move remaining torrent to same category
         $new = $tgMan->changeCategory(
             old:         $tgroup,
             torrent:     $torrentList[0],
@@ -102,6 +107,8 @@ class CategoryTest extends TestCase {
         );
         $this->assertInstanceOf(Gazelle\TGroup::class, $new, 'cat-change-to-comedy');
         $this->assertNull($tgMan->findById($tgroupId), 'cat-old-tgroup-removed');
+
+        $torrentList = array_map(fn($id) => $torMan->findById($id), $idList);
 
         // clean up
         foreach ($torrentList as $torrent) {

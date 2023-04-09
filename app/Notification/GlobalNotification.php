@@ -3,7 +3,6 @@
 namespace Gazelle\Notification;
 
 class GlobalNotification extends \Gazelle\Base {
-
     protected const CACHE_KEY = 'global_notification';
 
     /**
@@ -50,7 +49,7 @@ class GlobalNotification extends \Gazelle\Base {
         return is_null($alert) ? 1 : ($alert['created'] + $alert['expiry'] * 60) - time();
     }
 
-    public function remove() {
-        self::$cache->delete_value(self::CACHE_KEY);
+    public function remove(): int {
+        return (int)self::$cache->delete_value(self::CACHE_KEY);
     }
 }

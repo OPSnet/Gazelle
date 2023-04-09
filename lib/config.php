@@ -275,6 +275,7 @@ defined('STATUS_CHAN')       or define('STATUS_CHAN', '#status');
 defined('MOD_CHAN')          or define('MOD_CHAN', '#staff');
 defined('BOT_DISABLED_CHAN') or define('BOT_DISABLED_CHAN', '#blocked');
 defined('BOT_REPORT_CHAN')   or define('BOT_REPORT_CHAN', '#reports');
+defined('IRC_ANNOUNCE')      or define('IRC_ANNOUNCE', '#announce');
 
 // ------------------------------------------------------------------------
 // Push server settings

@@ -4,73 +4,32 @@ if (!$Viewer->permitted('admin_view_notifications')) {
     error(403);
 }
 
-$notifiedId = null;
-$group    = null;
-$tags     = [];
-$category = null;
-$release  = null;
-$torrent  = null;
-$result   = null;
-$sql      = null;
-$args     = null;
-$torMan   = new Gazelle\Manager\Torrent;
+$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
 
-if (isset($_POST['torrentid'])) {
-    $t = $torMan->findById((int)$_POST['torrentid']);
-    $torrent = $t->info();
-    $tgroup  = $t->group();
-    $group   = $tgroup->info();
-    if ($group) {
-        $tags = explode('|', $group['tagNames']);
-        if (!$tags) {
-            $tags = [];
-        }
-        $category = CATEGORY[$group['CategoryID'] - 1];
-        $release = (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']);
-        $notification = new Gazelle\Notification\Upload;
-        $notification->addFormat($torrent['Format'])
-            ->addEncodings($torrent['Encoding'])
-            ->addMedia($torrent['Media'])
-            ->addYear($group['Year'], $torrent['RemasterYear'])
-            ->addArtists($tgroup->artistRole()->roleList())
-            ->addTags($tags)
-            ->addCategory($category)
-            ->addUser(new Gazelle\User($torrent['UserID']))
-            ->addReleaseType($release);
+$notifiedId   = null;
+$result       = [];
+$notification = null;
+if ($torrent) {
+    $notification = new \Gazelle\Notification\Upload($torrent);
 
-        $result = $notification->lookup();
-        if (isset($_POST['notifiedid'])) {
-            $notified = (new Gazelle\Manager\User)->find(trim($_POST['notifiedid']));
-            if ($notified) {
-                $notifiedId = $notified->id();
-                $result = array_filter($result, fn($r) => $r['user_id'] === $notifiedId);
-            }
+    $result = $notification->userFilterList();
+    if (isset($_POST['notifiedid'])) {
+        $notified = (new Gazelle\Manager\User)->find(trim($_POST['notifiedid']));
+        if ($notified) {
+            $notifiedId = $notified->id();
+            $result = array_filter($result, fn($r) => $r['user_id'] === $notifiedId);
         }
-
-        foreach ($result as &$r) {
-            $r['filter'] = new Gazelle\NotificationFilter($r['filter_id']);
-        }
-        unset($r);
-        $sql = $notification->sql();
-        $args = $notification->args();
     }
+
+    foreach ($result as &$r) {
+        $r['filter'] = new Gazelle\NotificationFilter($r['filter_id']);
+    }
+    unset($r);
 }
 
 echo $Twig->render('admin/notification-sandbox.twig', [
-    'notified_id' => $notifiedId,
-
-    'group'   => $group,
-    'torrent' => $torrent,
-    'manager' => $torMan,
-
-    'category' => $category,
-    'release'  => $release,
-
-    'tags'  => implode(', ', $tags),
-    'label' => $torrent['RemasterRecordLabel'] ?? $group['RecordLabel'],
-    'year'  => $torrent['RemasterYear'] ?? $group['Year'],
-
-    'result' => $result,
-    'sql'    => $sql,
-    'args'   => $args,
+    'notification' => $notification,
+    'notified_id'  => $notifiedId,
+    'result'       => $result,
+    'torrent'      => $torrent,
 ]);

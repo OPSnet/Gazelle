@@ -63,6 +63,14 @@ class Pg {
         return $st->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function allByKey(string $key, string $query, ...$args): array {
+        $list = [];
+        foreach ($this->all($query, ...$args) as $row) {
+            $list[$row[$key]] = $row;
+        }
+        return $list;
+    }
+
     public function column(string $query, ...$args): array {
         $st = $this->pdo->prepare($query);
         if (!$st->execute([...$args])) {

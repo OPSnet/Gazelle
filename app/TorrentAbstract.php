@@ -14,6 +14,7 @@ abstract class TorrentAbstract extends BaseObject {
             sprintf(self::CACHE_KEY, $this->id),
             "torrent_download_{$this->id}",
         ]);
+        $this->info = [];
         $this->group()->flush();
         return $this;
     }
@@ -385,6 +386,17 @@ abstract class TorrentAbstract extends BaseObject {
 
     public function isScene(): bool {
         return $this->info()['Scene'];
+    }
+
+    /**
+     * TO BE USED JUDICIOUSLY - SITE CODE SHOULD NEVER CALL THIS
+     * Is this being actively seeded *right now*?
+     */
+    public function isSeedingRealtime(): bool {
+        return (bool)self::$db->scalar("
+            SELECT 1 FROM xbt_files_users WHERE remaining = 0 and active = 1 and fid = ?
+            ", $this->id
+        );
     }
 
     public function lastActiveDate(): ?string {

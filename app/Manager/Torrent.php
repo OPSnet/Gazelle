@@ -71,6 +71,7 @@ class Torrent extends \Gazelle\BaseManager {
             INSERT INTO torrents_leech_stats (TorrentID) VALUES (?)
             ', $torrent->id()
         );
+        $torrent->group()->flush();
         $torrent->lockUpload();
         return $torrent;
     }

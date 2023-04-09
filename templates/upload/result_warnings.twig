@@ -1,3 +1,4 @@
+{{ header('Warning') }}
 <h1>Warning</h1>
 {% if public or unsourced %}
 <p>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id={{ group_id }}">here</a> because:</p>
@@ -19,3 +20,4 @@ people attempt to download both torrents in the same client.</strong></p>
 remove the upload now, before people start queuing it up. You can then adjust
 the folder name locally and try again.</p>
 {% endif %}
+{{ footer() }}

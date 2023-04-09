@@ -3,10 +3,10 @@
 namespace Gazelle\Notification;
 
 class Filter extends \Gazelle\Base {
-    protected $id;
-    protected $field = [];
+    protected int $id;
+    protected array $field = [];
 
-    protected $fieldMap = [
+    protected array $fieldMap = [
         'artist'          => 'Artists',
         'category'        => 'Categories',
         'encoding'        => 'Encodings',
@@ -18,85 +18,10 @@ class Filter extends \Gazelle\Base {
         'new_groups_only' => 'NewGroupsOnly',
         'not_tag'         => 'NotTags',
         'release_type'    => 'ReleaseTypes',
+        'record_label'    => 'RecordLabels',
         'tag'             => 'Tags',
         'user'            => 'Users',
     ];
-
-    public function isConfigured(): bool {
-        return !empty($this->field);
-    }
-
-    public function hasLabel(): bool {
-        return isset($this->field['label']);
-    }
-
-    protected function multiLineSplit($data): array {
-        return array_unique(array_map('trim', preg_split('/\r\n?|\n/', trim($data))));
-    }
-
-    public function setMultiLine(string $field, $data) {
-        $this->field[$field] = $this->multiLineSplit($data);
-        return $this;
-    }
-
-    public function setMultiValue(string $field, $data) {
-        $this->field[$field] = array_unique(array_map('trim', $data));
-        return $this;
-    }
-
-    public function setBoolean(string $field, bool $flag) {
-        $this->field[$field] = $flag ? '1' : '0';
-        return $this;
-    }
-
-    public function setLabel($label) {
-        if (isset($label)) {
-            $this->field['label'] = trim($label);
-        }
-        return $this;
-    }
-
-    public function setYears(int $from, int $to) {
-        if ($from) {
-            $this->field['from_year'] = $from;
-            $this->field['to_year'] = $to ?: date('Y') + 3;
-        }
-        return $this;
-    }
-
-    public function setUsers(\Gazelle\Manager\User $userMan, string $data) {
-        $usernames = $this->multiLineSplit($data);
-        foreach ($usernames as $username) {
-            $user = $userMan->findByUsername($username);
-            if ($user && !$user->isParanoid('notifications')) {
-                $this->field['user'][] = $user->id();
-            }
-        }
-        return $this;
-    }
-
-    protected function arg(string $field) {
-        switch ($field) {
-            case 'label':
-            case 'exclude_va':
-            case 'new_groups_only':
-            case 'from_year':
-            case 'to_year':
-                return $this->field[$field];
-            case 'artist':
-            case 'user':
-            case 'tag':
-            case 'not_tag':
-            case 'category':
-            case 'release_type':
-            case 'format':
-            case 'encoding':
-            case 'media':
-                $arg = '|' . implode('|', $this->field[$field]) . '|';
-                return $arg === '||' ? '' : $arg;
-        }
-        return null;
-    }
 
     public function create(int $userId): int {
         $set = ['UserID', 'Label'];
@@ -113,7 +38,84 @@ class Filter extends \Gazelle\Base {
             VALUES (" . placeholders($set) . ")
             ", ...$args
         );
-        return self::$db->affected_rows();
+        return self::$db->inserted_id();
+    }
+
+    public function isConfigured(): bool {
+        return !empty($this->field);
+    }
+
+    public function hasLabel(): bool {
+        return isset($this->field['label']);
+    }
+
+    protected function multiLineSplit(string $data): array {
+        return array_unique(array_map('trim', preg_split('/\r\n?|\n/', trim($data)))); /** @phpstan-ignore-line */
+    }
+
+    public function setMultiLine(string $field, $data): Filter {
+        $this->field[$field] = $this->multiLineSplit($data);
+        return $this;
+    }
+
+    public function setMultiValue(string $field, $data): Filter {
+        $this->field[$field] = array_unique(array_map('trim', $data));
+        return $this;
+    }
+
+    public function setBoolean(string $field, bool $flag): Filter {
+        $this->field[$field] = $flag ? '1' : '0';
+        return $this;
+    }
+
+    public function setLabel($label): Filter {
+        if (isset($label)) {
+            $this->field['label'] = trim($label);
+        }
+        return $this;
+    }
+
+    public function setYears(int $from, int $to): Filter {
+        if ($from) {
+            $this->field['from_year'] = $from;
+            $this->field['to_year'] = $to ?: date('Y') + 3;
+        }
+        return $this;
+    }
+
+    public function setUsers(\Gazelle\Manager\User $userMan, string $data): Filter {
+        $usernames = $this->multiLineSplit($data);
+        foreach ($usernames as $username) {
+            $user = $userMan->findByUsername($username);
+            if ($user && !$user->isParanoid('notifications')) {
+                $this->field['user'][] = $user->id();
+            }
+        }
+        return $this;
+    }
+
+    protected function arg(string $field): ?string {
+        switch ($field) {
+            case 'label':
+            case 'exclude_va':
+            case 'new_groups_only':
+            case 'from_year':
+            case 'to_year':
+                return $this->field[$field];
+            case 'artist':
+            case 'user':
+            case 'tag':
+            case 'not_tag':
+            case 'category':
+            case 'record_label':
+            case 'release_type':
+            case 'format':
+            case 'encoding':
+            case 'media':
+                $arg = '|' . implode('|', $this->field[$field]) . '|';
+                return $arg === '||' ? '' : $arg;
+        }
+        return null;
     }
 
     public function modify(int $userId, int $filterId): int {

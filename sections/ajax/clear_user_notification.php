@@ -5,4 +5,6 @@ if (!class_exists($notifier)) {
     json_die('failure', 'no such notification');
 }
 
-json_print('success', ['clear' => (new $notifier($Viewer))->clear()]);
+json_print('success', [
+    'clear' => (new $notifier($Viewer))->clear() /** @phpstan-ignore-line */
+]);

@@ -3,8 +3,8 @@
 namespace Gazelle\Notification;
 
 class Torrent extends \Gazelle\Base {
-    protected $cond;
-    protected $args;
+    protected array $cond;
+    protected array $args;
 
     public function __construct(
         protected readonly int $userId,
@@ -17,7 +17,7 @@ class Torrent extends \Gazelle\Base {
         self::$cache->delete_value('user_notify_upload_' . $this->userId);
     }
 
-    public function setFilter(int $filterId) {
+    public function setFilter(int $filterId): Torrent {
         $cond = [];
         $args = [];
         $cond[] = 'unf.ID = ?';
@@ -26,7 +26,7 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function total(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_notify_torrents AS unt
             INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)

@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class Torrent extends TorrentAbstract {
+    use Pg;
+
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
@@ -452,6 +454,10 @@ class Torrent extends TorrentAbstract {
         }
 
         // Torrent notifications
+        $this->pg()->prepared_query("
+            DELETE FROM notification_ticket WHERE id_torrent = ?
+            ", $this->id
+        );
         self::$db->prepared_query("
             SELECT concat('user_notify_upload_', UserID) as ck
             FROM users_notify_torrents

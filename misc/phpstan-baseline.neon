@@ -1611,41 +1611,6 @@ parameters:
 			path: ../app/Manager/InviteSource.php
 
 		-
-			message: "#^Left side of && is always false\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Notification\\:\\:push\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Notification\\:\\:pushableUsers\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fwrite expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
-			message: "#^Parameter \\#2 \\$data of function fwrite expects string, string\\|false given\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
-			message: "#^Result of && is always false\\.$#"
-			count: 1
-			path: ../app/Manager/Notification.php
-
-		-
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../app/Manager/Referral.php
@@ -2104,171 +2069,6 @@ parameters:
 			message: "#^Method Gazelle\\\\Manager\\\\XBT\\:\\:saveRate\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Manager/XBT.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:arg\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:setBoolean\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:setLabel\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:setMultiLine\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:setMultiValue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:setUsers\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Filter\\:\\:setYears\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Filter\\:\\:\\$field has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Filter\\:\\:\\$fieldMap has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Filter\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Filter.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\GlobalNotification\\:\\:remove\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/GlobalNotification.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Torrent\\:\\:setFilter\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Torrent\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Notification/Torrent.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Torrent\\:\\:\\$args has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Torrent.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Torrent\\:\\:\\$cond has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addArtists\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addCategory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addDimension\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addEncodings\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addFormat\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addMedia\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addReleaseType\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addTags\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addUser\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:addYear\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Method Gazelle\\\\Notification\\\\Upload\\:\\:setDebug\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
-			count: 2
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fprintf expects resource, resource\\|false given\\.$#"
-			count: 3
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Upload\\:\\:\\$args has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Upload\\:\\:\\$cond has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Upload\\:\\:\\$debug has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
-
-		-
-			message: "#^Property Gazelle\\\\Notification\\\\Upload\\:\\:\\$seenUserFilter has no type specified\\.$#"
-			count: 1
-			path: ../app/Notification/Upload.php
 
 		-
 			message: "#^Method Gazelle\\\\PM\\:\\:postTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
@@ -3314,41 +3114,6 @@ parameters:
 			message: "#^Match expression does not handle remaining value\\: string$#"
 			count: 2
 			path: ../app/User/History.php
-
-		-
-			message: "#^Call to an undefined method object\\:\\:load\\(\\)\\.$#"
-			count: 1
-			path: ../app/User/Notification.php
-
-		-
-			message: "#^Call to an undefined method object\\:\\:setDisplay\\(\\)\\.$#"
-			count: 1
-			path: ../app/User/Notification.php
-
-		-
-			message: "#^Method Gazelle\\\\User\\\\Notification\\:\\:config\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/User/Notification.php
-
-		-
-			message: "#^Parameter \\#1 \\$display of method Gazelle\\\\User\\\\Notification\\\\AbstractNotification\\:\\:setDisplay\\(\\) expects string, int given\\.$#"
-			count: 1
-			path: ../app/User/Notification.php
-
-		-
-			message: "#^Property Gazelle\\\\User\\\\Notification\\:\\:\\$Types has no type specified\\.$#"
-			count: 1
-			path: ../app/User/Notification.php
-
-		-
-			message: "#^Negated boolean expression is always true\\.$#"
-			count: 1
-			path: ../app/User/Notification/Blog.php
-
-		-
-			message: "#^Negated boolean expression is always true\\.$#"
-			count: 1
-			path: ../app/User/Notification/News.php
 
 		-
 			message: "#^Cannot access offset 'path' on array\\{scheme\\?\\: string, host\\?\\: string, port\\?\\: int\\<0, 65535\\>, user\\?\\: string, pass\\?\\: string, path\\?\\: string, query\\?\\: string, fragment\\?\\: string\\}\\|false\\.$#"
@@ -4441,11 +4206,6 @@ parameters:
 			path: ../scripts/upload-wiki.php
 
 		-
-			message: "#^Call to an undefined method object\\:\\:clear\\(\\)\\.$#"
-			count: 1
-			path: ../sections/ajax/clear_user_notification.php
-
-		-
 			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
 			count: 1
 			path: ../sections/ajax/index.php
@@ -5024,11 +4784,6 @@ parameters:
 			message: "#^Variable \\$LargeTorrents might not be defined\\.$#"
 			count: 1
 			path: ../sections/tools/misc/vanity_house.php
-
-		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 1
-			path: ../sections/tools/sandboxes/notification.php
 
 		-
 			message: "#^Parameter \\#1 \\(array\\<int, string\\>\\|string\\) of echo cannot be converted to string\\.$#"

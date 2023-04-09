@@ -40,7 +40,6 @@
                 <th>This quarter</th>
                 <th>Per day this quarter</th>
                 </tr>
-
                 <tr>
                 <th>Torrents</th>
                 <td class="number_column">{{ torr_stat.amount('day')|number_format }}</td>
@@ -51,7 +50,6 @@
                 <td class="number_column">{{ torr_stat.amount('quarter')|number_format }}</td>
                 <td class="number_column">{{ (torr_stat.amount('quarter') / 120)|number_format }}</td>
                 </tr>
-
                 <tr>
                 <th>Size</th>
                 <td class="number_column">{{ torr_stat.size('day')|octet_size }}</td>
@@ -62,7 +60,6 @@
                 <td class="number_column">{{ torr_stat.size('quarter')|octet_size }}</td>
                 <td class="number_column">{{ (torr_stat.size('quarter') / 120)|octet_size }}</td>
                 </tr>
-
                 <tr>
                 <th>Files</th>
                 <td class="number_column">{{ torr_stat.files('day')|number_format }}</td>
@@ -79,6 +76,46 @@
 
     <br />
     <div class="box">
+        <div class="head">Notification tickets</div>
+        <div class="pad">
+            <table>
+                <tr>
+{% set stats = notification.ticketStats %}
+{% for name in stats %}
+                <th>{{ name.state }}</th>
+{% endfor %}
+                </tr>
+                <tr>
+{% for name in stats %}
+                <td class="number_column">{{ name.state }} {{ name.total|number_format }}</td>
+{% endfor %}
+                </tr>
+            </table>
+        </div>
+        <div class="head">Notification tickets pending by hour</div>
+        <div class="pad">
+            <table>
+                <tr>
+{% set pending = notification.ticketPendingStats %}
+{% for n in range(0, pending|length / 12 - 1) %}
+                <th>Hour</th>
+                <th>Total</th>
+{% endfor %}
+                </tr>
+{% for n in range(0, pending|length / 6 - 1) %}
+                <tr>
+    {% for h in range(0, 5) %}
+                <th>{{ pending[n + h * 12]['hour']|replace({':00+00': ''}) }}</th>
+                <th>{{ pending[n + h * 12]['total']|number_format }}</th>
+    {% endfor %}
+                </tr>
+{% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <br />
+    <div class="box">
         <div class="head">Content Analysis</div>
         <div class="pad">
             <table>
@@ -88,7 +125,6 @@
                 <th width="34%">Categories</th>
                 </tr>
                 <tr>
-
                 <td style="vertical-align: top;"><table>
 {% for f in torr_stat.format %}
                     <tr>
@@ -98,7 +134,6 @@
                     </tr>
 {% endfor %}
                 </table></td>
-
                 <td style="vertical-align: top;"><table>
 {% for m in torr_stat.media %}
                     <tr><td>{{ m[0]|default('<i>Total</it>')|raw }}</td>

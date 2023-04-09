@@ -26,7 +26,7 @@ class News extends AbstractNotification {
         $newJoiner = is_null($lastRead)
             && strtotime($newsMan->latest()['created']) > strtotime($this->user->created());
 
-        if ($newJoiner || (!$newJoiner && $newsId > $lastRead)) {
+        if ($newJoiner || $newsId > $lastRead) {
             $this->title   = "Announcement: $title";
             $this->url     = "index.php#news$newsId";
             $this->context = $newsId;

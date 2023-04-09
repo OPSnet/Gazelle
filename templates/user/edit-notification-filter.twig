@@ -75,6 +75,13 @@
                 </td>
             </tr>
             <tr>
+                <td class="label"><strong>One of these record labels</strong>(exact match, unfortunately)</td>
+                <td>
+                    <textarea name="recordlabel{{ loop.index }}" style="width: 100%;" rows="2">{{ filter.RecordLabels|join("\n") }}</textarea>
+                    <p class="min_padding">Newline-separated list</p>
+                </td>
+            </tr>
+            <tr>
                 <td class="label"><strong>Only these categories</strong></td>
                 <td>
     {% for key, name in constant('CATEGORY') %}

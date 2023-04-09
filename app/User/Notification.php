@@ -25,7 +25,7 @@ class Notification extends \Gazelle\BaseUser {
     protected array $args = [];
 
     // TODO: methodize
-    protected static $Types = [
+    protected static array $Types = [
         'Blog',
         'Collages',
         'Inbox',
@@ -41,7 +41,7 @@ class Notification extends \Gazelle\BaseUser {
     public function location(): string { return $this->user()->location(); }
     public function tableName(): string { return 'users_notifications_settings'; }
 
-    public function config() {
+    public function config(): array {
         if (isset($this->config)) {
             return $this->config;
         }
@@ -69,7 +69,9 @@ class Notification extends \Gazelle\BaseUser {
             'StaffPM'       => 0,
             'Subscriptions' => 0,
             'Torrents'      => 0,
-        ]; self::$cache->cache_value($key, $config, 0);
+        ];
+        $config = array_map('intval', $config);
+        self::$cache->cache_value($key, $config, 0);
         $this->config = $config;
         return $this->config;
     }
@@ -97,7 +99,6 @@ class Notification extends \Gazelle\BaseUser {
             }
             // does the user want to see this alert?
             if ($display) {
-                $className = "\\Gazelle\\User\\Notification\\$class";
                 // are we on the page of the alert?
                 if (isset($this->document)) {
                     if ($class === 'Collage' && $this->document === 'userhistory' && $this->action === 'subscribed_collages') {
@@ -116,15 +117,17 @@ class Notification extends \Gazelle\BaseUser {
                         continue;
                     }
                 }
+                $className = "\\Gazelle\\User\\Notification\\$class";
                 $notification = new $className($this->user);
-                if ($notification->load()) {
-                    $alert[$class] = $notification->setDisplay($display);
+                if ($notification->load()) { /** @phpstan-ignore-line */
+                    $alert[$class] = $notification->setDisplay($display); /** @phpstan-ignore-line */
                 }
             }
         }
         $global = new Notification\GlobalNotification($this->user);
         if ($global->load()) {
-            $alert['Global'] = $global->setDisplay($noty ? self::DISPLAY_POPUP : self::DISPLAY_TRADITIONAL);
+            // $alert['Global'] = $global->setDisplay($noty ? self::DISPLAY_POPUP : self::DISPLAY_TRADITIONAL);
+            $alert['Global'] = $global;
         }
         $this->alert = $alert;
         return $this->alert;
@@ -217,6 +220,7 @@ class Notification extends \Gazelle\BaseUser {
                 NewGroupsOnly,
                 Tags,
                 NotTags,
+                RecordLabels,
                 ReleaseTypes,
                 Categories,
                 Formats,
@@ -234,6 +238,7 @@ class Notification extends \Gazelle\BaseUser {
             $f['Artists']      = implode("\n", $this->valueToArray($f['Artists']));
             $f['Tags']         = implode("\n", $this->valueToArray($f['Tags']));
             $f['NotTags']      = implode("\n", $this->valueToArray($f['NotTags']));
+            $f['RecordLabels'] = $this->valueToArray($f['RecordLabels']);
             $f['ReleaseTypes'] = $this->valueToArray($f['ReleaseTypes']);
             $f['Categories']   = $this->valueToArray($f['Categories']);
             $f['Formats']      = $this->valueToArray($f['Formats']);

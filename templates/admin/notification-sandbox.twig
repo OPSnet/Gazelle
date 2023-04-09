@@ -1,63 +1,61 @@
-{% macro artistlist(list) %}
+{% macro artistlist(list) -%}
 {% if list is empty -%}
     <i>none</i>
-{%- else %}
+{%- else -%}
     {%- for a in list -%}
-        {%- if not loop.first -%}
-        <br />
-        {% endif -%}
-        {{ a.name }}
-    {%- endfor %}
-{% endif %}
-{% endmacro %}
+        {{ a.name }}{% if not loop.last %}<br />{% endif %}
+    {%- endfor -%}
+{% endif -%}
+{% endmacro -%}
+{% set role_list = torrent.group.artistRole.roleListByType -%}
 
 {{ header("Notifications Sandbox") }}
 <div class="thin">
     <div class="header">
         <h2>Notifications Sandbox</h2>
     </div>
-{% if group %}
+{% if torrent %}
     <div class="box pad">
-    <h4>Results {{ group.link|raw }}</h4>
+    <h4>Results {{ torrent.fullLink|raw }}</h4>
 
 <table><tr>
     <td style="vertical-align: top"><table>
         <tr><td class="label" colspan="2" style="text-align: center">Release details</td></tr>
         <tr>
             <td class="label">Uploaded by</td>
-            <td>{{ torrent.UserID|user_full }}</td>
+            <td>{{ torrent.uploaderId|user_full }}</td>
         </tr>
         <tr>
             <td class="label">Category</td>
-            <td>{{ category }}</td>
+            <td>{{ torrent.group.categoryName }}</td>
         </tr>
         <tr>
             <td class="label">Release Type</td>
-            <td>{{ release }}</td>
+            <td>{{ torrent.group.releaseTypeName }}</td>
         </tr>
         <tr>
             <td class="label">Media</td>
-            <td>{{ torrent.Media }}</td>
+            <td>{{ torrent.media }}</td>
         </tr>
         <tr>
             <td class="label">Format</td>
-            <td>{{ torrent.Format }}</td>
+            <td>{{ torrent.format }}</td>
         </tr>
         <tr>
             <td class="label">Encoding</td>
-            <td>{{ torrent.Encoding }}</td>
+            <td>{{ torrent.encoding }}</td>
         </tr>
         <tr>
             <td class="label">Year</td>
-            <td>{{ year }}</td>
+            <td>{{ torrent.remasterYear|default(torrent.group.year) }}</td>
         </tr>
         <tr>
             <td class="label">Record Label</td>
-            <td>{{ label }}</td>
+            <td>{{ torrent.remasterRecordLabel|default(group.recordLabel) }}</td>
         </tr>
         <tr>
             <td class="label">Tags</td>
-            <td>{{ tags }}</td>
+            <td>{{ torrent.group.tagNameList|join(', ') }}</td>
         </tr>
     </table></td>
     <td style="vertical-align: top"><table>
@@ -65,60 +63,60 @@
         <tr>
             <td class="label">Main</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.main) }}
+                {{ _self.artistlist(role_list.artists) }}
             </td>
         </tr>
         <tr>
             <td class="label">Composers</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.composer) }}
+                {{ _self.artistlist(role_list.composers) }}
             </td>
         </tr>
         <tr>
             <td class="label">Conductors</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.conductor) }}
+                {{ _self.artistlist(role_list.conductor) }}
             </td>
         </tr>
         <tr>
             <td class="label">Remixers</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.dj) }}
+                {{ _self.artistlist(role_list.remixedBy) }}
             </td>
         </tr>
         <tr>
             <td class="label">DJs</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.dj) }}
+                {{ _self.artistlist(role_list.dj) }}
             </td>
         </tr>
         <tr>
             <td class="label">Producers</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.producer) }}
+                {{ _self.artistlist(role_list.producer) }}
             </td>
         </tr>
         <tr>
             <td class="label">Arrangers</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.arranger) }}
+                {{ _self.artistlist(role_list.arranger) }}
             </td>
         </tr>
         <tr>
             <td class="label">Guests</td>
             <td>
-                {{ _self.artistlist(manager.artistRole.guest) }}
+                {{ _self.artistlist(role_list.with) }}
             </td>
         </tr>
     </table></td>
 </tr>
-{% if sql %}
+{% if notification.sql %}
 <tr>
-    <td colspan="2"><code>{{ sql }}</code></td>
+    <td colspan="2"><code>{{ notification.sql }}</code></td>
 <tr>
 <tr>
     <td colspan="2">
-    {% for arg in args %}
+    {% for arg in notification.args %}
         {{ arg }}{% if not loop.last %}<br />{% endif %}
     {% endfor %}
     </td>

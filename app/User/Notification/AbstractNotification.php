@@ -4,7 +4,7 @@ namespace Gazelle\User\Notification;
 
 abstract class AbstractNotification extends \Gazelle\BaseUser {
     protected int    $context; // id of a table row
-    protected string $display;
+    protected int    $display;
     protected string $title;
     protected string $url;
 
@@ -21,12 +21,12 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
         return $this->context ?? 0;
     }
 
-    public function setDisplay(string $display): AbstractNotification {
+    public function setDisplay(int $display): AbstractNotification {
         $this->display = $display;
         return $this;
     }
 
-    public function display(): string {
+    public function display(): int {
         return $this->display;
     }
 

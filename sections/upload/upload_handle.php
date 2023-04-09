@@ -1,6 +1,5 @@
 <?php
 
-use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 
 ini_set('max_file_uploads', 100);
@@ -145,10 +144,12 @@ if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
     }
 }
 
-$feedType = ['torrents_all'];
-
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 switch ($categoryName) {
+    case 'Audiobooks':
+        $Validate->setField('year', true,'number','The year of the release must be entered.');
+        break;
+
     case 'Music':
         $Validate->setFields([
             ['groupid', false, 'number', 'Group ID was not numeric'],
@@ -184,40 +185,6 @@ switch ($categoryName) {
                 );
             }
         }
-        $feedType[] = 'torrents_music';
-        if ($Properties['Media'] === 'Vinyl') {
-            $feedType[] = 'torrents_vinyl';
-        }
-        if ($Properties['Encoding'] === 'Lossless') {
-            $feedType[] = 'torrents_lossless';
-        } elseif ($Properties['Encoding'] === '24bit Lossless') {
-            $feedType[] = 'torrents_lossless24';
-        }
-        if ($Properties['Format'] === 'MP3') {
-            $feedType[] = 'torrents_mp3';
-        } elseif ($Properties['Format'] === 'FLAC') {
-            $feedType[] = 'torrents_flac';
-        }
-        break;
-
-    case 'Applications':
-        $feedType[] = 'torrents_apps';
-        break;
-    case 'Audiobooks':
-        $Validate->setField('year', true,'number','The year of the release must be entered.');
-        $feedType[] = 'torrents_abooks';
-        break;
-    case 'Comedy':
-        $feedType[] = 'torrents_comedy';
-        break;
-    case 'Comics':
-        $feedType[] = 'torrents_comics';
-        break;
-    case 'E-Books':
-        $feedType[] = 'torrents_ebooks';
-        break;
-    case 'E-Learning Videos':
-        $feedType[] = '';
         break;
 }
 
@@ -288,7 +255,7 @@ $LogName = '';
 if ($isMusicUpload) {
     // additional torrent files
     $dupeName = [$_FILES['file_input']['name'] => true];
-    if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate']) && !defined('AJAX')) {
+    if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate'])) {
         for ($i = 1; $i <= 5; $i++) {
             if (empty($_FILES["extra_file_$i"])) {
                 continue;
@@ -325,14 +292,14 @@ if ($isMusicUpload) {
                 $torrentId = $torrent->id();
                 if ($torrentFiler->exists($torrentId)) {
                     reportError(
-                        defined('AJAX') /** @phpstan-ignore-line */
+                        defined('AJAX')
                         ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
                         : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>"
                     );
                 } else {
                     $torrentFiler->put($ExtraTorData['TorEnc'], $torrentId);
                     reportError(
-                        defined('AJAX') /** @phpstan-ignore-line */
+                        defined('AJAX')
                         ? "Thank you for fixing this torrent (torrentid=$torrentId)"
                         : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>"
                     );
@@ -358,7 +325,7 @@ if ($isMusicUpload) {
                 if (mb_strlen($name, 'UTF-8') + mb_strlen($filePath, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
                     $fullpath = "$filePath/$name";
                     reportError(
-                        defined('AJAX') /** @phpstan-ignore-line */
+                        defined('AJAX')
                             ? "The torrent contained one or more files with too long a name: $fullpath"
                             : "The torrent contained one or more files with too long a name: <br />$fullpath"
                     );
@@ -655,6 +622,7 @@ foreach ($upload['new'] as $t) {
     $bonusTotal += $bonus->torrentValue($t);
     $tracker->addTorrent($t);
 }
+(new Gazelle\Manager\NotificationTicket)->create($torrent);
 
 if (!$Viewer->disableBonusPoints()) {
     $bonus->addPoints($bonusTotal);
@@ -664,6 +632,13 @@ $tgroup->refresh();
 $torMan->flushFoldernameCache($DirName);
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
     $torMan->flushLatestUploads(5);
+}
+
+if ($tgroup->image()) {
+    $Viewer->flushRecentUpload();
+}
+if ($Viewer->option('AutoSubscribe')) {
+    (new Gazelle\User\Subscription($Viewer))->subscribeComments('torrents', $GroupID);
 }
 
 $totalNew = count($upload['new']);
@@ -678,59 +653,6 @@ if ($torrent->isPerfectFlac()) {
 $Cache->increment_value('stats_torrent_count', $totalNew);
 if ($Properties['Image'] != '') {
     $Cache->delete_value('user_recent_up_' . $Viewer->id());
-}
-
-//******************************************************************************//
-//---------------IRC announce and feeds ---------------------------------------//
-
-$Announce = '';
-if ($isMusicUpload) {
-    $Announce .= $tgroup->artistName() . ' - ';
-}
-$Announce .= $Properties['Title'] . ' ';
-$Details = "";
-if ($isMusicUpload) {
-    $Announce .= '['.$Properties['Year'].']';
-    if ($Properties['ReleaseType'] > 0) {
-        $Announce .= ' [' . $releaseTypes[$Properties['ReleaseType']] . ']';
-    }
-    $Details .= $Properties['Format'].' / '.$Properties['Encoding'];
-    if ($hasLog) {
-        $score = $logfileSummary?->overallScore() ?? 0;
-        $Details .= ' / Log'.($hasLogInDB ? " ({$score}%)" : "");
-    }
-    if ($hasCue) {
-        $Details .= ' / Cue';
-    }
-    $Details .= ' / '.$Properties['Media'];
-    if ($Properties['Scene']) {
-        $Details .= ' / Scene';
-    }
-}
-
-$Title = $Announce;
-if ($Details !== "") {
-    $Title .= " - ".$Details;
-    $Announce .= "\003 - \00310" . $Details . "\003";
-}
-
-$AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
-    . " - \00312" . implode(',', $tagList) . "\003"
-    . " - \00304".SITE_URL."/torrents.php?id=$GroupID\003 / \00304".SITE_URL."/torrents.php?action=download&id=$TorrentID\003";
-
-// ENT_QUOTES is needed to decode single quotes/apostrophes
-Irc::sendMessage('#ANNOUNCE', html_entity_decode($AnnounceSSL, ENT_QUOTES));
-$Debug->set_flag('upload: announced on irc');
-
-//******************************************************************************//
-//--------------- Post-processing ----------------------------------------------//
-/* Because tracker updates and notifications can be slow, we're
- * redirecting the user to the destination page and flushing the buffers
- * to make it seem like the PHP process is working in the background.
- */
-
-if ($Properties['Image'] != '') {
-    $Viewer->flushRecentUpload();
 }
 
 if (defined('AJAX')) {
@@ -752,168 +674,30 @@ if (defined('AJAX')) {
         }
         $Response['fillRequest'] = $FillResponse;
     }
-
-    // TODO: this is copy-pasted
-    $Feed = new Gazelle\Feed;
-    $Item = $Feed->item(
-        $Title,
-        Text::strip_bbcode($Properties['GroupDescription']),
-        "torrents.php?action=download&id={$TorrentID}&torrent_pass=[[PASSKEY]]",
-        date('r'),
-        $Viewer->username(),
-        'torrents.php?id=' . $GroupID,
-        implode(',', $tagList)
-    );
-
-    $notification = (new Gazelle\Notification\Upload)
-        ->addFormat($Properties['Format'])
-        ->addEncodings($Properties['Encoding'])
-        ->addMedia($Properties['Media'])
-        ->addYear($Properties['Year'], $Properties['RemasterYear'])
-        ->addArtists($tgroup->artistRole()->roleList())
-        ->addTags($tagList)
-        ->addCategory($categoryName)
-        ->addUser($Viewer)
-        ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
-
-    if ($isMusicUpload) {
-        $notification->addReleaseType($releaseTypes[$Properties['ReleaseType']]);
-    }
-
-    $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
-
-    // RSS for bookmarks
-    $db->prepared_query('
-        SELECT u.torrent_pass
-        FROM users_main AS u
-        INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
-        WHERE b.GroupID = ?
-        ', $GroupID
-    );
-    while ([$Passkey] = $db->next_record()) {
-        $feedType[] = "torrents_bookmarks_t_$Passkey";
-    }
-    foreach ($feedType as $subFeed) {
-        $Feed->populate($subFeed, $Item);
-    }
-
-    $Debug->set_flag('upload: notifications handled');
-
-    $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
-
     json_print('success', $Response);
-} else {
-    $folderClash = 0;
-    if ($isMusicUpload) {
-        foreach ($folderCheck as $foldername) {
-            // This also has the nice side effect of warming the cache immediately
-            $list = $torMan->findAllByFoldername($foldername);
-            if (count($list) > 1) {
-                ++$folderClash;
-            }
-        }
-    }
-    if ($PublicTorrent || $UnsourcedTorrent || $folderClash) {
-        View::show_header('Warning');
-        echo $Twig->render('upload/result_warnings.twig', [
-            'clash'     => $folderClash,
-            'group_id'  => $GroupID,
-            'public'    => $PublicTorrent,
-            'unsourced' => $UnsourcedTorrent,
-            'wiki_id'   => SOURCE_FLAG_WIKI_PAGE_ID,
-        ]);
-        View::show_footer();
-    } elseif (isset($RequestID)) {
-        header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=" . $Viewer->auth());
-    } else {
-        header("Location: torrents.php?id=$GroupID");
-    }
+    exit;
 }
 
-if (function_exists('fastcgi_finish_request')) {
-    fastcgi_finish_request();
-} else {
-    ignore_user_abort(true);
-    ob_flush();
-    flush();
-    ob_start(); // So we don't keep sending data to the client
-}
-
-if ($Viewer->option('AutoSubscribe')) {
-    (new Gazelle\User\Subscription($Viewer))->subscribeComments('torrents', $GroupID);
-}
-
-// Manage notifications
-$seenFormatEncoding = [];
-
-if (!$IsNewGroup) {
-    // maybe there are torrents in the same release as the new torrent. Let's find out (for notifications)
-    $GroupInfo = get_group_info($GroupID, 0, false);
-
-    $ThisMedia = display_str($Properties['Media']);
-    $ThisRemastered = display_str($Properties['Remastered']);
-    $ThisRemasterYear = display_str($Properties['RemasterYear']);
-    $ThisRemasterTitle = display_str($Properties['RemasterTitle']);
-    $ThisRemasterRecordLabel = display_str($Properties['RemasterRecordLabel']);
-    $ThisRemasterCatalogueNumber = display_str($Properties['RemasterCatalogueNumber']);
-
-    foreach ($GroupInfo[1] as $TorrentInfo) {
-        if (($TorrentInfo['Media'] == $ThisMedia)
-            && ($TorrentInfo['Remastered'] == $ThisRemastered)
-            && ($TorrentInfo['RemasterYear'] == (int)$ThisRemasterYear)
-            && ($TorrentInfo['RemasterTitle'] == $ThisRemasterTitle)
-            && ($TorrentInfo['RemasterRecordLabel'] == $ThisRemasterRecordLabel)
-            && ($TorrentInfo['RemasterCatalogueNumber'] == $ThisRemasterCatalogueNumber)
-            && ($TorrentInfo['ID'] != $TorrentID)) {
-            $seenFormatEncoding[] = ['format' => $TorrentInfo['Format'], 'bitrate' => $TorrentInfo['Encoding']];
+$folderClash = 0;
+if ($isMusicUpload) {
+    foreach ($folderCheck as $foldername) {
+        // This also has the nice side effect of warming the cache immediately
+        $list = $torMan->findAllByFoldername($foldername);
+        if (count($list) > 1) {
+            ++$folderClash;
         }
     }
 }
-
-if (!in_array('notifications', $Viewer->paranoia())) {
-    // For RSS
-    $Feed = new Gazelle\Feed;
-    $Item = $Feed->item(
-        $Title,
-        Text::strip_bbcode($Properties['GroupDescription']),
-        "torrents.php?action=download&id={$TorrentID}&torrent_pass=[[PASSKEY]]",
-        date('r'),
-        $Viewer->username(),
-        'torrents.php?id=' . $GroupID,
-        implode(',', $tagList)
-    );
-
-    $notification = (new Gazelle\Notification\Upload)
-        ->addFormat($Properties['Format'])
-        ->addEncodings($Properties['Encoding'])
-        ->addMedia($Properties['Media'])
-        ->addYear($Properties['Year'], $Properties['RemasterYear'])
-        ->addArtists($tgroup->artistRole()->roleList())
-        ->addTags($tagList)
-        ->addCategory($categoryName)
-        ->addUser($Viewer)
-        ->setDebug(DEBUG_UPLOAD_NOTIFICATION);
-
-    if ($isMusicUpload) {
-        $notification->addReleaseType($releaseTypes[$Properties['ReleaseType']]);
-    }
-
-    $notification->trigger($GroupID, $TorrentID, $Feed, $Item);
-
-    // RSS for bookmarks
-    $db->prepared_query('
-        SELECT u.torrent_pass
-        FROM users_main AS u
-        INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
-        WHERE b.GroupID = ?
-        ', $GroupID
-    );
-    while ([$Passkey] = $db->next_record()) {
-        $feedType[] = "torrents_bookmarks_t_$Passkey";
-    }
-    foreach ($feedType as $subFeed) {
-        $Feed->populate($subFeed, $Item);
-    }
-
-    $Debug->set_flag('upload: notifications handled');
+if ($PublicTorrent || $UnsourcedTorrent || $folderClash) {
+    echo $Twig->render('upload/result_warnings.twig', [
+        'clash'     => $folderClash,
+        'group_id'  => $GroupID,
+        'public'    => $PublicTorrent,
+        'unsourced' => $UnsourcedTorrent,
+        'wiki_id'   => SOURCE_FLAG_WIKI_PAGE_ID,
+    ]);
+} elseif (isset($RequestID)) {
+    header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=" . $Viewer->auth());
+} else {
+    header("Location: torrents.php?id=$GroupID");
 }

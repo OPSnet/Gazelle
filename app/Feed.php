@@ -25,11 +25,11 @@ class Feed extends Base {
         ]);
     }
 
-    function item(string $title, string $description, string $page, string $creator, string $date, string $comments = '', string $feedName = ''): string {
+    function item(string $title, string $description, string $page, string $creator, string $date, string $comments = '', string $category = ''): string {
         return self::$twig->render('feed/item.twig', [
+            'category'    => $category,
             'comments'    => $comments,
             'creator'     => $creator,
-            'feedName'    => $feedName,
             'date'        => date('r', strtotime($date)),
             'description' => $description,
             'page'        => SITE_URL . "/$page",

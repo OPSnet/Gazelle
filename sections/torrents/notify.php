@@ -131,7 +131,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             $TorrentID = $Result['TorrentID'];
             $torrent = $Result['torrent'];
             $tgroup = $torrent->group();
-            $match = $tgroup->artistRole()->matchName($filter->artistList() ?? []);
+            $match = $tgroup->artistRole()?->matchName($filter->artistList() ?? []);
 ?>
     <tr id="torrent<?= $TorrentID ?>" class="torrent torrent_row<?=
         ($snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : '')
