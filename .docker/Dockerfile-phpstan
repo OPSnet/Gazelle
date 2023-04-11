@@ -1,2 +1,4 @@
 FROM ghcr.io/phpstan/phpstan:1.10.3-php8.2
-RUN docker-php-ext-install mysqli pcntl bcmath
+RUN apk add gmp-dev \
+    && docker-php-ext-install mysqli pcntl bcmath gmp \
+    && rm -rf /var/cache/apk/* /var/tmp/* /tmp/*

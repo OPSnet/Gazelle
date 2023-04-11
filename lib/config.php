@@ -100,10 +100,13 @@ defined('ALT_SITE_URL') or define('ALT_SITE_URL', SITE_URL);
 defined('DONATION_MANAGER_USER_ID') or define('DONATION_MANAGER_USER_ID', 0);
 
 // Monero donation address, must be a primary account address starting with 4...
-// Also set MONERO_ENCRYPTION_KEY if you set this!
-// The user will receive a payment id-bound address based on this address containing
-// an encrypted user id for automatic processing.
+// The user will receive a payment id-bound address based on this address.
 defined('MONERO_DONATION_ADDRESS') or define ('MONERO_DONATION_ADDRESS', '');
+
+// x/y/zpub to derive bitcoin donation addresses from
+// this should be the *pub of your receive wallet key only, not your wallet master key!
+// also see the documentation on Gazelle\Donate\Bitcoin::__construct for more info.
+defined('BITCOIN_DONATION_XYZPUB') or define('BITCOIN_DONATION_XYZPUB', '');
 
 // Top 10 history date. Previous days and weeks of Top 10 torrents are
 // recorded in a task. There is not point going back prior to the start

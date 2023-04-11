@@ -37,6 +37,7 @@ RUN apt-get update \
         php${PHP_VER}-apcu \
         php${PHP_VER}-dev \
         php${PHP_VER}-bcmath \
+        php${PHP_VER}-gmp \
         php${PHP_VER}-xdebug \
         python3 \
         python3-pip \

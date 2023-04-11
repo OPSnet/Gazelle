@@ -30,6 +30,7 @@
     "ext-mysqli": "*",
     "ext-openssl": "*",
     "d11wtq/boris": "^v1.0.10",
+    "doersf/bitcoin-php": "^2.0",
     "endroid/qr-code": "^4.8.1",
     "hashids/hashids": "^4.1.0",
     "maennchen/zipstream-php": "^2.4.0",

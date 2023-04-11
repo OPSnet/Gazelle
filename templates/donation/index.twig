@@ -29,9 +29,6 @@
     <h2>Monero (XMR)</h2>
     <div class="pad donation_info">
         You can send your monero donation to <span class="donation_address">{{ monero_address }}</span>
-        <br /><br />
-        The minimum amount required for donating is 10 Euros.
-        <br /><br />
         Monero donations are credited semi-automatically. If your donation is not credited within seven days please
         {% if constant('DONATION_MANAGER_USER_ID') %}
             contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}.
@@ -42,20 +39,23 @@
         If you are sending your donation directly from an exchange, you should use Bitcoin (see below) for privacy reasons.
     </div>
 {% endif %}
+{% if bitcoin_address %}
     <h2>Bitcoin (BTC)</h2>
     <div class="pad donation_info">
-        If you wish to donate using Bitcoin, please
+        You can send your bitcoin donation to <span class="donation_address">{{ bitcoin_address }}</span>
+        Bitcoin donations are credited semi-automatically. If your donation is not credited within seven days please
         {% if constant('DONATION_MANAGER_USER_ID') %}
-            contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}, and they will handle your donation.
+            contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}.
         {% else %}
             send a <a href="/staffpm.php">StaffPM</a>.
         {% endif %}
-        <br /><br />
-        The minimum amount required for donating is 10 Euros.
     </div>
+{% endif %}
 
     <h3>What you will receive for donating</h3>
     <div class="pad donation_info">
+        <strong>The minimum amount to receive donor privileges is 10 Euros.</strong>
+        <br /><br />
         Any donation or contribution option listed above gives you the opportunity to receive Donor Points.
         After acquiring your first Donor Point, your account will unlock Donor Rank #1. This rank will last
         forever, and you'll receive the following perks upon unlocking it:<br>
