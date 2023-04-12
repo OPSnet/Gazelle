@@ -30,7 +30,7 @@ if ($autoSuggest === false) {
         GROUP BY ta.ArtistID
         ORDER BY tls.Snatched DESC
         LIMIT ?",
-        str_replace('\\','\\\\',$letters) . '%', $keySize === $maxKeySize ? 250 : 10
+        str_replace('\\','\\\\',$letters) . '%', $keySize === $maxKeySize ? 250 : 20
     );
     $autoSuggest = $db->to_array(false, MYSQLI_NUM, false);
     $Cache->cache_value($key, $autoSuggest, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
@@ -45,7 +45,7 @@ foreach ($autoSuggest as $suggestion) {
     [$id, $name] = $suggestion;
     if (stripos($name, $fullName) === 0) {
         $response['suggestions'][] = ['value' => $name, 'data' => $id];
-        if (++$matched > 9) {
+        if (++$matched > 19) {
             break;
         }
     }
