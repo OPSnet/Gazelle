@@ -43,11 +43,6 @@ $ownProfile = $userId === $Viewer->id();
 $class = (int)($_POST['Class'] ?? 0);
 $title = trim($_POST['Title']);
 $adminComment = trim($_POST['admincomment'] ?? '');
-$secondaryClasses = array_filter(
-    array_map('intval', $_POST['secondary_classes'] ?? [] ),
-    fn($id) => $id > 0
-);
-sort($secondaryClasses);
 $visible = isset($_POST['Visible']) ? '1' : '0';
 $unlimitedDownload = isset($_POST['unlimitedDownload']);
 $invites = (int)$_POST['Invites'];
@@ -117,13 +112,6 @@ if ($_POST['comment_hash'] != $cur['CommentHash']) {
 if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['Uploaded'])) {
     // Too make make-work code to deal with this unlikely eventuality
     error("Do not transfer buffer and edit upload/download in the same operation.");
-}
-
-$donorMan = new Gazelle\Manager\Donation;
-if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
-    $donorMan->moderatorDonate($user, (float)$_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $Viewer->id());
-} elseif (!empty($_POST['donor_values_submit'])) {
-    $donorMan->moderatorAdjust($user, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $Viewer->id());
 }
 
 $tracker = new Gazelle\Tracker;
@@ -329,12 +317,48 @@ if ($Viewer->permitted('users_warn')) {
     }
 }
 
+$secondaryClasses = array_filter(
+    array_map('intval', $_POST['secondary_classes'] ?? [] ),
+    fn($id) => $id > 0
+);
+
+if ($Viewer->permitted('users_give_donor')) {
+    $donor = new Gazelle\User\Donor($user);
+    $value = (float)trim($_POST['donation_value']);
+    if ($value > 0.0) {
+        $donor->donate(
+            amount:   $value,
+            xbtRate:  (new Gazelle\Manager\XBT)->latestRate('EUR'),
+            currency: $_POST['donation_currency'],
+            reason:   trim($_POST['donation_reason']),
+            source:   'Add Points',
+            who:      $Viewer,
+        );
+        // pretend the secondary_classes field was checked, otherwise the
+        // class will be removed below, and we just added it!
+        $secondaryClasses[] = DONOR;
+    } else {
+        // can add a donation or adjust points, not both
+        $rankDelta   = (int)$_POST['donor_rank_delta'];
+        $totalDelta  = (int)$_POST['total_donor_rank_delta'];
+        if ($rankDelta || $totalDelta) {
+            $donor->adjust(
+                rankDelta:  $rankDelta,
+                totalDelta: $totalDelta,
+                reason:     trim($_POST['reason']),
+                adjuster:   $Viewer,
+            );
+        }
+    }
+}
+
 $removedClasses = [];
 $addedClasses   = [];
-if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
+if ($Viewer->permittedAny('users_promote_below', 'users_promote_to')) {
     $currentClasses = array_keys((new Gazelle\User\Privilege($user))->secondaryClassList());
     sort($currentClasses);
-    if (implode(',', $currentClasses) != implode(',', $secondaryClasses)) {
+    sort($secondaryClasses);
+    if ($currentClasses != $secondaryClasses) {
         $removedClasses = array_diff($currentClasses, $secondaryClasses);
         $addedClasses   = array_diff($secondaryClasses, $currentClasses);
         if (!empty($removedClasses)) {

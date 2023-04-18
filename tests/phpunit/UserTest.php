@@ -55,8 +55,6 @@ class UserTest extends TestCase {
         $user->toggleAttr('disable-forums', true);
         $this->assertTrue($user->hasAttr('disable-forums'), 'uattr-toggle-disable-forums');
         $this->assertTrue($user->disableForums(), 'uattr-hasAttr-disable-forums-yes');
-
-        $this->assertContainsOnly('null', $user->donorAvatar());
     }
 
     public function testPassword(): void {

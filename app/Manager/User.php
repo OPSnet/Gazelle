@@ -178,13 +178,15 @@ class User extends \Gazelle\BaseManager {
                     ?: STATIC_SERVER . '/common/avatars/default.png',
             };
             $attrs = ['width="' . AVATAR_WIDTH . '"'];
-            [$mouseover, $second] = $viewed->donorAvatar();
-            if (!is_null($mouseover)) {
-                $attrs[] = $mouseover;
+            $donor = new \Gazelle\User\Donor($viewed);
+            $avatarHoverText = $donor->avatarHoverText();
+            if ($avatarHoverText !== false) {
+                $attrs[] = "title=\"$avatarHoverText\" alt=\"$avatarHoverText\"";
             }
             $attr = implode(' ', $attrs);
+            $second = $donor->avatarHover();
             $cache[$viewedId] = "<div class=\"avatar_container\"><div><img $attr class=\"avatar_0\" src=\"$avatar\" /></div>"
-                . ($second ? ("<div><img $attr class=\"avatar_1\" src=\"" . $imgProxy->process($second, 'avatar2', $viewedId) . '" /></div>') : '')
+                . ($second !== false ? ("<div><img $attr class=\"avatar_1\" src=\"" . $imgProxy->process($second, 'avatar2', $viewedId) . '" /></div>') : '')
                 . "</div>";
         }
         return $cache[$viewedId];
@@ -809,68 +811,6 @@ class User extends \Gazelle\BaseManager {
         }
         $tracker->update_tracker('remove_users', ['passkeys' => $Concat]);
         return $n;
-    }
-
-    /**
-     * Manage donor status visibility
-     */
-    protected function setDonorVisibility(\Gazelle\User $user, bool $visible): int {
-        $hidden = $visible ? '0' : '1';
-        self::$db->prepared_query("
-            INSERT INTO users_donor_ranks
-                   (UserID, Hidden)
-            VALUES (?,      ?)
-            ON DUPLICATE KEY UPDATE
-                Hidden = ?
-            ", $user->id(), $hidden, $hidden
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function hideDonor(\Gazelle\User $user): int {
-        return $this->setDonorVisibility($user, false);
-    }
-
-    public function showDonor(\Gazelle\User $user): int {
-        return $this->setDonorVisibility($user, true);
-    }
-
-    public function donorRewardTotal(): int {
-        return (int)self::$db->scalar("
-            SELECT count(*)
-            FROM users_main AS um
-            INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
-            INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
-        ");
-    }
-
-    public function donorRewardPage($search, int $limit, int $offset): array {
-        $args = [$limit, $offset];
-        if (is_null($search)) {
-            $where = '';
-        } else {
-            $where = "WHERE um.username REGEXP ?";
-            array_unshift($args, $search);
-        }
-        self::$db->prepared_query("
-            SELECT um.Username,
-                d.UserID AS user_id,
-                d.donor_rank,
-                if(hidden=0, 'No', 'Yes') AS hidden,
-                d.DonationTime AS donation_time,
-                r.IconMouseOverText AS icon_mouse,
-                r.AvatarMouseOverText AS avatar_mouse,
-                r.CustomIcon AS custom_icon,
-                r.SecondAvatar AS second_avatar,
-                r.CustomIconLink AS custom_link
-            FROM users_main AS um
-            INNER JOIN users_donor_ranks AS d ON (d.UserID = um.ID)
-            INNER JOIN donor_rewards AS r ON (r.UserID = um.ID)
-            $where ORDER BY d.donor_rank DESC, d.DonationTime ASC
-            LIMIT ? OFFSET ?
-            ", ...$args
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function demotionCriteria(): array {

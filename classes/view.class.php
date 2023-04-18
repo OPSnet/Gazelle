@@ -1,7 +1,5 @@
 <?php
 class View {
-    protected static $footerSeen = false;
-
     /**
      * This function is to include the header file on a page.
      *
@@ -203,10 +201,6 @@ class View {
      *                       ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
      */
     public static function show_footer($Options = []) {
-        if (self::$footerSeen) {
-            return;
-        }
-        self::$footerSeen = true;
         echo self::footer($Options);
     }
 

@@ -15,12 +15,12 @@
             <input type="text" size="50" name="avatar" id="avatar" value="{{ user.avatar }}" />
         </td>
     </tr>
-{% include 'user/setting/donor.twig' with {'enabled': donor.enabled, 'reward': donor.reward, 'title': donor.title, 'user': user} only %}
+{% include 'user/setting/donor.twig' with {'donor': donor} only %}
     <tr id="pers_proftitle_tr">
         <td class="label tooltip" title="You can customize your profile information with text and BBCode. Entering a title will label your profile information section. Unlock additional profile info boxes via Donor Ranks.">
             <strong>Profile heading</strong>
         </td>
-        <td><input type="text" size="50" name="profile_title" id="profile_title" value="{{ profile.0.title }}" />
+        <td><input type="text" size="50" name="profile_title" id="profile_title" value="{{ profile.title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo_tr">
@@ -28,16 +28,17 @@
             <strong>Profile</strong>
         </td>
         <td>
-            {{ profile.0.ta.emit|raw }}
+            {{ profile.info.emit|raw }}
         </td>
     </tr>
-{% if profile.1.enabled %}
+
+{% if profile[1].info %}
     <tr id="pers_proftitle2_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2.
         Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
             <strong>Profile 2 heading</strong>
         </td>
-        <td><input type="text" size="50" name="profile_title_1" id="profile_title_1" value="{{ profile.1.title }}" />
+        <td><input type="text" size="50" name="profile_title_1" id="profile_title_1" value="{{ profile[1].title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo2_tr">
@@ -46,17 +47,18 @@
             <strong>Profile 2</strong>
         </td>
         <td>
-            {{ profile.1.ta.emit|raw }}
+            {{ profile[1].info.emit|raw }}
         </td>
     </tr>
 {% endif %}
-{% if profile.2.enabled %}
+
+{% if profile[2].info %}
     <tr id="pers_proftitle3_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3.
         Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
             <strong>Profile 3 heading</strong>
         </td>
-        <td><input type="text" size="50" name="profile_title_2" id="profile_title_2" value="{{ profile.2.title }}" />
+        <td><input type="text" size="50" name="profile_title_2" id="profile_title_2" value="{{ profile[2].title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo3_tr">
@@ -64,16 +66,17 @@
             <strong>Profile 3</strong>
         </td>
         <td>
-            {{ profile.2.ta.emit|raw }}
+            {{ profile[2].info.emit|raw }}
         </td>
     </tr>
 {% endif %}
-{% if profile.3.enabled %}
+
+{% if profile[3].info %}
     <tr id="pers_proftitle4_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
             <strong>Profile 4 heading</strong>
         </td>
-        <td><input type="text" size="50" name="profile_title_3" id="profile_title_3" value="{{ profile.3.title }}" />
+        <td><input type="text" size="50" name="profile_title_3" id="profile_title_3" value="{{ profile[3].title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo4_tr">
@@ -81,16 +84,17 @@
             <strong>Profile 4</strong>
         </td>
         <td>
-            {{ profile.3.ta.emit|raw }}
+            {{ profile[3].info.emit|raw }}
         </td>
     </tr>
 {% endif %}
-{% if profile.4.enabled %}
+
+{% if profile[4].info %}
     <tr id="pers_proftitle5_tr">
         <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section.">
             <strong>Profile 5 heading</strong>
         </td>
-        <td><input type="text" size="50" name="profile_title_4" id="profile_title_4" value="{{ profile.4.title }}" />
+        <td><input type="text" size="50" name="profile_title_4" id="profile_title_4" value="{{ profile[4].title }}" />
         </td>
     </tr>
     <tr id="pers_profinfo5_tr">
@@ -98,7 +102,7 @@
             <strong>Profile 5</strong>
         </td>
         <td>
-            {{ profile.4.ta.emit|raw }}
+            {{ profile[4].info.emit|raw }}
         </td>
     </tr>
 {% endif %}

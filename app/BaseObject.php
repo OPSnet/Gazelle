@@ -62,7 +62,7 @@ abstract class BaseObject extends Base {
         }
         $set = implode(', ', [...array_map(fn($f) => "$f = ?", array_keys($this->updateField))]);
         $args = [...array_values($this->updateField)];
-        $args[] = $this->id;
+        $args[] = $this->id();
         self::$db->prepared_query(
             "UPDATE {$this->tableName()} SET $set WHERE {$this->pkName()} = ?",
             ...$args

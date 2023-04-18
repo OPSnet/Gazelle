@@ -141,7 +141,7 @@ foreach ($slice as $Post) {
             'authorId'   => $AuthorID,
             'authorName' => $author->username(),
             'paranoia'   => $author->paranoia(),
-            'donor'      => (new Gazelle\User\Privilege($author))->isDonor(),
+            'donor'      => (new Gazelle\User\Donor($author))->isDonor(),
             'warned'     => $author->isWarned(),
             'avatar'     => $author->avatar(),
             'enabled'    => $author->isEnabled(),

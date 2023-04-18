@@ -28,17 +28,15 @@
       <td style="text-align: left;">Current Donor Rank</td>
       <td style="text-align: left;">Last Donated</td>
     </tr>
-{% for item in list %}
-    {% if not item.user is null %}
-        {% set hide = item.hidden and not is_mod %}
+{% for donor in list %}
+    {% set hide = not donor.isVisible and not is_mod %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td class="center">{{ loop.index }}</td>
-        <td>{% if hide  %}Hidden{% else %}{{ item.user.link|raw }}{% endif %}</td>
-        <td style="text-align: left;">{% if loop.index <= 50 or is_mod %}{{ item.total_rank }}{% else %}Hidden{% endif %}</td>
-        <td style="text-align: left;">{% if hide %}Hidden{% else %}{{ item.user.donorRankLabel|raw }}{% endif %}</td>
-        <td style="text-align: left;">{% if hide %}Hidden{% else %}{{ item.user.lastDonation }}{% endif %}</td>
+        <td>{% if hide %}Hidden{% else %}{{ donor.link|raw }}{% endif %}</td>
+        <td style="text-align: left;">{% if loop.index <= 50 or is_mod %}{{ donor.totalRank }}{% else %}Hidden{% endif %}</td>
+        <td style="text-align: left;">{% if hide %}Hidden{% else %}{{ donor.rankLabel|raw }}{% endif %}</td>
+        <td style="text-align: left;">{% if hide %}Hidden{% else %}{{ donor.lastDonationDate }}{% endif %}</td>
     </tr>
-    {% endif %}
 {% else %}
   <tr class="rowb">
       <td colspan="9" class="center">

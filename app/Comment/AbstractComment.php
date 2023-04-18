@@ -55,7 +55,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                 'postId'         => $postId,
                 'authorId'       => $userId,
                 'name'           => $author->username(),
-                'donor'          => (new \Gazelle\User\Privilege($author))->isDonor(),
+                'donor'          => (new \Gazelle\User\Donor($author))->isDonor(),
                 'warned'         => $author->isWarned(),
                 'enabled'        => $author->isEnabled(),
                 'class'          => $manager->userclassName($author->primaryClass()),

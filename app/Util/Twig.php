@@ -135,7 +135,7 @@ class Twig {
                 if (is_null($user)) {
                     return '';
                 }
-                $icon = [(new \Gazelle\User\Donor($user))->heartLink($viewer)];
+                $icon = [(new \Gazelle\User\Donor($user))->heart($viewer)];
                 if ($user->isWarned()) {
                     $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
                         . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
@@ -250,7 +250,7 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addTest(new \Twig\TwigTest('donor', fn($user) => $user::class === \Gazelle\User::class && (new \Gazelle\User\Privilege($user))->isDonor()));
+        $twig->addTest(new \Twig\TwigTest('donor', fn($user) => !is_null($user) && $user::class === \Gazelle\User::class && (new \Gazelle\User\Donor($user))->isDonor()));
 
         $twig->addTest(new \Twig\TwigTest('nan', fn($value) => is_nan($value)));
 

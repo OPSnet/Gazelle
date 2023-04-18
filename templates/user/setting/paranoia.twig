@@ -54,7 +54,7 @@
     <tr id="para_donations_tr">
         <td class="label"><strong>Donations</strong></td>
         <td>
-            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ checked(user.donorVisible) }} />
+            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ checked(donor.isVisible) }} />
             <label for="p_donor_stats">Show donor stats</label>&nbsp;&nbsp;
             <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ checked(not user.isParanoid('hide_donor_heart')) }} />
             <label for="p_donor_heart">Show donor heart</label>

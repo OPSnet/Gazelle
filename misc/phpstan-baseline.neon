@@ -4106,11 +4106,6 @@ parameters:
 			path: ../classes/users.class.php
 
 		-
-			message: "#^Parameter \\#3 \\$UserID of method Gazelle\\\\Util\\\\ImageProxy\\:\\:process\\(\\) expects bool\\|float\\|int, int\\|string given\\.$#"
-			count: 1
-			path: ../classes/users.class.php
-
-		-
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../classes/view.class.php
@@ -4147,11 +4142,6 @@ parameters:
 
 		-
 			message: "#^Method View\\:\\:show_header\\(\\) has parameter \\$option with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Property View\\:\\:\\$footerSeen has no type specified\\.$#"
 			count: 1
 			path: ../classes/view.class.php
 
@@ -4694,11 +4684,6 @@ parameters:
 			message: "#^Variable \\$where might not be defined\\.$#"
 			count: 1
 			path: ../sections/tools/development/database_specifics.php
-
-		-
-			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, float given\\.$#"
-			count: 1
-			path: ../sections/tools/finances/donation_log.php
 
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"

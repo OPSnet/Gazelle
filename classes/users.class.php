@@ -21,6 +21,7 @@ class Users {
         if (is_null($user)) {
             return "Unknown [$UserID]";
         }
+        $donor = new Gazelle\User\Donor($user);
 
         global $Viewer; // FIXME this is wrong
         $imgProxy = new \Gazelle\Util\ImageProxy($Viewer);
@@ -32,52 +33,15 @@ class Users {
             $OverrideParanoia = false;
         }
 
-        $Username = $user->username();
-        if ($IsDonorForum) {
-            [$Prefix, $Suffix, $HasComma] = $user->donorTitles();
-            $Username = "$Prefix $Username" . ($HasComma ? ', ' : ' ') . $Suffix;
-        }
-
+        $username = $donor->username($IsDonorForum);
         if ($Title) {
-            $Str = "<strong><a href=\"user.php?id=$UserID\">$Username</a></strong>";
+            $Str = "<strong><a href=\"user.php?id=$UserID\">$username</a></strong>";
         } else {
-            $Str = "<a href=\"user.php?id=$UserID\">$Username</a>";
+            $Str = "<a href=\"user.php?id=$UserID\">$username</a>";
         }
-
         if ($Badges) {
-            $DonorRank = $user->donorRank();
-            if ($DonorRank == 0 && (new \Gazelle\User\Privilege($user))->isDonor()) {
-                $DonorRank = 1;
-            }
-            if ($DonorRank > 0 && ($OverrideParanoia || $user->propertyVisible($Viewer, 'hide_donor_heart'))) {
-                $EnabledRewards = $user->enabledDonorRewards();
-                $DonorRewards = $user->donorRewards();
-                $IconText = ($EnabledRewards['HasDonorIconMouseOverText'] && !empty($DonorRewards['IconMouseOverText']))
-                    ? display_str($DonorRewards['IconMouseOverText']) : 'Donor';
-                $IconLink = ($EnabledRewards['HasDonorIconLink'] && !empty($DonorRewards['CustomIconLink']))
-                    ? display_str($DonorRewards['CustomIconLink']) : 'donate.php';
-                if ($EnabledRewards['HasCustomDonorIcon'] && !empty($DonorRewards['CustomIcon'])) {
-                    $IconImage = $imgProxy->process($DonorRewards['CustomIcon'], 'donoricon', $UserID);
-                } else {
-                    if ($user->specialDonorRank() === MAX_SPECIAL_RANK) {
-                        $DonorHeart = 6;
-                    } elseif ($DonorRank === 5) {
-                        $DonorHeart = 4; // Two points between rank 4 and 5
-                    } elseif ($DonorRank >= MAX_RANK) {
-                        $DonorHeart = 5;
-                    } else {
-                        $DonorHeart = $DonorRank;
-                    }
-                    if ($DonorHeart === 1) {
-                        $IconImage = STATIC_SERVER . '/common/symbols/donor.png';
-                    } else {
-                        $IconImage = STATIC_SERVER . "/common/symbols/donor_{$DonorHeart}.png";
-                    }
-                }
-                $Str .= "<a target=\"_blank\" href=\"$IconLink\"><img class=\"donor_icon tooltip\" src=\"$IconImage\" alt=\"$IconText\" title=\"$IconText\" /></a>";
-            }
+            $Str .= $donor->heart($Viewer);
         }
-
         $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
             . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
             . ($Viewer->id() == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($user->warningExpiry())) : '')

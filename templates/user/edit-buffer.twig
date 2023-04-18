@@ -24,8 +24,8 @@
     <td>
         <input type="hidden" name="OldCollages" value="{{ user.paidPersonalCollages }}" />
         <input type="text" size="20" name="Collages" value="{{ user.paidPersonalCollages }}" />
-{% if user.personalDonorCollages > 0 %}
-            <p>Donor perks provide an extra {{ user.personalDonorCollages }} collage{{ user.personalDonorCollages|plural }} <em>in addition</em> to this amount.</p>
+{% if donor.collageTotal %}
+            <p>Donor perks provide an extra {{ donor.collageTotal }} collage{{ donor.collageTotal|plural }} <em>in addition</em> to this amount.</p>
 {% endif %}
     </td>
 </tr>

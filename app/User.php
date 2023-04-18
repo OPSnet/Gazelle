@@ -24,9 +24,6 @@ class User extends BaseObject {
     protected array $forumWarning = [];
     protected array $staffNote = [];
 
-    protected bool $donorVisible;
-    protected string $donorHeart;
-
     protected Stats\User|null $stats;
 
     public function flush(): User {
@@ -228,8 +225,6 @@ class User extends BaseObject {
 
     /**
      * Get the permissions (granted or revoked) for this user
-     *
-     * @return array permission list
      */
     public function permissionList(): array {
         return $this->info()['Permission'];
@@ -238,8 +233,6 @@ class User extends BaseObject {
     /**
      * Get the default permissions of this user
      * (before any userlevel grants or revocations are considered).
-     *
-     * @return array permission list
      */
     public function defaultPermissionList(): array {
         return $this->info()['defaultPermission'] ?? [];
@@ -247,9 +240,6 @@ class User extends BaseObject {
 
     /**
      * Set the custom permissions for this user
-     *
-     * @param array $current a list of "perm_<permission_name>" custom permissions
-     * @return bool was there a change?
      */
     public function modifyPermissionList(array $current): bool {
         $permissionList = array_keys(\Gazelle\Manager\Privilege::privilegeList());
@@ -275,9 +265,6 @@ class User extends BaseObject {
 
     /**
      * Does the user have a specific permission?
-     *
-     * @param string $permission name
-     * @return bool permission granted
      */
     public function permitted(string $permission): bool {
         return $this->info()['Permission'][$permission] ?? false;
@@ -287,7 +274,6 @@ class User extends BaseObject {
      * Does the user have any of the specified permissions?
      *
      * @param string[] $permission names
-     * @return bool permission granted
      */
     public function permittedAny(...$permission): bool {
         foreach ($permission as $p) {
@@ -300,8 +286,6 @@ class User extends BaseObject {
 
     /**
      * Get the secondary classes of the user (enabled or not)
-     *
-     * @return array secondary classes list
      */
     public function secondaryClassesList(): array {
         self::$db->prepared_query('
@@ -370,22 +354,6 @@ class User extends BaseObject {
         return !$this->hasAttr('no-fl-gifts');
     }
 
-    public function option(string $option): array|int|string|null {
-        return $this->info()['SiteOptions'][$option] ?? null;
-    }
-
-    public function postsPerPage(): int {
-        return $this->info()['SiteOptions']['PostsPerPage'] ?? POSTS_PER_PAGE;
-    }
-
-    public function username(): string {
-        return $this->info()['Username'];
-    }
-
-    public function label(): string {
-        return $this->id . " (" . $this->info()['Username'] . ")";
-    }
-
     public function announceKey(): string {
         return $this->info()['torrent_pass'];
     }
@@ -395,20 +363,28 @@ class User extends BaseObject {
             . '/' . $this->announceKey() . '/announce';
     }
 
+    public function auth(): string {
+        return $this->info()['AuthKey'];
+    }
+
+    public function avatar(): ?string {
+        return $this->info()['Avatar'];
+    }
+
+    public function avatarMode(): int {
+        return (int)$this->option('DisableAvatars');
+    }
+
     public function bonusPointsTotal(): int {
         return (int)$this->info()['BonusPoints'];
     }
 
-    public function downloadedSize(): int {
-        return $this->info()['Downloaded'];
+    public function classLevel(): int {
+        return $this->info()['Class'];
     }
 
-    public function downloadedOnRatioWatch(): int {
-        return $this->info()['RatioWatchDownload'];
-    }
-
-    public function uploadedSize(): int {
-        return $this->info()['Uploaded'];
+    public function created(): string {
+        return $this->info()['JoinDate'];
     }
 
     public function disableAvatar(): bool {
@@ -455,96 +431,24 @@ class User extends BaseObject {
         return $this->hasAttr('disable-wiki');
     }
 
-    public function auth(): string {
-        return $this->info()['AuthKey'];
-    }
-
-    public function rssAuth(): string {
-        return md5($this->id . RSS_HASH . $this->announceKey());
-    }
-
-    public function avatar(): ?string {
-        return $this->info()['Avatar'];
-    }
-
-    public function avatarMode(): int {
-        return (int)$this->option('DisableAvatars');
-    }
-
-    public function showAvatars(): bool {
-        return $this->avatarMode() != 1;
-    }
-
-    public function donorAvatar(): array {
-        $enabled = $this->enabledDonorRewards();
-        $rewards = $this->donorRewards();
-        if (!$enabled['HasAvatarMouseOverText']) {
-            $mouseOver = null;
-        } else {
-            $text = $rewards['AvatarMouseOverText'];
-            $mouseOver = empty($text) ? null : "title=\"$text\" alt=\"$text\"";
-        }
-        return [$mouseOver, $enabled['HasSecondAvatar'] ? ($rewards['SecondAvatar'] ?: null) : null];
-    }
-
-    public function donorVisible(): bool {
-        if (!isset($this->donorVisible)) {
-            $this->donorVisible = (bool)self::$db->scalar("
-                SELECT 1 FROM users_donor_ranks WHERE Hidden = '0' AND UserID = ?
-                ", $this->id
-            );
-        }
-        return $this->donorVisible;
-    }
-
-    public function donorHeart(User $user): string {
-        if (!isset($this->donorHeart)) {
-            if (!(new User\Privilege($this))->isDonor()) {
-                $this->donorHeart = '';
-            } else {
-                $enabled = $this->enabledDonorRewards();
-                $reward = $this->donorRewards();
-                if ($enabled['HasCustomDonorIcon'] && $reward['CustomIcon']) {
-                    $iconImage = (new Util\ImageProxy($user))->process($reward['CustomIcon'], 'donoricon', $this->id);
-                } else {
-                    $rank = $this->donorRank();
-                    if ($rank == 0) {
-                        $rank = 1;
-                    }
-                    $donorHeart = match(true) {
-                        ($this->specialDonorRank() === MAX_SPECIAL_RANK) => 6,
-                        ($rank === 5)                                    => 4, // Two points between rank 4 and 5
-                        ($rank >= MAX_RANK)                              => 5,
-                        default                                          => $rank,
-                    };
-                    $iconImage = STATIC_SERVER . '/common/symbols/'
-                        . ($donorHeart === 1 ? 'donor.png' : "donor_{$donorHeart}.png");
-                }
-                $iconText = $enabled['HasDonorIconMouseOverText'] ? ($reward['IconMouseOverText'] ?? 'Donor') : 'Donor';
-                $this->donorHeart = '<a target="_blank" href="'
-                    . ($enabled['HasDonorIconLink'] ? ($reward['CustomIconLink'] ?? 'donate.php') : 'donate.php')
-                    . '"><img class="donor_icon tooltip" src="' . $iconImage
-                    . '" alt="' . $iconText . '" title="' . $iconText
-                    . '" /></a>';
-            }
-        }
-        return $this->donorHeart;
-    }
-
     public function downloadAlt(): bool {
         return $this->info()['DownloadAlt'] == '1';
     }
 
+    public function downloadedSize(): int {
+        return $this->info()['Downloaded'];
+    }
+
+    public function downloadedOnRatioWatch(): int {
+        return $this->info()['RatioWatchDownload'];
+    }
+
+    public function effectiveClass(): int {
+        return $this->info()['effective_class'];
+    }
+
     public function email(): string {
         return $this->info()['Email'];
-    }
-
-    public function infoProfile(): string {
-        return $this->info()['Info'] ?? '';
-    }
-
-    public function infoTitle(): string {
-        return $this->info()['InfoTitle'] ?? 'Profile';
     }
 
     public function ipaddr(): string {
@@ -555,12 +459,64 @@ class User extends BaseObject {
         return $this->info()['IRCKey'];
     }
 
-    public function created(): string {
-        return $this->info()['JoinDate'];
+    public function label(): string {
+        return $this->id . " (" . $this->info()['Username'] . ")";
+    }
+
+    public function option(string $option): array|int|string|null {
+        return $this->info()['SiteOptions'][$option] ?? null;
+    }
+
+    public function postsPerPage(): int {
+        return $this->info()['SiteOptions']['PostsPerPage'] ?? POSTS_PER_PAGE;
+    }
+
+    public function profileInfo(): string {
+        return $this->info()['Info'] ?? '';
+    }
+
+    public function profileTitle(): string {
+        return $this->info()['InfoTitle'] ?? 'Profile';
+    }
+
+    public function requiredRatio(): float {
+        return $this->info()['RequiredRatio'];
+    }
+
+    public function rssAuth(): string {
+        return md5($this->id . RSS_HASH . $this->announceKey());
+    }
+
+    public function showAvatars(): bool {
+        return $this->avatarMode() != 1;
+    }
+
+    public function staffNotes(): string {
+        return $this->info()['AdminComment'];
+    }
+
+    public function supportFor(): string {
+        return $this->info()['SupportFor'];
     }
 
     public function TFAKey(): ?string {
         return $this->info()['2FA_Key'];
+    }
+
+    public function title(): ?string {
+        return $this->info()['Title'];
+    }
+
+    public function uploadedSize(): int {
+        return $this->info()['Uploaded'];
+    }
+
+    public function userclassName(): string {
+        return $this->info()['className'];
+    }
+
+    public function username(): string {
+        return $this->info()['Username'];
     }
 
     /**
@@ -736,22 +692,6 @@ class User extends BaseObject {
         return null;
     }
 
-    public function requiredRatio(): float {
-        return $this->info()['RequiredRatio'];
-    }
-
-    public function staffNotes(): string {
-        return $this->info()['AdminComment'];
-    }
-
-    public function supportFor(): string {
-        return $this->info()['SupportFor'];
-    }
-
-    public function title(): ?string {
-        return $this->info()['Title'];
-    }
-
     public function primaryClass(): int {
         // temp hack to understand why this is sometimes null
         $permId = $this->info()['PermissionID'];
@@ -763,18 +703,6 @@ class User extends BaseObject {
             );
         }
         return $this->info()['PermissionID'];
-    }
-
-    public function userclassName(): string {
-        return $this->info()['className'];
-    }
-
-    public function classLevel(): int {
-        return $this->info()['Class'];
-    }
-
-    public function effectiveClass(): int {
-        return $this->info()['effective_class'];
     }
 
     /**
@@ -1454,7 +1382,7 @@ class User extends BaseObject {
      * @return int number of collages (including collages granted from donations)
      */
     public function allowedPersonalCollages(): int {
-        return $this->paidPersonalCollages() + $this->personalDonorCollages();
+        return $this->paidPersonalCollages() + (new User\Donor($this))->collageTotal();
     }
 
     /**
@@ -2206,403 +2134,5 @@ class User extends BaseObject {
             ", $this->id
         );
         return self::$db->affected_rows();
-    }
-
-    /**
-     * Get the donation history of the user
-     *
-     * @return array of array of [amount, date, currency, reason, source, addedby, rank, totalrank]
-     */
-    public function donorHistory(): array {
-        $QueryID = self::$db->get_query_id();
-        self::$db->prepared_query("
-            SELECT Amount, Time, Currency, Reason, Source, AddedBy, donor_rank, TotalRank
-            FROM donations
-            WHERE UserID = ?
-            ORDER BY Time DESC
-            ", $this->id
-        );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        self::$db->set_query_id($QueryID);
-        return $list;
-    }
-
-    /**
-     * Put all the common donor info in the same cache key to save some cache calls
-     */
-    protected function donorInfo(): array {
-        // Our cache class should prevent identical memcached requests
-        $UserID = $this->id;
-        $DonorInfo = self::$cache->get_value("donor_info_$UserID");
-        if ($DonorInfo === false) {
-            $QueryID = self::$db->get_query_id();
-            self::$db->prepared_query('
-                SELECT donor_rank,
-                    SpecialRank,
-                    TotalRank,
-                    DonationTime,
-                    RankExpirationTime + INTERVAL 766 HOUR
-                FROM users_donor_ranks
-                WHERE UserID = ?
-                ', $UserID
-            );
-            // 2 hours less than 32 days to account for schedule run times
-            if (self::$db->has_results()) {
-                [$Rank, $SpecialRank, $TotalRank, $DonationTime, $ExpireTime]
-                    = self::$db->next_record(MYSQLI_NUM, false);
-                if ($DonationTime === null) {
-                    $DonationTime = 0;
-                }
-                if ($ExpireTime === null) {
-                    $ExpireTime = 0;
-                }
-            } else {
-                $Rank = $SpecialRank = $TotalRank = $DonationTime = $ExpireTime = 0;
-            }
-            if ($this->isStaff()) {
-                $Rank = MAX_EXTRA_RANK;
-                $SpecialRank = MAX_SPECIAL_RANK;
-            }
-            self::$db->prepared_query('
-                SELECT IconMouseOverText,
-                    AvatarMouseOverText,
-                    CustomIcon,
-                    CustomIconLink,
-                    SecondAvatar
-                FROM donor_rewards
-                WHERE UserID = ?
-                ', $UserID
-            );
-            if (self::$db->has_results()) {
-                $Rewards = self::$db->next_record(MYSQLI_ASSOC, false);
-            } else {
-                $Rewards = [
-                    'IconMouseOverText'   => null,
-                    'AvatarMouseOverText' => null,
-                    'CustomIcon'          => null,
-                    'CustomIconLink'      => null,
-                    'SecondAvatar'        => null,
-                ];
-            }
-            self::$db->set_query_id($QueryID);
-
-            $DonorInfo = [
-                'donor_rank' => (int)$Rank,
-                'SRank'      => (int)$SpecialRank,
-                'TotRank'    => (int)$TotalRank,
-                'Time'       => $DonationTime,
-                'ExpireTime' => $ExpireTime,
-                'Rewards'    => $Rewards
-            ];
-            self::$cache->cache_value("donor_info_$UserID", $DonorInfo, 86400);
-        }
-        return $DonorInfo;
-    }
-
-    /**
-     * Donor honorifics for the donor forum
-     *
-     * @return array [prefix, suffix, use_comma]
-     */
-    public function donorTitles(): array {
-        $key = "u_donor_" . $this->id;
-        $Results = self::$cache->get_value($key);
-        if ($Results === false) {
-            $Results = self::$db->rowAssoc("
-                SELECT Prefix AS prefix,
-                    Suffix AS suffix,
-                    UseComma AS use_comma
-                FROM donor_forum_usernames
-                WHERE UserID = ?
-                ", $this->id
-            );
-            if (is_null($Results)) {
-                $Results = ['prefix' => null, 'suffix' => null, 'use_comma' => false];
-            } else {
-                $Results['use_comma'] = (bool)$Results['use_comma'];
-            }
-            self::$cache->cache_value($key, $Results, 0);
-        }
-        return $Results;
-    }
-
-    /**
-     * Current Donor rank (points)
-     *
-     * @return int points
-     */
-    public function donorRank() {
-        return $this->donorInfo()['donor_rank'];
-    }
-
-    /**
-     * Special Donor rank of user
-     *
-     * @return int special rank
-     */
-    public function specialDonorRank() {
-        return $this->donorInfo()['SRank'];
-    }
-
-    /**
-     * Total Donor points (to help calculate special rank)
-     *
-     * @return int total points
-     */
-    public function totalDonorRank() {
-        return $this->donorInfo()['TotRank'];
-    }
-
-    /**
-     * How many collages does the user have thanks to their donations?
-     *
-     * @return int number of collages
-     */
-    public function personalDonorCollages() {
-        $info = $this->donorInfo();
-        if ($info['SRank'] == MAX_SPECIAL_RANK) {
-            return 5;
-        }
-        return min($info['donor_rank'], 5); // One extra collage per donor rank up to 5
-    }
-
-    /**
-     * When did the user last donate?
-     *
-     * @return string date of last donation
-     */
-    public function lastDonation() {
-        return $this->donorInfo()['Time'];
-    }
-
-    /**
-     * Get the donation rewards (profiles, avatars etc)
-     *
-     * @return array rewards
-     */
-    public function donorRewards() {
-        return $this->donorInfo()['Rewards'];
-    }
-
-    /**
-     * Get the rewards to which the user is entitled
-     *
-     * @return array enabled rewards
-     */
-    public function enabledDonorRewards() {
-        $Rewards = [];
-        $Rank = $this->donorRank();
-        $SpecialRank = $this->specialDonorRank();
-        $HasAll = $SpecialRank == 3;
-
-        $Rewards = [
-            'HasAvatarMouseOverText' => false,
-            'HasCustomDonorIcon' => false,
-            'HasDonorForum' => false,
-            'HasDonorIconLink' => false,
-            'HasDonorIconMouseOverText' => false,
-            'HasProfileInfo1' => false,
-            'HasProfileInfo2' => false,
-            'HasProfileInfo3' => false,
-            'HasProfileInfo4' => false,
-            'HasSecondAvatar' => false
-        ];
-
-        if ($Rank >= 2 || $HasAll) {
-            $Rewards["HasDonorIconMouseOverText"] = true;
-            $Rewards["HasProfileInfo1"] = true;
-        }
-        if ($Rank >= 3 || $HasAll) {
-            $Rewards["HasAvatarMouseOverText"] = true;
-            $Rewards["HasProfileInfo2"] = true;
-        }
-        if ($Rank >= 4 || $HasAll) {
-            $Rewards["HasDonorIconLink"] = true;
-            $Rewards["HasProfileInfo3"] = true;
-        }
-        if ($Rank >= MAX_RANK || $HasAll) {
-            $Rewards["HasCustomDonorIcon"] = true;
-            $Rewards["HasDonorForum"] = true;
-            $Rewards["HasProfileInfo4"] = true;
-        }
-        if ($SpecialRank >= 2) {
-            $Rewards["HasSecondAvatar"] = true;
-        }
-        return $Rewards;
-    }
-
-    /**
-     * Get the donation rewards that are used on the user profile page
-     *
-     * @return array rewards
-     */
-    public function profileDonorRewards() {
-        $key = "donor_profile_rewards_" . $this->id;
-        $Results = self::$cache->get_value($key);
-        if ($Results === false) {
-            $QueryID = self::$db->get_query_id();
-            self::$db->prepared_query('
-                SELECT ProfileInfo1,
-                    ProfileInfo2,
-                    ProfileInfo3,
-                    ProfileInfo4,
-                    ProfileInfoTitle1,
-                    ProfileInfoTitle2,
-                    ProfileInfoTitle3,
-                    ProfileInfoTitle4
-                FROM donor_rewards
-                WHERE UserID = ?
-                ', $this->id
-            );
-            if (self::$db->has_results()) {
-                $Results = self::$db->next_record(MYSQLI_ASSOC, false);
-            } else {
-                $Results = [
-                    'ProfileInfo1' => null,
-                    'ProfileInfo2' => null,
-                    'ProfileInfo3' => null,
-                    'ProfileInfo4' => null,
-                    'ProfileInfoTitle1' => null,
-                    'ProfileInfoTitle2' => null,
-                    'ProfileInfoTitle3' => null,
-                    'ProfileInfoTitle4' => null,
-                ];
-            }
-            self::$db->set_query_id($QueryID);
-            self::$cache->cache_value($key, $Results, 0);
-        }
-        return $Results;
-    }
-
-    /**
-     * Get the donation label
-     *
-     * @return string donation label
-     */
-    public function donorRankLabel(bool $showOverflow = false): string {
-        if ($this->specialDonorRank() == 3) {
-            return '&infin; [Diamond]';
-        }
-        $rank = $this->donorRank();
-        $label = $rank >= MAX_RANK ? MAX_RANK : $rank;
-        $overflow = $rank - $label;
-        if ($label == 5 || $label == 6) {
-            $label--;
-        }
-        if ($showOverflow && $overflow) {
-            $label .= " (+$overflow)";
-        }
-
-        return $label . match(true) {
-            ($rank >= 6) => ' [Gold]',
-            ($rank >= 4) => ' [Silver]',
-            ($rank >= 3) => ' [Bronze]',
-            ($rank >= 2) => ' [Copper]',
-            ($rank >= 1) => ' [Red]',
-            default      => '',
-        };
-    }
-
-    /**
-     * When does the current donation level expire?
-     *
-     * @return string expiry label
-     */
-    public function donorRankExpiry(): string {
-        $info = $this->donorInfo();
-        if (in_array($info['SRank'], [1, MAX_SPECIAL_RANK])) {
-            return 'Never';
-        }
-        if (!$info['ExpireTime']) {
-            return '';
-        }
-        $expiry = strtotime($info['ExpireTime']);
-        return ($expiry - time() < 60) ? 'Soon' : ('in ' . time_diff($expiry));
-    }
-
-    /**
-     * Update donor rewards
-     */
-    public function updateReward(array $field): void {
-        $Rank = $this->donorRank();
-        $SpecialRank = $this->specialDonorRank();
-        $HasAll = ($SpecialRank === 3);
-        $insert = [];
-        $args = [];
-
-        $QueryID = self::$db->get_query_id();
-        $UserID = $this->id;
-
-        if ($Rank >= 2 || $HasAll) {
-            if (isset($field['donor_icon_mouse_over_text'])) {
-                $insert[] = "IconMouseOverText";
-                $args[] = $field['donor_icon_mouse_over_text'];
-            }
-        }
-        if ($Rank >= 3 || $HasAll) {
-            if (isset($field['avatar_mouse_over_text'])) {
-                $insert[] = "AvatarMouseOverText";
-                $args[] = $field['avatar_mouse_over_text'];
-            }
-        }
-        if ($Rank >= 4 || $HasAll) {
-            if (isset($field['donor_icon_link'])) {
-                $value = $field['donor_icon_link'];
-                if ($value === '' || preg_match(URL_REGEXP, $value)) {
-                    $insert[] = "CustomIconLink";
-                    $args[] = $value;
-                }
-            }
-        }
-        if ($Rank >= MAX_RANK || $HasAll) {
-            if (isset($field['donor_icon_custom_url'])) {
-                $value = $field['donor_icon_custom_url'];
-                if ($value === '' || preg_match(IMAGE_REGEXP, $value)) {
-                    $insert[] = "CustomIcon";
-                    $args[] = $value;
-                }
-            }
-            $comma = empty($field['donor_title_comma']) ? 0 : 1;
-            self::$db->prepared_query('
-                INSERT INTO donor_forum_usernames
-                       (UserID, Prefix, Suffix, UseComma)
-                VALUES (?,      ?,      ?,      ?)
-                ON DUPLICATE KEY UPDATE
-                    Prefix = ?, Suffix = ?, UseComma = ?
-                ', $UserID, $field['donor_title_prefix'] ?? '', $field['donor_title_suffix'] ?? '', $comma,
-                    $field['donor_title_prefix'] ?? '', $field['donor_title_suffix'] ?? '', $comma,
-            );
-            self::$cache->delete_value("u_donor_$UserID");
-        }
-
-        for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
-            if (isset($field["profile_title_" . $i]) && isset($field["profile_info_" . $i])) {
-                $insert[] = "ProfileInfoTitle" . $i;
-                $insert[] = "ProfileInfo" . $i;
-                $args[] = $field["profile_title_" . $i];
-                $args[] = $field["profile_info_" . $i];
-            }
-        }
-        if ($SpecialRank >= 2) {
-            if (isset($field['second_avatar'])) {
-                $value = $field['second_avatar'];
-                if ($value === '' || preg_match(IMAGE_REGEXP, $value)) {
-                    $insert[] = "SecondAvatar";
-                    $args[] = $value;
-                }
-            }
-        }
-        if (count($insert) > 0) {
-            self::$db->prepared_query("
-                INSERT INTO donor_rewards
-                       (UserID, " . implode(', ', $insert) . ")
-                VALUES (?, " . placeholders($insert) . ")
-                ON DUPLICATE KEY UPDATE
-                " . implode(', ', array_map(fn($c) => "$c = ?", $insert)),
-                $UserID, ...[...$args, ...$args]
-            );
-        }
-        self::$db->set_query_id($QueryID);
-        self::$cache->delete_multi(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
     }
 }

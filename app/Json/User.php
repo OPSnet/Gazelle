@@ -61,7 +61,7 @@ class User extends \Gazelle\Json {
             'username'    => $user->username(),
             'avatar'      => $user->avatar(),
             'isFriend'    => (new \Gazelle\User\Friend($user))->isFriend($viewer->id()),
-            'profileText' => \Text::full_format($user->infoProfile()),
+            'profileText' => \Text::full_format($user->profileInfo()),
             'stats' => [
                 'joinedDate'    => $user->created(),
                 'lastAccess'    => match(true) {
@@ -98,7 +98,7 @@ class User extends \Gazelle\Json {
                 'class'        => $user->userclassName(),
                 'paranoia'     => $user->paranoiaLevel(),
                 'paranoiaText' => $user->paranoiaLabel(),
-                'donor'        => (new \Gazelle\User\Privilege($user))->isDonor(),
+                'donor'        => (new \Gazelle\User\Donor($user))->isDonor(),
                 'warned'       => $user->isWarned(),
                 'enabled'      => $user->isEnabled(),
                 'passkey'      => ($user->id() === $viewer->id() || $viewer->isStaff()) ? $user->announceKey() : null,

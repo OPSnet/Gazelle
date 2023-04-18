@@ -30,7 +30,7 @@ class UserSearch extends \Gazelle\Json {
             $payload[] = [
                 'userId'   => $user->id(),
                 'username' => $user->username(),
-                'donor'    => (new \Gazelle\User\Privilege($user))->isDonor(),
+                'donor'    => (new \Gazelle\User\Donor($user))->isDonor(),
                 'warned'   => $user->isWarned(),
                 'enabled'  => $user->isEnabled(),
                 'class'    => $user->userclassName(),

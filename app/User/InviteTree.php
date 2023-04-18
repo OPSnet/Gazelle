@@ -200,7 +200,7 @@ class InviteTree extends \Gazelle\Base {
             if ($invitee->isDisabled()) {
                 $info['disabled']++;
             }
-            if ((new Privilege($invitee))->isDonor()) {
+            if ((new Donor($invitee))->isDonor()) {
                 $info['donor']++;
             }
 

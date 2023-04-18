@@ -40,7 +40,6 @@ class Privilege extends \Gazelle\BaseUser {
         return $this->info;
     }
 
-    public function isDonor(): bool       { return isset($this->info()[DONOR]) || $this->user->isStaff(); }
     public function isFLS(): bool         { return isset($this->info()[FLS_TEAM]); }
     public function isInterviewer(): bool { return isset($this->info()[INTERVIEWER]); }
     public function isRecruiter(): bool   { return isset($this->info()[RECRUITER]); }
@@ -98,5 +97,38 @@ class Privilege extends \Gazelle\BaseUser {
 
     public function secondaryClassList(): array {
         return array_map(fn($x) => $x['Name'], $this->info());
+    }
+
+    public function hasSecondaryClass(string $className): bool {
+        return (bool)self::$db->scalar("
+            SELECT 1
+            FROM users_levels ul
+            INNER JOIN permissions p ON (p.ID = ul.PermissionID)
+            WHERE ul.UserID = ?
+                AND p.Name = ?
+            ", $this->id(), $className
+        );
+    }
+
+    public function addSecondaryClass(string $className): int {
+        self::$db->prepared_query("
+            INSERT INTO users_levels
+                   (UserID, PermissionID)
+            VALUES (?,      (SELECT ID FROM permissions WHERE Name = ?))
+            ", $this->id(), $className
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function removeSecondaryClass(string $className): int {
+        self::$db->prepared_query("
+            DELETE ul
+            FROM users_levels ul
+            INNER JOIN permissions p ON (p.ID = ul.PermissionID)
+            WHERE ul.UserID = ?
+                AND p.Name = ?
+            ", $this->id(), $className
+        );
+        return self::$db->affected_rows();
     }
 }

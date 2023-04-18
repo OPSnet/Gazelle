@@ -12,7 +12,7 @@ if (is_null($User)) {
 $UserID      = $User->id();
 $Username    = $User->username();
 $Class       = $User->primaryClass();
-
+$donor       = new Gazelle\User\Donor($User);
 $userBonus   = new Gazelle\User\Bonus($User);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
 $PRL         = new Gazelle\User\PermissionRateLimit($User);
@@ -69,7 +69,8 @@ View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,
 echo $Twig->render('user/header.twig', [
     'badge_list' => (new Gazelle\User\Privilege($User))->badgeList(),
     'bonus'      => $userBonus,
-    'freeleech' => [
+    'donor'      => $donor,
+    'freeleech'  => [
         'item'   => $OwnProfile ? [] : $viewerBonus->otherList(),
         'other'  => $FL_OTHER_tokens ?? null,
         'latest' => $viewerBonus->otherLatest($User),
@@ -330,12 +331,10 @@ echo $Twig->render('user/sidebar-stats.twig', [
     ],
 ]);
 
-if ($Viewer->permitted("users_mod") || $OwnProfile || $User->donorVisible()) {
+if ($Viewer->permitted("users_mod") || $OwnProfile || $donor->isVisible()) {
     echo $Twig->render('donation/stats.twig', [
-        'is_self'     => $OwnProfile,
-        'is_mod'      => $Viewer->permitted('users_mod'),
-        'leaderboard' => $donorMan->leaderboardRank($User),
-        'user'        => $User,
+        'donor'  => $donor,
+        'viewer' => $Viewer,
     ]);
 }
 ?>
@@ -350,25 +349,24 @@ if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) {
 ?>
         <div class="box">
             <div class="head">
-                <?= display_str($User->infoTitle()) ?>
+                <?= display_str($User->profileTitle()) ?>
                 <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
             </div>
             <div class="pad profileinfo" id="profilediv">
-                <?= $User->infoProfile() ? Text::full_format($User->infoProfile()) : 'This profile is currently empty.' ?>
+                <?= $User->profileInfo() ? Text::full_format($User->profileInfo()) : 'This profile is currently empty.' ?>
             </div>
         </div>
 <?php
-$EnabledRewards = $User->enabledDonorRewards();
-$ProfileRewards = $User->profileDonorRewards();
-for ($i = 1; $i <= 4; $i++) {
-    if ($EnabledRewards['HasProfileInfo' . $i] && $ProfileRewards['ProfileInfo' . $i]) {
+foreach (range(1, 4) as $level) {
+    $profileInfo = $donor->profileInfo($level);
+    if (!empty($profileInfo)) {
 ?>
     <div class="box">
         <div class="head">
-            <?=!empty($ProfileRewards['ProfileInfoTitle' . $i]) ? display_str($ProfileRewards['ProfileInfoTitle' . $i]) : "Extra Profile " . ($i + 1)?>
-            <span style="float: right;"><a href="#" onclick="$('#profilediv_<?=$i?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
+            <?= display_str($donor->profileTitle($level) ?? "Extra Info $level") ?>
+            <span style="float: right;"><a href="#" onclick="$('#profilediv_<?= $level ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
         </div>
-        <div class="pad profileinfo" id="profilediv_<?= $i ?>"><?= Text::full_format($ProfileRewards['ProfileInfo' . $i]); ?></div>
+        <div class="pad profileinfo" id="profilediv_<?= $level ?>"><?= Text::full_format($profileInfo) ?></div>
     </div>
 <?php
     }
@@ -472,7 +470,7 @@ if ($Viewer->permitted('users_view_invites')) {
 
 if ($Viewer->permitted('users_give_donor')) {
     echo $Twig->render('donation/history.twig', [
-        'history' => $User->donorHistory(),
+        'history' => $donor->historyList(),
     ]);
 }
 
@@ -655,7 +653,8 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $OwnProfile)) {
         echo $Twig->render('user/edit-buffer.twig', [
-            'user' => $User,
+            'user'  => $User,
+            'donor' => $donor,
         ]);
     }
 
@@ -712,7 +711,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_give_donor')) {
         echo $Twig->render('donation/admin-panel.twig', [
-            'user' => $User,
+            'donor' => $donor,
         ]);
     }
 

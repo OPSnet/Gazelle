@@ -28,7 +28,7 @@ foreach ($thread as $Post) {
         'userinfo' => [
             'authorId'   => $AuthorID,
             'authorName' => $author->username(),
-            'donor'      => (new Gazelle\User\Privilege($author))->isDonor(),
+            'donor'      => (new Gazelle\User\Donor($author))->isDonor(),
             'warned'     => $author->isWarned(),
             'avatar'     => $author->avatar(),
             'enabled'    => $author->isEnabled(),

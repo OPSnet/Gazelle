@@ -193,9 +193,6 @@ END;
     }
 
     public function testTest(): void {
-        $admin = (new Gazelle\Manager\User)->find('@admin');
-        $this->assertEquals('yes', self::twig('{% if user is donor %}yes{% endif %}')->render(['user' => $admin]), 'twig-test-donor');
-
         $this->assertEquals('yes', self::twig('{% if value is nan %}yes{% endif %}')->render(['value' => sqrt(-1)]), 'twig-test-nan');
 
         $this->assertEquals(

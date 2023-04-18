@@ -111,27 +111,6 @@ if (!isset($_POST['p_donor_heart'])) {
 }
 // End building $Paranoia
 
-$user->updateReward(
-    array_map('trim',
-        array_filter($_POST,
-        fn($key) => in_array($key, [
-            'second_avatar', 'avatar_mouse_over_text',
-            'donor_icon_mouse_over_text', 'donor_icon_link', 'donor_icon_custom_url',
-            'donor_title_prefix', 'donor_title_suffix', 'donor_title_comma',
-            'profile_title_1', 'profile_info_1',
-            'profile_title_2', 'profile_info_2',
-            'profile_title_3', 'profile_info_3',
-            'profile_title_4', 'profile_info_4',
-        ]), ARRAY_FILTER_USE_KEY)
-    )
-);
-
-if (isset($_POST['p_donor_stats'])) {
-    $userMan->showDonor($user);
-} else {
-    $userMan->hideDonor($user);
-}
-
 $NewEmail = false;
 if ($user->email() != $_POST['email']) {
     if (!$Viewer->permitted('users_edit_profiles') && !$user->validatePassword($_POST['password'])) {
@@ -154,8 +133,14 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
     }
 }
 
-if ($Viewer->disableAvatar() && $_POST['avatar'] != $user->avatar()) {
-    error('Your avatar privileges have been revoked.');
+if ($_POST['avatar'] != $user->avatar()) {
+    if ($Viewer->disableAvatar()) {
+        error('Your avatar privileges have been revoked.');
+    }
+    $len = strlen($_POST['avatar']);
+    if ($len > 255) {
+        error('Your avatar link is too long ($len characters, maximum allowed is 255).');
+    }
 }
 
 $Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
@@ -340,6 +325,28 @@ $SQL .= ' WHERE m.ID = ?';
 $Params[] = $userId;
 
 $db->prepared_query($SQL, ...$Params);
+
+$donor = new Gazelle\User\Donor($user);
+if ($donor->isDonor()) {
+    $donor->setVisible(isset($_POST['p_donor_stats']));
+    $donor->setForumPrefix((string)$_POST['donor_title_prefix']);
+    $donor->setForumSuffix((string)$_POST['donor_title_suffix']);
+    $donor->setForumUseComma(isset($_POST['donor_title_comma']));
+    $donor->updateAvatarHover((string)$_POST['second_avatar'])
+        ->updateAvatarHoverText((string)$_POST['avatar_mouse_over_text'])
+        ->updateIcon((string)$_POST['donor_icon_custom_url'])
+        ->updateIconHoverText((string)$_POST['donor_icon_mouse_over_text'])
+        ->updateIconLink((string)$_POST['donor_icon_link'])
+        ->updateProfileInfo(1, (string)$_POST['profile_info_1'])
+        ->updateProfileInfo(2, (string)$_POST['profile_info_2'])
+        ->updateProfileInfo(3, (string)$_POST['profile_info_3'])
+        ->updateProfileInfo(4, (string)$_POST['profile_info_4'])
+        ->updateProfileTitle(1, (string)$_POST['profile_title_1'])
+        ->updateProfileTitle(2, (string)$_POST['profile_title_2'])
+        ->updateProfileTitle(3, (string)$_POST['profile_title_3'])
+        ->updateProfileTitle(4, (string)$_POST['profile_title_4'])
+        ->modify();
+}
 
 $user->flush();
 

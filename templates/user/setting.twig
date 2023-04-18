@@ -62,7 +62,7 @@
     } only
 %}
 {% include 'user/setting/personal.twig' %}
-{% include 'user/setting/paranoia.twig' with {'user': user} only %}
+{% include 'user/setting/paranoia.twig' with {'donor': donor, 'user': user} only %}
 {% include 'user/setting/access.twig' with {'user': user, 'viewer': viewer} only %}
     </div>
     </form>

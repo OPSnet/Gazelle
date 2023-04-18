@@ -1,4 +1,4 @@
-{% for dono in history %}
+{% for item in history %}
 {% if loop.first %}
 <div class="box box2" id="donation_history_box">
     <div class="head">
@@ -28,22 +28,22 @@
 {% endif %}
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>
-                    {{ dono.Source }} ({{ dono.AddedBy|user_url }})
+                    {{ item.source }} ({{ item.added_by|user_url }})
                 </td>
                 <td>
-                    {{ dono.Time }}
+                    {{ item.created }}
                 </td>
                 <td>
-                    {{ dono.Amount }}
+                    {{ item.amount }}
                 </td>
                 <td>
-                    {{ dono.donor_rank }}
+                    {{ item.donor_rank }}
                 </td>
                 <td>
-                    {{ dono.TotalRank }}
+                    {{ item.total_rank }}
                 </td>
                 <td>
-                    {{ dono.Reason }}
+                    {{ item.reason }}
                 </td>
             </tr>
 {% if loop.last %}
