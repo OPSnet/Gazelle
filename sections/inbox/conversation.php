@@ -1,6 +1,6 @@
 <?php
 
-$pm = (new Gazelle\Manager\PM($Viewer))->findById((int)$_GET['id']);
+$pm = (new Gazelle\Manager\PM($Viewer))->findById((int)($_GET['id'] ?? 0));
 if (is_null($pm)) {
     error(404);
 }

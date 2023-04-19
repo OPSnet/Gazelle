@@ -30,7 +30,7 @@
 {% endfor %}
 {{ paginator.linkbox|raw }}
 
-{% if pm.recipientList %}
+{% if pm.senderId %}
     <h3>Reply</h3>
     <form class="send_form" name="reply" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
