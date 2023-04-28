@@ -9,7 +9,7 @@ $doDisable = false;
 $doInvites = false;
 $message = null;
 
-if ($_POST['id']) {
+if (isset($_POST['id'])) {
     authorize();
     $action = $_POST['perform'] ?? '';
     $doComment = $action === 'comment';

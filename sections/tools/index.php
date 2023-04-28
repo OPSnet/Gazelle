@@ -18,36 +18,12 @@ if (preg_match('/^(?:sandbox|update_geoip)/', $_REQUEST['action']) && !isset($ar
 switch ($_REQUEST['action']) {
 
     //Managers
-    case 'bonus_points':
-        require_once('managers/bonus_points.php');
-        break;
-
     case 'asn_search':
         require_once('managers/asn_search.php');
         break;
-    case 'email_search':
-        require_once('managers/email_search.php');
-        break;
-    case 'ip_ban':
-        require_once('managers/bans.php');
-        break;
-    case 'ip_search':
-        require_once('managers/ip_search.php');
-        break;
-    case 'quick_ban':
-        require_once('managers/quick_ban.php');
-        break;
-    case 'ssl_host':
-        require_once('managers/ssl_host.php');
-        break;
-    case 'tor_node':
-        require_once('managers/tor_node.php');
-        break;
-    case 'torrent_report_edit':
-        require_once('managers/torrent_report_edit.php');
-        break;
-    case 'torrent_report_view':
-        require_once('managers/torrent_report_view.php');
+
+    case 'bonus_points':
+        require_once('managers/bonus_points.php');
         break;
 
     case 'categories':
@@ -56,9 +32,11 @@ switch ($_REQUEST['action']) {
     case 'categories_alter':
         require_once('managers/categories_alter.php');
         break;
-
     case 'change_log':
         require_once('managers/change_log.php');
+        break;
+    case 'create_user':
+        require_once('managers/create_user.php');
         break;
 
     case 'dbkey':
@@ -80,7 +58,9 @@ switch ($_REQUEST['action']) {
     case 'email_blacklist_alter':
         require_once('managers/email_blacklist_alter.php');
         break;
-
+    case 'email_search':
+        require_once('managers/email_search.php');
+        break;
     case 'enable_requests':
         require_once('managers/enable_requests.php');
         break;
@@ -116,7 +96,12 @@ switch ($_REQUEST['action']) {
     case 'invite_source_config':
         require_once('managers/invite_source_config.php');
         break;
-
+    case 'ip_ban':
+        require_once('managers/bans.php');
+        break;
+    case 'ip_search':
+        require_once('managers/ip_search.php');
+        break;
     case 'irc':
         require_once('managers/irc_list.php');
         break;
@@ -127,18 +112,19 @@ switch ($_REQUEST['action']) {
     case 'label_aliases':
         require_once('managers/label_aliases.php');
         break;
-
     case 'login_watch':
         require_once('managers/login_watch.php');
         break;
 
+    case 'manipulate_tree':
+        require_once('managers/manipulate_tree.php');
+        break;
     case 'mass_pm':
         require_once('managers/mass_pm.php');
         break;
     case 'take_mass_pm':
         require_once('managers/take_mass_pm.php');
         break;
-
     case 'multiple_freeleech':
         require_once('managers/multiple_freeleech.php');
         break;
@@ -175,10 +161,13 @@ switch ($_REQUEST['action']) {
         require_once('managers/privilege_matrix.php');
         break;
 
+    case 'quick_ban':
+        require_once('managers/quick_ban.php');
+        break;
+
     case 'rate_limit':
         require_once('managers/rate_limit.php');
         break;
-
     case 'referral_accounts':
         require_once('managers/referral_accounts.php');
         break;
@@ -189,16 +178,19 @@ switch ($_REQUEST['action']) {
         require_once('managers/referral_users.php');
         break;
 
+    case 'ssl_host':
+        require_once('managers/ssl_host.php');
+        break;
     case 'staff_groups_alter':
         require_once('managers/staff_groups_alter.php');
         break;
     case 'staff_groups':
         require_once('managers/staff_groups_list.php');
         break;
-
     case 'stylesheets':
         require_once('managers/stylesheets_list.php');
         break;
+
     case 'tags':
         require_once('managers/tags.php');
         break;
@@ -208,9 +200,17 @@ switch ($_REQUEST['action']) {
     case 'tags_official':
         require_once('managers/tags_official.php');
         break;
-
     case 'tokens':
         require_once('managers/tokens.php');
+        break;
+    case 'tor_node':
+        require_once('managers/tor_node.php');
+        break;
+    case 'torrent_report_edit':
+        require_once('managers/torrent_report_edit.php');
+        break;
+    case 'torrent_report_view':
+        require_once('managers/torrent_report_view.php');
         break;
 
     case 'whitelist':
@@ -283,6 +283,12 @@ switch ($_REQUEST['action']) {
         break;
 
     // Development
+    case 'analysis':
+        require_once('development/analysis.php');
+        break;
+    case 'analysis_list':
+        require_once('development/analysis_list.php');
+        break;
     case 'database_specifics':
         require_once('development/database_specifics.php');
         break;
@@ -327,18 +333,6 @@ switch ($_REQUEST['action']) {
         }
         break;
 
-    case 'analysis':
-        require_once('development/analysis.php');
-        break;
-    case 'analysis_list':
-        require_once('development/analysis_list.php');
-        break;
-    case 'create_user':
-        require_once('misc/create_user.php');
-        break;
-    case 'manipulate_tree':
-        require_once('misc/manipulate_tree.php');
-        break;
     case 'monthalbum':
         require_once('misc/album_of_month.php');
         break;
