@@ -39,8 +39,8 @@ class SiteInfo extends Base {
         fclose($in);
         $now = time();
         return [
-            'uptime'   => Time::diff($now - $uptime),
-            'idletime' => Time::diff($now - ($idletime / $ncpu), 2, true, false, true),
+            'uptime'   => Time::diff($now - (int)$uptime),
+            'idletime' => Time::diff($now - (int)($idletime / $ncpu), 2, true, false, true),
         ];
     }
 

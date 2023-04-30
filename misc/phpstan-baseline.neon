@@ -3426,11 +3426,6 @@ parameters:
 			path: ../app/Util/Time.php
 
 		-
-			message: "#^Method Gazelle\\\\Util\\\\Time\\:\\:diff\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
 			message: "#^Method Gazelle\\\\Util\\\\Time\\:\\:isValidDate\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Util/Time.php
@@ -3451,11 +3446,6 @@ parameters:
 			path: ../app/Util/Time.php
 
 		-
-			message: "#^Parameter \\#1 \\$datetime of function strtotime expects string, int\\|string given\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
 			message: "#^Parameter \\#1 \\$month of function checkdate expects int, string given\\.$#"
 			count: 1
 			path: ../app/Util/Time.php
@@ -3467,11 +3457,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#3 \\$year of function checkdate expects int, string given\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between int\\|string and null will always evaluate to false\\.$#"
 			count: 1
 			path: ../app/Util/Time.php
 

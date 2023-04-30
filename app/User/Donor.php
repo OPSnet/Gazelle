@@ -389,8 +389,9 @@ class Donor extends \Gazelle\BaseUser {
         if (!$expirationDate) {
             return '';
         }
-        $expiry = strtotime($expirationDate);
-        return ($expiry - time() < 60) ? 'Soon' : ('in ' . time_diff($expiry));
+        return (strtotime($expirationDate) - time() < 60)
+            ? 'Soon'
+            : ('in ' . time_diff($expirationDate));
     }
 
     public function username(bool $decorated): string {

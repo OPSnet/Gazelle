@@ -19,8 +19,8 @@ parameters:
         - ../lib/config.php
     scanFiles:
         - ../lib/bootstrap.php
-        - ../lib/util.php
     paths:
+        - ../lib/util.php
         - ../app
         - ../classes
         - ../misc/phinx
@@ -56,6 +56,10 @@ parameters:
         - STACKABLE_FREELEECH_TOKENS
         - USER_LIMIT
     ignoreErrors:
+    -
+      message: '/^Function \w+\(\) (?:has parameter \$\w+ with|return type has) no value type specified in iterable type array\.$/'
+      paths:
+        -  ../lib/util.php
     -
       message: '/^Method [^:]+::\w+\(\) has parameter \S+ with no (?:type specified|value type specified in iterable type array)\.$/'
       paths:

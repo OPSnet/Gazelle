@@ -28,10 +28,9 @@ function plural(int $n, string $plural = 's'): string {
  *
  * @param int $n the number
  * @param string $article string to use if you don't want the default 'a' e.g. 'an'
- * @return string 'a' (or $article) if $n == 1, otherwise $n
  */
-function article(int $n, $article = 'a') {
-    return $n == 1 ? $article : $n;
+function article(int $n, $article = 'a'): string {
+    return $n == 1 ? $article : (string)$n;
 }
 
 /**
@@ -70,7 +69,7 @@ function display_str(mixed $Str): string {
 /**
  * Returns ratio
  */
-function ratio(int $uploaded, $downloaded, $digits = 2): bool|string {
+function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {
     return match(true) {
         $downloaded == 0 && $uploaded == 0 => false,
         $downloaded == 0 => '∞',
@@ -100,7 +99,7 @@ function ratio_css(float $ratio): string {
 /**
  * Calculates and formats a ratio.
  */
-function ratio_html(int $uploaded, int $downloaded, $wantColor = true) {
+function ratio_html(int $uploaded, int $downloaded, bool $wantColor = true): string {
     $ratio = ratio($uploaded, $downloaded);
     if ($ratio === false) {
         return '--';
@@ -190,13 +189,13 @@ function get_bytes(string $size): int {
     if (empty($unit)) {
         return $value ? (int)round($value) : 0;
     }
-    return match (strtolower($unit[0])) {
-        'k' => round($value *              1024),
-        'm' => round($value *         1_048_576),
-        'g' => round($value *     1_073_741_824),
-        't' => round($value * 1_099_511_627_776),
+    return (int)round(match (strtolower($unit[0])) {
+        'k'     => $value *              1024,
+        'm'     => $value *         1_048_576,
+        'g'     => $value *     1_073_741_824,
+        't'     => $value * 1_099_511_627_776,
         default => 0,
-    };
+    });
 }
 
 /**
@@ -265,9 +264,10 @@ function authorize(bool $Ajax = false): void {
 function parse_user_agent(string $useragent): array {
     if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $useragent, $Matches) === 1) {
         $OS = explode(" ", $Matches[2]);
+        $dot = strrpos($Matches[1], '.') ?: null;
         $browserUserAgent = [
             'Browser' => 'Lidarr',
-            'BrowserVersion' => substr($Matches[1], 0, strrpos($Matches[1], '.')),
+            'BrowserVersion' => substr($Matches[1], 0, $dot),
             'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
             'OperatingSystemVersion' => $OS[1] ?? null
         ];
@@ -327,32 +327,32 @@ function error(int|string $Error, bool $NoHTML = false, bool $Log = false): neve
 /**
  * Print JSON status result with an optional message and die.
  */
-function json_die($Status, $Message="bad parameters"): never {
-    json_print($Status, $Message);
+function json_die(array|string $status, array|string $message = "bad parameters"): never {
+    json_print($status, $message);
     exit;
 }
 
 /**
  * Print JSON status result with an optional message.
  */
-function json_print($Status, $Message) {
-    if ($Status == 'success' && $Message) {
-        $response = ['status' => $Status, 'response' => $Message];
-    } elseif ($Message) {
-        $response = ['status' => $Status, 'error' => $Message];
+function json_print(array|string $status, array|int|string $message): void {
+    if (is_string($status) && $status == 'success' && $message) {
+        $response = ['status' => $status, 'response' => $message];
+    } elseif ($message) {
+        $response = ['status' => $status, 'error' => $message];
     } else {
-        $response = ['status' => $Status, 'response' => []];
+        $response = ['status' => $status, 'response' => []];
     }
 
     print(json_encode(add_json_info($response)));
 }
 
-function json_error($Code): never {
-    echo json_encode(add_json_info(['status' => 'failure', 'error' => $Code, 'response' => []]));
+function json_error(int|string $code): never {
+    echo json_encode(add_json_info(['status' => 'failure', 'error' => $code, 'response' => []]));
     exit;
 }
 
-function json_or_error($JsonError, $Error = null, $NoHTML = false) {
+function json_or_error(mixed $JsonError, mixed $Error = null, bool $NoHTML = false): never {
     if (defined('AJAX')) {
         json_error($JsonError);
     } else {
@@ -360,9 +360,9 @@ function json_or_error($JsonError, $Error = null, $NoHTML = false) {
     }
 }
 
-function add_json_info($Json) {
-    if (!isset($Json['info'])) {
-        $Json = array_merge($Json, [
+function add_json_info(array $info): array {
+    if (!isset($info['info'])) {
+        $info = array_merge($info, [
             'info' => [
                 'source' => SITE_NAME,
                 'version' => 1,
@@ -370,19 +370,19 @@ function add_json_info($Json) {
         ]);
     }
     global $Viewer;
-    if (!isset($Json['debug']) && $Viewer instanceof \Gazelle\User && $Viewer->permitted('site_debug')) {
+    if (!isset($info['debug']) && $Viewer instanceof \Gazelle\User && $Viewer->permitted('site_debug')) {
         global $Debug;
         $info = ['debug' => ['queries' => $Debug->get_queries()]];
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
             $info['searches'] = \Sphinxql::$Queries;
         }
-        $Json = array_merge($Json, ['debug' => $info]);
+        $info = array_merge($info, ['debug' => $info]);
     }
-    return $Json;
+    return $info;
 }
 
-function dump($thing): void {
-    echo "<pre>" . json_encode($thing, JSON_PRETTY_PRINT) . "</pre>";
+function dump(mixed $data): void {
+    echo "<pre>" . json_encode($data, JSON_PRETTY_PRINT) . "</pre>";
 }
 
 function show(mixed $data): void {
@@ -411,9 +411,8 @@ function unserialize_array($array) {
  *
  * @param array $list The list of elements
  * @param string $placeholder ('?' by default).
- * @return string The resulting placeholder string.
  */
-function placeholders(array $list, $placeholder = '?') {
+function placeholders(array $list, string $placeholder = '?'): string {
     return implode(',', array_fill(0, count($list), $placeholder));
 }
 
@@ -531,7 +530,7 @@ function proxyCheck(string $IP): bool {
  * Returns a <span> by default but can optionally return the raw time
  * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
  */
-function time_diff($TimeStamp, $Levels = 2, $Span = true, $StartTime = false) {
+function time_diff(string|null $TimeStamp, int $Levels = 2, bool $Span = true, string|false $StartTime = false): string {
     return Time::diff($TimeStamp, $Levels, $Span, $StartTime);
 }
 
@@ -626,7 +625,7 @@ function httpProxy(): ?string {
     $proxy = getenv('HTTP_PROXY');
     if ($proxy !== false) {
         return (string)$proxy;
-    } elseif (HTTP_PROXY !== false) { /** @phpstan-ignore-line */
+    } elseif (HTTP_PROXY !== false) {
         return (string)HTTP_PROXY;
     }
     return null;
@@ -634,11 +633,8 @@ function httpProxy(): ?string {
 
 /**
  * Geolocate an IP address using the database
- *
- * @param string|int $IP the ip to fetch the country for
- * @return string the country of origin
  */
-function geoip($IP): string {
+function geoip(string $IP): string {
     static $IPs = [];
     if (isset($IPs[$IP])) {
         return $IPs[$IP];

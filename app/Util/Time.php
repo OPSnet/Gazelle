@@ -9,7 +9,7 @@ class Time {
      * it's a string of a timestamp that we convert to a UNIX timestamp and then do a subtraction.
      * If the passed in $timestamp does not convert properly or is null, return false (error).
      */
-    public static function timeAgo(string|int $timestamp): false|int {
+    public static function timeAgo(string|int|null $timestamp): false|int {
         if ($timestamp === null) {
             return false;
         }
@@ -20,25 +20,27 @@ class Time {
             if ($timestamp == '' || is_null($timestamp)) {
                 return false;
             }
-            $timestamp = strtotime($timestamp);
-            if ($timestamp === false) {
-                return false;
+            if (is_string($timestamp)) {
+                $timestamp = strtotime($timestamp);
+                if ($timestamp === false) {
+                    return false;
+                }
             }
             return time() - $timestamp;
         }
     }
 
-    public static function diff($timestamp, $levels = 2, $span = true, $starttime = false, $hideAgo = false) {
+    public static function diff(int|string|null $timestamp, int $levels = 2, bool $span = true, string|false $starttime = false, bool $hideAgo = false): string {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
 
-        if (!is_number($timestamp)) { // Assume that $timestamp is SQL timestamp
-            if ($timestamp == '' || is_null($timestamp)) {
+        if ($timestamp === 0 || $timestamp === '' || is_null($timestamp)) {
+            return 'Never';
+        }
+        if (is_string($timestamp)) {
+            $timestamp = strtotime($timestamp);
+            if ($timestamp === false) {
                 return 'Never';
             }
-            $timestamp = strtotime($timestamp);
-        }
-        if ($timestamp == 0) {
-            return 'Never';
         }
         $time = $starttime - $timestamp;
 

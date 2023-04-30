@@ -403,7 +403,7 @@ if ($Viewer->permitted('site_moderate_forums')) {
         <input type="hidden" name="threadid" value="<?=$threadId?>" />
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border hidden" id="thread_notes_table">
 <?php foreach ($Notes as $Note) { ?>
-            <tr><td><?=Users::format_username($Note['AuthorID'])?> (<?=time_diff($Note['AddedTime'], 2, true, true)?>)</td><td><?=Text::full_format($Note['Body'])?></td></tr>
+            <tr><td><?=Users::format_username($Note['AuthorID'])?> (<?=time_diff($Note['AddedTime'], 2, true)?>)</td><td><?=Text::full_format($Note['Body'])?></td></tr>
 <?php } ?>
             <tr>
                 <td colspan="2" class="center">
