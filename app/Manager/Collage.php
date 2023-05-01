@@ -3,17 +3,23 @@
 namespace Gazelle\Manager;
 
 class Collage extends \Gazelle\BaseManager {
-
+    final const ID_KEY = 'zz_c_%d';
     protected const CACHE_DEFAULT_ARTIST = 'collage_def_artist_%d';
     protected const CACHE_DEFAULT_GROUP  = 'collage_def_tgroup_%d';
     protected const TGROUP_GENERAL_KEY   = 'torrent_collages_%d';
     protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
     protected const ARTIST_KEY           = 'artists_collages_%d';
-    protected const ID_KEY = 'zz_c_%d';
 
     protected \Gazelle\Util\ImageProxy $imageProxy;
 
-    public function create(\Gazelle\User $user, int $categoryId, string $name, string $description, string $tagList, \Gazelle\Log $logger) {
+    public function create(
+        \Gazelle\User $user,
+        int $categoryId,
+        string $name,
+        string $description,
+        string $tagList,
+        \Gazelle\Log $logger
+    ): \Gazelle\Collage {
         self::$db->prepared_query("
             INSERT INTO collages
                    (UserID, CategoryID, Name, Description, TagList)
@@ -22,7 +28,7 @@ class Collage extends \Gazelle\BaseManager {
         );
         $id = self::$db->inserted_id();
         (new \Gazelle\Stats\User($user->id()))->increment('collage_total');
-        $logger->general("Collage $id ($name) was created by " . $user->username());
+        $logger->general("Collage $id ($name) was created by {$user->username()}");
         return new \Gazelle\Collage($id);
     }
 
@@ -78,49 +84,35 @@ class Collage extends \Gazelle\BaseManager {
             ORDER BY Featured DESC, Name ASC
             ", $userId
         );
-        return array_map(fn ($id) => $this->findById($id), self::$db->collect(0, false));
+        return array_map(fn($id) => $this->findById($id), self::$db->collect(0, false));
     }
 
-    public function recoverById(int $id) {
-        $collageId = self::$db->scalar("SELECT ID FROM collages WHERE ID = ?", $id);
-        if ($collageId !== null) {
-            return $this->recover($collageId);
+    public function recoverById(int $id): ?\Gazelle\Collage {
+        return $this->recover((int)self::$db->scalar("SELECT ID FROM collages WHERE ID = ?", $id));
+    }
+
+    public function recoverByName(string $name): ?\Gazelle\Collage {
+        return $this->recover((int)self::$db->scalar("SELECT ID FROM collages WHERE Name = ?", $name));
+    }
+
+    protected function recover(int $id): ?\Gazelle\Collage {
+        if ($id) {
+            self::$db->prepared_query("
+                UPDATE collages SET
+                    Deleted = '0'
+                WHERE ID = ?
+                ", $id
+            );
         }
+        return $this->findById($id);
     }
 
-    public function recoverByName(string $name) {
-        $collageId = self::$db->scalar("SELECT ID FROM collages WHERE Name = ?", $name);
-        if ($collageId !== null) {
-            return $this->recover($collageId);
-        }
-    }
-
-    protected function recover(int $id) {
-        self::$db->prepared_query("
-            UPDATE collages SET
-                Deleted = '0'
-            WHERE ID = ?
-            ", $id
-        );
-        return new \Gazelle\Collage($id);
-    }
-
-    public function setImageProxy(\Gazelle\Util\ImageProxy $imageProxy) {
+    public function setImageProxy(\Gazelle\Util\ImageProxy $imageProxy): \Gazelle\Manager\Collage {
         $this->imageProxy = $imageProxy;
         return $this;
     }
 
     public function tgroupCover(\Gazelle\TGroup $tgroup): string {
-        return self::$twig->render('collage/row.twig', [
-            'group_id'   => $tgroup->id(),
-            'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
-            'name'       => $tgroup->text(),
-            'tags'       => implode(', ', array_map(fn($n) => "#{$n}", $tgroup->tagNameList())),
-            'tags_plain' => implode(', ', $tgroup->tagNameList()),
-        ]);
-    }
-
-    public function coverRow(\Gazelle\TGroup $tgroup): string {
         return self::$twig->render('collage/row.twig', [
             'group_id'   => $tgroup->id(),
             'image'      => isset($this->imageProxy) ? $this->imageProxy->process($tgroup->image()) : $tgroup->image(),
@@ -152,21 +144,6 @@ class Collage extends \Gazelle\BaseManager {
             );
         }
         return $new;
-    }
-
-    protected function idsToNames(array $idList): array {
-        if (empty($idList)) {
-            return [];
-        }
-        self::$db->prepared_query("
-            SELECT c.ID AS id,
-                c.Name AS name
-            FROM collages c
-            WHERE c.ID IN (" . placeholders($idList) . ")
-            ORDER BY c.Updated DESC
-            ", ...$idList
-        );
-        return self::$db->to_pair('id', 'name', false);
     }
 
     public function addToArtistCollageDefault(int $userId, int $artistId): array {
@@ -281,11 +258,11 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function flushDefaultArtist(int $userId) {
+    public function flushDefaultArtist(int $userId): void {
         self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $userId));
     }
 
-    public function flushDefaultGroup(int $userId) {
+    public function flushDefaultGroup(int $userId): void {
         self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $userId));
     }
 

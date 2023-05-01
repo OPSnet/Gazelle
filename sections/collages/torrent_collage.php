@@ -115,7 +115,7 @@ if ($Viewer->permitted('zip_downloader')) {
     foreach ($entryList as $tgroupId) {
         $tgroup = $tgMan->findById($tgroupId);
         if ($tgroup) {
-            echo $collMan->coverRow($tgroup);
+            echo $collMan->tgroupCover($tgroup);
             ++$Idx;
         }
         if ($Idx >= $limit) {
@@ -144,7 +144,7 @@ if ($Viewer->permitted('zip_downloader')) {
                     array_map(
                         function($id) use ($collMan, $tgMan) {
                             $tgroup = $tgMan->findById($id);
-                            return $tgroup ? $collMan->coverRow($tgroup) : '';
+                            return $tgroup ? $collMan->tgroupCover($tgroup) : '';
                         }, $chunk
                     )
                 );

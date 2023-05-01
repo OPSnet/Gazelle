@@ -42,26 +42,48 @@
             </tr>
             <tr>
                 <td class="label">Tags</td>
-                <td><input type="text" name="tags" size="60" value="{{ collage.tags|join(', ') }}" /></td>
+                <td><input type="text" name="tags" size="60" value="{{ collage.tags|join(', ') }}" />
+                <label class="tooltip" title="Regenerate the tag list based on the tags most frequently used by the current collage entries. If there are less than three candidate tags, the list will remain unchanged.">
+                    <input type="checkbox" name="regen-tags" /> Regenerate?
+                </label></td>
             </tr>
 {% if collage.isPersonal %}
             <tr>
-                <td class="label"><span class="tooltip" title="A &quot;featured&quot; personal collage will be listed first on your profile, along with a preview of the included torrents.">Featured</span></td>
-                <td><input type="checkbox" name="featured"{{ checked(collage.isFeatured) }} /></td>
+                <td class="label"><span class="tooltip" title="">Featured</span></td>
+                <td>
+                <label>
+                    <input type="checkbox" name="featured"{{ checked(collage.isFeatured) }} />
+                    A "featured" personal collage will be listed first on your profile, along with a preview of the included torrents.
+                </label></td>
+            </tr>
+            <tr>
+                <td class="label">Additions</td>
+                <td><label>
+                    <input type="checkbox" name="addition"{{ checked(collage.sortNewest) }} />
+                    Append new entries to the end of the list (new entries in Personal collages are inserted at the top by default).
+                </label></td>
+            </tr>
+{% else %}
+            <tr>
+                <td class="label">Additions</td>
+                <td><label>
+                    <input type="checkbox" name="addition"{{ checked(collage.sortNewest) }} />
+                    Insert new entries at the top of the list (new entries in collages other than Personal are appended to the end by default).
+                </label></td>
             </tr>
 {% endif %}
 {% if viewer.permitted('site_collages_delete') %}
             <tr>
                 <td class="label">Locked</td>
-                <td><input type="checkbox" name="locked"{{ checked(collage.isLocked) }} /></td>
+                <td><input type="checkbox" name="locked"{{ checked(collage.isLocked) }} /> No new entries are permitted.</td>
             </tr>
             <tr>
                 <td class="label">Max groups</td>
-                <td><input type="text" name="maxgroups" size="5" value="{{ collage.maxGroups }}" /></td>
+                <td><input type="text" name="maxgroups" size="2" value="{{ collage.maxGroups }}" /> (0 indicates unlimited)</td>
             </tr>
             <tr>
                 <td class="label">Max groups per user</td>
-                <td><input type="text" name="maxgroupsperuser" size="5" value="{{ collage.maxGroupsPerUser }}" /></td>
+                <td><input type="text" name="maxgroupsperuser" size="2" value="{{ collage.maxGroupsPerUser }}" /> (0 indicates unlimited)</td>
             </tr>
 {% endif %}
             <tr>

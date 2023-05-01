@@ -19,7 +19,7 @@ if (is_null($collage)) {
         $collage = $collageMan->findByName($_POST['name'] ?? '');
     }
     if (is_null($collage)) {
-        json_die('failure', 'collage not found');
+        json_die('failure', "collage not found" . json_encode($_POST, JSON_PRETTY_PRINT));
     }
 }
 

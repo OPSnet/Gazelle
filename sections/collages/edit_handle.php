@@ -38,8 +38,15 @@ if (isset($_POST['name'])) {
     }
 }
 
-$collage->setUpdate('Description', trim($_POST['description']))
-    ->setUpdate('TagList', (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])));
+if (!isset($_POST['regen-tags'])) {
+    $collage->setUpdate('TagList', (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])));
+} else {
+    $tagList = $collage->rebuildTagList();
+    if (count($tagList) > 2) {
+        $collage->setUpdate('TagList', implode(' ', $tagList));
+    }
+}
+$collage->setUpdate('Description', trim($_POST['description']));
 
 if (isset($_POST['featured'])
     && (
@@ -65,7 +72,7 @@ if (isset($_POST['category']) && isset(COLLAGE[$_POST['category']]) && (int)$_PO
 
 if ($Viewer->permitted('site_collages_delete')) {
     if (isset($_POST['locked']) != $collage->isLocked()) {
-        $collage->setToggleLocked();
+        $collage->toggleLocked();
     }
     if (isset($_POST['maxgroups']) && ($_POST['maxgroups'] == 0 || is_number($_POST['maxgroups'])) && $_POST['maxgroups'] != $collage->maxGroups()) {
         $collage->setUpdate('MaxGroups', (int)$_POST['maxgroups']);
@@ -74,6 +81,7 @@ if ($Viewer->permitted('site_collages_delete')) {
         $collage->setUpdate('MaxGroupsPerUser', (int)$_POST['maxgroupsperuser']);
     }
 }
+$collage->toggleAttr('sort-newest', isset($_POST['addition']));
 
 $collage->modify();
 header('Location: ' . $collage->location());

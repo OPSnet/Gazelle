@@ -3,7 +3,7 @@
 namespace Gazelle\Collage;
 
 class TGroup extends AbstractCollage {
-    protected array $groupIds = [];
+    protected array|null $groupIds;
     protected array $sequence = [];
     protected array $torrentTags = [];
 
@@ -11,6 +11,9 @@ class TGroup extends AbstractCollage {
     public function entryColumn(): string { return 'GroupID'; }
 
     public function groupIdList(): array {
+        if (!isset($this->groupIds)) {
+            $this->load();
+        }
         return $this->groupIds;
     }
 
@@ -33,7 +36,6 @@ class TGroup extends AbstractCollage {
         );
         $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC, false);
 
-        $order = $this->holder->sortNewest() ? 'DESC' : 'ASC';
         self::$db->prepared_query("
             SELECT ct.GroupID,
                 ct.UserID,
@@ -41,13 +43,16 @@ class TGroup extends AbstractCollage {
             FROM collages_torrents AS ct
             INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
             WHERE ct.CollageID = ?
-            ORDER BY ct.Sort $order
+            ORDER BY ct.Sort
             ", $this->holder->id()
         );
         $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC, false);
-        $groupIds = array_keys($groupContribIds);
+        $groupIds        = array_keys($groupContribIds);
 
-        $tgMan = new \Gazelle\Manager\TGroup;
+        $this->artists      = [];
+        $this->groupIds     = [];
+        $this->contributors = [];
+        $tgMan              = new \Gazelle\Manager\TGroup;
         foreach ($groupIds as $groupId) {
             $tgroup = $tgMan->findById($groupId);
             if (is_null($tgroup)) {
@@ -84,7 +89,7 @@ class TGroup extends AbstractCollage {
     }
 
     public function entryList(): array {
-        return $this->groupIds;
+        return $this->groupIdList();
     }
 
     public function sequence(int $entryId): int {
@@ -92,11 +97,28 @@ class TGroup extends AbstractCollage {
     }
 
     protected function flushTarget(int $tgroupId): void {
+        $this->groupIds = null;
         $this->flushAll([
             "torrent_collages_$tgroupId",
             "torrent_collages_personal_$tgroupId",
             "torrents_details_$tgroupId"
         ]);
+    }
+
+    public function rebuildTagList(): array {
+        self::$db->prepared_query("
+            SELECT tag.Name
+            FROM collages_torrents ct
+            INNER JOIN torrents_tags tt USING (GroupID)
+            INNER JOIN tags tag ON (tag.ID = tt.TagID)
+            WHERE ct.CollageID = ?
+            GROUP BY tag.Name
+            HAVING count(*) > 1
+            ORDER BY count(*) desc
+            LIMIT 8
+            ", $this->id
+        );
+        return self::$db->collect(0, false);
     }
 
     public function remove(): int {

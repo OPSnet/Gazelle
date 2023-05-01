@@ -2,7 +2,7 @@
 {{ header('Create a collage') }}
 <div class="thin">
 {% if error %}
-    <div class="save_message error">{{ error }}</div>
+    <div class="save_message error">{{ error|raw }}</div>
     <br />
 {% endif %}
     <form class="create_form" name="collage" action="collages.php" method="post">

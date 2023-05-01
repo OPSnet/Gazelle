@@ -3,7 +3,6 @@
 namespace Gazelle\Collage;
 
 class Artist extends AbstractCollage {
-
     public function entryTable(): string { return 'collages_artists'; }
     public function entryColumn(): string { return 'ArtistID'; }
 
@@ -24,6 +23,8 @@ class Artist extends AbstractCollage {
         $artists = self::$db->to_array('ArtistID', MYSQLI_ASSOC, false);
         $total = count($artists);
 
+        $this->artists      = [];
+        $this->contributors = [];
         foreach ($artists as $artist) {
             if (!isset($this->artists[$artist['ArtistID']])) {
                 $this->artists[$artist['ArtistID']] = [
@@ -65,6 +66,27 @@ class Artist extends AbstractCollage {
             "artists_collages_$artistId",
             "artists_collages_personal_$artistId",
         ]);
+    }
+
+    public function rebuildTagList(): array {
+        self::$db->prepared_query("
+            SELECT tag.Name FROM (
+                SELECT DISTINCT ta.GroupID
+                FROM collages_artists ca
+                INNER JOIN torrents_artists ta USING (ArtistID)
+                INNER JOIN artist_role ar USING (artist_role_id)
+                WHERE ar.slug in ('main', 'remixer', 'composer', 'conductor', 'dj', 'producer', 'arranger')
+                    AND ca.CollageID = ?
+            ) G
+            INNER JOIN torrents_tags tt USING (GroupID)
+            INNER JOIN tags tag on (tag.ID = tt.TagID)
+            GROUP BY tag.Name
+            HAVING count(*) > 1
+            ORDER BY count(*) desc, tag.Name
+            LIMIT 8
+            ", $this->id
+        );
+        return self::$db->collect(0, false);
     }
 
     public function remove(): int {

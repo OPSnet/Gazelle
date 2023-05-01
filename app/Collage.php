@@ -10,13 +10,13 @@ class Collage extends BaseObject {
      * (artists or torrent groups).
      */
 
-    final const CACHE_KEY    = 'collagev2_%d';
+    final const CACHE_KEY    = 'collagev4_%d';
     final const SUBS_KEY     = 'collage_subs_user_%d';
     final const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
-    protected bool  $lockedForUser = false;
-    protected array $userSubscriptions;
-    protected User  $viewer;
+    protected bool       $lockedForUser = false;
+    protected array|null $userSubscriptions;
+    protected User       $viewer;
 
     protected Collage\AbstractCollage $collage;
 
@@ -31,47 +31,15 @@ class Collage extends BaseObject {
         $this->collage->load();
     }
 
-    public function tableName(): string { return 'collages'; }
-
-    public function location(): string {
-        return 'collages.php?id=' . $this->id;
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
-    }
-
     public function flush(): Collage {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        $this->userSubscriptions = null;
+        $this->info = null;
         return $this;
     }
-
-    public function categoryId() { return $this->info()['category_id']; }
-    public function description() { return $this->info()['description']; }
-    public function maxGroups() { return $this->info()['group_max']; }
-    public function maxGroupsPerUser() { return $this->info()['group_max_per_user']; }
-    public function name() { return $this->info()['name']; }
-    public function numSubscribers() { return $this->info()['subscriber_total']; }
-    public function ownerId() { return $this->info()['user_id']; }
-    public function sortNewest() { return $this->info()['sort_newest']; }
-    public function tags() { return $this->info()['tag_list']; }
-    public function updated() { return $this->info()['updated']; }
-
-    public function numEntries() { return $this->info()['torrent_total']; }
-    public function groupIds() { return $this->collage->groupIdList(); } /** @phpstan-ignore-line */
-
-    public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
-    public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
-    public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
-    public function isOwner(int $userId): bool { return $this->info()['user_id'] === $userId; }
-    public function isPersonal(): bool { return $this->info()['category_id'] === 0; }
-
-    public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
-    public function contributors() { return $this->collage->contributorList(); }
-
-    public function numContributors() { return count(array_keys($this->contributors())); }
-    public function numArtists() { return count($this->collage->artistList()); }
-    public function sequence(int $entryId) { return $this->collage->sequence($entryId); } /** @phpstan-ignore-line */
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
+    public function location(): string { return 'collages.php?id=' . $this->id; }
+    public function tableName(): string { return 'collages'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {
@@ -93,31 +61,68 @@ class Collage extends BaseObject {
                     c.Locked           AS is_locked,
                     c.Name             AS name,
                     c.Description      AS description,
-                    c.Featured         AS is_featured,
-                    CASE WHEN cha.CollageID IS NULL THEN 0 ELSE 1 END AS sort_newest
+                    c.Featured         AS is_featured
                 FROM collages c
-                LEFT JOIN collage_has_attr cha ON (cha.CollageID = c.ID)
-                LEFT JOIN collage_attr ca ON (ca.ID = cha.CollageAttrID and ca.Name = ?)
                 WHERE c.ID = ?
-                ", 'sort-newest', $this->id
+                ", $this->id
             );
             $info['tag_list'] = explode(' ', $info['tag_string']);
+
+            self::$db->prepared_query("
+                SELECT ca.Name, ca.ID
+                FROM collage_attr ca
+                INNER JOIN collage_has_attr cha ON (cha.CollageAttrID = ca.ID)
+                WHERE cha.CollageID = ?
+                ", $this->id
+            );
+            $info['attr'] = self::$db->to_pair('Name', 'ID', false);
             self::$cache->cache_value($key, $info, 7200);
         }
         $this->info = $info;
         return $this->info;
     }
 
-    public function setViewer(User $viewer) {
+    public function categoryId(): int { return $this->info()['category_id']; }
+    public function description(): string { return $this->info()['description']; }
+    public function maxGroups(): int { return $this->info()['group_max']; }
+    public function maxGroupsPerUser(): int { return $this->info()['group_max_per_user']; }
+    public function name(): string { return $this->info()['name']; }
+    public function numSubscribers(): int { return $this->info()['subscriber_total']; }
+    public function ownerId(): int { return $this->info()['user_id']; }
+    public function tags(): array { return $this->info()['tag_list']; }
+    public function updated(): ?string { return $this->info()['updated']; }
+
+    public function numEntries(): int { return $this->info()['torrent_total']; }
+    public function groupIds(): array { return $this->collage->groupIdList(); /** @phpstan-ignore-line */ }
+
+    public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
+    public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
+    public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
+    public function isOwner(int $userId): bool { return $this->info()['user_id'] === $userId; }
+    public function isPersonal(): bool { return $this->info()['category_id'] === 0; }
+
+    public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
+    public function contributors(): array { return $this->collage->contributorList(); }
+
+    public function numContributors(): int { return count(array_keys($this->contributors())); }
+    public function numArtists(): int { return count($this->collage->artistList()); }
+    public function sequence(int $entryId): int { return $this->collage->sequence($entryId); /** @phpstan-ignore-line */ }
+
+    public function hasAttr(string $name): bool {
+        return isset($this->info()['attr'][$name]);
+    }
+    public function sortNewest(): bool { return $this->hasAttr('sort-newest'); }
+
+    public function setViewer(User $viewer): Collage {
         $this->viewer = $viewer;
         $this->lockedForUser = false;
         if (!$this->viewer->permitted('site_collages_delete')) {
-            if ($this->categoryId() === '0') {
+            if ($this->categoryId() === 0) {
                 if (!$this->viewer->permitted('site_collages_personal') || !$this->isOwner($this->viewer->id())) {
                     $this->lockedForUser = true;
                 }
             }
-            $groupsByUser = $this->contributors[$this->viewer->id()] ?? 0;
+            $groupsByUser = $this->contributors()[$this->viewer->id()] ?? 0;
             if ($this->isLocked()
                 || ($this->maxGroups() > 0 && count($this->groupIds()) >= $this->maxGroups())
                 || ($this->maxGroupsPerUser() > 0 && $groupsByUser >= $this->maxGroupsPerUser())
@@ -129,7 +134,7 @@ class Collage extends BaseObject {
     }
 
     public function userHasContributed(User $user): bool {
-        return isset($this->contributors[$user->id()]);
+        return isset($this->contributors()[$user->id()]);
     }
 
     public function userCanContribute(User $user): bool {
@@ -145,66 +150,73 @@ class Collage extends BaseObject {
      * How many entries in this collage are owned by a given user
      */
     public function countByUser(int $userId): int {
-        return $this->contributors[$userId] ?? 0;
+        return $this->contributors()[$userId] ?? 0;
     }
 
     public function entryUserId(int $entryId): int {
         return $this->collage->entryUserId($entryId);
     }
 
-    public function toggleSubscription(int $userId) {
-        self::$db->get_query_id();
-        if (self::$db->scalar("
+    public function toggleSubscription(User $user): int {
+        $affected = 0;
+        if ((bool)self::$db->scalar("
             SELECT 1
             FROM users_collage_subs
             WHERE UserID = ?
                 AND CollageID = ?
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         )) {
             self::$db->prepared_query("
                 DELETE FROM users_collage_subs
                 WHERE UserID = ?
                     AND CollageID = ?
-                ", $userId, $this->id
+                ", $user->id(), $this->id
             );
+            $affected = self::$db->affected_rows();
+            if (!empty($this->userSubscriptions)) {
+                unset($this->userSubscriptions[$user->id()]);
+            }
             $delta = -1;
         } else {
             self::$db->prepared_query("
                 INSERT IGNORE INTO users_collage_subs
                        (UserID, CollageID)
                 VALUES (?,      ?)
-                ", $userId, $this->id
+                ", $user->id(), $this->id
             );
+            $affected = self::$db->affected_rows();
             $delta = 1;
         }
-        self::$db->prepared_query("
-            UPDATE collages SET
-                Subscribers = greatest(0, Subscribers + ?)
-            WHERE ID = ?
-            ", $delta, $this->id
-        );
-        self::$cache->delete_multi([
-            sprintf(self::SUBS_KEY, $userId),
-            sprintf(self::SUBS_NEW_KEY, $userId),
-        ]);
-        $qid = self::$db->get_query_id();
-        return $this;
+        if ($affected) {
+            self::$db->prepared_query("
+                UPDATE collages SET
+                    Subscribers = greatest(0, Subscribers + ?)
+                WHERE ID = ?
+                ", $delta, $this->id
+            );
+            $this->flush();
+            self::$cache->delete_multi([
+                sprintf(self::SUBS_KEY, $user->id()),
+                sprintf(self::SUBS_NEW_KEY, $user->id()),
+            ]);
+        }
+        return $affected;
     }
 
     /**
      * Load the subscriptions of the user, and clear the new additions flag if
      * they have subscribed to this collage.
      */
-    public function isSubscribed(int $userId): bool {
+    public function isSubscribed(User $user): bool {
         if (empty($this->userSubscriptions)) {
-            $key = sprintf(self::SUBS_KEY, $userId);
+            $key = sprintf(self::SUBS_KEY, $user->id());
             $subs = self::$cache->get_value($key);
             if ($subs ===false) {
                 self::$db->prepared_query("
                     SELECT CollageID FROM users_collage_subs WHERE UserID = ?
-                    ", $userId
+                    ", $user->id()
                 );
-                $subs = self::$db->collect(0);
+                $subs = self::$db->collect(0, false);
                 self::$cache->cache_value($key, $subs, 3600 * 12);
             }
             $this->userSubscriptions = $subs;
@@ -217,9 +229,9 @@ class Collage extends BaseObject {
             UPDATE users_collage_subs SET
                 LastVisit = now()
             WHERE CollageID = ? AND UserID = ?
-            ", $this->id, $userId
+            ", $this->id, $user->id()
         );
-        self::$cache->delete_value(sprintf(self::SUBS_NEW_KEY, $userId));
+        self::$cache->delete_value(sprintf(self::SUBS_NEW_KEY, $user->id()));
         return true;
     }
 
@@ -269,8 +281,16 @@ class Collage extends BaseObject {
         return $this->collage->addEntry($entryId, $userId);
     }
 
+    public function hasEntry(int $entryId): bool {
+        return $this->collage->hasEntry($entryId);
+    }
+
     public function removeEntry(int $entryId): int {
         return $this->collage->removeEntry($entryId);
+    }
+
+    public function rebuildTagList(): array {
+        return $this->collage->rebuildTagList();
     }
 
     public function updateSequence(string $series): int {
@@ -285,19 +305,19 @@ class Collage extends BaseObject {
         return $this->collage->remove();
     }
 
-    public function setToggleLocked() {
-        return $this->setUpdate('Locked', $this->isLocked() === '1' ? '0' : '1');
+    public function toggleLocked(): Collage {
+        return $this->setUpdate('Locked', $this->isLocked() ? '0' : '1');
     }
 
-    public function setFeatured() {
+    public function setFeatured(): Collage {
         return $this->setUpdate('Featured', 1);
     }
 
     public function modify(): bool {
-        if (!$this->updateField) {
+        if (!$this->dirty()) {
             return false;
         }
-        if (in_array('Featured', $this->updateField)) {
+        if ($this->field('Featured')) {
             // unfeature the previously featured collage
             self::$db->prepared_query("
                 UPDATE collages SET
@@ -309,5 +329,48 @@ class Collage extends BaseObject {
             );
         }
         return parent::modify();
+    }
+
+    public function toggleAttr(string $attr, bool $flag): bool {
+        $hasAttr = $this->hasAttr($attr);
+        $toggled = false;
+        if (!$flag && $hasAttr) {
+            self::$db->prepared_query("
+                DELETE FROM collage_has_attr
+                WHERE CollageID = ?
+                    AND CollageAttrID = (SELECT ID FROM collage_attr WHERE Name = ?)
+                ", $this->id, $attr
+            );
+            $toggled = self::$db->affected_rows() === 1;
+        } elseif ($flag && !$hasAttr) {
+            self::$db->prepared_query("
+                INSERT INTO collage_has_attr (CollageID, CollageAttrID)
+                    SELECT ?, ID FROM collage_attr WHERE Name = ?
+                ", $this->id, $attr
+            );
+            $toggled = self::$db->affected_rows() === 1;
+        }
+        if ($toggled) {
+            $this->flush();
+        }
+        return $toggled;
+    }
+
+    public function hardRemove(): int {
+        self::$db->prepared_query("
+            DELETE c, ca, ct
+            FROM collages c
+            LEFT JOIN collages_artists ca ON (ca.CollageID = c.ID)
+            LEFT JOIN collages_torrents ct ON (ct.CollageID = c.ID)
+            WHERE c.ID = ?
+            ", $this->id
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        self::$cache->delete_multi([
+            sprintf(self::CACHE_KEY, $this->id),
+            sprintf(Manager\Collage::ID_KEY, $this->id),
+        ]);
+        return $affected;
     }
 }

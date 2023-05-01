@@ -238,8 +238,22 @@ class User extends BaseObject {
         return $this->info()['defaultPermission'] ?? [];
     }
 
+    public function addCustomPrivilege(string $name): bool {
+        $custom = (string)self::$db->scalar("
+            SELECT CustomPermissions FROM users_main WHERE ID = ?
+            ", $this->id
+        );
+        $custom = empty($custom) ? [] : unserialize($custom);
+        $custom[$name] = 1;
+        return $this->setUpdate('CustomPermissions', serialize($custom))->modify();
+    }
+
     /**
      * Set the custom permissions for this user
+     * TODO: this is pretty messed up, make it nice (get rid if "perm_")
+     *
+     * @param array $current a list of "perm_<permission_name>" custom permissions
+     * @return bool was there a change?
      */
     public function modifyPermissionList(array $current): bool {
         $permissionList = array_keys(\Gazelle\Manager\Privilege::privilegeList());
@@ -258,9 +272,9 @@ class User extends BaseObject {
             WHERE ID = ?
             ", count($delta) ? serialize($delta) : null, $this->id
         );
-        self::$cache->delete_value("u_" . $this->id);
-        $this->info = [];
-        return self::$db->affected_rows() === 1;
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected === 1;
     }
 
     /**

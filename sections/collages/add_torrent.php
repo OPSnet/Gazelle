@@ -46,6 +46,8 @@ if ($_REQUEST['action'] == 'add_torrent') {
     } elseif (isset($_POST['groupid'])) {
         // From a release page
         $URL[] = SITE_URL . '/torrents.php?id=' . (int)$_POST['groupid'];
+    } elseif (isset($_POST['entryid'])) {
+        $URL[] = SITE_URL . '/torrents.php?id=' . (int)$_POST['entryid'];
     }
 } elseif ($_REQUEST['action'] == 'add_torrent_batch') {
     foreach (explode("\n", $_REQUEST['urls']) as $u) {

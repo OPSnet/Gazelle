@@ -1041,7 +1041,7 @@ class TGroup extends BaseObject {
         return true;
     }
 
-    public function rename(string $name, User $user, Manager\TGroup $manager, Log $logger): int {
+    public function rename(string $name, User $user, Manager\TGroup $manager, Log $logger): bool {
         $oldName = $this->name();
         $success = $this->setUpdate('Name', $name)->modify();
         if ($success) {

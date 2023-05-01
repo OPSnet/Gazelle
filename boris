@@ -3,6 +3,10 @@
 
 error_reporting(E_ALL);
 
+require_once(__DIR__ . '/lib/bootstrap.php');
+require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
+require_once('tests/helper.php');
+
 $remove = [];
 foreach (['pcntl_fork', 'pcntl_signal', 'pcntl_signal_dispatch', 'pcntl_waitpid'] as $function) {
     if (!function_exists($function)) {
@@ -18,9 +22,6 @@ if ($remove) {
 define('BORIS', 1);
 $_SERVER['HTTP_USER_AGENT'] = 'boris';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
-
-require_once(__DIR__ . '/lib/bootstrap.php');
-require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
 $b = new Boris\Boris(SITE_NAME . '> ');
 $b->setInspector(new Boris\ExportInspector);

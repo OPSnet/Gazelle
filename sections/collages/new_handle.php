@@ -65,7 +65,7 @@ $collage = $collageMan->create(
 );
 
 if ($Viewer->option('AutoSubscribe')) {
-    $collage->toggleSubscription($Viewer->id());
+    $collage->toggleSubscription($Viewer);
     (new Gazelle\User\Subscription($Viewer))->subscribeComments('collages', $collage->id());
 }
 

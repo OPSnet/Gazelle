@@ -45,6 +45,17 @@ class DB extends Base {
         return "SELECT " . implode(",\n    ", self::$db->collect(0)) . "\nFROM $tableName\nWHERE --";
     }
 
+    public function primaryKeyExists(string $tableName, string $columnName): bool {
+        return (bool)self::$db->scalar("
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = ?
+                AND table_name = ?
+                AND column_name = ?
+            ", SQLDB, $tableName, $columnName
+        );
+    }
+
     /**
      * Check that the structures of two tables are identical (to ensure we can
      * select a row from one table and copy it to the other.

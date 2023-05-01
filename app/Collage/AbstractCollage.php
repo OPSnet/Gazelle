@@ -3,14 +3,16 @@
 namespace Gazelle\Collage;
 
 abstract class AbstractCollage extends \Gazelle\Base {
-    protected int   $id; // hold a local copy of our ID to save time
-    protected array $artists      = [];
-    protected array $contributors = [];
+    protected int        $id; // hold a local copy of our ID to save time
+    protected array|null $artists;
+    protected array|null $contributors;
 
     abstract public function entryTable(): string;
     abstract public function entryColumn(): string;
     abstract public function entryList(): array;
     abstract public function load(): int;
+    abstract public function rebuildTagList(): array;
+
     abstract protected function flushTarget(int $targetId): void;
 
     public function __construct(protected \Gazelle\Collage $holder) {
@@ -18,10 +20,16 @@ abstract class AbstractCollage extends \Gazelle\Base {
     }
 
     public function artistList(): array {
+        if (!isset($this->artists)) {
+            $this->load();
+        }
         return $this->artists;
     }
 
     public function contributorList(): array {
+        if (!isset($this->contributors)) {
+            $this->load();
+        }
         return $this->contributors;
     }
 
@@ -49,7 +57,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     /**
      * Flush the cache keys associated with this collage.
      */
-    public function flushAll(array $keys = []) {
+    public function flushAll(array $keys = []): AbstractCollage {
         self::$db->prepared_query("
             SELECT concat('collage_subs_user_new_', UserID)
             FROM users_collage_subs
@@ -61,6 +69,8 @@ abstract class AbstractCollage extends \Gazelle\Base {
         }
         self::$cache->delete_multi($keys);
         $this->holder->flush();
+        $this->artists      = null;
+        $this->contributors = null;
         return $this;
     }
 
@@ -79,7 +89,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
             WHERE ID = ?
             ", $this->id, $this->id
         );
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM {$this->entryTable()} ca WHERE ca.CollageID = ?
             ", $this->id
         );
@@ -93,13 +103,24 @@ abstract class AbstractCollage extends \Gazelle\Base {
             return 0;
         }
         self::$db->begin_transaction();
-        self::$db->prepared_query("
+        if ($this->holder->hasAttr('sort-newest')) {
+            $mult = $this->holder->isPersonal() ? 1 : -1;
+        } else {
+            $mult = $this->holder->isPersonal() ? -1 : 1;
+        }
+        $func = $mult > 0 ? 'max' : 'min';
+        self::$db->prepared_query($sql = "
             INSERT IGNORE INTO {$this->entryTable()}
                    (CollageID, UserID, {$this->entryColumn()}, Sort)
             VALUES (?,         ?,      ?,
-                (SELECT coalesce(max(ca.Sort), 0) + 10 FROM {$this->entryTable()} ca WHERE ca.CollageID = ?)
+                (
+                    SELECT coalesce($func(ca.Sort), 0) + (10 * ?)
+                    FROM {$this->entryTable()} ca
+                    WHERE ca.CollageID = ?
+                )
             )
-            ",  $this->id, $userId, $entryId, $this->id
+            ", $this->id, $userId, $entryId, $mult, $this->id
+
         );
         $affected = self::$db->affected_rows();
         if ($affected === 0) {
@@ -107,8 +128,8 @@ abstract class AbstractCollage extends \Gazelle\Base {
             return 0;
         }
         $this->recalcTotal();
-        $this->flushTarget($entryId);
         self::$db->commit();
+        $this->flushTarget($entryId);
         return $affected;
     }
 
@@ -131,6 +152,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         $this->recalcTotal();
         self::$db->commit();
         $this->flushTarget($entryId);
+        $this->load();
         return $affected;
     }
 
@@ -155,7 +177,9 @@ abstract class AbstractCollage extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE Sort = VALUES(Sort)
             ", ...$args
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->load();
+        return $affected;
     }
 
     public function updateSequenceEntry(int $entryId, int $sequence): int {
@@ -166,7 +190,9 @@ abstract class AbstractCollage extends \Gazelle\Base {
                 AND {$this->entryColumn()} = ?
             ", $sequence, $this->id, $entryId
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->load();
+        return $affected;
     }
 
    public function remove(): int {
@@ -186,14 +212,14 @@ abstract class AbstractCollage extends \Gazelle\Base {
      *
      * Example:
      * in: li[]=14&li[]=31&li[]=58&li[]=68&li[]=69&li[]=54&li[]=5, param=li[]
-     * parsed: ['li[]' => ['14', '31, '58', '68', '69', '5']]
-     * out: ['14', '31, '58', '68', '69', '5']
+     * parsed: ['li[]' => ['14', '31, '58', '68', '69', '54', '5']]
+     * out: [14, 31, 58, 68, 69, 54, 5]
      *
      * @param string $urlArgs query string from url
      * @param string $param url param to extract
-     * @return array hydrated equivalent
+     * returns hydrated equivalent
      */
-    protected function parseUrlArgs(string $urlArgs, string $param): array {
+    public function parseUrlArgs(string $urlArgs, string $param): array {
         if (empty($urlArgs)) {
             return [];
         }
@@ -202,14 +228,14 @@ abstract class AbstractCollage extends \Gazelle\Base {
         foreach ($pairs as $p) {
             [$name, $value] = explode('=', $p, 2);
             if (!isset($list[$name])) {
-                $list[$name] = $value;
+                $list[$name] = (int)$value;
             } else {
                 if (!is_array($list[$name])) {
                     $list[$name] = [$list[$name]];
                 }
-                $list[$name][] = $value;
+                $list[$name][] = (int)$value;
             }
         }
-        return array_key_exists($param, $list) ? $list[$param] : [];
+        return array_key_exists($param, $list) ? $list[$param] : []; /** @phpstan-ignore-line */
     }
 }

@@ -6,21 +6,22 @@ class Artist extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_a_%d';
     protected const ROLE_KEY = 'artist_role';
 
-    protected $role;
-
-    protected $groupId; // torrent or request context
-    protected $userId; // who is manipulating the torrents_artists or requests_artists tables
+    protected array $role;
+    protected int $groupId; // torrent or request context
+    protected int $userId; // who is manipulating the torrents_artists or requests_artists tables
 
     public function __construct() {
-        if (($this->role = self::$cache->get_value(self::ROLE_KEY)) === false) {
+        $role = self::$cache->get_value(self::ROLE_KEY);
+        if ($role === false) {
             self::$db->prepared_query("
                 SELECT slug, artist_role_id, sequence, name, title, collection
                 FROM artist_role
                 ORDER BY artist_role_id
             ");
-            $this->role = self::$db->to_array('slug', MYSQLI_ASSOC, false);
-            self::$cache->cache_value(self::ROLE_KEY, $this->role, 86400 * 30);
+            $role = self::$db->to_array('slug', MYSQLI_ASSOC, false);
+            self::$cache->cache_value(self::ROLE_KEY, $role, 86400 * 30);
         }
+        $this->role = $role;
     }
 
     public function findById(int $artistId): ?\Gazelle\Artist {
@@ -39,7 +40,7 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function findByIdAndRevision(int $artistId, int $revisionId): ?\Gazelle\Artist {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT ArtistID
             FROM artists_group
             WHERE ArtistID = ?
@@ -57,7 +58,7 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function findByNameAndRevision(string $name, int $revisionId): ?\Gazelle\Artist {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT ArtistID
             FROM artists_group
             WHERE Name = ?
@@ -101,7 +102,7 @@ class Artist extends \Gazelle\BaseManager {
         return $aliasId ? [$artistId, $aliasId] : $this->create($name);
     }
 
-    public function create($name) {
+    public function create($name): array {
         self::$db->begin_transaction();
         self::$db->prepared_query('
             INSERT INTO artists_group (Name)
@@ -123,12 +124,12 @@ class Artist extends \Gazelle\BaseManager {
         return [$artistId, $aliasId];
     }
 
-    public function setGroupId(int $groupId) {
+    public function setGroupId(int $groupId): Artist {
         $this->groupId = $groupId;
         return $this;
     }
 
-    public function setUserId(int $userId) {
+    public function setUserId(int $userId): Artist {
         $this->userId = $userId;
         return $this;
     }
