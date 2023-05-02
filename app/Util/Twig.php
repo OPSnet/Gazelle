@@ -55,6 +55,17 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'image_cache',
+            fn(string $image, mixed $height = 0, mixed $width = 0)
+                => new \Twig\Markup(image_cache_encode(url: $image, height: (int)$height, width: (int)$width), 'UTF-8')
+        ));
+        $twig->addFilter(new \Twig\TwigFilter(
+            'image_proxy',
+            fn(string $image, mixed $proxy = true)
+                => (bool)$proxy ? new \Twig\Markup(image_cache_encode(url: $image, proxy: true), 'UTF-8') : $image
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'linkify',
             function ($link) {
                 $local = \Text::local_url($link);

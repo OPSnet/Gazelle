@@ -246,6 +246,18 @@ defined('MEMCACHE_HOST_LIST') or define('MEMCACHE_HOST_LIST', [
 defined('CACHE_ID') or define('CACHE_ID', 'ops');
 
 // ------------------------------------------------------------------------
+// Local image caching settings
+
+// Is local image caching enabled?
+defined('IMAGE_CACHE_ENABLED') or define('IMAGE_CACHE_ENABLED', false);
+
+// When local image caching is enabled, this is used to define the cache names of assets
+defined('IMAGE_CACHE_SECRET') or define('IMAGE_CACHE_SECRET', 'thisisfine');
+
+// When local image caching is enabled, this hostname is used.
+defined('IMAGE_CACHE_HOST') or define('IMAGE_CACHE_HOST', SITE_URL);
+
+// ------------------------------------------------------------------------
 // Email settings
 
 // The DNS name (MX record) of your email hostname.

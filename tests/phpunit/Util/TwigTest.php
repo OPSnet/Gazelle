@@ -134,6 +134,42 @@ END;
         $this->assertIsString($status->render(['user_id' => 1, 'viewer' => $Viewer]), 'twig-user-status');
     }
 
+    public function testImageCache(): void {
+        $imageCache = self::twig('{{ image|image_cache }}');
+        $this->assertStringStartsWith(
+            IMAGE_CACHE_HOST . '/i/full/',
+            $imageCache->render(['image' => 'https://example.com/image.url']),
+            'twig-image-full'
+        );
+
+        $imageCache = self::twig('{{ image|image_cache(height, width) }}');
+        $this->assertStringStartsWith(
+            IMAGE_CACHE_HOST . '/i/64x96/',
+            $imageCache->render(['image' => 'https://example.com/image.url', 'height' => 64, 'width' => 96]),
+            'twig-image-64x96'
+        );
+        $this->assertStringStartsWith(
+            IMAGE_CACHE_HOST . '/i/256x/',
+            $imageCache->render(['image' => 'https://example.com/image.url', 'height' => 256]),
+            'twig-image-height-256'
+        );
+        $this->assertStringStartsWith(
+            IMAGE_CACHE_HOST . '/i/x480/',
+            $imageCache->render(['image' => 'https://example.com/image.url', 'width' => 480]),
+            'twig-image-width-480'
+        );
+    }
+
+    public function testImageProxy(): void {
+        $imageCache = self::twig('{{ image|image_proxy(active) }}');
+        $image = $imageCache->render(['image' => 'https://example.com/image.url', 'active' => true]);
+        $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/', $image, 'twig-image-proxy-spec');
+        $this->assertStringEndsWith('/proxy', $image, 'twig-image-proxy-end');
+
+        $image = $imageCache->render(['image' => 'https://example.com/image.url', 'active' => false]);
+        $this->assertStringEndsNotWith('/proxy', $image, 'twig-image-no-proxy-end');
+    }
+
     public function testFunction(): void {
         global $Document;
         $Document = 'index';

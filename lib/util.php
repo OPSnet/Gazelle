@@ -649,3 +649,46 @@ function geoip(string $IP): string {
     }
     return '?';
 }
+
+function urlencode_safe(string $string): string {
+    return rtrim(strtr(base64_encode($string), '+/', '-_'), '=');
+}
+
+function urldecode_safe(string $string): string {
+    return base64_decode(str_pad(strtr($string, '-_', '+/'), strlen($string) % 4, '=', STR_PAD_RIGHT));
+}
+
+function image_cache_signature(string $url, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): string {
+    return urlencode_safe(substr(
+        hash_hmac('sha256', $url, $secret . date('YW', $epoch ?? time()), binary: true),
+        0, 12)
+    );
+}
+
+/**
+ * Transform a URL with an optional resize directive to a image cache url
+ * E.g. https://example.com/image.jpg => /i/full/bf27c278bc5b/aHR0cHM6Ly9leGFtcGxlLmNvbS9pbWFnZS5qcGc
+ */
+function image_cache_encode(string $url, int $height = 0, int $width = 0, bool $proxy = false, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): string {
+    $encode = urlencode_safe($url) . ($proxy ? '/proxy' : '');
+    $sig    = image_cache_signature($encode, $epoch, $secret);
+    if ($proxy) {
+        $spec = 'full';
+    } else {
+        $spec = match($height || $width) {
+            true  => ($height ? $height : '') . 'x' . ($width ? $width : ''),
+            false => 'full', /** @phpstan-ignore-line */
+        };
+    }
+    return IMAGE_CACHE_HOST . "/i/$spec/$sig/$encode";
+}
+
+/**
+ * Test whether an image cache url is valid (check the signature)
+ */
+function image_cache_valid(string $url, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): bool {
+    // skip over slashes in http://xxx/
+    // if the /proxy specifier has been used, it is combined in $encode
+    [,,, $prefix, $spec, $sig, $encode] = explode('/', $url, 7);
+    return $prefix === 'i' && (string)$sig === image_cache_signature((string)$encode, $epoch, $secret);
+}
