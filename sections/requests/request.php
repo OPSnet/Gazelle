@@ -77,10 +77,10 @@ if ($request->categoryName() === 'Music') {
                 <div class="pad">
 <?php
 if ($request->image()) {
-    $image = (new Gazelle\Util\ImageProxy($Viewer))->process($request->image());
+    $image = image_cache_encode($request->image());
 ?>
                     <p align="center"><img style="width: 100%;" src="<?= $image ?>" alt="<?=
-                        $request->text() ?>" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
+                        $request->text() ?>" onclick="lightbox.init('<?= $image ?>', 220);" data-original-src="<?= $request->image() ?>" /></p>
 <?php } else { ?>
                     <p align="center"><img style="width: 100%;" src="<?=STATIC_SERVER?>/common/noartwork/<?=CATEGORY_ICON[$request->categoryId() - 1]?>" alt="<?=$request->categoryName() ?>" class="tooltip" title="<?= $request->categoryName() ?>" height="220" border="0" /></p>
 <?php } ?>

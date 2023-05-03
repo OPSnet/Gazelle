@@ -670,6 +670,9 @@ function image_cache_signature(string $url, int|null $epoch = null, string $secr
  * E.g. https://example.com/image.jpg => /i/full/bf27c278bc5b/aHR0cHM6Ly9leGFtcGxlLmNvbS9pbWFnZS5qcGc
  */
 function image_cache_encode(string $url, int $height = 0, int $width = 0, bool $proxy = false, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): string {
+    if (str_starts_with($url, STATIC_SERVER) || !str_starts_with($url, 'http')) {
+        return $url;
+    }
     $encode = urlencode_safe($url) . ($proxy ? '/proxy' : '');
     $sig    = image_cache_signature($encode, $epoch, $secret);
     if ($proxy) {

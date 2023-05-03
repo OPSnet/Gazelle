@@ -23,7 +23,6 @@ $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $requestMan    = new Gazelle\Manager\Request;
 $userMan       = new Gazelle\Manager\User;
-$imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher      = new Gazelle\User\Snatch($Viewer);
 $vote          = new Gazelle\User\Vote($Viewer);
 
@@ -147,9 +146,9 @@ $Index = 0;
 <div id="covers">
 <div id="cover_div_<?=$Index?>" class="pad">
 <?php
-$image = $imgProxy->process($tgroup->cover());
+$image = image_cache_encode($tgroup->cover());
 ?>
-            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image" onclick="lightbox.init('<?= $image ?>', 220);" /></p>
+            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image" onclick="lightbox.init('<?= $image ?>', 220);" data-original-src="<?= $tgroup->cover() ?>" /></p>
 <?php
 $Index++;
 ?>
@@ -158,14 +157,14 @@ $Index++;
                     <div id="cover_div_<?=$Index?>" class="pad"<?= $Viewer->option('ShowExtraCovers') ? '' : ' style="display: none;"' ?>>
                 <p align="center">
 <?php
-    $image = $imgProxy->process($c['Image']);
+    $image = image_cache_encode($c['Image']);
     if ($Viewer->option('ShowExtraCovers')) {
         $Src = 'src="' . $image . '"';
     } else {
         $Src = 'src="" data-gazelle-temp-src="' . $image . '"';
     }
 ?>
-                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" />
+                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" data-original-src="<?= $c['Image'] ?>" />
                 </p>
                 <ul class="stats nobullet">
                     <li><?= $c['Summary'] ?>

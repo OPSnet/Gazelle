@@ -15,12 +15,11 @@ $NumGroupsByUser = 0;
 $Render = [];
 $ArtistTable = '';
 
-$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 foreach ($Artists as $id => $Artist) {
     $name = display_str($Artist['name']);
     $image = $Artist['image']
-        ? sprintf('<img class="tooltip" src="%s" alt="%s" title="%s" width="118" />',
-            $imgProxy->process($Artist['image']), $name, $name)
+        ? sprintf('<img class="tooltip" src="%s" alt="%s" title="%s" width="118"  data-original-src="%s" />',
+            image_cache_encode($Artist['image'], 150, 150), $name, $name, $Artist['image'])
         : ('<span style="width: 107px; padding: 5px;">' . $name . '</span>');
     $ArtistTable .= "<tr><td><a href=\"artist.php?id=$id\">$name</a></td></tr>";
     $Render[] = "<li class=\"image_group_$id\"><a href=\"artist.php?id=$id\">$image</a></li>";

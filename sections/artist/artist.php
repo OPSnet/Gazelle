@@ -77,12 +77,12 @@ echo $Twig->render('bookmark/action.twig', [
 <?php
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 if ($Artist->image()) {
-    $image = $imgProxy->process($Artist->image());
+    $image = image_cache_encode($Artist->image());
 ?>
         <div class="box box_image">
             <div class="head"><strong><?= $name ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
-                <img style="max-width: 220px;" src="<?= $image ?>" alt="<?= $name ?>" onclick="lightbox.init('<?= $image ?>', 220);" />
+                <img style="max-width: 220px;" src="<?= $image ?>" alt="<?= $name ?>" onclick="lightbox.init('<?= $image ?>', 220);" data-original-src="<?= $Artist->image() ?>" />
             </div>
         </div>
 <?php } ?>
