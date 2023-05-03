@@ -164,7 +164,7 @@ class RequestTest extends TestCase {
         $this->assertEquals(-$bounty, $after['uploaded'] - $before['uploaded'], 'request-subtract-bounty');
 
         $this->assertEquals([$this->userList['admin']->id()], array_column($this->request->userIdVoteList(), 'user_id'), 'request-user-id-vote-list');
-        $this->assertEquals($taxedBounty, $this->request->userBounty($this->userList['admin']->id()), 'request-user-bounty-total');
+        $this->assertEquals($taxedBounty, $this->request->userBounty($this->userList['admin']), 'request-user-bounty-total');
 
         // add some bounty
         $this->assertTrue($this->request->vote($this->userList['user'], $bounty), 'request-more-bounty');

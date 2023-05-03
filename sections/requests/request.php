@@ -200,7 +200,7 @@ foreach ($topVoteList as $vote) {
 <?php
 }
 if (!$seen) {
-    $bounty = $request->userBounty($Viewer->id());
+    $bounty = $request->userBounty($Viewer);
     if ($bounty) {
 ?>
                 <tr>

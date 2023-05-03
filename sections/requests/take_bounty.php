@@ -47,13 +47,17 @@ foreach ($_POST as $k => $v) {
  *    $check:
  *      4 => true
  */
+$userMan = new Gazelle\Manager\User;
 $refund = [];
 $remove = [];
 foreach ($action as $userId => $operation) {
-    if ($operation == 'refund') {
-        $refund[] = $userId;
-    } elseif (isset($check[$userId])) {
-        $remove[] = $userId;
+    $user = $userMan->findById($userId);
+    if ($user) {
+        if ($operation == 'refund') {
+            $refund[] = $user;
+        } elseif (isset($check[$userId])) {
+            $remove[] = $user;
+        }
     }
 }
 
@@ -61,11 +65,11 @@ foreach ($action as $userId => $operation) {
  *   $refund = [8]
  *   $remove = [4]
  */
-foreach ($refund as $userId) {
-    $request->refundBounty($userId, $Viewer->username());
+foreach ($refund as $user) {
+    $request->refundBounty($user, $Viewer->username());
 }
-foreach ($remove as $userId) {
-    $request->removeBounty($userId, $Viewer->username());
+foreach ($remove as $user) {
+    $request->removeBounty($user, $Viewer->username());
 }
 $request->updateSphinx();
 

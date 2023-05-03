@@ -649,21 +649,21 @@ class Request extends BaseObject {
     /**
      * Get the total bounty that a user has added to a request
      */
-    public function userBounty(int $userId): int {
-        $vote = array_filter($this->userIdVoteList(), fn($r) => $r['user_id'] == $userId);
-        return count($vote) ? $vote[0]['bounty'] : 0;
+    public function userBounty(User $user): int {
+        $vote = array_filter($this->userIdVoteList(), fn($r) => $r['user_id'] == $user->id());
+        return count($vote) ? current($vote)['bounty'] : 0;
     }
 
     /**
      * Refund the bounty of a user on a request
      */
-    public function refundBounty(int $userId, string $staffName): int {
-        $bounty = $this->userBounty($userId);
+    public function refundBounty(User $user, string $staffName): int {
+        $bounty = $this->userBounty($user);
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
-            ", $this->id, $userId
+            ", $this->id, $user->id()
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
@@ -678,9 +678,9 @@ class Request extends BaseObject {
                     uls.Uploaded = uls.Uploaded + ?,
                     ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
                 WHERE ui.UserId = ?
-                ", $bounty, $message, $userId
+                ", $bounty, $message, $user->id()
             );
-            self::$cache->delete_value("user_stats_$userId");
+            $user->flush();
         }
         self::$db->commit();
         return $affected;
@@ -689,13 +689,13 @@ class Request extends BaseObject {
     /**
      * Remove the bounty of a user on a request
      */
-    public function removeBounty(int $userId, string $staffName): int {
-        $bounty = $this->userBounty($userId);
+    public function removeBounty(User $user, string $staffName): int {
+        $bounty = $this->userBounty($user);
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM requests_votes
             WHERE RequestID = ? AND UserID = ?
-            ", $this->id, $userId
+            ", $this->id, $user->id()
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
@@ -707,9 +707,9 @@ class Request extends BaseObject {
                 UPDATE users_info ui SET
                     ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
                 WHERE ui.UserId = ?
-                ", $message, $userId
+                ", $message, $user->id()
             );
-            self::$cache->delete_value("user_stats_$userId");
+            $user->flush();
         }
         self::$db->commit();
         return $affected;

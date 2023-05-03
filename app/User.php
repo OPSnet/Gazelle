@@ -32,6 +32,7 @@ class User extends BaseObject {
             sprintf(User\Privilege::CACHE_KEY, $this->id),
             sprintf('user_inv_pending_%d', $this->id),
             sprintf('user_invited_%d', $this->id),
+            sprintf('user_stat_%d', $this->id),
         ]);
         $this->stats()->flush();
         $this->stats = null;
