@@ -17,6 +17,8 @@ $paginator->setTotal(
         : $forumMan->subscribedForumTotal($Viewer) + $subscriber->commentTotal()
 );
 
+$avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
+
 $Results = (new Gazelle\User\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
 foreach ($Results as &$result) {
     $postLink = $result['PostID'] ? "&amp;postid={$result['PostID']}#post{$result['PostID']}" : '';
@@ -70,7 +72,7 @@ foreach ($Results as &$result) {
             error(0);
     }
     if (!empty($result['LastReadBody'])) {
-        $result['avatar'] = $userMan->avatarMarkup($Viewer, new Gazelle\User($result['LastReadUserID']));
+        $result['avatar'] = $avatarFilter->render(['user' => new Gazelle\User($result['LastReadUserID']), 'viewer' => $Viewer]);
     }
     if ($result['LastReadEditedUserID']) {
         $result['editor_link'] = $userMan->findById($result['LastReadEditedUserID'])->link();

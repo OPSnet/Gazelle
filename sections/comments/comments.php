@@ -264,7 +264,6 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
         echo $Twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,
             'author'      => $author,
-            'avatar'      => $userMan->avatarMarkup($Viewer, $author),
             'body'        => $Body,
             'editor'      => $userMan->findById((int)$EditedUserID),
             'edit_time'   => $EditedTime,

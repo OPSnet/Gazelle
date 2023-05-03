@@ -134,6 +134,36 @@ class DonorTest extends TestCase {
         $this->assertTrue($donor->hasMaxSpecialRank(), 'donor-set-has-max-special');
     }
 
+    public function testDonorAvatar(): void {
+        $donor = $this->donor;
+        $this->assertEquals(
+            1,
+            $donor->donate(
+                amount: DONOR_RANK_PRICE * 50,
+                xbtRate: 0.06125,
+                source: 'phpunit avatar source',
+                reason: 'phpunit avatar reason',
+            ),
+            'donor-donate-rank-2'
+        );
+        $this->assertTrue(
+            $donor->updateAvatarHoverText('avatar hover')
+                ->updateAvatarHover('https://www.example.com/donor.jpg')
+                ->modify(),
+            'donor-avatar-set'
+        );
+        $this->assertEquals('', $donor->user()->avatar(), 'donor-avatar-blank');
+        $this->assertEquals(
+            [
+                "image" => USER_DEFAULT_AVATAR,
+                "hover" => "https://www.example.com/donor.jpg",
+                "text"  => "avatar hover",
+            ],
+            $donor->user()->avatarComponentList($donor->user()),
+            'donor-avatar-component'
+        );
+    }
+
     public function testDonorStaff(): void {
         $donor = $this->donor;
         $donor->user()->setUpdate('PermissionID', MOD)->modify();

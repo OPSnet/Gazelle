@@ -33,9 +33,7 @@
         </tr>
         <tr>
         {% if viewer.showAvatars %}
-            <td valign="top">
-                {{ friend.avatar|raw }}
-            </td>
+            <td valign="top">{{ friend|avatar(viewer)|raw }}</td>
         {% endif %}
             <td valign="top">
                 <input type="hidden" name="friendid" value="{{ friend.id }}" />

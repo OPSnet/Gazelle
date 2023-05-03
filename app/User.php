@@ -2,8 +2,10 @@
 
 namespace Gazelle;
 
-use Gazelle\Util\Irc;
-use Gazelle\Util\Mail;
+use \Gazelle\Enum\AvatarDisplay;
+use \Gazelle\Enum\AvatarSynthetic;
+use \Gazelle\Util\Irc;
+use \Gazelle\Util\Mail;
 
 class User extends BaseObject {
     final const CACHE_KEY          = 'u2_%d';
@@ -20,6 +22,7 @@ class User extends BaseObject {
     protected int $lastReadForum;
     protected array $voteSummary;
 
+    protected array $avatarCache;
     protected array $lastRead;
     protected array $forumWarning = [];
     protected array $staffNote = [];
@@ -386,8 +389,38 @@ class User extends BaseObject {
         return $this->info()['Avatar'];
     }
 
-    public function avatarMode(): int {
-        return (int)$this->option('DisableAvatars');
+    public function avatarMode(): AvatarDisplay {
+        return match ((int)$this->option('DisableAvatars')) {
+            AvatarDisplay::none->value              => AvatarDisplay::none,
+            AvatarDisplay::fallbackSynthetic->value => AvatarDisplay::fallbackSynthetic,
+            AvatarDisplay::forceSynthetic->value    => AvatarDisplay::forceSynthetic,
+            default                                 => AvatarDisplay::show,
+        };
+    }
+
+    /**
+     * Assemble the pieces needed to display a user avatar
+     *  - an avatar (or the site default, or an sythetic image based on the username)
+     *  - optional hover text for donors
+     *  - optional rollover avatar for donors
+     * Twig will use these pieces to construct the markup for their avatar.
+     */
+    public function avatarComponentList(User $viewed): array {
+        $viewedId = $viewed->id();
+        if (!isset($this->avatarCache[$viewedId])) {
+            $donor = new User\Donor($viewed);
+            $this->avatarCache[$viewedId] = [
+                'image' => match($this->avatarMode()) {
+                    AvatarDisplay::show              => $viewed->avatar() ?: USER_DEFAULT_AVATAR,
+                    AvatarDisplay::fallbackSynthetic => $viewed->avatar() ?: (new User\SyntheticAvatar($this))->avatar($viewed->username()),
+                    AvatarDisplay::forceSynthetic    => (new User\SyntheticAvatar($this))->avatar($viewed->username()),
+                    AvatarDisplay::none              => USER_DEFAULT_AVATAR, /** @phpstan-ignore-line */
+                },
+                'hover' => $donor->avatarHover(),
+                'text'  => $donor->avatarHoverText(),
+            ];
+        }
+        return $this->avatarCache[$viewedId];
     }
 
     public function bonusPointsTotal(): int {
@@ -478,7 +511,7 @@ class User extends BaseObject {
         return $this->id . " (" . $this->info()['Username'] . ")";
     }
 
-    public function option(string $option): array|int|string|null {
+    public function option(string $option): mixed {
         return $this->info()['SiteOptions'][$option] ?? null;
     }
 
@@ -503,7 +536,7 @@ class User extends BaseObject {
     }
 
     public function showAvatars(): bool {
-        return $this->avatarMode() != 1;
+        return $this->avatarMode() != AvatarDisplay::none;
     }
 
     public function staffNotes(): string {

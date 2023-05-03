@@ -73,7 +73,7 @@
         <tr>
             {% if viewer.showAvatars %}
             <td class="avatar" valign="top">
-                {{ avatar|raw }}
+                {{ user|avatar(viewer)|raw }}
             </td>
             {% endif %}
             <td class="body" valign="top">

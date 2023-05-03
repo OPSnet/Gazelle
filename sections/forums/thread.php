@@ -81,6 +81,7 @@ if ($isSubscribed) {
 }
 
 $userMan = new Gazelle\Manager\User;
+$avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
 
 $transitions = $forumMan->threadTransitionList($Viewer, $forumId);
 $department = $forum->departmentList($Viewer);
@@ -328,7 +329,7 @@ foreach ($slice as $Key => $Post) {
     <tr>
 <?php   if ($Viewer->showAvatars()) { ?>
         <td class="avatar" valign="top">
-            <?= $userMan->avatarMarkup($Viewer, $author) ?>
+            <?= $avatarFilter->render(['user' => $author, 'viewer' => $Viewer]) ?>
         </td>
 <?php   } ?>
         <td class="body" valign="top"<?php if (!$Viewer->showAvatars()) { echo ' colspan="2"'; } ?>>

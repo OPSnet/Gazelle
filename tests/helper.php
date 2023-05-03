@@ -118,4 +118,15 @@ class Helper {
             ->setAdminComment("Created by tests/helper/User(InviteKey)")
             ->create();
     }
+
+    public static function modifyUserAvatar(\Gazelle\User $user, string $url): int {
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
+            UPDATE users_info SET Avatar = ? WHERE UserID = ?
+            ", $url, $user->id()
+        );
+        $affected = $db->affected_rows();
+        $user->flush();
+        return $affected;
+    }
 }

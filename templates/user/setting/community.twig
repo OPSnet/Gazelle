@@ -56,22 +56,22 @@
             <strong>Avatar display (posts)</strong>
         </td>
         <td>
-            <select name="disableavatars" id="disableavatars" onchange="ToggleIdenticons();">
-                {%- set avatar_mode = user.option('DisableAvatars') -%}
-                <option value="1"{{ selected(avatar_mode == 1) }}>Disable avatars</option>
-                <option value="0"{{ selected(avatar_mode == 0) }}>Show avatars</option>
-                <option value="2"{{ selected(avatar_mode == 2) }}>Show avatars or:</option>
-                <option value="3"{{ selected(avatar_mode == 3) }}>Replace all avatars with:</option>
+            <select name="disableavatars" id="disableavatars">
+                {%- set avatar_mode = user.avatarMode.value -%}
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarDisplay::none').value }}"{{ selected(avatar_mode == constant('\\Gazelle\\Enum\\AvatarDisplay::none').value) }}>Disable avatars</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarDisplay::show').value }}"{{ selected(avatar_mode == constant('\\Gazelle\\Enum\\AvatarDisplay::show').value) }}>Show avatars</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarDisplay::fallbackSynthetic').value }}"{{ selected(avatar_mode == constant('\\Gazelle\\Enum\\AvatarDisplay::fallbackSynthetic').value) }}>Show avatars or:</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarDisplay::forceSynthetic').value }}"{{ selected(avatar_mode == constant('\\Gazelle\\Enum\\AvatarDisplay::forceSynthetic').value) }}>Replace all avatars with:</option>
             </select>
             <select name="identicons" id="identicons">
                 {%- set identicon = user.option('Identicons') -%}
-                <option value="0"{{ selected(identicon == 0) }}>Identicon</option>
-                <option value="1"{{ selected(identicon == 1) }}>MonsterID</option>
-                <option value="2"{{ selected(identicon == 2) }}>Wavatar</option>
-                <option value="3"{{ selected(identicon == 3) }}>Retro</option>
-                <option value="4"{{ selected(identicon == 4) }}>Robots 1</option>
-                <option value="5"{{ selected(identicon == 5) }}>Robots 2</option>
-                <option value="6"{{ selected(identicon == 6) }}>Robots 3</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::identicon').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::identicon').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::identicon').label }}</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::monster').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::monster').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::monster').label }}</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::wavatar').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::wavatar').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::wavatar').label }}</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::retro').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::retro').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::retro').label }}</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::robot1').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::robot1').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::robot1').label }}</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::robot2').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::robot2').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::robot2').label }}</option>
+                <option value="{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::robot3').value }}"{{ selected(identicon == constant('\\Gazelle\\Enum\\AvatarSynthetic::robot3').value) }}>{{ constant('\\Gazelle\\Enum\\AvatarSynthetic::robot3').label }}</option>
             </select>
         </td>
     </tr>

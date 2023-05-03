@@ -253,8 +253,7 @@ if ($Viewer->permitted('users_edit_usernames')) {
         } elseif (strtolower($username) !== strtolower($cur['Username'])) {
             $found = $userMan->findByUsername($username);
             if ($found) {
-                $id = $found->id();
-                error('Username already in use by <a href="' . $found->url() . "\">$username</a>");
+                error("Username already in use by $username");
             }
         }
         $set[] = 'Username = ?';

@@ -31,7 +31,6 @@ $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['pa
 $paginator->setTotal($forumSearch->postHistoryTotal());
 
 echo $Twig->render('user/post-history.twig', [
-    'avatar'        => $userMan->avatarMarkup($Viewer, $user),
     'is_fmod'       => $Viewer->permitted('site_moderate_forums'),
     'own_profile'   => $ownProfile,
     'paginator'     => $paginator,

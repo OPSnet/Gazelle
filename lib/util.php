@@ -669,8 +669,16 @@ function image_cache_signature(string $url, int|null $epoch = null, string $secr
  * Transform a URL with an optional resize directive to a image cache url
  * E.g. https://example.com/image.jpg => /i/full/bf27c278bc5b/aHR0cHM6Ly9leGFtcGxlLmNvbS9pbWFnZS5qcGc
  */
-function image_cache_encode(string $url, int $height = 0, int $width = 0, bool $proxy = false, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): string {
-    if (str_starts_with($url, STATIC_SERVER) || !str_starts_with($url, 'http')) {
+function image_cache_encode(
+    string $url,
+    int $height     = 0,
+    int $width      = 0,
+    bool $proxy     = false,
+    int|null $epoch = null,
+    string $secret  = IMAGE_CACHE_SECRET,
+    bool $cache     = IMAGE_CACHE_ENABLED,
+): string {
+    if (!$cache || str_starts_with($url, STATIC_SERVER) || !str_starts_with($url, 'http')) {
         return $url;
     }
     $encode = urlencode_safe($url) . ($proxy ? '/proxy' : '');

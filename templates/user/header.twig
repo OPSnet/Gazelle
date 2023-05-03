@@ -75,9 +75,7 @@
 {% if viewer.showAvatars %}
 <div class="box box_image box_image_avatar">
     <div class="head colhead_dark">Avatar</div>
-    <div align="center">
-        {{ userMan.avatarMarkup(viewer, user)|raw }}
-    </div>
+    <div align="center">{{ user|avatar(viewer)|raw }}</div>
 </div>
 {% endif %}
 

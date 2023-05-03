@@ -3,10 +3,21 @@
 use \PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../../lib/bootstrap.php');
+require_once(__DIR__ . '/../../helper.php');
+
+use \Gazelle\Enum\AvatarDisplay;
+use \Gazelle\Enum\AvatarSynthetic;
 
 class TwigTest extends TestCase {
+    protected \Gazelle\User $user;
+
     public function setUp(): void {
         Gazelle\Util\Twig::setUserMan(new Gazelle\Manager\User);
+        $this->user = Helper::makeUser('user.' . randomString(6), 'user');
+    }
+
+    public function tearDown(): void {
+        $this->user->remove();
     }
 
     protected static function twig(string $template): \Twig\TemplateWrapper {
@@ -136,6 +147,9 @@ END;
 
     public function testImageCache(): void {
         $imageCache = self::twig('{{ image|image_cache }}');
+        if (!IMAGE_CACHE_ENABLED) {
+            $this->markTestSkipped('Image caching is not enabled');
+        }
         $this->assertStringStartsWith(
             IMAGE_CACHE_HOST . '/i/full/',
             $imageCache->render(['image' => 'https://example.com/image.url']),
@@ -163,8 +177,10 @@ END;
     public function testImageProxy(): void {
         $imageCache = self::twig('{{ image|image_proxy(active) }}');
         $image = $imageCache->render(['image' => 'https://example.com/image.url', 'active' => true]);
-        $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/', $image, 'twig-image-proxy-spec');
-        $this->assertStringEndsWith('/proxy', $image, 'twig-image-proxy-end');
+        if (IMAGE_CACHE_ENABLED) {
+            $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/', $image, 'twig-image-proxy-spec');
+            $this->assertStringEndsWith('/proxy', $image, 'twig-image-proxy-end');
+        }
 
         $image = $imageCache->render(['image' => 'https://example.com/image.url', 'active' => false]);
         $this->assertStringEndsNotWith('/proxy', $image, 'twig-image-no-proxy-end');

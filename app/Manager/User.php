@@ -158,41 +158,6 @@ class User extends \Gazelle\BaseManager {
     }
 
     /**
-     * Generate HTML for a user's avatar
-     */
-    public function avatarMarkup(\Gazelle\User $viewer, \Gazelle\User $viewed): string {
-        static $cache = [];
-        $viewedId = $viewed->id();
-        if (!isset($cache[$viewedId])) {
-            $imgProxy = new \Gazelle\Util\ImageProxy($viewer);
-            $avatar = match($viewer->avatarMode()) {
-                1 => STATIC_SERVER . '/common/avatars/default.png',
-                2 => $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
-                    ?: (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
-                        ->setSize(AVATAR_WIDTH)
-                        ->avatar($viewed->username()),
-                3 => (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
-                    ->setSize(AVATAR_WIDTH)
-                    ->avatar($viewed->username()),
-                default => $imgProxy->process($viewed->avatar(), 'avatar', $viewedId)
-                    ?: STATIC_SERVER . '/common/avatars/default.png',
-            };
-            $attrs = ['width="' . AVATAR_WIDTH . '"'];
-            $donor = new \Gazelle\User\Donor($viewed);
-            $avatarHoverText = $donor->avatarHoverText();
-            if ($avatarHoverText !== false) {
-                $attrs[] = "title=\"$avatarHoverText\" alt=\"$avatarHoverText\"";
-            }
-            $attr = implode(' ', $attrs);
-            $second = $donor->avatarHover();
-            $cache[$viewedId] = "<div class=\"avatar_container\"><div><img $attr class=\"avatar_0\" src=\"$avatar\" /></div>"
-                . ($second !== false ? ("<div><img $attr class=\"avatar_1\" src=\"" . $imgProxy->process($second, 'avatar2', $viewedId) . '" /></div>') : '')
-                . "</div>";
-        }
-        return $cache[$viewedId];
-    }
-
-    /**
      * Get list of user classes by ID
      * @return array $classes
      */

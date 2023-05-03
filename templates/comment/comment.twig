@@ -43,7 +43,7 @@
     </tr>
     <tr>
 {% if show_avatar %}
-        <td class="avatar" valign="top">{{ avatar|raw }}</td>
+        <td class="avatar" valign="top">{{ author|avatar(viewer)|raw }}</td>
 {% endif %}
         <td class="body" valign="top">
             <div id="content{{ id }}">

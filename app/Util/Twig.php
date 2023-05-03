@@ -22,6 +22,35 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'avatar',
+            function (\Gazelle\User $user, \Gazelle\User $viewer): string {
+                $data      = $viewer->avatarComponentList($user);
+                $basicAttr = ['class="avatar_0" width="' . AVATAR_WIDTH . '"'];
+                $hoverAttr = ['class="avatar_1" width="' . AVATAR_WIDTH . '"'];
+                $text      = $data['text'];
+                if ($text !== false && $text != '') {
+                    $basicAttr[] = "title=\"$text\" alt=\"$text\"";
+                    $hoverAttr[] = "title=\"$text\" alt=\"$text\"";
+                }
+
+                $image = $data['image'];
+                if ($image === USER_DEFAULT_AVATAR) {
+                    $basicAttr[] = "src=\"$image\"";
+                } else {
+                    $basicAttr[] = 'src="' . image_cache_encode($image, width: AVATAR_WIDTH) . "\" original-data-src=\"$image\"";
+                }
+
+                $rollover = $data['hover'];
+                if ($rollover) {
+                    $hoverAttr[] = 'src="' . image_cache_encode($rollover, width: AVATAR_WIDTH) . "\" original-data-src=\"$rollover\"";
+                }
+                return '<div class="avatar_container"><div><img ' . implode(' ', $basicAttr) . " /></div>"
+                    . ($rollover ? ('<div><img ' . implode(' ', $hoverAttr) . ' /></div>') : '')
+                    . "</div>";
+            },
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'b64',
             fn(string $binary) => base64_encode($binary)
         ));

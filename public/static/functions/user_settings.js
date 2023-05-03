@@ -45,6 +45,10 @@ $(document).ready(function() {
         }
     });
 
+    $("#disableavatars").change(function() {
+        ToggleIdenticons();
+    });
+
     // I'm sure there is a better way to do this but this will do for now.
     $("#notifications_Inbox_traditional").click(function() {
         $("#notifications_Inbox_popup").prop('checked', false);

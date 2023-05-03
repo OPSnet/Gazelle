@@ -764,6 +764,9 @@ defined('VALID_PAGE') or define('VALID_PAGE', [
 // Maximum length of a custom user title.
 defined('USER_TITLE_LENGTH') or define('USER_TITLE_LENGTH', 1024);
 
+// Default image for user avatars.
+defined('USER_DEFAULT_AVATAR') or define('USER_DEFAULT_AVATAR', STATIC_SERVER . '/common/avatars/default.png');
+
 // Magic constant of locked accounts.
 defined('STAFF_LOCKED') or define('STAFF_LOCKED', 1);
 

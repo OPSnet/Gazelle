@@ -42,7 +42,7 @@
         </tr>
         <tr>
     {% if viewer.showAvatars %}
-            <td class="avatar" valign="top">{{ userMan.avatarMarkup(viewer, userMan.findById(post.AuthorID))|raw }}</td>
+            <td class="avatar" valign="top">{{ userMan.findById(post.AuthorID)|avatar(viewer)|raw }}</td>
     {% endif %}
             <td class="body" valign="top">
                 <div id="content{{ post.ID }}">

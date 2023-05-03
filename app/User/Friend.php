@@ -87,7 +87,6 @@ class Friend extends \Gazelle\BaseUser {
         $list = self::$db->to_array('id', MYSQLI_ASSOC, false);
         foreach (array_keys($list) as $id) {
             $list[$id]['user']   = $userMan->findById($id);
-            $list[$id]['avatar'] = $userMan->avatarMarkup($this->user, $list[$id]['user']);
         }
         return $list;
     }
