@@ -1,5 +1,5 @@
 {% if recent %}
-<table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
+<table class="layout recent" id="recent_votes" cellpadding="0" cellspacing="0" border="0">
 <tr class="colhead">
     <td colspan="5">
     {%- if show_link -%}
@@ -31,7 +31,8 @@
 {% for r in recent -%}
     <td>
         <a href="torrents.php?id={{ r.group_id }}">
-        <img class="tooltip" title="{{ r.tgroup.text }}" alt="{{ r.tgroup.text }}" src="{{ r.tgroup.cover|image }}" width="107" />
+        <img class="tooltip" title="{{ r.tgroup.text }}" alt="{{ r.tgroup.text }}" src="{{ r.tgroup.cover|image_cache(width = 150) }}"
+             data-origin-src="{{ r.image }}" width="107" />
         </a>
     </td>
 {%- endfor %}

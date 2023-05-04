@@ -1,5 +1,5 @@
 {% if recent %}
-<table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
+<table class="layout recent" id="recent_{{ thing }}" cellpadding="0" cellspacing="0" border="0">
 <tr class="colhead">
     <td colspan="5"><a href="torrents.php?type={{ type }}&amp;userid={{ id }}">Recent {{ title }}</a></td>
 </tr>
@@ -7,7 +7,8 @@
 {% for r in recent %}
     <td>
         <a href="torrents.php?id={{ r.id }}">
-        <img class="tooltip" title="{{ r.text }}" alt="{{ r.text }}" src="{{ r.image|image }}" width="107" />
+        <img class="tooltip" title="{{ r.text }}" alt="{{ r.text }}" src="{{ r.image|image_cache(width = 150) }}"
+             data-origin-src="{{ r.image }}" width="107" />
         </a>
     </td>
 {% endfor %}

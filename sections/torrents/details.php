@@ -148,7 +148,7 @@ $Index = 0;
 <?php
 $image = image_cache_encode($tgroup->cover());
 ?>
-            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image" onclick="lightbox.init('<?= $image ?>', 220);" data-original-src="<?= $tgroup->cover() ?>" /></p>
+            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= $tgroup->cover() ?>" /></p>
 <?php
 $Index++;
 ?>
@@ -164,7 +164,7 @@ $Index++;
         $Src = 'src="" data-gazelle-temp-src="' . $image . '"';
     }
 ?>
-                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" data-original-src="<?= $c['Image'] ?>" />
+                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= $c['Image'] ?>" />
                 </p>
                 <ul class="stats nobullet">
                     <li><?= $c['Summary'] ?>

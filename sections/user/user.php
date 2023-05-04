@@ -378,6 +378,7 @@ if (check_paranoia_here('snatched')) {
         'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->recentSnatchList()),
         'title'  => 'Snatches',
         'type'   => 'snatched',
+        'thing'  => 'snatches',
     ]);
 }
 
@@ -387,6 +388,7 @@ if (check_paranoia_here('uploads')) {
         'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->recentUploadList()),
         'title'  => 'Uploads',
         'type'   => 'uploaded',
+        'thing'  => 'uploads',
     ]);
 }
 

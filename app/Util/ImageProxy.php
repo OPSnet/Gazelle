@@ -61,6 +61,6 @@ class ImageProxy {
         }
         return "<img src=\"". image_cache_encode($Src, 150, 150) . "\" width=\"90\" height=\"90\" " .
             "alt=\"Cover\" onclick=\"lightbox.init('" . image_cache_encode($Lightbox) . "', 90)\" " .
-            " data-original-src=\"$Src\" />";
+            " data-origin-src=\"$Src\" />";
     }
 }
