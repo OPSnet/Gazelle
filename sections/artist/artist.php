@@ -317,7 +317,7 @@ if ($sections = $Artist->sections()) {
                     </div>
 <?php   } ?>
                     <div class="group_info clear">
-                        <strong><?= $tgroup->link() ?></strong>
+                        <strong><?= $tgroup->year() ?> – <a href="<?= $tgroup->url() ?>" title="View torrent group" dir="ltr"><?= display_str($tgroup->name()) ?></a></strong>
                         <span class="float_right">
 <?php
         echo $Twig->render('bookmark/action.twig', [
