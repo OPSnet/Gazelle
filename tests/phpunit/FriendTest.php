@@ -26,6 +26,7 @@ class FriendTest extends TestCase {
         $this->assertEquals(0, $this->friend[0]->total(), 'friend-i-have-no-friends');
         $this->assertCount(0, $this->friend[1]->page($manager, 10, 0), 'friend-empty-page');
         $this->assertCount(0, $this->friend[2]->userList(), 'friend-empty-user-list');
+        $this->assertEquals(0, $this->friend[0]->add($this->friend[0]->user()->id()), 'friend-0-not-self');
 
         // add a friend
         $this->assertFalse($this->friend[0]->isFriend($this->friend[1]->user()->id()), 'friend-1-not-friend');

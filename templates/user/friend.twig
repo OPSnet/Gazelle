@@ -33,16 +33,16 @@
         </tr>
         <tr>
         {% if viewer.showAvatars %}
-            <td valign="top">{{ friend|avatar(viewer)|raw }}</td>
+            <td valign="top">{{ friend.user|avatar(viewer)|raw }}</td>
         {% endif %}
             <td valign="top">
                 <input type="hidden" name="friendid" value="{{ friend.id }}" />
-                <textarea name="comment" rows="4" cols="85">{{ friend.comment }}</textarea>
+                <textarea name="comment" rows="4" cols="70">{{ friend.comment }}</textarea>
+                <br /> <input type="submit" name="action" value="Save notes" />
             </td>
             <td class="left" valign="top">
-                <input type="submit" name="action" value="Send PM" />
-                <input type="submit" name="action" value="Save notes" />
-                <input type="submit" name="action" value="Unfriend" />
+                <a href="inbox.php?action=compose&amp;toid={{ friend.id }}" class="brackets">Send PM</a>
+                <br /><br /><br /><br /><input type="submit" name="action" value="Unfriend" />
             </td>
         </tr>
     </table>

@@ -31,6 +31,9 @@ class Friend extends \Gazelle\BaseUser {
 
 
     public function add(int $friendId): int {
+        if ($friendId == $this->user->id()) {
+            return 0;
+        }
         if (!(bool)self::$db->scalar("SELECT 1 FROM users_main WHERE ID = ?", $friendId)) {
             return 0;
         }
