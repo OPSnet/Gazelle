@@ -195,18 +195,17 @@ class Text {
     // of a user context. But most of the time you can forget about this.
     private static \Gazelle\User $viewer;
 
-    public static function setViewer(\Gazelle\User $viewer) {
+    public static function setViewer(\Gazelle\User $viewer): void {
         self::$viewer = $viewer;
     }
 
     /**
      * Output BBCode as XHTML
-     * @param string $Str BBCode text
-     * @param bool $OutputTOC Ouput TOC near (above) text
-     * @param int $Min See {@link parse_toc}
-     * @return string
      */
-    public static function full_format($Str, $OutputTOC = true, $Min = 3, $Rules = false) {
+    public static function full_format(?string $Str, bool $OutputTOC = true, int $Min = 3, bool $Rules = false, bool $cache = false): string {
+        if (is_null($Str)) {
+            return '';
+        }
         $Str = display_str($Str);
 
         self::$Headlines = [];
@@ -230,7 +229,7 @@ class Text {
             $Str = preg_replace('/(\={2})([^=].*)\1/i', '[inlinesize=7]$2[/inlinesize]', $Str);
         }
 
-        $HTML = nl2br(self::to_html(self::parse($Str), $Rules));
+        $HTML = nl2br(self::to_html(self::parse($Str), $Rules, $cache));
 
         if (self::$TOC && $OutputTOC) {
             $HTML = self::parse_toc($Min) . $HTML;
@@ -238,7 +237,7 @@ class Text {
         return $HTML;
     }
 
-    public static function strip_bbcode($Str) {
+    public static function strip_bbcode(string $Str): string {
         $Str = display_str($Str);
 
         //Inline links
@@ -247,7 +246,7 @@ class Text {
         return nl2br(self::raw_text(self::parse($Str)));
     }
 
-    private static function valid_url($Str, $Extension = '', $Inline = false) {
+    private static function valid_url(string $Str, string $Extension = '', bool $Inline = false): int|false {
         $re = '/^'
             . '(https?|ftps?|irc):\/\/' // protocol
             . '(\w+(:\w+)?@)?' // user:pass@
@@ -268,11 +267,11 @@ class Text {
         return preg_match($re, $Str, $Matches);
     }
 
-    private static function relative_url($str) {
+    private static function relative_url(string $str): bool {
         return !preg_match('~^https?://~', $str);
     }
 
-    public static function local_url($Str) {
+    public static function local_url(string $Str): string|false {
         $URLInfo = parse_url($Str);
         if (!$URLInfo) {
             return false;
@@ -295,7 +294,7 @@ class Text {
         }
     }
 
-    public static function resolve_url($url) {
+    public static function resolve_url(string $url): ?string {
         $rawurl = str_replace('&amp;', '&', $url); // unfuck aggressive escaping
         $info = parse_url($rawurl);
         if (
@@ -312,29 +311,29 @@ class Text {
                 $name = Gazelle\DB::DB()->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
                     $args['id'] ?? 0);
                 return $name
-                    ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name)
+                    ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name) /** @phpstan-ignore-line */
                     : null;
 
             case '/collages.php':
-                return self::bbcodeCollageUrl($args['id'] ?? $args['collageid'], $url) ?? null;
+                return self::bbcodeCollageUrl((int)($args['id'] ?? $args['collageid']), $url);
 
             case '/forums.php':
                 if (!isset($args['action'])) {
                     return null;
                 }
                 return match ($args['action']) {
-                    'viewforum' => self::bbcodeForumUrl($args['forumid']) ?? null,
+                    'viewforum' => self::bbcodeForumUrl((int)$args['forumid']),
                     'viewthread' => !isset($args['threadid']) && isset($args['postid'])
                         ?  self::bbcodePostUrl((int)$args['postid'])
-                        :  self::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null),
+                        :  self::bbcodeThreadUrl((int)$args['threadid']),
                     default => null,
                 };
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
-                    return (new \Gazelle\Manager\Torrent)->findById($args['torrentid'])?->link();
+                    return (new \Gazelle\Manager\Torrent)->findById((int)$args['torrentid'])?->link();
                 } elseif (isset($args['id'])) {
-                    return (new \Gazelle\Manager\TGroup)->findById($args['id'])?->link();
+                    return (new \Gazelle\Manager\TGroup)->findById((int)$args['id'])?->link();
                 }
                 return null;
 
@@ -381,7 +380,7 @@ class Text {
     7) Increment array pointer, start again (past the end of the [/close] tag)
 
     */
-    public static function parse($Str, $ListPrefix = '') {
+    public static function parse(string $Str, string $ListPrefix = ''): array {
         // Deal with list markup that is not list markup (e.g. [*] at EOL)
         // such that "abc [*]" => "abc [[n]*]"
         $Str = preg_replace('/(?<!\n\[)(?<!^\[)([*#])(?=\])/', '[n]\\1', $Str);
@@ -462,7 +461,7 @@ class Text {
 
                 // Let's say the block can stop at a newline or a space
                 $CloseTag = strcspn($Str, " \n\r", $i);
-                if ($CloseTag === false) { // block finishes with URL
+                if ($CloseTag === 0) { // block finishes with URL
                     $CloseTag = $Len;
                 }
                 if (preg_match('/[!,.?:]+$/',substr($Str, $i, $CloseTag), $Match)) {
@@ -641,9 +640,11 @@ class Text {
                             $ChildPrefix = $Attrib;
                         }
                         foreach ($Array[$ArrayPos]['Val'] as $Key=>$Val) {
-                            $Id = $ChildPrefix.'.'.($CurrentId++);
-                            $Array[$ArrayPos]['Val'][$Key] = self::parse(trim($Val), $Id);
-                            $Array[$ArrayPos]['Val'][$Key]['Id'] = $Id;
+                            if (is_string($Val)) {
+                                $Id = $ChildPrefix.'.'.($CurrentId++);
+                                $Array[$ArrayPos]['Val'][$Key] = self::parse(trim($Val), $Id);
+                                $Array[$ArrayPos]['Val'][$Key]['Id'] = $Id;
+                            }
                         }
                         $ListId++;
                     break;
@@ -708,13 +709,13 @@ class Text {
      *
      * Otherwise the item is on the same as level as the previous item
      *
-     * @param int $ItemLevel Current item level
-     * @param int $Level Current list level
-     * @param string $List reference to an XHTML string
-     * @param int $i Iterator digit
-     * @param int $Offset If the list doesn't start at level 1
+     * $ItemLevel Current item level
+     * $Level Current list level
+     * $List reference to an XHTML string
+     * $i Iterator digit
+     * $Offset If the list doesn't start at level 1
      */
-    private static function headline_level (&$ItemLevel, &$Level, &$List, $i, &$Offset, $Tag) {
+    private static function headline_level (int &$ItemLevel, int &$Level, string &$List, int $i, int &$Offset, string $Tag): void {
         if ($ItemLevel < $Level) {
             $diff = $Level - $ItemLevel;
             $List .= '</li>' . str_repeat("</$Tag></li>", $diff);
@@ -731,7 +732,7 @@ class Text {
         }
     }
 
-    private static function to_html ($Array, $Rules) {
+    private static function to_html(array $Array, bool $Rules, bool $cache): string {
         self::$Levels++;
         /*
          * Hax prevention
@@ -758,9 +759,6 @@ class Text {
             }
         }
 
-        // May need to instantiate this with a User object
-        $imgProxy = null;
-
         foreach ($Array as $Key=>$Block) {
             if ($Key === 'Id') {
                 continue;
@@ -773,22 +771,22 @@ class Text {
             if (self::$Levels < self::$MaximumNests) {
             switch ($Block['Type']) {
                 case 'b':
-                    $Str .= '<strong>'.self::to_html($Block['Val'], $Rules).'</strong>';
+                    $Str .= '<strong>'.self::to_html($Block['Val'], $Rules, $cache).'</strong>';
                     break;
                 case 'u':
-                    $Str .= '<span style="text-decoration: underline;">'.self::to_html($Block['Val'], $Rules).'</span>';
+                    $Str .= '<span style="text-decoration: underline;">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
                     break;
                 case 'i':
-                    $Str .= '<span style="font-style: italic;">'.self::to_html($Block['Val'], $Rules)."</span>";
+                    $Str .= '<span style="font-style: italic;">'.self::to_html($Block['Val'], $Rules, $cache)."</span>";
                     break;
                 case 's':
-                    $Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val'], $Rules).'</span>';
+                    $Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
                     break;
                 case 'hr':
                     $Str .= '<hr />';
                     break;
                 case 'important':
-                    $Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules).'</strong>';
+                    $Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules, $cache).'</strong>';
                     break;
                 case 'user':
                     $Str .= '<a href="user.php?action=search&amp;search='.urlencode(trim($Block['Val'], '@')).'">'.$Block['Val'].'</a>';
@@ -804,20 +802,21 @@ class Text {
                     $Str .= '<a href="rules.php?p=upload#'.urlencode(self::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
                     break;
                 case 'collage':
-                    $Str .= self::bbcodeCollageUrl($Block['Val']);
+                    $Str .= self::bbcodeCollageUrl((int)$Block['Val']);
                     break;
                 case 'forum':
-                    $Str .= self::bbcodeForumUrl($Block['Val']);
+                    $Str .= self::bbcodeForumUrl((int)$Block['Val']);
                     break;
                 case 'thread':
-                    $Str .= self::bbcodeThreadUrl($Block['Val']);
+                    $Str .= self::bbcodeThreadUrl((string)$Block['Val']);
                     break;
                 case 'pl':
-                    $pl = \Gazelle\Manager\Torrent::renderPL(
-                        (int)$Block['Val'],
-                        preg_split('/\s*,\s*/m', strtolower($Block['Attr']), -1, PREG_SPLIT_NO_EMPTY)
-                    );
-                    $Str .= is_null($pl) ? "[pl]{$Block['Val']}[/pl]" : $pl;
+                    $found = preg_split('/\s*,\s*/m', strtolower($Block['Attr']), -1, PREG_SPLIT_NO_EMPTY);
+                    if ($found !== false) {
+                        $Str .= \Gazelle\Manager\Torrent::renderPL((int)$Block['Val'], $found);
+                    } else {
+                        $Str .= "[pl]{$Block['Val']}[/pl]";
+                    }
                     break;
                 case 'torrent':
                     $GroupID = 0;
@@ -859,29 +858,29 @@ class Text {
                 case 'list':
                     $Str .= "<{$Block['ListType']} class=\"postlist\">";
                     foreach ($Block['Val'] as $Line) {
-                        $Str .= '<li'.($Rules ? ' id="r'.$Line['Id'].'"' : '').'>'.self::to_html($Line, $Rules).'</li>';
+                        $Str .= '<li'.($Rules ? ' id="r'.$Line['Id'].'"' : '').'>'.self::to_html($Line, $Rules, $cache).'</li>';
                     }
                     $Str .= '</'.$Block['ListType'].'>';
                     break;
                 case 'align':
                     $ValidAttribs = ['left', 'center', 'right'];
                     if (!in_array($Block['Attr'], $ValidAttribs)) {
-                        $Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/align]';
+                        $Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache).'[/align]';
                     } else {
-                        $Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules).'</div>';
+                        $Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules, $cache).'</div>';
                     }
                     break;
                 case 'color':
                 case 'colour':
                     $Block['Attr'] = strtolower($Block['Attr']);
                     if (!in_array($Block['Attr'], self::$ColorName) && !preg_match('/^#[0-9a-f]{6}$/', $Block['Attr'])) {
-                        $Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/color]';
+                        $Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache).'[/color]';
                     } else {
-                        $Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules).'</span>';
+                        $Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
                     }
                     break;
                 case 'headline':
-                    $text = self::to_html($Block['Val'], $Rules);
+                    $text = self::to_html($Block['Val'], $Rules, $cache);
                     $raw = self::raw_text($Block['Val']);
                     if (!in_array($Block['Attr'], self::$HeadlineLevels)) {
                         $Str .= sprintf('%1$s%2$s%1$s', str_repeat('=', $Block['Attr'] + 1), $text);
@@ -899,9 +898,9 @@ class Text {
                 case 'size':
                     $ValidAttribs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
                     if (!in_array($Block['Attr'], $ValidAttribs)) {
-                        $Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/size]';
+                        $Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache).'[/size]';
                     } else {
-                        $Str .= '<span class="size'.$Block['Attr'].'">'.self::to_html($Block['Val'], $Rules).'</span>';
+                        $Str .= '<span class="size'.$Block['Attr'].'">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
                     }
                     break;
                 case 'quote':
@@ -912,7 +911,7 @@ class Text {
                         $Str .= '<blockquote class="hidden spoiler">';
                     }
                     if (!empty($Block['Attr'])) {
-                        $Exploded = explode('|', self::to_html($Block['Attr'], $Rules));
+                        $Exploded = explode('|', self::to_html($Block['Attr'], $Rules, $cache));
                         if (isset($Exploded[1]) && (is_numeric($Exploded[1]) || (in_array($Exploded[1][0], ['a', 't', 'c', 'r']) && is_numeric(substr($Exploded[1], 1))))) {
                             // the part after | is either a number or starts with a, t, c or r, followed by a number (forum post, artist comment, torrent comment, collage comment or request comment, respectively)
                             $PostID = trim($Exploded[1]);
@@ -922,7 +921,7 @@ class Text {
                             $Str .= '<strong class="quoteheader">'.$Exploded[0].'</strong> wrote: ';
                         }
                     }
-                    $Str .= '<blockquote>'.self::to_html($Block['Val'], $Rules).'</blockquote>';
+                    $Str .= '<blockquote>'.self::to_html($Block['Val'], $Rules, $cache).'</blockquote>';
                     if (self::$InQuotes == self::$NestsBeforeHide) { //Close quote the deeply nested quote [hide].
                         $Str .= '</blockquote><br />'; // Ensure new line after quote train hiding
                     }
@@ -930,27 +929,27 @@ class Text {
                     self::$InQuotes--;
                     break;
                 case 'box':
-                    $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules).'</div>';
+                    $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules, $cache).'</div>';
                     break;
                 case 'pad':
                     $Attr = array_filter(explode('|',$Block['Attr'] ?? ''), fn($x) => is_numeric($x) && (float)$x >= 0);
                     if (count($Attr) === 0) {
-                        $Str .= self::to_html($Block['Val'], $Rules);
+                        $Str .= self::to_html($Block['Val'], $Rules, $cache);
                     } else {
                         $Padding = implode(' ', array_map(fn($x) => "{$x}px", $Attr));
-                        $Str .= "<span style=\"display: inline-block; padding: {$Padding}\">" . self::to_html($Block['Val'], $Rules).'</span>';
+                        $Str .= "<span style=\"display: inline-block; padding: {$Padding}\">" . self::to_html($Block['Val'], $Rules, $cache).'</span>';
                     }
                     break;
                 case 'hide':
                 case 'spoiler':
                     $Str .= '<strong>'.($Block['Attr'] ?: 'Hidden text').'</strong>: <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
-                    $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
+                    $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules, $cache).'</blockquote>';
                     break;
                 case 'mature':
                     if (self::$viewer->option('EnableMatureContent')) {
                         if (!empty($Block['Attr'])) {
                             $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
-                            $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
+                            $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules, $cache).'</blockquote>';
                         }
                         else {
                             $Str .= '<strong>Use of the [mature] tag requires a description.</strong> The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post. Misleading descriptions will be penalized. For further information on our mature content policies, please refer to this <a href="wiki.php?action=article&amp;id=1063">wiki</a>.';
@@ -966,17 +965,20 @@ class Text {
                         break;
                     }
                     if (!self::valid_url($Block['Val'], '\.(jpe?g|gif|png|bmp|tiff)')) {
-                        $Str .= '[img]'.$Block['Val'].'[/img]';
+                        $Str .= "[img]{$Block['Val']}[/img]";
                     } else {
                         $LocalURL = self::local_url($Block['Val']);
                         if ($LocalURL) {
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'.$Block['Val'].'" src="'.$LocalURL.'" />';
                         } else {
-                            if (is_null($imgProxy)) {
-                                $imgProxy = new Gazelle\Util\ImageProxy(self::$viewer);
+                            if ($cache) {
+                                $image    = image_cache_encode($Block['Val']);
+                                $original = " data-original-src=\"{$Block['Val']}\"";
+                            } else {
+                                $image    = $Block['Val'];
+                                $original = "";
                             }
-                            $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'
-                                . $Block['Val'].'" src="' . $imgProxy->process($Block['Val']) . '" />';
+                            $Str .= "<img class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"$image\" src=\"$image\"$original />";
                         }
                     }
                     break;
@@ -1000,7 +1002,7 @@ class Text {
                         $Block['Val'] = $Block['Attr'];
                         $NoName = true; // If there isn't a Val for this
                     } else {
-                        $Block['Val'] = self::to_html($Block['Val'], $Rules);
+                        $Block['Val'] = self::to_html($Block['Val'], $Rules, $cache);
                         $NoName = false;
                     }
 
@@ -1035,7 +1037,7 @@ class Text {
                     if (!self::valid_url($Block['Attr'], '', true)) {
                         $Array = self::parse($Block['Attr']);
                         $Block['Attr'] = $Array;
-                        $Str .= self::to_html($Block['Attr'], $Rules);
+                        $Str .= self::to_html($Block['Attr'], $Rules, $cache);
                     }
                     else {
                         $LocalURL = self::local_url($Block['Attr']);
@@ -1057,7 +1059,7 @@ class Text {
         return $Str;
     }
 
-    private static function raw_text ($Array) {
+    private static function raw_text(array $Array): string {
         $Str = '';
         foreach ($Array as $Block) {
             if (is_string($Block)) {
@@ -1147,7 +1149,7 @@ class Text {
         );
     }
 
-    private static function smileys($Str) {
+    private static function smileys(string $Str): string {
         if (!isset(self::$viewer) || self::$viewer->option('DisableSmileys')) {
             return $Str;
         }
@@ -1166,11 +1168,8 @@ class Text {
      * some other site's metadata. This also should reverse the HTML encoding
      * that display_str does so we do not have to call reverse_display_str on the
      * result.
-     *
-     * @param String $Html
-     * @return String
      */
-    public static function parse_html($Html) {
+    public static function parse_html(string $Html): string {
         $Document = new DOMDocument();
         $Document->loadHTML(stripslashes($Html));
 
@@ -1264,7 +1263,7 @@ class Text {
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
-            if ($Element->hasAttribute('class') === 'important_text') {
+            if (in_array('important_text', explode(' ', $Element->getAttribute('class')))) {
                 $NewElement = $Document->createElement('important');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
@@ -1309,7 +1308,7 @@ class Text {
             }
         }
 
-        $Str = $Document->saveHTML($Document->getElementsByTagName('body')->item(0));
+        $Str = (string)$Document->saveHTML($Document->getElementsByTagName('body')->item(0));
         $Str = str_replace(["<body>\n", "\n</body>", "<body>", "</body>"], "", $Str);
         $Str = str_replace(["\r\n", "\n"], "", $Str);
         $Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);
@@ -1356,7 +1355,7 @@ class Text {
         return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
     }
 
-    public static function bbcodeCollageUrl($id, $url = null): string {
+    public static function bbcodeCollageUrl(int $id, string $url = null): string {
         $cacheKey = 'bbcode_collage_' . $id;
         global $Cache;
         $name = $Cache->get_value($cacheKey);
@@ -1369,7 +1368,7 @@ class Text {
             : "[collage]{$id}[/collage]";
     }
 
-    protected static function bbcodeForumUrl($val): string {
+    protected static function bbcodeForumUrl(int $val): string {
         $cacheKey = 'bbcode_forum_' . $val;
         global $Cache;
         [$id, $name] = $Cache->get_value($cacheKey);
@@ -1395,14 +1394,14 @@ class Text {
         return self::bbcodeThreadUrl($post->threadId(), $post->id());
     }
 
-    protected static function bbcodeThreadUrl($thread, $postId = null): string {
-        if (str_contains($thread, ':')) {
+    protected static function bbcodeThreadUrl(int|string $thread, int $postId = null): string {
+        if (is_string($thread) && str_contains($thread, ':')) {
             [$threadId, $postId] = array_map('intval', explode(':', $thread));
         } else {
             $threadId = (int)$thread;
         }
         if (!$threadId) {
-            return '[thread]' .  $thread . '[/thread]';
+            return "[thread]{$thread}[/thread]";
         }
 
         $thread = (new \Gazelle\Manager\ForumThread)->findById($threadId);

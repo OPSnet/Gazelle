@@ -65,11 +65,13 @@ parameters:
       message: '/^Method [^:]+::\w+\(\) has parameter \S+ with no (?:type specified|value type specified in iterable type array)\.$/'
       paths:
         -  ../app/*
+        -  ../classes/text.class.php
         -  ../tests/*
     -
       message: '/^Method [^:]+::\w+\(\) return type has no value type specified in iterable type array\.$/'
       paths:
         -  ../app/*
+        -  ../classes/text.class.php
         -  ../misc/phinx/migrations/*
         -  ../tests/phpunit/*
     -
@@ -80,6 +82,7 @@ parameters:
       message: '/^Property [^:]+::\$\w+ type has no value type specified in iterable type array\.$/'
       paths:
         -  ../app/*
+        -  ../classes/text.class.php
         -  ../tests/phpunit/*
     -
       message: '/^Variable \$(?:Cache|DB|Debug|SessionID|Twig|Viewer) might not be defined\.$/'

@@ -33,8 +33,6 @@ class TextTest extends TestCase {
     }
 
     public static function dataBB(): array {
-        $image     = 'https://www.example.com/a.jpg';
-        $htmlImage = "<img class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"$image\" src=\"$image\" />";
         $url       = 'https://www.example.com/';
         $user      = (new Gazelle\Manager\User)->find('@user');
 
@@ -51,8 +49,6 @@ class TextTest extends TestCase {
             ["text-headline",   "[headline]abc[/headline]",      "=abc="],
             ["text-hr",         "[hr]",                          "<hr />"],
             ["text-i",          "[i]am[/i]",                     "<span style=\"font-style: italic;\">am</span>"],
-            ["text-img-1",      "[img={$image}]",                $htmlImage],
-            ["text-img-2",      "[img]{$image}[/img]",           $htmlImage],
             ["text-important",  "[important]x[/important]",      "<strong class=\"important_text\">x</strong>"],
             ["text-inlinesize", "[inlinesize=7]b[/inlinesize]",  "<span class=\"size7\">b</span>"],
             ["text-n",          "[[n]i]am[[n]/i]",               "[i]am[/i]"],
@@ -90,6 +86,19 @@ class TextTest extends TestCase {
                 "<strong class=\"quoteheader\">user</strong> wrote: <blockquote>abc <strong>xyz</strong> def</blockquote> <strong><span style=\"font-style: italic;\"><span style=\"text-decoration: line-through;\"><span style=\"text-decoration: underline;\">ghi</span></span></span></strong>"
             ],
         ];
+    }
+
+    public function testImage(): void {
+        $image     = 'https://www.example.com/a.jpg';
+        $withCache = '@^<img class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-original-src="\Q' . $image . '\E" />$@';
+        $noCache   = "<img class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\" />";
+
+        $this->assertEquals($noCache, Text::full_format("[img=$image]"), 'text-image1-cache-implicit');
+        // $this->assertEquals($noCache, Text::full_format("[img=$image]", cache: false), 'text-image1-cache-false');
+        $this->assertEquals($noCache, Text::full_format("[img]{$image}[/img]"), 'text-image2-cache-implicit');
+        // $this->assertEquals($noCache, Text::full_format("[img]{$image}[/img]", cache: false), 'text-image2-cache-false');
+        // $this->assertMatchesRegularExpression($withCache, Text::full_format("[img=$image]", cache: true), 'text-image1-cache-true');
+        // $this->assertMatchesRegularExpression($withCache, Text::full_format("[img]{$image}[/img]", cache: true), 'text-image2-cache-true');
     }
 
     public function testCollage(): void {
