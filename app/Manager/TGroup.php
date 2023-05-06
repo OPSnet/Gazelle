@@ -265,9 +265,8 @@ class TGroup extends \Gazelle\BaseManager {
                 ", $type
             );
             if (!is_null($featured)) {
-                global $Viewer; // FIXME this wrong
                 $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
-                $featured['image']       = (new \Gazelle\Util\ImageProxy($Viewer))->process($featured['WikiImage']);
+                $featured['image']       = image_cache_encode($featured['WikiImage']);
             }
             self::$cache->cache_value($key, $featured, 86400 * 7);
         }

@@ -24,7 +24,6 @@ class Users {
         $donor = new Gazelle\User\Donor($user);
 
         global $Viewer; // FIXME this is wrong
-        $imgProxy = new \Gazelle\Util\ImageProxy($Viewer);
         $Classes = $userMan->classList();
         if ($user->primaryClass() < $Classes[MOD]['Level']) {
             $OverrideParanoia = $Viewer->permitted('users_override_paranoia', $user->primaryClass());
@@ -75,8 +74,8 @@ class Users {
             $userTitle = $user->title();
             if ($Viewer->permitted('site_proxy_images') && !empty($userTitle)) {
                 $userTitle = preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-                    function($Matches) use ($imgProxy) {
-                        return 'src=' . $Matches[1] . $imgProxy->process($Matches[2]) . $Matches[3];
+                    function($Matches) {
+                        return 'src=' . $Matches[1] . image_cache_encode($Matches[2]) . $Matches[3];
                     }, $userTitle
                 );
             }

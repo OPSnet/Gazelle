@@ -78,8 +78,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'image',
             function ($i) {
-                global $Viewer; // this is sad
-                return new \Twig\Markup((new ImageProxy($Viewer))->process($i), 'UTF-8');
+                return new \Twig\Markup(image_cache_encode($i), 'UTF-8');
             }
         ));
 
@@ -201,11 +200,7 @@ class Twig {
         )));
 
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
-            global $Viewer;
-            return new \Twig\Markup(
-                (new ImageProxy($Viewer))->process($icon, 'donoricon', $userId),
-                'UTF-8'
-            );
+            return new \Twig\Markup(image_cache_encode($icon), 'UTF-8');
         }));
 
         $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn(string $ipaddr) => new \Twig\Markup(

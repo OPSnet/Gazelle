@@ -19,8 +19,6 @@ switch ($Category) {
         break;
 }
 
-$imgproxy = new Gazelle\Util\ImageProxy($Viewer);
-
 View::show_header('Last.fm', ['js' => 'jquery.imagesloaded,jquery.wookmark,top10', 'css' => 'tiles']);
 ?>
 <div class="thin">
@@ -39,7 +37,7 @@ View::show_header('Last.fm', ['js' => 'jquery.imagesloaded,jquery.wookmark,top10
                 }
                 $image = $artist['image'][3]['#text'];
                 if (!empty($image)) {
-                    $image = $imgproxy->process($image);
+                    $image = image_cache_encode($image);
                     $name  = display_str($artist['name']);
 ?>
             <li>
@@ -63,7 +61,7 @@ View::show_header('Last.fm', ['js' => 'jquery.imagesloaded,jquery.wookmark,top10
                 }
                 $image = $artist['image'][3]['#text'];
                 if (!empty($image)) {
-                    $image = $imgproxy->process($image);
+                    $image = image_cache_encode($image);
                     $name  = display_str($artist['name']);
 ?>
             <li>

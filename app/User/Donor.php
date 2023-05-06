@@ -290,10 +290,10 @@ class Donor extends \Gazelle\BaseUser {
     /**
      * The custom donor heart
      */
-    public function heartIcon(\Gazelle\User $viewer): ?string {
+    public function heartIcon(): ?string {
         $icon = $this->hasRankAbove(MAX_RANK) ? $this->icon() : false;
         if ($icon) {
-            return (new \Gazelle\Util\ImageProxy($viewer))->process($icon, 'donoricon', $this->id());
+            return image_cache_encode($icon);
         }
         $rank = $this->rank();
         return STATIC_SERVER . "/common/symbols/" . match(true) {
@@ -313,7 +313,7 @@ class Donor extends \Gazelle\BaseUser {
         if (!$override && !$this->user->propertyVisible($viewer, 'hide_donor_heart')) {
             return '';
         }
-        return "<a target=\"_blank\" href=\"{$this->iconLink()}\"><img class=\"donor_icon tooltip\" src=\"{$this->heartIcon($viewer)}\" title=\"{$this->iconHoverText()}\" /></a>";
+        return "<a target=\"_blank\" href=\"{$this->iconLink()}\"><img class=\"donor_icon tooltip\" src=\"{$this->heartIcon()}\" title=\"{$this->iconHoverText()}\" /></a>";
     }
 
     /**

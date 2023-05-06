@@ -730,7 +730,6 @@ defined('VALID_PAGE') or define('VALID_PAGE', [
     'error',
     'forums',
     'friends',
-    'image',
     'inbox',
     'index',
     'irc',

@@ -168,8 +168,7 @@ if ($report->image()) {
 <?php
     foreach ($report->image() as $image) {
 ?>
-            <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?=
-                $imgProxy->process($image) ?>" alt="Relevant image" />
+            <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= image_cache_encode($image) ?>" alt="Relevant image" />
 <?php } ?>
         </td>
     </tr>
