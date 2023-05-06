@@ -86,7 +86,7 @@ $OrderTable = [
     'Downloads'  => 'Downloads',
     'Email'      => 'um1.Email',
     'Invites'    => 'um1.Invites',
-    'Joined'     => 'ui1.JoinDate',
+    'Joined'     => 'um1.created',
     'Last Seen'  => 'ula.last_access',
     'Ratio'      => '(uls1.Uploaded / uls1.Downloaded)',
     'Seeding'    => 'Seeding',
@@ -304,7 +304,7 @@ if (empty($_GET)) {
 
     if (isset($_GET['joined']) && !empty($_GET['joined']) && isset($_GET['join1']) && !empty($_GET['join1'])) {
         $op = $_GET['joined'];
-        $Where[] = $m->date('ui1.JoinDate', $op);
+        $Where[] = $m->date('um1.created', $op);
         $Args[] = $_GET['join1'];
         if ($op === 'on') {
             $Args[] = $_GET['join1'];

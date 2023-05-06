@@ -87,17 +87,16 @@ class Email extends \Gazelle\Base {
     }
 
     public function liveList(int $limit, int $offset): array {
-        $column = ['um.Email', 'um.Username', 'ui.JoinDate', 'ui.JoinDate', 'inet_aton(um.IP)'][$this->column];
+        $column = ['um.Email', 'um.Username', 'um.created', 'um.created', 'inet_aton(um.IP)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query("
             SELECT um.Email AS email,
                 um.Username AS username,
                 um.ID       AS user_id,
-                ui.JoinDate AS join_date,
+                um.created  AS created,
                 um.IP       AS ipv4
             FROM users_main         um
-            INNER JOIN users_info   ui ON (ui.UserID = um.ID)
             INNER JOIN {$this->name} s ON (s.email = um.Email)
             ORDER BY $column $direction
             LIMIT ? OFFSET ?
@@ -123,20 +122,19 @@ class Email extends \Gazelle\Base {
     }
 
     public function historyList(int $limit, int $offset): array {
-        $column = ['uhe.Email', 'um.Username', 'ui.JoinDate', 'uhe.Time', 'inet_aton(uhe.IP)'][$this->column];
+        $column = ['uhe.Email', 'um.Username', 'um.created', 'uhe.Time', 'inet_aton(uhe.IP)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
         self::$db->prepared_query("
             SELECT uhe.Email AS email,
                 um.Username  AS username,
                 um.ID        AS user_id,
-                ui.JoinDate  AS join_date,
+                um.created   AS created,
                 uhe.Time     AS change_date,
                 uhe.IP       AS ipv4
             FROM users_history_emails uhe
             INNER JOIN {$this->name} s ON (s.email = uhe.Email)
             INNER JOIN users_main   um ON (um.ID = uhe.UserID)
-            INNER JOIN users_info   ui ON (ui.UserID = um.ID)
-            WHERE ((ui.JoinDate = uhe.Time and uhe.Email != um.Email) OR ui.JoinDate != uhe.Time)
+            WHERE ((um.created = uhe.Time and uhe.Email != um.Email) OR um.created != uhe.Time)
             ORDER BY $column $direction
             LIMIT ? OFFSET ?
             ", $limit, $offset

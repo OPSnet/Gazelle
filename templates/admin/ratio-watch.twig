@@ -36,7 +36,7 @@
             {%- endif -%}
         </td>
         <td class="number_column">{{ (u.downloaded - u.ratio_watch_downloaded)|octet_size }}</td>
-        <td>{{ u.join_date|time_diff }}</td>
+        <td>{{ u.created|time_diff }}</td>
         <td>{{ u.ratio_watch_ends|time_diff }}</td>
     </tr>
     {% endfor %}

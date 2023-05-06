@@ -315,8 +315,8 @@ class User extends \Gazelle\BaseManager {
             self::$db->prepared_query("
                 SELECT J.Week, J.n as Joined, coalesce(D.n, 0) as Disabled
                 FROM (
-                    SELECT DATE_FORMAT(JoinDate, '%X-%V') AS Week, count(*) AS n
-                    FROM users_info
+                    SELECT DATE_FORMAT(created, '%X-%V') AS Week, count(*) AS n
+                    FROM users_main
                     GROUP BY Week
                     ORDER BY 1 DESC
                     LIMIT 52) J
@@ -341,8 +341,9 @@ class User extends \Gazelle\BaseManager {
         return (int)self::$db->scalar("
             SELECT count(*) FROM (
                 SELECT 1
-                FROM users_info
-                GROUP BY DATE_FORMAT(coalesce(BanDate, JoinDate), '%Y-%m-%d')
+                FROM users_main um
+                INNER JOIN users_info ui ON (ui.UserID = um.ID)
+                GROUP BY DATE_FORMAT(coalesce(ui.BanDate, um.created), '%Y-%m-%d')
             ) D
         ");
     }
@@ -356,15 +357,15 @@ class User extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT j.Date                    AS date,
                 DATE_FORMAT(j.Date, '%Y-%m') AS month,
-                coalesce(j.Flow, 0)          AS joined,
+                coalesce(j.Flow, 0)          AS created,
                 coalesce(m.Flow, 0)          AS manual,
                 coalesce(r.Flow, 0)          AS ratio,
                 coalesce(i.Flow, 0)          AS inactivity
             FROM (
                     SELECT
-                        DATE_FORMAT(JoinDate, '%Y-%m-%d') AS Date,
+                        DATE_FORMAT(created, '%Y-%m-%d') AS Date,
                         count(*) AS Flow
-                    FROM users_info
+                    FROM users_main
                     GROUP BY Date
                 ) AS j
                 LEFT JOIN (
@@ -375,7 +376,7 @@ class User extends \Gazelle\BaseManager {
                     WHERE BanDate IS NOT NULL
                         AND BanReason = '1'
                     GROUP BY Date
-                ) AS m ON j.Date = m.Date
+                ) AS m ON (j.Date = m.Date)
                 LEFT JOIN (
                     SELECT
                         DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
@@ -477,7 +478,7 @@ class User extends \Gazelle\BaseManager {
             SELECT um.ID              AS user_id,
                 uls.Uploaded          AS uploaded,
                 uls.Downloaded        AS downloaded,
-                ui.JoinDate           AS join_date,
+                um.created            AS created,
                 ui.RatioWatchEnds     AS ratio_watch_ends,
                 ui.RatioWatchDownload AS ratio_watch_downloaded,
                 um.RequiredRatio      AS required_ratio
@@ -907,7 +908,7 @@ class User extends \Gazelle\BaseManager {
                     AND um.PermissionID = ?
                     AND uls.Uploaded + us.request_bounty_size >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
-                    AND ui.JoinDate < now() - INTERVAL ? WEEK
+                    AND um.created < now() - INTERVAL ? WEEK
                     AND us.upload_total >= ?
             ";
             $args = [$level['From'], $level['MinUpload'], $level['MinRatio'], $level['Weeks'], $level['MinUploads']];
@@ -1250,6 +1251,45 @@ class User extends \Gazelle\BaseManager {
         return $processed;
     }
 
+    public function disableUnconfirmedUsers(\Gazelle\Schedule\Task $task = null): int {
+        // get a list of user IDs for clearing cache keys
+        self::$db->prepared_query("
+            SELECT ID
+            FROM users_main um
+            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            WHERE ula.user_id IS NULL
+                AND um.created < now() - INTERVAL 7 DAY
+                AND um.Enabled != '2'
+            "
+        );
+        $userIDs = self::$db->collect(0, false);
+
+        // disable the users
+        self::$db->prepared_query("
+            UPDATE users_info AS ui
+            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
+            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            SET um.Enabled = '2',
+                ui.BanDate = now(),
+                ui.BanReason = '3',
+                ui.AdminComment = CONCAT(now(), ' - Disabled for inactivity (never logged in)\n\n', ui.AdminComment)
+            WHERE ula.user_id IS NULL
+                AND um.created < now() - INTERVAL 7 DAY
+                AND um.Enabled != '2'
+            "
+        );
+        if (self::$db->has_results()) {
+            $this->flushEnabledUsersCount();
+        }
+
+        // clear the appropriate cache keys
+        foreach ($userIDs as $userID) {
+            self::$cache->delete_value("u_$userID");
+            $task?->debug("Disabled $userID", $userID);
+        }
+        return count($userIDs);
+    }
+
     public function triggerRatioWatch(\Gazelle\Tracker $tracker, \Gazelle\Schedule\Task $task = null): int {
         self::$db->prepared_query("
             SELECT um.ID, um.torrent_pass
@@ -1290,9 +1330,7 @@ class User extends \Gazelle\BaseManager {
                 'Your downloading privileges have been suspended',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
             );
-            if ($task) {
-                $task->debug("Disabled leech for $userId", $userId);
-            }
+            $task?->debug("Disabled leech for $userId", $userId);
         }
 
         foreach ($passkeys as $passkey) {

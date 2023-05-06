@@ -2,17 +2,18 @@
 
 namespace Gazelle\Manager;
 
+// TODO: This should be subsumed into Search\User
+
 class Registration extends \Gazelle\Base {
+    protected string $beforeDate;
+    protected string $afterDate;
 
-    protected $beforeDate;
-    protected $afterDate;
-
-    public function setBeforeDate(string $date) {
+    public function setBeforeDate(string $date): Registration {
         $this->beforeDate = $date;
         return $this;
     }
 
-    public function setAfterDate(string $date) {
+    public function setAfterDate(string $date): Registration {
         $this->afterDate = $date;
         return $this;
     }
@@ -20,28 +21,28 @@ class Registration extends \Gazelle\Base {
     public function configure(): array {
         $cond = [];
         $args = [];
-        if ($this->beforeDate) {
-            if ($this->afterDate) {
-                $cond[] = 'ui.JoinDate BETWEEN ? AND ?';
+        if (isset($this->beforeDate)) {
+            if (isset($this->afterDate)) {
+                $cond[] = 'um.created BETWEEN ? AND ?';
                 $args[] = $this->afterDate;
                 $args[] = $this->beforeDate;
             } else {
-                $cond[] = 'ui.JoinDate < ?';
+                $cond[] = 'um.created < ?';
                 $args[] = $this->beforeDate;
             }
-        } elseif ($this->afterDate) {
-            $cond[] = 'ui.JoinDate >= ?';
+        } elseif (isset($this->afterDate)) {
+            $cond[] = 'um.created >= ?';
             $args[] = $this->afterDate;
         } else {
-            $cond[] = 'ui.JoinDate > now() - INTERVAL 3 DAY';
+            $cond[] = 'um.created > now() - INTERVAL 3 DAY';
         }
         return [implode(' AND ', $cond), $args];
     }
 
     public function total(): int {
         [$where, $args] = $this->configure();
-        return self::$db->scalar("
-            SELECT count(*) FROM users_info ui WHERE $where
+        return (int)self::$db->scalar("
+            SELECT count(*) FROM users_main um WHERE $where
             ", ...$args
         );
     }
@@ -49,12 +50,13 @@ class Registration extends \Gazelle\Base {
     public function page(int $limit, int $offset): array {
         [$where, $args] = $this->configure();
         self::$db->prepared_query("
-            SELECT ui.UserID FROM users_info AS ui
+            SELECT um.ID
+            FROM users_main um
             WHERE $where
-            ORDER BY ui.Joindate DESC
+            ORDER BY um.created DESC
             LIMIT ? OFFSET ?
             ", ...array_merge($args, [$limit, $offset])
         );
-        return self::$db->collect('UserID');
+        return self::$db->collect(0, false);
     }
 }

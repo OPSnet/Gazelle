@@ -27,10 +27,10 @@ class Users extends \Gazelle\Base {
                     J.n              AS new,
                     coalesce(D.n, 0) AS disabled
                 FROM (
-                    SELECT DATE_FORMAT(JoinDate,'%Y%m') AS M,
-                        DATE_FORMAT(JoinDate, '%b %Y')  AS Mon,
-                        count(*)                        AS n
-                    FROM users_info
+                    SELECT DATE_FORMAT(created,'%Y%m') AS M,
+                        DATE_FORMAT(created, '%b %Y')  AS Mon,
+                        count(*)                       AS n
+                    FROM users_main
                     GROUP BY M
                     ORDER BY 1 DESC
                     LIMIT 1, 12

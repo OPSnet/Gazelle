@@ -27,12 +27,12 @@ if (count($userSource)) {
     $invSourceMan->modifyUserSource($userId, $userSource);
 }
 
-$heading = new \Gazelle\Util\SortableTableHeader('joined', [
+$heading = new \Gazelle\Util\SortableTableHeader('created', [
     // see Gazelle\User::inviteList() for these table aliases
     'id'         => ['dbColumn' => 'um.ID',           'defaultSort' => 'desc'],
     'username'   => ['dbColumn' => 'um.Username',     'defaultSort' => 'desc', 'text' => 'Username'],
     'email'      => ['dbColumn' => 'um.Email',        'defaultSort' => 'desc', 'text' => 'Email'],
-    'joined'     => ['dbColumn' => 'ui.JoinDate',     'defaultSort' => 'desc', 'text' => 'Joined'],
+    'created'    => ['dbColumn' => 'um.created' ,     'defaultSort' => 'desc', 'text' => 'Joined'],
     'lastseen'   => ['dbColumn' => 'ula.last_access', 'defaultSort' => 'desc', 'text' => 'Last Seen'],
     'uploaded'   => ['dbColumn' => 'uls.Uploaded',    'defaultSort' => 'desc', 'text' => 'Uploaded'],
     'downloaded' => ['dbColumn' => 'uls.Downloaded',  'defaultSort' => 'desc', 'text' => 'Downloaded'],

@@ -49,7 +49,7 @@
         <td class="number_column">{{ row.request_fills|number_format }}</td>
         <td class="number_column">{{ row.num_uploads|number_format }}</td>
         <td class="number_column">{{ ratio(row.uploaded, row.downloaded) }}</td>
-        <td class="number_column">{{ row.join_date|time_diff }}</td>
+        <td class="number_column">{{ row.created|time_diff }}</td>
     </tr>
     {% endfor %}
 </table><br />

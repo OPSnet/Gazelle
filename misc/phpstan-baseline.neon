@@ -1596,31 +1596,6 @@ parameters:
 			path: ../app/Manager/Referral.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\Registration\\:\\:setAfterDate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Registration.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Registration\\:\\:setBeforeDate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Registration.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Registration\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Registration.php
-
-		-
-			message: "#^Property Gazelle\\\\Manager\\\\Registration\\:\\:\\$afterDate has no type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Registration.php
-
-		-
-			message: "#^Property Gazelle\\\\Manager\\\\Registration\\:\\:\\$beforeDate has no type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Registration.php
-
-		-
 			message: "#^Binary operation \"\\+\\=\" between int\\|string\\|null and int results in an error\\.$#"
 			count: 1
 			path: ../app/Manager/SiteLog.php

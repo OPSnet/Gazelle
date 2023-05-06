@@ -19,15 +19,14 @@ $BaseQuery = "
     SELECT
         um.ID,
         um.Username,
-        ui.JoinDate,
+        um.created,
         uls.Uploaded,
         uls.Downloaded,
-        GREATEST(uls.Uploaded - ?, 0) / (unix_timestamp(now()) - unix_timestamp(ui.JoinDate)) AS UpSpeed,
-        uls.Downloaded / (unix_timestamp(now()) - unix_timestamp(ui.JoinDate)) AS DownSpeed,
+        GREATEST(uls.Uploaded - ?, 0) / (unix_timestamp(now()) - unix_timestamp(um.created)) AS UpSpeed,
+        uls.Downloaded / (unix_timestamp(now()) - unix_timestamp(um.created)) AS DownSpeed,
         count(t.ID) AS NumUploads
     FROM users_main AS um
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-    INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
     LEFT JOIN torrents AS t ON (t.UserID = um.ID)
     WHERE um.Enabled = '1'
         AND uls.Uploaded > 5 * 1024 * 1024 * 1024
@@ -123,7 +122,7 @@ function generate_user_json(string $Caption, string $Tag, array $Details, int $L
             'downloaded' => (float)$Detail['Downloaded'],
             'downSpeed' => (float)$Detail['DownSpeed'],
             'numUploads' => (int)$Detail['NumUploads'],
-            'joinDate' => $Detail['JoinDate']
+            'joinDate' => $Detail['created']
         ];
     }
     return [

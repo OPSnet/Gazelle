@@ -14,7 +14,7 @@ $userflowDetails = $userMan->userflowDetails($paginator->limit(), $paginator->of
 
 echo $Twig->render('admin/userflow.twig', [
     'category'  => array_map(fn($x) => "'$x'", array_keys($userflow)),
-    'disabled'  => array_map(fn($x) => $userflow[$x]['Joined'], array_keys($userflow)),
+    'disabled'  => array_map(fn($x) => $userflow[$x]['created'], array_keys($userflow)),
     'enabled'   => array_map(fn($x) => -$userflow[$x]['Disabled'], array_keys($userflow)),
     'paginator' => $paginator,
     'show_flow' => $showFlow,

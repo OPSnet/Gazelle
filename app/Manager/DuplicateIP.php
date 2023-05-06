@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class DuplicateIP extends \Gazelle\Base {
-
     public function total(int $threshold): int {
         return self::$db->scalar("
             SELECT count(*)
@@ -21,16 +20,15 @@ class DuplicateIP extends \Gazelle\Base {
 
     public function page(int $threshold, int $limit, int $offset): array {
         self::$db->prepared_query("
-            SELECT um.ID    AS user_id,
-                um.IP       AS ipaddr,
-                ui.JoinDate AS joined,
+            SELECT um.ID   AS user_id,
+                um.IP      AS ipaddr,
+                um.created AS created,
                 (
                     SELECT count(DISTINCT h.UserID)
                     FROM users_history_ips AS h
                     WHERE h.IP = um.IP
                 ) AS uses
             FROM users_main AS um
-            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
             WHERE um.Enabled = '1'
                 AND um.IP != '127.0.0.1'
                 AND (

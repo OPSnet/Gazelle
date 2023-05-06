@@ -32,17 +32,16 @@ class User extends \Gazelle\Base {
             $orderBy = $this->sortMap[$type];
             self::$db->prepared_query(sprintf("
                 SELECT
-                    um.ID AS id,
-                    ui.JoinDate AS join_date,
-                    uls.Uploaded AS uploaded,
-                    uls.Downloaded AS downloaded,
+                    um.ID                  AS id,
+                    um.created             AS created,
+                    uls.Uploaded           AS uploaded,
+                    uls.Downloaded         AS downloaded,
                     coalesce(bs.Bounty, 0) AS request_votes,
-                    coalesce(bf.Fills, 0) AS request_fills,
-                    abs(uls.Uploaded - ?) / (unix_timestamp() - unix_timestamp(ui.JoinDate)) AS up_speed,
-                    uls.Downloaded / (unix_timestamp() - unix_timestamp(ui.JoinDate)) AS down_speed,
+                    coalesce(bf.Fills, 0)  AS request_fills,
+                    abs(uls.Uploaded - ?) / (unix_timestamp() - unix_timestamp(um.created)) AS up_speed,
+                    uls.Downloaded / (unix_timestamp() - unix_timestamp(um.created))        AS down_speed,
                     count(t.ID) AS num_uploads
                 FROM users_main AS um
-                INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
                 LEFT JOIN torrents AS t ON (t.UserID = um.ID)
                 LEFT JOIN

@@ -2,7 +2,7 @@ From: Spine
 To: Developers
 Date: 2021-01-17
 Subject: Orpheus Development Papers #4 - Witness Tables
-Version: 1
+Version: 2
 
 This technique is a response to a problem that exists in the original
 Gazelle implementation. There are many wide tables (that is, tables with
@@ -56,6 +56,10 @@ blog article that was written before they joined.
 
 Going forward, all newly created accounts will be considered as having
 read the most recent blog and news items.
+
+Note: since the time this article was written, the column
+users_info.JoinDate has been superceded by the column users_main.created
+The follow queries must be adapted in light of that.
 
 INSERT INTO user_read_blog (user_id, blog_id)
 SELECT ui.UserID, ui.LastReadBlog

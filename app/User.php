@@ -8,7 +8,7 @@ use \Gazelle\Util\Irc;
 use \Gazelle\Util\Mail;
 
 class User extends BaseObject {
-    final const CACHE_KEY          = 'u2_%d';
+    final const CACHE_KEY          = 'u3_%d';
     final const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
     final const CACHE_NOTIFY       = 'u_notify_%d';
     final const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
@@ -95,6 +95,7 @@ class User extends BaseObject {
         self::$db->prepared_query("
             SELECT um.Username,
                 um.can_leech,
+                um.created,
                 um.CustomPermissions,
                 um.IP,
                 um.Email,
@@ -117,7 +118,6 @@ class User extends BaseObject {
                 ui.Info,
                 ui.InfoTitle,
                 ui.Inviter,
-                ui.JoinDate,
                 ui.NavItems,
                 ui.NotifyOnDeleteSeeding,
                 ui.NotifyOnDeleteSnatched,
@@ -432,7 +432,7 @@ class User extends BaseObject {
     }
 
     public function created(): string {
-        return $this->info()['JoinDate'];
+        return $this->info()['created'];
     }
 
     public function disableAvatar(): bool {
@@ -1622,7 +1622,7 @@ class User extends BaseObject {
                 um.Email       AS email,
                 uls.Uploaded   AS uploaded,
                 uls.Downloaded AS downloaded,
-                ui.JoinDate    AS join_date,
+                um.created     AS created,
                 ula.last_access
             FROM users_main AS um
             LEFT  JOIN user_last_access AS ula ON (ula.user_id = um.ID)
@@ -1644,10 +1644,10 @@ class User extends BaseObject {
     public function passwordAge(): string {
         $age = time_diff(
             $this->getSingleValue('user_pw_age', '
-                SELECT coalesce(max(uhp.ChangeTime), ui.JoinDate)
-                FROM users_info ui
-                LEFT JOIN users_history_passwords uhp USING (UserID)
-                WHERE ui.UserID = ?
+                SELECT coalesce(max(uhp.ChangeTime), um.created)
+                FROM users_main um
+                LEFT JOIN users_history_passwords uhp ON (uhp.UserID = um.ID)
+                WHERE um.ID = ?
             ')
         );
         return substr($age, 0, (int)strpos($age, " ago"));

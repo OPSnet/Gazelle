@@ -5,7 +5,6 @@ namespace Gazelle\Contest;
 /* how many 100% flacs (any media) uploaded? */
 
 class UploadFlac extends AbstractContest {
-
     use TorrentLeaderboard;
 
     public function ranker(): array {
@@ -42,11 +41,10 @@ class UploadFlac extends AbstractContest {
                 count(um.ID) AS total_users
             FROM contest c,
                 users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
             INNER JOIN torrents t ON (t.Userid = um.ID)
             INNER JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
             WHERE um.Enabled = '1'
-                AND ui.JoinDate <= c.date_end
+                AND u.created <= c.date_end
                 AND xfu.remaining = 0
                 AND t.Time BETWEEN c.date_begin AND c.date_end
                 AND t.Format = 'FLAC'
@@ -72,11 +70,9 @@ class UploadFlac extends AbstractContest {
                 count(DISTINCT t.ID) * ? AS entries_bonus
             FROM contest c,
                 users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
             LEFT JOIN torrents t ON (t.UserID = um.ID)
             LEFT JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
             WHERE um.Enabled = '1'
-                AND ui.JoinDate <= c.date_end
                 AND (t.ID IS NULL
                     OR (
                             xfu.remaining = 0

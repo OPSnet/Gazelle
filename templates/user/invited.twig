@@ -138,7 +138,7 @@
         <tr class="colhead">
             <td class="m_th_left nobr">{{ heading|column('username') }}</td>
             <td class="nobr">{{ heading|column('email') }}</td>
-            <td class="nobr">{{ heading|column('joined') }}</td>
+            <td class="nobr">{{ heading|column('created') }}</td>
             <td class="nobr">{{ heading|column('lastseen') }}</td>
             <td class="m_th_right nobr">{{ heading|column('uploaded') }}</td>
             <td class="m_th_right nobr">{{ heading|column('downloaded') }}</td>
@@ -151,7 +151,7 @@
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td class="td_username">{{ u.user_id|user_full|raw }}</td>
             <td class="td_email">{{ u.email }}</td>
-            <td class="td_join_date">{{ u.join_date|time_diff }}</td>
+            <td class="td_join_date">{{ u.created|time_diff }}</td>
             <td class="td_last_access">{{ u.last_access|time_diff }}</td>
             <td class="td_up m_td_right">{{ u.uploaded|octet_size }}</td>
             <td class="td_dl m_td_right">{{ u.downloaded|octet_size }}</td>
