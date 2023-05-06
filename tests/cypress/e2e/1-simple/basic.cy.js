@@ -21,7 +21,6 @@ describe('page loads as admin', () => {
         "/reports.php",
         "/reportsv2.php",
         "/requests.php",
-        "/requests.php",
         "/rules.php",
         "/staff.php",
         "/staffpm.php",
