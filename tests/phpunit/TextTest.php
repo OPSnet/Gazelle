@@ -90,7 +90,7 @@ class TextTest extends TestCase {
 
     public function testImage(): void {
         $image     = 'https://www.example.com/a.jpg';
-        $withCache = '@^<img class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-original-src="\Q' . $image . '\E" />$@';
+        $withCache = '@^<img class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E" />$@';
         $noCache   = "<img class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\" />";
 
         $this->assertEquals($noCache, Text::full_format("[img=$image]"), 'text-image1-cache-implicit');

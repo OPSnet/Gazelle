@@ -1,6 +1,7 @@
 <?php
 
 use \PHPUnit\Framework\TestCase;
+use \Gazelle\Enum\CacheBucket;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
@@ -152,19 +153,20 @@ class UtilTest extends TestCase {
             $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/x100/',  image_cache_encode($url, width: 100), 'image-resize-width-only');
             $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/45x67/', image_cache_encode($url, height: 45, width: 67), 'image-resize-height-and-width');
             $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/',  image_cache_encode($url, height: 89, proxy: true), 'image-proxy-resize-height-and-width');
+            $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/f/full/',  image_cache_encode($url, height: 89, bucket: CacheBucket::forum), 'image-cache-custom-bucket');
 
             $this->assertEquals(
-                IMAGE_CACHE_HOST . '/i/full/ae0_4RXxKhh6_AwX/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn',
-                image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234"),
+                IMAGE_CACHE_HOST . '/i/full/4f3OT_te_O37pMOZ/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn',
+                image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "123456"),
                 'image-cache-reference-vector'
             );
             $this->assertEquals(
-                IMAGE_CACHE_HOST . '/i/full/WF4sfw13mmOn0EN7/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
+                IMAGE_CACHE_HOST . '/i/full/u21SyNepGvwmqYgs/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
                 image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", proxy: true),
                 'image-cache-proxied-reference-vector'
             );
             $this->assertEquals(
-                IMAGE_CACHE_HOST . '/i/full/WF4sfw13mmOn0EN7/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
+                IMAGE_CACHE_HOST . '/i/full/u21SyNepGvwmqYgs/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
                 image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", proxy: true, width: 512),
                 'image-cache-proxied-ignore-resize-reference-vector'
             );

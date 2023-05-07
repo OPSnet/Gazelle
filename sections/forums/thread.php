@@ -1,5 +1,7 @@
 <?php
-//TODO: Normalize thread_*_info don't need to waste all that ram on things that are already in other caches
+
+use Gazelle\Enum\CacheBucket;
+
 /**********|| Page to show individual threads || ********************************\
 
 Things to expect in $_GET:
@@ -334,7 +336,7 @@ foreach ($slice as $Key => $Post) {
 <?php   } ?>
         <td class="body" valign="top"<?php if (!$Viewer->showAvatars()) { echo ' colspan="2"'; } ?>>
             <div id="content<?=$PostID?>">
-                <?= Text::full_format($Body) ?>
+                <?= Text::full_format($Body, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum) ?>
 <?php   if ($EditedUserID) { ?>
                 <br />
                 <br />

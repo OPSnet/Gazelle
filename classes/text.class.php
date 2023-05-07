@@ -1,5 +1,7 @@
 <?php
 
+use \Gazelle\Enum\CacheBucket;
+
 class Text {
     /**
      * Array of valid tags; tag => max number of attributes
@@ -202,7 +204,14 @@ class Text {
     /**
      * Output BBCode as XHTML
      */
-    public static function full_format(?string $Str, bool $OutputTOC = true, int $Min = 3, bool $Rules = false, bool $cache = false): string {
+    public static function full_format(
+        ?string     $Str,
+        bool        $OutputTOC = true,
+        int         $Min = 3,
+        bool        $Rules = false,
+        bool        $cache = false,
+        CacheBucket $bucket = CacheBucket::standard,
+    ): string {
         if (is_null($Str)) {
             return '';
         }
@@ -229,7 +238,7 @@ class Text {
             $Str = preg_replace('/(\={2})([^=].*)\1/i', '[inlinesize=7]$2[/inlinesize]', $Str);
         }
 
-        $HTML = nl2br(self::to_html(self::parse($Str), $Rules, $cache));
+        $HTML = nl2br(self::to_html(self::parse($Str), $Rules, $cache, $bucket));
 
         if (self::$TOC && $OutputTOC) {
             $HTML = self::parse_toc($Min) . $HTML;
@@ -732,7 +741,7 @@ class Text {
         }
     }
 
-    private static function to_html(array $Array, bool $Rules, bool $cache): string {
+    private static function to_html(array $Array, bool $Rules, bool $cache, CacheBucket $bucket): string {
         self::$Levels++;
         /*
          * Hax prevention
@@ -771,22 +780,22 @@ class Text {
             if (self::$Levels < self::$MaximumNests) {
             switch ($Block['Type']) {
                 case 'b':
-                    $Str .= '<strong>'.self::to_html($Block['Val'], $Rules, $cache).'</strong>';
+                    $Str .= '<strong>'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</strong>';
                     break;
                 case 'u':
-                    $Str .= '<span style="text-decoration: underline;">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
+                    $Str .= '<span style="text-decoration: underline;">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</span>';
                     break;
                 case 'i':
-                    $Str .= '<span style="font-style: italic;">'.self::to_html($Block['Val'], $Rules, $cache)."</span>";
+                    $Str .= '<span style="font-style: italic;">'.self::to_html($Block['Val'], $Rules, $cache, $bucket)."</span>";
                     break;
                 case 's':
-                    $Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
+                    $Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</span>';
                     break;
                 case 'hr':
                     $Str .= '<hr />';
                     break;
                 case 'important':
-                    $Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules, $cache).'</strong>';
+                    $Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</strong>';
                     break;
                 case 'user':
                     $Str .= '<a href="user.php?action=search&amp;search='.urlencode(trim($Block['Val'], '@')).'">'.$Block['Val'].'</a>';
@@ -858,29 +867,29 @@ class Text {
                 case 'list':
                     $Str .= "<{$Block['ListType']} class=\"postlist\">";
                     foreach ($Block['Val'] as $Line) {
-                        $Str .= '<li'.($Rules ? ' id="r'.$Line['Id'].'"' : '').'>'.self::to_html($Line, $Rules, $cache).'</li>';
+                        $Str .= '<li'.($Rules ? ' id="r'.$Line['Id'].'"' : '').'>'.self::to_html($Line, $Rules, $cache, $bucket).'</li>';
                     }
                     $Str .= '</'.$Block['ListType'].'>';
                     break;
                 case 'align':
                     $ValidAttribs = ['left', 'center', 'right'];
                     if (!in_array($Block['Attr'], $ValidAttribs)) {
-                        $Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache).'[/align]';
+                        $Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'[/align]';
                     } else {
-                        $Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules, $cache).'</div>';
+                        $Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</div>';
                     }
                     break;
                 case 'color':
                 case 'colour':
                     $Block['Attr'] = strtolower($Block['Attr']);
                     if (!in_array($Block['Attr'], self::$ColorName) && !preg_match('/^#[0-9a-f]{6}$/', $Block['Attr'])) {
-                        $Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache).'[/color]';
+                        $Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'[/color]';
                     } else {
-                        $Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
+                        $Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</span>';
                     }
                     break;
                 case 'headline':
-                    $text = self::to_html($Block['Val'], $Rules, $cache);
+                    $text = self::to_html($Block['Val'], $Rules, $cache, $bucket);
                     $raw = self::raw_text($Block['Val']);
                     if (!in_array($Block['Attr'], self::$HeadlineLevels)) {
                         $Str .= sprintf('%1$s%2$s%1$s', str_repeat('=', $Block['Attr'] + 1), $text);
@@ -898,9 +907,9 @@ class Text {
                 case 'size':
                     $ValidAttribs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
                     if (!in_array($Block['Attr'], $ValidAttribs)) {
-                        $Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache).'[/size]';
+                        $Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'[/size]';
                     } else {
-                        $Str .= '<span class="size'.$Block['Attr'].'">'.self::to_html($Block['Val'], $Rules, $cache).'</span>';
+                        $Str .= '<span class="size'.$Block['Attr'].'">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</span>';
                     }
                     break;
                 case 'quote':
@@ -911,7 +920,7 @@ class Text {
                         $Str .= '<blockquote class="hidden spoiler">';
                     }
                     if (!empty($Block['Attr'])) {
-                        $Exploded = explode('|', self::to_html($Block['Attr'], $Rules, $cache));
+                        $Exploded = explode('|', self::to_html($Block['Attr'], $Rules, $cache, $bucket));
                         if (isset($Exploded[1]) && (is_numeric($Exploded[1]) || (in_array($Exploded[1][0], ['a', 't', 'c', 'r']) && is_numeric(substr($Exploded[1], 1))))) {
                             // the part after | is either a number or starts with a, t, c or r, followed by a number (forum post, artist comment, torrent comment, collage comment or request comment, respectively)
                             $PostID = trim($Exploded[1]);
@@ -921,7 +930,7 @@ class Text {
                             $Str .= '<strong class="quoteheader">'.$Exploded[0].'</strong> wrote: ';
                         }
                     }
-                    $Str .= '<blockquote>'.self::to_html($Block['Val'], $Rules, $cache).'</blockquote>';
+                    $Str .= '<blockquote>'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</blockquote>';
                     if (self::$InQuotes == self::$NestsBeforeHide) { //Close quote the deeply nested quote [hide].
                         $Str .= '</blockquote><br />'; // Ensure new line after quote train hiding
                     }
@@ -929,27 +938,27 @@ class Text {
                     self::$InQuotes--;
                     break;
                 case 'box':
-                    $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules, $cache).'</div>';
+                    $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</div>';
                     break;
                 case 'pad':
                     $Attr = array_filter(explode('|',$Block['Attr'] ?? ''), fn($x) => is_numeric($x) && (float)$x >= 0);
                     if (count($Attr) === 0) {
-                        $Str .= self::to_html($Block['Val'], $Rules, $cache);
+                        $Str .= self::to_html($Block['Val'], $Rules, $cache, $bucket);
                     } else {
                         $Padding = implode(' ', array_map(fn($x) => "{$x}px", $Attr));
-                        $Str .= "<span style=\"display: inline-block; padding: {$Padding}\">" . self::to_html($Block['Val'], $Rules, $cache).'</span>';
+                        $Str .= "<span style=\"display: inline-block; padding: {$Padding}\">" . self::to_html($Block['Val'], $Rules, $cache, $bucket).'</span>';
                     }
                     break;
                 case 'hide':
                 case 'spoiler':
                     $Str .= '<strong>'.($Block['Attr'] ?: 'Hidden text').'</strong>: <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
-                    $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules, $cache).'</blockquote>';
+                    $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</blockquote>';
                     break;
                 case 'mature':
                     if (self::$viewer->option('EnableMatureContent')) {
                         if (!empty($Block['Attr'])) {
                             $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
-                            $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules, $cache).'</blockquote>';
+                            $Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules, $cache, $bucket).'</blockquote>';
                         }
                         else {
                             $Str .= '<strong>Use of the [mature] tag requires a description.</strong> The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post. Misleading descriptions will be penalized. For further information on our mature content policies, please refer to this <a href="wiki.php?action=article&amp;id=1063">wiki</a>.';
@@ -964,7 +973,7 @@ class Text {
                         $Str .= '<a rel="noreferrer" target="_blank" href="'.$Block['Val'].'">'.$Block['Val'].'</a> (image)';
                         break;
                     }
-                    if (!self::valid_url($Block['Val'], '\.(jpe?g|gif|png|bmp|tiff)')) {
+                    if (!self::valid_url($Block['Val'], '\.(?:jpe?g|gif|png|bmp|tiff)')) {
                         $Str .= "[img]{$Block['Val']}[/img]";
                     } else {
                         $LocalURL = self::local_url($Block['Val']);
@@ -972,8 +981,8 @@ class Text {
                             $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="'.$Block['Val'].'" src="'.$LocalURL.'" />';
                         } else {
                             if ($cache) {
-                                $image    = image_cache_encode($Block['Val']);
-                                $original = " data-original-src=\"{$Block['Val']}\"";
+                                $image    = image_cache_encode($Block['Val'], bucket: $bucket);
+                                $original = " data-origin-src=\"{$Block['Val']}\"";
                             } else {
                                 $image    = $Block['Val'];
                                 $original = "";
@@ -988,7 +997,7 @@ class Text {
                         $Str .= '<a rel="noreferrer" target="_blank" href="'.$Block['Val'].'">'.$Block['Val'].'</a> (audio)';
                         break;
                     }
-                    if (!self::valid_url($Block['Val'], '\.(mp3|ogg|wav)')) {
+                    if (!self::valid_url($Block['Val'], '\.(?:mp3|ogg|wav)')) {
                         $Str .= '[aud]'.$Block['Val'].'[/aud]';
                     } else {
                         //TODO: Proxy this for staff?
@@ -1002,7 +1011,7 @@ class Text {
                         $Block['Val'] = $Block['Attr'];
                         $NoName = true; // If there isn't a Val for this
                     } else {
-                        $Block['Val'] = self::to_html($Block['Val'], $Rules, $cache);
+                        $Block['Val'] = self::to_html($Block['Val'], $Rules, $cache, $bucket);
                         $NoName = false;
                     }
 
@@ -1037,7 +1046,7 @@ class Text {
                     if (!self::valid_url($Block['Attr'], '', true)) {
                         $Array = self::parse($Block['Attr']);
                         $Block['Attr'] = $Array;
-                        $Str .= self::to_html($Block['Attr'], $Rules, $cache);
+                        $Str .= self::to_html($Block['Attr'], $Rules, $cache, $bucket);
                     }
                     else {
                         $LocalURL = self::local_url($Block['Attr']);

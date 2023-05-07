@@ -2,7 +2,10 @@
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
-use Gazelle\Util\{Type, Time, Irc};
+use Gazelle\Enum\CacheBucket;
+use Gazelle\Util\Irc;
+use Gazelle\Util\Time;
+use Gazelle\Util\Type;
 
 /**
  * Return true if the given string is an integer. The original Gazelle developers
@@ -670,19 +673,20 @@ function image_cache_signature(string $url, int|null $epoch = null, string $secr
  * E.g. https://example.com/image.jpg => /i/full/bf27c278bc5b/aHR0cHM6Ly9leGFtcGxlLmNvbS9pbWFnZS5qcGc
  */
 function image_cache_encode(
-    string $url,
-    int $height     = 0,
-    int $width      = 0,
-    bool $proxy     = false,
-    int|null $epoch = null,
-    string $secret  = IMAGE_CACHE_SECRET,
-    bool $cache     = IMAGE_CACHE_ENABLED,
+    string      $url,
+    int         $height = 0,
+    int         $width  = 0,
+    bool        $proxy  = false,
+    int|null    $epoch  = null,
+    CacheBucket $bucket = CacheBucket::standard,
+    string      $secret = IMAGE_CACHE_SECRET,
+    bool        $cache  = IMAGE_CACHE_ENABLED,
 ): string {
     if (!$cache || str_starts_with($url, STATIC_SERVER) || !str_starts_with($url, 'http')) {
         return $url;
     }
     $encode = urlencode_safe($url) . ($proxy ? '/proxy' : '');
-    $sig    = image_cache_signature($encode, $epoch, $secret);
+    $sig    = image_cache_signature($bucket->value . '/' . $encode, $epoch, $secret);
     if ($proxy) {
         $spec = 'full';
     } else {
@@ -691,7 +695,7 @@ function image_cache_encode(
             false => 'full', /** @phpstan-ignore-line */
         };
     }
-    return IMAGE_CACHE_HOST . "/i/$spec/$sig/$encode";
+    return IMAGE_CACHE_HOST . "/{$bucket->value}/$spec/$sig/$encode";
 }
 
 /**
@@ -700,6 +704,6 @@ function image_cache_encode(
 function image_cache_valid(string $url, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): bool {
     // skip over slashes in http://xxx/
     // if the /proxy specifier has been used, it is combined in $encode
-    [,,, $prefix, $spec, $sig, $encode] = explode('/', $url, 7);
-    return $prefix === 'i' && (string)$sig === image_cache_signature((string)$encode, $epoch, $secret);
+    [,,, $cache_bucket, $spec, $sig, $encode] = explode('/', $url, 7);
+    return (string)$sig === image_cache_signature($cache_bucket . '/' . (string)$encode, $epoch, $secret);
 }

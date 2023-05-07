@@ -115,7 +115,7 @@ class Collage extends \Gazelle\BaseManager {
     public function tgroupCover(\Gazelle\TGroup $tgroup): string {
         return self::$twig->render('collage/row.twig', [
             'group_id'   => $tgroup->id(),
-            'image'      => image_cache_encode($tgroup->image(), 150, 150),
+            'image'      => image_cache_encode($tgroup->image(), height: 150, width: 150),
             'name'       => $tgroup->text(),
             'tags'       => implode(', ', array_map(fn($n) => "#{$n}", $tgroup->tagNameList())),
             'tags_plain' => implode(', ', $tgroup->tagNameList()),

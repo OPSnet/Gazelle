@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Enum\CacheBucket;
+
 header('Access-Control-Allow-Origin: *');
 
 $tgMan  = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
@@ -614,7 +617,7 @@ if (!$torrentList) {
     }
     if (!empty($torrent->description())) {
 ?>
-        <blockquote><?= Text::full_format($torrent->description()) ?></blockquote>
+        <blockquote><?= Text::full_format($torrent->description(), cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::tgroup) ?></blockquote>
 <?php } ?>
                 </td>
             </tr>
@@ -638,7 +641,7 @@ echo $Twig->render('tgroup/similar.twig', [
             <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?= $tgroup->releaseTypeName() ? $tgroup->releaseTypeName() . ' info' : 'Info' ?></strong></div>
             <div class="body">
 <?php if (!empty($tgroup->description())) { ?>
-                <?= Text::full_format($tgroup->description()) ?>
+                <?= Text::full_format($tgroup->description(), cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::tgroup) ?>
 <?php } else { ?>
                 There is no information on this torrent.
 <?php } ?>
