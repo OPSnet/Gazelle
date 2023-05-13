@@ -494,7 +494,7 @@ foreach (CATEGORY as $catKey => $catName) {
         $tagList = $tgroup->tagList();
 ?>
         <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
-            . ($tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '')
+            . ($tgroup->isSnatched() ? ' snatched_group' : '')
             ?>">
             <td class="center cats_col">
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>

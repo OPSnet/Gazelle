@@ -521,8 +521,8 @@ if (!$Properties['GroupID']) {
 
 // Torrent
 $torrent = $torMan->create(
-    tgroupId:                $GroupID,
-    userId:                  $Viewer->id(),
+    tgroup:                  $tgroup,
+    user:                    $Viewer,
     description:             $Properties['Description'],
     media:                   $Properties['Media'],
     format:                  $Properties['Format'],
@@ -551,8 +551,8 @@ $upload['new'][] = $torrent;
 
 foreach ($upload['extra'] as $info) {
     $extra = $torMan->create(
-        tgroupId:                $GroupID,
-        userId:                  $Viewer->id(),
+        tgroup:                  $tgroup,
+        user:                    $Viewer,
         media:                   $Properties['Media'],
         isScene:                 $Properties['Scene'],
         isRemaster:              $Properties['Remastered'],
@@ -619,13 +619,7 @@ if (!$Viewer->disableBonusPoints()) {
 
 $tgroup->refresh();
 $torMan->flushFoldernameCache($DirName);
-if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    $torMan->flushLatestUploads(5);
-}
 
-if ($tgroup->image()) {
-    $Viewer->flushRecentUpload();
-}
 if ($Viewer->option('AutoSubscribe')) {
     (new Gazelle\User\Subscription($Viewer))->subscribeComments('torrents', $GroupID);
 }

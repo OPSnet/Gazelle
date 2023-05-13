@@ -188,7 +188,7 @@ if ($search->canUnclaim($Viewer)) {
 <?php                   } ?>
                         </table>
                         </div>
-                        <br />uploaded by <a href="user.php?id=<?=$extra->uploaderId() ?>"><?=$extra->uploader()?->username() ?? 'System' ?></a> on <span title="<?=
+                        <br />uploaded by <?= $extra->uploader()->link() ?>"> on <span title="<?=
                             time_diff($extra->created(), 3, false) ?>"><?= $extra->created() ?> (<?=
                             strtotime($extra->created()) < strtotime($torrent?->created() ?? '2000-01-01 00:00:00') ? 'older upload' : 'more recent upload' ?>)</span>
                         <br />Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>

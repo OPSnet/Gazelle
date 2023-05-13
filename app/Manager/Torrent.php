@@ -23,33 +23,33 @@ class Torrent extends \Gazelle\BaseManager {
      * Set the viewer context, for snatched indicators etc.
      * If this is set, and Torrent object created will have it set
      */
-    public function setViewer(\Gazelle\User $viewer) {
+    public function setViewer(\Gazelle\User $viewer): Torrent {
         $this->viewer = $viewer;
         return $this;
     }
 
     public function create(
-        int     $tgroupId,
-        int     $userId,
-        string  $description,
-        string  $media,
-        ?string $format,
-        ?string $encoding,
-        string  $infohash,
-        string  $filePath,
-        array   $fileList,
-        int     $size,
-        bool    $isScene,
-        bool    $isRemaster,
-        ?int    $remasterYear,
-        string  $remasterTitle,
-        string  $remasterRecordLabel,
-        string  $remasterCatalogueNumber,
-        int     $logScore     = 0,
-        bool    $hasChecksum = false,
-        bool    $hasCue      = false,
-        bool    $hasLog      = false,
-        bool    $hasLogInDB  = false,
+        \Gazelle\TGroup $tgroup,
+        \Gazelle\User   $user,
+        string          $description,
+        string          $media,
+        ?string         $format,
+        ?string         $encoding,
+        string          $infohash,
+        string          $filePath,
+        array           $fileList,
+        int             $size,
+        bool            $isScene,
+        bool            $isRemaster,
+        ?int            $remasterYear,
+        string          $remasterTitle,
+        string          $remasterRecordLabel,
+        string          $remasterCatalogueNumber,
+        int             $logScore     = 0,
+        bool            $hasChecksum = false,
+        bool            $hasCue      = false,
+        bool            $hasLog      = false,
+        bool            $hasLogInDB  = false,
     ): \Gazelle\Torrent {
         self::$db->prepared_query("
             INSERT INTO torrents (
@@ -60,7 +60,7 @@ class Torrent extends \Gazelle\BaseManager {
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?
-            )", $tgroupId, $userId, $media, $format, $encoding,
+            )", $tgroup->id(), $user->id(), $media, $format, $encoding,
                 $isRemaster ? '1' : '0', $remasterYear, $remasterTitle, $remasterRecordLabel, $remasterCatalogueNumber,
                 $infohash, $isScene ? '1': '0', $logScore, $hasChecksum ? '1' : '0', $hasLog ? '1' : '0',
                 $hasCue ? '1' : '0', $hasLogInDB ? '1' : '0', $filePath, count($fileList), implode("\n", $fileList),
@@ -71,8 +71,14 @@ class Torrent extends \Gazelle\BaseManager {
             INSERT INTO torrents_leech_stats (TorrentID) VALUES (?)
             ', $torrent->id()
         );
-        $torrent->group()->flush();
+        $tgroup->flush();
         $torrent->lockUpload();
+        $user->flushRecentUpload();
+
+        // Flush the most recent uploads when a new lossless upload is made
+        if (in_array($encoding, ['Lossless', '24bit Lossless'])) {
+            self::$cache->delete_value(sprintf(self::CACHE_KEY_LATEST_UPLOADS, 5));
+        }
         return $torrent;
     }
 
@@ -106,7 +112,7 @@ class Torrent extends \Gazelle\BaseManager {
         return $found ? new \Gazelle\TorrentDeleted($torrentId) : null;
     }
 
-    public function findByInfohash(string $hash) {
+    public function findByInfohash(string $hash): ?\Gazelle\Torrent {
         return $this->findById((int)self::$db->scalar("
             SELECT id FROM torrents WHERE info_hash = unhex(?)
             ", $hash
@@ -146,7 +152,7 @@ class Torrent extends \Gazelle\BaseManager {
         return $all;
     }
 
-    public function flushFoldernameCache(string $folder) {
+    public function flushFoldernameCache(string $folder): void {
         self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($folder)));
     }
 
@@ -218,7 +224,7 @@ class Torrent extends \Gazelle\BaseManager {
         $n = 0;
         if ($groupId) {
             $Tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
-            $Tor->decodeString($str = (new \Gazelle\File\Torrent())->get($torrentId));
+            $Tor->decodeString((string)(new \Gazelle\File\Torrent())->get($torrentId));
             $TorData = $Tor->getData();
             $folderPath = isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : '';
             ['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
@@ -236,14 +242,14 @@ class Torrent extends \Gazelle\BaseManager {
                 ", $TotalSize, $folderPath, implode("\n", $TmpFileList),
                 $torrentId
             );
-            self::$cache->delete_value("torrents_details_$groupId");
+            $this->findById($torrentId)?->flush();
             $this->flushFoldernameCache($folderPath);
         }
         self::$db->set_query_id($qid);
         return $n;
     }
 
-    public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent) {
+    public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent): bool {
         $torrentSource = $torrent->getSource();
         if ($torrentSource === SOURCE) {
             return false;
@@ -416,7 +422,6 @@ class Torrent extends \Gazelle\BaseManager {
         $tracker = new \Gazelle\Tracker;
         foreach ($Torrents as [$TorrentID, $GroupID, $InfoHash]) {
             $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $leechLevel]);
-            self::$cache->delete_value("torrent_download_$TorrentID");
             $groupLog->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $reason")
                 ->general($user->username() . " marked torrent $TorrentID freeleech type $reason");
         }
@@ -540,20 +545,6 @@ class Torrent extends \Gazelle\BaseManager {
     }
 
     /**
-     * Flush the most recent uploads (e.g. a new lossless upload is made).
-     *
-     * Note: Since arbitrary N may have been cached, all uses of N latest
-     * uploads must be flushed when invalidating, following a new upload.
-     * grep is your friend. This also assumes that there is sufficient
-     * activity to not have to worry about a very recent upload being
-     * deleted for whatever reason. For a start, even if the list becomes
-     * briefly out of date, the next upload will regenerate the list.
-     */
-    public function flushLatestUploads(int $limit) {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY_LATEST_UPLOADS, $limit));
-    }
-
-    /**
      * Return the N most recent lossless uploads
      * Note that if both a Lossless and 24bit Lossless are uploaded at the same time,
      * only one entry will be returned, to ensure that the result is comprised of N
@@ -673,7 +664,7 @@ class Torrent extends \Gazelle\BaseManager {
         );
     }
 
-    protected static function metaPL(string $media, string $format, string $encoding, bool $hasCue, bool $hasLog, bool $hasLogDb, int $logScore) {
+    protected static function metaPL(string $media, string $format, string $encoding, bool $hasCue, bool $hasLog, bool $hasLogDb, int $logScore): string {
         $meta = [$media, $format, $encoding];
         if ($hasCue) {
             $meta[] = 'Cue';

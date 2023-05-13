@@ -13,15 +13,15 @@ class TGroup extends \Gazelle\BaseManager {
     protected \Gazelle\User $viewer;
 
     public function create(
-        int $categoryId,
-        string $name,
-        string $description,
-        ?int $year,
-        ?int $releaseType,
+        int     $categoryId,
+        string  $name,
+        string  $description,
+        ?int    $year,
+        ?int    $releaseType,
         ?string $recordLabel,
         ?string $catalogueNumber,
         ?string $image,
-        bool $showcase = false,
+        bool    $showcase = false,
     ): \Gazelle\TGroup {
         self::$db->prepared_query("
             INSERT INTO torrents_group
@@ -30,8 +30,12 @@ class TGroup extends \Gazelle\BaseManager {
             ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
         );
         $id = self::$db->inserted_id();
+        $tgroup = $this->findById($id);
         self::$cache->increment_value('stats_group_count');
-        return $this->findById($id);
+        if ($tgroup->categoryName() === 'Music') {
+            self::$cache->decrement('stats_album_count');
+        }
+        return $tgroup;
     }
 
     public function findById(int $tgroupId): ?\Gazelle\TGroup {
@@ -173,8 +177,6 @@ class TGroup extends \Gazelle\BaseManager {
         self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id());
         $cacheKeys = [];
         while ([$TorrentID] = self::$db->next_row()) {
-            $cacheKeys[] = 'torrent_download_' . $TorrentID;
-            $cacheKeys[] = 'tid_to_group_' . $TorrentID;
             $cacheKeys[] = sprintf(\Gazelle\Torrent::CACHE_KEY, $TorrentID);
         }
         self::$cache->delete_multi($cacheKeys);

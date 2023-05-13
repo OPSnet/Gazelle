@@ -56,9 +56,9 @@ class ReaperTest extends TestCase {
         // and add some torrents to the group
         $this->torrentList = array_map(fn($info) =>
             Helper::makeTorrentMusic(
-                tgroupId:    $tgroup->id(),
-                user:        $this->userList[0],
-                title:       $info['title'],
+                tgroup: $tgroup,
+                user:   $this->userList[0],
+                title:  $info['title'],
             ), [
                 ['title' => 'Deluxe Edition'],
                 ['title' => 'Limited Edition'],

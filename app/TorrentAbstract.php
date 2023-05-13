@@ -3,16 +3,16 @@
 namespace Gazelle;
 
 abstract class TorrentAbstract extends BaseObject {
-    public const CACHE_KEY = 't_%d';
-    final const CACHE_LOCK = 'torrent_lock_%d';
+    final const CACHE_LOCK       = 'torrent_lock_%d';
+    final const CACHE_REPORTLIST = 't_rpt2_%s_%d';
 
     protected TGroup $tgroup;
     protected User   $viewer;
 
     public function flush(): TorrentAbstract {
         self::$cache->delete_multi([
-            sprintf(self::CACHE_KEY, $this->id),
-            "torrent_download_{$this->id}",
+            sprintf(Torrent::CACHE_KEY, $this->id),
+            sprintf(TorrentDeleted::CACHE_KEY, $this->id),
         ]);
         $this->info = [];
         $this->group()->flush();
@@ -63,7 +63,7 @@ abstract class TorrentAbstract extends BaseObject {
     /**
      * Set the viewer context, for snatched indicators etc.
      */
-    public function setViewer(User $viewer) {
+    public function setViewer(User $viewer): TorrentAbstract {
         $this->viewer = $viewer;
         return $this;
     }
@@ -77,7 +77,7 @@ abstract class TorrentAbstract extends BaseObject {
         if (isset($this->info) && !empty($this->info)) {
             return $this->info;
         }
-        $key = sprintf(self::CACHE_KEY, $this->id);
+        $key = sprintf($this->isDeleted() ? TorrentDeleted::CACHE_KEY : Torrent::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
             $info = $this->infoRow();
@@ -194,7 +194,7 @@ abstract class TorrentAbstract extends BaseObject {
         if (preg_match('/^(\..*?) s(\d+)s (.+) (?:&divide;|' . FILELIST_DELIM . ')$/', $metaname, $match)) {
             return [
                 'ext'  => $match[1] ?? null,
-                'size' => (int)$match[2] ?? 0,
+                'size' => (int)$match[2],
                 // transform leading blanks into hard blanks so that it shows up in HTML
                 'name' => preg_replace_callback('/^(\s+)/', fn($s) => str_repeat('&nbsp;', strlen($s[1])), $match[3] ?? ''),
             ];
@@ -301,6 +301,10 @@ abstract class TorrentAbstract extends BaseObject {
         return $this->info()['HasLogDB'];
     }
 
+    public function hasReport(\Gazelle\User $viewer): bool {
+        return count($this->reportIdList($viewer)) > 0;
+    }
+
     /**
      * It is possible that a torrent can be orphaned from a group, in which case the
      * TGroup property cannot be instantiated, even though the Torrent object can.
@@ -404,7 +408,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     public function lastActiveEpoch(): int {
-        return strtotime($this->lastActiveDate() ?? 0);
+        return is_null($this->lastActiveDate()) ? 0 : (int)strtotime($this->lastActiveDate());
     }
 
     public function lastReseedRequest(): ?string {
@@ -499,6 +503,42 @@ abstract class TorrentAbstract extends BaseObject {
             $this->remasterRecordLabel(),
             $this->remasterCatalogueNumber(),
         ]);
+    }
+
+    /**
+     * Get the reports associated with this torrent
+     * Non-admin users do not see Edited reports
+     *
+     * @return array of ids of \Gazelle\Torrent\Report
+     */
+    public function reportIdList(User $viewer): array {
+        $key = sprintf(self::CACHE_REPORTLIST, $viewer->permitted('admin_reports') ? 'a' : 'u', $this->id());
+        $list = self::$cache->get_value($key);
+        if ($list === false) {
+            $qid = self::$db->get_query_id();
+            if ($viewer->permitted('admin_reports')) {
+                self::$db->prepared_query("
+                    SELECT ID
+                    FROM reportsv2
+                    WHERE Status != 'Resolved'
+                        AND TorrentID = ?
+                    ", $this->id
+                );
+            } else {
+                self::$db->prepared_query("
+                    SELECT ID
+                    FROM reportsv2
+                    WHERE Status != 'Resolved'
+                        AND Type != 'edited'
+                        AND TorrentID = ?
+                    ", $this->id
+                );
+            }
+            $list = self::$db->collect(0, false);
+            self::$db->set_query_id($qid);
+            self::$cache->cache_value($key, $list, 7200);
+        }
+        return $list;
     }
 
     public function reportTotal(): int {

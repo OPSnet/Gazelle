@@ -196,8 +196,8 @@ class Report extends \Gazelle\BaseObject {
             ", $userId, $message, $this->id
         );
         $this->torrent->flush();
-        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'a', $this->torrentId()));
-        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'u', $this->torrentId()));
+        self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, 'a', $this->torrentId()));
+        self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, 'u', $this->torrentId()));
         return self::$db->affected_rows();
     }
 
@@ -214,8 +214,8 @@ class Report extends \Gazelle\BaseObject {
             ", $log, $message, $this->id
         );
         $this->torrent->flush();
-        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'a', $this->torrentId()));
-        self::$cache->delete_value(sprintf(\Gazelle\Torrent::CACHE_REPORTLIST, 'u', $this->torrentId()));
+        self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, 'a', $this->torrentId()));
+        self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, 'u', $this->torrentId()));
         return self::$db->affected_rows();
     }
 

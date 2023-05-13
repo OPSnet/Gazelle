@@ -68,10 +68,6 @@ if ($db->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $old->id())) 
 $new->flush();
 $new->refresh();
 $torrent->flush();
-$Cache->delete_multi([
-    "torrents_details_" . $oldId,
-    "torrent_download_" . $torrent->id(),
-]);
 
 $log->group($new->id(), $Viewer->id(), "merged group $oldId")
     ->general("Torrent " . $torrent->id() . " was edited by " . $Viewer->label());

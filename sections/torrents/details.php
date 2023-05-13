@@ -551,7 +551,7 @@ if (!$torrentList) {
 ?>
                         <a href="#" class="brackets" onclick="show_logs('<?= $TorrentID?>', <?=$torrent->hasLogDb()?>, '<?=
                             $torrent->logScore() ?>'); return false;">View log<?=
-                            plural(count($torrent->riplogIdList())) ?></a>
+                            plural(count($torrent->ripLogIdList())) ?></a>
 <?php
     }
     if ($Viewer->permitted('site_view_torrent_snatchlist')) {

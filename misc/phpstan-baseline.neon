@@ -1756,41 +1756,6 @@ parameters:
 			path: ../app/Manager/Thread.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\:\\:findByInfohash\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\:\\:flushFoldernameCache\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\:\\:flushLatestUploads\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\:\\:metaPL\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\:\\:setSourceFlag\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\:\\:setViewer\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
-			message: "#^Parameter \\#1 \\$data of method OrpheusNET\\\\BencodeTorrent\\\\BencodeTorrent\\:\\:decodeString\\(\\) expects string, string\\|false given\\.$#"
-			count: 1
-			path: ../app/Manager/Torrent.php
-
-		-
 			message: "#^Method Gazelle\\\\Manager\\\\Torrent\\\\Report\\:\\:searchTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Manager/Torrent/Report.php
@@ -2859,26 +2824,6 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between bool and 1 will always evaluate to false\\.$#"
 			count: 1
 			path: ../app/Torrent/ReportType.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: ../app/TorrentAbstract.php
-
-		-
-			message: "#^Method Gazelle\\\\TorrentAbstract\\:\\:lastActiveEpoch\\(\\) should return int but returns int\\|false\\.$#"
-			count: 1
-			path: ../app/TorrentAbstract.php
-
-		-
-			message: "#^Method Gazelle\\\\TorrentAbstract\\:\\:setViewer\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/TorrentAbstract.php
-
-		-
-			message: "#^Parameter \\#1 \\$datetime of function strtotime expects string, int\\|string given\\.$#"
-			count: 1
-			path: ../app/TorrentAbstract.php
 
 		-
 			message: '/Match arm comparison between \$this\(Gazelle\\TorrentFlag\)&Gazelle\\TorrentFlag::noLineage and Gazelle\\TorrentFlag::noLineage is always true\.$/'

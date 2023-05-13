@@ -46,8 +46,8 @@ class NotificationUploadTest extends TestCase {
 
         $this->torMan = new \Gazelle\Manager\Torrent;
         $this->torrent = $this->torMan->create(
-            tgroupId:                $tgroup->id(),
-            userId:                  $user->id(),
+            tgroup:                  $tgroup,
+            user:                    $user,
             description:             'notify release description',
             media:                   'WEB',
             format:                  'FLAC',
@@ -423,8 +423,8 @@ class NotificationUploadTest extends TestCase {
         $this->assertEquals(0, $notifier->total(), 'notifier-new-group-1-cleared-total');
 
         $newTorrent = $this->torMan->create(
-            tgroupId:                $this->torrent->group()->id(),
-            userId:                  $this->torrent->uploaderId(),
+            tgroup:                  $this->torrent->group(),
+            user:                    $this->torrent->uploader(),
             description:             'notify release second description',
             media:                   'WEB',
             format:                  'FLAC',

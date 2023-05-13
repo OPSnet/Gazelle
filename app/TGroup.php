@@ -25,7 +25,6 @@ class TGroup extends BaseObject {
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),
             sprintf(self::CACHE_COVERART_KEY, $this->id),
-            "torrents_details_{$this->id}",
             "torrent_group_{$this->id}",
             "groups_artists_{$this->id}",
         ]);
@@ -66,17 +65,6 @@ class TGroup extends BaseObject {
             'Comedy' => "$name [{$this->year()}]",
             default  => $name,
         };
-    }
-
-    public function flushTorrentDownload(): TGroup {
-        self::$db->prepared_query("
-            SELECT concat('torrent_download_', ID) as cacheKey
-            FROM torrents
-            WHERE GroupID = ?
-            ", $this->id
-        );
-        self::$cache->delete_multi(self::$db->collect('cacheKey'));
-        return $this;
     }
 
     /**
@@ -933,11 +921,6 @@ class TGroup extends BaseObject {
     }
 
     public function remove(User $user): bool {
-        if ($this->categoryName() === 'Music') {
-            self::$cache->decrement('stats_album_count');
-        }
-        self::$cache->decrement('stats_group_count');
-
         // Artists
         // Collect the artist IDs and then wipe the torrents_artist entry
         self::$db->prepared_query("
@@ -1030,13 +1013,18 @@ class TGroup extends BaseObject {
             return false;
         }
 
+        if ($this->categoryName() === 'Music') {
+            self::$cache->decrement('stats_album_count');
+        }
+        self::$cache->decrement('stats_group_count');
+
         self::$cache->delete_multi([
             "groups_artists_{$this->id}",
-            "torrents_details_{$this->id}",
             "torrent_group_{$this->id}",
-            sprintf(\Gazelle\TGroup::CACHE_KEY, $this->id),
-            sprintf(\Gazelle\TGroup::CACHE_TLIST_KEY, $this->id),
+            sprintf(self::CACHE_KEY, $this->id),
+            sprintf(self::CACHE_TLIST_KEY, $this->id),
             sprintf(\Gazelle\Manager\TGroup::ID_KEY, $this->id),
+            sprintf(\Gazelle\Manager\Torrent::CACHE_KEY_LATEST_UPLOADS, 5),
         ]);
         return true;
     }

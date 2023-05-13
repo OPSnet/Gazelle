@@ -23,7 +23,6 @@ class Freeleech extends \Gazelle\Schedule\Task {
 
         self::$db->set_query_id($qId);
         while ([$groupID] = self::$db->next_record()) {
-            self::$cache->delete_value("torrents_details_$groupID");
             self::$cache->delete_value("torrent_group_$groupID");
         }
     }

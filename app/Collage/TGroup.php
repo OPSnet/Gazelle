@@ -101,7 +101,6 @@ class TGroup extends AbstractCollage {
         $this->flushAll([
             "torrent_collages_$tgroupId",
             "torrent_collages_personal_$tgroupId",
-            "torrents_details_$tgroupId"
         ]);
     }
 
@@ -127,7 +126,7 @@ class TGroup extends AbstractCollage {
             ", $this->id
         );
         self::$cache->delete_multi(array_merge(...array_map(
-            fn ($id) => ["torrents_details_$id", "torrent_collages_$id", "torrent_collages_personal_$id"],
+            fn ($id) => ["torrent_collages_$id", "torrent_collages_personal_$id"],
             self::$db->collect(0, false)
         )));
         if (!$this->holder->isPersonal()) {

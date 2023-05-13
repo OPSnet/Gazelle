@@ -44,13 +44,13 @@ class Helper {
     }
 
     public static function makeTorrentEBook(
-        int           $tgroupId,
-        string        $description,
-        \Gazelle\User $user,
+        \Gazelle\TGroup $tgroup,
+        \Gazelle\User   $user,
+        string          $description,
     ): \Gazelle\Torrent {
         return (new \Gazelle\Manager\Torrent)->create(
-            tgroupId:                $tgroupId,
-            userId:                  $user->id(),
+            tgroup:                  $tgroup,
+            user:                    $user,
             description:             $description,
             media:                   'CD',
             format:                  null,
@@ -69,16 +69,16 @@ class Helper {
     }
 
     public static function makeTorrentMusic(
-        int $tgroupId,
-        \Gazelle\User $user,
-        string $media       = 'WEB',
-        string $format      = 'FLAC',
-        string $encoding    = 'Lossless',
-        string $title       = '',
+        \Gazelle\TGroup $tgroup,
+        \Gazelle\User   $user,
+        string          $media    = 'WEB',
+        string          $format   = 'FLAC',
+        string          $encoding = 'Lossless',
+        string          $title    = '',
     ): \Gazelle\Torrent {
         return (new \Gazelle\Manager\Torrent)->create(
-            tgroupId:                $tgroupId,
-            userId:                  $user->id(),
+            tgroup:                  $tgroup,
+            user:                    $user,
             description:             'phpunit release description',
             media:                   $media,
             format:                  $format,

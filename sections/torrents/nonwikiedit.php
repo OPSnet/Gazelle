@@ -43,7 +43,7 @@ if ($tgroup->catalogueNumber() != $catNumber) {
 
 if ($tgroup->dirty()) {
     (new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), ucfirst(implode(", ", $log)));
-    $tgroup->flushTorrentDownload()->modify();
+    $tgroup->modify();
     $tgroup->refresh();
 }
 

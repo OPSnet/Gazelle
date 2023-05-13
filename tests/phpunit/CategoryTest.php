@@ -31,9 +31,9 @@ class CategoryTest extends TestCase {
         );
         $torrentList = array_map(fn($info) =>
             Helper::makeTorrentEBook(
-                description: $info['description'],
-                tgroupId:    $tgroup->id(),
+                tgroup:      $tgroup,
                 user:        $user,
+                description: $info['description'],
             ), [
                 ['description' => 'Full version'],
                 ['description' => 'Abridged version'],

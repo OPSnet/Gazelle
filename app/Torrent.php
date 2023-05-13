@@ -5,9 +5,9 @@ namespace Gazelle;
 class Torrent extends TorrentAbstract {
     use Pg;
 
+    final const CACHE_KEY                = 't_%d';
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
-    final const CACHE_REPORTLIST         = 't_rpt2_%s_%d';
     final const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
 
     final const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
@@ -75,10 +75,6 @@ class Torrent extends TorrentAbstract {
         );
     }
 
-    public function hasReport(\Gazelle\User $viewer): bool {
-        return count($this->reportIdList($viewer)) > 0;
-    }
-
     /**
      * Check if the viewer has an active freeleech token on this torrent
      */
@@ -98,42 +94,6 @@ class Torrent extends TorrentAbstract {
             }
         }
         return isset($this->tokenCache[$this->id]);
-    }
-
-    /**
-     * Get the reports associated with this torrent
-     * Non-admin users do not see Edited reports
-     *
-     * @return array of ids of \Gazelle\Torrent\Report
-     */
-    public function reportIdList(\Gazelle\User $viewer): array {
-        $key = sprintf(self::CACHE_REPORTLIST, $viewer->permitted('admin_reports') ? 'a' : 'u', $this->id());
-        $list = self::$cache->get_value($key);
-        if ($list === false) {
-            $qid = self::$db->get_query_id();
-            if ($viewer->permitted('admin_reports')) {
-                self::$db->prepared_query("
-                    SELECT ID
-                    FROM reportsv2
-                    WHERE Status != 'Resolved'
-                        AND TorrentID = ?
-                    ", $this->id
-                );
-            } else {
-                self::$db->prepared_query("
-                    SELECT ID
-                    FROM reportsv2
-                    WHERE Status != 'Resolved'
-                        AND Type != 'edited'
-                        AND TorrentID = ?
-                    ", $this->id
-                );
-            }
-            $list = self::$db->collect(0, false);
-            self::$db->set_query_id($qid);
-            self::$cache->cache_value($key, $list, 7200);
-        }
-        return $list;
     }
 
     /**
@@ -483,9 +443,7 @@ class Torrent extends TorrentAbstract {
             );
         }
 
-        array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id),
-            "torrent_download_" . $this->id, "torrent_group_" . $groupId, "torrents_details_" . $groupId
-        );
+        array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id), "torrent_group_" . $groupId);
         self::$cache->delete_multi($deleteKeys);
         $this->group()->refresh();
 

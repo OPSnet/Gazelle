@@ -24,9 +24,9 @@ class UserSeedboxTest extends TestCase {
 
         $this->torrentList = array_map(fn($info) =>
             Helper::makeTorrentMusic(
-                tgroupId:    $tgroup->id(),
-                user:        $this->user,
-                title:       $info['title'],
+                tgroup: $tgroup,
+                user:   $this->user,
+                title:  $info['title'],
             ), [
                 ['title' => 'Standard Edition'],
                 ['title' => 'Deluxe Edition'],

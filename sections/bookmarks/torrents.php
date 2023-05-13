@@ -197,7 +197,7 @@ foreach ($bookmarkList as $bm) {
     if (is_null($tgroup)) {
         continue;
     }
-    $torrentIdList = explode(',', $bm['torrent_list']);
+    $torrentIdList = array_map('intval', explode(',', $bm['torrent_list']));
     $SnatchedGroupClass = $tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '';
 
     if (count($torrentIdList) > 1 || $tgroup->categoryId() == 1) {

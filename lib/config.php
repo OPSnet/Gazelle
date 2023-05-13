@@ -990,7 +990,6 @@ defined('CACHE_NAMESPACE') or define('CACHE_NAMESPACE', [
         'g1' => 'torrents_collages_%d',
         'g2' => 'torrent_collages_personal_%d',
         'g3' => 'torrents_cover_art_%d',
-        'g4' => 'torrents_details_%d',
         'g5' => 'torrent_group_%d',
         'g6' => 'torrent_group_light_%d',
         'g7' => 'groups_artists_%d',

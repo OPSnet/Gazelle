@@ -78,10 +78,6 @@ if ($db->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $oldId)) {
 $new->flush();
 $new->refresh();
 $torrent->flush();
-$Cache->delete_multi([
-    "torrents_details_" . $oldId,
-    "torrent_download_" . $torrent->id(),
-]);
 
 $log->group($new->id(), $Viewer->id(), "split from group $oldId")
     ->general("Torrent " . $torrent->id() . " was split out from group $oldId to " . $new->id() . " by " . $Viewer->label());
