@@ -60,7 +60,7 @@ $reporter = $userMan->findById($report->reporterId());
         <td colspan="3">
             <?=$linkName?>
             <a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
-            uploaded by <?= $uploader->link() ?></a> <?=time_diff($torrent->created()) ?>
+            uploaded by <?= $uploader->link() ?> <?=time_diff($torrent->created()) ?>
             <br />
             <div style="text-align: right;">was reported by <?= $reporter->link() ?> <?=time_diff($report->created())?> for the reason: <strong><?= $report->reportType()->name() ?></strong></div>
 <?php
