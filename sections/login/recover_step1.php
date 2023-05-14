@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Enum\UserTokenType;
+
 $validator = new Gazelle\Util\Validator;
 $validator->setField('email', true, 'email', 'You entered an invalid email address.');
 
@@ -12,7 +14,7 @@ if (isset($_REQUEST['expired'])) {
     if (!$error) {
         $user = (new Gazelle\Manager\User)->findByEmail(trim($_REQUEST['email']));
         if ($user) {
-            $user->resetPassword();
+            (new Gazelle\Manager\UserToken)->createPasswordResetToken($user);
             $user->logoutEverywhere();
             $sent = true;
         }

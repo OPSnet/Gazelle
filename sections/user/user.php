@@ -1,5 +1,6 @@
 <?php
 
+use Gazelle\Enum\UserTokenType;
 use Gazelle\User\Vote;
 
 $userMan = new Gazelle\Manager\User;
@@ -18,6 +19,9 @@ $viewerBonus = new Gazelle\User\Bonus($Viewer);
 $PRL         = new Gazelle\User\PermissionRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$resetToken  = $Viewer->permitted('users_mod')
+    ? (new Gazelle\Manager\UserToken)->findByUser($User, UserTokenType::password)
+    : false;
 
 if (!empty($_POST)) {
     authorize();
@@ -250,7 +254,10 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
 <?php
     }
     if ($Viewer->permitted('users_mod')) {
+        if ($resetToken) {
 ?>
+                <li><span class="tooltip" title="User requested a password reset by email">Password reset expiry: <?= time_diff($resetToken->expiry()) ?></li>
+<?php   } ?>
                 <li>Password history: <?=number_format($User->passwordCount())?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
                 <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php } ?>

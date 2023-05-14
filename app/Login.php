@@ -112,6 +112,10 @@ class Login extends Base {
             if (!$tfa->verifyCode($TFAKey, $this->twofa, 2)) {
                 // They have 2FA but the device key did not match
                 // Fallback to considering it as a recovery key.
+                $userToken = (new Manager\UserToken)->findByToken($this->twofa);
+                if ($userToken) {
+                    $userToken->consume();
+                }
                 if (!$user->burn2FARecovery($this->twofa)) {
                     $this->error = self::ERR_CREDENTIALS;
                     return null;

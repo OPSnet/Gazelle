@@ -1,9 +1,17 @@
 This email is to confirm that you have just created an account at {{ constant('SITE_NAME') }}.
 
 You have 24 hours to click the link below and finish the registration
-process for the account created with the username: {{ username }}
+process for the account created with the username: {{ user.username }}
 
-{{ constant('SITE_URL') }}/register.php?confirm={{ announce_key }}
+{{ constant('SITE_URL') }}/register.php?confirm={{ token.value }}
+
+If the link expires before you are able to deal with it, you can
+attempt to log in again and a new email message will be sent. Also
+note that if you cause a new confirmation email to be sent at any
+time, the link in the previous email will be invalidated.
 
 Thank you,
 {{ constant('SITE_NAME') }} Staff
+
+--
+registration IP address: {{ ipaddr }}

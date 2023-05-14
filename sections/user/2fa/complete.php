@@ -15,7 +15,7 @@ if (empty($_SESSION['private_key'])) {
     error(404);
 }
 
-$user->create2FA($_SESSION['private_key']);
+$user->create2FA(new Gazelle\Manager\UserToken, $_SESSION['private_key']);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

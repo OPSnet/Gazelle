@@ -1,13 +1,27 @@
 <?php
 
+use \Gazelle\Enum\UserStatus;
+use \Gazelle\Enum\UserTokenType;
+
 if (isset($_REQUEST['confirm'])) {
     // Confirm registration
-    $user = (new Gazelle\Manager\User)->findByAnnounceKey($_REQUEST['confirm']);
-    if ($user && $user->setUpdate('Enabled', '1')->modify()) {
-        $user->flush();
-        $Cache->increment('stats_user_count');
-        echo $Twig->render('register/complete.twig');
+    $token = (new Gazelle\Manager\UserToken)->findByToken($_REQUEST['confirm']);
+    if (!$token || $token->type() != UserTokenType::confirm || !$token->consume()) {
+        // we have no token, or not of the right type, or not consumable (expired)
+        echo $Twig->render('register/expired.twig');
+        exit;
     }
+    $user = $token->user();
+    $user->setUpdate('Enabled', UserStatus::enabled->value)->modify();
+    (new Gazelle\Manager\User)->sendPM($user->id(), 0,
+        "Welcome to " . SITE_NAME,
+        $Twig->render('register/welcome.twig', [
+            'user' => $user,
+        ])
+    );
+    (new Gazelle\Tracker)->update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
+    $Cache->increment('stats_user_count');
+    echo $Twig->render('register/complete.twig');
 
 } elseif (OPEN_REGISTRATION || isset($_REQUEST['invite'])) {
     if ($_REQUEST['invite']) {
@@ -47,18 +61,11 @@ if (isset($_REQUEST['confirm'])) {
                 $user = $creator->create();
                 (new Gazelle\Util\Mail)->send($user->email(), 'New account confirmation at '.SITE_NAME,
                     $Twig->render('email/registration.twig', [
-                        'username'     => $username,
-                        'announce_key' => $user->announceKey(),
+                        'ipaddr' => $_SERVER['REMOTE_ADDR'],
+                        'user'   => $user,
+                        'token'  => (new \Gazelle\Manager\UserToken)->create(UserTokenType::confirm, $user),
                     ])
                 );
-                (new Gazelle\Manager\User)->sendPM($user->id(), 0,
-                    "Welcome to " . SITE_NAME,
-                    $Twig->render('register/welcome.twig', [
-                        'username'     => $username,
-                        'announce_url' => $user->announceUrl(),
-                    ])
-                );
-                (new Gazelle\Tracker)->update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
                 $emailSent = true;
             }
             catch (Gazelle\Exception\UserCreatorException $e) {

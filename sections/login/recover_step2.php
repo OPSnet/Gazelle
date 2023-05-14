@@ -1,13 +1,10 @@
 <?php
 
-$user = (new Gazelle\Manager\User)->findByResetKey($_GET['key']);
-if (is_null($user)) {
+use Gazelle\Enum\UserTokenType;
+
+$userToken = (new Gazelle\Manager\UserToken)->findByToken($_GET['key']);
+if ($userToken?->type() != UserTokenType::password) {
     header('Location: login.php?action=recover');
-    exit;
-}
-if ($user->resetPasswordExpired()) {
-    $user->clearPasswordReset();
-    header('Location: login.php?action=recover&expired=1');
     exit;
 }
 
@@ -26,11 +23,16 @@ if (!empty($_REQUEST['password'])) {
     if (!$validator->validate($_REQUEST)) {
         $error = $validator->errorMessage();
     } else {
-        // Form validates without error, set new secret and password.
-        $user->clearPasswordReset();
-        $user->updatePassword($_REQUEST['password'], $_SERVER['REMOTE_ADDR']);
-        $user->logoutEverywhere();
-        $success = true;
+        // Form validates without error, try and use the token
+        if (!$userToken->consume()) {
+            header('Location: login.php?action=recover&expired=1');
+            exit;
+        } else {
+            // set new secret and password.
+            $userToken->user()->updatePassword($_REQUEST['password'], $_SERVER['REMOTE_ADDR']);
+            $userToken->user()->logoutEverywhere();
+            $success = true;
+        }
     }
 }
 

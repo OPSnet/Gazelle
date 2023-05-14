@@ -5,6 +5,7 @@ namespace Gazelle;
 use \Gazelle\Enum\AvatarDisplay;
 use \Gazelle\Enum\AvatarSynthetic;
 use \Gazelle\Enum\UserStatus;
+use \Gazelle\Enum\UserTokenType;
 
 use \Gazelle\Util\Irc;
 use \Gazelle\Util\Mail;
@@ -582,15 +583,13 @@ class User extends BaseObject {
 
     /**
      * Create the recovery keys for the user
-     *
-     * @param string $key 2FA seed (to validate challenges)
-     * @return int 1 if update succeeded
      */
-    public function create2FA($key): int {
-        $recovery = [];
-        for ($i = 0; $i < 10; $i++) {
-            $recovery[] = randomString(20);
+    public function create2FA(Manager\UserToken $manager, string $key): int {
+        $unique = [];
+        while (count($unique) < 10) {
+            $unique[randomString(20)] = 1;
         }
+        $recovery = array_keys($unique);
         self::$db->prepared_query("
             UPDATE users_main SET
                 2FA_Key = ?,
@@ -598,8 +597,12 @@ class User extends BaseObject {
             WHERE ID = ?
             ", $key, serialize($recovery), $this->id
         );
+        $affected = self::$db->affected_rows();
+        foreach ($recovery as $value) {
+            $manager->create(UserTokenType::mfa, user: $this, value: $value);
+        }
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function list2FA(): array {
@@ -2128,56 +2131,5 @@ class User extends BaseObject {
         self::$db->commit();
         $this->flush();
         return true;
-    }
-
-    /**
-     * Initiate a password reset
-     */
-    public function resetPassword(): void {
-        $resetKey = randomString();
-        self::$db->prepared_query("
-            UPDATE users_info SET
-                ResetExpires = now() + INTERVAL 1 HOUR,
-                ResetKey = ?
-            WHERE UserID = ?
-            ", $resetKey, $this->id
-        );
-        $this->flush();
-        (new Mail)->send($this->email(), 'Password reset information for ' . SITE_NAME,
-            self::$twig->render('email/password_reset.twig', [
-                'username'  => $this->username(),
-                'reset_key' => $resetKey,
-                'ipaddr'    => $_SERVER['REMOTE_ADDR'],
-            ])
-        );
-    }
-
-    /*
-     * Has a password reset expired?
-     */
-    public function resetPasswordExpired(): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM users_info
-            WHERE coalesce(ResetExpires, now()) <= now()
-                AND UserID = ?
-            ", $this->id
-        );
-    }
-
-    /**
-     * Forcibly clear a password reset
-     *
-     * @return int 1 if the user was cleared
-     */
-    public function clearPasswordReset(): int {
-        self::$db->prepared_query("
-            UPDATE users_info SET
-                ResetKey = '',
-                ResetExpires = NULL
-            WHERE UserID = ?
-            ", $this->id
-        );
-        return self::$db->affected_rows();
     }
 }

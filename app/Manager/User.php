@@ -111,8 +111,6 @@ class User extends \Gazelle\BaseManager {
     /**
      * Get a User object from their email address
      * (used for password reset)
-     *
-     * @return \Gazelle\User object or null if not found
      */
     public function findByEmail(string $email): ?\Gazelle\User {
         return $this->findById((int)self::$db->scalar("

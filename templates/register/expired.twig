@@ -1,0 +1,38 @@
+{{ header('No pending confirmation found') }}
+{% include 'logo.twig' %}
+
+<style type="text/css">
+li { margin-bottom: 10px; }
+</style>
+
+<div style="width: 100%">
+<div style="width: 45%; margin: auto;">
+
+<h2>No pending confirmation found</h2>
+
+<div>There is no pending confirmation waiting at the link you accessed. There
+are three possibilities:
+
+<ul>
+
+<li>You made a mistake when copying the invite url by hand and clipped off a
+few characters from the end. At the end of the url, the key following the =
+(equals) sign should be 32 characters long. If you made a mistake, you can
+correct it and try again.</li>
+
+<li>The confirmation code was issued more than 24 hours ago.</li>
+
+<li>The code was already used by you or someone else.</li>
+</ul>
+
+<p>In any event, you should try logging in with your credentials. If your
+account is still unconfirmed, a new email will be sent to the address you
+gave when signing up.<p>
+
+<p>When all else fails, try contacting staff on IRC. Join
+<tt>irc.orpheus.network</tt>, channel <tt>#disabled</tt>. Depending on the
+timezone you may have to wait, but you will receive a response.</li>
+
+</div>
+</div>
+</div>
