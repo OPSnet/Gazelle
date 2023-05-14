@@ -85,6 +85,22 @@ class UserTest extends TestCase {
         $this->user->toggleAttr('disable-forums', true);
         $this->assertTrue($this->user->hasAttr('disable-forums'), 'uattr-toggle-disable-forums');
         $this->assertTrue($this->user->disableForums(), 'uattr-hasAttr-disable-forums-yes');
+
+        $this->assertFalse($this->user->downloadAsText(), 'uattr-download-as-torrent');
+        $this->user->toggleAttr('download-as-text', true);
+        $this->assertTrue($this->user->downloadAsText(), 'uattr-download-as-text');
+
+        $this->assertTrue($this->user->notifyDeleteDownload(), 'uattr-pm-delete-download');
+        $this->user->toggleAttr('no-pm-delete-download', true);
+        $this->assertFalse($this->user->notifyDeleteDownload(), 'uattr-no-pm-delete-download');
+
+        $this->assertTrue($this->user->notifyDeleteSeeding(), 'uattr-pm-delete-seed');
+        $this->user->toggleAttr('no-pm-delete-seed', true);
+        $this->assertFalse($this->user->notifyDeleteSeeding(), 'uattr-no-pm-delete-seed');
+
+        $this->assertTrue($this->user->notifyDeleteSnatch(), 'uattr-pm-delete-snatch');
+        $this->user->toggleAttr('no-pm-delete-snatch', true);
+        $this->assertFalse($this->user->notifyDeleteSnatch(), 'uattr-no-pm-delete-snatch');
     }
 
     public function testPassword(): void {

@@ -8,7 +8,7 @@ use \Gazelle\Util\Irc;
 use \Gazelle\Util\Mail;
 
 class User extends BaseObject {
-    final const CACHE_KEY          = 'u3_%d';
+    final const CACHE_KEY          = 'u_%d';
     final const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
     final const CACHE_NOTIFY       = 'u_notify_%d';
     final const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
@@ -114,14 +114,10 @@ class User extends BaseObject {
                 ui.AuthKey,
                 ui.Avatar,
                 ui.collages,
-                ui.DownloadAlt,
                 ui.Info,
                 ui.InfoTitle,
                 ui.Inviter,
                 ui.NavItems,
-                ui.NotifyOnDeleteSeeding,
-                ui.NotifyOnDeleteSnatched,
-                ui.NotifyOnDeleteDownloaded,
                 ui.PermittedForums,
                 ui.RatioWatchEnds,
                 ui.RatioWatchDownload,
@@ -479,8 +475,8 @@ class User extends BaseObject {
         return $this->hasAttr('disable-wiki');
     }
 
-    public function downloadAlt(): bool {
-        return $this->info()['DownloadAlt'] == '1';
+    public function downloadAsText(): bool {
+        return $this->hasAttr('download-as-text');
     }
 
     public function downloadedSize(): int {
@@ -1357,15 +1353,15 @@ class User extends BaseObject {
     }
 
     public function notifyDeleteSeeding(): bool {
-        return $this->info()['NotifyOnDeleteSeeding'] == '1';
+        return !$this->hasAttr('no-pm-delete-seed');
     }
 
     public function notifyDeleteSnatch(): bool {
-        return $this->info()['NotifyOnDeleteSnatched'] == '1';
+        return !$this->hasAttr('no-pm-delete-snatch');
     }
 
     public function notifyDeleteDownload(): bool {
-        return $this->info()['NotifyOnDeleteDownloaded'] == '1';
+        return !$this->hasAttr('no-pm-delete-download');
     }
 
     public function removeArtistNotification(\Gazelle\Artist $artist): int {

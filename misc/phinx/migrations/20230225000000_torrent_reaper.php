@@ -89,6 +89,5 @@ final class TorrentReaper extends AbstractMigration {
             ->save();
 
         $this->execute("DELETE FROM user_attr where Name IN ('no-pm-unseeded-snatch', 'no-pm-unseeded-upload')");
-
     }
 }

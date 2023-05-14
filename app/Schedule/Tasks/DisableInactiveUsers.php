@@ -46,7 +46,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         if (self::$db->has_results()) {
             $userIDs = self::$db->collect('ID');
             $userMan = new \Gazelle\Manager\User;
-            $userMan->disableUserList($userIDs, 'Disabled for inactivity.', \Gazelle\Manager\User::DISABLE_INACTIVITY);
+            $userMan->disableUserList(new \Gazelle\Tracker, $userIDs, 'Disabled for inactivity.', \Gazelle\Manager\User::DISABLE_INACTIVITY);
             foreach ($userIDs as $userID) {
                 $this->processed++;
                 $this->debug("Disabling $userID", $userID);

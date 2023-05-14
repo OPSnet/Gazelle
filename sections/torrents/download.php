@@ -111,6 +111,6 @@ if ($torrent->group()->categoryId() == 1 && $torrent->group()->image() != '' && 
     $Viewer->flushRecentSnatch();
 }
 
-header('Content-Type: ' . ($Viewer->downloadAlt() ? 'text/plain' : 'application/x-bittorrent') . '; charset=utf-8');
-header('Content-Disposition: attachment; filename="' . $torrent->torrentFilename($Viewer->downloadAlt(), MAX_PATH_LEN) . '"');
+header('Content-Type: ' . ($Viewer->downloadAsText() ? 'text/plain' : 'application/x-bittorrent') . '; charset=utf-8');
+header('Content-Disposition: attachment; filename="' . $torrent->torrentFilename($Viewer->downloadAsText(), MAX_PATH_LEN) . '"');
 echo $torrent->torrentBody($Viewer->announceUrl());

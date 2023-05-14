@@ -41,26 +41,6 @@ parameters:
 			path: ../app/API/Torrent.php
 
 		-
-			message: "#^Method Gazelle\\\\API\\\\User\\:\\:disableUser\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/User.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\User\\:\\:enableUser\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/User.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\User\\:\\:getUser\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/User.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\User\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/User.php
-
-		-
 			message: "#^Method Gazelle\\\\API\\\\Wiki\\:\\:run\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/API/Wiki.php

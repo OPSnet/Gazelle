@@ -10,11 +10,14 @@ STORAGE_PATH_TORRENT    := $(shell scripts/getconf STORAGE_PATH_TORRENT)
 help:
 	echo '  help               - output this message'
 	echo '  build-css          - build the CSS'
+	echo '  check-php          - check that the modified PHP files are syntactically correct'
 	echo '  dump-all           - create tarballs of the following:'
 	echo '  dump-riplog        - create a tarball of the rip logs'
 	echo '  dump-riploghtml    - create a tarball of the HTMLified rip logs'
 	echo '  dump-torrent       - create a tarball of the rip logs'
 	echo '  lint-css           - lint (style check) the CSS'
+	echo '  lint-php           - lint (style check) the PHP'
+	echo '  lint-twig          - lint (style check) the Twig templates'
 	echo '  mysqldump          - dump mysql database from docker to misc/gazelle.sql'
 	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db   - signal Ocelot to reload from database'
@@ -27,6 +30,10 @@ help:
 .PHONY: build-css
 build-css:
 	yarn build:scss
+
+.PHONY: check-php
+check-php:
+	git status | awk '/(modified|new file):/ {print $$NF}' | xargs -n1 php -l
 
 .PHONY: dump-all
 dump-all: dump-riplog dump-riploghtml dump-torrent

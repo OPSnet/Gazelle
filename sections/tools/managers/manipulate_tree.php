@@ -59,10 +59,10 @@ if (isset($_POST['id'])) {
                 if ($doComment) {
                     $invitee->addStaffNote($comment)->modify();
                 } elseif ($doDisable) {
-                    $userMan->disableUserList([$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
+                    $userMan->disableUserList(new Gazelle\Tracker, [$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
                 } elseif ($doInvites) {
+                    $invitee->toggleAttr('disable-invites', true);
                     $invitee->addStaffNote($comment)->modify();
-                    $userMan->disableInvites($inviteeId);
                 }
             }
         }

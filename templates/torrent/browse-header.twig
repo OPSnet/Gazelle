@@ -209,12 +209,13 @@
         </tr>
     </table>
 
-{% if viewer.option('ShowTags') %}
+{% if not viewer.hasAttr('hide-tags') %}
     {% set n = 7 %}
     {% set width = 100 / n %}
     <div>
     <span style="float: right">
-        <a class="brackets" href="#" onclick="$('#taglist').gtoggle(); if (this.innerHTML == 'Show tags') { this.innerHTML = 'Hide tags'; } else { this.innerHTML = 'Show tags'; }; return false;">{% if viewer.option('ShowTags') %}Hide {% else %}Show {% endif %} tags</a>
+        {{- dom.click('#tag-toggle', "$('#taglist').gtoggle(); this.innerHTML = (this.innerHTML == 'Show tags' ? 'Hide tags' : 'Show tags'); return false;") -}}
+        <a class="brackets" id="tag-toggle" href="#">{% if viewer.hasAttr('hide-tags') %}Show{% else %}Hide{% endif %} tags</a>
     </span>
 
     <table class="layout cat_list" id="taglist">

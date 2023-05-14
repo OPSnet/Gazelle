@@ -24,8 +24,8 @@
                 </li>
 {% endif %}
                 <li>
-                    <input type="checkbox" name="showtags" id="showtags"{{ checked(user.option('ShowTags')) }} />
-                    <label for="showtags">Show top official tags at bottom of form</label>
+                    <input type="checkbox" name="hidetags" id="hidetags"{{ checked(user.hasAttr('hide-tags')) }} />
+                    <label for="hidetags">Do not show most popular official tags at bottom of search form by default</label>
                 </li>
             </ul>
         </td>
@@ -150,8 +150,8 @@
             <strong>Text file downloads</strong>
         </td>
         <td>
-            <input type="checkbox" name="downloadalt" id="downloadalt"{{ checked(user.downloadAlt) }} />
-            <label for="downloadalt">Enable downloading torrent files as text files</label>
+            <input type="checkbox" name="downloadtext" id="downloadtext"{{ checked(user.downloadAsText) }} />
+            <label for="downloadtext">Enable downloading torrent files as text files</label>
         </td>
     </tr>
     <tr id="tor_https_tr">

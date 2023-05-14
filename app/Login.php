@@ -126,7 +126,7 @@ class Login extends Base {
 
         // Did they come in over Tor?
         if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor)->isExitNode($this->ipaddr)) {
-            $userMan->disableUserList([$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
+            $userMan->disableUserList(new Tracker, [$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
             // return a newly disabled instance
             return $userMan->findById($user->id());
         }

@@ -433,11 +433,10 @@ if ($Viewer->permitted('users_disable_any')) {
     if ($disableLeech != $cur['can_leech']) {
         $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
         $set[] = "can_leech = ?";
-        $args[] = $disableLeech ? '1' : '0';
+        $args[] = $disableLeech ? 1 : 0;
         $trackerUserUpdates['can_leech'] = $disableLeech;
         $editSummary[] = "leeching status changed ("
             . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech ? '1' : '0').")";
-        $user->toggleAttr('disable-leech', !$disableLeech);
     }
     if ($disableInvites !== $user->disableInvites()) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
@@ -518,7 +517,7 @@ if ($privChange && $userReason) {
 if ($enableUser != $cur['Enabled'] && $Viewer->permitted('users_disable_users')) {
     $enableStr = 'account ' . translateUserStatus($cur['Enabled']) . ' &rarr; ' . translateUserStatus($enableUser);
     if ($enableUser == '2') {
-        $userMan->disableUserList([$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
+        $userMan->disableUserList($tracker, [$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
         $trackerUserUpdates = [];
     } elseif ($enableUser == '1') {
         $Cache->increment('stats_user_count');
@@ -572,7 +571,7 @@ if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
     (new Mail)->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
         $Twig->render('email/hacked.twig')
     );
-    $userMan->disableUserList([$userId], "Disabled via hacked email", Gazelle\Manager\User::DISABLE_MANUAL);
+    $userMan->disableUserList($tracker, [$userId], "Disabled via hacked email", Gazelle\Manager\User::DISABLE_MANUAL);
     $editSummary[] = "hacked account email sent to $hackedEmail";
 }
 

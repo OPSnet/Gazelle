@@ -120,8 +120,6 @@ class User extends \Gazelle\BaseManager {
 
     /**
      * Get a User object from their announceKey
-     *
-     * @return \Gazelle\User object or null if not found
      */
     public function findByAnnounceKey(string $announceKey): ?\Gazelle\User {
         return $this->findById((int)self::$db->scalar("
@@ -131,14 +129,53 @@ class User extends \Gazelle\BaseManager {
 
     /**
      * Get a User object from their password reset key
-     *
-     * @return \Gazelle\User object or null if not found
      */
     public function findByResetKey(string $key): ?\Gazelle\User {
         return $this->findById((int)self::$db->scalar("
             SELECT ui.UserID FROM users_info ui WHERE ui.ResetKey = ?
             ", $key
         ));
+    }
+
+    public function findAllByCustomPermission(): array {
+        self::$db->prepared_query("
+            SELECT ID, CustomPermissions
+            FROM users_main
+            WHERE CustomPermissions NOT IN ('', 'a:0:{}')
+        ");
+        return array_map(fn($perm) => unserialize($perm),
+            self::$db->to_pair('ID', 'CustomPermissions', false)
+        );
+    }
+
+    /**
+     * Bulk update a user attribute for a list of user ids.
+     * Note: the user cache is not updated, the calling code is
+     * responsible for flushing each object afterwards.
+     */
+    public function modifyAttr(array $idList, string $attr, bool $active): int {
+        if (!$idList) {
+            return 0;
+        }
+        $attrId = (int)self::$db->scalar("
+            SELECT ID FROM user_attr WHERE Name = ?
+            ", $attr
+        );
+        if ($active) {
+            self::$db->prepared_query("
+                INSERT IGNORE INTO user_has_attr (UserID, UserAttrID)
+                VALUES " . placeholders($idList, "(?, $attrId)")
+                , ...$idList
+            );
+        } else {
+            self::$db->prepared_query("
+                DELETE FROM user_has_attr
+                WHERE UserAttrID = ?
+                    AND UserID IN (" . placeholders($idList) . ")
+                ", $attrId, ...$idList
+            );
+        }
+        return self::$db->affected_rows();
     }
 
     public function staffPMList(): array {
@@ -293,17 +330,6 @@ class User extends \Gazelle\BaseManager {
         return $staff;
     }
 
-    public function findAllByCustomPermission(): array {
-        self::$db->prepared_query("
-            SELECT ID, CustomPermissions
-            FROM users_main
-            WHERE CustomPermissions NOT IN ('', 'a:0:{}')
-        ");
-        return array_map(fn($perm) => unserialize($perm),
-            self::$db->to_pair('ID', 'CustomPermissions', false)
-        );
-    }
-
     /**
      * Get the last year of user flow (joins, disables)
      *
@@ -428,77 +454,6 @@ class User extends \Gazelle\BaseManager {
     public function flushEnabledUsersCount(): User {
         self::$cache->delete_value('stats_user_count');
         return $this;
-    }
-
-    /**
-     * Disable a user from being able to use invites
-     *
-     * @return bool success (if invite status was changed)
-     */
-    public function disableInvites(int $userId): bool {
-        self::$db->prepared_query("
-            UPDATE users_info SET
-                DisableInvites = '1'
-            WHERE DisableInvites = '0'
-                AND UserID = ?
-            ", $userId
-        );
-        return self::$db->affected_rows() === 1;
-    }
-
-    /**
-     * Get the table joins for looking at users on ratio watch
-     *
-     * @return string SQL table joins
-     */
-    protected function sqlRatioWatchJoins(): string {
-        return "FROM users_main AS um
-            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-            WHERE ui.RatioWatchEnds > now()
-                AND um.Enabled = '1'";
-    }
-
-    /**
-     * How many people are on ratio watch?
-     *
-     * return int number of users
-     */
-    public function totalRatioWatchUsers(): int {
-        return (int)self::$db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
-    }
-
-    /**
-     * Get details of people on ratio watch
-     *
-     * @return array user details
-     */
-    public function ratioWatchUsers(int $limit, int $offset): array {
-        self::$db->prepared_query("
-            SELECT um.ID              AS user_id,
-                uls.Uploaded          AS uploaded,
-                uls.Downloaded        AS downloaded,
-                um.created            AS created,
-                ui.RatioWatchEnds     AS ratio_watch_ends,
-                ui.RatioWatchDownload AS ratio_watch_downloaded,
-                um.RequiredRatio      AS required_ratio
-            " . $this->sqlRatioWatchJoins() . "
-            ORDER BY ui.RatioWatchEnds ASC
-            LIMIT ? OFFSET ?
-            ", $limit, $offset
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    /**
-     * How many users are banned for inadequate ratio?
-     *
-     * @return int number of users
-     */
-    public function totalBannedForRatio(): int {
-        return (int)self::$db->scalar("
-            SELECT count(*) FROM users_info WHERE BanDate IS NOT NULL AND BanReason = '2'
-        ");
     }
 
     /**
@@ -638,12 +593,12 @@ class User extends \Gazelle\BaseManager {
 
         self::$db->prepared_query("
             SELECT DISTINCT xfu.uid
-            FROM xbt_files_users AS xfu
-            INNER JOIN users_info AS ui ON (xfu.uid = ui.UserID)
-            WHERE ui.NotifyOnDeleteSeeding = '1'
+            FROM xbt_files_users    xfu
+            LEFT JOIN user_has_attr uha ON (uha.UserID = xfu.uid AND uha.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            WHERE uha.UserID IS NULL
                 AND xfu.fid = ?
                 AND xfu.uid NOT IN (" . placeholders($seen) . ")
-            ", $torrentId, ...$seen
+            ", 'no-pm-delete-seed', $torrentId, ...$seen
         );
         $ids = self::$db->collect('uid');
         foreach ($ids as $userId) {
@@ -654,11 +609,11 @@ class User extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT DISTINCT xs.uid
             FROM xbt_snatched AS xs
-            INNER JOIN users_info AS ui ON (xs.uid = ui.UserID)
-            WHERE ui.NotifyOnDeleteSnatched = '1'
+            LEFT JOIN user_has_attr uha ON (uha.UserID = xs.uid AND uha.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            WHERE uha.UserID IS NULL
                 AND xs.fid = ?
                 AND xs.uid NOT IN (" . placeholders($seen) . ")
-            ", $torrentId, ...$seen
+            ", 'no-pm-delete-snatch', $torrentId, ...$seen
         );
         $ids = self::$db->collect('uid');
         foreach ($ids as $userId) {
@@ -669,11 +624,11 @@ class User extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT DISTINCT ud.UserID
             FROM users_downloads AS ud
-            INNER JOIN users_info AS ui ON (ud.UserID = ui.UserID)
-            WHERE ui.NotifyOnDeleteDownloaded = '1'
+            LEFT JOIN user_has_attr uha ON (uha.UserID = ud.UserID AND uha.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            WHERE uha.UserID IS NULL
                 AND ud.TorrentID = ?
                 AND ud.UserID NOT IN (" . placeholders($seen) . ")
-            ", $torrentId, ...$seen
+            ", 'no-pm-delete-download', $torrentId, ...$seen
         );
         $ids = self::$db->collect('UserID');
         foreach ($ids as $userId) {
@@ -681,6 +636,49 @@ class User extends \Gazelle\BaseManager {
         }
 
         return count(array_merge($seen, $ids));
+    }
+
+    public function disableUnconfirmedUsers(\Gazelle\Schedule\Task $task = null): int {
+        // get a list of user IDs for clearing cache keys
+        self::$db->prepared_query("
+            SELECT ID
+            FROM users_main um
+            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            WHERE ula.user_id IS NULL
+                AND um.created < now() - INTERVAL 7 DAY
+                AND um.Enabled != '2'
+            "
+        );
+        $idList = self::$db->collect(0, false);
+
+        // disable the users
+        self::$db->prepared_query("
+            UPDATE users_main          um
+            INNER JOIN users_info      ui  ON (ui.UserID = um.ID)
+            LEFT JOIN user_last_access ula ON (ula.user_id = um.ID)
+            SET um.Enabled = '2',
+                ui.BanDate = now(),
+                ui.BanReason = '3',
+                ui.AdminComment = CONCAT(now(), ' - Disabled for inactivity (never logged in)\n\n', ui.AdminComment)
+            WHERE ula.user_id IS NULL
+                AND um.created < now() - INTERVAL 7 DAY
+                AND um.Enabled != '2'
+            "
+        );
+        if (self::$db->has_results()) {
+            $this->flushEnabledUsersCount();
+        }
+
+        // clear the appropriate cache keys
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
+            $user->flush();
+            $task?->debug("Disabled {$user->label()}", $userId);
+        }
+        return count($idList);
     }
 
     /**
@@ -726,47 +724,49 @@ class User extends \Gazelle\BaseManager {
      *
      * @return int number of users disabled
      */
-    public function disableUserList(array $userIds, string $comment, int $reason): int {
+    public function disableUserList(\Gazelle\Tracker $tracker, array $idList, string $comment, int $reason): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
-            UPDATE users_info AS ui
-            INNER JOIN users_main AS um ON (um.ID = ui.UserID) SET
+            UPDATE users_main um
+            INNER JOIN users_info ui ON (um.ID = ui.UserID) SET
                 um.Enabled = '2',
-                um.can_leech = '0',
+                um.can_leech = 0,
                 ui.BanDate = now(),
                 ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment),
                 ui.BanReason = ?
-            WHERE um.ID IN (" . placeholders($userIds) . ")
-            ", "$comment\n\n", $reason, ...$userIds
+            WHERE um.ID IN (" . placeholders($idList) . ")
+            ", "$comment\n\n", $reason, ...$idList
         );
-        $n = self::$db->affected_rows();
+        $n = self::$db->affected_rows() / 2; // there are two rows, in users_main and users_info
 
         self::$db->prepared_query("
             SELECT concat('session_', SessionID) as cacheKey
             FROM users_sessions
             WHERE Active = 1
-                AND UserID IN (" . placeholders($userIds) . ")
-            ", ...$userIds
+                AND UserID IN (" . placeholders($idList) . ")
+            ", ...$idList
         );
         self::$cache->delete_multi(self::$db->collect('cacheKey'));
         self::$db->prepared_query("
-            DELETE FROM users_sessions WHERE UserID IN (" . placeholders($userIds) . ")
-            ", ...$userIds
+            DELETE FROM users_sessions WHERE UserID IN (" . placeholders($idList) . ")
+            ", ...$idList
         );
-        foreach ($userIds as $userId) {
-            $this->findById($userId)?->flush();
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if ($user) {
+                $user->flush();
+            }
         }
         $this->flushEnabledUsersCount();
 
         // Remove the users from the tracker.
         self::$db->prepared_query("
-            SELECT torrent_pass FROM users_main WHERE ID IN (" . placeholders($userIds) . ")
-            ", ...$userIds
+            SELECT torrent_pass FROM users_main WHERE ID IN (" . placeholders($idList) . ")
+            ", ...$idList
         );
-        $PassKeys = self::$db->collect('torrent_pass');
+        $PassKeys = self::$db->collect('torrent_pass', false);
         self::$db->commit();
         $Concat = '';
-        $tracker = new \Gazelle\Tracker;
         foreach ($PassKeys as $PassKey) {
             if (strlen($Concat) > 3950) { // Ocelot's read buffer is 4 KiB and anything exceeding it is truncated
                 $tracker->update_tracker('remove_users', ['passkeys' => $Concat]);
@@ -1164,58 +1164,354 @@ class User extends \Gazelle\BaseManager {
         return $affected + self::$db->affected_rows();
     }
 
-    public function addMassTokens(int $amount, bool $allowLeechDisabled): int {
-        $where = !$allowLeechDisabled ? "um.Enabled = '1' AND um.can_leech = 1" : "um.Enabled = '1'";
-
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            SELECT ID FROM users_main um WHERE $where
-        ");
-        $ids = self::$db->collect('ID');
-        self::$db->prepared_query("
-            UPDATE users_main um
-            INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
-                uf.tokens = uf.tokens + ?
-            WHERE $where
-            ", $amount
-        );
-        self::$db->commit();
-
-        self::$cache->delete_multi(array_map(fn($id) => "u_$id", $ids));
-        return count($ids);
+    /**
+     * Get the table joins for looking at users on ratio watch
+     *
+     * @return string SQL table joins
+     */
+    protected function sqlRatioWatchJoins(): string {
+        return "FROM users_main AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+            WHERE ui.RatioWatchEnds > now()
+                AND um.Enabled = '1'";
     }
 
-    public function clearMassTokens(int $amount, bool $allowLeechDisabled, bool $onlyDrop): int {
-        $cond = [];
-        if (!$onlyDrop) {
-            $cond[] = "um.Enabled = '1'";
-            if (!$allowLeechDisabled) {
-                $cond[] = "um.can_leech = 1";
+    /**
+     * How many people are on ratio watch?
+     *
+     * return int number of users
+     */
+    public function totalRatioWatchUsers(): int {
+        return (int)self::$db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
+    }
+
+    /**
+     * Get details of people on ratio watch
+     *
+     * @return array user details
+     */
+    public function ratioWatchUsers(int $limit, int $offset): array {
+        self::$db->prepared_query("
+            SELECT um.ID              AS user_id,
+                uls.Uploaded          AS uploaded,
+                uls.Downloaded        AS downloaded,
+                um.created            AS created,
+                ui.RatioWatchEnds     AS ratio_watch_ends,
+                ui.RatioWatchDownload AS ratio_watch_downloaded,
+                um.RequiredRatio      AS required_ratio
+            " . $this->sqlRatioWatchJoins() . "
+            ORDER BY ui.RatioWatchEnds ASC
+            LIMIT ? OFFSET ?
+            ", $limit, $offset
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    /**
+     * How many users are banned for inadequate ratio?
+     *
+     * @return int number of users
+     */
+    public function totalBannedForRatio(): int {
+        return (int)self::$db->scalar("
+            SELECT count(*) FROM users_info WHERE BanDate IS NOT NULL AND BanReason = '2'
+        ");
+    }
+
+    public function ratioWatchAudit(\Gazelle\Tracker $tracker, ?\Gazelle\Schedule\Task $task = null): int {
+        // Take users off ratio watch and enable leeching
+        return $this->ratioWatchClear($tracker, $task)
+            + $this->ratioWatchSet($task);
+    }
+
+    /**
+     * The list of ids of user whose leeching privileges need to be taken away
+     * (Gambled more than 10GiB after being put on ratio watch)
+     */
+    public function ratioWatchBlockList(): array {
+        self::$db->prepared_query("
+            SELECT um.ID
+            FROM users_main              um
+            INNER JOIN users_info        ui  ON (ui.UserID = um.ID)
+            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+            WHERE um.Enabled = '1'
+                AND um.can_leech = 1
+                AND ui.RatioWatchEnds IS NOT NULL
+                AND uls.Downloaded - ui.RatioWatchDownload > ?
+            ", 10 * 1_105_507_304
+        );
+        return self::$db->collect(0, false);
+    }
+
+    /**
+     * The list of ids of users who have made good since being put on ratio watch
+     * (Meet or exceed the required ratio for the amount downloaded)
+     */
+    public function ratioWatchClearList(): array {
+        self::$db->prepared_query("
+            SELECT um.ID
+            FROM users_main              um
+            INNER JOIN users_info        ui  ON (ui.UserID = um.ID)
+            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+            WHERE um.Enabled = '1'
+                AND ui.RatioWatchEnds IS NOT NULL
+                AND uls.Downloaded > 0
+                AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
+        ");
+        return self::$db->collect(0, false);
+    }
+
+    /**
+     * The list of ids of users who have been on ratio watch for long enough to
+     * improve their situation but failed to do so.
+     */
+    public function ratioWatchEngageList(): array {
+        self::$db->prepared_query("
+            SELECT um.ID
+            FROM users_main       um
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            WHERE um.Enabled = '1'
+                AND um.can_leech = 1
+                AND ui.RatioWatchEnds <= now()
+        ");
+        return self::$db->collect(0, false);
+    }
+
+    /**
+     * The list of ids of users who are below their required ratio and need to be put on ratio watch
+     */
+    public function ratioWatchSetList(): array {
+        self::$db->prepared_query("
+            SELECT um.ID
+            FROM users_main              um
+            INNER JOIN users_info        ui  ON (ui.UserID  = um.ID)
+            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+            WHERE um.Enabled = '1'
+                AND um.can_leech = 1
+                AND ui.RatioWatchEnds IS NULL
+                AND uls.Downloaded > 0
+                AND uls.Uploaded / uls.Downloaded < um.RequiredRatio
+        ");
+        return self::$db->collect(0, false);
+    }
+
+    /**
+     * Remove leeching privileges from users who were put on ratio watch and did not improve their situation in time
+     */
+    public function ratioWatchBlock(\Gazelle\Tracker $tracker, ?\Gazelle\Schedule\Task $task = null): int {
+        $idList = $this->ratioWatchBlockList();
+        if (!$idList) {
+            return 0;
+        }
+
+        self::$db->begin_transaction();
+        $processed = 0;
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if (is_null($user)) {
+                continue;
             }
+            $ratio = number_format($user->requiredRatio(), 2);
+            $user->setUpdate('can_leech', 0)
+                ->addStaffNote("Leeching privileges suspended by ratio watch system (required ratio: $ratio) for downloading more than 10 GBs on ratio watch.")
+                ->modify();
+            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
+            $this->sendPM( $userId, 0,
+                'Your download privileges have been removed',
+                'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been suspended. Please reread the rules and refer to this guide on [url=wiki.php?action=article&amp;name=ratiotips]how to improve your ratio[/url]',
+            );
+            $processed++;
+            $task?->debug("Disabling leech for {$user->label()}", $userId);
         }
-        if (count($cond) == 2) {
-            $cond = ['(' . implode(' AND ', $cond) . ')'];
+        self::$db->commit();
+        return $processed;
+    }
+
+    /**
+     * Clear users who were on ratio watch and have since improved their situtation
+     */
+    public function ratioWatchClear(\Gazelle\Tracker $tracker, ?\Gazelle\Schedule\Task $task = null): int {
+        $idList = $this->ratioWatchClearList();
+        if (!$idList) {
+            return 0;
         }
-        array_push($cond, "uf.tokens > ?");
-        $where = implode(' OR ', $cond);
 
         self::$db->begin_transaction();
         self::$db->prepared_query("
-            SELECT ID FROM users_main um INNER JOIN user_flt uf ON (uf.user_id = um.ID) WHERE $where
-            ", $amount
-        );
-        $ids = self::$db->collect('ID');
-        self::$db->prepared_query("
             UPDATE users_main um
-            INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
-                uf.tokens = ?
-            WHERE $where
-            ", $amount
+            INNER JOIN users_info ui ON (ui.UserID = um.ID) SET
+                um.can_leech          = 1,
+                ui.RatioWatchEnds     = NULL,
+                ui.RatioWatchDownload = '0',
+                ui.AdminComment       = concat(now(), ' - Taken off ratio watch by adequate ratio.\n\n', ui.AdminComment)
+            WHERE um.ID IN (" . placeholders($idList) . ")
+        ", ...$idList);
+
+        $processed = 0;
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
+            $user->flush();
+            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '1']);
+            $task?->debug("Taking {$user->label()} off ratio watch", $userId);
+            $this->sendPM($userId, 0,
+                'You have been taken off Ratio Watch',
+                "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=rules.php?p=ratio]here[/url].\n"
+            );
+            $processed++;
+        }
+        self::$db->commit();
+        return $processed;
+    }
+
+    public function ratioWatchEngage(\Gazelle\Tracker $tracker, \Gazelle\Schedule\Task $task = null): int {
+        $idList = $this->ratioWatchEngageList();
+        if (!$idList) {
+            return 0;
+        }
+
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            DELETE FROM users_torrent_history
+            WHERE UserID IN (" . placeholders($idList) . ")
+            ", ...$idList
         );
+        $processed = 0;
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
+            $ratio = number_format($user->requiredRatio(), 2);
+            $user->setUpdate('can_leech', 0)
+                ->addStaffNote("Leeching ability suspended by ratio watch system (required ratio: $ratio)")
+                ->modify();
+            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
+            $this->sendPM($userId, 0,
+                'Your downloading privileges have been suspended',
+                "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
+            );
+            ++$processed;
+            $task?->debug("Disabled leech for {$user->label()}", $userId);
+        }
+        self::$db->commit();
+        return $processed;
+    }
+
+    /**
+     * Mark all users on ratio watch who have downloaded beyond what their required ratio allows.
+     */
+    public function ratioWatchSet(?\Gazelle\Schedule\Task $task = null): int {
+        $idList = $this->ratioWatchSetList();
+        if (!$idList) {
+            return 0;
+        }
+
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            UPDATE users_info AS ui
+            INNER JOIN users_leech_stats AS uls USING (UserID) SET
+                ui.RatioWatchEnds     = now() + INTERVAL 2 WEEK,
+                ui.RatioWatchTimes    = ui.RatioWatchTimes + 1,
+                ui.RatioWatchDownload = uls.Downloaded
+            WHERE ui.UserID IN (" . placeholders($idList) . ")
+        ", ...$idList);
+
+        $processed = 0;
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
+            $user->flush();
+            $this->sendPM($userId, 0,
+                'You have been put on Ratio Watch',
+                "This happens when your ratio falls below the requirements outlined in the rules located [url=rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above."
+            );
+            $processed++;
+            $task?->debug("Putting $userId on ratio watch", $userId);
+        }
+        self::$db->commit();
+        return $processed;
+    }
+
+    public function addMassTokens(int $amount, bool $allowLeechDisabled): int {
+        $cond = ["um.Enabled = '1'"];
+        $args = [];
+        $join = ["LEFT JOIN user_has_attr fl ON (fl.UserID = um.ID AND fl.UserAttrID = ?)"];
+        $cond[] = "fl.UserID IS NULL";
+        $args[] = (int)self::$db->scalar("
+            SELECT ID FROM user_attr WHERE Name = ?
+            ", 'no-fl-gifts'
+        );
+        if (!$allowLeechDisabled) {
+            $cond[] = "um.can_leech = 1";
+        }
+        $where = implode(" AND ", $cond);
+        $join = implode(' ', $join);
+
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            SELECT um.ID
+            FROM users_main um
+            $join
+            WHERE $where
+            ", ...$args
+        );
+        $idList = array_map('intval', self::$db->collect(0, false));
+        if ($idList) {
+            self::$db->prepared_query("
+                UPDATE user_flt SET
+                    tokens = tokens + ?
+                WHERE user_id IN (" . placeholders($idList) . ")
+                ", $amount, ...$idList
+            );
+            foreach ($idList as $userId) {
+                $this->findById($userId)?->flush();
+            }
+        }
         self::$db->commit();
 
-        self::$cache->delete_multi(array_map(fn($id) => "u_$id", $ids));
-        return count($ids);
+        return count($idList);
+    }
+
+    public function clearMassTokens(int $amount, bool $allowLeechDisabled, bool $excludeDisabled): int {
+        $cond = [];
+        $args = [];
+        if (!$excludeDisabled) {
+            $cond[] = "um.Enabled = '1'";
+        }
+        if (!$allowLeechDisabled) {
+            $cond[] = "um.can_leech = 1";
+        }
+        $cond[] = "uf.tokens > ?";
+        $args[] = $amount;
+        $where = implode(' AND ', $cond);
+
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            SELECT ID
+            FROM users_main um
+            INNER JOIN user_flt uf ON (uf.user_id = um.ID)
+            WHERE $where
+            ", ...$args
+        );
+        $idList = self::$db->collect('ID');
+        if ($idList) {
+            self::$db->prepared_query("
+                UPDATE user_flt SET
+                    tokens = ?
+                WHERE user_id in (" . placeholders($idList) . ")
+                ", $amount, ...$idList
+            );
+        }
+        self::$db->commit();
+
+        self::$cache->delete_multi(array_map(fn($id) => "u_$id", $idList));
+        return count($idList);
     }
 
     public function expireFreeleechTokens(\Gazelle\Tracker $tracker): int {
@@ -1249,95 +1545,6 @@ class User extends \Gazelle\BaseManager {
         }
         self::$cache->delete_multi(array_keys($clear));
         return $processed;
-    }
-
-    public function disableUnconfirmedUsers(\Gazelle\Schedule\Task $task = null): int {
-        // get a list of user IDs for clearing cache keys
-        self::$db->prepared_query("
-            SELECT ID
-            FROM users_main um
-            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-            WHERE ula.user_id IS NULL
-                AND um.created < now() - INTERVAL 7 DAY
-                AND um.Enabled != '2'
-            "
-        );
-        $userIDs = self::$db->collect(0, false);
-
-        // disable the users
-        self::$db->prepared_query("
-            UPDATE users_info AS ui
-            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-            SET um.Enabled = '2',
-                ui.BanDate = now(),
-                ui.BanReason = '3',
-                ui.AdminComment = CONCAT(now(), ' - Disabled for inactivity (never logged in)\n\n', ui.AdminComment)
-            WHERE ula.user_id IS NULL
-                AND um.created < now() - INTERVAL 7 DAY
-                AND um.Enabled != '2'
-            "
-        );
-        if (self::$db->has_results()) {
-            $this->flushEnabledUsersCount();
-        }
-
-        // clear the appropriate cache keys
-        foreach ($userIDs as $userID) {
-            self::$cache->delete_value("u_$userID");
-            $task?->debug("Disabled $userID", $userID);
-        }
-        return count($userIDs);
-    }
-
-    public function triggerRatioWatch(\Gazelle\Tracker $tracker, \Gazelle\Schedule\Task $task = null): int {
-        self::$db->prepared_query("
-            SELECT um.ID, um.torrent_pass
-            FROM users_info AS ui
-            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-            WHERE ui.RatioWatchEnds < now()
-                AND um.Enabled = '1'
-                AND um.can_leech != '0'
-        ");
-
-        $idList  = self::$db->collect('ID');
-        if (count($idList) == 0) {
-            return 0;
-        }
-        $passkeys = self::$db->collect('torrent_pass');
-
-        self::$db->begin_transaction();
-        $placeholders = placeholders($idList);
-        self::$db->prepared_query("
-            UPDATE users_info AS ui
-            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-            SET um.can_leech = '0',
-                ui.AdminComment = concat(now(), ' - Leeching ability suspended by ratio watch system - required ratio: ', um.RequiredRatio, '\n\n', ui.AdminComment)
-            WHERE um.ID IN($placeholders)
-            ", ...$idList
-        );
-
-        self::$db->prepared_query("
-            DELETE FROM users_torrent_history
-            WHERE UserID IN ($placeholders)
-            ", ...$idList
-        );
-        self::$db->commit();
-
-        foreach ($idList as $userId) {
-            $this->findById($userId)?->flush();
-            $this->sendPM($userId, 0,
-                'Your downloading privileges have been suspended',
-                "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
-            );
-            $task?->debug("Disabled leech for $userId", $userId);
-        }
-
-        foreach ($passkeys as $passkey) {
-            $tracker->update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '0']);
-        }
-
-        return count($idList);
     }
 
     public function updateLastAccess(): int {

@@ -148,7 +148,6 @@ $Options['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
 $Options['PostsPerPage']        = (int)$_POST['postsperpage'];
 $Options['CollageCovers']       = (int)$_POST['collagecovers'];
 $Options['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
-$Options['ShowTags']            = (!empty($_POST['showtags']) ? 1 : 0);
 $Options['AutoSubscribe']       = (!empty($_POST['autosubscribe']) ? 1 : 0);
 $Options['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
 $Options['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0);
@@ -187,12 +186,6 @@ if ($Viewer->permitted('site_advanced_search')) {
 } else {
     unset($Options['SearchType']);
 }
-
-// These are all enums of '0' or '1'
-$DownloadAlt = isset($_POST['downloadalt']) ? '1' : '0';
-$NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? '1' : '0');
-$NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? '1' : '0');
-$NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : '0');
 
 $NavItems = $userMan->forumNavItemList();
 $UserNavItems = [];
@@ -251,16 +244,25 @@ foreach ($notification as $n) {
 }
 (new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
-$user->toggleAcceptFL(!empty($_POST['acceptfltoken']));
-$user->toggleAttr('no-pm-unseeded-snatch', empty($_POST['notifyonunseededsnatch']));
-$user->toggleAttr('no-pm-unseeded-upload', empty($_POST['notifyonunseededupload']));
-$user->toggleAttr('hide-vote-recent', empty($_POST['pattr_hide_vote_recent']));
-$user->toggleAttr('hide-vote-history', empty($_POST['pattr_hide_vote_history']));
-$user->toggleAttr('admin-error-reporting', isset($_POST['error_reporting']));
-
 // Information on how the user likes to download torrents is stored in cache
-if ((bool)$DownloadAlt != $user->downloadAlt() || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {
+if ((bool)$_POST['downloadtext'] != $user->downloadAsText() || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {
     $Cache->delete_value('user_' . $user->announceKey());
+}
+
+foreach ([
+    'admin-error-reporting' => isset($_POST['error_reporting']),
+    'download-as-text'      => isset($_POST['downloadtext']),
+    'hide-tags'             => isset($_POST['hidetags']),
+    'hide-vote-history'     => !isset($_POST['pattr_hide_vote_history']),
+    'hide-vote-recent'      => !isset($_POST['pattr_hide_vote_recent']),
+    'no-fl-gifts'           => !isset($_POST['acceptfltoken']),
+    'no-pm-delete-download' => !isset($_POST['notifyondeletedownloaded']),
+    'no-pm-delete-seed'     => !isset($_POST['notifyondeleteseeding']),
+    'no-pm-delete-snatch'   => !isset($_POST['notifyondeletesnatched']),
+    'no-pm-unseeded-snatch' => !isset($_POST['notifyonunseededsnatch']),
+    'no-pm-unseeded-upload' => !isset($_POST['notifyonunseededupload']),
+] as $attr => $state) {
+    $user->toggleAttr($attr, $state);
 }
 
 $SQL = "UPDATE users_main AS m
@@ -269,10 +271,6 @@ INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
     i.SiteOptions = ?,
     i.Info = ?,
     i.InfoTitle = ?,
-    i.DownloadAlt = ?,
-    i.NotifyOnDeleteSeeding = ?,
-    i.NotifyOnDeleteSnatched = ?,
-    i.NotifyOnDeleteDownloaded = ?,
     m.IRCKey = ?,
     m.Paranoia = ?,
     i.NavItems = ?
@@ -283,10 +281,6 @@ $Params = [
     serialize($Options),
     $_POST['info'],
     $_POST['profile_title'],
-    $DownloadAlt,
-    $NotifyOnDeleteSeeding,
-    $NotifyOnDeleteSnatched,
-    $NotifyOnDeleteDownloaded,
     $_POST['irckey'],
     serialize($Paranoia),
     $UserNavItems
