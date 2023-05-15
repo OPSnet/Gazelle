@@ -1,0 +1,86 @@
+#! /usr/bin/env php
+<?php
+
+/**
+ * Sometimes, unit tests crash and burn and leave garbage behind in the database.
+ * This program will clean out all known test entries. Any remaining entries are
+ * either unknown to the unit tests, or the queries here do not identify them.
+ */
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$db = Gazelle\DB::DB();
+
+// clean requests
+
+$db->prepared_query("
+    SELECT ID
+    FROM requests
+    WHERE Title regexp '^(?:The [a-z]{6} Test Sessions|phpunit request(?: report)?)$'
+");
+
+$reqMan = new Gazelle\Manager\Request;
+foreach ($db->collect(0, false) as $requestId) {
+    $request = $reqMan->findById($requestId);
+    echo "request {$request->id()} ({$request->title()})\n";
+    $request->remove();
+}
+
+// clean torrents and torrent groups
+
+$db->prepared_query("
+    SELECT g.ID as gid, t.ID as tid
+    FROM torrents_group g
+    LEFT JOIN torrents t on (t.GroupID = g.ID)
+    WHERE g.Name regexp '^(?:phpunit (?:category new|collfree|torman) [a-z]{6}|Some [a-z]{8} songs)$'
+");
+$groupList   = $db->collect('gid', false);
+$torrentList = $db->collect('tid', false);
+
+$torMan = new Gazelle\Manager\Torrent;
+foreach ($torrentList as $torrentId) {
+    $torrent = $torMan->findById((int)$torrentId);
+    if ($torrent) {
+        echo "torrent $torrentId\n";
+        $torrent->remove(null, 'garbage collection', -1);
+    }
+}
+$tgMan = new Gazelle\Manager\TGroup;
+foreach ($groupList as $tgroupId) {
+    $tgroup = $tgMan->findById($tgroupId);
+    echo "tgroup $torrentId ({$tgroup->name()})\n";
+    $tgroup->remove(new Gazelle\User(1));
+}
+
+// clean collages
+
+$db->prepared_query("
+    SELECT ID
+    FROM collages c
+    WHERE c.Name regexp '^phpunit freeleech '
+");
+$collMan = new Gazelle\Manager\Collage;
+
+foreach ($db->collect(0, false) as $collageId) {
+    $collage = $collMan->findById($collageId);
+    echo "collage {$collage->id()} ({$collage->name()})\n";
+    $collage->hardRemove();
+}
+
+// and finally, clean users
+
+$db->prepared_query("
+    SELECT um.ID
+    FROM users_main um
+    WHERE um.Username regexp '^(?:donor|u(?:[1-3]|ser)\.[a-z0-9]{6}|(?:collfree|feat|reg[1-5]|tgcat|token|torman|um[123])\.[a-z0-9]{10}|notf(?:\.(new|enc))?\.[^.]+)$'
+");
+$userMan = new Gazelle\Manager\User;
+
+foreach ($db->collect(0, false) as $userId) {
+    $user = $userMan->findById($userId);
+    echo "user {$user->label()}\n";
+    $db->prepared_query("DELETE FROM users_stats_daily WHERE UserID = ?", $userId);
+    $db->prepared_query("DELETE FROM users_stats_monthly WHERE UserID = ?", $userId);
+    $db->prepared_query("DELETE FROM users_stats_yearly WHERE UserID = ?", $userId);
+    $user->remove();
+}
