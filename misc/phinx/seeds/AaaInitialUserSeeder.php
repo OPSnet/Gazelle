@@ -3,7 +3,7 @@
 use Phinx\Seed\AbstractSeed;
 use Phinx\Util\Literal;
 
-require_once(__DIR__ . '/../../lib/util.php'); // for randomString()
+require_once(__DIR__ . '/../../../lib/util.php'); // for randomString()
 
 class AaaInitialUserSeeder extends AbstractSeed {
     public function run() {
