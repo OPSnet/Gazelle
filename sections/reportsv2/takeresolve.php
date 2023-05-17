@@ -131,7 +131,7 @@ if ($weeksWarned > 0) {
     if ($revokeUpload) {
         $Reason .= ' (Upload privileges removed).';
     }
-    $userMan->warn($uploader->id(), $WarnLength, $Reason, $Viewer->username());
+    $userMan->warn($uploader, $WarnLength, $Reason, $Viewer);
 } else {
     $staffNote = null;
     if ($revokeUpload) {

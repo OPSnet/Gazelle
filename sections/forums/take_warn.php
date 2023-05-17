@@ -38,7 +38,7 @@ $Reason = trim($_POST['reason']);
 $WarningLength = $_POST['length'];
 if ($WarningLength !== 'verbal') {
     $Time = (int)$WarningLength * (7 * 24 * 60 * 60);
-    $userMan->warn($user->id(), $Time, "{$post->url()} - $Reason", $Viewer->username());
+    $userMan->warn($user, $Time, "{$post->url()} - $Reason", $Viewer);
     $subject = 'You have received a warning';
     $message = "You have received a $WarningLength week warning for [url={$post->url()}]this post[/url].";
     $warned = "Warned until " .  Time::offset($Time);

@@ -278,8 +278,10 @@ if ($title != $user->title() && $Viewer->permitted('users_edit_titles')) {
 }
 
 if ($Viewer->permitted('users_warn')) {
+    $warning = new Gazelle\User\Warning($user);
     if ($warned == 0) {
         if ($user->isWarned()) {
+            $warning->clear();
             $set[] = "Warned = ?";
             $args[] = null;
             $editSummary[] = 'warning removed';
@@ -289,6 +291,10 @@ if ($Viewer->permitted('users_warn')) {
         ||
         (!$user->isWarned() && ($extendWarning != '---' || $reduceWarning != '---'))
     ) {
+        if ($reduceWarning) {
+            $warning->clear();
+        }
+        $warning->create(reason: $warnReason, interval: "$warnWeeks week", warner: $Viewer);
         if (!$user->isWarned()) {
             $weeksChange = $warnWeeks;
             $duration = 'week' . plural($warnWeeks);
@@ -304,8 +310,8 @@ if ($Viewer->permitted('users_warn')) {
             $action = $weeksChange > 0 ? 'extended' : 'reduced';
             $message = [
                 'summary' => "warning $action $nrWeeks $duration",
-                'subject' => "Your warning has been $action by $nrWeeks $duration",
-                'body'    => "Your warning has been $action by $nrWeeks $duration",
+                'subject' => "Your warning has been $action to $nrWeeks $duration",
+                'body'    => "Your warning has been $action to $nrWeeks $duration",
             ];
         }
         $set[] = "Warned = now() + INTERVAL ? WEEK";

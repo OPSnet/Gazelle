@@ -685,24 +685,23 @@ class User extends \Gazelle\BaseManager {
 
     /**
      * Warn a user.
-     *
-     * @return int 1 if user was warned
      */
-    public function warn(int $userId, int $duration, string $reason, string $staffName): int {
+    public function warn(\Gazelle\User $user, int $duration, string $reason, \Gazelle\User $staff): int {
         $current = (string)self::$db->scalar("
             SELECT Warned FROM users_info WHERE UserID = ?
-            ", $userId
+            ", $user->id()
         );
+        $warning = new \Gazelle\User\Warning($user);
+        $warning->create($reason, "$duration week", $staff);
         if (!$current) {
             // User was not already warned
-            self::$cache->delete_value("u_$userId");
             $warnTime = Time::offset($duration);
             $warning = "Warned until $warnTime";
         } else {
             // User was already warned, appending new warning to old.
             $warnTime = date('Y-m-d H:i:s', strtotime($current) + $duration);
             $warning = "Warning extended until $warnTime";
-            $this->sendPM($userId, 0,
+            $this->sendPM($user->id(), 0,
                 'You have received multiple warnings.',
                 "When you received your latest warning (set to expire on "
                     . date('Y-m-d', (time() + $duration))
@@ -716,9 +715,11 @@ class User extends \Gazelle\BaseManager {
                 Warned = ?,
                 AdminComment = concat(now(), ' - ', ?, AdminComment)
             WHERE UserID = ?
-            ", $warnTime, "$warning by $staffName\nReason: $reason\n\n", $userId
+            ", $warnTime, "$warning by {$staff->username()}\nReason: $reason\n\n", $user->id()
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $user->flush();
+        return $affected;
     }
 
     /**

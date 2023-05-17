@@ -216,4 +216,24 @@ class UserTest extends TestCase {
         $this->assertEquals($url, $stylesheet->styleUrl(), 'stylesheet-external-url');
         $this->assertEquals($url, $stylesheet->cssUrl(), 'stylesheet-external-ccs-url');
     }
+
+    public function testWarning(): void {
+        $warned = new \Gazelle\User\Warning($this->user);
+        $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
+        $end = $warned->create(reason: 'phpunit 1', interval: '1 hour', warner: $this->user);
+        $this->assertStringStartsWith(date('Y-m-d '), $end, 'utest-warn-1-hour');
+        $this->assertTrue($warned->isWarned(), 'utest-is-warned');
+        $this->assertEquals(1, $warned->total(), 'utest-warn-total');
+
+        $userMan = new \Gazelle\Manager\User;
+        $this->assertEquals(1, $userMan->warn($this->user, 2, "phpunit warning", $this->user), 'utest-warn-uman');
+        $this->assertEquals(2, $warned->total(), 'utest-warn-total');
+        $warningList = $warned->warningList();
+        $this->assertCount(2, $warningList, 'utest-warn-list');
+        $this->assertEquals('phpunit 1', $warningList[0]['reason'], 'utest-warn-first-reason');
+        $this->assertEquals('true', $warningList[1]['active'], 'utest-warn-second-active');
+
+        $this->assertEquals(2, $warned->clear(), 'utest-warn-clear');
+        $this->assertFalse($warned->isWarned(), 'utest-warn-final');
+    }
 }

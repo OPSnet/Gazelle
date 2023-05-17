@@ -30,7 +30,7 @@ $PrivateMessage = trim($_POST['privatemessage']);
 if ($Length !== 'verbal') {
     $Time = (int)$Length * (7 * 86_400);
     $WarnTime = Time::offset($Time);
-    $userMan->warn($user->id(), $Time, "$url - $Reason", $Viewer->username());
+    $userMan->warn($user, $Time, "$url - $Reason", $Viewer);
     $subject = 'You have received a warning';
     $message = "You have received a $Length week warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
     $note = "Warned until $WarnTime by " . $Viewer->username() . "\nReason: $url - $Reason";
