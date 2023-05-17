@@ -29,6 +29,17 @@ class UserManagerTest extends TestCase {
         }
     }
 
+    public function testCycleAuthKeys(): void {
+        $userMan = new Gazelle\Manager\User;
+        $this->assertEquals(
+            (int)\Gazelle\DB::DB()->scalar("
+                SELECT count(*) FROM users_main
+            "),
+            $userMan->cycleAuthKeys(),
+            'uman-auth-keys'
+        );
+    }
+
     public function testDisableUserList(): void {
         $userMan = new Gazelle\Manager\User;
         $idList  = array_map(fn($u) => $u->id(), $this->userList);

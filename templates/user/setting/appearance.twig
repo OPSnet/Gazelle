@@ -13,20 +13,20 @@
         <td>
             <select name="stylesheet" id="stylesheet">
 {% for sheet in stylesheets %}
-                <option value="{{ sheet.ID }}"{{ selected(sheet.ID == stylesheet.styleId) }}>{{ sheet.ProperName }}</option>
+                <option value="{{ sheet.id }}"{{ selected(sheet.id == stylesheet.styleId) }}>{{ sheet.name }}</option>
 {% endfor %}
             </select>&nbsp;&nbsp;
             <a href="#" id="toggle_css_gallery" class="brackets">Show gallery</a>
             <div id="css_gallery">
 {% for sheet in stylesheets %}
                 <div class="preview_wrapper">
-                    <div class="preview_image" name="{{ sheet.Name }}">
-                        <a href="{{ constant('STATIC_SERVER') }}/stylespreview/full_{{ sheet.Name }}.png" target="_blank">
-                            <img src="{{ constant('STATIC_SERVER') }}/stylespreview/thumb_{{ sheet.Name }}.png" alt="{{ sheet.Name }}" />
+                    <div class="preview_image" name="{{ sheet.css_name }}">
+                        <a href="{{ constant('STATIC_SERVER') }}/stylespreview/full_{{ sheet.css_name }}.png" target="_blank">
+                            <img src="{{ constant('STATIC_SERVER') }}/stylespreview/thumb_{{ sheet.css_name }}.png" alt="{{ sheet.css_name }}" />
                         </a>
                     </div>
                     <p class="preview_name">
-                        <label><input type="radio" name="stylesheet_gallery" value="{{ sheet.ID }}" /> {{ sheet.ProperName }}</label>
+                        <label><input type="radio" name="stylesheet_gallery" value="{{ sheet.id }}" /> {{ sheet.name }}</label>
                     </p>
                 </div>
 {% endfor %}

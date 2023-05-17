@@ -1,18 +1,11 @@
 <?php
 
+use Gazelle\Enum\UserStatus;
+
 use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 
 authorize();
-
-function translateUserStatus(string $status): string {
-    return match ($status) {
-        '0' => 'Unconfirmed',
-        '1' => 'Enabled',
-        '2' => 'Disabled',
-        default => $status,
-    };
-}
 
 function enabledStatus(string $status): string {
     return match ($status) {
@@ -46,7 +39,7 @@ $adminComment = trim($_POST['admincomment'] ?? '');
 $visible = isset($_POST['Visible']) ? '1' : '0';
 $unlimitedDownload = isset($_POST['unlimitedDownload']);
 $invites = (int)$_POST['Invites'];
-$supportFor = trim($_POST['SupportFor']);
+$slogan = trim($_POST['slogan']);
 $changePassword = !empty($_POST['ChangePassword']);
 $warned = isset($_POST['Warned']) ? 1 : 0;
 $uploaded = $downloaded = $bonusPoints = null;
@@ -86,10 +79,6 @@ $disablePM       = isset($_POST['DisablePM']);
 $disableIRC      = isset($_POST['DisableIRC']);
 $disableRequests = isset($_POST['DisableRequests']);
 $disableLeech    = isset($_POST['DisableLeech']) ? 0 : 1;
-$lockAccount     = isset($_POST['LockAccount']);
-$lockType        = (int)$_POST['LockType'];
-
-$enableUser      = $_POST['UserStatus'];
 $resetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
 $resetIPHistory  = $_POST['ResetIPHistory'] ?? 0;
 $resetPasskey    = isset($_POST['ResetPasskey']) ? 1 : 0;
@@ -109,7 +98,7 @@ if ($_POST['comment_hash'] != $cur['CommentHash']) {
     error("Somebody else has moderated this user since you loaded it. Please go back and refresh the page.");
 }
 
-if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['Uploaded'])) {
+if ($mergeStatsFrom && ($downloaded != $user->downloadedSize() || $uploaded != $user->uploadedSize())) {
     // Too make make-work code to deal with this unlikely eventuality
     error("Do not transfer buffer and edit upload/download in the same operation.");
 }
@@ -118,9 +107,9 @@ $tracker = new Gazelle\Tracker;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users')) {
-    (new Gazelle\Log)->general("User account $userId (".$cur['Username'].") was deleted by ".$Viewer->username());
+    (new Gazelle\Log)->general("User account {$user->label()} was deleted by ".$Viewer->username());
+    $tracker->update_tracker('remove_user', ['passkey' => $user->announceKey()]);
     $user->remove();
-    $tracker->update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
     header("Location: log.php?search=User+$userId");
     exit;
 }
@@ -128,22 +117,19 @@ if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users'
 // User was not deleted. Perform other stuff.
 
 $editSummary = [];
-$trackerUserUpdates = ['passkey' => $cur['torrent_pass']];
+$trackerUserUpdates = ['passkey' => $user->announceKey()];
 
-if (!$lockType || $lockAccount == 0) {
-    if ($cur['locked_account']) {
-        $user->unlock();
-        $Cache->delete_value('user_' . $cur['torrent_pass']);
-        $editSummary[] = 'account unlocked';
-    }
-} else {
-    if ($cur['locked_account'] !== $lockType) {
-        if ($user->lock($lockType)) {
-            $Cache->delete_value('user_' . $cur['torrent_pass']);
-            $editSummary[] = empty($cur['locked_account'])
-                ? "Account locked (type $lockType)"
-                : "Account lock type changed to $lockType";
-        }
+$lockType = (int)$_POST['LockType'];
+if ($user->lockType() != $lockType) {
+    // This is a pseudo-field that does not exist in the table,
+    // the modify() method knows how to deal with it.
+    $user->setUpdate('lock-type', $lockType);
+    if (!$lockType) {
+        $editSummary[] = "Account unlocked";
+    } else {
+        $editSummary[] = $user->isLocked()
+            ? "Account lock type changed to $lockType"
+            : "Account locked (type $lockType)";
     }
 }
 
@@ -158,7 +144,7 @@ if ($resetIPHistory && $Viewer->permitted('users_edit_reset_keys')) {
 }
 
 if (isset($_POST['ResetEmailHistory']) && $Viewer->permitted('users_edit_reset_keys')) {
-    (new Gazelle\User\History($user))->resetEmail($cur['Username'] . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
+    (new Gazelle\User\History($user))->resetEmail($user->username() . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $user->ipaddr());
     $editSummary[] = 'email history cleared';
 }
 
@@ -176,23 +162,33 @@ if ($logoutSession && $Viewer->permitted('users_logout')) {
     $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\User\Session($user))->dropAll() . ")";
 }
 
+if ($visible != $user->isVisible() && $Viewer->permitted('users_make_invisible')) {
+    $user->setUpdate('Visible', $visible ? '1' : '0');
+    $trackerUserUpdates['visible'] = $visible;
+    $editSummary[] = 'swarm visibility ' . ($visible ? 'on' : 'off');
+}
+
+// For the users_info update
+$set = [];
+$args = [];
+
+if ($slogan != $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
+    $user->setUpdate('slogan', $slogan);
+    $set[] = "SupportFor = ?";
+    $args[] = (string)$slogan;
+    $editSummary[] = "First-Line Support status changed to \"$slogan\"";
+}
+
 $editRatio = $Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile);
-if ($flTokens != $cur['FLTokens'] && ($editRatio || $Viewer->permitted('admin_manage_user_fls'))) {
-    $editSummary[] = "freeleech tokens changed from {$cur['FLTokens']} to $flTokens";
+if ($flTokens != $user->tokenCount() && ($editRatio || $Viewer->permitted('admin_manage_user_fls'))) {
+    $editSummary[] = "freeleech tokens changed from {$user->tokenCount()} to $flTokens";
 }
 
 $newBonusPoints = false;
-if (!in_array($bonusPoints, [(float)$cur['BonusPoints'], (float)($_POST['OldBonusPoints'])])
+if (!in_array($bonusPoints, [$user->bonusPointsTotal(), (float)($_POST['OldBonusPoints'])])
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))) {
     $newBonusPoints = $bonusPoints;
-    $editSummary[] = "bonus points changed from {$cur['BonusPoints']} to {$bonusPoints}";
-}
-
-if ($Collages != $cur['collages'] && $Collages != (int)$_POST['OldCollages']
-    && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))) {
-    $set[] = 'collages = ?';
-    $args[] = $Collages;
-    $EditSummary[] = "personal collages changed from {$cur['collages']} to {$Collages}";
+    $editSummary[] = "bonus points changed from {$user->bonusPointsTotal()} to {$bonusPoints}";
 }
 
 if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('admin_rate_limit_manage')) {
@@ -201,43 +197,53 @@ if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('
     }
 }
 
+if ($Collages != $user->paidPersonalCollages() && $Collages != (int)$_POST['OldCollages']
+    && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
+) {
+    $user->setUpdate('collage_total', $Collages);
+    $set[] = 'collages = ?';
+    $args[] = $Collages;
+    $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$Collages}";
+}
+
+if ($invites != $user->unusedInviteTotal() && $Viewer->permitted('users_edit_invites')) {
+    $user->setUpdate('Invites', $invites);
+    $editSummary[] = "number of invites changed from {$user->unusedInviteTotal()} to $invites";
+}
+
 $leechSet = [];
 $leechArgs = [];
 if ($editRatio) {
-    if ($uploaded != $cur['Uploaded'] && $uploaded != $_POST['OldUploaded']) {
+    if ($uploaded != $user->uploadedSize() && $uploaded != $_POST['OldUploaded']) {
         $leechSet[] = 'Uploaded = ?';
         $leechArgs[] = $uploaded;
-        $editSummary[] = "uploaded changed from " . byte_format($cur['Uploaded'])
+        $editSummary[] = "uploaded changed from " . byte_format($user->uploadedSize())
             . ' to ' . byte_format($uploaded)
-            . " (delta " . byte_format($uploaded - $cur['Uploaded']) . ")";
+            . " (delta " . byte_format($uploaded - $user->uploadedSize()) . ")";
     }
-    if ($downloaded != $cur['Downloaded'] && $downloaded != $_POST['OldDownloaded']) {
+    if ($downloaded != $user->downloadedSize() && $downloaded != $_POST['OldDownloaded']) {
         $leechSet[] = 'Downloaded = ?';
         $leechArgs[] = $downloaded;
-        $editSummary[] = "downloaded changed from " . byte_format($cur['Downloaded'])
+        $editSummary[] = "downloaded changed from " . byte_format($user->downloadedSize())
             . ' to ' . byte_format($downloaded)
-            . " (delta " . byte_format($downloaded - $cur['Downloaded']) . ")";
+            . " (delta " . byte_format($downloaded - $user->downloadedSize()) . ")";
     }
 }
 
-// Begin building users_main/users_info update
-$set = [];
-$args = [];
-
 if ($class) {
     $Classes = $userMan->classList();
-    if ($Classes[$class]['Level'] != $cur['Class']
+    $newClass = $Classes[$class]['Level'];
+    if ($newClass != $user->classLevel()
         && (
-            ($Classes[$class]['Level'] < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
-            || ($Classes[$class]['Level'] <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
+            ($newClass < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
+            || ($newClass <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
     )) {
-        $set[] = 'PermissionID = ?';
-        $args[] = $class;
+        $user->setUpdate('PermissionID', $class);
         $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
 
-        if ($user->supportCount($class, $cur['PermissionID']) === 2) {
-            if ($Classes[$class]['Level'] < $cur['Class']) {
-                $supportFor = '';
+        if ($user->supportCount($class, $user->primaryClass()) === 2) {
+            if ($newClass < $user->primaryClass()) {
+                $slogan = null;
             }
             $Cache->delete_value('staff_ids');
         }
@@ -247,45 +253,43 @@ if ($class) {
 
 if ($Viewer->permitted('users_edit_usernames')) {
     $username = trim($_POST['Username']);
-    if ($username !== $cur['Username']) {
+    if ($username !== $user->username()) {
         if (in_array($username, ['0', '1'])) {
             error('You cannot set a username of "0" or "1".');
-        } elseif (strtolower($username) !== strtolower($cur['Username'])) {
+        } elseif (strtolower($username) !== strtolower($user->username())) {
             $found = $userMan->findByUsername($username);
             if ($found) {
                 error("Username already in use by $username");
             }
         }
-        $set[] = 'Username = ?';
-        $args[] = $username;
-        $editSummary[] = "username changed from {$cur['Username']} to $username";
+        $user->setUpdate('Username', $username);
+        $editSummary[] = "username changed from {$user->username()} to $username";
     }
 }
 
-if ($title != $cur['Title'] && $Viewer->permitted('users_edit_titles')) {
+if ($title != $user->title() && $Viewer->permitted('users_edit_titles')) {
     // Using the unescaped value for the test to avoid confusion
     if (mb_strlen($_POST['Title']) > 1024) {
         error("Custom titles have a maximum length of 1,024 characters.");
     } else {
-        $set[] = 'Title = ?';
-        $args[] = $title;
+        $user->setUpdate('Title', $title);
         $editSummary[] = "title changed to [code]{$title}[/code]";
     }
 }
 
 if ($Viewer->permitted('users_warn')) {
     if ($warned == 0) {
-        if (!is_null($cur['Warned'])) {
+        if ($user->isWarned()) {
             $set[] = "Warned = ?";
             $args[] = null;
             $editSummary[] = 'warning removed';
         }
     } elseif (
-        (is_null($cur['Warned']) && $warnWeeks)
+        ($user->isWarned() && $warnWeeks)
         ||
-        ($cur['Warned'] && ($extendWarning != '---' || $reduceWarning != '---'))
+        (!$user->isWarned() && ($extendWarning != '---' || $reduceWarning != '---'))
     ) {
-        if (is_null($cur['Warned'])) {
+        if (!$user->isWarned()) {
             $weeksChange = $warnWeeks;
             $duration = 'week' . plural($warnWeeks);
             $message = [
@@ -408,35 +412,15 @@ if ($permittedForums != $cur['PermittedForums']) {
     $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
 }
 
-if ($visible != $cur['Visible'] && $Viewer->permitted('users_make_invisible')) {
-    $set[] = 'Visible = ?';
-    $args[] = $visible ? '1' : '0';
-    $trackerUserUpdates['visible'] = $visible;
-    $editSummary[] = 'visibility ' . ($visible ? 'on' : 'off');
-}
-
-if ($invites != $cur['Invites'] && $Viewer->permitted('users_edit_invites')) {
-    $set[] = 'Invites = ?';
-    $args[] = $invites;
-    $editSummary[] = "number of invites changed from {$cur['Invites']} to $invites";
-}
-
-if ($supportFor != $cur['SupportFor'] && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
-    $set[] = "SupportFor = ?";
-    $args[] = $supportFor;
-    $editSummary[] = "First-Line Support status changed to \"$supportFor\"";
-}
-
 $privChange = [];
 
 if ($Viewer->permitted('users_disable_any')) {
-    if ($disableLeech != $cur['can_leech']) {
+    if ($disableLeech != $user->canLeech()) {
         $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
-        $set[] = "can_leech = ?";
-        $args[] = $disableLeech ? 1 : 0;
+        $user->setUpdate('can_leech', $disableLeech ? 1 : 0);
         $trackerUserUpdates['can_leech'] = $disableLeech;
         $editSummary[] = "leeching status changed ("
-            . enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech ? '1' : '0').")";
+            . enabledStatus($user->canLeech() ? '1' : '0')." &rarr; ".enabledStatus($disableLeech ? '1' : '0').")";
     }
     if ($disableInvites !== $user->disableInvites()) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
@@ -514,55 +498,58 @@ if ($privChange && $userReason) {
     $editSummary[] = 'PM sent';
 }
 
-if ($enableUser != $cur['Enabled'] && $Viewer->permitted('users_disable_users')) {
-    $enableStr = 'account ' . translateUserStatus($cur['Enabled']) . ' &rarr; ' . translateUserStatus($enableUser);
-    if ($enableUser == '2') {
+$userStatus = match($_POST['UserStatus']) {
+    '1'     =>  UserStatus::enabled,
+    '2'     =>  UserStatus::disabled,
+    default => UserStatus::unconfirmed,
+};
+if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_users')) {
+    $enableStr = "account status {$user->userStatus()->label()} &rarr; {$userStatus->label()}";
+    if ($userStatus == UserStatus::disabled) {
         $userMan->disableUserList($tracker, [$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
         $trackerUserUpdates = [];
-    } elseif ($enableUser == '1') {
+    } elseif ($userStatus == UserStatus::enabled) {
         $Cache->increment('stats_user_count');
-        $visibleTrIP = $visible && $cur['IP'] != '127.0.0.1' ? '1' : '0';
-        $tracker->update_tracker('add_user', ['id' => $userId, 'passkey' => $cur['torrent_pass'], 'visible' => $visibleTrIP]);
-        if (($cur['Downloaded'] == 0) || ($cur['Uploaded'] / $cur['Downloaded'] >= $cur['RequiredRatio'])) {
+        $visibleTrIP = $visible && $user->ipaddr() != '127.0.0.1' ? '1' : '0';
+        $tracker->update_tracker('add_user', ['id' => $userId, 'passkey' => $user->announceKey(), 'visible' => $visibleTrIP]);
+        if (($user->downloadedSize() == 0) || ($user->uploadedSize() / $user->downloadedSize() >= $user->requiredRatio())) {
+            $user->setUpdate('can_leech', 1);
             $canLeech = 1;
-            $set[] = "i.RatioWatchEnds = ?";
+            $set[] = "RatioWatchEnds = ?";
             $args[] = null;
-            $set[] = "m.can_leech = ?";
-            $args[] = '1';
-            $set[] = "i.RatioWatchDownload = ?";
+            $set[] = "RatioWatchDownload = ?";
             $args[] = '0';
         } else {
-            $enableStr .= ' (Ratio: ' . ratio_html($cur['Uploaded'], $cur['Downloaded'], false) . ', RR: '.number_format($cur['RequiredRatio'],2).')';
+            $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false) . ', RR: '.number_format($user->requiredRatio(), 2).')';
             if ($cur['RatioWatchEnds']) {
-                $set[] = "i.RatioWatchEnds = now()";
-                $set[] = "i.RatioWatchDownload = ?";
-                $args[] = $cur['Downloaded'];
+                $set[] = "RatioWatchEnds = now()";
+                $set[] = "RatioWatchDownload = ?";
+                $args[] = $user->downloadedSize();
                 $canLeech = 0;
             }
             $trackerUserUpdates['can_leech'] = 0;
         }
-        $set[] = "i.BanReason = ?";
+        $set[] = "BanReason = ?";
         $args[] = '0';
-        $set[] = "Enabled = ?";
-        $args[] = '1';
     }
+    $user->setUpdate('Enabled', $userStatus->value);
     $editSummary[] = $enableStr;
 }
 
 if ($Viewer->permitted('users_edit_reset_keys')) {
     if ($resetAuthkey == 1) {
+        $authKey = randomString();
+        $user->setUpdate('auth_key', $authKey);
         $set[] = "Authkey = ?";
-        $args[] = randomString();
+        $args[] = $authKey;
         $editSummary[] = 'authkey reset';
     }
     if ($resetPasskey == 1) {
         $passkey = randomString();
-        $user->modifyAnnounceKeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
-        $Cache->delete_value('user_'.$cur['torrent_pass']);
+        $user->modifyAnnounceKeyHistory($user->announceKey(), $passkey, '0.0.0.0');
+        $user->setUpdate('torrent_pass', $passkey);
         $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
-        $tracker->update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
-        $set[] = "torrent_pass = ?";
-        $args[] = $passkey;
+        $tracker->update_tracker('change_passkey', ['oldpasskey' => $user->announceKey(), 'newpasskey' => $passkey]);
         $editSummary[] = 'passkey reset';
     }
 }
@@ -587,7 +574,7 @@ if ($mergeStatsFrom && $Viewer->permitted('users_edit_ratio')) {
         $editSummary[] = sprintf('leech stats (up: %s, down: %s, ratio: %s) merged from %s (%s) prior(up: %s, down: %s, ratio: %s)',
             byte_format($stats['up']), byte_format($stats['down']), ratio($stats['up'], $stats['down']),
             $merge->url(), $mergeStatsFrom,
-            byte_format($cur['Uploaded']), byte_format($cur['Downloaded']), ratio($cur['Uploaded'], $cur['Downloaded'])
+            byte_format($user->uploadedSize()), byte_format($user->downloadedSize()), ratio($user->uploadedSize(), $user->downloadedSize())
         );
     }
 }
@@ -614,13 +601,12 @@ if (count($editSummary)) {
     $args[] = $adminComment;
 }
 
-if (!empty($set)) {
+if ($set) {
     $args[] = $userId;
     Gazelle\DB::DB()->prepared_query("
-        UPDATE users_main AS m
-        INNER JOIN users_info AS i ON (m.ID = i.UserID)
+        UPDATE users_info
         SET " .  implode(', ', $set) . "
-        WHERE m.ID = ?
+        WHERE UserID = ?
         ", ...$args
     );
 }
@@ -651,7 +637,7 @@ if ($newBonusPoints !== false) {
     (new Gazelle\User\Bonus($user))->setPoints($newBonusPoints);
 }
 
-if ($flTokens != $cur['FLTokens']) {
+if ($flTokens != $user->tokenCount()) {
     $user->updateTokens($flTokens);
 }
 
@@ -659,9 +645,11 @@ if (count($trackerUserUpdates) > 1) {
     $tracker->update_tracker('update_user', $trackerUserUpdates);
 }
 
-if (count($set) || count($leechSet)) {
-    $user->flush();
+if (!$user->dirty() && count($set) || count($leechSet)) {
+    // users_main was not touched, force an update
+    $user->setUpdate('username', $user->username());
 }
+$user->modify();
 
 if (isset($_POST['invite_source_update'])) {
     $source = array_keys(array_filter($_POST, fn($x) => preg_match('/^source-\d+$/', $x), ARRAY_FILTER_USE_KEY));

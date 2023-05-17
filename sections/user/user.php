@@ -673,7 +673,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('admin_manage_fls') || ($Viewer->permitted('users_mod') && $OwnProfile)) {
         echo $Twig->render('user/edit-remark.twig', [
-            'remark' => $User->supportFor(),
+            'user' => $User,
         ]);
     }
 

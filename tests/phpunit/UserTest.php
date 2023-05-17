@@ -134,7 +134,6 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->isDisabled(), 'utest-is-disabled');
         $this->assertFalse($this->user->isFLS(), 'utest-is-fls');
         $this->assertFalse($this->user->isInterviewer(), 'utest-is-interviewer');
-        $this->assertFalse($this->user->isLocked(), 'utest-is-locked');
         $this->assertFalse($this->user->isRecruiter(), 'utest-is-recruiter');
         $this->assertFalse($this->user->isStaff(), 'utest-is-staff');
         $this->assertFalse($this->user->isStaffPMReader(), 'utest-is-staff-pm-reader');
@@ -145,6 +144,10 @@ class UserTest extends TestCase {
         $this->assertNull($this->user->warningExpiry(), 'utest-warning-expiry');
 
         $this->assertCount(0, $this->user->announceKeyHistory(), 'utest-announce-key-history');
+
+        // TODO: this will become null
+        $this->assertEquals('', $this->user->slogan(), 'utest-slogan');
+        $this->assertTrue($this->user->setUpdate('slogan', 'phpunit slogan')->modify(), 'utest-modify-slogan');
     }
 
     public function testAvatar(): void {
@@ -177,5 +180,40 @@ class UserTest extends TestCase {
         $this->assertEquals(1, $this->modifyAvatarRender(AvatarDisplay::show, AvatarSynthetic::robot1), 'utest-avatar-update-show');
         $new = $userMan->findById($this->user->id());
         $this->assertEquals('https://www.example.com/avatar.jpg', $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-show');
+    }
+
+    public function testLock(): void {
+        $this->assertFalse($this->user->isLocked(), 'utest-is-not-locked');
+        $this->assertTrue($this->user->setUpdate('lock-type', STAFF_LOCKED)->modify(), 'utest-set-locked');
+        $this->user->flush();
+        $this->assertTrue($this->user->isLocked(), 'utest-is-now-locked');
+        $this->assertEquals(STAFF_LOCKED, $this->user->lockType(), 'utest-lock-type');
+        $this->assertTrue($this->user->setUpdate('lock-type', 0)->modify(), 'utest-set-unlocked');
+        $this->user->flush();
+        $this->assertFalse($this->user->isLocked(), 'utest-is-unlocked');
+    }
+
+    public function testStylesheet(): void {
+        $manager = new \Gazelle\Manager\Stylesheet;
+        $list = $manager->list();
+        $this->assertGreaterThan(5, $list, 'we-can-haz-stylesheets');
+        $this->assertEquals(count($list), count($manager->usageList('name', 'ASC')), 'stylesheet-list-usage');
+
+        $first = current($list);
+        $url   = SITE_URL . 'static/bogus.css';
+        $stylesheet = new \Gazelle\User\Stylesheet($this->user);
+        $this->assertEquals($this->user->link(), $stylesheet->link(), 'stylesheet-link');
+        $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
+        $this->assertEquals(1, $stylesheet->modifyInfo($first['id'], null), 'stylesheet-modify');
+        $this->assertEquals($first['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');
+        $this->assertStringStartsWith("static/styles/{$first['css_name']}/style.css?v=", $stylesheet->cssUrl(), 'stylesheet-css-url');
+        $this->assertEquals("static/styles/{$first['css_name']}/images/", $stylesheet->imagePath(), 'stylesheet-image-path');
+        $this->assertEquals($first['name'], $stylesheet->name(), 'stylesheet-name');
+        $this->assertEquals($first['id'], $stylesheet->styleId(), 'stylesheet-style-id');
+        $this->assertEquals($first['theme'], $stylesheet->theme(), 'stylesheet-theme');
+        $this->assertEquals(1, $stylesheet->modifyInfo($first['id'], $url), 'stylesheet-set-external');
+        $this->assertEquals('External CSS', $stylesheet->name(), 'stylesheet-name');
+        $this->assertEquals($url, $stylesheet->styleUrl(), 'stylesheet-external-url');
+        $this->assertEquals($url, $stylesheet->cssUrl(), 'stylesheet-external-ccs-url');
     }
 }

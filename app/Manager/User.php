@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\UserStatus;
+
 use Gazelle\Util\Time;
 
 class User extends \Gazelle\BaseManager {
@@ -433,9 +435,9 @@ class User extends \Gazelle\BaseManager {
             SELECT um.ID
             FROM users_main um
             INNER JOIN permissions p ON (p.ID = um.PermissionID)
-            WHERE um.Enabled = '1'
+            WHERE um.Enabled = ?
                 AND p.Level = ?
-            ", $level
+            ", UserStatus::enabled->value, $level
         );
         $affected = 0;
         foreach (self::$db->collect(0, false) as $id) {
@@ -903,15 +905,15 @@ class User extends \Gazelle\BaseManager {
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
                 INNER JOIN users_info         ui ON (ui.UserID = um.ID)
                 INNER JOIN user_summary       us ON (us.user_id = um.ID)
-                WHERE um.Enabled = '1'
-                    AND ui.Warned IS NULL
+                WHERE ui.Warned IS NULL
+                    AND um.Enabled = ?
                     AND um.PermissionID = ?
                     AND uls.Uploaded + us.request_bounty_size >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                     AND um.created < now() - INTERVAL ? WEEK
                     AND us.upload_total >= ?
             ";
-            $args = [$level['From'], $level['MinUpload'], $level['MinRatio'], $level['Weeks'], $level['MinUploads']];
+            $args = [UserStatus::enabled->value, $level['From'], $level['MinUpload'], $level['MinRatio'], $level['Weeks'], $level['MinUploads']];
 
             if (!empty($level['Extra'])) {
                 $query .= ' AND ' . implode(' AND ',
@@ -961,13 +963,13 @@ class User extends \Gazelle\BaseManager {
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
                 INNER JOIN users_info         ui ON (ui.UserID = um.ID)
                 INNER JOIN user_summary       us ON (us.user_id = um.ID)
-                WHERE um.Enabled = '1'
+                WHERE um.Enabled = ?
                     AND um.PermissionID = ?
                     AND (
                         uls.Uploaded + us.request_bounty_size < ?
                         OR us.upload_total < ?
             ";
-            $args = [$level['To'], $level['MinUpload'], $level['MinUploads']];
+            $args = [UserStatus::enabled->value, $level['To'], $level['MinUpload'], $level['MinUploads']];
 
             if (!empty($level['Extra'])) {
                 $query .= ' OR NOT ' . implode(' AND ',
@@ -1235,11 +1237,11 @@ class User extends \Gazelle\BaseManager {
             FROM users_main              um
             INNER JOIN users_info        ui  ON (ui.UserID = um.ID)
             INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-            WHERE um.Enabled = '1'
-                AND um.can_leech = 1
+            WHERE um.can_leech = 1
                 AND ui.RatioWatchEnds IS NOT NULL
+                AND um.Enabled = ?
                 AND uls.Downloaded - ui.RatioWatchDownload > ?
-            ", 10 * 1_105_507_304
+            ", UserStatus::enabled->value, 10 * 1_105_507_304
         );
         return self::$db->collect(0, false);
     }
@@ -1254,11 +1256,12 @@ class User extends \Gazelle\BaseManager {
             FROM users_main              um
             INNER JOIN users_info        ui  ON (ui.UserID = um.ID)
             INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-            WHERE um.Enabled = '1'
-                AND ui.RatioWatchEnds IS NOT NULL
+            WHERE ui.RatioWatchEnds IS NOT NULL
                 AND uls.Downloaded > 0
                 AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
-        ");
+                AND um.Enabled = ?
+            ", UserStatus::enabled->value
+        );
         return self::$db->collect(0, false);
     }
 
@@ -1271,10 +1274,11 @@ class User extends \Gazelle\BaseManager {
             SELECT um.ID
             FROM users_main       um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            WHERE um.Enabled = '1'
-                AND um.can_leech = 1
+            WHERE um.can_leech = 1
                 AND ui.RatioWatchEnds <= now()
-        ");
+                AND um.Enabled = ?
+            ", UserStatus::enabled->value
+        );
         return self::$db->collect(0, false);
     }
 
@@ -1287,12 +1291,13 @@ class User extends \Gazelle\BaseManager {
             FROM users_main              um
             INNER JOIN users_info        ui  ON (ui.UserID  = um.ID)
             INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-            WHERE um.Enabled = '1'
-                AND um.can_leech = 1
+            WHERE um.can_leech = 1
                 AND ui.RatioWatchEnds IS NULL
                 AND uls.Downloaded > 0
                 AND uls.Uploaded / uls.Downloaded < um.RequiredRatio
-        ");
+                AND um.Enabled = ?
+            ", UserStatus::enabled->value
+        );
         return self::$db->collect(0, false);
     }
 
@@ -1439,27 +1444,17 @@ class User extends \Gazelle\BaseManager {
     }
 
     public function addMassTokens(int $amount, bool $allowLeechDisabled): int {
-        $cond = ["um.Enabled = '1'"];
-        $args = [];
-        $join = ["LEFT JOIN user_has_attr fl ON (fl.UserID = um.ID AND fl.UserAttrID = ?)"];
-        $cond[] = "fl.UserID IS NULL";
-        $args[] = (int)self::$db->scalar("
-            SELECT ID FROM user_attr WHERE Name = ?
-            ", 'no-fl-gifts'
-        );
-        if (!$allowLeechDisabled) {
-            $cond[] = "um.can_leech = 1";
-        }
-        $where = implode(" AND ", $cond);
-        $join = implode(' ', $join);
-
+        $leech = $allowLeechDisabled ? '' : " AND um.can_leech = 1";
         self::$db->begin_transaction();
         self::$db->prepared_query("
             SELECT um.ID
             FROM users_main um
-            $join
-            WHERE $where
-            ", ...$args
+            LEFT JOIN user_has_attr fl ON (fl.UserID = um.ID AND fl.UserAttrID = ?)
+            WHERE fl.UserID IS NULL
+                AND um.Enabled = ?
+                $leech
+            ", (int)self::$db->scalar(" SELECT ID FROM user_attr WHERE Name = ?  ", 'no-fl-gifts'),
+                UserStatus::enabled->value
         );
         $idList = array_map('intval', self::$db->collect(0, false));
         if ($idList) {
@@ -1482,7 +1477,8 @@ class User extends \Gazelle\BaseManager {
         $cond = [];
         $args = [];
         if (!$excludeDisabled) {
-            $cond[] = "um.Enabled = '1'";
+            $cond[] = "um.Enabled = ?";
+            $args[] = UserStatus::enabled->value;
         }
         if (!$allowLeechDisabled) {
             $cond[] = "um.can_leech = 1";
@@ -1545,6 +1541,36 @@ class User extends \Gazelle\BaseManager {
         }
         self::$cache->delete_multi(array_keys($clear));
         return $processed;
+    }
+
+    public function cycleAuthKeys(): int {
+        self::$db->prepared_query("
+            UPDATE users_main SET
+                auth_key = left(
+                    replace(
+                        replace(
+                            to_base64(unhex(sha2(unhex(sha2(concat(rand(), rand(), rand(), rand()), 256)), 256))),
+                            '+', '-'
+                        ),
+                        '/', '_'
+                    ),
+                    32
+                )
+        ");
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            UPDATE users_info ui
+            INNER JOIN users_main um ON (um.ID = ui.UserID)
+            SET ui.AuthKey = um.auth_key
+        ");
+
+        self::$db->prepared_query("
+            SELECT ID FROM users_main
+        ");
+        foreach (self::$db->collect(0, false) as $key) {
+            self::$cache->delete_value("u_$key");
+        }
+        return $affected;
     }
 
     public function updateLastAccess(): int {

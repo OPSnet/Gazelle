@@ -2,29 +2,25 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\UserStatus;
+
 use Gazelle\Exception\UserCreatorException;
 use Gazelle\Util\Time;
 
 class UserCreator extends Base {
-    protected $newInstall;
-
+    protected bool $newInstall;
     protected array $adminComment = [];
     protected array $email = [];
-    protected $id;
-    protected $inviteKey;
-    protected $ipaddr;
-    protected $passHash;
-    protected $permissionId;
-    protected $announceKey;
-    protected $username;
+    protected int|null $id;
+    protected int|null $permissionId;
+    protected string|null $announceKey;
+    protected string|null $inviteKey;
+    protected string|null $ipaddr;
+    protected string|null $passHash;
+    protected string|null $username;
 
-    public function create() {
-        $this->newInstall = !self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
-        if ($this->newInstall) {
-            $this->permissionId = SYSOP;
-        } else {
-            $this->permissionId = USER;
-        }
+    public function create(): User {
+        $this->newInstall = !(bool)self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
         if (!$this->ipaddr) {
             throw new UserCreatorException('ipaddr');
         }
@@ -41,11 +37,12 @@ class UserCreator extends Base {
             throw new UserCreatorException('username-invalid');
         }
 
-        $this->announceKey = randomString();
+        $this->permissionId = $this->newInstall ? SYSOP : USER;
+        $authKey = substr(strtr(base64_encode(hash('sha256', hash('sha256', randomString(64), true), true)), '+/', '-_'), 0, 32);
         $infoFields = ['AuthKey'];
-        $infoArgs = [randomString()];
+        $infoArgs = [$authKey];
 
-        if (!$this->inviteKey) {
+        if (!isset($this->inviteKey)) {
             $inviter = null;
         } else {
             [$inviterId, $inviterReason, $email] = self::$db->row("
@@ -77,15 +74,16 @@ class UserCreator extends Base {
         }
 
         // create users_main row
-        $mainFields = ['Username', 'Email', 'PassHash', 'torrent_pass', 'IP',
-            'PermissionID', 'Enabled', 'Invites', 'ipcc'
+        $this->announceKey = randomString();
+        $mainFields = ['inviter_user_id', 'Username', 'Email', 'PassHash', 'torrent_pass', 'IP',
+            'PermissionID', 'Enabled', 'Invites', 'ipcc', 'auth_key'
         ];
         $mainArgs = [
-            $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
-            $this->permissionId, $this->permissionId == SYSOP ? '1' : '0', STARTING_INVITES, geoip($this->ipaddr)
+            (int)$inviter?->id(), $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
+            $this->permissionId, $this->permissionId == SYSOP ? UserStatus::enabled->value : UserStatus::unconfirmed->value, STARTING_INVITES, geoip($this->ipaddr), $authKey
         ];
 
-        if ($this->id) {
+        if (isset($this->id)) {
             $mainFields[] = 'ID';
             $mainArgs[] = $this->id;
         }
@@ -94,11 +92,11 @@ class UserCreator extends Base {
 
         self::$db->prepared_query("
             INSERT INTO users_main
-                   (" . implode(',', $mainFields) . ")
-            VALUES (" . placeholders($mainFields) . ")
+                   (" . implode(',', $mainFields) . ", stylesheet_id)
+            VALUES (" . placeholders($mainFields) . ", (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
             ", ...$mainArgs
         );
-        if (!$this->id) {
+        if (!isset($this->id)) {
             $this->id = self::$db->inserted_id();
         }
 
@@ -126,15 +124,17 @@ class UserCreator extends Base {
             );
         }
 
-        self::$db->prepared_query("
-            UPDATE referral_users SET
-                UserID = ?,
-                Active = 1,
-                Joined = now(),
-                InviteKey = ''
-            WHERE InviteKey = ?
-            ", $this->id, $this->inviteKey
-        );
+        if (isset($this->inviteKey)) {
+            self::$db->prepared_query("
+                UPDATE referral_users SET
+                    UserID = ?,
+                    Active = 1,
+                    Joined = now(),
+                    InviteKey = ''
+                WHERE InviteKey = ?
+                ", $this->id, $this->inviteKey
+            );
+        }
 
         // Log the one or two email addresses known to be associated with the user.
         // Each additional previous email address is staggered one second back in the past.
@@ -196,7 +196,7 @@ class UserCreator extends Base {
      * Reset the internal state so that a new user may be created.
      * Calling create() calls this as a side effect.
      */
-    public function reset() {
+    public function reset(): void {
         $this->newInstall   = false;
         $this->adminComment = [];
         $this->email        = [];
@@ -233,7 +233,7 @@ class UserCreator extends Base {
     /**
      * Set the initial admin comment. Not mandatory for creation
      */
-    public function setAdminComment(string $adminComment) {
+    public function setAdminComment(string $adminComment): UserCreator {
         $this->adminComment[] = trim($adminComment);
         return $this;
     }
@@ -245,7 +245,7 @@ class UserCreator extends Base {
      * invitation was used, calling this method afterwards will override
      * the invitation email).
      */
-    public function setEmail(string $email) {
+    public function setEmail(string $email): UserCreator {
         $this->email[] = trim($email);
         return $this;
     }
@@ -258,7 +258,7 @@ class UserCreator extends Base {
      *
      * @param int $id of the user
      */
-    public function setId(int $id) {
+    public function setId(int $id): UserCreator {
         $this->id = $id;
         return $this;
     }
@@ -266,7 +266,7 @@ class UserCreator extends Base {
     /**
      * Set the invite key (only required if this is a creation via an invitation)
      */
-    public function setInviteKey(string $inviteKey) {
+    public function setInviteKey(string $inviteKey): UserCreator {
         $this->inviteKey = trim($inviteKey);
         return $this;
     }
@@ -274,7 +274,7 @@ class UserCreator extends Base {
     /**
      * Set the user IPv4 address.
      */
-    public function setIpaddr(string $ipaddr) {
+    public function setIpaddr(string $ipaddr): UserCreator {
         $this->ipaddr = trim($ipaddr);
         return $this;
     }
@@ -282,7 +282,7 @@ class UserCreator extends Base {
     /**
      * Set the password. Will be hashed before being stored.
      */
-    public function setPassword(#[\SensitiveParameter] string $password) {
+    public function setPassword(#[\SensitiveParameter] string $password): UserCreator {
         $this->passHash = self::hashPassword($password);
         return $this;
     }
@@ -290,7 +290,7 @@ class UserCreator extends Base {
     /**
      * Set the username.
      */
-    public function setUsername(string $username) {
+    public function setUsername(string $username): UserCreator {
         if (preg_match('/^' . str_replace('/', '', USERNAME_REGEXP) . '$/', trim($username), $match)) {
             if (!empty($match['username'])) {
                 $this->username = $match['username'];

@@ -109,14 +109,19 @@ foreach (['requestsfilled', 'requestsvoted'] as $bounty) {
 if (!isset($_POST['p_donor_heart'])) {
     $Paranoia[] = 'hide_donor_heart';
 }
-// End building $Paranoia
+
+$user->setUpdate('IRCKey', $_POST['irckey']);
+$user->setUpdate('Paranoia', serialize($Paranoia));
+$user->setUpdate('profile_info', substr($_POST['info'], 0, 20480));
+$user->setUpdate('profile_title', trim($_POST['profile_title']));
 
 $NewEmail = false;
-if ($user->email() != $_POST['email']) {
+if ($user->email() != trim($_POST['email'])) {
     if (!$Viewer->permitted('users_edit_profiles') && !$user->validatePassword($_POST['password'])) {
         error('You must enter your current password when changing your email address.');
     }
-    $NewEmail = $_POST['email'];
+    $NewEmail = trim($_POST['email']);
+    $user->setUpdate('Email', $NewEmail);
 }
 
 $ResetPassword = false;
@@ -129,18 +134,21 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
         } else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
             error('You did not enter the same password twice.');
         }
+        $user->setUpdate('PassHash', Gazelle\UserCreator::hashPassword($_POST['new_pass_1']));
         $ResetPassword = true;
     }
 }
 
-if ($_POST['avatar'] != $user->avatar()) {
+$avatar = trim($_POST['avatar']);
+if ($avatar != $user->avatar()) {
     if ($Viewer->disableAvatar()) {
         error('Your avatar privileges have been revoked.');
     }
-    $len = strlen($_POST['avatar']);
+    $len = strlen($avatar);
     if ($len > 255) {
         error('Your avatar link is too long ($len characters, maximum allowed is 255).');
     }
+    $user->setUpdate('Avatar', $avatar);
 }
 
 $Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
@@ -194,7 +202,6 @@ foreach ($NavItems as $n) {
         $UserNavItems[] = $n['id'];
     }
 }
-$UserNavItems = implode(',', $UserNavItems);
 
 $LastFMUsername = trim($_POST['lastfm_username'] ?? '');
 $OldFMUsername = (new Gazelle\Util\LastFM)->username($userId);
@@ -244,11 +251,6 @@ foreach ($notification as $n) {
 }
 (new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
-// Information on how the user likes to download torrents is stored in cache
-if ((bool)$_POST['downloadtext'] != $user->downloadAsText() || $Options['HttpsTracker'] != $user->option('HttpsTracker')) {
-    $Cache->delete_value('user_' . $user->announceKey());
-}
-
 foreach ([
     'admin-error-reporting' => isset($_POST['error_reporting']),
     'download-as-text'      => isset($_POST['downloadtext']),
@@ -265,36 +267,11 @@ foreach ([
     $user->toggleAttr($attr, $state);
 }
 
-$SQL = "UPDATE users_main AS m
-INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
-    i.Avatar = ?,
-    i.SiteOptions = ?,
-    i.Info = ?,
-    i.InfoTitle = ?,
-    m.IRCKey = ?,
-    m.Paranoia = ?,
-    i.NavItems = ?
-";
-
-$Params = [
-    $_POST['avatar'],
-    serialize($Options),
-    $_POST['info'],
-    $_POST['profile_title'],
-    $_POST['irckey'],
-    serialize($Paranoia),
-    $UserNavItems
-];
-
 if ($ResetPassword) {
-    $SQL .= ',m.PassHash = ?';
-    $Params[] = Gazelle\UserCreator::hashPassword($_POST['new_pass_1']);
     $user->recordPasswordChange($Viewer->ipaddr());
 }
 
 if ($NewEmail) {
-    $SQL .= ',m.email = ?';
-    $Params[] = $NewEmail;
     $user->recordEmailChange($NewEmail, $Viewer->ipaddr());
 }
 
@@ -302,23 +279,29 @@ if (isset($_POST['resetpasskey'])) {
     $OldPassKey = $user->announceKey();
     $NewPassKey = randomString();
     $ChangerIP = $Viewer->ipaddr();
-    $SQL .= ',m.torrent_pass = ?';
-    $Params[] = $NewPassKey;
+    $user->setUpdate('torrent_pass', $NewPassKey);
     $db->prepared_query('
         INSERT INTO users_history_passkeys
                (UserID, OldPassKey, NewPassKey, ChangerIP)
         VALUES (?,      ?,          ?,          ?)
         ', $userId, $OldPassKey, $NewPassKey, $ChangerIP
     );
-    $Cache->delete_value("user_$OldPassKey");
 
     (new Gazelle\Tracker)->update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
 }
 
-$SQL .= ' WHERE m.ID = ?';
-$Params[] = $userId;
+$db->prepared_query("
+    UPDATE users_info SET
+        Avatar = ?,
+        Info = ?,
+        InfoTitle = ?,
+        NavItems = ?,
+        SiteOptions = ?
+    WHERE UserID = ?
+    ", $avatar, $_POST['info'], $_POST['profile_title'], implode(',', $UserNavItems), serialize($Options), $userId
+);
 
-$db->prepared_query($SQL, ...$Params);
+$user->modify();
 
 $donor = new Gazelle\User\Donor($user);
 if ($donor->isDonor()) {

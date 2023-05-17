@@ -16,6 +16,7 @@ class View {
 
         $js = [
             'jquery',
+            'katex-0.16.4.min',
             'script_start',
             'ajax.class',
             'global',
@@ -36,24 +37,20 @@ class View {
             return;
         }
         array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min');
-        $Style = [];
-        $ScssStyle = [
-            'global.css',
-        ];
+
+        $cssList  = ['katex/katex-0.16.4.min.css'];
+        $scssList = ['global.css'];
+
         if (!empty($option['css'])) {
-            array_push($ScssStyle, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
+            array_push($scssList, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
         }
         if ($Viewer->option('Tooltipster') ?? 1) {
             array_push($js, 'tooltipster', 'tooltipster_settings');
-            $ScssStyle[] = 'tooltipster/style.css';
+            $scssList[] = 'tooltipster/style.css';
         }
         if ($Viewer->option('UseOpenDyslexic')) {
-            $ScssStyle[] = 'opendyslexic/style.css';
+            $scssList[] = 'opendyslexic/style.css';
         }
-
-        // add KaTeX renderer for bbcode [tex] elements
-        $Style[] = 'katex/katex-0.16.4.min.css';
-        $js[] = 'katex-0.16.4.min';
 
         $activity = new Gazelle\User\Activity($Viewer);
         $activity->configure()
@@ -138,13 +135,13 @@ class View {
         }
 
         echo $Twig->render('index/private-header.twig', [
-            'auth_args'   => '&amp;user=' . $Viewer->id() . '&amp;passkey=' . $Viewer->announceKey() . '&amp;authkey=' . $Viewer->auth() . '&amp;auth=' . $Viewer->rssAuth(),
-            'page_title'  => html_entity_decode($pageTitle),
-            'script'      => array_map(fn($s) => "$s.js", $js),
-            'style'       => new Gazelle\User\Stylesheet($Viewer),
-            'scss_style'  => $ScssStyle,
-            'css_style'   => $Style,
-            'viewer'      => $Viewer,
+            'auth_args'    => "&amp;user={$Viewer->id()}&amp;passkey={$Viewer->announceKey()}&amp;authkey={$Viewer->auth()}&amp;auth={$Viewer->rssAuth()}",
+            'page_title'   => html_entity_decode($pageTitle),
+            'script'       => array_map(fn($s) => "$s.js", $js),
+            'css_style'    => $cssList,
+            'scss_style'   => $scssList,
+            'stylesheet'   => new \Gazelle\User\Stylesheet($Viewer),
+            'viewer'       => $Viewer,
         ]);
         echo $Twig->render('index/page-header.twig', [
             'action'      => $_REQUEST['action'] ?? null,

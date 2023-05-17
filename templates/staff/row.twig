@@ -6,6 +6,6 @@
         {% if u.propertyVisible(user, 'lastseen') %}{{ u.lastAccess|time_diff }}{% else %}Hidden{% endif %}
     </td>
     <td class="nobr">
-        {{ u.supportFor|bb_format }}
+        {{ u.slogan|bb_format }}
     </td>
 </tr>

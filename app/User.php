@@ -4,6 +4,8 @@ namespace Gazelle;
 
 use \Gazelle\Enum\AvatarDisplay;
 use \Gazelle\Enum\AvatarSynthetic;
+use \Gazelle\Enum\UserStatus;
+
 use \Gazelle\Util\Irc;
 use \Gazelle\Util\Mail;
 
@@ -423,6 +425,13 @@ class User extends BaseObject {
         return (int)$this->info()['BonusPoints'];
     }
 
+    /**
+     * Is a user allowed to download a torrent file?
+     */
+    public function canLeech(): bool {
+        return $this->info()['can_leech'];
+    }
+
     public function classLevel(): int {
         return $this->info()['Class'];
     }
@@ -535,12 +544,12 @@ class User extends BaseObject {
         return $this->avatarMode() != AvatarDisplay::none;
     }
 
-    public function staffNotes(): string {
-        return $this->info()['AdminComment'];
+    public function slogan(): ?string {
+        return $this->info()['SupportFor'];
     }
 
-    public function supportFor(): string {
-        return $this->info()['SupportFor'];
+    public function staffNotes(): string {
+        return $this->info()['AdminComment'];
     }
 
     public function TFAKey(): ?string {
@@ -561,6 +570,14 @@ class User extends BaseObject {
 
     public function username(): string {
         return $this->info()['Username'];
+    }
+
+    public function userStatus(): UserStatus {
+        return match($this->info()['Enabled']) {
+            '1'     => UserStatus::enabled,
+            '2'     => UserStatus::disabled,
+            default => UserStatus::unconfirmed,
+        };
     }
 
     /**
@@ -737,15 +754,6 @@ class User extends BaseObject {
     }
 
     public function primaryClass(): int {
-        // temp hack to understand why this is sometimes null
-        $permId = $this->info()['PermissionID'];
-        if (is_null($permId)) {
-            (new Manager\User)->sendPM(2, 0, "TypeError caught by user " . $this->id,
-                var_export($_SERVER, true) . "\n\n"
-                . var_export($_REQUEST, true) . "\n\n"
-                . var_export(debug_backtrace(), true)
-            );
-        }
         return $this->info()['PermissionID'];
     }
 
@@ -1012,6 +1020,25 @@ class User extends BaseObject {
             $changed = $changed || self::$db->affected_rows() === 1;
             $this->staffNote = [];
         }
+        if (isset($this->updateField['lock-type'])) {
+            $lockType = $this->updateField['lock-type'];
+            unset($this->updateField['lock-type']);
+            if (!$lockType) {
+                self::$db->prepared_query("
+                    DELETE FROM locked_accounts WHERE UserID = ?
+                    ", $this->id
+                );
+            } else {
+                self::$db->prepared_query("
+                    INSERT INTO locked_accounts
+                           (UserID, Type)
+                    VALUES (?,      ?)
+                    ON DUPLICATE KEY UPDATE Type = ?
+                    ", $this->id, $lockType, $lockType
+                );
+            }
+            $changed = $changed || self::$db->affected_rows() === 1;
+        }
         if (parent::modify() || $changed) {
             $this->flush(); // parent::modify() may have done a flush() but it's too much code to optimize this second call away
             return true;
@@ -1048,25 +1075,8 @@ class User extends BaseObject {
         return ['up' => $up, 'down' => $down, 'userId' => $mergeId];
     }
 
-    public function lock(int $lockType): bool {
-        self::$db->prepared_query("
-            INSERT INTO locked_accounts
-                   (UserID, Type)
-            VALUES (?,      ?)
-            ON DUPLICATE KEY UPDATE Type = ?
-            ", $this->id, $lockType, $lockType
-        );
-        $this->flush();
-        return self::$db->affected_rows() === 1;
-    }
-
-    public function unlock(): bool {
-        self::$db->prepared_query("
-            DELETE FROM locked_accounts WHERE UserID = ?
-            ", $this->id
-        );
-        $this->flush();
-        return self::$db->affected_rows() === 1;
+    public function lockType(): ?int {
+        return $this->info()['locked_account'];
     }
 
     public function updateTokens(int $n): bool {
@@ -1394,9 +1404,9 @@ class User extends BaseObject {
         return $change;
     }
 
-    public function isUnconfirmed(): bool { return $this->info()['Enabled'] == '0'; }
-    public function isEnabled(): bool     { return $this->info()['Enabled'] == '1'; }
-    public function isDisabled(): bool    { return $this->info()['Enabled'] == '2'; }
+    public function isUnconfirmed(): bool { return $this->info()['Enabled'] == UserStatus::unconfirmed->value; }
+    public function isEnabled(): bool     { return $this->info()['Enabled'] == UserStatus::enabled->value; }
+    public function isDisabled(): bool    { return $this->info()['Enabled'] == UserStatus::disabled->value; }
     public function isLocked(): bool      { return !is_null($this->info()['locked_account']); }
     public function isVisible(): bool     { return $this->info()['Visible'] == '1'; }
     public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
@@ -2062,15 +2072,6 @@ class User extends BaseObject {
         );
         $this->flush();
         return self::$db->affected_rows();
-    }
-
-    /**
-     * Is a user allowed to download a torrent file?
-     *
-     * @return bool Yes they can
-     */
-    public function canLeech(): bool {
-        return $this->info()['can_leech'];
     }
 
     /**
