@@ -43,8 +43,16 @@ class Pg {
     }
 
     public function scalar(string $query, ...$args): mixed {
-        $row = $this->fetchRow($query, \PDO::FETCH_NUM, ...$args);
-        return empty($row) ? null : $row[0];
+        $st = $this->pdo->prepare($query);
+        if ($st !== false && $st->execute([...$args])) {
+            $result = $st->fetch(\PDO::FETCH_NUM);
+            if ($result) {
+                return $st->getColumnMeta(0)['native_type'] == 'bytea' /** @phpstan-ignore-line */
+                    ? stream_get_contents($result[0])
+                    : $result[0];
+            }
+        }
+        return null;
     }
 
     public function row(string $query, ...$args): array {

@@ -95,4 +95,26 @@ class DbTest extends TestCase {
             'db-pg-prepared-update'
         );
     }
+
+    public function testPgScalarBytea(): void {
+        $this->pg()->prepared_query("
+            create temporary table test_bytea (
+                payload bytea not null primary key
+            )
+        ");
+        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $this->assertEquals(
+            1,
+            $this->pg()->prepared_query("
+                insert into test_bytea (payload) values (?)
+                ", $payload
+            ),
+            'db-pg-insert-bytea'
+        );
+        $this->assertEquals(
+            $payload,
+            $this->pg()->scalar("select payload from test_bytea"),
+            'db-pg-scalar-bytea'
+        );
+    }
 }
