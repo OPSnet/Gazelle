@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
 
-$scheduler = new Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\TaskScheduler;
 $id = (int)($_GET['id'] ?? 0);
 if (!$scheduler->getTask($id)) {
     error(404);

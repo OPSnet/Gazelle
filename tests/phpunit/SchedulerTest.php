@@ -7,10 +7,10 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 ini_set('memory_limit', '1G');
 
 class SchedulerTest extends TestCase {
-    protected Gazelle\Schedule\Scheduler $scheduler;
+    protected Gazelle\TaskScheduler $scheduler;
 
     public function setUp(): void {
-        $this->scheduler = new Gazelle\Schedule\Scheduler;
+        $this->scheduler = new Gazelle\TaskScheduler;
     }
 
     public function testRun(): void {

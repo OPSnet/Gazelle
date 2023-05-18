@@ -74,7 +74,7 @@ class View {
                 ->setPayment($payMan)
                 ->setApplicant(new Gazelle\Manager\Applicant)
                 ->setDb(new Gazelle\DB)
-                ->setScheduler(new Gazelle\Schedule\Scheduler)
+                ->setScheduler(new Gazelle\TaskScheduler)
                 ->setSSLHost(new Gazelle\Manager\SSLHost)
                 ;
 

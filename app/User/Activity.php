@@ -116,7 +116,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setScheduler(\Gazelle\Schedule\Scheduler $scheduler): Activity {
+    public function setScheduler(\Gazelle\TaskScheduler $scheduler): Activity {
         if ($this->user->permitted('admin_periodic_task_view')) {
             $lastSchedulerRun = self::$db->scalar("
                 SELECT now() - max(launch_time) FROM periodic_task_history

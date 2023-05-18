@@ -113,10 +113,10 @@ class Cache extends \Memcached {
         $this->elapsed += (microtime(true) - $begin) * 1000;
         return $ret;
     }
-    public function delete_multi(array $list): array|false {
+    public function delete_multi(array $list): array {
         $begin = microtime(true);
         if (empty($list)) {
-            $ret = false;
+            $ret = [];
         } else {
             $ret = $this->deleteMulti($list);
             if (!isset($this->delete)) {

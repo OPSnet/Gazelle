@@ -30,7 +30,7 @@ class UserActivityTest extends TestCase {
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReferral(new Gazelle\Manager\Referral), 'user-activity-referral');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReport(new Gazelle\Stats\Report), 'user-activity-report');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setSSLHost(new Gazelle\Manager\SSLHost), 'user-activity-sslhost');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setScheduler(new Gazelle\Schedule\Scheduler), 'user-activity-scheduler');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setScheduler(new Gazelle\TaskScheduler), 'user-activity-scheduler');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaff(new Gazelle\Staff($admin)), 'user-activity-staff-set');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM), 'user-activity-staffpm');
 

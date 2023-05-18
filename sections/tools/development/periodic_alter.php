@@ -7,7 +7,7 @@ if (!$Viewer->permitted('admin_periodic_task_manage')) {
 authorize();
 
 $p = $_POST;
-$scheduler = new Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\TaskScheduler;
 
 if ($p['submit'] == 'Delete') {
     if (!is_number($p['id']) || $p['id'] == '') {

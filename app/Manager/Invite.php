@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class Invite extends \Gazelle\Base {
-
     protected $search;
 
     public function findUserByKey(string $inviteKey, User $manager): ?\Gazelle\User {
@@ -118,7 +117,7 @@ class Invite extends \Gazelle\Base {
     /**
      * Expire unused invitations
      */
-    public function expire(\Gazelle\Schedule\Task $task = null): int {
+    public function expire(\Gazelle\Task $task = null): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("SELECT InviterID FROM invites WHERE Expires < now()");
         $list = self::$db->collect('InviterID', false);

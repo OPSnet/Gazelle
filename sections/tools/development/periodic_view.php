@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
 
-$scheduler = new Gazelle\Schedule\Scheduler;
+$scheduler = new Gazelle\TaskScheduler;
 $taskId = (int)($_REQUEST['id'] ?? 0);
 
 if ($taskId && $_REQUEST['mode'] === 'run_now') {

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_periodic_task_view')) {
     error(403);
 }
 
-$stats = (new Gazelle\Schedule\Scheduler)->getRuntimeStats();
+$stats = (new Gazelle\TaskScheduler)->getRuntimeStats();
 echo $Twig->render('admin/scheduler/stats.twig', [
     'hourly' => [
         'duration'  => json_encode($stats['hourly'][0]['data']),
