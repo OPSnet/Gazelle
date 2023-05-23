@@ -261,7 +261,7 @@ class Subscription extends \Gazelle\BaseUser {
                 c_lr.EditedTime AS LastReadEditedTime,
                 um.ID AS LastReadUserID,
                 um.Username AS LastReadUsername,
-                ui.Avatar AS LastReadAvatar,
+                um.avatar AS LastReadAvatar,
                 c_lr.EditedUserID AS LastReadEditedUserID
             FROM users_subscriptions_comments AS s
             LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
@@ -271,7 +271,6 @@ class Subscription extends \Gazelle\BaseUser {
                 (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
             LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
             LEFT JOIN users_main AS um ON (um.ID = c_lr.AuthorID)
-            LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
             WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
                 AND (s.Page != 'collages' OR co.Deleted = '0')
                 " . ($showUnread ? ' AND c.ID > coalesce(lr.PostID, 0)' : '') . "
@@ -290,7 +289,7 @@ class Subscription extends \Gazelle\BaseUser {
                 p_lr.EditedTime,
                 um.ID,
                 um.Username,
-                ui.Avatar,
+                um.avatar,
                 p_lr.EditedUserID
             FROM users_subscriptions AS s
             LEFT JOIN forums_last_read_topics AS lr ON (lr.UserID = ? AND s.TopicID = lr.TopicID)
@@ -300,7 +299,6 @@ class Subscription extends \Gazelle\BaseUser {
                 (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
             LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
             LEFT JOIN users_main AS um ON (um.ID = p_lr.AuthorID)
-            LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
             WHERE " . implode(' AND ', $cond) . "
             GROUP BY t.ID
         ORDER BY LastPostTime DESC

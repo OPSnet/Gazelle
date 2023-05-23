@@ -137,7 +137,7 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->isRecruiter(), 'utest-is-recruiter');
         $this->assertFalse($this->user->isStaff(), 'utest-is-staff');
         $this->assertFalse($this->user->isStaffPMReader(), 'utest-is-staff-pm-reader');
-        $this->assertFalse($this->user->isWarned(), 'utest-is-warned');
+        $this->assertFalse($this->user->isWarned(), 'utest-is-not-warned');
         $this->assertFalse($this->user->canCreatePersonalCollage(), 'utest-personal-collage-create');
         $this->assertFalse($this->user->permitted('site_debug'), 'utest-permitted-site-debug');
 
@@ -169,8 +169,9 @@ class UserTest extends TestCase {
         $new = $userMan->findById($this->user->id());
         $this->assertEquals(USER_DEFAULT_AVATAR, $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-none');
 
-        $this->assertEquals(1, Helper::modifyUserAvatar($this->user, 'https://www.example.com/avatar.jpg'), 'utest-avatar-set');
-        $this->assertEquals('https://www.example.com/avatar.jpg', $this->user->avatar(), 'utest-avatar-url');
+        $url = 'https://www.example.com/avatar.jpg';
+        $this->assertTrue($this->user->setUpdate('avatar', $url)->modify(), 'utest-avatar-set');
+        $this->assertEquals($url, $this->user->avatar(), 'utest-avatar-url');
         $new = $userMan->findById($this->user->id());
         $this->assertEquals(USER_DEFAULT_AVATAR, $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-override-none');
 
@@ -226,7 +227,8 @@ class UserTest extends TestCase {
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
         $userMan = new \Gazelle\Manager\User;
-        $this->assertEquals(1, $userMan->warn($this->user, 2, "phpunit warning", $this->user), 'utest-warn-uman');
+        $end = $userMan->warn($this->user, 2, "phpunit warning", $this->user);
+        $this->assertStringStartsWith(date('Y-m-d', strtotime('+2 weeks')), $end, 'utest-warn-uman');
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');

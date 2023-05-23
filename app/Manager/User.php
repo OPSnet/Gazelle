@@ -127,16 +127,6 @@ class User extends \Gazelle\BaseManager {
         ));
     }
 
-    /**
-     * Get a User object from their password reset key
-     */
-    public function findByResetKey(string $key): ?\Gazelle\User {
-        return $this->findById((int)self::$db->scalar("
-            SELECT ui.UserID FROM users_info ui WHERE ui.ResetKey = ?
-            ", $key
-        ));
-    }
-
     public function findAllByCustomPermission(): array {
         self::$db->prepared_query("
             SELECT ID, CustomPermissions
@@ -682,42 +672,25 @@ class User extends \Gazelle\BaseManager {
     }
 
     /**
-     * Warn a user.
+     * Warn a user. Returns expiry date.
      */
-    public function warn(\Gazelle\User $user, int $duration, string $reason, \Gazelle\User $staff): int {
-        $current = (string)self::$db->scalar("
-            SELECT Warned FROM users_info WHERE UserID = ?
-            ", $user->id()
-        );
-        $warning = new \Gazelle\User\Warning($user);
-        $warning->create($reason, "$duration week", $staff);
-        if (!$current) {
-            // User was not already warned
-            $warnTime = Time::offset($duration);
-            $warning = "Warned until $warnTime";
-        } else {
-            // User was already warned, appending new warning to old.
-            $warnTime = date('Y-m-d H:i:s', strtotime($current) + $duration);
-            $warning = "Warning extended until $warnTime";
+    public function warn(\Gazelle\User $user, int $duration, string $reason, \Gazelle\User $staff): string {
+        $warnTime = Time::offset($duration * 7 * 86_400);
+        $warning  = new \Gazelle\User\Warning($user);
+        $expiry   = $warning->warningExpiry();
+        $user->addStaffNote("Warned until $warnTime by {$staff->username()}")->modify();
+        if ($expiry) {
             $this->sendPM($user->id(), 0,
-                'You have received multiple warnings.',
-                "When you received your latest warning (set to expire on "
-                    . date('Y-m-d', (time() + $duration))
-                    . "), you already had a different warning (set to expire at $current).\n\n"
-                    . "Due to this collision, your warning status will now expire at $warnTime."
+                'You have received a new warning',
+                "You had existing warning (set to expire at $expiry).\n\nDue to this prior warning, you will remain warned until $warnTime.\nReason: $reason"
+            );
+        } else {
+            $this->sendPM($user->id(), 0,
+                'You have been warned',
+                "You have been warned, the warning is set to expire on $warnTime. Remember, repeated warnings may jeopardize your account.\nReason: $reason"
             );
         }
-        self::$db->prepared_query("
-            UPDATE users_info SET
-                WarnedTimes = WarnedTimes + 1,
-                Warned = ?,
-                AdminComment = concat(now(), ' - ', ?, AdminComment)
-            WHERE UserID = ?
-            ", $warnTime, "$warning by {$staff->username()}\nReason: $reason\n\n", $user->id()
-        );
-        $affected = self::$db->affected_rows();
-        $user->flush();
-        return $affected;
+        return $warning->create($reason, "$duration week", $staff);
     }
 
     /**
@@ -902,10 +875,8 @@ class User extends \Gazelle\BaseManager {
                 SELECT um.ID
                 FROM users_main um
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                INNER JOIN users_info         ui ON (ui.UserID = um.ID)
                 INNER JOIN user_summary       us ON (us.user_id = um.ID)
-                WHERE ui.Warned IS NULL
-                    AND um.Enabled = ?
+                WHERE um.Enabled = ?
                     AND um.PermissionID = ?
                     AND uls.Uploaded + us.request_bounty_size >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
@@ -926,7 +897,7 @@ class User extends \Gazelle\BaseManager {
             self::$db->prepared_query($query, ...$args);
             foreach (self::$db->collect('ID', false) as $userId) {
                 $user = $this->findById($userId);
-                if (is_null($user)) {
+                if (is_null($user) || (new \Gazelle\User\Warning($user))->isWarned()) {
                     continue;
                 }
                 ++$processed;
@@ -1558,16 +1529,10 @@ class User extends \Gazelle\BaseManager {
         ");
         $affected = self::$db->affected_rows();
         self::$db->prepared_query("
-            UPDATE users_info ui
-            INNER JOIN users_main um ON (um.ID = ui.UserID)
-            SET ui.AuthKey = um.auth_key
-        ");
-
-        self::$db->prepared_query("
             SELECT ID FROM users_main
         ");
-        foreach (self::$db->collect(0, false) as $key) {
-            self::$cache->delete_value("u_$key");
+        foreach (self::$db->collect(0, false) as $userId) {
+            $this->findById($userId)->flush();
         }
         return $affected;
     }

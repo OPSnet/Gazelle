@@ -25,11 +25,11 @@ class Stylesheet extends \Gazelle\BaseUser {
                 SELECT s.ID                          AS style_id,
                     s.Name                           AS name,
                     lower(replace(s.Name, ' ', '_')) AS css_name,
-                    ui.StyleURL                      AS style_url,
+                    um.stylesheet_url                AS style_url,
                     s.theme
                 FROM stylesheets s
-                INNER JOIN users_info ui ON (ui.StyleID = s.ID)
-                WHERE ui.UserID = ?
+                INNER JOIN users_main um ON (um.stylesheet_id = s.ID)
+                WHERE um.ID = ?
                 ", $this->id()
             );
             self::$cache->cache_value($key, $info, 0);
@@ -47,16 +47,9 @@ class Stylesheet extends \Gazelle\BaseUser {
             ", $stylesheetId, empty($stylesheetUrl) ? null : trim($stylesheetUrl),
                 $this->id()
         );
-        self::$db->prepared_query("
-            UPDATE users_info SET
-                StyleID = ?,
-                StyleURL = ?
-            WHERE UserID = ?
-            ", $stylesheetId, empty($stylesheetUrl) ? null : trim($stylesheetUrl),
-                $this->id()
-        );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function cssName(): string {

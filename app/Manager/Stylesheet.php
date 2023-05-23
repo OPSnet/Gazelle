@@ -31,29 +31,16 @@ class Stylesheet extends \Gazelle\Base {
 
     public function usageList(string $orderBy, string $direction): array {
         self::$db->prepared_query("
-            SELECT s.ID             AS id,
-                s.Name              AS name,
-                s.Description       AS description,
-                s.Default           AS initial,
-                s.theme,
-                ifnull(ui.total, 0) AS total_enabled,
-                ifnull(ud.total, 0) AS total
-            FROM stylesheets AS s
-            LEFT JOIN (
-                SELECT StyleID,
-                    count(*) AS total
-                FROM users_info AS ui
-                INNER JOIN users_main AS um ON (ui.UserID = um.ID)
-                WHERE um.Enabled = ?
-                GROUP BY StyleID
-            ) AS ui ON (s.ID = ui.StyleID)
-            LEFT JOIN (
-                SELECT StyleID,
-                    count(*) AS total
-                FROM users_info AS ui
-                INNER JOIN users_main AS um ON (ui.UserID = um.ID)
-                GROUP BY StyleID
-            ) AS ud ON (s.ID = ud.StyleID)
+            SELECT s.ID                       AS id,
+                s.Name                        AS name,
+                s.Description                 AS description,
+                s.Default                     AS initial,
+                s.theme                       AS theme,
+                count(um.ID)                  AS total,
+                sum(if(um.Enabled = ?, 1, 0)) AS total_enabled
+            FROM stylesheets s
+            LEFT JOIN users_main um ON (um.stylesheet_id = s.ID)
+            GROUP BY s.ID, s.Name, s.Description, s.theme
             ORDER BY $orderBy $direction
             ", UserStatus::enabled->value
         );

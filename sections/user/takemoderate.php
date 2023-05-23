@@ -41,7 +41,6 @@ $unlimitedDownload = isset($_POST['unlimitedDownload']);
 $invites = (int)$_POST['Invites'];
 $slogan = trim($_POST['slogan']);
 $changePassword = !empty($_POST['ChangePassword']);
-$warned = isset($_POST['Warned']) ? 1 : 0;
 $uploaded = $downloaded = $bonusPoints = null;
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
     $uploaded = ($_POST['Uploaded'] === '' ? 0 : $_POST['Uploaded']);
@@ -62,10 +61,6 @@ if (isset($_POST['BonusPoints'])) {
 $Collages = (int)($_POST['Collages'] ?? 0);
 $flTokens = (int)($_POST['FLTokens'] ?? 0);
 
-$warnWeeks        = (int)($_POST['WarnLength'] ?? 0);
-$extendWarning   = $_POST['ExtendWarning'] ?? '---';
-$reduceWarning   = $_POST['ReduceWarning'] ?? '---';
-$warnReason      = trim($_POST['WarnReason']);
 $userReason      = trim($_POST['UserReason']);
 $disableAvatar   = isset($_POST['DisableAvatar']);
 $disableInvites  = isset($_POST['DisableInvites']);
@@ -174,8 +169,6 @@ $args = [];
 
 if ($slogan != $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
     $user->setUpdate('slogan', $slogan);
-    $set[] = "SupportFor = ?";
-    $args[] = (string)$slogan;
     $editSummary[] = "First-Line Support status changed to \"$slogan\"";
 }
 
@@ -201,8 +194,6 @@ if ($Collages != $user->paidPersonalCollages() && $Collages != (int)$_POST['OldC
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
     $user->setUpdate('collage_total', $Collages);
-    $set[] = 'collages = ?';
-    $args[] = $Collages;
     $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$Collages}";
 }
 
@@ -278,51 +269,41 @@ if ($title != $user->title() && $Viewer->permitted('users_edit_titles')) {
 }
 
 if ($Viewer->permitted('users_warn')) {
+    $weeks   = (int)($_POST['WarnLength'] ?? 0);
+    $extend  = (int)($_POST['ExtendWarning'] ?? 0);
+    $reduce  = (int)($_POST['ReduceWarning'] ?? 0);
     $warning = new Gazelle\User\Warning($user);
-    if ($warned == 0) {
+    $create  = [];
+    if (!isset($_POST['Warned'])) {
         if ($user->isWarned()) {
             $warning->clear();
-            $set[] = "Warned = ?";
-            $args[] = null;
             $editSummary[] = 'warning removed';
         }
-    } elseif (
-        ($user->isWarned() && $warnWeeks)
-        ||
-        (!$user->isWarned() && ($extendWarning != '---' || $reduceWarning != '---'))
-    ) {
-        if ($reduceWarning) {
-            $warning->clear();
-        }
-        $warning->create(reason: $warnReason, interval: "$warnWeeks week", warner: $Viewer);
-        if (!$user->isWarned()) {
-            $weeksChange = $warnWeeks;
-            $duration = 'week' . plural($warnWeeks);
-            $message = [
-                'summary' => "warned for $warnWeeks $duration",
-                'subject' => 'You have received a warning',
-                'body'    => "You have been [url=wiki.php?action=article&amp;name=warnings]warned[/url] for $warnWeeks $duration",
-            ];
-        } else {
-            $weeksChange = ($extendWarning != '---') ? $extendWarning : -$reduceWarning;
-            $nrWeeks = (int)abs($weeksChange);
-            $duration = 'week' . plural($nrWeeks);
-            $action = $weeksChange > 0 ? 'extended' : 'reduced';
-            $message = [
-                'summary' => "warning $action $nrWeeks $duration",
-                'subject' => "Your warning has been $action to $nrWeeks $duration",
-                'body'    => "Your warning has been $action to $nrWeeks $duration",
-            ];
-        }
-        $set[] = "Warned = now() + INTERVAL ? WEEK";
-        $args[] = $weeksChange;
-        $expiry = $user->endWarningDate($weeksChange);
-        $message['body'] .= ", by [user]" . $Viewer->username() . "[/user]."
-            . " The reason given was:\n[quote]{$warnReason}[/quote]. The warning will expire on $expiry."
+    } elseif ($extend || $reduce) {
+        $action   = $extend ? 'extended' : 'reduced';
+        $weeks    = $extend ?: $reduce;
+        $duration = 'week' . plural($weeks);
+        $create = [
+            'summary' => "warning $action $weeks $duration",
+            'subject' => "Your warning has been $action to $weeks $duration",
+            'body'    => "Your warning has been $action to $weeks $duration",
+        ];
+        $warning->clear(); // replace the current warning with the new duration
+    } elseif ($weeks) {
+        $duration = 'week' . plural($weeks);
+        $create = [
+            'summary' => "warned for $weeks $duration",
+            'subject' => 'You have received a warning',
+            'body'    => "You have been [url=wiki.php?action=article&amp;name=warnings]warned[/url] for $weeks $duration",
+        ];
+    }
+    if ($create) {
+        $reason = trim($_POST['WarnReason'] ?? 'none given');
+        $expiry = $warning->create(reason: $reason, interval: "$weeks week", warner: $Viewer);
+        $create['body'] .= ", by [user]" . $Viewer->username() . "[/user]."
+            . " The reason given was:\n[quote]{$reason}[/quote]. The warning will expire at $expiry."
             . "\n\nThis is an automated message. You may reply for more information if necessary.";
-        $userMan->sendPM($userId, $Viewer->id(), $message['subject'], $message['body']);
-        $editSummary[] = $message['summary'] . ", expiry: $expiry"
-            . ($warnReason ? ", reason: \"$warnReason\"" : '');
+        $userMan->sendPM($userId, $Viewer->id(), $create['subject'], $create['body']);
     }
 }
 
@@ -544,10 +525,7 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
 
 if ($Viewer->permitted('users_edit_reset_keys')) {
     if ($resetAuthkey == 1) {
-        $authKey = randomString();
-        $user->setUpdate('auth_key', $authKey);
-        $set[] = "Authkey = ?";
-        $args[] = $authKey;
+        $user->setUpdate('auth_key', authKey());
         $editSummary[] = 'authkey reset';
     }
     if ($resetPasskey == 1) {
@@ -651,11 +629,8 @@ if (count($trackerUserUpdates) > 1) {
     $tracker->update_tracker('update_user', $trackerUserUpdates);
 }
 
-if (!$user->dirty() && count($set) || count($leechSet)) {
-    // users_main was not touched, force an update
-    $user->setUpdate('username', $user->username());
-}
 $user->modify();
+$user->flush();
 
 if (isset($_POST['invite_source_update'])) {
     $source = array_keys(array_filter($_POST, fn($x) => preg_match('/^source-\d+$/', $x), ARRAY_FILTER_USE_KEY));

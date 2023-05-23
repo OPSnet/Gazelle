@@ -181,7 +181,7 @@ if (empty($_GET)) {
     $Order = '';
 
     $invitedValue = $showInvited
-        ? '(SELECT count(*) FROM users_info AS ui2 WHERE ui2.Inviter = um1.ID)'
+        ? '(SELECT count(*) FROM users_main AS umi WHERE umi.inviter_user_id = um1.ID)'
         : "'X'";
     $seedingValue = ($_GET['seeding'] ?? 'off') == 'off'
         ? "'X'"
@@ -287,19 +287,21 @@ if (empty($_GET)) {
     if ($showInvited && isset($_GET['invited1']) && strlen($_GET['invited1'])) {
         $op = $_GET['invited'];
         $Where[] = "um1.ID IN ("
-            . $m->op("SELECT umi.ID FROM users_info uii INNER JOIN users_main umi ON (umi.ID = uii.Inviter) GROUP BY umi.ID HAVING count(*)", $op)
+            . $m->op("SELECT umi.ID FROM users_main umii INNER JOIN users_main umi ON (umi.ID = umii.inviter_user_id) GROUP BY umi.ID HAVING count(*)", $op)
             . ")";
         $Args = array_merge($Args, [$_GET['invited1']], ($op === 'between' ? [$_GET['invited2']] : []));
     }
 
     if ($searchDisabledInvites) {
-        $Where[] = 'ui1.DisableInvites = ?';
-        $Args[] = $_GET['disabled_invites'] == 'yes' ? '1' : '0';
+        $allow = $_GET['disabled_invites'] == 'yes' ? '' : 'NOT ';
+        $Where[] = "$allow EXISTS(SELECT 1 FROM user_has_attr uha_invite where uha_invite.UserID = um1.ID and uha_invite.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))";
+        $Args[] = 'disable-invites';
     }
 
     if ($searchDisabledUploads) {
-        $Where[] = 'ui1.DisableUpload = ?';
-        $Args[] = $_GET['disabled_uploads'] === 'yes' ? '1' : '0';
+        $allow = $_GET['disabled_uploads'] == 'yes' ? '' : 'NOT ';
+        $Where[] = "$allow EXISTS(SELECT 1 FROM user_has_attr uha_upload where uha_upload.UserID = um1.ID and uha_upload.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))";
+        $Args[] = 'disable-upload';
     }
 
     if (isset($_GET['joined']) && !empty($_GET['joined']) && isset($_GET['join1']) && !empty($_GET['join1'])) {
@@ -431,12 +433,12 @@ if (empty($_GET)) {
     }
 
     if (isset($_GET['avatar']) && !empty($_GET['avatar'])) {
-        $Where[] = $m->matchField('ui1.Avatar');
+        $Where[] = $m->matchField('um1.avatar');
         $Args[] = $_GET['avatar'];
     }
 
     if (isset($_GET['stylesheet']) && !empty($_GET['stylesheet'])) {
-        $Where[] = $m->matchField('ui1.StyleID');
+        $Where[] = $m->matchField('um1.stylesheet_id');
         $Args[] = $_GET['stylesheet'];
     }
 

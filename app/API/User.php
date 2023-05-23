@@ -41,7 +41,6 @@ class User extends AbstractAPI {
                 GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS SecondaryClasses
             FROM users_main AS um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
             INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
             LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
             LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)

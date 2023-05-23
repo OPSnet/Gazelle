@@ -17,7 +17,7 @@ class InviteTest extends TestCase {
         $this->assertFalse($user->permitted('users_edit_invites'),          'invite-users-edit-invites');
         $this->assertFalse($user->permitted('admin_manage_invite_source'),  'invite-admin-manage-invite-source');
 
-        $this->assertEquals(0, $user->invitedTotal(), 'invite-total-0');
+        $this->assertEquals(0, $user->stats()->invitedTotal(), 'invite-total-0');
         $this->assertEquals(0, $user->unusedInviteTotal(), 'invite-unused-0');
         $this->assertEquals(0, $user->pendingInviteCount(), 'invite-pending-0-initial');
 
@@ -48,7 +48,7 @@ class InviteTest extends TestCase {
         $invitee = Helper::makeUserByInvite('invitee.' . randomString(6), $invite->key());
         $this->assertInstanceOf(Gazelle\User::class, $invitee, 'invitee-class');
         $this->assertEquals($user->id(), $invitee->inviter()->id(), 'invitee-invited-by');
-        $this->assertEquals(1, $user->invitedTotal(), 'invite-total-1');
+        $this->assertEquals(1, $user->stats()->invitedTotal(), 'invite-total-1');
         $this->assertEquals(0, $user->flush()->pendingInviteCount(), 'invite-pending-back-to-0');
         $inviteList = $user->inviteList('um.ID', 'ASC');
         $this->assertCount(1, $inviteList, 'invite-invite-list-total');

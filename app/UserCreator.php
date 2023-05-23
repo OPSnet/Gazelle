@@ -38,9 +38,6 @@ class UserCreator extends Base {
         }
 
         $this->permissionId = $this->newInstall ? SYSOP : USER;
-        $authKey = substr(strtr(base64_encode(hash('sha256', hash('sha256', randomString(64), true), true)), '+/', '-_'), 0, 32);
-        $infoFields = ['AuthKey'];
-        $infoArgs = [$authKey];
 
         if (!isset($this->inviteKey)) {
             $inviter = null;
@@ -61,8 +58,6 @@ class UserCreator extends Base {
                 // as belonging to them.
                 $this->email[] = $email;
             }
-            $infoFields[] = 'Inviter';
-            $infoArgs[] = $inviterId;
             if ($inviterReason) {
                 $this->adminComment[] = $inviterReason;
             }
@@ -80,7 +75,7 @@ class UserCreator extends Base {
         ];
         $mainArgs = [
             (int)$inviter?->id(), $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
-            $this->permissionId, $this->permissionId == SYSOP ? UserStatus::enabled->value : UserStatus::unconfirmed->value, STARTING_INVITES, geoip($this->ipaddr), $authKey
+            $this->permissionId, $this->permissionId == SYSOP ? UserStatus::enabled->value : UserStatus::unconfirmed->value, STARTING_INVITES, geoip($this->ipaddr), authKey()
         ];
 
         if (isset($this->id)) {
@@ -101,17 +96,11 @@ class UserCreator extends Base {
         }
 
         // create users_info row
-        $infoFields[] = 'UserID';
-        $infoArgs[] = $this->id;
-        if ($this->adminComment) {
-            $infoFields[] = 'AdminComment';
-            $infoArgs[] = Time::sqlTime() . " - " . implode("\n", $this->adminComment);
-        }
         self::$db->prepared_query("
             INSERT INTO users_info
-                   (" . implode(',', $infoFields) . ", StyleID)
-            VALUES (" . placeholders($infoFields) . ", (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
-            ", ...$infoArgs
+                   (UserID, AdminComment)
+            VALUES (?,      ?)
+            ",  $this->id, Time::sqlTime() . " - " . implode("\n", $this->adminComment)
         );
 
         if ($inviter) {

@@ -1,0 +1,158 @@
+#!/usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$db = Gazelle\DB::DB();
+
+$db->prepared_query("
+    SELECT UserID, AdminComment, WarnedTimes FROM users_info WHERE AdminComment REGEXP ' - Warn(ed|ing) '
+");
+
+foreach ($db->to_array(false, MYSQLI_NUM, false) as [$id, $note, $count]) {
+    $list = array_reverse(array_filter(array_map('trim', explode("\n", $note)), fn($s) => !empty($s)));
+    $reason = false;
+    $current = [];
+    echo "$id: $count times\n";
+    foreach ($list as $line) {
+        if (str_contains($line, 'Warned for 0 weeks, expiry: ,')) {
+            continue;
+        }
+
+        if (preg_match('/^Reason: (.*)/', $line, $match)) {
+            $reason = $match[1];
+            continue;
+        }
+
+        if (!str_contains($line, 'Warn')) {
+            continue;
+        }
+
+        // 2020-12-31 - Warned until 2021-01-07 16:06:58 by admin
+        if (preg_match('/^(\S+) - Warned until (\S+ \S+) by (\w+)/', $line, $match)) {
+            insert($id, $current);
+            $current = ['rule' => 1, 'begin' => "$match[1] 00:00:00", 'end' => $match[2], 'who' => $match[3], 'reason' => $reason];
+            $reason = false;
+            continue;
+        }
+
+        // 2023-05-19 12:56:25 - Warned until 2023-05-19 12:56:26 by admin
+        if (preg_match('/^(\S+ \S+) - Warned until (\S+ \S+) by (\w+)/', $line, $match)) {
+            insert($id, $current);
+            $current = ['rule' => 2, 'begin' => $match[1], 'end' => $match[2], 'who' => $match[3], 'reason' => $reason];
+            $reason = false;
+            continue;
+        }
+
+        // 2022-04-13 07:59:47 - 2022-04-13 - Warned until 2022-04-20 07:59:47 by admin for forums.php?action=viewthread&amp;threadid=2&amp;postid=820#post82
+        if (preg_match('/^(\S+ \S+) - \S+ - Warned until (\S+ \S+) by (\w+) for (.*)/', $line, $match)) {
+            insert($id, $current);
+            $current = ['rule' => 3, 'begin' => $match[1], 'end' => $match[2], 'who' => $match[3], 'reason' => $match[4]];
+            continue;
+        }
+
+        // 2020-07-04 17:35:32 - Warned for 1 week, expiry: 2020-07-11 17:35:32 by admin
+        if (preg_match('/^(\S+ \S+) - Warned for .*?, expiry: (\S+ \S+) by (\w+)/', $line, $match)) {
+            insert($id, $current);
+            $current = ['rule' => 4, 'begin' => $match[1], 'end' => $match[2], 'who' => $match[3], 'reason' => $reason];
+            $reason = false;
+            continue;
+        }
+
+        // 2020-08-30 14:09:50 - Warned for 1 week, expiry: 2020-09-06 14:09:50, reason: "because" by admin
+        if (preg_match('/^(\S+ \S+) - Warned .*?, expiry: (\S+ \S+), reason: "(.*?)" by (\w+)/', $line, $match)) {
+            insert($id, $current);
+            $current = ['rule' => 5, 'begin' => $match[1], 'end' => $match[2], 'who' => $match[4], 'reason' => $match[3]];
+            continue;
+        }
+
+        // 2023-05-19 15:32:01 - Warned for 2 weeks, expiry: 2023-06-02 15:32:01+00, reason: warning reason, posting privileges restored by admin
+        if (preg_match('/^(\S+ \S+) - Warned for .*?, expiry: (\S+ \S+), reason: ([^,]+), .*? by (\w+)$/', $line, $match)) {
+            insert($id, $current);
+            $current = ['rule' => 6, 'begin' => $match[1], 'end' => $match[2], 'who' => $match[4], 'reason' => $match[3]];
+            continue;
+        }
+
+        // 2020-05-25 13:33:54 - Warned for 1 week for "because" by admin
+        // 2018-11-11 14:44:04 - Warned for 8 weeks for "Outrageous behavior\", posting privileges disabled, upload privileges disabled by admin
+        if (preg_match('/^(\S+ \S+) - Warned for (.*?) for "(.*?)"(?:, .*?)? by (\w+)/', $line, $match)) {
+            insert($id, $current);
+            $end = date_add(new DateTime($match[1]), DateInterval::createFromDateString($match[2]));
+            $current = ['rule' => 7, 'begin' => $match[1], 'end' => date_format($end, 'Y-m-d H:i:s'), 'who' => $match[4], 'reason' => $match[3]];
+            continue;
+        }
+
+        // 2019-12-08 17:30:57 - Warned for 1 week, posting privileges disabled by admin
+        // 2019-01-19 09:02:56 - Warned for 1 week, account Disabled->Enabled by admine
+        if (preg_match('/^(\S+ \S+) - Warned for (.*?), .*? by (\w+)/', $line, $match)) {
+            insert($id, $current);
+            $end = date_add(new DateTime($match[1]), DateInterval::createFromDateString($match[2]));
+            $current = ['rule' => 8, 'begin' => $match[1], 'end' => $match[2], 'who' => $match[4], 'reason' => $match[3]];
+            continue;
+        }
+
+        // 2020-03-02 20:33:47 - Warned for 1 week by admin
+        if (preg_match('/^(\S+ \S+) - Warned for (.*?) by (\w+)$/', $line, $match)) {
+            insert($id, $current);
+            show($match);
+            $end = date_add(new DateTime($match[1]), DateInterval::createFromDateString($match[2]));
+            $current = ['rule' => 9, 'begin' => $match[1], 'end' => date_format($end, 'Y-m-d H:i:s'), 'who' => $match[3], 'reason' => $reason];
+            continue;
+        }
+
+        // 2023-05-19 15:32:32 - Warning extended 4 weeks, expiry: 2023-06-16 15:32:32, reason: extend by admin
+        // 2023-05-19 15:32:51 - Warning reduced 1 week, expiry: 2023-05-26 15:32:51, reason: reduce by admin
+        if (preg_match('/^\S+ \S+ - Warning (?:extended|reduced) .*?, expiry: (\S+ \S+)/', $line, $match)) {
+            $current['end'] = $match[1];
+            continue;
+        }
+
+        // 2019-06-06 15:44:40 - Warning extended by 2 weeks to 2019-06-20 15:44:14
+        // 2020-05-20 16:18:56 - Warning extended by 2 weeks to 2020-06-03 13:15:38 for "more" by admin
+        if (preg_match('/^\S+ \S+ - Warning extended by .*? to (\S+ \S+)/', $line, $match)) {
+            $current['end'] = $match[1];
+            continue;
+        }
+
+        // 2022-04-13 08:02:08 - Warning extended until 2022-05-04 07:59:47 by admin
+        if (preg_match('/^\S+ \S+ - Warning extended until (\S+ \S+)/', $line, $match)) {
+            $current['end'] = $match[1];
+            continue;
+        }
+
+        // 2020-03-23 - Warning (Clash) extended to expire at 2020-10-05 20:35:00
+        if (preg_match('/^\S+ - Warning \(Clash\) extended to expire at (\S+ \S+)/', $line, $match)) {
+            $current['end'] = $match[1];
+            continue;
+        }
+
+        // 2020-05-20 16:18:35 - Warning reduced by 1 week to 2020-05-20 13:15:38 for "because" by admin
+        if (preg_match('/^\S+ \S+ - Warning reduced by .*? (\S+ \S+)/', $line, $match)) {
+            $current['end'] = $match[1];
+            continue;
+        }
+
+        // 2023-05-19 15:05:59 - Warning removed
+        if (preg_match('/(\S+ \S+) - Warning removed/', $line, $match)) {
+            $current['end'] = $match[1];
+            continue;
+        }
+
+        echo "$id todo <$line>\n";
+    }
+    insert($id, $current);
+}
+
+function insert (int $id, array $data): void {
+    if (count($data) < 3) {
+        return;
+    }
+    $user = (new Gazelle\Manager\User)->findByUsername($data['who']);
+    (new Gazelle\DB\Pg(GZPG_DSN))->prepared_query("
+        insert into user_warning
+               (id_user, reason, id_user_warner, warning)
+        values (?,       ?,      ?,              tstzrange(?, ?))
+        on conflict do nothing
+        ", $id, $data['reason'] ?: '', (int)$user?->id(), $data['begin'], $data['end']
+    );
+}

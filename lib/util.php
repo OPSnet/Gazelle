@@ -250,6 +250,13 @@ function redirectUrl(string $fallback): string {
 }
 
 /**
+ * Generate a random authentication key for a user
+ */
+function authKey(): string {
+    return substr(strtr(base64_encode(hash('sha256', hash('sha256', randomString(64), true), true)), '+/', '-_'), 0, 32);
+}
+
+/**
  * Make sure $_GET['auth'] is the same as the user's authorization key
  * Should be used for any user action that relies solely on GET.
  */

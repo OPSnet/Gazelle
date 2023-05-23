@@ -292,13 +292,10 @@ if (isset($_POST['resetpasskey'])) {
 
 $db->prepared_query("
     UPDATE users_info SET
-        Avatar = ?,
-        Info = ?,
-        InfoTitle = ?,
         NavItems = ?,
         SiteOptions = ?
     WHERE UserID = ?
-    ", $avatar, $_POST['info'], $_POST['profile_title'], implode(',', $UserNavItems), serialize($Options), $userId
+    ", implode(',', $UserNavItems), serialize($Options), $userId
 );
 
 $user->modify();

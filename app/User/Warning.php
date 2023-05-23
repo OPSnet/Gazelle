@@ -5,10 +5,10 @@ namespace Gazelle\User;
 class Warning extends \Gazelle\BaseUser {
     use \Gazelle\Pg;
 
-    protected bool|null $isWarned;
+    protected array|null $info;
 
     public function flush(): Warning {
-        $this->isWarned = null;
+        unset($this->info);
         return $this;
     }
     public function link(): string { return $this->user()->link(); }
@@ -20,27 +20,50 @@ class Warning extends \Gazelle\BaseUser {
             insert into user_warning
                    (id_user, id_user_warner, reason, warning)
             values (?,       ?,              ?,      tstzrange(now(), now() + ?::interval))
-            returning upper(warning)
+            returning date_trunc('second', upper(warning))
             ", $this->id(), $warner->id(), $reason, $interval
         );
+        $this->user()->addStaffNote("Warned for $interval, expiry $end, reason: $reason");
         $this->flush();
         return $end;
     }
 
-    public function total(): int {
-        return (int)$this->pg()->scalar("
-            select count(*) from user_warning where id_user = ?
-            ", $this->id()
-        );
+    public function info(): array {
+        if (!isset($this->info)) {
+            $expiry = $this->pg()->scalar("
+                select max(upper(warning))
+                from user_warning
+                where now() <@ warning
+                    and id_user = ?
+                ", $this->id()
+            );
+            $this->info = ['expiry' => is_null($expiry) ? null : (string)$expiry];
+        }
+        return $this->info;
     }
 
     public function isWarned(): bool {
-        return $this->isWarned ??= (bool)$this->pg()->scalar("
-            select 1
+        return !is_null($this->warningExpiry());
+    }
+
+    public function warningExpiry(): ?string {
+        return $this->info()['expiry'];
+    }
+
+    public function total(): int {
+        return count($this->warningList());
+    }
+
+    public function warningList(): array {
+        return $this->pg()->all("
+            select id_user_warner as id_warner,
+                lower(warning)    as begin,
+                upper(warning)    as end,
+                now() <@ warning  as active,
+                reason
             from user_warning
-            where now() <@ warning
-                and id_user = ?
-            limit 1
+            where id_user = ?
+            order by lower(warning)
             ", $this->id()
         );
     }
@@ -58,19 +81,5 @@ class Warning extends \Gazelle\BaseUser {
         );
         $this->flush();
         return $affected;
-    }
-
-    public function warningList(): array {
-        return $this->pg()->all("
-            select id_user_warner as id_warner,
-                lower(warning)    as begin,
-                upper(warning)    as end,
-                now() <@ warning  as active,
-                reason
-            from user_warning
-            where id_user = ?
-            order by lower(warning)
-            ", $this->id()
-        );
     }
 }

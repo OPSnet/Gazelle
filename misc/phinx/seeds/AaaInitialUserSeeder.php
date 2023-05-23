@@ -31,6 +31,10 @@ class AaaInitialUserSeeder extends AbstractSeed {
                 'Enabled' => '1',
                 'Visible' => '1',
                 'can_leech' => 1,
+                'stylesheet_id' => 18,
+                'auth_key' => authKey(),
+                'inviter_id' => 0,
+                'profile_info' => 'Created by installation script',
             ],
             [
                 'Username' => 'user',
@@ -42,11 +46,14 @@ class AaaInitialUserSeeder extends AbstractSeed {
                 'Enabled' => '1',
                 'Visible' => '1',
                 'can_leech' => 1,
+                'stylesheet_id' => 18,
+                'auth_key' => authKey(),
+                'inviter_id' => 0,
+                'profile_info' => 'Created by installation script',
             ],
         ])->saveData();
 
         $stmt = $this->query("SELECT ID FROM users_main WHERE Username='admin'");
-        /** @var \PDOStatement $stmt */
         $adminId = (int) $stmt->fetch()['ID'];
         $userId = $adminId + 1;
 
@@ -73,23 +80,13 @@ class AaaInitialUserSeeder extends AbstractSeed {
         $this->table('users_info')->insert([
             [
                 'UserID' => $adminId,
-                'StyleID' => 18,
-                'TorrentGrouping' => 0,
-                'ShowTags' => 1,
-                'AuthKey' => '7d3b4750ea71502d25051875a250b71a',
-                'Inviter' => 0,
-                'Info' => 'Created by installation script',
                 'AdminComment' => '',
                 'SiteOptions' => serialize([]),
+                'TorrentGrouping' => 0,
             ],
             [
                 'UserID' => $userId,
-                'StyleID' => 1,
                 'TorrentGrouping' => 0,
-                'ShowTags' => 1,
-                'AuthKey' => 'a1189fa8554776c6de31b6b4e2d0faea',
-                'Inviter' => 0,
-                'Info' => 'Created by installation script',
                 'AdminComment' => '',
                 'SiteOptions' => serialize([]),
             ]

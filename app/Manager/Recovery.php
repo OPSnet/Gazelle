@@ -441,7 +441,6 @@ class Recovery extends \Gazelle\Base {
                     coalesce(r.Bounty, 0) as Bounty,
                     count(t.ID) AS nr_torrents
                 FROM       %s.users_main u
-                INNER JOIN %s.users_info ui ON (ui.UserID = u.ID)
                 LEFT  JOIN %s.torrents t    ON ( t.UserID = u.ID)
                 LEFT  JOIN (
                     SELECT UserID, sum(bounty) as Bounty
@@ -458,7 +457,6 @@ class Recovery extends \Gazelle\Base {
             ) HIST
             LIMIT ?
         ",  RECOVERY_DB,
-            RECOVERY_DB,
             RECOVERY_DB,
             RECOVERY_DB,
             RECOVERY_DB, RECOVERY_MAPPING_TABLE,

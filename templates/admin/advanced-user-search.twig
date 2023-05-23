@@ -468,11 +468,11 @@ Results ordered <select name="order">
         </td>
     {% if show_invited %}
             <td>
-        {%- if u.user.invitedTotal > 0 -%}
+        {%- if u.user.stats.invitedTotal > 0 -%}
             <a href="user.php?action=invitetree&userid={{ u.user_id }}">
         {%- endif -%}
-            {{ u.user.invitedTotal|number_format }}
-        {%- if u.user.invitedTotal > 0 -%}
+            {{ u.user.stats.invitedTotal|number_format }}
+        {%- if u.user.stats.invitedTotal > 0 -%}
             </a>
         {%- endif -%}
             </td>

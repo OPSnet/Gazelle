@@ -123,7 +123,6 @@ if ($revokeUpload) {
 }
 
 if ($weeksWarned > 0) {
-    $WarnLength = $weeksWarned * (7 * 86400);
     $Reason = "Uploader of torrent ($torrentId) $name which was resolved with the preset: $reportTypeName.";
     if ($adminMessage) {
         $Reason .= " ($adminMessage)";
@@ -131,7 +130,7 @@ if ($weeksWarned > 0) {
     if ($revokeUpload) {
         $Reason .= ' (Upload privileges removed).';
     }
-    $userMan->warn($uploader, $WarnLength, $Reason, $Viewer);
+    $userMan->warn($uploader, $weeksWarned, $Reason, $Viewer);
 } else {
     $staffNote = null;
     if ($revokeUpload) {
@@ -148,9 +147,10 @@ if ($weeksWarned > 0) {
         }
     }
     if ($staffNote) {
-        $uploader->addStaffNote($staffNote)->modify();
+        $uploader->addStaffNote($staffNote);
     }
 }
+$uploader->modify(); // if there are notes to add
 
 //PM
 if ($modNote || $weeksWarned > 0 || isset($_POST['delete']) || $SendPM) {

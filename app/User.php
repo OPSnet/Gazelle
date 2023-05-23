@@ -23,12 +23,13 @@ class User extends BaseObject {
 
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
-    protected array $voteSummary;
+    protected string $warningExpiry;
 
     protected array $avatarCache;
     protected array $lastRead;
     protected array $forumWarning = [];
     protected array $staffNote = [];
+    protected array $voteSummary;
 
     protected Stats\User|null $stats;
 
@@ -97,9 +98,13 @@ class User extends BaseObject {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             SELECT um.Username,
+                um.auth_key,
+                um.avatar,
                 um.can_leech,
+                um.collage_total,
                 um.created,
                 um.CustomPermissions,
+                um.inviter_user_id,
                 um.IP,
                 um.Email,
                 um.Enabled,
@@ -108,26 +113,21 @@ class User extends BaseObject {
                 um.Paranoia,
                 um.PassHash,
                 um.PermissionID,
+                um.profile_info,
+                um.profile_title,
                 um.RequiredRatio,
+                um.slogan,
                 um.Title,
                 um.torrent_pass,
                 um.Visible,
                 um.2FA_Key,
                 ui.AdminComment,
-                ui.AuthKey,
-                ui.Avatar,
-                ui.collages,
-                ui.Info,
-                ui.InfoTitle,
-                ui.Inviter,
                 ui.NavItems,
                 ui.PermittedForums,
                 ui.RatioWatchEnds,
                 ui.RatioWatchDownload,
                 ui.RestrictedForums,
                 ui.SiteOptions,
-                ui.SupportFor,
-                ui.Warned,
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
@@ -214,6 +214,9 @@ class User extends BaseObject {
             ", $this->id
         );
         $this->info['attr'] = self::$db->to_pair('Name', 'ID', false);
+
+        $this->info['warning_expiry'] = (new User\Warning($this))->warningExpiry();
+
         self::$cache->cache_value($key, $this->info, 3600);
         self::$db->set_query_id($qid);
         return $this->info;
@@ -381,11 +384,11 @@ class User extends BaseObject {
     }
 
     public function auth(): string {
-        return $this->info()['AuthKey'];
+        return $this->info()['auth_key'];
     }
 
     public function avatar(): ?string {
-        return $this->info()['Avatar'];
+        return $this->info()['avatar'];
     }
 
     public function avatarMode(): AvatarDisplay {
@@ -526,11 +529,11 @@ class User extends BaseObject {
     }
 
     public function profileInfo(): string {
-        return $this->info()['Info'] ?? '';
+        return $this->info()['profile_info'];
     }
 
     public function profileTitle(): string {
-        return $this->info()['InfoTitle'] ?? 'Profile';
+        return $this->info()['profile_title'] ?: 'Profile';
     }
 
     public function requiredRatio(): float {
@@ -546,7 +549,7 @@ class User extends BaseObject {
     }
 
     public function slogan(): ?string {
-        return $this->info()['SupportFor'];
+        return $this->info()['slogan'];
     }
 
     public function staffNotes(): string {
@@ -1012,6 +1015,7 @@ class User extends BaseObject {
             );
             $changed = self::$db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
             $this->forumWarning = [];
+            self::$cache->delete_value('user_forum_warn_' . $this->id);
         }
         if (!empty($this->staffNote)) {
             self::$db->prepared_query("
@@ -1421,16 +1425,7 @@ class User extends BaseObject {
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
 
     public function warningExpiry(): ?string {
-        return $this->info()['Warned'];
-    }
-
-    public function endWarningDate(int $weeks): string {
-        return (string)self::$db->scalar("
-            SELECT coalesce(Warned, now()) + INTERVAL ? WEEK
-            FROM users_info
-            WHERE UserID = ?
-            ", $weeks, $this->id
-        );
+        return $this->info()['warning_expiry'];
     }
 
     /**
@@ -1448,7 +1443,7 @@ class User extends BaseObject {
      * @return int number of collages
      */
     public function paidPersonalCollages(): int {
-        return $this->info()['collages'];
+        return $this->info()['collage_total'];
     }
 
     /**
@@ -1581,7 +1576,7 @@ class User extends BaseObject {
     }
 
     public function inviterId(): int {
-        return (int)$this->info()['Inviter'];
+        return (int)$this->info()['inviter_user_id'];
     }
 
     public function unusedInviteTotal(): int {
@@ -1637,17 +1632,11 @@ class User extends BaseObject {
             LEFT  JOIN user_last_access AS ula ON (ula.user_id = um.ID)
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-            WHERE ui.Inviter = ?
+            WHERE um.inviter_user_id = ?
             ORDER BY $orderBy $direction
             ", $this->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function invitedTotal(): int {
-        return (int)$this->getSingleValue('user_invited', '
-            SELECT count(*) FROM users_info WHERE Inviter = ?
-        ');
     }
 
     public function passwordAge(): string {
@@ -1882,7 +1871,7 @@ class User extends BaseObject {
         if (is_null($this->avatar())) {
             $factor *= 0.75;
         }
-        if (!strlen($this->info()['Info'])) {
+        if (!strlen($this->profileInfo())) {
             $factor *= 0.75;
         }
         return $factor;
@@ -1946,7 +1935,7 @@ class User extends BaseObject {
     }
 
     public function nextClass(): ?array {
-        $criteria = (new Manager\User)->promotionCriteria()[$this->info()['PermissionID']] ?? null;
+        $criteria = (new Manager\User)->promotionCriteria()[$this->primaryClass()] ?? null;
         if (!$criteria) {
             return null;
         }

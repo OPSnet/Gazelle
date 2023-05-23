@@ -416,10 +416,10 @@ class Users extends \Gazelle\Base {
 
         self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, invited_total)
-                SELECT ui.Inviter, count(*) AS invited_total
-                FROM users_info ui
-                WHERE ui.Inviter IS NOT NULL
-                GROUP BY ui.Inviter
+                SELECT um.inviter_user_id, count(*) AS invited_total
+                FROM users_main um
+                WHERE um.inviter_user_id > 0
+                GROUP BY um.inviter_user_id
             ON DUPLICATE KEY UPDATE
                 invited_total = VALUES(invited_total)
         ");

@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class InviteSource extends \Gazelle\Base {
-
     public function create(string $name): int {
         self::$db->prepared_query("
             INSERT INTO invite_source (name) VALUES (?)
@@ -46,13 +45,14 @@ class InviteSource extends \Gazelle\Base {
     }
 
     public function findSourceNameByUserId(int $userId): ?string {
-        return self::$db->scalar("
+        $name = self::$db->scalar("
             SELECT i.name
             FROM invite_source i
             INNER JOIN user_has_invite_source uhis USING (invite_source_id)
             WHERE uhis.user_id = ?
             ", $userId
         );
+        return $name ? (string)$name : null;
     }
 
     public function remove(int $id): int {
@@ -136,15 +136,15 @@ class InviteSource extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    public function userSource(int $userId) {
+    public function userSource(int $userId): array {
         self::$db->prepared_query("
-            SELECT ui.UserID AS user_id,
+            SELECT um.ID AS user_id,
                 uhis.invite_source_id,
                 i.name
-            FROM users_info ui
-            LEFT JOIN user_has_invite_source uhis ON (uhis.user_id = ui.UserID)
+            FROM users_main um
+            LEFT JOIN user_has_invite_source uhis ON (uhis.user_id = um.ID)
             LEFT JOIN invite_source i USING (invite_source_id)
-            WHERE ui.inviter = ?
+            WHERE um.inviter_user_id = ?
             ", $userId
         );
         return self::$db->to_array('user_id', MYSQLI_ASSOC, false);
@@ -160,8 +160,8 @@ class InviteSource extends \Gazelle\Base {
         self::$db->prepared_query("
             DELETE uhis
             FROM user_has_invite_source uhis
-            INNER JOIN users_info ui ON (ui.UserID = uhis.user_id)
-            WHERE ui.Inviter = ?
+            INNER JOIN users_main um ON (um.ID = uhis.user_id)
+            WHERE um.inviter_user_id = ?
             ", $userId
         );
         self::$db->prepared_query("

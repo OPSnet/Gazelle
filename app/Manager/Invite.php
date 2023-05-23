@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Invite extends \Gazelle\Base {
-    protected $search;
+    protected string|null $search;
 
     public function findUserByKey(string $inviteKey, User $manager): ?\Gazelle\User {
         return $manager->findById(
@@ -17,7 +17,7 @@ class Invite extends \Gazelle\Base {
     /**
      * Set a text filter on email addresses
      */
-    public function setSearch(string $search) {
+    public function setSearch(string $search): Invite {
         $this->search = $search;
         return $this;
     }
@@ -36,7 +36,7 @@ class Invite extends \Gazelle\Base {
         );
         $invite = new \Gazelle\Invite($inviteKey);
         if (preg_match('/^s-(\d+)$/', $source, $match)) {
-            (new \Gazelle\Manager\InviteSource)->createPendingInviteSource($match[1], $inviteKey);
+            (new \Gazelle\Manager\InviteSource)->createPendingInviteSource((int)$match[1], $inviteKey);
         }
         self::$db->commit();
         return $invite;
@@ -48,7 +48,7 @@ class Invite extends \Gazelle\Base {
      * @return int number of invites
      */
     public function totalPending(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM invites WHERE Expires > now()
         ");
     }

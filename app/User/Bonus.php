@@ -262,9 +262,9 @@ class Bonus extends \Gazelle\BaseUser {
         $price = $this->effectivePrice($label);
         self::$db->prepared_query('
             UPDATE user_bonus ub
-            INNER JOIN users_info ui ON (ui.UserID = ub.user_id) SET
+            INNER JOIN users_main um ON (um.ID = ub.user_id) SET
                 ub.points = ub.points - ?,
-                ui.collages = ui.collages + 1
+                um.collage_total = um.collage_total + 1
             WHERE ub.points >= ?
                 AND ub.user_id = ?
             ', $price, $price, $this->user->id()

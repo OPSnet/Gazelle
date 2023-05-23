@@ -7,9 +7,9 @@ $db->prepared_query("
     DELETE FROM invite_tree
 ");
 $invite = $db->prepared_query('
-	SELECT UserID, Inviter
-    FROM users_info
-    WHERE Inviter IS NOT NULL
+	SELECT ID, inviter_user_id
+    FROM users_main
+    WHERE inviter_user_id > 0
     ORDER BY UserID
 ');
 $inv = [];

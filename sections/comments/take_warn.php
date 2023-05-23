@@ -21,26 +21,25 @@ if (is_null($user) || $user->classLevel() > $Viewer->classLevel()) {
     error(403);
 }
 
-$url = $comment->publicUrl();
 $comment->setBody(trim($_POST['body']))->modify();
 
-$Length = trim($_POST['length']);
-$Reason = trim($_POST['reason']);
-$PrivateMessage = trim($_POST['privatemessage']);
-if ($Length !== 'verbal') {
-    $Time = (int)$Length * (7 * 86_400);
-    $WarnTime = Time::offset($Time);
-    $userMan->warn($user, $Time, "$url - $Reason", $Viewer);
-    $subject = 'You have received a warning';
-    $message = "You have received a $Length week warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
-    $note = "Warned until $WarnTime by " . $Viewer->username() . "\nReason: $url - $Reason";
-} else {
+$weeks   = trim($_POST['length']);
+$reason  = trim($_POST['reason']);
+$url     = $comment->publicUrl();
+$context = trim($_POST['privatemessage']);
+if ($weeks === 'verbal') {
     $subject = 'You have received a verbal warning';
-    $message = "You have received a verbal warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
-    $note = "Verbally warned by " . $Viewer->username() . "\nReason: $url - $Reason";
+    $body    = "You have received a verbal warning for [url=$url]this comment[/url].\n\n[quote]{$context}[/quote]";
+    $note    = "Verbally warned by {$Viewer->username()}\nReason: $url - $reason";
     $user->addStaffNote($note);
+} else {
+    $weeks   = (int)$weeks;
+    $expiry  = $userMan->warn($user, $weeks, "$url - $reason", $Viewer);
+    $subject = 'You have received a warning';
+    $body    = "You have received a $weeks week warning for [url=$url]this comment[/url].\n\n[quote]{$context}[/quote]";
+    $note    = "Warned until $expiry by {$Viewer->username()}\nReason: $url - $reason";
 }
 $user->addForumWarning($note)->modify();
-$userMan->sendPM($user->id(), $Viewer->id(), $subject, $message);
+$userMan->sendPM($user->id(), $Viewer->id(), $subject, $body);
 
 header("Location: $url");

@@ -171,12 +171,16 @@ class ForumTest extends TestCase {
         $this->assertTrue($admin->writeAccess($secret), 'fthread-secret-admin-write');
         $this->assertTrue($admin->createAccess($secret), 'fthread-secret-admin-create');
 
-        /* Need to extend modify() to joined tables
-        $user->setUpdate('PermittedForums', $secret->id())->modify();
+         \Gazelle\DB::DB()->prepared_query("
+            UPDATE users_info SET
+                PermittedForums = ?
+            WHERE UserID = ?
+            ", $secret->id(), $user->id()
+        );
+        $user->flush();
         $this->assertTrue($user->readAccess($secret), 'fthread-secret-user-permitted-read');
         $this->assertTrue($user->writeAccess($secret), 'fthread-secret-user-permitted-write');
         $this->assertTrue($user->createAccess($secret), 'fthread-secret-user-permitted-create');
-        */
         $this->assertEquals(1, $secret->remove(), 'forum-secret-remove');
 
         // Forum Posts
@@ -284,5 +288,56 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $poll->close(), 'forum-poll-close');
         $this->assertTrue($poll->isClosed(), 'forum-poll-is-closed');
         $this->assertFalse($poll->isFeatured(), 'forum-poll-is-no-longer-featured');
+    }
+
+    public function testForumWarn(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum;
+        $admin          = $this->userList['admin'];
+        $user           = $this->userList['user'];
+        $this->forum    = $forumMan->create(
+            user:           $admin,
+            sequence:       151,
+            categoryId:     $this->category->id(),
+            name:           'Warn forum',
+            description:    'This is where it warns',
+            minClassRead:   100,
+            minClassWrite:  100,
+            minClassCreate: 100,
+            autoLock:       false,
+            autoLockWeeks:  42,
+        );
+        $pmMan = new Gazelle\Manager\PM($user);
+        foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
+            $pm->remove();
+        }
+
+        // TODO: move more warning functionality out of sections/...
+        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
+        $post    = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'offensive content'));
+        $userMan = new \Gazelle\Manager\User;
+        $week    = 2;
+        $message = "phpunit forum warn test " . randomString(10);
+        $expiry  = $userMan->warn($user, $week, "{$post->url()} - because phpunit", $admin);
+        $this->assertNull($user->forumWarning(), 'forum-post-no-warning-history');
+        $this->assertTrue($user->addForumWarning($message)->modify(), 'forum-post-add-warning');
+        $this->assertStringStartsWith(date('Y-m-d H', strtotime("+$week weeks")), $expiry, 'forum-post-warn');
+        // phpstan does not realize that forumWarning() is volatile and so it considers that the value is still null when in fact it is a string
+        $this->assertStringStartsWith(date('Y-m-d H'), $user->forumWarning(), 'forum-user-warning-history-start'); /** @phpstan-ignore-line */
+        $this->assertStringEndsWith($message, $user->forumWarning(), 'forum-user-warning-history-end'); /** @phpstan-ignore-line */
+
+        $inbox = new \Gazelle\User\Inbox($user);
+        $pmReceiverManager = new Gazelle\Manager\PM($inbox->user());
+        $this->assertEquals(1, $inbox->messageTotal(), 'warn-user-inbox-total');
+        $pm = $inbox->messageList($pmReceiverManager, 1, 0)[0];
+        $this->assertEquals('You have been warned', $pm->subject(), 'warn-user-inbox-pm-subject');
+        $body = $pm->postList(1, 0)[0]['body'];
+        // remove trailing '+00' timezone from expiry timestamp
+        $this->assertStringStartsWith(
+            "You have been warned, the warning is set to expire on " . substr($expiry, 0, -3),
+            $body,
+            'warn-user-inbox-pm-body-start'
+        );
+        $this->assertStringEndsWith("{$post->url()} - because phpunit", $body, 'warn-user-inbox-pm-body-end');
     }
 }

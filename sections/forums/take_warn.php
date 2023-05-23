@@ -34,28 +34,26 @@ if (is_null($post)) {
 }
 $post->setUpdate('Body', $body)->modify();
 
-$Reason = trim($_POST['reason']);
-$WarningLength = $_POST['length'];
-if ($WarningLength !== 'verbal') {
-    $Time = (int)$WarningLength * (7 * 24 * 60 * 60);
-    $userMan->warn($user, $Time, "{$post->url()} - $Reason", $Viewer);
-    $subject = 'You have received a warning';
-    $message = "You have received a $WarningLength week warning for [url={$post->url()}]this post[/url].";
-    $warned = "Warned until " .  Time::offset($Time);
-} else {
+$reason = trim($_POST['reason']);
+$weeks = $_POST['length'];
+if ($weeks === 'verbal') {
     $subject = 'You have received a verbal warning';
     $message = "You have received a verbal warning for [url={$post->url()}]this post[/url].";
     $warned = "Verbally warned";
+} else {
+    $expiry = $userMan->warn($user, $weeks, "{$post->url()} - $reason", $Viewer);
+    $subject = 'You have received a warning';
+    $message = "You have received a $weeks week warning for [url={$post->url()}]this post[/url].";
+    $warned = "Warned until $expiry";
 }
-$adminComment = date('Y-m-d') . " - $warned by " . $Viewer->username() . " for {$post->url()}\nReason: $Reason";
 
 $extraMessage = trim($_POST['privatemessage'] ?? '');
 if (strlen($extraMessage)) {
     $message .= "\n\n$extraMessage";
 }
 
-$user->addForumWarning($adminComment)->addStaffNote($adminComment)->modify();
-$userMan->sendPM($user->id(), $Viewer->id(), $subject, $message);
+$user->addForumWarning(date('Y-m-d') . " - $warned by {$Viewer->username()} for {$post->url()}\nReason: $reason")
+    ->modify();
 
 if ($post->isPinned()) {
     $post->thread()->flush();

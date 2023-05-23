@@ -1361,36 +1361,6 @@ parameters:
 			path: ../app/Manager/IPv4.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\Invite\\:\\:setSearch\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Invite.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Invite\\:\\:totalPending\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Invite.php
-
-		-
-			message: "#^Parameter \\#1 \\$inviteSourceId of method Gazelle\\\\Manager\\\\InviteSource\\:\\:createPendingInviteSource\\(\\) expects int, string given\\.$#"
-			count: 1
-			path: ../app/Manager/Invite.php
-
-		-
-			message: "#^Property Gazelle\\\\Manager\\\\Invite\\:\\:\\$search has no type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Invite.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\InviteSource\\:\\:findSourceNameByUserId\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/InviteSource.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\InviteSource\\:\\:userSource\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/InviteSource.php
-
-		-
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../app/Manager/Referral.php
