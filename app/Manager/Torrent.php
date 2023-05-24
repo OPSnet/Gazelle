@@ -418,11 +418,11 @@ class Torrent extends \Gazelle\BaseManager {
             $tgMan->findById($id)->refresh();
         }
 
-        $groupLog = new \Gazelle\Log;
+        $log = new \Gazelle\Log;
         $tracker = new \Gazelle\Tracker;
         foreach ($Torrents as [$TorrentID, $GroupID, $InfoHash]) {
             $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $leechLevel]);
-            $groupLog->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $reason")
+            $log->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $reason")
                 ->general($user->username() . " marked torrent $TorrentID freeleech type $reason");
         }
 

@@ -28,11 +28,11 @@
 {% if sitelog.error %}
     <tr class="nobr"><td colspan="2">Search request failed ({{ siteLog.errorMessage }}).</td></tr>
 {% else %}
-    {% for event in sitelog.next %}
+    {% for event in page %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}" id="log_{{ event.id }}">
             <td style="text-align: right">{{ event.id }}</td>
             <td class="nobr">
-                {{ event.time|time_diff }}
+                {{ event.created|time_diff }}
             </td>
             <td>
                 <span{% if event.color %} style="color: {{ event.color }}"{% endif %}>{{ event.message|raw }}</span>

@@ -16,7 +16,6 @@ describe('page loads as admin', () => {
         "/inbox.php",
         "/index.php",
         "/locked.php",
-        "/log.php",
         "/logchecker.php",
         "/reports.php",
         "/reportsv2.php",

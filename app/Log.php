@@ -5,8 +5,6 @@ namespace Gazelle;
 class Log extends Base {
     /**
      * Write a general message to the system log.
-     *
-     * @param string $message the message to write.
      */
     public function general(string $message): Log {
         $qid = self::$db->get_query_id();
@@ -20,10 +18,8 @@ class Log extends Base {
 
     /**
      * Write a group entry
-     *
-     * @param string $message
      */
-    public function group(int $groupId, int $userId, $message): Log {
+    public function group(int $groupId, int $userId, string $message): Log {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log
@@ -37,10 +33,8 @@ class Log extends Base {
 
     /**
      * Write a torrent entry
-     *
-     * @param string $message
      */
-    public function torrent(int $groupId, int $torrentId, ?int $userId, $message): Log {
+    public function torrent(int $groupId, int $torrentId, ?int $userId, string $message): Log {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log
