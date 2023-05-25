@@ -53,6 +53,8 @@ if (isset($_GET['searchsubmit'])) {
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $Search = new Gazelle\Search\Torrent(
+    new Gazelle\Manager\TGroup,
+    new Gazelle\Manager\Torrent,
     $GroupResults,
     $header->getSortKey(),
     $header->getOrderDir(),
@@ -61,6 +63,9 @@ $Search = new Gazelle\Search\Torrent(
     $Viewer->permitted('site_search_many')
 );
 $Results = $Search->query($_GET);
+if ($Results === false) {
+    $Results = [];
+}
 if ($GroupResults) {
     // FIXME: is this even needed?
     $Results = array_unique($Results);

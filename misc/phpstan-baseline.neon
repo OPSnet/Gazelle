@@ -2071,131 +2071,6 @@ parameters:
 			path: ../app/Search/Request.php
 
 		-
-			message: "#^Cannot access property \\$Errno on SphinxqlResult\\|false\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Cannot call method collect\\(\\) on SphinxqlResult\\|false\\.$#"
-			count: 3
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Cannot call method get_meta\\(\\) on SphinxqlResult\\|false\\.$#"
-			count: 3
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Cannot call method has_results\\(\\) on SphinxqlResult\\|false\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Cannot call method to_pair\\(\\) on SphinxqlResult\\|false\\.$#"
-			count: 2
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:add_field\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:add_word\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:filter_torrents_internal\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:filter_torrents_sph\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:post_process_fields\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:process_attribute\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:process_field\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:process_results\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:process_search_terms\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:query\\(\\) should return array\\|false but returns array\\|bool\\|null\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:search_basic\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:search_filelist\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Torrent\\:\\:search_taglist\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Parameter \\#1 \\$GroupIDs of static method Torrents\\:\\:get_groups\\(\\) expects array, array\\|bool\\|null given\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Parameter \\#1 \\$value of function count expects array\\|Countable, array\\|bool\\|null given\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Parameter \\#2 \\$Value of method SphinxqlQuery\\:\\:where_gt\\(\\) expects int\\|null, string given\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Parameter \\#2 \\$Value of method SphinxqlQuery\\:\\:where_lt\\(\\) expects int\\|null, string given\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Torrent\\:\\:\\$Groups \\(array\\) does not accept array\\|void\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Torrent\\:\\:\\$SortOrders has no type specified\\.$#"
-			count: 1
-			path: ../app/Search/Torrent.php
-
-		-
 			message: "#^Method Gazelle\\\\Search\\\\Torrent\\\\Report\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Search/Torrent/Report.php
@@ -3291,16 +3166,6 @@ parameters:
 			path: ../classes/tags.class.php
 
 		-
-			message: "#^Method Torrents\\:\\:get_groups\\(\\) has parameter \\$GroupIDs with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/torrents.class.php
-
-		-
-			message: "#^Method Torrents\\:\\:get_groups\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/torrents.class.php
-
-		-
 			message: "#^Parameter \\#1 \\$userId of method Gazelle\\\\Manager\\\\User\\:\\:findById\\(\\) expects int, int\\|string given\\.$#"
 			count: 1
 			path: ../classes/users.class.php
@@ -3994,16 +3859,6 @@ parameters:
 			message: "#^Variable \\$SnatchedGroupClass might not be defined\\.$#"
 			count: 1
 			path: ../sections/top10/votes.php
-
-		-
-			message: "#^Argument of an invalid type array\\|false supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: ../sections/torrents/browse.php
-
-		-
-			message: "#^Parameter \\#1 \\$array of function array_unique expects array, array\\|false given\\.$#"
-			count: 1
-			path: ../sections/torrents/browse.php
 
 		-
 			message: "#^Offset 'FreeLeech' does not exist on array\\{Name\\: string, Format\\: mixed, Media\\: mixed, Encoding\\: mixed, TorrentDescription\\: string, Scene\\: '0'\\|'1', HasLog\\: '0'\\|'1', HasCue\\: '0'\\|'1', \\.\\.\\.\\}\\|array\\{Name\\: string, Format\\: mixed, Media\\: mixed, Encoding\\: mixed, TorrentDescription\\: string, Scene\\: '0'\\|'1', HasLog\\: '0'\\|'1', HasCue\\: '0'\\|'1', \\.\\.\\.\\}\\.$#"

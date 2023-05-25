@@ -10,6 +10,8 @@ $GroupResults = ($_GET['group_results'] ?? '1') != '0';
 $Page = (int)($_GET['page'] ?? 1);
 
 $Search = new Gazelle\Search\Torrent(
+    new Gazelle\Manager\TGroup,
+    new Gazelle\Manager\Torrent,
     $GroupResults,
     $OrderBy,
     $OrderWay,
@@ -23,7 +25,7 @@ if (!$Viewer->permitted('site_search_many')) {
     $resultTotal = min($resultTotal, SPHINX_MAX_MATCHES);
 }
 
-if ($Results === false) {
+if (!is_array($Results)) {
     json_die('failure', 'Search returned an error. Make sure all parameters are valid and of the expected types.');
 }
 if ($resultTotal == 0) {
