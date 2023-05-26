@@ -51,14 +51,9 @@ if ($UserID == $Viewer->id()) {
     // Don't allow any kind of previewing on other profiles
     $Preview = false;
 }
+$previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
+$Paranoia  = $Preview ? explode(',', $_GET['paranoia']) : $User->paranoia();
 
-// Image proxy CTs
-$DisplayCustomTitle = !empty($User->title())
-    ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-        fn ($m) => 'src=' . $m[1] . image_cache_encode($m[2]) . $m[3], $User->title())
-    : $User->title();
-
-$Paranoia = $Preview ? explode(',', $_GET['paranoia']) : $User->paranoia();
 function check_paranoia_here(string $Setting): int|false {
     global $Paranoia, $Class, $UserID, $Preview;
     if ($Preview) {
@@ -67,6 +62,12 @@ function check_paranoia_here(string $Setting): int|false {
         return check_paranoia($Setting, $Paranoia ?? [], $Class, $UserID);
     }
 }
+
+// Image proxy CTs
+$DisplayCustomTitle = !empty($User->title())
+    ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
+        fn ($m) => 'src=' . $m[1] . image_cache_encode($m[2]) . $m[3], $User->title())
+    : $User->title();
 
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
@@ -79,7 +80,7 @@ echo $Twig->render('user/header.twig', [
         'latest' => $viewerBonus->otherLatest($User),
     ],
     'friend'       => new Gazelle\User\Friend($Viewer),
-    'preview_user' => $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer,
+    'preview_user' => $previewer,
     'user'         => $User,
     'userMan'      => $userMan,
     'viewer'       => $Viewer,
@@ -223,7 +224,6 @@ if (($Override = check_paranoia_here('artistsadded'))) {
                 <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
 <?php
 }
-$previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
 if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
 ?>
                 <li<?= $User->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
@@ -482,66 +482,11 @@ if ($Viewer->permitted('users_give_donor')) {
     ]);
 }
 
-// Requests
-if (!$Viewer->disableRequests() && check_paranoia_here('requestsvoted_list')) {
-    $requestList = (new Gazelle\Manager\Request)->findUnfilledByUser($User, 100);
-    $hide = count($requestList) > 5;
-    if ($requestList) {
-?>
-        <div class="box" id="requests_box">
-            <div class="head">
-                Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">Toggle</a>
-            </div>
-            <div id="requests" class="request_table <?= $hide ? ' hidden' : '' ?>">
-                <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
-                    <tr class="colhead_dark">
-                        <td style="width: 48%;">
-                            <strong>Request Name</strong>
-                        </td>
-                        <td>
-                            <strong>Vote</strong>
-                        </td>
-                        <td>
-                            <strong>Bounty</strong>
-                        </td>
-                        <td>
-                            <strong>Added</strong>
-                        </td>
-                    </tr>
-<?php
-        $Row = 'b';
-        foreach ($requestList as $request) {
-            $Row = $Row === 'a' ?  'b' : 'a';
-?>
-                    <tr class="row<?= $Row ?>">
-                        <td>
-                            <?= $request->smartLink() ?>
-                            <div class="tags">
-                                <?= implode(', ', array_map(
-                                    fn ($tag) => "<a href=\"requests.php?tags=$tag\">" . display_str($tag) . '</a>',
-                                    $request->tagNameList()
-                                )) ?>
-                            </div>
-                        </td>
-                        <td>
-                            <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>
-<?php            if ($Viewer->permitted('site_vote')) { ?>
-                            &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $request->id() ?>)" class="brackets">+</a>
-<?php            } ?>
-                        </td>
-                        <td>
-                            <span id="bounty_<?= $request->id() ?>"><?= byte_format($request->bountyTotal()) ?></span>
-                        </td>
-                        <td>
-                            <?= time_diff($request->created()) ?>
-                        </td>
-                    </tr>
-<?php        } ?>
-                </table>
-            </div>
-        </div>
-<?php
-    }
+if (!$Viewer->disableRequests() && $User->propertyVisible($previewer, 'requestsvoted_list')) {
+    echo $Twig->render('request/user-unfilled.twig', [
+        'list'   => (new Gazelle\Manager\Request)->findUnfilledByUser($User, 100),
+        'viewer' => $Viewer,
+    ]);
 }
 
 if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {

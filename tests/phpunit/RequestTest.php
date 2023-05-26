@@ -79,6 +79,7 @@ class RequestTest extends TestCase {
         $tagId  = $tagMan->create('jazz', $this->userList['admin']->id());
         $this->assertGreaterThan(0, $tagId, 'request-create-tag');
         $this->assertEquals(1, $this->request->addTag($tagId), 'request-add-tag');
+        $this->request->addTag($tagMan->create('vaporwave', $this->userList['admin']->id()));
 
         // FIXME: cannot be asserted earlier: this should not depend on a request having tags
         $this->assertInstanceOf(Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
@@ -103,7 +104,11 @@ class RequestTest extends TestCase {
         $this->assertEquals('Unitest Artists', $this->request->recordLabel(), 'request-rec-label');
         $this->assertEquals(1, $this->request->categoryId(), 'request-cat-id');
         $this->assertEquals('Music', $this->request->categoryName(), 'request-cat-name');
-        $this->assertEquals(['jazz'], $this->request->tagNameList(), 'request-tag-list');
+        $this->assertEquals(['jazz', 'vaporwave'], $this->request->tagNameList(), 'request-tag-list');
+        $this->assertEquals(
+            '<a href="requests.php?tags=jazz">jazz</a> <a href="requests.php?tags=vaporwave">vaporwave</a>',
+            $this->request->tagSearchLink(), 'request-tag-searchlink'
+        );
         $this->assertEquals('This is a unit test description', $this->request->description(), 'request-description');
         $this->assertTrue($this->request->needCue(), 'request-need-cue');
         $this->assertTrue($this->request->needLog(), 'request-need-log');

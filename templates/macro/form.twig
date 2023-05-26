@@ -6,6 +6,11 @@
     {%- if flag %} disabled="disabled"{% endif -%}
 {%- endmacro %}
 
+{# used as an additional name in an element class declaration #}
+{%- macro hidden(flag) -%}
+    {%- if flag %} hidden{% endif -%}
+{%- endmacro %}
+
 {%- macro selected(flag) -%}
     {%- if flag %} selected="selected"{% endif -%}
 {%- endmacro %}

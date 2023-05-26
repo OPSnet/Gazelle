@@ -1,0 +1,48 @@
+{% from 'macro/form.twig' import hidden %}
+{% for request in list %}
+    {% if loop.first %}
+<div class="box" id="requests_box">
+    <div class="head">
+        Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">Toggle</a>
+    </div>
+    <div id="requests" class="request_table{{ hidden(list|length > 5) }}">
+        <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
+            <tr class="colhead_dark">
+                <td style="width: 48%;">
+                    <strong>Request Name</strong>
+                </td>
+                <td>
+                    <strong>Vote</strong>
+                </td>
+                <td>
+                    <strong>Bounty</strong>
+                </td>
+                <td>
+                    <strong>Added</strong>
+                </td>
+            </tr>
+    {% endif %}
+            <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+                <td>
+                    {{ request.smartLink|raw }}
+                    <div class="tags">{{ request.tagLinkList }}</div>
+                </td>
+                <td>
+                    <span id="vote_count_{{ request.id }}">{{ request.userVotedTotal }}</span>
+    {% if viewer.permitted('site_vote') %}
+                    &nbsp;&nbsp; <a href="javascript:Vote(0, {{ request.id }})" class="brackets">+</a>
+    {% endif %}
+                </td>
+                <td>
+                    <span id="bounty_{{ request.id }}">{{ request.bountyTotal|octet_size }}</span>
+                </td>
+                <td>
+                    {{ request.created|time_diff }}
+                </td>
+            </tr>
+    {% if loop.last %}
+        </table>
+    </div>
+</div>
+    {% endif %}
+{% endfor %}

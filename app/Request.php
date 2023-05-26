@@ -366,6 +366,15 @@ class Request extends BaseObject {
         return $this->info()['release_type'];
     }
 
+    public function tagSearchLink(): string {
+        return implode(' ',
+            array_map(
+                fn($tag) => "<a href=\"requests.php?tags=$tag\">$tag</a>",
+                $this->tagNameList()
+            )
+        );
+    }
+
     public function tagNameList(): array {
         return $this->info()['tag'];
     }
