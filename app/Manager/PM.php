@@ -14,17 +14,29 @@ class PM extends \Gazelle\BaseUser {
         $key = sprintf(self::ID_KEY, $pmId, $this->user->id());
         $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT cu.ConvID
-                FROM pm_conversations_users cu
-                WHERE cu.ConvID = ?
-                    AND cu.UserID = ?
+            $id = (int)self::$db->scalar("
+                SELECT pcu.ConvID
+                FROM pm_conversations_users pcu
+                WHERE pcu.ConvID = ?
+                    AND pcu.UserID = ?
                 ", $pmId, $this->user->id()
             );
-            if (!is_null($id)) {
+            if ($id) {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }
+        return $id ? new \Gazelle\PM($id, $this->user) : null;
+    }
+
+    public function findByPostId(int $postId): ?\Gazelle\PM {
+        $id = (int)self::$db->scalar("
+            SELECT pcu.ConvID
+            FROM pm_conversations_users pcu
+            INNER JOIN pm_messages      pm USING (ConvID)
+            WHERE pcu.UserID = ?
+                AND pm.ID = ?
+            ", $this->user->id(), $postId
+        );
         return $id ? new \Gazelle\PM($id, $this->user) : null;
     }
 }

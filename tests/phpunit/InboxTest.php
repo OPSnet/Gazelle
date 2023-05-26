@@ -15,8 +15,8 @@ class InboxTest extends TestCase {
     }
     public function testInbox(): void {
         $this->userList = [
-            'sender'   => Helper::makeUser('inbox.send', 'inbox'),
-            'receiver' => Helper::makeUser('inbox.recv', 'inbox'),
+            'sender'   => Helper::makeUser('inbox.send.' . randomString(6), 'inbox'),
+            'receiver' => Helper::makeUser('inbox.recv.' . randomString(6), 'inbox'),
         ];
         $senderId = $this->userList['sender']->id();
         $receiverId = $this->userList['receiver']->id();
@@ -114,8 +114,15 @@ class InboxTest extends TestCase {
         $this->assertEquals(4, $receiver->user()->inboxUnreadCount(), 'inbox-more-count');
         $this->assertEquals(5, $receiver->messageTotal(), 'inbox-more-message-count');
         $rlist = $receiver->messageList($pmReceiverManager, 6, 0);
-        $this->assertFalse($rlist[0]->isUnread(), 'inbox-first-is-read');
+        $flaky = implode(", ", array_map(fn($m) => "id={$m->id()} sent={$m->sentDate()} unr=" . ($m->isUnread() ? 'y' : 'n'), $rlist));
+        $this->assertFalse($rlist[0]->isUnread(), "inbox-first-is-read $flaky");
         $this->assertTrue($rlist[1]->isUnread(), 'inbox-second-is-unread');
+
+        // get body
+        $postlist = $rlist[0]->postList(2, 0);
+        $postId = $postlist[0]['id'];
+        $pm = $pmReceiverManager->findByPostId($postId);
+        $this->assertEquals($body, $pm->postBody($postId), 'inbox-pm-post-body');
 
         // unread first
         $receiver->setUnreadFirst(true);

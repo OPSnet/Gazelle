@@ -137,7 +137,7 @@ class Inbox extends \Gazelle\BaseUser {
 
     public function messageList(\Gazelle\Manager\PM $pmMan, int $limit, int $offset): array {
         [$cond, $args] = $this->configure();
-        $unreadFirst = $this->showUnreadFirst() ? "cu.Unread," : '';
+        $unreadFirst = $this->showUnreadFirst() ? "if(cu.Unread = '1', 0, 1) ASC," : '';
         array_push($args, $limit, $offset);
         self::$db->prepared_query("
             SELECT cu.ConvID

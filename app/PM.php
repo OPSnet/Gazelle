@@ -216,8 +216,19 @@ class PM extends Base {
         return $affected;
     }
 
+    public function postBody(int $postId): ?string {
+        $body = self::$db->scalar("
+            SELECT Body
+            FROM pm_messages pm
+            WHERE pm.ConvID = ?
+                AND pm.ID = ?
+            ", $this->id, $postId
+        );
+        return $body ? (string)$body : null;
+    }
+
     public function postTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) from pm_messages where ConvID = ?
             ", $this->id
         );

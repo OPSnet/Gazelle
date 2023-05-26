@@ -1761,11 +1761,6 @@ parameters:
 			path: ../app/Manager/XBT.php
 
 		-
-			message: "#^Method Gazelle\\\\PM\\:\\:postTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/PM.php
-
-		-
 			message: "#^Method Gazelle\\\\ReleaseType\\:\\:findExtendedNameById\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/ReleaseType.php

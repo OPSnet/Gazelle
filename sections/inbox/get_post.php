@@ -1,19 +1,16 @@
 <?php
 
-$postId = (int)$_GET['post'];
-// Quick SQL injection check
-if (!$postId) {
+$postId = (int)($_GET['post'] ?? 0);
+$pm = (new Gazelle\Manager\PM($Viewer))->findByPostId($postId);
+if (is_null($pm)) {
+    error(403);
+}
+
+$body = $pm->postBody($postId);
+if (is_null($body)) {
     error(404);
 }
 
-// Message is selected providing the user quoting is one of the two people in the thread
 // This gets sent to the browser, which echoes it wherever
-echo trim((string)Gazelle\DB::DB()->scalar("
-    SELECT m.Body
-    FROM pm_messages AS m
-    INNER JOIN pm_conversations_users AS u USING (ConvID)
-    WHERE u.UserID = ?
-        AND m.ID = ?
-    ", $Viewer->id(), $postId
-));
+echo $body;
 
