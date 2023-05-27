@@ -44,42 +44,28 @@ abstract class Collector extends Base  {
     final const CHUNK_SIZE = 100;
     final const ORDER_BY = ['t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC'];
 
-    protected $sql  = '';
-    protected $args = [];
-    protected $qid  = false;
-    protected $idBoundary;
-    protected $totalAdded = 0;
-    protected $totalFound = 0;
-    protected $totalSize = 0;
-    protected $totalTokens = 0;
-    protected $error = [];
-    protected $skipped = [];
-    protected $startTime;
-    protected $zip;
-    protected $torMan;
+    protected string $sql  = '';
+    protected array $args = [];
+    protected \mysqli_result|bool $qid  = false;
+    protected array|false $idBoundary;
+    protected int $totalAdded = 0;
+    protected int $totalFound = 0;
+    protected int $totalSize = 0;
+    protected int $totalTokens = 0;
+    protected array $error = [];
+    protected array $skipped = [];
+    protected float $startTime;
 
-    abstract public function prepare(array $list);
-    abstract public function fill();
+    abstract public function prepare(array $list): bool;
+    abstract public function fillZip(\ZipStream\ZipStream $zip): void;
 
-    /**
-     * Create a Zip object and store the query results
-     */
     public function __construct(
         protected \Gazelle\User $user,
-        protected readonly string $title,
-        protected readonly int $orderBy,
+        protected \Gazelle\Manager\Torrent $torMan,
+        protected readonly string          $title,
+        protected int                      $orderBy,
     ) {
         $this->startTime = microtime(true);
-
-        $options = new \ZipStream\Option\Archive;
-        $options->setSendHttpHeaders(true);
-        $options->setEnableZip64(false); // for macOS compatibility
-        $options->setFlushOutput(true); // flush on each file to save on memory
-        $options->setContentType('application/x-zip');
-        $options->setDeflateLevel(8);
-        $this->zip = new \ZipStream\ZipStream(SITE_NAME . '-' . safeFilename($title) . '.zip', $options);
-
-        $this->torMan = new \Gazelle\Manager\Torrent;
     }
 
     /**
@@ -87,7 +73,7 @@ abstract class Collector extends Base  {
      *
      * return string beginning of SQL query to collect torrents
      */
-    public function queryPreamble(array $list) {
+    public function queryPreamble(array $list): string {
         $sql = 'SELECT ';
         if (count($list) == 0) {
             $sql .= '0 AS sequence, ';
@@ -132,7 +118,7 @@ abstract class Collector extends Base  {
                     '46' => $sql .= "t.Format = 'AAC'  AND t.Encoding = '192'",
                     default => error(0),
                 };
-                $sql .= "THEN $Priority ";
+                $sql .= " THEN $Priority ";
             }
             $sql .= "ELSE 100 END AS sequence, ";
         }
@@ -153,7 +139,7 @@ abstract class Collector extends Base  {
      * the resultset in chunks, to avoid blowing out the memory requirements on
      * artists with many, many, many releases.
      */
-    public function process(string $Key): array {
+    public function process(string $Key): array|null {
         $saveQid = self::$db->get_query_id();
         self::$db->set_query_id($this->qid);
         if (!isset($this->idBoundary)) {
@@ -164,13 +150,11 @@ abstract class Collector extends Base  {
             }
         }
         $found = 0;
-        $GroupIDs = [];
-        $Downloads = [];
+        $downloadList = [];
         while ($row = self::$db->next_record(MYSQLI_ASSOC, false)) {
             if (!$this->idBoundary || $row['TorrentID'] == $this->idBoundary[$row[$Key]]) {
                 $found++;
-                $Downloads[$row[$Key]] = $row;
-                $GroupIDs[$row['TorrentID']] = $row['GroupID'];
+                $downloadList[$row[$Key]] = $row;
                 if ($found >= self::CHUNK_SIZE) {
                     break;
                 }
@@ -178,7 +162,7 @@ abstract class Collector extends Base  {
         }
         $this->totalFound += $found;
         self::$db->set_query_id($saveQid);
-        return empty($Downloads) ? [null, null] : [$Downloads, $GroupIDs];
+        return $this->totalFound > 0 ? $downloadList : null;
     }
 
     /**
@@ -186,11 +170,10 @@ abstract class Collector extends Base  {
      * it will be added to the list of errors. If the torrent does not
      * match the minimum format/encoding requirements, it will be skipped.
      *
-     * @param array $info file info stored as an array with at least the keys
+     * $info file info stored as an array with at least the keys
      *     Artist, Name, Year, Media, Format, Encoding and TorrentID
-     * @param string $folderName folder name
      */
-    public function add(array $info, $folderName = null) {
+    public function addZip(\ZipStream\ZipStream $zip, array $info, string $folderName = null): void {
         if ($info['sequence'] == 100) {
             $this->skip($info);
             return;
@@ -205,9 +188,10 @@ abstract class Collector extends Base  {
             $this->fail($info);
             return;
         }
+
         $folder = is_null($folderName) ? '' : (safeFilename($folderName) . '/');
         $name = $torrent->torrentFilename(false, MAX_PATH_LEN - strlen($folder));
-        $this->zip->addFile("$folder$name", $contents);
+        $zip->addFile("$folder$name", $contents);
 
         $this->totalAdded++;
         $this->totalSize += $info['Size'];
@@ -217,7 +201,7 @@ abstract class Collector extends Base  {
     /**
      * Add a file to the list of files that did not match the user's format or quality requirements
      */
-    public function skip(array $info) {
+    public function skip(array $info): Collector {
         $this->skipped[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
         return $this;
     }
@@ -225,7 +209,7 @@ abstract class Collector extends Base  {
     /**
      * Add a file to the list of files for which the torrent data is corrupt.
      */
-    public function fail(array $info) {
+    public function fail(array $info): Collector {
         $this->error[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
         return $this;
     }
@@ -242,18 +226,18 @@ abstract class Collector extends Base  {
     /**
      * Add a summary to the archive and include a list of files that could not be added. Close the zip archive
      */
-    public function emit() {
-        $this->fill();
-        $this->zip->addFile("README.txt", $this->summary());
+    public function emitZip(\ZipStream\ZipStream $zip): void {
+        $this->fillZip($zip);
+        $zip->addFile("README.txt", $this->summary());
         if ($this->error) {
-            $this->zip->addFile("ERRORS.txt", $this->errors());
+            $zip->addFile("ERRORS.txt", $this->errors());
         }
-        $this->zip->finish();
+        header('X-Accel-Buffering: no');
+        $zip->finish();
     }
 
     /**
      * Produce a summary text over the collector results
-     * @return string summary text
      */
     public function summary(): string {
         return self::$twig->render('collector.twig', [

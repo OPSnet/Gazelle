@@ -497,7 +497,7 @@ class Mysql {
         $this->Row = 0;
     }
 
-    public function get_query_id(): mixed {
+    public function get_query_id(): \mysqli_result|false {
         return $this->QueryID ?? false;
     }
 

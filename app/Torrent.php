@@ -128,7 +128,11 @@ class Torrent extends TorrentAbstract {
             return '';
         }
         $tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
-        $tor->decodeString($contents);
+        try {
+            $tor->decodeString($contents);
+        } catch (\RuntimeException $e) {
+            return '';
+        }
         $tor->cleanDataDictionary();
         $tor->setValue([
             'announce' => $announceUrl,

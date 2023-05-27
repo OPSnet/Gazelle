@@ -13,11 +13,10 @@ if (is_null($collage)) {
     error(404);
 }
 
-$collector = new Gazelle\Collector\Collage($Viewer, $collage, (int)$_REQUEST['preference']);
+$collector = new Gazelle\Collector\Collage($Viewer, new Gazelle\Manager\Torrent, $collage, (int)$_REQUEST['preference']);
 if (!$collector->prepare($_REQUEST['list'])) {
     error("Nothing to gather, choose some encodings and bitrates!");
 }
 $Viewer->modifyOption('Collector', [implode(':', $_REQUEST['list']), $_REQUEST['preference']]);
 
-header('X-Accel-Buffering: no');
-$collector->emit();
+$collector->emitZip(Gazelle\Util\Zip::make($collage->name()));

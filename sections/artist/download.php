@@ -11,11 +11,10 @@ if (is_null($artist)) {
     error(404);
 }
 
-$collector = new Gazelle\Collector\Artist($Viewer, $artist, (int)$_REQUEST['preference']);
+$collector = new Gazelle\Collector\Artist($Viewer, new Gazelle\Manager\Torrent, $artist, (int)$_REQUEST['preference']);
 if (!$collector->prepare($_REQUEST['list'])) {
     error("Nothing to gather, choose some encodings and bitrates!");
 }
 $Viewer->modifyOption('Collector', [implode(':', $_REQUEST['list']), $_REQUEST['preference']]);
 
-header('X-Accel-Buffering: no');
-$collector->emit();
+$collector->emitZip(Gazelle\Util\Zip::make($artist->name()));

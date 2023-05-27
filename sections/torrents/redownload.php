@@ -39,7 +39,8 @@ switch ($_GET['type']) {
         error(0);
 }
 
-$collector = new Gazelle\Collector\TList($Viewer, $user->username() . "-$label", 0);
+$title = "{$user->username()}-$label";
+$collector = new Gazelle\Collector\TList($Viewer, new Gazelle\Manager\Torrent, $title, 0);
 
 $db = Gazelle\DB::DB();
 $db->prepared_query("
@@ -49,8 +50,7 @@ $db->prepared_query("
     $SQL
     ", $user->id()
 );
-$collector->setList($db->collect(0));
+$collector->setList($db->collect(0, false));
 $collector->prepare([]);
 
-header('X-Accel-Buffering: no');
-$collector->emit();
+$collector->emitZip(Gazelle\Util\Zip::make($title));

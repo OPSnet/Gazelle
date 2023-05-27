@@ -34,11 +34,10 @@ if (!$ids) {
     error(0);
 }
 
-$collector = new Gazelle\Collector\TList($Viewer, $title, 0);
+$collector = new Gazelle\Collector\TList($Viewer, new Gazelle\Manager\Torrent, $title, 0);
 $collector->setList($ids);
 if (!$collector->prepare([])) {
     error("Nothing to gather, choose some encodings and bitrates!");
 }
 
-header('X-Accel-Buffering: no');
-$collector->emit();
+$collector->emitZip(Gazelle\Util\Zip::make($title));
