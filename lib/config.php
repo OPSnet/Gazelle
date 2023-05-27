@@ -431,8 +431,8 @@ defined('SCHEDULER_DELAY') or define('SCHEDULER_DELAY', 450);
 defined('UNSEEDED_DRAIN_INTERVAL') or define('UNSEEDED_DRAIN_INTERVAL', 3600 * 6);
 
 // Which image hosts are acceptable and which aren't?
-defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', ['badhost.example.com']);
-defined('IMAGE_HOST_RECOMMENDED') or define('IMAGE_HOST_RECOMMENDED', ['goodhost.example.com']);
+defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', []);
+defined('IMAGE_HOST_RECOMMENDED') or define('IMAGE_HOST_RECOMMENDED', []);
 
 // What are the relative weights of user percentiles, in order to calculate
 // the overall percentile rank.
@@ -808,6 +808,8 @@ defined('CATEGORY') or define('CATEGORY', [
     'Comics'
 ]);
 defined('CATEGORY_GROUPED') or define('CATEGORY_GROUPED', array_intersect(['Music'], CATEGORY));
+defined('CATEGORY_EBOOK') or define('CATEGORY_EBOOK', 3);
+defined('CATEGORY_MUSIC') or define('CATEGORY_MUSIC', 1);
 
 // Icons of upload categories.
 defined('CATEGORY_ICON') or define('CATEGORY_ICON', [

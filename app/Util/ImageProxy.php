@@ -19,7 +19,7 @@ class ImageProxy {
      * @param string $url Link to an image
      */
     public function badHost(string $url): ?string {
-        foreach (IMAGE_HOST_BANNED as $host) {
+        foreach (IMAGE_HOST_BANNED as $host) { /** @phpstan-ignore-line */
             if (stripos($url, (string) $host) !== false) {
                 return $host;
             }
@@ -34,6 +34,6 @@ class ImageProxy {
         $image = $tgroup->image() ?: STATIC_SERVER . '/common/noartwork/' . strtolower($tgroup->categoryName()) . '.png';
         return "<img src=\"". image_cache_encode($image, height: 150, width: 150)
             . "\" width=\"90\" height=\"90\" alt=\"Cover\" onclick=\"lightbox.init('" . image_cache_encode($image)
-            . "', 90)\" data-origin-src=\"${image}\" />";
+            . "', 90)\" data-origin-src=\"{$image}\" />";
     }
 }

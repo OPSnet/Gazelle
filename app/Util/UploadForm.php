@@ -17,25 +17,19 @@ namespace Gazelle\Util;
 use \OrpheusNET\Logchecker\Logchecker;
 
 class UploadForm extends \Gazelle\Base {
-    var $user;
-
-    protected int $categoryId = 0;
-
-    var $NewTorrent = false;
-    var $Torrent = [];
-    var $Error = false;
-    var $Disabled = '';
-    var $DisabledFlag = false;
+    protected int    $categoryId = 0;
+    protected string $Disabled = '';
+    protected bool   $DisabledFlag = false;
 
     const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
     const JSON_INPUT_ACCEPT = ['application/json', '.json'];
 
-    public function __construct(\Gazelle\User $user, $Torrent = false, $Error = false, $NewTorrent = true) {
-        $this->user = $user;
-        $this->NewTorrent = $NewTorrent;
-        $this->Torrent = $Torrent;
-        $this->Error = $Error;
-
+    public function __construct(
+        protected \Gazelle\User $user,
+        protected array|false $Torrent = false,
+        protected string|false $Error = false,
+        protected bool $NewTorrent = true
+    ) {
         if ($this->Torrent && isset($this->Torrent['GroupID'])) {
             $this->Disabled = ' disabled="disabled"';
             $this->DisabledFlag = true;
@@ -53,39 +47,38 @@ class UploadForm extends \Gazelle\Base {
      * We want to get rid eval()'ing Javascript code, and this produces
      * something that can be added to the DOM and the engine will run it.
      */
-    function albumReleaseJS(): string {
+    public function albumReleaseJS(): string {
         $groupDesc = new Textarea('album_desc', '');
         $relDesc   = new Textarea('release_desc', '');
         return Textarea::factory();
     }
 
-    function descriptionJS(): string {
+    public function descriptionJS(): string {
         $groupDesc = new Textarea('desc', '');
         return Textarea::factory();
     }
 
-    function head(): string {
+    public function head(): string {
         return self::$twig->render('upload/header.twig', [
-            'announce'    => $this->user->announceUrl(),
-            'auth'        => $this->user->auth(),
             'category_id' => $this->categoryId,
             'error'       => $this->Error,
             'is_disabled' => $this->DisabledFlag,
             'is_new'      => (int)$this->NewTorrent,
             'info'        => $this->Torrent,
+            'user'        => $this->user,
         ]);
     }
 
-    function foot(bool $showFooter): string {
+    public function foot(bool $showFooter): string {
         return self::$twig->render('upload/footer.twig', [
             'is_new'      => (int)$this->NewTorrent,
             'info'        => $this->Torrent,
             'show_footer' => $showFooter,
-            'viewer'      => $this->user,
+            'user'        => $this->user,
         ]);
     }
 
-    function music_form(array $GenreTags): string {
+    public function music_form(array $GenreTags): string {
         $QueryID = self::$db->get_query_id();
         $Torrent = $this->Torrent;
         $IsRemaster = !empty($Torrent['Remastered']);
@@ -162,7 +155,7 @@ class UploadForm extends \Gazelle\Base {
                     <select id="releasetype" name="releasetype"<?=$this->Disabled?>>
                         <option>---</option>
 <?php       foreach ($releaseTypes as $Key => $Val) { ?>
-                        <option value="<?= $Key ?>"<?= !$this->NewTorrent && $Key == $Torrent['ReleaseType'] ? ' selected="selected"' : '' ?>><?= $Val ?></option>
+                        <option value="<?= $Key ?>"<?= isset($Torrent['ReleaseType']) && $Key == $Torrent['ReleaseType'] ? ' selected="selected"' : '' ?>><?= $Val ?></option>
 <?php       } ?>
                     </select>
                     <br />Please take the time to fill this out correctly (especially when adding Compilations and Anthologies). Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
@@ -173,7 +166,7 @@ class UploadForm extends \Gazelle\Base {
                 <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image'] ?? '') ?>"<?=$this->Disabled?> />
                     <img id="thumbnail" src="#" height="100" width="100" float="right" style="margin-left: 10px; vertical-align: top; display: none;" />
                 <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
-<?php       if (IMAGE_HOST_BANNED) { ?>
+<?php       if (IMAGE_HOST_BANNED) { /** @phpstan-ignore-line */ ?>
                 <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
                     ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
 <?php       } ?>
@@ -358,7 +351,7 @@ class UploadForm extends \Gazelle\Base {
                 <td class="label">Vanity House:</td>
                 <td>
                     <label><input type="checkbox" id="vanity_house" name="vanity_house"<?php
-                        if (!$this->NewTorrent && $Torrent['GroupID']) { echo ' disabled="disabled"'; } ?><?php
+                        if (isset($Torrent['GroupID'])) { echo ' disabled="disabled"'; } ?><?php
                         if ($Torrent['VanityHouse'] ?? false) { echo ' checked="checked"';} ?> />
                     Check this only if you are submitting your own work or submitting on behalf of the artist, and this is intended to be a Vanity House release.
                     </label>
@@ -530,10 +523,10 @@ class UploadForm extends \Gazelle\Base {
         </table>
 <?php
         self::$db->set_query_id($QueryID);
-        return ob_get_clean();
+        return (string)ob_get_clean();
     }
 
-    function audiobook_form(): string {
+    public function audiobook_form(): string {
         $Torrent = $this->Torrent;
         ob_start();
 ?>
@@ -624,10 +617,10 @@ class UploadForm extends \Gazelle\Base {
             </tr>
         </table>
 <?php
-        return ob_get_clean();
+        return (string)ob_get_clean();
     }
 
-    function simple_form(): string {
+    public function simple_form(): string {
         $Torrent = $this->Torrent;
         ob_start();
 ?>
@@ -652,7 +645,7 @@ class UploadForm extends \Gazelle\Base {
                 <td class="label">Image (optional):</td>
                 <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image'] ?? '') ?>"<?=$this->Disabled?> />
                 <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
-<?php       if (IMAGE_HOST_BANNED) { ?>
+<?php       if (IMAGE_HOST_BANNED) { /** @phpstan-ignore-line */ ?>
                 <br />Images hosted on <?= implode(', ', IMAGE_HOST_BANNED) ?> are not allowed, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>
 <?php       } ?>
                 </td>
@@ -666,6 +659,6 @@ class UploadForm extends \Gazelle\Base {
 <?php   } ?>
         </table>
 <?php
-        return ob_get_clean();
+        return (string)ob_get_clean();
     }
 }

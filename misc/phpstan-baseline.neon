@@ -2561,66 +2561,6 @@ parameters:
 			path: ../app/Util/Twig.php
 
 		-
-			message: "#^If condition is always true\\.$#"
-			count: 2
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\UploadForm\\:\\:audiobook_form\\(\\) should return string but returns string\\|false\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\UploadForm\\:\\:music_form\\(\\) should return string but returns string\\|false\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\UploadForm\\:\\:simple_form\\(\\) should return string but returns string\\|false\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 2
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Property Gazelle\\\\Util\\\\UploadForm\\:\\:\\$Disabled has no type specified\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Property Gazelle\\\\Util\\\\UploadForm\\:\\:\\$DisabledFlag has no type specified\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Property Gazelle\\\\Util\\\\UploadForm\\:\\:\\$Error has no type specified\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Property Gazelle\\\\Util\\\\UploadForm\\:\\:\\$NewTorrent has no type specified\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Property Gazelle\\\\Util\\\\UploadForm\\:\\:\\$Torrent has no type specified\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Property Gazelle\\\\Util\\\\UploadForm\\:\\:\\$user has no type specified\\.$#"
-			count: 1
-			path: ../app/Util/UploadForm.php
-
-		-
-			message: "#^Result of && is always false\\.$#"
-			count: 2
-			path: ../app/Util/UploadForm.php
-
-		-
 			message: "#^Method Gazelle\\\\Wiki\\:\\:remove\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Wiki.php
@@ -3304,11 +3244,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\<int, string\\>\\|false given\\.$#"
 			count: 1
 			path: ../sections/reportsv2/takereport.php
-
-		-
-			message: "#^If condition is always true\\.$#"
-			count: 1
-			path: ../sections/requests/new_edit.php
 
 		-
 			message: "#^Parameter \\#1 \\$string of function trim expects string, bool\\|float\\|int\\|string given\\.$#"

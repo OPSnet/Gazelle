@@ -397,6 +397,30 @@ class TGroup extends BaseObject {
         return $this->info()['ReleaseType'] == 0 ? null : $releaseTypes[$this->releaseType()];
     }
 
+    public function remasterList(): array {
+        self::$db->prepared_query("
+            SELECT min(ID)               AS id,
+                RemasterYear             AS year,
+                RemasterTitle            AS title,
+                RemasterRecordLabel      AS record_label,
+                RemasterCatalogueNumber  AS catalogue_number
+            FROM torrents
+            WHERE Remastered = '1'
+                AND RemasterYear != 0
+                AND GroupID = ?
+            GROUP BY RemasterYear,
+                RemasterTitle,
+                RemasterRecordLabel,
+                RemasterCatalogueNumber
+            ORDER BY RemasterYear DESC,
+                RemasterTitle DESC,
+                RemasterRecordLabel DESC,
+                RemasterCatalogueNumber DESC
+            ", $this->id
+        );
+        return self::$db->to_array(false, MYSQLI_BOTH, false);
+    }
+
     /**
      * Delegate stats methods to the Stats\TGroup class
      */

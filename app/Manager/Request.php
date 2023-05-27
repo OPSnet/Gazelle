@@ -33,7 +33,7 @@ class Request extends \Gazelle\BaseManager {
             $catalogueNumber, $releaseType, $encodingList, $formatList, $mediaList, $logCue,
             (int)$checksum ? 1 : 0, $oclc, $groupId
         );
-        return $this->findById(self::$db->inserted_id());
+        return new \Gazelle\Request(self::$db->inserted_id());
     }
 
     public function findById(int $requestId): ?\Gazelle\Request {

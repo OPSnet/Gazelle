@@ -71,11 +71,16 @@ class Helper {
     public static function makeTorrentMusic(
         \Gazelle\TGroup $tgroup,
         \Gazelle\User   $user,
-        string          $media    = 'WEB',
-        string          $format   = 'FLAC',
-        string          $encoding = 'Lossless',
-        string          $title    = '',
+        string          $media           = 'WEB',
+        string          $format          = 'FLAC',
+        string          $encoding        = 'Lossless',
+        string          $catalogueNumber = '',
+        string          $recordLabel     = 'Unitest Artists',
+        string          $title           = 'phpunit remaster title',
     ): \Gazelle\Torrent {
+        if (empty($catalogueNumber)) {
+            $catalogueNumber = 'UA-REM-' . random_int(10000, 99999);
+        }
         return (new \Gazelle\Manager\Torrent)->create(
             tgroup:                  $tgroup,
             user:                    $user,
@@ -91,8 +96,8 @@ class Helper {
             isRemaster:              true,
             remasterYear:            (int)date('Y'),
             remasterTitle:           $title,
-            remasterRecordLabel:     'Unitest Artists',
-            remasterCatalogueNumber: 'UA-REM-' . random_int(10000, 99999),
+            remasterRecordLabel:     $recordLabel,
+            remasterCatalogueNumber: $catalogueNumber,
         );
     }
 

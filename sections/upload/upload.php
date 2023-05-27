@@ -56,15 +56,14 @@ if (!isset($Properties)) {
     }
 }
 
-if (!empty($ArtistForm)) {
+if (!isset($Properties)) {
+    $Properties = false;
+} elseif (isset($ArtistForm)) {
     $Properties['Artists'] = $ArtistForm;
 }
 
-if (empty($Properties)) {
-    $Properties = null;
-}
-if (empty($Err)) {
-    $Err = null;
+if (!isset($Err)) {
+    $Err = false;
 }
 
 $dnu     = new Gazelle\Manager\DNU;
@@ -98,15 +97,16 @@ View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbra
         </tr>
 <?php } ?>
     </table>
-</div><?= $dnuHide ? '<br />' : '' ?>
+</div>
+<br />
 <?php
-$uploadForm = new Gazelle\Util\UploadForm($Viewer, $Properties, $Err);
-if (isset($categoryId)) {
-    // we have been require'd from upload_handle
-    $uploadForm->setCategoryId($categoryId);
+if (!isset($categoryId)) {
+    $categoryId = CATEGORY_MUSIC;
 }
+$uploadForm = (new Gazelle\Util\UploadForm($Viewer, $Properties, $Err))
+    ->setCategoryId($categoryId);
 echo $uploadForm->head();
-echo match (CATEGORY[($categoryId ?? 1) - 1]) {
+echo match (CATEGORY[$categoryId - 1]) {
     'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
     'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
     default                                                  => $uploadForm->music_form((new Gazelle\Manager\Tag)->genreList()),

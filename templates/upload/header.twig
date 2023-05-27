@@ -3,7 +3,7 @@
 {% if is_new %}
     <div style="text-align: center;">
         Your personal announce URL is:<br />
-        <div style="margin: 0 auto;"><input type="text" value="{{ announce }}" size="71" onclick="this.select();" readonly="readonly" /></div>
+        <div style="margin: 0 auto;"><input type="text" value="{{ user.announceUrl }}" size="71" onclick="this.select();" readonly="readonly" /></div>
     </div>
 {% endif %}
 {% if error %}
@@ -13,7 +13,7 @@
         <div>
             <input type="hidden" id="torrent-new" name="torrent-new" value="{{ is_new }}" />
             <input type="hidden" name="submit" value="true" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ user.auth }}" />
 {% if not is_new %}
             <input type="hidden" name="action" value="takeedit" />
             <input type="hidden" name="torrentid" value="{{ info.ID }}" />

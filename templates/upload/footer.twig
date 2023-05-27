@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import selected %}
 </div>
 <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
-{% if not is_new and viewer.permitted('torrents_freeleech') %}
+{% if not is_new and user.permitted('torrents_freeleech') %}
     <tr id="freetorrent">
         <td class="label">Leech Type</td>
         <td>

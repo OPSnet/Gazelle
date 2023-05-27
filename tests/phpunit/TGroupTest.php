@@ -37,9 +37,39 @@ class TGroupTest extends TestCase {
             releaseType:     (new Gazelle\ReleaseType)->findIdByName('Live album'),
             showcase:        false,
         );
+
+        // and add some torrents to the group
+        Helper::makeTorrentMusic(
+            tgroup:          $this->tgroup,
+            user:            $this->userList['user'],
+            catalogueNumber: 'UA-TG-1',
+        );
+        Helper::makeTorrentMusic(
+            tgroup:          $this->tgroup,
+            user:            $this->userList['user'],
+            catalogueNumber: 'UA-TG-1',
+            format:          'MP3',
+            encoding:        'V0',
+        );
+        Helper::makeTorrentMusic(
+            tgroup:          $this->tgroup,
+            user:            $this->userList['user'],
+            catalogueNumber: 'UA-TG-2',
+            title:           'Limited Edition',
+        );
     }
 
     public function tearDown(): void {
+        foreach ($this->tgroup->torrentIdList() as $torrent) {
+            $torrent = (new \Gazelle\Manager\Torrent)->findById($torrent);
+            if (is_null($torrent)) {
+                continue;
+            }
+            [$ok, $message] = $torrent->remove($this->userList['user'], 'tgroup unit test');
+            if (!$ok) {
+                print "error $message [{$this->userList['user']->id()}]\n";
+            }
+        }
         $this->tgroup->remove($this->userList['admin']);
         foreach ($this->userList as $user) {
             $user->remove();

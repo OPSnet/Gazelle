@@ -239,7 +239,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                     <td class="label">Image</td>
                     <td>
                         <input type="text" name="image" size="45" value="<?= $image ?>" />
-<?php       if (IMAGE_HOST_BANNED) { ?>
+<?php       if (IMAGE_HOST_BANNED) { /** @phpstan-ignore-line */ ?>
                         <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
                             ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
 <?php       } ?>

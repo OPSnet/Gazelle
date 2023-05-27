@@ -22,7 +22,7 @@ class Privilege extends \Gazelle\BaseManager {
             ', $name, $level, $secondary, $forums, serialize($values), $staffGroupId, $badge, $displayStaff ? '1' : '0'
         );
         self::$cache->delete_multi(['user_class', 'staff_class']);
-        return $this->findById(self::$db->inserted_id());
+        return new \Gazelle\Privilege(self::$db->inserted_id());
     }
 
     public function findById(int $privilegeId): ?\Gazelle\Privilege {

@@ -335,7 +335,9 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $report->claim($this->userList['admin']), 'request-report-claim');
         $this->assertTrue($report->isClaimed(), 'request-report-is-claimed');
         $this->assertEquals('InProgress', $report->flush()->status(), 'request-report-in-progress');
-        $this->assertEquals($this->userList['admin']->id(), $report->claimer()->id(), 'request-report-claimer-id'); /** @phpstan-ignore-line */
+        $claimer = $report->claimer();
+        $this->assertNotNull($claimer, 'request-report-has-claimer');
+        $this->assertEquals($this->userList['admin']->id(), $claimer->id(), 'request-report-claimer-id');
         $this->assertEquals(1, $report->claim(null), 'request-report-unclaim');
         $this->assertFalse($report->isClaimed(), 'request-report-is-unclaimed');
 
@@ -366,7 +368,9 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $report->resolve($this->userList['admin'], $manager), 'request-report-claim');
         $this->assertNotNull($report->resolved(), 'request-report-resolved-date');
         $this->assertEquals('Resolved', $report->status(), 'request-report-resolved-status');
-        $this->assertEquals($this->userList['admin']->id(), $report->resolver()->id(), 'request-report-resolver-id'); /** @phpstan-ignore-line */
+        $resolver = $report->resolver();
+        $this->assertNotNull($resolver, 'request-report-has-resolver');
+        $this->assertEquals($this->userList['admin']->id(), $resolver->id(), 'request-report-resolver-id');
         $this->assertEquals($initial, $manager->remainingTotal(), 'request-report-initial-total');
     }
 }

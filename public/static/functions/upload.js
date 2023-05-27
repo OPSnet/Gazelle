@@ -394,6 +394,7 @@ function AddArtistField() {
     var x = $('#artistfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(ArtistField);
+    x.append(' ');
     x.appendChild(RoleField);
 
     if ($("#artist_0").data("gazelle-autocomplete")) {
