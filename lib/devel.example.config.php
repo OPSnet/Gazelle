@@ -3,7 +3,7 @@
 // Copy these variables to your override.config.php in a development environment.
 // Change as required.
 
-define('SITE_URL', 'http://localhost:8080');
+define('SITE_URL', 'http://localhost:7001');
 
 define('DISABLE_TRACKER', true);
 define('DISABLE_IRC', true);

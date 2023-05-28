@@ -5,11 +5,12 @@
 <div style="width: 45%; margin: auto;">
 <form class="create_form" name="user" id="registerform" method="post" action="" onsubmit="return formVal();">
 {% if sent %}
+    {% if is_new %}
+Since this is a new installation, you can log in directly without having to confirm your account.
+    {% else %}
 An email has been sent to the address that you provided. After you confirm your email address, you will be able to log into your account.
 If you do not receive a response within a couple of hours, you may try contacting staff on IRC. Join <tt>irc.orpheus.network</tt>,
 channel <tt>#disabled</tt>. Depending on the timezone you may have to wait, but you will receive a response.
-    {% if is_new %}
-Since this is a new installation, you can log in directly without having to confirm your account.
     {% endif %}
 {% else %}
     {% if invite %}

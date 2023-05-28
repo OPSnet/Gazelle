@@ -6,18 +6,34 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
 class RequestTest extends TestCase {
-    protected Gazelle\Manager\Request $requestMan;
-    protected Gazelle\Request         $request;
-    protected array                   $userList;
+    protected Gazelle\Request $request;
+    protected Gazelle\TGroup  $tgroup;
+    protected array           $userList;
 
     public function setUp(): void {
-        $this->requestMan = new Gazelle\Manager\Request;
+        // we need two users, one who uploads and one who snatches
         $this->userList = [
-            'admin' => Helper::makeUser('req1.' . randomString(6), 'request'),
-            'user'  => Helper::makeUser('req2.' . randomString(6), 'request'),
+            'admin' => Helper::makeUser('req.' . randomString(10), 'request'),
+            'user'  => Helper::makeUser('req.' . randomString(10), 'request'),
         ];
         $this->userList['admin']->setUpdate('Enabled', '1')->setUpdate('PermissionID', SYSOP)->modify();
         $this->userList['user']->setUpdate('Enabled', '1')->modify();
+
+        // create a torrent group
+        $tgroupName = 'phpunit request ' . randomString(6);
+        $this->tgroup = Helper::makeTGroupMusic(
+            name:       $tgroupName,
+            artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
+            tagName:    ['electronic'],
+            user:       $this->userList['user'],
+        );
+
+        // add a torrent to the group
+        Helper::makeTorrentMusic(
+            tgroup: $this->tgroup,
+            user:   $this->userList['user'],
+            title:  'Deluxe Edition',
+        );
     }
 
     public function tearDown(): void {
@@ -25,6 +41,20 @@ class RequestTest extends TestCase {
             // testCreate() removes it for an assertion
             $this->request->remove();
         }
+
+        $torMan = new Gazelle\Manager\Torrent;
+        foreach ($this->tgroup->torrentIdList() as $torrentId) {
+            $torrent = $torMan->findById($torrentId);
+            if (is_null($torrent)) {
+                continue;
+            }
+            [$ok, $message] = $torrent->remove($this->userList[0], 'reaper unit test');
+            if (!$ok) {
+                print "error $message [{$this->userList[0]->id()}]\n";
+            }
+        }
+        $this->tgroup->remove($this->userList['admin']);
+
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -46,8 +76,9 @@ class RequestTest extends TestCase {
             'uploaded'      => $this->userList['admin']->uploadedSize(),
         ];
 
+        $requestMan = new Gazelle\Manager\Request;
         $title = 'The ' . randomString(6). ' Test Sessions';
-        $this->request = $this->requestMan->create(
+        $this->request = $requestMan->create(
             userId:          $this->userList['admin']->id(),
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
             year:            2018,
@@ -197,11 +228,11 @@ class RequestTest extends TestCase {
         $requestId = $this->request->id();
         $this->assertTrue($this->request->remove(), 'request-remove');
         unset($this->request); // success, no need to tidy up
-        $this->assertNull($this->requestMan->findById($requestId), 'request-gone');
+        $this->assertNull($requestMan->findById($requestId), 'request-gone');
     }
 
     public function testJson(): void {
-        $this->request = $this->requestMan->create(
+        $this->request = (new Gazelle\Manager\Request)->create(
             userId:          $this->userList['admin']->id(),
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
             year:            (int)date('Y'),
@@ -244,7 +275,8 @@ class RequestTest extends TestCase {
     }
 
     public function testReport(): void {
-        $this->request = $this->requestMan->create(
+        
+        $this->request = (new Gazelle\Manager\Request)->create(
             userId:          $this->userList['user']->id(),
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Comics'),
             year:            (int)date('Y'),
@@ -303,7 +335,7 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $report->claim($this->userList['admin']), 'request-report-claim');
         $this->assertTrue($report->isClaimed(), 'request-report-is-claimed');
         $this->assertEquals('InProgress', $report->flush()->status(), 'request-report-in-progress');
-        $this->assertEquals($this->userList['admin']->id(), $report->claimer()?->id(), 'request-report-claimer-id');
+        $this->assertEquals($this->userList['admin']->id(), $report->claimer()->id(), 'request-report-claimer-id'); /** @phpstan-ignore-line */
         $this->assertEquals(1, $report->claim(null), 'request-report-unclaim');
         $this->assertFalse($report->isClaimed(), 'request-report-is-unclaimed');
 
@@ -334,7 +366,7 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $report->resolve($this->userList['admin'], $manager), 'request-report-claim');
         $this->assertNotNull($report->resolved(), 'request-report-resolved-date');
         $this->assertEquals('Resolved', $report->status(), 'request-report-resolved-status');
-        $this->assertEquals($this->userList['admin']->id(), $report->resolver()?->id(), 'request-report-resolver-id');
+        $this->assertEquals($this->userList['admin']->id(), $report->resolver()->id(), 'request-report-resolver-id'); /** @phpstan-ignore-line */
         $this->assertEquals($initial, $manager->remainingTotal(), 'request-report-initial-total');
     }
 }

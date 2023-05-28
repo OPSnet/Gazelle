@@ -49,7 +49,11 @@ class PrivilegeTest extends TestCase {
             staffGroupId: null,
             displayStaff: false
         );
-        $this->assertEquals($privilege->id(), $manager->findByLevel(666)?->id(), 'privilege-find-by-level');
+        $this->assertEquals(
+            $privilege->id(),
+            $manager->findByLevel(666)->id(), /** @phpstan-ignore-line */
+            'privilege-find-by-level'
+        );
         $this->assertEquals($badge, $privilege->badge(), 'privilege-badge');
         $this->assertEquals(666, $privilege->level(), 'privilege-level');
         $this->assertCount(0, $privilege->permittedForums(), 'privilege-permitted-forums');

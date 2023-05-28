@@ -1,9 +1,10 @@
 FROM debian:bullseye-slim
 
-WORKDIR /var/www
-
+ENV DEB_RELEASE bullseye
 ENV DEBIAN_FRONTEND noninteractive
-ENV PHP_VER=8.2
+ENV PHP_VER 8.2
+
+WORKDIR /var/www
 
 # Software package layer
 # Nodesource setup comes after yarnpkg because it runs `apt-get update`
@@ -15,7 +16,7 @@ RUN apt-get update \
         curl \
         gnupg2 \
     && curl -sL https://packages.sury.org/php/apt.gpg | apt-key add - \
-    && echo "deb https://packages.sury.org/php/ bullseye main" | tee /etc/apt/sources.list.d/php.list \
+    && echo "deb https://packages.sury.org/php/ $DEB_RELEASE main" | tee /etc/apt/sources.list.d/php.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         cron \
@@ -23,6 +24,7 @@ RUN apt-get update \
         nginx \
         netcat \
         php${PHP_VER}-cli \
+        php${PHP_VER}-common \
         php${PHP_VER}-curl \
         php${PHP_VER}-fpm \
         php${PHP_VER}-gd \

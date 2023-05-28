@@ -7,7 +7,7 @@ final class UserLastAccessDelta extends AbstractMigration {
     public function up(): void {
         $this->table('user_last_access_delta', ['id' => false, 'primary_key' => 'user_last_access_delta_id'])
             ->addColumn('user_last_access_delta_id', 'integer', ['identity' => true])
-            ->addColumn('user_id', 'integer', ['signed' => false])
+            ->addColumn('user_id', 'integer')
             ->addColumn('last_access', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
             ->addIndex(['user_id'], ['name' => 'ulad_idx'])
             ->addForeignKey('user_id', 'users_main', 'ID')

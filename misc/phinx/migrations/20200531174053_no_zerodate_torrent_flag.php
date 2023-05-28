@@ -9,7 +9,6 @@ class NoZerodateTorrentFlag extends AbstractMigration {
 
     public function up(): void {
         foreach ($this->torrentTables() as $table) {
-            echo "=> $table\n";
             $this->execute("ALTER TABLE $table
                 MODIFY TimeAdded datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
             ");
@@ -18,7 +17,6 @@ class NoZerodateTorrentFlag extends AbstractMigration {
 
     public function down(): void {
         foreach ($this->torrentTables() as $table) {
-            echo "=> $table\n";
             $this->execute("ALTER TABLE $table
                 MODIFY TimeAdded datetime
             ");

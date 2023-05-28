@@ -535,19 +535,16 @@ class IndexRefactor extends AbstractMigration {
 
         foreach ($this->modifyColumn() as $mod) {
             $sql = sprintf("ALTER TABLE %s MODIFY %s", $mod['t'], $mod['new']);
-            echo "$sql\n";
             $this->execute($sql);
         }
 
         foreach ($this->modifyTable() as $mod) {
             $sql = sprintf("ALTER TABLE %s %s", $mod['t'], $mod['new']);
-            echo "$sql\n";
             $this->execute($sql);
         }
 
         foreach ($this->engineChange() as $table) {
             $sql = sprintf("ALTER TABLE %s ENGINE=InnoDB ROW_FORMAT=DYNAMIC", $table);
-            echo "$sql\n";
             $this->execute($sql);
         }
     }

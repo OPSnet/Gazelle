@@ -3216,16 +3216,6 @@ parameters:
 			path: ../classes/view.class.php
 
 		-
-			message: "#^Method TorrentSeeder\\:\\:getRandomDiscogsAlbum\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../misc/phinx/seeds/TorrentSeeder.php
-
-		-
-			message: "#^Parameter \\#1 \\$json of function json_decode expects string, bool\\|string given\\.$#"
-			count: 1
-			path: ../misc/phinx/seeds/TorrentSeeder.php
-
-		-
 			message: "#^Call to an undefined method Gazelle\\\\File\\\\RipLog\\:\\:pathLegacy\\(\\)\\.$#"
 			count: 2
 			path: ../scripts/migrate-logs.php

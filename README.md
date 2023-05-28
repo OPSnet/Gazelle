@@ -53,7 +53,7 @@ Bullseye. A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
 
-You can access the site by viewing `http://localhost:8080`
+You can access the site by viewing `http://localhost:7001/`
 
 The first account is 'admin' and has the highest level of  access
 to the site installation. The second account is 'user' and has

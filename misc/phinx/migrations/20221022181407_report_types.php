@@ -792,7 +792,7 @@ Your torrent was reported because it contained multiple comic volumes.',
             ->addColumn('torrent_report_configuration_log_id', 'integer', ['identity' => true])
             ->addColumn('torrent_report_configuration_id', 'integer')
             ->addColumn('created', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
-            ->addColumn('user_id', 'integer', ['signed' => false])
+            ->addColumn('user_id', 'integer')
             ->addColumn('change_set', 'json')
             ->addForeignKey('torrent_report_configuration_id', 'torrent_report_configuration', 'torrent_report_configuration_id')
             ->addForeignKey('user_id', 'users_main', 'ID')

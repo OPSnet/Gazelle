@@ -19,10 +19,10 @@ services:
       - MYSQL_PASSWORD=password
 
   memcached:
-    image: memcached:1.6.14-alpine
+    image: memcached:1.6.20-alpine
 
   pg:
-    image: postgres:14.5
+    image: postgres:14-bullseye
     ports:
       - 127.0.0.1:54321:5432
     volumes:
@@ -36,7 +36,6 @@ services:
       - 127.0.0.1:36000:3306
     volumes:
       - ./.docker/data/mysql:/var/lib/mysql
-      - ./.docker/mysql-home:/home/mysql
     environment:
       - MYSQL_DATABASE=gazelle
       - MYSQL_USER=gazelle

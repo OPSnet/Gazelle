@@ -39,7 +39,7 @@ if (mix.inProduction()) {
 } else {
     mix.sourceMaps(false, 'source-map');
     mix.browserSync({
-        proxy: 'localhost:8080',
+        proxy: 'localhost:7001',
         notify: false,
         files: [
             'public/static/styles/**/*.css',

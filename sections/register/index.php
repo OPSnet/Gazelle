@@ -23,7 +23,7 @@ if (isset($_REQUEST['confirm'])) {
     $Cache->increment('stats_user_count');
     echo $Twig->render('register/complete.twig');
 
-} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite'])) {
+} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite']) || (new Gazelle\Stats\Users)->enabledUserTotal() == 0) {
     if ($_REQUEST['invite']) {
         if (!(new Gazelle\Manager\Invite)->inviteExists($_GET['invite'])) {
             echo $Twig->render('register/no-invite.twig');

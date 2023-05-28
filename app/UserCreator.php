@@ -20,7 +20,6 @@ class UserCreator extends Base {
     protected string|null $username;
 
     public function create(): User {
-        $this->newInstall = !(bool)self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
         if (!$this->ipaddr) {
             throw new UserCreatorException('ipaddr');
         }
@@ -37,7 +36,17 @@ class UserCreator extends Base {
             throw new UserCreatorException('username-invalid');
         }
 
-        $this->permissionId = $this->newInstall ? SYSOP : USER;
+        $this->newInstall = !(bool)self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
+        if ($this->newInstall) {
+            $this->permissionId = SYSOP;
+            $this->adminComment[] = 'Initial account created on first registration';
+        } else {
+            $this->permissionId = USER;
+        }
+
+        $authKey = substr(strtr(base64_encode(hash('sha256', hash('sha256', randomString(64), true), true)), '+/', '-_'), 0, 32);
+        $infoFields = ['AuthKey'];
+        $infoArgs = [$authKey];
 
         if (!isset($this->inviteKey)) {
             $inviter = null;
