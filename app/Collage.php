@@ -153,6 +153,10 @@ class Collage extends BaseObject {
         return $this->contributors()[$userId] ?? 0;
     }
 
+    public function entryCreated(int $entryId): string {
+        return $this->collage->entryCreated($entryId);
+    }
+
     public function entryUserId(int $entryId): int {
         return $this->collage->entryUserId($entryId);
     }

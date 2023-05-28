@@ -6,6 +6,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     protected int        $id; // hold a local copy of our ID to save time
     protected array|null $artists;
     protected array|null $contributors;
+    protected array|null $created;
 
     abstract public function entryTable(): string;
     abstract public function entryColumn(): string;
@@ -31,6 +32,13 @@ abstract class AbstractCollage extends \Gazelle\Base {
             $this->load();
         }
         return $this->contributors;
+    }
+
+    public function entryCreated(int $entryId): string {
+        if (!isset($this->created)) {
+            $this->load();
+        }
+        return $this->created[$entryId];
     }
 
     /**
@@ -71,6 +79,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         $this->holder->flush();
         $this->artists      = null;
         $this->contributors = null;
+        $this->created      = null;
         return $this;
     }
 

@@ -39,7 +39,8 @@ class TGroup extends AbstractCollage {
         self::$db->prepared_query("
             SELECT ct.GroupID,
                 ct.UserID,
-                ct.Sort as sequence
+                ct.Sort    AS sequence,
+                ct.AddedOn AS created
             FROM collages_torrents AS ct
             INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
             WHERE ct.CollageID = ?
@@ -52,6 +53,7 @@ class TGroup extends AbstractCollage {
         $this->artists      = [];
         $this->groupIds     = [];
         $this->contributors = [];
+        $this->created      = [];
         $tgMan              = new \Gazelle\Manager\TGroup;
         foreach ($groupIds as $groupId) {
             $tgroup = $tgMan->findById($groupId);
@@ -59,6 +61,7 @@ class TGroup extends AbstractCollage {
                 continue;
             }
             $this->groupIds[] = $groupId;
+            $this->created[$groupId] = $groupContribIds[$groupId]['created'];
             $artistRole = $tgroup->artistRole();
             if ($artistRole) {
                 $roleList = $artistRole->roleList();

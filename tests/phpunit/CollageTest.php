@@ -215,6 +215,8 @@ class CollageTest extends TestCase {
         $this->assertEquals(1, $collage->toggleSubscription($this->userList['u2']), 'collage-unsubscribe');
         $this->assertFalse($collage->isSubscribed($this->userList['u2']), 'collage-is-no-longer-subcribed');
         $this->assertEquals(0, $collage->numSubscribers(), 'collage-no-subcribers');
+
+        $this->assertStringStartsWith(date('Y-m-d '), $collage->entryCreated($this->tgroupList[0]->id()), 'collage-entry-created');
     }
 
     public function testCollageArtist(): void {
@@ -253,6 +255,12 @@ class CollageTest extends TestCase {
         $this->assertEquals(2, $summary['total'], 'collage-artist-summary-total');
         $this->assertCount(2, $summary['above'], 'collage-artist-summary-above');
         $this->assertCount(0, $summary['below'], 'collage-artist-summary-below');
+
+        $this->assertStringStartsWith(
+            date('Y-m-d '),
+            $this->collageList[1]->entryCreated($artistMan->findByName($this->artistName[3])->id()),
+            'collage-artist-entry-created'
+        );
     }
 
     public function testCollageContribute(): void {

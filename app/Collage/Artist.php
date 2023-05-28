@@ -10,9 +10,10 @@ class Artist extends AbstractCollage {
         self::$db->prepared_query("
             SELECT ca.ArtistID,
                 ag.Name,
-                IF(wa.Image is NULL, '', wa.Image) as Image,
+                coalesce(wa.Image, '') AS Image,
                 ca.UserID,
-                ca.Sort
+                ca.Sort,
+                ca.AddedOn AS created
             FROM collages_artists    AS ca
             INNER JOIN artists_group AS ag USING (ArtistID)
             LEFT JOIN wiki_artists   AS wa USING (RevisionID)
@@ -25,8 +26,10 @@ class Artist extends AbstractCollage {
 
         $this->artists      = [];
         $this->contributors = [];
+        $this->created      = [];
         foreach ($artists as $artist) {
             if (!isset($this->artists[$artist['ArtistID']])) {
+                $this->created[$artist['ArtistID']] = $artist['created'];
                 $this->artists[$artist['ArtistID']] = [
                     'count'    => 0,
                     'id'       => $artist['ArtistID'],

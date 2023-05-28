@@ -30,6 +30,7 @@
                 <th style="width: 1%;"><span>Year</span></th>
                 <th style="width: 15%;" data-sorter="ignoreArticles"><span>Artist</span></th>
                 <th data-sorter="ignoreArticles"><span>Torrent</span></th>
+                <th style="width: 10%;"><span>Added</span></th>
                 <th style="width: 1%;"><span>User</span></th>
                 <th style="width: 1%; text-align: right;" class="nobr" data-sorter="false"><span><abbr class="tooltip" title="Modify an individual row">Tweak</abbr></span></th>
             </tr>
@@ -48,6 +49,7 @@
                 <td>{{ tgroup.year|default('&nbsp;')|raw }}</td>
                 <td>{{ tgroup.artistRole.link|raw|default('&mdash;')|raw }}</td>
                 <td><a href="{{ tgroup.url }}" class="tooltip" title="View torrent group">{{ tgroup.name }}</a></td>
+                <td class="nobr">{{ collage.entryCreated(id) }}</td>
                 <td class="nobr">{{ collage.entryUserId(id)|user_url }}</td>
                 <td class="nobr">
                     <input type="hidden" name="action" value="manage_handle" />
