@@ -44,7 +44,10 @@ class Monero {
             WHERE id_user = ?
             ", $userId
         );
-        return bin2hex($token);
+        if ($token) {
+            return bin2hex($token);
+        }
+        return null;
     }
 
     /**

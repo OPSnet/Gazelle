@@ -1,0 +1,46 @@
+#! /usr/bin/env php
+<?php
+
+/**
+ * Handle incoming monero donation
+ *
+ * Usage: process-monero-donation <payment_id>,<eur_value> [<payment_id>,<eur_value> ...]
+ */
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$monero = new Gazelle\Donate\Monero;
+$userMan = new Gazelle\Manager\User;
+
+$xbtRate = (new Gazelle\Manager\XBT)->latestRate('EUR');
+
+array_shift($argv);
+foreach ($argv as $paymentData) {
+    [$pid, $eurValue] = explode(',', $paymentData, limit: 2);
+    $userId = $monero->findUserIdbyPaymentId($pid);
+    if (is_null($userId)) {
+        echo "No such payment id $pid\n";
+        continue;
+    }
+    $user = $userMan->find($userId);
+    if (is_null($user)) {
+        echo "No such user $userId\n";
+        continue;
+    }
+    $eurValue = (float)$eurValue;
+    if ($eurValue <= 0) {
+        echo "Bad donation value $eurValue for $pid\n";
+        continue;
+    }
+
+    $donor = new Gazelle\User\Donor($user);
+    $donor->donate(
+        amount:   $eurValue,
+        xbtRate:  $xbtRate,
+        source:   'XMR donation',
+        reason:   "",
+        currency: 'EUR'
+    );
+    $monero->invalidate($userId);
+    echo "added $eurValue EUR donation for " . $user->username() . "\n";
+}
