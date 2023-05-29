@@ -64,6 +64,7 @@
     ['Referral accounts',    'tools.php?action=referral_accounts', viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
     ['Referred users',       'tools.php?action=referral_users',    viewer.permitted('admin_view_referrals')],
     ['Registration log',     'tools.php?action=registration_log',  viewer.permitted('users_view_email')],
+    ['Send custom PM',       'tools.php?action=custom_pm',         viewer.permitted('site_debug')],
     ['User flow',            'tools.php?action=user_flow',         viewer.permitted('site_view_flow')],
 ]) }}
 
@@ -118,7 +119,7 @@
     ['Ratio watch',          'tools.php?action=ratio_watch',    viewer.permitted('site_view_flow')],
     ['OS and browser usage', 'tools.php?action=platform_usage', viewer.permitted('site_debug')],
     ['Site info',            'tools.php?action=site_info',      viewer.permitted('admin_site_debug')],
-    ['Site options',         'tools.php?action=site_options',   true],
+    ['Site options',         'tools.php?action=site_options',   viewer.permitted('users_mod')],
     ['SSL certificates',     'tools.php?action=ssl_host',       viewer.permitted('site_debug')],
     ['Tracker info',         'tools.php?action=ocelot_info',    true],
 ]) }}

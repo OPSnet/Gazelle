@@ -548,6 +548,20 @@ class User extends \Gazelle\BaseManager {
         );
     }
 
+    public function sendCustomPM(\Gazelle\User $sender, string $subject, string $template, array $idList): int {
+        $total = 0;
+        foreach ($idList as $userId) {
+            $user = $this->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
+            $message = preg_replace('/%USERNAME%/', $user->username(), $template);
+            $this->sendPM($userId, $sender->id(), $subject, $message);
+            $total++;
+        }
+        return $total;
+    }
+
     public function sendSnatchPm(\Gazelle\User $viewer, \Gazelle\Torrent  $torrent, string $subject, string $body): int {
         self::$db->prepared_query('
             SELECT uid FROM xbt_snatched WHERE fid = ?

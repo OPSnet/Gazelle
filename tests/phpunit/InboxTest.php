@@ -107,22 +107,28 @@ class InboxTest extends TestCase {
         // several
         $subject  = "phpunit multi " . randomString(12);
         $bodyList = [randomString(), randomString(), randomString(), randomString()];
-        $convList = array_map(
-            fn($body) => $userMan->sendPM($receiverId, $senderId, $subject, $body),
-            $bodyList
-        );
+        $convList = [];
+        foreach ($bodyList as $body) {
+            // Unfortunately there is no other way that works reliably.
+            // Since the Unread flag applies to the entire conversation and the Sent date
+            // has second granularity, the inbox-unread-first-is-unread will fail
+            // whenever the wallclock second rolls over from one second to the next
+            // between first and last message sent. This problem never show up in real life.
+            sleep(1);
+            $convList[] = $userMan->sendPM($receiverId, $senderId, $subject, $body);
+        }
         $this->assertEquals(4, $receiver->user()->inboxUnreadCount(), 'inbox-more-count');
         $this->assertEquals(5, $receiver->messageTotal(), 'inbox-more-message-count');
         $rlist = $receiver->messageList($pmReceiverManager, 6, 0);
         $flaky = implode(", ", array_map(fn($m) => "id={$m->id()} sent={$m->sentDate()} unr=" . ($m->isUnread() ? 'y' : 'n'), $rlist));
-        $this->assertFalse($rlist[0]->isUnread(), "inbox-first-is-read $flaky");
-        $this->assertTrue($rlist[1]->isUnread(), 'inbox-second-is-unread');
+        $this->assertFalse($rlist[4]->isUnread(), "inbox-last-is-read $flaky");
+        $this->assertTrue($rlist[3]->isUnread(), 'inbox-second-last-is-unread');
 
         // get body
-        $postlist = $rlist[0]->postList(2, 0);
-        $postId = $postlist[0]['id'];
+        $postList = $rlist[2]->postList(2, 0);
+        $postId = $postList[0]['id'];
         $pm = $pmReceiverManager->findByPostId($postId);
-        $this->assertEquals($body, $pm->postBody($postId), 'inbox-pm-post-body');
+        $this->assertEquals($bodyList[1], $pm->postBody($postId), 'inbox-pm-post-body');
 
         // unread first
         $receiver->setUnreadFirst(true);
@@ -131,11 +137,11 @@ class InboxTest extends TestCase {
         $this->assertFalse(end($rlist)->isUnread(), 'inbox-unread-last-is-read');
 
         // search body
-        $receiver->setSearchField('message')->setSearchTerm($bodyList[2]);
+        $receiver->setSearchField('message')->setSearchTerm($bodyList[1]);
         $this->assertEquals(1, $receiver->messageTotal(), 'inbox-search-body');
         $rlist = $receiver->messageList($pmReceiverManager, 2, 0);
         $this->assertCount(1, $rlist, 'inbox-search-list-body');
-        $this->assertEquals($convList[2], $rlist[0]->id(), 'inbox-search-found');
+        $this->assertEquals($convList[1], $rlist[0]->id(), 'inbox-search-found');
 
         // search user
         $receiver->setSearchField('user')->setSearchTerm('nobody-here');
@@ -154,13 +160,13 @@ class InboxTest extends TestCase {
         $receiver->setSearchField('subject')->setSearchTerm('')->setUnreadFirst(false);
         $rlist = $receiver->messageList($pmReceiverManager, 6, 0);
         $this->assertEquals(
-            [$pmSent->id(), $convList[1], $convList[2], $convList[0], $convList[3]],
+            [$convList[2], $convList[1], $convList[3], $convList[0], $pmSent->id()],
             [$rlist[0]->id(), $rlist[1]->id(), $rlist[2]->id(), $rlist[3]->id(), $rlist[4]->id()],
             'inbox-pinned-order-regular'
         );
         $rlist = $receiver->setUnreadFirst(true)->messageList($pmReceiverManager, 6, 0);
         $this->assertEquals(
-            [$convList[1], $convList[2], $convList[0], $convList[3], $pmSent->id()],
+            [$convList[2], $convList[1], $convList[3], $convList[0], $pmSent->id()],
             [$rlist[0]->id(), $rlist[1]->id(), $rlist[2]->id(), $rlist[3]->id(), $rlist[4]->id()],
             'inbox-pinned-order-unread'
         );
@@ -190,6 +196,6 @@ class InboxTest extends TestCase {
         $this->assertEquals(1, $payload['currentPage'], 'inbox-json-current-page');
         $this->assertEquals(1, $payload['pages'], 'inbox-json-pages');
         $this->assertCount(3, $payload['messages'], 'inbox-json-message-list');
-        $this->assertEquals($convList[1], $payload['messages'][0]['convId'], 'inbox-json-first-message-id');
+        $this->assertEquals($convList[2], $payload['messages'][0]['convId'], 'inbox-json-first-message-id');
     }
 }

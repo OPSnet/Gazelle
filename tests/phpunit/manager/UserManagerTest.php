@@ -246,4 +246,28 @@ class UserManagerTest extends TestCase {
         $this->assertEquals('Your downloading privileges have been suspended', $list[0]->subject(), 'uman-ratiowatch-pm-engage-subject');
         $this->assertFalse($this->userList[2]->canLeech(), 'uman-user2-no-canleech');
     }
+
+    public function sendCustomPMTest(): void {
+        $userMan = new \Gazelle\Manager\User;
+        $this->assertEquals(
+            2,
+            $userMan->sendCustomPM(
+                $this->userList[0]->id(),
+                'phpunit sendCustomPMTest',
+                'phpunit sendCustomPMTest %USERNAME% message',
+                [$this->userList[1]->id(), $this->userList[2]->id()],
+            ),
+            'uman-send-custom-pm'
+        );
+
+        $receiver = new \Gazelle\User\Inbox($this->userList[1]);
+        $pmMan    = new \Gazelle\Manager\PM($receiver->user());
+        $this->assertEquals(1, $receiver->messageTotal(), 'uman-custom-pm-count');
+        $list = $receiver->messageList($pmMan, 2, 0);
+        $this->assertEquals('phpunit sendCustomPMTest', $list[0]->subject(), 'uman-custom-pm-subject');
+
+        $postId = $list[0]['id'];
+        $pm = $pmMan->findByPostId($postId);
+        $this->assertStringContainsString($this->userList[1]->username(), $pm->postBody($postId), 'uman-custom-pm-body');
+    }
 }

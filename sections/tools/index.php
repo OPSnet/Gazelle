@@ -38,6 +38,9 @@ switch ($_REQUEST['action']) {
     case 'create_user':
         require_once('managers/create_user.php');
         break;
+    case 'custom_pm':
+        require_once('managers/custom_pm.php');
+        break;
 
     case 'dbkey':
         require_once('managers/db_key.php');

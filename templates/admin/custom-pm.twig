@@ -1,0 +1,97 @@
+{% from 'macro/form.twig' import checked %}
+{{ header('Send a custom PM') }}
+<div class="header">
+    <h2>Send a custom PM</h2>
+</div>
+
+<div class="thin">
+    <div class="box pad">In this toolbox, you can specify an arbitrary SQL query that returns a list of
+    user IDs, and then deliver a PM to those users. Note that if the results include your own ID, you
+    will not receive the message, however, all messages will be in your Sendbox.</div>
+</div>
+
+{% if delivered != false %}
+<div class="thin">
+    <div class="box pad">Message was sent <a href="inbox.php?sort=latest&section=sentbox">to {{ delivered }} user{{ delivered|plural }}</a>.</div>
+</div>
+{% endif %}
+
+<div class="thin box pad">
+<form class="create_form" name="user" method="post" action="">
+    <input type="hidden" name="action" value="custom_pm" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <table class="layout" cellpadding="2" cellspacing="1" border="0">
+        <tr valign="top">
+            <td align="right" class="label">Source:</td>
+            <td>
+                <label><input type="radio" name="source" value="my"{{ checked(source == 'my') }} /> Mysql</label>
+                <br /><label><input type="radio" name="source" value="pg"{{ checked(source == 'pg') }} /> Postgres</label>
+            </td>
+        </tr>
+        <tr valign="top">
+            <td align="right" class="label">Query:</td>
+            <td>
+                {%- if error %}<strong>{{ error }}</strong>{% endif %}
+                <textarea name="query" cols="100" rows="6">{{ query|raw }}</textarea>
+            <br />
+
+        </tr>
+{% if id_list %}
+        <tr>
+            <td align="right" class="label">Users matched:</td>
+            <td>{%- for user_id in id_list %}{{ user_id|user_url }} {% endfor -%}</td>
+        </tr>
+        <tr>
+            <td align="right" class="label">Subject:</td>
+            <td>
+                <input type="text" size="50" name="subject" value="{{ subject }}" />
+            </td>
+        </tr>
+        <tr>
+            <td align="right" class="label">Message:</td>
+            <td>NB: You may use <code>%USERNAME%</code> which will be replaced by their username<br />
+                {{ message.emit|raw }}
+            </td>
+        </tr>
+        <tr>
+            <td align="right" class="label">Send:</td>
+            <td>
+                <label><input type="checkbox" name="send" /> This must be checked to send the message</label>
+            </td>
+        </tr>
+{% else %}
+        <tr>
+            <td align="right" class="label">Examples:</td>
+            <td>
+                <pre>
+    -- old-time users with dodgy email addrsses
+    SELECT ID
+    FROM users_main
+    WHERE created < now() - INTERVAL 2 YEAR
+        AND Enabled = '1'
+        AND Email LIKE '%@hotmail.com'
+                </pre>
+                <br />
+                <pre>
+    -- users who have exactly 42 snatches
+    SELECT uid
+    FROM xbt_snatches
+    GROUP BY uid
+    HAVING count(*) = 42
+            </pre>
+            <p><a href="tools.php?action=database_specifics">Review the database schema</a> for more column details.</p>
+            <p>You will have a chance to review the users, and then create the message that will be sent to them.</p>
+            </div>
+            </td>
+        </tr>
+{% endif %}
+        <tr>
+            <td>&nbsp;</td>
+            <td>
+                <input type="submit" name="submit" value="{% if id_list %}Send{% else %}Review{% endif %}" />
+            </td>
+        </tr>
+    </table>
+</form>
+</div>
+{{ footer() }}

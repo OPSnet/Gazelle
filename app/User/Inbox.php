@@ -137,7 +137,7 @@ class Inbox extends \Gazelle\BaseUser {
 
     public function messageList(\Gazelle\Manager\PM $pmMan, int $limit, int $offset): array {
         [$cond, $args] = $this->configure();
-        $unreadFirst = $this->showUnreadFirst() ? 'ASC' : 'DESC';
+        $unreadFirst = $this->showUnreadFirst() ? "if(cu.Unread = '1', 0, 1) ASC," : '';
         array_push($args, $limit, $offset);
         self::$db->prepared_query("
             SELECT cu.ConvID
@@ -148,7 +148,7 @@ class Inbox extends \Gazelle\BaseUser {
             LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
             WHERE " . implode(' AND ', $cond) . "
             GROUP BY c.ID
-            ORDER BY if(cu.Unread = '1', 0, 1) $unreadFirst, cu.Sticky, cu.SentDate DESC, max(pm.ID)
+            ORDER BY cu.Sticky, $unreadFirst cu.SentDate DESC, max(pm.ID)
             LIMIT ? OFFSET ?
             ", $this->user->id(), $this->user->id(), ...$args
         );
