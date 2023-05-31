@@ -12,9 +12,9 @@ class Report extends \Gazelle\Base {
         return $this;
     }
 
-    public function setStatus(string $status): Report {
-        $this->cond[] = 'r.Status = ?';
-        $this->args[]  = $status;
+    public function setStatus(array $status): Report {
+        $this->cond[] = 'r.Status in (' . placeholders($status) . ')';
+        array_push($this->args, ...$status);
         return $this;
     }
 

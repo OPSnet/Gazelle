@@ -1541,11 +1541,6 @@ parameters:
 			path: ../app/ReleaseType.php
 
 		-
-			message: "#^Method Gazelle\\\\Report\\\\Comment\\:\\:setContext\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Report/Comment.php
-
-		-
 			message: "#^Method Gazelle\\\\Router\\:\\:addGet\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Router.php

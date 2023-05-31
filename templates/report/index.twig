@@ -49,8 +49,7 @@
     {% endif %}
                         &nbsp;&nbsp;
                         <a href="#" onclick="toggleNotes({{ report.id }}); return false;" class="brackets">Toggle notes</a>
-
-                        <div id="notes_div_{{ report.id }}" style="display: {% if notes %}block{% else %}none{% endif %};">
+                        <div id="notes_div_{{ report.id }}" style="display: {% if report.notes %}block{% else %}none{% endif %};">
                             <textarea cols="50" rows="3" id="notes_{{ report.id }}">{{ report.notes }}</textarea>
                             <br />
                             <input type="submit" onclick="saveNotes({{ report.id }})" value="Save" />

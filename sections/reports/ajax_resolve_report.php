@@ -5,7 +5,7 @@ if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
 }
 authorize();
 
-$report = (new Gazelle\Manager\Report)->findById((int)($_POST['id'] ?? 0));
+$report = (new Gazelle\Manager\Report)->findById((int)($_POST['reportid'] ?? 0));
 if (is_null($report)) {
     json_error('no report id');
 }

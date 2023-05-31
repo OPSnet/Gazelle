@@ -15,9 +15,9 @@ if (!$Viewer->permitted('admin_reports')) {
 if (isset($_GET['id'])) {
     $search->setId((int)$_GET['id']);
 } elseif (empty($_GET['view'])) {
-    $search->setStatus('New');
+    $search->setStatus(['New', 'InProgress']);
 } elseif ($_GET['view'] === 'old') {
-    $search->setStatus('Resolved');
+    $search->setStatus(['Resolved']);
 } else {
     error(403);
 }

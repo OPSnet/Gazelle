@@ -607,8 +607,10 @@ class CollageTest extends TestCase {
         );
         $collage = $this->collageList[0];
 
-        $report = (new Gazelle\Manager\Report)->create($this->userList['u2'], $collage->id(), 'collage', 'phpunit collage report');
+        $manager = new Gazelle\Manager\Report;
+        $report = $manager->create($this->userList['u2'], $collage->id(), 'collage', 'phpunit collage report');
         $this->assertEquals("phpunit collage report", $report->reason(), 'collage-report-reason');
         $this->assertEquals($collage->id(), $report->subjectId(), 'collage-report-subject-id');
+        $this->assertEquals(1, $report->resolve($this->userList['u1'], $manager));
     }
 }

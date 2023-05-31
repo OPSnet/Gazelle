@@ -275,7 +275,6 @@ class RequestTest extends TestCase {
     }
 
     public function testReport(): void {
-        
         $this->request = (new Gazelle\Manager\Request)->create(
             userId:          $this->userList['user']->id(),
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Comics'),
@@ -349,17 +348,17 @@ class RequestTest extends TestCase {
         );
         $this->assertEquals(
             1,
-            (new Gazelle\Search\Report)->setStatus('InProgress')->total(),
+            (new Gazelle\Search\Report)->setStatus(['InProgress'])->total(),
             'request-report-search-in-progress-total'
         );
         $this->assertEquals(
             0,
-            (new Gazelle\Search\Report)->setStatus('InProgress')->restrictForumMod()->total(),
+            (new Gazelle\Search\Report)->setStatus(['InProgress'])->restrictForumMod()->total(),
             'request-report-search-fmod-in-progress-total'
         );
 
         $search = new Gazelle\Search\Report;
-        $total  = $search->setStatus('InProgress')->total();
+        $total  = $search->setStatus(['InProgress'])->total();
         $page   = $search->page($total, 0);
         $this->assertEquals($total, count($page), 'request-report-page-list');
         $this->assertEquals($report->id(), $page[0], 'request-report-page-id');
