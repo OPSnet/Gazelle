@@ -1,8 +1,6 @@
-create extension "pgcrypto";
+-- it is assumed that the pgcrypto extension was created in 20230311000000_monero.sql
 
 create type user_token_type as enum ('confirm', 'password', 'mfa');
-
-drop table if exists user_token;
 
 create table user_token (
     id_user_token integer not null primary key generated always as identity,
