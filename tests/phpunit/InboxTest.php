@@ -33,11 +33,11 @@ class InboxTest extends TestCase {
         $this->assertEquals('inbox.php?sort=unread', $sender->folderLink('inbox', true), 'inbox-folder-unread-first');
         $this->assertEquals('inbox.php?sort=latest&section=sentbox', $sender->folderLink('sentbox', false), 'inbox-sentbox-folder-latest');
         $this->assertEquals('inbox.php?sort=unread&section=sentbox', $sender->folderLink('sentbox', true), 'inbox-sentbox-folder-unread-first');
-
         $this->assertEquals('inbox', $sender->folder(), 'inbox-sender-inbox');
         $this->assertEquals('Inbox', $sender->folderTitle($sender->folder()), 'inbox-sender-folder-title-inbox');
         $this->assertEquals('Inbox', $sender->title(), 'inbox-sender-title-inbox');
         $this->assertEquals(0, $sender->messageTotal(), 'inbox-initial-message-count');
+
         $sender->setFolder('sentbox');
         $this->assertEquals('sentbox', $sender->folder(), 'inbox-sender-sentbox');
         $this->assertEquals('Sentbox', $sender->folderTitle($sender->folder()), 'inbox-sender-folder-title-sentbox');
@@ -154,7 +154,7 @@ class InboxTest extends TestCase {
         $receiver->setSearchField('subject')->setSearchTerm('')->setUnreadFirst(false);
         $rlist = $receiver->messageList($pmReceiverManager, 6, 0);
         $this->assertEquals(
-            [$convList[1], $convList[2], $pmSent->id(), $convList[0], $convList[3]],
+            [$pmSent->id(), $convList[1], $convList[2], $convList[0], $convList[3]],
             [$rlist[0]->id(), $rlist[1]->id(), $rlist[2]->id(), $rlist[3]->id(), $rlist[4]->id()],
             'inbox-pinned-order-regular'
         );
