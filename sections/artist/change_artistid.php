@@ -172,10 +172,8 @@ if (isset($_POST['confirm'])) {
         }
     }
 
-    $artist->flushCache();
-    $new->flushCache();
-    $Cache->delete_value("artist_groups_$ArtistID");
-    $Cache->delete_value("artist_groups_$NewArtistID");
+    $artist->flush();
+    $new->flush();
 
     // Delete the old artist
     $db->prepared_query("

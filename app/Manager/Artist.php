@@ -24,6 +24,28 @@ class Artist extends \Gazelle\BaseManager {
         $this->role = $role;
     }
 
+    public function create(string $name): array {
+        self::$db->begin_transaction();
+        self::$db->prepared_query('
+            INSERT INTO artists_group (Name)
+            VALUES (?)
+            ', $name
+        );
+        $artistId = self::$db->inserted_id();
+
+        self::$db->prepared_query('
+            INSERT INTO artists_alias (ArtistID, Name)
+            VALUES (?, ?)
+            ', $artistId, $name
+        );
+        $aliasId = self::$db->inserted_id();
+        self::$db->commit();
+
+        self::$cache->increment('stats_artist_count');
+
+        return [$artistId, $aliasId];
+    }
+
     public function findById(int $artistId): ?\Gazelle\Artist {
         $key = sprintf(self::ID_KEY, $artistId);
         $id = self::$cache->get_value($key);
@@ -100,28 +122,6 @@ class Artist extends \Gazelle\BaseManager {
             }
         }
         return $aliasId ? [$artistId, $aliasId] : $this->create($name);
-    }
-
-    public function create($name): array {
-        self::$db->begin_transaction();
-        self::$db->prepared_query('
-            INSERT INTO artists_group (Name)
-            VALUES (?)
-            ', $name
-        );
-        $artistId = self::$db->inserted_id();
-
-        self::$db->prepared_query('
-            INSERT INTO artists_alias (ArtistID, Name)
-            VALUES (?, ?)
-            ', $artistId, $name
-        );
-        $aliasId = self::$db->inserted_id();
-        self::$db->commit();
-
-        self::$cache->increment('stats_artist_count');
-
-        return [$artistId, $aliasId];
     }
 
     public function setGroupId(int $groupId): Artist {

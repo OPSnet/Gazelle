@@ -2,13 +2,14 @@
 
 namespace Gazelle;
 
-class Artist extends Base {
-    final const CACHE_REQUEST_ARTIST      = 'artists_requests_%d';
+class Artist extends BaseObject {
+    final const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
+    final const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
 
-    protected const CACHE_PREFIX    = 'artist_%d';
+    protected const CACHE_PREFIX    = 'artistv2_%d';
     protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
-    protected $artistRole;
+    protected array $artistRole;
     protected int $nrGroups = 0;
 
     /** All the groups */
@@ -20,157 +21,183 @@ class Artist extends Base {
     /** Their groups, gathered into sections */
     protected array $section = [];
 
-    /** attributes */
-    protected array $attr;
-
-    protected $discogsId;
-    protected $discogsName;
-    protected $discogsStem;
-    /** @var string|int */
-    protected $discogsSequence;
-    protected $discogsIsPreferred;
-    protected $homonyms;
-
-    protected string $name = '';
-    protected $image;
-    protected $body;
-    /** @var bool|int */
-    protected $vanity;
-    protected $similar = [];
-
     protected Stats\Artist $stats;
 
     public function __construct(
         protected int $id,
         protected int $revisionId = 0
-    ) {
+    ) {}
 
-        $cacheKey = $this->cacheKey();
-        if (($info = self::$cache->get_value($cacheKey)) !== false) {
-            [$this->name, $this->image, $this->body, $this->vanity, $this->similar,
-                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms, $attr
-            ] = $info;
-            $this->attr = is_array($attr) ? $attr : $this->loadAttr();
-        } else {
-            if ($this->revisionId) {
-                $join = "LEFT JOIN wiki_artists AS wa ON (wa.PageID = ag.ArtistID)";
-                $cond = 'wa.RevisionID = ?';
-                $args = $this->revisionId;
-            } else {
-                $join = "LEFT JOIN wiki_artists AS wa USING (RevisionID)";
-                $cond = 'ag.ArtistID = ?';
-                $args = $this->id;
-            }
-            [$this->name, $this->image, $this->body, $this->vanity, $this->discogsId, $this->discogsName,
-                $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred
-            ] = self::$db->row("
-                SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse, dg.artist_discogs_id, dg.name,
-                    dg.stem, dg.sequence, dg.is_preferred
-                FROM artists_group AS ag
-                $join
-                LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
-                WHERE $cond
-                ", $args
-            );
-            $this->similar = $this->loadSimilar();
-            $this->homonyms = $this->homonymCount();
-            $this->attr = $this->loadAttr();
-
-            self::$cache->cache_value($cacheKey, [
-                    $this->name, $this->image, $this->body, $this->vanity, $this->similar,
-                    $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms, $this->attr
-                ], 3600
-            );
-        }
-    }
-
-    public function id(): int {
-        return $this->id;
-    }
-
-    public function location(): string {
-        return 'artist.php?id=' . $this->id;
-    }
-
-    public function url(): string {
-        return htmlentities($this->location());
-    }
-
-    public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name));
-    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
+    public function location(): string { return 'artist.php?id=' . $this->id; }
+    public function tableName(): string { return 'artists_group'; }
 
     protected function cacheKey(): string {
         return sprintf(self::CACHE_PREFIX, $this->id)
             . ($this->revisionId ? '_r' . $this->revisionId : '');
     }
 
-    public function flushCache(): int {
+    public function info(): array {
+        $cacheKey = $this->cacheKey();
+        $info = self::$cache->get_value($cacheKey);
+        if ($info !== false) {
+            $this->info = $info;
+        } else {
+            $sql = "
+            SELECT ag.Name           AS name,
+                wa.Image             AS image,
+                wa.body              AS body,
+                ag.VanityHouse       AS showcase,
+                dg.artist_discogs_id AS discogs_id,
+                dg.name              AS discogs_name,
+                dg.stem              AS discogs_stem,
+                dg.sequence,
+                dg.is_preferred
+            FROM artists_group AS ag
+            LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
+            ";
+            if ($this->revisionId) {
+                $sql .= "LEFT JOIN wiki_artists AS wa ON (wa.PageID = ag.ArtistID)";
+                $cond = 'wa.RevisionID = ?';
+                $args = [$this->revisionId];
+            } else {
+                $sql .= "LEFT JOIN wiki_artists AS wa USING (RevisionID)";
+                $cond = 'ag.ArtistID = ?';
+                $args = [$this->id];
+            }
+            $sql .= " WHERE $cond";
+            $info = self::$db->rowAssoc($sql, ...$args);
+
+            self::$db->prepared_query("
+                SELECT aa.name, aa.artist_attr_id
+                FROM artist_attr aa
+                INNER JOIN artist_has_attr aha USING (artist_attr_id)
+                WHERE aha.artist_id = ?
+                ", $this->id
+            );
+            $info['attr'] = self::$db->to_pair('name', 'artist_attr_id', false);
+
+            self::$db->prepared_query("
+                SELECT s2.ArtistID,
+                    a.Name,
+                    ass.Score,
+                    ass.SimilarID
+                FROM artists_similar AS s1
+                INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+                INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
+                INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+                WHERE s1.ArtistID = ?
+                ORDER BY ass.Score DESC
+                LIMIT 30
+                ", $this->id
+            );
+            $info['similar'] = self::$db->to_array(false, MYSQLI_ASSOC, false);
+
+            $info['homonyms'] = (int)self::$db->scalar('
+                SELECT count(*) FROM artist_discogs WHERE stem = ?
+                ', $info['discogs_stem']
+            );
+
+            self::$cache->cache_value($cacheKey, $info, 3600);
+            $this->info = $info;
+        }
+        return $this->info;
+    }
+
+    public function flush(): Artist {
         self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
             FROM torrents_artists
             WHERE ArtistID = ?
             ", $this->id
         );
-        return count(self::$cache->delete_multi([$this->cacheKey(), ...self::$db->collect(0, false)]));
+        self::$cache->delete_multi([
+            $this->cacheKey(),
+            sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
+            sprintf(self::CACHE_TGROUP_ARTIST, $this->id),
+            ...self::$db->collect(0, false)
+        ]);
+        unset($this->info);
+        return $this;
     }
 
-    protected function loadAttr(): array {
-        self::$db->prepared_query("
-            SELECT aa.name, aa.artist_attr_id
-            FROM artist_attr aa
-            INNER JOIN artist_has_attr aha USING (artist_attr_id)
-            WHERE aha.artist_id = ?
-            ", $this->id
-        );
-        return self::$db->to_pair('name', 'artist_attr_id');
+    public function body(): ?string {
+        return $this->info()['body'];
     }
 
-    public function hasAttr(string $name): ?int {
-        if (!isset($this->attr)) {
-            $this->attr = $this->loadAttr();
+    public function discogsId(): ?int {
+        return $this->info()['discogs_id'];
+    }
+
+    public function discogsName(): ?string {
+        return $this->info()['discogs_name'];
+    }
+
+    public function discogsIsPreferred(): bool {
+        return $this->info()['is_preferred'];
+    }
+
+    public function homonymCount(): int {
+        return $this->info()['homonyms'];
+    }
+
+    public function image(): ?string {
+        return $this->info()['image'];
+    }
+
+    public function isLocked(): bool {
+        return $this->hasAttr('locked');
+    }
+
+    public function isShowcase(): bool {
+        return $this->info()['showcase'] == 1;
+    }
+
+    public function name(): string {
+        return $this->info()['name'];
+    }
+
+    public function similarArtists(): array {
+        return $this->info()['similar'];
+    }
+
+    public function stats(): Stats\Artist{
+        if (!isset($this->stats)) {
+            $this->stats = new Stats\Artist($this->id);
         }
-        return $this->attr[$name] ?? null;
+        return $this->stats;
     }
 
-    protected function toggleAttr(string $attr, bool $flag): bool {
-        $attrId = $this->hasAttr($attr);
-        $found = !is_null($attrId);
+    public function hasAttr(string $name): bool {
+        return isset($this->info()['attr'][$name]);
+    }
+
+    public function toggleAttr(string $attr, bool $flag): bool {
+        $hasAttr = $this->hasAttr($attr);
         $toggled = false;
-        if (!$flag && $found) {
-            self::$db->prepared_query('
-                DELETE FROM artist_has_attr WHERE artist_id = ? AND artist_attr_id = ?
-                ', $this->id, $attrId
+        if (!$flag && $hasAttr) {
+            self::$db->prepared_query("
+                DELETE FROM artist_has_attr
+                WHERE artist_id = ?
+                    AND artist_attr_id = (SELECT artist_attr_id FROM artist_attr WHERE name = ?)
+                ", $this->id, $attr
             );
             $toggled = self::$db->affected_rows() === 1;
-        }
-        elseif ($flag && !$found) {
-            self::$db->prepared_query('
+        } elseif ($flag && !$hasAttr) {
+            self::$db->prepared_query("
                 INSERT INTO artist_has_attr (artist_id, artist_attr_id)
                     SELECT ?, artist_attr_id FROM artist_attr WHERE name = ?
-                ', $this->id, $attr
+                ", $this->id, $attr
             );
             $toggled = self::$db->affected_rows() === 1;
         }
         if ($toggled) {
-            $this->flushCache();
+            $this->flush();
         }
         return $toggled;
     }
 
-    public function isLocked(): bool {
-        return $this->hasAttr('locked') ?? false;
-    }
-
-    public function setLocked(): bool {
-        return $this->toggleAttr('locked', true);
-    }
-
-    public function setUnlocked(): bool {
-        return $this->toggleAttr('locked', false);
-    }
-
-    public function loadArtistRole() {
+    public function loadArtistRole(): Artist {
         self::$db->prepared_query("
             SELECT ta.GroupID AS group_id,
                 ta.Importance as artist_role,
@@ -216,6 +243,20 @@ class Artist extends Base {
         return $this;
     }
 
+    public function revisionList(): array {
+         self::$db->prepared_query("
+            SELECT RevisionID AS revision,
+                Summary       AS summary,
+                Time          AS time,
+                UserID        AS user_id
+            FROM wiki_artists
+            WHERE PageID = ?
+            ORDER BY RevisionID DESC
+            ", $this->id
+        );
+        return self::$db->to_array('revision', MYSQLI_ASSOC, false);
+    }
+
     public function artistRole(): array {
         return $this->artistRole;
     }
@@ -234,33 +275,6 @@ class Artist extends Base {
 
     public function sections(): array {
         return $this->section;
-    }
-
-    public function stats(): Stats\Artist{
-        if (!isset($this->stats)) {
-            $this->stats = new Stats\Artist($this->id);
-        }
-        return $this->stats;
-    }
-
-    public function name(): ?string {
-        return $this->name;
-    }
-
-    public function image(): ?string {
-        return $this->image;
-    }
-
-    public function body(): ?string {
-        return $this->body;
-    }
-
-    public function vanityHouse(): bool {
-        return $this->vanity == 1;
-    }
-
-    public function similarArtists(): array {
-        return $this->similar;
     }
 
     public function tagLeaderboard(): array {
@@ -340,7 +354,7 @@ class Artist extends Base {
             ", $redirectId
         );
         if (!$foundId) {
-            throw new Exception\ResourceNotFoundException($redirectId);
+            throw new Exception\ResourceNotFoundException((string)$redirectId);
         }
         if ($this->id !== $foundId) {
             throw new Exception\ArtistRedirectException();
@@ -358,18 +372,8 @@ class Artist extends Base {
         return self::$db->inserted_id();
     }
 
-    public function removeAlias(int $aliasId): void {
-        self::$db->prepared_query("
-            UPDATE artists_alias SET
-                ArtistID = ?,
-                Redirect = 0
-            WHERE AliasID = ?
-            ", $this->id, $aliasId
-        );
-    }
-
     public function getAlias($name): int {
-        $alias = self::$db->scalar('
+        $alias = (int)self::$db->scalar('
             SELECT AliasID
             FROM artists_alias
             WHERE ArtistID = ?
@@ -380,6 +384,17 @@ class Artist extends Base {
         return $alias ?: $this->id;
     }
 
+    public function removeAlias(int $aliasId): int {
+        self::$db->prepared_query("
+            UPDATE artists_alias SET
+                ArtistID = ?,
+                Redirect = 0
+            WHERE AliasID = ?
+            ", $this->id, $aliasId
+        );
+        return self::$db->affected_rows();
+    }
+
     public function aliasNameList(): array {
         self::$db->prepared_query("
             SELECT Name
@@ -388,23 +403,7 @@ class Artist extends Base {
             ORDER BY Name
             ", $this->id
         );
-        return self::$db->collect('Name');
-    }
-
-    public function editableInformation(): array {
-        return self::$db->row("
-            SELECT
-                ag.Name,
-                wa.Image,
-                wa.Body,
-                ag.VanityHouse,
-                dg.artist_discogs_id
-            FROM artists_group       AS ag
-            LEFT JOIN wiki_artists   AS wa USING (RevisionID)
-            LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
-            WHERE ag.ArtistID = ?
-            ", $this->id
-        ) ?? [];
+        return self::$db->collect('Name', false);
     }
 
     public function aliasInfo(): array {
@@ -527,7 +526,7 @@ class Artist extends Base {
      * Sets the Discogs ID for the artist and returns the number of affected rows.
      */
     public function setDiscogsRelation(int $discogsId, int $userId): int {
-        if ($this->discogsId === $discogsId) {
+        if ($this->discogsId() === $discogsId) {
             // don't blindly set the Discogs ID to something else if it's already set, or doesn't change
             return 0;
         }
@@ -548,7 +547,7 @@ class Artist extends Base {
         }
 
         $result = curl_exec($curl);
-        if ($result === false || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
+        if (!is_string($result) || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
             return 0;
         }
 
@@ -560,15 +559,15 @@ class Artist extends Base {
          * This can be adjusted via a control panel afterwards.
          */
         $payload = json_decode($result);
-        $this->discogsName = $payload->name;
-        if (preg_match('/^(.*) \((\d+)\)$/', $this->discogsName, $match)) {
-            $this->discogsStem = $match[1];
-            $this->discogsSequence = $match[2];
+        $discogsName = $payload->name;
+        if (preg_match('/^(.*) \((\d+)\)$/', $discogsName, $match)) {
+            $discogsStem = $match[1];
+            $discogsSequence = (int)$match[2];
         } else {
-            $this->discogsStem = $this->discogsName;
-            $this->discogsSequence = 1;
+            $discogsStem = $discogsName;
+            $discogsSequence = 1;
         }
-        $this->discogsId = $discogsId;
+        $discogsId = $discogsId;
 
         // We only run this query when artist_discogs_id has changed, so the collision
         // should only happen on the UNIQUE(artist_id) index
@@ -583,18 +582,12 @@ class Artist extends Base {
                 stem = VALUES(stem),
                 name = VALUES(name),
                 user_id = VALUES(user_id)
-            ", $this->discogsId, $this->id, (int)($this->homonymCount() == 0),
-            $this->discogsSequence, $this->discogsStem, $this->discogsName, $userId
+            ", $discogsId, $this->id, (int)($this->homonymCount() == 0),
+            $discogsSequence, $discogsStem, $discogsName, $userId
         );
-        $this->flushCache();
-        return self::$db->affected_rows();
-    }
-
-    public function homonymCount(): int {
-        return self::$db->scalar('
-            SELECT count(*) FROM artist_discogs WHERE stem = ?
-            ', $this->discogsStem
-        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     public function removeDiscogsRelation(): int {
@@ -602,49 +595,12 @@ class Artist extends Base {
             DELETE FROM artist_discogs WHERE artist_id = ?
             ', $this->id
         );
-        $this->flushCache();
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
-    public function discogsId(): ?int {
-        return $this->discogsId;
-    }
-
-    public function discogsName(): ?string {
-        return $this->discogsName;
-    }
-
-    public function discogsIsPreferred(): bool {
-        return $this->discogsIsPreferred;
-    }
-
-    /* STATIC METHODS - for when you do not yet have an ID, e.g. during creation */
-    /**
-     * Collapse whitespace and directional markers, because people copypaste carelessly.
-     * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
-     */
-    public static function sanitize(string $name): ?string {
-        // \u200e is &lrm;
-        $name = preg_replace('/^(?:\xE2\x80\x8E|\s)+/', '', $name);
-        $name = preg_replace('/(?:\xE2\x80\x8E|\s)+$/', '', $name);
-        return preg_replace('/ +/', ' ', $name);
-    }
-
-    public function revisionList(): array {
-         self::$db->prepared_query("
-            SELECT RevisionID AS revision,
-                Summary       AS summary,
-                Time          AS time,
-                UserID        AS user_id
-            FROM wiki_artists
-            WHERE PageID = ?
-            ORDER BY RevisionID DESC
-            ", $this->id
-        );
-        return self::$db->to_array('revision', MYSQLI_ASSOC, false);
-    }
-
-    public function addSimilar(Artist $similar, int $userId) {
+    public function addSimilar(Artist $similar, int $userId): int {
         $artistId = $this->id;
         $similarArtistId = $similar->id();
         // Let's see if there's already a similar artists field for these two
@@ -683,11 +639,52 @@ class Artist extends Base {
             VALUES (?,         ?,      'up')
             ", $similarId, $userId
         );
+        $affected = self::$db->affected_rows();
         self::$db->commit();
 
-        $this->flushCache();
-        $similar->flushCache();
         self::$cache->delete_multi(["similar_positions_$artistId", "similar_positions_$similarArtistId"]);
+        $this->flush();
+        $similar->flush();
+        return $affected;
+    }
+
+    public function voteSimilar(int $userId, int $similarId, bool $upvote): bool {
+        if (self::$db->scalar("
+            SELECT 1
+            FROM artists_similar_votes
+            WHERE SimilarID = ?
+                AND UserID = ?
+                AND Way = ?
+            ", $similarId, $userId, $upvote ? 'up' : 'down'
+        )) {
+            return false;
+        }
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            UPDATE artists_similar_scores SET
+                Score = Score + ?
+            WHERE SimilarID = ?
+            ", $upvote ? 100 : -100, $similarId
+        );
+        self::$db->prepared_query("
+            INSERT INTO artists_similar_votes
+                   (SimilarID, UserID, Way)
+            VALUES (?,         ?,      ?)
+            ", $similarId, $userId, $upvote ? 'up' : 'down'
+        );
+        self::$db->commit();
+        $similarArtistId = (int)self::$db->scalar("
+            SELECT ArtistID
+            FROM artists_similar
+            WHERE SimilarID = ?
+                AND ArtistID != ?
+            ", $similarId, $this->id
+        );
+        $similarArtist = new Artist($similarArtistId, 0);
+        $this->flush();
+        $similarArtist->flush();
+        self::$cache->delete_multi(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
+        return true;
     }
 
     public function removeSimilar(int $similarId, Manager\Artist $artMan, Manager\Request $reqMan): bool {
@@ -715,30 +712,11 @@ class Artist extends Base {
         );
         foreach ($artistIds as $id) {
             self::$cache->delete_value("similar_positions_$id");
-            $artMan->findById($id)?->flushCache();
+            $artMan->findById($id)?->flush();
             $reqMan->findById($id)?->updateSphinx();
         }
         self::$db->commit();
         return true;
-    }
-
-    public function loadSimilar(): array {
-        self::$db->prepared_query("
-            SELECT
-                s2.ArtistID,
-                a.Name,
-                ass.Score,
-                ass.SimilarID
-            FROM artists_similar AS s1
-            INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
-            INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
-            INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
-            WHERE s1.ArtistID = ?
-            ORDER BY ass.Score DESC
-            LIMIT 30
-            ", $this->id
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function similarGraph(int $width, int $height): array {
@@ -933,45 +911,6 @@ class Artist extends Base {
         return $similar;
     }
 
-    public function voteSimilar(int $userId, int $similarId, bool $upvote): bool {
-        if (self::$db->scalar("
-            SELECT 1
-            FROM artists_similar_votes
-            WHERE SimilarID = ?
-                AND UserID = ?
-                AND Way = ?
-            ", $similarId, $userId, $upvote ? 'up' : 'down'
-        )) {
-            return false;
-        }
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            UPDATE artists_similar_scores SET
-                Score = Score + ?
-            WHERE SimilarID = ?
-            ", $upvote ? 100 : -100, $similarId
-        );
-        self::$db->prepared_query("
-            INSERT INTO artists_similar_votes
-                   (SimilarID, UserID, Way)
-            VALUES (?,         ?,      ?)
-            ", $similarId, $userId, $upvote ? 'up' : 'down'
-        );
-        self::$db->commit();
-        $similarArtistId = self::$db->scalar("
-            SELECT ArtistID
-            FROM artists_similar
-            WHERE SimilarID = ?
-                AND ArtistID != ?
-            ", $similarId, $this->id
-        );
-        $similarArtist = new Artist($similarArtistId, 0);
-        $this->flushCache();
-        $similarArtist->flushCache();
-        self::$cache->delete_multi(["similar_positions_" . $this->id, "similar_positions_$similarArtistId"]);
-        return true;
-    }
-
     /**
      * Deletes an artist and their wiki and tags.
      * Does NOT delete their requests or torrents.
@@ -998,5 +937,17 @@ class Artist extends Base {
 
         self::$db->set_query_id($qid);
         return 1;
+    }
+
+    /* STATIC METHODS - for when you do not yet have an ID, e.g. during creation */
+    /**
+     * Collapse whitespace and directional markers, because people copypaste carelessly.
+     * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
+     */
+    public static function sanitize(string $name): ?string {
+        // \u200e is &lrm;
+        $name = preg_replace('/^(?:\xE2\x80\x8E|\s)+/', '', $name);
+        $name = preg_replace('/(?:\xE2\x80\x8E|\s)+$/', '', $name);
+        return preg_replace('/ +/', ' ', $name);
     }
 }

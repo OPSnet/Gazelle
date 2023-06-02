@@ -14,7 +14,7 @@ class TGroup extends \Gazelle\ArtistRole {
         8 => 'arranger',
     ];
 
-    protected function artistListQuery(): \mysqli_result {
+    protected function artistListQuery(): \mysqli_result|bool {
         return self::$db->prepared_query("
             SELECT ta.Importance,
                 ta.ArtistID,
@@ -28,7 +28,7 @@ class TGroup extends \Gazelle\ArtistRole {
         );
     }
 
-    protected function init() {
+    protected function init(): void {
         $this->artistList = $this->artistList();
         $this->roleList = array_fill_keys(array_values(self::MAP), []);
         $this->idList = [];

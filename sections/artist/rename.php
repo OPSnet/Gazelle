@@ -15,15 +15,16 @@
  * Neither are similar artists.                                 *
  ****************************************************************/
 
-authorize();
-
 if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$reqMan = new Gazelle\Manager\Request;
+authorize();
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
+$reqMan    = new Gazelle\Manager\Request;
+$artistMan = new Gazelle\Manager\Artist;
+
+$artist = $artistMan->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     error(404);
 }
@@ -43,6 +44,8 @@ if (!($oldAliasId = $artist->getAlias($oldName))) {
 }
 
 $db = Gazelle\DB::DB();
+$db->begin_transaction();
+
 [$TargetAliasID, $TargetArtistID] = $db->row("
     SELECT AliasID, ArtistID
     FROM artists_alias
@@ -182,16 +185,15 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     }
 }
 
-$db->prepared_query("
-    SELECT GroupID
-    FROM torrents_artists
-    WHERE ArtistID = ?
-    ", $ArtistID
-);
-$Cache->delete_multi(array_merge($db->collect('GroupID'), ["artists_requests_$TargetArtistID", "artists_requests_$ArtistID"]));
+$target = $artistMan->findById($TargetArtistID);
+if ($target) {
+    $db->commit();
+} else {
+    $db->rollback();
+    error("Unable to rename artist");
+}
 
-$artist->flushCache();
-$artist = new Gazelle\Artist($TargetArtistID);
-$artist->flushCache();
+$artist->flush();
+$target->flush();
 
-header("Location: artist.php?id={$TargetArtistID}");
+header("Location: {$target->location()}");

@@ -951,19 +951,21 @@ class TGroup extends BaseObject {
             SELECT ArtistID FROM torrents_artists WHERE GroupID = ?
             ", $this->id
         );
-        $Artists = self::$db->collect(0, false);
+        $artistList = self::$db->collect(0, false);
         self::$db->prepared_query("
             DELETE FROM torrents_artists WHERE GroupID = ?
             ", $this->id
         );
-        $logger = new Log;
-        foreach ($Artists as $ArtistID) {
-            $artist = new Artist($ArtistID);
-            if ($artist->usageTotal() === 0) {
-                $artist->remove($user, $logger);
-            } else {
-                // Not the only group, still need to clear cache
-                self::$cache->delete_value("artist_groups_$ArtistID");
+        $logger    = new Log;
+        $artistMan = new Manager\Artist;
+        foreach ($artistList as $artistId) {
+            $artist = $artistMan->findById($artistId);
+            if ($artist) {
+                if ($artist->usageTotal() === 0) {
+                    $artist->remove($user, $logger);
+                } else {
+                    $this->flush();
+                }
             }
         }
 

@@ -10,7 +10,7 @@ abstract class ArtistRole extends \Gazelle\Base {
     protected array $roleList;
     protected array $idList;
 
-    abstract protected function artistListQuery(): \mysqli_result;
+    abstract protected function artistListQuery(): \mysqli_result|bool;
     abstract public function idList(): array;
     abstract public function roleList(): array;
 
@@ -21,8 +21,11 @@ abstract class ArtistRole extends \Gazelle\Base {
 
     protected function artistList(): array {
         if (!isset($this->artistList)) {
-            $this->artistListQuery();
-            $this->artistList = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            if ($this->artistListQuery()) {
+                $this->artistList = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            } else {
+                $this->artistList = [];
+            }
         }
         return $this->artistList;
     }

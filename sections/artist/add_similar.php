@@ -24,13 +24,13 @@ if (is_null($similar)) {
         }
     }
 }
-$artist->addSimilar($similar, $Viewer->id());
+$artist->addSimilar($similar, $Viewer);
 
 if (defined('AJAX')) {
     json_print('success', [
-        'artist' => $artist->id(),
+        'artist'  => $artist->id(),
         'similar' => $similar->id(),
     ]);
 } else {
-    header("Location: " . redirectUrl("artist.php?id=" . $artist->id()));
+    header("Location: {$artist->location()}");
 }

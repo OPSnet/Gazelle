@@ -231,106 +231,6 @@ parameters:
 			path: ../app/ApplicantRole.php
 
 		-
-			message: "#^Method Gazelle\\\\Artist\\:\\:addSimilar\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Method Gazelle\\\\Artist\\:\\:getAlias\\(\\) should return int but returns float\\|int\\|string\\|true\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Method Gazelle\\\\Artist\\:\\:homonymCount\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Method Gazelle\\\\Artist\\:\\:isLocked\\(\\) should return bool but returns int\\|false\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Method Gazelle\\\\Artist\\:\\:loadArtistRole\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\Artist constructor expects int, bool\\|float\\|int\\|string\\|null given\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|true given\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Parameter \\#1 \\$message of class Gazelle\\\\Exception\\\\ResourceNotFoundException constructor expects string, int given\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$artistRole has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$body has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$discogsId has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$discogsIsPreferred has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$discogsName has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$discogsStem has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$homonyms has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$image has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Property Gazelle\\\\Artist\\:\\:\\$similar has no type specified\\.$#"
-			count: 1
-			path: ../app/Artist.php
-
-		-
-			message: "#^Method Gazelle\\\\ArtistRole\\\\Request\\:\\:artistListQuery\\(\\) should return mysqli_result but returns bool\\|mysqli_result\\.$#"
-			count: 1
-			path: ../app/ArtistRole/Request.php
-
-		-
-			message: "#^Method Gazelle\\\\ArtistRole\\\\TGroup\\:\\:artistListQuery\\(\\) should return mysqli_result but returns bool\\|mysqli_result\\.$#"
-			count: 1
-			path: ../app/ArtistRole/TGroup.php
-
-		-
-			message: "#^Method Gazelle\\\\ArtistRole\\\\TGroup\\:\\:init\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/ArtistRole/TGroup.php
-
-		-
 			message: "#^Method Gazelle\\\\Base\\:\\:enumDefault\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Base.php
@@ -874,11 +774,6 @@ parameters:
 			message: "#^Method Gazelle\\\\Json\\:\\:setVersion\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Json.php
-
-		-
-			message: "#^Method Gazelle\\\\Json\\\\Artist\\:\\:setReleasesOnly\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Json/Artist.php
 
 		-
 			message: "#^Parameter \\#2 \\$property of method Gazelle\\\\Json\\\\User\\:\\:valueOrNull\\(\\) expects bool, string given\\.$#"

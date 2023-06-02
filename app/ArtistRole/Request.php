@@ -3,7 +3,7 @@
 namespace Gazelle\ArtistRole;
 
 class Request extends \Gazelle\ArtistRole {
-    protected function artistListQuery(): \mysqli_result {
+    protected function artistListQuery(): \mysqli_result|bool {
         return self::$db->prepared_query("
             SELECT r.artist_role_id,
                 r.slug      AS slug,

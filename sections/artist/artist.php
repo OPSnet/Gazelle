@@ -21,14 +21,14 @@ $vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $artistId);
-$name         = $Artist->name() ?? 'artist:' . $artistId;
+$name         = $Artist->name();
 $requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request)->findByArtist($Artist);
 
 View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscriptions']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
+        <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->isShowcase() ? ' [Showcase]' : '' ?></h2>
         <div class="linkbox">
 <?php if ($Viewer->permitted('torrents_edit')) { ?>
             <a href="artist.php?action=edit&amp;artistid=<?= $artistId ?>" class="brackets">Edit</a>

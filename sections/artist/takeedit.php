@@ -91,11 +91,11 @@ $db->prepared_query($sql = "
 );
 
 if ($locked) {
-    $artist->setLocked();
+    $artist->toggleAttr('locked', true);
 } elseif ($unlocked && $Viewer->permitted('users_mod')) {
-    $artist->setUnlocked();
+    $artist->toggleAttr('locked', false);
 }
 
 // There we go, all done!
-$artist->flushCache();
+$artist->flush();
 header("Location: " . $artist->location());

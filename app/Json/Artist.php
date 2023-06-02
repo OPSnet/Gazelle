@@ -14,7 +14,7 @@ class Artist extends \Gazelle\Json {
         protected \Gazelle\Manager\Torrent $torMan
     ) {}
 
-    public function setReleasesOnly(bool $releasesOnly) {
+    public function setReleasesOnly(bool $releasesOnly): Artist {
         $this->releasesOnly = $releasesOnly;
         return $this;
     }
@@ -124,24 +124,18 @@ class Artist extends \Gazelle\Json {
             );
         }
 
-        $name = $artist->name();
-        if (is_null($name)) {
-            global $Debug;
-            $Debug->analysis("Artist has null name", $artistId, 3600 * 168);
-        }
         $stats = $artist->stats();
         return [
-            'id'             => $artistId,
-            'name'           => $name,
-            'notificationsEnabled' =>
-                is_null($name) ? false : $this->user->hasArtistNotification($name),
-            'hasBookmarked'  => $this->bookmark->isArtistBookmarked($artistId),
-            'image'          => $artist->image(),
-            'body'           => \Text::full_format($artist->body()),
-            'bodyBbcode'     => $artist->body(),
-            'vanityHouse'    => $artist->vanityHouse(),
-            'tags'           => array_values($Tags),
-            'similarArtists' => $JsonSimilar,
+            'id'                   => $artistId,
+            'name'                 => $artist->name(),
+            'notificationsEnabled' => $this->user->hasArtistNotification($artist->name()),
+            'hasBookmarked'        => $this->bookmark->isArtistBookmarked($artistId),
+            'image'                => $artist->image(),
+            'body'                 => \Text::full_format($artist->body()),
+            'bodyBbcode'           => $artist->body(),
+            'vanityHouse'          => $artist->isShowcase(),
+            'tags'                 => array_values($Tags),
+            'similarArtists'       => $JsonSimilar,
             'statistics' => [
                 'numGroups'   => $stats->tgroupTotal(),
                 'numTorrents' => $stats->torrentTotal(),
@@ -155,16 +149,16 @@ class Artist extends \Gazelle\Json {
         ];
     }
 
-    protected function search_array($Array, $Key, $Value): array {
-        $Results = [];
+    protected function search_array(mixed $Array, string $Key, mixed $Value): array {
+        $results = [];
         if (is_array($Array)) {
             if (isset($Array[$Key]) && $Array[$Key] == $Value) {
-                $Results[] = $Array;
+                $results[] = $Array;
             }
             foreach ($Array as $subarray) {
-                $Results = array_merge($Results, $this->search_array($subarray, $Key, $Value));
+                $results = array_merge($results, $this->search_array($subarray, $Key, $Value));
             }
         }
-        return $Results;
+        return $results;
     }
 }
