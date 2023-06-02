@@ -3,13 +3,30 @@
 namespace Gazelle\Manager;
 
 class Tag extends \Gazelle\BaseManager {
-    protected const ID_KEY = 'zz_tag_%d';
+    protected const ID_KEY    = 'zz_tag_%d';
+    protected const ALIAS_KEY = 'tag_aliases_search';
+    protected const GENRE_KEY = 'tag_genre';
+
+    /**
+     * Create a tag. If the tag already exists its usage is incremented.
+     */
+    public function create(string $name, \Gazelle\User $user): int {
+        self::$db->prepared_query("
+            INSERT INTO tags
+                   (Name, UserID)
+            VALUES (?,    ?)
+            ON DUPLICATE KEY UPDATE
+                Uses = Uses + 1
+            ", $this->resolve($this->sanitize($name)), $user->id()
+        );
+        return self::$db->inserted_id();
+    }
 
     public function findById(int $tagId): ?\Gazelle\Tag {
         $key = sprintf(self::ID_KEY, $tagId);
         $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = self::$db->scalar("
+            $id = (int)self::$db->scalar("
                 SELECT ID FROM tags WHERE ID = ?
                 ", $tagId
             );
@@ -20,7 +37,7 @@ class Tag extends \Gazelle\BaseManager {
         return $id ? new \Gazelle\Tag($id) : null;
     }
 
-    public function findByName(string $name) {
+    public function findByName(string $name): ?\Gazelle\Tag {
         return $this->findById((int)self::$db->scalar("
             SELECT ID FROM tags WHERE Name = ?
             ", $name
@@ -50,10 +67,13 @@ class Tag extends \Gazelle\BaseManager {
     /**
      * Normalize a list of tags (sanitize them and remove duplicates)
      *
-     * @param string $tagList space-separated list of tags
+     * $tagList space-separated list of tags
      */
     public function normalize(string $tagList): string {
-        $tags = preg_split('/[\s]+/', $tagList);
+        $tags = preg_split('/[\s]+/', trim($tagList));
+        if ($tags === false) {
+            return '';
+        }
         $clean = [];
         foreach ($tags as $t) {
             $clean[$this->sanitize($t)] = 1;
@@ -62,54 +82,48 @@ class Tag extends \Gazelle\BaseManager {
     }
 
     /**
-     * Get the ID of a tag
-     *
-     * @return int ID of tag, or null if no such tag
+     * Get the ID of a tag, or null if no such tag
      */
     public function lookup(string $name): ?int {
-        return self::$db->scalar("
+        $tagId = self::$db->scalar("
             SELECT ID FROM tags WHERE Name = ?
             ", $name
         );
+        return is_null($tagId) ? null : (int)$tagId;
     }
 
     /**
-     * Get the name of an ID
-     *
-     * @param int $tagId ID of the tag
+     * Get the name of an ID, or null if no such tag
      */
     public function name(int $tagId): ?string {
-        return self::$db->scalar("
+        $name = self::$db->scalar("
             SELECT Name FROM tags WHERE ID = ?
             ", $tagId
         );
+        return is_null($name) ? null : (string)$name;
     }
 
     /**
-     * Create a tag. If the tag already exists its usage is incremented.
+     * Resolve the alias of a tag.
      *
-     * @param int $userId The id of the user creating the tag.
+     * @see lookupBad()
      */
-    public function create(string $name, int $userId): int {
-        self::$db->prepared_query("
-            INSERT INTO tags
-                   (Name, UserID)
-            VALUES (?,    ?)
-            ON DUPLICATE KEY UPDATE
-                Uses = Uses + 1
-            ", $this->resolve($this->sanitize($name)), $userId
+    public function resolve(string $name): ?string {
+        $resolved = self::$db->scalar("
+            SELECT AliasTag FROM tag_aliases WHERE BadTag = ?
+            ", $name
         );
-        return self::$db->inserted_id();
+        return is_null($resolved) ? $name : (string)$resolved;
     }
 
     /**
      * See if a tag is marked as bad (would be replaced by an alias)
      *
      * @see resolve()
-     * @return int ID of tag, or null if no such tag
+     * return ID of tag, or null if no such tag
      */
     public function lookupBad(string $name): ?int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT ID FROM tag_aliases WHERE BadTag = ?
             ", $name
         );
@@ -118,10 +132,10 @@ class Tag extends \Gazelle\BaseManager {
     /**
      * Make a tag official
      *
-     * @param int $userId Who is doing the officializing/
-     * @return int $tagId id of the officialized tag.
+     * $userId Who is doing the officializing/
+     * return id of the officialized tag.
      */
-    public function officialize(string $name, int $userId): int {
+    public function officialize(string $name, \Gazelle\User $user): int {
         $name = $this->sanitize($name);
         $tagId = $this->lookup($name);
         if ($tagId) {
@@ -138,19 +152,19 @@ class Tag extends \Gazelle\BaseManager {
                 INSERT INTO tags
                        (Name, UserID, TagType, Uses)
                 VALUES (?,    ?,      'genre', 0)
-                ", $name, $userId
+                ", $name, $user->id()
             );
             $tagId = self::$db->inserted_id();
         }
-        self::$cache->delete_value('genre_tags');
+        self::$cache->delete_value(self::GENRE_KEY);
         return $tagId;
     }
 
     /**
      * Make a list of tags unofficial
      *
-     * @param array $tagId list of ids to unofficialize
-     * @return int Number of tags that were actually unofficialized
+     * $tagId list of ids to unofficialize
+     * return number of tags that were actually unofficialized
      */
     public function unofficialize(array $tagId): int {
         self::$db->prepared_query("
@@ -159,14 +173,14 @@ class Tag extends \Gazelle\BaseManager {
             WHERE ID IN (" . placeholders($tagId) . ")
             ", ...$tagId
         );
-        self::$cache->delete_value('genre_tags');
+        self::$cache->delete_value(self::GENRE_KEY);
         return self::$db->affected_rows();
     }
 
     /**
      * Return the list of all official tags
      *
-     * @return array [id, name, uses]
+     * return array [id, name, uses]
      */
     public function officialList($order = 'name'): array {
         $orderBy = $order == 'name' ? '2, 3 DESC' : '3 DESC, 2';
@@ -186,32 +200,32 @@ class Tag extends \Gazelle\BaseManager {
      * @return array List of names
      */
     public function genreList(): array {
-        $list = self::$cache->get_value('genre_tags');
+        $list = self::$cache->get_value(self::GENRE_KEY);
         if (!$list) {
             self::$db->prepared_query("
-                SELECT Name
+                SELECT Name AS name
                 FROM tags
                 WHERE TagType = 'genre'
                 ORDER BY Name
             ");
-            $list = self::$db->collect('Name');
-            self::$cache->cache_value('genre_tags', $list, 3600 * 24);
+            $list = self::$db->collect('name', false);
+            self::$cache->cache_value(self::GENRE_KEY, $list, 3600 * 24);
         }
         return $list;
     }
 
-    public function rename(int $tagId, string $name, int $userId) {
+    public function rename(int $tagId, string $name, \Gazelle\User $user): int {
         self::$db->prepared_query("
             UPDATE tags SET
                 Name = ?,
                 UserID = ?
             WHERE ID = ?
-            ", $name, $userId, $tagId
+            ", $name, $user->id(), $tagId
         );
         return self::$db->affected_rows();
     }
 
-    public function merge(int $currentId, array $replacement, int $userId): int {
+    public function merge(int $currentId, array $replacement, \Gazelle\User $user): int {
         $totalChanged = 0;
         $totalRenamed = 0;
         foreach ($replacement as $r) {
@@ -221,9 +235,9 @@ class Tag extends \Gazelle\BaseManager {
                 // then we can rename the first one but after that we have to
                 // begin creating additional tags.
                 if ($totalRenamed == 0) {
-                    $totalRenamed += $this->rename($currentId, $r, $userId);
+                    $totalRenamed += $this->rename($currentId, $r, $user);
                 } else {
-                    $replacementId = $this->create($r, $userId);
+                    $replacementId = $this->create($r, $user);
                     ++$totalRenamed;
                 }
                 continue;
@@ -237,7 +251,7 @@ class Tag extends \Gazelle\BaseManager {
                     FROM torrents_tags curr
                     LEFT JOIN torrents_tags merge ON (merge.GroupID = curr.GroupID AND merge.TagID = ?)
                     WHERE curr.TagID = ? AND merge.TagID IS NULL
-                ", $replacementId, $userId, $replacementId, $currentId
+                ", $replacementId, $user->id(), $replacementId, $currentId
             );
             $changed += self::$db->affected_rows();
 
@@ -248,7 +262,7 @@ class Tag extends \Gazelle\BaseManager {
                     FROM artists_tags curr
                     LEFT JOIN artists_tags merge ON (merge.ArtistID = curr.ArtistID AND merge.TagID = ?)
                     WHERE curr.TagID = ? AND merge.TagID IS NULL
-                ', $replacementId, $userId, $replacementId, $currentId
+                ', $replacementId, $user->id(), $replacementId, $currentId
             );
             $changed += self::$db->affected_rows();
 
@@ -288,6 +302,7 @@ class Tag extends \Gazelle\BaseManager {
 
     /**
      * Add a mapping of a bad tag alias to a acceptable alias
+     * Returns the alias ID
      */
     public function createAlias(string $bad, string $good): int {
         self::$db->prepared_query("
@@ -296,7 +311,9 @@ class Tag extends \Gazelle\BaseManager {
             VALUES (?,     ?)
             ", $this->sanitize($bad), $this->sanitize($good)
         );
-        return self::$db->affected_rows();
+        $id = self::$db->inserted_id();
+        self::$cache->delete_value(self::ALIAS_KEY);
+        return $id;
     }
 
     /**
@@ -310,7 +327,9 @@ class Tag extends \Gazelle\BaseManager {
             WHERE ID = ?
             ", $this->sanitize($bad), $this->sanitize($good), $aliasId
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        self::$cache->delete_value(self::ALIAS_KEY);
+        return $affected;
     }
 
     /**
@@ -321,22 +340,71 @@ class Tag extends \Gazelle\BaseManager {
             DELETE FROM tag_aliases WHERE ID = ?
             ", $aliasId
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        self::$cache->delete_value(self::ALIAS_KEY);
+        return $affected;
+    }
+
+    public function aliasList(): array {
+        $aliasList = self::$cache->get_value(self::ALIAS_KEY);
+        if ($aliasList === false) {
+            self::$db->prepared_query("
+                SELECT ID, BadTag, AliasTag
+                FROM tag_aliases
+                ORDER BY BadTag
+            ");
+            $aliasList = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            // Unify tag aliases to be in_this_format as tags not in.this.format
+            array_walk_recursive($aliasList, function(&$val, $key) {
+                $val = strtr($val, '.', '_');
+            });
+            // Clean up the array for smaller cache size
+            foreach ($aliasList as &$TagAlias) {
+                foreach (array_keys($TagAlias) as $Key) {
+                    if (is_numeric($Key)) {
+                        unset($TagAlias[$Key]);
+                    }
+                }
+            }
+            self::$cache->cache_value(self::ALIAS_KEY, $aliasList, 3600 * 24 * 7); // cache for 7 days
+        }
+        return $aliasList;
     }
 
     /**
-     * Resolve the alias of a tag.
-     *
-     * @see lookupBad()
+     * Replace bad tags with tag aliases
      */
-    public function resolve($name): string {
-        $QueryID = self::$db->get_query_id();
-        $resolved = self::$db->scalar("
-            SELECT AliasTag FROM tag_aliases WHERE BadTag = ?
-            ", $name
-        );
-        self::$db->set_query_id($QueryID);
-        return $resolved ?: $name;
+    public function replaceAliasList(array $Tags): array {
+        $TagAliases = $this->aliasList();
+
+        if (isset($Tags['include'])) {
+            $End = count($Tags['include']);
+            for ($i = 0; $i < $End; $i++) {
+                foreach ($TagAliases as $TagAlias) {
+                    if ($Tags['include'][$i] === $TagAlias['BadTag']) {
+                        $Tags['include'][$i] = $TagAlias['AliasTag'];
+                        break;
+                    }
+                }
+            }
+            // Only keep unique entries after unifying tag standard
+            $Tags['include'] = array_unique($Tags['include']);
+        }
+
+        if (isset($Tags['exclude'])) {
+            $End = count($Tags['exclude']);
+            for ($i = 0; $i < $End; $i++) {
+                foreach ($TagAliases as $TagAlias) {
+                    if (substr($Tags['exclude'][$i], 1) === $TagAlias['BadTag']) {
+                        $Tags['exclude'][$i] = '!'.$TagAlias['AliasTag'];
+                        break;
+                    }
+                }
+            }
+            // Only keep unique entries after unifying tag standard
+            $Tags['exclude'] = array_unique($Tags['exclude']);
+        }
+        return $Tags;
     }
 
     /**
@@ -424,7 +492,7 @@ class Tag extends \Gazelle\BaseManager {
     }
 
     public function torrentTagHasVote(int $tagId, int $groupId, int $userId): bool {
-        self::$db->prepared_query("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM torrents_tags_votes
             WHERE TagID = ?
@@ -432,7 +500,6 @@ class Tag extends \Gazelle\BaseManager {
                 AND UserID = ?
             ", $tagId, $groupId, $userId
         );
-        return self::$db->has_results();
     }
 
     /**
@@ -481,5 +548,49 @@ class Tag extends \Gazelle\BaseManager {
             ", $userId
         );
         return self::$db->collect(0, false);
+    }
+
+    /**
+     * Filters a list of include and exclude tags to be used in a Sphinx search
+     * $Tags An array of tags with sub-arrays 'include' and 'exclude'
+     * $EnableNegation Sphinx needs at least one positive search condition to support the NOT operator
+     * $TagType Search for Any or All of these tags.
+     * return array Array keys predicate and input
+     *               Predicate for a Sphinx 'taglist' query
+     *               Input contains clean, aliased tags. Use it in a form instead of the user submitted string
+     */
+    public function sphinxFilter(array $Tags, bool $EnableNegation, bool $allTags): array {
+        $QueryParts = [];
+        $Tags = $this->replaceAliasList($Tags);
+        $TagList = str_replace('_', '.', implode(', ', array_merge($Tags['include'], $Tags['exclude'])));
+
+        if (!$EnableNegation && !empty($Tags['exclude'])) {
+            $Tags['include'] = array_merge($Tags['include'], $Tags['exclude']);
+            unset($Tags['exclude']);
+        }
+
+        foreach ($Tags['include'] as &$Tag) {
+            $Tag = \Sphinxql::sph_escape_string($Tag);
+        }
+
+        if (!empty($Tags['exclude'])) {
+            foreach ($Tags['exclude'] as &$Tag) {
+                $Tag = '!' . \Sphinxql::sph_escape_string(substr($Tag, 1));
+            }
+        }
+
+        if ($allTags) {
+            $QueryParts[] = implode(' ', array_merge($Tags['include'], $Tags['exclude']));
+        } else {
+            // Any
+            if (!empty($Tags['include'])) {
+                $QueryParts[] = '( ' . implode(' | ', $Tags['include']) . ' )';
+            }
+            if (!empty($Tags['exclude'])) {
+                $QueryParts[] = implode(' ', $Tags['exclude']);
+            }
+        }
+
+        return ['input' => $TagList, 'predicate' => implode(' ', $QueryParts)];
     }
 }

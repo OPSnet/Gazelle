@@ -479,7 +479,7 @@ class Torrent {
     private function post_process_fields(): void {
         if (isset($this->Terms['taglist'])) {
             // Replace bad tags with tag aliases
-            $this->Terms['taglist'] = \Tags::remove_aliases($this->Terms['taglist']);
+            $this->Terms['taglist'] = (new \Gazelle\Manager\Tag)->replaceAliasList($this->Terms['taglist']);
             if (isset($this->RawTerms['tags_type']) && (int)$this->RawTerms['tags_type'] === self::TAGS_ANY) {
                 $this->Terms['taglist']['operator'] = self::SPH_BOOL_OR;
             }

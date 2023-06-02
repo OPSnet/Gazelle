@@ -4,6 +4,7 @@ use \PHPUnit\Framework\TestCase;
 use \Gazelle\NotificationTicketState;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class NotificationUploadTest extends TestCase {
     use Gazelle\Pg;
@@ -12,19 +13,8 @@ class NotificationUploadTest extends TestCase {
     protected Gazelle\Torrent         $torrent;
     protected array                   $userList;
 
-    protected function makeUser(string $key): \Gazelle\User {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        return (new Gazelle\UserCreator)->setUsername("notf.$key" . randomString(5))
-            ->setEmail(randomString(6) . "@notif.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/NotificationUploadTest.php')
-            ->create();
-    }
-
     public function setUp(): void {
-        $user = $this->makeUser('uploader');
-
+        $user = Helper::makeUser('uploader.' . randomString(10), 'notification-ticket');
         $tgroup = (new Gazelle\Manager\TGroup)->create(
             categoryId:      1,
             releaseType:     (new Gazelle\ReleaseType)->findIdByName('Compilation'),
@@ -39,9 +29,9 @@ class NotificationUploadTest extends TestCase {
         $tgroup->addArtists([ARTIST_MAIN], ['Notify Man ' . randomString(12)], $user, new Gazelle\Manager\Artist, new Gazelle\Log);
 
         $tagMan = new Gazelle\Manager\Tag;
-        $tagMan->createTorrentTag($tagMan->create('electronic', $user->id()), $tgroup->id(), $user->id(), 10);
-        $tagMan->createTorrentTag($tagMan->create('funk', $user->id()), $tgroup->id(), $user->id(), 10);
-        $tagMan->createTorrentTag($tagMan->create('jazz', $user->id()), $tgroup->id(), $user->id(), 10);
+        $tagMan->createTorrentTag($tagMan->create('electronic', $user), $tgroup->id(), $user->id(), 10);
+        $tagMan->createTorrentTag($tagMan->create('funk', $user), $tgroup->id(), $user->id(), 10);
+        $tagMan->createTorrentTag($tagMan->create('jazz', $user), $tgroup->id(), $user->id(), 10);
         $tgroup->refresh();
 
         $this->torMan = new \Gazelle\Manager\Torrent;
@@ -66,10 +56,8 @@ class NotificationUploadTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $user   = $this->torrent->uploader();
-        $tgroup = $this->torrent->group();
-        $this->torrent->remove($user, 'notify unit test');
-        $tgroup->remove($user);
+        $user = $this->torrent->uploader();
+        Helper::removeTGroup($this->torrent->group(), $user);
         $user->remove();
         foreach ($this->userList as $user) {
             $user->remove();
@@ -82,16 +70,16 @@ class NotificationUploadTest extends TestCase {
         // In other words, if you want to add a new combination to check, you need
         // to create user here.
         $this->userList = [
-            'artist'  => $this->makeUser('artist'),
-            'enc.med' => $this->makeUser('enc.med'),
-            'release' => $this->makeUser('release'),
-            'tag'     => $this->makeUser('tag'),
-            'tag2yes' => $this->makeUser('tag2yes'),
-            'tag2no'  => $this->makeUser('tag2no'),
-            'tagno'   => $this->makeUser('tagno'),
-            'user'    => $this->makeUser('user'),
-            'xva'     => $this->makeUser('xva'),
-            'year'    => $this->makeUser('year'),
+            'artist'  => Helper::makeUser('artist.' . randomString(10), 'notification-ticket'),
+            'enc.med' => Helper::makeUser('enc.med.' . randomString(10), 'notification-ticket'),
+            'release' => Helper::makeUser('release.' . randomString(10), 'notification-ticket'),
+            'tag'     => Helper::makeUser('tag.' . randomString(10), 'notification-ticket'),
+            'tag2yes' => Helper::makeUser('tag2yes.' . randomString(10), 'notification-ticket'),
+            'tag2no'  => Helper::makeUser('tag2no.' . randomString(10), 'notification-ticket'),
+            'tagno'   => Helper::makeUser('tagno.' . randomString(10), 'notification-ticket'),
+            'user'    => Helper::makeUser('user.' . randomString(10), 'notification-ticket'),
+            'xva'     => Helper::makeUser('xva.' . randomString(10), 'notification-ticket'),
+            'year'    => Helper::makeUser('year.' . randomString(10), 'notification-ticket'),
         ];
 
         // create some notification filters for the users
@@ -297,7 +285,7 @@ class NotificationUploadTest extends TestCase {
     public function testHandle(): void {
         // create a user and a notification filter
         $this->userList = [
-            'record.label' => $this->makeUser('reclab'),
+            'record.label' => Helper::makeUser('reclab.' . randomString(10), 'notification-ticket'),
         ];
         $filter = (new Gazelle\Notification\Filter)
             ->setLabel('Record Labels')
@@ -327,7 +315,7 @@ class NotificationUploadTest extends TestCase {
 
     public function testProcessBacklog(): void {
         $this->userList = [
-            'backlog' => $this->makeUser('backlog'),
+            'backlog' => Helper::makeUser('backlog.' . randomString(10), 'notification-ticket'),
         ];
         $filter = (new Gazelle\Notification\Filter)
             ->setLabel('Backlog')
@@ -368,7 +356,7 @@ class NotificationUploadTest extends TestCase {
 
     public function testStale(): void {
         $this->userList = [
-            'backlog' => $this->makeUser('backlog'),
+            'backlog' => Helper::makeUser('backlog.' . randomString(10), 'notification-ticket'),
         ];
         $filter = (new Gazelle\Notification\Filter)
             ->setLabel('Stale')
@@ -395,7 +383,7 @@ class NotificationUploadTest extends TestCase {
 
     public function testNewGroup(): void {
         $this->userList = [
-            'new.grp' => $this->makeUser('new.grp'),
+            'new.grp' => Helper::makeUser('new.grp.' . randomString(10), 'notification-ticket'),
         ];
         $filter = (new Gazelle\Notification\Filter)
             ->setLabel('New Group')

@@ -164,7 +164,7 @@ class Request extends \Gazelle\Base {
                 $this->negate = true;
             }
         }
-        $filter = \Tags::tag_filter_sph(['include' => $include, 'exclude' => $exclude], $this->negate, $tagMode === 'all');
+        $filter = (new \Gazelle\Manager\Tag)->sphinxFilter(['include' => $include, 'exclude' => $exclude], $this->negate, $tagMode === 'all');
         $this->tagList = $filter['input'];
         if ($filter['predicate']) {
             $this->sphinxq->where_match($filter['predicate'], 'taglist', false);

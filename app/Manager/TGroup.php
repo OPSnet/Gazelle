@@ -30,7 +30,7 @@ class TGroup extends \Gazelle\BaseManager {
             ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
         );
         $id = self::$db->inserted_id();
-        $tgroup = $this->findById($id);
+        $tgroup = $this->findById((int)$id);
         self::$cache->increment_value('stats_group_count');
         if ($tgroup->categoryName() === 'Music') {
             self::$cache->decrement('stats_album_count');
@@ -73,7 +73,7 @@ class TGroup extends \Gazelle\BaseManager {
      * Map a torrenthash to a group id
      */
     public function findByTorrentInfohash(string $hash): ?\Gazelle\TGroup {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT GroupID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );

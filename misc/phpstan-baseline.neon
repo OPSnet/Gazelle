@@ -1321,41 +1321,6 @@ parameters:
 			path: ../app/Manager/TGroup.php
 
 		-
-			message: "#^Parameter \\#1 \\$tgroupId of method Gazelle\\\\Manager\\\\TGroup\\:\\:findById\\(\\) expects int, bool\\|float\\|int\\|string\\|null given\\.$#"
-			count: 1
-			path: ../app/Manager/TGroup.php
-
-		-
-			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: ../app/Manager/Tag.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Tag\\:\\:findByName\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Tag.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Tag\\:\\:lookup\\(\\) should return int\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Tag.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Tag\\:\\:lookupBad\\(\\) should return int\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Tag.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Tag\\:\\:name\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Tag.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Tag\\:\\:rename\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Tag.php
-
-		-
 			message: "#^Method Gazelle\\\\Manager\\\\Thread\\:\\:createThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Manager/Thread.php
@@ -1717,11 +1682,6 @@ parameters:
 
 		-
 			message: "#^Method Gazelle\\\\Search\\\\Request\\:\\:limit\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Request.php
-
-		-
-			message: "#^Parameter \\#3 \\$TagType of static method Tags\\:\\:tag_filter_sph\\(\\) expects int, bool given\\.$#"
 			count: 1
 			path: ../app/Search/Request.php
 
@@ -2711,56 +2671,6 @@ parameters:
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: "#^Method Tags\\:\\:get_aliases\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Method Tags\\:\\:remove_aliases\\(\\) has parameter \\$Tags with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Method Tags\\:\\:remove_aliases\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Method Tags\\:\\:tag_filter_sph\\(\\) has parameter \\$Tags with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Method Tags\\:\\:tag_filter_sph\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Property Tags\\:\\:\\$All type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Property Tags\\:\\:\\$Primary is never read, only written\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Property Tags\\:\\:\\$TagLink is never read, only written\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Property Tags\\:\\:\\$TagLink type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
-			message: "#^Property Tags\\:\\:\\$Tags type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/tags.class.php
-
-		-
 			message: "#^Parameter \\#1 \\$userId of method Gazelle\\\\Manager\\\\User\\:\\:findById\\(\\) expects int, int\\|string given\\.$#"
 			count: 1
 			path: ../classes/users.class.php
@@ -3384,26 +3294,6 @@ parameters:
 			message: "#^Function type_list\\(\\) has parameter \\$Types with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/tools/managers/referral_accounts.php
-
-		-
-			message: "#^Variable \\$affectedRequests might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/tags.php
-
-		-
-			message: "#^Variable \\$affectedTorrents might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/tags.php
-
-		-
-			message: "#^Variable \\$result might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/tags_aliases.php
-
-		-
-			message: "#^Variable \\$unofficialId might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/tags_official.php
 
 		-
 			message: "#^Variable \\$LargeTorrents might not be defined\\.$#"

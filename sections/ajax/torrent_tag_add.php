@@ -33,7 +33,7 @@ foreach ($Tags as $tagName) {
     if (empty($resolved)) {
         $rejected[] = $tagName;
     } else {
-        $tagId = $tagMan->create($resolved, $userId);
+        $tagId = $tagMan->create($resolved, $Viewer);
         if ($tagMan->torrentTagHasVote($tagId, $tgroupId, $userId)) {
             // User has already voted on this tag
             if (defined('AJAX')) {

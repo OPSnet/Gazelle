@@ -60,17 +60,7 @@ class TGroupTest extends TestCase {
     }
 
     public function tearDown(): void {
-        foreach ($this->tgroup->torrentIdList() as $torrent) {
-            $torrent = (new \Gazelle\Manager\Torrent)->findById($torrent);
-            if (is_null($torrent)) {
-                continue;
-            }
-            [$ok, $message] = $torrent->remove($this->userList['user'], 'tgroup unit test');
-            if (!$ok) {
-                print "error $message [{$this->userList['user']->id()}]\n";
-            }
-        }
-        $this->tgroup->remove($this->userList['admin']);
+        Helper::removeTGroup($this->tgroup, $this->userList['admin']);
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -165,11 +155,11 @@ class TGroupTest extends TestCase {
         $user = $this->userList['admin'];
 
         $tagMan = new Gazelle\Manager\Tag;
-        $tagId = $tagMan->create('synthetic.disco.punk', $user->id());
+        $tagId = $tagMan->create('synthetic.disco.punk', $user);
         $this->assertGreaterThan(1, $tagId, 'tgroup-tag-create');
         $this->assertEquals(1, $tagMan->createTorrentTag($tagId, $this->tgroup->id(), $user->id(), 10), 'tgroup-tag-add-one');
 
-        $tag2 = $tagMan->create('acoustic.norwegian.black.metal', $user->id());
+        $tag2 = $tagMan->create('acoustic.norwegian.black.metal', $user);
         $this->assertEquals(1, $tagMan->createTorrentTag($tag2, $this->tgroup->id(), $user->id(), 5), 'tgroup-tag-add-two');
         $this->tgroup->flush();
         $this->assertCount(2, $this->tgroup->tagNameList(), 'tgroup-tag-name-list');
@@ -182,7 +172,7 @@ class TGroupTest extends TestCase {
         $this->assertEquals('Synthetic.disco.punk', $this->tgroup->primaryTag(), 'tgroup-tag-primary');
 
         $this->assertTrue($this->tgroup->removeTag(new Gazelle\Tag($tag2)), 'tgroup-tag-remove-exists');
-        $tag3 = $tagMan->create('disco', $user->id());
+        $tag3 = $tagMan->create('disco', $user);
         $this->assertFalse($this->tgroup->removeTag(new Gazelle\Tag($tag3)), 'tgroup-tag-remove-not-exists');
     }
 }

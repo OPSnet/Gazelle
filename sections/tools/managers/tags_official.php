@@ -9,7 +9,7 @@ $tagMan = new Gazelle\Manager\Tag;
 $unofficialName = [];
 if ($_POST['oldtags'] ?? null) {
     authorize();
-    $unofficalId = [];
+    $unofficialId = [];
     foreach ($_POST['oldtags'] as $tagId) {
         $name = $tagMan->name($tagId);
         if (is_null($name)) {

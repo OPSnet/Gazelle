@@ -37,13 +37,7 @@ class UserSeedboxTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $tgroup = $this->torrentList[0]->group();
-        $torMan = new Gazelle\Manager\Torrent;
-        foreach ($this->torrentList as $torrent) {
-            $torrent = $torMan->findById($torrent->id());
-            [$ok, $message] = $torrent->remove($this->user, 'reaper unit test');
-        }
-        $tgroup->remove($this->user);
+        Helper::removeTGroup($this->torrentList[0]->group(), $this->user);
         Gazelle\DB::DB()->prepared_query("
             DELETE us, xfu
             FROM user_seedbox us

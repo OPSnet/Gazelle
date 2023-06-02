@@ -68,20 +68,7 @@ class ReaperTest extends TestCase {
 
     public function tearDown(): void {
         $this->removeUnseededAlert($this->torrentList);
-        $tgroup = $this->torrentList[0]->group();
-        $torMan = new Gazelle\Manager\Torrent;
-        foreach ($this->torrentList as $torrent) {
-            $torrent = $torMan->findById($torrent->id());
-            if (is_null($torrent)) {
-                continue;
-            }
-            [$ok, $message] = $torrent->remove($this->userList[0], 'reaper unit test');
-            if (!$ok) {
-                print "error $message [{$this->userList[0]->id()}]\n";
-            }
-        }
-        $tgroup->remove($this->userList[0]);
-
+        Helper::removeTGroup($this->torrentList[0]->group(), $this->userList[0]);
         foreach ($this->userList as $user) {
             $user->remove();
         }

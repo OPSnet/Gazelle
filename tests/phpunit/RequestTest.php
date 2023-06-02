@@ -41,20 +41,7 @@ class RequestTest extends TestCase {
             // testCreate() removes it for an assertion
             $this->request->remove();
         }
-
-        $torMan = new Gazelle\Manager\Torrent;
-        foreach ($this->tgroup->torrentIdList() as $torrentId) {
-            $torrent = $torMan->findById($torrentId);
-            if (is_null($torrent)) {
-                continue;
-            }
-            [$ok, $message] = $torrent->remove($this->userList[0], 'reaper unit test');
-            if (!$ok) {
-                print "error $message [{$this->userList[0]->id()}]\n";
-            }
-        }
-        $this->tgroup->remove($this->userList['admin']);
-
+        Helper::removeTGroup($this->tgroup, $this->userList['admin']);
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -107,10 +94,10 @@ class RequestTest extends TestCase {
 
         $this->assertCount(0, $this->request->tagNameList());
         $tagMan = new Gazelle\Manager\Tag;
-        $tagId  = $tagMan->create('jazz', $this->userList['admin']->id());
+        $tagId  = $tagMan->create('jazz', $this->userList['admin']);
         $this->assertGreaterThan(0, $tagId, 'request-create-tag');
         $this->assertEquals(1, $this->request->addTag($tagId), 'request-add-tag');
-        $this->request->addTag($tagMan->create('vaporwave', $this->userList['admin']->id()));
+        $this->request->addTag($tagMan->create('vaporwave', $this->userList['admin']));
 
         // FIXME: cannot be asserted earlier: this should not depend on a request having tags
         $this->assertInstanceOf(Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
@@ -255,7 +242,7 @@ class RequestTest extends TestCase {
         $artistMan->setGroupId($this->request->id());
         $artistMan->addToRequest($artistId, $aliasId, ARTIST_MAIN);
 
-        $this->request->addTag((new Gazelle\Manager\Tag)->create('jazz', $this->userList['admin']->id()));
+        $this->request->addTag((new Gazelle\Manager\Tag)->create('jazz', $this->userList['admin']));
         $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-json-create');
 
         $json = new Gazelle\Json\Request(

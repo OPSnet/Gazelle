@@ -29,9 +29,12 @@ echo $Val->generateJS('tagform');
     <br />
 <?php
 
+$affectedTorrents = [];
+$affectedRequests = [];
+$failure          = [];
+$success          = [];
+
 // use a loop for fast exit if any precondition fails
-$failure = [];
-$success = [];
 while (isset($_GET['tag']) && isset($_GET['replace'])) {
     if (!$Val->validate($_GET)) {
         $failure[] = $Val->errorMessage();

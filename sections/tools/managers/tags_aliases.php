@@ -6,6 +6,7 @@ if (!($Viewer->permittedAny('users_mod', 'site_tag_aliases_read'))) {
 
 $tagMan = new Gazelle\Manager\Tag;
 $action = null;
+$result = null;
 if ($Viewer->permitted('users_mod')) {
     if (isset($_POST['newalias'])) {
         $action = 'addition';

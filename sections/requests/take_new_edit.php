@@ -397,7 +397,7 @@ if (!$newRequest) {
 $tagMan = new Gazelle\Manager\Tag;
 $tags = array_unique(explode(',', $tags));
 foreach ($tags as $Index => $Tag) {
-    $TagID = $tagMan->create($Tag, $Viewer->id());
+    $TagID = $tagMan->create($Tag, $Viewer);
     $request->addTag($TagID);
     $tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
 }
