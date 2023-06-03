@@ -1,14 +1,14 @@
 {% from 'macro/form.twig' import checked, disabled, selected %}
-{{ header('Edit artist ' ~ name) }}
+{{ header('Edit artist ' ~ artist.name) }}
 <div class="thin">
 
 <div class="header">
-    <h2>Edit <a href="artist.php?id={{ id }}">{{ name }}</a></h2>
+    <h2>Edit <a href="artist.php?id={{ artist.id }}">{{ artist.name }}</a></h2>
 </div>
 
-{% if locked %}
+{% if artist.isLocked %}
 <div class="box pad">
-<h4>This artist is locked</h4>
+<h4>This artist is artist.isLocked</h4>
 <p>Some editing functions are unavailable. If you see an error that you cannot change,
 please send a Staff PM to ask a moderator to unlock the artist.</p>
 </div>
@@ -16,8 +16,8 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 
 <form class="edit_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="edit" />
-<input type="hidden" name="auth" value="{{ auth }}" />
-<input type="hidden" name="artistid" value="{{ id }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="artistid" value="{{ artist.id }}" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_basic">
     <tr class="colhead_dark">
         <td colspan="2"><strong>Basic Information</strong></td>
@@ -25,7 +25,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
     <tr>
         <td class="label" style="width: 120px; vertical-align: top;">Image</td>
         <td>
-        <input type="text" name="image" size="92" value="{{ image }}" /><br />
+        <input type="text" name="image" size="92" value="{{ artist.image }}" /><br />
 {% if constant('IMAGE_HOST_BANNED') %}
         <b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ')
             }} are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b><br />
@@ -38,19 +38,19 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
         <div class="pad">E.g. for Suzanne Vega, the Discogs artist page is https://www.discogs.com/artist/41182-Suzanne-Vega
         <br />Hence her Discogs ID is <b>41182</b>.
         </div>
-        <input type="text" name="discogs-id" size="9" value="{{ discogs_id }}" /><br /><br />
+        <input type="text" name="discogs-id" size="9" value="{{ artist.discogsId }}" /><br /><br />
         </td>
     </tr>
-{% if not locked %}
+{% if not artist.isLocked %}
     <tr>
         <td class="label" style="vertical-align: top;">Lock this artist
         </td>
         <td>
-        <input type="checkbox" id="locked" name="locked" value="1"{{ checked(locked) }} /> Prevent renaming or further redirects on this artist<br />
+        <input type="checkbox" id="locked" name="locked" value="1"{{ checked(artist.isLocked) }} /> Prevent renaming or further redirects on this artist<br />
         <br />This is for special artists only! <b>Leave artists unlocked unless you know what you are doing.</b>
         </td>
     </tr>
-{% elseif locked and is_mod %}
+{% elseif artist.isLocked and viewer.permitted('users_mod') %}
     <tr>
         <td class="label" style="vertical-align: top;">Unlock this artist</td>
         <td>
@@ -61,13 +61,13 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
     <tr>
         <td class="label" style="vertical-align: top;">Artist information</td>
         <td>
-        <textarea name="body" cols="91" rows="15">{{ body }}</textarea> <br /><br />
+        <textarea name="body" cols="91" rows="15">{{ artist.body }}</textarea> <br /><br />
         </td>
     </tr>
     <tr>
         <td class="label" style="vertical-align: top;"><label for="showcase">Showcase a.k.a Vanity House</label></td>
         <td>
-            <input type="checkbox" id="showcase" name="showcase" value="1"{{ disabled(not is_showcase_editor) }}{{ checked(showcase) }} /><br /><br />
+            <input type="checkbox" id="showcase" name="showcase" value="1"{{ disabled(not viewer.permitted('artist_edit_vanityhouse')) }}{{ checked(artist.isShowcase) }} /><br /><br />
         </td>
     </tr>
     <tr>
@@ -83,12 +83,12 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 </table>
 </form>
 
-{% if is_editor %}
+{% if viewer.permitted('torrents_edit') %}
 
 <form class="merge_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="change_artistid" />
-<input type="hidden" name="auth" value="{{ auth }}" />
-<input type="hidden" name="artistid" value="{{ id }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="artistid" value="{{ artist.id }}" />
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
     <tr class="colhead_dark">
         <td colspan="2"><strong>Alias Management</strong></td>
@@ -101,21 +101,21 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
             {{ constant('ICON_WHITE_SQUARE') }} alias of artist or previous NRA<br />
         </div>
         <ul class="nobullet">
-    {% for alias_id, info in alias_info %}
+    {% for alias_id, info in artist.aliasInfo %}
             <li><span title="Non-redirecting alias {{ info.alias_id }}">{{ constant('ICON_BLACK_SQUARE') }} {{ info.name }}</span> <span style="font-size: smaller">({{ info.alias_id }})</span>
         {%- if info.user %} by <a href="/user.php?id={{ info.user.id}}">{{ info.user.id|user_url }}</a>{% endif -%}
-            &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ info.alias_id }}&amp;auth={{ auth }}" title="Delete this non-redirecting alias" class="brackets tooltip">X</a>
+            &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ info.alias_id }}&amp;auth={{ viewer.auth }}" title="Delete this non-redirecting alias" class="brackets tooltip">X</a>
             </li>
         {% for alias in info.alias %}
             <li><span title="alias {{ alias.alias_id }} of {{ info.name }}">{{ constant('ICON_WHITE_SQUARE') }}</span> {{ alias.name }} <span style="font-size: smaller">({{ alias.alias_id }})</span>
             {%- if alias.user %} by <a href="/user.php?id={{ alias.user.id}}">{{ alias.user.id|user_url }}</a>{% endif -%}
-            {% if not locked -%}
-                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ alias.alias_id }}&amp;auth={{ auth }}" title="Delete this alias" class="brackets tooltip">X</a>
+            {% if not artist.isLocked -%}
+                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ alias.alias_id }}&amp;auth={{ viewer.auth }}" title="Delete this alias" class="brackets tooltip">X</a>
             {%- endif %}
             </li>
         {% endfor %}
     {% endfor %}
-        {% if not r.redirectId %}
+        {% if not info.redirectId %}
                 &nbsp;<?= "\xE2\x98\x85" ?>
         {% endif %}
             </li>
@@ -127,8 +127,8 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 
 <form class="add_form" name="aliases" action="artist.php" method="post">
 <input type="hidden" name="action" value="add_alias" />
-<input type="hidden" name="auth" value="{{ auth }}" />
-<input type="hidden" name="artistid" value="{{ id }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="artistid" value="{{ artist.id }}" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_alias">
     <tr>
         <td class="label" style="width: 120px; vertical-align: top;">Add new alias</td>
@@ -138,7 +138,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
             <div class="field_div">
                 <span class="label"><strong>Name:</strong></span>
                 <br />
-                <input type="text" name="name" size="40" value="{{ name }}" />
+                <input type="text" name="name" size="40" value="{{ artist.name }}" />
             </div>
             <div class="field_div">
                 <span class="label"><strong>Usage replaced with:</strong></span>
@@ -161,18 +161,18 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 
 <form class="merge_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="change_artistid" />
-<input type="hidden" name="auth" value="{{ auth }}" />
-<input type="hidden" name="artistid" value="{{ id }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="artistid" value="{{ artist.id }}" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
     <tr>
         <td class="label" style="width: 120px; vertical-align: top;">Change to non-redirecting alias</td>
         <td>
-    {% if locked %}
-            <p>Modifications are locked</p>
+    {% if artist.isLocked %}
+            <p>Modifications are artist.isLocked</p>
     {% else %}
-            <p>Merges this artist ("{{ name }}") into the artist specified below (without redirection),
-            so that ("{{ name }}") and its aliases will appear as a non-redirecting alias of the artist entered in the text box below.</p>
-            <p>A non-redirecting alias is used so a release is show with the correct artist name (e.g.
+            <p>Merges this artist ("{{ artist.name }}") into the artist specified below (without redirection),
+            so that ("{{ artist.name }}") and its aliases will appear as a non-redirecting alias of the artist entered in the text box below.</p>
+            <p>A non-redirecting alias is used so a release is show with the correct artist artist.name (e.g.
             <i>Sun Ra All Stars</i> versus <i>Sun Ra and His Astro-Solar-Infinity Arkestra</i>) and all
             releases are shown on the artist page <i>Sun Ra</i>.</p>
             <br />
@@ -184,7 +184,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
     {% endif %}
         </td>
     </tr>
-    {% if not locked %}
+    {% if not artist.isLocked %}
     <tr>
         <td>&nbsp;</td>
         <td><input type="submit" value="Make non-redirecting alias" /></td>
@@ -193,13 +193,13 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 </table>
 </form>
 
-    {% if locked %}
+    {% if artist.isLocked %}
 <h4>Renaming is locked</h4>
     {% else %}
 <form class="rename_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="rename" />
-<input type="hidden" name="auth" value="{{ auth }}" />
-<input type="hidden" name="artistid" value="{{ id }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="artistid" value="{{ artist.id }}" />
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_rename">
     <tr class="colhead_dark">
         <td colspan="2"><strong>Rename this artist</strong></td>
@@ -207,7 +207,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
     <tr>
         <td class="label" style="width: 120px; vertical-align: top;">New name</td>
         <td>
-            <input type="text" name="name" size="92" value="{{ name }}" /><br /><br />
+            <input type="text" name="name" size="92" value="{{ artist.name }}" /><br /><br />
         </td>
     </tr>
     <tr>
