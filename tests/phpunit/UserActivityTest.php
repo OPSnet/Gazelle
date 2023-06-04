@@ -14,7 +14,7 @@ class UserActivityTest extends TestCase {
 
     public function testActivity(): void {
         $admin = Helper::makeUser('admin.' . randomString(10), 'activity');
-        $admin->setUpdate('PermissionID', SYSOP)->modify();
+        $admin->setField('PermissionID', SYSOP)->modify();
 
         $activity = new Gazelle\User\Activity($admin);
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity, 'user-activity-instance');

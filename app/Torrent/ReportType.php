@@ -204,7 +204,7 @@ class ReportType extends \Gazelle\BaseObject {
     public function modify(): bool {
         [$userId, $changeSet] = $this->changeSet;
         foreach ($changeSet as $c) {
-            $this->setUpdate($c['field'], $c['new']);
+            $this->setField($c['field'], $c['new']);
         }
         $this->changeSet = [];
         $affected = parent::modify();

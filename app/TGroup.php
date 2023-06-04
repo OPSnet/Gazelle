@@ -1057,7 +1057,7 @@ class TGroup extends BaseObject {
 
     public function rename(string $name, User $user, Manager\TGroup $manager, Log $logger): bool {
         $oldName = $this->name();
-        $success = $this->setUpdate('Name', $name)->modify();
+        $success = $this->setField('Name', $name)->modify();
         if ($success) {
             $this->refresh();
             $logger->group($this->id, $user->id(), "renamed to \"$name\" from \"$oldName\"")

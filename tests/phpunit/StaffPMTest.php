@@ -21,8 +21,8 @@ class StaffPMTest extends TestCase {
         $this->user  = Helper::makeUser('spm_user_' . randomString(10), 'staffpm');
 
         $this->fls->addClasses([FLS_TEAM]);
-        $this->mod->setUpdate('PermissionID', MOD)->modify();
-        $this->sysop->setUpdate('PermissionID', SYSOP)->modify();
+        $this->mod->setField('PermissionID', MOD)->modify();
+        $this->sysop->setField('PermissionID', SYSOP)->modify();
     }
 
     public function tearDown(): void {

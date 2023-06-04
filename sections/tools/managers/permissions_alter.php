@@ -69,14 +69,14 @@ if (isset($_REQUEST['submit'])) {
         header("Location: tools.php?action=permissions");
         exit;
     }
-    $privilege->setUpdate('Badge', $badge)
-        ->setUpdate('DisplayStaff', $displayStaff ? '1' : '0')
-        ->setUpdate('Level', $level)
-        ->setUpdate('Name', $name)
-        ->setUpdate('Secondary', $secondary)
-        ->setUpdate('PermittedForums', $forums)
-        ->setUpdate('StaffGroup', $staffGroupId)
-        ->setUpdate('`Values`', serialize($values))
+    $privilege->setField('Badge', $badge)
+        ->setField('DisplayStaff', $displayStaff ? '1' : '0')
+        ->setField('Level', $level)
+        ->setField('Name', $name)
+        ->setField('Secondary', $secondary)
+        ->setField('PermittedForums', $forums)
+        ->setField('StaffGroup', $staffGroupId)
+        ->setField('`Values`', serialize($values))
         ->modify();
 
     $usersAffected = (new Gazelle\Manager\User)->flushUserclass($level);

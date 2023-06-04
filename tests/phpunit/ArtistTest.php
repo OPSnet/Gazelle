@@ -106,19 +106,19 @@ class ArtistTest extends TestCase {
         $artist = $manager->findById($artistId);
 
         $this->assertTrue(
-            $artist->setUpdate('body', 'body modification')->setUpdateUser($this->user)->modify(),
+            $artist->setField('body', 'body modification')->setUpdateUser($this->user)->modify(),
             'artist-modify-body'
         );
         $this->assertCount(1, $artist->revisionList());
         $this->assertTrue(
-            $artist->setUpdate('VanityHouse', true)->setUpdateUser($this->user)->modify(),
+            $artist->setField('VanityHouse', true)->setUpdateUser($this->user)->modify(),
             'artist-modify-showcase'
         );
         $this->assertCount(1, $artist->revisionList());
 
         $this->assertTrue(
-            $artist ->setUpdate('image', 'https://example.com/update.png')
-                ->setUpdate('summary', 'You look nice in a suit')
+            $artist ->setField('image', 'https://example.com/update.png')
+                ->setField('summary', 'You look nice in a suit')
                 ->setUpdateUser($this->user)
                 ->modify(),
             'artist-modify-image'

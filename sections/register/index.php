@@ -12,7 +12,7 @@ if (isset($_REQUEST['confirm'])) {
         exit;
     }
     $user = $token->user();
-    $user->setUpdate('Enabled', UserStatus::enabled->value)->modify();
+    $user->setField('Enabled', UserStatus::enabled->value)->modify();
     (new Gazelle\Manager\User)->sendPM($user->id(), 0,
         "Welcome to " . SITE_NAME,
         $Twig->render('register/welcome.twig', [

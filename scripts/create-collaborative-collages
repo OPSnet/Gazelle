@@ -33,6 +33,6 @@ foreach ($nameList as $name) {
     } catch (\Exception $e) {
         continue; // name already exists
     }
-    $collage->setUpdate('MaxGroupsPerUser', 1)->modify();
+    $collage->setField('MaxGroupsPerUser', 1)->modify();
     echo "[collage]{$collage->id()}[/collage]\n";
 }

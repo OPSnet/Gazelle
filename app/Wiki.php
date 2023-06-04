@@ -132,7 +132,7 @@ class Wiki extends BaseObject {
             SELECT 1 + max(Revision) FROM wiki_articles WHERE ID = ?
             ", $this->id
         );
-        $this->setUpdate('Revision', $revision);
+        $this->setField('Revision', $revision);
         $success = parent::modify();
         self::$db->commit();
         return $success;

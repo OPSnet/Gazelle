@@ -176,7 +176,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function updateAvatarHover(string $value): Donor {
-        return $this->specialRank() > 1 ? $this->setUpdate("SecondAvatar", trim($value)) : $this;
+        return $this->specialRank() > 1 ? $this->setField("SecondAvatar", trim($value)) : $this;
     }
 
     /**
@@ -187,7 +187,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function updateAvatarHoverText(string $value): Donor {
-        return $this->hasRankAbove(2) ? $this->setUpdate("AvatarMouseOverText", trim($value)) : $this;
+        return $this->hasRankAbove(2) ? $this->setField("AvatarMouseOverText", trim($value)) : $this;
     }
 
     /**
@@ -237,7 +237,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function updateIcon(string $value): Donor {
-        return $this->hasRankAbove(MAX_RANK) ? $this->setUpdate("CustomIcon", trim($value)) : $this;
+        return $this->hasRankAbove(MAX_RANK) ? $this->setField("CustomIcon", trim($value)) : $this;
     }
 
     /**
@@ -259,7 +259,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function updateIconLink(string $value): Donor {
-        return $this->hasRankAbove(1) ? $this->setUpdate("CustomIconLink", $value) : $this;
+        return $this->hasRankAbove(1) ? $this->setField("CustomIconLink", $value) : $this;
     }
 
     /**
@@ -284,7 +284,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function updateIconHoverText(string $value): Donor {
-        return $this->hasRankAbove(1) ? $this->setUpdate("IconMouseOverText", $value) : $this;
+        return $this->hasRankAbove(1) ? $this->setField("IconMouseOverText", $value) : $this;
     }
 
     /**
@@ -331,7 +331,7 @@ class Donor extends \Gazelle\BaseUser {
      * Update the profile info
      */
     public function updateProfileInfo(int $level, string $value): Donor {
-        return $this->hasRankAbove($level) ? $this->setUpdate("ProfileInfo$level", trim($value)) : $this;
+        return $this->hasRankAbove($level) ? $this->setField("ProfileInfo$level", trim($value)) : $this;
     }
 
     /**
@@ -348,7 +348,7 @@ class Donor extends \Gazelle\BaseUser {
      * Update the profile info title
      */
     public function updateProfileTitle(int $level, string $value): Donor {
-        return $this->hasRankAbove($level) ? $this->setUpdate("ProfileInfoTitle$level", trim($value)) : $this;
+        return $this->hasRankAbove($level) ? $this->setField("ProfileInfoTitle$level", trim($value)) : $this;
     }
 
     /**

@@ -920,7 +920,7 @@ class User extends \Gazelle\BaseManager {
                     continue;
                 }
 
-                $user->setUpdate('PermissionID', $level['To'])
+                $user->setField('PermissionID', $level['To'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
                 $this->sendPM($userId, 0,
@@ -977,7 +977,7 @@ class User extends \Gazelle\BaseManager {
                     continue;
                 }
 
-                $user->setUpdate('PermissionID', $level['From'])
+                $user->setField('PermissionID', $level['From'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
                 $this->sendPM($userId, 0,
@@ -1302,7 +1302,7 @@ class User extends \Gazelle\BaseManager {
                 continue;
             }
             $ratio = number_format($user->requiredRatio(), 2);
-            $user->setUpdate('can_leech', 0)
+            $user->setField('can_leech', 0)
                 ->addStaffNote("Leeching privileges suspended by ratio watch system (required ratio: $ratio) for downloading more than 10 GBs on ratio watch.")
                 ->modify();
             $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
@@ -1375,7 +1375,7 @@ class User extends \Gazelle\BaseManager {
                 continue;
             }
             $ratio = number_format($user->requiredRatio(), 2);
-            $user->setUpdate('can_leech', 0)
+            $user->setField('can_leech', 0)
                 ->addStaffNote("Leeching ability suspended by ratio watch system (required ratio: $ratio)")
                 ->modify();
             $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);

@@ -25,7 +25,7 @@ if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous 
 
 $body = trim($_POST['body']);
 if ($body != $artist->body()) {
-    $artist->setUpdate('body', $body);
+    $artist->setField('body', $body);
 }
 
 $image = trim($_POST['image']);
@@ -37,19 +37,19 @@ if ($image != $artist->image()) {
     if ($banned) {
         error("Please rehost images from $banned elsewhere.");
     }
-    $artist->setUpdate('image', $image);
+    $artist->setField('image', $image);
 }
 
 $showcase = isset($_POST['showcase']);
 if ($showcase != $artist->isShowcase() && $Viewer->permitted('artist_edit_vanityhouse')) {
-    $artist->setUpdate('VanityHouse', (int)$showcase);
+    $artist->setField('VanityHouse', (int)$showcase);
 }
 
 $summary   = [];
 $discogsId = (int)($_POST['discogs-id']);
 if ($discogsId != $artist->discogsId()) {
     $summary[] = $discogsId ? "Discogs relation set to $discogsId" : "Discogs relation cleared";
-    $artist->setUpdate('discogs_id', $discogsId);
+    $artist->setField('discogs_id', $discogsId);
 }
 
 if (isset($_POST['locked'])) {
@@ -64,6 +64,6 @@ $notes = trim($_POST['summary']);
 if ($notes) {
     $summary[] = "notes: $notes";
 }
-$artist->setUpdate('summary', $summary) ->setUpdateUser($Viewer)->modify();
+$artist->setField('summary', $summary) ->setUpdateUser($Viewer)->modify();
 
 header("Location: " . $artist->location());

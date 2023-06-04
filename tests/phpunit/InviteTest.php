@@ -23,7 +23,7 @@ class InviteTest extends TestCase {
 
         // USER cannot invite, but MEMBER can
         $this->assertFalse($user->canPurchaseInvite(),  'invite-cannot-purchase');
-        $user->setUpdate('PermissionID', MEMBER)->modify();
+        $user->setField('PermissionID', MEMBER)->modify();
         $this->assertTrue($user->canPurchaseInvite(),  'invite-can-now-purchase');
 
         // add some BP to play with
@@ -62,7 +62,7 @@ class InviteTest extends TestCase {
 
     public function testEtm(): void {
         $etm = Helper::makeUser('etm.' . randomString(6), 'etm')
-            ->setUpdate('PermissionID', ELITE_TM);
+            ->setField('PermissionID', ELITE_TM);
         $etm->modify();
 
         $this->assertEquals('Elite TM', $etm->userclassName(),              'etm-userclass-check');

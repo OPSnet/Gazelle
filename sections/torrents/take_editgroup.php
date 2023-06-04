@@ -42,7 +42,7 @@ if (($_GET['action'] ?? '') == 'revert') {
         error(403);
     }
     if ($ReleaseType != $tgroup->releaseType()) {
-        $tgroup->setUpdate('ReleaseType', $ReleaseType);
+        $tgroup->setField('ReleaseType', $ReleaseType);
         $logInfo[] = "Release type changed from "
             . $rt->findNameById($tgroup->releaseType())
             . " to $newReleaseTypeName";
@@ -51,7 +51,7 @@ if (($_GET['action'] ?? '') == 'revert') {
     if ($Viewer->permitted('torrents_edit_vanityhouse')) {
         $showcase = isset($_POST['vanity_house']) ? 1 : 0;
         if ($tgroup->isShowcase() != $showcase) {
-            $tgroup->setUpdate('VanityHouse', $showcase);
+            $tgroup->setField('VanityHouse', $showcase);
             $logInfo[] = 'Vanity House status changed to '. ($showcase ? 'true' : 'false');
         }
     }
@@ -78,8 +78,8 @@ if (($_GET['action'] ?? '') == 'revert') {
 
 $imageFlush = ($Image != $tgroup->showFallbackImage(false)->image());
 
-$tgroup->setUpdate('WikiBody', $Body)
-    ->setUpdate('WikiImage', $Image)
+$tgroup->setField('WikiBody', $Body)
+    ->setField('WikiImage', $Image)
     ->modify();
 
 if ($imageFlush) {

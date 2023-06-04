@@ -90,7 +90,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function setEditedUserID(int $userId) {
-        $this->setUpdate('EditedUserID', $userId);
+        $this->setField('EditedUserID', $userId);
         return $this;
     }
 
@@ -100,7 +100,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function setBody(string $body) {
-        $this->setUpdate('Body', trim($body));
+        $this->setField('Body', trim($body));
         return $this;
     }
 

@@ -291,25 +291,25 @@ if (is_null($request)) {
     );
     $RequestID = $request->id();
 } else {
-    $request->setUpdate('CategoryID', $categoryId)
-        ->setUpdate('Title', $title)
-        ->setUpdate('Year', $year)
-        ->setUpdate('Image', $image)
-        ->setUpdate('Description', $description)
-        ->setUpdate('CatalogueNumber', $catalogueNumber)
-        ->setUpdate('RecordLabel', $recordLabel)
-        ->setUpdate('OCLC', $OCLC);
+    $request->setField('CategoryID', $categoryId)
+        ->setField('Title', $title)
+        ->setField('Year', $year)
+        ->setField('Image', $image)
+        ->setField('Description', $description)
+        ->setField('CatalogueNumber', $catalogueNumber)
+        ->setField('RecordLabel', $recordLabel)
+        ->setField('OCLC', $OCLC);
 
     if ($GroupID) {
-        $request->setUpdate('GroupID', $GroupID);
+        $request->setField('GroupID', $GroupID);
     }
     if (!$onlyMetadata) {
-        $request->setUpdate('ReleaseType', $releaseType)
-            ->setUpdate('BitrateList', $EncodingList)
-            ->setUpdate('FormatList', $FormatList)
-            ->setUpdate('MediaList', $MediaList)
-            ->setUpdate('LogCue', $LogCue)
-            ->setUpdate('Checksum', $NeedChecksum ? 1 : 0);
+        $request->setField('ReleaseType', $releaseType)
+            ->setField('BitrateList', $EncodingList)
+            ->setField('FormatList', $FormatList)
+            ->setField('MediaList', $MediaList)
+            ->setField('LogCue', $LogCue)
+            ->setField('Checksum', $NeedChecksum ? 1 : 0);
     }
     $request->modify();
 

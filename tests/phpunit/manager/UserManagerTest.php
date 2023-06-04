@@ -15,7 +15,7 @@ class UserManagerTest extends TestCase {
             Helper::makeUser('um3.' . randomString(10), 'userman'),
         ];
         foreach ($this->userList as $user) {
-            $user->setUpdate('Enabled', '1')->modify();
+            $user->setField('Enabled', '1')->modify();
             $pmMan = new Gazelle\Manager\PM($user);
             foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
                 $pm->remove();
@@ -73,7 +73,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(10, $this->userList[1]->tokenCount(), 'uman-masstoken-add-all-1');
         $this->assertEquals(10, $this->userList[2]->tokenCount(), 'uman-masstoken-add-all-2');
 
-        $this->userList[0]->setUpdate('can_leech', 0)->modify();
+        $this->userList[0]->setField('can_leech', 0)->modify();
         $userMan->addMassTokens(15, allowLeechDisabled: false);
         foreach ($this->userList as $user) {
             $user->flush();
@@ -172,7 +172,7 @@ class UserManagerTest extends TestCase {
 
         // nuke the recent pms
         foreach ($this->userList as $user) {
-            $user->setUpdate('Enabled', '1')->modify();
+            $user->setField('Enabled', '1')->modify();
             $pmMan = new Gazelle\Manager\PM($user);
             foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
                 $pm->remove();

@@ -310,11 +310,11 @@ class Collage extends BaseObject {
     }
 
     public function toggleLocked(): Collage {
-        return $this->setUpdate('Locked', $this->isLocked() ? '0' : '1');
+        return $this->setField('Locked', $this->isLocked() ? '0' : '1');
     }
 
     public function setFeatured(): Collage {
-        return $this->setUpdate('Featured', 1);
+        return $this->setField('Featured', 1);
     }
 
     public function modify(): bool {

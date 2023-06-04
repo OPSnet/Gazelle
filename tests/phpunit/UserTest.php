@@ -147,7 +147,7 @@ class UserTest extends TestCase {
 
         // TODO: this will become null
         $this->assertEquals('', $this->user->slogan(), 'utest-slogan');
-        $this->assertTrue($this->user->setUpdate('slogan', 'phpunit slogan')->modify(), 'utest-modify-slogan');
+        $this->assertTrue($this->user->setField('slogan', 'phpunit slogan')->modify(), 'utest-modify-slogan');
     }
 
     public function testAvatar(): void {
@@ -170,7 +170,7 @@ class UserTest extends TestCase {
         $this->assertEquals(USER_DEFAULT_AVATAR, $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-none');
 
         $url = 'https://www.example.com/avatar.jpg';
-        $this->assertTrue($this->user->setUpdate('avatar', $url)->modify(), 'utest-avatar-set');
+        $this->assertTrue($this->user->setField('avatar', $url)->modify(), 'utest-avatar-set');
         $this->assertEquals($url, $this->user->avatar(), 'utest-avatar-url');
         $new = $userMan->findById($this->user->id());
         $this->assertEquals(USER_DEFAULT_AVATAR, $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-override-none');
@@ -185,11 +185,11 @@ class UserTest extends TestCase {
 
     public function testLock(): void {
         $this->assertFalse($this->user->isLocked(), 'utest-is-not-locked');
-        $this->assertTrue($this->user->setUpdate('lock-type', STAFF_LOCKED)->modify(), 'utest-set-locked');
+        $this->assertTrue($this->user->setField('lock-type', STAFF_LOCKED)->modify(), 'utest-set-locked');
         $this->user->flush();
         $this->assertTrue($this->user->isLocked(), 'utest-is-now-locked');
         $this->assertEquals(STAFF_LOCKED, $this->user->lockType(), 'utest-lock-type');
-        $this->assertTrue($this->user->setUpdate('lock-type', 0)->modify(), 'utest-set-unlocked');
+        $this->assertTrue($this->user->setField('lock-type', 0)->modify(), 'utest-set-unlocked');
         $this->user->flush();
         $this->assertFalse($this->user->isLocked(), 'utest-is-unlocked');
     }

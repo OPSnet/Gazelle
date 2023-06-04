@@ -14,7 +14,7 @@ class ApplicantTest extends TestCase {
         $new = $manager->newApplicantCount();
         $admin = Helper::makeUser('admin.' . randomString(10), 'applicant');
         $user  = Helper::makeUser('user.' . randomString(10), 'applicant');
-        $admin->setUpdate('PermissionID', SYSOP)->modify();
+        $admin->setField('PermissionID', SYSOP)->modify();
 
         $role = 'published-' . randomString(6);
         $published = $roleManager->create($role, 'this is a published role', true, 1);

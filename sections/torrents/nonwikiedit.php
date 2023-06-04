@@ -25,19 +25,19 @@ if (isset($_POST['freeleechtype']) && $Viewer->permitted('torrents_freeleech')) 
 
 $year = (int)trim($_POST['year']);
 if ($tgroup->year() != $year) {
-    $tgroup->setUpdate('Year', $year);
+    $tgroup->setField('Year', $year);
     $log[] = "year {$tgroup->year()} => $year";
 }
 
 $recordLabel = trim($_POST['record_label']);
 if ($tgroup->recordLabel() != $recordLabel) {
-    $tgroup->setUpdate('RecordLabel', $recordLabel);
+    $tgroup->setField('RecordLabel', $recordLabel);
     $log[] = "record label \"{$tgroup->recordLabel()}\" => \"$recordLabel\"";
 }
 
 $catNumber = trim($_POST['catalogue_number']);
 if ($tgroup->catalogueNumber() != $catNumber) {
-    $tgroup->setUpdate('CatalogueNumber', $catNumber);
+    $tgroup->setField('CatalogueNumber', $catNumber);
     $log[] = "cat number \"{$tgroup->catalogueNumber()}\" => \"$catNumber\"";
 }
 

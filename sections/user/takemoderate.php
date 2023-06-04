@@ -118,7 +118,7 @@ $lockType = (int)$_POST['LockType'];
 if ($user->lockType() != $lockType) {
     // This is a pseudo-field that does not exist in the table,
     // the modify() method knows how to deal with it.
-    $user->setUpdate('lock-type', $lockType);
+    $user->setField('lock-type', $lockType);
     if (!$lockType) {
         $editSummary[] = "Account unlocked";
     } else {
@@ -158,7 +158,7 @@ if ($logoutSession && $Viewer->permitted('users_logout')) {
 }
 
 if ($visible != $user->isVisible() && $Viewer->permitted('users_make_invisible')) {
-    $user->setUpdate('Visible', $visible ? '1' : '0');
+    $user->setField('Visible', $visible ? '1' : '0');
     $trackerUserUpdates['visible'] = $visible;
     $editSummary[] = 'swarm visibility ' . ($visible ? 'on' : 'off');
 }
@@ -168,7 +168,7 @@ $set = [];
 $args = [];
 
 if ($slogan != $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
-    $user->setUpdate('slogan', $slogan);
+    $user->setField('slogan', $slogan);
     $editSummary[] = "First-Line Support status changed to \"$slogan\"";
 }
 
@@ -193,12 +193,12 @@ if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('
 if ($Collages != $user->paidPersonalCollages() && $Collages != (int)$_POST['OldCollages']
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
-    $user->setUpdate('collage_total', $Collages);
+    $user->setField('collage_total', $Collages);
     $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$Collages}";
 }
 
 if ($invites != $user->unusedInviteTotal() && $Viewer->permitted('users_edit_invites')) {
-    $user->setUpdate('Invites', $invites);
+    $user->setField('Invites', $invites);
     $editSummary[] = "number of invites changed from {$user->unusedInviteTotal()} to $invites";
 }
 
@@ -229,7 +229,7 @@ if ($class) {
             ($newClass < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
             || ($newClass <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
     )) {
-        $user->setUpdate('PermissionID', $class);
+        $user->setField('PermissionID', $class);
         $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
 
         if ($user->supportCount($class, $user->primaryClass()) === 2) {
@@ -253,7 +253,7 @@ if ($Viewer->permitted('users_edit_usernames')) {
                 error("Username already in use by $username");
             }
         }
-        $user->setUpdate('Username', $username);
+        $user->setField('Username', $username);
         $editSummary[] = "username changed from {$user->username()} to $username";
     }
 }
@@ -263,7 +263,7 @@ if ($title != $user->title() && $Viewer->permitted('users_edit_titles')) {
     if (mb_strlen($_POST['Title']) > 1024) {
         error("Custom titles have a maximum length of 1,024 characters.");
     } else {
-        $user->setUpdate('Title', $title);
+        $user->setField('Title', $title);
         $editSummary[] = "title changed to [code]{$title}[/code]";
     }
 }
@@ -404,7 +404,7 @@ $privChange = [];
 if ($Viewer->permitted('users_disable_any')) {
     if ($disableLeech != $user->canLeech()) {
         $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
-        $user->setUpdate('can_leech', $disableLeech ? 1 : 0);
+        $user->setField('can_leech', $disableLeech ? 1 : 0);
         $trackerUserUpdates['can_leech'] = $disableLeech;
         $editSummary[] = "leeching status changed ("
             . enabledStatus($user->canLeech() ? '1' : '0')." &rarr; ".enabledStatus($disableLeech ? '1' : '0').")";
@@ -500,7 +500,7 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
         $visibleTrIP = $visible && $user->ipaddr() != '127.0.0.1' ? '1' : '0';
         $tracker->update_tracker('add_user', ['id' => $userId, 'passkey' => $user->announceKey(), 'visible' => $visibleTrIP]);
         if (($user->downloadedSize() == 0) || ($user->uploadedSize() / $user->downloadedSize() >= $user->requiredRatio())) {
-            $user->setUpdate('can_leech', 1);
+            $user->setField('can_leech', 1);
             $canLeech = 1;
             $set[] = "RatioWatchEnds = ?";
             $args[] = null;
@@ -519,19 +519,19 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
         $set[] = "BanReason = ?";
         $args[] = '0';
     }
-    $user->setUpdate('Enabled', $userStatus->value);
+    $user->setField('Enabled', $userStatus->value);
     $editSummary[] = $enableStr;
 }
 
 if ($Viewer->permitted('users_edit_reset_keys')) {
     if ($resetAuthkey == 1) {
-        $user->setUpdate('auth_key', authKey());
+        $user->setField('auth_key', authKey());
         $editSummary[] = 'authkey reset';
     }
     if ($resetPasskey == 1) {
         $passkey = randomString();
         $user->modifyAnnounceKeyHistory($user->announceKey(), $passkey, '0.0.0.0');
-        $user->setUpdate('torrent_pass', $passkey);
+        $user->setField('torrent_pass', $passkey);
         $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
         $tracker->update_tracker('change_passkey', ['oldpasskey' => $user->announceKey(), 'newpasskey' => $passkey]);
         $editSummary[] = 'passkey reset';

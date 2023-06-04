@@ -23,11 +23,11 @@ if ($error) {
     error($error);
 }
 
-$article->setUpdate('Body', trim($_POST['body']))
-    ->setUpdate('Title', trim($_POST['title']))
-    ->setUpdate('Author', $Viewer->id())
-    ->setUpdate('MinClassEdit', $minEdit)
-    ->setUpdate('MinClassRead', $minRead)
+$article->setField('Body', trim($_POST['body']))
+    ->setField('Title', trim($_POST['title']))
+    ->setField('Author', $Viewer->id())
+    ->setField('MinClassEdit', $minEdit)
+    ->setField('MinClassRead', $minRead)
     ->modify();
 
 header('Location: ' . $article->location());

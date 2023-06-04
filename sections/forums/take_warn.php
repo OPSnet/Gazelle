@@ -32,7 +32,7 @@ $post = (new Gazelle\Manager\ForumPost)->findById($postId);
 if (is_null($post)) {
     error("No forum post #$postId found");
 }
-$post->setUpdate('Body', $body)->modify();
+$post->setField('Body', $body)->modify();
 
 $reason = trim($_POST['reason']);
 $weeks = $_POST['length'];

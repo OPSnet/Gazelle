@@ -9,7 +9,7 @@ class StaffBlogTest extends TestCase {
     public function testStaffBlog(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $mod = Helper::makeUser('mod.' . randomString(6), 'mod')
-            ->setUpdate('PermissionID', MOD);
+            ->setField('PermissionID', MOD);
         $mod->modify();
         $this->assertEquals('Moderator', $mod->userclassName(), 'mod-userclass-check');
 
@@ -47,7 +47,7 @@ class StaffBlogTest extends TestCase {
         }
 
         $newBody = 'new body ' . randomString();
-        $this->assertTrue($blog->setUpdate('Body', $newBody)->modify(), 'staff-blog-modify');
+        $this->assertTrue($blog->setField('Body', $newBody)->modify(), 'staff-blog-modify');
         $this->assertEquals($newBody, $blog->body(), 'staff-blog-new-body');
 
         $list = $manager->blogList();

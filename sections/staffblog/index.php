@@ -39,8 +39,8 @@ if ($Viewer->permitted('admin_manage_blog')) {
                         . " - " . $blog->publicLocation()
                     );
                 } else {
-                    $blog->setUpdate('Title', $title)
-                        ->setUpdate('Body', $body)
+                    $blog->setField('Title', $title)
+                        ->setField('Body', $body)
                         ->modify();
                 }
                 header('Location: staffblog.php');

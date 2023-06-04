@@ -925,7 +925,7 @@ class Artist extends BaseObject {
         }
         $updated = false;
         if ($revisionData || $summary) {
-            $this->setUpdate('RevisionID',
+            $this->setField('RevisionID',
                 $this->createRevision(
                     body:    $revisionData['body'] ?? $this->body(),
                     image:   $revisionData['image'] ?? $this->image(),

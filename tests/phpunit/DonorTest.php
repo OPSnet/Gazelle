@@ -166,7 +166,7 @@ class DonorTest extends TestCase {
 
     public function testDonorStaff(): void {
         $donor = $this->donor;
-        $donor->user()->setUpdate('PermissionID', MOD)->modify();
+        $donor->user()->setField('PermissionID', MOD)->modify();
         $this->assertTrue($donor->hasForum(), 'donor-mod-has-forum');
         $this->assertTrue($donor->hasRankAbove(0), 'donor-mod-has-rank');
         $this->assertTrue($donor->hasMaxSpecialRank(), 'donor-mod-has-max-special');

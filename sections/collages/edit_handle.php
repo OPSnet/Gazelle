@@ -39,14 +39,14 @@ if (isset($_POST['name'])) {
 }
 
 if (!isset($_POST['regen-tags'])) {
-    $collage->setUpdate('TagList', (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])));
+    $collage->setField('TagList', (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])));
 } else {
     $tagList = $collage->rebuildTagList();
     if (count($tagList) > 2) {
-        $collage->setUpdate('TagList', implode(' ', $tagList));
+        $collage->setField('TagList', implode(' ', $tagList));
     }
 }
-$collage->setUpdate('Description', trim($_POST['description']));
+$collage->setField('Description', trim($_POST['description']));
 
 if (isset($_POST['featured'])
     && (
@@ -60,14 +60,14 @@ if (isset($_POST['featured'])
 if (($collage->isPersonal() && $collage->isOwner($Viewer->id()) && $Viewer->permitted('site_collages_renamepersonal'))
     || $Viewer->permitted('site_collages_delete')
 ) {
-    $collage->setUpdate('Name', trim($_POST['name']));
+    $collage->setField('Name', trim($_POST['name']));
 }
 
 if (isset($_POST['category']) && isset(COLLAGE[$_POST['category']]) && (int)$_POST['category'] !== $collage->categoryId()) {
     if ($collage->isPersonal() && !$Viewer->permitted('site_collages_delete')) {
         error(403);
     }
-    $collage->setUpdate('CategoryID', (int)$_POST['category']);
+    $collage->setField('CategoryID', (int)$_POST['category']);
 }
 
 if ($Viewer->permitted('site_collages_delete')) {
@@ -75,10 +75,10 @@ if ($Viewer->permitted('site_collages_delete')) {
         $collage->toggleLocked();
     }
     if (isset($_POST['maxgroups']) && ($_POST['maxgroups'] == 0 || is_number($_POST['maxgroups'])) && $_POST['maxgroups'] != $collage->maxGroups()) {
-        $collage->setUpdate('MaxGroups', (int)$_POST['maxgroups']);
+        $collage->setField('MaxGroups', (int)$_POST['maxgroups']);
     }
     if (isset($_POST['maxgroups']) && ($_POST['maxgroupsperuser'] == 0 || is_number($_POST['maxgroupsperuser'])) && $_POST['maxgroupsperuser'] != $collage->maxGroupsPerUser()) {
-        $collage->setUpdate('MaxGroupsPerUser', (int)$_POST['maxgroupsperuser']);
+        $collage->setField('MaxGroupsPerUser', (int)$_POST['maxgroupsperuser']);
     }
 }
 $collage->toggleAttr('sort-newest', isset($_POST['addition']));

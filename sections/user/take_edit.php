@@ -110,10 +110,10 @@ if (!isset($_POST['p_donor_heart'])) {
     $Paranoia[] = 'hide_donor_heart';
 }
 
-$user->setUpdate('IRCKey', $_POST['irckey']);
-$user->setUpdate('Paranoia', serialize($Paranoia));
-$user->setUpdate('profile_info', substr($_POST['info'], 0, 20480));
-$user->setUpdate('profile_title', trim($_POST['profile_title']));
+$user->setField('IRCKey', $_POST['irckey']);
+$user->setField('Paranoia', serialize($Paranoia));
+$user->setField('profile_info', substr($_POST['info'], 0, 20480));
+$user->setField('profile_title', trim($_POST['profile_title']));
 
 $NewEmail = false;
 if ($user->email() != trim($_POST['email'])) {
@@ -121,7 +121,7 @@ if ($user->email() != trim($_POST['email'])) {
         error('You must enter your current password when changing your email address.');
     }
     $NewEmail = trim($_POST['email']);
-    $user->setUpdate('Email', $NewEmail);
+    $user->setField('Email', $NewEmail);
 }
 
 $ResetPassword = false;
@@ -134,7 +134,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
         } else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
             error('You did not enter the same password twice.');
         }
-        $user->setUpdate('PassHash', Gazelle\UserCreator::hashPassword($_POST['new_pass_1']));
+        $user->setField('PassHash', Gazelle\UserCreator::hashPassword($_POST['new_pass_1']));
         $ResetPassword = true;
     }
 }
@@ -148,7 +148,7 @@ if ($avatar != $user->avatar()) {
     if ($len > 255) {
         error('Your avatar link is too long ($len characters, maximum allowed is 255).');
     }
-    $user->setUpdate('Avatar', $avatar);
+    $user->setField('Avatar', $avatar);
 }
 
 $Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
@@ -279,7 +279,7 @@ if (isset($_POST['resetpasskey'])) {
     $OldPassKey = $user->announceKey();
     $NewPassKey = randomString();
     $ChangerIP = $Viewer->ipaddr();
-    $user->setUpdate('torrent_pass', $NewPassKey);
+    $user->setField('torrent_pass', $NewPassKey);
     $db->prepared_query('
         INSERT INTO users_history_passkeys
                (UserID, OldPassKey, NewPassKey, ChangerIP)

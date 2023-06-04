@@ -33,11 +33,11 @@ $thread = match((int)($_POST['thread'] ?? -1)) {
 };
 
 if ($thread) {
-    $blog->setUpdate('ThreadID', $thread->id());
+    $blog->setField('ThreadID', $thread->id());
 }
-$blog->setUpdate('Body', $body)
-    ->setUpdate('Title', $title)
-    ->setUpdate('Important', isset($_POST['important']) ? 1 : 0)
+$blog->setField('Body', $body)
+    ->setField('Title', $title)
+    ->setField('Important', isset($_POST['important']) ? 1 : 0)
     ->modify();
 
 if ($thread && isset($_POST['subscribe'])) {

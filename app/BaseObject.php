@@ -61,7 +61,7 @@ abstract class BaseObject extends Base {
      * the derived class will deal with or pre-process the contents so
      * the modify() method can do its thing.
      */
-    public function setUpdate(string $field, array|bool|int|float|string|null $value): mixed {
+    public function setField(string $field, array|bool|int|float|string|null $value): mixed {
         $this->updateField[$field] = $value;
         return $this;
     }

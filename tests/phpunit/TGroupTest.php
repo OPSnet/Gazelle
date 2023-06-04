@@ -19,7 +19,7 @@ class TGroupTest extends TestCase {
             'admin' => Helper::makeUser('tgroup.a.' . randomString(6), 'forum'),
             'user'  => Helper::makeUser('tgroup.u.' . randomString(6), 'forum'),
         ];
-        $this->userList['admin']->setUpdate('PermissionID', MOD)->modify();
+        $this->userList['admin']->setField('PermissionID', MOD)->modify();
 
         $this->name            = 'Live in ' . randomString(6);
         $this->year            = (int)date('Y');

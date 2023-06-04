@@ -11,11 +11,11 @@ class DuplicateIpTest extends TestCase {
     public function setUp(): void {
         $ip = '169.254.0.1';
         $this->userList = [
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setUpdate('IP', $ip)->setUpdate('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setUpdate('IP', $ip)->setUpdate('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setUpdate('IP', $ip)->setUpdate('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setUpdate('IP', $ip)->setUpdate('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setUpdate('IP', $ip)->setUpdate('Enabled', '1'),
+            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
         ];
         foreach ($this->userList as $user) {
             $user->modify();

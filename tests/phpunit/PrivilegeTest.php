@@ -18,7 +18,7 @@ class PrivilegeTest extends TestCase {
             'admin' => Helper::makeUser('priv1.' . randomString(6), 'request'),
             'user'  => Helper::makeUser('priv2.' . randomString(6), 'request'),
         ];
-        $this->userList['admin']->setUpdate('PermissionID', SYSOP)->modify();
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
     }
 
     public function tearDown(): void {

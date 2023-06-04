@@ -89,13 +89,13 @@ class Report extends BaseObject {
      */
     public function claim(?User $user): int {
         return (int)$this
-            ->setUpdate('ClaimerID', (int)$user?->id())
-            ->setUpdate('Status', 'InProgress')
+            ->setField('ClaimerID', (int)$user?->id())
+            ->setField('Status', 'InProgress')
             ->modify();
     }
 
     public function addNote(string $note): Report {
-        $this->setUpdate('Notes', str_replace("<br />", "\n", trim($note)))->modify();
+        $this->setField('Notes', str_replace("<br />", "\n", trim($note)))->modify();
         return $this;
     }
 

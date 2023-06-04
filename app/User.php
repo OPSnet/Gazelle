@@ -251,7 +251,7 @@ class User extends BaseObject {
         );
         $custom = empty($custom) ? [] : unserialize($custom);
         $custom[$name] = 1;
-        return $this->setUpdate('CustomPermissions', serialize($custom))->modify();
+        return $this->setField('CustomPermissions', serialize($custom))->modify();
     }
 
     /**
@@ -639,8 +639,8 @@ class User extends BaseObject {
     }
 
     public function remove2FA(): User {
-        return $this->setUpdate('2FA_Key', null)
-            ->setUpdate('Recovery', null);
+        return $this->setField('2FA_Key', null)
+            ->setField('Recovery', null);
     }
 
     public function paranoia(): array {
@@ -973,7 +973,7 @@ class User extends BaseObject {
         if (mb_strlen($title) > USER_TITLE_LENGTH) {
             return false;
         }
-        $this->setUpdate('Title', $title);
+        $this->setField('Title', $title);
         return true;
     }
 
@@ -981,7 +981,7 @@ class User extends BaseObject {
      * Remove the custom title of a user
      */
     public function removeTitle(): User {
-        return $this->setUpdate('Title', null);
+        return $this->setField('Title', null);
     }
 
     public function modifyOption(string $name, $value): User {

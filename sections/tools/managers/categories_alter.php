@@ -36,8 +36,8 @@ if ($_POST['submit'] == 'Delete') {
             error(404);
         }
         $forumCategory
-            ->setUpdate('Sort', (int)$_POST['sort'])
-            ->setUpdate('Name', trim($_POST['name']))
+            ->setField('Sort', (int)$_POST['sort'])
+            ->setField('Name', trim($_POST['name']))
             ->modify();
     }
 }

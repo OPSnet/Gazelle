@@ -24,7 +24,7 @@ if ($_POST['submit'] == 'Delete') {
     }
 
     if ($_POST['submit'] == 'Edit') {
-        $staffGroup->setUpdate('Sort', (int)$_POST['sort'])->setUpdate('Name', trim($_POST['name']))->modify();
+        $staffGroup->setField('Sort', (int)$_POST['sort'])->setField('Name', trim($_POST['name']))->modify();
     } else {
         $manager->create(sequence: (int)$_POST['sort'], name: trim($_POST['name']));
     }

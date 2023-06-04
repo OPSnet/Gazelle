@@ -57,7 +57,7 @@ class UserCreateTest extends TestCase {
         $this->assertEquals(\Gazelle\Login::ERR_UNCONFIRMED, $login->error(), 'user-create-login-unconfirmed-error');
 
         $this->assertEquals(2, $watch->nrAttempts(), 'user-create-two-login-attempts');
-        $this->user->setUpdate('Enabled', '2')->modify();
+        $this->user->setField('Enabled', '2')->modify();
 
         $enabledUser = $login->login($this->user->username(), $password, $watch);
         $this->assertInstanceOf(\Gazelle\User::class, $enabledUser, 'user-create-login-success');

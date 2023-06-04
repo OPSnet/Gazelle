@@ -16,8 +16,8 @@ class RequestTest extends TestCase {
             'admin' => Helper::makeUser('req.' . randomString(10), 'request'),
             'user'  => Helper::makeUser('req.' . randomString(10), 'request'),
         ];
-        $this->userList['admin']->setUpdate('Enabled', '1')->setUpdate('PermissionID', SYSOP)->modify();
-        $this->userList['user']->setUpdate('Enabled', '1')->modify();
+        $this->userList['admin']->setField('Enabled', '1')->setField('PermissionID', SYSOP)->modify();
+        $this->userList['user']->setField('Enabled', '1')->modify();
 
         // create a torrent group
         $tgroupName = 'phpunit request ' . randomString(6);

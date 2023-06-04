@@ -12,13 +12,13 @@ if (isset($_POST['cid'])) {
     authorize();
     $contest = $contestMan->findById((int)$_POST['cid']);
     $saved = $contest
-        ->setUpdate('banner',          trim($_POST['banner']))
-        ->setUpdate('contest_type_id', $_POST['type'])
-        ->setUpdate('date_begin',      $_POST['date_begin'])
-        ->setUpdate('date_end',        $_POST['date_end'])
-        ->setUpdate('description',     trim($_POST['description']))
-        ->setUpdate('display',         (int)$_POST['display'])
-        ->setUpdate('name',            trim($_POST['name']))
+        ->setField('banner',          trim($_POST['banner']))
+        ->setField('contest_type_id', $_POST['type'])
+        ->setField('date_begin',      $_POST['date_begin'])
+        ->setField('date_end',        $_POST['date_end'])
+        ->setField('description',     trim($_POST['description']))
+        ->setField('display',         (int)$_POST['display'])
+        ->setField('name',            trim($_POST['name']))
         ->modify();
     if ($contest->hasBonusPool()) {
         $affected = $contest->modifyBonusPool(

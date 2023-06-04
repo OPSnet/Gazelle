@@ -15,7 +15,7 @@ class ForumTest extends TestCase {
             'admin' => Helper::makeUser('admin.' . randomString(10), 'forum'),
             'user'  => Helper::makeUser('user.' . randomString(10), 'forum'),
         ];
-        $this->userList['admin']->setUpdate('PermissionID', SYSOP)->modify();
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
     }
 
     public function tearDown(): void {
@@ -40,7 +40,7 @@ class ForumTest extends TestCase {
         $this->assertCount($initial + 2, $fcatMan->usageList(), 'forum-cat-usage-list');
 
         $find = $fcatMan->findById($this->category->id());
-        $find->setUpdate('Name', 'phpunit renamed')->modify();
+        $find->setField('Name', 'phpunit renamed')->modify();
         $this->assertEquals($this->category->id(), $find->id(), 'forum-cat-find');
         $this->assertEquals('phpunit renamed', $find->name(), 'forum-cat-name');
         $this->assertEquals(10001, $find->sequence(), 'forum-cat-sequence');

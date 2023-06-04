@@ -410,7 +410,7 @@ class TGroup extends \Gazelle\BaseManager {
         if ($new->categoryName() === 'Music') {
             $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan, $logger);
         }
-        $torrent->setUpdate('GroupID', $new->id())->modify();
+        $torrent->setField('GroupID', $new->id())->modify();
 
         // Refresh the old group, otherwise remove it if there is nothing left
         if (self::$db->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $old->id())) {

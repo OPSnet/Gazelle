@@ -34,8 +34,8 @@ class BonusTest extends TestCase {
             ->setAdminComment('Created by tests/phpunit/InviteTest.php')
             ->create();
 
-        $this->userList['giver']->setUpdate('Enabled', '1')->modify();
-        $this->userList['receiver']->setUpdate('Enabled', '1')->modify();
+        $this->userList['giver']->setField('Enabled', '1')->modify();
+        $this->userList['receiver']->setField('Enabled', '1')->modify();
         $startingPoints = 10000;
 
         $giver = new Gazelle\User\Bonus($this->userList['giver']);
